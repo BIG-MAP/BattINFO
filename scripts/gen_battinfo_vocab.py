@@ -54,6 +54,7 @@ CONTEXT = ROOT / "src" / "battinfo" / "data" / "context" / "records.context.json
 PUBLISHED_CONTEXT = ROOT / "src" / "battinfo" / "data" / "context" / "records.context.v1.json"
 SAVE_GATE = ROOT / "src" / "battinfo" / "data" / "schemas" / "cell-canonical.schema.json"
 UNIT_MAP = ROOT / "src" / "battinfo" / "data" / "mappings" / "domain-battery" / "unit_map.curated.json"
+PROPERTY_MAP = ROOT / "src" / "battinfo" / "data" / "mappings" / "domain-battery" / "property_map.curated.json"
 
 # The hash namespace served records EXPAND against (@vocab in the registry
 # wrapper context). Distinct from the slash namespace above: the slash form is
@@ -255,6 +256,46 @@ _NS_SCAFFOLDING: dict[str, str] = {
     "publisherId": "Identifier of the publishing agent (registry envelope).",
     "sourceLocalId": "Publisher-local identifier of the source record (registry envelope).",
     "sourceVersion": "Version stamp of the published source (registry envelope).",
+    # Registry projection keys. Minted by battinfo-registry when it wraps a
+    # record for serving (publishing/normalizers.py, publishing/display.py,
+    # api/routes.py), so no battinfo schema declares them — but they are served
+    # under this @vocab and so have to resolve.
+    "canonical_iri": "Canonical IRI of a resource referenced from a served record (registry projection).",
+    "relationship": "How a related resource stands to the record that links it (registry projection).",
+    "resource_type": "Registry resource type of a referenced record (registry projection).",
+    "record_url": "Landing-page URL of a served record (registry projection).",
+    "manufacturer_id": "Canonical IRI of the manufacturer organization (registry projection).",
+    "immutable": "Whether a distribution's bytes are guaranteed not to change (registry projection).",
+    # Test-protocol summary block: computed by api/_records.py from the
+    # protocol's steps rather than declared as schema properties, and carried
+    # into the served record.
+    "facets": "Computed summary facets of a test protocol.",
+    "modes": "Control modes a test protocol uses, as a computed summary facet.",
+    "control_modes": "Per-step control modes of a test protocol.",
+    "directions": "Charge/discharge directions a test protocol covers, as a computed summary facet.",
+    "c_rates": "C-rates a test protocol uses, as a computed summary facet.",
+    "has_rest": "Whether a test protocol contains a rest step (computed summary facet).",
+    "has_eis": "Whether a test protocol contains an impedance step (computed summary facet).",
+    "has_cv_hold": "Whether a test protocol contains a constant-voltage hold (computed summary facet).",
+    # Further registry projection keys, all appearing under the ``metadata``
+    # block the registry composes per record type. They are not record fields:
+    # the normalizer lifts and renames them for display, so the spelling is the
+    # registry's and only this inventory can account for it.
+    "contributors": "Contributor summary lifted into the registry metadata block.",
+    "funding_identifier": "Grant identifier lifted into the registry metadata block.",
+    "protocol": "Test-protocol reference lifted into the registry metadata block.",
+    "conformance_note": "Conformance statement lifted into the registry metadata block.",
+    "specification_note": "Specification remark lifted into the registry metadata block.",
+    "processing_route": "Electrode processing route lifted into the registry metadata block.",
+    "processing_solvent": "Electrode processing solvent lifted into the registry metadata block.",
+    # These two are both a registry metadata key and a real test-condition key
+    # in the record body (``test.conditions``). Declared so they resolve; they
+    # carry no rdfs:seeAlso because the transform's measurement-parameter table
+    # does not map them, which is an upstream grounding gap rather than
+    # something to invent here.
+    "ambient_temperature": "Ambient temperature a test was run at (test condition; also a registry metadata key).",
+    "voltage_reference": "Reference electrode a test's voltages are quoted against "
+    "(test condition; also a registry metadata key).",
 }
 
 
@@ -289,6 +330,97 @@ def _cell_spec_identity_keys() -> list[str]:
     schema = ROOT / "src" / "battinfo" / "data" / "schemas" / "cell-spec.schema.json"
     data = json.loads(schema.read_text(encoding="utf-8"))
     return list(data["properties"]["cell_spec"].get("properties", {}))
+
+
+def _curated_property_terms() -> dict[str, str]:
+    """Component/datasheet property key -> the EMMO class the curation assigns.
+
+    These keys (``loading``, ``dry_thickness``, ``areal_capacity``,
+    ``mass_fraction``, ...) live in open property blocks, so no schema declares
+    them and the two schema-shaped sources above cannot see them. The curated
+    map is where their meaning is actually recorded, and it carries a real EMMO
+    IRI — so they ground properly here rather than becoming bare stubs.
+
+    Only ``curated`` rows: the candidate map is a proposal, not a commitment.
+    """
+    data = json.loads(PROPERTY_MAP.read_text(encoding="utf-8"))
+    return {
+        row["key"]: row["class_iri"]
+        for row in data.get("mappings", [])
+        if row.get("status") == "curated" and row.get("key") and row.get("class_iri")
+    }
+
+
+def _transform_property_terms(ctx: dict) -> dict[str, str | None]:
+    """Emitter property key -> EMMO IRI, from the transform's own term tables.
+
+    These keys live in open ``property`` blocks and test-condition blocks, so
+    no schema declares them and the curated map does not carry them either.
+    The transform is where their meaning is decided — it is the code that turns
+    ``dry_thickness`` into ``DryCoatingThickness`` — so read the decision from
+    there rather than restating it.
+
+    The tables give an EMMO *term name*; the records context is what turns that
+    into an IRI. A term the context does not carry still gets a defining
+    subject, just without the ``seeAlso``: resolving is the requirement here,
+    grounding is the bonus.
+    """
+    from battinfo.transform.json_to_jsonld import (
+        _ASSEMBLY_QUANTITY_TERMS,
+        _MEASUREMENT_PARAMETER_TERMS,
+        COMPONENT_PROPERTY_TERM_TABLES,
+    )
+
+    out: dict[str, str | None] = {}
+    tables = (*COMPONENT_PROPERTY_TERM_TABLES, _MEASUREMENT_PARAMETER_TERMS, _ASSEMBLY_QUANTITY_TERMS)
+    for table in tables:
+        for key, term in table.items():
+            if _LOCALNAME_RE.match(key):
+                out.setdefault(key, _context_iri(ctx.get(term)))
+    return out
+
+
+def _record_body_keys() -> list[str]:
+    """Every property name declared by any record schema.
+
+    The two functions above read the cell save-gate and the cell-spec identity
+    block, which is the whole surface only for as long as a record *is* a cell.
+    It stopped being true when datasets, tests, protocols, materials and
+    electrodes became record types of their own: their body keys — ``contributor``,
+    ``same_as``, ``funding``, ``loading``, ``variable_measured``, and 100-odd
+    more — were served under ``@vocab`` with nothing at the other end, which is
+    exactly the dead-end this section exists to prevent.
+
+    So source the inventory from the schemas themselves. Every ``properties``
+    block anywhere in any schema (top level, ``$defs``, nested objects) is a set
+    of keys some record can carry, which is the same criterion the ``@vocab``
+    fallback applies at serving time. Reading the shipped schema tree rather
+    than a hand-kept list means a new record type arrives here on its own.
+    """
+    schema_root = ROOT / "src" / "battinfo" / "data" / "schemas"
+    keys: set[str] = set()
+
+    def walk(node) -> None:  # noqa: ANN001 - arbitrary JSON Schema
+        if isinstance(node, dict):
+            properties = node.get("properties")
+            if isinstance(properties, dict):
+                keys.update(k for k in properties if _LOCALNAME_RE.match(k))
+            for key, value in node.items():
+                # "properties" is a key namespace, not a schema: recursing into
+                # it as one would read a property literally named "type" or
+                # "required" as a JSON Schema keyword.
+                if key == "properties" and isinstance(value, dict):
+                    for subschema in value.values():
+                        walk(subschema)
+                else:
+                    walk(value)
+        elif isinstance(node, list):
+            for item in node:
+                walk(item)
+
+    for path in sorted(schema_root.rglob("*.schema.json")):
+        walk(json.loads(path.read_text(encoding="utf-8")))
+    return sorted(keys)
 
 
 def _context_iri(value) -> str | None:
@@ -357,12 +489,12 @@ def _ns_terms() -> tuple[list[dict], set[str]]:
     # Property predicates from the records context, in both the snake-case
     # spelling the JSON-LD uses and the lowerCamelCase spelling the Turtle
     # projection uses; quantity keys additionally get a *_unit companion.
-    def add_property(key: str, see: str | None) -> None:
+    def add_property(key: str, see: str | None, with_unit: bool = False) -> None:
         add(key, "rdf:Property", see_also=see)
         camel = _to_camel(key)
         if camel != key:
             add(camel, "rdf:Property", equivalent_of=key, see_also=see)
-        if key in quantity:
+        if key in quantity or with_unit:
             add(f"{key}_unit", "rdf:Property", comment=f"Measurement unit of {key}.")
             camel_unit = f"{camel}Unit"
             add(camel_unit, "rdf:Property", equivalent_of=f"{key}_unit",
@@ -379,6 +511,23 @@ def _ns_terms() -> tuple[list[dict], set[str]]:
     for key in sorted(_cell_spec_identity_keys()):
         if _LOCALNAME_RE.match(key):
             add_property(key, props.get(key))
+    # Curated open-block property keys, grounded by the curation's own EMMO
+    # class. Before the schema sweep, so these arrive with their grounding
+    # rather than as bare stubs (`add` keeps the first spelling it sees).
+    # Both carry quantities, so both get the `<key>_unit` companion the served
+    # records pair every value with.
+    curated = _curated_property_terms()
+    for key in sorted(curated):
+        add_property(key, curated[key], with_unit=True)
+    transform_terms = _transform_property_terms(ctx)
+    for key in sorted(transform_terms):
+        add_property(key, transform_terms[key], with_unit=True)
+    # Every remaining record-body key, from every record schema. `add` is
+    # idempotent on `seen`, so the mapped and quantity keys handled above keep
+    # their EMMO grounding and their unit companions; this pass only picks up
+    # what nothing else claimed.
+    for key in _record_body_keys():
+        add_property(key, props.get(key))
 
     # Envelope / scaffolding, emitted verbatim.
     for name, comment in _NS_SCAFFOLDING.items():

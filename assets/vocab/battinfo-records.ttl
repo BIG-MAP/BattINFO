@@ -2094,9 +2094,3027 @@ ns:year a rdf:Property ;
     rdfs:label "Year"@en ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
 
+ns:available_volume a rdf:Property ;
+    rdfs:label "Available volume"@en ;
+    rdfs:seeAlso <https://w3id.org/emmo#EMMO_f1a51559_aa3d_43a0_9327_918039f0dfed> ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:availableVolume a rdf:Property ;
+    rdfs:label "Available Volume"@en ;
+    owl:equivalentProperty ns:available_volume ;
+    rdfs:seeAlso <https://w3id.org/emmo#EMMO_f1a51559_aa3d_43a0_9327_918039f0dfed> ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:available_volume_unit a rdf:Property ;
+    rdfs:label "Available volume unit"@en ;
+    rdfs:comment "Measurement unit of available_volume."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:availableVolumeUnit a rdf:Property ;
+    rdfs:label "Available Volume Unit"@en ;
+    rdfs:comment "Measurement unit of available_volume."@en ;
+    owl:equivalentProperty ns:available_volume_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:cap_assembly_weight a rdf:Property ;
+    rdfs:label "Cap assembly weight"@en ;
+    rdfs:seeAlso <https://w3id.org/emmo#EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405> ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:capAssemblyWeight a rdf:Property ;
+    rdfs:label "Cap Assembly Weight"@en ;
+    owl:equivalentProperty ns:cap_assembly_weight ;
+    rdfs:seeAlso <https://w3id.org/emmo#EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405> ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:cap_assembly_weight_unit a rdf:Property ;
+    rdfs:label "Cap assembly weight unit"@en ;
+    rdfs:comment "Measurement unit of cap_assembly_weight."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:capAssemblyWeightUnit a rdf:Property ;
+    rdfs:label "Cap Assembly Weight Unit"@en ;
+    rdfs:comment "Measurement unit of cap_assembly_weight."@en ;
+    owl:equivalentProperty ns:cap_assembly_weight_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:d50_particle_size a rdf:Property ;
+    rdfs:label "D50 particle size"@en ;
+    rdfs:seeAlso <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_3cfdfc10_a5cb_4e3e_b1a1_281010d1465c> ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:d50ParticleSize a rdf:Property ;
+    rdfs:label "D50 Particle Size"@en ;
+    owl:equivalentProperty ns:d50_particle_size ;
+    rdfs:seeAlso <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_3cfdfc10_a5cb_4e3e_b1a1_281010d1465c> ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:d50_particle_size_unit a rdf:Property ;
+    rdfs:label "D50 particle size unit"@en ;
+    rdfs:comment "Measurement unit of d50_particle_size."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:d50ParticleSizeUnit a rdf:Property ;
+    rdfs:label "D50 Particle Size Unit"@en ;
+    rdfs:comment "Measurement unit of d50_particle_size."@en ;
+    owl:equivalentProperty ns:d50_particle_size_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:double_side_loading a rdf:Property ;
+    rdfs:label "Double side loading"@en ;
+    rdfs:seeAlso <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c955c089_6ee1_41a2_95fc_d534c5cfd3d5> ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:doubleSideLoading a rdf:Property ;
+    rdfs:label "Double Side Loading"@en ;
+    owl:equivalentProperty ns:double_side_loading ;
+    rdfs:seeAlso <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c955c089_6ee1_41a2_95fc_d534c5cfd3d5> ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:double_side_loading_unit a rdf:Property ;
+    rdfs:label "Double side loading unit"@en ;
+    rdfs:comment "Measurement unit of double_side_loading."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:doubleSideLoadingUnit a rdf:Property ;
+    rdfs:label "Double Side Loading Unit"@en ;
+    rdfs:comment "Measurement unit of double_side_loading."@en ;
+    owl:equivalentProperty ns:double_side_loading_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:foil_thickness a rdf:Property ;
+    rdfs:label "Foil thickness"@en ;
+    rdfs:seeAlso <https://w3id.org/emmo#EMMO_43003c86_9d15_433b_9789_ee2940920656> ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:foilThickness a rdf:Property ;
+    rdfs:label "Foil Thickness"@en ;
+    owl:equivalentProperty ns:foil_thickness ;
+    rdfs:seeAlso <https://w3id.org/emmo#EMMO_43003c86_9d15_433b_9789_ee2940920656> ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:foil_thickness_unit a rdf:Property ;
+    rdfs:label "Foil thickness unit"@en ;
+    rdfs:comment "Measurement unit of foil_thickness."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:foilThicknessUnit a rdf:Property ;
+    rdfs:label "Foil Thickness Unit"@en ;
+    rdfs:comment "Measurement unit of foil_thickness."@en ;
+    owl:equivalentProperty ns:foil_thickness_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:n_p_ratio a rdf:Property ;
+    rdfs:label "N p ratio"@en ;
+    rdfs:seeAlso <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_05012606_b93d_4016_bbc7_8a927efdf723> ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:nPRatio a rdf:Property ;
+    rdfs:label "N PRatio"@en ;
+    owl:equivalentProperty ns:n_p_ratio ;
+    rdfs:seeAlso <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_05012606_b93d_4016_bbc7_8a927efdf723> ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:n_p_ratio_unit a rdf:Property ;
+    rdfs:label "N p ratio unit"@en ;
+    rdfs:comment "Measurement unit of n_p_ratio."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:nPRatioUnit a rdf:Property ;
+    rdfs:label "N PRatio Unit"@en ;
+    rdfs:comment "Measurement unit of n_p_ratio."@en ;
+    owl:equivalentProperty ns:n_p_ratio_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:press_density a rdf:Property ;
+    rdfs:label "Press density"@en ;
+    rdfs:seeAlso <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_520995f8_ec9c_4b3c_bb64_2cd691947379> ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:pressDensity a rdf:Property ;
+    rdfs:label "Press Density"@en ;
+    owl:equivalentProperty ns:press_density ;
+    rdfs:seeAlso <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_520995f8_ec9c_4b3c_bb64_2cd691947379> ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:press_density_unit a rdf:Property ;
+    rdfs:label "Press density unit"@en ;
+    rdfs:comment "Measurement unit of press_density."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:pressDensityUnit a rdf:Property ;
+    rdfs:label "Press Density Unit"@en ;
+    rdfs:comment "Measurement unit of press_density."@en ;
+    owl:equivalentProperty ns:press_density_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:rated_areal_discharge_capacity a rdf:Property ;
+    rdfs:label "Rated areal discharge capacity"@en ;
+    rdfs:seeAlso <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_bcb33f7e_5573_4bc2_b636_4ea313a9dd3a> ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:ratedArealDischargeCapacity a rdf:Property ;
+    rdfs:label "Rated Areal Discharge Capacity"@en ;
+    owl:equivalentProperty ns:rated_areal_discharge_capacity ;
+    rdfs:seeAlso <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_bcb33f7e_5573_4bc2_b636_4ea313a9dd3a> ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:rated_areal_discharge_capacity_unit a rdf:Property ;
+    rdfs:label "Rated areal discharge capacity unit"@en ;
+    rdfs:comment "Measurement unit of rated_areal_discharge_capacity."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:ratedArealDischargeCapacityUnit a rdf:Property ;
+    rdfs:label "Rated Areal Discharge Capacity Unit"@en ;
+    rdfs:comment "Measurement unit of rated_areal_discharge_capacity."@en ;
+    owl:equivalentProperty ns:rated_areal_discharge_capacity_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:rated_specific_discharge_capacity a rdf:Property ;
+    rdfs:label "Rated specific discharge capacity"@en ;
+    rdfs:seeAlso <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_884650fd_6cc6_4ec6_8264_c18fbe6b90ee> ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:ratedSpecificDischargeCapacity a rdf:Property ;
+    rdfs:label "Rated Specific Discharge Capacity"@en ;
+    owl:equivalentProperty ns:rated_specific_discharge_capacity ;
+    rdfs:seeAlso <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_884650fd_6cc6_4ec6_8264_c18fbe6b90ee> ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:rated_specific_discharge_capacity_unit a rdf:Property ;
+    rdfs:label "Rated specific discharge capacity unit"@en ;
+    rdfs:comment "Measurement unit of rated_specific_discharge_capacity."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:ratedSpecificDischargeCapacityUnit a rdf:Property ;
+    rdfs:label "Rated Specific Discharge Capacity Unit"@en ;
+    rdfs:comment "Measurement unit of rated_specific_discharge_capacity."@en ;
+    owl:equivalentProperty ns:rated_specific_discharge_capacity_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:single_side_loading a rdf:Property ;
+    rdfs:label "Single side loading"@en ;
+    rdfs:seeAlso <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c955c089_6ee1_41a2_95fc_d534c5cfd3d5> ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:singleSideLoading a rdf:Property ;
+    rdfs:label "Single Side Loading"@en ;
+    owl:equivalentProperty ns:single_side_loading ;
+    rdfs:seeAlso <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c955c089_6ee1_41a2_95fc_d534c5cfd3d5> ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:single_side_loading_unit a rdf:Property ;
+    rdfs:label "Single side loading unit"@en ;
+    rdfs:comment "Measurement unit of single_side_loading."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:singleSideLoadingUnit a rdf:Property ;
+    rdfs:label "Single Side Loading Unit"@en ;
+    rdfs:comment "Measurement unit of single_side_loading."@en ;
+    owl:equivalentProperty ns:single_side_loading_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:theoretical_capacity a rdf:Property ;
+    rdfs:label "Theoretical capacity"@en ;
+    rdfs:seeAlso <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_372c89d0_adab_4585_9662_33c912acef23> ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:theoreticalCapacity a rdf:Property ;
+    rdfs:label "Theoretical Capacity"@en ;
+    owl:equivalentProperty ns:theoretical_capacity ;
+    rdfs:seeAlso <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_372c89d0_adab_4585_9662_33c912acef23> ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:theoretical_capacity_unit a rdf:Property ;
+    rdfs:label "Theoretical capacity unit"@en ;
+    rdfs:comment "Measurement unit of theoretical_capacity."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:theoreticalCapacityUnit a rdf:Property ;
+    rdfs:label "Theoretical Capacity Unit"@en ;
+    rdfs:comment "Measurement unit of theoretical_capacity."@en ;
+    owl:equivalentProperty ns:theoretical_capacity_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:tortuosity a rdf:Property ;
+    rdfs:label "Tortuosity"@en ;
+    rdfs:seeAlso <https://w3id.org/emmo#EMMO_c413d96f_c57b_4c70_9ac1_312db6c009a8> ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:tortuosity_unit a rdf:Property ;
+    rdfs:label "Tortuosity unit"@en ;
+    rdfs:comment "Measurement unit of tortuosity."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:tortuosityUnit a rdf:Property ;
+    rdfs:label "Tortuosity Unit"@en ;
+    rdfs:comment "Measurement unit of tortuosity."@en ;
+    owl:equivalentProperty ns:tortuosity_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:wall_thickness a rdf:Property ;
+    rdfs:label "Wall thickness"@en ;
+    rdfs:seeAlso <https://w3id.org/emmo#EMMO_43003c86_9d15_433b_9789_ee2940920656> ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:wallThickness a rdf:Property ;
+    rdfs:label "Wall Thickness"@en ;
+    owl:equivalentProperty ns:wall_thickness ;
+    rdfs:seeAlso <https://w3id.org/emmo#EMMO_43003c86_9d15_433b_9789_ee2940920656> ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:wall_thickness_unit a rdf:Property ;
+    rdfs:label "Wall thickness unit"@en ;
+    rdfs:comment "Measurement unit of wall_thickness."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:wallThicknessUnit a rdf:Property ;
+    rdfs:label "Wall Thickness Unit"@en ;
+    rdfs:comment "Measurement unit of wall_thickness."@en ;
+    owl:equivalentProperty ns:wall_thickness_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:weight a rdf:Property ;
+    rdfs:label "Weight"@en ;
+    rdfs:seeAlso <https://w3id.org/emmo#EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405> ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:weight_unit a rdf:Property ;
+    rdfs:label "Weight unit"@en ;
+    rdfs:comment "Measurement unit of weight."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:weightUnit a rdf:Property ;
+    rdfs:label "Weight Unit"@en ;
+    rdfs:comment "Measurement unit of weight."@en ;
+    owl:equivalentProperty ns:weight_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:areal_capacity a rdf:Property ;
+    rdfs:label "Areal capacity"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:arealCapacity a rdf:Property ;
+    rdfs:label "Areal Capacity"@en ;
+    owl:equivalentProperty ns:areal_capacity ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:areal_capacity_unit a rdf:Property ;
+    rdfs:label "Areal capacity unit"@en ;
+    rdfs:comment "Measurement unit of areal_capacity."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:arealCapacityUnit a rdf:Property ;
+    rdfs:label "Areal Capacity Unit"@en ;
+    rdfs:comment "Measurement unit of areal_capacity."@en ;
+    owl:equivalentProperty ns:areal_capacity_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:areal_loading a rdf:Property ;
+    rdfs:label "Areal loading"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:arealLoading a rdf:Property ;
+    rdfs:label "Areal Loading"@en ;
+    owl:equivalentProperty ns:areal_loading ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:areal_loading_unit a rdf:Property ;
+    rdfs:label "Areal loading unit"@en ;
+    rdfs:comment "Measurement unit of areal_loading."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:arealLoadingUnit a rdf:Property ;
+    rdfs:label "Areal Loading Unit"@en ;
+    rdfs:comment "Measurement unit of areal_loading."@en ;
+    owl:equivalentProperty ns:areal_loading_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:average_voltage a rdf:Property ;
+    rdfs:label "Average voltage"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:averageVoltage a rdf:Property ;
+    rdfs:label "Average Voltage"@en ;
+    owl:equivalentProperty ns:average_voltage ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:average_voltage_unit a rdf:Property ;
+    rdfs:label "Average voltage unit"@en ;
+    rdfs:comment "Measurement unit of average_voltage."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:averageVoltageUnit a rdf:Property ;
+    rdfs:label "Average Voltage Unit"@en ;
+    rdfs:comment "Measurement unit of average_voltage."@en ;
+    owl:equivalentProperty ns:average_voltage_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:bet_surface_area a rdf:Property ;
+    rdfs:label "Bet surface area"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:betSurfaceArea a rdf:Property ;
+    rdfs:label "Bet Surface Area"@en ;
+    owl:equivalentProperty ns:bet_surface_area ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:bet_surface_area_unit a rdf:Property ;
+    rdfs:label "Bet surface area unit"@en ;
+    rdfs:comment "Measurement unit of bet_surface_area."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:betSurfaceAreaUnit a rdf:Property ;
+    rdfs:label "Bet Surface Area Unit"@en ;
+    rdfs:comment "Measurement unit of bet_surface_area."@en ;
+    owl:equivalentProperty ns:bet_surface_area_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:c_rate a rdf:Property ;
+    rdfs:label "C rate"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:cRate a rdf:Property ;
+    rdfs:label "C Rate"@en ;
+    owl:equivalentProperty ns:c_rate ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:c_rate_unit a rdf:Property ;
+    rdfs:label "C rate unit"@en ;
+    rdfs:comment "Measurement unit of c_rate."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:cRateUnit a rdf:Property ;
+    rdfs:label "C Rate Unit"@en ;
+    rdfs:comment "Measurement unit of c_rate."@en ;
+    owl:equivalentProperty ns:c_rate_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:calendered_coating_thickness a rdf:Property ;
+    rdfs:label "Calendered coating thickness"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:calenderedCoatingThickness a rdf:Property ;
+    rdfs:label "Calendered Coating Thickness"@en ;
+    owl:equivalentProperty ns:calendered_coating_thickness ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:calendered_coating_thickness_unit a rdf:Property ;
+    rdfs:label "Calendered coating thickness unit"@en ;
+    rdfs:comment "Measurement unit of calendered_coating_thickness."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:calenderedCoatingThicknessUnit a rdf:Property ;
+    rdfs:label "Calendered Coating Thickness Unit"@en ;
+    rdfs:comment "Measurement unit of calendered_coating_thickness."@en ;
+    owl:equivalentProperty ns:calendered_coating_thickness_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:calendered_density a rdf:Property ;
+    rdfs:label "Calendered density"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:calenderedDensity a rdf:Property ;
+    rdfs:label "Calendered Density"@en ;
+    owl:equivalentProperty ns:calendered_density ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:calendered_density_unit a rdf:Property ;
+    rdfs:label "Calendered density unit"@en ;
+    rdfs:comment "Measurement unit of calendered_density."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:calenderedDensityUnit a rdf:Property ;
+    rdfs:label "Calendered Density Unit"@en ;
+    rdfs:comment "Measurement unit of calendered_density."@en ;
+    owl:equivalentProperty ns:calendered_density_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:calendered_thickness a rdf:Property ;
+    rdfs:label "Calendered thickness"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:calenderedThickness a rdf:Property ;
+    rdfs:label "Calendered Thickness"@en ;
+    owl:equivalentProperty ns:calendered_thickness ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:calendered_thickness_unit a rdf:Property ;
+    rdfs:label "Calendered thickness unit"@en ;
+    rdfs:comment "Measurement unit of calendered_thickness."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:calenderedThicknessUnit a rdf:Property ;
+    rdfs:label "Calendered Thickness Unit"@en ;
+    rdfs:comment "Measurement unit of calendered_thickness."@en ;
+    owl:equivalentProperty ns:calendered_thickness_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:charge_c_rate a rdf:Property ;
+    rdfs:label "Charge c rate"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:chargeCRate a rdf:Property ;
+    rdfs:label "Charge CRate"@en ;
+    owl:equivalentProperty ns:charge_c_rate ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:charge_c_rate_unit a rdf:Property ;
+    rdfs:label "Charge c rate unit"@en ;
+    rdfs:comment "Measurement unit of charge_c_rate."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:chargeCRateUnit a rdf:Property ;
+    rdfs:label "Charge CRate Unit"@en ;
+    rdfs:comment "Measurement unit of charge_c_rate."@en ;
+    owl:equivalentProperty ns:charge_c_rate_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:concentration a rdf:Property ;
+    rdfs:label "Concentration"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:concentration_unit a rdf:Property ;
+    rdfs:label "Concentration unit"@en ;
+    rdfs:comment "Measurement unit of concentration."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:concentrationUnit a rdf:Property ;
+    rdfs:label "Concentration Unit"@en ;
+    rdfs:comment "Measurement unit of concentration."@en ;
+    owl:equivalentProperty ns:concentration_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:conductivity a rdf:Property ;
+    rdfs:label "Conductivity"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:conductivity_unit a rdf:Property ;
+    rdfs:label "Conductivity unit"@en ;
+    rdfs:comment "Measurement unit of conductivity."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:conductivityUnit a rdf:Property ;
+    rdfs:label "Conductivity Unit"@en ;
+    rdfs:comment "Measurement unit of conductivity."@en ;
+    owl:equivalentProperty ns:conductivity_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:current a rdf:Property ;
+    rdfs:label "Current"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:current_unit a rdf:Property ;
+    rdfs:label "Current unit"@en ;
+    rdfs:comment "Measurement unit of current."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:currentUnit a rdf:Property ;
+    rdfs:label "Current Unit"@en ;
+    rdfs:comment "Measurement unit of current."@en ;
+    owl:equivalentProperty ns:current_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:density a rdf:Property ;
+    rdfs:label "Density"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:density_unit a rdf:Property ;
+    rdfs:label "Density unit"@en ;
+    rdfs:comment "Measurement unit of density."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:densityUnit a rdf:Property ;
+    rdfs:label "Density Unit"@en ;
+    rdfs:comment "Measurement unit of density."@en ;
+    owl:equivalentProperty ns:density_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:discharge_c_rate a rdf:Property ;
+    rdfs:label "Discharge c rate"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:dischargeCRate a rdf:Property ;
+    rdfs:label "Discharge CRate"@en ;
+    owl:equivalentProperty ns:discharge_c_rate ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:discharge_c_rate_unit a rdf:Property ;
+    rdfs:label "Discharge c rate unit"@en ;
+    rdfs:comment "Measurement unit of discharge_c_rate."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:dischargeCRateUnit a rdf:Property ;
+    rdfs:label "Discharge CRate Unit"@en ;
+    rdfs:comment "Measurement unit of discharge_c_rate."@en ;
+    owl:equivalentProperty ns:discharge_c_rate_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:dry_coating_thickness a rdf:Property ;
+    rdfs:label "Dry coating thickness"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:dryCoatingThickness a rdf:Property ;
+    rdfs:label "Dry Coating Thickness"@en ;
+    owl:equivalentProperty ns:dry_coating_thickness ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:dry_coating_thickness_unit a rdf:Property ;
+    rdfs:label "Dry coating thickness unit"@en ;
+    rdfs:comment "Measurement unit of dry_coating_thickness."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:dryCoatingThicknessUnit a rdf:Property ;
+    rdfs:label "Dry Coating Thickness Unit"@en ;
+    rdfs:comment "Measurement unit of dry_coating_thickness."@en ;
+    owl:equivalentProperty ns:dry_coating_thickness_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:dry_thickness a rdf:Property ;
+    rdfs:label "Dry thickness"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:dryThickness a rdf:Property ;
+    rdfs:label "Dry Thickness"@en ;
+    owl:equivalentProperty ns:dry_thickness ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:dry_thickness_unit a rdf:Property ;
+    rdfs:label "Dry thickness unit"@en ;
+    rdfs:comment "Measurement unit of dry_thickness."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:dryThicknessUnit a rdf:Property ;
+    rdfs:label "Dry Thickness Unit"@en ;
+    rdfs:comment "Measurement unit of dry_thickness."@en ;
+    owl:equivalentProperty ns:dry_thickness_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:electrode_length a rdf:Property ;
+    rdfs:label "Electrode length"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:electrodeLength a rdf:Property ;
+    rdfs:label "Electrode Length"@en ;
+    owl:equivalentProperty ns:electrode_length ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:electrode_length_unit a rdf:Property ;
+    rdfs:label "Electrode length unit"@en ;
+    rdfs:comment "Measurement unit of electrode_length."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:electrodeLengthUnit a rdf:Property ;
+    rdfs:label "Electrode Length Unit"@en ;
+    rdfs:comment "Measurement unit of electrode_length."@en ;
+    owl:equivalentProperty ns:electrode_length_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:fill_volume a rdf:Property ;
+    rdfs:label "Fill volume"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:fillVolume a rdf:Property ;
+    rdfs:label "Fill Volume"@en ;
+    owl:equivalentProperty ns:fill_volume ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:fill_volume_unit a rdf:Property ;
+    rdfs:label "Fill volume unit"@en ;
+    rdfs:comment "Measurement unit of fill_volume."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:fillVolumeUnit a rdf:Property ;
+    rdfs:label "Fill Volume Unit"@en ;
+    rdfs:comment "Measurement unit of fill_volume."@en ;
+    owl:equivalentProperty ns:fill_volume_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:jellyroll_volume a rdf:Property ;
+    rdfs:label "Jellyroll volume"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:jellyrollVolume a rdf:Property ;
+    rdfs:label "Jellyroll Volume"@en ;
+    owl:equivalentProperty ns:jellyroll_volume ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:jellyroll_volume_unit a rdf:Property ;
+    rdfs:label "Jellyroll volume unit"@en ;
+    rdfs:comment "Measurement unit of jellyroll_volume."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:jellyrollVolumeUnit a rdf:Property ;
+    rdfs:label "Jellyroll Volume Unit"@en ;
+    rdfs:comment "Measurement unit of jellyroll_volume."@en ;
+    owl:equivalentProperty ns:jellyroll_volume_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:loading a rdf:Property ;
+    rdfs:label "Loading"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:loading_unit a rdf:Property ;
+    rdfs:label "Loading unit"@en ;
+    rdfs:comment "Measurement unit of loading."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:loadingUnit a rdf:Property ;
+    rdfs:label "Loading Unit"@en ;
+    rdfs:comment "Measurement unit of loading."@en ;
+    owl:equivalentProperty ns:loading_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:lower_voltage_limit a rdf:Property ;
+    rdfs:label "Lower voltage limit"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:lowerVoltageLimit a rdf:Property ;
+    rdfs:label "Lower Voltage Limit"@en ;
+    owl:equivalentProperty ns:lower_voltage_limit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:lower_voltage_limit_unit a rdf:Property ;
+    rdfs:label "Lower voltage limit unit"@en ;
+    rdfs:comment "Measurement unit of lower_voltage_limit."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:lowerVoltageLimitUnit a rdf:Property ;
+    rdfs:label "Lower Voltage Limit Unit"@en ;
+    rdfs:comment "Measurement unit of lower_voltage_limit."@en ;
+    owl:equivalentProperty ns:lower_voltage_limit_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:mass_fraction a rdf:Property ;
+    rdfs:label "Mass fraction"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:massFraction a rdf:Property ;
+    rdfs:label "Mass Fraction"@en ;
+    owl:equivalentProperty ns:mass_fraction ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:mass_fraction_unit a rdf:Property ;
+    rdfs:label "Mass fraction unit"@en ;
+    rdfs:comment "Measurement unit of mass_fraction."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:massFractionUnit a rdf:Property ;
+    rdfs:label "Mass Fraction Unit"@en ;
+    rdfs:comment "Measurement unit of mass_fraction."@en ;
+    owl:equivalentProperty ns:mass_fraction_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:molar_mass a rdf:Property ;
+    rdfs:label "Molar mass"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:molarMass a rdf:Property ;
+    rdfs:label "Molar Mass"@en ;
+    owl:equivalentProperty ns:molar_mass ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:molar_mass_unit a rdf:Property ;
+    rdfs:label "Molar mass unit"@en ;
+    rdfs:comment "Measurement unit of molar_mass."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:molarMassUnit a rdf:Property ;
+    rdfs:label "Molar Mass Unit"@en ;
+    rdfs:comment "Measurement unit of molar_mass."@en ;
+    owl:equivalentProperty ns:molar_mass_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:nominal_areal_capacity a rdf:Property ;
+    rdfs:label "Nominal areal capacity"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:nominalArealCapacity a rdf:Property ;
+    rdfs:label "Nominal Areal Capacity"@en ;
+    owl:equivalentProperty ns:nominal_areal_capacity ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:nominal_areal_capacity_unit a rdf:Property ;
+    rdfs:label "Nominal areal capacity unit"@en ;
+    rdfs:comment "Measurement unit of nominal_areal_capacity."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:nominalArealCapacityUnit a rdf:Property ;
+    rdfs:label "Nominal Areal Capacity Unit"@en ;
+    rdfs:comment "Measurement unit of nominal_areal_capacity."@en ;
+    owl:equivalentProperty ns:nominal_areal_capacity_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:particle_size_d50 a rdf:Property ;
+    rdfs:label "Particle size d50"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:particleSizeD50 a rdf:Property ;
+    rdfs:label "Particle Size D50"@en ;
+    owl:equivalentProperty ns:particle_size_d50 ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:particle_size_d50_unit a rdf:Property ;
+    rdfs:label "Particle size d50 unit"@en ;
+    rdfs:comment "Measurement unit of particle_size_d50."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:particleSizeD50Unit a rdf:Property ;
+    rdfs:label "Particle Size D50 Unit"@en ;
+    rdfs:comment "Measurement unit of particle_size_d50."@en ;
+    owl:equivalentProperty ns:particle_size_d50_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:porosity a rdf:Property ;
+    rdfs:label "Porosity"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:porosity_unit a rdf:Property ;
+    rdfs:label "Porosity unit"@en ;
+    rdfs:comment "Measurement unit of porosity."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:porosityUnit a rdf:Property ;
+    rdfs:label "Porosity Unit"@en ;
+    rdfs:comment "Measurement unit of porosity."@en ;
+    owl:equivalentProperty ns:porosity_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:reversible_areal_capacity a rdf:Property ;
+    rdfs:label "Reversible areal capacity"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:reversibleArealCapacity a rdf:Property ;
+    rdfs:label "Reversible Areal Capacity"@en ;
+    owl:equivalentProperty ns:reversible_areal_capacity ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:reversible_areal_capacity_unit a rdf:Property ;
+    rdfs:label "Reversible areal capacity unit"@en ;
+    rdfs:comment "Measurement unit of reversible_areal_capacity."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:reversibleArealCapacityUnit a rdf:Property ;
+    rdfs:label "Reversible Areal Capacity Unit"@en ;
+    rdfs:comment "Measurement unit of reversible_areal_capacity."@en ;
+    owl:equivalentProperty ns:reversible_areal_capacity_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:specific_capacity a rdf:Property ;
+    rdfs:label "Specific capacity"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:specificCapacity a rdf:Property ;
+    rdfs:label "Specific Capacity"@en ;
+    owl:equivalentProperty ns:specific_capacity ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:specific_capacity_unit a rdf:Property ;
+    rdfs:label "Specific capacity unit"@en ;
+    rdfs:comment "Measurement unit of specific_capacity."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:specificCapacityUnit a rdf:Property ;
+    rdfs:label "Specific Capacity Unit"@en ;
+    rdfs:comment "Measurement unit of specific_capacity."@en ;
+    owl:equivalentProperty ns:specific_capacity_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:specific_discharge_capacity a rdf:Property ;
+    rdfs:label "Specific discharge capacity"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:specificDischargeCapacity a rdf:Property ;
+    rdfs:label "Specific Discharge Capacity"@en ;
+    owl:equivalentProperty ns:specific_discharge_capacity ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:specific_discharge_capacity_unit a rdf:Property ;
+    rdfs:label "Specific discharge capacity unit"@en ;
+    rdfs:comment "Measurement unit of specific_discharge_capacity."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:specificDischargeCapacityUnit a rdf:Property ;
+    rdfs:label "Specific Discharge Capacity Unit"@en ;
+    rdfs:comment "Measurement unit of specific_discharge_capacity."@en ;
+    owl:equivalentProperty ns:specific_discharge_capacity_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:tap_density a rdf:Property ;
+    rdfs:label "Tap density"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:tapDensity a rdf:Property ;
+    rdfs:label "Tap Density"@en ;
+    owl:equivalentProperty ns:tap_density ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:tap_density_unit a rdf:Property ;
+    rdfs:label "Tap density unit"@en ;
+    rdfs:comment "Measurement unit of tap_density."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:tapDensityUnit a rdf:Property ;
+    rdfs:label "Tap Density Unit"@en ;
+    rdfs:comment "Measurement unit of tap_density."@en ;
+    owl:equivalentProperty ns:tap_density_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:temperature a rdf:Property ;
+    rdfs:label "Temperature"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:temperature_unit a rdf:Property ;
+    rdfs:label "Temperature unit"@en ;
+    rdfs:comment "Measurement unit of temperature."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:temperatureUnit a rdf:Property ;
+    rdfs:label "Temperature Unit"@en ;
+    rdfs:comment "Measurement unit of temperature."@en ;
+    owl:equivalentProperty ns:temperature_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:true_density a rdf:Property ;
+    rdfs:label "True density"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:trueDensity a rdf:Property ;
+    rdfs:label "True Density"@en ;
+    owl:equivalentProperty ns:true_density ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:true_density_unit a rdf:Property ;
+    rdfs:label "True density unit"@en ;
+    rdfs:comment "Measurement unit of true_density."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:trueDensityUnit a rdf:Property ;
+    rdfs:label "True Density Unit"@en ;
+    rdfs:comment "Measurement unit of true_density."@en ;
+    owl:equivalentProperty ns:true_density_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:viscosity a rdf:Property ;
+    rdfs:label "Viscosity"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:viscosity_unit a rdf:Property ;
+    rdfs:label "Viscosity unit"@en ;
+    rdfs:comment "Measurement unit of viscosity."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:viscosityUnit a rdf:Property ;
+    rdfs:label "Viscosity Unit"@en ;
+    rdfs:comment "Measurement unit of viscosity."@en ;
+    owl:equivalentProperty ns:viscosity_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:voltage a rdf:Property ;
+    rdfs:label "Voltage"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:voltage_unit a rdf:Property ;
+    rdfs:label "Voltage unit"@en ;
+    rdfs:comment "Measurement unit of voltage."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:voltageUnit a rdf:Property ;
+    rdfs:label "Voltage Unit"@en ;
+    rdfs:comment "Measurement unit of voltage."@en ;
+    owl:equivalentProperty ns:voltage_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:volume_fraction a rdf:Property ;
+    rdfs:label "Volume fraction"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:volumeFraction a rdf:Property ;
+    rdfs:label "Volume Fraction"@en ;
+    owl:equivalentProperty ns:volume_fraction ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:volume_fraction_unit a rdf:Property ;
+    rdfs:label "Volume fraction unit"@en ;
+    rdfs:comment "Measurement unit of volume_fraction."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:volumeFractionUnit a rdf:Property ;
+    rdfs:label "Volume Fraction Unit"@en ;
+    rdfs:comment "Measurement unit of volume_fraction."@en ;
+    owl:equivalentProperty ns:volume_fraction_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:about a rdf:Property ;
+    rdfs:label "About"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:access_level a rdf:Property ;
+    rdfs:label "Access level"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:accessLevel a rdf:Property ;
+    rdfs:label "Access Level"@en ;
+    owl:equivalentProperty ns:access_level ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:access_url a rdf:Property ;
+    rdfs:label "Access url"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:accessUrl a rdf:Property ;
+    rdfs:label "Access Url"@en ;
+    owl:equivalentProperty ns:access_url ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:acronym a rdf:Property ;
+    rdfs:label "Acronym"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:active_material a rdf:Property ;
+    rdfs:label "Active material"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:activeMaterial a rdf:Property ;
+    rdfs:label "Active Material"@en ;
+    owl:equivalentProperty ns:active_material ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:active_material_spec_id a rdf:Property ;
+    rdfs:label "Active material spec id"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:activeMaterialSpecId a rdf:Property ;
+    rdfs:label "Active Material Spec Id"@en ;
+    owl:equivalentProperty ns:active_material_spec_id ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:additive a rdf:Property ;
+    rdfs:label "Additive"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:addressCountry a rdf:Property ;
+    rdfs:label "Address Country"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:addressLocality a rdf:Property ;
+    rdfs:label "Address Locality"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:addressRegion a rdf:Property ;
+    rdfs:label "Address Region"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:affiliation a rdf:Property ;
+    rdfs:label "Affiliation"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:algorithm a rdf:Property ;
+    rdfs:label "Algorithm"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:alternateName a rdf:Property ;
+    rdfs:label "Alternate Name"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:amount a rdf:Property ;
+    rdfs:label "Amount"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:anion a rdf:Property ;
+    rdfs:label "Anion"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:anode_sheet_count a rdf:Property ;
+    rdfs:label "Anode sheet count"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:anodeSheetCount a rdf:Property ;
+    rdfs:label "Anode Sheet Count"@en ;
+    owl:equivalentProperty ns:anode_sheet_count ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:argument a rdf:Property ;
+    rdfs:label "Argument"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:artifacts a rdf:Property ;
+    rdfs:label "Artifacts"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:assembly_sequence a rdf:Property ;
+    rdfs:label "Assembly sequence"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:assemblySequence a rdf:Property ;
+    rdfs:label "Assembly Sequence"@en ;
+    owl:equivalentProperty ns:assembly_sequence ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:assembly_type a rdf:Property ;
+    rdfs:label "Assembly type"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:assemblyType a rdf:Property ;
+    rdfs:label "Assembly Type"@en ;
+    owl:equivalentProperty ns:assembly_type ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:author a rdf:Property ;
+    rdfs:label "Author"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:base_material_id a rdf:Property ;
+    rdfs:label "Base material id"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:baseMaterialId a rdf:Property ;
+    rdfs:label "Base Material Id"@en ;
+    owl:equivalentProperty ns:base_material_id ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:batch_id a rdf:Property ;
+    rdfs:label "Batch id"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:batchId a rdf:Property ;
+    rdfs:label "Batch Id"@en ;
+    owl:equivalentProperty ns:batch_id ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:battery a rdf:Property ;
+    rdfs:label "Battery"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:battery_status a rdf:Property ;
+    rdfs:label "Battery status"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:batteryStatus a rdf:Property ;
+    rdfs:label "Battery Status"@en ;
+    owl:equivalentProperty ns:battery_status ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:battinfo_version a rdf:Property ;
+    rdfs:label "Battinfo version"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:battinfoVersion a rdf:Property ;
+    rdfs:label "Battinfo Version"@en ;
+    owl:equivalentProperty ns:battinfo_version ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:bibliography a rdf:Property ;
+    rdfs:label "Bibliography"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:binder a rdf:Property ;
+    rdfs:label "Binder"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:branch a rdf:Property ;
+    rdfs:label "Branch"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:byte_size a rdf:Property ;
+    rdfs:label "Byte size"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:byteSize a rdf:Property ;
+    rdfs:label "Byte Size"@en ;
+    owl:equivalentProperty ns:byte_size ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:cap a rdf:Property ;
+    rdfs:label "Cap"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:cas_number a rdf:Property ;
+    rdfs:label "Cas number"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:casNumber a rdf:Property ;
+    rdfs:label "Cas Number"@en ;
+    owl:equivalentProperty ns:cas_number ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:case a rdf:Property ;
+    rdfs:label "Case"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:cathode_sheet_count a rdf:Property ;
+    rdfs:label "Cathode sheet count"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:cathodeSheetCount a rdf:Property ;
+    rdfs:label "Cathode Sheet Count"@en ;
+    owl:equivalentProperty ns:cathode_sheet_count ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:cation a rdf:Property ;
+    rdfs:label "Cation"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:cell a rdf:Property ;
+    rdfs:label "Cell"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:cell_id a rdf:Property ;
+    rdfs:label "Cell id"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:cellId a rdf:Property ;
+    rdfs:label "Cell Id"@en ;
+    owl:equivalentProperty ns:cell_id ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:cell_instance a rdf:Property ;
+    rdfs:label "Cell instance"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:cellInstance a rdf:Property ;
+    rdfs:label "Cell Instance"@en ;
+    owl:equivalentProperty ns:cell_instance ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:cell_spec a rdf:Property ;
+    rdfs:label "Cell spec"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:cellSpec a rdf:Property ;
+    rdfs:label "Cell Spec"@en ;
+    owl:equivalentProperty ns:cell_spec ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:cell_spec_id a rdf:Property ;
+    rdfs:label "Cell spec id"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:cellSpecId a rdf:Property ;
+    rdfs:label "Cell Spec Id"@en ;
+    owl:equivalentProperty ns:cell_spec_id ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:channel a rdf:Property ;
+    rdfs:label "Channel"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:channel_count a rdf:Property ;
+    rdfs:label "Channel count"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:channelCount a rdf:Property ;
+    rdfs:label "Channel Count"@en ;
+    owl:equivalentProperty ns:channel_count ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:channel_id a rdf:Property ;
+    rdfs:label "Channel id"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:channelId a rdf:Property ;
+    rdfs:label "Channel Id"@en ;
+    owl:equivalentProperty ns:channel_id ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:checksum a rdf:Property ;
+    rdfs:label "Checksum"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:chemistry_family a rdf:Property ;
+    rdfs:label "Chemistry family"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:chemistryFamily a rdf:Property ;
+    rdfs:label "Chemistry Family"@en ;
+    owl:equivalentProperty ns:chemistry_family ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:citation_key a rdf:Property ;
+    rdfs:label "Citation key"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:citationKey a rdf:Property ;
+    rdfs:label "Citation Key"@en ;
+    owl:equivalentProperty ns:citation_key ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:citations a rdf:Property ;
+    rdfs:label "Citations"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:claims a rdf:Property ;
+    rdfs:label "Claims"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:co_type a rdf:Property ;
+    rdfs:label "Co type"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:coType a rdf:Property ;
+    rdfs:label "Co Type"@en ;
+    owl:equivalentProperty ns:co_type ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:coating a rdf:Property ;
+    rdfs:label "Coating"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:coatings a rdf:Property ;
+    rdfs:label "Coatings"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:columns a rdf:Property ;
+    rdfs:label "Columns"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:comment a rdf:Property ;
+    rdfs:label "Comment"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:commissioned_at a rdf:Property ;
+    rdfs:label "Commissioned at"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:commissionedAt a rdf:Property ;
+    rdfs:label "Commissioned At"@en ;
+    owl:equivalentProperty ns:commissioned_at ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:component a rdf:Property ;
+    rdfs:label "Component"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:composition a rdf:Property ;
+    rdfs:label "Composition"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:concentration_ppm a rdf:Property ;
+    rdfs:label "Concentration ppm"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:concentrationPpm a rdf:Property ;
+    rdfs:label "Concentration Ppm"@en ;
+    owl:equivalentProperty ns:concentration_ppm ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:conditions a rdf:Property ;
+    rdfs:label "Conditions"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:conditions_of_access a rdf:Property ;
+    rdfs:label "Conditions of access"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:conditionsOfAccess a rdf:Property ;
+    rdfs:label "Conditions Of Access"@en ;
+    owl:equivalentProperty ns:conditions_of_access ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:confidence a rdf:Property ;
+    rdfs:label "Confidence"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:conformance a rdf:Property ;
+    rdfs:label "Conformance"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:conforms_to a rdf:Property ;
+    rdfs:label "Conforms to"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:conformsTo a rdf:Property ;
+    rdfs:label "Conforms To"@en ;
+    owl:equivalentProperty ns:conforms_to ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:constituents a rdf:Property ;
+    rdfs:label "Constituents"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:construction a rdf:Property ;
+    rdfs:label "Construction"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:content_size a rdf:Property ;
+    rdfs:label "Content size"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:contentSize a rdf:Property ;
+    rdfs:label "Content Size"@en ;
+    owl:equivalentProperty ns:content_size ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:content_url a rdf:Property ;
+    rdfs:label "Content url"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:contentUrl a rdf:Property ;
+    rdfs:label "Content Url"@en ;
+    owl:equivalentProperty ns:content_url ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:contributor a rdf:Property ;
+    rdfs:label "Contributor"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:count a rdf:Property ;
+    rdfs:label "Count"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:counter_electrode a rdf:Property ;
+    rdfs:label "Counter electrode"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:counterElectrode a rdf:Property ;
+    rdfs:label "Counter Electrode"@en ;
+    owl:equivalentProperty ns:counter_electrode ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:counter_electrode_id a rdf:Property ;
+    rdfs:label "Counter electrode id"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:counterElectrodeId a rdf:Property ;
+    rdfs:label "Counter Electrode Id"@en ;
+    owl:equivalentProperty ns:counter_electrode_id ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:counter_electrode_spec_id a rdf:Property ;
+    rdfs:label "Counter electrode spec id"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:counterElectrodeSpecId a rdf:Property ;
+    rdfs:label "Counter Electrode Spec Id"@en ;
+    owl:equivalentProperty ns:counter_electrode_spec_id ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:created_by a rdf:Property ;
+    rdfs:label "Created by"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:createdBy a rdf:Property ;
+    rdfs:label "Created By"@en ;
+    owl:equivalentProperty ns:created_by ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:creators a rdf:Property ;
+    rdfs:label "Creators"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:critical_raw_materials a rdf:Property ;
+    rdfs:label "Critical raw materials"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:criticalRawMaterials a rdf:Property ;
+    rdfs:label "Critical Raw Materials"@en ;
+    owl:equivalentProperty ns:critical_raw_materials ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:current_collector a rdf:Property ;
+    rdfs:label "Current collector"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:currentCollector a rdf:Property ;
+    rdfs:label "Current Collector"@en ;
+    owl:equivalentProperty ns:current_collector ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:current_collector_spec a rdf:Property ;
+    rdfs:label "Current collector spec"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:currentCollectorSpec a rdf:Property ;
+    rdfs:label "Current Collector Spec"@en ;
+    owl:equivalentProperty ns:current_collector_spec ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:current_collector_spec_id a rdf:Property ;
+    rdfs:label "Current collector spec id"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:currentCollectorSpecId a rdf:Property ;
+    rdfs:label "Current Collector Spec Id"@en ;
+    owl:equivalentProperty ns:current_collector_spec_id ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:current_mA a rdf:Property ;
+    rdfs:label "Current m A"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:currentMA a rdf:Property ;
+    rdfs:label "Current MA"@en ;
+    owl:equivalentProperty ns:current_mA ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:curve a rdf:Property ;
+    rdfs:label "Curve"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:dataset a rdf:Property ;
+    rdfs:label "Dataset"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:dataset_ids a rdf:Property ;
+    rdfs:label "Dataset ids"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:datasetIds a rdf:Property ;
+    rdfs:label "Dataset Ids"@en ;
+    owl:equivalentProperty ns:dataset_ids ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:datasets a rdf:Property ;
+    rdfs:label "Datasets"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:datatype a rdf:Property ;
+    rdfs:label "Datatype"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:date_published a rdf:Property ;
+    rdfs:label "Date published"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:datePublished a rdf:Property ;
+    rdfs:label "Date Published"@en ;
+    owl:equivalentProperty ns:date_published ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:delay_s a rdf:Property ;
+    rdfs:label "Delay s"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:delayS a rdf:Property ;
+    rdfs:label "Delay S"@en ;
+    owl:equivalentProperty ns:delay_s ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:derived_from_artifact a rdf:Property ;
+    rdfs:label "Derived from artifact"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:derivedFromArtifact a rdf:Property ;
+    rdfs:label "Derived From Artifact"@en ;
+    owl:equivalentProperty ns:derived_from_artifact ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:description a rdf:Property ;
+    rdfs:label "Description"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:detail a rdf:Property ;
+    rdfs:label "Detail"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:deviations a rdf:Property ;
+    rdfs:label "Deviations"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:direction a rdf:Property ;
+    rdfs:label "Direction"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:dissolutionDate a rdf:Property ;
+    rdfs:label "Dissolution Date"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:distributions a rdf:Property ;
+    rdfs:label "Distributions"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:doi a rdf:Property ;
+    rdfs:label "Doi"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:dopants a rdf:Property ;
+    rdfs:label "Dopants"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:dpp_status a rdf:Property ;
+    rdfs:label "Dpp status"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:dppStatus a rdf:Property ;
+    rdfs:label "Dpp Status"@en ;
+    owl:equivalentProperty ns:dpp_status ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:duration a rdf:Property ;
+    rdfs:label "Duration"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:duration_s a rdf:Property ;
+    rdfs:label "Duration s"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:durationS a rdf:Property ;
+    rdfs:label "Duration S"@en ;
+    owl:equivalentProperty ns:duration_s ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:editorial a rdf:Property ;
+    rdfs:label "Editorial"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:electrode a rdf:Property ;
+    rdfs:label "Electrode"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:electrode_polarity a rdf:Property ;
+    rdfs:label "Electrode polarity"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:electrodePolarity a rdf:Property ;
+    rdfs:label "Electrode Polarity"@en ;
+    owl:equivalentProperty ns:electrode_polarity ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:electrode_spec a rdf:Property ;
+    rdfs:label "Electrode spec"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:electrodeSpec a rdf:Property ;
+    rdfs:label "Electrode Spec"@en ;
+    owl:equivalentProperty ns:electrode_spec ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:electrode_spec_id a rdf:Property ;
+    rdfs:label "Electrode spec id"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:electrodeSpecId a rdf:Property ;
+    rdfs:label "Electrode Spec Id"@en ;
+    owl:equivalentProperty ns:electrode_spec_id ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:electrolyte a rdf:Property ;
+    rdfs:label "Electrolyte"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:electrolyte_spec a rdf:Property ;
+    rdfs:label "Electrolyte spec"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:electrolyteSpec a rdf:Property ;
+    rdfs:label "Electrolyte Spec"@en ;
+    owl:equivalentProperty ns:electrolyte_spec ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:electrolyte_spec_id a rdf:Property ;
+    rdfs:label "Electrolyte spec id"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:electrolyteSpecId a rdf:Property ;
+    rdfs:label "Electrolyte Spec Id"@en ;
+    owl:equivalentProperty ns:electrolyte_spec_id ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:element a rdf:Property ;
+    rdfs:label "Element"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:email a rdf:Property ;
+    rdfs:label "Email"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:emmo_type a rdf:Property ;
+    rdfs:label "Emmo type"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:emmoType a rdf:Property ;
+    rdfs:label "Emmo Type"@en ;
+    owl:equivalentProperty ns:emmo_type ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:encoding_format a rdf:Property ;
+    rdfs:label "Encoding format"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:encodingFormat a rdf:Property ;
+    rdfs:label "Encoding Format"@en ;
+    owl:equivalentProperty ns:encoding_format ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:ended_at a rdf:Property ;
+    rdfs:label "Ended at"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:endedAt a rdf:Property ;
+    rdfs:label "Ended At"@en ;
+    owl:equivalentProperty ns:ended_at ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:equipment a rdf:Property ;
+    rdfs:label "Equipment"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:equipment_class a rdf:Property ;
+    rdfs:label "Equipment class"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:equipmentClass a rdf:Property ;
+    rdfs:label "Equipment Class"@en ;
+    owl:equivalentProperty ns:equipment_class ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:equipment_id a rdf:Property ;
+    rdfs:label "Equipment id"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:equipmentId a rdf:Property ;
+    rdfs:label "Equipment Id"@en ;
+    owl:equivalentProperty ns:equipment_id ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:equipment_spec a rdf:Property ;
+    rdfs:label "Equipment spec"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:equipmentSpec a rdf:Property ;
+    rdfs:label "Equipment Spec"@en ;
+    owl:equivalentProperty ns:equipment_spec ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:equipment_spec_id a rdf:Property ;
+    rdfs:label "Equipment spec id"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:equipmentSpecId a rdf:Property ;
+    rdfs:label "Equipment Spec Id"@en ;
+    owl:equivalentProperty ns:equipment_spec_id ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:expires_at a rdf:Property ;
+    rdfs:label "Expires at"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:expiresAt a rdf:Property ;
+    rdfs:label "Expires At"@en ;
+    owl:equivalentProperty ns:expires_at ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:expression a rdf:Property ;
+    rdfs:label "Expression"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:extinguishing_agent a rdf:Property ;
+    rdfs:label "Extinguishing agent"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:extinguishingAgent a rdf:Property ;
+    rdfs:label "Extinguishing Agent"@en ;
+    owl:equivalentProperty ns:extinguishing_agent ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:extracted_at a rdf:Property ;
+    rdfs:label "Extracted at"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:extractedAt a rdf:Property ;
+    rdfs:label "Extracted At"@en ;
+    owl:equivalentProperty ns:extracted_at ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:facets a rdf:Property ;
+    rdfs:label "Facets"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:family a rdf:Property ;
+    rdfs:label "Family"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:family_name a rdf:Property ;
+    rdfs:label "Family name"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:familyName a rdf:Property ;
+    rdfs:label "Family Name"@en ;
+    owl:equivalentProperty ns:family_name ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:file_hash a rdf:Property ;
+    rdfs:label "File hash"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:fileHash a rdf:Property ;
+    rdfs:label "File Hash"@en ;
+    owl:equivalentProperty ns:file_hash ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:format a rdf:Property ;
+    rdfs:label "Format"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:formula a rdf:Property ;
+    rdfs:label "Formula"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:foundingDate a rdf:Property ;
+    rdfs:label "Founding Date"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:fraction a rdf:Property ;
+    rdfs:label "Fraction"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:funder a rdf:Property ;
+    rdfs:label "Funder"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:funders a rdf:Property ;
+    rdfs:label "Funders"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:funding a rdf:Property ;
+    rdfs:label "Funding"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:generated a rdf:Property ;
+    rdfs:label "Generated"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:generated_from a rdf:Property ;
+    rdfs:label "Generated from"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:generatedFrom a rdf:Property ;
+    rdfs:label "Generated From"@en ;
+    owl:equivalentProperty ns:generated_from ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:given_name a rdf:Property ;
+    rdfs:label "Given name"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:givenName a rdf:Property ;
+    rdfs:label "Given Name"@en ;
+    owl:equivalentProperty ns:given_name ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:grade a rdf:Property ;
+    rdfs:label "Grade"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:hazardous_substances a rdf:Property ;
+    rdfs:label "Hazardous substances"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:hazardousSubstances a rdf:Property ;
+    rdfs:label "Hazardous Substances"@en ;
+    owl:equivalentProperty ns:hazardous_substances ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:headline a rdf:Property ;
+    rdfs:label "Headline"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:housing a rdf:Property ;
+    rdfs:label "Housing"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:housing_spec a rdf:Property ;
+    rdfs:label "Housing spec"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:housingSpec a rdf:Property ;
+    rdfs:label "Housing Spec"@en ;
+    owl:equivalentProperty ns:housing_spec ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:housing_spec_id a rdf:Property ;
+    rdfs:label "Housing spec id"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:housingSpecId a rdf:Property ;
+    rdfs:label "Housing Spec Id"@en ;
+    owl:equivalentProperty ns:housing_spec_id ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:impact a rdf:Property ;
+    rdfs:label "Impact"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:in_language a rdf:Property ;
+    rdfs:label "In language"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:inLanguage a rdf:Property ;
+    rdfs:label "In Language"@en ;
+    owl:equivalentProperty ns:in_language ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:included_in_data_catalog a rdf:Property ;
+    rdfs:label "Included in data catalog"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:includedInDataCatalog a rdf:Property ;
+    rdfs:label "Included In Data Catalog"@en ;
+    owl:equivalentProperty ns:included_in_data_catalog ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:index a rdf:Property ;
+    rdfs:label "Index"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:inferred_fields a rdf:Property ;
+    rdfs:label "Inferred fields"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:inferredFields a rdf:Property ;
+    rdfs:label "Inferred Fields"@en ;
+    owl:equivalentProperty ns:inferred_fields ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:ingest_status a rdf:Property ;
+    rdfs:label "Ingest status"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:ingestStatus a rdf:Property ;
+    rdfs:label "Ingest Status"@en ;
+    owl:equivalentProperty ns:ingest_status ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:instrument_name a rdf:Property ;
+    rdfs:label "Instrument name"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:instrumentName a rdf:Property ;
+    rdfs:label "Instrument Name"@en ;
+    owl:equivalentProperty ns:instrument_name ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:interpolation a rdf:Property ;
+    rdfs:label "Interpolation"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:is_accessible_for_free a rdf:Property ;
+    rdfs:label "Is accessible for free"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:isAccessibleForFree a rdf:Property ;
+    rdfs:label "Is Accessible For Free"@en ;
+    owl:equivalentProperty ns:is_accessible_for_free ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:is_based_on a rdf:Property ;
+    rdfs:label "Is based on"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:isBasedOn a rdf:Property ;
+    rdfs:label "Is Based On"@en ;
+    owl:equivalentProperty ns:is_based_on ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:keywords a rdf:Property ;
+    rdfs:label "Keywords"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:kind a rdf:Property ;
+    rdfs:label "Kind"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:label a rdf:Property ;
+    rdfs:label "Label"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:language a rdf:Property ;
+    rdfs:label "Language"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:layer_count a rdf:Property ;
+    rdfs:label "Layer count"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:layerCount a rdf:Property ;
+    rdfs:label "Layer Count"@en ;
+    owl:equivalentProperty ns:layer_count ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:layering a rdf:Property ;
+    rdfs:label "Layering"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:legalName a rdf:Property ;
+    rdfs:label "Legal Name"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:location a rdf:Property ;
+    rdfs:label "Location"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:locator a rdf:Property ;
+    rdfs:label "Locator"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:lot_id a rdf:Property ;
+    rdfs:label "Lot id"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:lotId a rdf:Property ;
+    rdfs:label "Lot Id"@en ;
+    owl:equivalentProperty ns:lot_id ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:main_entity a rdf:Property ;
+    rdfs:label "Main entity"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:mainEntity a rdf:Property ;
+    rdfs:label "Main Entity"@en ;
+    owl:equivalentProperty ns:main_entity ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:manufactured_at a rdf:Property ;
+    rdfs:label "Manufactured at"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:manufacturedAt a rdf:Property ;
+    rdfs:label "Manufactured At"@en ;
+    owl:equivalentProperty ns:manufactured_at ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:material a rdf:Property ;
+    rdfs:label "Material"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:material_class a rdf:Property ;
+    rdfs:label "Material class"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:materialClass a rdf:Property ;
+    rdfs:label "Material Class"@en ;
+    owl:equivalentProperty ns:material_class ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:material_kind a rdf:Property ;
+    rdfs:label "Material kind"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:materialKind a rdf:Property ;
+    rdfs:label "Material Kind"@en ;
+    owl:equivalentProperty ns:material_kind ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:material_spec a rdf:Property ;
+    rdfs:label "Material spec"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:materialSpec a rdf:Property ;
+    rdfs:label "Material Spec"@en ;
+    owl:equivalentProperty ns:material_spec ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:material_spec_id a rdf:Property ;
+    rdfs:label "Material spec id"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:materialSpecId a rdf:Property ;
+    rdfs:label "Material Spec Id"@en ;
+    owl:equivalentProperty ns:material_spec_id ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:max a rdf:Property ;
+    rdfs:label "Max"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:max_capacity_mAh a rdf:Property ;
+    rdfs:label "Max capacity m Ah"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:maxCapacityMAh a rdf:Property ;
+    rdfs:label "Max Capacity MAh"@en ;
+    owl:equivalentProperty ns:max_capacity_mAh ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:max_current_mA a rdf:Property ;
+    rdfs:label "Max current m A"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:maxCurrentMA a rdf:Property ;
+    rdfs:label "Max Current MA"@en ;
+    owl:equivalentProperty ns:max_current_mA ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:max_temperature_degC a rdf:Property ;
+    rdfs:label "Max temperature deg C"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:maxTemperatureDegC a rdf:Property ;
+    rdfs:label "Max Temperature Deg C"@en ;
+    owl:equivalentProperty ns:max_temperature_degC ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:max_value a rdf:Property ;
+    rdfs:label "Max value"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:maxValue a rdf:Property ;
+    rdfs:label "Max Value"@en ;
+    owl:equivalentProperty ns:max_value ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:max_voltage_V a rdf:Property ;
+    rdfs:label "Max voltage V"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:maxVoltageV a rdf:Property ;
+    rdfs:label "Max Voltage V"@en ;
+    owl:equivalentProperty ns:max_voltage_V ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:measured a rdf:Property ;
+    rdfs:label "Measured"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:measurement_methods a rdf:Property ;
+    rdfs:label "Measurement methods"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:measurementMethods a rdf:Property ;
+    rdfs:label "Measurement Methods"@en ;
+    owl:equivalentProperty ns:measurement_methods ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:measurement_techniques a rdf:Property ;
+    rdfs:label "Measurement techniques"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:measurementTechniques a rdf:Property ;
+    rdfs:label "Measurement Techniques"@en ;
+    owl:equivalentProperty ns:measurement_techniques ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:measurements a rdf:Property ;
+    rdfs:label "Measurements"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:media_type a rdf:Property ;
+    rdfs:label "Media type"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:mediaType a rdf:Property ;
+    rdfs:label "Media Type"@en ;
+    owl:equivalentProperty ns:media_type ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:method a rdf:Property ;
+    rdfs:label "Method"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:min a rdf:Property ;
+    rdfs:label "Min"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:min_current_mA a rdf:Property ;
+    rdfs:label "Min current m A"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:minCurrentMA a rdf:Property ;
+    rdfs:label "Min Current MA"@en ;
+    owl:equivalentProperty ns:min_current_mA ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:min_temperature_degC a rdf:Property ;
+    rdfs:label "Min temperature deg C"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:minTemperatureDegC a rdf:Property ;
+    rdfs:label "Min Temperature Deg C"@en ;
+    owl:equivalentProperty ns:min_temperature_degC ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:min_value a rdf:Property ;
+    rdfs:label "Min value"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:minValue a rdf:Property ;
+    rdfs:label "Min Value"@en ;
+    owl:equivalentProperty ns:min_value ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:min_voltage_V a rdf:Property ;
+    rdfs:label "Min voltage V"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:minVoltageV a rdf:Property ;
+    rdfs:label "Min Voltage V"@en ;
+    owl:equivalentProperty ns:min_voltage_V ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:missing_fields a rdf:Property ;
+    rdfs:label "Missing fields"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:missingFields a rdf:Property ;
+    rdfs:label "Missing Fields"@en ;
+    owl:equivalentProperty ns:missing_fields ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:mode a rdf:Property ;
+    rdfs:label "Mode"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:model_context a rdf:Property ;
+    rdfs:label "Model context"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:modelContext a rdf:Property ;
+    rdfs:label "Model Context"@en ;
+    owl:equivalentProperty ns:model_context ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:model_name a rdf:Property ;
+    rdfs:label "Model name"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:modelName a rdf:Property ;
+    rdfs:label "Model Name"@en ;
+    owl:equivalentProperty ns:model_name ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:molecular_formula a rdf:Property ;
+    rdfs:label "Molecular formula"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:molecularFormula a rdf:Property ;
+    rdfs:label "Molecular Formula"@en ;
+    owl:equivalentProperty ns:molecular_formula ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:negative_electrode a rdf:Property ;
+    rdfs:label "Negative electrode"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:negativeElectrode a rdf:Property ;
+    rdfs:label "Negative Electrode"@en ;
+    owl:equivalentProperty ns:negative_electrode ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:negative_electrode_spec_id a rdf:Property ;
+    rdfs:label "Negative electrode spec id"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:negativeElectrodeSpecId a rdf:Property ;
+    rdfs:label "Negative Electrode Spec Id"@en ;
+    owl:equivalentProperty ns:negative_electrode_spec_id ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:note a rdf:Property ;
+    rdfs:label "Note"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:notes a rdf:Property ;
+    rdfs:label "Notes"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:occurred_at a rdf:Property ;
+    rdfs:label "Occurred at"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:occurredAt a rdf:Property ;
+    rdfs:label "Occurred At"@en ;
+    owl:equivalentProperty ns:occurred_at ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:opened_date a rdf:Property ;
+    rdfs:label "Opened date"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:openedDate a rdf:Property ;
+    rdfs:label "Opened Date"@en ;
+    owl:equivalentProperty ns:opened_date ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:orcid a rdf:Property ;
+    rdfs:label "Orcid"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:organization a rdf:Property ;
+    rdfs:label "Organization"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:page a rdf:Property ;
+    rdfs:label "Page"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:parameter a rdf:Property ;
+    rdfs:label "Parameter"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:parameter_set a rdf:Property ;
+    rdfs:label "Parameter set"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:parameterSet a rdf:Property ;
+    rdfs:label "Parameter Set"@en ;
+    owl:equivalentProperty ns:parameter_set ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:parentOrganization a rdf:Property ;
+    rdfs:label "Parent Organization"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:parts a rdf:Property ;
+    rdfs:label "Parts"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:period a rdf:Property ;
+    rdfs:label "Period"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:photo_glob a rdf:Property ;
+    rdfs:label "Photo glob"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:photoGlob a rdf:Property ;
+    rdfs:label "Photo Glob"@en ;
+    owl:equivalentProperty ns:photo_glob ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:polarity a rdf:Property ;
+    rdfs:label "Polarity"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:positive_electrode a rdf:Property ;
+    rdfs:label "Positive electrode"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:positiveElectrode a rdf:Property ;
+    rdfs:label "Positive Electrode"@en ;
+    owl:equivalentProperty ns:positive_electrode ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:positive_electrode_spec_id a rdf:Property ;
+    rdfs:label "Positive electrode spec id"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:positiveElectrodeSpecId a rdf:Property ;
+    rdfs:label "Positive Electrode Spec Id"@en ;
+    owl:equivalentProperty ns:positive_electrode_spec_id ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:primary_key a rdf:Property ;
+    rdfs:label "Primary key"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:primaryKey a rdf:Property ;
+    rdfs:label "Primary Key"@en ;
+    owl:equivalentProperty ns:primary_key ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:processing a rdf:Property ;
+    rdfs:label "Processing"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:product_id a rdf:Property ;
+    rdfs:label "Product id"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:productId a rdf:Property ;
+    rdfs:label "Product Id"@en ;
+    owl:equivalentProperty ns:product_id ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:profile a rdf:Property ;
+    rdfs:label "Profile"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:program a rdf:Property ;
+    rdfs:label "Program"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:properties a rdf:Property ;
+    rdfs:label "Properties"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:property a rdf:Property ;
+    rdfs:label "Property"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:property_id a rdf:Property ;
+    rdfs:label "Property id"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:propertyId a rdf:Property ;
+    rdfs:label "Property Id"@en ;
+    owl:equivalentProperty ns:property_id ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:protocol_id a rdf:Property ;
+    rdfs:label "Protocol id"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:protocolId a rdf:Property ;
+    rdfs:label "Protocol Id"@en ;
+    owl:equivalentProperty ns:protocol_id ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:provenance a rdf:Property ;
+    rdfs:label "Provenance"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:provenance_class a rdf:Property ;
+    rdfs:label "Provenance class"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:provenanceClass a rdf:Property ;
+    rdfs:label "Provenance Class"@en ;
+    owl:equivalentProperty ns:provenance_class ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:published_at a rdf:Property ;
+    rdfs:label "Published at"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:publishedAt a rdf:Property ;
+    rdfs:label "Published At"@en ;
+    owl:equivalentProperty ns:published_at ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:publisher a rdf:Property ;
+    rdfs:label "Publisher"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:publisher_id a rdf:Property ;
+    rdfs:label "Publisher id"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:publisherId a rdf:Property ;
+    rdfs:label "Publisher Id"@en ;
+    owl:equivalentProperty ns:publisher_id ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:quality a rdf:Property ;
+    rdfs:label "Quality"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:quality_flags a rdf:Property ;
+    rdfs:label "Quality flags"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:qualityFlags a rdf:Property ;
+    rdfs:label "Quality Flags"@en ;
+    owl:equivalentProperty ns:quality_flags ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:quantity a rdf:Property ;
+    rdfs:label "Quantity"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:raw a rdf:Property ;
+    rdfs:label "Raw"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:received_date a rdf:Property ;
+    rdfs:label "Received date"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:receivedDate a rdf:Property ;
+    rdfs:label "Received Date"@en ;
+    owl:equivalentProperty ns:received_date ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:record a rdf:Property ;
+    rdfs:label "Record"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:required a rdf:Property ;
+    rdfs:label "Required"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:resource_iri a rdf:Property ;
+    rdfs:label "Resource iri"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:resourceIri a rdf:Property ;
+    rdfs:label "Resource Iri"@en ;
+    owl:equivalentProperty ns:resource_iri ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:resource_name a rdf:Property ;
+    rdfs:label "Resource name"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:resourceName a rdf:Property ;
+    rdfs:label "Resource Name"@en ;
+    owl:equivalentProperty ns:resource_name ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:resource_type a rdf:Property ;
+    rdfs:label "Resource type"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:resourceType a rdf:Property ;
+    rdfs:label "Resource Type"@en ;
+    owl:equivalentProperty ns:resource_type ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:role a rdf:Property ;
+    rdfs:label "Role"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:route a rdf:Property ;
+    rdfs:label "Route"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:rules a rdf:Property ;
+    rdfs:label "Rules"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:safety a rdf:Property ;
+    rdfs:label "Safety"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:salt a rdf:Property ;
+    rdfs:label "Salt"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:same_as a rdf:Property ;
+    rdfs:label "Same as"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:sameAs a rdf:Property ;
+    rdfs:label "Same As"@en ;
+    owl:equivalentProperty ns:same_as ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:sample_count a rdf:Property ;
+    rdfs:label "Sample count"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:sampleCount a rdf:Property ;
+    rdfs:label "Sample Count"@en ;
+    owl:equivalentProperty ns:sample_count ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
 ns:schema_version a rdf:Property ;
     rdfs:label "Schema version"@en ;
-    rdfs:comment "Record schema version stamp."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:schemaVersion a rdf:Property ;
+    rdfs:label "Schema Version"@en ;
+    owl:equivalentProperty ns:schema_version ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:scope a rdf:Property ;
+    rdfs:label "Scope"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:seals a rdf:Property ;
+    rdfs:label "Seals"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:separator a rdf:Property ;
+    rdfs:label "Separator"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:separator_sheet_count a rdf:Property ;
+    rdfs:label "Separator sheet count"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:separatorSheetCount a rdf:Property ;
+    rdfs:label "Separator Sheet Count"@en ;
+    owl:equivalentProperty ns:separator_sheet_count ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:separator_spec a rdf:Property ;
+    rdfs:label "Separator spec"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:separatorSpec a rdf:Property ;
+    rdfs:label "Separator Spec"@en ;
+    owl:equivalentProperty ns:separator_spec ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:separator_spec_id a rdf:Property ;
+    rdfs:label "Separator spec id"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:separatorSpecId a rdf:Property ;
+    rdfs:label "Separator Spec Id"@en ;
+    owl:equivalentProperty ns:separator_spec_id ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:serial_number a rdf:Property ;
+    rdfs:label "Serial number"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:serialNumber a rdf:Property ;
+    rdfs:label "Serial Number"@en ;
+    owl:equivalentProperty ns:serial_number ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:service_start_date a rdf:Property ;
+    rdfs:label "Service start date"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:serviceStartDate a rdf:Property ;
+    rdfs:label "Service Start Date"@en ;
+    owl:equivalentProperty ns:service_start_date ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:setpoints a rdf:Property ;
+    rdfs:label "Setpoints"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:sha256 a rdf:Property ;
+    rdfs:label "Sha256"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:solvent a rdf:Property ;
+    rdfs:label "Solvent"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:solvent_mixture a rdf:Property ;
+    rdfs:label "Solvent mixture"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:solventMixture a rdf:Property ;
+    rdfs:label "Solvent Mixture"@en ;
+    owl:equivalentProperty ns:solvent_mixture ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:source a rdf:Property ;
+    rdfs:label "Source"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:source_dataset_key a rdf:Property ;
+    rdfs:label "Source dataset key"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:sourceDatasetKey a rdf:Property ;
+    rdfs:label "Source Dataset Key"@en ;
+    owl:equivalentProperty ns:source_dataset_key ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:source_file a rdf:Property ;
+    rdfs:label "Source file"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:sourceFile a rdf:Property ;
+    rdfs:label "Source File"@en ;
+    owl:equivalentProperty ns:source_file ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:source_id a rdf:Property ;
+    rdfs:label "Source id"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:sourceId a rdf:Property ;
+    rdfs:label "Source Id"@en ;
+    owl:equivalentProperty ns:source_id ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:source_name a rdf:Property ;
+    rdfs:label "Source name"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:sourceName a rdf:Property ;
+    rdfs:label "Source Name"@en ;
+    owl:equivalentProperty ns:source_name ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:source_row a rdf:Property ;
+    rdfs:label "Source row"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:sourceRow a rdf:Property ;
+    rdfs:label "Source Row"@en ;
+    owl:equivalentProperty ns:source_row ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:source_sheet a rdf:Property ;
+    rdfs:label "Source sheet"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:sourceSheet a rdf:Property ;
+    rdfs:label "Source Sheet"@en ;
+    owl:equivalentProperty ns:source_sheet ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:source_version a rdf:Property ;
+    rdfs:label "Source version"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:sourceVersion a rdf:Property ;
+    rdfs:label "Source Version"@en ;
+    owl:equivalentProperty ns:source_version ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:source_workbook_sha256 a rdf:Property ;
+    rdfs:label "Source workbook sha256"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:sourceWorkbookSha256 a rdf:Property ;
+    rdfs:label "Source Workbook Sha256"@en ;
+    owl:equivalentProperty ns:source_workbook_sha256 ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:spatial_coverage a rdf:Property ;
+    rdfs:label "Spatial coverage"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:spatialCoverage a rdf:Property ;
+    rdfs:label "Spatial Coverage"@en ;
+    owl:equivalentProperty ns:spatial_coverage ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:specification_comment a rdf:Property ;
+    rdfs:label "Specification comment"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:specificationComment a rdf:Property ;
+    rdfs:label "Specification Comment"@en ;
+    owl:equivalentProperty ns:specification_comment ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:standard_deviation a rdf:Property ;
+    rdfs:label "Standard deviation"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:standardDeviation a rdf:Property ;
+    rdfs:label "Standard Deviation"@en ;
+    owl:equivalentProperty ns:standard_deviation ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:started_at a rdf:Property ;
+    rdfs:label "Started at"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:startedAt a rdf:Property ;
+    rdfs:label "Started At"@en ;
+    owl:equivalentProperty ns:started_at ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:status a rdf:Property ;
+    rdfs:label "Status"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:step_index a rdf:Property ;
+    rdfs:label "Step index"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:stepIndex a rdf:Property ;
+    rdfs:label "Step Index"@en ;
+    owl:equivalentProperty ns:step_index ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:steps a rdf:Property ;
+    rdfs:label "Steps"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:storage a rdf:Property ;
+    rdfs:label "Storage"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:structure a rdf:Property ;
+    rdfs:label "Structure"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:subject_of a rdf:Property ;
+    rdfs:label "Subject of"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:subjectOf a rdf:Property ;
+    rdfs:label "Subject Of"@en ;
+    owl:equivalentProperty ns:subject_of ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:supersedes a rdf:Property ;
+    rdfs:label "Supersedes"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:supplier a rdf:Property ;
+    rdfs:label "Supplier"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:supported_chemistries a rdf:Property ;
+    rdfs:label "Supported chemistries"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:supportedChemistries a rdf:Property ;
+    rdfs:label "Supported Chemistries"@en ;
+    owl:equivalentProperty ns:supported_chemistries ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:tab a rdf:Property ;
+    rdfs:label "Tab"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:table a rdf:Property ;
+    rdfs:label "Table"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:table_schema a rdf:Property ;
+    rdfs:label "Table schema"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:tableSchema a rdf:Property ;
+    rdfs:label "Table Schema"@en ;
+    owl:equivalentProperty ns:table_schema ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:tags a rdf:Property ;
+    rdfs:label "Tags"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:temporal_coverage a rdf:Property ;
+    rdfs:label "Temporal coverage"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:temporalCoverage a rdf:Property ;
+    rdfs:label "Temporal Coverage"@en ;
+    owl:equivalentProperty ns:temporal_coverage ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:terminals a rdf:Property ;
+    rdfs:label "Terminals"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:termination a rdf:Property ;
+    rdfs:label "Termination"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:test a rdf:Property ;
+    rdfs:label "Test"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:test_kind_from_filename a rdf:Property ;
+    rdfs:label "Test kind from filename"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:testKindFromFilename a rdf:Property ;
+    rdfs:label "Test Kind From Filename"@en ;
+    owl:equivalentProperty ns:test_kind_from_filename ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:test_spec a rdf:Property ;
+    rdfs:label "Test spec"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:testSpec a rdf:Property ;
+    rdfs:label "Test Spec"@en ;
+    owl:equivalentProperty ns:test_spec ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:text a rdf:Property ;
+    rdfs:label "Text"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:time_s a rdf:Property ;
+    rdfs:label "Time s"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:timeS a rdf:Property ;
+    rdfs:label "Time S"@en ;
+    owl:equivalentProperty ns:time_s ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:timeseries_glob a rdf:Property ;
+    rdfs:label "Timeseries glob"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:timeseriesGlob a rdf:Property ;
+    rdfs:label "Timeseries Glob"@en ;
+    owl:equivalentProperty ns:timeseries_glob ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:timestamp a rdf:Property ;
+    rdfs:label "Timestamp"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:title a rdf:Property ;
+    rdfs:label "Title"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:titles a rdf:Property ;
+    rdfs:label "Titles"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:tool a rdf:Property ;
+    rdfs:label "Tool"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:type a rdf:Property ;
+    rdfs:label "Type"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:type_record a rdf:Property ;
+    rdfs:label "Type record"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:typeRecord a rdf:Property ;
+    rdfs:label "Type Record"@en ;
+    owl:equivalentProperty ns:type_record ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:typical_value a rdf:Property ;
+    rdfs:label "Typical value"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:typicalValue a rdf:Property ;
+    rdfs:label "Typical Value"@en ;
+    owl:equivalentProperty ns:typical_value ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:unit a rdf:Property ;
+    rdfs:label "Unit"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:unit_code a rdf:Property ;
+    rdfs:label "Unit code"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:unitCode a rdf:Property ;
+    rdfs:label "Unit Code"@en ;
+    owl:equivalentProperty ns:unit_code ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:unit_text a rdf:Property ;
+    rdfs:label "Unit text"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:unitText a rdf:Property ;
+    rdfs:label "Unit Text"@en ;
+    owl:equivalentProperty ns:unit_text ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:unit_uri a rdf:Property ;
+    rdfs:label "Unit uri"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:unitUri a rdf:Property ;
+    rdfs:label "Unit Uri"@en ;
+    owl:equivalentProperty ns:unit_uri ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:value a rdf:Property ;
+    rdfs:label "Value"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:value_text a rdf:Property ;
+    rdfs:label "Value text"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:valueText a rdf:Property ;
+    rdfs:label "Value Text"@en ;
+    owl:equivalentProperty ns:value_text ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:variable_measured a rdf:Property ;
+    rdfs:label "Variable measured"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:variableMeasured a rdf:Property ;
+    rdfs:label "Variable Measured"@en ;
+    owl:equivalentProperty ns:variable_measured ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:version a rdf:Property ;
+    rdfs:label "Version"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:voltage_V a rdf:Property ;
+    rdfs:label "Voltage V"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:voltageV a rdf:Property ;
+    rdfs:label "Voltage V"@en ;
+    owl:equivalentProperty ns:voltage_V ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:warnings a rdf:Property ;
+    rdfs:label "Warnings"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:weight_fraction a rdf:Property ;
+    rdfs:label "Weight fraction"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:weightFraction a rdf:Property ;
+    rdfs:label "Weight Fraction"@en ;
+    owl:equivalentProperty ns:weight_fraction ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:winding_turns a rdf:Property ;
+    rdfs:label "Winding turns"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:windingTurns a rdf:Property ;
+    rdfs:label "Winding Turns"@en ;
+    owl:equivalentProperty ns:winding_turns ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:working_electrode a rdf:Property ;
+    rdfs:label "Working electrode"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:workingElectrode a rdf:Property ;
+    rdfs:label "Working Electrode"@en ;
+    owl:equivalentProperty ns:working_electrode ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:working_electrode_id a rdf:Property ;
+    rdfs:label "Working electrode id"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:workingElectrodeId a rdf:Property ;
+    rdfs:label "Working Electrode Id"@en ;
+    owl:equivalentProperty ns:working_electrode_id ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:working_electrode_spec_id a rdf:Property ;
+    rdfs:label "Working electrode spec id"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:workingElectrodeSpecId a rdf:Property ;
+    rdfs:label "Working Electrode Spec Id"@en ;
+    owl:equivalentProperty ns:working_electrode_spec_id ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:workspace_id a rdf:Property ;
+    rdfs:label "Workspace id"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:workspaceId a rdf:Property ;
+    rdfs:label "Workspace Id"@en ;
+    owl:equivalentProperty ns:workspace_id ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:x a rdf:Property ;
+    rdfs:label "X"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:x_quantity a rdf:Property ;
+    rdfs:label "X quantity"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:xQuantity a rdf:Property ;
+    rdfs:label "X Quantity"@en ;
+    owl:equivalentProperty ns:x_quantity ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:x_unit a rdf:Property ;
+    rdfs:label "X unit"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:xUnit a rdf:Property ;
+    rdfs:label "X Unit"@en ;
+    owl:equivalentProperty ns:x_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:y a rdf:Property ;
+    rdfs:label "Y"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:y_unit a rdf:Property ;
+    rdfs:label "Y unit"@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:yUnit a rdf:Property ;
+    rdfs:label "Y Unit"@en ;
+    owl:equivalentProperty ns:y_unit ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
 
 ns:battinfo_records a rdf:Property ;
@@ -2104,84 +5122,9 @@ ns:battinfo_records a rdf:Property ;
     rdfs:comment "Wrapper holding the canonical BattINFO record body inside a served resource."@en ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
 
-ns:cell_spec a rdf:Property ;
-    rdfs:label "Cell spec"@en ;
-    rdfs:comment "The cell-specification body of a served record."@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
-
-ns:properties a rdf:Property ;
-    rdfs:label "Properties"@en ;
-    rdfs:comment "The quantitative property set of a served record."@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
-
-ns:provenance a rdf:Property ;
-    rdfs:label "Provenance"@en ;
-    rdfs:comment "Provenance block of a served record."@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
-
-ns:format a rdf:Property ;
-    rdfs:label "Format"@en ;
-    rdfs:comment "Physical cell format (registry projection key)."@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
-
-ns:type a rdf:Property ;
-    rdfs:label "Type"@en ;
-    rdfs:comment "Node type discriminator inside a served record."@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
-
-ns:raw a rdf:Property ;
-    rdfs:label "Raw"@en ;
-    rdfs:comment "Provenance of an extracted datasheet value (source text / page / confidence)."@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
-
-ns:text a rdf:Property ;
-    rdfs:label "Text"@en ;
-    rdfs:comment "Source text a datasheet value was extracted from."@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
-
-ns:page a rdf:Property ;
-    rdfs:label "Page"@en ;
-    rdfs:comment "Source page a datasheet value was extracted from."@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
-
-ns:confidence a rdf:Property ;
-    rdfs:label "Confidence"@en ;
-    rdfs:comment "Extraction-confidence score for a datasheet value."@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
-
-ns:value a rdf:Property ;
-    rdfs:label "Value"@en ;
-    rdfs:comment "Numeric value of a quantity node."@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
-
-ns:value_text a rdf:Property ;
-    rdfs:label "Value text"@en ;
-    rdfs:comment "Verbatim text value of a quantity node (when not numeric)."@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
-
-ns:unit a rdf:Property ;
-    rdfs:label "Unit"@en ;
-    rdfs:comment "Measurement unit symbol of a quantity node."@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
-
-ns:source_file a rdf:Property ;
-    rdfs:label "Source file"@en ;
-    rdfs:comment "Source file a record was extracted from."@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
-
-ns:file_hash a rdf:Property ;
-    rdfs:label "File hash"@en ;
-    rdfs:comment "Content hash of a source or distribution file."@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
-
 ns:metadata a rdf:Property ;
     rdfs:label "Metadata"@en ;
     rdfs:comment "Registry-projected summary block of a served resource."@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
-
-ns:distributions a rdf:Property ;
-    rdfs:label "Distributions"@en ;
-    rdfs:comment "Data distributions attached to a served resource."@en ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
 
 ns:relatedResources a rdf:Property ;
@@ -2189,17 +5132,112 @@ ns:relatedResources a rdf:Property ;
     rdfs:comment "Related resources linked from a served resource."@en ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
 
-ns:publisherId a rdf:Property ;
-    rdfs:label "Publisher Id"@en ;
-    rdfs:comment "Identifier of the publishing agent (registry envelope)."@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
-
 ns:sourceLocalId a rdf:Property ;
     rdfs:label "Source Local Id"@en ;
     rdfs:comment "Publisher-local identifier of the source record (registry envelope)."@en ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
 
-ns:sourceVersion a rdf:Property ;
-    rdfs:label "Source Version"@en ;
-    rdfs:comment "Version stamp of the published source (registry envelope)."@en ;
+ns:canonical_iri a rdf:Property ;
+    rdfs:label "Canonical iri"@en ;
+    rdfs:comment "Canonical IRI of a resource referenced from a served record (registry projection)."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:relationship a rdf:Property ;
+    rdfs:label "Relationship"@en ;
+    rdfs:comment "How a related resource stands to the record that links it (registry projection)."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:record_url a rdf:Property ;
+    rdfs:label "Record url"@en ;
+    rdfs:comment "Landing-page URL of a served record (registry projection)."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:manufacturer_id a rdf:Property ;
+    rdfs:label "Manufacturer id"@en ;
+    rdfs:comment "Canonical IRI of the manufacturer organization (registry projection)."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:immutable a rdf:Property ;
+    rdfs:label "Immutable"@en ;
+    rdfs:comment "Whether a distribution's bytes are guaranteed not to change (registry projection)."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:modes a rdf:Property ;
+    rdfs:label "Modes"@en ;
+    rdfs:comment "Control modes a test protocol uses, as a computed summary facet."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:control_modes a rdf:Property ;
+    rdfs:label "Control modes"@en ;
+    rdfs:comment "Per-step control modes of a test protocol."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:directions a rdf:Property ;
+    rdfs:label "Directions"@en ;
+    rdfs:comment "Charge/discharge directions a test protocol covers, as a computed summary facet."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:c_rates a rdf:Property ;
+    rdfs:label "C rates"@en ;
+    rdfs:comment "C-rates a test protocol uses, as a computed summary facet."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:has_rest a rdf:Property ;
+    rdfs:label "Has rest"@en ;
+    rdfs:comment "Whether a test protocol contains a rest step (computed summary facet)."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:has_eis a rdf:Property ;
+    rdfs:label "Has eis"@en ;
+    rdfs:comment "Whether a test protocol contains an impedance step (computed summary facet)."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:has_cv_hold a rdf:Property ;
+    rdfs:label "Has cv hold"@en ;
+    rdfs:comment "Whether a test protocol contains a constant-voltage hold (computed summary facet)."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:contributors a rdf:Property ;
+    rdfs:label "Contributors"@en ;
+    rdfs:comment "Contributor summary lifted into the registry metadata block."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:funding_identifier a rdf:Property ;
+    rdfs:label "Funding identifier"@en ;
+    rdfs:comment "Grant identifier lifted into the registry metadata block."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:protocol a rdf:Property ;
+    rdfs:label "Protocol"@en ;
+    rdfs:comment "Test-protocol reference lifted into the registry metadata block."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:conformance_note a rdf:Property ;
+    rdfs:label "Conformance note"@en ;
+    rdfs:comment "Conformance statement lifted into the registry metadata block."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:specification_note a rdf:Property ;
+    rdfs:label "Specification note"@en ;
+    rdfs:comment "Specification remark lifted into the registry metadata block."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:processing_route a rdf:Property ;
+    rdfs:label "Processing route"@en ;
+    rdfs:comment "Electrode processing route lifted into the registry metadata block."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:processing_solvent a rdf:Property ;
+    rdfs:label "Processing solvent"@en ;
+    rdfs:comment "Electrode processing solvent lifted into the registry metadata block."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:ambient_temperature a rdf:Property ;
+    rdfs:label "Ambient temperature"@en ;
+    rdfs:comment "Ambient temperature a test was run at (test condition; also a registry metadata key)."@en ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:voltage_reference a rdf:Property ;
+    rdfs:label "Voltage reference"@en ;
+    rdfs:comment "Reference electrode a test's voltages are quoted against (test condition; also a registry metadata key)."@en ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
