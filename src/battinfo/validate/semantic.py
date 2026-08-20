@@ -7,6 +7,7 @@ from functools import lru_cache
 from importlib import resources
 from typing import Any, Mapping
 
+from battinfo._util import is_dataset_series
 from battinfo.canonical_aliases import record_to_snake_aliases
 from battinfo.validate.core import (
     DEFAULT_POLICY,
@@ -881,7 +882,11 @@ def _validate_dataset_semantics(
         cell_ids = related_entities.get("cell_ids")
         if isinstance(cell_ids, list):
             has_battery_link = any(isinstance(item, str) and item.startswith(CELL_IRI_PREFIX) for item in cell_ids)
-    if not has_battery_link:
+    # A series-flavored dataset (dcat:DatasetSeries) is a grouping record: its
+    # member datasets carry the cell links and point here via series_id, so
+    # requiring a direct cell link on the collection would force redundancy.
+    # A collection MAY still state cells/specs in `about`; it just isn't made to.
+    if not has_battery_link and not is_dataset_series(dataset.get("additional_type")):
         _append_issue(
             issues,
             code="semantic.dataset_missing_cell_link",
