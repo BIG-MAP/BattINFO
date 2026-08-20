@@ -23,6 +23,8 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any, Callable
 
+from battinfo._util import is_dataset_series
+
 _DATA = Path(__file__).parent / "data"
 _CONTEXT_PATH = _DATA / "context" / "records.context.json"
 _CONTEXT_URL  = "https://w3id.org/battinfo/context/records/v1.json"
@@ -921,6 +923,26 @@ def dataset_to_jsonld(record: dict) -> dict:
         "@id":      ds.get("id", ""),
         "dcterms:title": ds.get("name"),
     }
+    if is_dataset_series(ds.get("additional_type")):
+        node["@type"] = [
+            "http://www.w3.org/ns/dcat#Dataset",
+            "http://www.w3.org/ns/dcat#DatasetSeries",
+        ]
+    if ds.get("series_id"):
+        # Twinned like the rest of the emitter: dcat:inSeries is the DCAT 3
+        # membership edge, schema:isPartOf is what dataset search engines read.
+        node["dcat:inSeries"] = {"@id": ds["series_id"]}
+        node["schema:isPartOf"] = {"@id": ds["series_id"]}
+    catalog = ds.get("included_in_data_catalog")
+    if isinstance(catalog, str) and catalog:
+        node["schema:includedInDataCatalog"] = {"@id": catalog} if "://" in catalog else catalog
+    elif isinstance(catalog, Mapping) and isinstance(catalog.get("name"), str):
+        catalog_node: dict = {"@type": "schema:DataCatalog", "schema:name": catalog["name"]}
+        if isinstance(catalog.get("id"), str):
+            catalog_node["@id"] = catalog["id"]
+        if isinstance(catalog.get("url"), str):
+            catalog_node["schema:url"] = catalog["url"]
+        node["schema:includedInDataCatalog"] = catalog_node
     if ds.get("description"):
         node["dcterms:description"] = ds["description"]
         node["schema:description"] = ds["description"]

@@ -14,7 +14,7 @@ from typing import Any, Mapping, Sequence
 from battinfo._emmo_instruments import _instrument_node
 from battinfo._jsonio import read_record_json as _load_json
 from battinfo._jsonio import write_json as _write_json
-from battinfo._util import _as_path
+from battinfo._util import _as_path, is_dataset_series
 from battinfo.api._shared import (
     CELL_IRI_RE,
     DEFAULT_PUBLISH_SOURCES,
@@ -469,7 +469,11 @@ def _resolver_jsonld(doc: dict[str, Any]) -> dict[str, Any]:
         out = {
             "@context": context,
             "@id": entity_iri,
-            "@type": "schema:Dataset",
+            "@type": (
+                ["schema:Dataset", "dcat:DatasetSeries"]
+                if is_dataset_series(dataset.get("additional_type"))
+                else "schema:Dataset"
+            ),
             "schema:identifier": _schema_identifier_value(dataset.get("identifier"), uid),
             "schema:name": dataset.get("name") or dataset.get("title"),
             "schema:description": dataset.get("description"),
@@ -554,6 +558,9 @@ def _resolver_jsonld(doc: dict[str, Any]) -> dict[str, Any]:
             refs = [{"@id": item} for item in dataset["is_based_on"] if isinstance(item, str)]
             if refs:
                 out["schema:isBasedOn"] = refs
+        if isinstance(dataset.get("series_id"), str) and dataset["series_id"]:
+            out["dcat:inSeries"] = {"@id": dataset["series_id"]}
+            out["schema:isPartOf"] = {"@id": dataset["series_id"]}
         included_in_data_catalog = dataset.get("included_in_data_catalog")
         included_in_data_catalog_value = _schema_data_catalog_value(included_in_data_catalog)
         if included_in_data_catalog_value is not None:

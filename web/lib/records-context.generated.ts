@@ -525,6 +525,11 @@ export const recordsContext: Record<string, unknown> = {
     },
     "WorkingElectrode": "electrochemistry:electrochemistry_fb988878_ee54_4350_9ee9_228c00c3ad35",
     "CounterElectrode": "electrochemistry:electrochemistry_871bc4a4_2d17_4b88_9b0f_7ab85f14afea",
-    "ReferenceElectrode": "electrochemistry:electrochemistry_7729c34e_1ae9_403d_b933_1765885e7f29"
+    "ReferenceElectrode": "electrochemistry:electrochemistry_7729c34e_1ae9_403d_b933_1765885e7f29",
+    "DatasetSeries": "dcat:DatasetSeries",
+    "inSeries": {
+      "@id": "dcat:inSeries",
+      "@type": "@id"
+    }
   }
 };
