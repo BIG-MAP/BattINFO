@@ -32,12 +32,13 @@ _PROVENANCE = ProvenanceInfo(
 
 
 def _series() -> Dataset:
+    # Deliberately no cell link: a collection is a grouping record whose members
+    # carry the cell links (and point here via series_id).
     return Dataset(
         id=SERIES_IRI,
         name="Half-cell OCV collection",
         access_url="https://doi.org/10.5281/zenodo.20086298",
         additional_type=["DatasetSeries"],
-        cell_instance_id=CELL_IRI,
         source=_PROVENANCE,
     )
 
@@ -87,6 +88,24 @@ def test_series_and_member_validate_clean_in_strict_mode() -> None:
     for dataset in (_series(), _member()):
         report = validate_record_report(dataset.to_record(), policy="strict")
         assert not report.issues, [issue.message for issue in report.issues]
+
+
+def test_series_without_cell_link_is_exempt_but_plain_dataset_is_not() -> None:
+    # The dataset_missing_cell_link rule stays for ordinary datasets; only the
+    # series flavor is exempt (its members carry the cell links).
+    plain = Dataset(
+        id=MEMBER_IRI,
+        name="no links at all",
+        access_url="https://example.org/datasets/orphan",
+        source=_PROVENANCE,
+    )
+    report = validate_record_report(plain.to_record(), policy="strict")
+    assert any(issue.code == "semantic.dataset_missing_cell_link" for issue in report.issues)
+
+    series_report = validate_record_report(_series().to_record(), policy="strict")
+    assert not any(
+        issue.code == "semantic.dataset_missing_cell_link" for issue in series_report.issues
+    )
 
 
 def test_schema_rejects_a_non_dataset_series_iri() -> None:
