@@ -17,6 +17,7 @@
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix battery: <https://w3id.org/emmo/domain/battery#> .
 @prefix bibo: <http://purl.org/ontology/bibo/> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
 @prefix electrochemistry: <https://w3id.org/emmo/domain/electrochemistry#> .
 @prefix emmo: <https://w3id.org/emmo#> .
 @prefix pav: <http://purl.org/pav/> .
@@ -314,6 +315,11 @@ ns:CellSpecification a owl:Class ;
     rdfs:label "Cell Specification"@en ;
     owl:equivalentClass ns:CellSpec ;
     rdfs:seeAlso battery:battery_1cfbba6c_8824_4932_a23e_2141483acef7 ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:DatasetSeries a rdf:Property ;
+    rdfs:label "Dataset Series"@en ;
+    rdfs:seeAlso dcat:DatasetSeries ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
 
 ns:MWh a rdf:Property ;
@@ -741,6 +747,11 @@ ns:impedanceUnit a rdf:Property ;
     rdfs:label "Impedance Unit"@en ;
     rdfs:comment "Measurement unit of impedance."@en ;
     owl:equivalentProperty ns:impedance_unit ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
+
+ns:inSeries a rdf:Property ;
+    rdfs:label "In Series"@en ;
+    rdfs:seeAlso dcat:inSeries ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/ns> .
 
 ns:initial_coulombic_efficiency a rdf:Property ;

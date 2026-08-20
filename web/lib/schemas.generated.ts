@@ -2729,6 +2729,9 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               },
               "uniqueItems": true
             },
+            "series_id": {
+              "$ref": "#/$defs/DatasetIri"
+            },
             "included_in_data_catalog": {
               "anyOf": [
                 {

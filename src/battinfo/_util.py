@@ -55,6 +55,20 @@ def _now_unix() -> int:
     return int(datetime.now(timezone.utc).timestamp())
 
 
+def is_dataset_series(additional_type: object) -> bool:
+    """True when a dataset's ``additional_type`` marks it as a dcat:DatasetSeries.
+
+    The marker is the exact string ``"DatasetSeries"`` (DCAT 3 declares
+    dcat:DatasetSeries a subclass of dcat:Dataset, so a series is an ordinary
+    dataset record flavored by this value — not a separate record type).
+    """
+    if isinstance(additional_type, str):
+        return additional_type == "DatasetSeries"
+    if isinstance(additional_type, (list, tuple)):
+        return any(item == "DatasetSeries" for item in additional_type)
+    return False
+
+
 def _sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as handle:

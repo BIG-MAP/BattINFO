@@ -2654,6 +2654,7 @@ class Dataset(BundleJsonModel):
     temporal_coverage: str | None = Field(default=None, validation_alias=AliasChoices("temporal_coverage", "temporalCoverage"), description="Time interval the data covers (ISO 8601 interval, e.g. '2026-01-01/2026-01-31').")
     spatial_coverage: str | None = Field(default=None, validation_alias=AliasChoices("spatial_coverage", "spatialCoverage"), description="Place the data was collected (free text).")
     is_based_on: _StrList = Field(default_factory=list, validation_alias=AliasChoices("is_based_on", "isBasedOn"), description="URLs of resources this dataset derives from (e.g. a protocol).")
+    series_id: str | None = Field(default=None, validation_alias=AliasChoices("series_id", "seriesId"), description="Canonical IRI of the dataset series (dcat:DatasetSeries record) this dataset belongs to.")
     included_in_data_catalog: str | dict[str, Any] | None = Field(default=None, validation_alias=AliasChoices("included_in_data_catalog", "includedInDataCatalog"), description="Catalog this dataset is listed in (URL or DataCatalog object).")
     main_entity: list[dict[str, Any]] = Field(default_factory=list, validation_alias=AliasChoices("main_entity", "mainEntity"), description="Primary content entities (e.g. a CSVW Table with its tableSchema).")
     distributions: list[dict[str, Any]] = Field(default_factory=list, validation_alias=AliasChoices("distributions", "distribution"), description="DataDownload entries (content_url, encoding_format, checksum); synthesized from download_url/data_format/checksum when omitted.")
@@ -2926,6 +2927,7 @@ class Dataset(BundleJsonModel):
             temporal_coverage=dataset.get("temporal_coverage"),
             spatial_coverage=dataset.get("spatial_coverage"),
             is_based_on=_string_list(dataset.get("is_based_on")),
+            series_id=dataset.get("series_id") if isinstance(dataset.get("series_id"), str) else None,
             included_in_data_catalog=_canonical_data_catalog(dataset.get("included_in_data_catalog")),
             main_entity=[entity for item in _mapping_list(dataset.get("main_entity")) if (entity := _canonical_main_entity(item)) is not None],
             distributions=[dist for item in _mapping_list(distribution) if (dist := _canonical_distribution(item)) is not None],
@@ -3018,6 +3020,8 @@ class Dataset(BundleJsonModel):
             dataset_obj["about"] = about
         if self.is_based_on:
             dataset_obj["is_based_on"] = list(self.is_based_on)
+        if self.series_id is not None:
+            dataset_obj["series_id"] = self.series_id
         if self.included_in_data_catalog is not None:
             dataset_obj["included_in_data_catalog"] = self.included_in_data_catalog
         if self.main_entity:
@@ -3391,6 +3395,7 @@ class BattinfoBundle(BundleJsonModel):
             temporal_coverage=dataset_node.get("schema:temporalCoverage"),
             spatial_coverage=dataset_node.get("schema:spatialCoverage"),
             is_based_on=_ref_ids(dataset_node.get("schema:isBasedOn")) or _text_list(dataset_node.get("schema:isBasedOn")),
+            series_id=_ref_id(dataset_node.get("dcat:inSeries")) or _ref_id(dataset_node.get("schema:isPartOf")),
             included_in_data_catalog=_canonical_data_catalog(
                 _ref_id(dataset_node.get("schema:includedInDataCatalog"))
                 or (

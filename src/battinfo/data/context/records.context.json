@@ -181,6 +181,11 @@
     "modified_at": {
       "@id": "dcterms:modified",
       "@type": "xsd:dateTime"
+    },
+    "DatasetSeries": "dcat:DatasetSeries",
+    "inSeries": {
+      "@id": "dcat:inSeries",
+      "@type": "@id"
     }
   }
 }

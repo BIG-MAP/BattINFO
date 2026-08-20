@@ -38,6 +38,7 @@ _DATASET_TO_SNAKE = {
     "temporalCoverage": "temporal_coverage",
     "spatialCoverage": "spatial_coverage",
     "isBasedOn": "is_based_on",
+    "seriesId": "series_id",
     "includedInDataCatalog": "included_in_data_catalog",
     "mainEntity": "main_entity",
     "distribution": "distributions",

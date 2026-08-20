@@ -202,6 +202,17 @@ TYPED_TERMS: dict[str, object] = {
     # / schema:expires values (xsd:gYearMonth), so no extra aliases are declared here.
 }
 
+# ── DCAT dataset-series terms ─────────────────────────────────────────────────
+# A collection-level record is an ordinary dataset flavored as a series
+# (additional_type = "DatasetSeries"); membership is the series_id edge. These
+# cannot come from slot_uri extraction because assemble_context drops the ds_*
+# slot names, so the series vocabulary is curated here like the other
+# non-schema-sourced terms.
+DCAT_SERIES_TERMS: dict[str, object] = {
+    "DatasetSeries": "dcat:DatasetSeries",
+    "inSeries":      {"@id": "dcat:inSeries", "@type": "@id"},
+}
+
 # ── Slots whose value is an IRI reference, not a literal ──────────────────────
 # The IRI these expand to lives in the schema (slot_uri); only the JSON-LD typing
 # is declared here, because @type is a serialization concern LinkML has no slot
@@ -318,6 +329,7 @@ def build_context(schema_dir: Path) -> dict:
     ctx.update(keep)
     ctx.update(UNIT_SYMBOLS)
     ctx.update(TYPED_TERMS)
+    ctx.update(DCAT_SERIES_TERMS)
 
     # Guard: a term key in the form of an IRI (contains "/" or ":") must expand to
     # its own definition under JSON-LD 1.1, otherwise a strict processor rejects the

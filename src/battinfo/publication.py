@@ -15,7 +15,7 @@ from urllib.parse import unquote, urlparse
 from battinfo._emmo_instruments import _instrument_node
 from battinfo._jsonio import read_record_json as _load_json
 from battinfo._jsonio import write_json as _write_json
-from battinfo._util import _as_path, _citation_doi_from_url, _now_iso, _now_unix, _sha256
+from battinfo._util import _as_path, _citation_doi_from_url, _now_iso, _now_unix, _sha256, is_dataset_series
 from battinfo.bundle import (
     ZENODO_CELL_RECORD_FILENAME,
     BattinfoBundle,
@@ -999,9 +999,12 @@ def _dataset_jsonld_node(
     url_override: str | None = None,
 ) -> dict[str, Any]:
     about_refs = [{"@id": cell_id}, {"@id": test_id}]
+    node_types = ["BatteryTestResult", "schema:Dataset"]
+    if is_dataset_series(dataset.additional_type):
+        node_types.append("dcat:DatasetSeries")
     node: dict[str, Any] = {
         "@id": dataset.id,
-        "@type": ["BatteryTestResult", "schema:Dataset"],
+        "@type": node_types,
         "schema:identifier": _schema_identifier_value(dataset.identifier),
         "schema:name": dataset.name,
         "schema:description": dataset.description,
@@ -1061,6 +1064,9 @@ def _dataset_jsonld_node(
         node["schema:spatialCoverage"] = dataset.spatial_coverage
     if dataset.is_based_on:
         node["schema:isBasedOn"] = list(dataset.is_based_on)
+    if dataset.series_id is not None:
+        node["dcat:inSeries"] = {"@id": dataset.series_id}
+        node["schema:isPartOf"] = {"@id": dataset.series_id}
     if dataset.included_in_data_catalog is not None:
         included_in_data_catalog = _schema_data_catalog_node(dataset.included_in_data_catalog)
         if included_in_data_catalog is not None:
