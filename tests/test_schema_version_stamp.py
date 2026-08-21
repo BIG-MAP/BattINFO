@@ -38,6 +38,10 @@ def _stamped_files() -> list[Path]:
 def test_schema_version_matches_source_of_truth(path: Path) -> None:
     text = path.read_text(encoding="utf-8")
     stamps = _STAMP.findall(text)
+    # The records context defines a TERM named schema_version (its value is a
+    # CURIE mapping, "schema:schemaVersion"); that is a definition, not a
+    # stamp, so mapping-shaped values are out of scope for the drift check.
+    stamps = [s for s in stamps if not re.match(r"^[A-Za-z][\w.-]*:\S", s)]
     bad = [s for s in stamps if s != SCHEMA_VERSION]
     assert not bad, (
         f"{path.relative_to(ROOT)} carries schema_version {sorted(set(bad))} "

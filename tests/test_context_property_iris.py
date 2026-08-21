@@ -48,10 +48,18 @@ def test_context_property_iris_match_curated_map() -> None:
 
 
 def test_context_uses_single_emmo_quantity_serialization() -> None:
-    """Quantities use ONE EMMO serialization everywhere (publish + validation), so the
-    QUDT value/unit schema is fully retired: no value/unit aliases and no qudt prefixes."""
+    """The QUDT value/unit schema stays retired: no qudt prefixes anywhere.
+
+    The bare ``value``/``unit`` keys exist again — canonical record bodies
+    (served by the registry as the artifact's semantic payload) write flat
+    quantity nodes with exactly those keys — but they ground in the schema.org
+    quantity pattern the transform already uses for non-EMMO quantities, never
+    in QUDT. The EMMO serialization keeps hasNumberValue/hasMeasurementUnit
+    and never writes the bare keys.
+    """
     ctx = json.loads(CONTEXT.read_text(encoding="utf-8"))["@context"]
-    assert "value" not in ctx and "unit" not in ctx
     assert "qudt" not in ctx and "qudt-unit" not in ctx
-    # The EMMO quantity terms the single serialization relies on must be present.
+    assert ctx["value"] == "schema:value"
+    assert ctx["unit"] == "schema:unitText"
+    # The EMMO quantity terms the EMMO serialization relies on must be present.
     assert "hasNumberValue" in ctx and "hasMeasurementUnit" in ctx

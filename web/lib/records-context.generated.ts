@@ -530,6 +530,199 @@ export const recordsContext: Record<string, unknown> = {
     "inSeries": {
       "@id": "dcat:inSeries",
       "@type": "@id"
-    }
+    },
+    "battinfo_records": "@nest",
+    "cell": "@nest",
+    "cell_spec": "@nest",
+    "cell_instance": "@nest",
+    "dataset": "@nest",
+    "test": "@nest",
+    "test_spec": "@nest",
+    "material": "@nest",
+    "material_spec": "@nest",
+    "electrode": "@nest",
+    "electrode_spec": "@nest",
+    "organization": "@nest",
+    "properties": "@nest",
+    "property": "@nest",
+    "setpoints": "@nest",
+    "provenance": "@nest",
+    "type": "@type",
+    "Person": "schema:Person",
+    "Organization": "schema:Organization",
+    "Grant": "schema:Grant",
+    "DataDownload": "schema:DataDownload",
+    "Dataset": "dcat:Dataset",
+    "CellInstance": "battery:battery_68ed592a_7924_45d0_a108_94d6275d57f0",
+    "CellSpecification": "battery:battery_1cfbba6c_8824_4932_a23e_2141483acef7",
+    "MaterialSpec": "battinfo:MaterialSpec",
+    "Material": "battinfo:Material",
+    "ElectrodeSpec": "battinfo:ElectrodeSpec",
+    "TestSpec": "battinfo:TestSpec",
+    "same_as": {
+      "@id": "schema:sameAs",
+      "@type": "@id"
+    },
+    "affiliation": "schema:affiliation",
+    "contributor": "dcterms:contributor",
+    "description": "dcterms:description",
+    "funding": {
+      "@id": "schema:funding",
+      "@context": {
+        "id": "@id"
+      }
+    },
+    "funder": "schema:funder",
+    "acronym": "schema:alternateName",
+    "program": "battinfo:fundingProgramme",
+    "doi": "bibo:doi",
+    "citations": "schema:citation",
+    "url": {
+      "@id": "schema:url",
+      "@type": "@id"
+    },
+    "about": {
+      "@id": "dcterms:subject",
+      "@type": "@id"
+    },
+    "keywords": "schema:keywords",
+    "is_based_on": {
+      "@id": "schema:isBasedOn",
+      "@type": "@id"
+    },
+    "variable_measured": "schema:variableMeasured",
+    "measurement_techniques": "schema:measurementTechnique",
+    "published_at": "schema:datePublished",
+    "access_level": "dcterms:accessRights",
+    "distributions": "dcat:distribution",
+    "access_url": {
+      "@id": "dcat:accessURL",
+      "@type": "@id"
+    },
+    "media_type": "dcat:mediaType",
+    "encoding_format": "dcat:mediaType",
+    "byte_size": "dcat:byteSize",
+    "content_url": {
+      "@id": "dcat:downloadURL",
+      "@type": "@id"
+    },
+    "content_size": "schema:contentSize",
+    "checksum": {
+      "@id": "spdx:checksum",
+      "@context": {
+        "algorithm": "spdx:checksumAlgorithm",
+        "value": "spdx:checksumValue"
+      }
+    },
+    "value": "schema:value",
+    "unit": "schema:unitText",
+    "unit_text": "schema:unitText",
+    "min_value": "schema:minValue",
+    "max_value": "schema:maxValue",
+    "standard_deviation": "battinfo:standardDeviation",
+    "sample_count": "battinfo:sampleCount",
+    "loading": "electrochemistry:electrochemistry_c955c089_6ee1_41a2_95fc_d534c5cfd3d5",
+    "dry_thickness": "electrochemistry:electrochemistry_d10b3c03_8d4c_4aa2_882f_5d8f680a85ed",
+    "areal_capacity": "electrochemistry:electrochemistry_bcb33f7e_5573_4bc2_b636_4ea313a9dd3a",
+    "mass_fraction": "emmo:EMMO_7c055d65_2929_40e1_af4f_4bf10995ad50",
+    "theoretical_capacity": "electrochemistry:electrochemistry_372c89d0_adab_4585_9662_33c912acef23",
+    "duration": "emmo:EMMO_0adabf6f_7404_44cb_9f65_32d83d8101a3",
+    "c_rate": "electrochemistry:electrochemistry_e1fd84eb_acdb_4b2c_b90c_e899d552a3ee",
+    "count": "emmo:EMMO_41efdf5d_0c9c_4ea0_bb65_f8236e663be5",
+    "formula": "emmo:EMMO_9236d0aa_cb39_43a1_bbdd_6a2a714951c8",
+    "solvent": "https://w3id.org/emmo/domain/chemical-substance#substance_0f2f65a7_5cc4_4c86_a4d0_676771c646f1",
+    "coating": "electrochemistry:electrochemistry_09a7f560_9ddf_4c32_b067_b213eca5b0a1",
+    "active_material": "electrochemistry:electrochemistry_79d1b273_58cd_4be6_a250_434817f7c261",
+    "binder": "electrochemistry:electrochemistry_68eb5e35_5bd8_47b1_9b7f_f67224fa291e",
+    "additive": "electrochemistry:electrochemistry_0a399f3f_b873_41f5_be1f_9b6df75cc30a",
+    "component": "@nest",
+    "working_electrode": "electrochemistry:electrochemistry_fb988878_ee54_4350_9ee9_228c00c3ad35",
+    "counter_electrode": "electrochemistry:electrochemistry_871bc4a4_2d17_4b88_9b0f_7ab85f14afea",
+    "reference_electrode": "electrochemistry:electrochemistry_7729c34e_1ae9_403d_b933_1765885e7f29",
+    "cell_spec_id": {
+      "@id": "schema:isVariantOf",
+      "@type": "@id"
+    },
+    "material_spec_id": {
+      "@id": "schema:isVariantOf",
+      "@type": "@id"
+    },
+    "electrode_spec_id": {
+      "@id": "schema:isVariantOf",
+      "@type": "@id"
+    },
+    "cell_id": {
+      "@id": "battery:battery_da3b3f28_aaad_4d67_b674_df47e109fb8b",
+      "@type": "@id"
+    },
+    "protocol_id": {
+      "@id": "prov:used",
+      "@type": "@id"
+    },
+    "working_electrode_id": {
+      "@id": "electrochemistry:electrochemistry_c76dbfeb_f3d9_44d4_9cbe_0946924f311f",
+      "@type": "@id"
+    },
+    "working_electrode_spec_id": {
+      "@id": "electrochemistry:electrochemistry_c76dbfeb_f3d9_44d4_9cbe_0946924f311f",
+      "@type": "@id"
+    },
+    "active_material_spec_id": {
+      "@id": "electrochemistry:electrochemistry_79d1b273_58cd_4be6_a250_434817f7c261",
+      "@type": "@id"
+    },
+    "batch_id": "battinfo:batchId",
+    "lot_id": "battinfo:lotId",
+    "processing": "prov:wasGeneratedBy",
+    "route": "dcterms:type",
+    "chemistry": "battinfo:chemistry",
+    "cell_format": "battinfo:cellFormat",
+    "size_code": "battinfo:sizeCode",
+    "rechargeable": "battinfo:rechargeable",
+    "cell_configuration": "battinfo:cellConfiguration",
+    "chemistry_family": "battinfo:chemistryFamily",
+    "material_class": "battinfo:materialClass",
+    "supplier": "schema:provider",
+    "serial_number": "schema:serialNumber",
+    "manufactured_at": "schema:productionDate",
+    "kind": "dcterms:type",
+    "status": "battinfo:testStatus",
+    "started_at": "prov:startedAtTime",
+    "conditions": "battinfo:conditions",
+    "steps": "battinfo:steps",
+    "method": "battinfo:method",
+    "mode": "battinfo:stepMode",
+    "direction": "battinfo:stepDirection",
+    "conformance": {
+      "@id": "battinfo:testConformance",
+      "@context": {
+        "status": "battinfo:conformanceStatus",
+        "note": "schema:description",
+        "deviations": "battinfo:deviation"
+      }
+    },
+    "ambient_temperature": "battinfo:ambientTemperature",
+    "voltage_reference": "battinfo:voltageReference",
+    "note": "schema:description",
+    "notes": "rdfs:comment",
+    "comment": "rdfs:comment",
+    "specification_comment": "rdfs:comment",
+    "detail": "rdfs:comment",
+    "category": "dcterms:type",
+    "schema_version": "schema:schemaVersion",
+    "Cell": "battery:battery_68ed592a_7924_45d0_a108_94d6275d57f0",
+    "CellSpec": "battery:battery_1cfbba6c_8824_4932_a23e_2141483acef7",
+    "Test": "battery:battery_dca7729a_421a_4921_90cf_9692bb9eb081",
+    "EquipmentSpec": "battinfo:EquipmentSpec",
+    "Equipment": "battinfo:Equipment",
+    "Channel": "battinfo:Channel",
+    "ParameterSet": "battinfo:ParameterSet",
+    "product_id": "schema:productID",
+    "grade": "battinfo:grade",
+    "electrode_polarity": "electrochemistry:electrochemistry_16a5de33_a2ca_4563_80d4_6caeb08d97ca",
+    "positive_electrode": "electrochemistry:electrochemistry_aff732a9_238a_4734_977c_b2ba202af126",
+    "negative_electrode": "electrochemistry:electrochemistry_c94c041b_8ea6_43e7_85cc_d2bce7785b4c",
+    "positive_electrode_basis": "battinfo:positiveElectrodeBasis",
+    "negative_electrode_basis": "battinfo:negativeElectrodeBasis"
   }
 };

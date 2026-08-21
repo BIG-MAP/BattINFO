@@ -86,6 +86,22 @@ Searched and absent from the 0.20.2 / 0.37.2 / 1.0.2 closure: `StandardDeviation
 
 To wire after publishing: `_SAMPLE_STATISTIC_TERMS` and `_apply_sample_statistics` in `transform/json_to_jsonld.py` are the only emission site (both quantity-node builders route through it); add the class to `validate/jsonld.py` `_EXPLICIT_ALLOWED_TYPE_TERMS`, and append the terms to `records.context.v1.json` via `scripts/gen_context.py`. Records already published with the `schema:` qualifier keep expanding as they do, so the flip is additive rather than a v2.
 
+## 6. ns#-retirement placeholders (2026-08-21)
+
+Retiring the served `ns#` catch-all namespace put every canonical record-body key into the records context. The keys below had no EMMO term anywhere in the closure and now expand to `battinfo:` slash placeholders; each is an upstream ask, and the placeholder is retired (context term repointed at the next context version) once the class lands.
+
+| Placeholder | Wanted upstream | Notes |
+|---|---|---|
+| `battinfo:ambientTemperature` | test-condition quantity, domain-electrochemistry or domain-battery | The transform deliberately types generic conditions as `ConventionalProperty`; a dedicated `AmbientTemperature` quantity would let both the emitter and the flat record layer ground it. |
+| `battinfo:voltageReference` | relation or annotation, domain-electrochemistry | Which electrode potentials are quoted against (e.g. Li/Li+). Zero candidates in the closure. |
+| `battinfo:stepMode` / `battinfo:stepDirection` | control-mode / direction quantities or a sanctioned literal pattern | Process classes (`ConstantCurrentCharging`, …) exist for typed emission; the flat step layer states mode/direction as literals and needs a predicate. |
+| `battinfo:lotId` | batch/lot identifier property, domain-battery | Sibling of `battinfo:batchId` (already a placeholder via `ci_batch_id`). |
+| `battinfo:chemistryFamily` / `battinfo:materialClass` | material classification relations, domain-battery or chemical-substance | Coarse family ("nmc") and class ("powder") of a material spec. |
+| `battinfo:MaterialSpec` / `battinfo:Material` / `battinfo:ElectrodeSpec` / `battinfo:TestSpec` | specification/instance classes parallel to `BatteryCellSpecification` | `MaterialSpecification`, `ElectrodeSpecification` and a test-specification class would ground the served record `@type`s that currently have no EMMO home. |
+| `battinfo:EquipmentSpec` / `battinfo:Equipment` / `battinfo:Channel` / `battinfo:ParameterSet` | equipment/channel/parameter-set classes, domain-battery | `hasTestEquipment` exists; the equipment classes themselves (and a measurement-channel class) do not. Parameter sets may re-home to a modelling vocabulary instead. |
+
+Not upstream asks (administrative, stays a placeholder or re-homes to a standard vocabulary if one appears): `battinfo:fundingProgramme`.
+
 ## Landed upstream — stubs flipped
 
 ### domain-electrochemistry 0.36.0
