@@ -1,0 +1,44 @@
+# Office hours, 21 August 2026
+
+Snapshot of the monthly BattINFO + Battery Genome call. Pull-request numbers and counts are as of the call date; follow the links for the current state.
+
+## Slides
+
+Use the arrow keys or space to move between slides, or <a href="../../_static/office-hours/2026-08-21.html" target="_blank" rel="noopener">open the deck full screen</a>.
+
+<div style="position:relative;width:100%;aspect-ratio:16/10;border:1px solid var(--bi-border,#E7E5DF);border-radius:10px;overflow:hidden;margin:0 0 1.5rem">
+<iframe src="../../_static/office-hours/2026-08-21.html" title="Office hours slides, 21 August 2026" style="position:absolute;inset:0;width:100%;height:100%;border:0" loading="lazy"></iframe>
+</div>
+
+## What was shown
+
+The month's theme was that records moved from schema to substance: a real dataset now exists as linked records, and two new record types reached production.
+
+**Flores half-cell OCV dataset.** [Zenodo 20086298](https://zenodo.org/records/20086298) (SINTEF, IntelLiGent 101069765, CC-BY-4.0) is described as 424 BattINFO records: material lots, electrodes, nine R2032 half-cell specs, 95 cells, four structured protocols, 95 tests and 95 per-test datasets. The data stays on Zenodo; datasets reference the existing files with verified md5 checksums. The eleven known issues from the original metadata sheet are encoded as conformance on the tests. Half-cells are typed as `HalfCellDevice` with the working electrode as positive and lithium metal as negative.
+
+**Parameter claims.** A parameter-set record type where each claim is one of a quantity, a curve (OCP with hysteresis branch) or a BPX expression, with a provenance class per claim (BattINFO [#347](https://github.com/BIG-MAP/BattINFO/pull/347), [#348](https://github.com/BIG-MAP/BattINFO/pull/348), [#349](https://github.com/BIG-MAP/BattINFO/pull/349)). Seventeen records are live; the registry resolves them by material kind at `GET /parameters/resolve`, and the cell design tool on battery-genome.org draws its OCP curves from them.
+
+**Materials and electrodes as first-class records.** Material kinds are a curated vocabulary, material specs are records with deterministic ids and attribution, electrodes have kinds and design values, and cells link to their electrodes ([#330](https://github.com/BIG-MAP/BattINFO/pull/330), [#334](https://github.com/BIG-MAP/BattINFO/pull/334), [#342](https://github.com/BIG-MAP/BattINFO/pull/342) to [#346](https://github.com/BIG-MAP/BattINFO/pull/346)). This work closed a blocker found while authoring the OCV set, where material specs were minted with random ids and re-runs accumulated duplicates.
+
+**Dataset series.** `series_id` on a dataset, emitted as `dcat:inSeries` and `schema:isPartOf` ([#351](https://github.com/BIG-MAP/BattINFO/pull/351), [#352](https://github.com/BIG-MAP/BattINFO/pull/352)). A collection record for the Flores deposit is the next step.
+
+**Ontology releases.** chemical-substance 0.15.0, electrochemistry 0.37.2 and domain-battery 0.20.2. Seventeen duplicate labels were resolved (foundational domain wins across domains, best-documented wins within one), nine quantity classes were fleshed out, and the electrode chemistry classes were un-deprecated because they were still doing inference work as defined classes. BattINFO consumes 0.20.2 via [#338](https://github.com/BIG-MAP/BattINFO/pull/338). One known defect was stated openly: `ElectrochemicalHalfCell` is a subclass of `ElectrochemicalCell` although the parent is elucidated as having two electrodes.
+
+**JSON-LD hygiene.** A hosted, generated, versioned records context ([#294](https://github.com/BIG-MAP/BattINFO/pull/294), [#307](https://github.com/BIG-MAP/BattINFO/pull/307)). An audit found 121 of 168 predicates in served artifacts had no defining subject; the `ns#` namespace is being retired in BattINFO [#355](https://github.com/BIG-MAP/BattINFO/pull/355) and registry [#59](https://github.com/battery-genome/battinfo-registry/pull/59), both open at the time of the call. The JSON-LD workbench at [battinfo.org/validate](https://battinfo.org/validate) was shown.
+
+**Platform and registry.** Two review rounds in late July came back green. Kind pages and linked-resource panels, the record dossier on the registry, and the first equipment records (eleven MC3000 charger spec, unit and channel records with BLE MAC as identity).
+
+## Questions raised
+
+These were put to the room. Outcomes, where there are any, will be linked from here.
+
+- Per-test datasets plus a collection record, or one dataset per deposit: does that match how people cite?
+- Should a collection record carry the Zenodo concept DOI or the version DOI?
+- Who has fitted parameter sets (PyBaMM, BPX, BattMo) they would publish as claims, and at which provenance tier?
+- Which external anchor for material kinds do people actually look things up by (Wikidata, InChIKey, PubChem, Materials Project)?
+- Record corrections: contributors propose, maintainers approve. Should a maintainer self-edit still create a visible change record?
+- Does anyone consume the JSON-LD with a reasoner or triple store and could review the expanded graph?
+
+## What is queued
+
+Record corrections and versioning (design done), the Flores collection record and Zenodo version update, BattINFO 0.8 once the `ns#` retirement and material-spec dedupe land, and the remaining parameter-claims phases (BPX/PyBaMM export of resolved sets, tier badges).
