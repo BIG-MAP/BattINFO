@@ -7,6 +7,7 @@
    pages/howto
    pages/reference
    pages/concepts
+   community/index
 
 
 BattINFO
@@ -124,3 +125,12 @@ states the facts, and **concepts** explain the design.
         :octicon:`gear;1em;sd-text-info`  Concepts
         ^^^^^^^^
         How records read as linked data, the ontology architecture, and how BattINFO is built.
+
+.. grid:: 2
+
+    .. grid-item-card::
+        :link: community/index.html
+
+        :octicon:`people;1em;sd-text-info`  Community
+        ^^^^^^^^^
+        Monthly office hours: slides, notes, and the questions raised on each call.
