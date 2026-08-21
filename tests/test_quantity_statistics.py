@@ -250,19 +250,26 @@ def test_the_statistics_do_not_disturb_the_value_or_the_save_gate() -> None:
 
 
 def test_the_qualifier_terms_resolve_offline() -> None:
-    """``schema:`` is a declared prefix, so no context term is minted for these.
+    """The emitter's qualifier stays prefixed schema.org; no class token is minted.
 
-    That is the point of choosing a prefixed schema.org shape over a bare class
-    token: the frozen v1 context needs no append, and a reader resolves the
-    qualifier with the context it already has.
+    The EMITTER writes ``schema:PropertyValue`` qualifiers with prefixed keys,
+    so no PascalCase class token needs a context term — that decision holds.
+    The bare snake_case keys are a different surface: canonical record bodies
+    (served by the registry) carry ``standard_deviation``/``sample_count``
+    directly, and with the ns# catch-all retired those keys must ground
+    somewhere. They map to battinfo: slash placeholders matching the standing
+    upstream ask (ontology-additions-needed.md section 5), which the next EMMO
+    release drains.
     """
     v1 = json.loads(
         (ROOT / "src" / "battinfo" / "data" / "context" / "records.context.v1.json")
         .read_text(encoding="utf-8")
     )["@context"]
     assert v1["schema"] == "https://schema.org/"
-    for minted in ("StandardDeviation", "SampleCount", "standard_deviation", "sample_count"):
-        assert minted not in v1, f"{minted} should not be a minted term"
+    for minted in ("StandardDeviation", "SampleCount"):
+        assert minted not in v1, f"{minted} should not be a minted class token"
+    assert v1["standard_deviation"] == "battinfo:standardDeviation"
+    assert v1["sample_count"] == "battinfo:sampleCount"
 
 
 def test_no_emmo_uncertainty_class_is_claimed() -> None:
