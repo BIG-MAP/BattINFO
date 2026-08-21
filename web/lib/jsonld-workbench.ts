@@ -336,13 +336,23 @@ function walkSemantics(node: unknown, path: string, out: LayeredIssue[]): void {
   }
 }
 
+// The records context aliases the @type keyword as "type" (canonical record
+// bodies write the bare key), so compacted and framed output may carry either
+// spelling. Every reader of a node's types goes through this.
+function typeValues(node: Record<string, unknown>): string[] {
+  const out: string[] = [];
+  for (const key of ["@type", "type"]) {
+    const value = node[key];
+    if (typeof value === "string") out.push(value);
+    else if (Array.isArray(value)) for (const item of value) if (typeof item === "string") out.push(item);
+  }
+  return out;
+}
+
 function labelOf(node: Record<string, unknown>): string | null {
   const pref = node["skos:prefLabel"];
   if (typeof pref === "string") return pref;
-  const t = node["@type"];
-  if (typeof t === "string") return t;
-  if (Array.isArray(t) && typeof t[0] === "string") return t[0];
-  return null;
+  return typeValues(node)[0] ?? null;
 }
 
 // --- expand + frame orchestration --------------------------------------------
@@ -359,7 +369,7 @@ export function canonicalFrame(doc: Record<string, unknown>): Record<string, unk
     "@context": { ...base, ...inline },
     "@embed": "@once",
   };
-  const topType = doc["@type"];
+  const topType = doc["@type"] ?? doc["type"];
   if (typeof topType === "string" || (Array.isArray(topType) && topType.length > 0)) {
     frame["@type"] = topType;
   }
@@ -407,14 +417,11 @@ function asString(value: unknown): string | null {
 }
 
 function collectTypes(node: Record<string, unknown>): string[] {
-  const out: string[] = [];
-  const push = (t: unknown) => {
-    if (typeof t === "string") out.push(shortIri(t));
-    else if (Array.isArray(t)) t.forEach(push);
-  };
-  push(node["@type"]);
+  const out: string[] = typeValues(node).map(shortIri);
   const desc = node["isDescriptionFor"];
-  if (desc && typeof desc === "object") push((desc as Record<string, unknown>)["@type"]);
+  if (desc && typeof desc === "object") {
+    out.push(...typeValues(desc as Record<string, unknown>).map(shortIri));
+  }
   // Drop the generic wrappers that add no lab-facing meaning.
   return out.filter((t) => t !== "CreativeWork" && !t.startsWith("EMMO_"));
 }
@@ -422,10 +429,8 @@ function collectTypes(node: Record<string, unknown>): string[] {
 function propertyLabel(node: Record<string, unknown>): string {
   const pref = node["skos:prefLabel"] ?? node["prefLabel"];
   if (typeof pref === "string") return pref;
-  const t = node["@type"];
-  if (typeof t === "string") return shortIri(t);
-  if (Array.isArray(t) && typeof t[0] === "string") return shortIri(t[0]);
-  return "property";
+  const first = typeValues(node)[0];
+  return typeof first === "string" ? shortIri(first) : "property";
 }
 
 function propertyValue(node: Record<string, unknown>): string | null {
