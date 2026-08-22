@@ -470,40 +470,71 @@
                   
   <section id="office-hours-21-august-2026">
 <h1>Office hours, 21 August 2026<a class="headerlink" href="#office-hours-21-august-2026" title="Link to this heading">#</a></h1>
-<p>Snapshot of the monthly BattINFO + Battery Genome call. Pull-request numbers and counts are as of the call date; follow the links for the current state.</p>
-<section id="slides">
-<h2>Slides<a class="headerlink" href="#slides" title="Link to this heading">#</a></h2>
-<p>Use the arrow keys or space to move between slides, or <a href="../../_static/office-hours/2026-08-21.html" target="_blank" rel="noopener">open the deck full screen</a>.</p>
-<div style="position:relative;width:100%;aspect-ratio:16/10;border:1px solid var(--bi-border,#E7E5DF);border-radius:10px;overflow:hidden;margin:0 0 1.5rem">
-<iframe src="../../_static/office-hours/2026-08-21.html" title="Office hours slides, 21 August 2026" style="position:absolute;inset:0;width:100%;height:100%;border:0" loading="lazy"></iframe>
-</div>
+<p>Notes from the monthly BattINFO + Battery Genome community call (56 minutes, online). Written up from the meeting transcript. Pull-request numbers and counts are as of the call date; follow the links for the current state.</p>
+<section id="updates-from-the-maintainers">
+<h2>Updates from the maintainers<a class="headerlink" href="#updates-from-the-maintainers" title="Link to this heading">#</a></h2>
+<p>Three things have been the focus since the last call.</p>
+<p><strong>Half-cell OCP dataset as a test case.</strong> A paper on measuring half-cell open-circuit potential profiles of various electrode materials is under review, and the dataset behind it is already open on Zenodo (<a class="reference external" href="https://zenodo.org/records/20086298">10.5281/zenodo.20086298</a>): 95 cells covering eleven materials across lithium-ion anodes and cathodes, processed by different routes, with the associated metadata. It is being used as the worked example for describing half cells in BattINFO and for making the chain from half-cell characterisation to datasets, to parameters, to models. Without any promotion the dataset is already being downloaded heavily, which is a useful reminder that even a modest dataset with proper annotation finds an audience.</p>
+<p><strong>Parameter sets and BPX.</strong> Work has started with the BPX maintainers in the UK on using the Battery Genome to document and share battery model parameter files, linked to the half-cell OCPs above. Published parameter sets (Chen 2020 and others) are being broken into their constituent pieces so that a single OCP profile or a single material’s parameters can be reused on their own. The longer-term goal: you build an NMC811/graphite pouch cell with no parameters of your own, find the five published sets closest to it, and use them as the starting point for calibration in PyBOP or similar. The DigiBatt project already runs this loop with PyBOP as the calibration step, pulling the cell’s metadata from the registry. Anyone with parameter sets, published or not, who would like them indexed is invited to get in touch.</p>
+<p><strong>Ontology release wave.</strong> chemical-substance, domain-electrochemistry and domain-battery have all been bumped to new versions in response to term requests and issues raised since spring, and BattINFO now imports the new versions.</p>
 </section>
-<section id="what-was-shown">
-<h2>What was shown<a class="headerlink" href="#what-was-shown" title="Link to this heading">#</a></h2>
-<p>The month’s theme was that records moved from schema to substance: a real dataset now exists as linked records, and two new record types reached production.</p>
-<p><strong>Flores half-cell OCV dataset.</strong> <a class="reference external" href="https://zenodo.org/records/20086298">Zenodo 20086298</a> (SINTEF, IntelLiGent 101069765, CC-BY-4.0) is described as 424 BattINFO records: material lots, electrodes, nine R2032 half-cell specs, 95 cells, four structured protocols, 95 tests and 95 per-test datasets. The data stays on Zenodo; datasets reference the existing files with verified md5 checksums. The eleven known issues from the original metadata sheet are encoded as conformance on the tests. Half-cells are typed as <code class="docutils literal notranslate"><span class="pre">HalfCellDevice</span></code> with the working electrode as positive and lithium metal as negative.</p>
-<p><strong>Parameter claims.</strong> A parameter-set record type where each claim is one of a quantity, a curve (OCP with hysteresis branch) or a BPX expression, with a provenance class per claim (BattINFO <a class="reference external" href="https://github.com/BIG-MAP/BattINFO/pull/347">#347</a>, <a class="reference external" href="https://github.com/BIG-MAP/BattINFO/pull/348">#348</a>, <a class="reference external" href="https://github.com/BIG-MAP/BattINFO/pull/349">#349</a>). Seventeen records are live; the registry resolves them by material kind at <code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/parameters/resolve</span></code>, and the cell design tool on battery-genome.org draws its OCP curves from them.</p>
-<p><strong>Materials and electrodes as first-class records.</strong> Material kinds are a curated vocabulary, material specs are records with deterministic ids and attribution, electrodes have kinds and design values, and cells link to their electrodes (<a class="reference external" href="https://github.com/BIG-MAP/BattINFO/pull/330">#330</a>, <a class="reference external" href="https://github.com/BIG-MAP/BattINFO/pull/334">#334</a>, <a class="reference external" href="https://github.com/BIG-MAP/BattINFO/pull/342">#342</a> to <a class="reference external" href="https://github.com/BIG-MAP/BattINFO/pull/346">#346</a>). This work closed a blocker found while authoring the OCV set, where material specs were minted with random ids and re-runs accumulated duplicates.</p>
-<p><strong>Dataset series.</strong> <code class="docutils literal notranslate"><span class="pre">series_id</span></code> on a dataset, emitted as <code class="docutils literal notranslate"><span class="pre">dcat:inSeries</span></code> and <code class="docutils literal notranslate"><span class="pre">schema:isPartOf</span></code> (<a class="reference external" href="https://github.com/BIG-MAP/BattINFO/pull/351">#351</a>, <a class="reference external" href="https://github.com/BIG-MAP/BattINFO/pull/352">#352</a>). A collection record for the Flores deposit is the next step.</p>
-<p><strong>Ontology releases.</strong> chemical-substance 0.15.0, electrochemistry 0.37.2 and domain-battery 0.20.2. Seventeen duplicate labels were resolved (foundational domain wins across domains, best-documented wins within one), nine quantity classes were fleshed out, and the electrode chemistry classes were un-deprecated because they were still doing inference work as defined classes. BattINFO consumes 0.20.2 via <a class="reference external" href="https://github.com/BIG-MAP/BattINFO/pull/338">#338</a>. One known defect was stated openly: <code class="docutils literal notranslate"><span class="pre">ElectrochemicalHalfCell</span></code> is a subclass of <code class="docutils literal notranslate"><span class="pre">ElectrochemicalCell</span></code> although the parent is elucidated as having two electrodes.</p>
-<p><strong>JSON-LD hygiene.</strong> A hosted, generated, versioned records context (<a class="reference external" href="https://github.com/BIG-MAP/BattINFO/pull/294">#294</a>, <a class="reference external" href="https://github.com/BIG-MAP/BattINFO/pull/307">#307</a>). An audit found 121 of 168 predicates in served artifacts had no defining subject; the <code class="docutils literal notranslate"><span class="pre">ns#</span></code> namespace is being retired in BattINFO <a class="reference external" href="https://github.com/BIG-MAP/BattINFO/pull/355">#355</a> and registry <a class="reference external" href="https://github.com/battery-genome/battinfo-registry/pull/59">#59</a>, both open at the time of the call. The JSON-LD workbench at <a class="reference external" href="https://battinfo.org/validate">battinfo.org/validate</a> was shown.</p>
-<p><strong>Platform and registry.</strong> Two review rounds in late July came back green. Kind pages and linked-resource panels, the record dossier on the registry, and the first equipment records (eleven MC3000 charger spec, unit and channel records with BLE MAC as identity).</p>
-</section>
-<section id="questions-raised">
-<h2>Questions raised<a class="headerlink" href="#questions-raised" title="Link to this heading">#</a></h2>
-<p>These were put to the room. Outcomes, where there are any, will be linked from here.</p>
+<section id="discussion">
+<h2>Discussion<a class="headerlink" href="#discussion" title="Link to this heading">#</a></h2>
+<section id="a-catalysis-extension-to-the-battery-data-format-graham">
+<h3>A catalysis extension to the Battery Data Format (Graham)<a class="headerlink" href="#a-catalysis-extension-to-the-battery-data-format-graham" title="Link to this heading">#</a></h3>
+<p>Graham presented a catalysis data format built as an extension of BDF 1.3.0: it takes the full BDF schema and adds aliases plus extra columns, mainly per-species faradaic efficiencies, which catalysis groups genuinely measure for fifty or more products. It is published under a w3id namespace. The source file is modest: you define a chemical and say which column shapes apply to it, and the Turtle is generated, so it is less error-prone than hand-writing every term. Each column header still needs its own IRI. A dataset using it needs to be published in the coming weeks (a paper has been accepted).</p>
+<p>Points from the discussion:</p>
 <ul class="simple">
-<li><p>Per-test datasets plus a collection record, or one dataset per deposit: does that match how people cite?</p></li>
-<li><p>Should a collection record carry the Zenodo concept DOI or the version DOI?</p></li>
-<li><p>Who has fitted parameter sets (PyBaMM, BPX, BattMo) they would publish as claims, and at which provenance tier?</p></li>
-<li><p>Which external anchor for material kinds do people actually look things up by (Wikidata, InChIKey, PubChem, Materials Project)?</p></li>
-<li><p>Record corrections: contributors propose, maintainers approve. Should a maintainer self-edit still create a visible change record?</p></li>
-<li><p>Does anyone consume the JSON-LD with a reasoner or triple store and could review the expanded graph?</p></li>
+<li><p>Terms this general (chemical species, faradaic efficiency) could be promoted to domain-electrochemistry or domain-battery; what gives pause is the very specific per-species terms, which are better left in the application ontology where the authors have full control. If they are promoted later, the application terms can be deprecated and replaced.</p></li>
+<li><p>For now the catalysis data ships with a metadata sidecar that points the table schema at the extension. The extra columns are unknown to a plain BDF reader and only come through if you ask for non-BDF columns.</p></li>
+<li><p>The wanted end state is a formal BDF extension mechanism: a set of rules an extension must obey, a validation step, and a metadata key that tells the reader to pull (and cache) the extension schema so it can at least accept the columns and do machine-readable to preferred-label conversion. Nothing more elaborate than that. Reading and writing BDF metadata has to be sorted out first.</p></li>
+<li><p>Several groups want to extend the existing ontologies rather than reinvent them, so a written guide on the standard way to do this would be valuable. Redox-flow groups have been asking similar questions recently.</p></li>
+</ul>
+<p><strong>Outcome:</strong> tracked as an issue against BDF 0.3. Graham and Simon will look at it together the following week.</p>
+</section>
+<section id="battery-genome-platform-code-docs-api-marija-for-fullmap">
+<h3>Battery Genome platform: code, docs, API (Marija, for FULLMAP)<a class="headerlink" href="#battery-genome-platform-code-docs-api-marija-for-fullmap" title="Link to this heading">#</a></h3>
+<p>FULLMAP asked for an update on code availability, documentation and API access. Recent platform work has gone into the human-facing surfaces: a dossier view that compiles one cell’s information from its constituent records (cell spec, electrode spec, electrode as built, active material) with KPIs promoted to the top, the measurement dataset plotted and linked back to its protocol, and batch statistics such as loading and areal capacity. An API endpoint exists, but it is not yet considered robust enough to open fully. FULLMAP will be given early access.</p>
+<p><strong>Outcome:</strong> FULLMAP to send GitHub IDs by email; Simon adds them to the early-access list. A platform update is due the weekend after the call (ahead of a talk at Swiss Battery Days), and registered users will be emailed when it lands. Search and filtering are also being worked on.</p>
+</section>
+<section id="adding-battinfo-metadata-to-bpx-files-carlos">
+<h3>Adding BattINFO metadata to BPX files (Carlos)<a class="headerlink" href="#adding-battinfo-metadata-to-bpx-files-carlos" title="Link to this heading">#</a></h3>
+<p>Carlos (Imperial College, supporting the Faraday Institution’s BPX standard) is implementing BattINFO on BPX so that BPX, BDF and BattINFO metadata fields can talk to each other. The question: a BPX file is JSON, so should metadata go in a sidecar, be appended as a JSON-LD block, or live in a new <code class="docutils literal notranslate"><span class="pre">metadata</span></code> section of the same file?</p>
+<p>The view offered: because BPX is already JSON, a JSON-LD interpretation inside the file is the most interesting route; non-JSON-LD keys are simply ignored by JSON-LD processors. A second option, if the metadata is fairly fixed, is to host it at a web address and add a single <code class="docutils literal notranslate"><span class="pre">metadata</span></code> field to the BPX schema holding that IRI. Sidecars encapsulate cleanly but inevitably get separated from their data. Mapping every BPX parameter to the ontology is best done through a BPX application ontology that maps to the top-level terms; some early work on that exists from when BPX was first proposed, giving one-to-one BPX field to IRI conversions.</p>
+<p>Several attendees had not heard of BPX. It came out of the Faraday Institution multi-scale modelling project with support from BMW, AVL, About:Energy, Ionworks and the PyBaMM developers. The Battery Genome is starting to index BPX examples so that cell specs and instances can be linked to their parameter sets and simulated in PyBaMM or BattMo. On the question of what counts as “close enough” when reusing a parameter set, the working rule is about 20 mV RMSE, with no strong basis behind the number.</p>
+</section>
+<section id="source-of-truth-should-records-be-editable-on-the-platform">
+<h3>Source of truth: should records be editable on the platform?<a class="headerlink" href="#source-of-truth-should-records-be-editable-on-the-platform" title="Link to this heading">#</a></h3>
+<p>Simon put a strategic question to the group. Today the Battery Genome is a reorganisation of information published elsewhere: a paper and a Zenodo deposit get read and harmonised into records. If a contributor spots a mistake, the only route is to fix it at the source and wait for the next version to be scraped. The alternative is to let maintainers or named contributors edit records on the platform, at the cost of the record diverging from its source, with all the push-back problems that brings.</p>
+<p>The room came down clearly on one side:</p>
+<ul class="simple">
+<li><p>Graham: leave it to Zenodo. Otherwise there are two records that disagree and it depends where someone happened to get their copy. It is also less work.</p></li>
+<li><p>Marija: agreed, at least to begin with; Zenodo will not be the only source of truth forever, and push-back gets more complicated with each new one. Asked how propagation would work in the second model: technically, the Zenodo API can create a new version, provided the editor has rights on the deposit, but it is a can of worms.</p></li>
+<li><p>Felix: keep it an aggregator rather than opening up the authorisation problems (what if the editor has no ORCID, or the ORCID is not linked to the Zenodo deposit). Be explicit on the page about which version is displayed and point people to the source if they need the latest.</p></li>
+<li><p>Sudeepika (in chat): keep the original immutable and add corrections or annotations as a layer on top. Felix added that a diff-style layer would be feasible if the corrections are a few numbers.</p></li>
+<li><p>Graham: since BattINFO can already upload to Zenodo programmatically, offer “make this a new version of my existing record” there, so Python-comfortable users fix the source through the same tool.</p></li>
+</ul>
+<p>On mechanics, the backend already keeps the full history of every record, so the original is retained when a new version lands; the issue is purely divergence. Checking for new Zenodo versions could run every six months or so, or on a slow crawler that compares versions and only re-downloads what changed (Zenodo checksums files, so it does not re-upload unchanged ones). A “report an issue” or “ping” button on a record, raising its priority for a re-check, was also suggested. Scale is the open worry once records number in the tens of thousands, but it can be handled when it becomes a problem.</p>
+<p><strong>Outcome:</strong> the Battery Genome stays an aggregator that reads from the source of truth. Contributors who find an error are pointed back to the source, and the fix propagates on the next version.</p>
+</section>
+<section id="back-of-the-envelope-cell-designer-demo">
+<h3>Back-of-the-envelope cell designer (demo)<a class="headerlink" href="#back-of-the-envelope-cell-designer-demo" title="Link to this heading">#</a></h3>
+<p>Simon showed a cell design calculator built for the KPI tables that proposals keep asking for. Three levels of detail: spec-sheet (format, chemistry, duty cycle; gives high-level KPIs and benchmarks against the corpus with nearest neighbours), engineering (mass loading, porosity, material ratios, N/P ratio) and laboratory (everything). Designs can be pinned and compared, for example NMC811/graphite against a 10% silicon-graphite variant, shared by link, and exported as a BattINFO cell spec; BPX export is in progress, which will also feed a physics model so the loading sweeps are not purely thermodynamic. The OCV profiles come from literature sources, so the design is traceable back to the parameter-set records. Felix asked how the OCV source is chosen when several exist (graphite has about five): currently the first in the list; making it selectable is a natural next feature. It has been validated against every spec in the corpus; bugs and oddities are welcome as issues.</p>
+</section>
+</section>
+<section id="action-items">
+<h2>Action items<a class="headerlink" href="#action-items" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>FULLMAP sends GitHub IDs; Simon grants early access to the API and backend.</p></li>
+<li><p>Extending BDF semantics to catalysis, or more generally to per-species quantities, goes on the BDF 0.3 list; Graham and Simon review it next week.</p></li>
+<li><p>Battery Genome remains an aggregator of published sources; no in-platform editing for now.</p></li>
+<li><p>Simon indexes more BPX parameter sets over the coming weeks and continues the cherry-pick parameterisation and calibration work.</p></li>
+<li><p>Notes go to this section of the docs.</p></li>
 </ul>
 </section>
-<section id="what-is-queued">
-<h2>What is queued<a class="headerlink" href="#what-is-queued" title="Link to this heading">#</a></h2>
-<p>Record corrections and versioning (design done), the Flores collection record and Zenodo version update, BattINFO 0.8 once the <code class="docutils literal notranslate"><span class="pre">ns#</span></code> retirement and material-spec dedupe land, and the remaining parameter-claims phases (BPX/PyBaMM export of resolved sets, tier badges).</p>
+<section id="prepared-slides">
+<h2>Prepared slides<a class="headerlink" href="#prepared-slides" title="Link to this heading">#</a></h2>
+<p>The slides prepared for the call (the call itself was largely demo and discussion): <a href="../../_static/office-hours/2026-08-21.html" target="_blank" rel="noopener">open the deck</a>.</p>
 </section>
 </section>
 
@@ -545,10 +576,17 @@
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#slides">Slides</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-was-shown">What was shown</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#questions-raised">Questions raised</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-queued">What is queued</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#updates-from-the-maintainers">Updates from the maintainers</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#discussion">Discussion</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#a-catalysis-extension-to-the-battery-data-format-graham">A catalysis extension to the Battery Data Format (Graham)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#battery-genome-platform-code-docs-api-marija-for-fullmap">Battery Genome platform: code, docs, API (Marija, for FULLMAP)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adding-battinfo-metadata-to-bpx-files-carlos">Adding BattINFO metadata to BPX files (Carlos)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#source-of-truth-should-records-be-editable-on-the-platform">Source of truth: should records be editable on the platform?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#back-of-the-envelope-cell-designer-demo">Back-of-the-envelope cell designer (demo)</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#action-items">Action items</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#prepared-slides">Prepared slides</a></li>
 </ul>
   </nav></div>
 
