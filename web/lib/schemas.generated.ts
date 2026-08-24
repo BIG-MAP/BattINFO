@@ -8921,6 +8921,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
                 "group"
               ]
             },
+            "step_id": {
+              "type": "integer",
+              "description": "Identifier assigned to this step in the test program/schedule. Corresponds to BDF step_id. Not constrained to zero-based, contiguous, monotonic, or unique values."
+            },
             "direction": {
               "type": "string",
               "enum": [
