@@ -504,8 +504,8 @@
 unit IRI, by the curated mapping tables under
 <code class="docutils literal notranslate"><span class="pre">assets/mappings/domain-battery/</span></code> — the single source of truth for the
 semantics of emitted JSON-LD. This page is generated from those tables.</p>
-<section id="properties-77">
-<h2>Properties (77)<a class="headerlink" href="#properties-77" title="Link to this heading">#</a></h2>
+<section id="properties-81">
+<h2>Properties (81)<a class="headerlink" href="#properties-81" title="Link to this heading">#</a></h2>
 <p>The keys accepted in <code class="docutils literal notranslate"><span class="pre">properties={...}</span></code> on a cell spec, and the EMMO
 class each becomes in JSON-LD:</p>
 <div class="pst-scrollable-table-container"><table class="table">
@@ -536,8 +536,14 @@ class each becomes in JSON-LD:</p>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">certified_usable_energy</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d">NominalEnergy</a></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">charging_cutoff_voltage</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">charging_capacity</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_10763eb0_dbc9_4d34_bd1a_7b8996590d45">ChargingCapacity</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">charging_cutoff_voltage</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_6dcd5baf_58cd_43f5_a692_51508e036c88">UpperVoltageLimit</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">charging_energy</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_2ab7af60_da58_4243_b3bc_cbb2155cac53">ChargingEnergy</a></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">charging_temperature_max</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_4a354510_4dc2_4803_8845_f4024a1a7260">MaximumChargingTemperature</a></p></td>
@@ -569,8 +575,14 @@ class each becomes in JSON-LD:</p>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">diameter</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo#EMMO_c1c8ac3c_8a1c_4777_8e0b_14c1f9f9b0c6">Diameter</a></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">discharging_cutoff_voltage</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">discharging_capacity</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_0141b5c2_9f15_46f4_82e6_92a104faa476">DischargingCapacity</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">discharging_cutoff_voltage</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_534dd59c_904c_45d9_8550_ae9d2eb6bbc9">LowerVoltageLimit</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">discharging_energy</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_ca36cbf3_1fed_4b88_9177_b4e16ad00cf7">DischargingEnergy</a></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">discharging_temperature_max</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_de612af2_a029_4a02_8090_4a75ab13271d">MaximumDischargingTemperature</a></p></td>
@@ -922,7 +934,7 @@ surface as machine-readable issues.</p>
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#properties-77">Properties (77)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#properties-81">Properties (81)</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#units-35">Units (35)</a></li>
 </ul>
   </nav></div>
