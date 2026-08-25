@@ -388,6 +388,12 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "type": "object",
           "additionalProperties": false,
           "properties": {
+            "discharging_capacity": {
+              "$ref": "#/$defs/SpecItem"
+            },
+            "charging_capacity": {
+              "$ref": "#/$defs/SpecItem"
+            },
             "nominal_capacity": {
               "$ref": "#/$defs/SpecItem"
             },
@@ -398,6 +404,12 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "$ref": "#/$defs/SpecItem"
             },
             "rated_capacity": {
+              "$ref": "#/$defs/SpecItem"
+            },
+            "discharging_energy": {
+              "$ref": "#/$defs/SpecItem"
+            },
+            "charging_energy": {
               "$ref": "#/$defs/SpecItem"
             },
             "typical_energy": {
