@@ -98,7 +98,7 @@ class each becomes in JSON-LD:
 | `weight` | [Mass](https://w3id.org/emmo#EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405) |
 | `width` | [Width](https://w3id.org/emmo#EMMO_e4de48b1_dabb_4490_ac2b_040f926c64f0) |
 
-## Units (35)
+## Units (48)
 
 The unit symbols accepted in quantity dicts, and the unit IRI each maps
 to (EMMO where a term exists, QUDT as the documented fallback):
@@ -106,28 +106,41 @@ to (EMMO where a term exists, QUDT as the documented fallback):
 | Symbol | Unit |
 |---|---|
 | `%` | [WeightPercent](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_2c0e66c8_d58d_44b2_b0ce_ba55194bd505) |
+| `1` | [UnitOne](https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978) |
 | `A` | [Ampere](https://w3id.org/emmo#Ampere) |
+| `A/Ah` | [AmperePerAmpereHour](https://w3id.org/emmo/domain/electrochemistry#AmperePerAmpereHour) |
 | `Ah` | [AmpereHour](https://w3id.org/emmo#AmpereHour) |
 | `cm` | [CentiMetre](https://w3id.org/emmo#CentiMetre) |
+| `cm2` | [SquareCentiMetre](https://w3id.org/emmo#SquareCentiMetre) |
+| `cm3` | [CubicCentiMetre](https://w3id.org/emmo#CubicCentiMetre) |
 | `count` | [UnitOne](https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978) |
 | `degC` | [DegreeCelsius](https://w3id.org/emmo#DegreeCelsius) |
 | `g` | [Gram](https://w3id.org/emmo#Gram) |
 | `g/cm3` | [GramPerCubicCentiMetre](https://w3id.org/emmo#GramPerCubicCentiMetre) |
+| `g/mol` | [GramPerMole](https://w3id.org/emmo#GramPerMole) |
 | `h` | [Hour](https://w3id.org/emmo#Hour) |
+| `Hz` | [Hertz](https://w3id.org/emmo#Hertz) |
 | `K` | [Kelvin](https://w3id.org/emmo#Kelvin) |
 | `kg` | [Kilogram](https://w3id.org/emmo#Kilogram) |
+| `kg/m3` | [KilogramPerCubicMetre](https://w3id.org/emmo#KilogramPerCubicMetre) |
 | `kWh` | [KiloWattHour](https://w3id.org/emmo#KiloWatthour) |
 | `L` | [Litre](https://w3id.org/emmo#Litre) |
 | `m` | [Metre](https://w3id.org/emmo#Metre) |
+| `m2/g` | [SquareMetrePerGram](https://w3id.org/emmo#SquareMetrePerGram) |
 | `mA` | [MilliAmpere](https://w3id.org/emmo#MilliAmpere) |
 | `mAh` | [MilliAmpereHour](https://w3id.org/emmo#MilliAmpereHour) |
+| `mg` | [MilliGram](https://w3id.org/emmo#MilliGram) |
 | `mg/cm2` | [MilliGramPerSquareCentiMetre](https://w3id.org/emmo#MilliGramPerSquareCentiMetre) |
 | `min` | [Minute](https://w3id.org/emmo#Minute) |
 | `mL` | [MilliLitre](https://w3id.org/emmo#MilliLitre) |
 | `mm` | [MilliMetre](https://w3id.org/emmo#MilliMetre) |
+| `mol/kg` | [MolPerKilogram](https://w3id.org/emmo#MolPerKilogram) |
 | `mol/L` | [MolePerLitre](https://w3id.org/emmo#MolePerLitre) |
+| `mPa.s` | [MilliPascalSecond](https://w3id.org/emmo#MilliPascalSecond) |
+| `mS/cm` | [MilliSiemensPerCentiMetre](https://w3id.org/emmo#MilliSiemensPerCentiMetre) |
 | `mV` | [MilliVolt](https://w3id.org/emmo#MilliVolt) |
 | `mΩ` | [MilliOhm](https://w3id.org/emmo#MilliOhm) |
+| `nm` | [NanoMetre](https://w3id.org/emmo#NanoMetre) |
 | `s` | [Second](https://w3id.org/emmo#Second) |
 | `V` | [Volt](https://w3id.org/emmo#Volt) |
 | `vol%` | [VolumePercent](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_db37b358_b2f0_4e06_b6ae_8c56c8fbb6ba) |
