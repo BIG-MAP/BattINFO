@@ -15,23 +15,28 @@
       "minItems": 1,
       "items": {
         "$ref": "material-component.schema.json"
-      }
+      },
+      "description": "Component materials of the mixture, each with its fraction under property: volume_fraction (v/v) or mass_fraction (w/w), using one basis for the whole mixture."
     },
     "manufacturer": {
-      "type": "string"
+      "type": "string",
+      "description": "Manufacturer of the item."
     },
     "supplier": {
-      "type": "string"
+      "type": "string",
+      "description": "Supplier or vendor the item was sourced from."
     },
     "product_id": {
-      "type": "string"
+      "type": "string",
+      "description": "Manufacturer or supplier product/grade identifier."
     },
     "property": {
-      "$ref": "../common/quantitative-properties.schema.json"
+      "$ref": "../common/quantitative-properties.schema.json",
+      "description": "Named quantity map of technical properties (snake_case key to value+unit quantity)."
     },
     "comment": {
-      "type": "string"
+      "type": "string",
+      "description": "Free-text comment."
     }
   }
 }
-

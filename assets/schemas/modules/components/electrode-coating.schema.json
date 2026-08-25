@@ -18,37 +18,59 @@
           "type": "array",
           "items": {
             "$ref": "material-component.schema.json"
-          }
+          },
+          "description": "Active material component(s) of the coating."
         },
         "binder": {
           "type": "array",
           "items": {
             "$ref": "material-component.schema.json"
-          }
+          },
+          "description": "Binder component(s) of the coating."
         },
         "additive": {
           "type": "array",
           "items": {
             "$ref": "material-component.schema.json"
-          }
+          },
+          "description": "Alias of conductive_additive, kept for compatibility. Conductive additive component(s) of the coating (e.g. carbon black)."
+        },
+        "conductive_additive": {
+          "type": "array",
+          "items": {
+            "$ref": "material-component.schema.json"
+          },
+          "description": "Conductive additive component(s) of the coating (e.g. carbon black, CNT). Preferred over the legacy `additive` key."
+        },
+        "other_additive": {
+          "type": "array",
+          "items": {
+            "$ref": "material-component.schema.json"
+          },
+          "description": "Non-conductive functional additive component(s) of the coating (e.g. thickener, dispersant, lithium-compensation additive)."
         }
-      }
+      },
+      "description": "Coating composition by role: active material, binder, conductive additive, and other additives. Each component carries its mass_fraction of the dry coating solids under property (0-1 with unit '1', or 0-100 with unit '%'); the fractions across all roles sum to 1."
     },
     "manufacturer": {
-      "type": "string"
+      "type": "string",
+      "description": "Manufacturer of the item."
     },
     "supplier": {
-      "type": "string"
+      "type": "string",
+      "description": "Supplier or vendor the item was sourced from."
     },
     "product_id": {
-      "type": "string"
+      "type": "string",
+      "description": "Manufacturer or supplier product/grade identifier."
     },
     "property": {
-      "$ref": "../common/quantitative-properties.schema.json"
+      "$ref": "../common/quantitative-properties.schema.json",
+      "description": "Named quantity map of coating-level properties (e.g. loading in mg/cm2 per side, thickness per side, porosity, calendered_density, areal_capacity). See the property keys reference for the full list of recognised keys."
     },
     "comment": {
-      "type": "string"
+      "type": "string",
+      "description": "Free-text comment."
     }
   }
 }
-

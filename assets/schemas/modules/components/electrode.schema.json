@@ -3,7 +3,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://w3id.org/battinfo/schema/modules/components/electrode.schema.json",
   "title": "Electrode",
-  "description": "Electrode model composed of coating, current collector, and optional properties.",
+  "description": "Electrode model composed of coating, current collector, tab, and optional properties. At least one of coating, current_collector, property is required.",
   "type": "object",
   "additionalProperties": false,
   "properties": {
@@ -13,30 +13,64 @@
       "description": "Optional canonical IRI of a standalone electrode-spec this inline holder realizes. Lets a cell-spec cite the designed electrode while keeping its embedded fields; the same reference seam material-component.schema.json gives materials."
     },
     "coating": {
-      "$ref": "electrode-coating.schema.json"
+      "$ref": "electrode-coating.schema.json",
+      "description": "Coating layer of the electrode: component materials by role (active material, binder, conductive additive, other additives) and coating-level properties."
     },
     "current_collector": {
-      "$ref": "current-collector.schema.json"
+      "$ref": "current-collector.schema.json",
+      "description": "Current-collector foil the coating is applied to."
     },
     "manufacturer": {
-      "type": "string"
+      "type": "string",
+      "description": "Manufacturer of the item."
     },
     "supplier": {
-      "type": "string"
+      "type": "string",
+      "description": "Supplier or vendor the item was sourced from."
     },
     "product_id": {
-      "type": "string"
+      "type": "string",
+      "description": "Manufacturer or supplier product/grade identifier."
     },
     "property": {
-      "$ref": "../common/quantitative-properties.schema.json"
+      "$ref": "../common/quantitative-properties.schema.json",
+      "description": "Named quantity map of electrode-level properties (e.g. diameter, mass, theoretical_capacity, rated_areal_discharge_capacity). See the property keys reference for the full list of recognised keys."
     },
     "comment": {
-      "type": "string"
+      "type": "string",
+      "description": "Free-text comment."
     },
     "tab": {
       "type": "object",
       "title": "CurrentCollectorTab",
-      "description": "Electrode current-collector tab (width, thickness, length, weld_width, tape_width)."
+      "additionalProperties": false,
+      "properties": {
+        "material": {
+          "type": "string",
+          "description": "Tab material (e.g. 'Al', 'Ni-plated Cu')."
+        },
+        "manufacturer": {
+          "type": "string",
+          "description": "Manufacturer of the item."
+        },
+        "supplier": {
+          "type": "string",
+          "description": "Supplier or vendor the item was sourced from."
+        },
+        "product_id": {
+          "type": "string",
+          "description": "Manufacturer or supplier product/grade identifier."
+        },
+        "property": {
+          "$ref": "../common/quantitative-properties.schema.json",
+          "description": "Named quantity map of tab dimensions; expected keys are width, thickness, length, weld_width, and tape_width. See the property keys reference for the full list of recognised keys."
+        },
+        "comment": {
+          "type": "string",
+          "description": "Free-text comment."
+        }
+      },
+      "description": "Electrode current-collector tab: material plus its dimensions (width, thickness, length, weld_width, tape_width) under property."
     }
   },
   "anyOf": [

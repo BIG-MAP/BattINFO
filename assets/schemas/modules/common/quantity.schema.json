@@ -16,20 +16,25 @@
           "type": "string",
           "minLength": 1
         }
-      ]
+      ],
+      "description": "Point value, numeric or as a string when the source value is not purely numeric."
     },
     "min_value": {
-      "type": "number"
+      "type": "number",
+      "description": "Lower bound when the source specifies a range."
     },
     "max_value": {
-      "type": "number"
+      "type": "number",
+      "description": "Upper bound when the source specifies a range."
     },
     "typical_value": {
-      "type": "number"
+      "type": "number",
+      "description": "Typical value when the source distinguishes typical from nominal or limit values."
     },
     "value_text": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "Verbatim value text when the source value cannot be parsed to a number."
     },
     "standard_deviation": {
       "type": "number",
@@ -43,7 +48,8 @@
     },
     "unit_text": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "Human-readable unit text as written in the source (schema.org unitText)."
     },
     "unit": {
       "type": "string",
@@ -58,11 +64,11 @@
         "Rated",
         "Nominal"
       ],
-      "description": "Nature of the value: a directly Measured property, a declared Conventional/Nominal value, or a Rated value established under a rating procedure. Drives the EMMO property-nature co-type in JSON-LD."
+      "description": "Nature of the value. Nominal: the design or target value as specified (default for spec records). Measured: obtained by measurement on a physical item (default for instance records). Rated: a guaranteed value established under a stated rating procedure (datasheet 'rated capacity'). Conventional: fixed by convention or calculation (e.g. theoretical capacity). Drives the EMMO property-nature co-type in JSON-LD; until the EMMO RatedProperty class is published, Rated is exported as ConventionalProperty."
     },
     "conditions": {
       "type": "object",
-      "description": "Measurement parameters/conditions under which this quantity holds (e.g. discharge_c_rate, lower_voltage_limit, upper_voltage_limit, temperature, counter_electrode, cycle_number). Each entry is itself a quantity; emitted as hasMeasurementParameter in JSON-LD.",
+      "description": "Measurement parameters or conditions under which this quantity holds, as a map of condition name to quantity (e.g. discharge_c_rate, lower_voltage_limit, upper_voltage_limit, temperature, counter_electrode, cycle_number). Emitted as hasMeasurementParameter in JSON-LD.",
       "patternProperties": {
         "^[a-z][a-z0-9_]*$": {
           "$ref": "#"

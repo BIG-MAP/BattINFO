@@ -725,6 +725,17 @@
     "ChargingCapacity": "electrochemistry:electrochemistry_10763eb0_dbc9_4d34_bd1a_7b8996590d45",
     "ChargingEnergy": "electrochemistry:electrochemistry_2ab7af60_da58_4243_b3bc_cbb2155cac53",
     "DischargingCapacity": "electrochemistry:electrochemistry_0141b5c2_9f15_46f4_82e6_92a104faa476",
-    "DischargingEnergy": "electrochemistry:electrochemistry_ca36cbf3_1fed_4b88_9177_b4e16ad00cf7"
+    "DischargingEnergy": "electrochemistry:electrochemistry_ca36cbf3_1fed_4b88_9177_b4e16ad00cf7",
+    "MilliSiemensPerCentiMetre": "emmo:MilliSiemensPerCentiMetre",
+    "SquareMetrePerGram": "emmo:SquareMetrePerGram",
+    "GramPerMole": "emmo:GramPerMole",
+    "MolPerKilogram": "emmo:MolPerKilogram",
+    "NanoMetre": "emmo:NanoMetre",
+    "MilliPascalSecond": "emmo:MilliPascalSecond",
+    "MilliGram": "emmo:MilliGram",
+    "Hertz": "emmo:Hertz",
+    "KilogramPerCubicMetre": "emmo:KilogramPerCubicMetre",
+    "CubicCentiMetre": "emmo:CubicCentiMetre",
+    "SquareCentiMetre": "emmo:SquareCentiMetre"
   }
 }

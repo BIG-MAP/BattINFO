@@ -499,7 +499,7 @@ def _current_collector_value(value: Any) -> dict[str, Any] | None:
     name = value.get("name") or value.get("material")
     if isinstance(name, str) and name.strip():
         holder["name"] = name.strip()
-    for key in ("material_spec_id", "manufacturer", "supplier", "product_id", "comment"):
+    for key in ("material", "form", "material_spec_id", "manufacturer", "supplier", "product_id", "comment"):
         if value.get(key) is not None:
             holder[key] = value[key]
     prop = dict(value.get("property") or {})

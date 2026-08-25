@@ -468,6 +468,12 @@ def _coerce_spec_value(value: Any) -> Any:
                 out["max_value"] = value.sv_max_value
             if value.sv_typical_value is not None:
                 out["typical_value"] = value.sv_typical_value
+            if value.sv_value_text is not None:
+                out["value_text"] = value.sv_value_text
+            if value.sv_co_type is not None:
+                out["co_type"] = value.sv_co_type
+            if value.sv_conditions:
+                out["conditions"] = dict(value.sv_conditions)
             return out
     except ImportError:
         pass
@@ -558,10 +564,17 @@ class BillOfMaterials(BaseModel):
 
     active_material: list["MaterialComponent"] = Field(default_factory=list)
     binder: list["MaterialComponent"] = Field(default_factory=list)
+    # ``additive`` is the legacy conductive-additive slot (kept for compatibility);
+    # ``conductive_additive`` is the explicit role and ``other_additive`` holds
+    # non-conductive functional additives (thickener, dispersant, ...).
     additive: list["MaterialComponent"] = Field(default_factory=list)
+    conductive_additive: list["MaterialComponent"] = Field(default_factory=list)
+    other_additive: list["MaterialComponent"] = Field(default_factory=list)
 
     def to_mapping(self) -> dict[str, Any]:
-        return self.model_dump(mode="json", exclude_none=True)
+        out = self.model_dump(mode="json", exclude_none=True)
+        # Empty roles are noise in the record (the schema treats every role as optional).
+        return {key: value for key, value in out.items() if value}
 
 
 def _mapping_from_object(value: Any) -> Any:
@@ -971,6 +984,8 @@ class CurrentCollector(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     name: str | None = None
+    material: str | None = None  # substrate, e.g. "Al", "Cu", "carbon-coated Al"
+    form: str | None = None  # foil | mesh | foam | perforated | other
     material_spec_id: str | None = Field(default=None, description="Optional canonical IRI of a standalone material-spec for the foil material — the same MaterialSpec -> component reference seam MaterialComponent carries.")
     manufacturer: str | None = None
     supplier: str | None = None
@@ -1084,7 +1099,11 @@ class Salt(BaseModel):
 class Separator(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
+    name: str | None = None
     material: str | None = None
+    material_spec_id: str | None = None
+    structure: str | None = None  # monolayer | bilayer | trilayer | composite | other | unknown
+    coating: str | None = None
     manufacturer: str | None = None
     supplier: str | None = None
     product_id: str | None = None
@@ -1131,6 +1150,7 @@ class Terminal(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     polarity: str | None = None  # "positive" | "negative"
+    type: str | None = None  # tab | rivet | stud | threaded_post | other
     material: str | None = None
     manufacturer: str | None = None
     supplier: str | None = None
@@ -1212,10 +1232,19 @@ class Housing(BaseModel):
     terminals: list[Terminal] = Field(default_factory=list)
     seals: list[Seal] = Field(default_factory=list)
     parts: list[HardwarePart] = Field(default_factory=list)  # spring/spacer/other
+    property: dict[str, Any] = Field(default_factory=dict)  # housing-level: mass, wall_thickness
     comment: str | None = None
 
+    @field_validator("property", mode="before")
+    @classmethod
+    def _coerce_property(cls, value: Any) -> Any:
+        return _mapping_from_object(value)
+
     def to_mapping(self) -> dict[str, Any]:
-        return self.model_dump(mode="json", exclude_none=True)
+        out = self.model_dump(mode="json", exclude_none=True)
+        if not out.get("property"):
+            out.pop("property", None)
+        return out
 
 
 _COIN_HARDWARE_PART_KEYS = ("lid", "can", "spring", "spacer")

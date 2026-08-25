@@ -1,5 +1,5 @@
 {
-  "version": "0.4.0",
+  "version": "0.5.0",
   "status": "review",
   "notes": [
     "Curated unit mappings promoted from decisions in interactive review.",
@@ -7,7 +7,8 @@
     "IRIs verified against EMMO 1.0.2, domain-battery 0.20.2, domain-electrochemistry 0.37.2 and domain-chemical-substance 0.15.0.",
     "All candidates with confidence 1.0 promoted. MANUAL_UNIT_TYPES entries consolidated here.",
     "Wh/kg and Wh/L use EMMO IRIs (confirmed present). W/kg uses QUDT (not in EMMO core).",
-    "Wh and kWh: EMMO spells the local names Watthour / KiloWatthour (lower-case h) while the prefLabels read WattHour / KiloWattHour; the IRIs follow EMMO, the labels follow the prefLabel."
+    "Wh and kWh: EMMO spells the local names Watthour / KiloWatthour (lower-case h) while the prefLabels read WattHour / KiloWattHour; the IRIs follow EMMO, the labels follow the prefLabel.",
+    "0.5.0: added 1, mS/cm, m2/g, g/mol, mol/kg, nm, mPa.s, mg, Hz, A/Ah, kg/m3, cm3, cm2; IRIs verified against the bundled domain-battery context. ASCII aliases (um, mg/cm^2, mOhm, ...) are normalised in code, not listed here."
   ],
   "mappings": [
     {
@@ -326,6 +327,126 @@
       "unit_qname": "emmo:MolePerLitre",
       "unit_pref_label": "MolePerLitre",
       "unit_label": "mol/L",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "1",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "unit_qname": "emmo:UnitOne",
+      "unit_pref_label": "UnitOne",
+      "unit_label": "1",
+      "confidence": 1.0,
+      "notes": "Dimensionless fraction in [0, 1] (mass_fraction, volume_fraction, porosity); same IRI as 'count'."
+    },
+    {
+      "symbol": "mS/cm",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#MilliSiemensPerCentiMetre",
+      "unit_qname": "emmo:MilliSiemensPerCentiMetre",
+      "unit_pref_label": "MilliSiemensPerCentiMetre",
+      "unit_label": "mS/cm",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "m2/g",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#SquareMetrePerGram",
+      "unit_qname": "emmo:SquareMetrePerGram",
+      "unit_pref_label": "SquareMetrePerGram",
+      "unit_label": "m²/g",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "g/mol",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#GramPerMole",
+      "unit_qname": "emmo:GramPerMole",
+      "unit_pref_label": "GramPerMole",
+      "unit_label": "g/mol",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "mol/kg",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#MolPerKilogram",
+      "unit_qname": "emmo:MolPerKilogram",
+      "unit_pref_label": "MolPerKilogram",
+      "unit_label": "mol/kg",
+      "confidence": 1.0,
+      "notes": "EMMO spells the IRI fragment MolPerKilogram (context term MolePerKilogram)."
+    },
+    {
+      "symbol": "nm",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#NanoMetre",
+      "unit_qname": "emmo:NanoMetre",
+      "unit_pref_label": "NanoMetre",
+      "unit_label": "nm",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "mPa.s",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#MilliPascalSecond",
+      "unit_qname": "emmo:MilliPascalSecond",
+      "unit_pref_label": "MilliPascalSecond",
+      "unit_label": "mPa·s",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "mg",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#MilliGram",
+      "unit_qname": "emmo:MilliGram",
+      "unit_pref_label": "MilliGram",
+      "unit_label": "mg",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "Hz",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#Hertz",
+      "unit_qname": "emmo:Hertz",
+      "unit_pref_label": "Hertz",
+      "unit_label": "Hz",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "A/Ah",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo/domain/electrochemistry#AmperePerAmpereHour",
+      "unit_qname": "electrochemistry:AmperePerAmpereHour",
+      "unit_pref_label": "AmperePerAmpereHour",
+      "unit_label": "A/Ah",
+      "confidence": 1.0,
+      "notes": "C-rate unit defined in domain-electrochemistry."
+    },
+    {
+      "symbol": "kg/m3",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#KilogramPerCubicMetre",
+      "unit_qname": "emmo:KilogramPerCubicMetre",
+      "unit_pref_label": "KilogramPerCubicMetre",
+      "unit_label": "kg/m³",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "cm3",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#CubicCentiMetre",
+      "unit_qname": "emmo:CubicCentiMetre",
+      "unit_pref_label": "CubicCentiMetre",
+      "unit_label": "cm³",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "cm2",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#SquareCentiMetre",
+      "unit_qname": "emmo:SquareCentiMetre",
+      "unit_pref_label": "SquareCentiMetre",
+      "unit_label": "cm²",
       "confidence": 1.0
     }
   ]
