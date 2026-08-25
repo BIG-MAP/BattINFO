@@ -789,16 +789,8 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "additionalProperties": false,
           "properties": {
             "value": {
-              "anyOf": [
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "string",
-                  "minLength": 1
-                }
-              ],
-              "description": "Point value, numeric or as a string when the source value is not purely numeric."
+              "type": "number",
+              "description": "Point numeric value. A value that is not purely numeric belongs in value_text, never as a string here."
             },
             "min_value": {
               "type": "number",
@@ -8144,6 +8136,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
                 "can",
                 "spring",
                 "spacer",
+                "vent",
                 "other"
               ],
               "description": "Kind of hardware part, for parts without a dedicated field; use case/cap for those."
