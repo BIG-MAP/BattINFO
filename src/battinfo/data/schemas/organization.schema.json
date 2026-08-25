@@ -14,7 +14,8 @@
   "properties": {
     "schema_version": {
       "type": "string",
-      "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$",
+      "description": "Version of the record schema this document conforms to (semantic versioning); stamped by the library on save."
     },
     "organization": {
       "type": "object",
@@ -25,7 +26,8 @@
       ],
       "properties": {
         "id": {
-          "$ref": "#/$defs/OrganizationIri"
+          "$ref": "#/$defs/OrganizationIri",
+          "description": "Canonical IRI of this organization record."
         },
         "short_id": {
           "$ref": "#/$defs/ShortId"
@@ -41,7 +43,8 @@
             "GovernmentOrganization",
             "NGO",
             "Other"
-          ]
+          ],
+          "description": "Organization kind (schema.org type)."
         },
         "name": {
           "type": "string",
@@ -55,10 +58,16 @@
         },
         "alternateName": {
           "anyOf": [
-            { "type": "string", "minLength": 1 },
+            {
+              "type": "string",
+              "minLength": 1
+            },
             {
               "type": "array",
-              "items": { "type": "string", "minLength": 1 },
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
               "minItems": 1,
               "uniqueItems": true
             }
@@ -67,14 +76,21 @@
         },
         "url": {
           "type": "string",
-          "format": "uri"
+          "format": "uri",
+          "description": "Official website URL."
         },
         "same_as": {
           "anyOf": [
-            { "type": "string", "format": "uri" },
+            {
+              "type": "string",
+              "format": "uri"
+            },
             {
               "type": "array",
-              "items": { "type": "string", "format": "uri" },
+              "items": {
+                "type": "string",
+                "format": "uri"
+              },
               "minItems": 1,
               "uniqueItems": true
             }
@@ -98,7 +114,8 @@
               "type": "string",
               "description": "City or locality."
             }
-          }
+          },
+          "description": "Headquarters or principal location."
         },
         "foundingDate": {
           "type": "string",
@@ -109,24 +126,37 @@
           "description": "Year or ISO 8601 date the organization was dissolved, if applicable."
         },
         "description": {
-          "type": "string"
+          "type": "string",
+          "description": "Short description of the organization."
         },
         "parentOrganization": {
           "anyOf": [
-            { "$ref": "#/$defs/OrganizationIri" },
+            {
+              "$ref": "#/$defs/OrganizationIri"
+            },
             {
               "type": "object",
               "additionalProperties": false,
-              "required": ["name"],
+              "required": [
+                "name"
+              ],
               "properties": {
-                "id": { "$ref": "#/$defs/OrganizationIri" },
-                "name": { "type": "string", "minLength": 1 }
+                "id": {
+                  "$ref": "#/$defs/OrganizationIri",
+                  "description": "Canonical IRI of the parent organization record."
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Name of the parent organization."
+                }
               }
             }
           ],
           "description": "Parent organization, if this is a subsidiary or division."
         }
-      }
+      },
+      "description": "The organization being described, in schema.org Organization terms."
     },
     "provenance": {
       "type": "object",
@@ -138,22 +168,38 @@
       "properties": {
         "source_type": {
           "type": "string",
-          "enum": ["inferred", "manual", "external", "knowledge_base", "other"]
+          "enum": [
+            "inferred",
+            "manual",
+            "external",
+            "knowledge_base",
+            "other"
+          ],
+          "description": "Kind of source this record was created from."
         },
         "source_url": {
           "anyOf": [
-            { "type": "string", "format": "uri" },
-            { "type": "null" }
-          ]
+            {
+              "type": "string",
+              "format": "uri"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "URL of the source document or landing page, when available."
         },
         "retrieved_at": {
-          "$ref": "#/$defs/UnixTime"
+          "$ref": "#/$defs/UnixTime",
+          "description": "Unix timestamp (seconds since epoch, UTC) when the source was retrieved or the record was captured."
         },
         "battinfo_version": {
           "type": "string",
-          "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+          "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$",
+          "description": "Version of the battinfo library that wrote this record (semantic versioning); stamped on save."
         }
-      }
+      },
+      "description": "Where the information in this record came from: source type, file or URL, citation, and retrieval time."
     },
     "editorial": {
       "type": "object",
@@ -162,17 +208,22 @@
     },
     "notes": {
       "type": "array",
-      "items": { "type": "string" }
+      "items": {
+        "type": "string"
+      },
+      "description": "Free-text notes carried with the record."
     }
   },
   "$defs": {
     "OrganizationIri": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+      "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+      "description": "Canonical BattINFO IRI in the organization/ namespace (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx)."
     },
     "ShortId": {
       "type": "string",
-      "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$"
+      "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$",
+      "description": "Short human-friendly identifier derived from the record IRI (Crockford base32, 6-16 characters)."
     },
     "UnixTime": {
       "type": "integer",

@@ -342,6 +342,8 @@ class SpecValue(ConfiguredBaseModel):
          'domain': 'SpecValue',
          'domain_of': ['SpecValue']} })
     sv_value_text: Optional[str] = Field(default=None, description="""Free-text value representation when numeric is unavailable.""", json_schema_extra = { "linkml_meta": {'aliases': ['value_text'], 'domain': 'SpecValue', 'domain_of': ['SpecValue']} })
+    sv_co_type: Optional[str] = Field(default=None, description="""Nature of the value: Nominal, Measured, Rated, or Conventional (drives the EMMO property-nature co-type in JSON-LD).""", json_schema_extra = { "linkml_meta": {'aliases': ['co_type'], 'domain': 'SpecValue', 'domain_of': ['SpecValue']} })
+    sv_conditions: Optional[dict[str, Any]] = Field(default=None, description="""Measurement parameters/conditions under which the value holds, as a map of condition name to a {value, unit} quantity (emitted as hasMeasurementParameter).""", json_schema_extra = { "linkml_meta": {'aliases': ['conditions'], 'domain': 'SpecValue', 'domain_of': ['SpecValue']} })
 
 
 class Provenance(ConfiguredBaseModel):

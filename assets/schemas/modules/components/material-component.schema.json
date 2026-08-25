@@ -12,7 +12,8 @@
   "properties": {
     "name": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "Material name or grade (e.g. 'NMC811', 'PVDF', 'C65'). Use the recognised labels where they apply (see the property keys reference); other values are carried as literals."
     },
     "material_spec_id": {
       "type": "string",
@@ -20,24 +21,28 @@
       "description": "Optional canonical IRI of a standalone material-spec record this embedded holder realizes. Lets a cell-spec dedup materials by reference instead of/in addition to inlining them."
     },
     "manufacturer": {
-      "type": "string"
+      "type": "string",
+      "description": "Manufacturer of the item."
     },
     "supplier": {
-      "type": "string"
+      "type": "string",
+      "description": "Supplier or vendor the item was sourced from."
     },
     "product_id": {
-      "type": "string"
+      "type": "string",
+      "description": "Manufacturer or supplier product/grade identifier."
     },
     "molecular_formula": {
       "type": "string",
       "description": "Optional chemical formula of the material (e.g. 'LiFePO4')."
     },
     "property": {
-      "$ref": "../common/quantitative-properties.schema.json"
+      "$ref": "../common/quantitative-properties.schema.json",
+      "description": "Named quantity map of material-level properties (e.g. mass_fraction, volume_fraction, d50_particle_size, specific_capacity). mass_fraction in an electrode coating is the fraction of the dry coating solids, given either as 0-1 with unit '1' or as 0-100 with unit '%' (percentages are rescaled to 0-1 on JSON-LD export); the fractions across active material, binder, and additives sum to 1. In a solvent mixture use volume_fraction (v/v) or mass_fraction (w/w), one basis per mixture. For electrolyte additives mass_fraction is the fraction of the total electrolyte unless the comment states otherwise. See the property keys reference for the full list of recognised keys."
     },
     "comment": {
-      "type": "string"
+      "type": "string",
+      "description": "Free-text comment."
     }
   }
 }
-

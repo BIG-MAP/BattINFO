@@ -6,26 +6,35 @@
   "description": "Canonical JSON schema for BattINFO data ingestion.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["battinfo_version", "record", "battery"],
+  "required": [
+    "battinfo_version",
+    "record",
+    "battery"
+  ],
   "properties": {
     "battinfo_version": {
       "type": "string",
-      "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$",
+      "description": "Version of the BattINFO envelope format (semantic versioning)."
     },
     "profile": {
-      "type": "string"
+      "type": "string",
+      "description": "Name of the validation profile the document targets (e.g. 'batterypass')."
     },
     "record": {
-      "$ref": "#/$defs/Record"
+      "$ref": "#/$defs/Record",
+      "description": "Administrative metadata about the document."
     },
     "battery": {
-      "$ref": "#/$defs/Battery"
+      "$ref": "#/$defs/Battery",
+      "description": "The battery item the document describes."
     },
     "measurements": {
       "type": "array",
       "items": {
         "$ref": "#/$defs/Measurement"
-      }
+      },
+      "description": "Measured quantities reported for the battery."
     }
   },
   "$defs": {
@@ -33,24 +42,60 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "name": { "type": "string" },
-        "organization": { "type": "string" },
-        "email": { "type": "string", "format": "email" },
-        "orcid": { "type": "string" }
-      }
+        "name": {
+          "type": "string",
+          "description": "Agent name."
+        },
+        "organization": {
+          "type": "string",
+          "description": "Organization the agent belongs to."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Contact e-mail address."
+        },
+        "orcid": {
+          "type": "string",
+          "description": "ORCID identifier of the person."
+        }
+      },
+      "description": "A person or organization acting as creator or manufacturer."
     },
     "Record": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id"],
+      "required": [
+        "id"
+      ],
       "properties": {
-        "id": { "type": "string" },
-        "title": { "type": "string" },
-        "description": { "type": "string" },
-        "created_at": { "type": "string", "format": "date-time" },
-        "created_by": { "$ref": "#/$defs/Agent" },
-        "source": { "type": "string" }
-      }
+        "id": {
+          "type": "string",
+          "description": "Identifier of the document."
+        },
+        "title": {
+          "type": "string",
+          "description": "Document title."
+        },
+        "description": {
+          "type": "string",
+          "description": "Free-text description of the document."
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp when the record was created."
+        },
+        "created_by": {
+          "$ref": "#/$defs/Agent",
+          "description": "Agent that created the record."
+        },
+        "source": {
+          "type": "string",
+          "description": "System or workflow the record originates from."
+        }
+      },
+      "description": "Administrative metadata about the document."
     },
     "Quantity": {
       "type": "object",
@@ -58,63 +103,179 @@
       "properties": {
         "value": {
           "anyOf": [
-            { "type": "number" },
-            { "type": "string", "minLength": 1 }
-          ]
+            {
+              "type": "number"
+            },
+            {
+              "type": "string",
+              "minLength": 1
+            }
+          ],
+          "description": "Point value, numeric or as a string when the source value is not purely numeric."
         },
-        "min_value": { "type": "number" },
-        "max_value": { "type": "number" },
-        "typical_value": { "type": "number" },
-        "value_text": { "type": "string", "minLength": 1 },
-        "unit_code": { "type": "string", "minLength": 1 },
-        "unit_text": { "type": "string", "minLength": 1 },
-        "unit": { "type": "string", "minLength": 1 },
-        "unit_uri": { "type": "string" }
+        "min_value": {
+          "type": "number",
+          "description": "Lower bound when the source specifies a range."
+        },
+        "max_value": {
+          "type": "number",
+          "description": "Upper bound when the source specifies a range."
+        },
+        "typical_value": {
+          "type": "number",
+          "description": "Typical value when the source distinguishes typical from nominal or limit values."
+        },
+        "value_text": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Verbatim value text when the source value cannot be parsed to a number."
+        },
+        "unit_code": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Machine-readable unit code (schema.org unitCode convention, e.g. UN/CEFACT)."
+        },
+        "unit_text": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Human-readable unit text as written in the source (schema.org unitText)."
+        },
+        "unit": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Canonical compact unit symbol/code, for example V, A, Ah, Wh/kg."
+        },
+        "unit_uri": {
+          "type": "string",
+          "description": "IRI of the unit in an ontology (e.g. EMMO or QUDT)."
+        }
       },
       "allOf": [
         {
           "anyOf": [
-            { "required": ["value"] },
-            { "required": ["min_value"] },
-            { "required": ["max_value"] },
-            { "required": ["typical_value"] },
-            { "required": ["value_text"] }
+            {
+              "required": [
+                "value"
+              ]
+            },
+            {
+              "required": [
+                "min_value"
+              ]
+            },
+            {
+              "required": [
+                "max_value"
+              ]
+            },
+            {
+              "required": [
+                "typical_value"
+              ]
+            },
+            {
+              "required": [
+                "value_text"
+              ]
+            }
           ]
         },
         {
           "anyOf": [
-            { "required": ["unit_code"] },
-            { "required": ["unit_text"] },
-            { "required": ["unit"] }
+            {
+              "required": [
+                "unit_code"
+              ]
+            },
+            {
+              "required": [
+                "unit_text"
+              ]
+            },
+            {
+              "required": [
+                "unit"
+              ]
+            }
           ]
         }
-      ]
+      ],
+      "description": "Quantitative value with unit: a point value or range."
     },
     "Battery": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "type"],
+      "required": [
+        "id",
+        "type"
+      ],
       "properties": {
-        "id": { "type": "string" },
-        "type": { "type": "string", "enum": ["cell", "module", "pack", "system"] },
-        "chemistry": { "type": "string" },
-        "manufacturer": { "$ref": "#/$defs/Agent" },
-        "nominal_capacity": { "$ref": "#/$defs/Quantity" },
-        "nominal_voltage": { "$ref": "#/$defs/Quantity" },
-        "mass": { "$ref": "#/$defs/Quantity" }
-      }
+        "id": {
+          "type": "string",
+          "description": "Identifier of the battery item."
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "cell",
+            "module",
+            "pack",
+            "system"
+          ],
+          "description": "Level of the battery system hierarchy this document describes."
+        },
+        "chemistry": {
+          "type": "string",
+          "description": "Overall chemistry label."
+        },
+        "manufacturer": {
+          "$ref": "#/$defs/Agent",
+          "description": "Manufacturer of the battery."
+        },
+        "nominal_capacity": {
+          "$ref": "#/$defs/Quantity",
+          "description": "Nominal capacity."
+        },
+        "nominal_voltage": {
+          "$ref": "#/$defs/Quantity",
+          "description": "Nominal voltage."
+        },
+        "mass": {
+          "$ref": "#/$defs/Quantity",
+          "description": "Mass of the item."
+        }
+      },
+      "description": "The battery item the document describes."
     },
     "Measurement": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["quantity"],
+      "required": [
+        "quantity"
+      ],
       "properties": {
-        "name": { "type": "string" },
-        "property": { "type": "string" },
-        "quantity": { "$ref": "#/$defs/Quantity" },
-        "method": { "type": "string" },
-        "timestamp": { "type": "string" }
-      }
+        "name": {
+          "type": "string",
+          "description": "Name of the measured property (snake_case key)."
+        },
+        "property": {
+          "type": "string",
+          "description": "Ontology label or IRI of the measured property, when known."
+        },
+        "quantity": {
+          "$ref": "#/$defs/Quantity",
+          "description": "Measured value and unit."
+        },
+        "method": {
+          "type": "string",
+          "description": "Measurement method or protocol name."
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Timestamp of the measurement."
+        }
+      },
+      "description": "A measured quantity attached to the item, complementing declared datasheet properties."
     }
   }
 }

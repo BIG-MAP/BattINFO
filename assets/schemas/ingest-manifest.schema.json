@@ -77,7 +77,8 @@
             "minLength": 1
           }
         }
-      }
+      },
+      "description": "File-discovery rules driving what gets ingested from the folder."
     }
   },
   "$defs": {
@@ -95,7 +96,8 @@
             "minLength": 1
           }
         }
-      ]
+      ],
+      "description": "A glob pattern, or an ordered list of glob patterns."
     }
   },
   "examples": [

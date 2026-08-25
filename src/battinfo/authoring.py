@@ -172,6 +172,8 @@ def bom(
     active_material: str | MaterialComponent | Sequence[str | MaterialComponent] | None = None,
     binder: str | MaterialComponent | Sequence[str | MaterialComponent] | None = None,
     additive: str | MaterialComponent | Sequence[str | MaterialComponent] | None = None,
+    conductive_additive: str | MaterialComponent | Sequence[str | MaterialComponent] | None = None,
+    other_additive: str | MaterialComponent | Sequence[str | MaterialComponent] | None = None,
 ) -> BillOfMaterials:
     """Build a bill-of-materials for an electrode coating.
 
@@ -182,12 +184,18 @@ def bom(
     Args:
         active_material: Primary electrochemically active material(s).
         binder: Binder material(s), e.g. ``"PVDF"``, ``"CMC"``, ``"SBR"``.
-        additive: Conductive additive(s), e.g. ``"Carbon black"``, ``"VGCF"``.
+        additive: Conductive additive(s), e.g. ``"Carbon black"``, ``"VGCF"``. Legacy
+            alias of ``conductive_additive``; both land on ``hasConductiveAdditive``.
+        conductive_additive: Conductive additive(s); the explicit role name.
+        other_additive: Non-conductive functional additive(s), e.g. a thickener
+            (``"CMC"``) or dispersant.
     """
     return BillOfMaterials(
         active_material=_component_list(active_material),
         binder=_component_list(binder),
         additive=_component_list(additive),
+        conductive_additive=_component_list(conductive_additive),
+        other_additive=_component_list(other_additive),
     )
 
 
@@ -373,6 +381,10 @@ def electrolyte_recipe(
 def separator_spec(
     *,
     material: str,
+    name: str | None = None,
+    structure: str | None = None,
+    coating: str | None = None,
+    material_spec_id: str | None = None,
     thickness: dict[str, Any] | None = None,
     diameter: dict[str, Any] | None = None,
     properties: PropertySet | None = None,
@@ -382,6 +394,11 @@ def separator_spec(
 
     Args:
         material: Base material name, e.g. ``"polypropylene"``, ``"glass fibre"``.
+        name: Product name, e.g. ``"Celgard 2400"``.
+        structure: Layer structure: ``"monolayer"``, ``"bilayer"``, ``"trilayer"``,
+            ``"composite"``, ``"other"``, or ``"unknown"``.
+        coating: Surface coating on the base membrane, e.g. ``"Al2O3"``.
+        material_spec_id: IRI of the material-spec the base material realizes.
         thickness: Thickness quantity dict, e.g. ``{"value": 25, "unit": "mm"}``.
         diameter: Diameter quantity dict, e.g. ``{"value": 19, "unit": "mm"}``.
         properties: Additional separator properties (porosity, Gurley number, etc.).
@@ -393,7 +410,10 @@ def separator_spec(
         resolved_properties.thickness = thickness
     if diameter is not None:
         resolved_properties.diameter = diameter
-    return Separator(material=material, property=resolved_properties, comment=comment)
+    return Separator(
+        name=name, material=material, material_spec_id=material_spec_id,
+        structure=structure, coating=coating, property=resolved_properties, comment=comment,
+    )
 
 
 def case(
@@ -424,6 +444,7 @@ def case(
 def terminal(
     *,
     polarity: str | None = None,
+    type: str | None = None,
     material: str | None = None,
     manufacturer: str | None = None,
     supplier: str | None = None,
@@ -432,10 +453,13 @@ def terminal(
     comment: str | None = None,
     **named_properties: Any,
 ) -> Terminal:
-    """Build a cell terminal (``width``/``thickness``/``weld_width``/``tape_width`` as quantities)."""
+    """Build a cell terminal (``width``/``thickness``/``weld_width``/``tape_width`` as quantities).
+
+    ``type`` is the mechanical kind: ``"tab"``, ``"rivet"``, ``"stud"``, ``"threaded_post"``, or ``"other"``.
+    """
     property_set = properties or PropertySet(**named_properties)
     return Terminal(
-        polarity=polarity, material=material, manufacturer=manufacturer,
+        polarity=polarity, type=type, material=material, manufacturer=manufacturer,
         supplier=supplier, product_id=product_id, property=property_set, comment=comment,
     )
 
