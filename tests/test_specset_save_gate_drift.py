@@ -57,3 +57,73 @@ def test_save_gate_specset_is_closed() -> None:
     # The gate must stay strict; the fix is to widen the key set, not to open it.
     schema = json.loads(SAVE_GATE.read_text(encoding="utf-8"))
     assert schema["$defs"]["SpecSet"]["additionalProperties"] is False
+
+
+# ── Measured-instance keys ────────────────────────────────────────────────────
+# A cell instance's `measured` block records what an individual cell actually
+# did; IEC nominal/rated capacity are manufacturer declarations about the
+# product type. The direction-qualified keys (discharging_/charging_ capacity
+# and energy, matching the BDF column vocabulary and the EMMO
+# DischargingCapacity/ChargingCapacity/DischargingEnergy/ChargingEnergy
+# classes) exist so a measured value never has to masquerade as a declaration.
+
+_MEASURED = {
+    "discharging_capacity": {"value": 4.85, "unit": "Ah"},
+    "charging_capacity": {"value": 4.87, "unit": "Ah"},
+    "discharging_energy": {"value": 17.6, "unit": "Wh"},
+    "charging_energy": {"value": 18.1, "unit": "Wh"},
+    "specific_energy": {"value": 252.0, "unit": "Wh/kg"},
+    "energy_density": {"value": 720.0, "unit": "Wh/L"},
+}
+
+
+def _example_cell_instance_record() -> dict:
+    path = (
+        ROOT / "src" / "battinfo" / "data" / "examples" / "cell-instance"
+        / "cell-3m6k-9t2p-7x4h-9nq8.json"
+    )
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def test_measured_capacity_and_energy_pass_the_strict_save_gate() -> None:
+    from battinfo.validate import ValidationPolicy, validate_record_report
+
+    record = _example_cell_instance_record()
+    record["measured"] = dict(_MEASURED)
+    report = validate_record_report(
+        record, policy=ValidationPolicy(name="strict", semantic="error")
+    )
+    assert report.ok, [f"{i.code}: {i.message}" for i in report.issues]
+
+
+def test_measured_capacity_and_energy_round_trip_through_cell() -> None:
+    from battinfo.bundle import Cell
+
+    record = _example_cell_instance_record()
+    record["measured"] = dict(_MEASURED)
+    cell = Cell.from_record(record)
+    assert cell.measured == _MEASURED
+    assert cell.to_record()["measured"] == _MEASURED
+
+
+def test_measured_capacity_and_energy_are_typed_specset_fields() -> None:
+    from battinfo.bundle_adapter import specs_to_specset, specset_to_specs
+
+    for key in (
+        "discharging_capacity",
+        "charging_capacity",
+        "discharging_energy",
+        "charging_energy",
+    ):
+        assert key in SpecSet.model_fields
+
+    specset = specs_to_specset(dict(_MEASURED))
+    assert specset is not None
+    # Typed fields, not extras: attribute access works and carries the values.
+    assert specset.discharging_capacity.sv_value == 4.85
+    assert specset.discharging_capacity.sv_unit == "Ah"
+    assert specset.charging_capacity.sv_value == 4.87
+    assert specset.discharging_energy.sv_value == 17.6
+    assert specset.discharging_energy.sv_unit == "Wh"
+    assert specset.charging_energy.sv_value == 18.1
+    assert specset_to_specs(specset) == _MEASURED

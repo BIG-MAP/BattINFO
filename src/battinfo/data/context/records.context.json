@@ -71,6 +71,8 @@
       "@type": "@id"
     },
     "id": "schema:productID",
+    "discharging_capacity": "electrochemistry:electrochemistry_0141b5c2_9f15_46f4_82e6_92a104faa476",
+    "charging_capacity": "electrochemistry:electrochemistry_10763eb0_dbc9_4d34_bd1a_7b8996590d45",
     "nominal_capacity": "electrochemistry:electrochemistry_8abde9d0_84f6_4b4f_a87e_86028a397100",
     "minimum_capacity": "electrochemistry:electrochemistry_d3c0078e_c1d3_461e_873d_e5c3adf441c5",
     "rated_capacity": "electrochemistry:electrochemistry_9b3b4668_0795_4a35_9965_2af383497a26",
@@ -86,6 +88,8 @@
     "maximum_continuous_discharging_current": "electrochemistry:electrochemistry_ba7ac581_0e13_4815_b888_013c378932f5",
     "nominal_continuous_discharging_current": "electrochemistry:electrochemistry_ba7ac581_0e13_4815_b888_013c378932f5",
     "maximum_pulse_discharging_current": "electrochemistry:electrochemistry_3e54f9e3_a31d_4821_9bfb_ef953a42c35b",
+    "discharging_energy": "electrochemistry:electrochemistry_ca36cbf3_1fed_4b88_9177_b4e16ad00cf7",
+    "charging_energy": "electrochemistry:electrochemistry_2ab7af60_da58_4243_b3bc_cbb2155cac53",
     "nominal_energy": "electrochemistry:electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d",
     "typical_energy": "electrochemistry:electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d",
     "rated_energy": "electrochemistry:electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d",

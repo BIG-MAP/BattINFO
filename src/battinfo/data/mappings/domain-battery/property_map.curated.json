@@ -77,6 +77,16 @@
       "notes": "certified_usable_energy (EU Battery Regulation) maps to NominalEnergy; matches the schema slot_uri."
     },
     {
+      "key": "charging_capacity",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_10763eb0_dbc9_4d34_bd1a_7b8996590d45",
+      "class_qname": "emmo:ChargingCapacity",
+      "class_pref_label": "ChargingCapacity",
+      "class_label": "ChargingCapacity",
+      "confidence": 1.0,
+      "notes": "Measured charge capacity of an individual cell (cell-instance `measured` block); nominal/rated capacity remain manufacturer declarations on the spec. Direction-qualified to match the BDF column vocabulary."
+    },
+    {
       "key": "charging_cutoff_voltage",
       "status": "curated",
       "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_6dcd5baf_58cd_43f5_a692_51508e036c88",
@@ -84,6 +94,16 @@
       "class_pref_label": "UpperVoltageLimit",
       "class_label": "UpperVoltageLimit",
       "confidence": 1.0
+    },
+    {
+      "key": "charging_energy",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_2ab7af60_da58_4243_b3bc_cbb2155cac53",
+      "class_qname": "emmo:ChargingEnergy",
+      "class_pref_label": "ChargingEnergy",
+      "class_label": "ChargingEnergy",
+      "confidence": 1.0,
+      "notes": "Measured charge energy of an individual cell (cell-instance `measured` block); nominal/rated/typical energy remain manufacturer declarations on the spec."
     },
     {
       "key": "charging_temperature_max",
@@ -177,6 +197,16 @@
       "confidence": 1.0
     },
     {
+      "key": "discharging_capacity",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_0141b5c2_9f15_46f4_82e6_92a104faa476",
+      "class_qname": "emmo:DischargingCapacity",
+      "class_pref_label": "DischargingCapacity",
+      "class_label": "DischargingCapacity",
+      "confidence": 1.0,
+      "notes": "Measured discharge capacity of an individual cell (cell-instance `measured` block); nominal/rated capacity remain manufacturer declarations on the spec. Direction-qualified to match the BDF column vocabulary (discharging_capacity_ah)."
+    },
+    {
       "key": "discharging_cutoff_voltage",
       "status": "curated",
       "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_534dd59c_904c_45d9_8550_ae9d2eb6bbc9",
@@ -184,6 +214,16 @@
       "class_pref_label": "LowerVoltageLimit",
       "class_label": "LowerVoltageLimit",
       "confidence": 1.0
+    },
+    {
+      "key": "discharging_energy",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_ca36cbf3_1fed_4b88_9177_b4e16ad00cf7",
+      "class_qname": "emmo:DischargingEnergy",
+      "class_pref_label": "DischargingEnergy",
+      "class_label": "DischargingEnergy",
+      "confidence": 1.0,
+      "notes": "Measured discharge energy of an individual cell (cell-instance `measured` block); nominal/rated/typical energy remain manufacturer declarations on the spec."
     },
     {
       "key": "discharging_temperature_max",

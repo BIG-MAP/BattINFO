@@ -58,6 +58,8 @@ classes:
 
     # ── Capacity ──────────────────────────────────────────────────────────────
     slots:
+      - discharging_capacity
+      - charging_capacity
       - nominal_capacity
       - minimum_capacity
       - rated_capacity
@@ -79,6 +81,8 @@ classes:
       - maximum_pulse_discharging_current
 
     # ── Energy ────────────────────────────────────────────────────────────────
+      - discharging_energy
+      - charging_energy
       - nominal_energy
       - typical_energy
       - rated_energy
@@ -297,6 +301,32 @@ slots:
   # The alias list carries the BPX-style human-readable name with unit in brackets.
 
   # Capacity
+  discharging_capacity:
+    # electrochemistry:DischargingCapacity (altLabel DischargeCapacity), a
+    # subclass of the generic Capacity quantity. A measured discharge capacity
+    # of an individual cell, e.g. in a cell instance's `measured` block; the
+    # IEC nominal/rated keys are manufacturer declarations about the product
+    # type, not measurements. Direction-qualified to match the BDF column
+    # vocabulary (discharging_capacity_ah); which cycle/rate produced the value
+    # belongs in the record's notes.
+    slot_uri: electrochemistry:electrochemistry_0141b5c2_9f15_46f4_82e6_92a104faa476
+    range: SpecValue
+    description: Measured discharge capacity of an individual cell (not a manufacturer declaration).
+    aliases:
+      - "Discharge capacity [Ah]"
+      - "Discharging capacity [Ah]"
+
+  charging_capacity:
+    # electrochemistry:ChargingCapacity (altLabel ChargeCapacity). Companion to
+    # discharging_capacity; reporting both makes coulombic efficiency derivable
+    # from the record.
+    slot_uri: electrochemistry:electrochemistry_10763eb0_dbc9_4d34_bd1a_7b8996590d45
+    range: SpecValue
+    description: Measured charge capacity of an individual cell (not a manufacturer declaration).
+    aliases:
+      - "Charge capacity [Ah]"
+      - "Charging capacity [Ah]"
+
   nominal_capacity:
     slot_uri: electrochemistry:electrochemistry_8abde9d0_84f6_4b4f_a87e_86028a397100
     range: SpecValue
@@ -410,6 +440,30 @@ slots:
       - "Maximum pulse discharging current [A]"
 
   # Energy
+  discharging_energy:
+    # electrochemistry:DischargingEnergy (altLabel DischargeEnergy), a subclass
+    # of StoredEnergy. A measured discharge energy of an individual cell, e.g.
+    # in a cell instance's `measured` block; the nominal/rated/typical keys are
+    # manufacturer declarations. Direction-qualified to match the BDF column
+    # vocabulary; measurement conditions belong in the record's notes.
+    slot_uri: electrochemistry:electrochemistry_ca36cbf3_1fed_4b88_9177_b4e16ad00cf7
+    range: SpecValue
+    description: Measured discharge energy of an individual cell (not a manufacturer declaration).
+    aliases:
+      - "Discharge energy [Wh]"
+      - "Discharging energy [Wh]"
+
+  charging_energy:
+    # electrochemistry:ChargingEnergy (altLabel ChargeEnergy). Companion to
+    # discharging_energy; reporting both makes energy efficiency derivable from
+    # the record.
+    slot_uri: electrochemistry:electrochemistry_2ab7af60_da58_4243_b3bc_cbb2155cac53
+    range: SpecValue
+    description: Measured charge energy of an individual cell (not a manufacturer declaration).
+    aliases:
+      - "Charge energy [Wh]"
+      - "Charging energy [Wh]"
+
   nominal_energy:
     slot_uri: electrochemistry:electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d
     range: SpecValue

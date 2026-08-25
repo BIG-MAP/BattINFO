@@ -438,6 +438,12 @@ class SpecSet(ConfiguredBaseModel):
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://w3id.org/battinfo/schema/cell-spec'})
 
+    discharging_capacity: Optional[SpecValue] = Field(default=None, description="""Measured discharge capacity of an individual cell (not a manufacturer declaration).""", json_schema_extra = { "linkml_meta": {'aliases': ['Discharge capacity [Ah]', 'Discharging capacity [Ah]'],
+         'domain_of': ['SpecSet'],
+         'slot_uri': 'electrochemistry:electrochemistry_0141b5c2_9f15_46f4_82e6_92a104faa476'} })
+    charging_capacity: Optional[SpecValue] = Field(default=None, description="""Measured charge capacity of an individual cell (not a manufacturer declaration).""", json_schema_extra = { "linkml_meta": {'aliases': ['Charge capacity [Ah]', 'Charging capacity [Ah]'],
+         'domain_of': ['SpecSet'],
+         'slot_uri': 'electrochemistry:electrochemistry_10763eb0_dbc9_4d34_bd1a_7b8996590d45'} })
     nominal_capacity: Optional[SpecValue] = Field(default=None, description="""Nominal (rated) discharge capacity at standard conditions.""", json_schema_extra = { "linkml_meta": {'aliases': ['Nominal capacity [Ah]', 'Rated capacity [Ah]'],
          'domain_of': ['SpecSet'],
          'slot_uri': 'electrochemistry:electrochemistry_8abde9d0_84f6_4b4f_a87e_86028a397100'} })
@@ -483,6 +489,12 @@ class SpecSet(ConfiguredBaseModel):
     maximum_pulse_discharging_current: Optional[SpecValue] = Field(default=None, description="""Peak pulse discharge current.""", json_schema_extra = { "linkml_meta": {'aliases': ['Maximum pulse discharging current [A]'],
          'domain_of': ['SpecSet'],
          'slot_uri': 'electrochemistry:electrochemistry_3e54f9e3_a31d_4821_9bfb_ef953a42c35b'} })
+    discharging_energy: Optional[SpecValue] = Field(default=None, description="""Measured discharge energy of an individual cell (not a manufacturer declaration).""", json_schema_extra = { "linkml_meta": {'aliases': ['Discharge energy [Wh]', 'Discharging energy [Wh]'],
+         'domain_of': ['SpecSet'],
+         'slot_uri': 'electrochemistry:electrochemistry_ca36cbf3_1fed_4b88_9177_b4e16ad00cf7'} })
+    charging_energy: Optional[SpecValue] = Field(default=None, description="""Measured charge energy of an individual cell (not a manufacturer declaration).""", json_schema_extra = { "linkml_meta": {'aliases': ['Charge energy [Wh]', 'Charging energy [Wh]'],
+         'domain_of': ['SpecSet'],
+         'slot_uri': 'electrochemistry:electrochemistry_2ab7af60_da58_4243_b3bc_cbb2155cac53'} })
     nominal_energy: Optional[SpecValue] = Field(default=None, description="""Nominal stored energy.""", json_schema_extra = { "linkml_meta": {'aliases': ['Nominal energy [Wh]'],
          'domain_of': ['SpecSet'],
          'slot_uri': 'electrochemistry:electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d'} })
