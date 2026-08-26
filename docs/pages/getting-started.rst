@@ -19,20 +19,9 @@ Installation
 
 BattINFO requires Python 3.11 or later.
 
-.. note::
-
-   The package is not on PyPI yet — it publishes with the 0.8 release. Until
-   then, install from source.
-
-.. code-block:: bash
-
-   git clone https://github.com/BIG-MAP/BattINFO.git
-   cd BattINFO
-   pip install -e ".[dev]"
-
-Once 0.8 is released, ``pip install battinfo`` will work, with optional extras
-that add features as you need them (each missing dependency raises an error
-naming the extra to install):
+Install the package from PyPI, with optional extras that add features as you
+need them (each missing dependency raises an error naming the extra to
+install):
 
 .. code-block:: bash
 
