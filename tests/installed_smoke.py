@@ -10,10 +10,17 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def main() -> None:
+    import importlib.metadata
+
     import battinfo
     from battinfo.cli import app
 
-    assert battinfo.__version__ == "0.7.0"
+    # The imported package must be the wheel this job just installed — a stale
+    # or shadowed install shows up as a version mismatch. Compared against the
+    # dist metadata rather than a hand-updated literal so a version bump cannot
+    # break the smoke test.
+    assert battinfo.__version__ == importlib.metadata.version("battinfo"), (
+        battinfo.__version__, importlib.metadata.version("battinfo"))
     runner = CliRunner()
     result = runner.invoke(
         app,

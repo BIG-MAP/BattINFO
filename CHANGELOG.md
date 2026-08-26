@@ -7,7 +7,61 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.8.0] — 2026-08-26
+
+First release published to PyPI (`pip install battinfo`). The version line
+continues the historical ontology releases; 0.7.0 was a development milestone
+that was never tagged or published.
+
 ### Added
+
+- **Measured capacity and energy keys for cell instances, direction-qualified.**
+  A cell instance's `measured` block can carry `discharging_capacity`,
+  `charging_capacity`, `discharging_energy`, and `charging_energy`, mapped to
+  the EMMO electrochemistry classes DischargingCapacity / ChargingCapacity /
+  DischargingEnergy / ChargingEnergy (subclasses of Capacity and StoredEnergy,
+  so generic queries still find them by subsumption). The existing
+  nominal_/rated_/typical_ keys are manufacturer declarations about the product
+  type; these are what an individual cell actually did, and a measured value no
+  longer has to masquerade as a declaration. Direction-qualified rather than a
+  bare `capacity` because charge and discharge differ by coulombic efficiency
+  and the BDF column vocabulary (`charging_`/`discharging_capacity_ah`) forces
+  the same distinction; reporting both makes coulombic and energy efficiency
+  derivable from the record. The keys get unit compatibility and plausibility
+  bounds in the semantic validator and are deliberately excluded from spec
+  authoring (a test enforces it). (#360)
+
+- **Authoring contract additions from the August schema pass.** `SpecItem`
+  accepts `co_type` and `conditions` in the save-gate schemas with full model
+  round-trip, so a value can state its nature (Measured/Nominal/Rated/
+  Conventional) and its measurement conditions. Coating composition gains
+  explicit roles: `conductive_additive` (the legacy `additive` stays as an
+  alias; both emit hasConductiveAdditive, accumulating instead of overwriting)
+  and `other_additive` for non-conductive functional additives (thickener,
+  dispersant — both added to the material_class vocabulary). Inline separators
+  carry name/structure/coating/material_spec_id; current collectors carry
+  material/form; terminals carry a mechanical `type`
+  (tab/rivet/stud/threaded_post); housings gain a property block and the new
+  construction/housing component modules. Unit input is normalised through an
+  alias table (`um` → `µm`, `degC` → `°C`, `percent` → `%`, `mOhm` → `mΩ`, …)
+  plus generic rewrites for exponents, micro prefixes, Ohm spellings and
+  separators, on both the EMMO-IRI and converter-token lookup paths, with ~30
+  new curated unit entries. FlexDate patterns are tightened to ISO forms and
+  test conditions must be quantity objects. Nearly every schema property now
+  carries a description. (#363)
+
+- **`ws.submit()` reaches every registrable record kind.** The sweep covers
+  equipment-spec, equipment, channel, and parameter-set records (specs before
+  the instances that reference them), `only=` accepts the new type tokens, and
+  `ws.add("equipment", ...)` registers the records it writes in the session
+  set — so an equipment-only workspace publishes in one session without a
+  `ws.save()` call, where previously it silently published nothing. Equipment
+  submissions carry instanceOf → spec and hasChannel → each channel (labels as
+  titles), channels carry channelOf → their unit, and parameter sets carry
+  about → their target when it is a record IRI. Component-family records the
+  registry cannot register yet (separator, current-collector, electrolyte,
+  housing) produce an explicit NOTE naming them instead of vanishing from the
+  submission. (#364)
 
 - **`theoretical_specific_capacity` joins the parameter vocabulary.** The curated
   material-kind reference anchors (graphite 372 mAh/g, silicon 3579, lithium

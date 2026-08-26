@@ -53,8 +53,7 @@ print(result.canonical_iri)
 # https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0`;
 
 export const installSnippet = `python -m venv .venv
-# until the 0.8 release lands on PyPI, install from source:
 # macOS / Linux:
-.venv/bin/pip install git+https://github.com/BIG-MAP/BattINFO.git
+.venv/bin/pip install battinfo
 # Windows (PowerShell / cmd):
-.venv\\Scripts\\pip install git+https://github.com/BIG-MAP/BattINFO.git`;
+.venv\\Scripts\\pip install battinfo`;

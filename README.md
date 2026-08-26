@@ -85,16 +85,14 @@ JSON. BattINFO turns that into a single, semantically-grounded record model:
 
 Requires **Python 3.11+**.
 
-BattINFO is not on PyPI until the 0.8 release. Until then, install from source
-into a virtual environment:
-
 ```bash
 python -m venv .venv
 source .venv/bin/activate            # Windows: .venv\Scripts\activate
-pip install "git+https://github.com/BIG-MAP/BattINFO.git"
+pip install battinfo
 ```
 
-<!-- 0.8 release: replace the block above with  pip install battinfo -->
+To work from the latest development state instead, install from source:
+`pip install "git+https://github.com/BIG-MAP/BattINFO.git"`.
 
 Optional extras: `battinfo[processing]` (cycler-file conversion via `ws.convert()`
 + plotting), `battinfo[tabular]` (CSV/Parquet/XLSX readers), `battinfo[publish]`
