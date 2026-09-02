@@ -9,6 +9,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- **The `modes` facet recurses into step groups.** A cycling protocol wrapped
+  in a repeat group faceted as `modes: ["group"]`, so any consumer filtering
+  on `modes` missed every cycling protocol; `control_modes`, `directions`,
+  and the `has_*` flags already recursed. `modes` now lists leaf-step modes
+  in first-encounter order and never contains `group` — group nesting stays
+  visible in the method graph itself. Facets are stamped at publish time, so
+  already-published records carry the old shape until re-emitted (#361).
+
 - **Registry listings paginate; lookups no longer miss older records.** A
   single GET of `/resources` is capped by the server at one page (100 rows,
   newest first), and both the cell-spec search cache and the cell/serial

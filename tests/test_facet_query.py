@@ -49,8 +49,11 @@ def test_query_by_c_rate_and_mode(tmp_path: Path) -> None:
     d = _make_dir(tmp_path)
     assert len(query_test_specs(directory=d, c_rate=0.5)) == 1
     assert len(query_test_specs(directory=d, c_rate=1.0)) == 1
-    # A group (cycled) method only appears in the formation spec.
-    assert [r["name"] for r in query_test_specs(directory=d, mode="group")] == ["Formation CCCV"]
+    # modes lists leaf steps (never "group", #361): the cycled formation
+    # method is found by what it does, and its cv hold is not hidden by
+    # the group wrapper.
+    assert [r["name"] for r in query_test_specs(directory=d, mode="cv")] == ["Formation CCCV"]
+    assert query_test_specs(directory=d, mode="group") == []
 
 
 def test_query_combines_facet_and_identity_filters(tmp_path: Path) -> None:

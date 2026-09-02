@@ -479,7 +479,14 @@ _CONTROL_MODE = {"cc": "current", "cv": "voltage", "cccv": "current", "cp": "pow
 
 
 def compute_facets(steps: Sequence[Step], conditions: dict[str, Quantity] | None = None) -> dict[str, Any]:
-    """Derive a flat, queryable rollup of a method for cheap agent filtering."""
+    """Derive a flat, queryable rollup of a method for cheap agent filtering.
+
+    ``modes`` lists leaf-step modes in first-encounter order; ``group`` is
+    structure, not a mode, and never appears (a cycling protocol wrapped in a
+    repeat group must facet as its cc/cv/rest content, or every ``modes``
+    filter misses it — #361). Group nesting stays visible in the method graph
+    and the ``has_*`` flags.
+    """
     modes: list[str] = []
     directions: set[str] = set()
     control_modes: set[str] = set()
@@ -488,7 +495,7 @@ def compute_facets(steps: Sequence[Step], conditions: dict[str, Quantity] | None
     temperatures: list[float] = []
     tags: set[str] = set()
 
-    for step in steps:
+    for step in _iter_leaf_steps(steps):
         if step.mode not in modes:
             modes.append(step.mode)
     for step in _iter_leaf_steps(steps):
