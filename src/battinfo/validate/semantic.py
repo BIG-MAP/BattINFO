@@ -1051,6 +1051,69 @@ def _walk_non_finite(
             _walk_non_finite(sub, f"{path}[{index}]", issues, resource_type)
 
 
+def _validate_substance_resolution(
+    doc: Mapping[str, Any],
+    issues: list[ValidationIssue],
+    resource_type: str | None,
+) -> None:
+    """Warn when an electrolyte component names a substance the vocabulary
+    cannot resolve. Never an error: honest records with obscure or proprietary
+    substances save fine; the warning is what makes the unidentified backlog
+    visible (readiness panel counts it). A resolvable-but-unstamped name is NOT
+    flagged - enrichment sweeps can stamp it mechanically at any time."""
+    from battinfo.substances import AmbiguousSubstanceError, resolve, suggest
+
+    def _check(component: Any, slot: str, path: str) -> None:
+        if not isinstance(component, Mapping):
+            return
+        name = component.get("name")
+        if not isinstance(name, str) or not name.strip() or component.get("inchikey"):
+            return
+        try:
+            resolved = resolve(name, slot=slot)
+        except AmbiguousSubstanceError:
+            _append_issue(
+                issues,
+                code="semantic.substance_ambiguous",
+                severity="warning",
+                path=path,
+                message=f"substance name '{name}' is ambiguous even for slot '{slot}'.",
+                resource_type=resource_type,
+            )
+            return
+        if resolved is None:
+            hint = suggest(name)
+            hint_text = f" Did you mean: {', '.join(hint)}?" if hint else ""
+            _append_issue(
+                issues,
+                code="semantic.substance_unresolved",
+                severity="warning",
+                path=path,
+                message=(
+                    f"substance '{name}' is not in the substances vocabulary; the record "
+                    f"saves without chemical identity (no InChIKey).{hint_text}"
+                ),
+                resource_type=resource_type,
+            )
+
+    electrolyte_bodies: list[tuple[Mapping[str, Any], str]] = []
+    spec_body = doc.get("electrolyte_spec")
+    if isinstance(spec_body, Mapping):
+        electrolyte_bodies.append((spec_body, "electrolyte_spec"))
+    cell_body = doc.get("cell_spec")
+    if isinstance(cell_body, Mapping) and isinstance(cell_body.get("electrolyte"), Mapping):
+        electrolyte_bodies.append((cell_body["electrolyte"], "cell_spec.electrolyte"))
+
+    for body, prefix in electrolyte_bodies:
+        _check(body.get("salt"), "salt", f"{prefix}.salt")
+        mixture = body.get("solvent_mixture")
+        if isinstance(mixture, Mapping):
+            for idx, comp in enumerate(mixture.get("component") or []):
+                _check(comp, "solvent", f"{prefix}.solvent_mixture.component[{idx}]")
+        for idx, comp in enumerate(body.get("additive") or []):
+            _check(comp, "additive", f"{prefix}.additive[{idx}]")
+
+
 def validate_semantic_report(
     doc: dict[str, Any],
     *,
@@ -1072,6 +1135,7 @@ def validate_semantic_report(
     _validate_material_kind(doc, issues, resource_type, hard_issue_severity)
     _validate_electrode_kind(doc, issues, resource_type, hard_issue_severity)
     _validate_size_code(doc, issues, resource_type, hard_issue_severity)
+    _validate_substance_resolution(doc, issues, resource_type)
     # Non-finite numerics are invalid anywhere in the record (RFC 8259); walk the
     # whole doc so nested quantities (electrode coating, etc.) are caught, not just
     # flat specs.

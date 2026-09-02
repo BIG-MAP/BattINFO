@@ -1,0 +1,74 @@
+symbol,pubchem_cid,roles,cation_ref,anion_ref,status,note
+AN,6342,,,,verified,acetonitrile (OEDB)
+Ac,180,,,,verified,acetone (OEDB)
+Ac2O,7918,,,,verified,acetic anhydride (OEDB)
+BC,10080377,,,,verified,"2,3-butylene carbonate (OEDB)"
+DEC,7766,,,,verified,diethyl carbonate (OEDB)
+DMC,12021,,,,verified,dimethyl carbonate (OEDB)
+DMI,6661,,,,verified,"1,3-dimethyl-2-imidazolidinone (OEDB)"
+DMSO,679,,,,verified,dimethyl sulfoxide (OEDB)
+EA,8857,,,,verified,ethyl acetate (OEDB)
+EB,7762,,,,verified,ethyl butyrate (OEDB)
+EC,7303,solvent|additive,,,verified,ethylene carbonate (OEDB); collides with ethyl cellulose (binder)
+EMC,522046,,,,verified,ethyl methyl carbonate (OEDB)
+EP,7749,,,,verified,ethyl propionate (OEDB)
+FAN,10420,,,,verified,fluoroacetonitrile (OEDB)
+FEA,10016,,,,verified,2-fluoroethyl acetate (OEDB)
+FEC,2769656,solvent|additive,,,verified,fluoroethylene carbonate (OEDB)
+FEMC,17761042,,,,verified,"methyl 2,2,2-trifluoroethyl carbonate (OEDB)"
+GBL,7302,,,,verified,gamma-butyrolactone (OEDB)
+GN,10994,,,,verified,glutaronitrile (OEDB)
+MA,6584,,,,verified,methyl acetate (battery convention; NB OEDB's 'MA' is methyl acetoacetate = MAA)
+MAA,7757,,,,verified,methyl acetoacetate; OEDB uses symbol 'MA' for this
+MB,12180,,,,verified,methyl butyrate (OEDB)
+MP,11124,,,,verified,methyl propionate (battery convention; NB OEDB's 'MP' is methyl pyruvate = MPyr)
+MPyr,11748,,,,verified,methyl pyruvate; OEDB uses symbol 'MP' for this
+PC,7924,solvent,,,verified,"propylene carbonate (OEDB); 'PC' also = polycarbonate (polymer, material_map, not here)"
+SN,8062,solvent|plasticizer|host,,,verified,succinonitrile; also plastic-crystal matrix (OEDB)
+TEP,6535,,,,verified,triethyl phosphate (OEDB)
+TMP,10541,,,,verified,trimethyl phosphate (OEDB)
+DME,8071,,,,verified,"1,2-dimethoxyethane (monoglyme)"
+DOL,12586,,,,verified,"1,3-dioxolane"
+G2,8150,,,,verified,diglyme
+G4,8925,,,,verified,tetraglyme
+THF,8028,,,,verified,tetrahydrofuran
+BETI-,4067273,,,,verified,bis(pentafluoroethylsulfonyl)imide (OEDB)
+BF4-,26255,,,,verified,tetrafluoroborate (OEDB)
+ClO4-,123351,,,,verified,perchlorate (OEDB)
+DFOB-,58152809,,,,verified,difluoro(oxalato)borate (OEDB)
+FSI-,5257893,,,,verified,bis(fluorosulfonyl)imide (OEDB)
+OTf-,2758875,,,,verified,triflate (OEDB)
+PF6-,9886,,,,verified,hexafluorophosphate (OEDB)
+TFA-,84468,,,,verified,trifluoroacetate (OEDB)
+TFSI-,4176748,,,,verified,"bis(trifluoromethanesulfonyl)imide anion; PubChem title on this CID is a mislabeled salt name, formula/SMILES confirm the anion"
+BOB-,11275562,,,,verified,bis(oxalato)borate
+OH-,961,,,,verified,hydroxide
+Li+,28486,,,,verified,lithium cation
+Na+,923,,,,verified,sodium cation
+K+,813,,,,verified,potassium cation
+EMIM+,174076,,,,verified,1-ethyl-3-methylimidazolium
+BMIM+,2734162,,,,verified,1-butyl-3-methylimidazolium
+PYR14+,11009533,,,,verified,1-butyl-1-methylpyrrolidinium
+LiPF6,23688915,,Li+,PF6-,verified,lithium hexafluorophosphate
+LiTFSI,3816071,,Li+,TFSI-,verified,"lithium bis(trifluoromethanesulfonyl)imide, ionic-form entry"
+LiFSI,86277430,,Li+,FSI-,verified,lithium bis(fluorosulfonyl)imide
+LiBF4,4298216,,Li+,BF4-,verified,lithium tetrafluoroborate
+LiClO4,23665649,,Li+,ClO4-,verified,lithium perchlorate
+LiBOB,23677815,,Li+,BOB-,verified,lithium bis(oxalato)borate; salt or additive
+LiDFOB,91810277,,Li+,DFOB-,verified,lithium difluoro(oxalato)borate; salt or additive
+LiOTf,3664839,,Li+,OTf-,verified,lithium triflate
+NaPF6,5147921,,Na+,PF6-,verified,sodium hexafluorophosphate
+NaClO4,522606,,Na+,ClO4-,verified,sodium perchlorate
+KOH,14797,,K+,OH-,verified,potassium hydroxide
+H2SO4,1118,,,,verified,sulfuric acid; no simple 1:1 ion decomposition
+ZnSO4,24424,,,,verified,zinc sulfate
+VC,13385,,,,verified,vinylene carbonate
+VEC,2735038,,,,verified,4-vinyl ethylene carbonate
+PS,14264,additive,,,verified,"1,3-propane sultone; 'PS' also = polystyrene (polymer, not here)"
+DTD,14075,,,,verified,"1,3,2-dioxathiolane 2,2-dioxide (ethylene sulfate)"
+TTE,2776662,diluent,,,verified,"1,1,2,2-tetrafluoroethyl 2,2,3,3-tetrafluoropropyl ether; LHCE diluent"
+BTFE,9528,diluent,,,verified,"bis(2,2,2-trifluoroethyl) ether (aka flurothyl); LHCE diluent"
+EMIM-TFSI,11731903,solvent,EMIM+,TFSI-,verified,1-ethyl-3-methylimidazolium TFSI
+BMIM-BF4,2734178,solvent,BMIM+,BF4-,verified,1-butyl-3-methylimidazolium BF4
+PYR14-TFSI,11048104,solvent,PYR14+,TFSI-,verified,1-butyl-1-methylpyrrolidinium TFSI
+EC,,binder,,,label_basis,"ethyl cellulose; polymer, identity_basis label, disambiguated from ethylene carbonate by role"

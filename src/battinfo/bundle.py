@@ -930,6 +930,11 @@ class MaterialComponent(BaseModel):
     supplier: str | None = None
     product_id: str | None = None
     molecular_formula: str | None = None
+    label: str | None = Field(default=None, description="Preferred substance name stamped by the resolver (e.g. 'ethylene carbonate' for name 'EC').")
+    inchikey: str | None = Field(default=None, pattern=r"^[A-Z]{14}-[A-Z]{10}-[A-Z]$", description="Standard InChIKey — canonical chemical identity, stamped from the substances vocabulary.")
+    pubchem_cid: int | None = Field(default=None, ge=1, description="PubChem Compound ID crosswalk.")
+    cas_number: str | None = Field(default=None, pattern=r"^\d{2,7}-\d{2}-\d$", description="CAS Registry Number crosswalk.")
+    smiles: str | None = Field(default=None, description="Connectivity SMILES payload; identity lives in inchikey.")
     property: dict[str, Any] = Field(default_factory=dict)
     comment: str | None = None
 
@@ -1072,6 +1077,11 @@ class Salt(BaseModel):
     manufacturer: str | None = None
     supplier: str | None = None
     product_id: str | None = None
+    label: str | None = Field(default=None, description="Preferred substance name stamped by the resolver (e.g. 'lithium hexafluorophosphate' for name 'LiPF6').")
+    inchikey: str | None = Field(default=None, pattern=r"^[A-Z]{14}-[A-Z]{10}-[A-Z]$", description="Standard InChIKey — canonical chemical identity, stamped from the substances vocabulary.")
+    pubchem_cid: int | None = Field(default=None, ge=1, description="PubChem Compound ID crosswalk.")
+    cas_number: str | None = Field(default=None, pattern=r"^\d{2,7}-\d{2}-\d$", description="CAS Registry Number crosswalk.")
+    smiles: str | None = Field(default=None, description="Connectivity SMILES (dot-disconnected ionic form); identity lives in inchikey.")
     property: dict[str, Any] = Field(default_factory=dict)
     comment: str | None = None
 

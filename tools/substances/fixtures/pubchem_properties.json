@@ -1,0 +1,654 @@
+{
+ "PropertyTable": {
+  "Properties": [
+   {
+    "CID": 180,
+    "MolecularFormula": "C3H6O",
+    "MolecularWeight": "58.08",
+    "ConnectivitySMILES": "CC(=O)C",
+    "InChI": "InChI=1S/C3H6O/c1-3(2)4/h1-2H3",
+    "InChIKey": "CSCPPACGZOOCGX-UHFFFAOYSA-N",
+    "Title": "Acetone"
+   },
+   {
+    "CID": 679,
+    "MolecularFormula": "C2H6OS",
+    "MolecularWeight": "78.14",
+    "ConnectivitySMILES": "CS(=O)C",
+    "InChI": "InChI=1S/C2H6OS/c1-4(2)3/h1-2H3",
+    "InChIKey": "IAZDPXIOMUYVGZ-UHFFFAOYSA-N",
+    "Title": "Dimethyl Sulfoxide"
+   },
+   {
+    "CID": 813,
+    "MolecularFormula": "K+",
+    "MolecularWeight": "39.0983",
+    "ConnectivitySMILES": "[K+]",
+    "InChI": "InChI=1S/K/q+1",
+    "InChIKey": "NPYPAHLBTDXSSS-UHFFFAOYSA-N",
+    "Title": "Potassium Cation"
+   },
+   {
+    "CID": 923,
+    "MolecularFormula": "Na+",
+    "MolecularWeight": "22.9897693",
+    "ConnectivitySMILES": "[Na+]",
+    "InChI": "InChI=1S/Na/q+1",
+    "InChIKey": "FKNQFGJONOIPTF-UHFFFAOYSA-N",
+    "Title": "Sodium ion"
+   },
+   {
+    "CID": 961,
+    "MolecularFormula": "HO-",
+    "MolecularWeight": "17.007",
+    "ConnectivitySMILES": "[OH-]",
+    "InChI": "InChI=1S/H2O/h1H2/p-1",
+    "InChIKey": "XLYOFNOQVPJJNP-UHFFFAOYSA-M",
+    "Title": "Hydroxide"
+   },
+   {
+    "CID": 1118,
+    "MolecularFormula": "H2O4S",
+    "MolecularWeight": "98.08",
+    "ConnectivitySMILES": "OS(=O)(=O)O",
+    "InChI": "InChI=1S/H2O4S/c1-5(2,3)4/h(H2,1,2,3,4)",
+    "InChIKey": "QAOWNCQODCNURD-UHFFFAOYSA-N",
+    "Title": "Sulfuric Acid"
+   },
+   {
+    "CID": 6342,
+    "MolecularFormula": "C2H3N",
+    "MolecularWeight": "41.05",
+    "ConnectivitySMILES": "CC#N",
+    "InChI": "InChI=1S/C2H3N/c1-2-3/h1H3",
+    "InChIKey": "WEVYAHXRMPXWCK-UHFFFAOYSA-N",
+    "Title": "Acetonitrile"
+   },
+   {
+    "CID": 6535,
+    "MolecularFormula": "C6H15O4P",
+    "MolecularWeight": "182.15",
+    "ConnectivitySMILES": "CCOP(=O)(OCC)OCC",
+    "InChI": "InChI=1S/C6H15O4P/c1-4-8-11(7,9-5-2)10-6-3/h4-6H2,1-3H3",
+    "InChIKey": "DQWPFSLDHJDLRL-UHFFFAOYSA-N",
+    "Title": "Triethyl Phosphate"
+   },
+   {
+    "CID": 6584,
+    "MolecularFormula": "C3H6O2",
+    "MolecularWeight": "74.08",
+    "ConnectivitySMILES": "CC(=O)OC",
+    "InChI": "InChI=1S/C3H6O2/c1-3(4)5-2/h1-2H3",
+    "InChIKey": "KXKVLQRXCPHEJC-UHFFFAOYSA-N",
+    "Title": "Methyl Acetate"
+   },
+   {
+    "CID": 6661,
+    "MolecularFormula": "C5H10N2O",
+    "MolecularWeight": "114.15",
+    "ConnectivitySMILES": "CN1CCN(C1=O)C",
+    "InChI": "InChI=1S/C5H10N2O/c1-6-3-4-7(2)5(6)8/h3-4H2,1-2H3",
+    "InChIKey": "CYSGHNMQYZDMIA-UHFFFAOYSA-N",
+    "Title": "1,3-Dimethyl-2-imidazolidinone"
+   },
+   {
+    "CID": 7302,
+    "MolecularFormula": "C4H6O2",
+    "MolecularWeight": "86.09",
+    "ConnectivitySMILES": "C1CC(=O)OC1",
+    "InChI": "InChI=1S/C4H6O2/c5-4-2-1-3-6-4/h1-3H2",
+    "InChIKey": "YEJRWHAVMIAJKC-UHFFFAOYSA-N",
+    "Title": "Gamma-Butyrolactone"
+   },
+   {
+    "CID": 7303,
+    "MolecularFormula": "C3H4O3",
+    "MolecularWeight": "88.06",
+    "ConnectivitySMILES": "C1COC(=O)O1",
+    "InChI": "InChI=1S/C3H4O3/c4-3-5-1-2-6-3/h1-2H2",
+    "InChIKey": "KMTRUDSVKNLOMY-UHFFFAOYSA-N",
+    "Title": "Ethylene carbonate"
+   },
+   {
+    "CID": 7749,
+    "MolecularFormula": "C5H10O2",
+    "MolecularWeight": "102.13",
+    "ConnectivitySMILES": "CCC(=O)OCC",
+    "InChI": "InChI=1S/C5H10O2/c1-3-5(6)7-4-2/h3-4H2,1-2H3",
+    "InChIKey": "FKRCODPIKNYEAC-UHFFFAOYSA-N",
+    "Title": "Ethyl Propionate"
+   },
+   {
+    "CID": 7757,
+    "MolecularFormula": "C5H8O3",
+    "MolecularWeight": "116.11",
+    "ConnectivitySMILES": "CC(=O)CC(=O)OC",
+    "InChI": "InChI=1S/C5H8O3/c1-4(6)3-5(7)8-2/h3H2,1-2H3",
+    "InChIKey": "WRQNANDWMGAFTP-UHFFFAOYSA-N",
+    "Title": "Methyl acetoacetate"
+   },
+   {
+    "CID": 7762,
+    "MolecularFormula": "C6H12O2",
+    "MolecularWeight": "116.16",
+    "ConnectivitySMILES": "CCCC(=O)OCC",
+    "InChI": "InChI=1S/C6H12O2/c1-3-5-6(7)8-4-2/h3-5H2,1-2H3",
+    "InChIKey": "OBNCKNCVKJNDBV-UHFFFAOYSA-N",
+    "Title": "Ethyl butyrate"
+   },
+   {
+    "CID": 7766,
+    "MolecularFormula": "C5H10O3",
+    "MolecularWeight": "118.13",
+    "ConnectivitySMILES": "CCOC(=O)OCC",
+    "InChI": "InChI=1S/C5H10O3/c1-3-7-5(6)8-4-2/h3-4H2,1-2H3",
+    "InChIKey": "OIFBSDVPJOWBCH-UHFFFAOYSA-N",
+    "Title": "Diethyl Carbonate"
+   },
+   {
+    "CID": 7918,
+    "MolecularFormula": "C4H6O3",
+    "MolecularWeight": "102.09",
+    "ConnectivitySMILES": "CC(=O)OC(=O)C",
+    "InChI": "InChI=1S/C4H6O3/c1-3(5)7-4(2)6/h1-2H3",
+    "InChIKey": "WFDIJRYMOXRFFG-UHFFFAOYSA-N",
+    "Title": "Acetic Anhydride"
+   },
+   {
+    "CID": 7924,
+    "MolecularFormula": "C4H6O3",
+    "MolecularWeight": "102.09",
+    "ConnectivitySMILES": "CC1COC(=O)O1",
+    "InChI": "InChI=1S/C4H6O3/c1-3-2-6-4(5)7-3/h3H,2H2,1H3",
+    "InChIKey": "RUOJZAUFBMNUDX-UHFFFAOYSA-N",
+    "Title": "Propylene Carbonate"
+   },
+   {
+    "CID": 8028,
+    "MolecularFormula": "C4H8O",
+    "MolecularWeight": "72.11",
+    "ConnectivitySMILES": "C1CCOC1",
+    "InChI": "InChI=1S/C4H8O/c1-2-4-5-3-1/h1-4H2",
+    "InChIKey": "WYURNTSHIVDZCO-UHFFFAOYSA-N",
+    "Title": "Tetrahydrofuran"
+   },
+   {
+    "CID": 8062,
+    "MolecularFormula": "C4H4N2",
+    "MolecularWeight": "80.09",
+    "ConnectivitySMILES": "C(CC#N)C#N",
+    "InChI": "InChI=1S/C4H4N2/c5-3-1-2-4-6/h1-2H2",
+    "InChIKey": "IAHFWCOBPZCAEA-UHFFFAOYSA-N",
+    "Title": "Succinonitrile"
+   },
+   {
+    "CID": 8071,
+    "MolecularFormula": "C4H10O2",
+    "MolecularWeight": "90.12",
+    "ConnectivitySMILES": "COCCOC",
+    "InChI": "InChI=1S/C4H10O2/c1-5-3-4-6-2/h3-4H2,1-2H3",
+    "InChIKey": "XTHFKEDIFFGKHM-UHFFFAOYSA-N",
+    "Title": "1,2-Dimethoxyethane"
+   },
+   {
+    "CID": 8150,
+    "MolecularFormula": "C6H14O3",
+    "MolecularWeight": "134.17",
+    "ConnectivitySMILES": "COCCOCCOC",
+    "InChI": "InChI=1S/C6H14O3/c1-7-3-5-9-6-4-8-2/h3-6H2,1-2H3",
+    "InChIKey": "SBZXBUIDTXKZTM-UHFFFAOYSA-N",
+    "Title": "Diglyme"
+   },
+   {
+    "CID": 8857,
+    "MolecularFormula": "C4H8O2",
+    "MolecularWeight": "88.11",
+    "ConnectivitySMILES": "CCOC(=O)C",
+    "InChI": "InChI=1S/C4H8O2/c1-3-6-4(2)5/h3H2,1-2H3",
+    "InChIKey": "XEKOWRVHYACXOJ-UHFFFAOYSA-N",
+    "Title": "Ethyl Acetate"
+   },
+   {
+    "CID": 8925,
+    "MolecularFormula": "C10H22O5",
+    "MolecularWeight": "222.28",
+    "ConnectivitySMILES": "COCCOCCOCCOCCOC",
+    "InChI": "InChI=1S/C10H22O5/c1-11-3-5-13-7-9-15-10-8-14-6-4-12-2/h3-10H2,1-2H3",
+    "InChIKey": "ZUHZGEOKBKGPSW-UHFFFAOYSA-N",
+    "Title": "Tetraglyme"
+   },
+   {
+    "CID": 9528,
+    "MolecularFormula": "C4H4F6O",
+    "MolecularWeight": "182.06",
+    "ConnectivitySMILES": "C(C(F)(F)F)OCC(F)(F)F",
+    "InChI": "InChI=1S/C4H4F6O/c5-3(6,7)1-11-2-4(8,9)10/h1-2H2",
+    "InChIKey": "KGPPDNUWZNWPSI-UHFFFAOYSA-N",
+    "Title": "Flurothyl"
+   },
+   {
+    "CID": 9886,
+    "MolecularFormula": "F6P-",
+    "MolecularWeight": "144.9641810",
+    "ConnectivitySMILES": "F[P-](F)(F)(F)(F)F",
+    "InChI": "InChI=1S/F6P/c1-7(2,3,4,5)6/q-1",
+    "InChIKey": "LJQLCJWAZJINEB-UHFFFAOYSA-N",
+    "Title": "Hexafluorophosphate"
+   },
+   {
+    "CID": 10016,
+    "MolecularFormula": "C4H7FO2",
+    "MolecularWeight": "106.10",
+    "ConnectivitySMILES": "CC(=O)OCCF",
+    "InChI": "InChI=1S/C4H7FO2/c1-4(6)7-3-2-5/h2-3H2,1H3",
+    "InChIKey": "PVDYNYCZGYOXAF-UHFFFAOYSA-N",
+    "Title": "Ethanol, 2-fluoro-, 1-acetate"
+   },
+   {
+    "CID": 10420,
+    "MolecularFormula": "C2H2FN",
+    "MolecularWeight": "59.04",
+    "ConnectivitySMILES": "C(C#N)F",
+    "InChI": "InChI=1S/C2H2FN/c3-1-2-4/h1H2",
+    "InChIKey": "GNFVFPBRMLIKIM-UHFFFAOYSA-N",
+    "Title": "Acetonitrile, fluoro-"
+   },
+   {
+    "CID": 10541,
+    "MolecularFormula": "C3H9O4P",
+    "MolecularWeight": "140.07",
+    "ConnectivitySMILES": "COP(=O)(OC)OC",
+    "InChI": "InChI=1S/C3H9O4P/c1-5-8(4,6-2)7-3/h1-3H3",
+    "InChIKey": "WVLBCYQITXONBZ-UHFFFAOYSA-N",
+    "Title": "Trimethyl Phosphate"
+   },
+   {
+    "CID": 10994,
+    "MolecularFormula": "C5H6N2",
+    "MolecularWeight": "94.11",
+    "ConnectivitySMILES": "C(CC#N)CC#N",
+    "InChI": "InChI=1S/C5H6N2/c6-4-2-1-3-5-7/h1-3H2",
+    "InChIKey": "ZTOMUSMDRMJOTH-UHFFFAOYSA-N",
+    "Title": "Glutaronitrile"
+   },
+   {
+    "CID": 11124,
+    "MolecularFormula": "C4H8O2",
+    "MolecularWeight": "88.11",
+    "ConnectivitySMILES": "CCC(=O)OC",
+    "InChI": "InChI=1S/C4H8O2/c1-3-4(5)6-2/h3H2,1-2H3",
+    "InChIKey": "RJUFJBKOKNCXHH-UHFFFAOYSA-N",
+    "Title": "Methyl propionate"
+   },
+   {
+    "CID": 11748,
+    "MolecularFormula": "C4H6O3",
+    "MolecularWeight": "102.09",
+    "ConnectivitySMILES": "CC(=O)C(=O)OC",
+    "InChI": "InChI=1S/C4H6O3/c1-3(5)4(6)7-2/h1-2H3",
+    "InChIKey": "CWKLZLBVOJRSOM-UHFFFAOYSA-N",
+    "Title": "Methyl pyruvate"
+   },
+   {
+    "CID": 12021,
+    "MolecularFormula": "C3H6O3",
+    "MolecularWeight": "90.08",
+    "ConnectivitySMILES": "COC(=O)OC",
+    "InChI": "InChI=1S/C3H6O3/c1-5-3(4)6-2/h1-2H3",
+    "InChIKey": "IEJIGPNLZYLLBP-UHFFFAOYSA-N",
+    "Title": "Dimethyl Carbonate"
+   },
+   {
+    "CID": 12180,
+    "MolecularFormula": "C5H10O2",
+    "MolecularWeight": "102.13",
+    "ConnectivitySMILES": "CCCC(=O)OC",
+    "InChI": "InChI=1S/C5H10O2/c1-3-4-5(6)7-2/h3-4H2,1-2H3",
+    "InChIKey": "UUIQMZJEGPQKFD-UHFFFAOYSA-N",
+    "Title": "Methyl butyrate"
+   },
+   {
+    "CID": 12586,
+    "MolecularFormula": "C3H6O2",
+    "MolecularWeight": "74.08",
+    "ConnectivitySMILES": "C1COCO1",
+    "InChI": "InChI=1S/C3H6O2/c1-2-5-3-4-1/h1-3H2",
+    "InChIKey": "WNXJIVFYUVYPPR-UHFFFAOYSA-N",
+    "Title": "1,3-Dioxolane"
+   },
+   {
+    "CID": 13385,
+    "MolecularFormula": "C3H2O3",
+    "MolecularWeight": "86.05",
+    "ConnectivitySMILES": "C1=COC(=O)O1",
+    "InChI": "InChI=1S/C3H2O3/c4-3-5-1-2-6-3/h1-2H",
+    "InChIKey": "VAYTZRYEBVHVLE-UHFFFAOYSA-N",
+    "Title": "Vinylene carbonate"
+   },
+   {
+    "CID": 14075,
+    "MolecularFormula": "C2H4O4S",
+    "MolecularWeight": "124.12",
+    "ConnectivitySMILES": "C1COS(=O)(=O)O1",
+    "InChI": "InChI=1S/C2H4O4S/c3-7(4)5-1-2-6-7/h1-2H2",
+    "InChIKey": "ZPFAVCIQZKRBGF-UHFFFAOYSA-N",
+    "Title": "1,3,2-Dioxathiolane, 2,2-dioxide"
+   },
+   {
+    "CID": 14264,
+    "MolecularFormula": "C3H6O3S",
+    "MolecularWeight": "122.15",
+    "ConnectivitySMILES": "C1COS(=O)(=O)C1",
+    "InChI": "InChI=1S/C3H6O3S/c4-7(5)3-1-2-6-7/h1-3H2",
+    "InChIKey": "FSSPGSAQUIYDCN-UHFFFAOYSA-N",
+    "Title": "Propane sultone"
+   },
+   {
+    "CID": 14797,
+    "MolecularFormula": "HKO",
+    "MolecularWeight": "56.106",
+    "ConnectivitySMILES": "[OH-].[K+]",
+    "InChI": "InChI=1S/K.H2O/h;1H2/q+1;/p-1",
+    "InChIKey": "KWYUFKZDYYNOTN-UHFFFAOYSA-M",
+    "Title": "Potassium Hydroxide"
+   },
+   {
+    "CID": 24424,
+    "MolecularFormula": "O4SZn",
+    "MolecularWeight": "161.4",
+    "ConnectivitySMILES": "[O-]S(=O)(=O)[O-].[Zn+2]",
+    "InChI": "InChI=1S/H2O4S.Zn/c1-5(2,3)4;/h(H2,1,2,3,4);/q;+2/p-2",
+    "InChIKey": "NWONKYPBYAMBJT-UHFFFAOYSA-L",
+    "Title": "Zinc Sulfate"
+   },
+   {
+    "CID": 26255,
+    "MolecularFormula": "BF4-",
+    "MolecularWeight": "86.81",
+    "ConnectivitySMILES": "[B-](F)(F)(F)F",
+    "InChI": "InChI=1S/BF4/c2-1(3,4)5/q-1",
+    "InChIKey": "ODGCEQLVLXJUCC-UHFFFAOYSA-N",
+    "Title": "Tetrafluoroborate"
+   },
+   {
+    "CID": 28486,
+    "MolecularFormula": "Li+",
+    "MolecularWeight": "7.0",
+    "ConnectivitySMILES": "[Li+]",
+    "InChI": "InChI=1S/Li/q+1",
+    "InChIKey": "HBBGRARXTFLTSG-UHFFFAOYSA-N",
+    "Title": "Lithium ion"
+   },
+   {
+    "CID": 84468,
+    "MolecularFormula": "C2F3O2-",
+    "MolecularWeight": "113.02",
+    "ConnectivitySMILES": "C(=O)(C(F)(F)F)[O-]",
+    "InChI": "InChI=1S/C2HF3O2/c3-2(4,5)1(6)7/h(H,6,7)/p-1",
+    "InChIKey": "DTQVDTLACAAQTR-UHFFFAOYSA-M",
+    "Title": "Trifluoroacetate"
+   },
+   {
+    "CID": 123351,
+    "MolecularFormula": "ClO4-",
+    "MolecularWeight": "99.45",
+    "ConnectivitySMILES": "[O-]Cl(=O)(=O)=O",
+    "InChI": "InChI=1S/ClHO4/c2-1(3,4)5/h(H,2,3,4,5)/p-1",
+    "InChIKey": "VLTRZXGMWDSKGL-UHFFFAOYSA-M",
+    "Title": "Perchlorate"
+   },
+   {
+    "CID": 174076,
+    "MolecularFormula": "C6H11N2+",
+    "MolecularWeight": "111.17",
+    "ConnectivitySMILES": "CCN1C=C[N+](=C1)C",
+    "InChI": "InChI=1S/C6H11N2/c1-3-8-5-4-7(2)6-8/h4-6H,3H2,1-2H3/q+1",
+    "InChIKey": "NJMWOUFKYKNWDW-UHFFFAOYSA-N",
+    "Title": "1-Ethyl-3-methylimidazolium"
+   },
+   {
+    "CID": 522046,
+    "MolecularFormula": "C4H8O3",
+    "MolecularWeight": "104.10",
+    "ConnectivitySMILES": "CCOC(=O)OC",
+    "InChI": "InChI=1S/C4H8O3/c1-3-7-4(5)6-2/h3H2,1-2H3",
+    "InChIKey": "JBTWLSYIZRCDFO-UHFFFAOYSA-N",
+    "Title": "Ethyl methyl carbonate"
+   },
+   {
+    "CID": 522606,
+    "MolecularFormula": "ClNaO4",
+    "MolecularWeight": "122.44",
+    "ConnectivitySMILES": "[O-]Cl(=O)(=O)=O.[Na+]",
+    "InChI": "InChI=1S/ClHO4.Na/c2-1(3,4)5;/h(H,2,3,4,5);/q;+1/p-1",
+    "InChIKey": "BAZAXWOYCMUHIX-UHFFFAOYSA-M",
+    "Title": "Sodium Perchlorate"
+   },
+   {
+    "CID": 2734162,
+    "MolecularFormula": "C8H15N2+",
+    "MolecularWeight": "139.22",
+    "ConnectivitySMILES": "CCCCN1C=C[N+](=C1)C",
+    "InChI": "InChI=1S/C8H15N2/c1-3-4-5-10-7-6-9(2)8-10/h6-8H,3-5H2,1-2H3/q+1",
+    "InChIKey": "IQQRAVYLUAZUGX-UHFFFAOYSA-N",
+    "Title": "1-Butyl-3-methylimidazolium"
+   },
+   {
+    "CID": 2734178,
+    "MolecularFormula": "C8H15BF4N2",
+    "MolecularWeight": "226.03",
+    "ConnectivitySMILES": "[B-](F)(F)(F)F.CCCCN1C=C[N+](=C1)C",
+    "InChI": "InChI=1S/C8H15N2.BF4/c1-3-4-5-10-7-6-9(2)8-10;2-1(3,4)5/h6-8H,3-5H2,1-2H3;/q+1;-1",
+    "InChIKey": "LSBXQLQATZTAPE-UHFFFAOYSA-N",
+    "Title": "1-Butyl-3-methylimidazolium tetrafluoroborate"
+   },
+   {
+    "CID": 2735038,
+    "MolecularFormula": "C5H6O3",
+    "MolecularWeight": "114.10",
+    "ConnectivitySMILES": "C=CC1COC(=O)O1",
+    "InChI": "InChI=1S/C5H6O3/c1-2-4-3-7-5(6)8-4/h2,4H,1,3H2",
+    "InChIKey": "BJWMSGRKJIOCNR-UHFFFAOYSA-N",
+    "Title": "1,3-Dioxolan-2-one, 4-ethenyl-"
+   },
+   {
+    "CID": 2758875,
+    "MolecularFormula": "CF3O3S-",
+    "MolecularWeight": "149.07",
+    "ConnectivitySMILES": "C(F)(F)(F)S(=O)(=O)[O-]",
+    "InChI": "InChI=1S/CHF3O3S/c2-1(3,4)8(5,6)7/h(H,5,6,7)/p-1",
+    "InChIKey": "ITMCEJHCFYSIIV-UHFFFAOYSA-M",
+    "Title": "Trifluoromethanesulfonate"
+   },
+   {
+    "CID": 2769656,
+    "MolecularFormula": "C3H3FO3",
+    "MolecularWeight": "106.05",
+    "ConnectivitySMILES": "C1C(OC(=O)O1)F",
+    "InChI": "InChI=1S/C3H3FO3/c4-2-1-6-3(5)7-2/h2H,1H2",
+    "InChIKey": "SBLRHMKNNHXPHG-UHFFFAOYSA-N",
+    "Title": "1,3-Dioxolan-2-one, 4-fluoro-"
+   },
+   {
+    "CID": 2776662,
+    "MolecularFormula": "C5H4F8O",
+    "MolecularWeight": "232.07",
+    "ConnectivitySMILES": "C(C(C(F)F)(F)F)OC(C(F)F)(F)F",
+    "InChI": "InChI=1S/C5H4F8O/c6-2(7)4(10,11)1-14-5(12,13)3(8)9/h2-3H,1H2",
+    "InChIKey": "HCBRSIIGBBDDCD-UHFFFAOYSA-N",
+    "Title": "1,1,2,2-Tetrafluoro-3-(1,1,2,2-tetrafluoroethoxy)propane"
+   },
+   {
+    "CID": 3664839,
+    "MolecularFormula": "CF3LiO3S",
+    "MolecularWeight": "156.0",
+    "ConnectivitySMILES": "[Li+].C(F)(F)(F)S(=O)(=O)[O-]",
+    "InChI": "InChI=1S/CHF3O3S.Li/c2-1(3,4)8(5,6)7;/h(H,5,6,7);/q;+1/p-1",
+    "InChIKey": "MCVFFRWZNYZUIJ-UHFFFAOYSA-M",
+    "Title": "Trifluoromethanesulfonic acid, lithium salt"
+   },
+   {
+    "CID": 3816071,
+    "MolecularFormula": "C2F6LiNO4S2",
+    "MolecularWeight": "287.1",
+    "ConnectivitySMILES": "[Li+].C(F)(F)(F)S(=O)(=O)[N-]S(=O)(=O)C(F)(F)F",
+    "InChI": "InChI=1S/C2F6NO4S2.Li/c3-1(4,5)14(10,11)9-15(12,13)2(6,7)8;/q-1;+1",
+    "InChIKey": "QSZMZKBZAYQGRS-UHFFFAOYSA-N",
+    "Title": "Lithium bis((trifluoromethyl)sulfonyl)azanide"
+   },
+   {
+    "CID": 4067273,
+    "MolecularFormula": "C4F10NO4S2-",
+    "MolecularWeight": "380.2",
+    "ConnectivitySMILES": "C(C(F)(F)S(=O)(=O)[N-]S(=O)(=O)C(C(F)(F)F)(F)F)(F)(F)F",
+    "InChI": "InChI=1S/C4F10NO4S2/c5-1(6,7)3(11,12)20(16,17)15-21(18,19)4(13,14)2(8,9)10/q-1",
+    "InChIKey": "SLSPYQCCSCAKIB-UHFFFAOYSA-N",
+    "Title": "Bis(perfluoroethylsulfonyl)imide"
+   },
+   {
+    "CID": 4176748,
+    "MolecularFormula": "C2F6NO4S2-",
+    "MolecularWeight": "280.15",
+    "ConnectivitySMILES": "C(F)(F)(F)S(=O)(=O)[N-]S(=O)(=O)C(F)(F)F",
+    "InChI": "InChI=1S/C2F6NO4S2/c3-1(4,5)14(10,11)9-15(12,13)2(6,7)8/q-1",
+    "InChIKey": "NHHWJSXMTZIPES-UHFFFAOYSA-N",
+    "Title": "N-Propyl-Methyl Piperidinium Bis(trifluoroMethylsulfonyl)Imide"
+   },
+   {
+    "CID": 4298216,
+    "MolecularFormula": "BF4Li",
+    "MolecularWeight": "93.8",
+    "ConnectivitySMILES": "[Li+].[B-](F)(F)(F)F",
+    "InChI": "InChI=1S/BF4.Li/c2-1(3,4)5;/q-1;+1",
+    "InChIKey": "UFXJWFBILHTTET-UHFFFAOYSA-N",
+    "Title": "Lithium tetrafluoroborate"
+   },
+   {
+    "CID": 5147921,
+    "MolecularFormula": "F6NaP",
+    "MolecularWeight": "167.9539502",
+    "ConnectivitySMILES": "F[P-](F)(F)(F)(F)F.[Na+]",
+    "InChI": "InChI=1S/F6P.Na/c1-7(2,3,4,5)6;/q-1;+1",
+    "InChIKey": "KMADQUOCJBLXRP-UHFFFAOYSA-N",
+    "Title": "Sodium hexafluorophosphate"
+   },
+   {
+    "CID": 5257893,
+    "MolecularFormula": "F2NO4S2-",
+    "MolecularWeight": "180.14",
+    "ConnectivitySMILES": "[N-](S(=O)(=O)F)S(=O)(=O)F",
+    "InChI": "InChI=1S/F2NO4S2/c1-8(4,5)3-9(2,6)7/q-1",
+    "InChIKey": "NVIANCROYQGROD-UHFFFAOYSA-N",
+    "Title": "Bis(fluorosulfonyl)azanide"
+   },
+   {
+    "CID": 10080377,
+    "MolecularFormula": "C5H8O3",
+    "MolecularWeight": "116.11",
+    "ConnectivitySMILES": "CC1C(OC(=O)O1)C",
+    "InChI": "InChI=1S/C5H8O3/c1-3-4(2)8-5(6)7-3/h3-4H,1-2H3/t3-,4-/m0/s1",
+    "InChIKey": "LWLOKSXSAUHTJO-IMJSIDKUSA-N",
+    "Title": "Trans-2,3-Butylene carbonate"
+   },
+   {
+    "CID": 11009533,
+    "MolecularFormula": "C9H20N+",
+    "MolecularWeight": "142.26",
+    "ConnectivitySMILES": "CCCC[N+]1(CCCC1)C",
+    "InChI": "InChI=1S/C9H20N/c1-3-4-7-10(2)8-5-6-9-10/h3-9H2,1-2H3/q+1",
+    "InChIKey": "PXELHGDYRQLRQO-UHFFFAOYSA-N",
+    "Title": "1-Butyl-1-methylpyrrolidinium"
+   },
+   {
+    "CID": 11048104,
+    "MolecularFormula": "C11H20F6N2O4S2",
+    "MolecularWeight": "422.4",
+    "ConnectivitySMILES": "CCCC[N+]1(CCCC1)C.C(F)(F)(F)S(=O)(=O)[N-]S(=O)(=O)C(F)(F)F",
+    "InChI": "InChI=1S/C9H20N.C2F6NO4S2/c1-3-4-7-10(2)8-5-6-9-10;3-1(4,5)14(10,11)9-15(12,13)2(6,7)8/h3-9H2,1-2H3;/q+1;-1",
+    "InChIKey": "HSLXOARVFIWOQF-UHFFFAOYSA-N",
+    "Title": "1-Butyl-1-methylpyrrolidinium bis(trifluoromethylsulfonyl)imide"
+   },
+   {
+    "CID": 11275562,
+    "MolecularFormula": "C4BO8-",
+    "MolecularWeight": "186.85",
+    "ConnectivitySMILES": "[B-]12(OC(=O)C(=O)O1)OC(=O)C(=O)O2",
+    "InChI": "InChI=1S/C4BO8/c6-1-2(7)11-5(10-1)12-3(8)4(9)13-5/q-1",
+    "InChIKey": "IKHPCVLSMLIHHR-UHFFFAOYSA-N",
+    "Title": "Bis(oxalato)borate"
+   },
+   {
+    "CID": 11731903,
+    "MolecularFormula": "C8H11F6N3O4S2",
+    "MolecularWeight": "391.3",
+    "ConnectivitySMILES": "CCN1C=C[N+](=C1)C.C(F)(F)(F)S(=O)(=O)[N-]S(=O)(=O)C(F)(F)F",
+    "InChI": "InChI=1S/C6H11N2.C2F6NO4S2/c1-3-8-5-4-7(2)6-8;3-1(4,5)14(10,11)9-15(12,13)2(6,7)8/h4-6H,3H2,1-2H3;/q+1;-1",
+    "InChIKey": "LRESCJAINPKJTO-UHFFFAOYSA-N",
+    "Title": "1-Ethyl-3-methylimidazolium bis(trifluoromethanesulfonyl)imide"
+   },
+   {
+    "CID": 17761042,
+    "MolecularFormula": "C4H5F3O3",
+    "MolecularWeight": "158.08",
+    "ConnectivitySMILES": "COC(=O)OCC(F)(F)F",
+    "InChI": "InChI=1S/C4H5F3O3/c1-9-3(8)10-2-4(5,6)7/h2H2,1H3",
+    "InChIKey": "GBPVMEKUJUKTBA-UHFFFAOYSA-N",
+    "Title": "Methyl 2,2,2-trifluoroethyl carbonate"
+   },
+   {
+    "CID": 23665649,
+    "MolecularFormula": "ClLiO4",
+    "MolecularWeight": "106.4",
+    "ConnectivitySMILES": "[Li+].[O-]Cl(=O)(=O)=O",
+    "InChI": "InChI=1S/ClHO4.Li/c2-1(3,4)5;/h(H,2,3,4,5);/q;+1/p-1",
+    "InChIKey": "MHCFAGZWMAWTNR-UHFFFAOYSA-M",
+    "Title": "Lithium perchlorate"
+   },
+   {
+    "CID": 23677815,
+    "MolecularFormula": "C4BLiO8",
+    "MolecularWeight": "193.8",
+    "ConnectivitySMILES": "[Li+].[B-]12(OC(=O)C(=O)O1)OC(=O)C(=O)O2",
+    "InChI": "InChI=1S/C4BO8.Li/c6-1-2(7)11-5(10-1)12-3(8)4(9)13-5;/q-1;+1",
+    "InChIKey": "NVQAYVUCVASGDK-UHFFFAOYSA-N",
+    "Title": "Borate(1-), bis(ethanedioato(2-)-kappaO1,kappaO2)-, lithium (1:1), (T-4)-"
+   },
+   {
+    "CID": 23688915,
+    "MolecularFormula": "F6LiP",
+    "MolecularWeight": "151.9",
+    "ConnectivitySMILES": "[Li+].F[P-](F)(F)(F)(F)F",
+    "InChI": "InChI=1S/F6P.Li/c1-7(2,3,4,5)6;/q-1;+1",
+    "InChIKey": "AXPLOJNSKRXQPA-UHFFFAOYSA-N",
+    "Title": "Lithium hexafluorophosphate"
+   },
+   {
+    "CID": 58152809,
+    "MolecularFormula": "C2BF2O4-",
+    "MolecularWeight": "136.83",
+    "ConnectivitySMILES": "[B-]1(OC(=O)C(=O)O1)(F)F",
+    "InChI": "InChI=1S/C2BF2O4/c4-3(5)8-1(6)2(7)9-3/q-1",
+    "InChIKey": "CKSNGRFEJKNBMU-UHFFFAOYSA-N",
+    "Title": "2,2-Difluoro-1,3-dioxa-2-boranuidacyclopentane-4,5-dione"
+   },
+   {
+    "CID": 86277430,
+    "MolecularFormula": "F2LiNO4S2",
+    "MolecularWeight": "187.1",
+    "ConnectivitySMILES": "[Li+].[N-](S(=O)(=O)F)S(=O)(=O)F",
+    "InChI": "InChI=1S/F2NO4S2.Li/c1-8(4,5)3-9(2,6)7;/q-1;+1",
+    "InChIKey": "VDVLPSWVDYJFRW-UHFFFAOYSA-N",
+    "Title": "Lithium bis(fluorosulfonyl)imide"
+   },
+   {
+    "CID": 91810277,
+    "MolecularFormula": "C2BF2LiO4",
+    "MolecularWeight": "143.8",
+    "ConnectivitySMILES": "[Li+].[B-]1(OC(=O)C(=O)O1)(F)F",
+    "InChI": "InChI=1S/C2BF2O4.Li/c4-3(5)8-1(6)2(7)9-3;/q-1;+1",
+    "InChIKey": "MEDDCIKGDMDORY-UHFFFAOYSA-N",
+    "Title": "Lithium difluoro(oxalato)borate(1-)"
+   }
+  ]
+ }
+}

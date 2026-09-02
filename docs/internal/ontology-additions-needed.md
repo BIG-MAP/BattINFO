@@ -292,3 +292,17 @@ closure. None is caused by this repo; each is worked around locally.
   caveat existed to remove. Note that the **silicon-oxide** siblings
   (`LithiumIonSilicon{,Oxide,OxideGraphite,Graphite}Battery`, `SiliconOxideElectrode`,
   `SiliconOxideGraphiteElectrode`) are still deprecated — battinfo maps none of them.
+
+## Chemical-substance classes needed for the substances vocabulary (2026-08-29)
+
+The substance-vocabulary build (`tools/substances/build_vocab.py`, joining the seed against domain-chemical-substance 0.14.2-14-g3347cc2 by PubChem CID) found 39 of 72 structure-identified substances already have chemsub classes. The 33 below do not; each is listed as symbol | PubChem title | CID | InChIKey | CAS so upstream entries can be minted mechanically. The bare ions in particular block ion-typed JSON-LD emission (electrolyte plan E6).
+
+**Ions (10):** BETI- | Bis(pentafluoroethylsulfonyl)imide | 4067273 | SLSPYQCCSCAKIB-UHFFFAOYSA-N | 129318-46-3; BMIM+ | 1-Butyl-3-methylimidazolium | 2734162 | IQQRAVYLUAZUGX-UHFFFAOYSA-N | 80432-08-2; DFOB- | Difluoro(oxalato)borate | 58152809 | CKSNGRFEJKNBMU-UHFFFAOYSA-N | (none); EMIM+ | 1-Ethyl-3-methylimidazolium | 174076 | NJMWOUFKYKNWDW-UHFFFAOYSA-N | 65039-03-4; K+ | 813 | NPYPAHLBTDXSSS-UHFFFAOYSA-N | 24203-36-9; Li+ | 28486 | HBBGRARXTFLTSG-UHFFFAOYSA-N | 17341-24-1; Na+ | 923 | FKNQFGJONOIPTF-UHFFFAOYSA-N | 17341-25-2; OH- | 961 | XLYOFNOQVPJJNP-UHFFFAOYSA-M | 14280-30-9; PYR14+ | 1-Butyl-1-methylpyrrolidinium | 11009533 | PXELHGDYRQLRQO-UHFFFAOYSA-N | 223437-10-3; TFA- | Trifluoroacetate | 84468 | DTQVDTLACAAQTR-UHFFFAOYSA-M | 14477-72-6.
+
+**Solvents (16):** Ac2O acetic anhydride 7918 (108-24-7); BC 2,3-butylene carbonate 10080377 (51261-82-6); DMI 1,3-dimethyl-2-imidazolidinone 6661 (80-73-9); EB ethyl butyrate 7762 (105-54-4); EP ethyl propionate 7749 (105-37-3); FAN fluoroacetonitrile 10420 (503-20-8); FEA 2-fluoroethyl acetate 10016 (462-26-0); FEMC methyl 2,2,2-trifluoroethyl carbonate 17761042 (156783-95-8); GN glutaronitrile 10994 (544-13-8); MAA methyl acetoacetate 7757 (105-45-3); MB methyl butyrate 12180 (623-42-7); MP methyl propionate 11124 (554-12-1); MPyr methyl pyruvate 11748 (600-22-6); SN succinonitrile 8062 (110-61-2); TEP triethyl phosphate 6535 (78-40-0); TMP trimethyl phosphate 10541 (512-56-1).
+
+**Ionic liquids (3):** EMIM-TFSI 11731903 (174899-82-2); BMIM-BF4 2734178 (174501-65-6); PYR14-TFSI 11048104 (223437-11-4).
+
+**Additives/diluents (4):** PS 1,3-propane sultone 14264 (1120-71-4); DTD ethylene sulfate 14075 (1072-53-3); TTE 2776662 (16627-68-2); BTFE 9528 (333-36-8) — the last two are LHCE diluents.
+
+Full identifiers for every entry are in `src/battinfo/data/vocab/substances.json`; the generator re-emits this gap list on every run, so the section can be refreshed after each chemsub release.
