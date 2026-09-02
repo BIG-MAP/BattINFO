@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w3id.org/battinfo/schema/modules/components/construction.schema.json",
+  "title": "Cell Construction",
+  "description": "Internal construction: assembly type, layering, sheet counts, and electrode-assembly geometry.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "assembly_type": {
+      "type": "string",
+      "enum": [
+        "wound",
+        "stacked",
+        "other",
+        "unknown"
+      ],
+      "description": "How the electrode/separator stack is assembled."
+    },
+    "layering": {
+      "type": "string",
+      "enum": [
+        "single_layer",
+        "multilayer",
+        "not_applicable",
+        "unknown"
+      ],
+      "description": "Whether the stack is single- or multilayer."
+    },
+    "layer_count": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Number of layers in the stack."
+    },
+    "assembly_sequence": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "Ordered list of stack layers, outside in."
+    },
+    "comment": {
+      "type": "string",
+      "description": "Free-text construction comment."
+    },
+    "cathode_sheet_count": {
+      "type": "integer",
+      "description": "Number of positive-electrode sheets in the stack."
+    },
+    "anode_sheet_count": {
+      "type": "integer",
+      "description": "Number of negative-electrode sheets in the stack."
+    },
+    "separator_sheet_count": {
+      "type": "integer",
+      "description": "Number of separator sheets."
+    },
+    "winding_turns": {
+      "type": "number",
+      "description": "Number of winding turns (wound assemblies)."
+    },
+    "electrode_length": {
+      "$ref": "../common/quantity.schema.json",
+      "description": "Unrolled length of one electrode sheet in a wound assembly."
+    },
+    "jellyroll_volume": {
+      "$ref": "../common/quantity.schema.json",
+      "description": "Volume of the wound or stacked electrode assembly (jelly roll or stack)."
+    }
+  }
+}

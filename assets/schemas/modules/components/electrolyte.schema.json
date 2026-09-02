@@ -20,10 +20,12 @@
         "gel",
         "hybrid",
         "unknown"
-      ]
+      ],
+      "description": "Broad electrolyte class. organic: non-aqueous liquid electrolyte, including carbonate and ether systems; aqueous: water-based liquid electrolyte; ionic_liquid: room-temperature ionic liquid electrolyte; solid: inorganic or polymer solid electrolyte; gel: polymer-swollen liquid (gel polymer) electrolyte; hybrid: combination of two families; unknown: not stated."
     },
     "solvent_mixture": {
-      "$ref": "material-mixture.schema.json"
+      "$ref": "material-mixture.schema.json",
+      "description": "Solvent mixture, with each component's fraction under its property map: volume_fraction (v/v) or mass_fraction (w/w), one basis per mixture."
     },
     "salt": {
       "type": "object",
@@ -34,7 +36,8 @@
       "properties": {
         "name": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Salt name or formula (e.g. 'LiPF6')."
         },
         "material_spec_id": {
           "type": "string",
@@ -42,49 +45,62 @@
           "description": "Optional canonical IRI of a standalone material-spec for the salt."
         },
         "cation": {
-          "type": "string"
+          "type": "string",
+          "description": "Cation of the salt (e.g. 'Li+')."
         },
         "anion": {
-          "type": "string"
+          "type": "string",
+          "description": "Anion of the salt (e.g. 'PF6-')."
         },
         "manufacturer": {
-          "type": "string"
+          "type": "string",
+          "description": "Manufacturer of the item."
         },
         "supplier": {
-          "type": "string"
+          "type": "string",
+          "description": "Supplier or vendor the item was sourced from."
         },
         "product_id": {
-          "type": "string"
+          "type": "string",
+          "description": "Manufacturer or supplier product/grade identifier."
         },
         "property": {
-          "$ref": "../common/quantitative-properties.schema.json"
+          "$ref": "../common/quantitative-properties.schema.json",
+          "description": "Named quantity map of salt properties (e.g. concentration in mol/L; molality in mol/kg when given per solvent mass). See the property keys reference for the full list of recognised keys."
         },
         "comment": {
-          "type": "string"
+          "type": "string",
+          "description": "Free-text comment."
         }
-      }
+      },
+      "description": "Conducting salt (e.g. LiPF6), with concentration under its property map."
     },
     "additive": {
       "type": "array",
       "items": {
         "$ref": "material-component.schema.json"
-      }
+      },
+      "description": "Functional additives (e.g. VC, FEC). Each carries its mass_fraction of the total electrolyte under property, unless the component comment states another basis."
     },
     "manufacturer": {
-      "type": "string"
+      "type": "string",
+      "description": "Manufacturer of the item."
     },
     "supplier": {
-      "type": "string"
+      "type": "string",
+      "description": "Supplier or vendor the item was sourced from."
     },
     "product_id": {
-      "type": "string"
+      "type": "string",
+      "description": "Manufacturer or supplier product/grade identifier."
     },
     "property": {
-      "$ref": "../common/quantitative-properties.schema.json"
+      "$ref": "../common/quantitative-properties.schema.json",
+      "description": "Named quantity map of technical properties (snake_case key to value+unit quantity)."
     },
     "comment": {
-      "type": "string"
+      "type": "string",
+      "description": "Free-text comment."
     }
   }
 }
-

@@ -14,7 +14,8 @@
   "properties": {
     "schema_version": {
       "type": "string",
-      "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$",
+      "description": "Version of the record schema this document conforms to (semantic versioning); stamped by the library on save."
     },
     "material_spec": {
       "type": "object",
@@ -57,6 +58,8 @@
             "electrolyte_additive",
             "metal_electrode",
             "coating",
+            "thickener",
+            "dispersant",
             "other"
           ],
           "description": "Functional role of this material in a cell, used for querying."
@@ -87,28 +90,35 @@
           "description": "CAS Registry Number, when applicable."
         },
         "manufacturer": {
-          "$ref": "#/$defs/OrgRef"
+          "$ref": "#/$defs/OrgRef",
+          "description": "Manufacturer of the item."
         },
         "supplier": {
-          "$ref": "#/$defs/OrgRef"
+          "$ref": "#/$defs/OrgRef",
+          "description": "Supplier or vendor the item was sourced from."
         },
         "product_id": {
           "type": "string",
           "description": "Manufacturer / supplier product or grade identifier."
         },
         "composition": {
-          "$ref": "#/$defs/Composition"
+          "$ref": "#/$defs/Composition",
+          "description": "Structured derivation of this grade: base material, coatings, dopants, and constituents."
         },
         "property": {
-          "$ref": "modules/common/quantitative-properties.schema.json"
+          "$ref": "modules/common/quantitative-properties.schema.json",
+          "description": "Named quantity map of technical properties (snake_case key to value+unit quantity)."
         },
         "description": {
-          "type": "string"
+          "type": "string",
+          "description": "Longer free-text description of the material."
         },
         "comment": {
-          "type": "string"
+          "type": "string",
+          "description": "Free-text comment."
         }
-      }
+      },
+      "description": "The material grade being specified."
     },
     "provenance": {
       "type": "object",
@@ -127,13 +137,16 @@
             "literature",
             "manual",
             "other"
-          ]
+          ],
+          "description": "Kind of source this record was created from."
         },
         "source_name": {
-          "type": "string"
+          "type": "string",
+          "description": "Human-readable name of the source (document title, instrument, lab, or system)."
         },
         "source_file": {
-          "type": "string"
+          "type": "string",
+          "description": "Filename or path of the source file, when the record was derived from a file."
         },
         "source_url": {
           "oneOf": [
@@ -144,43 +157,54 @@
             {
               "type": "null"
             }
-          ]
+          ],
+          "description": "URL of the source document or landing page, when available."
         },
         "citation": {
           "type": "string",
-          "format": "uri"
+          "format": "uri",
+          "description": "Resolvable citation target to use for attribution, typically a DOI URL."
         },
         "citation_doi": {
           "type": "string",
-          "pattern": "^10\\.\\d{4,9}/[-._;()/:A-Za-z0-9]+$"
+          "pattern": "^10\\.\\d{4,9}/[-._;()/:A-Za-z0-9]+$",
+          "description": "DOI of the source publication (bare '10.xxxx/...' form). Prefer provenance.citation with a DOI resolver URL."
         },
         "retrieved_at": {
-          "$ref": "#/$defs/UnixTime"
+          "$ref": "#/$defs/UnixTime",
+          "description": "Unix timestamp (seconds since epoch, UTC) when the source was retrieved or the record was captured."
         },
         "file_hash": {
           "type": "string",
-          "pattern": "^[A-Fa-f0-9]{64}$"
+          "pattern": "^[A-Fa-f0-9]{64}$",
+          "description": "SHA-256 hash of the source file, for integrity verification."
         },
         "workflow_version": {
-          "type": "string"
+          "type": "string",
+          "description": "Version of the ingest/curation workflow that produced this record."
         },
         "curated_by": {
-          "type": "string"
+          "type": "string",
+          "description": "Name or identifier of the person who curated this record."
         },
         "comment": {
-          "type": "string"
+          "type": "string",
+          "description": "Free-text provenance comment."
         },
         "battinfo_version": {
           "type": "string",
-          "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+          "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$",
+          "description": "Version of the battinfo library that wrote this record (semantic versioning); stamped on save."
         }
-      }
+      },
+      "description": "Where the information in this record came from: source type, file or URL, citation, and retrieval time."
     },
     "notes": {
       "type": "array",
       "items": {
         "type": "string"
-      }
+      },
+      "description": "Free-text notes carried with the record."
     },
     "funding": {
       "$ref": "#/$defs/Funding"
@@ -207,7 +231,8 @@
     },
     "ShortId": {
       "type": "string",
-      "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$"
+      "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$",
+      "description": "Short human-friendly identifier derived from the record IRI (Crockford base32, 6-16 characters)."
     },
     "MaterialSpecIri": {
       "type": "string",
@@ -215,7 +240,8 @@
     },
     "OrganizationIri": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+      "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+      "description": "Canonical BattINFO IRI in the organization/ namespace (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx)."
     },
     "Organization": {
       "type": "object",
@@ -225,7 +251,8 @@
       ],
       "properties": {
         "type": {
-          "const": "Organization"
+          "const": "Organization",
+          "description": "JSON-LD type discriminator."
         },
         "id": {
           "$ref": "#/$defs/OrganizationIri",
@@ -233,13 +260,16 @@
         },
         "name": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Organization name."
         },
         "url": {
           "type": "string",
-          "format": "uri"
+          "format": "uri",
+          "description": "Homepage URL."
         }
-      }
+      },
+      "description": "An organization referenced by name, with an optional canonical BattINFO organization IRI."
     },
     "OrgRef": {
       "description": "An organization, as either a plain name string or a structured Organization object that can carry a canonical organization IRI.",
@@ -352,14 +382,17 @@
       "additionalProperties": false,
       "properties": {
         "material_spec_id": {
-          "$ref": "#/$defs/MaterialSpecIri"
+          "$ref": "#/$defs/MaterialSpecIri",
+          "description": "IRI of the material-spec record being referenced."
         },
         "name": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Free-text material name, used when no material-spec record exists."
         },
         "property": {
-          "$ref": "modules/common/quantitative-properties.schema.json"
+          "$ref": "modules/common/quantitative-properties.schema.json",
+          "description": "Quantities qualifying the reference (e.g. mass_fraction, thickness)."
         }
       },
       "anyOf": [
@@ -402,20 +435,23 @@
             "properties": {
               "element": {
                 "type": "string",
-                "minLength": 1
+                "minLength": 1,
+                "description": "Chemical symbol of the dopant element (e.g. 'Al', 'Zr')."
               },
               "fraction": {
-                "$ref": "modules/common/quantity.schema.json"
+                "$ref": "modules/common/quantity.schema.json",
+                "description": "Dopant fraction. Use unit 'mol/mol' for a mole fraction, or unit '1' (0-1) or '%' (0-100) for a mass fraction."
               }
             }
-          }
+          },
+          "description": "Dopant elements with their fractions (mole fraction with unit 'mol/mol', or mass fraction with unit '1' or '%')."
         },
         "constituents": {
           "type": "array",
           "items": {
             "$ref": "#/$defs/MaterialRef"
           },
-          "description": "Constituent materials of a blend/mixture, each with a fraction under its property map."
+          "description": "Constituent materials of a blend/mixture, each with its mass_fraction (unit '1' or '%') under its property map."
         }
       }
     }

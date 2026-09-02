@@ -2,8 +2,8 @@
   "license": "https://www.apache.org/licenses/LICENSE-2.0",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://w3id.org/battinfo/schema/cell-spec.schema.json",
-  "title": "BattINFO Cell Type (Schema.org-Aligned Product)",
-  "description": "Canonical cell-spec metadata using schema.org Product terms with minimal battery-specific extensions.",
+  "title": "BattINFO Cell Spec (Schema.org-Aligned Product)",
+  "description": "The datasheet-level description of a cell model: identity, format, chemistry, construction, and nominal or rated properties (schema.org Product terms with battery extensions).",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -84,7 +84,8 @@
   "properties": {
     "schema_version": {
       "type": "string",
-      "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$",
+      "description": "Version of the record schema this document conforms to (semantic versioning); stamped by the library on save."
     },
     "cell_spec": {
       "type": "object",
@@ -99,34 +100,42 @@
       ],
       "properties": {
         "id": {
-          "$ref": "#/$defs/SpecIri"
+          "$ref": "#/$defs/SpecIri",
+          "description": "Canonical IRI of this cell spec."
         },
         "short_id": {
           "$ref": "#/$defs/ShortId"
         },
         "identifier": {
-          "$ref": "#/$defs/Identifier"
+          "$ref": "#/$defs/Identifier",
+          "description": "Additional identifier(s) for the cell model, as strings or PropertyValue pairs."
         },
         "name": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Human-readable display name, typically manufacturer plus model."
         },
         "model": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Manufacturer model designation (e.g. 'ANR26650M1-B')."
         },
         "manufacturer": {
-          "$ref": "#/$defs/Organization"
+          "$ref": "#/$defs/Organization",
+          "description": "Organization that manufactures this cell model."
         },
         "brand": {
-          "$ref": "#/$defs/BrandOrOrganization"
+          "$ref": "#/$defs/BrandOrOrganization",
+          "description": "Brand the cell is marketed under, when different from the manufacturer."
         },
         "category": {
-          "type": "string"
+          "type": "string",
+          "description": "Coarse product category label (e.g. 'battery cell')."
         },
         "url": {
           "type": "string",
-          "format": "uri"
+          "format": "uri",
+          "description": "Product or datasheet page URL."
         },
         "additional_type": {
           "anyOf": [
@@ -143,7 +152,8 @@
               "minItems": 1,
               "uniqueItems": true
             }
-          ]
+          ],
+          "description": "Extra JSON-LD type IRIs or labels stacked onto the record's @type."
         },
         "product_type": {
           "type": "string",
@@ -152,7 +162,7 @@
             "research",
             "prototype"
           ],
-          "description": "Whether this cell type is a commercial product, a research cell, or a prototype."
+          "description": "Whether this cell spec is a commercial product, a research cell, or a prototype."
         },
         "cell_format": {
           "type": "string",
@@ -163,19 +173,23 @@
             "coin",
             "other",
             "unknown"
-          ]
+          ],
+          "description": "Mechanical format of the cell."
         },
         "size_code": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Standard size designation (e.g. '18650', '21700', 'CR2032')."
         },
         "iec_code": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "IEC designation code (IEC 60086 / IEC 61960), when defined."
         },
         "country_of_origin": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Country where the cell is manufactured."
         },
         "rechargeable": {
           "type": "boolean",
@@ -184,20 +198,25 @@
         "year": {
           "type": "integer",
           "minimum": 1800,
-          "maximum": 3000
+          "maximum": 3000,
+          "description": "Year the cell model was released or the datasheet was issued."
         },
         "chemistry": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Overall cell chemistry label (e.g. 'Li-ion', 'NiMH', 'Zn-MnO2'). Use the recognised labels where they apply (see the property keys reference); other values are carried as literals."
         },
         "positive_electrode_basis": {
-          "type": "string"
+          "type": "string",
+          "description": "Positive-electrode active material basis (e.g. 'LFP', 'NMC811'). Use the recognised labels where they apply (see the property keys reference); other values are carried as literals."
         },
         "negative_electrode_basis": {
-          "type": "string"
+          "type": "string",
+          "description": "Negative-electrode active material basis (e.g. 'graphite', 'LTO', 'Si-C'). Use the recognised labels where they apply (see the property keys reference); other values are carried as literals."
         },
         "datasheet_revision": {
-          "type": "string"
+          "type": "string",
+          "description": "Revision label of the datasheet the spec was taken from."
         },
         "manufacturing_place": {
           "type": "string",
@@ -229,10 +248,12 @@
           ],
           "description": "Electrode configuration as built. Optional; absent means unstated (read as a full cell unless a reference_electrode is present). Stated explicitly it overrides that heuristic: half_cell types the JSON-LD as BatteryHalfCell + HalfCellDevice, three_electrode_cell as ThreeElectrodeCellDevice, full_cell suppresses both."
         }
-      }
+      },
+      "description": "Identity and classification of the cell design."
     },
     "properties": {
-      "$ref": "cell-canonical.schema.json#/$defs/SpecSet"
+      "$ref": "cell-canonical.schema.json#/$defs/SpecSet",
+      "description": "Datasheet-style quantitative properties of the cell model; each key holds a SpecItem quantity. Dimension keys follow the format rules: diameter for cylindrical and coin, length/width/thickness for prismatic and pouch, height for all."
     },
     "provenance": {
       "type": "object",
@@ -243,10 +264,12 @@
       "properties": {
         "source_type": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Kind of source this record was created from. Recommended values: datasheet, manufacturer, curated, literature, manual, other."
         },
         "source_name": {
-          "type": "string"
+          "type": "string",
+          "description": "Human-readable name of the source (document title, instrument, lab, or system)."
         },
         "source_file": {
           "anyOf": [
@@ -256,7 +279,8 @@
             {
               "type": "null"
             }
-          ]
+          ],
+          "description": "Filename or path of the source file, when the record was derived from a file."
         },
         "source_url": {
           "anyOf": [
@@ -267,37 +291,47 @@
             {
               "type": "null"
             }
-          ]
+          ],
+          "description": "URL of the source document or landing page, when available."
         },
         "citation": {
           "type": "string",
-          "format": "uri"
+          "format": "uri",
+          "description": "Resolvable citation target to use for attribution, typically a DOI URL."
         },
         "citation_doi": {
           "type": "string",
-          "pattern": "^10\\.\\d{4,9}/[-._;()/:A-Za-z0-9]+$"
+          "pattern": "^10\\.\\d{4,9}/[-._;()/:A-Za-z0-9]+$",
+          "description": "DOI of the source publication (bare '10.xxxx/...' form). Prefer provenance.citation with a DOI resolver URL."
         },
         "file_hash": {
           "type": "string",
-          "pattern": "^[A-Fa-f0-9]{64}$"
+          "pattern": "^[A-Fa-f0-9]{64}$",
+          "description": "SHA-256 hash of the source file, for integrity verification."
         },
         "workflow_version": {
-          "type": "string"
+          "type": "string",
+          "description": "Version of the ingest/curation workflow that produced this record."
         },
         "retrieved_at": {
-          "$ref": "#/$defs/UnixTime"
+          "$ref": "#/$defs/UnixTime",
+          "description": "Unix timestamp (seconds since epoch, UTC) when the source was retrieved or the record was captured."
         },
         "comment": {
-          "type": "string"
+          "type": "string",
+          "description": "Free-text provenance comment."
         },
         "curated_by": {
-          "type": "string"
+          "type": "string",
+          "description": "Name or identifier of the person who curated this record."
         },
         "battinfo_version": {
           "type": "string",
-          "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+          "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$",
+          "description": "Version of the battinfo library that wrote this record (semantic versioning); stamped on save."
         }
-      }
+      },
+      "description": "Where the information in this record came from: source type, file or URL, citation, and retrieval time."
     },
     "bibliography": {
       "type": "object",
@@ -307,21 +341,25 @@
           "type": "array",
           "items": {
             "$ref": "#/$defs/BibliographyEntry"
-          }
+          },
+          "description": "Publications (papers, reports) that study or document this cell model."
         }
-      }
+      },
+      "description": "Publications about this cell model."
     },
     "notes": {
       "type": "array",
       "items": {
         "type": "string"
-      }
+      },
+      "description": "Free-text notes carried with the record."
     },
     "specification_comment": {
       "type": "array",
       "items": {
         "type": "string"
-      }
+      },
+      "description": "Verbatim comment lines carried over from the source specification."
     },
     "editorial": {
       "type": "object",
@@ -329,13 +367,16 @@
       "additionalProperties": true
     },
     "construction": {
-      "$ref": "modules/components/specification.schema.json#/properties/construction"
+      "$ref": "modules/components/construction.schema.json",
+      "description": "Internal construction: assembly type, layering, sheet counts, and electrode-assembly geometry."
     },
     "positive_electrode": {
-      "$ref": "modules/components/electrode.schema.json"
+      "$ref": "modules/components/electrode.schema.json",
+      "description": "Inline description of the positive electrode (coating, current collector, tab, properties)."
     },
     "negative_electrode": {
-      "$ref": "modules/components/electrode.schema.json"
+      "$ref": "modules/components/electrode.schema.json",
+      "description": "Inline description of the negative electrode (coating, current collector, tab, properties)."
     },
     "working_electrode": {
       "$ref": "modules/components/electrode.schema.json",
@@ -346,21 +387,24 @@
       "description": "Inline counter-electrode structure. Role holder for a half_cell or three_electrode_cell. In a half cell the counter electrode also serves as the reference, so it is emitted with @type [CounterElectrode, ReferenceElectrode]; in a three-electrode cell the separate reference_electrode field carries the reference role."
     },
     "electrolyte": {
-      "$ref": "modules/components/electrolyte.schema.json"
+      "$ref": "modules/components/electrolyte.schema.json",
+      "description": "Inline electrolyte description (family, salt, solvents, additives)."
     },
     "separator": {
-      "$ref": "modules/components/specification.schema.json#/properties/separator"
+      "$ref": "modules/components/specification.schema.json#/properties/separator",
+      "description": "Inline separator description (material, structure, coating, and properties)."
     },
     "housing": {
-      "$ref": "modules/components/specification.schema.json#/properties/housing"
+      "$ref": "modules/components/housing.schema.json",
+      "description": "Inline housing description (case, cap, terminals, seals, parts)."
     },
     "positive_electrode_spec_id": {
       "$ref": "#/$defs/ElectrodeSpecIri",
-      "description": "Optional canonical IRI of a standalone electrode-spec for the positive electrode (used instead of, or alongside, the inline positive_electrode holder)."
+      "description": "IRI of the standalone electrode-spec used as the positive electrode of this cell model; may be given instead of, or alongside, the inline positive_electrode holder."
     },
     "negative_electrode_spec_id": {
       "$ref": "#/$defs/ElectrodeSpecIri",
-      "description": "Optional canonical IRI of a standalone electrode-spec for the negative electrode."
+      "description": "IRI of the standalone electrode-spec used as the negative electrode of this cell model; may be given instead of, or alongside, the inline negative_electrode holder."
     },
     "working_electrode_spec_id": {
       "$ref": "#/$defs/ElectrodeSpecIri",
@@ -372,15 +416,15 @@
     },
     "electrolyte_spec_id": {
       "$ref": "#/$defs/ElectrolyteSpecIri",
-      "description": "Optional canonical IRI of a standalone electrolyte-spec."
+      "description": "IRI of the standalone electrolyte-spec used in this cell model; may be given instead of, or alongside, the inline electrolyte holder."
     },
     "separator_spec_id": {
       "$ref": "#/$defs/SeparatorSpecIri",
-      "description": "Optional canonical IRI of a standalone separator-spec."
+      "description": "IRI of the standalone separator-spec used in this cell model; may be given instead of, or alongside, the inline separator holder."
     },
     "housing_spec_id": {
       "$ref": "#/$defs/HousingSpecIri",
-      "description": "Optional canonical IRI of a standalone housing-spec."
+      "description": "IRI of the standalone housing-spec used in this cell model; may be given instead of, or alongside, the inline housing holder."
     },
     "hazardous_substances": {
       "type": "array",
@@ -393,15 +437,18 @@
         ],
         "properties": {
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "Substance name."
           },
           "cas_number": {
             "type": "string",
-            "pattern": "^\\d{1,7}-\\d{2}-\\d$"
+            "pattern": "^\\d{1,7}-\\d{2}-\\d$",
+            "description": "CAS Registry Number of the substance."
           },
           "concentration_ppm": {
             "type": "number",
-            "minimum": 0
+            "minimum": 0,
+            "description": "Concentration in parts per million by weight."
           }
         }
       }
@@ -417,12 +464,14 @@
         ],
         "properties": {
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "Material name, per the EU critical raw materials list."
           },
           "weight_fraction": {
             "type": "number",
             "minimum": 0,
-            "maximum": 1
+            "maximum": 1,
+            "description": "Mass fraction of the material in the battery (0-1)."
           }
         }
       }
@@ -437,7 +486,8 @@
       "description": "License under which this record and its data are released, as an SPDX license identifier (e.g. \"cc-by-4.0\") or a license URL. Stamped from the workspace default (ws.license) and emitted as dcterms:license in JSON-LD."
     },
     "funding": {
-      "$ref": "#/$defs/Funding"
+      "$ref": "#/$defs/Funding",
+      "description": "Funding project (grant) under which the record was produced."
     },
     "contributor": {
       "type": "array",
@@ -460,26 +510,32 @@
       "properties": {
         "id": {
           "type": "string",
-          "format": "uri"
+          "format": "uri",
+          "description": "URI of the publication."
         },
         "doi": {
           "type": "string",
-          "pattern": "^10\\.\\d{4,9}/[-._;()/:A-Za-z0-9]+$"
+          "pattern": "^10\\.\\d{4,9}/[-._;()/:A-Za-z0-9]+$",
+          "description": "DOI of the publication (bare '10.xxxx/...' form)."
         },
         "type": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Publication type (e.g. 'ScholarlyArticle')."
         },
         "headline": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Title of the publication."
         },
         "author": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Author list as a formatted string."
         },
         "description": {
-          "type": "string"
+          "type": "string",
+          "description": "Short summary of the publication."
         },
         "date_published": {
           "anyOf": [
@@ -492,13 +548,16 @@
               "type": "string",
               "minLength": 1
             }
-          ]
+          ],
+          "description": "Publication year or date."
         }
-      }
+      },
+      "description": "A publication that documents or studies the described item."
     },
     "ShortId": {
       "type": "string",
-      "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$"
+      "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$",
+      "description": "Short human-friendly identifier derived from the record IRI (Crockford base32, 6-16 characters)."
     },
     "Identifier": {
       "anyOf": [
@@ -524,7 +583,8 @@
           },
           "minItems": 1
         }
-      ]
+      ],
+      "description": "One or more identifiers: plain strings and/or PropertyValue pairs naming the identifier scheme."
     },
     "PropertyValue": {
       "type": "object",
@@ -536,13 +596,16 @@
       "properties": {
         "property_id": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Identifier scheme or property IRI the value belongs to."
         },
         "value": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Identifier value within that scheme."
         }
-      }
+      },
+      "description": "An identifier value qualified by the scheme it belongs to (schema.org PropertyValue)."
     },
     "Organization": {
       "type": "object",
@@ -552,7 +615,8 @@
       ],
       "properties": {
         "type": {
-          "const": "Organization"
+          "const": "Organization",
+          "description": "JSON-LD type discriminator."
         },
         "id": {
           "$ref": "#/$defs/OrganizationIri",
@@ -560,13 +624,16 @@
         },
         "name": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Organization name."
         },
         "url": {
           "type": "string",
-          "format": "uri"
+          "format": "uri",
+          "description": "Homepage URL."
         }
-      }
+      },
+      "description": "An organization referenced by name, with an optional canonical BattINFO organization IRI."
     },
     "Brand": {
       "type": "object",
@@ -576,7 +643,8 @@
       ],
       "properties": {
         "type": {
-          "const": "Brand"
+          "const": "Brand",
+          "description": "JSON-LD type discriminator."
         },
         "id": {
           "$ref": "#/$defs/OrganizationIri",
@@ -584,13 +652,16 @@
         },
         "name": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Brand name."
         },
         "url": {
           "type": "string",
-          "format": "uri"
+          "format": "uri",
+          "description": "Homepage URL."
         }
-      }
+      },
+      "description": "A brand, with an optional canonical organization IRI for the brand owner."
     },
     "BrandOrOrganization": {
       "anyOf": [
@@ -600,7 +671,8 @@
         {
           "$ref": "#/$defs/Organization"
         }
-      ]
+      ],
+      "description": "Either a Brand or an Organization object."
     },
     "SpecIri": {
       "type": "string",
@@ -608,7 +680,8 @@
     },
     "OrganizationIri": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+      "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+      "description": "Canonical BattINFO IRI in the organization/ namespace (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx)."
     },
     "ElectrodeSpecIri": {
       "type": "string",
@@ -635,24 +708,30 @@
       ],
       "properties": {
         "type": {
-          "const": "Grant"
+          "const": "Grant",
+          "description": "JSON-LD type discriminator."
         },
         "id": {
           "type": "string",
-          "format": "uri"
+          "format": "uri",
+          "description": "Resolvable IRI of the grant (e.g. a CORDIS project IRI)."
         },
         "identifier": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Grant number as assigned by the funder (e.g. '101069765')."
         },
         "name": {
-          "type": "string"
+          "type": "string",
+          "description": "Project title."
         },
         "acronym": {
-          "type": "string"
+          "type": "string",
+          "description": "Project acronym."
         },
         "program": {
-          "type": "string"
+          "type": "string",
+          "description": "Funding programme or call (e.g. 'Horizon Europe')."
         },
         "funder": {
           "type": "object",
@@ -662,21 +741,26 @@
           ],
           "properties": {
             "type": {
-              "const": "Organization"
+              "const": "Organization",
+              "description": "JSON-LD type discriminator."
             },
             "name": {
               "type": "string",
-              "minLength": 1
+              "minLength": 1,
+              "description": "Funder name (e.g. 'European Commission')."
             },
             "url": {
               "type": "string",
-              "format": "uri"
+              "format": "uri",
+              "description": "Funder homepage URL."
             },
             "same_as": {
               "type": "string",
-              "format": "uri"
+              "format": "uri",
+              "description": "External identifier IRI for the funder (e.g. a ROR or DOI funder IRI)."
             }
-          }
+          },
+          "description": "Organization that awarded the grant."
         }
       }
     },
@@ -688,36 +772,45 @@
       ],
       "properties": {
         "type": {
-          "const": "Person"
+          "const": "Person",
+          "description": "JSON-LD type discriminator."
         },
         "name": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Full name."
         },
         "given_name": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Given (first) name."
         },
         "family_name": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Family (last) name."
         },
         "email": {
           "type": "string",
-          "format": "email"
+          "format": "email",
+          "description": "Contact e-mail address."
         },
         "url": {
           "type": "string",
-          "format": "uri"
+          "format": "uri",
+          "description": "Personal or institutional web page."
         },
         "same_as": {
           "type": "string",
-          "format": "uri"
+          "format": "uri",
+          "description": "External identifier IRI, typically an ORCID (https://orcid.org/...)."
         },
         "affiliation": {
-          "$ref": "#/$defs/Organization"
+          "$ref": "#/$defs/Organization",
+          "description": "Organization the person is affiliated with."
         }
-      }
+      },
+      "description": "A person, in schema.org Person terms; an ORCID may be given in same_as."
     }
   }
 }

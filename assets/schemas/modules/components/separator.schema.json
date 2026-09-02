@@ -45,7 +45,8 @@
       "description": "Name of the manufacturer or supplier."
     },
     "supplier": {
-      "type": "string"
+      "type": "string",
+      "description": "Supplier or vendor the item was sourced from."
     },
     "product_id": {
       "type": "string",
@@ -53,10 +54,11 @@
     },
     "property": {
       "$ref": "../common/quantitative-properties.schema.json",
-      "description": "Quantitative physical or electrochemical properties, e.g. thickness, porosity, Gurley number, ionic conductivity."
+      "description": "Named quantity map of separator properties (e.g. thickness, porosity, gurley_number, ionic_conductivity). See the property keys reference for the full list of recognised keys."
     },
     "comment": {
-      "type": "string"
+      "type": "string",
+      "description": "Free-text comment."
     }
   }
 }

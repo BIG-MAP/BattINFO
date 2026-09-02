@@ -388,10 +388,128 @@ def _property_co_type(name: str) -> str:
     return "ConventionalProperty"
 
 
+# Accepted alternative spellings -> canonical symbol as listed in unit_map.curated.json.
+# Whole-string aliases are checked first (after whitespace trimming); the generic
+# rewrites in :func:`normalize_unit_symbol` then handle ASCII exponents, micro
+# prefixes, Ohm spellings and separator characters. The map symbols themselves are
+# never rewritten, so lookups for canonical input are unchanged.
+_UNIT_ALIASES: dict[str, str] = {
+    "um": "µm",
+    "micron": "µm",
+    "microns": "µm",
+    "micrometre": "µm",
+    "micrometer": "µm",
+    "degC": "°C",
+    "deg C": "°C",
+    "degrees C": "°C",
+    "degree C": "°C",
+    "℃": "°C",
+    "celsius": "°C",
+    "Celsius": "°C",
+    "percent": "%",
+    "pct": "%",
+    "wt%": "%",
+    "wt.%": "%",
+    "vol.%": "vol%",
+    "v/v%": "vol%",
+    "l": "L",
+    "litre": "L",
+    "liter": "L",
+    "ml": "mL",
+    "cc": "cm3",
+    "g/cc": "g/cm3",
+    "sec": "s",
+    "second": "s",
+    "seconds": "s",
+    "minute": "min",
+    "minutes": "min",
+    "hr": "h",
+    "hour": "h",
+    "hours": "h",
+    "milliohm": "mΩ",
+    "milliohms": "mΩ",
+    "mohm": "mΩ",
+    "ohm": "Ω",
+    "ohms": "Ω",
+    "mAh/gram": "mAh/g",
+    "amp": "A",
+    "amps": "A",
+    "volt": "V",
+    "volts": "V",
+    "gram": "g",
+    "grams": "g",
+    "kilogram": "kg",
+    "kilograms": "kg",
+}
+
+_MICRO_PREFIX_RE = re.compile(r"^u(?=[A-Za-z])")
+_OHM_SUFFIX_RE = re.compile(r"[Oo]hms?(?=$|/)")
+_SEPARATOR_SPACE_RE = re.compile(r"\s*([/*·.^])\s*")
+
+
+def normalize_unit_symbol(unit: str | None) -> str | None:
+    """Map an input unit spelling to the canonical symbol used by the unit map.
+
+    Canonical symbols pass through unchanged. Accepted alternative spellings are
+    rewritten: ASCII exponents (``mg/cm^2`` -> ``mg/cm2``, ``g/cm³`` -> ``g/cm3``),
+    ASCII micro prefixes (``um`` -> ``µm``), Ohm spellings (``mOhm`` / ``milliohm`` ->
+    ``mΩ``), product separators (``mPa*s`` / ``mPa·s`` -> ``mPa.s``), Celsius
+    spellings (``degC`` / ``deg C`` -> ``°C``), and a short list of spelled-out
+    names (``percent`` -> ``%``, ``hour`` -> ``h``). Unknown strings are returned
+    trimmed, so the caller can still fall back to ``schema:unitText``.
+    """
+    if not isinstance(unit, str):
+        return None
+    text = " ".join(unit.split())
+    if not text:
+        return None
+    if text in _UNIT_ALIASES:
+        return _UNIT_ALIASES[text]
+    text = _SEPARATOR_SPACE_RE.sub(r"\1", text)
+    text = text.replace("**", "^")
+    text = text.replace("²", "2").replace("³", "3").replace("^2", "2").replace("^3", "3")
+    text = text.replace("*", ".").replace("·", ".").replace("⋅", ".")
+    # A remaining interior space is a product separator ("mPa s").
+    text = text.replace(" ", ".")
+    text = text.replace("μ", "µ")  # Greek mu (U+03BC) -> micro sign (U+00B5)
+    text = _MICRO_PREFIX_RE.sub("µ", text)
+    text = _OHM_SUFFIX_RE.sub("Ω", text)
+    return _UNIT_ALIASES.get(text, text)
+
+
+def _unit_lookup_candidates(unit: str) -> list[str]:
+    """Spellings to try, in order, against a unit table keyed by symbol."""
+    candidates = [unit]
+    normalized = normalize_unit_symbol(unit)
+    if normalized and normalized not in candidates:
+        candidates.append(normalized)
+    if normalized:
+        ascii_form = normalized.replace("µ", "u")
+        if ascii_form not in candidates:
+            candidates.append(ascii_form)
+    return candidates
+
+
 def _unit_iri(unit: str | None) -> str | None:
     if not isinstance(unit, str) or not unit:
         return None
-    return _unit_type_map().get(unit)
+    table = _unit_type_map()
+    for candidate in _unit_lookup_candidates(unit):
+        iri = table.get(candidate)
+        if iri:
+            return iri
+    return None
+
+
+def _converter_unit_token(unit: str | None) -> str | None:
+    """Look up the converter-compatible unit token, accepting the same aliases as the IRI path."""
+    if not isinstance(unit, str) or not unit:
+        return None
+    for candidate in _unit_lookup_candidates(unit):
+        token = CONVERTER_UNIT_TEXT_TO_TOKEN.get(candidate)
+        if token:
+            return token
+    return None
 
 
 def _epoch_to_iso8601(value: Any) -> str | None:
@@ -973,7 +1091,7 @@ def _converter_quantity_node(
         "@type": type_name,
         "hasNumericalPart": {"@type": "emmo:RealData", "hasNumberValue": quantity["value"]},
     }
-    unit_token = CONVERTER_UNIT_TEXT_TO_TOKEN.get(str(quantity.get("unit") or quantity.get("unit_text") or ""))
+    unit_token = _converter_unit_token(str(quantity.get("unit") or quantity.get("unit_text") or ""))
     if unit_token is not None:
         node["hasMeasurementUnit"] = unit_token
     return node
@@ -1068,15 +1186,29 @@ def _converter_electrode_node(electrode: dict[str, Any] | None) -> dict[str, Any
                 items = [item for item in items if item]
                 if items:
                     coating_node["hasBinder"] = items[0] if len(items) == 1 else items
-            if isinstance(component_groups.get("additive"), list):
+            # ``additive`` is the legacy conductive-additive slot; ``conductive_additive`` is
+            # the explicit role. Both feed hasConductiveAdditive; ``other_additive`` is a
+            # plain Additive.
+            conductive_items: list[dict[str, Any]] = []
+            for role_key in ("additive", "conductive_additive"):
+                if isinstance(component_groups.get(role_key), list):
+                    conductive_items.extend(
+                        _converter_named_node(item, wrapper_type="ConductiveAdditive", property_types=CONVERTER_PROPERTY_TYPES)
+                        for item in component_groups[role_key]
+                        if isinstance(item, dict)
+                    )
+            conductive_items = [item for item in conductive_items if item]
+            if conductive_items:
+                coating_node["hasConductiveAdditive"] = conductive_items[0] if len(conductive_items) == 1 else conductive_items
+            if isinstance(component_groups.get("other_additive"), list):
                 items = [
-                    _converter_named_node(item, wrapper_type="ConductiveAdditive", property_types=CONVERTER_PROPERTY_TYPES)
-                    for item in component_groups["additive"]
+                    _converter_named_node(item, wrapper_type="Additive", property_types=CONVERTER_PROPERTY_TYPES)
+                    for item in component_groups["other_additive"]
                     if isinstance(item, dict)
                 ]
                 items = [item for item in items if item]
                 if items:
-                    coating_node["hasConductiveAdditive"] = items[0] if len(items) == 1 else items
+                    coating_node["hasAdditive"] = items[0] if len(items) == 1 else items
         measured = _converter_measured_properties(coating.get("property"), property_types=CONVERTER_COATING_PROPERTY_TYPES)
         if measured:
             coating_node["hasMeasuredProperty"] = measured[0] if len(measured) == 1 else measured
@@ -1291,11 +1423,15 @@ _ELECTROLYTE_FAMILY_TYPES: dict[str, str] = {
 }
 
 # Electrode BOM role → EMMO relation predicate and role class.
-# The additive slot in electrode coatings is conventionally a conductive additive (e.g. carbon black).
+# ``additive`` is the legacy conductive-additive slot (kept for compatibility) and
+# ``conductive_additive`` the explicit role; both emit hasConductiveAdditive.
+# ``other_additive`` holds non-conductive functional additives (thickener, dispersant, ...).
 _ELECTRODE_ROLE_MAP: dict[str, dict[str, str]] = {
-    "active_material": {"relation": "hasActiveMaterial", "role_class": "ActiveMaterial"},
-    "binder":          {"relation": "hasBinder",         "role_class": "Binder"},
-    "additive":        {"relation": "hasConductiveAdditive", "role_class": "ConductiveAdditive"},
+    "active_material":     {"relation": "hasActiveMaterial",     "role_class": "ActiveMaterial"},
+    "binder":              {"relation": "hasBinder",             "role_class": "Binder"},
+    "additive":            {"relation": "hasConductiveAdditive", "role_class": "ConductiveAdditive"},
+    "conductive_additive": {"relation": "hasConductiveAdditive", "role_class": "ConductiveAdditive"},
+    "other_additive":      {"relation": "hasAdditive",           "role_class": "Additive"},
 }
 
 # UnitOne IRI — used for dimensionless fraction quantities (MassFraction, VolumeFraction, Porosity).
@@ -1468,6 +1604,7 @@ def _descriptor_electrode_coating_to_jsonld(coating: dict[str, Any] | None) -> d
     node: dict[str, Any] = {"@type": "ElectrodeCoating"}
     components = coating.get("component", {})
     if isinstance(components, dict):
+        nodes_by_relation: dict[str, list[dict[str, Any]]] = {}
         for role, role_cfg in _ELECTRODE_ROLE_MAP.items():
             mats = components.get(role, [])
             if not isinstance(mats, list):
@@ -1477,7 +1614,10 @@ def _descriptor_electrode_coating_to_jsonld(coating: dict[str, Any] | None) -> d
                 if (c := _typed_constituent_node(mat, role_cfg["role_class"], "MassFraction")) is not None
             ]
             if role_nodes:
-                node[role_cfg["relation"]] = role_nodes[0] if len(role_nodes) == 1 else role_nodes
+                # Roles sharing a relation (additive + conductive_additive) accumulate.
+                nodes_by_relation.setdefault(role_cfg["relation"], []).extend(role_nodes)
+        for relation, role_nodes in nodes_by_relation.items():
+            node[relation] = role_nodes[0] if len(role_nodes) == 1 else role_nodes
 
     prop_nodes = _descriptor_property_nodes(
         coating.get("property"), term_overrides=_DESCRIPTOR_COATING_PROPERTY_TERMS

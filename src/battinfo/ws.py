@@ -3624,6 +3624,9 @@ class AuthoringWorkspace:
             "test": "test", "dataset": "dataset",
             "material-spec": "material-spec", "material": "material",
             "electrode-spec": "electrode-spec", "electrode": "electrode",
+            "equipment-spec": "equipment-spec", "equipment": "equipment",
+            "channel": "channel", "channels": "channel",
+            "parameter-set": "parameter-set", "parameters": "parameter-set",
         }
         allowed: set[str] | None
         if only is not None:
@@ -3642,7 +3645,8 @@ class AuthoringWorkspace:
                     raise ValueError(
                         f"unknown record type {rt!r} in only=. Valid values: "
                         "cell-spec, cell-instance, test-spec, test, dataset, "
-                        "material-spec, material, electrode-spec, electrode."
+                        "material-spec, material, electrode-spec, electrode, "
+                        "equipment-spec, equipment, channel, parameter-set."
                     )
                 allowed.add(token)
         else:
@@ -3650,10 +3654,19 @@ class AuthoringWorkspace:
 
         # Every record type ws.save() can write must be submittable, or a saved
         # record silently never reaches the registry. Specs precede the instances
-        # that reference them so the registry sees a resolvable target first.
+        # that reference them so the registry sees a resolvable target first
+        # (channels after equipment, parameter-sets after the specs they target).
         _SUBDIRS = (
             "material-spec", "material", "electrode-spec", "electrode",
             "cell-spec", "cell-instance", "test-protocol", "test", "dataset",
+            "equipment-spec", "equipment", "channel", "parameter-set",
+        )
+        # Component-family records exist locally but the registry cannot register
+        # their resource types yet (identifiers.py: "Component-spec resource types
+        # are not registrable yet"). They are surfaced below, never silently skipped.
+        _NOT_REGISTRABLE = (
+            "separator-spec", "separator", "current-collector-spec", "current-collector",
+            "electrolyte-spec", "electrolyte", "housing-spec", "housing",
         )
 
         def _all_in(subdir: str) -> list[Path]:
@@ -3676,6 +3689,23 @@ class AuthoringWorkspace:
                     "disk. Call ws.save() first, or pass submit_all=True to submit them."
                 )
             selected = {s: [] for s in wanted}
+
+        # Fail loud, not silent: component-family records in scope cannot be
+        # registered yet, so say so instead of dropping them without a word.
+        if self._session_paths or submit_all:
+            unregistrable = {
+                s: [f for f in _all_in(s)
+                    if submit_all or f in self._session_paths]
+                for s in _NOT_REGISTRABLE
+            }
+            unregistrable = {s: fs for s, fs in unregistrable.items() if fs}
+            if unregistrable:
+                listing = ", ".join(f"{len(fs)} {s}" for s, fs in unregistrable.items())
+                print(
+                    f"  NOTE: not submitted ({listing}) -- the registry cannot register "
+                    "these component record types yet. They stay local; reference them "
+                    "from cell/electrode records, which do submit."
+                )
 
         # ── Up-front integrity pass: parse AND validate every record before any network
         # call. A corrupt/unreadable or invalid record fails the batch loudly here rather
@@ -3759,6 +3789,7 @@ class AuthoringWorkspace:
 
         _all_datasets = _load_all("dataset", "dataset")
         _all_tests = _load_all("test", "test")
+        _all_channels = _load_all("channel", "channel")
         if _corrupt_siblings and not allow_partial:
             failures = [
                 {"title": f.name, "source_local_id": f.stem, "ok": False, "status": "unreadable",
@@ -3780,6 +3811,15 @@ class AuthoringWorkspace:
         cell_preview_png: dict[str, str] = {}
         ds_links: dict[str, dict] = {}
         spec_tests: dict[str, list[str]] = {}
+        # equipment IRI -> [(channel IRI, label)] so an equipment submission can
+        # carry hasChannel links (mirrors the cell -> dataset/test link pattern).
+        equipment_channels: dict[str, list[tuple[str, str]]] = {}
+        for ch_iri, (_ch_rec, ch_inner) in _all_channels.items():
+            eq_iri = ch_inner.get("equipment_id")
+            if eq_iri:
+                equipment_channels.setdefault(eq_iri, []).append(
+                    (ch_iri, str(ch_inner.get("label") or ""))
+                )
 
         for ds_iri, (_ds_rec, ds_inner) in _all_datasets.items():
             about = ds_inner.get("about") or []
@@ -3802,23 +3842,29 @@ class AuthoringWorkspace:
             if proto_iri:
                 spec_tests.setdefault(proto_iri, []).append(t_iri)
 
-        # ── Materials and electrodes ──────────────────────────────────────────
-        # These are ordinary records that ws.save() writes, so they submit like
-        # any other; they were previously absent from _SUBDIRS, which meant a
-        # saved material or electrode silently never reached the registry.
+        # ── Materials, electrodes, equipment, and parameter sets ──────────────
+        # These are ordinary records that ws.save() (or ws.add) writes, so they
+        # submit like any other; kinds absent from _SUBDIRS meant a saved record
+        # silently never reached the registry (materials/electrodes first, then
+        # the same gap for equipment/channel/parameter-set — G11).
         # Specs first, then the instances that reference them.
         for subdir, record_key, resource_type, rdf_type, spec_ref in (
             ("material-spec", "material_spec", "material_spec", "MaterialSpec", None),
             ("material", "material", "material", "Material", "material_spec_id"),
             ("electrode-spec", "electrode_spec", "electrode_spec", "ElectrodeSpec", None),
             ("electrode", "electrode", "electrode", "Electrode", "electrode_spec_id"),
+            ("equipment-spec", "equipment_spec", "equipment_spec", "EquipmentSpec", None),
+            ("equipment", "equipment", "equipment", "Equipment", "equipment_spec_id"),
+            ("channel", "channel", "channel", "Channel", None),
+            ("parameter-set", "parameter_set", "parameter_set", "ParameterSet", None),
         ):
             spec_resource_type = f"{resource_type}_spec"
             for src in _selected(subdir):
                 raw = parsed[src]
                 body = raw.get(record_key, {})
                 title = (
-                    body.get("name") or body.get("batch_id") or body.get("lot_id")
+                    body.get("name") or body.get("label") or body.get("serial_number")
+                    or body.get("batch_id") or body.get("lot_id")
                     or body.get("short_id") or src.stem
                 )
                 source_local_id = body.get("short_id") or src.stem
@@ -3840,6 +3886,32 @@ class AuthoringWorkspace:
                         "resource_type": "material_spec",
                         "canonical_iri": body["active_material_spec_id"],
                     })
+                if record_key == "equipment":
+                    for ch_iri, ch_label in equipment_channels.get(body.get("id", ""), []):
+                        link = {"relationship": "hasChannel", "resource_type": "channel",
+                                "canonical_iri": ch_iri}
+                        if ch_label:
+                            link["title"] = ch_label
+                        record_links.append(link)
+                if record_key == "channel" and isinstance(body.get("equipment_id"), str):
+                    record_links.append({
+                        "relationship": "channelOf",
+                        "resource_type": "equipment",
+                        "canonical_iri": body["equipment_id"],
+                    })
+                if record_key == "parameter_set":
+                    # The claim batch's target, when it is a registered record
+                    # (a material_kind target is vocabulary, not a record).
+                    for tgt_field, tgt_type in (
+                        ("material_spec_id", "material_spec"),
+                        ("cell_spec_id", "cell_spec"),
+                    ):
+                        if isinstance(body.get(tgt_field), str):
+                            record_links.append({
+                                "relationship": "about",
+                                "resource_type": tgt_type,
+                                "canonical_iri": body[tgt_field],
+                            })
                 payload = _simple_submission_payload(
                     raw, resource_type=resource_type, rdf_type=rdf_type,
                     record_key=record_key, wid=wid, pid=pid, ver=ver,
@@ -6937,7 +7009,17 @@ class AuthoringWorkspace:
             raise ValueError(f"channels must be a non-negative integer (got {n_channels!r}).")
 
         source_root = self._ws.source_root
-        spec_result = save_record(spec_record, source_root=source_root, mode="upsert")
+
+        def _track(result: dict) -> dict:
+            # Equipment records are written at add()-time, not by ws.save(), so
+            # register them in the session set here — otherwise a subsequent
+            # ws.submit()/publish() in the same session would not select them.
+            path = result.get("path")
+            if path:
+                self._session_paths.add(Path(path))
+            return result
+
+        spec_result = _track(save_record(spec_record, source_root=source_root, mode="upsert"))
 
         # Deterministic equipment identity: the same (spec, serial_number) always
         # mints the same equipment IRI - the seed mirrors the ratified channel
@@ -6955,7 +7037,7 @@ class AuthoringWorkspace:
             status=status,
             commissioned_at=commissioned_at,
         )
-        save_record(equipment_record, source_root=source_root, mode="upsert")
+        _track(save_record(equipment_record, source_root=source_root, mode="upsert"))
         equipment_id = equipment_record["equipment"]["id"]
 
         unit_label = name or serial_number
@@ -6966,7 +7048,7 @@ class AuthoringWorkspace:
                 index=index,
                 label=f"{unit_label}/CH{index}",
             )
-            save_record(channel_record, source_root=source_root, mode="upsert")
+            _track(save_record(channel_record, source_root=source_root, mode="upsert"))
             self._register_channel_keys(channel_record["channel"], equipment_record["equipment"])
             channel_records.append(channel_record)
 

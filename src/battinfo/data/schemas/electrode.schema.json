@@ -14,7 +14,8 @@
   "properties": {
     "schema_version": {
       "type": "string",
-      "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$",
+      "description": "Version of the record schema this document conforms to (semantic versioning); stamped by the library on save."
     },
     "electrode": {
       "type": "object",
@@ -47,7 +48,8 @@
           "description": "Coating batch label (e.g. 'Si-AQ-1'). Together with the spec IRI this is the batch's identity — the IRI is minted from the pair."
         },
         "supplier": {
-          "$ref": "#/$defs/OrgRef"
+          "$ref": "#/$defs/OrgRef",
+          "description": "Supplier or vendor the item was sourced from."
         },
         "manufactured_at": {
           "$ref": "#/$defs/FlexDate",
@@ -86,12 +88,15 @@
           "description": "As-built batch actuals — measured loading, measured calendered thickness, measured porosity, disc diameter, disc mass. An open snake_case map: whatever this batch was actually measured for is recordable without a schema change."
         },
         "comment": {
-          "type": "string"
+          "type": "string",
+          "description": "Free-text comment."
         }
-      }
+      },
+      "description": "The physical electrode being described."
     },
     "provenance": {
-      "$ref": "#/$defs/Provenance"
+      "$ref": "#/$defs/Provenance",
+      "description": "Where the information in this record came from: source type, file or URL, citation, and retrieval time."
     },
     "notes": {
       "type": "array",
@@ -119,7 +124,8 @@
   "$defs": {
     "ComponentIri": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/electrode/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+      "pattern": "^https://w3id\\.org/battinfo/electrode/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+      "description": "Canonical BattINFO IRI in the electrode/ namespace (https://w3id.org/battinfo/electrode/xxxx-xxxx-xxxx-xxxx)."
     },
     "ComponentSpecIri": {
       "type": "string",
@@ -127,11 +133,13 @@
     },
     "ShortId": {
       "type": "string",
-      "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$"
+      "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$",
+      "description": "Short human-friendly identifier derived from the record IRI (Crockford base32, 6-16 characters)."
     },
     "UnixTime": {
       "type": "integer",
-      "minimum": 0
+      "minimum": 0,
+      "description": "Unix timestamp in whole seconds since 1970-01-01T00:00:00Z."
     },
     "FlexDate": {
       "oneOf": [
@@ -139,13 +147,17 @@
           "$ref": "#/$defs/UnixTime"
         },
         {
-          "type": "string"
+          "type": "string",
+          "pattern": "^\\d{4}(-\\d{2}(-\\d{2})?)?$",
+          "description": "ISO 8601 calendar date string: YYYY, YYYY-MM, or YYYY-MM-DD."
         }
-      ]
+      ],
+      "description": "Date as an ISO 8601 string (YYYY, YYYY-MM, or YYYY-MM-DD) or a Unix timestamp in seconds."
     },
     "DatasetIri": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+      "pattern": "^https://w3id\\.org/battinfo/dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+      "description": "Canonical BattINFO IRI in the dataset/ namespace (https://w3id.org/battinfo/dataset/xxxx-xxxx-xxxx-xxxx)."
     },
     "DatasetLink": {
       "type": "object",
@@ -155,7 +167,8 @@
       ],
       "properties": {
         "id": {
-          "$ref": "#/$defs/DatasetIri"
+          "$ref": "#/$defs/DatasetIri",
+          "description": "Canonical IRI of the linked dataset record."
         },
         "role": {
           "type": "string",
@@ -165,13 +178,16 @@
             "report",
             "metadata",
             "other"
-          ]
+          ],
+          "description": "Role of the linked dataset as a whole relative to this record (record level; the per-file role lives on the dataset's distribution entries)."
         }
-      }
+      },
+      "description": "Link to a dataset record, with the role the dataset plays for this record."
     },
     "OrganizationIri": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+      "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+      "description": "Canonical BattINFO IRI in the organization/ namespace (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx)."
     },
     "Organization": {
       "type": "object",
@@ -181,20 +197,25 @@
       ],
       "properties": {
         "type": {
-          "const": "Organization"
+          "const": "Organization",
+          "description": "JSON-LD type discriminator."
         },
         "id": {
-          "$ref": "#/$defs/OrganizationIri"
+          "$ref": "#/$defs/OrganizationIri",
+          "description": "Canonical BattINFO organization IRI linking this party to its organization record."
         },
         "name": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Organization name."
         },
         "url": {
           "type": "string",
-          "format": "uri"
+          "format": "uri",
+          "description": "Homepage URL."
         }
-      }
+      },
+      "description": "An organization referenced by name, with an optional canonical BattINFO organization IRI."
     },
     "OrgRef": {
       "oneOf": [
@@ -205,7 +226,8 @@
         {
           "$ref": "#/$defs/Organization"
         }
-      ]
+      ],
+      "description": "An organization, as either a plain name string or a structured Organization object that can carry a canonical organization IRI."
     },
     "Funding": {
       "type": "object",
@@ -317,13 +339,16 @@
             "literature",
             "manual",
             "other"
-          ]
+          ],
+          "description": "Kind of source this record was created from."
         },
         "source_name": {
-          "type": "string"
+          "type": "string",
+          "description": "Human-readable name of the source (document title, instrument, lab, or system)."
         },
         "source_file": {
-          "type": "string"
+          "type": "string",
+          "description": "Filename or path of the source file, when the record was derived from a file."
         },
         "source_url": {
           "oneOf": [
@@ -334,37 +359,30 @@
             {
               "type": "null"
             }
-          ]
+          ],
+          "description": "URL of the source document or landing page, when available."
         },
         "citation": {
           "type": "string",
-          "format": "uri"
+          "format": "uri",
+          "description": "Resolvable citation target to use for attribution, typically a DOI URL."
         },
         "citation_doi": {
           "type": "string",
-          "pattern": "^10\\.\\d{4,9}/[-._;()/:A-Za-z0-9]+$"
+          "pattern": "^10\\.\\d{4,9}/[-._;()/:A-Za-z0-9]+$",
+          "description": "DOI of the source publication (bare '10.xxxx/...' form). Prefer provenance.citation with a DOI resolver URL."
         },
         "retrieved_at": {
-          "$ref": "#/$defs/UnixTime"
-        },
-        "file_hash": {
-          "type": "string",
-          "pattern": "^[A-Fa-f0-9]{64}$"
-        },
-        "workflow_version": {
-          "type": "string"
-        },
-        "curated_by": {
-          "type": "string"
-        },
-        "comment": {
-          "type": "string"
+          "$ref": "#/$defs/UnixTime",
+          "description": "Unix timestamp (seconds since epoch, UTC) when the source was retrieved or the record was captured."
         },
         "battinfo_version": {
           "type": "string",
-          "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+          "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$",
+          "description": "Version of the battinfo library that wrote this record (semantic versioning); stamped on save."
         }
-      }
+      },
+      "description": "Where the information in this record came from: source type, file or URL, citation, and retrieval time."
     }
   }
 }

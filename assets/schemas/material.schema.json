@@ -14,7 +14,8 @@
   "properties": {
     "schema_version": {
       "type": "string",
-      "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$",
+      "description": "Version of the record schema this document conforms to (semantic versioning); stamped by the library on save."
     },
     "material": {
       "type": "object",
@@ -28,7 +29,8 @@
           "$ref": "#/$defs/MaterialIri"
         },
         "material_spec_id": {
-          "$ref": "#/$defs/MaterialSpecIri"
+          "$ref": "#/$defs/MaterialSpecIri",
+          "description": "IRI of the material-spec this physical lot realizes."
         },
         "short_id": {
           "$ref": "#/$defs/ShortId"
@@ -42,20 +44,24 @@
           "description": "Manufacturer / supplier lot or batch number."
         },
         "batch_id": {
-          "type": "string"
+          "type": "string",
+          "description": "Internal lab batch identifier, when different from the supplier lot."
         },
         "supplier": {
-          "$ref": "#/$defs/OrgRef"
+          "$ref": "#/$defs/OrgRef",
+          "description": "Supplier or vendor the item was sourced from."
         },
         "received_date": {
-          "$ref": "#/$defs/FlexDate"
+          "$ref": "#/$defs/FlexDate",
+          "description": "Date the lot was received (YYYY, YYYY-MM, or YYYY-MM-DD, or Unix timestamp)."
         },
         "opened_date": {
           "$ref": "#/$defs/FlexDate",
           "description": "Date this lot was first opened / put into use."
         },
         "expires_at": {
-          "$ref": "#/$defs/FlexDate"
+          "$ref": "#/$defs/FlexDate",
+          "description": "Expiry or retest date for the lot (YYYY, YYYY-MM, or YYYY-MM-DD, or Unix timestamp)."
         },
         "amount": {
           "$ref": "modules/common/quantity.schema.json",
@@ -77,12 +83,15 @@
           "description": "Characterization datasets for this material lot (XRD, SEM, ICP, PSD, ...)."
         },
         "property": {
-          "$ref": "modules/common/quantitative-properties.schema.json"
+          "$ref": "modules/common/quantitative-properties.schema.json",
+          "description": "Named quantity map of technical properties (snake_case key to value+unit quantity)."
         },
         "comment": {
-          "type": "string"
+          "type": "string",
+          "description": "Free-text comment."
         }
-      }
+      },
+      "description": "The physical material lot being described."
     },
     "provenance": {
       "type": "object",
@@ -101,13 +110,16 @@
             "literature",
             "manual",
             "other"
-          ]
+          ],
+          "description": "Kind of source this record was created from."
         },
         "source_name": {
-          "type": "string"
+          "type": "string",
+          "description": "Human-readable name of the source (document title, instrument, lab, or system)."
         },
         "source_file": {
-          "type": "string"
+          "type": "string",
+          "description": "Filename or path of the source file, when the record was derived from a file."
         },
         "source_url": {
           "oneOf": [
@@ -118,43 +130,54 @@
             {
               "type": "null"
             }
-          ]
+          ],
+          "description": "URL of the source document or landing page, when available."
         },
         "citation": {
           "type": "string",
-          "format": "uri"
+          "format": "uri",
+          "description": "Resolvable citation target to use for attribution, typically a DOI URL."
         },
         "citation_doi": {
           "type": "string",
-          "pattern": "^10\\.\\d{4,9}/[-._;()/:A-Za-z0-9]+$"
+          "pattern": "^10\\.\\d{4,9}/[-._;()/:A-Za-z0-9]+$",
+          "description": "DOI of the source publication (bare '10.xxxx/...' form). Prefer provenance.citation with a DOI resolver URL."
         },
         "retrieved_at": {
-          "$ref": "#/$defs/UnixTime"
+          "$ref": "#/$defs/UnixTime",
+          "description": "Unix timestamp (seconds since epoch, UTC) when the source was retrieved or the record was captured."
         },
         "file_hash": {
           "type": "string",
-          "pattern": "^[A-Fa-f0-9]{64}$"
+          "pattern": "^[A-Fa-f0-9]{64}$",
+          "description": "SHA-256 hash of the source file, for integrity verification."
         },
         "workflow_version": {
-          "type": "string"
+          "type": "string",
+          "description": "Version of the ingest/curation workflow that produced this record."
         },
         "curated_by": {
-          "type": "string"
+          "type": "string",
+          "description": "Name or identifier of the person who curated this record."
         },
         "comment": {
-          "type": "string"
+          "type": "string",
+          "description": "Free-text provenance comment."
         },
         "battinfo_version": {
           "type": "string",
-          "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+          "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$",
+          "description": "Version of the battinfo library that wrote this record (semantic versioning); stamped on save."
         }
-      }
+      },
+      "description": "Where the information in this record came from: source type, file or URL, citation, and retrieval time."
     },
     "notes": {
       "type": "array",
       "items": {
         "type": "string"
-      }
+      },
+      "description": "Free-text notes carried with the record."
     },
     "funding": {
       "$ref": "#/$defs/Funding"
@@ -211,17 +234,21 @@
         },
         {
           "type": "string",
-          "description": "ISO 8601 date string (YYYY-MM-DD or YYYY-MM)."
+          "description": "ISO 8601 calendar date string: YYYY, YYYY-MM, or YYYY-MM-DD.",
+          "pattern": "^\\d{4}(-\\d{2}(-\\d{2})?)?$"
         }
-      ]
+      ],
+      "description": "Date as an ISO 8601 string (YYYY, YYYY-MM, or YYYY-MM-DD) or a Unix timestamp in seconds."
     },
     "ShortId": {
       "type": "string",
-      "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$"
+      "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$",
+      "description": "Short human-friendly identifier derived from the record IRI (Crockford base32, 6-16 characters)."
     },
     "MaterialIri": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/material/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+      "pattern": "^https://w3id\\.org/battinfo/material/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+      "description": "Canonical BattINFO IRI in the material/ namespace (https://w3id.org/battinfo/material/xxxx-xxxx-xxxx-xxxx)."
     },
     "MaterialSpecIri": {
       "type": "string",
@@ -229,7 +256,8 @@
     },
     "DatasetIri": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+      "pattern": "^https://w3id\\.org/battinfo/dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+      "description": "Canonical BattINFO IRI in the dataset/ namespace (https://w3id.org/battinfo/dataset/xxxx-xxxx-xxxx-xxxx)."
     },
     "DatasetLink": {
       "type": "object",
@@ -239,7 +267,8 @@
       ],
       "properties": {
         "id": {
-          "$ref": "#/$defs/DatasetIri"
+          "$ref": "#/$defs/DatasetIri",
+          "description": "Canonical IRI of the linked dataset record."
         },
         "role": {
           "type": "string",
@@ -249,13 +278,16 @@
             "report",
             "metadata",
             "other"
-          ]
+          ],
+          "description": "Role of the linked dataset as a whole relative to this record (record level; the per-file role lives on the dataset's distribution entries)."
         }
-      }
+      },
+      "description": "Link to a dataset record, with the role the dataset plays for this record."
     },
     "OrganizationIri": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+      "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+      "description": "Canonical BattINFO IRI in the organization/ namespace (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx)."
     },
     "Organization": {
       "type": "object",
@@ -265,20 +297,25 @@
       ],
       "properties": {
         "type": {
-          "const": "Organization"
+          "const": "Organization",
+          "description": "JSON-LD type discriminator."
         },
         "id": {
-          "$ref": "#/$defs/OrganizationIri"
+          "$ref": "#/$defs/OrganizationIri",
+          "description": "Canonical BattINFO organization IRI linking this party to its organization record."
         },
         "name": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Organization name."
         },
         "url": {
           "type": "string",
-          "format": "uri"
+          "format": "uri",
+          "description": "Homepage URL."
         }
-      }
+      },
+      "description": "An organization referenced by name, with an optional canonical BattINFO organization IRI."
     },
     "OrgRef": {
       "oneOf": [
@@ -289,7 +326,8 @@
         {
           "$ref": "#/$defs/Organization"
         }
-      ]
+      ],
+      "description": "An organization, as either a plain name string or a structured Organization object that can carry a canonical organization IRI."
     },
     "Funding": {
       "type": "object",

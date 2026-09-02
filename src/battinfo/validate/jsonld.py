@@ -137,6 +137,7 @@ _EXPLICIT_ALLOWED_TYPE_TERMS = {
     "CalenderedCoatingThickness",
     "CalenderedDensity",
     "CelsiusTemperature",
+    "Additive",
     "ConductiveAdditive",
     "D50ParticleSize",
     "Density",

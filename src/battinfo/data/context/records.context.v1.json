@@ -717,6 +717,25 @@
     "positive_electrode": "electrochemistry:electrochemistry_aff732a9_238a_4734_977c_b2ba202af126",
     "negative_electrode": "electrochemistry:electrochemistry_c94c041b_8ea6_43e7_85cc_d2bce7785b4c",
     "positive_electrode_basis": "battinfo:positiveElectrodeBasis",
-    "negative_electrode_basis": "battinfo:negativeElectrodeBasis"
+    "negative_electrode_basis": "battinfo:negativeElectrodeBasis",
+    "discharging_capacity": "electrochemistry:electrochemistry_0141b5c2_9f15_46f4_82e6_92a104faa476",
+    "charging_capacity": "electrochemistry:electrochemistry_10763eb0_dbc9_4d34_bd1a_7b8996590d45",
+    "discharging_energy": "electrochemistry:electrochemistry_ca36cbf3_1fed_4b88_9177_b4e16ad00cf7",
+    "charging_energy": "electrochemistry:electrochemistry_2ab7af60_da58_4243_b3bc_cbb2155cac53",
+    "ChargingCapacity": "electrochemistry:electrochemistry_10763eb0_dbc9_4d34_bd1a_7b8996590d45",
+    "ChargingEnergy": "electrochemistry:electrochemistry_2ab7af60_da58_4243_b3bc_cbb2155cac53",
+    "DischargingCapacity": "electrochemistry:electrochemistry_0141b5c2_9f15_46f4_82e6_92a104faa476",
+    "DischargingEnergy": "electrochemistry:electrochemistry_ca36cbf3_1fed_4b88_9177_b4e16ad00cf7",
+    "MilliSiemensPerCentiMetre": "emmo:MilliSiemensPerCentiMetre",
+    "SquareMetrePerGram": "emmo:SquareMetrePerGram",
+    "GramPerMole": "emmo:GramPerMole",
+    "MolPerKilogram": "emmo:MolPerKilogram",
+    "NanoMetre": "emmo:NanoMetre",
+    "MilliPascalSecond": "emmo:MilliPascalSecond",
+    "MilliGram": "emmo:MilliGram",
+    "Hertz": "emmo:Hertz",
+    "KilogramPerCubicMetre": "emmo:KilogramPerCubicMetre",
+    "CubicCentiMetre": "emmo:CubicCentiMetre",
+    "SquareCentiMetre": "emmo:SquareCentiMetre"
   }
 }

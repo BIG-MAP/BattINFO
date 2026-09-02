@@ -3893,10 +3893,14 @@ def config_show() -> None:
 # ---------------------------------------------------------------------------
 
 _SPEC_CATEGORIES: dict[str, str] = {
+    "discharging_capacity": "capacity",
+    "charging_capacity": "capacity",
     "nominal_capacity": "capacity",
     "minimum_capacity": "capacity",
     "min_capacity": "capacity",
     "rated_capacity": "capacity",
+    "discharging_energy": "energy",
+    "charging_energy": "energy",
     "typical_energy": "energy",
     "rated_energy": "energy",
     "nominal_energy": "energy",

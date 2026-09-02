@@ -110,6 +110,14 @@ _KNOWN_SCHEMA_ONLY_SPEC_FIELDS: frozenset[str] = frozenset({
     "upper_voltage_limit",
     # energy synonym — schema splits rated/nominal/typical; bundle uses typical/rated
     "nominal_energy",
+    # measured-instance keys — direction-qualified measured values for a cell
+    # instance's `measured` block; deliberately NOT spec-authoring properties,
+    # because on a spec record capacity/energy statements are manufacturer
+    # declarations (nominal_/rated_/typical_).
+    "discharging_capacity",
+    "charging_capacity",
+    "discharging_energy",
+    "charging_energy",
 })
 
 
