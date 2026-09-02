@@ -177,4 +177,14 @@ def test_facets_rollup() -> None:
     assert facets["control_modes"] == ["current", "voltage"]
     assert facets["c_rates"] == [0.02, 0.5, 1.0]
     assert facets["voltage_window_V"] == [2.5, 4.2]
-    assert facets["modes"] == ["group"]
+    # modes recurses into the cycle group: leaf modes in first-encounter
+    # order, never "group" itself (#361).
+    assert facets["modes"] == ["cc", "cv", "rest"]
+
+
+def test_facets_modes_recurse_into_nested_groups() -> None:
+    inner = parse_experiment(["Charge at 1 C until 4.2 V", "Rest for 5 minutes"], cycles=2)
+    outer = Step(mode="group", count=3, steps=inner)
+    facets = compute_facets([outer])
+    assert facets["modes"] == ["cc", "rest"]
+    assert "group" not in facets["modes"]
