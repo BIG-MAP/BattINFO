@@ -3097,22 +3097,49 @@ class AuthoringWorkspace:
             return
         self._index_saved_cells()
 
-    def _registry_resources(self, resource_type: str, q: str | None = None) -> builtins.list[dict]:
-        """GET /resources?resource_type=... [&q=...] — raw summaries, [] if unreachable."""
+    _RESOURCES_PAGE_LIMIT = 1000  # registry's maximum limit= for /resources
+
+    def _fetch_resource_pages(self, params: dict, *, timeout: int = 60) -> builtins.list[dict]:
+        """GET /resources with exhaustive offset pagination.
+
+        A single GET of /resources is capped by the server (default 100 rows,
+        newest first), so listings silently truncate once the corpus outgrows
+        one page — the trap that made lookups miss registered records and
+        re-mint duplicate IRIs. Pages by advancing offset until a short page
+        signals exhaustion. A server that ignores offset (pre-pagination
+        deployment) returns the same page again; that repeat is detected and
+        the loop stops with the rows it has rather than spinning forever.
+        """
         import urllib.parse
         import urllib.request
 
+        rows: list[dict] = []
+        prev_page: list | None = None
+        offset = 0
+        while True:
+            query = dict(params, limit=self._RESOURCES_PAGE_LIMIT, offset=offset)
+            url = f"{self._registry_url}/resources?" + urllib.parse.urlencode(query)
+            req = urllib.request.Request(url, headers={"User-Agent": "battinfo-client/1.0"})
+            with urllib.request.urlopen(req, timeout=timeout) as resp:  # noqa: S310
+                page = json.loads(resp.read().decode())
+            if not isinstance(page, list) or (offset and page == prev_page):
+                return rows
+            rows.extend(page)
+            if len(page) < self._RESOURCES_PAGE_LIMIT:
+                return rows
+            prev_page = page
+            offset += self._RESOURCES_PAGE_LIMIT
+
+    def _registry_resources(self, resource_type: str, q: str | None = None) -> builtins.list[dict]:
+        """GET /resources?resource_type=... [&q=...] — raw summaries, [] if unreachable."""
         if not self._registry_url:
             print("  No registry configured (registry_url=None).")
             return []
         params = {"resource_type": resource_type}
         if q:
             params["q"] = q
-        url = f"{self._registry_url}/resources?" + urllib.parse.urlencode(params)
         try:
-            req = urllib.request.Request(url, headers={"User-Agent": "battinfo-client/1.0"})
-            with urllib.request.urlopen(req, timeout=30) as resp:  # noqa: S310
-                return json.loads(resp.read().decode())
+            return self._fetch_resource_pages(params, timeout=30)
         except Exception as exc:  # registry down / network - degrade gracefully
             print(f"  Registry unreachable ({exc}).")
             return []
@@ -6415,11 +6442,7 @@ class AuthoringWorkspace:
 
     def _build_api_cache(self) -> builtins.list[dict]:
         """Fetch all published cell-spec summaries from the registry API."""
-        import urllib.request
-        url = f"{self._registry_url}/resources?resource_type=cell_spec"
-        req = urllib.request.Request(url, headers={"User-Agent": "battinfo-client/1.0"})
-        with urllib.request.urlopen(req, timeout=60) as resp:  # noqa: S310
-            data = json.loads(resp.read().decode())
+        data = self._fetch_resource_pages({"resource_type": "cell_spec"})
 
         entries: list[dict] = []
         for r in data:

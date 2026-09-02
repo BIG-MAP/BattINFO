@@ -7,6 +7,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Registry listings paginate; lookups no longer miss older records.** A
+  single GET of `/resources` is capped by the server at one page (100 rows,
+  newest first), and both the cell-spec search cache and the cell/serial
+  lookup treated that first page as the whole catalog. Once the corpus
+  outgrew a page, `ws.search` reported registered specs as missing and the
+  cell lookup silently re-minted IRIs for serials that already had canonical
+  ones (#340, #341). The client now pages with `limit`/`offset` until the
+  listing is exhausted, and stops safely against a registry that predates
+  pagination support.
+
 ### Added
 
 - **`Step` gains an optional `step_id`.** A test-protocol method step can now
