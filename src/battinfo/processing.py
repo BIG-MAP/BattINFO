@@ -124,15 +124,23 @@ def _read_bdf_pandas(source: Path, *, validate: bool = False):
     still emits a "tz defaulted to UTC" UserWarning for naive-datetime formats,
     so that specific warning is suppressed here.
     """
+    import inspect  # noqa: PLC0415
     import warnings as _warnings  # noqa: PLC0415
 
     import bdf  # noqa: PLC0415
+
+    # Older batterydf builds default to a LazyFrame and take lazy= to collect
+    # eagerly; current main dropped the kwarg (read() is always eager, scan()
+    # is the lazy path). Sniff the signature so both work.
+    read_kwargs: dict = {"validate": validate, "tz": "UTC"}
+    if "lazy" in inspect.signature(bdf.read).parameters:
+        read_kwargs["lazy"] = False
 
     with _warnings.catch_warnings():
         _warnings.filterwarnings(
             "ignore", message="tz defaulted to UTC", category=UserWarning
         )
-        frame, metadata = bdf.read(source, validate=validate, lazy=False, tz="UTC")
+        frame, metadata = bdf.read(source, **read_kwargs)
     return frame.to_pandas(), metadata
 
 
