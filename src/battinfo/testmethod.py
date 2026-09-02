@@ -25,6 +25,7 @@ Examples::
     "Discharge at 200 mA for 90 seconds"
     "Rest for 30 minutes"
 """
+
 from __future__ import annotations
 
 import re
@@ -69,9 +70,7 @@ def _require_member(value: Any, allowed: tuple[str, ...], field: str) -> Any:
     if value is None:
         return value
     if value not in allowed:
-        raise ValueError(
-            f"{field} must be one of {list(allowed)}; got {value!r}."
-        )
+        raise ValueError(f"{field} must be one of {list(allowed)}; got {value!r}.")
     return value
 
 
@@ -85,6 +84,7 @@ class ExperimentSyntaxError(ValueError):
 
 # ── Model ─────────────────────────────────────────────────────────────────────
 
+
 class Quantity(BaseModel):
     """A value (or min/max window) with its unit.
 
@@ -93,6 +93,7 @@ class Quantity(BaseModel):
     ``{min_value: 2.5, max_value: 4.2, unit: "V"}`` — e.g. a test-spec voltage
     window. At least one of ``value``/``min_value``/``max_value`` is required.
     """
+
     model_config = ConfigDict(extra="forbid")
     value: Optional[float] = None
     min_value: Optional[float] = None
@@ -107,26 +108,20 @@ class Quantity(BaseModel):
                 "(e.g. {'value': 25, 'unit': 'degC'} or "
                 "{'min_value': 2.5, 'max_value': 4.2, 'unit': 'V'})."
             )
-        if (
-            self.min_value is not None
-            and self.max_value is not None
-            and self.min_value > self.max_value
-        ):
-            raise ValueError(
-                f"Quantity min_value ({self.min_value}) must not exceed "
-                f"max_value ({self.max_value})."
-            )
+        if self.min_value is not None and self.max_value is not None and self.min_value > self.max_value:
+            raise ValueError(f"Quantity min_value ({self.min_value}) must not exceed max_value ({self.max_value}).")
         return self
 
 
 class Termination(BaseModel):
     """A single stop condition.  A step's ``termination`` list is any-of (the
     step ends when the first condition is met — PyBaMM's ``or``)."""
+
     model_config = ConfigDict(extra="forbid")
-    quantity: str                      # voltage | current | c_rate | capacity | duration
+    quantity: str  # voltage | current | c_rate | capacity | duration
     value: float
     unit: str
-    direction: Optional[str] = None    # below | above | elapsed (None for duration)
+    direction: Optional[str] = None  # below | above | elapsed (None for duration)
 
     @field_validator("quantity")
     @classmethod
@@ -142,10 +137,12 @@ class Termination(BaseModel):
 class Step(BaseModel):
     """One segment of a test method — a charge/discharge/hold/rest/scan step with
     setpoints, any-of stop conditions, and optional sub-steps (when ``mode`` is a group)."""
+
     model_config = ConfigDict(extra="forbid")
 
-    mode: str                          # cc | cv | cccv | cp | cr | rest | eis | scan | group
-    direction: Optional[str] = None    # charge | discharge | hold | rest | None
+    mode: str  # cc | cv | cccv | cp | cr | rest | eis | scan | group
+    step_id: Optional[int] = None  # identifier in the test program/schedule; aligns with BDF step_id
+    direction: Optional[str] = None  # charge | discharge | hold | rest | None
     setpoints: dict[str, Quantity] = Field(default_factory=dict)
     termination: list[Termination] = Field(default_factory=list)
     duration: Optional[Quantity] = None
@@ -187,9 +184,18 @@ _UNIT_TABLE: dict[str, tuple[str, str, float]] = {
 }
 
 _TIME_TABLE: dict[str, float] = {
-    "s": 1.0, "sec": 1.0, "second": 1.0, "seconds": 1.0,
-    "m": 60.0, "min": 60.0, "minute": 60.0, "minutes": 60.0,
-    "h": 3600.0, "hr": 3600.0, "hour": 3600.0, "hours": 3600.0,
+    "s": 1.0,
+    "sec": 1.0,
+    "second": 1.0,
+    "seconds": 1.0,
+    "m": 60.0,
+    "min": 60.0,
+    "minute": 60.0,
+    "minutes": 60.0,
+    "h": 3600.0,
+    "hr": 3600.0,
+    "hour": 3600.0,
+    "hours": 3600.0,
 }
 
 _CRATE_DIV_RE = re.compile(r"^([cd])\s*/\s*([\d.]+)$", re.IGNORECASE)
@@ -222,9 +228,7 @@ def _parse_value(text: str) -> tuple[str, Quantity]:
         return "c_rate", Quantity(value=1.0 / denom, unit="A/Ah")
     m = _NUM_UNIT_RE.match(token)
     if not m:
-        raise ExperimentSyntaxError(
-            f"Could not parse value '{text}'. Expected e.g. 'C/10', '1C', '200 mA', '4.1 V'."
-        )
+        raise ExperimentSyntaxError(f"Could not parse value '{text}'. Expected e.g. 'C/10', '1C', '200 mA', '4.1 V'.")
     number = _to_float(m.group(1), text)
     unit_key = m.group(2).lower()
     if unit_key not in _UNIT_TABLE:
@@ -255,13 +259,17 @@ def _termination_from_value(kind: str, qty: Quantity, direction: str | None) -> 
     """Map a parsed ``until`` value to a termination, inferring approach direction
     from the step's charge/discharge sense when not otherwise determined."""
     if kind == "voltage":
-        return Termination(quantity="voltage", value=_require_value(qty, "A voltage termination"),
-                           unit=qty.unit,
-                           direction="above" if direction == "charge" else "below")
+        return Termination(
+            quantity="voltage",
+            value=_require_value(qty, "A voltage termination"),
+            unit=qty.unit,
+            direction="above" if direction == "charge" else "below",
+        )
     if kind in ("current", "c_rate"):
         # Cutoff currents are crossed from above as the cell relaxes/charges taper.
-        return Termination(quantity=kind, value=_require_value(qty, "A current termination"),
-                           unit=qty.unit, direction="below")
+        return Termination(
+            quantity=kind, value=_require_value(qty, "A current termination"), unit=qty.unit, direction="below"
+        )
     raise ExperimentSyntaxError(f"Unsupported termination quantity '{kind}'.")
 
 
@@ -296,11 +304,9 @@ def parse_step(text: str) -> Step:
     raw = text.strip()
     op_match = _OP_RE.match(raw)
     if not op_match:
-        raise ExperimentSyntaxError(
-            f"Step must start with Charge, Discharge, Hold or Rest: '{text}'."
-        )
+        raise ExperimentSyntaxError(f"Step must start with Charge, Discharge, Hold or Rest: '{text}'.")
     op = op_match.group(1).lower()
-    remainder = raw[op_match.end():].strip()
+    remainder = raw[op_match.end() :].strip()
 
     mode: str
     direction: str | None
@@ -313,10 +319,10 @@ def parse_step(text: str) -> Step:
         at_match = _AT_RE.match(remainder)
         if not at_match:
             raise ExperimentSyntaxError(f"'{op}' step requires 'at <value>': '{text}'.")
-        after_at = remainder[at_match.end():]
+        after_at = remainder[at_match.end() :]
         boundary = _KW_BOUNDARY_RE.search(after_at)
         if boundary:
-            value_str, tail = after_at[:boundary.start()], after_at[boundary.start():]
+            value_str, tail = after_at[: boundary.start()], after_at[boundary.start() :]
         else:
             value_str, tail = after_at, ""
         kind, qty = _parse_value(value_str)
@@ -339,9 +345,7 @@ def parse_step(text: str) -> Step:
             kind, qty = _parse_value(clause[6:])
             terminations.append(_termination_from_value(kind, qty, direction))
         else:
-            raise ExperimentSyntaxError(
-                f"Unexpected clause '{clause}' in '{text}'. Expected 'for ...' or 'until ...'."
-            )
+            raise ExperimentSyntaxError(f"Unexpected clause '{clause}' in '{text}'. Expected 'for ...' or 'until ...'.")
 
     return Step(
         mode=mode,
@@ -365,6 +369,7 @@ def parse_experiment(steps: Sequence[str], cycles: int | None = None) -> list[St
 
 
 # ── Rendering (inverse of parsing) ──────────────────────────────────────────
+
 
 def _fmt_number(value: float) -> str:
     return f"{value:g}"
@@ -461,6 +466,7 @@ def render_method(steps: Sequence[Step]) -> tuple[list[str], int]:
 
 # ── Facets (derived filter index) ──────────────────────────────────────────
 
+
 def _iter_leaf_steps(steps: Sequence[Step]):
     for step in steps:
         if step.mode == "group":
@@ -469,12 +475,10 @@ def _iter_leaf_steps(steps: Sequence[Step]):
             yield step
 
 
-_CONTROL_MODE = {"cc": "current", "cv": "voltage", "cccv": "current",
-                 "cp": "power", "cr": "resistance"}
+_CONTROL_MODE = {"cc": "current", "cv": "voltage", "cccv": "current", "cp": "power", "cr": "resistance"}
 
 
-def compute_facets(steps: Sequence[Step],
-                   conditions: dict[str, Quantity] | None = None) -> dict[str, Any]:
+def compute_facets(steps: Sequence[Step], conditions: dict[str, Quantity] | None = None) -> dict[str, Any]:
     """Derive a flat, queryable rollup of a method for cheap agent filtering."""
     modes: list[str] = []
     directions: set[str] = set()
@@ -509,9 +513,7 @@ def compute_facets(steps: Sequence[Step],
 
     for key, qty in (conditions or {}).items():
         if key in ("temperature", "ambient_temperature", "room_temperature"):
-            temperatures.extend(
-                v for v in (qty.value, qty.min_value, qty.max_value) if v is not None
-            )
+            temperatures.extend(v for v in (qty.value, qty.min_value, qty.max_value) if v is not None)
 
     leaf_modes = {s.mode for s in _iter_leaf_steps(steps)}
     facets: dict[str, Any] = {

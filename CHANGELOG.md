@@ -9,6 +9,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **`Step` gains an optional `step_id`.** A test-protocol method step can now
+  carry the identifier assigned to it in the test program or schedule. The
+  field name and semantics align with BDF `step_id`, but BattINFO does not
+  depend on the BDF ontology; the field is not zero-based, contiguous,
+  monotonic, or unique. `step_id` is unset by default and omitted when not
+  given.
+
 - **`theoretical_specific_capacity` joins the parameter vocabulary.** The curated
   material-kind reference anchors (graphite 372 mAh/g, silicon 3579, lithium
   metal 3862, LFP 170) are theoretical stoichiometric capacities, while
