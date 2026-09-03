@@ -1,4 +1,4 @@
-# Materials: kind, spec, instance
+# The materials model
 
 Materials in BattINFO follow a **three-level model** — the spec + instance pattern
 every record family uses, with one universal level above it. It mirrors how cells

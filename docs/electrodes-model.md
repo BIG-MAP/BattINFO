@@ -1,4 +1,4 @@
-# Electrodes: kind, powder spec, electrode spec, batch
+# The electrodes model
 
 The material spec describes the **powder**; the electrode spec describes the
 **electrode**. They are different things that people routinely conflate, and

@@ -6,7 +6,6 @@
    pages/guides
    pages/howto
    pages/reference
-   reference-records/index
    pages/concepts
    community/index
 

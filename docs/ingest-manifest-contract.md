@@ -1,4 +1,4 @@
-# Ingest Manifest Contract
+# Ingest manifest contract
 
 `battinfo.ingest.json` is the folder-local manifest for the `battinfo ingest ...`
 workflow.

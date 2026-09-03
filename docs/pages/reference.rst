@@ -1,10 +1,10 @@
 Reference
 =========
 
-Facts about the surface: every class, command, schema, property, and guarantee.
-The pages descend from what you call, to what comes out, to what is promised. The
-generated pages are produced from the code and mapping tables and drift-checked
-in CI, so they cannot rot.
+Facts about the surface, descending from what you call, to what a correct
+record looks like, to how each family is modeled, to what is promised. The
+generated pages are produced from the code and mapping tables and
+drift-checked in CI, so they cannot rot.
 
 Surfaces
 --------
@@ -18,10 +18,23 @@ workspace, the everyday way most people author records, see the how-to guides.
    api-reference
    cli-reference
 
-Record types
-------------
+Reference records
+-----------------
 
-One page per record family: the fields each carries, and how they link.
+One exemplar per record type: the authoring code, the canonical record it
+produces, and the JSON-LD that record emits — generated against the current
+library and drift-gated, so they always show what the code does today.
+
+.. toctree::
+   :maxdepth: 1
+
+   ../reference-records/index
+
+Record models
+-------------
+
+How each record family is modeled: the levels, the fields, the links between
+records, and the design decisions behind them.
 
 .. toctree::
    :maxdepth: 1
@@ -31,8 +44,8 @@ One page per record family: the fields each carries, and how they link.
    ../electrodes-model
    ../component-specs
    ../cell-fleet
-   ../test-specs
    ../engineering-cell-description
+   ../test-specs
 
 Schemas and properties
 ----------------------

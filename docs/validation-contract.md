@@ -1,4 +1,4 @@
-# BattINFO Validation Contract
+# Validation contract
 
 This document defines the validation behavior that consumers can rely on for the supported BattINFO scope.
 
