@@ -34,11 +34,44 @@ from battinfo.api import create_component_spec
 record = create_component_spec(
     "electrolyte",
     uid="0rp6-kncv-cyem-qwcd",
-    name="LP30 + 2% VC",
-    # The electrolyte class is required. It goes through body= because the
-    # record field is also named "family" — the function's first argument.
-    body={"family": "organic"},
-    source_type="lab",
+    name="1M LiPF6 in EC:EMC 3:7 + 2% VC",
+    # Composition fields go through body= (the class field is also named
+    # "family" — the function's first argument). Every constituent can
+    # cite its material-spec by IRI, so the formulation is assembled from
+    # materials, never retyped.
+    body={
+        "family": "organic",
+        "salt": {
+            "name": "LiPF6",
+            "material_spec_id": "https://w3id.org/battinfo/spec/t4wz-ff8s-6vp6-af48",
+            "cation": "Li+",
+            "anion": "PF6-",
+            "property": {"concentration": {"value": 1.0, "unit": "mol/L"}},
+        },
+        "solvent_mixture": {
+            "component": [
+                {
+                    "name": "EC",
+                    "material_spec_id": "https://w3id.org/battinfo/spec/xcv1-hpy1-b0bw-z5s2",
+                    "property": {"volume_fraction": {"value": 0.3, "unit": "1"}},
+                },
+                {
+                    "name": "EMC",
+                    "material_spec_id": "https://w3id.org/battinfo/spec/7p3d-2e22-7yae-spyb",
+                    "property": {"volume_fraction": {"value": 0.7, "unit": "1"}},
+                },
+            ]
+        },
+        "additive": [
+            {
+                "name": "VC",
+                "material_spec_id": "https://w3id.org/battinfo/spec/s6y8-5mne-94gx-e5ve",
+                "property": {"mass_fraction": {"value": 0.02, "unit": "1"}},
+            }
+        ],
+        "property": {"conductivity": {"value": 10.0, "unit": "mS/cm"}},
+    },
+    source_type="datasheet",
 )
 ```
 
@@ -50,11 +83,65 @@ The canonical record this produces:
   "electrolyte_spec": {
     "id": "https://w3id.org/battinfo/spec/0rp6-kncv-cyem-qwcd",
     "short_id": "0rp6kn",
-    "name": "LP30 + 2% VC",
-    "family": "organic"
+    "name": "1M LiPF6 in EC:EMC 3:7 + 2% VC",
+    "family": "organic",
+    "salt": {
+      "name": "LiPF6",
+      "material_spec_id": "https://w3id.org/battinfo/spec/t4wz-ff8s-6vp6-af48",
+      "cation": "Li+",
+      "anion": "PF6-",
+      "property": {
+        "concentration": {
+          "value": 1.0,
+          "unit": "mol/L"
+        }
+      }
+    },
+    "solvent_mixture": {
+      "component": [
+        {
+          "name": "EC",
+          "material_spec_id": "https://w3id.org/battinfo/spec/xcv1-hpy1-b0bw-z5s2",
+          "property": {
+            "volume_fraction": {
+              "value": 0.3,
+              "unit": "1"
+            }
+          }
+        },
+        {
+          "name": "EMC",
+          "material_spec_id": "https://w3id.org/battinfo/spec/7p3d-2e22-7yae-spyb",
+          "property": {
+            "volume_fraction": {
+              "value": 0.7,
+              "unit": "1"
+            }
+          }
+        }
+      ]
+    },
+    "additive": [
+      {
+        "name": "VC",
+        "material_spec_id": "https://w3id.org/battinfo/spec/s6y8-5mne-94gx-e5ve",
+        "property": {
+          "mass_fraction": {
+            "value": 0.02,
+            "unit": "1"
+          }
+        }
+      }
+    ],
+    "property": {
+      "conductivity": {
+        "value": 10.0,
+        "unit": "mS/cm"
+      }
+    }
   },
   "provenance": {
-    "source_type": "lab",
+    "source_type": "datasheet",
     "retrieved_at": 1750000000,
     "battinfo_version": "0.7.0"
   }
@@ -73,16 +160,115 @@ The JSON-LD it emits (`record_to_jsonld`, hosted-context mode):
       "battinfo": "https://w3id.org/battinfo/"
     }
   ],
-  "@type": "ElectrolyteSolution",
+  "@type": "OrganicElectrolyte",
+  "hasSolute": {
+    "@type": [
+      "LithiumHexafluorophosphate",
+      "Solute"
+    ],
+    "schema:name": "LiPF6",
+    "schema:isVariantOf": {
+      "@id": "https://w3id.org/battinfo/spec/t4wz-ff8s-6vp6-af48"
+    },
+    "hasProperty": {
+      "@type": [
+        "AmountConcentration",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "AmountConcentration",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 1.0
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#MolePerLitre"
+    }
+  },
+  "hasSolvent": [
+    {
+      "@type": [
+        "EthyleneCarbonate",
+        "Solvent"
+      ],
+      "schema:name": "EC",
+      "schema:isVariantOf": {
+        "@id": "https://w3id.org/battinfo/spec/xcv1-hpy1-b0bw-z5s2"
+      },
+      "hasProperty": {
+        "@type": [
+          "VolumeFraction",
+          "ConventionalProperty"
+        ],
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 0.3
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+      }
+    },
+    {
+      "@type": [
+        "EthylMethylCarbonate",
+        "Solvent"
+      ],
+      "schema:name": "EMC",
+      "schema:isVariantOf": {
+        "@id": "https://w3id.org/battinfo/spec/7p3d-2e22-7yae-spyb"
+      },
+      "hasProperty": {
+        "@type": [
+          "VolumeFraction",
+          "ConventionalProperty"
+        ],
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 0.7
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+      }
+    }
+  ],
+  "hasAdditive": {
+    "@type": [
+      "VinyleneCarbonate",
+      "ElectrolyteAdditive"
+    ],
+    "schema:name": "VC",
+    "schema:isVariantOf": {
+      "@id": "https://w3id.org/battinfo/spec/s6y8-5mne-94gx-e5ve"
+    },
+    "hasProperty": {
+      "@type": [
+        "MassFraction",
+        "ConventionalProperty"
+      ],
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.02
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+    }
+  },
+  "hasProperty": {
+    "@type": [
+      "ElectrolyticConductivity",
+      "ConventionalProperty"
+    ],
+    "skos:prefLabel": "ElectrolyticConductivity",
+    "hasNumericalPart": {
+      "@type": "RealData",
+      "hasNumberValue": 10.0
+    },
+    "hasMeasurementUnit": "https://w3id.org/emmo#MilliSiemensPerCentiMetre"
+  },
   "@id": "https://w3id.org/battinfo/spec/0rp6-kncv-cyem-qwcd",
-  "schema:name": "LP30 + 2% VC"
+  "schema:name": "1M LiPF6 in EC:EMC 3:7 + 2% VC"
 }
 ```
 
 What to notice:
 
-- This minimal spec types as `ElectrolyteSolution`; the family-specific classes (`OrganicElectrolyte`, `AqueousElectrolyte`) appear on the packaged example formulations that carry a full composition.
-- The composition fields (salt, solvent mixture, additives) reference material-specs by IRI — see the field reference below.
+- The node types by its family (`OrganicElectrolyte`), and the composition emits as typed constituents: the salt under `hasSolute` (itself EMMO-typed, e.g. `LithiumHexafluorophosphate`), the solvents under `hasSolvent`, the additive under `hasAdditive`.
+- Every constituent cites its material-spec by IRI, so the formulation is assembled from materials, never retyped.
 
 **Validated clean** — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).
 
