@@ -11,10 +11,10 @@
   },
   "dcterms:subject": [
     {
-      "@id": "https://w3id.org/battinfo/cell/7d9k-2m4p-8t3x-6nq5"
+      "@id": "https://w3id.org/battinfo/cell/y9xy-kr0v-y5tn-dfj7"
     },
     {
-      "@id": "https://w3id.org/battinfo/test/y9xy-kr0v-y5tn-dfj7"
+      "@id": "https://w3id.org/battinfo/test/6nec-h262-tthy-4rnt"
     }
   ]
 }
