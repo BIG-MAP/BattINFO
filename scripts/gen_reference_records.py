@@ -1,28 +1,25 @@
-"""Generate docs/records/ — the reference-records chapter.
+"""Generate docs/records/ — one page per record family, the single door.
 
-One page per record type, each carrying the same triplet, produced live at
-generation time so it cannot lie:
+Every family page carries everything about its thing, in one place:
 
-  1. the authoring code (a snippet function below; its SOURCE is what the page
-     shows, its EXECUTION produces the record beside it),
-  2. the canonical record JSON it produced (IRIs and timestamps normalized to
-     the same stable placeholders the web showcase uses),
-  3. the emitted JSON-LD (record_to_jsonld, hosted-context mode, so the
-     committed artifact stays compact and diffs stay semantic).
+  1. curated model prose, injected from docs/records/_fragments/<slug>.md
+     (edit the fragment, then regenerate — never the page),
+  2. reference examples: authoring snippets whose SOURCE is what the page
+     shows and whose EXECUTION produced the records beside them, each
+     validated under the STRICT policy (generation fails on any issue) and
+     emitted as JSON-LD where an emitter exists,
+  3. a field reference generated from the packaged JSON Schemas — the same
+     files `battinfo validate` and the registry gate enforce.
 
-Every record is validated under the STRICT policy during generation and this
-script fails on any issue — a schema or emitter change that breaks a reference
-record breaks this generator in the same PR that caused it.
-
-tests/test_reference_records.py regenerates the chapter in memory and fails on
-drift, so any PR that changes what these pages show must regenerate them:
+tests/test_reference_records.py regenerates the chapter in memory and fails
+on drift, so any PR that changes what these pages show must regenerate them:
 
     uv run python scripts/gen_reference_records.py           # write
     uv run python scripts/gen_reference_records.py --check   # CI drift gate
 
 The chapter is the review surface for change propagation: the git history of
-docs/records/ is the record of how schema, API, and emitter changes
-reached real examples.
+docs/records/ is the record of how schema, API, and emitter changes reached
+real examples.
 """
 from __future__ import annotations
 
@@ -47,13 +44,20 @@ normalize = _web.normalize
 snippet_source = _web.snippet_source
 
 OUT_DIR = ROOT / "docs" / "records"
+FRAGMENT_DIR = OUT_DIR / "_fragments"
+SCHEMA_DIR = ROOT / "src" / "battinfo" / "data" / "schemas"
+SCHEMA_URL_BASE = "https://w3id.org/battinfo/schema/"
 NL = chr(10)
+
+# Record-envelope keys shared by every family; everything else on a schema's
+# top level is family content and gets rendered.
+ENVELOPE_KEYS = {"schema_version", "provenance", "notes", "funding", "contributor", "license"}
 
 
 # ── Snippets: the code shown on the page IS the code that ran ────────────────
-# Each function returns the canonical record dict. Explicit IRIs are shown the
-# way the workspace would mint them; in the ws.add()/ws.save() flow you never
-# set them yourself.
+# Each function returns the canonical record dict. Explicit IRIs/uids are shown
+# the way the workspace would mint them; in the ws.add()/ws.save() flow you
+# never set them yourself.
 
 
 def snippet_cell_spec():
@@ -98,6 +102,83 @@ def snippet_cell_instance():
         source={"type": "lab", "retrieved_at": 1750000000},
     )
     record = cell.to_record()
+    return record
+
+
+def snippet_material_spec():
+    from battinfo.api import create_material_spec
+
+    record = create_material_spec(
+        uid="7d9k-2m4p-8t3x-6nq5",
+        name="NMC811 cathode powder",
+        kind="nmc811",                     # Level-1 key from the curated vocabulary
+        material_class="active_material",
+        source_type="datasheet",
+    )
+    return record
+
+
+def snippet_material():
+    from battinfo.api import create_material
+
+    record = create_material(
+        uid="y9xy-kr0v-y5tn-dfj7",
+        name="NMC811 lot 2026-04",
+        material_spec_id="https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+        source_type="lab",
+    )
+    return record
+
+
+def snippet_electrode_spec():
+    from battinfo.api import create_electrode_spec
+
+    record = create_electrode_spec(
+        uid="kxwy-5f5f-f682-hhch",
+        name="NMC811 cathode design A",
+        kind="nmc811",                     # the ACTIVE material's kind
+        active_material_spec_id="https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+        source_type="lab",
+    )
+    return record
+
+
+def snippet_electrode():
+    from battinfo.api import create_electrode
+
+    record = create_electrode(
+        uid="3w87-0ddf-ryjg-evxe",
+        name="Cathode disc, cell LAB-2026-0001",
+        electrode_spec_id="https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
+        source_type="lab",
+    )
+    return record
+
+
+def snippet_separator_spec():
+    from battinfo.api import create_component_spec
+
+    record = create_component_spec(
+        "separator",
+        uid="6nec-h262-tthy-4rnt",
+        name="Celgard 2500",
+        source_type="datasheet",
+    )
+    return record
+
+
+def snippet_electrolyte_spec():
+    from battinfo.api import create_component_spec
+
+    record = create_component_spec(
+        "electrolyte",
+        uid="0rp6-kncv-cyem-qwcd",
+        name="LP30 + 2% VC",
+        # The electrolyte class is required. It goes through body= because the
+        # record field is also named "family" — the function's first argument.
+        body={"family": "organic"},
+        source_type="lab",
+    )
     return record
 
 
@@ -211,23 +292,106 @@ def snippet_dataset_series():
     return record
 
 
-# ── Pages ────────────────────────────────────────────────────────────────────
-# Each page groups one or more sections; a section is one triplet. `notice`
-# lines name what a reader should find in the emitted JSON-LD — keep every
-# claim true of the current output (the drift test re-renders these pages, so
-# a stale claim survives only until the next regeneration is reviewed).
+def snippet_equipment_spec():
+    from battinfo.api import create_equipment_spec
 
-PAGES = [
+    record = create_equipment_spec(
+        id="https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+        name="SkyRC MC3000",
+        manufacturer="SkyRC",
+        model="MC3000",
+        equipment_class="cycler",          # category is data, never a namespace
+        channel_count=4,
+        supported_chemistries=["NiMH", "Li-ion", "LiFePO4", "Na-ion"],
+    )
+    return record
+
+
+def snippet_equipment():
+    from battinfo.api import create_equipment
+
+    record = create_equipment(
+        id="https://w3id.org/battinfo/equipment/y9xy-kr0v-y5tn-dfj7",
+        equipment_spec_id="https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+        serial_number="MC3K-2026-0001",
+        name="Cycler 1",
+        location="Lab B",
+        status="active",
+    )
+    return record
+
+
+def snippet_channel():
+    from battinfo.api import create_channel
+
+    # The channel uid is deterministic from (unit, index): registering the
+    # same bench twice never duplicates channels.
+    record = create_channel(
+        equipment_id="https://w3id.org/battinfo/equipment/y9xy-kr0v-y5tn-dfj7",
+        index=1,
+        label="MC3000-A/CH1",
+    )
+    return record
+
+
+def snippet_parameter_set():
+    from battinfo.api import create_parameter_set
+
+    record = create_parameter_set(
+        uid="fm9p-sqkk-tbx3-rr66",
+        name="Graphite density claims, Smith 2026",
+        material_kind="graphite",
+        claims=[
+            {
+                "parameter": "density",
+                "quantity": {"value": 2.26, "unit": "g/cm3"},
+                "provenance_class": "literature",
+            }
+        ],
+    )
+    return record
+
+
+def snippet_organization():
+    # No authoring API exists for organizations yet, so the reference example
+    # is the record itself (data-first, the documented fallback).
+    record = {
+        "schema_version": "0.2.0",
+        "organization": {
+            "id": "https://w3id.org/battinfo/organization/s6y8-5mne-94gx-e5ve",
+            "short_id": "s6y85m",
+            "type": "Manufacturer",
+            "name": "Example Instruments",
+            "url": "https://www.example-instruments.test",
+            "same_as": ["https://ror.org/000000000"],
+            "description": "Fictional bench-equipment manufacturer for this example.",
+        },
+        "provenance": {
+            "source_type": "manual",
+            "source_url": "https://www.example-instruments.test",
+            "retrieved_at": 1750000000,
+        },
+    }
+    return record
+
+
+# ── Families ─────────────────────────────────────────────────────────────────
+# One entry per record family = one page = the single door. `notice` lines
+# name what a reader should find in the emitted JSON-LD — keep every claim
+# true of the current output. `jsonld` names the record_to_jsonld type, or
+# None where no emitter exists yet (the page says so instead of hiding it).
+
+FAMILIES = [
     {
-        "slug": "cell-spec",
-        "title": "Cell spec",
+        "slug": "cells",
+        "title": "Cells",
         "intro": (
-            "The specification of a cell design — the datasheet, not a physical "
-            "unit. Physical cells (`cell-instance` records) point at it."
+            "How to describe a cell: the design as a **cell spec**, each "
+            "physical unit as a **cell instance** under it."
         ),
         "sections": [
             {
-                "heading": "A commercial cell from its datasheet",
+                "heading": "A cell spec, from its datasheet",
                 "fn": snippet_cell_spec,
                 "record_type": "cell-spec",
                 "notice": [
@@ -237,18 +401,8 @@ PAGES = [
                     "that seeded the IRI.",
                 ],
             },
-        ],
-    },
-    {
-        "slug": "cell-instance",
-        "title": "Cell instance",
-        "intro": (
-            "One physical cell: a serial number and batch under a cell spec. "
-            "The (spec, serial) pair seeds its IRI."
-        ),
-        "sections": [
             {
-                "heading": "A lab cell under a commercial spec",
+                "heading": "A cell instance under that spec",
                 "fn": snippet_cell_instance,
                 "record_type": "cell-instance",
                 "notice": [
@@ -258,14 +412,116 @@ PAGES = [
                 ],
             },
         ],
+        "schemas": ["cell-spec.schema.json", "cell-instance.schema.json"],
+        "see_also": "Recipes: [label your cells](../howto/label-your-cells.md), "
+                    "[build a cell from components](../howto/build-a-cell-from-components.md).",
     },
     {
-        "slug": "test",
-        "title": "Test and protocol",
+        "slug": "materials",
+        "title": "Materials",
         "intro": (
-            "Two layers: the protocol (`test-protocol`, the plan) and the test "
-            "(the execution on one cell). Planned conditions live on the "
-            "protocol; as-run conditions on the test. Conditions are "
+            "How to describe a material: the manufactured product as a "
+            "**material spec**, a physical lot or batch as a **material** "
+            "instance, both under a curated Level-1 kind."
+        ),
+        "sections": [
+            {
+                "heading": "A material spec (the powder as a product)",
+                "fn": snippet_material_spec,
+                "record_type": "material-spec",
+                "notice": [
+                    "The `kind` resolves to the chemical-substance class IRI that "
+                    "types the emitted node — the genome's aggregation axis.",
+                ],
+            },
+            {
+                "heading": "A material instance (one physical lot)",
+                "fn": snippet_material,
+                "record_type": "material",
+                "notice": [
+                    "`material_spec_id` links the lot to its product; the lot is "
+                    "what an electrode batch actually consumed.",
+                ],
+            },
+        ],
+        "schemas": ["material-spec.schema.json", "material.schema.json"],
+        "see_also": "Recipe: [register materials](../howto/register-materials.md).",
+    },
+    {
+        "slug": "electrodes",
+        "title": "Electrodes",
+        "intro": (
+            "How to describe an electrode: the design as an **electrode spec** "
+            "(composition, route, design values), a physical coated disc or "
+            "batch as an **electrode** instance."
+        ),
+        "sections": [
+            {
+                "heading": "An electrode spec (the design)",
+                "fn": snippet_electrode_spec,
+                "record_type": "electrode-spec",
+                "notice": [
+                    "`active_material_spec_id` cites the powder, so no design "
+                    "points at a bare vocabulary key.",
+                ],
+            },
+            {
+                "heading": "An electrode (the disc in one cell)",
+                "fn": snippet_electrode,
+                "record_type": "electrode",
+                "notice": [
+                    "`electrode_spec_id` carries the design; a cell instance "
+                    "points at this disc through `working_electrode_id`.",
+                ],
+            },
+        ],
+        "schemas": ["electrode-spec.schema.json", "electrode.schema.json"],
+        "see_also": "Recipe: [build a cell from components](../howto/build-a-cell-from-components.md).",
+    },
+    {
+        "slug": "components",
+        "title": "Components",
+        "intro": (
+            "How to describe the other cell components — separator, current "
+            "collector, electrolyte, housing. All four families share one "
+            "generic spec + instance surface; only their fields differ."
+        ),
+        "sections": [
+            {
+                "heading": "A separator spec",
+                "fn": snippet_separator_spec,
+                "record_type": "separator-spec",
+                "notice": [
+                    "The same `create_component_spec(family, ...)` call authors "
+                    "all four families; the family picks the schema.",
+                ],
+            },
+            {
+                "heading": "An electrolyte spec",
+                "fn": snippet_electrolyte_spec,
+                "record_type": "electrolyte-spec",
+                "notice": [
+                    "Electrolytes assemble material constituents (salt, solvents, "
+                    "additives) — see the composition fields in the field "
+                    "reference below.",
+                ],
+            },
+        ],
+        "schemas": [
+            "separator-spec.schema.json", "separator.schema.json",
+            "current-collector-spec.schema.json", "current-collector.schema.json",
+            "electrolyte-spec.schema.json", "electrolyte.schema.json",
+            "housing-spec.schema.json", "housing.schema.json",
+        ],
+        "see_also": "Recipe: [build a cell from components](../howto/build-a-cell-from-components.md).",
+    },
+    {
+        "slug": "tests",
+        "title": "Tests",
+        "intro": (
+            "How to describe testing: the plan as a **test protocol**, each "
+            "execution on one cell as a **test**. Planned conditions live on "
+            "the protocol; as-run conditions on the test; both are "
             "`{value, unit}` quantities by contract."
         ),
         "sections": [
@@ -291,16 +547,16 @@ PAGES = [
                 ],
             },
         ],
+        "schemas": ["test-protocol.schema.json", "test.schema.json"],
+        "see_also": None,
     },
     {
-        "slug": "dataset",
-        "title": "Dataset and series",
+        "slug": "datasets",
+        "title": "Datasets",
         "intro": (
-            "A dataset describes measured data files; a dataset SERIES is the "
-            "collection they belong to — an ordinary dataset record flavored "
-            "by `additional_type: [\"DatasetSeries\"]`, with membership on each "
-            "member's `series_id`. The collection publishes first, because "
-            "members carry the forward edge."
+            "How to describe measured data: a **dataset** record per data "
+            "artifact, and a **dataset series** (collection) record for the "
+            "deposit or study they belong to."
         ),
         "sections": [
             {
@@ -328,16 +584,192 @@ PAGES = [
                 ],
             },
         ],
+        "schemas": ["dataset.schema.json"],
+        "see_also": None,
+    },
+    {
+        "slug": "equipment",
+        "title": "Equipment",
+        "intro": (
+            "How to describe lab equipment: the product as an **equipment "
+            "spec**, each bench unit as **equipment**, each addressable slot "
+            "as a **channel**."
+        ),
+        "sections": [
+            {
+                "heading": "An equipment spec (the product)",
+                "fn": snippet_equipment_spec,
+                "record_type": None,
+                "gap": "No JSON-LD emitter exists for equipment records yet; the "
+                       "canonical record is the published form.",
+            },
+            {
+                "heading": "An equipment unit",
+                "fn": snippet_equipment,
+                "record_type": None,
+                "gap": "No JSON-LD emitter exists for equipment records yet.",
+            },
+            {
+                "heading": "A channel on that unit",
+                "fn": snippet_channel,
+                "record_type": None,
+                "gap": "No JSON-LD emitter exists for channel records yet.",
+            },
+        ],
+        "schemas": ["equipment-spec.schema.json", "equipment.schema.json", "channel.schema.json"],
+        "see_also": "Recipe: [register equipment](../howto/register-equipment.md).",
+    },
+    {
+        "slug": "parameter-sets",
+        "title": "Parameter sets",
+        "intro": (
+            "How to describe parameter claims: a **parameter set** is a batch "
+            "of claims about a target, each naming a curated parameter, a "
+            "quantity, and a provenance class."
+        ),
+        "sections": [
+            {
+                "heading": "A claim batch from the literature",
+                "fn": snippet_parameter_set,
+                "record_type": "parameter-set",
+                "notice": [
+                    "The claim batch emits as one `schema:Dataset` node: scalar "
+                    "claims as EMMO-typed quantities, the target on "
+                    "`schema:about`.",
+                ],
+            },
+        ],
+        "schemas": ["parameter-set.schema.json"],
+        "see_also": None,
+    },
+    {
+        "slug": "organizations",
+        "title": "Organizations",
+        "intro": (
+            "How to describe an organization — the manufacturers, labs, and "
+            "publishers other records point at."
+        ),
+        "sections": [
+            {
+                "heading": "A manufacturer",
+                "fn": snippet_organization,
+                "record_type": None,
+                "gap": "Three gaps meet on this family: no authoring API "
+                       "(the record above is authored directly, data-first), "
+                       "no JSON-LD emitter, and no entities-registry kind — "
+                       "so organization records are outside the semantic "
+                       "validation path and are checked against the JSON "
+                       "Schema only.",
+                "schema_only": "organization.schema.json",
+            },
+        ],
+        "schemas": ["organization.schema.json"],
+        "see_also": None,
     },
 ]
 
 
+# ── Field reference from the packaged JSON Schemas ───────────────────────────
+
+def _type_str(prop: dict) -> str:
+    """A compact, human-readable type for one schema property."""
+    if "$ref" in prop:
+        return "→ " + prop["$ref"].split("/")[-1].replace(".schema.json", "")
+    if "const" in prop:
+        return f"const `{prop['const']}`"
+    if "enum" in prop:
+        values = prop["enum"]
+        shown = " \\| ".join(f"`{v}`" for v in values[:4])
+        return shown + (f" … ({len(values)} values)" if len(values) > 4 else "")
+    if "anyOf" in prop:
+        parts = []
+        for sub in prop["anyOf"]:
+            part = _type_str(sub)
+            if part not in parts:
+                parts.append(part)
+        return " or ".join(parts)
+    kind = prop.get("type")
+    if kind == "array":
+        items = prop.get("items")
+        return "array of " + (_type_str(items) if isinstance(items, dict) else "any")
+    if kind == "object":
+        if prop.get("patternProperties"):
+            return "object (open keys)"
+        return "object"
+    if isinstance(kind, list):
+        return " or ".join(kind)
+    return kind or "any"
+
+
+def _clean_description(text: str) -> str:
+    return " ".join(str(text).split()).replace("|", "\\|")
+
+
+def render_field_tables(schema_file: str) -> str:
+    schema = json.loads((SCHEMA_DIR / schema_file).read_text(encoding="utf-8"))
+    top_props = schema.get("properties", {})
+    top_required = set(schema.get("required", []))
+    body_keys = [k for k in top_props if k not in ENVELOPE_KEYS]
+    label = schema_file.replace(".schema.json", "")
+
+    parts = [f"### {label} fields", NL, NL]
+    parts += [
+        f"Schema: [`{schema_file}`]({SCHEMA_URL_BASE}{schema_file}) · "
+        f"required at top level: " + ", ".join(f"`{k}`" for k in schema.get("required", [])) + NL, NL,
+    ]
+    for key in body_keys:
+        body = top_props[key]
+        props = body.get("properties")
+        if not isinstance(props, dict):
+            description = body.get("description")
+            marker = " (required)" if key in top_required else ""
+            parts += [
+                f"Top-level `{key}`{marker}: "
+                + (_clean_description(description) if description else _type_str(body))
+                + NL, NL,
+            ]
+            continue
+        required = set(body.get("required", []))
+        if len(body_keys) > 1:
+            parts += [f"The `{key}` block:", NL, NL]
+        parts += ["| Field | Type | Required | Description |", NL, "|---|---|---|---|", NL]
+        for name, prop in props.items():
+            if not isinstance(prop, dict):
+                continue
+            req = "yes" if name in required else ""
+            desc = _clean_description(prop.get("description", ""))
+            parts += [f"| `{name}` | {_type_str(prop)} | {req} | {desc} |", NL]
+        parts += [NL]
+    return "".join(parts)
+
+
 # ── Build ────────────────────────────────────────────────────────────────────
 
-def _validate_or_die(record: dict, where: str) -> str:
-    """Strict-validate; die loudly on ANY issue; return the verdict line."""
+def _validate_or_die(record: dict, where: str, *, schema_only: str | None = None) -> str:
+    """Strict-validate; die loudly on ANY issue; return the verdict line.
+
+    ``schema_only`` names a schema file for the one family the semantic
+    validation path cannot reach (organizations have no entities-registry
+    kind, so ``validate_record_report`` rejects them — a known gap the page
+    states rather than hides).
+    """
     import battinfo
     from battinfo.validate.record import validate_record_report
+    from battinfo.validate.schema import validate_schema_data
+
+    if schema_only is not None:
+        schema = json.loads((SCHEMA_DIR / schema_only).read_text(encoding="utf-8"))
+        report = validate_schema_data(record, schema)
+        if not report.ok:
+            raise SystemExit(
+                f"gen_reference_records: the '{where}' reference record no longer "
+                f"validates against {schema_only}."
+            )
+        return (
+            "**Schema-validated** — 0 errors against "
+            f"`{schema_only}` (battinfo {battinfo.__version__}); this family is "
+            "outside the semantic validation path (see the known gap above)."
+        )
 
     report = validate_record_report(record, policy="strict")
     if report.issues:
@@ -357,69 +789,108 @@ def _validate_or_die(record: dict, where: str) -> str:
     )
 
 
-def build_sections(page: dict) -> list[dict]:
+def build_sections(family: dict) -> list[dict]:
     from battinfo import record_to_jsonld
 
     sections = []
-    for section in page["sections"]:
+    for section in family["sections"]:
         record = normalize(section["fn"]())
-        verdict = _validate_or_die(record, f"{page['slug']}: {section['heading']}")
-        jsonld = record_to_jsonld(record, section["record_type"])
+        verdict = _validate_or_die(
+            record,
+            f"{family['slug']}: {section['heading']}",
+            schema_only=section.get("schema_only"),
+        )
+        jsonld = (
+            record_to_jsonld(record, section["record_type"])
+            if section.get("record_type")
+            else None
+        )
         sections.append({**section, "record": record, "jsonld": jsonld, "verdict": verdict})
     return sections
 
 
 BANNER = (
-    "<!-- GENERATED by scripts/gen_reference_records.py — do not edit." + NL
-    + "     Regenerate: uv run python scripts/gen_reference_records.py" + NL
+    "<!-- GENERATED by scripts/gen_reference_records.py — do not edit this page." + NL
+    + "     Model prose is injected from docs/records/_fragments/<slug>.md:" + NL
+    + "     edit the fragment, then regenerate:" + NL
+    + "     uv run python scripts/gen_reference_records.py" + NL
     + "     tests/test_reference_records.py fails when this page drifts. -->" + NL
 )
 
 
-def render_page(page: dict, sections: list[dict]) -> str:
-    parts = [BANNER, NL, f"# {page['title']}", NL, NL, page["intro"], NL]
+def _fragment(slug: str) -> str:
+    path = FRAGMENT_DIR / f"{slug}.md"
+    return path.read_text(encoding="utf-8").replace("\r\n", "\n").rstrip() + NL
+
+
+def render_page(family: dict, sections: list[dict]) -> str:
+    parts = [BANNER, NL, f"# {family['title']}", NL, NL, family["intro"], NL, NL]
+    parts += [_fragment(family["slug"]), NL]
+
+    parts += ["## Reference examples", NL]
     for section in sections:
-        parts += [NL, f"## {section['heading']}", NL, NL]
+        parts += [NL, f"### {section['heading']}", NL, NL]
         parts += ["```python", NL, snippet_source(section["fn"]), NL, "```", NL, NL]
         parts += ["The canonical record this produces:", NL, NL]
         parts += ["```json", NL, json.dumps(section["record"], indent=2, ensure_ascii=False), NL, "```", NL, NL]
-        parts += [
-            "The JSON-LD it emits (`record_to_jsonld`, hosted-context mode):",
-            NL, NL,
-            "```json", NL, json.dumps(section["jsonld"], indent=2, ensure_ascii=False), NL, "```", NL, NL,
-        ]
+        if section.get("jsonld") is not None:
+            parts += [
+                "The JSON-LD it emits (`record_to_jsonld`, hosted-context mode):",
+                NL, NL,
+                "```json", NL, json.dumps(section["jsonld"], indent=2, ensure_ascii=False), NL, "```", NL, NL,
+            ]
+        if section.get("gap"):
+            parts += ["```{admonition} Known gap", NL, ":class: warning", NL, NL,
+                      section["gap"], NL, "```", NL, NL]
         if section.get("notice"):
             parts += ["What to notice:", NL, NL]
             for line in section["notice"]:
                 parts += [f"- {line}", NL]
             parts += [NL]
         parts += [section["verdict"], NL]
+
+    parts += [NL, "## Field reference", NL, NL]
+    parts += [
+        "Generated from the packaged JSON Schemas — the same files "
+        "`battinfo validate` and the registry's publish gate enforce. Every "
+        "record also carries the shared envelope (`schema_version`, "
+        "`provenance`, and optional `notes`, `funding`, `contributor`, "
+        "`license`)." + NL, NL,
+    ]
+    for schema_file in family["schemas"]:
+        parts += [render_field_tables(schema_file)]
+
+    if family.get("see_also"):
+        parts += ["## See also", NL, NL, family["see_also"], NL]
     return "".join(parts)
 
 
 def render_index() -> str:
     rows = NL.join(
-        f"| [{page['title']}]({page['slug']}.md) | "
-        + " · ".join(s["heading"] for s in page["sections"]) + " |"
-        for page in PAGES
+        f"| [{family['title']}]({family['slug']}.md) | "
+        + " · ".join(s["heading"] for s in family["sections"]) + " |"
+        for family in FAMILIES
     )
-    toc = NL.join(f"{page['slug']}" for page in PAGES)
+    toc = NL.join(family["slug"] for family in FAMILIES)
     return (
         BANNER + NL
-        + "# Reference records" + NL + NL
-        + "One exemplar per record type: the authoring code, the canonical "
-        + "record it produces, and the JSON-LD that record emits — generated "
-        + "against the current library on every change, validated clean under "
-        + "the strict policy, and drift-gated so a schema, API, or emitter "
-        + "change must regenerate this chapter in the same PR. The git history "
-        + "of `docs/records/` is therefore the record of how changes "
-        + "propagate to real examples." + NL + NL
-        + "| Page | Exemplars |" + NL
+        + "# Record types" + NL + NL
+        + "One page per record family, and each page is the whole story: what "
+        + "the thing is, a reference example (authoring code, the canonical "
+        + "record it produces, the JSON-LD that record emits), and the field "
+        + "reference from the JSON Schemas. When someone asks how to describe "
+        + "a cell, a material, or a separator — the answer is one link below." + NL + NL
+        + "Everything generated here is produced against the current library "
+        + "on every change, validated clean under the strict policy, and "
+        + "drift-gated: a schema, API, or emitter change must regenerate this "
+        + "chapter in the same PR, so the git history of `docs/records/` is "
+        + "the record of how changes propagate to real examples." + NL + NL
+        + "| Family | Reference examples |" + NL
         + "|---|---|" + NL
         + rows + NL + NL
         + "Coverage accounting (every schema property exercised by a reference "
-        + "record, or waived with a reason) arrives with the next expansion of "
-        + "this chapter." + NL + NL
+        + "example, or waived with a reason) arrives with the next expansion "
+        + "of this chapter." + NL + NL
         + "```{toctree}" + NL + ":hidden:" + NL + NL
         + toc + NL
         + "```" + NL
@@ -428,8 +899,8 @@ def render_index() -> str:
 
 def render_all() -> dict[str, str]:
     files = {"index.md": render_index()}
-    for page in PAGES:
-        files[f"{page['slug']}.md"] = render_page(page, build_sections(page))
+    for family in FAMILIES:
+        files[f"{family['slug']}.md"] = render_page(family, build_sections(family))
     return files
 
 
@@ -452,6 +923,9 @@ def main() -> int:
         print(f"reference records in sync ({len(files)} pages).")
         return 0
     OUT_DIR.mkdir(parents=True, exist_ok=True)
+    for stale_page in OUT_DIR.glob("*.md"):
+        if stale_page.name not in files:
+            stale_page.unlink()
     for name, text in files.items():
         (OUT_DIR / name).write_text(text, encoding="utf-8", newline=NL)
     print(f"Wrote {len(files)} pages -> {OUT_DIR}")

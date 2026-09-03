@@ -31,7 +31,7 @@ and flagged with a `semantic.property_unmapped` warning rather than dropped.
 retired coin-specific `coin_hardware` dict (which still loads, migrating into
 `housing` automatically). A housing can be authored inline on a cell-spec or
 lifted into a standalone `housing-spec` record referenced by
-`housing_spec_id` — see [Components](component-specs.md).
+`housing_spec_id` — see [Components](records/components.md).
 
 | Field | Model | Holds |
 | --- | --- | --- |

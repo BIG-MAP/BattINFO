@@ -50,6 +50,9 @@ exclude_patterns = [
     "_build",
     "Thumbs.db",
     ".DS_Store",
+    # Curated inputs to the generated record-family pages; injected by
+    # scripts/gen_reference_records.py, never rendered standalone.
+    "records/_fragments",
     # Maintainer-only working notes (see docs/internal/README.md) — kept in-repo
     # but never rendered into the site.
     "internal/**",
