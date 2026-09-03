@@ -10,6 +10,8 @@ One page per record family, and each page is the whole story: what the thing is,
 
 Everything generated here is produced against the current library on every change, validated clean under the strict policy, and drift-gated: a schema, API, or emitter change must regenerate this chapter in the same PR, so the git history of `docs/records/` is the record of how changes propagate to real examples.
 
+Each page also carries a shelf of common, real examples — the docs' reasonable selection; the registry is the full library.
+
 | Family | Reference examples |
 |---|---|
 | [Cells](cells.md) | A cell spec, from its datasheet · A cell instance under that spec |

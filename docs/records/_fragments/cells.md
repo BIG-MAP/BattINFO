@@ -38,12 +38,43 @@ Where each part lives:
   `jellyroll_volume`) is the cell spec's own `construction` block — see the
   cell-spec field table below.
 
-A deeper treatment of authoring many cells against one spec lives beside
-this page: [cell fleets](../cell-fleet.md) (reference-based authoring
-patterns for a fleet).
+## Composing a cell from parts
 
-```{toctree}
-:hidden:
+A cell-spec can be described from reusable, IRI-addressable parts: seven
+optional top-level reference fields sit beside the inline holders —
 
-../cell-fleet
+| Field | Resolves to |
+| --- | --- |
+| `positive_electrode_spec_id` / `negative_electrode_spec_id` | `electrode-spec` |
+| `working_electrode_spec_id` / `counter_electrode_spec_id` | `electrode-spec` |
+| `electrolyte_spec_id` | `electrolyte-spec` |
+| `separator_spec_id` | `separator-spec` |
+| `housing_spec_id` | `housing-spec` |
+
+Which electrode pair a cell uses follows from its `cell_configuration` —
+polarity for a full cell, role for a half or three-electrode cell (see
+[electrodes](electrodes.md#cells-reference-electrodes)). A cell may
+**reference**, **inline**, or both — inline holders stay optional, so
+existing records are unaffected. The JSON-LD emits reference nodes
+(`hasPositiveElectrode: {"@id": <electrode-spec IRI>}`, etc.); when an
+inline node is also present, the `@id` merges onto it.
+
+References are **checked at save**: a `*_spec_id` that points at nothing
+fails the save with the missing IRI named (opt out with
+`resolve_references=False` for staged workflows; `save_batch` allows
+references within the batch and validates the completed set). The bench
+recipe is [How-to: build a cell from components](../howto/build-a-cell-from-components.md),
+and `extract_component_specs(cell_spec_record)` goes the other way, lifting
+a cell's inline holders into standalone component-specs so any inline cell
+can be decomposed and de-duplicated.
+
+The example cells on the shelf below use exactly this pattern — shared
+component-specs referenced by IRI across the fleet. The NMC811 coin shows
+the complete graph end-to-end:
+
+```text
+cell-spec COIN-NMC811-D  →  cell-instance (P025-CEL-001)  →  test (cycling)  →  dataset
+        ↓ references
+   electrode-spec / electrolyte-spec / separator-spec / housing-spec  →  material-specs
 ```
+
