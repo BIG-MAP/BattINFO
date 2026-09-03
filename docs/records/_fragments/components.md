@@ -54,5 +54,5 @@ the namespace via `family.replace("_", "-")`.
 wheel). Coverage: Celgard PP + ceramic-coated PE separators; Al/Cu current collectors;
 CR2032 coin + LFP 100 Ah prismatic housings — grounded in the DIGIBAT Discovery-Benchmark and the Cell_Design_Tool.
 Cell-specs reference these component-specs by IRI today via the five `*_spec_id`
-fields — see [Cells](../cell-fleet.md) for the reference seam and the example fleet
+fields — see [Cells](cells.md#composing-a-cell-from-parts) for the reference seam and the example fleet
 that uses it.
