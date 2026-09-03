@@ -263,10 +263,23 @@ own record.
 See [materials](materials.md) for levels 1-2, and
 [components](components.md) for the remaining component families.
 
+## Tabs and coatings
+
+Two engineering parts belong to the electrode rather than the cell. A
+**current-collector tab** (`Electrode.tab`) carries `material`, the identity
+fields, and a `property` dict (width, thickness, length, weld width, tape
+width); it emits under `hasCurrentCollectorTab` on the electrode node. A
+**coating** carries the active/binder/additive composition and its own
+`property` dict — a secondary layer such as a ceramic coating is simply an
+additional coating holder, so no new field type is needed to express it.
+
 ## Reference examples
 
 ### An electrode spec (the design)
 
+::::{tab-set}
+
+:::{tab-item} Python
 ```python
 from battinfo.api import create_electrode_spec
 
@@ -278,9 +291,9 @@ record = create_electrode_spec(
     source_type="lab",
 )
 ```
+:::
 
-The canonical record this produces:
-
+:::{tab-item} Canonical record
 ```json
 {
   "schema_version": "0.2.0",
@@ -299,8 +312,10 @@ The canonical record this produces:
   }
 }
 ```
+:::
 
-The JSON-LD it emits (`record_to_jsonld`, hosted-context mode):
+:::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
 
 ```json
 {
@@ -324,6 +339,9 @@ The JSON-LD it emits (`record_to_jsonld`, hosted-context mode):
   }
 }
 ```
+:::
+
+::::
 
 What to notice:
 
@@ -333,6 +351,9 @@ What to notice:
 
 ### An electrode (the disc in one cell)
 
+::::{tab-set}
+
+:::{tab-item} Python
 ```python
 from battinfo.api import create_electrode
 
@@ -343,9 +364,9 @@ record = create_electrode(
     source_type="lab",
 )
 ```
+:::
 
-The canonical record this produces:
-
+:::{tab-item} Canonical record
 ```json
 {
   "schema_version": "0.2.0",
@@ -362,8 +383,10 @@ The canonical record this produces:
   }
 }
 ```
+:::
 
-The JSON-LD it emits (`record_to_jsonld`, hosted-context mode):
+:::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
 
 ```json
 {
@@ -383,6 +406,9 @@ The JSON-LD it emits (`record_to_jsonld`, hosted-context mode):
   }
 }
 ```
+:::
+
+::::
 
 What to notice:
 

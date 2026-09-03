@@ -342,6 +342,9 @@ synthetic reference examples.
 
 ### A material spec (the powder as a product)
 
+::::{tab-set}
+
+:::{tab-item} Python
 ```python
 from battinfo.api import create_material_spec
 
@@ -353,9 +356,9 @@ record = create_material_spec(
     source_type="datasheet",
 )
 ```
+:::
 
-The canonical record this produces:
-
+:::{tab-item} Canonical record
 ```json
 {
   "schema_version": "0.2.0",
@@ -373,8 +376,10 @@ The canonical record this produces:
   }
 }
 ```
+:::
 
-The JSON-LD it emits (`record_to_jsonld`, hosted-context mode):
+:::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
 
 ```json
 {
@@ -399,6 +404,9 @@ The JSON-LD it emits (`record_to_jsonld`, hosted-context mode):
   "schema:name": "NMC811 cathode powder"
 }
 ```
+:::
+
+::::
 
 What to notice:
 
@@ -408,6 +416,9 @@ What to notice:
 
 ### A material instance (one physical lot)
 
+::::{tab-set}
+
+:::{tab-item} Python
 ```python
 from battinfo.api import create_material
 
@@ -418,9 +429,9 @@ record = create_material(
     source_type="lab",
 )
 ```
+:::
 
-The canonical record this produces:
-
+:::{tab-item} Canonical record
 ```json
 {
   "schema_version": "0.2.0",
@@ -437,8 +448,10 @@ The canonical record this produces:
   }
 }
 ```
+:::
 
-The JSON-LD it emits (`record_to_jsonld`, hosted-context mode):
+:::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
 
 ```json
 {
@@ -458,6 +471,9 @@ The JSON-LD it emits (`record_to_jsonld`, hosted-context mode):
   }
 }
 ```
+:::
+
+::::
 
 What to notice:
 

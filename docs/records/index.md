@@ -15,7 +15,8 @@ Everything generated here is produced against the current library on every chang
 | [Cells](cells.md) | A cell spec, from its datasheet · A cell instance under that spec |
 | [Materials](materials.md) | A material spec (the powder as a product) · A material instance (one physical lot) |
 | [Electrodes](electrodes.md) | An electrode spec (the design) · An electrode (the disc in one cell) |
-| [Components](components.md) | A separator spec · An electrolyte spec |
+| [Electrolytes](electrolytes.md) | An electrolyte spec (the formulation) · An electrolyte (one mixed batch) |
+| [Components](components.md) | A separator spec |
 | [Tests](tests.md) | The protocol · The execution |
 | [Datasets](datasets.md) | A member dataset · The collection (dataset series) |
 | [Equipment](equipment.md) | An equipment spec (the product) · An equipment unit · A channel on that unit |
@@ -30,6 +31,7 @@ Coverage accounting (every schema property exercised by a reference example, or 
 cells
 materials
 electrodes
+electrolytes
 components
 tests
 datasets

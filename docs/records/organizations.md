@@ -19,6 +19,9 @@ where one organization supersedes another's stub).
 
 ### A manufacturer
 
+::::{tab-set}
+
+:::{tab-item} Python
 ```python
 # No authoring API exists for organizations yet, so the reference example
 # is the record itself (data-first, the documented fallback).
@@ -40,9 +43,9 @@ record = {
     },
 }
 ```
+:::
 
-The canonical record this produces:
-
+:::{tab-item} Canonical record
 ```json
 {
   "schema_version": "0.2.0",
@@ -64,6 +67,9 @@ The canonical record this produces:
   }
 }
 ```
+:::
+
+::::
 
 ```{admonition} Known gap
 :class: warning

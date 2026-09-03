@@ -173,11 +173,55 @@ def snippet_electrolyte_spec():
     record = create_component_spec(
         "electrolyte",
         uid="0rp6-kncv-cyem-qwcd",
-        name="LP30 + 2% VC",
-        # The electrolyte class is required. It goes through body= because the
-        # record field is also named "family" — the function's first argument.
-        body={"family": "organic"},
-        source_type="lab",
+        name="1M LiPF6 in EC:EMC 3:7 + 2% VC",
+        # Composition fields go through body= (the class field is also named
+        # "family" — the function's first argument). Every constituent can
+        # cite its material-spec by IRI, so the formulation is assembled from
+        # materials, never retyped.
+        body={
+            "family": "organic",
+            "salt": {
+                "name": "LiPF6",
+                "material_spec_id": "https://w3id.org/battinfo/spec/t4wz-ff8s-6vp6-af48",
+                "cation": "Li+",
+                "anion": "PF6-",
+                "property": {"concentration": {"value": 1.0, "unit": "mol/L"}},
+            },
+            "solvent_mixture": {
+                "component": [
+                    {
+                        "name": "EC",
+                        "material_spec_id": "https://w3id.org/battinfo/spec/xcv1-hpy1-b0bw-z5s2",
+                        "property": {"volume_fraction": {"value": 0.3, "unit": "1"}},
+                    },
+                    {
+                        "name": "EMC",
+                        "material_spec_id": "https://w3id.org/battinfo/spec/7p3d-2e22-7yae-spyb",
+                        "property": {"volume_fraction": {"value": 0.7, "unit": "1"}},
+                    },
+                ]
+            },
+            "additive": [
+                {
+                    "name": "VC",
+                    "material_spec_id": "https://w3id.org/battinfo/spec/s6y8-5mne-94gx-e5ve",
+                    "property": {"mass_fraction": {"value": 0.02, "unit": "1"}},
+                }
+            ],
+            "property": {"conductivity": {"value": 10.0, "unit": "mS/cm"}},
+        },
+        source_type="datasheet",
+    )
+    return record
+
+
+def snippet_electrolyte():
+    from battinfo.api import create_component_instance
+
+    record = create_component_instance(
+        "electrolyte",
+        uid="me0t-k16f-eh5y-rq0k",
+        spec_id="https://w3id.org/battinfo/spec/0rp6-kncv-cyem-qwcd",
     )
     return record
 
@@ -479,12 +523,50 @@ FAMILIES = [
         "see_also": "Recipe: [build a cell from components](../howto/build-a-cell-from-components.md).",
     },
     {
+        "slug": "electrolytes",
+        "title": "Electrolytes",
+        "intro": (
+            "How to describe an electrolyte: the formulation as an "
+            "**electrolyte spec** (its family and its composition, assembled "
+            "from material-specs), a mixed batch as an **electrolyte** "
+            "instance."
+        ),
+        "sections": [
+            {
+                "heading": "An electrolyte spec (the formulation)",
+                "fn": snippet_electrolyte_spec,
+                "record_type": "electrolyte-spec",
+                "notice": [
+                    "The node types by its family (`OrganicElectrolyte`), and "
+                    "the composition emits as typed constituents: the salt "
+                    "under `hasSolute` (itself EMMO-typed, e.g. "
+                    "`LithiumHexafluorophosphate`), the solvents under "
+                    "`hasSolvent`, the additive under `hasAdditive`.",
+                    "Every constituent cites its material-spec by IRI, so the "
+                    "formulation is assembled from materials, never retyped.",
+                ],
+            },
+            {
+                "heading": "An electrolyte (one mixed batch)",
+                "fn": snippet_electrolyte,
+                "record_type": "electrolyte",
+                "notice": [
+                    "`spec_id` carries the formulation; the batch is what a "
+                    "cell build actually consumed.",
+                ],
+            },
+        ],
+        "schemas": ["electrolyte-spec.schema.json", "electrolyte.schema.json"],
+        "see_also": "Recipe: [build a cell from components](../howto/build-a-cell-from-components.md).",
+    },
+    {
         "slug": "components",
         "title": "Components",
         "intro": (
-            "How to describe the other cell components — separator, current "
-            "collector, electrolyte, housing. All four families share one "
-            "generic spec + instance surface; only their fields differ."
+            "How to describe the remaining cell components — separator, "
+            "current collector, housing. The three families share one generic "
+            "spec + instance surface; only their fields differ. Electrolytes "
+            "ride the same machinery but have [their own page](electrolytes.md)."
         ),
         "sections": [
             {
@@ -493,24 +575,13 @@ FAMILIES = [
                 "record_type": "separator-spec",
                 "notice": [
                     "The same `create_component_spec(family, ...)` call authors "
-                    "all four families; the family picks the schema.",
-                ],
-            },
-            {
-                "heading": "An electrolyte spec",
-                "fn": snippet_electrolyte_spec,
-                "record_type": "electrolyte-spec",
-                "notice": [
-                    "Electrolytes assemble material constituents (salt, solvents, "
-                    "additives) — see the composition fields in the field "
-                    "reference below.",
+                    "every component family; the family picks the schema.",
                 ],
             },
         ],
         "schemas": [
             "separator-spec.schema.json", "separator.schema.json",
             "current-collector-spec.schema.json", "current-collector.schema.json",
-            "electrolyte-spec.schema.json", "electrolyte.schema.json",
             "housing-spec.schema.json", "housing.schema.json",
         ],
         "see_also": "Recipe: [build a cell from components](../howto/build-a-cell-from-components.md).",
@@ -830,15 +901,22 @@ def render_page(family: dict, sections: list[dict]) -> str:
     parts += ["## Reference examples", NL]
     for section in sections:
         parts += [NL, f"### {section['heading']}", NL, NL]
-        parts += ["```python", NL, snippet_source(section["fn"]), NL, "```", NL, NL]
-        parts += ["The canonical record this produces:", NL, NL]
-        parts += ["```json", NL, json.dumps(section["record"], indent=2, ensure_ascii=False), NL, "```", NL, NL]
+        # One artifact, three views: the tabs mirror the Python/JSON pairing
+        # the docs landing page already uses. Python first — the authoring
+        # code is the teaching artifact; the JSON views are what it becomes.
+        parts += ["::::{tab-set}", NL, NL]
+        parts += [":::{tab-item} Python", NL, "```python", NL,
+                  snippet_source(section["fn"]), NL, "```", NL, ":::", NL, NL]
+        parts += [":::{tab-item} Canonical record", NL, "```json", NL,
+                  json.dumps(section["record"], indent=2, ensure_ascii=False),
+                  NL, "```", NL, ":::", NL, NL]
         if section.get("jsonld") is not None:
-            parts += [
-                "The JSON-LD it emits (`record_to_jsonld`, hosted-context mode):",
-                NL, NL,
-                "```json", NL, json.dumps(section["jsonld"], indent=2, ensure_ascii=False), NL, "```", NL, NL,
-            ]
+            parts += [":::{tab-item} JSON-LD", NL,
+                      "Emitted by `record_to_jsonld`, hosted-context mode.", NL, NL,
+                      "```json", NL,
+                      json.dumps(section["jsonld"], indent=2, ensure_ascii=False),
+                      NL, "```", NL, ":::", NL, NL]
+        parts += ["::::", NL, NL]
         if section.get("gap"):
             parts += ["```{admonition} Known gap", NL, ":class: warning", NL, NL,
                       section["gap"], NL, "```", NL, NL]
