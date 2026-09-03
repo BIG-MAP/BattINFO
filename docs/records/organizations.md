@@ -83,23 +83,86 @@ Three gaps meet on this family: no authoring API (the record above is authored d
 
 A selection of real, validated records from the packaged examples corpus — each one click away, included from its single source under `examples/`. The full, living library is the registry: [browse it there](https://www.battery-genome.org/explore).
 
-::::{dropdown} A123 Systems (organization)
+::::::{dropdown} A123 Systems (organization)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/organization/A123.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
 ```{literalinclude} ../../examples/organization/A123.json
 :language: json
 ```
 ::::
 
-::::{dropdown} Celgard (organization)
+:::::
+::::::
+
+::::::{dropdown} Celgard (organization)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/organization/Celgard.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
 ```{literalinclude} ../../examples/organization/Celgard.json
 :language: json
 ```
 ::::
 
-::::{dropdown} Empa (organization)
+:::::
+::::::
+
+::::::{dropdown} Empa (organization)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/organization/EMPA.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
 ```{literalinclude} ../../examples/organization/EMPA.json
 :language: json
 ```
 ::::
+
+:::::
+::::::
 
 
 ## Field reference

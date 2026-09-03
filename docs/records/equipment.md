@@ -182,17 +182,59 @@ No JSON-LD emitter exists for channel records yet.
 
 A selection of real, validated records from the packaged examples corpus — each one click away, included from its single source under `examples/`. The full, living library is the registry: [browse it there](https://www.battery-genome.org/explore).
 
-::::{dropdown} SkyRC MC3000 (equipment-spec)
+::::::{dropdown} SkyRC MC3000 (equipment-spec)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/equipment-spec/rchb-csx8-3vp8-ekcs.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
 ```{literalinclude} ../../examples/equipment-spec/rchb-csx8-3vp8-ekcs.json
 :language: json
 ```
 ::::
 
-::::{dropdown} Cycler 1 (equipment)
+:::::
+::::::
+
+::::::{dropdown} Cycler 1 (equipment)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/equipment/bw1k-j56y-r2ax-2adv.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
 ```{literalinclude} ../../examples/equipment/bw1k-j56y-r2ax-2adv.json
 :language: json
 ```
 ::::
+
+:::::
+::::::
 
 
 ## Field reference

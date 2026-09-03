@@ -348,17 +348,215 @@ What to notice:
 
 A selection of real, validated records from the packaged examples corpus — each one click away, included from its single source under `examples/`. The full, living library is the registry: [browse it there](https://www.battery-genome.org/explore).
 
-::::{dropdown} 1M LiPF6 in EC:EMC 3:7 (electrolyte-spec)
+::::::{dropdown} 1M LiPF6 in EC:EMC 3:7 (electrolyte-spec)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/electrolyte-spec/gpkh-74nj-6sdb-vcsc.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
 ```{literalinclude} ../../examples/electrolyte-spec/gpkh-74nj-6sdb-vcsc.json
 :language: json
 ```
 ::::
 
-::::{dropdown} 7M KOH in H2O (electrolyte-spec)
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": [
+    "https://w3id.org/emmo/domain/battery/context",
+    {
+      "schema": "https://schema.org/",
+      "dcterms": "http://purl.org/dc/terms/",
+      "battinfo": "https://w3id.org/battinfo/"
+    }
+  ],
+  "@type": "OrganicElectrolyte",
+  "hasSolute": {
+    "@type": [
+      "LithiumHexafluorophosphate",
+      "Solute"
+    ],
+    "schema:name": "LiPF6",
+    "schema:isVariantOf": {
+      "@id": "https://w3id.org/battinfo/spec/fpeg-3wg8-e6cs-2vn1"
+    },
+    "hasProperty": {
+      "@type": [
+        "AmountConcentration",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "AmountConcentration",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 1.0
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#MolePerLitre"
+    }
+  },
+  "hasSolvent": [
+    {
+      "@type": [
+        "EthyleneCarbonate",
+        "Solvent"
+      ],
+      "schema:name": "EC",
+      "schema:isVariantOf": {
+        "@id": "https://w3id.org/battinfo/spec/efxx-b9yg-wh00-d23a"
+      },
+      "hasProperty": {
+        "@type": [
+          "VolumeFraction",
+          "ConventionalProperty"
+        ],
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 0.3
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+      }
+    },
+    {
+      "@type": [
+        "EthylMethylCarbonate",
+        "Solvent"
+      ],
+      "schema:name": "EMC",
+      "schema:isVariantOf": {
+        "@id": "https://w3id.org/battinfo/spec/hy9g-22sd-czdb-nmm4"
+      },
+      "hasProperty": {
+        "@type": [
+          "VolumeFraction",
+          "ConventionalProperty"
+        ],
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 0.7
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+      }
+    }
+  ],
+  "hasProperty": {
+    "@type": [
+      "ElectrolyticConductivity",
+      "ConventionalProperty"
+    ],
+    "skos:prefLabel": "ElectrolyticConductivity",
+    "hasNumericalPart": {
+      "@type": "RealData",
+      "hasNumberValue": 10.0
+    },
+    "hasMeasurementUnit": "https://w3id.org/emmo#MilliSiemensPerCentiMetre"
+  },
+  "@id": "https://w3id.org/battinfo/spec/gpkh-74nj-6sdb-vcsc",
+  "schema:name": "1M LiPF6 in EC:EMC 3:7"
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} 7M KOH in H2O (electrolyte-spec)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/electrolyte-spec/gzt2-hrqq-gsfn-sp94.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
 ```{literalinclude} ../../examples/electrolyte-spec/gzt2-hrqq-gsfn-sp94.json
 :language: json
 ```
 ::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": [
+    "https://w3id.org/emmo/domain/battery/context",
+    {
+      "schema": "https://schema.org/",
+      "dcterms": "http://purl.org/dc/terms/",
+      "battinfo": "https://w3id.org/battinfo/"
+    }
+  ],
+  "@type": "AqueousElectrolyte",
+  "hasSolute": {
+    "@type": [
+      "PotassiumHydroxide",
+      "Solute"
+    ],
+    "schema:name": "KOH",
+    "schema:isVariantOf": {
+      "@id": "https://w3id.org/battinfo/spec/s9h8-dfbw-zs4k-2qk8"
+    },
+    "hasProperty": {
+      "@type": [
+        "AmountConcentration",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "AmountConcentration",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 7.0
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#MolePerLitre"
+    }
+  },
+  "hasSolvent": {
+    "@type": "Solvent",
+    "schema:name": "Water"
+  },
+  "hasProperty": {
+    "@type": [
+      "ElectrolyticConductivity",
+      "ConventionalProperty"
+    ],
+    "skos:prefLabel": "ElectrolyticConductivity",
+    "hasNumericalPart": {
+      "@type": "RealData",
+      "hasNumberValue": 600.0
+    },
+    "hasMeasurementUnit": "https://w3id.org/emmo#MilliSiemensPerCentiMetre"
+  },
+  "@id": "https://w3id.org/battinfo/spec/gzt2-hrqq-gsfn-sp94",
+  "schema:name": "7M KOH in H2O"
+}
+```
+::::
+
+:::::
+::::::
 
 
 ## Field reference

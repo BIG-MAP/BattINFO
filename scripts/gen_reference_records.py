@@ -995,10 +995,53 @@ def render_shelf(family: dict) -> str:
                 "— shelf entries must be recognizable by name."
             )
         type_label = rel.split("/")[0]
-        parts += [f"::::{{dropdown}} {name} ({type_label})", NL]
-        parts += [f"```{{literalinclude}} ../../examples/{rel}", NL,
+        # Same three-view tabs as the reference examples. The Python view is
+        # the load pattern (these records ship inside the wheel); the JSON-LD
+        # view is emitted live where an emitter exists, so shelf entries are
+        # one more surface where an emitter change must show its diff.
+        loader = (
+            "import json" + NL
+            + "from importlib import resources" + NL + NL
+            + "record = json.loads(" + NL
+            + '    resources.files("battinfo")' + NL
+            + f'    .joinpath("data/examples/{rel}")' + NL
+            + '    .read_text(encoding="utf-8")' + NL
+            + ")"
+        )
+        parts += [f"::::::{{dropdown}} {name} ({type_label})", NL]
+        parts += [":::::{tab-set}", NL, NL]
+        parts += ["::::{tab-item} Python", NL,
+                  "The record ships in the installed wheel — load it as a starting point:", NL, NL,
+                  "```python", NL, loader, NL, "```", NL, "::::", NL, NL]
+        parts += ["::::{tab-item} Canonical record", NL,
+                  f"```{{literalinclude}} ../../examples/{rel}", NL,
                   ":language: json", NL, "```", NL, "::::", NL, NL]
+        jsonld = _shelf_jsonld(doc, type_label)
+        if jsonld is not None:
+            parts += ["::::{tab-item} JSON-LD", NL,
+                      "Emitted by `record_to_jsonld`, hosted-context mode.", NL, NL,
+                      "```json", NL, json.dumps(jsonld, indent=2, ensure_ascii=False),
+                      NL, "```", NL, "::::", NL, NL]
+        parts += [":::::", NL, "::::::", NL, NL]
     return "".join(parts)
+
+
+# Record types record_to_jsonld can emit; equipment, channel, and organization
+# records have no emitter yet (stated as known gaps on their pages).
+_EMITTABLE_TYPES = {
+    "cell-spec", "cell-instance", "test", "test-protocol", "dataset",
+    "material-spec", "material", "electrode-spec", "electrode",
+    "separator-spec", "separator", "current-collector-spec", "current-collector",
+    "electrolyte-spec", "electrolyte", "housing-spec", "housing", "parameter-set",
+}
+
+
+def _shelf_jsonld(doc: dict, type_label: str):
+    if type_label not in _EMITTABLE_TYPES:
+        return None
+    from battinfo import record_to_jsonld
+
+    return record_to_jsonld(doc, type_label)
 
 
 BANNER = (
