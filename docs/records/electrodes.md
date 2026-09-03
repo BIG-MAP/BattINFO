@@ -263,6 +263,16 @@ own record.
 See [materials](materials.md) for levels 1-2, and
 [components](components.md) for the remaining component families.
 
+## Tabs and coatings
+
+Two engineering parts belong to the electrode rather than the cell. A
+**current-collector tab** (`Electrode.tab`) carries `material`, the identity
+fields, and a `property` dict (width, thickness, length, weld width, tape
+width); it emits under `hasCurrentCollectorTab` on the electrode node. A
+**coating** carries the active/binder/additive composition and its own
+`property` dict — a secondary layer such as a ceramic coating is simply an
+additional coating holder, so no new field type is needed to express it.
+
 ## Reference examples
 
 ### An electrode spec (the design)
