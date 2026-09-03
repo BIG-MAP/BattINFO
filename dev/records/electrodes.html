@@ -59,7 +59,7 @@
     <link rel="icon" href="../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Components" href="components.html" />
+    <link rel="next" title="Electrolytes" href="electrolytes.html" />
     <link rel="prev" title="Materials" href="materials.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -415,11 +415,11 @@
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Record types</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2 has-children"><a class="reference internal" href="cells.html">Cells</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="../cell-fleet.html">Cells</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../engineering-cell-description.html">Engineering cell description</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2"><a class="reference internal" href="materials.html">Materials</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Electrodes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="electrolytes.html">Electrolytes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="components.html">Components</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tests.html">Tests</a></li>
 <li class="toctree-l2"><a class="reference internal" href="datasets.html">Datasets</a></li>
@@ -781,10 +781,24 @@ own record.</p>
 <p>See <a class="reference internal" href="materials.html"><span class="std std-doc">materials</span></a> for levels 1-2, and
 <a class="reference internal" href="components.html"><span class="std std-doc">components</span></a> for the remaining component families.</p>
 </section>
+<section id="tabs-and-coatings">
+<h2>Tabs and coatings<a class="headerlink" href="#tabs-and-coatings" title="Link to this heading">#</a></h2>
+<p>Two engineering parts belong to the electrode rather than the cell. A
+<strong>current-collector tab</strong> (<code class="docutils literal notranslate"><span class="pre">Electrode.tab</span></code>) carries <code class="docutils literal notranslate"><span class="pre">material</span></code>, the identity
+fields, and a <code class="docutils literal notranslate"><span class="pre">property</span></code> dict (width, thickness, length, weld width, tape
+width); it emits under <code class="docutils literal notranslate"><span class="pre">hasCurrentCollectorTab</span></code> on the electrode node. A
+<strong>coating</strong> carries the active/binder/additive composition and its own
+<code class="docutils literal notranslate"><span class="pre">property</span></code> dict — a secondary layer such as a ceramic coating is simply an
+additional coating holder, so no new field type is needed to express it.</p>
+</section>
 <section id="reference-examples">
 <h2>Reference examples<a class="headerlink" href="#reference-examples" title="Link to this heading">#</a></h2>
 <section id="an-electrode-spec-the-design">
 <h3>An electrode spec (the design)<a class="headerlink" href="#an-electrode-spec-the-design" title="Link to this heading">#</a></h3>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-0">
+Python</label><div class="sd-tab-content docutils">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_electrode_spec</span>
 
 <span class="n">record</span> <span class="o">=</span> <span class="n">create_electrode_spec</span><span class="p">(</span>
@@ -796,7 +810,10 @@ own record.</p>
 <span class="p">)</span>
 </pre></div>
 </div>
-<p>The canonical record this produces:</p>
+</div>
+<input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-1">
+Canonical record</label><div class="sd-tab-content docutils">
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;schema_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;electrode_spec&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -815,7 +832,11 @@ own record.</p>
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>The JSON-LD it emits (<code class="docutils literal notranslate"><span class="pre">record_to_jsonld</span></code>, hosted-context mode):</p>
+</div>
+<input id="sd-tab-item-2" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-2">
+JSON-LD</label><div class="sd-tab-content docutils">
+<p>Emitted by <code class="docutils literal notranslate"><span class="pre">record_to_jsonld</span></code>, hosted-context mode.</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;@context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="s2">&quot;https://w3id.org/emmo/domain/battery/context&quot;</span><span class="p">,</span>
@@ -838,6 +859,8 @@ own record.</p>
 <span class="p">}</span>
 </pre></div>
 </div>
+</div>
+</div>
 <p>What to notice:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">active_material_spec_id</span></code> cites the powder, so no design points at a bare vocabulary key.</p></li>
@@ -846,6 +869,10 @@ own record.</p>
 </section>
 <section id="an-electrode-the-disc-in-one-cell">
 <h3>An electrode (the disc in one cell)<a class="headerlink" href="#an-electrode-the-disc-in-one-cell" title="Link to this heading">#</a></h3>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-3" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-3">
+Python</label><div class="sd-tab-content docutils">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_electrode</span>
 
 <span class="n">record</span> <span class="o">=</span> <span class="n">create_electrode</span><span class="p">(</span>
@@ -856,7 +883,10 @@ own record.</p>
 <span class="p">)</span>
 </pre></div>
 </div>
-<p>The canonical record this produces:</p>
+</div>
+<input id="sd-tab-item-4" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-4">
+Canonical record</label><div class="sd-tab-content docutils">
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;schema_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;electrode&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -873,7 +903,11 @@ own record.</p>
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>The JSON-LD it emits (<code class="docutils literal notranslate"><span class="pre">record_to_jsonld</span></code>, hosted-context mode):</p>
+</div>
+<input id="sd-tab-item-5" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-5">
+JSON-LD</label><div class="sd-tab-content docutils">
+<p>Emitted by <code class="docutils literal notranslate"><span class="pre">record_to_jsonld</span></code>, hosted-context mode.</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;@context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="s2">&quot;https://w3id.org/emmo/domain/battery/context&quot;</span><span class="p">,</span>
@@ -891,6 +925,8 @@ own record.</p>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
+</div>
+</div>
 </div>
 <p>What to notice:</p>
 <ul class="simple">
@@ -1126,11 +1162,11 @@ own record.</p>
       </div>
     </a>
     <a class="right-next"
-       href="components.html"
+       href="electrolytes.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Components</p>
+        <p class="prev-next-title">Electrolytes</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -1168,6 +1204,7 @@ own record.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#half-cells-name-their-electrodes-by-role-not-by-polarity">Half cells name their electrodes by role, not by polarity</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cell-instances-cite-the-discs-they-were-built-from">Cell instances cite the discs they were built from</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#examples">Examples</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tabs-and-coatings">Tabs and coatings</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reference-examples">Reference examples</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#an-electrode-spec-the-design">An electrode spec (the design)</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#an-electrode-the-disc-in-one-cell">An electrode (the disc in one cell)</a></li>

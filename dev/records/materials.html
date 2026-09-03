@@ -60,7 +60,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Electrodes" href="electrodes.html" />
-    <link rel="prev" title="Engineering cell description" href="../engineering-cell-description.html" />
+    <link rel="prev" title="Cells" href="../cell-fleet.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -415,11 +415,11 @@
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Record types</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2 has-children"><a class="reference internal" href="cells.html">Cells</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="../cell-fleet.html">Cells</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../engineering-cell-description.html">Engineering cell description</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Materials</a></li>
 <li class="toctree-l2"><a class="reference internal" href="electrodes.html">Electrodes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="electrolytes.html">Electrolytes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="components.html">Components</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tests.html">Tests</a></li>
 <li class="toctree-l2"><a class="reference internal" href="datasets.html">Datasets</a></li>
@@ -934,6 +934,10 @@ reference the powder’s material-spec.</p>
 <h2>Reference examples<a class="headerlink" href="#reference-examples" title="Link to this heading">#</a></h2>
 <section id="a-material-spec-the-powder-as-a-product">
 <h3>A material spec (the powder as a product)<a class="headerlink" href="#a-material-spec-the-powder-as-a-product" title="Link to this heading">#</a></h3>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-0">
+Python</label><div class="sd-tab-content docutils">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_material_spec</span>
 
 <span class="n">record</span> <span class="o">=</span> <span class="n">create_material_spec</span><span class="p">(</span>
@@ -945,7 +949,10 @@ reference the powder’s material-spec.</p>
 <span class="p">)</span>
 </pre></div>
 </div>
-<p>The canonical record this produces:</p>
+</div>
+<input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-1">
+Canonical record</label><div class="sd-tab-content docutils">
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;schema_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;material_spec&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -963,7 +970,11 @@ reference the powder’s material-spec.</p>
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>The JSON-LD it emits (<code class="docutils literal notranslate"><span class="pre">record_to_jsonld</span></code>, hosted-context mode):</p>
+</div>
+<input id="sd-tab-item-2" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-2">
+JSON-LD</label><div class="sd-tab-content docutils">
+<p>Emitted by <code class="docutils literal notranslate"><span class="pre">record_to_jsonld</span></code>, hosted-context mode.</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;@context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="s2">&quot;https://w3id.org/emmo/domain/battery/context&quot;</span><span class="p">,</span>
@@ -987,6 +998,8 @@ reference the powder’s material-spec.</p>
 <span class="p">}</span>
 </pre></div>
 </div>
+</div>
+</div>
 <p>What to notice:</p>
 <ul class="simple">
 <li><p>The <code class="docutils literal notranslate"><span class="pre">kind</span></code> resolves to the chemical-substance class IRI that types the emitted node — the genome’s aggregation axis.</p></li>
@@ -995,6 +1008,10 @@ reference the powder’s material-spec.</p>
 </section>
 <section id="a-material-instance-one-physical-lot">
 <h3>A material instance (one physical lot)<a class="headerlink" href="#a-material-instance-one-physical-lot" title="Link to this heading">#</a></h3>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-3" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-3">
+Python</label><div class="sd-tab-content docutils">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_material</span>
 
 <span class="n">record</span> <span class="o">=</span> <span class="n">create_material</span><span class="p">(</span>
@@ -1005,7 +1022,10 @@ reference the powder’s material-spec.</p>
 <span class="p">)</span>
 </pre></div>
 </div>
-<p>The canonical record this produces:</p>
+</div>
+<input id="sd-tab-item-4" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-4">
+Canonical record</label><div class="sd-tab-content docutils">
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;schema_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;material&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -1022,7 +1042,11 @@ reference the powder’s material-spec.</p>
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>The JSON-LD it emits (<code class="docutils literal notranslate"><span class="pre">record_to_jsonld</span></code>, hosted-context mode):</p>
+</div>
+<input id="sd-tab-item-5" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-5">
+JSON-LD</label><div class="sd-tab-content docutils">
+<p>Emitted by <code class="docutils literal notranslate"><span class="pre">record_to_jsonld</span></code>, hosted-context mode.</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;@context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="s2">&quot;https://w3id.org/emmo/domain/battery/context&quot;</span><span class="p">,</span>
@@ -1040,6 +1064,8 @@ reference the powder’s material-spec.</p>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
+</div>
+</div>
 </div>
 <p>What to notice:</p>
 <ul class="simple">
@@ -1271,12 +1297,12 @@ reference the powder’s material-spec.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="../engineering-cell-description.html"
+       href="../cell-fleet.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Engineering cell description</p>
+        <p class="prev-next-title">Cells</p>
       </div>
     </a>
     <a class="right-next"

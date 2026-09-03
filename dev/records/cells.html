@@ -415,11 +415,11 @@
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Record types</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2 current active has-children"><a class="current reference internal" href="#">Cells</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="../cell-fleet.html">Cells</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../engineering-cell-description.html">Engineering cell description</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2"><a class="reference internal" href="materials.html">Materials</a></li>
 <li class="toctree-l2"><a class="reference internal" href="electrodes.html">Electrodes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="electrolytes.html">Electrolytes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="components.html">Components</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tests.html">Tests</a></li>
 <li class="toctree-l2"><a class="reference internal" href="datasets.html">Datasets</a></li>
@@ -522,16 +522,46 @@ is a no-op instead of a duplicate.</p>
 <p>A cell instance can also state which physical components went into it —
 <code class="docutils literal notranslate"><span class="pre">working_electrode_id</span></code> points at the electrode disc inside this cell (see
 <a class="reference internal" href="electrodes.html"><span class="std std-doc">electrodes</span></a>).</p>
-<p>Two deeper treatments live beside this page: <a class="reference internal" href="../cell-fleet.html"><span class="std std-doc">cell fleets</span></a>
-(reference-based authoring patterns for many cells against one spec) and the
-<a class="reference internal" href="../engineering-cell-description.html"><span class="std std-doc">engineering cell description</span></a> (housing,
-tabs, electrode-assembly geometry for prismatic/cylindrical/pouch designs).</p>
+<section id="the-engineering-layer">
+<h2>The engineering layer<a class="headerlink" href="#the-engineering-layer" title="Link to this heading">#</a></h2>
+<p>Beyond composition and nominal performance, a cell spec can carry the
+<strong>as-designed engineering</strong> description: how the cell is physically built.
+Two things are deliberately excluded: design-tool scratch math (intermediate
+volumes, slurry masses — recomputed, not stored) and state-dependent
+behaviour (swelling versus cycle, impedance decomposition — those belong to
+measurement series on a test or dataset, not to a spec).</p>
+<p>Every engineering part follows one <strong>holder + property</strong> principle: identity
+fields (<code class="docutils literal notranslate"><span class="pre">material</span></code> / <code class="docutils literal notranslate"><span class="pre">manufacturer</span></code> / <code class="docutils literal notranslate"><span class="pre">supplier</span></code> / <code class="docutils literal notranslate"><span class="pre">product_id</span></code>) plus a
+<code class="docutils literal notranslate"><span class="pre">property</span></code> dict of <code class="docutils literal notranslate"><span class="pre">{value,</span> <span class="pre">unit}</span></code> quantities. Unknown property keys are
+preserved in the record and flagged with a <code class="docutils literal notranslate"><span class="pre">semantic.property_unmapped</span></code>
+warning rather than dropped.</p>
+<p>Where each part lives:</p>
+<ul class="simple">
+<li><p>The <strong>housing</strong> (case, cap, terminals, seals, discrete parts) is authored
+inline on the cell spec or lifted into a standalone housing spec referenced
+by <code class="docutils literal notranslate"><span class="pre">housing_spec_id</span></code> — its field tables are on the
+<a class="reference internal" href="components.html#housing-spec-fields"><span class="std std-ref">components page</span></a>.</p></li>
+<li><p><strong>Current-collector tabs</strong> and <strong>coatings</strong> belong to the electrode — see
+<a class="reference internal" href="electrodes.html"><span class="std std-doc">electrodes</span></a>.</p></li>
+<li><p>The <strong>electrode-assembly geometry</strong> (wound or stacked: <code class="docutils literal notranslate"><span class="pre">assembly_type</span></code>,
+layer and sheet counts, <code class="docutils literal notranslate"><span class="pre">winding_turns</span></code>, <code class="docutils literal notranslate"><span class="pre">electrode_length</span></code>,
+<code class="docutils literal notranslate"><span class="pre">jellyroll_volume</span></code>) is the cell spec’s own <code class="docutils literal notranslate"><span class="pre">construction</span></code> block — see the
+cell-spec field table below.</p></li>
+</ul>
+<p>A deeper treatment of authoring many cells against one spec lives beside
+this page: <a class="reference internal" href="../cell-fleet.html"><span class="std std-doc">cell fleets</span></a> (reference-based authoring
+patterns for a fleet).</p>
 <div class="toctree-wrapper compound">
 </div>
+</section>
 <section id="reference-examples">
 <h2>Reference examples<a class="headerlink" href="#reference-examples" title="Link to this heading">#</a></h2>
 <section id="a-cell-spec-from-its-datasheet">
 <h3>A cell spec, from its datasheet<a class="headerlink" href="#a-cell-spec-from-its-datasheet" title="Link to this heading">#</a></h3>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-0">
+Python</label><div class="sd-tab-content docutils">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">CellSpec</span>
 
 <span class="n">spec</span> <span class="o">=</span> <span class="n">CellSpec</span><span class="p">(</span>
@@ -553,7 +583,10 @@ tabs, electrode-assembly geometry for prismatic/cylindrical/pouch designs).</p>
 <span class="n">record</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">to_record</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>The canonical record this produces:</p>
+</div>
+<input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-1">
+Canonical record</label><div class="sd-tab-content docutils">
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;schema_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;cell_spec&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -592,7 +625,11 @@ tabs, electrode-assembly geometry for prismatic/cylindrical/pouch designs).</p>
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>The JSON-LD it emits (<code class="docutils literal notranslate"><span class="pre">record_to_jsonld</span></code>, hosted-context mode):</p>
+</div>
+<input id="sd-tab-item-2" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-2">
+JSON-LD</label><div class="sd-tab-content docutils">
+<p>Emitted by <code class="docutils literal notranslate"><span class="pre">record_to_jsonld</span></code>, hosted-context mode.</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;@context&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/context/records/v1.json&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
@@ -667,6 +704,8 @@ tabs, electrode-assembly geometry for prismatic/cylindrical/pouch designs).</p>
 <span class="p">}</span>
 </pre></div>
 </div>
+</div>
+</div>
 <p>What to notice:</p>
 <ul class="simple">
 <li><p>The node is EMMO-typed (<code class="docutils literal notranslate"><span class="pre">BatteryCellSpecification</span></code>) and each spec property becomes a typed quantity under <code class="docutils literal notranslate"><span class="pre">hasProperty</span></code>.</p></li>
@@ -676,6 +715,10 @@ tabs, electrode-assembly geometry for prismatic/cylindrical/pouch designs).</p>
 </section>
 <section id="a-cell-instance-under-that-spec">
 <h3>A cell instance under that spec<a class="headerlink" href="#a-cell-instance-under-that-spec" title="Link to this heading">#</a></h3>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-3" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-3">
+Python</label><div class="sd-tab-content docutils">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">Cell</span><span class="p">,</span> <span class="n">CellSpec</span>
 
 <span class="n">spec</span> <span class="o">=</span> <span class="n">CellSpec</span><span class="p">(</span>
@@ -696,7 +739,10 @@ tabs, electrode-assembly geometry for prismatic/cylindrical/pouch designs).</p>
 <span class="n">record</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">to_record</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>The canonical record this produces:</p>
+</div>
+<input id="sd-tab-item-4" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-4">
+Canonical record</label><div class="sd-tab-content docutils">
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;schema_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;cell_instance&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -716,7 +762,11 @@ tabs, electrode-assembly geometry for prismatic/cylindrical/pouch designs).</p>
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>The JSON-LD it emits (<code class="docutils literal notranslate"><span class="pre">record_to_jsonld</span></code>, hosted-context mode):</p>
+</div>
+<input id="sd-tab-item-5" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-5">
+JSON-LD</label><div class="sd-tab-content docutils">
+<p>Emitted by <code class="docutils literal notranslate"><span class="pre">record_to_jsonld</span></code>, hosted-context mode.</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;@context&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/context/records/v1.json&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
@@ -744,6 +794,8 @@ tabs, electrode-assembly geometry for prismatic/cylindrical/pouch designs).</p>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
+</div>
+</div>
 </div>
 <p>What to notice:</p>
 <ul class="simple">
@@ -1090,6 +1142,7 @@ tabs, electrode-assembly geometry for prismatic/cylindrical/pouch designs).</p>
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-engineering-layer">The engineering layer</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reference-examples">Reference examples</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#a-cell-spec-from-its-datasheet">A cell spec, from its datasheet</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#a-cell-instance-under-that-spec">A cell instance under that spec</a></li>

@@ -21,6 +21,9 @@ the packaged `parameters.json`; the resolve endpoint applies the same rules.
 
 ### A claim batch from the literature
 
+::::{tab-set}
+
+:::{tab-item} Python
 ```python
 from battinfo.api import create_parameter_set
 
@@ -37,9 +40,9 @@ record = create_parameter_set(
     ],
 )
 ```
+:::
 
-The canonical record this produces:
-
+:::{tab-item} Canonical record
 ```json
 {
   "schema_version": "0.2.0",
@@ -67,8 +70,10 @@ The canonical record this produces:
   }
 }
 ```
+:::
 
-The JSON-LD it emits (`record_to_jsonld`, hosted-context mode):
+:::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
 
 ```json
 {
@@ -112,6 +117,9 @@ The JSON-LD it emits (`record_to_jsonld`, hosted-context mode):
   }
 }
 ```
+:::
+
+::::
 
 What to notice:
 

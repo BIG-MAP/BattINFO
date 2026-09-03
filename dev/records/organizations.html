@@ -415,11 +415,11 @@
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Record types</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2 has-children"><a class="reference internal" href="cells.html">Cells</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="../cell-fleet.html">Cells</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../engineering-cell-description.html">Engineering cell description</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2"><a class="reference internal" href="materials.html">Materials</a></li>
 <li class="toctree-l2"><a class="reference internal" href="electrodes.html">Electrodes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="electrolytes.html">Electrolytes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="components.html">Components</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tests.html">Tests</a></li>
 <li class="toctree-l2"><a class="reference internal" href="datasets.html">Datasets</a></li>
@@ -522,6 +522,10 @@ where one organization supersedes another’s stub).</p>
 <h2>Reference examples<a class="headerlink" href="#reference-examples" title="Link to this heading">#</a></h2>
 <section id="a-manufacturer">
 <h3>A manufacturer<a class="headerlink" href="#a-manufacturer" title="Link to this heading">#</a></h3>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-0">
+Python</label><div class="sd-tab-content docutils">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># No authoring API exists for organizations yet, so the reference example</span>
 <span class="c1"># is the record itself (data-first, the documented fallback).</span>
 <span class="n">record</span> <span class="o">=</span> <span class="p">{</span>
@@ -543,7 +547,10 @@ where one organization supersedes another’s stub).</p>
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>The canonical record this produces:</p>
+</div>
+<input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-1">
+Canonical record</label><div class="sd-tab-content docutils">
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;schema_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;organization&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -564,6 +571,8 @@ where one organization supersedes another’s stub).</p>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
+</div>
+</div>
 </div>
 <div class="warning admonition">
 <p class="admonition-title">Known gap</p>

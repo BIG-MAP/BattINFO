@@ -415,11 +415,11 @@
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Record types</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2 has-children"><a class="reference internal" href="cells.html">Cells</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="../cell-fleet.html">Cells</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../engineering-cell-description.html">Engineering cell description</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2"><a class="reference internal" href="materials.html">Materials</a></li>
 <li class="toctree-l2"><a class="reference internal" href="electrodes.html">Electrodes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="electrolytes.html">Electrolytes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="components.html">Components</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tests.html">Tests</a></li>
 <li class="toctree-l2"><a class="reference internal" href="datasets.html">Datasets</a></li>
@@ -523,6 +523,10 @@ duplicates channels. Tests point at the unit and channel they ran on through
 <h2>Reference examples<a class="headerlink" href="#reference-examples" title="Link to this heading">#</a></h2>
 <section id="an-equipment-spec-the-product">
 <h3>An equipment spec (the product)<a class="headerlink" href="#an-equipment-spec-the-product" title="Link to this heading">#</a></h3>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-0">
+Python</label><div class="sd-tab-content docutils">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_equipment_spec</span>
 
 <span class="n">record</span> <span class="o">=</span> <span class="n">create_equipment_spec</span><span class="p">(</span>
@@ -536,7 +540,10 @@ duplicates channels. Tests point at the unit and channel they ran on through
 <span class="p">)</span>
 </pre></div>
 </div>
-<p>The canonical record this produces:</p>
+</div>
+<input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-1">
+Canonical record</label><div class="sd-tab-content docutils">
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;schema_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;equipment_spec&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -565,6 +572,8 @@ duplicates channels. Tests point at the unit and channel they ran on through
 <span class="p">}</span>
 </pre></div>
 </div>
+</div>
+</div>
 <div class="warning admonition">
 <p class="admonition-title">Known gap</p>
 <p>No JSON-LD emitter exists for equipment records yet; the canonical record is the published form.</p>
@@ -573,6 +582,10 @@ duplicates channels. Tests point at the unit and channel they ran on through
 </section>
 <section id="an-equipment-unit">
 <h3>An equipment unit<a class="headerlink" href="#an-equipment-unit" title="Link to this heading">#</a></h3>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-2" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-2">
+Python</label><div class="sd-tab-content docutils">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_equipment</span>
 
 <span class="n">record</span> <span class="o">=</span> <span class="n">create_equipment</span><span class="p">(</span>
@@ -585,7 +598,10 @@ duplicates channels. Tests point at the unit and channel they ran on through
 <span class="p">)</span>
 </pre></div>
 </div>
-<p>The canonical record this produces:</p>
+</div>
+<input id="sd-tab-item-3" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-3">
+Canonical record</label><div class="sd-tab-content docutils">
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;schema_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;equipment&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -605,6 +621,8 @@ duplicates channels. Tests point at the unit and channel they ran on through
 <span class="p">}</span>
 </pre></div>
 </div>
+</div>
+</div>
 <div class="warning admonition">
 <p class="admonition-title">Known gap</p>
 <p>No JSON-LD emitter exists for equipment records yet.</p>
@@ -613,6 +631,10 @@ duplicates channels. Tests point at the unit and channel they ran on through
 </section>
 <section id="a-channel-on-that-unit">
 <h3>A channel on that unit<a class="headerlink" href="#a-channel-on-that-unit" title="Link to this heading">#</a></h3>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-4" name="sd-tab-set-2" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-4">
+Python</label><div class="sd-tab-content docutils">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_channel</span>
 
 <span class="c1"># The channel uid is deterministic from (unit, index): registering the</span>
@@ -624,7 +646,10 @@ duplicates channels. Tests point at the unit and channel they ran on through
 <span class="p">)</span>
 </pre></div>
 </div>
-<p>The canonical record this produces:</p>
+</div>
+<input id="sd-tab-item-5" name="sd-tab-set-2" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-5">
+Canonical record</label><div class="sd-tab-content docutils">
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;schema_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;channel&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -641,6 +666,8 @@ duplicates channels. Tests point at the unit and channel they ran on through
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
+</div>
+</div>
 </div>
 <div class="warning admonition">
 <p class="admonition-title">Known gap</p>

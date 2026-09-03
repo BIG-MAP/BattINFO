@@ -60,7 +60,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Tests" href="tests.html" />
-    <link rel="prev" title="Electrodes" href="electrodes.html" />
+    <link rel="prev" title="Electrolytes" href="electrolytes.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -415,11 +415,11 @@
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Record types</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2 has-children"><a class="reference internal" href="cells.html">Cells</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="../cell-fleet.html">Cells</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../engineering-cell-description.html">Engineering cell description</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2"><a class="reference internal" href="materials.html">Materials</a></li>
 <li class="toctree-l2"><a class="reference internal" href="electrodes.html">Electrodes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="electrolytes.html">Electrolytes</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Components</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tests.html">Tests</a></li>
 <li class="toctree-l2"><a class="reference internal" href="datasets.html">Datasets</a></li>
@@ -511,10 +511,10 @@
      tests/test_reference_records.py fails when this page drifts. -->
 <section id="components">
 <h1>Components<a class="headerlink" href="#components" title="Link to this heading">#</a></h1>
-<p>How to describe the other cell components — separator, current collector, electrolyte, housing. All four families share one generic spec + instance surface; only their fields differ.</p>
+<p>How to describe the remaining cell components — separator, current collector, housing. The three families share one generic spec + instance surface; only their fields differ. Electrolytes ride the same machinery but have <a class="reference internal" href="electrolytes.html"><span class="std std-doc">their own page</span></a>.</p>
 <p>BattINFO models every entity as a <strong>spec + instance</strong> pair. After materials
 (<a class="reference internal" href="materials.html#records"><span class="std std-ref">materials</span></a>) and electrodes
-(<a class="reference internal" href="electrodes.html"><span class="std std-doc">electrodes-model.md</span></a>), four <strong>component</strong> families let the rest of a
+(<a class="reference internal" href="electrodes.html"><span class="std std-doc">electrodes-model.md</span></a>), three <strong>component</strong> families let the rest of a
 cell be described from reusable, IRI-addressable parts. Each family is a thin registry entry
 that reuses an existing embedded holder shape; component-specs reference <code class="docutils literal notranslate"><span class="pre">material-spec</span></code>
 records by IRI.</p>
@@ -527,22 +527,17 @@ records by IRI.</p>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p>electrolyte</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">electrolyte-spec</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">electrolyte</span></code></p></td>
-<td><p>salt + solvent + additive <code class="docutils literal notranslate"><span class="pre">material_spec_id</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p>separator</p></td>
+<tr class="row-even"><td><p>separator</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">separator-spec</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">separator</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">material_spec_id</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p>current-collector</p></td>
+<tr class="row-odd"><td><p>current-collector</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">current-collector-spec</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">current-collector</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">material_spec_id</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p>housing</p></td>
+<tr class="row-even"><td><p>housing</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">housing-spec</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">housing</span></code></p></td>
 <td><p>(materials as strings)</p></td>
@@ -550,7 +545,8 @@ records by IRI.</p>
 </tbody>
 </table>
 </div>
-<p>Electrodes used to be a fifth generic family. They are now first-class — a curated <code class="docutils literal notranslate"><span class="pre">kind</span></code>,
+<p>Electrolytes share this generic machinery but have <a class="reference internal" href="electrolytes.html"><span class="std std-doc">their own page</span></a>.
+Electrodes used to be another generic family. They are now first-class — a curated <code class="docutils literal notranslate"><span class="pre">kind</span></code>,
 deterministic identity that includes the processing route, design values, and their own
 emitter — so they have their own page: <a class="reference internal" href="electrodes.html"><span class="std std-doc">Electrodes</span></a>.</p>
 <section id="generic-api-per-family-wrappers">
@@ -565,7 +561,7 @@ generated from the entity registry, so the surface matches the cell/material API
           <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;thickness&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;um&quot;</span><span class="p">}}})</span>
 
 <span class="c1"># generic form is also available</span>
-<span class="n">create_component_spec</span><span class="p">(</span><span class="s2">&quot;electrolyte&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;…&quot;</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="p">{</span><span class="o">...</span><span class="p">})</span>
+<span class="n">create_component_spec</span><span class="p">(</span><span class="s2">&quot;housing&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;…&quot;</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="p">{</span><span class="o">...</span><span class="p">})</span>
 </pre></div>
 </div>
 <p>The step-by-step bench version of this — materials first, IRIs harvested from
@@ -582,18 +578,11 @@ hand-written first-class builders rather than generated wrappers.</p>
 the namespace via <code class="docutils literal notranslate"><span class="pre">family.replace(&quot;_&quot;,</span> <span class="pre">&quot;-&quot;)</span></code>.</p>
 </section>
 </section>
-<section id="electrolyte-assembles-material-constituents">
-<h2>Electrolyte assembles material constituents<a class="headerlink" href="#electrolyte-assembles-material-constituents" title="Link to this heading">#</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">electrolyte-spec</span></code> carries <code class="docutils literal notranslate"><span class="pre">salt</span></code> + <code class="docutils literal notranslate"><span class="pre">solvent_mixture.component[]</span></code> + <code class="docutils literal notranslate"><span class="pre">additive[]</span></code>, each able
-to reference a <code class="docutils literal notranslate"><span class="pre">material-spec</span></code> by IRI — so the <strong>organic 1M LiPF₆ EC:EMC 3:7</strong> and
-<strong>aqueous 7M KOH</strong> example formulations are assembled from the LiPF6/EC/EMC/KOH material-specs
-and emit <code class="docutils literal notranslate"><span class="pre">OrganicElectrolyte</span></code> / <code class="docutils literal notranslate"><span class="pre">AqueousElectrolyte</span></code> JSON-LD with <code class="docutils literal notranslate"><span class="pre">hasSolute</span></code>/<code class="docutils literal notranslate"><span class="pre">hasSolvent</span></code>.</p>
-</section>
 <section id="examples">
 <h2>Examples<a class="headerlink" href="#examples" title="Link to this heading">#</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">examples/&lt;family&gt;-spec/*</span></code> + <code class="docutils literal notranslate"><span class="pre">examples/&lt;family&gt;/*</span></code> (single source of truth, mirrored into the
 wheel). Coverage: Celgard PP + ceramic-coated PE separators; Al/Cu current collectors;
-organic + aqueous electrolytes; CR2032 coin + LFP 100 Ah prismatic housings — grounded in the DIGIBAT Discovery-Benchmark and the Cell_Design_Tool.
+CR2032 coin + LFP 100 Ah prismatic housings — grounded in the DIGIBAT Discovery-Benchmark and the Cell_Design_Tool.
 Cell-specs reference these component-specs by IRI today via the five <code class="docutils literal notranslate"><span class="pre">*_spec_id</span></code>
 fields — see <a class="reference internal" href="../cell-fleet.html"><span class="std std-doc">Cells</span></a> for the reference seam and the example fleet
 that uses it.</p>
@@ -602,6 +591,10 @@ that uses it.</p>
 <h2>Reference examples<a class="headerlink" href="#reference-examples" title="Link to this heading">#</a></h2>
 <section id="a-separator-spec">
 <h3>A separator spec<a class="headerlink" href="#a-separator-spec" title="Link to this heading">#</a></h3>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-0">
+Python</label><div class="sd-tab-content docutils">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_component_spec</span>
 
 <span class="n">record</span> <span class="o">=</span> <span class="n">create_component_spec</span><span class="p">(</span>
@@ -612,7 +605,10 @@ that uses it.</p>
 <span class="p">)</span>
 </pre></div>
 </div>
-<p>The canonical record this produces:</p>
+</div>
+<input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-1">
+Canonical record</label><div class="sd-tab-content docutils">
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;schema_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;separator_spec&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -628,7 +624,11 @@ that uses it.</p>
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>The JSON-LD it emits (<code class="docutils literal notranslate"><span class="pre">record_to_jsonld</span></code>, hosted-context mode):</p>
+</div>
+<input id="sd-tab-item-2" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-2">
+JSON-LD</label><div class="sd-tab-content docutils">
+<p>Emitted by <code class="docutils literal notranslate"><span class="pre">record_to_jsonld</span></code>, hosted-context mode.</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;@context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="s2">&quot;https://w3id.org/emmo/domain/battery/context&quot;</span><span class="p">,</span>
@@ -644,63 +644,11 @@ that uses it.</p>
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>What to notice:</p>
-<ul class="simple">
-<li><p>The same <code class="docutils literal notranslate"><span class="pre">create_component_spec(family,</span> <span class="pre">...)</span></code> call authors all four families; the family picks the schema.</p></li>
-</ul>
-<p><strong>Validated clean</strong> — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).</p>
-</section>
-<section id="an-electrolyte-spec">
-<h3>An electrolyte spec<a class="headerlink" href="#an-electrolyte-spec" title="Link to this heading">#</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_component_spec</span>
-
-<span class="n">record</span> <span class="o">=</span> <span class="n">create_component_spec</span><span class="p">(</span>
-    <span class="s2">&quot;electrolyte&quot;</span><span class="p">,</span>
-    <span class="n">uid</span><span class="o">=</span><span class="s2">&quot;0rp6-kncv-cyem-qwcd&quot;</span><span class="p">,</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;LP30 + 2% VC&quot;</span><span class="p">,</span>
-    <span class="c1"># The electrolyte class is required. It goes through body= because the</span>
-    <span class="c1"># record field is also named &quot;family&quot; — the function&#39;s first argument.</span>
-    <span class="n">body</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;family&quot;</span><span class="p">:</span> <span class="s2">&quot;organic&quot;</span><span class="p">},</span>
-    <span class="n">source_type</span><span class="o">=</span><span class="s2">&quot;lab&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-</pre></div>
 </div>
-<p>The canonical record this produces:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;schema_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;electrolyte_spec&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/0rp6-kncv-cyem-qwcd&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;short_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0rp6kn&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;LP30 + 2% VC&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;family&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;organic&quot;</span>
-<span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;provenance&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;source_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;lab&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;retrieved_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1750000000</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;battinfo_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.7.0&quot;</span>
-<span class="w">  </span><span class="p">}</span>
-<span class="p">}</span>
-</pre></div>
-</div>
-<p>The JSON-LD it emits (<code class="docutils literal notranslate"><span class="pre">record_to_jsonld</span></code>, hosted-context mode):</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;@context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">    </span><span class="s2">&quot;https://w3id.org/emmo/domain/battery/context&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://schema.org/&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;dcterms&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://purl.org/dc/terms/&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;battinfo&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/&quot;</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">  </span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ElectrolyteSolution&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/0rp6-kncv-cyem-qwcd&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;LP30 + 2% VC&quot;</span>
-<span class="p">}</span>
-</pre></div>
 </div>
 <p>What to notice:</p>
 <ul class="simple">
-<li><p>Electrolytes assemble material constituents (salt, solvents, additives) — see the composition fields in the field reference below.</p></li>
+<li><p>The same <code class="docutils literal notranslate"><span class="pre">create_component_spec(family,</span> <span class="pre">...)</span></code> call authors every component family; the family picks the schema.</p></li>
 </ul>
 <p><strong>Validated clean</strong> — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).</p>
 </section>
@@ -997,153 +945,6 @@ that uses it.</p>
 </table>
 </div>
 </section>
-<section id="electrolyte-spec-fields">
-<h3>electrolyte-spec fields<a class="headerlink" href="#electrolyte-spec-fields" title="Link to this heading">#</a></h3>
-<p>Schema: <a class="reference external" href="https://w3id.org/battinfo/schema/electrolyte-spec.schema.json"><code class="docutils literal notranslate"><span class="pre">electrolyte-spec.schema.json</span></code></a> · required at top level: <code class="docutils literal notranslate"><span class="pre">schema_version</span></code>, <code class="docutils literal notranslate"><span class="pre">electrolyte_spec</span></code>, <code class="docutils literal notranslate"><span class="pre">provenance</span></code></p>
-<div class="pst-scrollable-table-container"><table class="table">
-<thead>
-<tr class="row-odd"><th class="head"><p>Field</p></th>
-<th class="head"><p>Type</p></th>
-<th class="head"><p>Required</p></th>
-<th class="head"><p>Description</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">id</span></code></p></td>
-<td><p>→ ComponentSpecIri</p></td>
-<td><p>yes</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">short_id</span></code></p></td>
-<td><p>→ ShortId</p></td>
-<td><p></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">name</span></code></p></td>
-<td><p>string</p></td>
-<td><p>yes</p></td>
-<td><p>Human-readable name of this formulation (e.g. ‘LP57 + 2% VC’).</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">family</span></code></p></td>
-<td><p>→ family</p></td>
-<td><p>yes</p></td>
-<td><p>Broad electrolyte class.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">salt</span></code></p></td>
-<td><p>→ salt</p></td>
-<td><p></p></td>
-<td><p>Conducting salt (e.g. LiPF6), with concentration under its property map.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">solvent_mixture</span></code></p></td>
-<td><p>→ solvent_mixture</p></td>
-<td><p></p></td>
-<td><p>Solvent mixture, with component fractions under each component’s property map.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">additive</span></code></p></td>
-<td><p>→ additive</p></td>
-<td><p></p></td>
-<td><p>Functional additives (e.g. VC, FEC), each with its fraction under property.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">property</span></code></p></td>
-<td><p>→ quantitative-properties</p></td>
-<td><p></p></td>
-<td><p>Named quantity map of technical properties (snake_case key to value+unit quantity).</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">manufacturer</span></code></p></td>
-<td><p>→ OrgRef</p></td>
-<td><p></p></td>
-<td><p>Manufacturer of the item.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">supplier</span></code></p></td>
-<td><p>→ OrgRef</p></td>
-<td><p></p></td>
-<td><p>Supplier or vendor the item was sourced from.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">product_id</span></code></p></td>
-<td><p>string</p></td>
-<td><p></p></td>
-<td><p>Manufacturer or supplier product/grade identifier.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">comment</span></code></p></td>
-<td><p>string</p></td>
-<td><p></p></td>
-<td><p>Free-text comment.</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-</section>
-<section id="electrolyte-fields">
-<h3>electrolyte fields<a class="headerlink" href="#electrolyte-fields" title="Link to this heading">#</a></h3>
-<p>Schema: <a class="reference external" href="https://w3id.org/battinfo/schema/electrolyte.schema.json"><code class="docutils literal notranslate"><span class="pre">electrolyte.schema.json</span></code></a> · required at top level: <code class="docutils literal notranslate"><span class="pre">schema_version</span></code>, <code class="docutils literal notranslate"><span class="pre">electrolyte</span></code>, <code class="docutils literal notranslate"><span class="pre">provenance</span></code></p>
-<div class="pst-scrollable-table-container"><table class="table">
-<thead>
-<tr class="row-odd"><th class="head"><p>Field</p></th>
-<th class="head"><p>Type</p></th>
-<th class="head"><p>Required</p></th>
-<th class="head"><p>Description</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">id</span></code></p></td>
-<td><p>→ ComponentIri</p></td>
-<td><p>yes</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">electrolyte_spec_id</span></code></p></td>
-<td><p>→ ComponentSpecIri</p></td>
-<td><p>yes</p></td>
-<td><p>IRI of the electrolyte-spec this physical electrolyte realizes.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">short_id</span></code></p></td>
-<td><p>→ ShortId</p></td>
-<td><p></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">name</span></code></p></td>
-<td><p>string</p></td>
-<td><p></p></td>
-<td><p>Human-readable label for this physical lot (e.g. a lab inventory id).</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">lot_id</span></code></p></td>
-<td><p>string</p></td>
-<td><p></p></td>
-<td><p>Manufacturer or supplier lot number.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">batch_id</span></code></p></td>
-<td><p>string</p></td>
-<td><p></p></td>
-<td><p>Internal lab batch identifier, when different from the supplier lot.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">supplier</span></code></p></td>
-<td><p>→ OrgRef</p></td>
-<td><p></p></td>
-<td><p>Supplier or vendor the item was sourced from.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">manufactured_at</span></code></p></td>
-<td><p>→ FlexDate</p></td>
-<td><p></p></td>
-<td><p>Date this item was manufactured.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">datasets</span></code></p></td>
-<td><p>array of → DatasetLink</p></td>
-<td><p></p></td>
-<td><p>Characterization datasets recorded for this physical item.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">property</span></code></p></td>
-<td><p>→ quantitative-properties</p></td>
-<td><p></p></td>
-<td><p>Named quantity map of technical properties (snake_case key to value+unit quantity).</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">comment</span></code></p></td>
-<td><p>string</p></td>
-<td><p></p></td>
-<td><p>Free-text comment.</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-</section>
 <section id="housing-spec-fields">
 <h3>housing-spec fields<a class="headerlink" href="#housing-spec-fields" title="Link to this heading">#</a></h3>
 <p>Schema: <a class="reference external" href="https://w3id.org/battinfo/schema/housing-spec.schema.json"><code class="docutils literal notranslate"><span class="pre">housing-spec.schema.json</span></code></a> · required at top level: <code class="docutils literal notranslate"><span class="pre">schema_version</span></code>, <code class="docutils literal notranslate"><span class="pre">housing_spec</span></code>, <code class="docutils literal notranslate"><span class="pre">provenance</span></code></p>
@@ -1319,12 +1120,12 @@ that uses it.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="electrodes.html"
+       href="electrolytes.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Electrodes</p>
+        <p class="prev-next-title">Electrolytes</p>
       </div>
     </a>
     <a class="right-next"
@@ -1359,11 +1160,9 @@ that uses it.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#naming-convention">Naming convention</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#electrolyte-assembles-material-constituents">Electrolyte assembles material constituents</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#examples">Examples</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reference-examples">Reference examples</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#a-separator-spec">A separator spec</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#an-electrolyte-spec">An electrolyte spec</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#field-reference">Field reference</a><ul class="nav section-nav flex-column">
@@ -1371,8 +1170,6 @@ that uses it.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#separator-fields">separator fields</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#current-collector-spec-fields">current-collector-spec fields</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#current-collector-fields">current-collector fields</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#electrolyte-spec-fields">electrolyte-spec fields</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#electrolyte-fields">electrolyte fields</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#housing-spec-fields">housing-spec fields</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#housing-fields">housing fields</a></li>
 </ul>

@@ -29,6 +29,9 @@ flavor only.
 
 ### A member dataset
 
+::::{tab-set}
+
+:::{tab-item} Python
 ```python
 from battinfo import Cell, CellSpec, Dataset, Test
 
@@ -64,9 +67,9 @@ dataset = Dataset(
 )
 record = dataset.to_record()
 ```
+:::
 
-The canonical record this produces:
-
+:::{tab-item} Canonical record
 ```json
 {
   "schema_version": "0.2.0",
@@ -102,8 +105,10 @@ The canonical record this produces:
   }
 }
 ```
+:::
 
-The JSON-LD it emits (`record_to_jsonld`, hosted-context mode):
+:::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
 
 ```json
 {
@@ -156,6 +161,9 @@ The JSON-LD it emits (`record_to_jsonld`, hosted-context mode):
   }
 }
 ```
+:::
+
+::::
 
 What to notice:
 
@@ -166,6 +174,9 @@ What to notice:
 
 ### The collection (dataset series)
 
+::::{tab-set}
+
+:::{tab-item} Python
 ```python
 from battinfo import Dataset
 
@@ -186,9 +197,9 @@ collection = Dataset(
 )
 record = collection.to_record()
 ```
+:::
 
-The canonical record this produces:
-
+:::{tab-item} Canonical record
 ```json
 {
   "schema_version": "0.2.0",
@@ -214,8 +225,10 @@ The canonical record this produces:
   }
 }
 ```
+:::
 
-The JSON-LD it emits (`record_to_jsonld`, hosted-context mode):
+:::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
 
 ```json
 {
@@ -241,6 +254,9 @@ The JSON-LD it emits (`record_to_jsonld`, hosted-context mode):
   }
 }
 ```
+:::
+
+::::
 
 What to notice:
 
