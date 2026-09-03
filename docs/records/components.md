@@ -6,23 +6,23 @@
 
 # Components
 
-How to describe the other cell components — separator, current collector, electrolyte, housing. All four families share one generic spec + instance surface; only their fields differ.
+How to describe the remaining cell components — separator, current collector, housing. The three families share one generic spec + instance surface; only their fields differ. Electrolytes ride the same machinery but have [their own page](electrolytes.md).
 
 BattINFO models every entity as a **spec + instance** pair. After materials
 ([materials](materials.md#records)) and electrodes
-([electrodes-model.md](electrodes.md)), four **component** families let the rest of a
+([electrodes-model.md](electrodes.md)), three **component** families let the rest of a
 cell be described from reusable, IRI-addressable parts. Each family is a thin registry entry
 that reuses an existing embedded holder shape; component-specs reference `material-spec`
 records by IRI.
 
 | Family | Spec record | Instance record | References materials via |
 | --- | --- | --- | --- |
-| electrolyte | `electrolyte-spec` | `electrolyte` | salt + solvent + additive `material_spec_id` |
 | separator | `separator-spec` | `separator` | `material_spec_id` |
 | current-collector | `current-collector-spec` | `current-collector` | `material_spec_id` |
 | housing | `housing-spec` | `housing` | (materials as strings) |
 
-Electrodes used to be a fifth generic family. They are now first-class — a curated `kind`,
+Electrolytes share this generic machinery but have [their own page](electrolytes.md).
+Electrodes used to be another generic family. They are now first-class — a curated `kind`,
 deterministic identity that includes the processing route, design values, and their own
 emitter — so they have their own page: [Electrodes](electrodes.md).
 
@@ -40,7 +40,7 @@ separator = create_separator_spec(
           "property": {"thickness": {"value": 25, "unit": "um"}}})
 
 # generic form is also available
-create_component_spec("electrolyte", name="…", body={...})
+create_component_spec("housing", name="…", body={...})
 ```
 
 The step-by-step bench version of this — materials first, IRIs harvested from
@@ -58,18 +58,11 @@ Family identifiers use **underscores** (`current_collector`); the IRI namespace 
 **hyphens** (`https://w3id.org/battinfo/spec/…`). The generic API derives
 the namespace via `family.replace("_", "-")`.
 
-## Electrolyte assembles material constituents
-
-`electrolyte-spec` carries `salt` + `solvent_mixture.component[]` + `additive[]`, each able
-to reference a `material-spec` by IRI — so the **organic 1M LiPF₆ EC:EMC 3:7** and
-**aqueous 7M KOH** example formulations are assembled from the LiPF6/EC/EMC/KOH material-specs
-and emit `OrganicElectrolyte` / `AqueousElectrolyte` JSON-LD with `hasSolute`/`hasSolvent`.
-
 ## Examples
 
 `examples/<family>-spec/*` + `examples/<family>/*` (single source of truth, mirrored into the
 wheel). Coverage: Celgard PP + ceramic-coated PE separators; Al/Cu current collectors;
-organic + aqueous electrolytes; CR2032 coin + LFP 100 Ah prismatic housings — grounded in the DIGIBAT Discovery-Benchmark and the Cell_Design_Tool.
+CR2032 coin + LFP 100 Ah prismatic housings — grounded in the DIGIBAT Discovery-Benchmark and the Cell_Design_Tool.
 Cell-specs reference these component-specs by IRI today via the five `*_spec_id`
 fields — see [Cells](../cell-fleet.md) for the reference seam and the example fleet
 that uses it.
@@ -127,66 +120,7 @@ The JSON-LD it emits (`record_to_jsonld`, hosted-context mode):
 
 What to notice:
 
-- The same `create_component_spec(family, ...)` call authors all four families; the family picks the schema.
-
-**Validated clean** — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).
-
-### An electrolyte spec
-
-```python
-from battinfo.api import create_component_spec
-
-record = create_component_spec(
-    "electrolyte",
-    uid="0rp6-kncv-cyem-qwcd",
-    name="LP30 + 2% VC",
-    # The electrolyte class is required. It goes through body= because the
-    # record field is also named "family" — the function's first argument.
-    body={"family": "organic"},
-    source_type="lab",
-)
-```
-
-The canonical record this produces:
-
-```json
-{
-  "schema_version": "0.2.0",
-  "electrolyte_spec": {
-    "id": "https://w3id.org/battinfo/spec/0rp6-kncv-cyem-qwcd",
-    "short_id": "0rp6kn",
-    "name": "LP30 + 2% VC",
-    "family": "organic"
-  },
-  "provenance": {
-    "source_type": "lab",
-    "retrieved_at": 1750000000,
-    "battinfo_version": "0.7.0"
-  }
-}
-```
-
-The JSON-LD it emits (`record_to_jsonld`, hosted-context mode):
-
-```json
-{
-  "@context": [
-    "https://w3id.org/emmo/domain/battery/context",
-    {
-      "schema": "https://schema.org/",
-      "dcterms": "http://purl.org/dc/terms/",
-      "battinfo": "https://w3id.org/battinfo/"
-    }
-  ],
-  "@type": "ElectrolyteSolution",
-  "@id": "https://w3id.org/battinfo/spec/0rp6-kncv-cyem-qwcd",
-  "schema:name": "LP30 + 2% VC"
-}
-```
-
-What to notice:
-
-- Electrolytes assemble material constituents (salt, solvents, additives) — see the composition fields in the field reference below.
+- The same `create_component_spec(family, ...)` call authors every component family; the family picks the schema.
 
 **Validated clean** — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).
 
@@ -259,43 +193,6 @@ Schema: [`current-collector.schema.json`](https://w3id.org/battinfo/schema/curre
 | `current_collector_spec_id` | → ComponentSpecIri | yes | IRI of the current collector-spec this physical current collector realizes. |
 | `short_id` | → ShortId |  |  |
 | `name` | string |  | Human-readable label for this physical item (e.g. a lab inventory id). |
-| `lot_id` | string |  | Manufacturer or supplier lot number. |
-| `batch_id` | string |  | Internal lab batch identifier, when different from the supplier lot. |
-| `supplier` | → OrgRef |  | Supplier or vendor the item was sourced from. |
-| `manufactured_at` | → FlexDate |  | Date this item was manufactured. |
-| `datasets` | array of → DatasetLink |  | Characterization datasets recorded for this physical item. |
-| `property` | → quantitative-properties |  | Named quantity map of technical properties (snake_case key to value+unit quantity). |
-| `comment` | string |  | Free-text comment. |
-
-### electrolyte-spec fields
-
-Schema: [`electrolyte-spec.schema.json`](https://w3id.org/battinfo/schema/electrolyte-spec.schema.json) · required at top level: `schema_version`, `electrolyte_spec`, `provenance`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `id` | → ComponentSpecIri | yes |  |
-| `short_id` | → ShortId |  |  |
-| `name` | string | yes | Human-readable name of this formulation (e.g. 'LP57 + 2% VC'). |
-| `family` | → family | yes | Broad electrolyte class. |
-| `salt` | → salt |  | Conducting salt (e.g. LiPF6), with concentration under its property map. |
-| `solvent_mixture` | → solvent_mixture |  | Solvent mixture, with component fractions under each component's property map. |
-| `additive` | → additive |  | Functional additives (e.g. VC, FEC), each with its fraction under property. |
-| `property` | → quantitative-properties |  | Named quantity map of technical properties (snake_case key to value+unit quantity). |
-| `manufacturer` | → OrgRef |  | Manufacturer of the item. |
-| `supplier` | → OrgRef |  | Supplier or vendor the item was sourced from. |
-| `product_id` | string |  | Manufacturer or supplier product/grade identifier. |
-| `comment` | string |  | Free-text comment. |
-
-### electrolyte fields
-
-Schema: [`electrolyte.schema.json`](https://w3id.org/battinfo/schema/electrolyte.schema.json) · required at top level: `schema_version`, `electrolyte`, `provenance`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `id` | → ComponentIri | yes |  |
-| `electrolyte_spec_id` | → ComponentSpecIri | yes | IRI of the electrolyte-spec this physical electrolyte realizes. |
-| `short_id` | → ShortId |  |  |
-| `name` | string |  | Human-readable label for this physical lot (e.g. a lab inventory id). |
 | `lot_id` | string |  | Manufacturer or supplier lot number. |
 | `batch_id` | string |  | Internal lab batch identifier, when different from the supplier lot. |
 | `supplier` | → OrgRef |  | Supplier or vendor the item was sourced from. |

@@ -182,6 +182,17 @@ def snippet_electrolyte_spec():
     return record
 
 
+def snippet_electrolyte():
+    from battinfo.api import create_component_instance
+
+    record = create_component_instance(
+        "electrolyte",
+        uid="me0t-k16f-eh5y-rq0k",
+        spec_id="https://w3id.org/battinfo/spec/0rp6-kncv-cyem-qwcd",
+    )
+    return record
+
+
 def snippet_test_protocol():
     from battinfo import TestSpec
 
@@ -479,12 +490,50 @@ FAMILIES = [
         "see_also": "Recipe: [build a cell from components](../howto/build-a-cell-from-components.md).",
     },
     {
+        "slug": "electrolytes",
+        "title": "Electrolytes",
+        "intro": (
+            "How to describe an electrolyte: the formulation as an "
+            "**electrolyte spec** (its family and its composition, assembled "
+            "from material-specs), a mixed batch as an **electrolyte** "
+            "instance."
+        ),
+        "sections": [
+            {
+                "heading": "An electrolyte spec (the formulation)",
+                "fn": snippet_electrolyte_spec,
+                "record_type": "electrolyte-spec",
+                "notice": [
+                    "This minimal spec types as `ElectrolyteSolution`; the "
+                    "family-specific classes (`OrganicElectrolyte`, "
+                    "`AqueousElectrolyte`) appear on the packaged example "
+                    "formulations that carry a full composition.",
+                    "The composition fields (salt, solvent mixture, additives) "
+                    "reference material-specs by IRI — see the field reference "
+                    "below.",
+                ],
+            },
+            {
+                "heading": "An electrolyte (one mixed batch)",
+                "fn": snippet_electrolyte,
+                "record_type": "electrolyte",
+                "notice": [
+                    "`spec_id` carries the formulation; the batch is what a "
+                    "cell build actually consumed.",
+                ],
+            },
+        ],
+        "schemas": ["electrolyte-spec.schema.json", "electrolyte.schema.json"],
+        "see_also": "Recipe: [build a cell from components](../howto/build-a-cell-from-components.md).",
+    },
+    {
         "slug": "components",
         "title": "Components",
         "intro": (
-            "How to describe the other cell components — separator, current "
-            "collector, electrolyte, housing. All four families share one "
-            "generic spec + instance surface; only their fields differ."
+            "How to describe the remaining cell components — separator, "
+            "current collector, housing. The three families share one generic "
+            "spec + instance surface; only their fields differ. Electrolytes "
+            "ride the same machinery but have [their own page](electrolytes.md)."
         ),
         "sections": [
             {
@@ -493,24 +542,13 @@ FAMILIES = [
                 "record_type": "separator-spec",
                 "notice": [
                     "The same `create_component_spec(family, ...)` call authors "
-                    "all four families; the family picks the schema.",
-                ],
-            },
-            {
-                "heading": "An electrolyte spec",
-                "fn": snippet_electrolyte_spec,
-                "record_type": "electrolyte-spec",
-                "notice": [
-                    "Electrolytes assemble material constituents (salt, solvents, "
-                    "additives) — see the composition fields in the field "
-                    "reference below.",
+                    "every component family; the family picks the schema.",
                 ],
             },
         ],
         "schemas": [
             "separator-spec.schema.json", "separator.schema.json",
             "current-collector-spec.schema.json", "current-collector.schema.json",
-            "electrolyte-spec.schema.json", "electrolyte.schema.json",
             "housing-spec.schema.json", "housing.schema.json",
         ],
         "see_also": "Recipe: [build a cell from components](../howto/build-a-cell-from-components.md).",
