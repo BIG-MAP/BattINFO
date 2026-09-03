@@ -16,7 +16,7 @@ Three versions exist in the wild, and consumers should accept all three:
 
 | `schema_version` | What it means |
 |---|---|
-| `0.1.0` | The original record shape (most of the example corpus still carries it) |
+| `0.1.0` | The original record shape; records published before the 0.2.0 consolidation still carry it |
 | `1.0.0` | An interim stamp used briefly before the numbering was consolidated |
 | `0.2.0` | The current shape: snake_case keys throughout, `properties` (ex `specs`), organizations use `same_as` |
 

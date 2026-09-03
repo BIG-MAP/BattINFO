@@ -32,7 +32,7 @@ Each notebook runs from its own folder and writes only to a throwaway `_scratch/
 |---|---|
 | **[Python API](pages/api-reference.rst)** | Full Python surface: Workspace, authoring helpers, query/save/publish functions |
 | **[CLI reference](pages/cli-reference.md)** | All CLI commands, options, and output formats |
-| **[Reference records](reference-records/index.md)** | One exemplar per record type: authoring code, canonical record, emitted JSON-LD — generated and drift-gated |
+| **[Reference records](records/index.md)** | One exemplar per record type: authoring code, canonical record, emitted JSON-LD — generated and drift-gated |
 | **[Validation contract](validation-contract.md)** | Validation policies, machine-readable issue output |
 | **[Identifier policy](../IDENTIFIER_POLICY.md)** | IRI minting, governance, and stability guarantees |
 

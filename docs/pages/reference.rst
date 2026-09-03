@@ -28,7 +28,7 @@ library and drift-gated, so they always show what the code does today.
 .. toctree::
    :maxdepth: 1
 
-   ../reference-records/index
+   ../records/index
 
 Record models
 -------------

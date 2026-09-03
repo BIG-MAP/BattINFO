@@ -1,4 +1,4 @@
-"""Generate docs/reference-records/ — the reference-records chapter.
+"""Generate docs/records/ — the reference-records chapter.
 
 One page per record type, each carrying the same triplet, produced live at
 generation time so it cannot lie:
@@ -21,7 +21,7 @@ drift, so any PR that changes what these pages show must regenerate them:
     uv run python scripts/gen_reference_records.py --check   # CI drift gate
 
 The chapter is the review surface for change propagation: the git history of
-docs/reference-records/ is the record of how schema, API, and emitter changes
+docs/records/ is the record of how schema, API, and emitter changes
 reached real examples.
 """
 from __future__ import annotations
@@ -46,7 +46,7 @@ _spec.loader.exec_module(_web)
 normalize = _web.normalize
 snippet_source = _web.snippet_source
 
-OUT_DIR = ROOT / "docs" / "reference-records"
+OUT_DIR = ROOT / "docs" / "records"
 NL = chr(10)
 
 
@@ -412,7 +412,7 @@ def render_index() -> str:
         + "against the current library on every change, validated clean under "
         + "the strict policy, and drift-gated so a schema, API, or emitter "
         + "change must regenerate this chapter in the same PR. The git history "
-        + "of `docs/reference-records/` is therefore the record of how changes "
+        + "of `docs/records/` is therefore the record of how changes "
         + "propagate to real examples." + NL + NL
         + "| Page | Exemplars |" + NL
         + "|---|---|" + NL
@@ -444,7 +444,7 @@ def main() -> int:
                 stale.append(name)
         if stale:
             print(
-                "docs/reference-records/ drifts: " + ", ".join(sorted(stale))
+                "docs/records/ drifts: " + ", ".join(sorted(stale))
                 + " — run `uv run python scripts/gen_reference_records.py`",
                 file=sys.stderr,
             )

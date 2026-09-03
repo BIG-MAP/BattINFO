@@ -58,7 +58,7 @@ These are what make the boundary survive growth. Keep them working.
 5. **Written rule + CI link-check.** This file is the rule. Both builds should
    run a link checker in CI (`sphinx-build -b linkcheck` for docs; a link
    checker for the Next build) so cross-surface links can't silently break.
-6. **Reference records are generated, never edited.** `docs/reference-records/`
+6. **Reference records are generated, never edited.** `docs/records/`
    is produced end to end by `scripts/gen_reference_records.py`: every page's
    authoring snippet executes against the current library, the record it makes
    is validated strict-clean at generation time, and the emitted JSON-LD is

@@ -4,7 +4,7 @@
 
 # Reference records
 
-One exemplar per record type: the authoring code, the canonical record it produces, and the JSON-LD that record emits — generated against the current library on every change, validated clean under the strict policy, and drift-gated so a schema, API, or emitter change must regenerate this chapter in the same PR. The git history of `docs/reference-records/` is therefore the record of how changes propagate to real examples.
+One exemplar per record type: the authoring code, the canonical record it produces, and the JSON-LD that record emits — generated against the current library on every change, validated clean under the strict policy, and drift-gated so a schema, API, or emitter change must regenerate this chapter in the same PR. The git history of `docs/records/` is therefore the record of how changes propagate to real examples.
 
 | Page | Exemplars |
 |---|---|
