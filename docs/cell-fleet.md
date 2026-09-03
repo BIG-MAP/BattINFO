@@ -1,4 +1,4 @@
-# Cells
+# Cell fleets
 
 A **cell** is one physical item with a serial number; this page covers how
 many cells reference one spec, and how a cell-spec is described from reusable
