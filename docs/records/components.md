@@ -132,6 +132,53 @@ What to notice:
 
 **Validated clean** — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).
 
+## Common examples
+
+A selection of real, validated records from the packaged examples corpus — each one click away, included from its single source under `examples/`. The full, living library is the registry: [browse it there](https://www.battery-genome.org/explore).
+
+::::{dropdown} Celgard 2400 (separator-spec)
+```{literalinclude} ../../examples/separator-spec/wgym-4xfa-pws1-ek1b.json
+:language: json
+```
+::::
+
+::::{dropdown} Ceramic-coated PE (separator-spec)
+```{literalinclude} ../../examples/separator-spec/v94j-jm2h-t8d1-t5a6.json
+:language: json
+```
+::::
+
+::::{dropdown} Aluminium foil (current-collector-spec)
+```{literalinclude} ../../examples/current-collector-spec/vkaf-f5bv-fwt2-e6yz.json
+:language: json
+```
+::::
+
+::::{dropdown} Copper foil (current-collector-spec)
+```{literalinclude} ../../examples/current-collector-spec/z25y-gab5-hd3n-qfpr.json
+:language: json
+```
+::::
+
+::::{dropdown} CR2032 coin housing (housing-spec)
+```{literalinclude} ../../examples/housing-spec/38af-bpnv-1zmm-32hs.json
+:language: json
+```
+::::
+
+::::{dropdown} 21700 cylindrical housing (housing-spec)
+```{literalinclude} ../../examples/housing-spec/k2q4-dk79-g890-7veq.json
+:language: json
+```
+::::
+
+::::{dropdown} LFP 100Ah prismatic housing (housing-spec)
+```{literalinclude} ../../examples/housing-spec/ypyh-v38v-r276-snmk.json
+:language: json
+```
+::::
+
+
 ## Field reference
 
 Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`).

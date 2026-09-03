@@ -880,6 +880,127 @@ def build_sections(family: dict) -> list[dict]:
     return sections
 
 
+# ── Common-example shelves ───────────────────────────────────────────────────
+# The curated selection each family page surfaces from the CI-gated examples/
+# corpus (the registry is the full library; this is the docs' reasonable
+# selection). The only curated input is the pick list — display names are read
+# from the record files at generation time, so renaming an example updates the
+# shelf on regeneration and a deleted pick fails generation loudly.
+
+REGISTRY_BROWSE = {
+    "cells": "https://www.battery-genome.org/cells",
+    "datasets": "https://www.battery-genome.org/datasets",
+}
+REGISTRY_BROWSE_DEFAULT = "https://www.battery-genome.org/explore"
+
+SHELVES: dict[str, list[str]] = {
+    "cells": [
+        "cell-spec/A123__ANR26650M1-B.json",
+        "cell-spec/research/cylindrical-detailed.example.json",
+        "cell-spec/research/prismatic-detailed.example.json",
+        "cell-spec/research/pouch-multilayer-detailed.example.json",
+        "cell-spec/research/coin-detailed.example.json",
+        "cell-spec/cell-spec-tme2-0sy6-q89b-8m92.json",
+        "cell-spec/cell-spec-86k6-6tzd-c4sf-5s01.json",
+        "cell-spec/cell-spec-jgyy-x3h5-drmv-5tn5.json",
+    ],
+    "materials": [
+        "material-spec/npa4-0dnw-evyh-hhdm.json",
+        "material-spec/5ms1-9jv8-hr54-mn4e.json",
+        "material-spec/gwck-k5kf-ae1f-gfgc.json",
+        "material-spec/jnab-ggw9-cbn8-hhjr.json",
+        "material-spec/83bd-jmk7-2x47-s04a.json",
+        "material-spec/bkrw-7shb-tzbm-j664.json",
+        "material-spec/r5xt-4hrh-jm2k-yg4m.json",
+        "material-spec/fpeg-3wg8-e6cs-2vn1.json",
+        "material-spec/efxx-b9yg-wh00-d23a.json",
+    ],
+    "electrodes": [
+        "electrode-spec/qfjh-7xyr-ga1k-tjez.json",
+        "electrode-spec/d7qr-n581-74c3-7g7r.json",
+        "electrode-spec/m6y0-tkfg-sn40-q10p.json",
+        "electrode-spec/qw3j-we77-zzj1-ya55.json",
+        "electrode/k81p-5wxb-gaph-z6ee.json",
+    ],
+    "electrolytes": [
+        "electrolyte-spec/gpkh-74nj-6sdb-vcsc.json",
+        "electrolyte-spec/gzt2-hrqq-gsfn-sp94.json",
+    ],
+    "components": [
+        "separator-spec/wgym-4xfa-pws1-ek1b.json",
+        "separator-spec/v94j-jm2h-t8d1-t5a6.json",
+        "current-collector-spec/vkaf-f5bv-fwt2-e6yz.json",
+        "current-collector-spec/z25y-gab5-hd3n-qfpr.json",
+        "housing-spec/38af-bpnv-1zmm-32hs.json",
+        "housing-spec/k2q4-dk79-g890-7veq.json",
+        "housing-spec/ypyh-v38v-r276-snmk.json",
+    ],
+    "tests": [
+        "test-protocol/test-protocol-8r2m-4v6k-9p3t-7n5x.json",
+        "test-protocol/test-protocol-fj4k-hj6f-cd5v-36fb.json",
+        "test-protocol/test-protocol-5v3n-8x1m-4k7p-9r2t.json",
+        "test-protocol/test-protocol-j19t-9cm0-f219-zh4y.json",
+        "test-protocol/test-protocol-7m4t-1n9v-6r3k-2p8x.json",
+        "test-protocol/test-protocol-3p7k-2m9r-6t4n-1v8x.json",
+        "test-protocol/test-protocol-wmqd-1fbt-zyya-k4bw.json",
+        "test-protocol/test-protocol-t163-7ba5-r0kn-h9my.json",
+    ],
+    "datasets": [
+        "dataset/dataset-nns1-gh5p-v5n1-td17.json",
+        "dataset/dataset-nxv4-ecrt-9wnm-a2yt.json",
+    ],
+    "equipment": [
+        "equipment-spec/rchb-csx8-3vp8-ekcs.json",
+        "equipment/bw1k-j56y-r2ax-2adv.json",
+    ],
+    "parameter-sets": [
+        "parameter-set/parameter-set-8qqs-rh43-wt8d-172n.json",
+    ],
+    "organizations": [
+        "organization/A123.json",
+        "organization/Celgard.json",
+        "organization/EMPA.json",
+    ],
+}
+
+
+def render_shelf(family: dict) -> str:
+    picks = SHELVES.get(family["slug"], [])
+    if not picks:
+        return ""
+    browse = REGISTRY_BROWSE.get(family["slug"], REGISTRY_BROWSE_DEFAULT)
+    parts = [NL, "## Common examples", NL, NL]
+    parts += [
+        "A selection of real, validated records from the packaged examples "
+        "corpus — each one click away, included from its single source under "
+        f"`examples/`. The full, living library is the registry: "
+        f"[browse it there]({browse})." + NL, NL,
+    ]
+    for rel in picks:
+        path = ROOT / "examples" / rel
+        if not path.is_file():
+            raise SystemExit(
+                f"gen_reference_records: shelf pick examples/{rel} does not exist "
+                f"(page '{family['slug']}'). Fix the pick list or restore the example."
+            )
+        doc = json.loads(path.read_text(encoding="utf-8"))
+        body = next(
+            (v for k, v in doc.items() if k not in ENVELOPE_KEYS and isinstance(v, dict)),
+            {},
+        )
+        name = body.get("name") or body.get("title")
+        if not name:
+            raise SystemExit(
+                f"gen_reference_records: shelf pick examples/{rel} carries no name "
+                "— shelf entries must be recognizable by name."
+            )
+        type_label = rel.split("/")[0]
+        parts += [f"::::{{dropdown}} {name} ({type_label})", NL]
+        parts += [f"```{{literalinclude}} ../../examples/{rel}", NL,
+                  ":language: json", NL, "```", NL, "::::", NL, NL]
+    return "".join(parts)
+
+
 BANNER = (
     "<!-- GENERATED by scripts/gen_reference_records.py — do not edit this page." + NL
     + "     Model prose is injected from docs/records/_fragments/<slug>.md:" + NL
@@ -927,6 +1048,8 @@ def render_page(family: dict, sections: list[dict]) -> str:
             parts += [NL]
         parts += [section["verdict"], NL]
 
+    parts += [render_shelf(family)]
+
     parts += [NL, "## Field reference", NL, NL]
     parts += [
         "Generated from the packaged JSON Schemas — the same files "
@@ -963,6 +1086,8 @@ def render_index() -> str:
         + "drift-gated: a schema, API, or emitter change must regenerate this "
         + "chapter in the same PR, so the git history of `docs/records/` is "
         + "the record of how changes propagate to real examples." + NL + NL
+        + "Each page also carries a shelf of common, real examples — the "
+        + "docs' reasonable selection; the registry is the full library." + NL + NL
         + "| Family | Reference examples |" + NL
         + "|---|---|" + NL
         + rows + NL + NL

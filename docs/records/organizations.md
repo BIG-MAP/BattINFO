@@ -79,6 +79,29 @@ Three gaps meet on this family: no authoring API (the record above is authored d
 
 **Schema-validated** — 0 errors against `organization.schema.json` (battinfo 0.7.0); this family is outside the semantic validation path (see the known gap above).
 
+## Common examples
+
+A selection of real, validated records from the packaged examples corpus — each one click away, included from its single source under `examples/`. The full, living library is the registry: [browse it there](https://www.battery-genome.org/explore).
+
+::::{dropdown} A123 Systems (organization)
+```{literalinclude} ../../examples/organization/A123.json
+:language: json
+```
+::::
+
+::::{dropdown} Celgard (organization)
+```{literalinclude} ../../examples/organization/Celgard.json
+:language: json
+```
+::::
+
+::::{dropdown} Empa (organization)
+```{literalinclude} ../../examples/organization/EMPA.json
+:language: json
+```
+::::
+
+
 ## Field reference
 
 Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`).

@@ -530,6 +530,59 @@ What to notice:
 
 **Validated clean** — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).
 
+## Common examples
+
+A selection of real, validated records from the packaged examples corpus — each one click away, included from its single source under `examples/`. The full, living library is the registry: [browse it there](https://www.battery-genome.org/explore).
+
+::::{dropdown} 1C Cycle Life at 25 C (test-protocol)
+```{literalinclude} ../../examples/test-protocol/test-protocol-8r2m-4v6k-9p3t-7n5x.json
+:language: json
+```
+::::
+
+::::{dropdown} Capacity Check — C/10 at 25 C (test-protocol)
+```{literalinclude} ../../examples/test-protocol/test-protocol-fj4k-hj6f-cd5v-36fb.json
+:language: json
+```
+::::
+
+::::{dropdown} Rate Capability: C/10 to 5C Discharge at 25°C (test-protocol)
+```{literalinclude} ../../examples/test-protocol/test-protocol-5v3n-8x1m-4k7p-9r2t.json
+:language: json
+```
+::::
+
+::::{dropdown} Formation — Slow First Cycles at 25 C (test-protocol)
+```{literalinclude} ../../examples/test-protocol/test-protocol-j19t-9cm0-f219-zh4y.json
+:language: json
+```
+::::
+
+::::{dropdown} HPPC — Pulse Power Characterisation at 25°C (test-protocol)
+```{literalinclude} ../../examples/test-protocol/test-protocol-7m4t-1n9v-6r3k-2p8x.json
+:language: json
+```
+::::
+
+::::{dropdown} GITT — Galvanostatic Intermittent Titration at 25°C (test-protocol)
+```{literalinclude} ../../examples/test-protocol/test-protocol-3p7k-2m9r-6t4n-1v8x.json
+:language: json
+```
+::::
+
+::::{dropdown} EIS Impedance — 100 kHz to 10 mHz at 50% SOC, 25 C (test-protocol)
+```{literalinclude} ../../examples/test-protocol/test-protocol-wmqd-1fbt-zyya-k4bw.json
+:language: json
+```
+::::
+
+::::{dropdown} Quasi-OCV — C/25 Discharge at 25 C (test-protocol)
+```{literalinclude} ../../examples/test-protocol/test-protocol-t163-7ba5-r0kn-h9my.json
+:language: json
+```
+::::
+
+
 ## Field reference
 
 Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`).

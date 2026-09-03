@@ -344,6 +344,23 @@ What to notice:
 
 **Validated clean** — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).
 
+## Common examples
+
+A selection of real, validated records from the packaged examples corpus — each one click away, included from its single source under `examples/`. The full, living library is the registry: [browse it there](https://www.battery-genome.org/explore).
+
+::::{dropdown} 1M LiPF6 in EC:EMC 3:7 (electrolyte-spec)
+```{literalinclude} ../../examples/electrolyte-spec/gpkh-74nj-6sdb-vcsc.json
+:language: json
+```
+::::
+
+::::{dropdown} 7M KOH in H2O (electrolyte-spec)
+```{literalinclude} ../../examples/electrolyte-spec/gzt2-hrqq-gsfn-sp94.json
+:language: json
+```
+::::
+
+
 ## Field reference
 
 Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`).

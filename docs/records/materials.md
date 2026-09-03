@@ -481,6 +481,65 @@ What to notice:
 
 **Validated clean** — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).
 
+## Common examples
+
+A selection of real, validated records from the packaged examples corpus — each one click away, included from its single source under `examples/`. The full, living library is the registry: [browse it there](https://www.battery-genome.org/explore).
+
+::::{dropdown} NMC811 (material-spec)
+```{literalinclude} ../../examples/material-spec/npa4-0dnw-evyh-hhdm.json
+:language: json
+```
+::::
+
+::::{dropdown} LFP (material-spec)
+```{literalinclude} ../../examples/material-spec/5ms1-9jv8-hr54-mn4e.json
+:language: json
+```
+::::
+
+::::{dropdown} Graphite (material-spec)
+```{literalinclude} ../../examples/material-spec/gwck-k5kf-ae1f-gfgc.json
+:language: json
+```
+::::
+
+::::{dropdown} Silicon-graphite composite (material-spec)
+```{literalinclude} ../../examples/material-spec/jnab-ggw9-cbn8-hhjr.json
+:language: json
+```
+::::
+
+::::{dropdown} LNMO (material-spec)
+```{literalinclude} ../../examples/material-spec/83bd-jmk7-2x47-s04a.json
+:language: json
+```
+::::
+
+::::{dropdown} PVDF (material-spec)
+```{literalinclude} ../../examples/material-spec/bkrw-7shb-tzbm-j664.json
+:language: json
+```
+::::
+
+::::{dropdown} Carbon black (material-spec)
+```{literalinclude} ../../examples/material-spec/r5xt-4hrh-jm2k-yg4m.json
+:language: json
+```
+::::
+
+::::{dropdown} LiPF6 (material-spec)
+```{literalinclude} ../../examples/material-spec/fpeg-3wg8-e6cs-2vn1.json
+:language: json
+```
+::::
+
+::::{dropdown} EC (material-spec)
+```{literalinclude} ../../examples/material-spec/efxx-b9yg-wh00-d23a.json
+:language: json
+```
+::::
+
+
 ## Field reference
 
 Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`).

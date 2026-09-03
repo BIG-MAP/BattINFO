@@ -308,6 +308,59 @@ What to notice:
 
 **Validated clean** — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).
 
+## Common examples
+
+A selection of real, validated records from the packaged examples corpus — each one click away, included from its single source under `examples/`. The full, living library is the registry: [browse it there](https://www.battery-genome.org/cells).
+
+::::{dropdown} A123 ANR26650M1-B (cell-spec)
+```{literalinclude} ../../examples/cell-spec/A123__ANR26650M1-B.json
+:language: json
+```
+::::
+
+::::{dropdown} ExampleLab CYL-LFP-18650 (cell-spec)
+```{literalinclude} ../../examples/cell-spec/research/cylindrical-detailed.example.json
+:language: json
+```
+::::
+
+::::{dropdown} ExampleLab PRISM-LFP-020 (cell-spec)
+```{literalinclude} ../../examples/cell-spec/research/prismatic-detailed.example.json
+:language: json
+```
+::::
+
+::::{dropdown} ExampleLab POUCH-ML-LFP-018 (cell-spec)
+```{literalinclude} ../../examples/cell-spec/research/pouch-multilayer-detailed.example.json
+:language: json
+```
+::::
+
+::::{dropdown} ExampleLab COIN-LFP-2032 (cell-spec)
+```{literalinclude} ../../examples/cell-spec/research/coin-detailed.example.json
+:language: json
+```
+::::
+
+::::{dropdown} EMPA COIN-NMC811-D (cell-spec)
+```{literalinclude} ../../examples/cell-spec/cell-spec-tme2-0sy6-q89b-8m92.json
+:language: json
+```
+::::
+
+::::{dropdown} EMPA PRISM-LFP-100AH (cell-spec)
+```{literalinclude} ../../examples/cell-spec/cell-spec-86k6-6tzd-c4sf-5s01.json
+:language: json
+```
+::::
+
+::::{dropdown} EMPA COIN-ZNMNO2-ALK (cell-spec)
+```{literalinclude} ../../examples/cell-spec/cell-spec-jgyy-x3h5-drmv-5tn5.json
+:language: json
+```
+::::
+
+
 ## Field reference
 
 Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`).

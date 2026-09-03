@@ -416,6 +416,41 @@ What to notice:
 
 **Validated clean** — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).
 
+## Common examples
+
+A selection of real, validated records from the packaged examples corpus — each one click away, included from its single source under `examples/`. The full, living library is the registry: [browse it there](https://www.battery-genome.org/explore).
+
+::::{dropdown} NMC811 cathode (electrode-spec)
+```{literalinclude} ../../examples/electrode-spec/qfjh-7xyr-ga1k-tjez.json
+:language: json
+```
+::::
+
+::::{dropdown} Graphite anode (electrode-spec)
+```{literalinclude} ../../examples/electrode-spec/d7qr-n581-74c3-7g7r.json
+:language: json
+```
+::::
+
+::::{dropdown} LFP cathode (electrode-spec)
+```{literalinclude} ../../examples/electrode-spec/m6y0-tkfg-sn40-q10p.json
+:language: json
+```
+::::
+
+::::{dropdown} Si-Gr anode (electrode-spec)
+```{literalinclude} ../../examples/electrode-spec/qw3j-we77-zzj1-ya55.json
+:language: json
+```
+::::
+
+::::{dropdown} Graphite anode disc (16 mm) (electrode)
+```{literalinclude} ../../examples/electrode/k81p-5wxb-gaph-z6ee.json
+:language: json
+```
+::::
+
+
 ## Field reference
 
 Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`).
