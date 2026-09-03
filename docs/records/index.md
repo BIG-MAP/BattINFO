@@ -15,6 +15,7 @@ Each page also carries a shelf of common, real examples — the docs' reasonable
 | Family | Reference examples |
 |---|---|
 | [Cells](cells.md) | A cell spec, from its datasheet · A cell instance under that spec |
+| [Half cells](half-cells.md) | A coin half cell for electrode characterization |
 | [Materials](materials.md) | A material spec (the powder as a product) · A material instance (one physical lot) |
 | [Electrodes](electrodes.md) | An electrode spec (the design) · An electrode (the disc in one cell) |
 | [Electrolytes](electrolytes.md) | An electrolyte spec (the formulation) · An electrolyte (one mixed batch) |
@@ -31,6 +32,7 @@ Coverage accounting (every schema property exercised by a reference example, or 
 :hidden:
 
 cells
+half-cells
 materials
 electrodes
 electrolytes

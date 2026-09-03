@@ -105,6 +105,31 @@ def snippet_cell_instance():
     return record
 
 
+def snippet_half_cell_spec():
+    from battinfo import CellSpec
+
+    spec = CellSpec(
+        id="https://w3id.org/battinfo/spec/t4wz-ff8s-6vp6-af48",
+        manufacturer="Example Lab",
+        model="HC-GR-01",
+        format="coin",
+        chemistry="Li-ion",
+        # The half-cell flavor: electrodes are named by ROLE, not polarity.
+        cell_configuration="half_cell",
+        # The design under test, referenced by its electrode-spec IRI.
+        working_electrode_spec_id="https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
+        # The counter is described inline: lithium foil the lab treats as
+        # interchangeable earns a description, not a tracked record. In a
+        # two-electrode half cell it is also the potential reference.
+        counter_electrode={
+            "coating": {"component": {"active_material": [{"name": "Lithium metal"}]}}
+        },
+        source={"type": "lab", "retrieved_at": 1750000000},
+    )
+    record = spec.to_record()
+    return record
+
+
 def snippet_material_spec():
     from battinfo.api import create_material_spec
 
@@ -459,6 +484,39 @@ FAMILIES = [
         "schemas": ["cell-spec.schema.json", "cell-instance.schema.json"],
         "see_also": "Recipes: [label your cells](../howto/label-your-cells.md), "
                     "[build a cell from components](../howto/build-a-cell-from-components.md).",
+    },
+    {
+        "slug": "half-cells",
+        "title": "Half cells",
+        "intro": (
+            "How to describe a half cell: one electrode under test against a "
+            "counter/reference. Not a separate record type — a **cell** "
+            "flavored by `cell_configuration: \"half_cell\"`, with electrodes "
+            "named by role."
+        ),
+        "sections": [
+            {
+                "heading": "A coin half cell for electrode characterization",
+                "fn": snippet_half_cell_spec,
+                "record_type": "cell-spec",
+                "notice": [
+                    "The described device types as `HalfCellDevice` (never "
+                    "`ElectrochemicalHalfCell`).",
+                    "The working electrode emits under `hasWorkingElectrode` "
+                    "as a reference to its spec; the counter node types as "
+                    "BOTH `CounterElectrode` and `ReferenceElectrode`.",
+                ],
+            },
+        ],
+        "schemas": [],
+        "field_reference_note": (
+            "Half cells are cell records — the field reference lives on "
+            "[Cells](cells.md#field-reference), and `cell_configuration`, "
+            "the role holders, and their `*_spec_id` siblings appear in the "
+            "cell-spec table there."
+        ),
+        "see_also": "The role ruling: [electrodes](electrodes.md#half-cells-name-their-electrodes-by-role-not-by-polarity). "
+                    "Everything else half cells share with full cells: [cells](cells.md).",
     },
     {
         "slug": "materials",
@@ -1092,6 +1150,13 @@ def render_page(family: dict, sections: list[dict]) -> str:
         parts += [section["verdict"], NL]
 
     parts += [render_shelf(family)]
+
+    if not family["schemas"]:
+        if family.get("field_reference_note"):
+            parts += [NL, "## Field reference", NL, NL, family["field_reference_note"], NL]
+        if family.get("see_also"):
+            parts += ["## See also", NL, NL, family["see_also"], NL]
+        return "".join(parts)
 
     parts += [NL, "## Field reference", NL, NL]
     parts += [
