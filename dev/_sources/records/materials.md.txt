@@ -481,6 +481,1023 @@ What to notice:
 
 **Validated clean** — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).
 
+## Common examples
+
+A selection of real, validated records from the packaged examples corpus — each one click away, included from its single source under `examples/`. The full, living library is the registry: [browse it there](https://www.battery-genome.org/explore).
+
+::::::{dropdown} NMC811 (material-spec)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/material-spec/npa4-0dnw-evyh-hhdm.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/material-spec/npa4-0dnw-evyh-hhdm.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": [
+    "https://w3id.org/emmo/domain/battery/context",
+    {
+      "schema": "https://schema.org/",
+      "dcterms": "http://purl.org/dc/terms/",
+      "battinfo": "https://w3id.org/battinfo/"
+    }
+  ],
+  "@id": "https://w3id.org/battinfo/spec/npa4-0dnw-evyh-hhdm",
+  "@type": "LithiumNickelManganeseCobaltOxide811",
+  "schema:sameAs": {
+    "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_e877987f_3b08_4e21_8f2e_c280e6bef52f"
+  },
+  "skos:exactMatch": [
+    {
+      "@id": "http://www.wikidata.org/entity/Q121086674"
+    }
+  ],
+  "schema:name": "NMC811",
+  "schema:molecularFormula": "LiNi0.8Mn0.1Co0.1O2",
+  "hasProperty": [
+    {
+      "@type": [
+        "Voltage",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "Voltage",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 3.8
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
+    },
+    {
+      "@type": [
+        "SpecificCapacity",
+        "MeasuredProperty"
+      ],
+      "skos:prefLabel": "SpecificCapacity",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 200
+      },
+      "schema:unitText": "mAh/g",
+      "hasMeasurementParameter": [
+        {
+          "@type": [
+            "battinfo:counterElectrode",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "counterElectrode",
+          "schema:value": "Li metal",
+          "schema:unitText": "n/a",
+          "rdfs:label": "counter_electrode"
+        },
+        {
+          "@type": [
+            "CRate",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "CRate",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 0.1
+          },
+          "schema:unitText": "C",
+          "rdfs:label": "discharge_c_rate"
+        },
+        {
+          "@type": [
+            "LowerVoltageLimit",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "LowerVoltageLimit",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 3.0
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
+          "rdfs:label": "lower_voltage_limit"
+        },
+        {
+          "@type": [
+            "CelsiusTemperature",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "CelsiusTemperature",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 25
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc",
+          "rdfs:label": "temperature"
+        },
+        {
+          "@type": [
+            "UpperVoltageLimit",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "UpperVoltageLimit",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 4.3
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
+          "rdfs:label": "upper_voltage_limit"
+        }
+      ]
+    },
+    {
+      "@type": [
+        "Density",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "Density",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 4.8
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#GramPerCubicCentiMetre"
+    }
+  ],
+  "schema:comment": "Nickel-rich layered oxide cathode. Discovery-Benchmark NMC811-Graphite cells."
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} LFP (material-spec)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/material-spec/5ms1-9jv8-hr54-mn4e.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/material-spec/5ms1-9jv8-hr54-mn4e.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": [
+    "https://w3id.org/emmo/domain/battery/context",
+    {
+      "schema": "https://schema.org/",
+      "dcterms": "http://purl.org/dc/terms/",
+      "battinfo": "https://w3id.org/battinfo/"
+    }
+  ],
+  "@id": "https://w3id.org/battinfo/spec/5ms1-9jv8-hr54-mn4e",
+  "@type": "LithiumIronPhosphate",
+  "schema:sameAs": {
+    "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_aa8e9cc4_5f66_4307_b1c8_26fac7653a90"
+  },
+  "skos:exactMatch": [
+    {
+      "@id": "http://www.wikidata.org/entity/Q3042400"
+    },
+    {
+      "@id": "https://pubchem.ncbi.nlm.nih.gov/compound/15320824"
+    },
+    {
+      "@id": "https://next-gen.materialsproject.org/materials/mp-19017"
+    }
+  ],
+  "schema:name": "LFP",
+  "schema:molecularFormula": "LiFePO4",
+  "hasProperty": [
+    {
+      "@type": [
+        "Voltage",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "Voltage",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 3.4
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
+    },
+    {
+      "@type": [
+        "SpecificCapacity",
+        "MeasuredProperty"
+      ],
+      "skos:prefLabel": "SpecificCapacity",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 160
+      },
+      "schema:unitText": "mAh/g",
+      "hasMeasurementParameter": [
+        {
+          "@type": [
+            "battinfo:counterElectrode",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "counterElectrode",
+          "schema:value": "Li metal",
+          "schema:unitText": "n/a",
+          "rdfs:label": "counter_electrode"
+        },
+        {
+          "@type": [
+            "CRate",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "CRate",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 0.1
+          },
+          "schema:unitText": "C",
+          "rdfs:label": "discharge_c_rate"
+        },
+        {
+          "@type": [
+            "LowerVoltageLimit",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "LowerVoltageLimit",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 2.5
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
+          "rdfs:label": "lower_voltage_limit"
+        },
+        {
+          "@type": [
+            "CelsiusTemperature",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "CelsiusTemperature",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 25
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc",
+          "rdfs:label": "temperature"
+        },
+        {
+          "@type": [
+            "UpperVoltageLimit",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "UpperVoltageLimit",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 3.65
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
+          "rdfs:label": "upper_voltage_limit"
+        }
+      ]
+    },
+    {
+      "@type": [
+        "Density",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "Density",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 3.6
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#GramPerCubicCentiMetre"
+    }
+  ],
+  "schema:comment": "Lithium iron phosphate cathode active material. Discovery-Benchmark LFP-Graphite cells."
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} Graphite (material-spec)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/material-spec/gwck-k5kf-ae1f-gfgc.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/material-spec/gwck-k5kf-ae1f-gfgc.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": [
+    "https://w3id.org/emmo/domain/battery/context",
+    {
+      "schema": "https://schema.org/",
+      "dcterms": "http://purl.org/dc/terms/",
+      "battinfo": "https://w3id.org/battinfo/"
+    }
+  ],
+  "@id": "https://w3id.org/battinfo/spec/gwck-k5kf-ae1f-gfgc",
+  "@type": "Graphite",
+  "schema:sameAs": {
+    "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_d53259a7_0d9c_48b9_a6c1_4418169df303"
+  },
+  "skos:exactMatch": [
+    {
+      "@id": "http://www.wikidata.org/entity/Q5309"
+    },
+    {
+      "@id": "https://pubchem.ncbi.nlm.nih.gov/compound/5462310"
+    },
+    {
+      "@id": "https://next-gen.materialsproject.org/materials/mp-48"
+    }
+  ],
+  "schema:name": "Graphite",
+  "schema:molecularFormula": "C",
+  "hasProperty": [
+    {
+      "@type": [
+        "D50ParticleSize",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "D50ParticleSize",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 15
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
+    },
+    {
+      "@type": [
+        "SpecificCapacity",
+        "MeasuredProperty"
+      ],
+      "skos:prefLabel": "SpecificCapacity",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 360
+      },
+      "schema:unitText": "mAh/g",
+      "hasMeasurementParameter": [
+        {
+          "@type": [
+            "battinfo:counterElectrode",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "counterElectrode",
+          "schema:value": "Li metal",
+          "schema:unitText": "n/a",
+          "rdfs:label": "counter_electrode"
+        },
+        {
+          "@type": [
+            "CRate",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "CRate",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 0.1
+          },
+          "schema:unitText": "C",
+          "rdfs:label": "discharge_c_rate"
+        },
+        {
+          "@type": [
+            "LowerVoltageLimit",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "LowerVoltageLimit",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 0.01
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
+          "rdfs:label": "lower_voltage_limit"
+        },
+        {
+          "@type": [
+            "CelsiusTemperature",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "CelsiusTemperature",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 25
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc",
+          "rdfs:label": "temperature"
+        },
+        {
+          "@type": [
+            "UpperVoltageLimit",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "UpperVoltageLimit",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 1.5
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
+          "rdfs:label": "upper_voltage_limit"
+        }
+      ]
+    },
+    {
+      "@type": [
+        "Density",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "Density",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 2.26
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#GramPerCubicCentiMetre"
+    }
+  ],
+  "schema:comment": "Graphite anode active material. Grounded in the DIGIBAT Discovery-Benchmark coin-cell builds (Canrud anode)."
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} Silicon-graphite composite (material-spec)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/material-spec/jnab-ggw9-cbn8-hhjr.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/material-spec/jnab-ggw9-cbn8-hhjr.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": [
+    "https://w3id.org/emmo/domain/battery/context",
+    {
+      "schema": "https://schema.org/",
+      "dcterms": "http://purl.org/dc/terms/",
+      "battinfo": "https://w3id.org/battinfo/"
+    }
+  ],
+  "@id": "https://w3id.org/battinfo/spec/jnab-ggw9-cbn8-hhjr",
+  "@type": "SiliconGraphite",
+  "schema:sameAs": {
+    "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_3f061928_e90f_4414_9308_d4c843ebb79a"
+  },
+  "schema:name": "Silicon-graphite composite",
+  "schema:molecularFormula": "Si/C",
+  "hasProperty": {
+    "@type": [
+      "SpecificCapacity",
+      "ConventionalProperty"
+    ],
+    "skos:prefLabel": "SpecificCapacity",
+    "hasNumericalPart": {
+      "@type": "RealData",
+      "hasNumberValue": 450
+    },
+    "schema:unitText": "mAh/g"
+  },
+  "schema:comment": "Generic Si/Gr blend (nominal 450 mAh/g); a real grade carries its manufacturer and grade."
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} LNMO (material-spec)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/material-spec/83bd-jmk7-2x47-s04a.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/material-spec/83bd-jmk7-2x47-s04a.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": [
+    "https://w3id.org/emmo/domain/battery/context",
+    {
+      "schema": "https://schema.org/",
+      "dcterms": "http://purl.org/dc/terms/",
+      "battinfo": "https://w3id.org/battinfo/"
+    }
+  ],
+  "@id": "https://w3id.org/battinfo/spec/83bd-jmk7-2x47-s04a",
+  "@type": "LithiumNickelManganeseOxide",
+  "schema:sameAs": {
+    "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_f3e7979a_e3ef_450a_8762_7d8778afe478"
+  },
+  "schema:name": "LNMO",
+  "schema:molecularFormula": "LiNi0.5Mn1.5O4",
+  "hasProperty": [
+    {
+      "@type": [
+        "Voltage",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "Voltage",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 4.7
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
+    },
+    {
+      "@type": [
+        "SpecificCapacity",
+        "MeasuredProperty"
+      ],
+      "skos:prefLabel": "SpecificCapacity",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 140
+      },
+      "schema:unitText": "mAh/g",
+      "hasMeasurementParameter": [
+        {
+          "@type": [
+            "battinfo:counterElectrode",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "counterElectrode",
+          "schema:value": "Li metal",
+          "schema:unitText": "n/a",
+          "rdfs:label": "counter_electrode"
+        },
+        {
+          "@type": [
+            "CRate",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "CRate",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 0.1
+          },
+          "schema:unitText": "C",
+          "rdfs:label": "discharge_c_rate"
+        },
+        {
+          "@type": [
+            "LowerVoltageLimit",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "LowerVoltageLimit",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 3.5
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
+          "rdfs:label": "lower_voltage_limit"
+        },
+        {
+          "@type": [
+            "CelsiusTemperature",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "CelsiusTemperature",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 25
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc",
+          "rdfs:label": "temperature"
+        },
+        {
+          "@type": [
+            "UpperVoltageLimit",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "UpperVoltageLimit",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 4.9
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
+          "rdfs:label": "upper_voltage_limit"
+        }
+      ]
+    }
+  ],
+  "schema:comment": "High-voltage spinel cathode active material (synthetic reference example)."
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} PVDF (material-spec)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/material-spec/bkrw-7shb-tzbm-j664.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/material-spec/bkrw-7shb-tzbm-j664.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": [
+    "https://w3id.org/emmo/domain/battery/context",
+    {
+      "schema": "https://schema.org/",
+      "dcterms": "http://purl.org/dc/terms/",
+      "battinfo": "https://w3id.org/battinfo/"
+    }
+  ],
+  "@id": "https://w3id.org/battinfo/spec/bkrw-7shb-tzbm-j664",
+  "@type": "PolyvinylideneFluoride",
+  "schema:sameAs": {
+    "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_f2e48e9e_f774_4f42_939f_1fe522efb7c8"
+  },
+  "schema:name": "PVDF",
+  "schema:molecularFormula": "(C2H2F2)n",
+  "hasProperty": [
+    {
+      "@type": [
+        "MolarMass",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "MolarMass",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 534000
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#GramPerMole"
+    },
+    {
+      "@type": [
+        "Density",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "Density",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 1.78
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#GramPerCubicCentiMetre"
+    }
+  ],
+  "schema:comment": "Polyvinylidene fluoride binder."
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} Carbon black (material-spec)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/material-spec/r5xt-4hrh-jm2k-yg4m.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/material-spec/r5xt-4hrh-jm2k-yg4m.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": [
+    "https://w3id.org/emmo/domain/battery/context",
+    {
+      "schema": "https://schema.org/",
+      "dcterms": "http://purl.org/dc/terms/",
+      "battinfo": "https://w3id.org/battinfo/"
+    }
+  ],
+  "@id": "https://w3id.org/battinfo/spec/r5xt-4hrh-jm2k-yg4m",
+  "@type": "CarbonBlack",
+  "schema:sameAs": {
+    "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_0a5cb747_60cf_4929_a54a_712c54b49f3b"
+  },
+  "schema:name": "Carbon black",
+  "schema:molecularFormula": "C",
+  "hasProperty": [
+    {
+      "@type": [
+        "SpecificSurfaceArea",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "SpecificSurfaceArea",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 62
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#SquareMetrePerGram"
+    },
+    {
+      "@type": [
+        "Density",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "Density",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 1.8
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#GramPerCubicCentiMetre"
+    }
+  ],
+  "schema:comment": "Conductive carbon additive (e.g. Super P-grade)."
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} LiPF6 (material-spec)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/material-spec/fpeg-3wg8-e6cs-2vn1.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/material-spec/fpeg-3wg8-e6cs-2vn1.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": [
+    "https://w3id.org/emmo/domain/battery/context",
+    {
+      "schema": "https://schema.org/",
+      "dcterms": "http://purl.org/dc/terms/",
+      "battinfo": "https://w3id.org/battinfo/"
+    }
+  ],
+  "@id": "https://w3id.org/battinfo/spec/fpeg-3wg8-e6cs-2vn1",
+  "@type": "LithiumHexafluorophosphate",
+  "schema:sameAs": {
+    "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_0deb4fe8_b0c0_4e3f_8848_64435e5c0771"
+  },
+  "skos:exactMatch": [
+    {
+      "@id": "http://www.wikidata.org/entity/Q2583808"
+    },
+    {
+      "@id": "https://pubchem.ncbi.nlm.nih.gov/compound/23688915"
+    },
+    {
+      "@id": "https://next-gen.materialsproject.org/materials/mp-9143"
+    }
+  ],
+  "schema:name": "LiPF6",
+  "schema:molecularFormula": "LiPF6",
+  "hasProperty": {
+    "@type": [
+      "MolarMass",
+      "ConventionalProperty"
+    ],
+    "skos:prefLabel": "MolarMass",
+    "hasNumericalPart": {
+      "@type": "RealData",
+      "hasNumberValue": 151.9
+    },
+    "hasMeasurementUnit": "https://w3id.org/emmo#GramPerMole"
+  },
+  "schema:comment": "Lithium hexafluorophosphate; conducting salt for organic Li-ion electrolytes. Discovery-Benchmark 1M LiPF6 EC:EMC."
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} EC (material-spec)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/material-spec/efxx-b9yg-wh00-d23a.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/material-spec/efxx-b9yg-wh00-d23a.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": [
+    "https://w3id.org/emmo/domain/battery/context",
+    {
+      "schema": "https://schema.org/",
+      "dcterms": "http://purl.org/dc/terms/",
+      "battinfo": "https://w3id.org/battinfo/"
+    }
+  ],
+  "@id": "https://w3id.org/battinfo/spec/efxx-b9yg-wh00-d23a",
+  "@type": "EthyleneCarbonate",
+  "schema:sameAs": {
+    "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_57339d90_0553_4a96_8da9_ff6c3684e226"
+  },
+  "skos:exactMatch": [
+    {
+      "@id": "http://www.wikidata.org/entity/Q421145"
+    },
+    {
+      "@id": "https://pubchem.ncbi.nlm.nih.gov/compound/7303"
+    }
+  ],
+  "schema:name": "EC",
+  "schema:molecularFormula": "C3H4O3",
+  "hasProperty": [
+    {
+      "@type": [
+        "Density",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "Density",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 1.32
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#GramPerCubicCentiMetre"
+    },
+    {
+      "@type": [
+        "MolarMass",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "MolarMass",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 88.06
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#GramPerMole"
+    }
+  ],
+  "schema:comment": "Ethylene carbonate; cyclic carbonate solvent."
+}
+```
+::::
+
+:::::
+::::::
+
+
 ## Field reference
 
 Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`).

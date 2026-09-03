@@ -530,6 +530,883 @@ What to notice:
 
 **Validated clean** — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).
 
+## Common examples
+
+A selection of real, validated records from the packaged examples corpus — each one click away, included from its single source under `examples/`. The full, living library is the registry: [browse it there](https://www.battery-genome.org/explore).
+
+::::::{dropdown} 1C Cycle Life at 25 C (test-protocol)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/test-protocol/test-protocol-8r2m-4v6k-9p3t-7n5x.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/test-protocol/test-protocol-8r2m-4v6k-9p3t-7n5x.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@type": [
+    "prov:Plan",
+    "schema:HowTo",
+    "CyclingTest"
+  ],
+  "@id": "https://w3id.org/battinfo/spec/8r2m-4v6k-9p3t-7n5x",
+  "schema:name": "1C Cycle Life at 25 C",
+  "schema:additionalType": "cycling",
+  "schema:description": "Repeated 1C charge and 1C discharge at nominal room temperature.",
+  "hasTask": [
+    {
+      "@type": "IterativeWorkflow",
+      "NumberOfIterations": {
+        "hasNumericalPart": {
+          "hasNumberValue": 500
+        }
+      },
+      "hasTask": [
+        {
+          "@type": "ConstantCurrentCharging",
+          "rdfs:label": "Charge at 1C until 4.2 V",
+          "hasControlParameter": [
+            {
+              "@type": "CRate",
+              "hasNumericalPart": {
+                "hasNumberValue": 1.0
+              },
+              "hasMeasurementUnit": {
+                "@id": "electrochemistry:AmperePerAmpereHour"
+              }
+            }
+          ],
+          "hasTerminationParameter": [
+            {
+              "@type": "UpperVoltageLimit",
+              "hasNumericalPart": {
+                "hasNumberValue": 4.2
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Volt"
+              }
+            }
+          ]
+        },
+        {
+          "@type": "ConstantCurrentDischarging",
+          "rdfs:label": "Discharge at 1C until 2.5 V",
+          "hasControlParameter": [
+            {
+              "@type": "CRate",
+              "hasNumericalPart": {
+                "hasNumberValue": 1.0
+              },
+              "hasMeasurementUnit": {
+                "@id": "electrochemistry:AmperePerAmpereHour"
+              }
+            }
+          ],
+          "hasTerminationParameter": [
+            {
+              "@type": "LowerVoltageLimit",
+              "hasNumericalPart": {
+                "hasNumberValue": 2.5
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Volt"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "hasProperty": [
+    {
+      "@type": "ConventionalProperty",
+      "hasNumericalPart": {
+        "hasNumberValue": 25.0
+      },
+      "rdfs:label": "temperature",
+      "hasMeasurementUnit": {
+        "@id": "emmo:DegreeCelsius"
+      }
+    }
+  ],
+  "dcterms:source": {
+    "@type": "prov:Entity",
+    "dcterms:type": "manual",
+    "prov:generatedAtTime": "2026-03-18T05:20:00+00:00"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} Capacity Check — C/10 at 25 C (test-protocol)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/test-protocol/test-protocol-fj4k-hj6f-cd5v-36fb.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/test-protocol/test-protocol-fj4k-hj6f-cd5v-36fb.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@type": [
+    "prov:Plan",
+    "schema:HowTo",
+    "CapacityTest"
+  ],
+  "@id": "https://w3id.org/battinfo/spec/fj4k-hj6f-cd5v-36fb",
+  "schema:name": "Capacity Check — C/10 at 25 C",
+  "schema:additionalType": "capacity_check",
+  "schema:description": "Standard deliverable-capacity check: CC-CV charge then slow C/10 discharge.",
+  "hasTask": [
+    {
+      "@type": "ConstantCurrentCharging",
+      "rdfs:label": "Charge at C/3 until 4.2 V",
+      "hasControlParameter": [
+        {
+          "@type": "CRate",
+          "hasNumericalPart": {
+            "hasNumberValue": 0.3333333333333333
+          },
+          "hasMeasurementUnit": {
+            "@id": "electrochemistry:AmperePerAmpereHour"
+          }
+        }
+      ],
+      "hasTerminationParameter": [
+        {
+          "@type": "UpperVoltageLimit",
+          "hasNumericalPart": {
+            "hasNumberValue": 4.2
+          },
+          "hasMeasurementUnit": {
+            "@id": "emmo:Volt"
+          }
+        }
+      ]
+    },
+    {
+      "@type": "VoltageHold",
+      "rdfs:label": "Hold at 4.2 V until C/20",
+      "hasControlParameter": [
+        {
+          "@type": "Voltage",
+          "hasNumericalPart": {
+            "hasNumberValue": 4.2
+          },
+          "hasMeasurementUnit": {
+            "@id": "emmo:Volt"
+          }
+        }
+      ],
+      "hasTerminationParameter": [
+        {
+          "@type": "TerminationQuantity",
+          "hasNumericalPart": {
+            "hasNumberValue": 0.05
+          },
+          "hasMeasurementUnit": {
+            "@id": "electrochemistry:AmperePerAmpereHour"
+          }
+        }
+      ]
+    },
+    {
+      "@type": "ConstantCurrentDischarging",
+      "rdfs:label": "Discharge at C/10 until 2.5 V",
+      "hasControlParameter": [
+        {
+          "@type": "CRate",
+          "hasNumericalPart": {
+            "hasNumberValue": 0.1
+          },
+          "hasMeasurementUnit": {
+            "@id": "electrochemistry:AmperePerAmpereHour"
+          }
+        }
+      ],
+      "hasTerminationParameter": [
+        {
+          "@type": "LowerVoltageLimit",
+          "hasNumericalPart": {
+            "hasNumberValue": 2.5
+          },
+          "hasMeasurementUnit": {
+            "@id": "emmo:Volt"
+          }
+        }
+      ]
+    }
+  ],
+  "hasProperty": [
+    {
+      "@type": "ConventionalProperty",
+      "hasNumericalPart": {
+        "hasNumberValue": 25.0
+      },
+      "rdfs:label": "ambient temperature",
+      "hasMeasurementUnit": {
+        "@id": "emmo:DegreeCelsius"
+      }
+    }
+  ],
+  "dcterms:source": {
+    "@type": "prov:Entity",
+    "dcterms:type": "manual",
+    "prov:generatedAtTime": "2026-06-18T10:24:04+00:00"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} Rate Capability: C/10 to 5C Discharge at 25°C (test-protocol)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/test-protocol/test-protocol-5v3n-8x1m-4k7p-9r2t.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/test-protocol/test-protocol-5v3n-8x1m-4k7p-9r2t.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@type": [
+    "prov:Plan",
+    "schema:HowTo",
+    "CRateTest"
+  ],
+  "@id": "https://w3id.org/battinfo/spec/5v3n-8x1m-4k7p-9r2t",
+  "schema:name": "Rate Capability: C/10 to 5C Discharge at 25°C",
+  "schema:additionalType": "rate_capability",
+  "schema:description": "Galvanostatic constant-current discharge at six C-rates (C/10, C/5, C/2, 1C, 2C, 5C) to measure deliverable capacity and energy as a function of rate. Each discharge is preceded by a full constant-current constant-voltage charge at C/5. Three cycles are recorded at each rate. A reference C/10 cycle is repeated at the end to confirm capacity recovery.",
+  "hasProperty": [
+    {
+      "@type": "ConventionalProperty",
+      "hasNumericalPart": {
+        "hasNumberValue": 25.0
+      },
+      "rdfs:label": "ambient temperature",
+      "hasMeasurementUnit": {
+        "@id": "emmo:DegreeCelsius"
+      }
+    }
+  ],
+  "dcterms:source": {
+    "@type": "prov:Entity",
+    "dcterms:type": "manual",
+    "prov:generatedAtTime": "2025-05-03T00:00:00+00:00"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} Formation — Slow First Cycles at 25 C (test-protocol)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/test-protocol/test-protocol-j19t-9cm0-f219-zh4y.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/test-protocol/test-protocol-j19t-9cm0-f219-zh4y.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@type": [
+    "prov:Plan",
+    "schema:HowTo",
+    "FormationCycling"
+  ],
+  "@id": "https://w3id.org/battinfo/spec/j19t-9cm0-f219-zh4y",
+  "schema:name": "Formation — Slow First Cycles at 25 C",
+  "schema:additionalType": "formation",
+  "schema:description": "First-cycle formation/activation: slow C/20 cycles to build the SEI, then a C/10 conditioning cycle.",
+  "hasTask": [
+    {
+      "@type": "ConstantCurrentCharging",
+      "rdfs:label": "Charge at C/20 until 4.2 V",
+      "hasControlParameter": [
+        {
+          "@type": "CRate",
+          "hasNumericalPart": {
+            "hasNumberValue": 0.05
+          },
+          "hasMeasurementUnit": {
+            "@id": "electrochemistry:AmperePerAmpereHour"
+          }
+        }
+      ],
+      "hasTerminationParameter": [
+        {
+          "@type": "UpperVoltageLimit",
+          "hasNumericalPart": {
+            "hasNumberValue": 4.2
+          },
+          "hasMeasurementUnit": {
+            "@id": "emmo:Volt"
+          }
+        }
+      ]
+    },
+    {
+      "@type": "VoltageHold",
+      "rdfs:label": "Hold at 4.2 V until C/50",
+      "hasControlParameter": [
+        {
+          "@type": "Voltage",
+          "hasNumericalPart": {
+            "hasNumberValue": 4.2
+          },
+          "hasMeasurementUnit": {
+            "@id": "emmo:Volt"
+          }
+        }
+      ],
+      "hasTerminationParameter": [
+        {
+          "@type": "TerminationQuantity",
+          "hasNumericalPart": {
+            "hasNumberValue": 0.02
+          },
+          "hasMeasurementUnit": {
+            "@id": "electrochemistry:AmperePerAmpereHour"
+          }
+        }
+      ]
+    },
+    {
+      "@type": "OpenCircuitHold",
+      "rdfs:label": "Rest for 30 minutes",
+      "hasTerminationParameter": [
+        {
+          "@type": "Duration",
+          "hasNumericalPart": {
+            "hasNumberValue": 1800.0
+          },
+          "hasMeasurementUnit": {
+            "@id": "emmo:Second"
+          }
+        }
+      ]
+    },
+    {
+      "@type": "ConstantCurrentDischarging",
+      "rdfs:label": "Discharge at C/20 until 2.5 V",
+      "hasControlParameter": [
+        {
+          "@type": "CRate",
+          "hasNumericalPart": {
+            "hasNumberValue": 0.05
+          },
+          "hasMeasurementUnit": {
+            "@id": "electrochemistry:AmperePerAmpereHour"
+          }
+        }
+      ],
+      "hasTerminationParameter": [
+        {
+          "@type": "LowerVoltageLimit",
+          "hasNumericalPart": {
+            "hasNumberValue": 2.5
+          },
+          "hasMeasurementUnit": {
+            "@id": "emmo:Volt"
+          }
+        }
+      ]
+    },
+    {
+      "@type": "ConstantCurrentCharging",
+      "rdfs:label": "Charge at C/10 until 4.2 V",
+      "hasControlParameter": [
+        {
+          "@type": "CRate",
+          "hasNumericalPart": {
+            "hasNumberValue": 0.1
+          },
+          "hasMeasurementUnit": {
+            "@id": "electrochemistry:AmperePerAmpereHour"
+          }
+        }
+      ],
+      "hasTerminationParameter": [
+        {
+          "@type": "UpperVoltageLimit",
+          "hasNumericalPart": {
+            "hasNumberValue": 4.2
+          },
+          "hasMeasurementUnit": {
+            "@id": "emmo:Volt"
+          }
+        }
+      ]
+    },
+    {
+      "@type": "ConstantCurrentDischarging",
+      "rdfs:label": "Discharge at C/10 until 2.5 V",
+      "hasControlParameter": [
+        {
+          "@type": "CRate",
+          "hasNumericalPart": {
+            "hasNumberValue": 0.1
+          },
+          "hasMeasurementUnit": {
+            "@id": "electrochemistry:AmperePerAmpereHour"
+          }
+        }
+      ],
+      "hasTerminationParameter": [
+        {
+          "@type": "LowerVoltageLimit",
+          "hasNumericalPart": {
+            "hasNumberValue": 2.5
+          },
+          "hasMeasurementUnit": {
+            "@id": "emmo:Volt"
+          }
+        }
+      ]
+    }
+  ],
+  "hasProperty": [
+    {
+      "@type": "ConventionalProperty",
+      "hasNumericalPart": {
+        "hasNumberValue": 25.0
+      },
+      "rdfs:label": "ambient temperature",
+      "hasMeasurementUnit": {
+        "@id": "emmo:DegreeCelsius"
+      }
+    }
+  ],
+  "dcterms:source": {
+    "@type": "prov:Entity",
+    "dcterms:type": "manual",
+    "prov:generatedAtTime": "2026-06-18T10:24:04+00:00"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} HPPC — Pulse Power Characterisation at 25°C (test-protocol)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/test-protocol/test-protocol-7m4t-1n9v-6r3k-2p8x.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/test-protocol/test-protocol-7m4t-1n9v-6r3k-2p8x.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@type": [
+    "prov:Plan",
+    "schema:HowTo",
+    "HPPC"
+  ],
+  "@id": "https://w3id.org/battinfo/spec/7m4t-1n9v-6r3k-2p8x",
+  "schema:name": "HPPC — Pulse Power Characterisation at 25°C",
+  "schema:additionalType": "hppc",
+  "schema:description": "Hybrid Pulse Power Characterisation (HPPC) per IEC 62660-1 / USABC methodology. Discharge and charge pulses are applied at nine SOC setpoints (90%, 80%, 70%, 60%, 50%, 40%, 30%, 20%, 10%) to determine DC internal resistance and the cell's power capability envelope as a function of state of charge. A 10s 2C discharge pulse followed by a 40s rest and a 10s 1.75C charge pulse is applied at each SOC level.",
+  "hasProperty": [
+    {
+      "@type": "ConventionalProperty",
+      "hasNumericalPart": {
+        "hasNumberValue": 25.0
+      },
+      "rdfs:label": "ambient temperature",
+      "hasMeasurementUnit": {
+        "@id": "emmo:DegreeCelsius"
+      }
+    }
+  ],
+  "dcterms:source": {
+    "@type": "prov:Entity",
+    "dcterms:type": "manual",
+    "prov:generatedAtTime": "2025-05-03T00:00:00+00:00"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} GITT — Galvanostatic Intermittent Titration at 25°C (test-protocol)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/test-protocol/test-protocol-3p7k-2m9r-6t4n-1v8x.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/test-protocol/test-protocol-3p7k-2m9r-6t4n-1v8x.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@type": [
+    "prov:Plan",
+    "schema:HowTo",
+    "GalvanostaticIntermittentTitrationTechnique"
+  ],
+  "@id": "https://w3id.org/battinfo/spec/3p7k-2m9r-6t4n-1v8x",
+  "schema:name": "GITT — Galvanostatic Intermittent Titration at 25°C",
+  "schema:additionalType": "gitt",
+  "schema:description": "Galvanostatic Intermittent Titration Technique (GITT) applied during discharge from 100% to ~5% SOC at 25°C. A 10-minute C/10 current pulse is applied followed by a 60-minute rest at open-circuit. The OCV relaxation transient after each pulse is used to calculate the apparent solid-state lithium diffusion coefficient (D_Li) in the electrode as a function of SOC. The full discharge GITT curve also yields a pseudo-equilibrium OCV profile.",
+  "hasProperty": [
+    {
+      "@type": "ConventionalProperty",
+      "hasNumericalPart": {
+        "hasNumberValue": 25.0
+      },
+      "rdfs:label": "ambient temperature",
+      "hasMeasurementUnit": {
+        "@id": "emmo:DegreeCelsius"
+      }
+    }
+  ],
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "initial_state_of_charge",
+      "schema:propertyID": "conditions",
+      "schema:value": 100.0,
+      "schema:unitText": "%"
+    }
+  ],
+  "dcterms:source": {
+    "@type": "prov:Entity",
+    "dcterms:type": "manual",
+    "prov:generatedAtTime": "2025-05-03T00:00:00+00:00"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} EIS Impedance — 100 kHz to 10 mHz at 50% SOC, 25 C (test-protocol)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/test-protocol/test-protocol-wmqd-1fbt-zyya-k4bw.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/test-protocol/test-protocol-wmqd-1fbt-zyya-k4bw.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@type": [
+    "prov:Plan",
+    "schema:HowTo",
+    "ElectrochemicalImpedanceSpectroscopy"
+  ],
+  "@id": "https://w3id.org/battinfo/spec/wmqd-1fbt-zyya-k4bw",
+  "schema:name": "EIS Impedance — 100 kHz to 10 mHz at 50% SOC, 25 C",
+  "schema:additionalType": "impedance",
+  "schema:description": "Electrochemical impedance spectroscopy from 100 kHz to 10 mHz, 10 mV AC, at 50% state of charge.",
+  "hasTask": [
+    {
+      "@type": "ElectrochemicalImpedanceSpectroscopy"
+    }
+  ],
+  "hasProperty": [
+    {
+      "@type": "ConventionalProperty",
+      "hasNumericalPart": {
+        "hasNumberValue": 25.0
+      },
+      "rdfs:label": "ambient temperature",
+      "hasMeasurementUnit": {
+        "@id": "emmo:DegreeCelsius"
+      }
+    }
+  ],
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "state_of_charge",
+      "schema:propertyID": "conditions",
+      "schema:value": 50.0,
+      "schema:unitText": "%"
+    }
+  ],
+  "dcterms:source": {
+    "@type": "prov:Entity",
+    "dcterms:type": "manual",
+    "prov:generatedAtTime": "2026-06-18T10:24:04+00:00"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} Quasi-OCV — C/25 Discharge at 25 C (test-protocol)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/test-protocol/test-protocol-t163-7ba5-r0kn-h9my.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/test-protocol/test-protocol-t163-7ba5-r0kn-h9my.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@type": [
+    "prov:Plan",
+    "schema:HowTo",
+    "PseudoOpenCircuitVoltageMethod"
+  ],
+  "@id": "https://w3id.org/battinfo/spec/t163-7ba5-r0kn-h9my",
+  "schema:name": "Quasi-OCV — C/25 Discharge at 25 C",
+  "schema:additionalType": "quasi_ocv",
+  "schema:description": "Quasi-equilibrium open-circuit voltage profile mapped by a very slow C/25 charge and discharge.",
+  "hasTask": [
+    {
+      "@type": "ConstantCurrentCharging",
+      "rdfs:label": "Charge at C/25 until 4.2 V",
+      "hasControlParameter": [
+        {
+          "@type": "CRate",
+          "hasNumericalPart": {
+            "hasNumberValue": 0.04
+          },
+          "hasMeasurementUnit": {
+            "@id": "electrochemistry:AmperePerAmpereHour"
+          }
+        }
+      ],
+      "hasTerminationParameter": [
+        {
+          "@type": "UpperVoltageLimit",
+          "hasNumericalPart": {
+            "hasNumberValue": 4.2
+          },
+          "hasMeasurementUnit": {
+            "@id": "emmo:Volt"
+          }
+        }
+      ]
+    },
+    {
+      "@type": "ConstantCurrentDischarging",
+      "rdfs:label": "Discharge at C/25 until 2.5 V",
+      "hasControlParameter": [
+        {
+          "@type": "CRate",
+          "hasNumericalPart": {
+            "hasNumberValue": 0.04
+          },
+          "hasMeasurementUnit": {
+            "@id": "electrochemistry:AmperePerAmpereHour"
+          }
+        }
+      ],
+      "hasTerminationParameter": [
+        {
+          "@type": "LowerVoltageLimit",
+          "hasNumericalPart": {
+            "hasNumberValue": 2.5
+          },
+          "hasMeasurementUnit": {
+            "@id": "emmo:Volt"
+          }
+        }
+      ]
+    }
+  ],
+  "hasProperty": [
+    {
+      "@type": "ConventionalProperty",
+      "hasNumericalPart": {
+        "hasNumberValue": 25.0
+      },
+      "rdfs:label": "ambient temperature",
+      "hasMeasurementUnit": {
+        "@id": "emmo:DegreeCelsius"
+      }
+    }
+  ],
+  "dcterms:source": {
+    "@type": "prov:Entity",
+    "dcterms:type": "manual",
+    "prov:generatedAtTime": "2026-06-18T10:24:04+00:00"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+
 ## Field reference
 
 Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`).

@@ -127,6 +127,192 @@ What to notice:
 
 **Validated clean** — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).
 
+## Common examples
+
+A selection of real, validated records from the packaged examples corpus — each one click away, included from its single source under `examples/`. The full, living library is the registry: [browse it there](https://www.battery-genome.org/explore).
+
+::::::{dropdown} Chen 2020 - graphite (parameter-set)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/parameter-set/parameter-set-8qqs-rh43-wt8d-172n.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/parameter-set/parameter-set-8qqs-rh43-wt8d-172n.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": [
+    "https://w3id.org/emmo/domain/battery/context",
+    {
+      "schema": "https://schema.org/",
+      "dcterms": "http://purl.org/dc/terms/",
+      "bibo": "http://purl.org/ontology/bibo/",
+      "battinfo": "https://w3id.org/battinfo/"
+    }
+  ],
+  "@id": "https://w3id.org/battinfo/spec/8qqs-rh43-wt8d-172n",
+  "@type": "schema:Dataset",
+  "schema:name": "Chen 2020 - graphite",
+  "schema:description": "Subset of the Chen et al. 2020 LG M50 parameterization for the graphite negative electrode material, as a worked example of parameter claims.",
+  "schema:about": {
+    "@type": "Graphite",
+    "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_d53259a7_0d9c_48b9_a6c1_4418169df303",
+    "schema:name": "Graphite"
+  },
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "scope",
+      "schema:value": "material"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_model",
+      "schema:value": "DFN"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_name",
+      "schema:value": "Chen2020"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_tool",
+      "schema:value": "BPX"
+    }
+  ],
+  "hasProperty": [
+    {
+      "@type": [
+        "battinfo:particleRadius",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "particleRadius",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 5.86e-06
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:maxConcentration",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "maxConcentration",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 33133.0
+      },
+      "schema:unitText": "mol/m3",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:reactionRateConstant",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "reactionRateConstant",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 6.716e-06
+      },
+      "schema:unitText": "mol.m-2.s-1",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:stoichiometryMin",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "stoichiometryMin",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.0279
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:stoichiometryMax",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "stoichiometryMax",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.9014
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    }
+  ],
+  "schema:variableMeasured": {
+    "@type": "schema:PropertyValue",
+    "schema:name": "ocp",
+    "schema:description": "tabulated curve vs stoichiometry, 8 points, average branch",
+    "schema:unitText": "V",
+    "schema:measurementTechnique": "GITT",
+    "schema:additionalProperty": {
+      "@type": "schema:PropertyValue",
+      "schema:name": "provenance_class",
+      "schema:value": "measured"
+    }
+  },
+  "schema:citation": {
+    "@id": "https://doi.org/10.1149/1945-7111/ab9050",
+    "@type": "schema:CreativeWork",
+    "bibo:doi": "10.1149/1945-7111/ab9050"
+  },
+  "schema:comment": "Worked example generated by scripts in the parameter-claims change; values from the cited source."
+}
+```
+::::
+
+:::::
+::::::
+
+
 ## Field reference
 
 Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`).

@@ -265,6 +265,171 @@ What to notice:
 
 **Validated clean** — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).
 
+## Common examples
+
+A selection of real, validated records from the packaged examples corpus — each one click away, included from its single source under `examples/`. The full, living library is the registry: [browse it there](https://www.battery-genome.org/datasets).
+
+::::::{dropdown} NMC811 coin cell cycling data (dataset)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/dataset/dataset-nns1-gh5p-v5n1-td17.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/dataset/dataset-nns1-gh5p-v5n1-td17.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@type": "http://www.w3.org/ns/dcat#Dataset",
+  "@id": "https://w3id.org/battinfo/dataset/nns1-gh5p-v5n1-td17",
+  "dcterms:title": "NMC811 coin cell cycling data",
+  "dcterms:description": "Raw galvanostatic cycling export for one NMC811-Graphite coin cell.",
+  "schema:description": "Raw galvanostatic cycling export for one NMC811-Graphite coin cell.",
+  "dcterms:license": {
+    "@id": "https://creativecommons.org/licenses/by/4.0/"
+  },
+  "dcat:accessURL": {
+    "@id": "https://example.org/dataset/nns1-gh5p-v5n1-td17"
+  },
+  "dcterms:created": "2026-06-18T08:54:36Z",
+  "dcterms:modified": "2026-06-18T08:54:36Z",
+  "dcterms:issued": "2026-06-18T08:54:36Z",
+  "schema:datePublished": "2026-06-18T08:54:36Z",
+  "schema:measurementTechnique": [
+    "cycling"
+  ],
+  "schema:measurementMethod": [
+    "galvanostatic cycling"
+  ],
+  "schema:variableMeasured": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "voltage",
+      "schema:unitText": "V"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "current",
+      "schema:unitText": "A"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "capacity",
+      "schema:unitText": "Ah"
+    }
+  ],
+  "dcterms:subject": [
+    {
+      "@id": "https://w3id.org/battinfo/cell/ag7d-b4fp-r0sv-226m"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/test/ezwb-tj8t-0474-7dgh"
+    }
+  ],
+  "dcterms:source": {
+    "@type": "prov:Entity",
+    "dcterms:type": "measurement",
+    "prov:generatedAtTime": "2026-06-18T08:54:36+00:00"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} NMC811 powder XRD pattern (dataset)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/dataset/dataset-nxv4-ecrt-9wnm-a2yt.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/dataset/dataset-nxv4-ecrt-9wnm-a2yt.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@type": "http://www.w3.org/ns/dcat#Dataset",
+  "@id": "https://w3id.org/battinfo/dataset/nxv4-ecrt-9wnm-a2yt",
+  "dcterms:title": "NMC811 powder XRD pattern",
+  "dcterms:description": "X-ray diffraction pattern of an NMC811 cathode powder lot.",
+  "schema:description": "X-ray diffraction pattern of an NMC811 cathode powder lot.",
+  "dcterms:license": {
+    "@id": "https://creativecommons.org/licenses/by/4.0/"
+  },
+  "dcat:accessURL": {
+    "@id": "https://example.org/dataset/nxv4-ecrt-9wnm-a2yt"
+  },
+  "dcterms:created": "2026-06-18T10:27:48Z",
+  "dcterms:modified": "2026-06-18T10:27:48Z",
+  "dcterms:issued": "2026-06-18T10:27:48Z",
+  "schema:datePublished": "2026-06-18T10:27:48Z",
+  "schema:measurementTechnique": [
+    "X-ray diffraction"
+  ],
+  "schema:variableMeasured": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "two_theta",
+      "schema:unitText": "deg"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "intensity",
+      "schema:unitText": "counts"
+    }
+  ],
+  "dcterms:source": {
+    "@type": "prov:Entity",
+    "dcterms:type": "measurement",
+    "prov:generatedAtTime": "2026-06-18T10:27:48+00:00"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+
 ## Field reference
 
 Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`).

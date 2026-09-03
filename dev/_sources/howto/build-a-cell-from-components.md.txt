@@ -143,7 +143,7 @@ CELL_IRI = save_cell_spec(cell, source_root=LAB, mode="upsert")["id"]
 
 This is shipped, working behavior — the five `*_spec_id` reference fields are
 part of the `CellSpec` model today, and the packaged
-[example fleet](../cell-fleet.md) uses exactly this pattern. A cell may
+[example cells](../records/cells.md#composing-a-cell-from-parts) uses exactly this pattern. A cell may
 reference components, inline them, or both (inline holders remain optional —
 see [Components](../records/components.md)).
 
@@ -197,6 +197,6 @@ a finished set.
 A three-level graph on disk — cell → components → materials — where every node
 is a schema-valid record with a permanent IRI, and shared parts (that binder,
 that electrolyte) are registered once and referenced everywhere. The
-[cell fleet page](../cell-fleet.md) shows the same pattern across the packaged
+[cells page](../records/cells.md#composing-a-cell-from-parts) shows the same pattern across the packaged
 example fleet, and [Find existing records](find-existing-records.md) shows how
 to query what you have built.

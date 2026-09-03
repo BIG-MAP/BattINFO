@@ -64,7 +64,7 @@ the namespace via `family.replace("_", "-")`.
 wheel). Coverage: Celgard PP + ceramic-coated PE separators; Al/Cu current collectors;
 CR2032 coin + LFP 100 Ah prismatic housings — grounded in the DIGIBAT Discovery-Benchmark and the Cell_Design_Tool.
 Cell-specs reference these component-specs by IRI today via the five `*_spec_id`
-fields — see [Cells](../cell-fleet.md) for the reference seam and the example fleet
+fields — see [Cells](cells.md#composing-a-cell-from-parts) for the reference seam and the example fleet
 that uses it.
 
 ## Reference examples
@@ -131,6 +131,666 @@ What to notice:
 - The same `create_component_spec(family, ...)` call authors every component family; the family picks the schema.
 
 **Validated clean** — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).
+
+## Common examples
+
+A selection of real, validated records from the packaged examples corpus — each one click away, included from its single source under `examples/`. The full, living library is the registry: [browse it there](https://www.battery-genome.org/explore).
+
+::::::{dropdown} Celgard 2400 (separator-spec)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/separator-spec/wgym-4xfa-pws1-ek1b.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/separator-spec/wgym-4xfa-pws1-ek1b.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": [
+    "https://w3id.org/emmo/domain/battery/context",
+    {
+      "schema": "https://schema.org/",
+      "dcterms": "http://purl.org/dc/terms/",
+      "battinfo": "https://w3id.org/battinfo/"
+    }
+  ],
+  "@type": [
+    "Polypropylene",
+    "Separator"
+  ],
+  "schema:name": "polypropylene",
+  "hasProperty": [
+    {
+      "@type": [
+        "Porosity",
+        "ConventionalProperty"
+      ],
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.41
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+    },
+    {
+      "@type": [
+        "Thickness",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "Thickness",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 25
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
+    }
+  ],
+  "@id": "https://w3id.org/battinfo/spec/wgym-4xfa-pws1-ek1b"
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} Ceramic-coated PE (separator-spec)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/separator-spec/v94j-jm2h-t8d1-t5a6.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/separator-spec/v94j-jm2h-t8d1-t5a6.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": [
+    "https://w3id.org/emmo/domain/battery/context",
+    {
+      "schema": "https://schema.org/",
+      "dcterms": "http://purl.org/dc/terms/",
+      "battinfo": "https://w3id.org/battinfo/"
+    }
+  ],
+  "@type": [
+    "Polyethylene",
+    "Separator"
+  ],
+  "schema:name": "polyethylene",
+  "hasProperty": [
+    {
+      "@type": [
+        "Porosity",
+        "ConventionalProperty"
+      ],
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.42
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+    },
+    {
+      "@type": [
+        "Thickness",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "Thickness",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 20
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
+    }
+  ],
+  "@id": "https://w3id.org/battinfo/spec/v94j-jm2h-t8d1-t5a6"
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} Aluminium foil (current-collector-spec)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/current-collector-spec/vkaf-f5bv-fwt2-e6yz.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/current-collector-spec/vkaf-f5bv-fwt2-e6yz.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": [
+    "https://w3id.org/emmo/domain/battery/context",
+    {
+      "schema": "https://schema.org/",
+      "dcterms": "http://purl.org/dc/terms/",
+      "battinfo": "https://w3id.org/battinfo/"
+    }
+  ],
+  "@type": [
+    "CurrentCollector",
+    "Aluminium",
+    "Foil"
+  ],
+  "schema:name": "Aluminium foil",
+  "hasProperty": [
+    {
+      "@type": [
+        "battinfo:arealMass",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "arealMass",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 4.05
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#MilliGramPerSquareCentiMetre"
+    },
+    {
+      "@type": [
+        "Thickness",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "Thickness",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 15
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
+    }
+  ],
+  "@id": "https://w3id.org/battinfo/spec/vkaf-f5bv-fwt2-e6yz"
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} Copper foil (current-collector-spec)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/current-collector-spec/z25y-gab5-hd3n-qfpr.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/current-collector-spec/z25y-gab5-hd3n-qfpr.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": [
+    "https://w3id.org/emmo/domain/battery/context",
+    {
+      "schema": "https://schema.org/",
+      "dcterms": "http://purl.org/dc/terms/",
+      "battinfo": "https://w3id.org/battinfo/"
+    }
+  ],
+  "@type": [
+    "CurrentCollector",
+    "Copper",
+    "Foil"
+  ],
+  "schema:name": "Copper foil",
+  "hasProperty": {
+    "@type": [
+      "Thickness",
+      "ConventionalProperty"
+    ],
+    "skos:prefLabel": "Thickness",
+    "hasNumericalPart": {
+      "@type": "RealData",
+      "hasNumberValue": 10
+    },
+    "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
+  },
+  "@id": "https://w3id.org/battinfo/spec/z25y-gab5-hd3n-qfpr"
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} CR2032 coin housing (housing-spec)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/housing-spec/38af-bpnv-1zmm-32hs.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/housing-spec/38af-bpnv-1zmm-32hs.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": [
+    "https://w3id.org/emmo/domain/battery/context",
+    {
+      "schema": "https://schema.org/",
+      "dcterms": "http://purl.org/dc/terms/",
+      "battinfo": "https://w3id.org/battinfo/"
+    }
+  ],
+  "@type": "schema:Product",
+  "hasCase": {
+    "@type": "CoinCase",
+    "schema:size": "2032",
+    "schema:material": "Stainless steel",
+    "hasProperty": [
+      {
+        "@type": [
+          "Diameter",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "Diameter",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 20
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
+      },
+      {
+        "@type": [
+          "Height",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "Height",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 3.2
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
+      }
+    ]
+  },
+  "hasConstituent": [
+    {
+      "@type": "Spring",
+      "schema:material": "Stainless steel"
+    },
+    {
+      "@type": "Spacer",
+      "schema:material": "Stainless steel",
+      "hasProperty": {
+        "@type": [
+          "Thickness",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "Thickness",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 1.0
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
+      }
+    }
+  ],
+  "@id": "https://w3id.org/battinfo/spec/38af-bpnv-1zmm-32hs",
+  "schema:name": "CR2032 coin housing"
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} 21700 cylindrical housing (housing-spec)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/housing-spec/k2q4-dk79-g890-7veq.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/housing-spec/k2q4-dk79-g890-7veq.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": [
+    "https://w3id.org/emmo/domain/battery/context",
+    {
+      "schema": "https://schema.org/",
+      "dcterms": "http://purl.org/dc/terms/",
+      "battinfo": "https://w3id.org/battinfo/"
+    }
+  ],
+  "@type": "schema:Product",
+  "hasCase": {
+    "@type": "CylindricalCase",
+    "schema:material": "Nickel-plated steel",
+    "hasProperty": [
+      {
+        "@type": [
+          "Thickness",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "Thickness",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 0.25
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
+      },
+      {
+        "@type": [
+          "Mass",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "Mass",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 15.0
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#Gram"
+      }
+    ]
+  },
+  "hasTerminal": [
+    {
+      "@type": "Terminal",
+      "schema:additionalType": "positive",
+      "schema:material": "Aluminium",
+      "hasProperty": [
+        {
+          "@type": [
+            "Thickness",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "Thickness",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 0.1
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
+        },
+        {
+          "@type": [
+            "Width",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "Width",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 6.0
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
+        }
+      ]
+    },
+    {
+      "@type": "Terminal",
+      "schema:additionalType": "negative",
+      "schema:material": "Nickel",
+      "hasProperty": [
+        {
+          "@type": [
+            "Thickness",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "Thickness",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 0.1
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
+        },
+        {
+          "@type": [
+            "Width",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "Width",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 5.0
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
+        }
+      ]
+    }
+  ],
+  "hasConstituent": {
+    "@type": "SafetyVent",
+    "schema:material": "Aluminium",
+    "rdfs:comment": "Safety vent (CID / burst membrane) in the top cap."
+  },
+  "@id": "https://w3id.org/battinfo/spec/k2q4-dk79-g890-7veq",
+  "schema:name": "21700 cylindrical housing"
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} LFP 100Ah prismatic housing (housing-spec)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/housing-spec/ypyh-v38v-r276-snmk.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/housing-spec/ypyh-v38v-r276-snmk.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": [
+    "https://w3id.org/emmo/domain/battery/context",
+    {
+      "schema": "https://schema.org/",
+      "dcterms": "http://purl.org/dc/terms/",
+      "battinfo": "https://w3id.org/battinfo/"
+    }
+  ],
+  "@type": "schema:Product",
+  "hasCase": {
+    "@type": [
+      "PrismaticCase",
+      "Aluminium"
+    ],
+    "hasProperty": [
+      {
+        "@type": [
+          "Thickness",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "Thickness",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 0.8
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
+      },
+      {
+        "@type": [
+          "Mass",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "Mass",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 95
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#Gram"
+      }
+    ]
+  },
+  "hasTerminal": [
+    {
+      "@type": "Terminal",
+      "schema:additionalType": "positive",
+      "schema:material": "Aluminium",
+      "hasProperty": {
+        "@type": [
+          "Width",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "Width",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 20
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
+      }
+    },
+    {
+      "@type": "Terminal",
+      "schema:additionalType": "negative",
+      "schema:material": "Copper",
+      "hasProperty": {
+        "@type": [
+          "Width",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "Width",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 20
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
+      }
+    }
+  ],
+  "hasConstituent": {
+    "@type": "Seal",
+    "schema:material": "Polypropylene"
+  },
+  "@id": "https://w3id.org/battinfo/spec/ypyh-v38v-r276-snmk",
+  "schema:name": "LFP 100Ah prismatic housing"
+}
+```
+::::
+
+:::::
+::::::
+
 
 ## Field reference
 

@@ -620,7 +620,7 @@ the electrolyte’s <code class="docutils literal notranslate"><span class="pre"
 </div>
 <p>This is shipped, working behavior — the five <code class="docutils literal notranslate"><span class="pre">*_spec_id</span></code> reference fields are
 part of the <code class="docutils literal notranslate"><span class="pre">CellSpec</span></code> model today, and the packaged
-<a class="reference internal" href="../cell-fleet.html"><span class="std std-doc">example fleet</span></a> uses exactly this pattern. A cell may
+<a class="reference internal" href="../records/cells.html#composing-a-cell-from-parts"><span class="std std-ref">example cells</span></a> uses exactly this pattern. A cell may
 reference components, inline them, or both (inline holders remain optional —
 see <a class="reference internal" href="../records/components.html"><span class="std std-doc">Components</span></a>).</p>
 </section>
@@ -670,7 +670,7 @@ a finished set.</p>
 <p>A three-level graph on disk — cell → components → materials — where every node
 is a schema-valid record with a permanent IRI, and shared parts (that binder,
 that electrolyte) are registered once and referenced everywhere. The
-<a class="reference internal" href="../cell-fleet.html"><span class="std std-doc">cell fleet page</span></a> shows the same pattern across the packaged
+<a class="reference internal" href="../records/cells.html#composing-a-cell-from-parts"><span class="std std-ref">cells page</span></a> shows the same pattern across the packaged
 example fleet, and <a class="reference internal" href="find-existing-records.html"><span class="std std-doc">Find existing records</span></a> shows how
 to query what you have built.</p>
 </section>
