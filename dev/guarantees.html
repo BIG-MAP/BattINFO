@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>BattINFO Validation Contract &#8212; BattINFO  documentation</title>
+    <title>Guarantees &#8212; BattINFO  documentation</title>
   
   
   
@@ -47,7 +47,7 @@
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'validation-contract';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'guarantees';</script>
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.21.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://big-map.github.io/BattINFO/switcher.json';
@@ -59,8 +59,8 @@
     <link rel="icon" href="_static/favicon.svg"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="The infrastructure contract" href="pages/contract.html" />
-    <link rel="prev" title="Property &amp; unit reference" href="pages/property-reference.html" />
+    <link rel="next" title="Scope and capabilities" href="scope.html" />
+    <link rel="prev" title="Properties and units" href="pages/property-reference.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -412,29 +412,35 @@
 <li class="toctree-l1"><a class="reference internal" href="pages/cli-reference.html">CLI reference</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="materials-model.html">Materials: kind, spec, instance</a></li>
-<li class="toctree-l1"><a class="reference internal" href="material-spec.html">Materials</a></li>
-<li class="toctree-l1"><a class="reference internal" href="electrodes-model.html">Electrodes: kind, powder spec, electrode spec, batch</a></li>
-<li class="toctree-l1"><a class="reference internal" href="component-specs.html">Components</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cell-fleet.html">Cells</a></li>
-<li class="toctree-l1"><a class="reference internal" href="test-specs.html">Test specs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="engineering-cell-description.html">Engineering cell description</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="records/index.html">Record types</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="records/cells.html">Cells</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="cell-fleet.html">Cells</a></li>
+<li class="toctree-l3"><a class="reference internal" href="engineering-cell-description.html">Engineering cell description</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2"><a class="reference internal" href="records/materials.html">Materials</a></li>
+<li class="toctree-l2"><a class="reference internal" href="records/electrodes.html">Electrodes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="records/components.html">Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="records/tests.html">Tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="records/datasets.html">Datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="records/equipment.html">Equipment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="records/parameter-sets.html">Parameter sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="records/organizations.html">Organizations</a></li>
+</ul>
+</details></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="pages/schema-reference.html">JSON Schema reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pages/property-reference.html">Property &amp; unit reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pages/property-reference.html">Properties and units</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">BattINFO Validation Contract</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pages/contract.html">The infrastructure contract</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ingest-manifest-contract.html">Ingest Manifest Contract</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pages/interop-recovery.html">Interop recovery scorecard</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Guarantees</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="scope.html">BattINFO Scope &amp; Capabilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scope.html">Scope and capabilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pages/interop-recovery.html">Interop scorecard</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="pages/glossary.html">Glossary — the vocabulary, in plain language</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pages/glossary.html">Glossary</a></li>
 </ul>
 </div>
 </nav></div>
@@ -478,7 +484,7 @@
     
     <li class="breadcrumb-item"><a href="pages/reference.html" class="nav-link">Reference</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">BattINFO Validation Contract</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Guarantees</span></li>
   </ul>
 </nav>
 </div>
@@ -495,11 +501,128 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="battinfo-validation-contract">
-<h1>BattINFO Validation Contract<a class="headerlink" href="#battinfo-validation-contract" title="Link to this heading">#</a></h1>
+  <section id="guarantees">
+<h1>Guarantees<a class="headerlink" href="#guarantees" title="Link to this heading">#</a></h1>
+<p>What the infrastructure promises, and the interfaces you can build against —
+three contracts on one page, each for a different reader. Building a platform
+or registry <strong>on</strong> BattINFO: start with <a class="reference internal" href="#the-infrastructure-contract"><span class="std std-ref">the infrastructure
+contract</span></a>. Integrating validation into a
+pipeline: <a class="reference internal" href="#validation-contract"><span class="std std-ref">the validation contract</span></a>. Feeding bulk data
+in from a folder of files: <a class="reference internal" href="#ingest-manifest-contract"><span class="std std-ref">the ingest manifest
+contract</span></a>.</p>
+<section id="the-infrastructure-contract">
+<h2>The infrastructure contract<a class="headerlink" href="#the-infrastructure-contract" title="Link to this heading">#</a></h2>
+<p>This page is for the person deciding whether to <em>build on</em> BattINFO: what the
+guarantees are, where they are enforced, and what breaks loudly instead of
+silently. Everything here is backed by tests or CI gates in this repo or the
+registry.</p>
+<section id="records-are-versioned">
+<h3>Records are versioned<a class="headerlink" href="#records-are-versioned" title="Link to this heading">#</a></h3>
+<p>Every canonical record carries <code class="docutils literal notranslate"><span class="pre">schema_version</span></code> (currently <code class="docutils literal notranslate"><span class="pre">0.2.0</span></code>, a single
+module-level constant). The registry’s publish gate validates against pinned,
+vendored copies of the same schemas and <strong>flags unknown versions</strong> rather than
+guessing. Changes to record shape are CHANGELOG entries, never silent.</p>
+<p>Three versions exist in the wild, and consumers should accept all three:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p><code class="docutils literal notranslate"><span class="pre">schema_version</span></code></p></th>
+<th class="head"><p>What it means</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">0.1.0</span></code></p></td>
+<td><p>The original record shape; records published before the 0.2.0 consolidation still carry it</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">1.0.0</span></code></p></td>
+<td><p>An interim stamp used briefly before the numbering was consolidated</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">0.2.0</span></code></p></td>
+<td><p>The current shape: snake_case keys throughout, <code class="docutils literal notranslate"><span class="pre">properties</span></code> (ex <code class="docutils literal notranslate"><span class="pre">specs</span></code>), organizations use <code class="docutils literal notranslate"><span class="pre">same_as</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The differences are additive/renaming only — no field changed meaning. New
+records always stamp the current version; old records validate against the
+same schemas (the keys they use are all still accepted).</p>
+</section>
+<section id="records-are-attributable">
+<h3>Records are attributable<a class="headerlink" href="#records-are-attributable" title="Link to this heading">#</a></h3>
+<p>Every emitted record’s provenance block carries <code class="docutils literal notranslate"><span class="pre">battinfo_version</span></code> — the
+library build that wrote it. A malformed record found in a corpus two years
+from now is forensically traceable to its producer. Explicitly set values are
+preserved, so re-serialising another build’s record never falsifies origin.</p>
+</section>
+<section id="identifiers-are-deterministic">
+<h3>Identifiers are deterministic<a class="headerlink" href="#identifiers-are-deterministic" title="Link to this heading">#</a></h3>
+<p>Records saved without an explicit <code class="docutils literal notranslate"><span class="pre">uid</span></code> mint their IRI from the record’s
+natural identity key (for a cell spec: manufacturer :: model :: format ::
+chemistry :: size code), using the same seeds in every authoring path.
+Consequences you can rely on:</p>
+<ul class="simple">
+<li><p>re-running an identical ingest is a <strong>no-op</strong>, never a duplicate corpus;</p></li>
+<li><p>the workspace and <code class="docutils literal notranslate"><span class="pre">save_*</span></code> paths mint <strong>identical IRIs</strong> for identical
+identities (tested);</p></li>
+<li><p>records with no distinguishing identity still mint randomly — two anonymous
+but physically distinct cells never silently merge.</p></li>
+</ul>
+<p>Governance of the IRI space itself is written down in the
+<a class="reference external" href="https://github.com/BIG-MAP/BattINFO/blob/main/IDENTIFIER_POLICY.md">identifier policy</a>.</p>
+</section>
+<section id="one-schema-contract-three-consumers">
+<h3>One schema contract, three consumers<a class="headerlink" href="#one-schema-contract-three-consumers" title="Link to this heading">#</a></h3>
+<p>The canonical JSON Schemas in <code class="docutils literal notranslate"><span class="pre">src/battinfo/data/schemas/</span></code> are enforced in
+three places, each with a CI gate against drift:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Consumer</p></th>
+<th class="head"><p>Mechanism</p></th>
+<th class="head"><p>Drift gate</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">validate</span></code> / <code class="docutils literal notranslate"><span class="pre">save_*</span></code></p></td>
+<td><p>jsonschema at save/publish</p></td>
+<td><p>the test suite</p></td>
+</tr>
+<tr class="row-odd"><td><p>Registry publish gate</p></td>
+<td><p>vendored schemas, fails closed on unknown record types</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">schema-drift</span></code> CI job pinned to a BattINFO commit</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://battinfo.org/validate">battinfo.org/validate</a></p></td>
+<td><p>vendored schemas compiled with Ajv</p></td>
+<td><p>web CI: sync check + 103-record agreement corpus</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The same record gets the same structural verdict in all three.</p>
+</section>
+<section id="bulk-operations-are-safe-to-automate">
+<h3>Bulk operations are safe to automate<a class="headerlink" href="#bulk-operations-are-safe-to-automate" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">bulk_save_session</span></code> ingests ~400 records/s; a 10k-record ingest takes under
+half a minute and is re-runnable without duplicates.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ws.submit()</span></code> journals every outcome and resumes interrupted batches,
+re-sending only what is missing; transient registry failures retry with
+exponential backoff.</p></li>
+<li><p>Submission content conflicts return a <strong>structured 409</strong> naming the existing
+record, not a bare string.</p></li>
+</ul>
+</section>
+<section id="deprecations-are-announced">
+<h3>Deprecations are announced<a class="headerlink" href="#deprecations-are-announced" title="Link to this heading">#</a></h3>
+<p>Public API removals go through one release of <code class="docutils literal notranslate"><span class="pre">DeprecationWarning</span></code> naming the
+replacement — never straight to <code class="docutils literal notranslate"><span class="pre">ImportError</span></code>. The policy lives in
+<a class="reference external" href="https://github.com/BIG-MAP/BattINFO/blob/main/CONTRIBUTING.md">CONTRIBUTING</a>;
+expiring shims are swept at each release.</p>
+</section>
+</section>
+<section id="validation-contract">
+<h2>Validation contract<a class="headerlink" href="#validation-contract" title="Link to this heading">#</a></h2>
 <p>This document defines the validation behavior that consumers can rely on for the supported BattINFO scope.</p>
 <section id="supported-entry-points">
-<h2>Supported Entry Points<a class="headerlink" href="#supported-entry-points" title="Link to this heading">#</a></h2>
+<h3>Supported Entry Points<a class="headerlink" href="#supported-entry-points" title="Link to this heading">#</a></h3>
 <p>Core validation entry points:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">validate</span></code></p></li>
@@ -512,7 +635,7 @@
 </ul>
 </section>
 <section id="policy-names">
-<h2>Policy Names<a class="headerlink" href="#policy-names" title="Link to this heading">#</a></h2>
+<h3>Policy Names<a class="headerlink" href="#policy-names" title="Link to this heading">#</a></h3>
 <p>BattINFO currently exposes these named validation policies:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">default</span></code></p></li>
@@ -529,7 +652,7 @@
 </ul>
 </section>
 <section id="issue-model">
-<h2>Issue Model<a class="headerlink" href="#issue-model" title="Link to this heading">#</a></h2>
+<h3>Issue Model<a class="headerlink" href="#issue-model" title="Link to this heading">#</a></h3>
 <p>Structured validation issues expose these fields:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">code</span></code></p></li>
@@ -558,13 +681,13 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">semantic.temporal_order_invalid</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">semantic.electrode_holders_mixed</span></code> (with <code class="docutils literal notranslate"><span class="pre">semantic.electrode_role_expected</span></code> /
 <code class="docutils literal notranslate"><span class="pre">semantic.electrode_polarity_expected</span></code>: the electrode holders disagree with the
-cell configuration — see <a class="reference internal" href="electrodes-model.html#half-cells-name-their-electrodes-by-role-not-by-polarity"><span class="std std-ref">Electrodes</span></a>)</p></li>
+cell configuration — see <a class="reference internal" href="records/electrodes.html#half-cells-name-their-electrodes-by-role-not-by-polarity"><span class="std std-ref">Electrodes</span></a>)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">publication.distribution_url_invalid</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">publication.jsonld_parse_error</span></code></p></li>
 </ul>
 </section>
 <section id="cli-contract">
-<h2>CLI Contract<a class="headerlink" href="#cli-contract" title="Link to this heading">#</a></h2>
+<h3>CLI Contract<a class="headerlink" href="#cli-contract" title="Link to this heading">#</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">validate</span></code> supports:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">--format</span> <span class="pre">text</span></code></p></li>
@@ -608,10 +731,194 @@ cell configuration — see <a class="reference internal" href="electrodes-model.
 </ul>
 </section>
 <section id="current-boundary">
-<h2>Current Boundary<a class="headerlink" href="#current-boundary" title="Link to this heading">#</a></h2>
+<h3>Current Boundary<a class="headerlink" href="#current-boundary" title="Link to this heading">#</a></h3>
 <p>Reference validation is supported against repository-style source trees through <code class="docutils literal notranslate"><span class="pre">source_root</span></code>.</p>
 <p>Every <code class="docutils literal notranslate"><span class="pre">*_id</span></code> field on a record body resolves to a record of one expected type, and a reference that resolves to the wrong type is <code class="docutils literal notranslate"><span class="pre">reference.type_mismatch</span></code> rather than a pass. The distinctions the checks enforce are meaningful ones: <code class="docutils literal notranslate"><span class="pre">cell_instance.cell_spec_id</span></code> must be a <code class="docutils literal notranslate"><span class="pre">cell-spec</span></code>, while <code class="docutils literal notranslate"><span class="pre">cell_instance.working_electrode_id</span></code> / <code class="docutils literal notranslate"><span class="pre">counter_electrode_id</span></code> must be <code class="docutils literal notranslate"><span class="pre">electrode</span></code> records — the built batch, not the <code class="docutils literal notranslate"><span class="pre">electrode-spec</span></code> design, which the cell spec already links.</p>
 <p>This is sufficient for the core scope, but it is not yet the long-term scalability model for larger external registries or snapshots.</p>
+</section>
+</section>
+<section id="ingest-manifest-contract">
+<h2>Ingest manifest contract<a class="headerlink" href="#ingest-manifest-contract" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">battinfo.ingest.json</span></code> is the folder-local manifest for the <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">ingest</span> <span class="pre">...</span></code>
+workflow.</p>
+<p>Purpose:</p>
+<ul class="simple">
+<li><p>declare the typed subject being ingested</p></li>
+<li><p>point that subject to a curated reusable type record</p></li>
+<li><p>provide the minimum publication metadata needed for repeatable ingest</p></li>
+<li><p>configure folder scanning rules for attached files</p></li>
+</ul>
+<p>Normative schema: <code class="docutils literal notranslate"><span class="pre">assets/schemas/ingest-manifest.schema.json</span></code></p>
+<p>Packaged runtime copy: <code class="docutils literal notranslate"><span class="pre">src/battinfo/data/schemas/ingest-manifest.schema.json</span></code></p>
+<section id="scope">
+<h3>Scope<a class="headerlink" href="#scope" title="Link to this heading">#</a></h3>
+<p>This manifest is not the source of truth for reusable type definitions.</p>
+<p>Use it for:</p>
+<ul class="simple">
+<li><p>one operational ingest folder</p></li>
+<li><p>one typed instance-like resource</p></li>
+<li><p>file discovery and publication defaults</p></li>
+</ul>
+<p>Do not use it for:</p>
+<ul class="simple">
+<li><p>curated <code class="docutils literal notranslate"><span class="pre">cell-spec</span></code> authoring</p></li>
+<li><p>editing canonical registry output</p></li>
+<li><p>replacing the source folder itself</p></li>
+</ul>
+</section>
+<section id="required-fields">
+<h3>Required fields<a class="headerlink" href="#required-fields" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">resource_type</span></code></p>
+<ul>
+<li><p>current allowed value: <code class="docutils literal notranslate"><span class="pre">cell-instance</span></code></p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">type_record</span></code></p>
+<ul>
+<li><p>path to the curated reusable type record</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="optional-fields">
+<h3>Optional fields<a class="headerlink" href="#optional-fields" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">resource_iri</span></code></p>
+<ul>
+<li><p>preserved canonical IRI for the ingested resource when already assigned</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">resource_name</span></code></p>
+<ul>
+<li><p>human-facing instance label used as the default generated serial/name</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">workspace_id</span></code></p>
+<ul>
+<li><p>registry workspace id used during bundle/publish</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">publisher_id</span></code></p>
+<ul>
+<li><p>publisher id used during bundle/publish</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">source_version</span></code></p>
+<ul>
+<li><p>submission version string written into generated workspace/package state</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">license</span></code></p>
+<ul>
+<li><p>default dataset license</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rules</span></code></p>
+<ul>
+<li><p>file discovery and filename-to-test-kind inference overrides</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="rules-object">
+<h3>Rules object<a class="headerlink" href="#rules-object" title="Link to this heading">#</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">rules</span></code> currently supports:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">photo_glob</span></code></p>
+<ul>
+<li><p>string or string array</p></li>
+<li><p>default:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">image/photo/*.jpg</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">image/photo/*.jpeg</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">image/photo/*.png</span></code></p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">timeseries_glob</span></code></p>
+<ul>
+<li><p>string or string array</p></li>
+<li><p>default:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">timeseries/raw/*.csv</span></code></p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">test_kind_from_filename</span></code></p>
+<ul>
+<li><p>object mapping lowercase filename tokens to BattINFO test kinds</p></li>
+<li><p>default:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">rate</span> <span class="pre">-&gt;</span> <span class="pre">rate_capability</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ici</span> <span class="pre">-&gt;</span> <span class="pre">ici</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">capacity</span> <span class="pre">-&gt;</span> <span class="pre">capacity_check</span></code></p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="minimal-example">
+<h3>Minimal example<a class="headerlink" href="#minimal-example" title="Link to this heading">#</a></h3>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;resource_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cell-instance&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;type_record&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;battinfo-records/records/cell-spec/google--g20m7--2025/record.json&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="practical-example">
+<h3>Practical example<a class="headerlink" href="#practical-example" title="Link to this heading">#</a></h3>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;resource_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cell-instance&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;type_record&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;battinfo-records/records/cell-spec/google--g20m7--2025/record.json&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;resource_iri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/cell/15qn-rpd4-xhy7-kx2q&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;resource_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;google--g20m7--2025--15qnrp&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;workspace_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;google-g20m7-instance-demo&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;publisher_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demo-lab&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;source_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-04-10&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;license&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CC-BY-4.0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;rules&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;photo_glob&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;image/photo/*.jpg&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;image/photo/*.jpeg&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;image/photo/*.png&quot;</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;timeseries_glob&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;timeseries/raw/*.csv&quot;</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;test_kind_from_filename&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;rate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;rate_capability&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;ici&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ici&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;capacity&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;capacity_check&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="operational-rule">
+<h3>Operational rule<a class="headerlink" href="#operational-rule" title="Link to this heading">#</a></h3>
+<p>For routine use:</p>
+<ul class="simple">
+<li><p>users edit the ingest folder and <code class="docutils literal notranslate"><span class="pre">battinfo.ingest.json</span></code></p></li>
+<li><p>BattINFO generates the <code class="docutils literal notranslate"><span class="pre">Workspace</span></code></p></li>
+<li><p>users do not treat the generated workspace as the primary long-term source by default</p></li>
+</ul>
+</section>
+<section id="current-implementation-boundary">
+<h3>Current implementation boundary<a class="headerlink" href="#current-implementation-boundary" title="Link to this heading">#</a></h3>
+<p>The manifest contract is designed to expand to other typed resource kinds, but the
+current ingest engine only implements:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">cell-instance</span></code></p></li>
+</ul>
+<p>Additional <code class="docutils literal notranslate"><span class="pre">resource_type</span></code> values should only be added when the ingest engine and
+its downstream record-generation logic actually support them.</p>
+</section>
 </section>
 </section>
 
@@ -631,15 +938,15 @@ cell configuration — see <a class="reference internal" href="electrodes-model.
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Property &amp; unit reference</p>
+        <p class="prev-next-title">Properties and units</p>
       </div>
     </a>
     <a class="right-next"
-       href="pages/contract.html"
+       href="scope.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">The infrastructure contract</p>
+        <p class="prev-next-title">Scope and capabilities</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -662,11 +969,34 @@ cell configuration — see <a class="reference internal" href="electrodes-model.
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#supported-entry-points">Supported Entry Points</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#policy-names">Policy Names</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#issue-model">Issue Model</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cli-contract">CLI Contract</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#current-boundary">Current Boundary</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-infrastructure-contract">The infrastructure contract</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#records-are-versioned">Records are versioned</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#records-are-attributable">Records are attributable</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#identifiers-are-deterministic">Identifiers are deterministic</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#one-schema-contract-three-consumers">One schema contract, three consumers</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bulk-operations-are-safe-to-automate">Bulk operations are safe to automate</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#deprecations-are-announced">Deprecations are announced</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#validation-contract">Validation contract</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#supported-entry-points">Supported Entry Points</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#policy-names">Policy Names</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#issue-model">Issue Model</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cli-contract">CLI Contract</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#current-boundary">Current Boundary</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ingest-manifest-contract">Ingest manifest contract</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#scope">Scope</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#required-fields">Required fields</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#optional-fields">Optional fields</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rules-object">Rules object</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#minimal-example">Minimal example</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#practical-example">Practical example</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#operational-rule">Operational rule</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#current-implementation-boundary">Current implementation boundary</a></li>
+</ul>
+</li>
 </ul>
   </nav></div>
 

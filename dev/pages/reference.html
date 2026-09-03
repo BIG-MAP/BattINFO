@@ -412,29 +412,35 @@
 <li class="toctree-l1"><a class="reference internal" href="cli-reference.html">CLI reference</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../materials-model.html">Materials: kind, spec, instance</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../material-spec.html">Materials</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../electrodes-model.html">Electrodes: kind, powder spec, electrode spec, batch</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../component-specs.html">Components</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../cell-fleet.html">Cells</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../test-specs.html">Test specs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../engineering-cell-description.html">Engineering cell description</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../records/index.html">Record types</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../records/cells.html">Cells</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../cell-fleet.html">Cells</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../engineering-cell-description.html">Engineering cell description</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2"><a class="reference internal" href="../records/materials.html">Materials</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../records/electrodes.html">Electrodes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../records/components.html">Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../records/tests.html">Tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../records/datasets.html">Datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../records/equipment.html">Equipment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../records/parameter-sets.html">Parameter sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../records/organizations.html">Organizations</a></li>
+</ul>
+</details></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="schema-reference.html">JSON Schema reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="property-reference.html">Property &amp; unit reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="property-reference.html">Properties and units</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../validation-contract.html">BattINFO Validation Contract</a></li>
-<li class="toctree-l1"><a class="reference internal" href="contract.html">The infrastructure contract</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../ingest-manifest-contract.html">Ingest Manifest Contract</a></li>
-<li class="toctree-l1"><a class="reference internal" href="interop-recovery.html">Interop recovery scorecard</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guarantees.html">Guarantees</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../scope.html">BattINFO Scope &amp; Capabilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../scope.html">Scope and capabilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interop-recovery.html">Interop scorecard</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary — the vocabulary, in plain language</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary</a></li>
 </ul>
 </div>
 </nav></div>
@@ -494,14 +500,15 @@
                   
   <section id="reference">
 <h1>Reference<a class="headerlink" href="#reference" title="Link to this heading">#</a></h1>
-<p>Facts about the surface: every class, command, schema, property, and guarantee.
-The pages descend from what you call, to what comes out, to what is promised. The
-generated pages are produced from the code and mapping tables and drift-checked
-in CI, so they cannot rot.</p>
-<section id="surfaces">
-<h2>Surfaces<a class="headerlink" href="#surfaces" title="Link to this heading">#</a></h2>
-<p>The two generated surfaces you call against: the Python API and the CLI. For the
-workspace, the everyday way most people author records, see the how-to guides.</p>
+<p>Organized by the question you arrive with: what you call, what a record of
+each type looks like, what records emit semantically, what the infrastructure
+promises, and what is supported today. The generated pages are produced from
+the code, schemas, and mapping tables and drift-checked in CI, so they cannot
+rot.</p>
+<section id="what-you-call">
+<h2>What you call<a class="headerlink" href="#what-you-call" title="Link to this heading">#</a></h2>
+<p>The two generated surfaces: the Python API and the CLI. For the workspace,
+the everyday way most people author records, see the how-to guides.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="api-reference.html">Python API</a></li>
@@ -511,49 +518,45 @@ workspace, the everyday way most people author records, see the how-to guides.</
 </section>
 <section id="record-types">
 <h2>Record types<a class="headerlink" href="#record-types" title="Link to this heading">#</a></h2>
-<p>One page per record family: the fields each carries, and how they link.</p>
+<p>One page per record family, and each page is the whole story: what the thing
+is, a reference example (authoring code, the canonical record, its JSON-LD),
+and the field reference from the JSON Schemas. When someone asks how to
+describe a cell, a material, or a separator — the answer is one link.</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../materials-model.html">Materials: kind, spec, instance</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../material-spec.html">Materials</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../electrodes-model.html">Electrodes: kind, powder spec, electrode spec, batch</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../component-specs.html">Components</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../cell-fleet.html">Cells</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../test-specs.html">Test specs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../engineering-cell-description.html">Engineering cell description</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../records/index.html">Record types</a></li>
 </ul>
 </div>
 </section>
-<section id="schemas-and-properties">
-<h2>Schemas and properties<a class="headerlink" href="#schemas-and-properties" title="Link to this heading">#</a></h2>
-<p>The JSON Schemas the records are checked against, and the property and unit
-vocabulary.</p>
+<section id="what-records-emit">
+<h2>What records emit<a class="headerlink" href="#what-records-emit" title="Link to this heading">#</a></h2>
+<p>The semantic layer: the property and unit vocabulary behind every quantity.
+For the anatomy of a published JSON-LD document, see
+<a class="reference internal" href="../reading-a-record.html"><span class="doc">Anatomy of a published BattINFO record (battinfo.json)</span></a> (under Concepts).</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="schema-reference.html">JSON Schema reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="property-reference.html">Property &amp; unit reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="property-reference.html">Properties and units</a></li>
 </ul>
 </div>
 </section>
-<section id="contracts">
-<h2>Contracts<a class="headerlink" href="#contracts" title="Link to this heading">#</a></h2>
-<p>What the infrastructure guarantees, and the interfaces you can build against.</p>
+<section id="guarantees">
+<h2>Guarantees<a class="headerlink" href="#guarantees" title="Link to this heading">#</a></h2>
+<p>The three contracts on one page — infrastructure, validation, ingest
+manifest — each naming the reader it is for.</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../validation-contract.html">BattINFO Validation Contract</a></li>
-<li class="toctree-l1"><a class="reference internal" href="contract.html">The infrastructure contract</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../ingest-manifest-contract.html">Ingest Manifest Contract</a></li>
-<li class="toctree-l1"><a class="reference internal" href="interop-recovery.html">Interop recovery scorecard</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guarantees.html">Guarantees</a></li>
 </ul>
 </div>
 </section>
-<section id="scope-and-support">
-<h2>Scope and support<a class="headerlink" href="#scope-and-support" title="Link to this heading">#</a></h2>
-<p>The capability map: what is supported today, what is preview, what is in
-development, and the modeling boundary (cell level and below).</p>
+<section id="status">
+<h2>Status<a class="headerlink" href="#status" title="Link to this heading">#</a></h2>
+<p>What is supported today, what is preview, and how well each external data
+source round-trips.</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../scope.html">BattINFO Scope &amp; Capabilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../scope.html">Scope and capabilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interop-recovery.html">Interop scorecard</a></li>
 </ul>
 </div>
 </section>
@@ -561,7 +564,7 @@ development, and the modeling boundary (cell level and below).</p>
 <h2>Glossary<a class="headerlink" href="#glossary" title="Link to this heading">#</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary — the vocabulary, in plain language</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary</a></li>
 </ul>
 </div>
 </section>
@@ -614,11 +617,11 @@ development, and the modeling boundary (cell level and below).</p>
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#surfaces">Surfaces</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-you-call">What you call</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#record-types">Record types</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#schemas-and-properties">Schemas and properties</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#contracts">Contracts</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scope-and-support">Scope and support</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-records-emit">What records emit</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#guarantees">Guarantees</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#status">Status</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#glossary">Glossary</a></li>
 </ul>
   </nav></div>

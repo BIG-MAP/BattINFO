@@ -166,7 +166,7 @@ from battinfo.ingest import build_ingest_workspace, publish_ingest_workspace, wr
 
 The folder-local `battinfo.ingest.json` manifest carries stable ingest
 metadata; its shape is defined by
-{doc}`the ingest manifest contract <../ingest-manifest-contract>` and validated
+{doc}`the ingest manifest contract <../guarantees>` and validated
 against `assets/schemas/ingest-manifest.schema.json`.
 `resource_type="cell-instance"` is the currently implemented subject.
 
@@ -184,5 +184,5 @@ see a deprecation message pointing at the replacement for each call.
 
 - Prefer `battinfo.workspace(...)` for anything that ends in publishing.
 - Prefer opaque BattINFO IRIs under `https://w3id.org/battinfo/`.
-- For validation policy and machine-readable issue output, see {doc}`the validation contract <../validation-contract>`.
-- For submission-envelope internals, see {doc}`the contract explanation page </pages/contract>`.
+- For validation policy and machine-readable issue output, see {doc}`the validation contract <../guarantees>`.
+- For submission-envelope internals, see {doc}`the infrastructure contract <../guarantees>`.

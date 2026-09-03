@@ -48,7 +48,7 @@ graphite = save_material_spec(create_material_spec(
 
 Quantities are always `{"value": ..., "unit": ...}` maps; a measured value can
 also carry the conditions it was measured under — see
-[Materials](../material-spec.md) for the property and composition reference.
+[Materials](../records/materials.md) for the property and composition reference.
 
 ## Find them again
 

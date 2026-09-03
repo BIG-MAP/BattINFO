@@ -1,0 +1,1146 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Cells &#8212; BattINFO  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/tokens.css?v=ff8d36bc" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=2911d74e" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
+
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'records/cells';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.21.0';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://big-map.github.io/BattINFO/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="icon" href="../_static/favicon.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Cells" href="../cell-fleet.html" />
+    <link rel="prev" title="Record types" href="index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class=" navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo-horizontal.svg" class="logo__image only-light" alt="BattINFO"/>
+    <img src="../_static/logo-horizontal-on-dark.svg" class="logo__image only-dark pst-js-only" alt="BattINFO"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class=" navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/getting-started.html">
+    Get Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/guides.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/howto.html">
+    How-to guides
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../pages/reference.html">
+    Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/concepts.html">
+    Concepts
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../community/index.html">
+    Community
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://battinfo.org">
+    Home
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://battinfo.org/validate">
+    Validate
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://battinfo.org/convert">
+    Convert
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BIG-MAP/BattINFO" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/getting-started.html">
+    Get Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/guides.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/howto.html">
+    How-to guides
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../pages/reference.html">
+    Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/concepts.html">
+    Concepts
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../community/index.html">
+    Community
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://battinfo.org">
+    Home
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://battinfo.org/validate">
+    Validate
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://battinfo.org/convert">
+    Convert
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BIG-MAP/BattINFO" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../pages/api-reference.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/cli-reference.html">CLI reference</a></li>
+</ul>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Record types</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 current active has-children"><a class="current reference internal" href="#">Cells</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../cell-fleet.html">Cells</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../engineering-cell-description.html">Engineering cell description</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2"><a class="reference internal" href="materials.html">Materials</a></li>
+<li class="toctree-l2"><a class="reference internal" href="electrodes.html">Electrodes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="components.html">Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tests.html">Tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="datasets.html">Datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="equipment.html">Equipment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="parameter-sets.html">Parameter sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="organizations.html">Organizations</a></li>
+</ul>
+</details></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../pages/property-reference.html">Properties and units</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../guarantees.html">Guarantees</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../scope.html">Scope and capabilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/interop-recovery.html">Interop scorecard</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../pages/glossary.html">Glossary</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../pages/reference.html" class="nav-link">Reference</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Record types</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Cells</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <!-- GENERATED by scripts/gen_reference_records.py — do not edit this page.
+     Model prose is injected from docs/records/_fragments/<slug>.md:
+     edit the fragment, then regenerate:
+     uv run python scripts/gen_reference_records.py
+     tests/test_reference_records.py fails when this page drifts. -->
+<section id="cells">
+<h1>Cells<a class="headerlink" href="#cells" title="Link to this heading">#</a></h1>
+<p>How to describe a cell: the design as a <strong>cell spec</strong>, each physical unit as a <strong>cell instance</strong> under it.</p>
+<p>A cell is described at two levels, the spec + instance pattern every family
+uses. The <strong>cell spec</strong> is the design — the datasheet: manufacturer, model,
+format, chemistry, and rated properties as <code class="docutils literal notranslate"><span class="pre">{value,</span> <span class="pre">unit}</span></code> quantities. The
+<strong>cell instance</strong> is one physical unit built to that design: a serial number
+and batch under <code class="docutils literal notranslate"><span class="pre">cell_spec_id</span></code>, plus what was measured on that unit. The
+(spec, serial) pair seeds the instance IRI, so re-registering the same cell
+is a no-op instead of a duplicate.</p>
+<p>A cell instance can also state which physical components went into it —
+<code class="docutils literal notranslate"><span class="pre">working_electrode_id</span></code> points at the electrode disc inside this cell (see
+<a class="reference internal" href="electrodes.html"><span class="std std-doc">electrodes</span></a>).</p>
+<p>Two deeper treatments live beside this page: <a class="reference internal" href="../cell-fleet.html"><span class="std std-doc">cell fleets</span></a>
+(reference-based authoring patterns for many cells against one spec) and the
+<a class="reference internal" href="../engineering-cell-description.html"><span class="std std-doc">engineering cell description</span></a> (housing,
+tabs, electrode-assembly geometry for prismatic/cylindrical/pouch designs).</p>
+<div class="toctree-wrapper compound">
+</div>
+<section id="reference-examples">
+<h2>Reference examples<a class="headerlink" href="#reference-examples" title="Link to this heading">#</a></h2>
+<section id="a-cell-spec-from-its-datasheet">
+<h3>A cell spec, from its datasheet<a class="headerlink" href="#a-cell-spec-from-its-datasheet" title="Link to this heading">#</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">CellSpec</span>
+
+<span class="n">spec</span> <span class="o">=</span> <span class="n">CellSpec</span><span class="p">(</span>
+    <span class="c1"># The published flagship IRI — dereference it (Accept:</span>
+    <span class="c1"># application/ld+json) to get this exact record.</span>
+    <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0&quot;</span><span class="p">,</span>
+    <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;A123&quot;</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="s2">&quot;ANR26650M1-B&quot;</span><span class="p">,</span>
+    <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;cylindrical&quot;</span><span class="p">,</span>
+    <span class="n">chemistry</span><span class="o">=</span><span class="s2">&quot;Li-ion&quot;</span><span class="p">,</span>
+    <span class="n">positive_electrode_basis</span><span class="o">=</span><span class="s2">&quot;LFP&quot;</span><span class="p">,</span>
+    <span class="n">properties</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;nominal_capacity&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">2.5</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;Ah&quot;</span><span class="p">},</span>
+        <span class="s2">&quot;nominal_voltage&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">3.3</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;V&quot;</span><span class="p">},</span>
+        <span class="s2">&quot;mass&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">76.0</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;g&quot;</span><span class="p">},</span>
+    <span class="p">},</span>
+    <span class="n">source</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;datasheet&quot;</span><span class="p">,</span> <span class="s2">&quot;retrieved_at&quot;</span><span class="p">:</span> <span class="mi">1750000000</span><span class="p">},</span>
+<span class="p">)</span>
+<span class="n">record</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">to_record</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The canonical record this produces:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;schema_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;cell_spec&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;short_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pge5we&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cell-spec:pge5-wer6-2q82-v9k0&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A123 ANR26650M1-B&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ANR26650M1-B&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;manufacturer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Organization&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A123&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;cell_format&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cylindrical&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;chemistry&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Li-ion&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;positive_electrode_basis&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;LFP&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;nominal_capacity&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">2.5</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ah&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;nominal_voltage&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">3.3</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;V&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;mass&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">76.0</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;g&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;provenance&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;source_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;datasheet&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;retrieved_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1750000000</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;battinfo_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.7.0&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The JSON-LD it emits (<code class="docutils literal notranslate"><span class="pre">record_to_jsonld</span></code>, hosted-context mode):</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;@context&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/context/records/v1.json&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;BatteryCellSpecification&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;schema:CreativeWork&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pge5-wer6-2q82-v9k0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A123 ANR26650M1-B&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:model&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ANR26650M1-B&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:manufacturer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;schema:Organization&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A123&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;schema:url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://www.battery-genome.org/registry/spec/pge5-wer6-2q82-v9k0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;isDescriptionFor&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;BatteryCell&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;CylindricalBattery&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;LithiumIonBattery&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;LithiumIonIronPhosphateBattery&quot;</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A123 ANR26650M1-B&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;schema:schemaVersion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;NominalCapacity&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;ConventionalProperty&quot;</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NominalCapacity&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">2.5</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#AmpereHour&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;NominalVoltage&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;ConventionalProperty&quot;</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NominalVoltage&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">3.3</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#Volt&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;Mass&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;ConventionalProperty&quot;</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Mass&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">76.0</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#Gram&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;hasPositiveElectrode&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;LithiumIronPhosphateElectrode&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;dcterms:source&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;prov:Entity&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;dcterms:type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;datasheet&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;prov:generatedAtTime&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-06-15T15:06:40+00:00&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>What to notice:</p>
+<ul class="simple">
+<li><p>The node is EMMO-typed (<code class="docutils literal notranslate"><span class="pre">BatteryCellSpecification</span></code>) and each spec property becomes a typed quantity under <code class="docutils literal notranslate"><span class="pre">hasProperty</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">schema:manufacturer</span></code> and <code class="docutils literal notranslate"><span class="pre">schema:model</span></code> carry the identity that seeded the IRI.</p></li>
+</ul>
+<p><strong>Validated clean</strong> — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).</p>
+</section>
+<section id="a-cell-instance-under-that-spec">
+<h3>A cell instance under that spec<a class="headerlink" href="#a-cell-instance-under-that-spec" title="Link to this heading">#</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">Cell</span><span class="p">,</span> <span class="n">CellSpec</span>
+
+<span class="n">spec</span> <span class="o">=</span> <span class="n">CellSpec</span><span class="p">(</span>
+    <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5&quot;</span><span class="p">,</span>
+    <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Samsung SDI&quot;</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="s2">&quot;INR21700-50E&quot;</span><span class="p">,</span>
+    <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;cylindrical&quot;</span><span class="p">,</span>
+    <span class="n">chemistry</span><span class="o">=</span><span class="s2">&quot;Li-ion&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">cell</span> <span class="o">=</span> <span class="n">Cell</span><span class="p">(</span>
+    <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;https://w3id.org/battinfo/cell/y9xy-kr0v-y5tn-dfj7&quot;</span><span class="p">,</span>
+    <span class="n">cell_spec</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span>                    <span class="c1"># every cell links to its spec</span>
+    <span class="n">serial_number</span><span class="o">=</span><span class="s2">&quot;LAB-2026-0001&quot;</span><span class="p">,</span>
+    <span class="n">batch_id</span><span class="o">=</span><span class="s2">&quot;2026-W03&quot;</span><span class="p">,</span>
+    <span class="n">manufactured_at</span><span class="o">=</span><span class="s2">&quot;2026-01-15&quot;</span><span class="p">,</span>
+    <span class="n">source</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span> <span class="s2">&quot;retrieved_at&quot;</span><span class="p">:</span> <span class="mi">1750000000</span><span class="p">},</span>
+<span class="p">)</span>
+<span class="n">record</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">to_record</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The canonical record this produces:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;schema_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;cell_instance&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/cell/y9xy-kr0v-y5tn-dfj7&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;short_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;y9xykr&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;cell_spec_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;LAB-2026-0001&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;serial_number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;LAB-2026-0001&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;batch_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-W03&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;manufactured_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-01-15&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;provenance&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;source_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;lab&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;retrieved_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1750000000</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;battinfo_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.7.0&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The JSON-LD it emits (<code class="docutils literal notranslate"><span class="pre">record_to_jsonld</span></code>, hosted-context mode):</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;@context&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/context/records/v1.json&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;BatteryCell&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;schema:IndividualProduct&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/cell/y9xy-kr0v-y5tn-dfj7&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:serialNumber&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;LAB-2026-0001&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;hasDescription&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;schema:identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;schema:PropertyValue&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;schema:propertyID&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;batch_id&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;schema:value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-W03&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;schema:productionDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-01-15&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;dcterms:source&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;prov:Entity&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;dcterms:type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;lab&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;prov:generatedAtTime&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-06-15T15:06:40+00:00&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>What to notice:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">cell_spec_id</span></code> is the instantiation edge; the JSON-LD states it as a reference to the spec node.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">schema:serialNumber</span></code> carries the physical identity.</p></li>
+</ul>
+<p><strong>Validated clean</strong> — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).</p>
+</section>
+</section>
+<section id="field-reference">
+<h2>Field reference<a class="headerlink" href="#field-reference" title="Link to this heading">#</a></h2>
+<p>Generated from the packaged JSON Schemas — the same files <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">validate</span></code> and the registry’s publish gate enforce. Every record also carries the shared envelope (<code class="docutils literal notranslate"><span class="pre">schema_version</span></code>, <code class="docutils literal notranslate"><span class="pre">provenance</span></code>, and optional <code class="docutils literal notranslate"><span class="pre">notes</span></code>, <code class="docutils literal notranslate"><span class="pre">funding</span></code>, <code class="docutils literal notranslate"><span class="pre">contributor</span></code>, <code class="docutils literal notranslate"><span class="pre">license</span></code>).</p>
+<section id="cell-spec-fields">
+<h3>cell-spec fields<a class="headerlink" href="#cell-spec-fields" title="Link to this heading">#</a></h3>
+<p>Schema: <a class="reference external" href="https://w3id.org/battinfo/schema/cell-spec.schema.json"><code class="docutils literal notranslate"><span class="pre">cell-spec.schema.json</span></code></a> · required at top level: <code class="docutils literal notranslate"><span class="pre">schema_version</span></code>, <code class="docutils literal notranslate"><span class="pre">cell_spec</span></code>, <code class="docutils literal notranslate"><span class="pre">provenance</span></code></p>
+<p>The <code class="docutils literal notranslate"><span class="pre">cell_spec</span></code> block:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Required</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">id</span></code></p></td>
+<td><p>→ SpecIri</p></td>
+<td><p>yes</p></td>
+<td><p>Canonical IRI of this cell spec.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">short_id</span></code></p></td>
+<td><p>→ ShortId</p></td>
+<td><p></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">identifier</span></code></p></td>
+<td><p>→ Identifier</p></td>
+<td><p></p></td>
+<td><p>Additional identifier(s) for the cell model, as strings or PropertyValue pairs.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">name</span></code></p></td>
+<td><p>string</p></td>
+<td><p>yes</p></td>
+<td><p>Human-readable display name, typically manufacturer plus model.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">model</span></code></p></td>
+<td><p>string</p></td>
+<td><p>yes</p></td>
+<td><p>Manufacturer model designation (e.g. ‘ANR26650M1-B’).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">manufacturer</span></code></p></td>
+<td><p>→ Organization</p></td>
+<td><p>yes</p></td>
+<td><p>Organization that manufactures this cell model.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">brand</span></code></p></td>
+<td><p>→ BrandOrOrganization</p></td>
+<td><p></p></td>
+<td><p>Brand the cell is marketed under, when different from the manufacturer.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">category</span></code></p></td>
+<td><p>string</p></td>
+<td><p></p></td>
+<td><p>Coarse product category label (e.g. ‘battery cell’).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">url</span></code></p></td>
+<td><p>string</p></td>
+<td><p></p></td>
+<td><p>Product or datasheet page URL.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">additional_type</span></code></p></td>
+<td><p>string or array of string</p></td>
+<td><p></p></td>
+<td><p>Extra JSON-LD type IRIs or labels stacked onto the record’s &#64;type.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">product_type</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">commercial</span></code> | <code class="docutils literal notranslate"><span class="pre">research</span></code> | <code class="docutils literal notranslate"><span class="pre">prototype</span></code></p></td>
+<td><p></p></td>
+<td><p>Whether this cell spec is a commercial product, a research cell, or a prototype.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cell_format</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cylindrical</span></code> | <code class="docutils literal notranslate"><span class="pre">prismatic</span></code> | <code class="docutils literal notranslate"><span class="pre">pouch</span></code> | <code class="docutils literal notranslate"><span class="pre">coin</span></code> … (6 values)</p></td>
+<td><p>yes</p></td>
+<td><p>Mechanical format of the cell.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">size_code</span></code></p></td>
+<td><p>string</p></td>
+<td><p></p></td>
+<td><p>Standard size designation (e.g. ‘18650’, ‘21700’, ‘CR2032’).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">iec_code</span></code></p></td>
+<td><p>string</p></td>
+<td><p></p></td>
+<td><p>IEC designation code (IEC 60086 / IEC 61960), when defined.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">country_of_origin</span></code></p></td>
+<td><p>string</p></td>
+<td><p></p></td>
+<td><p>Country where the cell is manufactured.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rechargeable</span></code></p></td>
+<td><p>boolean</p></td>
+<td><p></p></td>
+<td><p>Whether this cell is rechargeable (true) or primary/single-use (false).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">year</span></code></p></td>
+<td><p>integer</p></td>
+<td><p></p></td>
+<td><p>Year the cell model was released or the datasheet was issued.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">chemistry</span></code></p></td>
+<td><p>string</p></td>
+<td><p>yes</p></td>
+<td><p>Overall cell chemistry label (e.g. ‘Li-ion’, ‘NiMH’, ‘Zn-MnO2’). Use the recognised labels where they apply (see the property keys reference); other values are carried as literals.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">positive_electrode_basis</span></code></p></td>
+<td><p>string</p></td>
+<td><p></p></td>
+<td><p>Positive-electrode active material basis (e.g. ‘LFP’, ‘NMC811’). Use the recognised labels where they apply (see the property keys reference); other values are carried as literals.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">negative_electrode_basis</span></code></p></td>
+<td><p>string</p></td>
+<td><p></p></td>
+<td><p>Negative-electrode active material basis (e.g. ‘graphite’, ‘LTO’, ‘Si-C’). Use the recognised labels where they apply (see the property keys reference); other values are carried as literals.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">datasheet_revision</span></code></p></td>
+<td><p>string</p></td>
+<td><p></p></td>
+<td><p>Revision label of the datasheet the spec was taken from.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">manufacturing_place</span></code></p></td>
+<td><p>string</p></td>
+<td><p></p></td>
+<td><p>Geographic location of the battery manufacturing plant (EU Battery Regulation Annex VI Part A).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">battery_category</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">EV</span></code> | <code class="docutils literal notranslate"><span class="pre">LMT</span></code> | <code class="docutils literal notranslate"><span class="pre">industrial</span></code> | <code class="docutils literal notranslate"><span class="pre">stationary</span></code> … (7 values)</p></td>
+<td><p></p></td>
+<td><p>Battery category per EU Battery Regulation Article 3.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">reference_electrode</span></code></p></td>
+<td><p>string</p></td>
+<td><p></p></td>
+<td><p>Counter/reference electrode for half-cell configurations (e.g. ‘lithium’, ‘NHE’).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cell_configuration</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">full_cell</span></code> | <code class="docutils literal notranslate"><span class="pre">half_cell</span></code> | <code class="docutils literal notranslate"><span class="pre">three_electrode_cell</span></code></p></td>
+<td><p></p></td>
+<td><p>Electrode configuration as built. Optional; absent means unstated (read as a full cell unless a reference_electrode is present). Stated explicitly it overrides that heuristic: half_cell types the JSON-LD as BatteryHalfCell + HalfCellDevice, three_electrode_cell as ThreeElectrodeCellDevice, full_cell suppresses both.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Top-level <code class="docutils literal notranslate"><span class="pre">properties</span></code>: Datasheet-style quantitative properties of the cell model; each key holds a SpecItem quantity. Dimension keys follow the format rules: diameter for cylindrical and coin, length/width/thickness for prismatic and pouch, height for all.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">bibliography</span></code> block:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Required</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">subject_of</span></code></p></td>
+<td><p>array of → BibliographyEntry</p></td>
+<td><p></p></td>
+<td><p>Publications (papers, reports) that study or document this cell model.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Top-level <code class="docutils literal notranslate"><span class="pre">specification_comment</span></code>: Verbatim comment lines carried over from the source specification.</p>
+<p>Top-level <code class="docutils literal notranslate"><span class="pre">editorial</span></code>: Internal editorial metadata — review status and curation notes. Ignored by the publish pipeline; not forwarded to the registry semantic payload.</p>
+<p>Top-level <code class="docutils literal notranslate"><span class="pre">construction</span></code>: Internal construction: assembly type, layering, sheet counts, and electrode-assembly geometry.</p>
+<p>Top-level <code class="docutils literal notranslate"><span class="pre">positive_electrode</span></code>: Inline description of the positive electrode (coating, current collector, tab, properties).</p>
+<p>Top-level <code class="docutils literal notranslate"><span class="pre">negative_electrode</span></code>: Inline description of the negative electrode (coating, current collector, tab, properties).</p>
+<p>Top-level <code class="docutils literal notranslate"><span class="pre">working_electrode</span></code>: Inline working-electrode structure. Role holder for a half_cell or three_electrode_cell: a cell that is not a full cell has no positive/negative polarity to assign, so the electrode under study is the working electrode. Emitted as hasWorkingElectrode with &#64;type WorkingElectrode.</p>
+<p>Top-level <code class="docutils literal notranslate"><span class="pre">counter_electrode</span></code>: Inline counter-electrode structure. Role holder for a half_cell or three_electrode_cell. In a half cell the counter electrode also serves as the reference, so it is emitted with &#64;type [CounterElectrode, ReferenceElectrode]; in a three-electrode cell the separate reference_electrode field carries the reference role.</p>
+<p>Top-level <code class="docutils literal notranslate"><span class="pre">electrolyte</span></code>: Inline electrolyte description (family, salt, solvents, additives).</p>
+<p>Top-level <code class="docutils literal notranslate"><span class="pre">separator</span></code>: Inline separator description (material, structure, coating, and properties).</p>
+<p>Top-level <code class="docutils literal notranslate"><span class="pre">housing</span></code>: Inline housing description (case, cap, terminals, seals, parts).</p>
+<p>Top-level <code class="docutils literal notranslate"><span class="pre">positive_electrode_spec_id</span></code>: IRI of the standalone electrode-spec used as the positive electrode of this cell model; may be given instead of, or alongside, the inline positive_electrode holder.</p>
+<p>Top-level <code class="docutils literal notranslate"><span class="pre">negative_electrode_spec_id</span></code>: IRI of the standalone electrode-spec used as the negative electrode of this cell model; may be given instead of, or alongside, the inline negative_electrode holder.</p>
+<p>Top-level <code class="docutils literal notranslate"><span class="pre">working_electrode_spec_id</span></code>: Optional canonical IRI of a standalone electrode-spec for the working electrode (used instead of, or alongside, the inline working_electrode holder).</p>
+<p>Top-level <code class="docutils literal notranslate"><span class="pre">counter_electrode_spec_id</span></code>: Optional canonical IRI of a standalone electrode-spec for the counter electrode.</p>
+<p>Top-level <code class="docutils literal notranslate"><span class="pre">electrolyte_spec_id</span></code>: IRI of the standalone electrolyte-spec used in this cell model; may be given instead of, or alongside, the inline electrolyte holder.</p>
+<p>Top-level <code class="docutils literal notranslate"><span class="pre">separator_spec_id</span></code>: IRI of the standalone separator-spec used in this cell model; may be given instead of, or alongside, the inline separator holder.</p>
+<p>Top-level <code class="docutils literal notranslate"><span class="pre">housing_spec_id</span></code>: IRI of the standalone housing-spec used in this cell model; may be given instead of, or alongside, the inline housing holder.</p>
+<p>Top-level <code class="docutils literal notranslate"><span class="pre">hazardous_substances</span></code>: Hazardous substances present in the battery (EU Battery Regulation Annex XIII §7.1).</p>
+<p>Top-level <code class="docutils literal notranslate"><span class="pre">critical_raw_materials</span></code>: Critical raw materials present in the battery at more than 0.1% weight by weight (EU Battery Regulation Annex XIII §7.1).</p>
+<p>Top-level <code class="docutils literal notranslate"><span class="pre">extinguishing_agent</span></code>: Usable extinguishing agent for the battery (EU Battery Regulation Annex VI Part A).</p>
+</section>
+<section id="cell-instance-fields">
+<h3>cell-instance fields<a class="headerlink" href="#cell-instance-fields" title="Link to this heading">#</a></h3>
+<p>Schema: <a class="reference external" href="https://w3id.org/battinfo/schema/cell-instance.schema.json"><code class="docutils literal notranslate"><span class="pre">cell-instance.schema.json</span></code></a> · required at top level: <code class="docutils literal notranslate"><span class="pre">schema_version</span></code>, <code class="docutils literal notranslate"><span class="pre">cell_instance</span></code>, <code class="docutils literal notranslate"><span class="pre">provenance</span></code></p>
+<p>The <code class="docutils literal notranslate"><span class="pre">cell_instance</span></code> block:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Required</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">id</span></code></p></td>
+<td><p>→ CellIri</p></td>
+<td><p>yes</p></td>
+<td><p>Canonical IRI of this cell instance.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cell_spec_id</span></code></p></td>
+<td><p>→ SpecIri</p></td>
+<td><p>yes</p></td>
+<td><p>IRI of the cell spec this physical cell realizes.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">working_electrode_id</span></code></p></td>
+<td><p>→ ElectrodeIri</p></td>
+<td><p></p></td>
+<td><p>Canonical IRI of the electrode record (the physical batch or disc) built into this cell as its working electrode. The cell spec says which electrode design the cell uses; this says which built electrode went into this individual cell.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">counter_electrode_id</span></code></p></td>
+<td><p>→ ElectrodeIri</p></td>
+<td><p></p></td>
+<td><p>Canonical IRI of the electrode record built into this cell as its counter electrode. In a half cell that electrode is also the reference electrode, so it is emitted with both role classes.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">name</span></code></p></td>
+<td><p>string</p></td>
+<td><p></p></td>
+<td><p>Human-readable name / label for this cell (e.g. a lab batch ID). The primary identifier; usually present even without a manufacturer serial number.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">short_id</span></code></p></td>
+<td><p>→ ShortId</p></td>
+<td><p></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">serial_number</span></code></p></td>
+<td><p>string</p></td>
+<td><p></p></td>
+<td><p>Manufacturer serial number (unique within the product model); optional.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">batch_id</span></code></p></td>
+<td><p>string</p></td>
+<td><p></p></td>
+<td><p>Production or lab batch this cell belongs to.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">grade</span></code></p></td>
+<td><p>string</p></td>
+<td><p></p></td>
+<td><p>Quality grade assigned to this cell (e.g. ‘A’, ‘B’, ‘C’, ‘reject’).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">manufactured_at</span></code></p></td>
+<td><p>→ FlexDate</p></td>
+<td><p></p></td>
+<td><p>Production date. ISO 8601 string (YYYY, YYYY-MM, YYYY-MM-DD) or Unix timestamp.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">expires_at</span></code></p></td>
+<td><p>→ FlexDate</p></td>
+<td><p></p></td>
+<td><p>Expiration / best-before date. ISO 8601 string (YYYY, YYYY-MM, YYYY-MM-DD) or Unix timestamp.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">service_start_date</span></code></p></td>
+<td><p>string</p></td>
+<td><p></p></td>
+<td><p>ISO 8601 date when the battery was first put into service.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">battery_status</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">original</span></code> | <code class="docutils literal notranslate"><span class="pre">repurposed</span></code> | <code class="docutils literal notranslate"><span class="pre">re-used</span></code> | <code class="docutils literal notranslate"><span class="pre">remanufactured</span></code> … (5 values)</p></td>
+<td><p></p></td>
+<td><p>Current status of the battery per EU Battery Regulation Annex XIII.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dpp_status</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">active</span></code> | <code class="docutils literal notranslate"><span class="pre">archived</span></code> | <code class="docutils literal notranslate"><span class="pre">inactive</span></code> | <code class="docutils literal notranslate"><span class="pre">marked-for-deletion</span></code></p></td>
+<td><p></p></td>
+<td><p>Status of this digital product passport record.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">supersedes</span></code></p></td>
+<td><p>→ CellIri</p></td>
+<td><p></p></td>
+<td><p>IRI of the previous cell record this passport replaces, e.g. after repurposing.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">conformance</span></code></p></td>
+<td><p>object</p></td>
+<td><p></p></td>
+<td><p>Assessment of how well this record followed the spec that governs it.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Top-level <code class="docutils literal notranslate"><span class="pre">measured</span></code>: Measured cell properties using the same keys as the spec’s properties map; read each key as the value measured for this cell (e.g. nominal_capacity = measured discharge capacity, mass = weighed mass).</p>
+<p>Top-level <code class="docutils literal notranslate"><span class="pre">datasets</span></code>: Datasets recorded for this cell. Back-reference to dataset records. dataset.about is the source of truth for what a dataset describes; when records are saved together through a workspace the library fills this list from each dataset’s cell and test links, and hand-authored records may set it directly.</p>
+</section>
+</section>
+<section id="see-also">
+<h2>See also<a class="headerlink" href="#see-also" title="Link to this heading">#</a></h2>
+<p>Recipes: <a class="reference internal" href="../howto/label-your-cells.html"><span class="std std-doc">label your cells</span></a>, <a class="reference internal" href="../howto/build-a-cell-from-components.html"><span class="std std-doc">build a cell from components</span></a>.</p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="index.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Record types</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../cell-fleet.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Cells</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reference-examples">Reference examples</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#a-cell-spec-from-its-datasheet">A cell spec, from its datasheet</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#a-cell-instance-under-that-spec">A cell instance under that spec</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#field-reference">Field reference</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cell-spec-fields">cell-spec fields</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cell-instance-fields">cell-instance fields</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#see-also">See also</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2021-2026, Simon Clark.
+      <br/>
+    
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+  </body>
+</html>

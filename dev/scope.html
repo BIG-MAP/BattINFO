@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>BattINFO Scope &amp; Capabilities &#8212; BattINFO  documentation</title>
+    <title>Scope and capabilities &#8212; BattINFO  documentation</title>
   
   
   
@@ -59,8 +59,8 @@
     <link rel="icon" href="_static/favicon.svg"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Glossary — the vocabulary, in plain language" href="pages/glossary.html" />
-    <link rel="prev" title="Interop recovery scorecard" href="pages/interop-recovery.html" />
+    <link rel="next" title="Interop scorecard" href="pages/interop-recovery.html" />
+    <link rel="prev" title="Guarantees" href="guarantees.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -412,29 +412,35 @@
 <li class="toctree-l1"><a class="reference internal" href="pages/cli-reference.html">CLI reference</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="materials-model.html">Materials: kind, spec, instance</a></li>
-<li class="toctree-l1"><a class="reference internal" href="material-spec.html">Materials</a></li>
-<li class="toctree-l1"><a class="reference internal" href="electrodes-model.html">Electrodes: kind, powder spec, electrode spec, batch</a></li>
-<li class="toctree-l1"><a class="reference internal" href="component-specs.html">Components</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cell-fleet.html">Cells</a></li>
-<li class="toctree-l1"><a class="reference internal" href="test-specs.html">Test specs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="engineering-cell-description.html">Engineering cell description</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="records/index.html">Record types</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="records/cells.html">Cells</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="cell-fleet.html">Cells</a></li>
+<li class="toctree-l3"><a class="reference internal" href="engineering-cell-description.html">Engineering cell description</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2"><a class="reference internal" href="records/materials.html">Materials</a></li>
+<li class="toctree-l2"><a class="reference internal" href="records/electrodes.html">Electrodes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="records/components.html">Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="records/tests.html">Tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="records/datasets.html">Datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="records/equipment.html">Equipment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="records/parameter-sets.html">Parameter sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="records/organizations.html">Organizations</a></li>
+</ul>
+</details></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="pages/schema-reference.html">JSON Schema reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pages/property-reference.html">Property &amp; unit reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pages/property-reference.html">Properties and units</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="validation-contract.html">BattINFO Validation Contract</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pages/contract.html">The infrastructure contract</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ingest-manifest-contract.html">Ingest Manifest Contract</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pages/interop-recovery.html">Interop recovery scorecard</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guarantees.html">Guarantees</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">BattINFO Scope &amp; Capabilities</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Scope and capabilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pages/interop-recovery.html">Interop scorecard</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="pages/glossary.html">Glossary — the vocabulary, in plain language</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pages/glossary.html">Glossary</a></li>
 </ul>
 </div>
 </nav></div>
@@ -478,7 +484,7 @@
     
     <li class="breadcrumb-item"><a href="pages/reference.html" class="nav-link">Reference</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">BattINFO Scope &amp; Capabilities</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Scope and capabilities</span></li>
   </ul>
 </nav>
 </div>
@@ -495,8 +501,8 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="battinfo-scope-capabilities">
-<h1>BattINFO Scope &amp; Capabilities<a class="headerlink" href="#battinfo-scope-capabilities" title="Link to this heading">#</a></h1>
+  <section id="scope-and-capabilities">
+<h1>Scope and capabilities<a class="headerlink" href="#scope-and-capabilities" title="Link to this heading">#</a></h1>
 <p>This document maps the BattINFO surface by maturity, so you know what you can
 rely on today, what is available but still evolving, and what is in development.</p>
 <section id="modeling-scope">
@@ -583,20 +589,20 @@ internal:</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="pages/interop-recovery.html"
+       href="guarantees.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Interop recovery scorecard</p>
+        <p class="prev-next-title">Guarantees</p>
       </div>
     </a>
     <a class="right-next"
-       href="pages/glossary.html"
+       href="pages/interop-recovery.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Glossary — the vocabulary, in plain language</p>
+        <p class="prev-next-title">Interop scorecard</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

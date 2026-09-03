@@ -21,7 +21,7 @@ A cell-spec gains seven optional top-level reference fields (siblings of the inl
 
 Which electrode pair a cell uses follows from its `cell_configuration` — polarity
 for a full cell, role for a half or three-electrode cell. See
-[Electrodes: cells reference electrodes](electrodes-model.md#cells-reference-electrodes).
+[Electrodes: cells reference electrodes](records/electrodes.md#cells-reference-electrodes).
 
 A cell may **reference**, **inline**, or both — inline holders stay optional, so existing
 records are unaffected. The JSON-LD emits reference nodes

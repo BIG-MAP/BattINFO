@@ -145,7 +145,7 @@ This is shipped, working behavior — the five `*_spec_id` reference fields are
 part of the `CellSpec` model today, and the packaged
 [example fleet](../cell-fleet.md) uses exactly this pattern. A cell may
 reference components, inline them, or both (inline holders remain optional —
-see [Components](../component-specs.md)).
+see [Components](../records/components.md)).
 
 ## 5. The physical cells
 

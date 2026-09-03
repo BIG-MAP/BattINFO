@@ -412,29 +412,35 @@
 <li class="toctree-l1"><a class="reference internal" href="cli-reference.html">CLI reference</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../materials-model.html">Materials: kind, spec, instance</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../material-spec.html">Materials</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../electrodes-model.html">Electrodes: kind, powder spec, electrode spec, batch</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../component-specs.html">Components</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../cell-fleet.html">Cells</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../test-specs.html">Test specs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../engineering-cell-description.html">Engineering cell description</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../records/index.html">Record types</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../records/cells.html">Cells</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../cell-fleet.html">Cells</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../engineering-cell-description.html">Engineering cell description</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2"><a class="reference internal" href="../records/materials.html">Materials</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../records/electrodes.html">Electrodes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../records/components.html">Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../records/tests.html">Tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../records/datasets.html">Datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../records/equipment.html">Equipment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../records/parameter-sets.html">Parameter sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../records/organizations.html">Organizations</a></li>
+</ul>
+</details></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="schema-reference.html">JSON Schema reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="property-reference.html">Property &amp; unit reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="property-reference.html">Properties and units</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../validation-contract.html">BattINFO Validation Contract</a></li>
-<li class="toctree-l1"><a class="reference internal" href="contract.html">The infrastructure contract</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../ingest-manifest-contract.html">Ingest Manifest Contract</a></li>
-<li class="toctree-l1"><a class="reference internal" href="interop-recovery.html">Interop recovery scorecard</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guarantees.html">Guarantees</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../scope.html">BattINFO Scope &amp; Capabilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../scope.html">Scope and capabilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interop-recovery.html">Interop scorecard</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary — the vocabulary, in plain language</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary</a></li>
 </ul>
 </div>
 </nav></div>
@@ -674,7 +680,7 @@ files (photos become photo datasets; CSVs become a <code class="docutils literal
 </div>
 <p>The folder-local <code class="docutils literal notranslate"><span class="pre">battinfo.ingest.json</span></code> manifest carries stable ingest
 metadata; its shape is defined by
-<a class="reference internal" href="../ingest-manifest-contract.html"><span class="doc">the ingest manifest contract</span></a> and validated
+<a class="reference internal" href="../guarantees.html"><span class="doc">the ingest manifest contract</span></a> and validated
 against <code class="docutils literal notranslate"><span class="pre">assets/schemas/ingest-manifest.schema.json</span></code>.
 <code class="docutils literal notranslate"><span class="pre">resource_type=&quot;cell-instance&quot;</span></code> is the currently implemented subject.</p>
 </section>
@@ -693,8 +699,8 @@ see a deprecation message pointing at the replacement for each call.</p>
 <ul class="simple">
 <li><p>Prefer <code class="docutils literal notranslate"><span class="pre">battinfo.workspace(...)</span></code> for anything that ends in publishing.</p></li>
 <li><p>Prefer opaque BattINFO IRIs under <code class="docutils literal notranslate"><span class="pre">https://w3id.org/battinfo/</span></code>.</p></li>
-<li><p>For validation policy and machine-readable issue output, see <a class="reference internal" href="../validation-contract.html"><span class="doc">the validation contract</span></a>.</p></li>
-<li><p>For submission-envelope internals, see <a class="reference internal" href="contract.html"><span class="doc">the contract explanation page</span></a>.</p></li>
+<li><p>For validation policy and machine-readable issue output, see <a class="reference internal" href="../guarantees.html"><span class="doc">the validation contract</span></a>.</p></li>
+<li><p>For submission-envelope internals, see <a class="reference internal" href="../guarantees.html"><span class="doc">the infrastructure contract</span></a>.</p></li>
 </ul>
 </section>
 <section id="generated-reference">
@@ -704,11 +710,13 @@ descriptions — it cannot drift from the code. The authoring workspace has its
 own page at <a class="reference internal" href="../workspace-authoring.html"><span class="doc">Workspace authoring</span></a>.</p>
 <section id="the-record-classes">
 <h3>The record classes<a class="headerlink" href="#the-record-classes" title="Link to this heading">#</a></h3>
-<p>The five record classes are both the canonical source of truth and the
-authoring input: construct them with the flat field names you know from the
-datasheet and hand them to <code class="docutils literal notranslate"><span class="pre">publish</span></code> or the matching <code class="docutils literal notranslate"><span class="pre">save_*</span></code> function.
-Every field is documented below; quantity keys and unit symbols are
-enumerated in <a class="reference internal" href="property-reference.html"><span class="doc">Property &amp; unit reference</span></a>.</p>
+<p>The five record classes — <code class="docutils literal notranslate"><span class="pre">CellSpec</span></code>, <code class="docutils literal notranslate"><span class="pre">Cell</span></code>, <code class="docutils literal notranslate"><span class="pre">TestSpec</span></code>, <code class="docutils literal notranslate"><span class="pre">Test</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Dataset</span></code> — are both the canonical source of truth and the authoring
+input: construct them with the flat field names you know from the datasheet
+and hand them to <code class="docutils literal notranslate"><span class="pre">publish</span></code> or the matching <code class="docutils literal notranslate"><span class="pre">save_*</span></code> function.
+<code class="docutils literal notranslate"><span class="pre">ProvenanceInfo</span></code>, documented with them, is the provenance block every
+record embeds. Every field is documented below; quantity keys and unit
+symbols are enumerated in <a class="reference internal" href="property-reference.html"><span class="doc">Properties and units</span></a>.</p>
 <dl class="py class pydantic_model">
 <dt class="sig sig-object py" id="battinfo.CellSpec">
 <span class="property"><span class="pre">pydantic</span> <span class="pre">model</span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">battinfo.</span></span><span class="sig-name descname"><span class="pre">CellSpec</span></span><a class="headerlink" href="#battinfo.CellSpec" title="Link to this definition">#</a></dt>

@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>The infrastructure contract &#8212; BattINFO  documentation</title>
+    <title>Record types &#8212; BattINFO  documentation</title>
   
   
   
@@ -47,7 +47,7 @@
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'pages/contract';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'records/index';</script>
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.21.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://big-map.github.io/BattINFO/switcher.json';
@@ -59,8 +59,8 @@
     <link rel="icon" href="../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Ingest Manifest Contract" href="../ingest-manifest-contract.html" />
-    <link rel="prev" title="BattINFO Validation Contract" href="../validation-contract.html" />
+    <link rel="next" title="Cells" href="cells.html" />
+    <link rel="prev" title="CLI reference" href="../pages/cli-reference.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -152,35 +152,35 @@
   <ul class="bd-navbar-elements navbar-nav">
     
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="getting-started.html">
+  <a class="nav-link nav-internal" href="../pages/getting-started.html">
     Get Started
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="guides.html">
+  <a class="nav-link nav-internal" href="../pages/guides.html">
     Tutorials
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="howto.html">
+  <a class="nav-link nav-internal" href="../pages/howto.html">
     How-to guides
   </a>
 </li>
 
 
 <li class="nav-item current active">
-  <a class="nav-link nav-internal" href="reference.html">
+  <a class="nav-link nav-internal" href="../pages/reference.html">
     Reference
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="concepts.html">
+  <a class="nav-link nav-internal" href="../pages/concepts.html">
     Concepts
   </a>
 </li>
@@ -273,10 +273,6 @@
   
 
   
-    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
-      <span class="fa-solid fa-outdent"></span>
-    </button>
-  
 </div>
 
     </header>
@@ -304,35 +300,35 @@
   <ul class="bd-navbar-elements navbar-nav">
     
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="getting-started.html">
+  <a class="nav-link nav-internal" href="../pages/getting-started.html">
     Get Started
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="guides.html">
+  <a class="nav-link nav-internal" href="../pages/guides.html">
     Tutorials
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="howto.html">
+  <a class="nav-link nav-internal" href="../pages/howto.html">
     How-to guides
   </a>
 </li>
 
 
 <li class="nav-item current active">
-  <a class="nav-link nav-internal" href="reference.html">
+  <a class="nav-link nav-internal" href="../pages/reference.html">
     Reference
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="concepts.html">
+  <a class="nav-link nav-internal" href="../pages/concepts.html">
     Concepts
   </a>
 </li>
@@ -408,33 +404,39 @@
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="api-reference.html">Python API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cli-reference.html">CLI reference</a></li>
-</ul>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../materials-model.html">Materials: kind, spec, instance</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../material-spec.html">Materials</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../electrodes-model.html">Electrodes: kind, powder spec, electrode spec, batch</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../component-specs.html">Components</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../cell-fleet.html">Cells</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../test-specs.html">Test specs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../engineering-cell-description.html">Engineering cell description</a></li>
-</ul>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="schema-reference.html">JSON Schema reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="property-reference.html">Property &amp; unit reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/api-reference.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/cli-reference.html">CLI reference</a></li>
 </ul>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../validation-contract.html">BattINFO Validation Contract</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">The infrastructure contract</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../ingest-manifest-contract.html">Ingest Manifest Contract</a></li>
-<li class="toctree-l1"><a class="reference internal" href="interop-recovery.html">Interop recovery scorecard</a></li>
+<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">Record types</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="cells.html">Cells</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../cell-fleet.html">Cells</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../engineering-cell-description.html">Engineering cell description</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2"><a class="reference internal" href="materials.html">Materials</a></li>
+<li class="toctree-l2"><a class="reference internal" href="electrodes.html">Electrodes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="components.html">Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tests.html">Tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="datasets.html">Datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="equipment.html">Equipment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="parameter-sets.html">Parameter sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="organizations.html">Organizations</a></li>
+</ul>
+</details></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../scope.html">BattINFO Scope &amp; Capabilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/property-reference.html">Properties and units</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary — the vocabulary, in plain language</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guarantees.html">Guarantees</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../scope.html">Scope and capabilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/interop-recovery.html">Interop scorecard</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../pages/glossary.html">Glossary</a></li>
 </ul>
 </div>
 </nav></div>
@@ -476,9 +478,9 @@
       </a>
     </li>
     
-    <li class="breadcrumb-item"><a href="reference.html" class="nav-link">Reference</a></li>
+    <li class="breadcrumb-item"><a href="../pages/reference.html" class="nav-link">Reference</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">The infrastructure contract</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Record types</span></li>
   </ul>
 </nav>
 </div>
@@ -495,113 +497,55 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="the-infrastructure-contract">
-<h1>The infrastructure contract<a class="headerlink" href="#the-infrastructure-contract" title="Link to this heading">#</a></h1>
-<p>This page is for the person deciding whether to <em>build on</em> BattINFO: what the
-guarantees are, where they are enforced, and what breaks loudly instead of
-silently. Everything here is backed by tests or CI gates in this repo or the
-registry.</p>
-<section id="records-are-versioned">
-<h2>Records are versioned<a class="headerlink" href="#records-are-versioned" title="Link to this heading">#</a></h2>
-<p>Every canonical record carries <code class="docutils literal notranslate"><span class="pre">schema_version</span></code> (currently <code class="docutils literal notranslate"><span class="pre">0.2.0</span></code>, a single
-module-level constant). The registry’s publish gate validates against pinned,
-vendored copies of the same schemas and <strong>flags unknown versions</strong> rather than
-guessing. Changes to record shape are CHANGELOG entries, never silent.</p>
-<p>Three versions exist in the wild, and consumers should accept all three:</p>
+  <!-- GENERATED by scripts/gen_reference_records.py — do not edit this page.
+     Model prose is injected from docs/records/_fragments/<slug>.md:
+     edit the fragment, then regenerate:
+     uv run python scripts/gen_reference_records.py
+     tests/test_reference_records.py fails when this page drifts. -->
+<section id="record-types">
+<h1>Record types<a class="headerlink" href="#record-types" title="Link to this heading">#</a></h1>
+<p>One page per record family, and each page is the whole story: what the thing is, a reference example (authoring code, the canonical record it produces, the JSON-LD that record emits), and the field reference from the JSON Schemas. When someone asks how to describe a cell, a material, or a separator — the answer is one link below.</p>
+<p>Everything generated here is produced against the current library on every change, validated clean under the strict policy, and drift-gated: a schema, API, or emitter change must regenerate this chapter in the same PR, so the git history of <code class="docutils literal notranslate"><span class="pre">docs/records/</span></code> is the record of how changes propagate to real examples.</p>
 <div class="pst-scrollable-table-container"><table class="table">
 <thead>
-<tr class="row-odd"><th class="head"><p><code class="docutils literal notranslate"><span class="pre">schema_version</span></code></p></th>
-<th class="head"><p>What it means</p></th>
+<tr class="row-odd"><th class="head"><p>Family</p></th>
+<th class="head"><p>Reference examples</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">0.1.0</span></code></p></td>
-<td><p>The original record shape (most of the example corpus still carries it)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="cells.html"><span class="std std-doc">Cells</span></a></p></td>
+<td><p>A cell spec, from its datasheet · A cell instance under that spec</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">1.0.0</span></code></p></td>
-<td><p>An interim stamp used briefly before the numbering was consolidated</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="materials.html"><span class="std std-doc">Materials</span></a></p></td>
+<td><p>A material spec (the powder as a product) · A material instance (one physical lot)</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">0.2.0</span></code></p></td>
-<td><p>The current shape: snake_case keys throughout, <code class="docutils literal notranslate"><span class="pre">properties</span></code> (ex <code class="docutils literal notranslate"><span class="pre">specs</span></code>), organizations use <code class="docutils literal notranslate"><span class="pre">same_as</span></code></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="electrodes.html"><span class="std std-doc">Electrodes</span></a></p></td>
+<td><p>An electrode spec (the design) · An electrode (the disc in one cell)</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="components.html"><span class="std std-doc">Components</span></a></p></td>
+<td><p>A separator spec · An electrolyte spec</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="tests.html"><span class="std std-doc">Tests</span></a></p></td>
+<td><p>The protocol · The execution</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="datasets.html"><span class="std std-doc">Datasets</span></a></p></td>
+<td><p>A member dataset · The collection (dataset series)</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="equipment.html"><span class="std std-doc">Equipment</span></a></p></td>
+<td><p>An equipment spec (the product) · An equipment unit · A channel on that unit</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="parameter-sets.html"><span class="std std-doc">Parameter sets</span></a></p></td>
+<td><p>A claim batch from the literature</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="organizations.html"><span class="std std-doc">Organizations</span></a></p></td>
+<td><p>A manufacturer</p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<p>The differences are additive/renaming only — no field changed meaning. New
-records always stamp the current version; old records validate against the
-same schemas (the keys they use are all still accepted).</p>
-</section>
-<section id="records-are-attributable">
-<h2>Records are attributable<a class="headerlink" href="#records-are-attributable" title="Link to this heading">#</a></h2>
-<p>Every emitted record’s provenance block carries <code class="docutils literal notranslate"><span class="pre">battinfo_version</span></code> — the
-library build that wrote it. A malformed record found in a corpus two years
-from now is forensically traceable to its producer. Explicitly set values are
-preserved, so re-serialising another build’s record never falsifies origin.</p>
-</section>
-<section id="identifiers-are-deterministic">
-<h2>Identifiers are deterministic<a class="headerlink" href="#identifiers-are-deterministic" title="Link to this heading">#</a></h2>
-<p>Records saved without an explicit <code class="docutils literal notranslate"><span class="pre">uid</span></code> mint their IRI from the record’s
-natural identity key (for a cell spec: manufacturer :: model :: format ::
-chemistry :: size code), using the same seeds in every authoring path.
-Consequences you can rely on:</p>
-<ul class="simple">
-<li><p>re-running an identical ingest is a <strong>no-op</strong>, never a duplicate corpus;</p></li>
-<li><p>the workspace and <code class="docutils literal notranslate"><span class="pre">save_*</span></code> paths mint <strong>identical IRIs</strong> for identical
-identities (tested);</p></li>
-<li><p>records with no distinguishing identity still mint randomly — two anonymous
-but physically distinct cells never silently merge.</p></li>
-</ul>
-<p>Governance of the IRI space itself is written down in the
-<a class="reference external" href="https://github.com/BIG-MAP/BattINFO/blob/main/IDENTIFIER_POLICY.md">identifier policy</a>.</p>
-</section>
-<section id="one-schema-contract-three-consumers">
-<h2>One schema contract, three consumers<a class="headerlink" href="#one-schema-contract-three-consumers" title="Link to this heading">#</a></h2>
-<p>The canonical JSON Schemas in <code class="docutils literal notranslate"><span class="pre">src/battinfo/data/schemas/</span></code> are enforced in
-three places, each with a CI gate against drift:</p>
-<div class="pst-scrollable-table-container"><table class="table">
-<thead>
-<tr class="row-odd"><th class="head"><p>Consumer</p></th>
-<th class="head"><p>Mechanism</p></th>
-<th class="head"><p>Drift gate</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">validate</span></code> / <code class="docutils literal notranslate"><span class="pre">save_*</span></code></p></td>
-<td><p>jsonschema at save/publish</p></td>
-<td><p>the test suite</p></td>
-</tr>
-<tr class="row-odd"><td><p>Registry publish gate</p></td>
-<td><p>vendored schemas, fails closed on unknown record types</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">schema-drift</span></code> CI job pinned to a BattINFO commit</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference external" href="https://battinfo.org/validate">battinfo.org/validate</a></p></td>
-<td><p>vendored schemas compiled with Ajv</p></td>
-<td><p>web CI: sync check + 103-record agreement corpus</p></td>
-</tr>
-</tbody>
-</table>
+<p>Coverage accounting (every schema property exercised by a reference example, or waived with a reason) arrives with the next expansion of this chapter.</p>
+<div class="toctree-wrapper compound">
 </div>
-<p>The same record gets the same structural verdict in all three.</p>
-</section>
-<section id="bulk-operations-are-safe-to-automate">
-<h2>Bulk operations are safe to automate<a class="headerlink" href="#bulk-operations-are-safe-to-automate" title="Link to this heading">#</a></h2>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">bulk_save_session</span></code> ingests ~400 records/s; a 10k-record ingest takes under
-half a minute and is re-runnable without duplicates.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ws.submit()</span></code> journals every outcome and resumes interrupted batches,
-re-sending only what is missing; transient registry failures retry with
-exponential backoff.</p></li>
-<li><p>Submission content conflicts return a <strong>structured 409</strong> naming the existing
-record, not a bare string.</p></li>
-</ul>
-</section>
-<section id="deprecations-are-announced">
-<h2>Deprecations are announced<a class="headerlink" href="#deprecations-are-announced" title="Link to this heading">#</a></h2>
-<p>Public API removals go through one release of <code class="docutils literal notranslate"><span class="pre">DeprecationWarning</span></code> naming the
-replacement — never straight to <code class="docutils literal notranslate"><span class="pre">ImportError</span></code>. The policy lives in
-<a class="reference external" href="https://github.com/BIG-MAP/BattINFO/blob/main/CONTRIBUTING.md">CONTRIBUTING</a>;
-expiring shims are swept at each release.</p>
-</section>
 </section>
 
 
@@ -615,20 +559,20 @@ expiring shims are swept at each release.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="../validation-contract.html"
+       href="../pages/cli-reference.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">BattINFO Validation Contract</p>
+        <p class="prev-next-title">CLI reference</p>
       </div>
     </a>
     <a class="right-next"
-       href="../ingest-manifest-contract.html"
+       href="cells.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Ingest Manifest Contract</p>
+        <p class="prev-next-title">Cells</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -638,29 +582,6 @@ expiring shims are swept at each release.</p>
             </div>
             
             
-              
-                <dialog id="pst-secondary-sidebar-modal"></dialog>
-                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
-
-
-  <div class="sidebar-secondary-item">
-<div
-    id="pst-page-navigation-heading-2"
-    class="page-toc tocsection onthispage">
-    <i class="fa-solid fa-list"></i> On this page
-  </div>
-  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
-    <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#records-are-versioned">Records are versioned</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#records-are-attributable">Records are attributable</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#identifiers-are-deterministic">Identifiers are deterministic</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#one-schema-contract-three-consumers">One schema contract, three consumers</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bulk-operations-are-safe-to-automate">Bulk operations are safe to automate</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#deprecations-are-announced">Deprecations are announced</a></li>
-</ul>
-  </nav></div>
-
-</div></div>
               
             
           </div>
