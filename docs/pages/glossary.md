@@ -1,4 +1,4 @@
-# Glossary — the vocabulary, in plain language
+# Glossary
 
 Two sentences per term, no prerequisites. For the full story behind any of
 them, follow the link at the end of the entry.
@@ -63,7 +63,7 @@ them, follow the link at the end of the entry.
 **SHACL**
 : A rule language for checking RDF graphs — the semantic layer's
   counterpart of JSON Schema. One of the layers behind
-  `validate_record_report` ([validation contract](../validation-contract.md)).
+  `validate_record_report` ([validation contract](../guarantees.md#validation-contract)).
 
 **content negotiation**
 : One IRI, several representations: the same address returns JSON-LD to a

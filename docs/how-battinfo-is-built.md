@@ -88,7 +88,7 @@ drift gate: this package (`validate/` — schema, then semantic rules,
 cross-record references, and optional SHACL), the registry's publish gate
 (vendored copy), and the browser validator at battinfo.org/validate (vendored
 copy compiled with Ajv). Same record, same verdict, everywhere. Details in
-[the infrastructure contract](pages/contract.md).
+[the infrastructure contract](guarantees.md#the-infrastructure-contract).
 
 ### The semantic layer — mapping tables, not magic
 
@@ -168,5 +168,5 @@ at every place the story is told — that is by design.
 
 - **Use it:** [Guide 06 — publish your first dataset](guides/06-publish-your-data.ipynb)
 - **Author records:** [Python API](pages/api-reference.rst)
-- **Build on it:** [the infrastructure contract](pages/contract.md) · [identifier policy](https://github.com/BIG-MAP/BattINFO/blob/main/IDENTIFIER_POLICY.md)
+- **Build on it:** [the infrastructure contract](guarantees.md#the-infrastructure-contract) · [identifier policy](https://github.com/BIG-MAP/BattINFO/blob/main/IDENTIFIER_POLICY.md)
 - **Contribute:** [CONTRIBUTING](https://github.com/BIG-MAP/BattINFO/blob/main/CONTRIBUTING.md)

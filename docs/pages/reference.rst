@@ -47,18 +47,13 @@ For the anatomy of a published JSON-LD document, see
 Guarantees
 ----------
 
-What the infrastructure promises, and the interfaces you can build against.
-Each contract names its audience: the infrastructure contract is for the
-person building *on* BattINFO, the validation contract for the person
-integrating validation, the ingest manifest contract for the person feeding
-bulk data in.
+The three contracts on one page — infrastructure, validation, ingest
+manifest — each naming the reader it is for.
 
 .. toctree::
    :maxdepth: 1
 
-   contract
-   ../validation-contract
-   ../ingest-manifest-contract
+   ../guarantees
 
 Status
 ------
@@ -79,13 +74,3 @@ Glossary
    :maxdepth: 1
 
    glossary
-
-.. toctree::
-   :hidden:
-
-   ../materials-model
-   ../material-spec
-   ../electrodes-model
-   ../component-specs
-   ../test-specs
-   schema-reference
