@@ -351,13 +351,21 @@ KEEP_UIDS = {
 def normalize(record: dict) -> dict:
     text = json.dumps(record, ensure_ascii=False)
     seen: dict[str, str] = {}
+    # A uid that is already a pool value was chosen deliberately by a snippet —
+    # keep it verbatim, and never hand its value to another uid. The old code
+    # mapped first-seen uids onto the pool positionally, so a record whose
+    # snippet used pool uids in a different order got them SWAPPED by the
+    # sequential replace below and two entities ended up sharing one identity
+    # (the showcase cell's spec reference wore the cell's own uid).
+    present = set(UID_RE.findall(text))
+    available = [p for p in PLACEHOLDER_UIDS if p not in present]
     for uid in UID_RE.findall(text):
-        if uid in KEEP_UIDS:
+        if uid in KEEP_UIDS or uid in PLACEHOLDER_UIDS:
             continue
         if uid not in seen:
-            if len(seen) >= len(PLACEHOLDER_UIDS):
+            if not available:
                 raise RuntimeError("placeholder uid pool exhausted")
-            seen[uid] = PLACEHOLDER_UIDS[len(seen)]
+            seen[uid] = available.pop(0)
     for real, fake in seen.items():
         text = text.replace(real, fake)
         text = text.replace(real.replace("-", ""), fake.replace("-", ""))

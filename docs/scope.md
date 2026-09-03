@@ -1,4 +1,4 @@
-# BattINFO Scope & Capabilities
+# Scope and capabilities
 
 This document maps the BattINFO surface by maturity, so you know what you can
 rely on today, what is available but still evolving, and what is in development.

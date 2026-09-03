@@ -1,5 +1,3 @@
-# Test specs
-
 A **test-spec** is the reusable, IRI-addressable description of a test
 procedure — the *spec* half of `test-spec` + `test`. A `test` (instance) links a cell-instance to
 a test-spec via `protocol_id` and to its `dataset`s.

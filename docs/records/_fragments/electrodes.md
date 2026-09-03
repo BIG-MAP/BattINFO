@@ -1,5 +1,3 @@
-# Electrodes: kind, powder spec, electrode spec, batch
-
 The material spec describes the **powder**; the electrode spec describes the
 **electrode**. They are different things that people routinely conflate, and
 keeping them apart is what lets you say "every Si/Gr anode in the corpus,
@@ -252,5 +250,5 @@ recipe, same loading, two routes, two IRIs. The batch example shows measured
 actuals differing from the design values, which is exactly why the batch is its
 own record.
 
-See [materials](materials-model.md) for levels 1-2, and
-[components](component-specs.md) for the remaining component families.
+See [materials](materials.md) for levels 1-2, and
+[components](components.md) for the remaining component families.

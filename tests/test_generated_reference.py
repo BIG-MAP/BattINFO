@@ -17,13 +17,9 @@ def _load(script: str):
     return module
 
 
-def test_schema_reference_matches_the_schemas() -> None:
-    gen = _load("gen_schema_reference")
-    expected = gen.build()
-    actual = gen.OUT.read_text(encoding="utf-8").replace("\r\n", "\n")
-    assert actual == expected.replace("\r\n", "\n"), (
-        "docs/pages/schema-reference.md drifts — run `uv run python scripts/gen_schema_reference.py`"
-    )
+# The standalone schema-reference page retired into docs/records/ (each family
+# page carries its schemas' field tables, drift-gated by
+# tests/test_reference_records.py); its generator went with it.
 
 
 def test_cli_reference_matches_the_typer_app() -> None:

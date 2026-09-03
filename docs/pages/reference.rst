@@ -1,16 +1,17 @@
 Reference
 =========
 
-Facts about the surface: every class, command, schema, property, and guarantee.
-The pages descend from what you call, to what comes out, to what is promised. The
-generated pages are produced from the code and mapping tables and drift-checked
-in CI, so they cannot rot.
+Organized by the question you arrive with: what you call, what a record of
+each type looks like, what records emit semantically, what the infrastructure
+promises, and what is supported today. The generated pages are produced from
+the code, schemas, and mapping tables and drift-checked in CI, so they cannot
+rot.
 
-Surfaces
---------
+What you call
+-------------
 
-The two generated surfaces you call against: the Python API and the CLI. For the
-workspace, the everyday way most people author records, see the how-to guides.
+The two generated surfaces: the Python API and the CLI. For the workspace,
+the everyday way most people author records, see the how-to guides.
 
 .. toctree::
    :maxdepth: 1
@@ -21,54 +22,50 @@ workspace, the everyday way most people author records, see the how-to guides.
 Record types
 ------------
 
-One page per record family: the fields each carries, and how they link.
+One page per record family, and each page is the whole story: what the thing
+is, a reference example (authoring code, the canonical record, its JSON-LD),
+and the field reference from the JSON Schemas. When someone asks how to
+describe a cell, a material, or a separator — the answer is one link.
 
 .. toctree::
    :maxdepth: 1
 
-   ../materials-model
-   ../material-spec
-   ../electrodes-model
-   ../component-specs
-   ../cell-fleet
-   ../test-specs
-   ../engineering-cell-description
+   ../records/index
 
-Schemas and properties
-----------------------
-
-The JSON Schemas the records are checked against, and the property and unit
-vocabulary.
-
-.. toctree::
-   :maxdepth: 1
-
-   schema-reference
-   property-reference
-
-Contracts
----------
-
-What the infrastructure guarantees, and the interfaces you can build against.
-
-.. toctree::
-   :maxdepth: 1
-
-   ../validation-contract
-   contract
-   ../ingest-manifest-contract
-   interop-recovery
-
-Scope and support
+What records emit
 -----------------
 
-The capability map: what is supported today, what is preview, what is in
-development, and the modeling boundary (cell level and below).
+The semantic layer: the property and unit vocabulary behind every quantity.
+For the anatomy of a published JSON-LD document, see
+:doc:`../reading-a-record` (under Concepts).
+
+.. toctree::
+   :maxdepth: 1
+
+   property-reference
+
+Guarantees
+----------
+
+The three contracts on one page — infrastructure, validation, ingest
+manifest — each naming the reader it is for.
+
+.. toctree::
+   :maxdepth: 1
+
+   ../guarantees
+
+Status
+------
+
+What is supported today, what is preview, and how well each external data
+source round-trips.
 
 .. toctree::
    :maxdepth: 1
 
    ../scope
+   interop-recovery
 
 Glossary
 --------

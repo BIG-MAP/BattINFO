@@ -52,7 +52,7 @@ battinfo.save_test_spec(battinfo.TestSpec(
 ), source_root="my-library", mode="upsert")
 ```
 
-See [Test specs](../test-specs.md) for the full recipe.
+See [Tests](../records/tests.md) for the full recipe.
 
 ## "Which install extra do I need?"
 

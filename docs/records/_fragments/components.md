@@ -1,8 +1,6 @@
-# Components
-
 BattINFO models every entity as a **spec + instance** pair. After materials
-([material-spec.md](material-spec.md)) and electrodes
-([electrodes-model.md](electrodes-model.md)), four **component** families let the rest of a
+([materials](materials.md#records)) and electrodes
+([electrodes-model.md](electrodes.md)), four **component** families let the rest of a
 cell be described from reusable, IRI-addressable parts. Each family is a thin registry entry
 that reuses an existing embedded holder shape; component-specs reference `material-spec`
 records by IRI.
@@ -16,7 +14,7 @@ records by IRI.
 
 Electrodes used to be a fifth generic family. They are now first-class — a curated `kind`,
 deterministic identity that includes the processing route, design values, and their own
-emitter — so they have their own page: [Electrodes](electrodes-model.md).
+emitter — so they have their own page: [Electrodes](electrodes.md).
 
 ## Generic API + per-family wrappers
 
@@ -36,7 +34,7 @@ create_component_spec("electrolyte", name="…", body={...})
 ```
 
 The step-by-step bench version of this — materials first, IRIs harvested from
-each save — is [How-to: build a cell from components](howto/build-a-cell-from-components.md).
+each save — is [How-to: build a cell from components](../howto/build-a-cell-from-components.md).
 
 Per family you get `create_<family>_spec`, `save_<family>_spec`, `query_<family>_specs`,
 `template_<family>_spec` and the bare-name instance equivalents (`create_<family>`,
@@ -63,5 +61,5 @@ and emit `OrganicElectrolyte` / `AqueousElectrolyte` JSON-LD with `hasSolute`/`h
 wheel). Coverage: Celgard PP + ceramic-coated PE separators; Al/Cu current collectors;
 organic + aqueous electrolytes; CR2032 coin + LFP 100 Ah prismatic housings — grounded in the DIGIBAT Discovery-Benchmark and the Cell_Design_Tool.
 Cell-specs reference these component-specs by IRI today via the five `*_spec_id`
-fields — see [Cells](cell-fleet.md) for the reference seam and the example fleet
+fields — see [Cells](../cell-fleet.md) for the reference seam and the example fleet
 that uses it.
