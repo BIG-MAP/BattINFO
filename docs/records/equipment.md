@@ -20,6 +20,9 @@ duplicates channels. Tests point at the unit and channel they ran on through
 
 ### An equipment spec (the product)
 
+::::{tab-set}
+
+:::{tab-item} Python
 ```python
 from battinfo.api import create_equipment_spec
 
@@ -33,9 +36,9 @@ record = create_equipment_spec(
     supported_chemistries=["NiMH", "Li-ion", "LiFePO4", "Na-ion"],
 )
 ```
+:::
 
-The canonical record this produces:
-
+:::{tab-item} Canonical record
 ```json
 {
   "schema_version": "0.2.0",
@@ -64,6 +67,9 @@ The canonical record this produces:
   }
 }
 ```
+:::
+
+::::
 
 ```{admonition} Known gap
 :class: warning
@@ -75,6 +81,9 @@ No JSON-LD emitter exists for equipment records yet; the canonical record is the
 
 ### An equipment unit
 
+::::{tab-set}
+
+:::{tab-item} Python
 ```python
 from battinfo.api import create_equipment
 
@@ -87,9 +96,9 @@ record = create_equipment(
     status="active",
 )
 ```
+:::
 
-The canonical record this produces:
-
+:::{tab-item} Canonical record
 ```json
 {
   "schema_version": "0.2.0",
@@ -109,6 +118,9 @@ The canonical record this produces:
   }
 }
 ```
+:::
+
+::::
 
 ```{admonition} Known gap
 :class: warning
@@ -120,6 +132,9 @@ No JSON-LD emitter exists for equipment records yet.
 
 ### A channel on that unit
 
+::::{tab-set}
+
+:::{tab-item} Python
 ```python
 from battinfo.api import create_channel
 
@@ -131,9 +146,9 @@ record = create_channel(
     label="MC3000-A/CH1",
 )
 ```
+:::
 
-The canonical record this produces:
-
+:::{tab-item} Canonical record
 ```json
 {
   "schema_version": "0.2.0",
@@ -151,6 +166,9 @@ The canonical record this produces:
   }
 }
 ```
+:::
+
+::::
 
 ```{admonition} Known gap
 :class: warning

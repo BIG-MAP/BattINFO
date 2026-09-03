@@ -129,6 +129,9 @@ then sufficient for discovery and filtering.
 
 ### The protocol
 
+::::{tab-set}
+
+:::{tab-item} Python
 ```python
 from battinfo import TestSpec
 
@@ -148,9 +151,9 @@ protocol = TestSpec(
 )
 record = protocol.to_record()
 ```
+:::
 
-The canonical record this produces:
-
+:::{tab-item} Canonical record
 ```json
 {
   "schema_version": "0.2.0",
@@ -271,8 +274,10 @@ The canonical record this produces:
   }
 }
 ```
+:::
 
-The JSON-LD it emits (`record_to_jsonld`, hosted-context mode):
+:::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
 
 ```json
 {
@@ -399,6 +404,9 @@ The JSON-LD it emits (`record_to_jsonld`, hosted-context mode):
   }
 }
 ```
+:::
+
+::::
 
 What to notice:
 
@@ -408,6 +416,9 @@ What to notice:
 
 ### The execution
 
+::::{tab-set}
+
+:::{tab-item} Python
 ```python
 from battinfo import Cell, CellSpec, Test
 
@@ -436,9 +447,9 @@ test = Test(
 )
 record = test.to_record()
 ```
+:::
 
-The canonical record this produces:
-
+:::{tab-item} Canonical record
 ```json
 {
   "schema_version": "0.2.0",
@@ -468,8 +479,10 @@ The canonical record this produces:
   }
 }
 ```
+:::
 
-The JSON-LD it emits (`record_to_jsonld`, hosted-context mode):
+:::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
 
 ```json
 {
@@ -506,6 +519,9 @@ The JSON-LD it emits (`record_to_jsonld`, hosted-context mode):
   }
 }
 ```
+:::
+
+::::
 
 What to notice:
 

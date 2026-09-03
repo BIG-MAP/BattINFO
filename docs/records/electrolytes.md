@@ -28,6 +28,9 @@ Authoring rides the same generic component surface as the other families
 
 ### An electrolyte spec (the formulation)
 
+::::{tab-set}
+
+:::{tab-item} Python
 ```python
 from battinfo.api import create_component_spec
 
@@ -74,9 +77,9 @@ record = create_component_spec(
     source_type="datasheet",
 )
 ```
+:::
 
-The canonical record this produces:
-
+:::{tab-item} Canonical record
 ```json
 {
   "schema_version": "0.2.0",
@@ -147,8 +150,10 @@ The canonical record this produces:
   }
 }
 ```
+:::
 
-The JSON-LD it emits (`record_to_jsonld`, hosted-context mode):
+:::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
 
 ```json
 {
@@ -264,6 +269,9 @@ The JSON-LD it emits (`record_to_jsonld`, hosted-context mode):
   "schema:name": "1M LiPF6 in EC:EMC 3:7 + 2% VC"
 }
 ```
+:::
+
+::::
 
 What to notice:
 
@@ -274,6 +282,9 @@ What to notice:
 
 ### An electrolyte (one mixed batch)
 
+::::{tab-set}
+
+:::{tab-item} Python
 ```python
 from battinfo.api import create_component_instance
 
@@ -283,9 +294,9 @@ record = create_component_instance(
     spec_id="https://w3id.org/battinfo/spec/0rp6-kncv-cyem-qwcd",
 )
 ```
+:::
 
-The canonical record this produces:
-
+:::{tab-item} Canonical record
 ```json
 {
   "schema_version": "0.2.0",
@@ -301,8 +312,10 @@ The canonical record this produces:
   }
 }
 ```
+:::
 
-The JSON-LD it emits (`record_to_jsonld`, hosted-context mode):
+:::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
 
 ```json
 {
@@ -321,6 +334,9 @@ The JSON-LD it emits (`record_to_jsonld`, hosted-context mode):
   }
 }
 ```
+:::
+
+::::
 
 What to notice:
 

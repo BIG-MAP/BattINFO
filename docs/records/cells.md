@@ -36,6 +36,9 @@ tabs, electrode-assembly geometry for prismatic/cylindrical/pouch designs).
 
 ### A cell spec, from its datasheet
 
+::::{tab-set}
+
+:::{tab-item} Python
 ```python
 from battinfo import CellSpec
 
@@ -57,9 +60,9 @@ spec = CellSpec(
 )
 record = spec.to_record()
 ```
+:::
 
-The canonical record this produces:
-
+:::{tab-item} Canonical record
 ```json
 {
   "schema_version": "0.2.0",
@@ -98,8 +101,10 @@ The canonical record this produces:
   }
 }
 ```
+:::
 
-The JSON-LD it emits (`record_to_jsonld`, hosted-context mode):
+:::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
 
 ```json
 {
@@ -175,6 +180,9 @@ The JSON-LD it emits (`record_to_jsonld`, hosted-context mode):
   }
 }
 ```
+:::
+
+::::
 
 What to notice:
 
@@ -185,6 +193,9 @@ What to notice:
 
 ### A cell instance under that spec
 
+::::{tab-set}
+
+:::{tab-item} Python
 ```python
 from battinfo import Cell, CellSpec
 
@@ -205,9 +216,9 @@ cell = Cell(
 )
 record = cell.to_record()
 ```
+:::
 
-The canonical record this produces:
-
+:::{tab-item} Canonical record
 ```json
 {
   "schema_version": "0.2.0",
@@ -227,8 +238,10 @@ The canonical record this produces:
   }
 }
 ```
+:::
 
-The JSON-LD it emits (`record_to_jsonld`, hosted-context mode):
+:::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
 
 ```json
 {
@@ -258,6 +271,9 @@ The JSON-LD it emits (`record_to_jsonld`, hosted-context mode):
   }
 }
 ```
+:::
+
+::::
 
 What to notice:
 

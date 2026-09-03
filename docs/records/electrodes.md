@@ -267,6 +267,9 @@ See [materials](materials.md) for levels 1-2, and
 
 ### An electrode spec (the design)
 
+::::{tab-set}
+
+:::{tab-item} Python
 ```python
 from battinfo.api import create_electrode_spec
 
@@ -278,9 +281,9 @@ record = create_electrode_spec(
     source_type="lab",
 )
 ```
+:::
 
-The canonical record this produces:
-
+:::{tab-item} Canonical record
 ```json
 {
   "schema_version": "0.2.0",
@@ -299,8 +302,10 @@ The canonical record this produces:
   }
 }
 ```
+:::
 
-The JSON-LD it emits (`record_to_jsonld`, hosted-context mode):
+:::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
 
 ```json
 {
@@ -324,6 +329,9 @@ The JSON-LD it emits (`record_to_jsonld`, hosted-context mode):
   }
 }
 ```
+:::
+
+::::
 
 What to notice:
 
@@ -333,6 +341,9 @@ What to notice:
 
 ### An electrode (the disc in one cell)
 
+::::{tab-set}
+
+:::{tab-item} Python
 ```python
 from battinfo.api import create_electrode
 
@@ -343,9 +354,9 @@ record = create_electrode(
     source_type="lab",
 )
 ```
+:::
 
-The canonical record this produces:
-
+:::{tab-item} Canonical record
 ```json
 {
   "schema_version": "0.2.0",
@@ -362,8 +373,10 @@ The canonical record this produces:
   }
 }
 ```
+:::
 
-The JSON-LD it emits (`record_to_jsonld`, hosted-context mode):
+:::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
 
 ```json
 {
@@ -383,6 +396,9 @@ The JSON-LD it emits (`record_to_jsonld`, hosted-context mode):
   }
 }
 ```
+:::
+
+::::
 
 What to notice:
 

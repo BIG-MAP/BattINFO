@@ -901,15 +901,22 @@ def render_page(family: dict, sections: list[dict]) -> str:
     parts += ["## Reference examples", NL]
     for section in sections:
         parts += [NL, f"### {section['heading']}", NL, NL]
-        parts += ["```python", NL, snippet_source(section["fn"]), NL, "```", NL, NL]
-        parts += ["The canonical record this produces:", NL, NL]
-        parts += ["```json", NL, json.dumps(section["record"], indent=2, ensure_ascii=False), NL, "```", NL, NL]
+        # One artifact, three views: the tabs mirror the Python/JSON pairing
+        # the docs landing page already uses. Python first — the authoring
+        # code is the teaching artifact; the JSON views are what it becomes.
+        parts += ["::::{tab-set}", NL, NL]
+        parts += [":::{tab-item} Python", NL, "```python", NL,
+                  snippet_source(section["fn"]), NL, "```", NL, ":::", NL, NL]
+        parts += [":::{tab-item} Canonical record", NL, "```json", NL,
+                  json.dumps(section["record"], indent=2, ensure_ascii=False),
+                  NL, "```", NL, ":::", NL, NL]
         if section.get("jsonld") is not None:
-            parts += [
-                "The JSON-LD it emits (`record_to_jsonld`, hosted-context mode):",
-                NL, NL,
-                "```json", NL, json.dumps(section["jsonld"], indent=2, ensure_ascii=False), NL, "```", NL, NL,
-            ]
+            parts += [":::{tab-item} JSON-LD", NL,
+                      "Emitted by `record_to_jsonld`, hosted-context mode.", NL, NL,
+                      "```json", NL,
+                      json.dumps(section["jsonld"], indent=2, ensure_ascii=False),
+                      NL, "```", NL, ":::", NL, NL]
+        parts += ["::::", NL, NL]
         if section.get("gap"):
             parts += ["```{admonition} Known gap", NL, ":class: warning", NL, NL,
                       section["gap"], NL, "```", NL, NL]

@@ -71,6 +71,9 @@ that uses it.
 
 ### A separator spec
 
+::::{tab-set}
+
+:::{tab-item} Python
 ```python
 from battinfo.api import create_component_spec
 
@@ -81,9 +84,9 @@ record = create_component_spec(
     source_type="datasheet",
 )
 ```
+:::
 
-The canonical record this produces:
-
+:::{tab-item} Canonical record
 ```json
 {
   "schema_version": "0.2.0",
@@ -99,8 +102,10 @@ The canonical record this produces:
   }
 }
 ```
+:::
 
-The JSON-LD it emits (`record_to_jsonld`, hosted-context mode):
+:::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
 
 ```json
 {
@@ -117,6 +122,9 @@ The JSON-LD it emits (`record_to_jsonld`, hosted-context mode):
   "schema:name": "Celgard 2500"
 }
 ```
+:::
+
+::::
 
 What to notice:
 
