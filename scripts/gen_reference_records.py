@@ -938,6 +938,17 @@ def build_sections(family: dict) -> list[dict]:
     return sections
 
 
+# The chapter reads in assembly order: the parts a cell is made from first
+# (materials up through components), then the flavored and full cells built
+# from them, then what is done with a cell and what comes out of it.
+_PAGE_ORDER = [
+    "materials", "electrodes", "electrolytes", "components", "half-cells",
+    "cells", "tests", "datasets", "equipment", "parameter-sets", "organizations",
+]
+assert sorted(_PAGE_ORDER) == sorted(f["slug"] for f in FAMILIES)
+FAMILIES.sort(key=lambda f: _PAGE_ORDER.index(f["slug"]))
+
+
 # ── Common-example shelves ───────────────────────────────────────────────────
 # The curated selection each family page surfaces from the CI-gated examples/
 # corpus (the registry is the full library; this is the docs' reasonable
