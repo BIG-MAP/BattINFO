@@ -145,7 +145,7 @@ No `ws._ws` is required for materials.
 Electrode composition components (and electrolyte solvents/salts, separator
 materials) reference a material at whichever level you know:
 
-- a **kind key** — minimum ("the anode is graphite"), resolves to the vocabulary
+- a **kind key** — minimum ("the active material is graphite"), resolves to the vocabulary
   IRI / EMMO class;
 - a **material-spec IRI** — better ("Targray NMC811 grade X");
 - a **material-instance IRI** — best ("this lot"), typically on the cell *build*.
@@ -179,7 +179,7 @@ A reusable material specification. Top-level key `material_spec`.
 | `kind` | ✓ (at save) | Level-1 [MaterialKind](#level-1-materialkind-a-curated-vocabulary) key from the curated vocabulary (`graphite`, `lfp`, `nmc811`, …). The genome's aggregation axis; resolves to the kind's chemical-substance class IRI. Aliases resolve on input; an unknown kind is rejected at save. See `battinfo.materials.material_kind_keys()` |
 | `grade` | | Manufacturer grade / product version; part of spec identity |
 | `material_class` | | `active_material`, `binder`, `conductive_additive`, `current_collector`, `separator_material`, `electrolyte_salt`, `electrolyte_solvent`, `electrolyte_additive`, `metal_electrode`, `coating`, `other` |
-| `electrode_polarity` | | `positive` / `negative` / `none` (for active materials) |
+| `electrode_polarity` | | `positive` / `negative` / `none`. A material has no side of its own (system-relative — graphite is the positive electrode of a lithium-counter half cell); the side belongs to the cell that uses it. Field remains in the schema pending review; prefer leaving it unset |
 | `formula` | | Idealized composition, e.g. `LiFePO4`, `C`, `Zn`, `(C2H2F2)n` |
 | `chemistry_family` | | Coarse family label, e.g. `olivine`, `layered-oxide`, `spinel` |
 | `manufacturer` / `supplier` | | Organization reference — a plain name string **or** an `{type: Organization, name, id}` object whose `id` links to an `organization` record |
@@ -307,7 +307,6 @@ from battinfo.api import (
 spec = create_material_spec(
     name="LFP",
     material_class="active_material",
-    electrode_polarity="positive",
     formula="LiFePO4",
     chemistry_family="olivine",
     manufacturer="Canrud",
@@ -333,7 +332,7 @@ Canonical examples live in [`examples/material-spec/`](https://github.com/BIG-MA
 [`examples/material/`](https://github.com/BIG-MAP/BattINFO/tree/main/examples/material) (the single source of truth, mirrored into
 the wheel by `scripts/sync_examples.py`). Coverage spans graphite, LFP, NMC811, NMC622,
 LCO, LMFP, LNMO, zinc, carbon black, PVDF, and the KOH / LiPF6 / EC / EMC electrolyte
-constituents. The Li-ion cathode/anode actives and electrolyte salts/solvents are
+constituents. The Li-ion actives and electrolyte salts/solvents are
 grounded in the DIGIBAT Discovery-Benchmark coin-cell corpus; LNMO, zinc, and KOH are
 synthetic reference examples.
 
