@@ -23,7 +23,6 @@ import battinfo
 import battinfo.api as api
 from battinfo.electrodes import (
     electrode_kind_keys,
-    electrode_polarity_for_kind,
     is_active_kind,
     resolve_electrode_kind,
 )
@@ -115,13 +114,17 @@ def test_advertised_kinds_are_the_active_materials() -> None:
     assert all(is_active_kind(k) for k in keys)
 
 
-def test_polarity_is_derived_from_the_kind() -> None:
-    assert electrode_polarity_for_kind("lfp") == "positive"
-    assert electrode_polarity_for_kind("graphite") == "negative"
-    assert electrode_polarity_for_kind("pvdf") is None
+def test_polarity_is_authored_never_derived() -> None:
+    # The vocabulary assigns no side to an active material (system-relative:
+    # graphite is the positive electrode of a lithium-counter half cell), so a
+    # spec carries polarity only when its author states it.
+    spec = api.create_electrode_spec(name="LFP electrode", kind="lfp", validate=False)
+    assert "polarity" not in spec["electrode_spec"]
 
-    spec = api.create_electrode_spec(name="LFP cathode", kind="lfp", validate=False)
-    assert spec["electrode_spec"]["polarity"] == "positive"
+    authored = api.create_electrode_spec(
+        name="LFP positive electrode", kind="lfp", polarity="positive", validate=False
+    )
+    assert authored["electrode_spec"]["polarity"] == "positive"
 
 
 def test_unknown_kind_rejected_with_helpful_message() -> None:
@@ -151,13 +154,16 @@ def test_non_active_kind_warns_rather_than_failing() -> None:
     assert issue.severity == "warning"
 
 
-def test_polarity_conflicting_with_kind_warns() -> None:
+def test_authored_polarity_never_conflicts_with_the_kind() -> None:
+    # Retired check: with no vocabulary-assigned side there is nothing for an
+    # authored polarity to disagree with (an "LFP negative electrode" is a
+    # legitimate design in a lithium-counter half cell).
     from battinfo.validate.semantic import validate_semantic_report
 
-    spec = api.create_electrode_spec(uid="abcd23456789abcd", name="LFP anode?", kind="lfp",
-                                     polarity="negative", validate=False)
+    spec = api.create_electrode_spec(uid="abcd23456789abcd", name="LFP working electrode",
+                                     kind="lfp", polarity="negative", validate=False)
     report = validate_semantic_report(spec, policy="default")
-    assert any(i.code == "semantic.electrode_polarity_conflict" for i in report.issues)
+    assert not any(i.code == "semantic.electrode_polarity_conflict" for i in report.issues)
 
 
 def test_purchased_electrode_needs_no_material_spec() -> None:
@@ -239,14 +245,15 @@ def test_electrode_schemas_permit_attribution() -> None:
 
 # ── Emission ──────────────────────────────────────────────────────────────────
 
-def test_kind_types_the_node_with_the_chemistry_and_polarity_classes() -> None:
+def test_kind_types_the_node_and_authored_polarity_stacks() -> None:
     from battinfo.jsonld import record_to_jsonld
 
-    spec = api.create_electrode_spec(name="Si-Gr anode", kind="silicon_graphite", validate=False)
-    ld = record_to_jsonld(spec, "electrode-spec")
-    assert ld["@type"] == ["SiliconGraphiteElectrode", "NegativeElectrode"]
+    spec = api.create_electrode_spec(name="Si-Gr electrode", kind="silicon_graphite", validate=False)
+    assert record_to_jsonld(spec, "electrode-spec")["@type"] == "SiliconGraphiteElectrode"
 
-    cathode = api.create_electrode_spec(name="LFP cathode", kind="lfp", validate=False)
+    cathode = api.create_electrode_spec(
+        name="LFP positive electrode", kind="lfp", polarity="positive", validate=False
+    )
     assert record_to_jsonld(cathode, "electrode-spec")["@type"] == [
         "LithiumIronPhosphateElectrode", "PositiveElectrode",
     ]
@@ -267,9 +274,12 @@ def test_every_electrode_kind_types_the_node() -> None:
         spec = api.create_electrode_spec(name=f"{kind} electrode", kind=kind, validate=False)
         types = record_to_jsonld(spec, "electrode-spec")["@type"]
         if kind in chemistry_free:
-            assert types == "PositiveElectrode", f"{kind} typed as {types}"
+            # No chemistry electrode class (deliberate; NCA chemistry lives on
+            # the cell's battery class) and no vocabulary-assigned side: the
+            # generic Electrode class keeps the node typed.
+            assert types == "Electrode", f"{kind} typed as {types}"
             continue
-        assert isinstance(types, list) and len(types) == 2, f"{kind} typed only as {types}"
+        assert types and "Electrode" in str(types), f"{kind} untyped: {types}"
 
 
 def test_active_material_reference_emits_as_a_linked_node() -> None:

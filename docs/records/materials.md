@@ -27,9 +27,10 @@ governed by PR — like the property vocabulary — **not** a user-authored reco
 type. If level 1 were records, the corpus would grow fifty graphites.
 
 Each kind carries a canonical `key` (the ergonomic handle), a `label`, a `family`
-(`active_anode`, `active_cathode`, `binder`, `conductive_additive`,
-`electrolyte_solvent`, `electrolyte_salt`, `separator_material`,
-`current_collector_material`, `other`), an optional `formula`, tolerant-import
+(`active_material` or `other` — deliberately minimal: a material's *role* is
+system-relative and is stated where the material is used, in the coating role
+slots, the electrolyte constituent slots, or the component spec that
+references it, never on the kind), an optional `formula`, tolerant-import
 `aliases` ("NMC 811", "LiNi0.8Mn0.1Co0.1O2", "Si/Gr"), and — the anchor — its
 `chemsub`: the material's **chemical-substance domain-ontology class IRI** (the EMMO
 ecosystem's `domain-chemical-substance`). The battinfo `key` is just the handle;
@@ -80,10 +81,12 @@ Adding a kind is a PR against `src/battinfo/data/vocab/material_kinds.json`; the
 tests check that each new `emmo` class resolves in the bundled context and names the
 same substance as its `chemsub` anchor.
 
-One placement is worth flagging: NMP is a **processing** solvent (slurry casting),
-not an electrolyte solvent, and the family list has no `processing_solvent` value, so
-it sits under `other` with a `family_note` saying why. Add the family when a second
-processing solvent arrives rather than stretching `electrolyte_solvent` to cover it.
+Only the active flag is intrinsic enough to live on the kind: it gates which
+kinds an electrode may name, and it is where reference anchors such as
+specific capacity attach. Everything else — binders, salts, solvents,
+separator films, conductive carbons — sits under `other`, with a
+`family_note` where the placement deserves a word (NMP, for example, is a
+processing solvent, not an electrolyte solvent).
 
 ## Level 2 — material-spec (first-class record)
 

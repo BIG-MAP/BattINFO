@@ -561,7 +561,6 @@ def _electrode_spec_identity_uid(draft: ElectrodeSpecInput, kind_key: str | None
 
 
 def _record_from_electrode_spec(draft: ElectrodeSpecInput) -> dict[str, Any]:
-    from battinfo.electrodes import electrode_polarity_for_kind
 
     kind_key = _resolve_electrode_kind_or_raise(draft.kind, draft.name, draft.product_id)
     if draft.id is not None:
@@ -594,11 +593,10 @@ def _record_from_electrode_spec(draft: ElectrodeSpecInput) -> dict[str, Any]:
     spec.update(draft.body or {})
     if kind_key is not None:
         spec["kind"] = kind_key
-    # Polarity is derived from the kind's family when not authored, so a record
-    # never has to state the same fact twice (and cannot disagree with itself).
-    polarity = draft.polarity or electrode_polarity_for_kind(kind_key)
-    if polarity is not None:
-        spec["polarity"] = polarity
+    # Polarity is authored or absent — never derived from the kind: which side
+    # an active material sits on is the cell's fact, not the material's.
+    if draft.polarity is not None:
+        spec["polarity"] = draft.polarity
     for field_name in ("grade", "active_material_spec_id", "product_id", "description", "comment"):
         value = getattr(draft, field_name)
         if value is not None:

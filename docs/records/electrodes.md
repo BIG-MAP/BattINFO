@@ -302,7 +302,6 @@ record = create_electrode_spec(
     "short_id": "kxwy5f",
     "name": "NMC811 cathode design A",
     "kind": "nmc811",
-    "polarity": "positive",
     "active_material_spec_id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5"
   },
   "provenance": {
@@ -327,10 +326,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "battinfo": "https://w3id.org/battinfo/"
     }
   ],
-  "@type": [
-    "LithiumNickelManganeseCobaltOxideElectrode",
-    "PositiveElectrode"
-  ],
+  "@type": "LithiumNickelManganeseCobaltOxideElectrode",
   "@id": "https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
   "schema:name": "NMC811 cathode design A",
   "hasActiveMaterial": {

@@ -243,7 +243,9 @@ def test_electrode_nodes_carry_their_full_emission() -> None:
     spec_node = by_id[_record_iri(record_sets["electrode-spec"][0])]
     types = spec_node["@type"] if isinstance(spec_node["@type"], list) else [spec_node["@type"]]
     assert "GraphiteElectrode" in types, types           # chemistry from the kind
-    assert "NegativeElectrode" in types, types           # polarity derived from the kind
+    # No polarity class: the vocabulary assigns no side to an active material
+    # (system-relative), so an unauthored polarity emits nothing.
+    assert "NegativeElectrode" not in types, types
     assert spec_node["hasProperty"]["@type"][0] == "AreicCapacity"
 
     batch_node = by_id[_record_iri(record_sets["electrode"][0])]
