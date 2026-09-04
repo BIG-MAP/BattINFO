@@ -1588,6 +1588,19 @@ def _typed_constituent_node(
     if isinstance(formula, str) and formula:
         node["schema:molecularFormula"] = formula
 
+    # Pinned chemical identity, stamped from the substances vocabulary: the
+    # InChIKey is the canonical key; SMILES rides along for depiction and
+    # featurization; the PubChem page is the resolvable sameAs target.
+    inchikey = mat.get("inchikey")
+    if isinstance(inchikey, str) and inchikey:
+        node["schema:inChIKey"] = inchikey
+    smiles = mat.get("smiles")
+    if isinstance(smiles, str) and smiles:
+        node["schema:smiles"] = smiles
+    cid = mat.get("pubchem_cid")
+    if isinstance(cid, int) and cid > 0:
+        node["schema:sameAs"] = {"@id": f"https://pubchem.ncbi.nlm.nih.gov/compound/{cid}"}
+
     if comment := mat.get("comment"):
         node["schema:description"] = comment
     return node

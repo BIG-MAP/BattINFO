@@ -7857,6 +7857,29 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "type": "string",
               "description": "Anion of the salt (e.g. 'PF6-')."
             },
+            "label": {
+              "type": "string",
+              "description": "Preferred human-readable substance name stamped by the resolver (e.g. 'lithium hexafluorophosphate' for name 'LiPF6')."
+            },
+            "inchikey": {
+              "type": "string",
+              "pattern": "^[A-Z]{14}-[A-Z]{10}-[A-Z]$",
+              "description": "Standard InChIKey of the salt — the canonical chemical-identity key. Stamped from the substances vocabulary at authoring; never hand-typed."
+            },
+            "pubchem_cid": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "PubChem Compound ID (crosswalk; identity lives in inchikey)."
+            },
+            "cas_number": {
+              "type": "string",
+              "pattern": "^\\d{2,7}-\\d{2}-\\d$",
+              "description": "CAS Registry Number (crosswalk)."
+            },
+            "smiles": {
+              "type": "string",
+              "description": "Connectivity SMILES of the salt (dot-disconnected ionic form; identity lives in inchikey)."
+            },
             "manufacturer": {
               "type": "string",
               "description": "Manufacturer of the item."
@@ -8214,6 +8237,29 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         "molecular_formula": {
           "type": "string",
           "description": "Optional chemical formula of the material (e.g. 'LiFePO4')."
+        },
+        "label": {
+          "type": "string",
+          "description": "Preferred human-readable substance name stamped by the resolver (e.g. 'ethylene carbonate' for name 'EC')."
+        },
+        "inchikey": {
+          "type": "string",
+          "pattern": "^[A-Z]{14}-[A-Z]{10}-[A-Z]$",
+          "description": "Standard InChIKey of the substance — the canonical chemical-identity key. Stamped from the substances vocabulary at authoring; never hand-typed."
+        },
+        "pubchem_cid": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "PubChem Compound ID (crosswalk; identity lives in inchikey)."
+        },
+        "cas_number": {
+          "type": "string",
+          "pattern": "^\\d{2,7}-\\d{2}-\\d$",
+          "description": "CAS Registry Number (crosswalk)."
+        },
+        "smiles": {
+          "type": "string",
+          "description": "Connectivity SMILES of the substance (depiction and featurization payload; identity lives in inchikey)."
         },
         "property": {
           "$ref": "../common/quantitative-properties.schema.json",

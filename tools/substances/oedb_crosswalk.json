@@ -1,0 +1,181 @@
+{
+ "solvents": {
+  "AN": {
+   "name": "Acetonitrile",
+   "cid": 6342,
+   "smiles": "CC#N"
+  },
+  "Ac2O": {
+   "name": "Acetic anhydride",
+   "cid": 7918,
+   "smiles": "CC(=O)OC(=O)C"
+  },
+  "Ac": {
+   "name": "Acetone",
+   "cid": 180,
+   "smiles": "CC(=O)C"
+  },
+  "BC": {
+   "name": "2,3-butylene carbonate",
+   "cid": 10080377,
+   "smiles": "C[C@H]1[C@@H](OC(=O)O1)C"
+  },
+  "DEC": {
+   "name": "Diethyl carbonate",
+   "cid": 7766,
+   "smiles": "CCOC(=O)OCC"
+  },
+  "DMC": {
+   "name": "Dimethyl carbonate",
+   "cid": 12021,
+   "smiles": "COC(=O)OC"
+  },
+  "DMI": {
+   "name": "1,3-dimethyl-2-imidazolidinone",
+   "cid": 6661,
+   "smiles": "CN1CCN(C1=O)C"
+  },
+  "DMSO": {
+   "name": "Dimethyl sulfoxide",
+   "cid": 679,
+   "smiles": "CS(=O)C"
+  },
+  "EA": {
+   "name": "Ethyl acetate",
+   "cid": 8857,
+   "smiles": "CCOC(=O)C"
+  },
+  "EB": {
+   "name": "Ethyl butyrate",
+   "cid": 7762,
+   "smiles": "CCCC(=O)OCC"
+  },
+  "EC": {
+   "name": "Ethylene carbonate",
+   "cid": 7303,
+   "smiles": "C1COC(=O)O1"
+  },
+  "EMC": {
+   "name": "Ethyl methyl carbonate",
+   "cid": 522046,
+   "smiles": "CCOC(=O)OC"
+  },
+  "EP": {
+   "name": "Ethyl propionate",
+   "cid": 7749,
+   "smiles": "CCC(=O)OCC"
+  },
+  "FAN": {
+   "name": "Fluoroacetonitrile",
+   "cid": 10420,
+   "smiles": "C(C#N)F"
+  },
+  "FEA": {
+   "name": "Fluoroethyl acetate",
+   "cid": 10016,
+   "smiles": "CC(=O)OCCF"
+  },
+  "FEC": {
+   "name": "Fluoroethylene carbonate",
+   "cid": 2769656,
+   "smiles": "C1C(OC(=O)O1)F"
+  },
+  "FEMC": {
+   "name": "Fluoroethyl methyl carbonate",
+   "cid": 17761042,
+   "smiles": "COC(=O)OCC(F)(F)F"
+  },
+  "GBL": {
+   "name": "γ-butyrolactone",
+   "cid": 7302,
+   "smiles": "C1CC(=O)OC1"
+  },
+  "GN": {
+   "name": "Glutaronitrile",
+   "cid": 10994,
+   "smiles": "C(CC#N)CC#N"
+  },
+  "MA": {
+   "name": "Methyl acetoacetate",
+   "cid": 7757,
+   "smiles": "CC(=O)CC(=O)OC"
+  },
+  "MB": {
+   "name": "Methyl butyrate",
+   "cid": 12180,
+   "smiles": "CCCC(=O)OC"
+  },
+  "MP": {
+   "name": "Methyl pyruvate",
+   "cid": 11748,
+   "smiles": "CC(=O)C(=O)OC"
+  },
+  "PC": {
+   "name": "Propylene carbonate",
+   "cid": 7924,
+   "smiles": "CC1COC(=O)O1"
+  },
+  "SN": {
+   "name": "Succinonitrile",
+   "cid": 8062,
+   "smiles": "C(CC#N)C#N"
+  },
+  "TEP": {
+   "name": "Triethyl phosphate",
+   "cid": 6535,
+   "smiles": "CCOP(=O)(OCC)OCC"
+  },
+  "TMP": {
+   "name": "Trimethyl phosphate",
+   "cid": 10541,
+   "smiles": "COP(=O)(OC)OC"
+  }
+ },
+ "anions": {
+  "BETI": {
+   "name": "Bis(pentafluoroethylsulfonyl)imide",
+   "cid": 4067273,
+   "smiles": "C(C(F)(F)S(=O)(=O)[N-]S(=O)(=O)C(C(F)(F)F)(F)F)(F)(F)F"
+  },
+  "BF4": {
+   "name": "Tetrafluoroborate",
+   "cid": 26255,
+   "smiles": "[B-](F)(F)(F)F"
+  },
+  "ClO4": {
+   "name": "Perchlorate",
+   "cid": 123351,
+   "smiles": "[O-]Cl(=O)(=O)=O"
+  },
+  "DFOB": {
+   "name": "Difluoro(oxalato)borate",
+   "cid": 58152809,
+   "smiles": "[B-]1(OC(=O)C(=O)O1)(F)F"
+  },
+  "FSI": {
+   "name": "Bis(fluorosulfonyl)imide",
+   "cid": 5257893,
+   "smiles": "[N-](S(=O)(=O)F)S(=O)(=O)F"
+  },
+  "OTf": {
+   "name": "Trifluoromethanesulfonate (triflate)",
+   "cid": 2758875,
+   "smiles": "C(F)(F)(F)S(=O)(=O)[O-]"
+  },
+  "PF6": {
+   "name": "Hexafluorophosphate",
+   "cid": 9886,
+   "smiles": "F[P-](F)(F)(F)(F)F"
+  },
+  "TFA": {
+   "name": "Trifluoroacetate",
+   "cid": 84468,
+   "smiles": "C(=O)(C(F)(F)F)[O-]"
+  },
+  "TFSI": {
+   "name": "Bis(trifluoromethanesulfonyl)imide",
+   "cid": 4176748,
+   "smiles": "C(F)(F)(F)S(=O)(=O)[N-]S(=O)(=O)C(F)(F)F"
+  }
+ }
+}
