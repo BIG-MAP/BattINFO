@@ -37,7 +37,7 @@ def _load_material_kinds_file() -> dict[str, Any]:
     if asset_path.is_file():
         with asset_path.open("r", encoding="utf-8") as handle:
             return json.load(handle)
-    return {"version": "0", "families": [], "kinds": {}}
+    return {"version": "0", "roles": [], "kinds": {}}
 
 
 @lru_cache(maxsize=1)
@@ -64,8 +64,8 @@ def _material_kind_alias_index() -> dict[str, str]:
 def material_kinds() -> dict[str, Any]:
     """Return the curated MaterialKind vocabulary (Level 1), as a deep copy.
 
-    Shape: ``{"version", "families": [...], "kinds": {"<key>": {"label",
-    "family", "formula"?, "chemsub"?, "emmo"?, "aliases": [...],
+    Shape: ``{"version", "roles": [...], "kinds": {"<key>": {"label",
+    "roles": [...], "formula"?, "chemsub"?, "emmo"?, "aliases": [...],
     "reference_properties"?}}}``. ``chemsub`` is the material's canonical
     semantic identity — its chemical-substance domain-ontology class IRI.
     """

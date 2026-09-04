@@ -9,25 +9,24 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
-- **The material-kind `family` axis collapses to `active_material` / `other`.**
-  The vocabulary no longer assigns a side to an active material
-  (`active_anode` / `active_cathode` are gone): which electrode a material
-  serves is system-relative — graphite is the positive electrode of every
-  lithium-counter half cell — so role lives where the material is used,
-  never on the kind. With it goes the whole polarity-derivation chain:
-  `create_electrode_spec` no longer stamps a `polarity` derived from the
-  kind (authored polarity is untouched), the emitted `@type` carries the
-  polarity class only when polarity is authored, and the
-  `semantic.electrode_polarity_conflict` check is retired. The role-flavored
-  single-member families (`conductive_additive`, `separator_material`,
-  `current_collector_material`, `binder`, `electrolyte_salt`,
-  `electrolyte_solvent`) fold into `other` for the same reason: the coating
-  role slots, electrolyte constituent slots, and component specs already
-  state each role at the place it is true. `electrode_polarity_for_kind`
-  (module-level, never exported from the package root) is removed;
-  `electrode_kind()` no longer injects a `polarity` key. Vocabulary version
-  0.2.0 → 0.3.0. The registry re-vendors `material_kinds.json` after this
-  merge.
+- **Material kinds carry `roles` (a list), replacing the single-valued
+  `family`.** The old axis forced one role onto substances that legitimately
+  play several and took sides on active materials (`active_anode` /
+  `active_cathode`) — but roles are system-relative: graphite is the positive
+  electrode of every lithium-counter half cell, FEC is both co-solvent and
+  additive, CMC both binder and thickener. `roles` lists the use-site slots a
+  substance is known to fill (coating roles, electrolyte constituents,
+  component films/foils/coatings); it is informative, never normative — no
+  validator rejects a use outside the listed roles. `active_material` is the
+  one load-bearing role: it gates `electrode_spec.kind` and anchors reference
+  properties. VC is refiled from solvent to additive; NMP carries an empty
+  list (a processing solvent fills no composition slot). With the sides gone,
+  the polarity-derivation chain retires: `create_electrode_spec` stamps
+  `polarity` only when authored, the emitted `@type` carries a polarity class
+  only for authored polarity, `semantic.electrode_polarity_conflict` is
+  removed, and `electrode_polarity_for_kind` (never exported from the package
+  root) is gone. Vocabulary 0.2.0 → 0.3.0. The registry re-vendors
+  `material_kinds.json` after this merge.
 
 ### Fixed
 

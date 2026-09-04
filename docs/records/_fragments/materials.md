@@ -16,11 +16,14 @@ identifier for graphite. So kinds are a **shipped, versioned, curated vocabulary
 governed by PR — like the property vocabulary — **not** a user-authored record
 type. If level 1 were records, the corpus would grow fifty graphites.
 
-Each kind carries a canonical `key` (the ergonomic handle), a `label`, a `family`
-(`active_material` or `other` — deliberately minimal: a material's *role* is
-system-relative and is stated where the material is used, in the coating role
-slots, the electrolyte constituent slots, or the component spec that
-references it, never on the kind), an optional `formula`, tolerant-import
+Each kind carries a canonical `key` (the ergonomic handle), a `label`, its
+`roles` — the use-site slots this substance is *known* to fill, as a list
+because roles are system-relative (FEC is both co-solvent and additive, CMC
+both binder and thickener). The list is informative, never normative: the
+role a material actually plays in a given cell is stated at the use site
+(coating role slots, electrolyte constituent slots, the component spec that
+references it), and a use outside the listed roles is never an error. Then
+an optional `formula`, tolerant-import
 `aliases` ("NMC 811", "LiNi0.8Mn0.1Co0.1O2", "Si/Gr"), and — the anchor — its
 `chemsub`: the material's **chemical-substance domain-ontology class IRI** (the EMMO
 ecosystem's `domain-chemical-substance`). The battinfo `key` is just the handle;
@@ -71,12 +74,11 @@ Adding a kind is a PR against `src/battinfo/data/vocab/material_kinds.json`; the
 tests check that each new `emmo` class resolves in the bundled context and names the
 same substance as its `chemsub` anchor.
 
-Only the active flag is intrinsic enough to live on the kind: it gates which
-kinds an electrode may name, and it is where reference anchors such as
-specific capacity attach. Everything else — binders, salts, solvents,
-separator films, conductive carbons — sits under `other`, with a
-`family_note` where the placement deserves a word (NMP, for example, is a
-processing solvent, not an electrolyte solvent).
+One role is load-bearing: `active_material` gates which kinds an electrode
+may name and is where reference anchors such as specific capacity attach.
+The rest are browse-and-discovery knowledge. An empty list is honest too:
+NMP fills no composition slot at all — it is a processing solvent, which its
+`roles_note` says.
 
 ## Level 2 — material-spec (first-class record)
 

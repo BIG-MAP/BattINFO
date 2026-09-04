@@ -210,7 +210,7 @@ def test_anchor_fields_stay_inside_the_declared_set() -> None:
     """A typo'd anchor key would silently emit nothing; pin the field names."""
     from battinfo.materials import EXTERNAL_ID_FIELDS, EXTERNAL_ID_IRI_TEMPLATES
 
-    known = {"label", "family", "family_note", "formula", "chemsub", "emmo",
+    known = {"label", "roles", "roles_note", "formula", "chemsub", "emmo",
              "aliases", "reference_properties", *EXTERNAL_ID_FIELDS}
     for key, entry in battinfo.material_kinds()["kinds"].items():
         unexpected = set(entry) - known
