@@ -36,9 +36,11 @@ too; leave it out and you lose the powder link, not the record.
 
 A `kind` that resolves but is not an active material (a binder, a salt) is a
 **warning**, not an error — the record is still usable, and the author is better
-placed than the validator to fix the mix-up. `polarity` is **derived** from the
-kind's family, so a record never states the same fact twice; stating a polarity
-that contradicts the kind ("LFP anode") warns.
+placed than the validator to fix the mix-up. `polarity` is **authored or
+absent, never derived from the kind**: which side an active material sits on
+is the cell's fact, not the material's — graphite is the positive electrode
+of every lithium-counter half cell, so an "LFP negative electrode" is a
+legitimate design, not a typo, and nothing warns about it.
 
 ### Composition is the cell-spec coating shape
 

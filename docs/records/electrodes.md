@@ -46,9 +46,11 @@ too; leave it out and you lose the powder link, not the record.
 
 A `kind` that resolves but is not an active material (a binder, a salt) is a
 **warning**, not an error — the record is still usable, and the author is better
-placed than the validator to fix the mix-up. `polarity` is **derived** from the
-kind's family, so a record never states the same fact twice; stating a polarity
-that contradicts the kind ("LFP anode") warns.
+placed than the validator to fix the mix-up. `polarity` is **authored or
+absent, never derived from the kind**: which side an active material sits on
+is the cell's fact, not the material's — graphite is the positive electrode
+of every lithium-counter half cell, so an "LFP negative electrode" is a
+legitimate design, not a typo, and nothing warns about it.
 
 ### Composition is the cell-spec coating shape
 
@@ -1207,7 +1209,7 @@ Schema: [`electrode-spec.schema.json`](https://w3id.org/battinfo/schema/electrod
 | `short_id` | → ShortId |  |  |
 | `name` | string | yes | Human-readable electrode name / designation (e.g. 'Si-Gr anode, aqueous', 'NMC811 cathode 96/2/2'). |
 | `kind` | string |  | Required Level-1 kind naming the ACTIVE material of this electrode, from the curated material-kind vocabulary (e.g. 'graphite', 'silicon_graphite', 'nmc811', 'lfp'). Required so a purchased electrode whose powder provenance is unknown is still queryable on the same aggregation axis as one built from an authored material-spec. Aliases resolve on input; an unknown kind is rejected at save time. See battinfo.electrodes.electrode_kind_keys(). |
-| `polarity` | `positive` \| `negative` \| `unknown` |  | Electrode polarity. Derived from the kind's family when not authored (active_cathode -> positive, active_anode -> negative). |
+| `polarity` | `positive` \| `negative` \| `unknown` |  | Electrode polarity, authored when the design has a side to state. Never derived from the kind: which side an active material sits on is system-relative (graphite is the positive electrode of a lithium-counter half cell). Role-based cells (half / three-electrode) name electrodes by role instead. |
 | `grade` | string |  | Producer grade / design version (e.g. 'v2', 'rev B'). Part of spec identity together with the producer and the electrode name. |
 | `active_material_spec_id` | → MaterialSpecIri |  | Optional canonical IRI of the material-spec for this electrode's active material, present when the powder is known and authored. Absent for a purchased electrode of known chemistry but unknown powder — 'kind' still carries the chemistry. |
 | `coating` | → electrode-coating |  | Coating composition and coating-level design values. 'component.active_material / binder / additive' each carry a weight fraction under property.mass_fraction — the same shape a cell-spec's inline electrode coating uses, so a composition authored here is the composition a cell reads. |

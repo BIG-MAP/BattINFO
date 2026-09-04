@@ -48,7 +48,7 @@
             "negative",
             "unknown"
           ],
-          "description": "Electrode polarity. Derived from the kind's family when not authored (active_cathode -> positive, active_anode -> negative)."
+          "description": "Electrode polarity, authored when the design has a side to state. Never derived from the kind: which side an active material sits on is system-relative (graphite is the positive electrode of a lithium-counter half cell). Role-based cells (half / three-electrode) name electrodes by role instead."
         },
         "grade": {
           "type": "string",
