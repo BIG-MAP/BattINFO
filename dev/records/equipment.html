@@ -413,11 +413,12 @@
 </ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Record types</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="cells.html">Cells</a></li>
 <li class="toctree-l2"><a class="reference internal" href="materials.html">Materials</a></li>
 <li class="toctree-l2"><a class="reference internal" href="electrodes.html">Electrodes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="electrolytes.html">Electrolytes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="components.html">Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cells.html">Cells</a></li>
+<li class="toctree-l2"><a class="reference internal" href="half-cells.html">Half cells</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tests.html">Tests</a></li>
 <li class="toctree-l2"><a class="reference internal" href="datasets.html">Datasets</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Equipment</a></li>
@@ -509,15 +510,13 @@
 <section id="equipment">
 <h1>Equipment<a class="headerlink" href="#equipment" title="Link to this heading">#</a></h1>
 <p>How to describe lab equipment: the product as an <strong>equipment spec</strong>, each bench unit as <strong>equipment</strong>, each addressable slot as a <strong>channel</strong>.</p>
-<p>Lab equipment follows the same spec + instance pattern: the <strong>equipment
-spec</strong> is the product (a cycler model, its channel count, supported
-chemistries), the <strong>equipment</strong> record is one physical unit (serial number,
-location, status), and a <strong>channel</strong> is one addressable slot on a unit —
-its uid is deterministic from (unit, index), so re-registering a bench never
-duplicates channels. Tests point at the unit and channel they ran on through
-<code class="docutils literal notranslate"><span class="pre">equipment_id</span></code> and <code class="docutils literal notranslate"><span class="pre">channel_id</span></code>.</p>
-<section id="reference-examples">
-<h2>Reference examples<a class="headerlink" href="#reference-examples" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><strong>Spec</strong> = the product; <strong>equipment</strong> = one bench unit (serial, location); <strong>channel</strong> = one addressable slot on a unit.</p></li>
+<li><p>Channel identity is deterministic from (unit, index): re-registering a bench never duplicates channels.</p></li>
+<li><p>Tests point at the unit and channel via <code class="docutils literal notranslate"><span class="pre">equipment_id</span></code> / <code class="docutils literal notranslate"><span class="pre">channel_id</span></code>.</p></li>
+</ul>
+<section id="define-one">
+<h2>Define one<a class="headerlink" href="#define-one" title="Link to this heading">#</a></h2>
 <section id="an-equipment-spec-the-product">
 <h3>An equipment spec (the product)<a class="headerlink" href="#an-equipment-spec-the-product" title="Link to this heading">#</a></h3>
 <div class="sd-tab-set docutils">
@@ -844,8 +843,8 @@ Canonical record</label><div class="sd-tab-content docutils">
 </div>
 </div>
 </details></section>
-<section id="field-reference">
-<h2>Field reference<a class="headerlink" href="#field-reference" title="Link to this heading">#</a></h2>
+<section id="fields">
+<h2>Fields<a class="headerlink" href="#fields" title="Link to this heading">#</a></h2>
 <p>Generated from the packaged JSON Schemas — the same files <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">validate</span></code> and the registry’s publish gate enforce. Every record also carries the shared envelope (<code class="docutils literal notranslate"><span class="pre">schema_version</span></code>, <code class="docutils literal notranslate"><span class="pre">provenance</span></code>, and optional <code class="docutils literal notranslate"><span class="pre">notes</span></code>, <code class="docutils literal notranslate"><span class="pre">funding</span></code>, <code class="docutils literal notranslate"><span class="pre">contributor</span></code>, <code class="docutils literal notranslate"><span class="pre">license</span></code>).</p>
 <section id="equipment-spec-fields">
 <h3>equipment-spec fields<a class="headerlink" href="#equipment-spec-fields" title="Link to this heading">#</a></h3>
@@ -1046,10 +1045,6 @@ Canonical record</label><div class="sd-tab-content docutils">
 </div>
 </section>
 </section>
-<section id="see-also">
-<h2>See also<a class="headerlink" href="#see-also" title="Link to this heading">#</a></h2>
-<p>Recipe: <a class="reference internal" href="../howto/register-equipment.html"><span class="std std-doc">register equipment</span></a>.</p>
-</section>
 </section>
 
 
@@ -1099,20 +1094,19 @@ Canonical record</label><div class="sd-tab-content docutils">
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reference-examples">Reference examples</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#define-one">Define one</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#an-equipment-spec-the-product">An equipment spec (the product)</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#an-equipment-unit">An equipment unit</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#a-channel-on-that-unit">A channel on that unit</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common-examples">Common examples</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#field-reference">Field reference</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fields">Fields</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#equipment-spec-fields">equipment-spec fields</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#equipment-fields">equipment fields</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#channel-fields">channel fields</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#see-also">See also</a></li>
 </ul>
   </nav></div>
 

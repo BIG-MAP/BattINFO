@@ -59,7 +59,7 @@
     <link rel="icon" href="../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Tests" href="tests.html" />
+    <link rel="next" title="Cells" href="cells.html" />
     <link rel="prev" title="Electrolytes" href="electrolytes.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -413,11 +413,12 @@
 </ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Record types</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="cells.html">Cells</a></li>
 <li class="toctree-l2"><a class="reference internal" href="materials.html">Materials</a></li>
 <li class="toctree-l2"><a class="reference internal" href="electrodes.html">Electrodes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="electrolytes.html">Electrolytes</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cells.html">Cells</a></li>
+<li class="toctree-l2"><a class="reference internal" href="half-cells.html">Half cells</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tests.html">Tests</a></li>
 <li class="toctree-l2"><a class="reference internal" href="datasets.html">Datasets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="equipment.html">Equipment</a></li>
@@ -509,83 +510,14 @@
 <section id="components">
 <h1>Components<a class="headerlink" href="#components" title="Link to this heading">#</a></h1>
 <p>How to describe the remaining cell components — separator, current collector, housing. The three families share one generic spec + instance surface; only their fields differ. Electrolytes ride the same machinery but have <a class="reference internal" href="electrolytes.html"><span class="std std-doc">their own page</span></a>.</p>
-<p>BattINFO models every entity as a <strong>spec + instance</strong> pair. After materials
-(<a class="reference internal" href="materials.html#records"><span class="std std-ref">materials</span></a>) and electrodes
-(<a class="reference internal" href="electrodes.html"><span class="std std-doc">electrodes-model.md</span></a>), three <strong>component</strong> families let the rest of a
-cell be described from reusable, IRI-addressable parts. Each family is a thin registry entry
-that reuses an existing embedded holder shape; component-specs reference <code class="docutils literal notranslate"><span class="pre">material-spec</span></code>
-records by IRI.</p>
-<div class="pst-scrollable-table-container"><table class="table">
-<thead>
-<tr class="row-odd"><th class="head"><p>Family</p></th>
-<th class="head"><p>Spec record</p></th>
-<th class="head"><p>Instance record</p></th>
-<th class="head"><p>References materials via</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>separator</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">separator-spec</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">separator</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">material_spec_id</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p>current-collector</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">current-collector-spec</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">current-collector</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">material_spec_id</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p>housing</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">housing-spec</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">housing</span></code></p></td>
-<td><p>(materials as strings)</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p>Electrolytes share this generic machinery but have <a class="reference internal" href="electrolytes.html"><span class="std std-doc">their own page</span></a>.
-Electrodes used to be another generic family. They are now first-class — a curated <code class="docutils literal notranslate"><span class="pre">kind</span></code>,
-deterministic identity that includes the processing route, design values, and their own
-emitter — so they have their own page: <a class="reference internal" href="electrodes.html"><span class="std std-doc">Electrodes</span></a>.</p>
-<section id="generic-api-per-family-wrappers">
-<h2>Generic API + per-family wrappers<a class="headerlink" href="#generic-api-per-family-wrappers" title="Link to this heading">#</a></h2>
-<p>A generic factory in <code class="docutils literal notranslate"><span class="pre">api.py</span></code> is parameterized by family; thin per-family wrappers are
-generated from the entity registry, so the surface matches the cell/material API:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_separator_spec</span><span class="p">,</span> <span class="n">create_component_spec</span>
-
-<span class="n">separator</span> <span class="o">=</span> <span class="n">create_separator_spec</span><span class="p">(</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Celgard 2400&quot;</span><span class="p">,</span> <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Celgard&quot;</span><span class="p">,</span>
-    <span class="n">body</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;material&quot;</span><span class="p">:</span> <span class="s2">&quot;polypropylene&quot;</span><span class="p">,</span> <span class="s2">&quot;structure&quot;</span><span class="p">:</span> <span class="s2">&quot;monolayer&quot;</span><span class="p">,</span>
-          <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;thickness&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;um&quot;</span><span class="p">}}})</span>
-
-<span class="c1"># generic form is also available</span>
-<span class="n">create_component_spec</span><span class="p">(</span><span class="s2">&quot;housing&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;…&quot;</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="p">{</span><span class="o">...</span><span class="p">})</span>
-</pre></div>
-</div>
-<p>The step-by-step bench version of this — materials first, IRIs harvested from
-each save — is <a class="reference internal" href="../howto/build-a-cell-from-components.html"><span class="std std-doc">How-to: build a cell from components</span></a>.</p>
-<p>Per family you get <code class="docutils literal notranslate"><span class="pre">create_&lt;family&gt;_spec</span></code>, <code class="docutils literal notranslate"><span class="pre">save_&lt;family&gt;_spec</span></code>, <code class="docutils literal notranslate"><span class="pre">query_&lt;family&gt;_specs</span></code>,
-<code class="docutils literal notranslate"><span class="pre">template_&lt;family&gt;_spec</span></code> and the bare-name instance equivalents (<code class="docutils literal notranslate"><span class="pre">create_&lt;family&gt;</span></code>,
-<code class="docutils literal notranslate"><span class="pre">query_&lt;family&gt;s</span></code>). Generic functions <code class="docutils literal notranslate"><span class="pre">create/save/query/template_component_spec(family,</span> <span class="pre">…)</span></code>
-(and <code class="docutils literal notranslate"><span class="pre">_instance</span></code>) underlie them. Electrodes expose the same function names, but as
-hand-written first-class builders rather than generated wrappers.</p>
-<section id="naming-convention">
-<h3>Naming convention<a class="headerlink" href="#naming-convention" title="Link to this heading">#</a></h3>
-<p>Family identifiers use <strong>underscores</strong> (<code class="docutils literal notranslate"><span class="pre">current_collector</span></code>); the IRI namespace uses
-<strong>hyphens</strong> (<code class="docutils literal notranslate"><span class="pre">https://w3id.org/battinfo/spec/…</span></code>). The generic API derives
-the namespace via <code class="docutils literal notranslate"><span class="pre">family.replace(&quot;_&quot;,</span> <span class="pre">&quot;-&quot;)</span></code>.</p>
-</section>
-</section>
-<section id="examples">
-<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading">#</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">examples/&lt;family&gt;-spec/*</span></code> + <code class="docutils literal notranslate"><span class="pre">examples/&lt;family&gt;/*</span></code> (single source of truth, mirrored into the
-wheel). Coverage: Celgard PP + ceramic-coated PE separators; Al/Cu current collectors;
-CR2032 coin + LFP 100 Ah prismatic housings — grounded in the DIGIBAT Discovery-Benchmark and the Cell_Design_Tool.
-Cell-specs reference these component-specs by IRI today via the five <code class="docutils literal notranslate"><span class="pre">*_spec_id</span></code>
-fields — see <a class="reference internal" href="cells.html#composing-a-cell-from-parts"><span class="std std-ref">Cells</span></a> for the reference seam and the example fleet
-that uses it.</p>
-</section>
-<section id="reference-examples">
-<h2>Reference examples<a class="headerlink" href="#reference-examples" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Separator, current collector, and housing share one generic surface: <code class="docutils literal notranslate"><span class="pre">create_&lt;family&gt;_spec(...)</span></code> or <code class="docutils literal notranslate"><span class="pre">create_component_spec(family,</span> <span class="pre">...)</span></code>, plus the instance equivalents.</p></li>
+<li><p>Fields whose names collide with an argument go through <code class="docutils literal notranslate"><span class="pre">body={...}</span></code>.</p></li>
+<li><p>Family identifiers use underscores (<code class="docutils literal notranslate"><span class="pre">current_collector</span></code>); IRIs use hyphens.</p></li>
+<li><p><a class="reference internal" href="electrolytes.html"><span class="std std-doc">Electrolytes</span></a> ride the same machinery but have their own page.</p></li>
+</ul>
+<section id="define-one">
+<h2>Define one<a class="headerlink" href="#define-one" title="Link to this heading">#</a></h2>
 <section id="a-separator-spec">
 <h3>A separator spec<a class="headerlink" href="#a-separator-spec" title="Link to this heading">#</a></h3>
 <div class="sd-tab-set docutils">
@@ -1584,8 +1516,8 @@ JSON-LD</label><div class="sd-tab-content docutils">
 </div>
 </div>
 </details></section>
-<section id="field-reference">
-<h2>Field reference<a class="headerlink" href="#field-reference" title="Link to this heading">#</a></h2>
+<section id="fields">
+<h2>Fields<a class="headerlink" href="#fields" title="Link to this heading">#</a></h2>
 <p>Generated from the packaged JSON Schemas — the same files <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">validate</span></code> and the registry’s publish gate enforce. Every record also carries the shared envelope (<code class="docutils literal notranslate"><span class="pre">schema_version</span></code>, <code class="docutils literal notranslate"><span class="pre">provenance</span></code>, and optional <code class="docutils literal notranslate"><span class="pre">notes</span></code>, <code class="docutils literal notranslate"><span class="pre">funding</span></code>, <code class="docutils literal notranslate"><span class="pre">contributor</span></code>, <code class="docutils literal notranslate"><span class="pre">license</span></code>).</p>
 <section id="separator-spec-fields">
 <h3>separator-spec fields<a class="headerlink" href="#separator-spec-fields" title="Link to this heading">#</a></h3>
@@ -2034,10 +1966,44 @@ JSON-LD</label><div class="sd-tab-content docutils">
 </div>
 </section>
 </section>
-<section id="see-also">
-<h2>See also<a class="headerlink" href="#see-also" title="Link to this heading">#</a></h2>
-<p>Recipe: <a class="reference internal" href="../howto/build-a-cell-from-components.html"><span class="std std-doc">build a cell from components</span></a>.</p>
-</section>
+<section id="design-notes">
+<h2>Design notes<a class="headerlink" href="#design-notes" title="Link to this heading">#</a></h2>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">The reasoning behind the model</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text"><strong>The family table.</strong> Each family is a thin registry entry reusing an existing embedded holder shape; specs reference <code class="docutils literal notranslate"><span class="pre">material-spec</span></code> records by IRI.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p class="sd-card-text">Family</p></th>
+<th class="head"><p class="sd-card-text">Spec record</p></th>
+<th class="head"><p class="sd-card-text">Instance record</p></th>
+<th class="head"><p class="sd-card-text">References materials via</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p class="sd-card-text">separator</p></td>
+<td><p class="sd-card-text"><code class="docutils literal notranslate"><span class="pre">separator-spec</span></code></p></td>
+<td><p class="sd-card-text"><code class="docutils literal notranslate"><span class="pre">separator</span></code></p></td>
+<td><p class="sd-card-text"><code class="docutils literal notranslate"><span class="pre">material_spec_id</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p class="sd-card-text">current-collector</p></td>
+<td><p class="sd-card-text"><code class="docutils literal notranslate"><span class="pre">current-collector-spec</span></code></p></td>
+<td><p class="sd-card-text"><code class="docutils literal notranslate"><span class="pre">current-collector</span></code></p></td>
+<td><p class="sd-card-text"><code class="docutils literal notranslate"><span class="pre">material_spec_id</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p class="sd-card-text">housing</p></td>
+<td><p class="sd-card-text"><code class="docutils literal notranslate"><span class="pre">housing-spec</span></code></p></td>
+<td><p class="sd-card-text"><code class="docutils literal notranslate"><span class="pre">housing</span></code></p></td>
+<td><p class="sd-card-text">(materials as strings)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="sd-card-text"><strong>The generated surface.</strong> Per family you get <code class="docutils literal notranslate"><span class="pre">create_&lt;family&gt;_spec</span></code>, <code class="docutils literal notranslate"><span class="pre">save_&lt;family&gt;_spec</span></code>, <code class="docutils literal notranslate"><span class="pre">query_&lt;family&gt;_specs</span></code>, <code class="docutils literal notranslate"><span class="pre">template_&lt;family&gt;_spec</span></code> and the bare-name instance equivalents; generic <code class="docutils literal notranslate"><span class="pre">create/save/query/template_component_spec(family,</span> <span class="pre">…)</span></code> functions underlie them. Electrodes expose the same names but as hand-written first-class builders; electrolytes share the machinery with <a class="reference internal" href="electrolytes.html"><span class="std std-doc">their own page</span></a>.</p>
+<p class="sd-card-text"><strong>History, in one line:</strong> electrodes used to be a generic family here and are now first-class (curated kind, route in the identity, their own emitter) — see <a class="reference internal" href="electrodes.html"><span class="std std-doc">electrodes</span></a>.</p>
+<p class="sd-card-text"><strong>Naming convention.</strong> Family identifiers use underscores (<code class="docutils literal notranslate"><span class="pre">current_collector</span></code>); the IRI namespace uses hyphens; the generic API derives one from the other.</p>
+</div>
+</details></section>
 </section>
 
 
@@ -2060,11 +2026,11 @@ JSON-LD</label><div class="sd-tab-content docutils">
       </div>
     </a>
     <a class="right-next"
-       href="tests.html"
+       href="cells.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Tests</p>
+        <p class="prev-next-title">Cells</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -2087,17 +2053,12 @@ JSON-LD</label><div class="sd-tab-content docutils">
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#generic-api-per-family-wrappers">Generic API + per-family wrappers</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#naming-convention">Naming convention</a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#examples">Examples</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reference-examples">Reference examples</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#define-one">Define one</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#a-separator-spec">A separator spec</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common-examples">Common examples</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#field-reference">Field reference</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fields">Fields</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#separator-spec-fields">separator-spec fields</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#separator-fields">separator fields</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#current-collector-spec-fields">current-collector-spec fields</a></li>
@@ -2106,7 +2067,7 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#housing-fields">housing fields</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#see-also">See also</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#design-notes">Design notes</a></li>
 </ul>
   </nav></div>
 

@@ -8,23 +8,11 @@
 
 How to describe an electrolyte: the formulation as an **electrolyte spec** (its family and its composition, assembled from material-specs), a mixed batch as an **electrolyte** instance.
 
-An electrolyte follows the spec + instance pattern: the **electrolyte spec**
-is the formulation — its required `family` (the broad class: organic, aqueous,
-…) and its composition — and the **electrolyte** record is a physical batch
-mixed to that formulation.
+- `family` (organic, aqueous, ...) is required.
+- The composition is assembled from materials: `salt`, `solvent_mixture.component[]`, and `additive[]` each cite a material-spec by IRI.
+- The **spec** is the formulation; the **electrolyte** instance is one mixed batch.
 
-The composition is assembled from materials, not retyped: `electrolyte-spec`
-carries `salt` + `solvent_mixture.component[]` + `additive[]`, each able to
-reference a `material-spec` by IRI — so an **organic 1M LiPF₆ EC:EMC 3:7**
-and an **aqueous 7M KOH** are built from the LiPF6/EC/EMC/KOH material-specs
-and emit `OrganicElectrolyte` / `AqueousElectrolyte` JSON-LD with
-`hasSolute`/`hasSolvent`.
-
-Authoring rides the same generic component surface as the other families
-(`create_electrolyte_spec` / `create_component_spec("electrolyte", …)`); see
-[Components](components.md) for the shared machinery and naming convention.
-
-## Reference examples
+## Define one
 
 ### An electrolyte spec (the formulation)
 
@@ -559,7 +547,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 ::::::
 
 
-## Field reference
+## Fields
 
 Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`).
 
@@ -600,6 +588,13 @@ Schema: [`electrolyte.schema.json`](https://w3id.org/battinfo/schema/electrolyte
 | `property` | → quantitative-properties |  | Named quantity map of technical properties (snake_case key to value+unit quantity). |
 | `comment` | string |  | Free-text comment. |
 
-## See also
 
-Recipe: [build a cell from components](../howto/build-a-cell-from-components.md).
+## Design notes
+
+:::{dropdown} The reasoning behind the model
+**Composition is assembled, never retyped.** `salt` + `solvent_mixture.component[]` + `additive[]` each reference a `material-spec` by IRI, so an organic 1M LiPF₆ EC:EMC 3:7 and an aqueous 7M KOH are built from the LiPF6/EC/EMC/KOH material-specs. Each constituent carries its own fraction or concentration under `property`.
+
+**Emission follows the composition.** A minimal spec types as the generic `ElectrolyteSolution`; a full formulation types by its family (`OrganicElectrolyte`, `AqueousElectrolyte`) and emits its constituents typed under `hasSolute` / `hasSolvent` / `hasAdditive`.
+
+**Authoring rides the generic component surface** (`create_electrolyte_spec`, or `create_component_spec("electrolyte", ...)` with composition through `body=` because the class field shares its name with the function's first argument) — see [components](components.md) for the shared machinery.
+:::

@@ -413,11 +413,12 @@
 </ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Record types</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="cells.html">Cells</a></li>
 <li class="toctree-l2"><a class="reference internal" href="materials.html">Materials</a></li>
 <li class="toctree-l2"><a class="reference internal" href="electrodes.html">Electrodes</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Electrolytes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="components.html">Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cells.html">Cells</a></li>
+<li class="toctree-l2"><a class="reference internal" href="half-cells.html">Half cells</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tests.html">Tests</a></li>
 <li class="toctree-l2"><a class="reference internal" href="datasets.html">Datasets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="equipment.html">Equipment</a></li>
@@ -509,21 +510,13 @@
 <section id="electrolytes">
 <h1>Electrolytes<a class="headerlink" href="#electrolytes" title="Link to this heading">#</a></h1>
 <p>How to describe an electrolyte: the formulation as an <strong>electrolyte spec</strong> (its family and its composition, assembled from material-specs), a mixed batch as an <strong>electrolyte</strong> instance.</p>
-<p>An electrolyte follows the spec + instance pattern: the <strong>electrolyte spec</strong>
-is the formulation — its required <code class="docutils literal notranslate"><span class="pre">family</span></code> (the broad class: organic, aqueous,
-…) and its composition — and the <strong>electrolyte</strong> record is a physical batch
-mixed to that formulation.</p>
-<p>The composition is assembled from materials, not retyped: <code class="docutils literal notranslate"><span class="pre">electrolyte-spec</span></code>
-carries <code class="docutils literal notranslate"><span class="pre">salt</span></code> + <code class="docutils literal notranslate"><span class="pre">solvent_mixture.component[]</span></code> + <code class="docutils literal notranslate"><span class="pre">additive[]</span></code>, each able to
-reference a <code class="docutils literal notranslate"><span class="pre">material-spec</span></code> by IRI — so an <strong>organic 1M LiPF₆ EC:EMC 3:7</strong>
-and an <strong>aqueous 7M KOH</strong> are built from the LiPF6/EC/EMC/KOH material-specs
-and emit <code class="docutils literal notranslate"><span class="pre">OrganicElectrolyte</span></code> / <code class="docutils literal notranslate"><span class="pre">AqueousElectrolyte</span></code> JSON-LD with
-<code class="docutils literal notranslate"><span class="pre">hasSolute</span></code>/<code class="docutils literal notranslate"><span class="pre">hasSolvent</span></code>.</p>
-<p>Authoring rides the same generic component surface as the other families
-(<code class="docutils literal notranslate"><span class="pre">create_electrolyte_spec</span></code> / <code class="docutils literal notranslate"><span class="pre">create_component_spec(&quot;electrolyte&quot;,</span> <span class="pre">…)</span></code>); see
-<a class="reference internal" href="components.html"><span class="std std-doc">Components</span></a> for the shared machinery and naming convention.</p>
-<section id="reference-examples">
-<h2>Reference examples<a class="headerlink" href="#reference-examples" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">family</span></code> (organic, aqueous, …) is required.</p></li>
+<li><p>The composition is assembled from materials: <code class="docutils literal notranslate"><span class="pre">salt</span></code>, <code class="docutils literal notranslate"><span class="pre">solvent_mixture.component[]</span></code>, and <code class="docutils literal notranslate"><span class="pre">additive[]</span></code> each cite a material-spec by IRI.</p></li>
+<li><p>The <strong>spec</strong> is the formulation; the <strong>electrolyte</strong> instance is one mixed batch.</p></li>
+</ul>
+<section id="define-one">
+<h2>Define one<a class="headerlink" href="#define-one" title="Link to this heading">#</a></h2>
 <section id="an-electrolyte-spec-the-formulation">
 <h3>An electrolyte spec (the formulation)<a class="headerlink" href="#an-electrolyte-spec-the-formulation" title="Link to this heading">#</a></h3>
 <div class="sd-tab-set docutils">
@@ -1161,8 +1154,8 @@ JSON-LD</label><div class="sd-tab-content docutils">
 </div>
 </div>
 </details></section>
-<section id="field-reference">
-<h2>Field reference<a class="headerlink" href="#field-reference" title="Link to this heading">#</a></h2>
+<section id="fields">
+<h2>Fields<a class="headerlink" href="#fields" title="Link to this heading">#</a></h2>
 <p>Generated from the packaged JSON Schemas — the same files <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">validate</span></code> and the registry’s publish gate enforce. Every record also carries the shared envelope (<code class="docutils literal notranslate"><span class="pre">schema_version</span></code>, <code class="docutils literal notranslate"><span class="pre">provenance</span></code>, and optional <code class="docutils literal notranslate"><span class="pre">notes</span></code>, <code class="docutils literal notranslate"><span class="pre">funding</span></code>, <code class="docutils literal notranslate"><span class="pre">contributor</span></code>, <code class="docutils literal notranslate"><span class="pre">license</span></code>).</p>
 <section id="electrolyte-spec-fields">
 <h3>electrolyte-spec fields<a class="headerlink" href="#electrolyte-spec-fields" title="Link to this heading">#</a></h3>
@@ -1312,10 +1305,16 @@ JSON-LD</label><div class="sd-tab-content docutils">
 </div>
 </section>
 </section>
-<section id="see-also">
-<h2>See also<a class="headerlink" href="#see-also" title="Link to this heading">#</a></h2>
-<p>Recipe: <a class="reference internal" href="../howto/build-a-cell-from-components.html"><span class="std std-doc">build a cell from components</span></a>.</p>
-</section>
+<section id="design-notes">
+<h2>Design notes<a class="headerlink" href="#design-notes" title="Link to this heading">#</a></h2>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">The reasoning behind the model</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text"><strong>Composition is assembled, never retyped.</strong> <code class="docutils literal notranslate"><span class="pre">salt</span></code> + <code class="docutils literal notranslate"><span class="pre">solvent_mixture.component[]</span></code> + <code class="docutils literal notranslate"><span class="pre">additive[]</span></code> each reference a <code class="docutils literal notranslate"><span class="pre">material-spec</span></code> by IRI, so an organic 1M LiPF₆ EC:EMC 3:7 and an aqueous 7M KOH are built from the LiPF6/EC/EMC/KOH material-specs. Each constituent carries its own fraction or concentration under <code class="docutils literal notranslate"><span class="pre">property</span></code>.</p>
+<p class="sd-card-text"><strong>Emission follows the composition.</strong> A minimal spec types as the generic <code class="docutils literal notranslate"><span class="pre">ElectrolyteSolution</span></code>; a full formulation types by its family (<code class="docutils literal notranslate"><span class="pre">OrganicElectrolyte</span></code>, <code class="docutils literal notranslate"><span class="pre">AqueousElectrolyte</span></code>) and emits its constituents typed under <code class="docutils literal notranslate"><span class="pre">hasSolute</span></code> / <code class="docutils literal notranslate"><span class="pre">hasSolvent</span></code> / <code class="docutils literal notranslate"><span class="pre">hasAdditive</span></code>.</p>
+<p class="sd-card-text"><strong>Authoring rides the generic component surface</strong> (<code class="docutils literal notranslate"><span class="pre">create_electrolyte_spec</span></code>, or <code class="docutils literal notranslate"><span class="pre">create_component_spec(&quot;electrolyte&quot;,</span> <span class="pre">...)</span></code> with composition through <code class="docutils literal notranslate"><span class="pre">body=</span></code> because the class field shares its name with the function’s first argument) — see <a class="reference internal" href="components.html"><span class="std std-doc">components</span></a> for the shared machinery.</p>
+</div>
+</details></section>
 </section>
 
 
@@ -1365,18 +1364,18 @@ JSON-LD</label><div class="sd-tab-content docutils">
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reference-examples">Reference examples</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#define-one">Define one</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#an-electrolyte-spec-the-formulation">An electrolyte spec (the formulation)</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#an-electrolyte-one-mixed-batch">An electrolyte (one mixed batch)</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common-examples">Common examples</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#field-reference">Field reference</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fields">Fields</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#electrolyte-spec-fields">electrolyte-spec fields</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#electrolyte-fields">electrolyte fields</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#see-also">See also</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#design-notes">Design notes</a></li>
 </ul>
   </nav></div>
 

@@ -60,7 +60,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Datasets" href="datasets.html" />
-    <link rel="prev" title="Components" href="components.html" />
+    <link rel="prev" title="Half cells" href="half-cells.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -413,11 +413,12 @@
 </ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Record types</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="cells.html">Cells</a></li>
 <li class="toctree-l2"><a class="reference internal" href="materials.html">Materials</a></li>
 <li class="toctree-l2"><a class="reference internal" href="electrodes.html">Electrodes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="electrolytes.html">Electrolytes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="components.html">Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cells.html">Cells</a></li>
+<li class="toctree-l2"><a class="reference internal" href="half-cells.html">Half cells</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Tests</a></li>
 <li class="toctree-l2"><a class="reference internal" href="datasets.html">Datasets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="equipment.html">Equipment</a></li>
@@ -509,168 +510,14 @@
 <section id="tests">
 <h1>Tests<a class="headerlink" href="#tests" title="Link to this heading">#</a></h1>
 <p>How to describe testing: the plan as a <strong>test protocol</strong>, each execution on one cell as a <strong>test</strong>. Planned conditions live on the protocol; as-run conditions on the test; both are <code class="docutils literal notranslate"><span class="pre">{value,</span> <span class="pre">unit}</span></code> quantities by contract.</p>
-<p>A <strong>test-spec</strong> is the reusable, IRI-addressable description of a test
-procedure — the <em>spec</em> half of <code class="docutils literal notranslate"><span class="pre">test-spec</span></code> + <code class="docutils literal notranslate"><span class="pre">test</span></code>. A <code class="docutils literal notranslate"><span class="pre">test</span></code> (instance) links a cell-instance to
-a test-spec via <code class="docutils literal notranslate"><span class="pre">protocol_id</span></code> and to its <code class="docutils literal notranslate"><span class="pre">dataset</span></code>s.</p>
-<blockquote>
-<div><p><strong>One thing, three names.</strong> A <em>test spec</em> is stored as a <code class="docutils literal notranslate"><span class="pre">test-protocol</span></code>
-record on disk and authored as the <code class="docutils literal notranslate"><span class="pre">TestSpec</span></code> Python class — same object
-throughout. The <code class="docutils literal notranslate"><span class="pre">kind=</span></code> argument (the workspace calls it <code class="docutils literal notranslate"><span class="pre">type=</span></code>) takes any
-<code class="docutils literal notranslate"><span class="pre">BatteryTestType</span></code> value: <code class="docutils literal notranslate"><span class="pre">cycling</span></code>, <code class="docutils literal notranslate"><span class="pre">capacity_check</span></code>, <code class="docutils literal notranslate"><span class="pre">rate_capability</span></code>,
-<code class="docutils literal notranslate"><span class="pre">hppc</span></code>, <code class="docutils literal notranslate"><span class="pre">ici</span></code>, <code class="docutils literal notranslate"><span class="pre">gitt</span></code>, <code class="docutils literal notranslate"><span class="pre">dcir</span></code>, <code class="docutils literal notranslate"><span class="pre">eis</span></code>, <code class="docutils literal notranslate"><span class="pre">impedance</span></code>, <code class="docutils literal notranslate"><span class="pre">calendar_ageing</span></code>,
-<code class="docutils literal notranslate"><span class="pre">formation</span></code>, <code class="docutils literal notranslate"><span class="pre">rpt</span></code>, <code class="docutils literal notranslate"><span class="pre">quasi_ocv</span></code>, <code class="docutils literal notranslate"><span class="pre">field</span></code>, <code class="docutils literal notranslate"><span class="pre">duty_cycle</span></code>, <code class="docutils literal notranslate"><span class="pre">wltp</span></code>, <code class="docutils literal notranslate"><span class="pre">nedc</span></code>,
-<code class="docutils literal notranslate"><span class="pre">sem</span></code>, <code class="docutils literal notranslate"><span class="pre">characterization</span></code>, <code class="docutils literal notranslate"><span class="pre">other</span></code>.</p>
-</div></blockquote>
-<section id="authoring">
-<h2>Authoring<a class="headerlink" href="#authoring" title="Link to this heading">#</a></h2>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">battinfo</span>
-
-<span class="n">battinfo</span><span class="o">.</span><span class="n">save_test_spec</span><span class="p">(</span><span class="n">battinfo</span><span class="o">.</span><span class="n">TestSpec</span><span class="p">(</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Capacity Check — C/10 at 25 C&quot;</span><span class="p">,</span>
-    <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;capacity_check&quot;</span><span class="p">,</span>
-    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;CC-CV charge then slow C/10 discharge.&quot;</span><span class="p">,</span>
-    <span class="n">experiment</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Charge at C/3 until 4.2 V&quot;</span><span class="p">,</span> <span class="s2">&quot;Hold at 4.2 V until C/20&quot;</span><span class="p">,</span> <span class="s2">&quot;Discharge at C/10 until 2.5 V&quot;</span><span class="p">],</span>
-    <span class="n">conditions</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;ambient_temperature&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">25.0</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;degC&quot;</span><span class="p">}},</span>
-<span class="p">),</span> <span class="n">source_root</span><span class="o">=</span><span class="s2">&quot;examples&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;upsert&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-<p><code class="docutils literal notranslate"><span class="pre">experiment</span></code> PyBaMM-style strings parse into the structured <code class="docutils literal notranslate"><span class="pre">method[]</span></code> (steps with
-mode/direction/setpoints/termination); <code class="docutils literal notranslate"><span class="pre">facets</span></code> are derived automatically for filtering.
-The model is two-layer by design: a descriptive <code class="docutils literal notranslate"><span class="pre">method[]</span></code> (what the procedure is) plus
-actionable <code class="docutils literal notranslate"><span class="pre">artifacts[]</span></code> (runnable protocol files carried as linked distributions).</p>
-</section>
-<section id="how-each-kind-is-modelled">
-<h2>How each kind is modelled<a class="headerlink" href="#how-each-kind-is-modelled" title="Link to this heading">#</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">examples/test-protocol/</span></code> carries <strong>one example for every <code class="docutils literal notranslate"><span class="pre">BatteryTestType</span></code></strong> value (20
-kinds), enforced by <code class="docutils literal notranslate"><span class="pre">tests/test_test_contract.py::test_test_protocol_examples_cover_full_battery_test_type_enum</span></code>.</p>
-<div class="pst-scrollable-table-container"><table class="table">
-<thead>
-<tr class="row-odd"><th class="head"><p>Kind</p></th>
-<th class="head"><p>Modelled with</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>cycling, capacity_check, formation, rate_capability, hppc, ici, gitt, dcir, rpt, quasi_ocv, duty_cycle</p></td>
-<td><p>structured <code class="docutils literal notranslate"><span class="pre">method[]</span></code> (CC/CV/rest/pulse steps) + <code class="docutils literal notranslate"><span class="pre">conditions</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p>eis, impedance</p></td>
-<td><p>an <code class="docutils literal notranslate"><span class="pre">eis</span></code> method step (frequency window + AC amplitude) + <code class="docutils literal notranslate"><span class="pre">conditions</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p>calendar_ageing</p></td>
-<td><p>storage <code class="docutils literal notranslate"><span class="pre">conditions</span></code> + check-up cadence</p></td>
-</tr>
-<tr class="row-odd"><td><p>wltp, nedc</p></td>
-<td><p>drive-cycle power profile — <code class="docutils literal notranslate"><span class="pre">description</span></code> + <code class="docutils literal notranslate"><span class="pre">protocol_url</span></code>; the full time-resolved trace is carried as a linked actionable artifact</p></td>
-</tr>
-<tr class="row-even"><td><p>sem, characterization, field, other</p></td>
-<td><p>minimal <code class="docutils literal notranslate"><span class="pre">name</span></code> + <code class="docutils literal notranslate"><span class="pre">kind</span></code> + <code class="docutils literal notranslate"><span class="pre">description</span></code> (no electrochemical method)</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<blockquote>
-<div><p>The <code class="docutils literal notranslate"><span class="pre">kind</span></code> enum in <code class="docutils literal notranslate"><span class="pre">test-protocol.schema.json</span></code> is kept in sync with the <code class="docutils literal notranslate"><span class="pre">BatteryTestType</span></code>
-Python enum (<code class="docutils literal notranslate"><span class="pre">battinfo.bundle.BatteryTestType</span></code>); the coverage test guards against drift.</p>
-</div></blockquote>
-</section>
-<section id="going-deeper-semantic-depth-of-a-test-protocol">
-<h2>Going deeper: semantic depth of a test protocol<a class="headerlink" href="#going-deeper-semantic-depth-of-a-test-protocol" title="Link to this heading">#</a></h2>
-<p><em>Everything below is background for ontology-curious readers — nothing in it
-is needed to author or run a test spec.</em></p>
-<p>The current representation types the protocol at the class level and carries a free-text
-<code class="docutils literal notranslate"><span class="pre">description</span></code>. EMMO domain-electrochemistry has richer terms that allow a more explicit,
-machine-replicable representation — here is what is available and when to use it.</p>
-<section id="what-the-ontology-provides">
-<h3>What the ontology provides<a class="headerlink" href="#what-the-ontology-provides" title="Link to this heading">#</a></h3>
-<div class="pst-scrollable-table-container"><table class="table">
-<thead>
-<tr class="row-odd"><th class="head"><p>EMMO term</p></th>
-<th class="head"><p>Meaning</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ConstantCurrentConstantVoltageCycling</span></code></p></td>
-<td><p>The complete CC-CV cycle-life protocol</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ConstantCurrentConstantVoltageCharging</span></code></p></td>
-<td><p>A single CC-CV charge step</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ConstantCurrentDischarging</span></code></p></td>
-<td><p>A single CC discharge step</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Resting</span></code></p></td>
-<td><p>A rest / OCV hold step</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ElectrochemicalTestingProcedure</span></code></p></td>
-<td><p>General electrochemical test container</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SerialWorkflow</span></code> / <code class="docutils literal notranslate"><span class="pre">IterativeWorkflow</span></code></p></td>
-<td><p>Structural containers for step sequences</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">hasNext</span></code> / <code class="docutils literal notranslate"><span class="pre">precedes</span></code> / <code class="docutils literal notranslate"><span class="pre">follows</span></code></p></td>
-<td><p>Step-to-step sequencing predicates</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">StepDuration</span></code>, <code class="docutils literal notranslate"><span class="pre">StepSignalCurrent</span></code>, <code class="docutils literal notranslate"><span class="pre">StepSignalVoltage</span></code></p></td>
-<td><p>Per-step parameters</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p>A 1C CC-CV cycle-life protocol could therefore be expressed as an <code class="docutils literal notranslate"><span class="pre">IterativeWorkflow</span></code>
-containing a <code class="docutils literal notranslate"><span class="pre">SerialWorkflow</span></code> whose steps are:
-<code class="docutils literal notranslate"><span class="pre">ConstantCurrentConstantVoltageCharging</span></code> → <code class="docutils literal notranslate"><span class="pre">Resting</span></code> → <code class="docutils literal notranslate"><span class="pre">ConstantCurrentDischarging</span></code> →
-<code class="docutils literal notranslate"><span class="pre">Resting</span></code>, each step carrying typed parameters for C-rate, voltage limit, cut-off
-current, rest duration, and temperature.</p>
-</section>
-<section id="pros-of-explicit-step-decomposition">
-<h3>Pros of explicit step decomposition<a class="headerlink" href="#pros-of-explicit-step-decomposition" title="Link to this heading">#</a></h3>
 <ul class="simple">
-<li><p><strong>Machine-replicable</strong>: the test can be reproduced from the JSON-LD alone without
-parsing free text.</p></li>
-<li><p><strong>SPARQL-queryable at step level</strong>: structured queries like <em>“find all datasets charged
-to 4.2 V at 1C CC-CV”</em> become precise rather than text-search-based.</p></li>
-<li><p><strong>Parameter validation</strong>: step parameters (C-rate, voltage limits, temperatures) can
-be range-checked against cell specs and standards (IEC 62660, EUCAR) automatically.</p></li>
-<li><p><strong>Stable protocol identity</strong>: the semantic structure survives even if the free-text
-description is incomplete or updated.</p></li>
+<li><p>The <strong>protocol</strong> is the plan; the <strong>test</strong> is one execution on one cell (<code class="docutils literal notranslate"><span class="pre">cell_id</span></code>), linked by <code class="docutils literal notranslate"><span class="pre">protocol_id</span></code>.</p></li>
+<li><p>Conditions are <code class="docutils literal notranslate"><span class="pre">{value,</span> <span class="pre">unit}</span></code> quantities - planned ones on the protocol, as-run ones on the test.</p></li>
+<li><p>PyBaMM-style <code class="docutils literal notranslate"><span class="pre">experiment</span></code> strings become structured <code class="docutils literal notranslate"><span class="pre">method</span></code> steps automatically.</p></li>
+<li><p>Deviations from the plan go in the test’s <code class="docutils literal notranslate"><span class="pre">conformance</span></code> block.</p></li>
 </ul>
-</section>
-<section id="cons-and-practical-limits">
-<h3>Cons and practical limits<a class="headerlink" href="#cons-and-practical-limits" title="Link to this heading">#</a></h3>
-<ul class="simple">
-<li><p><strong>Authoring burden</strong>: a four-step cycle becomes a graph of ~10 typed nodes. No
-researcher will author this by hand, so tooling is a prerequisite.</p></li>
-<li><p><strong>EMMO coverage gaps</strong>: GITT, interspersed EIS, multi-rate formation sequences, and
-temperature ramps do not yet have first-class EMMO step types. Mixed typed/free-text
-nodes undermine the value of the graph.</p></li>
-<li><p><strong>Cycler-file redundancy and false precision</strong>: the ground-truth protocol is usually
-the binary file in Biologic BT-Lab, Maccor, or Arbin format. A parallel step graph
-that was hand-authored can silently diverge from what was actually run — which is
-worse than no graph at all.</p></li>
-<li><p><strong>Version fragility</strong>: step-graph records couple tightly to specific EMMO term IRIs.
-An upstream rename invalidates stored records in a way that a text description does
-not.</p></li>
-</ul>
-</section>
-<section id="current-recommendation">
-<h3>Current recommendation<a class="headerlink" href="#current-recommendation" title="Link to this heading">#</a></h3>
-<p>Type the protocol at the class level (e.g. <code class="docutils literal notranslate"><span class="pre">ConstantCurrentConstantVoltageCycling</span></code>) and
-record protocol-level parameters (C-rate, voltage window, temperature, cut-off
-condition) as typed properties. Keep the free-text <code class="docutils literal notranslate"><span class="pre">description</span></code> as the human-readable
-ground truth. Reserve step-level decomposition for cases where:</p>
-<ol class="arabic simple">
-<li><p>The protocol is simple enough to express without gaps (standard CC, CC-CV, or rest
-steps only), <strong>and</strong></p></li>
-<li><p>The step graph is generated programmatically from a machine-readable protocol
-definition (e.g. a cycler script), not authored by hand.</p></li>
-</ol>
-<p>When the cycler file is included as a dataset distribution, it already carries the
-authoritative step definition — the EMMO class typing on the protocol record is
-then sufficient for discovery and filtering.</p>
-</section>
-</section>
-<section id="reference-examples">
-<h2>Reference examples<a class="headerlink" href="#reference-examples" title="Link to this heading">#</a></h2>
+<section id="define-one">
+<h2>Define one<a class="headerlink" href="#define-one" title="Link to this heading">#</a></h2>
 <section id="the-protocol">
 <h3>The protocol<a class="headerlink" href="#the-protocol" title="Link to this heading">#</a></h3>
 <div class="sd-tab-set docutils">
@@ -2516,8 +2363,8 @@ JSON-LD</label><div class="sd-tab-content docutils">
 </div>
 </div>
 </details></section>
-<section id="field-reference">
-<h2>Field reference<a class="headerlink" href="#field-reference" title="Link to this heading">#</a></h2>
+<section id="fields">
+<h2>Fields<a class="headerlink" href="#fields" title="Link to this heading">#</a></h2>
 <p>Generated from the packaged JSON Schemas — the same files <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">validate</span></code> and the registry’s publish gate enforce. Every record also carries the shared envelope (<code class="docutils literal notranslate"><span class="pre">schema_version</span></code>, <code class="docutils literal notranslate"><span class="pre">provenance</span></code>, and optional <code class="docutils literal notranslate"><span class="pre">notes</span></code>, <code class="docutils literal notranslate"><span class="pre">funding</span></code>, <code class="docutils literal notranslate"><span class="pre">contributor</span></code>, <code class="docutils literal notranslate"><span class="pre">license</span></code>).</p>
 <section id="test-protocol-fields">
 <h3>test-protocol fields<a class="headerlink" href="#test-protocol-fields" title="Link to this heading">#</a></h3>
@@ -2775,6 +2622,16 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <p>Top-level <code class="docutils literal notranslate"><span class="pre">artifacts</span></code>: Actionable-layer links to runnable protocol/vendor files produced by or executed in this test.</p>
 </section>
 </section>
+<section id="design-notes">
+<h2>Design notes<a class="headerlink" href="#design-notes" title="Link to this heading">#</a></h2>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">The reasoning behind the model</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text"><strong>Two layers on the protocol.</strong> The descriptive layer is <code class="docutils literal notranslate"><span class="pre">method[]</span></code> — canonical structured steps (modes, directions, setpoints as quantities), authored directly or compiled from PyBaMM-style <code class="docutils literal notranslate"><span class="pre">experiment</span></code> strings — plus derived <code class="docutils literal notranslate"><span class="pre">facets</span></code> for querying. The actionable layer is <code class="docutils literal notranslate"><span class="pre">artifacts[]</span></code>: machine-runnable programs (cycler files, PyBaMM experiments) attached to the spec.</p>
+<p class="sd-card-text"><strong>How the kinds are modelled.</strong> Each test kind (cycling, capacity check, rate capability, formation, HPPC, ICI, GITT, DCIR, EIS, quasi-OCV) has a canonical method shape; the JSON-LD emits a typed EMMO process graph — <code class="docutils literal notranslate"><span class="pre">prov:Plan</span></code> / <code class="docutils literal notranslate"><span class="pre">schema:HowTo</span></code> with a typed method class (for example <code class="docutils literal notranslate"><span class="pre">GalvanostaticIntermittentTitrationTechnique</span></code>) over an <code class="docutils literal notranslate"><span class="pre">IterativeWorkflow</span></code> of typed steps with control and termination parameters.</p>
+<p class="sd-card-text"><strong>Execution semantics.</strong> A test links its cell (<code class="docutils literal notranslate"><span class="pre">hasTestObject</span></code> / <code class="docutils literal notranslate"><span class="pre">schema:object</span></code>) and protocol (<code class="docutils literal notranslate"><span class="pre">dcterms:conformsTo</span></code>); as-run conditions emit as <code class="docutils literal notranslate"><span class="pre">schema:PropertyValue</span></code> entries under <code class="docutils literal notranslate"><span class="pre">schema:additionalProperty</span></code>; deviations live in the <code class="docutils literal notranslate"><span class="pre">conformance</span></code> block with typed deviation entries, so a non-conformant run stays honest without losing the protocol link.</p>
+</div>
+</details></section>
 </section>
 
 
@@ -2788,12 +2645,12 @@ JSON-LD</label><div class="sd-tab-content docutils">
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="components.html"
+       href="half-cells.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Components</p>
+        <p class="prev-next-title">Half cells</p>
       </div>
     </a>
     <a class="right-next"
@@ -2824,26 +2681,18 @@ JSON-LD</label><div class="sd-tab-content docutils">
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#authoring">Authoring</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-each-kind-is-modelled">How each kind is modelled</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#going-deeper-semantic-depth-of-a-test-protocol">Going deeper: semantic depth of a test protocol</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#what-the-ontology-provides">What the ontology provides</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pros-of-explicit-step-decomposition">Pros of explicit step decomposition</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cons-and-practical-limits">Cons and practical limits</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#current-recommendation">Current recommendation</a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reference-examples">Reference examples</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#define-one">Define one</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-protocol">The protocol</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-execution">The execution</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common-examples">Common examples</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#field-reference">Field reference</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fields">Fields</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#test-protocol-fields">test-protocol fields</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#test-fields">test fields</a></li>
 </ul>
 </li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#design-notes">Design notes</a></li>
 </ul>
   </nav></div>
 

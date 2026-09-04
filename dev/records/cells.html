@@ -59,8 +59,8 @@
     <link rel="icon" href="../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Materials" href="materials.html" />
-    <link rel="prev" title="Record types" href="index.html" />
+    <link rel="next" title="Half cells" href="half-cells.html" />
+    <link rel="prev" title="Components" href="components.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -413,11 +413,12 @@
 </ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Record types</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2 current active"><a class="current reference internal" href="#">Cells</a></li>
 <li class="toctree-l2"><a class="reference internal" href="materials.html">Materials</a></li>
 <li class="toctree-l2"><a class="reference internal" href="electrodes.html">Electrodes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="electrolytes.html">Electrolytes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="components.html">Components</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Cells</a></li>
+<li class="toctree-l2"><a class="reference internal" href="half-cells.html">Half cells</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tests.html">Tests</a></li>
 <li class="toctree-l2"><a class="reference internal" href="datasets.html">Datasets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="equipment.html">Equipment</a></li>
@@ -509,98 +510,14 @@
 <section id="cells">
 <h1>Cells<a class="headerlink" href="#cells" title="Link to this heading">#</a></h1>
 <p>How to describe a cell: the design as a <strong>cell spec</strong>, each physical unit as a <strong>cell instance</strong> under it.</p>
-<p>A cell is described at two levels, the spec + instance pattern every family
-uses. The <strong>cell spec</strong> is the design — the datasheet: manufacturer, model,
-format, chemistry, and rated properties as <code class="docutils literal notranslate"><span class="pre">{value,</span> <span class="pre">unit}</span></code> quantities. The
-<strong>cell instance</strong> is one physical unit built to that design: a serial number
-and batch under <code class="docutils literal notranslate"><span class="pre">cell_spec_id</span></code>, plus what was measured on that unit. The
-(spec, serial) pair seeds the instance IRI, so re-registering the same cell
-is a no-op instead of a duplicate.</p>
-<p>A cell instance can also state which physical components went into it —
-<code class="docutils literal notranslate"><span class="pre">working_electrode_id</span></code> points at the electrode disc inside this cell (see
-<a class="reference internal" href="electrodes.html"><span class="std std-doc">electrodes</span></a>).</p>
-<section id="the-engineering-layer">
-<h2>The engineering layer<a class="headerlink" href="#the-engineering-layer" title="Link to this heading">#</a></h2>
-<p>Beyond composition and nominal performance, a cell spec can carry the
-<strong>as-designed engineering</strong> description: how the cell is physically built.
-Two things are deliberately excluded: design-tool scratch math (intermediate
-volumes, slurry masses — recomputed, not stored) and state-dependent
-behaviour (swelling versus cycle, impedance decomposition — those belong to
-measurement series on a test or dataset, not to a spec).</p>
-<p>Every engineering part follows one <strong>holder + property</strong> principle: identity
-fields (<code class="docutils literal notranslate"><span class="pre">material</span></code> / <code class="docutils literal notranslate"><span class="pre">manufacturer</span></code> / <code class="docutils literal notranslate"><span class="pre">supplier</span></code> / <code class="docutils literal notranslate"><span class="pre">product_id</span></code>) plus a
-<code class="docutils literal notranslate"><span class="pre">property</span></code> dict of <code class="docutils literal notranslate"><span class="pre">{value,</span> <span class="pre">unit}</span></code> quantities. Unknown property keys are
-preserved in the record and flagged with a <code class="docutils literal notranslate"><span class="pre">semantic.property_unmapped</span></code>
-warning rather than dropped.</p>
-<p>Where each part lives:</p>
 <ul class="simple">
-<li><p>The <strong>housing</strong> (case, cap, terminals, seals, discrete parts) is authored
-inline on the cell spec or lifted into a standalone housing spec referenced
-by <code class="docutils literal notranslate"><span class="pre">housing_spec_id</span></code> — its field tables are on the
-<a class="reference internal" href="components.html#housing-spec-fields"><span class="std std-ref">components page</span></a>.</p></li>
-<li><p><strong>Current-collector tabs</strong> and <strong>coatings</strong> belong to the electrode — see
-<a class="reference internal" href="electrodes.html"><span class="std std-doc">electrodes</span></a>.</p></li>
-<li><p>The <strong>electrode-assembly geometry</strong> (wound or stacked: <code class="docutils literal notranslate"><span class="pre">assembly_type</span></code>,
-layer and sheet counts, <code class="docutils literal notranslate"><span class="pre">winding_turns</span></code>, <code class="docutils literal notranslate"><span class="pre">electrode_length</span></code>,
-<code class="docutils literal notranslate"><span class="pre">jellyroll_volume</span></code>) is the cell spec’s own <code class="docutils literal notranslate"><span class="pre">construction</span></code> block — see the
-cell-spec field table below.</p></li>
+<li><p>The <strong>spec</strong> is the design (the datasheet); the <strong>cell</strong> instance is one physical unit - the (spec, serial) pair makes re-registration a no-op.</p></li>
+<li><p>A spec composes from parts by IRI: seven optional <code class="docutils literal notranslate"><span class="pre">*_spec_id</span></code> reference fields (electrodes, electrolyte, separator, housing), checked at save.</p></li>
+<li><p>The as-built engineering layer (housing, tabs, <code class="docutils literal notranslate"><span class="pre">construction</span></code> geometry) follows one pattern: identity fields plus a <code class="docutils literal notranslate"><span class="pre">property</span></code> dict of quantities.</p></li>
+<li><p>An instance can name the physical parts inside it, e.g. <code class="docutils literal notranslate"><span class="pre">working_electrode_id</span></code> points at the disc.</p></li>
 </ul>
-</section>
-<section id="composing-a-cell-from-parts">
-<h2>Composing a cell from parts<a class="headerlink" href="#composing-a-cell-from-parts" title="Link to this heading">#</a></h2>
-<p>A cell-spec can be described from reusable, IRI-addressable parts: seven
-optional top-level reference fields sit beside the inline holders —</p>
-<div class="pst-scrollable-table-container"><table class="table">
-<thead>
-<tr class="row-odd"><th class="head"><p>Field</p></th>
-<th class="head"><p>Resolves to</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">positive_electrode_spec_id</span></code> / <code class="docutils literal notranslate"><span class="pre">negative_electrode_spec_id</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">electrode-spec</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">working_electrode_spec_id</span></code> / <code class="docutils literal notranslate"><span class="pre">counter_electrode_spec_id</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">electrode-spec</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">electrolyte_spec_id</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">electrolyte-spec</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">separator_spec_id</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">separator-spec</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">housing_spec_id</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">housing-spec</span></code></p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p>Which electrode pair a cell uses follows from its <code class="docutils literal notranslate"><span class="pre">cell_configuration</span></code> —
-polarity for a full cell, role for a half or three-electrode cell (see
-<a class="reference internal" href="electrodes.html#cells-reference-electrodes"><span class="std std-ref">electrodes</span></a>). A cell may
-<strong>reference</strong>, <strong>inline</strong>, or both — inline holders stay optional, so
-existing records are unaffected. The JSON-LD emits reference nodes
-(<code class="docutils literal notranslate"><span class="pre">hasPositiveElectrode:</span> <span class="pre">{&quot;&#64;id&quot;:</span> <span class="pre">&lt;electrode-spec</span> <span class="pre">IRI&gt;}</span></code>, etc.); when an
-inline node is also present, the <code class="docutils literal notranslate"><span class="pre">&#64;id</span></code> merges onto it.</p>
-<p>References are <strong>checked at save</strong>: a <code class="docutils literal notranslate"><span class="pre">*_spec_id</span></code> that points at nothing
-fails the save with the missing IRI named (opt out with
-<code class="docutils literal notranslate"><span class="pre">resolve_references=False</span></code> for staged workflows; <code class="docutils literal notranslate"><span class="pre">save_batch</span></code> allows
-references within the batch and validates the completed set). The bench
-recipe is <a class="reference internal" href="../howto/build-a-cell-from-components.html"><span class="std std-doc">How-to: build a cell from components</span></a>,
-and <code class="docutils literal notranslate"><span class="pre">extract_component_specs(cell_spec_record)</span></code> goes the other way, lifting
-a cell’s inline holders into standalone component-specs so any inline cell
-can be decomposed and de-duplicated.</p>
-<p>The example cells on the shelf below use exactly this pattern — shared
-component-specs referenced by IRI across the fleet. The NMC811 coin shows
-the complete graph end-to-end:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>cell-spec COIN-NMC811-D  →  cell-instance (P025-CEL-001)  →  test (cycling)  →  dataset
-        ↓ references
-   electrode-spec / electrolyte-spec / separator-spec / housing-spec  →  material-specs
-</pre></div>
-</div>
-</section>
-<section id="reference-examples">
-<h2>Reference examples<a class="headerlink" href="#reference-examples" title="Link to this heading">#</a></h2>
+<section id="define-one">
+<h2>Define one<a class="headerlink" href="#define-one" title="Link to this heading">#</a></h2>
 <section id="a-cell-spec-from-its-datasheet">
 <h3>A cell spec, from its datasheet<a class="headerlink" href="#a-cell-spec-from-its-datasheet" title="Link to this heading">#</a></h3>
 <div class="sd-tab-set docutils">
@@ -3886,8 +3803,8 @@ JSON-LD</label><div class="sd-tab-content docutils">
 </div>
 </div>
 </details></section>
-<section id="field-reference">
-<h2>Field reference<a class="headerlink" href="#field-reference" title="Link to this heading">#</a></h2>
+<section id="fields">
+<h2>Fields<a class="headerlink" href="#fields" title="Link to this heading">#</a></h2>
 <p>Generated from the packaged JSON Schemas — the same files <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">validate</span></code> and the registry’s publish gate enforce. Every record also carries the shared envelope (<code class="docutils literal notranslate"><span class="pre">schema_version</span></code>, <code class="docutils literal notranslate"><span class="pre">provenance</span></code>, and optional <code class="docutils literal notranslate"><span class="pre">notes</span></code>, <code class="docutils literal notranslate"><span class="pre">funding</span></code>, <code class="docutils literal notranslate"><span class="pre">contributor</span></code>, <code class="docutils literal notranslate"><span class="pre">license</span></code>).</p>
 <section id="cell-spec-fields">
 <h3>cell-spec fields<a class="headerlink" href="#cell-spec-fields" title="Link to this heading">#</a></h3>
@@ -4170,10 +4087,22 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <p>Top-level <code class="docutils literal notranslate"><span class="pre">datasets</span></code>: Datasets recorded for this cell. Back-reference to dataset records. dataset.about is the source of truth for what a dataset describes; when records are saved together through a workspace the library fills this list from each dataset’s cell and test links, and hand-authored records may set it directly.</p>
 </section>
 </section>
-<section id="see-also">
-<h2>See also<a class="headerlink" href="#see-also" title="Link to this heading">#</a></h2>
-<p>Recipes: <a class="reference internal" href="../howto/label-your-cells.html"><span class="std std-doc">label your cells</span></a>, <a class="reference internal" href="../howto/build-a-cell-from-components.html"><span class="std std-doc">build a cell from components</span></a>.</p>
-</section>
+<section id="design-notes">
+<h2>Design notes<a class="headerlink" href="#design-notes" title="Link to this heading">#</a></h2>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">The reasoning behind the model</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text"><strong>Composing a cell from parts.</strong> The seven reference fields resolve as: <code class="docutils literal notranslate"><span class="pre">positive_electrode_spec_id</span></code> / <code class="docutils literal notranslate"><span class="pre">negative_electrode_spec_id</span></code> and <code class="docutils literal notranslate"><span class="pre">working_electrode_spec_id</span></code> / <code class="docutils literal notranslate"><span class="pre">counter_electrode_spec_id</span></code> → <code class="docutils literal notranslate"><span class="pre">electrode-spec</span></code> (which pair applies follows from <code class="docutils literal notranslate"><span class="pre">cell_configuration</span></code>); <code class="docutils literal notranslate"><span class="pre">electrolyte_spec_id</span></code> → <code class="docutils literal notranslate"><span class="pre">electrolyte-spec</span></code>; <code class="docutils literal notranslate"><span class="pre">separator_spec_id</span></code> → <code class="docutils literal notranslate"><span class="pre">separator-spec</span></code>; <code class="docutils literal notranslate"><span class="pre">housing_spec_id</span></code> → <code class="docutils literal notranslate"><span class="pre">housing-spec</span></code>. A cell may reference, inline, or both — inline holders stay optional, so existing records are unaffected. The JSON-LD emits reference nodes (<code class="docutils literal notranslate"><span class="pre">hasPositiveElectrode:</span> <span class="pre">{&quot;&#64;id&quot;:</span> <span class="pre">…}</span></code>), merging the <code class="docutils literal notranslate"><span class="pre">&#64;id</span></code> onto an inline node when both are present.</p>
+<p class="sd-card-text"><strong>References are checked at save.</strong> A <code class="docutils literal notranslate"><span class="pre">*_spec_id</span></code> that points at nothing fails the save with the missing IRI named; <code class="docutils literal notranslate"><span class="pre">resolve_references=False</span></code> opts out for staged workflows, and <code class="docutils literal notranslate"><span class="pre">save_batch</span></code> allows references within the batch and validates the completed set. <code class="docutils literal notranslate"><span class="pre">extract_component_specs(cell_spec_record)</span></code> goes the other way, lifting inline holders into standalone specs so any inline cell can be decomposed and de-duplicated.</p>
+<p class="sd-card-text"><strong>The engineering layer.</strong> Beyond composition and rated performance, a spec can carry the as-designed build. Deliberately excluded: design-tool scratch math (recomputed, not stored) and state-dependent behaviour (belongs to tests and datasets). Every part follows holder + property: identity fields plus <code class="docutils literal notranslate"><span class="pre">{value,</span> <span class="pre">unit}</span></code> quantities, unknown keys preserved and warned rather than dropped. The housing (case, cap, terminals, seals, parts) is authored inline or as a standalone <a class="reference internal" href="components.html"><span class="std std-doc">housing spec</span></a>; tabs and coatings belong to <a class="reference internal" href="electrodes.html"><span class="std std-doc">the electrode</span></a>; the wound/stacked geometry is the spec’s own <code class="docutils literal notranslate"><span class="pre">construction</span></code> block.</p>
+<p class="sd-card-text"><strong>The full graph, end to end:</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>cell-spec  →  cell-instance  →  test  →  dataset
+     ↓ references
+electrode-spec / electrolyte-spec / separator-spec / housing-spec  →  material-specs
+</pre></div>
+</div>
+</div>
+</details></section>
 </section>
 
 
@@ -4187,20 +4116,20 @@ JSON-LD</label><div class="sd-tab-content docutils">
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="index.html"
+       href="components.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Record types</p>
+        <p class="prev-next-title">Components</p>
       </div>
     </a>
     <a class="right-next"
-       href="materials.html"
+       href="half-cells.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Materials</p>
+        <p class="prev-next-title">Half cells</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -4223,20 +4152,18 @@ JSON-LD</label><div class="sd-tab-content docutils">
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-engineering-layer">The engineering layer</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#composing-a-cell-from-parts">Composing a cell from parts</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reference-examples">Reference examples</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#define-one">Define one</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#a-cell-spec-from-its-datasheet">A cell spec, from its datasheet</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#a-cell-instance-under-that-spec">A cell instance under that spec</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common-examples">Common examples</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#field-reference">Field reference</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fields">Fields</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cell-spec-fields">cell-spec fields</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cell-instance-fields">cell-instance fields</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#see-also">See also</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#design-notes">Design notes</a></li>
 </ul>
   </nav></div>
 

@@ -8,24 +8,11 @@
 
 How to describe measured data: a **dataset** record per data artifact, and a **dataset series** (collection) record for the deposit or study they belong to.
 
-A dataset record describes measured data files — where they live
-(`access_url`, distributions with checksums), what they measure
-(`variable_measured`, techniques), and what they are about (`about` links to
-the cell and the test that produced them). The files themselves stay wherever
-they are published (Zenodo, an institutional store); the record is the
-semantic layer over them.
+- A dataset describes data files (URLs, checksums, measured variables); the files stay where they are published.
+- `about` links the cell and the test the data came from.
+- A **series** is an ordinary dataset flavored `additional_type: ["DatasetSeries"]`; members point at it with `series_id`, so the collection publishes first.
 
-A dataset **series** is the collection those datasets belong to — one record
-for a whole deposit or study. There is no separate record type: a series is
-an ordinary dataset flavored by `additional_type: ["DatasetSeries"]` (DCAT 3
-declares `dcat:DatasetSeries` a subclass of `dcat:Dataset`). Membership is
-stated on each member through `series_id`, which emits as `dcat:inSeries`
-and `schema:isPartOf`. Because members carry the forward edge, the collection
-publishes first. A series record carries no cell link of its own — its
-members do — and the strict validation policy admits that for the series
-flavor only.
-
-## Reference examples
+## Define one
 
 ### A member dataset
 
@@ -430,7 +417,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 ::::::
 
 
-## Field reference
+## Fields
 
 Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`).
 
@@ -473,3 +460,13 @@ Schema: [`dataset.schema.json`](https://w3id.org/battinfo/schema/dataset.schema.
 | `series_id` | → DatasetIri |  |  |
 | `included_in_data_catalog` | string or → DataCatalog |  | Catalog(s) the dataset is listed in (e.g. the Battery Genome registry). |
 
+
+## Design notes
+
+:::{dropdown} The reasoning behind the model
+**The record is the semantic layer over the files.** Distributions carry the download URL, media type, byte size, and checksum verbatim from where the data is published; `variable_measured` and the measurement technique say what is inside without moving it.
+
+**Self-reference has exactly three honest slots.** A dataset's own archive DOI belongs in `access_url` (where the file lives), `same_as` (the archived representation of this same dataset), and a citation typed `kind: "dataset"` (how the registry derives the DOI) — never in a plain provenance citation, which means "a paper this record supports" and would make the dataset cite itself as its own literature.
+
+**Why the series is a flavor, not a type.** DCAT 3 declares `dcat:DatasetSeries` a subclass of `dcat:Dataset`, so the collection is an ordinary dataset record flavored by `additional_type`, and membership is one edge: the member's `series_id`, emitted as both `dcat:inSeries` and `schema:isPartOf`. Members carry the forward link, so the collection publishes first. A series record needs no cell link of its own — its members hold them — and the strict policy admits that for the series flavor only.
+:::

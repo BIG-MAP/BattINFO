@@ -8,15 +8,11 @@
 
 How to describe lab equipment: the product as an **equipment spec**, each bench unit as **equipment**, each addressable slot as a **channel**.
 
-Lab equipment follows the same spec + instance pattern: the **equipment
-spec** is the product (a cycler model, its channel count, supported
-chemistries), the **equipment** record is one physical unit (serial number,
-location, status), and a **channel** is one addressable slot on a unit —
-its uid is deterministic from (unit, index), so re-registering a bench never
-duplicates channels. Tests point at the unit and channel they ran on through
-`equipment_id` and `channel_id`.
+- **Spec** = the product; **equipment** = one bench unit (serial, location); **channel** = one addressable slot on a unit.
+- Channel identity is deterministic from (unit, index): re-registering a bench never duplicates channels.
+- Tests point at the unit and channel via `equipment_id` / `channel_id`.
 
-## Reference examples
+## Define one
 
 ### An equipment spec (the product)
 
@@ -237,7 +233,7 @@ record = json.loads(
 ::::::
 
 
-## Field reference
+## Fields
 
 Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`).
 
@@ -292,6 +288,3 @@ Schema: [`channel.schema.json`](https://w3id.org/battinfo/schema/channel.schema.
 | `property` | → quantitative-properties |  |  |
 | `comment` | string |  |  |
 
-## See also
-
-Recipe: [register equipment](../howto/register-equipment.md).

@@ -8,16 +8,10 @@
 
 How to describe parameter claims: a **parameter set** is a batch of claims about a target, each naming a curated parameter, a quantity, and a provenance class.
 
-A parameter set is a batch of parameter **claims** about a material kind or
-other target: each claim names a parameter from the curated parameter
-vocabulary, a `{value, unit}` quantity (or a curve), and a provenance class
-(literature, measured, fitted, assumed). Claims are deliberately records —
-several sources can claim different values for the same parameter, and a
-consumer selects among them rather than being handed one anonymous number.
-The parameter vocabulary and the model-tier completeness contracts live in
-the packaged `parameters.json`; the resolve endpoint applies the same rules.
+- A batch of **claims** about a target: each names a curated parameter, a quantity or curve, and a provenance class (literature, measured, fitted, assumed).
+- Claims are records so sources can disagree; consumers select among them.
 
-## Reference examples
+## Define one
 
 ### A claim batch from the literature
 
@@ -313,7 +307,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 ::::::
 
 
-## Field reference
+## Fields
 
 Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`).
 

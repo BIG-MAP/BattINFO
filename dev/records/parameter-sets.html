@@ -413,11 +413,12 @@
 </ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Record types</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="cells.html">Cells</a></li>
 <li class="toctree-l2"><a class="reference internal" href="materials.html">Materials</a></li>
 <li class="toctree-l2"><a class="reference internal" href="electrodes.html">Electrodes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="electrolytes.html">Electrolytes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="components.html">Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cells.html">Cells</a></li>
+<li class="toctree-l2"><a class="reference internal" href="half-cells.html">Half cells</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tests.html">Tests</a></li>
 <li class="toctree-l2"><a class="reference internal" href="datasets.html">Datasets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="equipment.html">Equipment</a></li>
@@ -509,16 +510,12 @@
 <section id="parameter-sets">
 <h1>Parameter sets<a class="headerlink" href="#parameter-sets" title="Link to this heading">#</a></h1>
 <p>How to describe parameter claims: a <strong>parameter set</strong> is a batch of claims about a target, each naming a curated parameter, a quantity, and a provenance class.</p>
-<p>A parameter set is a batch of parameter <strong>claims</strong> about a material kind or
-other target: each claim names a parameter from the curated parameter
-vocabulary, a <code class="docutils literal notranslate"><span class="pre">{value,</span> <span class="pre">unit}</span></code> quantity (or a curve), and a provenance class
-(literature, measured, fitted, assumed). Claims are deliberately records —
-several sources can claim different values for the same parameter, and a
-consumer selects among them rather than being handed one anonymous number.
-The parameter vocabulary and the model-tier completeness contracts live in
-the packaged <code class="docutils literal notranslate"><span class="pre">parameters.json</span></code>; the resolve endpoint applies the same rules.</p>
-<section id="reference-examples">
-<h2>Reference examples<a class="headerlink" href="#reference-examples" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>A batch of <strong>claims</strong> about a target: each names a curated parameter, a quantity or curve, and a provenance class (literature, measured, fitted, assumed).</p></li>
+<li><p>Claims are records so sources can disagree; consumers select among them.</p></li>
+</ul>
+<section id="define-one">
+<h2>Define one<a class="headerlink" href="#define-one" title="Link to this heading">#</a></h2>
 <section id="a-claim-batch-from-the-literature">
 <h3>A claim batch from the literature<a class="headerlink" href="#a-claim-batch-from-the-literature" title="Link to this heading">#</a></h3>
 <div class="sd-tab-set docutils">
@@ -913,8 +910,8 @@ JSON-LD</label><div class="sd-tab-content docutils">
 </div>
 </div>
 </details></section>
-<section id="field-reference">
-<h2>Field reference<a class="headerlink" href="#field-reference" title="Link to this heading">#</a></h2>
+<section id="fields">
+<h2>Fields<a class="headerlink" href="#fields" title="Link to this heading">#</a></h2>
 <p>Generated from the packaged JSON Schemas — the same files <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">validate</span></code> and the registry’s publish gate enforce. Every record also carries the shared envelope (<code class="docutils literal notranslate"><span class="pre">schema_version</span></code>, <code class="docutils literal notranslate"><span class="pre">provenance</span></code>, and optional <code class="docutils literal notranslate"><span class="pre">notes</span></code>, <code class="docutils literal notranslate"><span class="pre">funding</span></code>, <code class="docutils literal notranslate"><span class="pre">contributor</span></code>, <code class="docutils literal notranslate"><span class="pre">license</span></code>).</p>
 <section id="parameter-set-fields">
 <h3>parameter-set fields<a class="headerlink" href="#parameter-set-fields" title="Link to this heading">#</a></h3>
@@ -1042,12 +1039,12 @@ JSON-LD</label><div class="sd-tab-content docutils">
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reference-examples">Reference examples</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#define-one">Define one</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#a-claim-batch-from-the-literature">A claim batch from the literature</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common-examples">Common examples</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#field-reference">Field reference</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fields">Fields</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#parameter-set-fields">parameter-set fields</a></li>
 </ul>
 </li>

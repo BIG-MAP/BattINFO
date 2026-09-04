@@ -413,11 +413,12 @@
 </ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Record types</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="cells.html">Cells</a></li>
 <li class="toctree-l2"><a class="reference internal" href="materials.html">Materials</a></li>
 <li class="toctree-l2"><a class="reference internal" href="electrodes.html">Electrodes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="electrolytes.html">Electrolytes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="components.html">Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cells.html">Cells</a></li>
+<li class="toctree-l2"><a class="reference internal" href="half-cells.html">Half cells</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tests.html">Tests</a></li>
 <li class="toctree-l2"><a class="reference internal" href="datasets.html">Datasets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="equipment.html">Equipment</a></li>
@@ -509,14 +510,13 @@
 <section id="organizations">
 <h1>Organizations<a class="headerlink" href="#organizations" title="Link to this heading">#</a></h1>
 <p>How to describe an organization — the manufacturers, labs, and publishers other records point at.</p>
-<p>An organization record identifies a manufacturer, lab, or publisher that
-other records point at (<code class="docutils literal notranslate"><span class="pre">manufacturer.id</span></code> on specs, publisher on datasets).
-The identity that matters is the <code class="docutils literal notranslate"><span class="pre">same_as</span></code> link to a registry such as ROR;
-the record body carries the display name and its variants, and an
-<code class="docutils literal notranslate"><span class="pre">editorial</span></code> block records curation decisions (for example, a name change
-where one organization supersedes another’s stub).</p>
-<section id="reference-examples">
-<h2>Reference examples<a class="headerlink" href="#reference-examples" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Identity is the <code class="docutils literal notranslate"><span class="pre">same_as</span></code> registry link (ROR, Wikidata); the body carries the display name and its variants.</p></li>
+<li><p>Other records point here: <code class="docutils literal notranslate"><span class="pre">manufacturer.id</span></code> on specs, publisher on datasets.</p></li>
+<li><p>An <code class="docutils literal notranslate"><span class="pre">editorial</span></code> block records curation decisions (for example, supersession on a name change).</p></li>
+</ul>
+<section id="define-one">
+<h2>Define one<a class="headerlink" href="#define-one" title="Link to this heading">#</a></h2>
 <section id="a-manufacturer">
 <h3>A manufacturer<a class="headerlink" href="#a-manufacturer" title="Link to this heading">#</a></h3>
 <div class="sd-tab-set docutils">
@@ -734,8 +734,8 @@ Canonical record</label><div class="sd-tab-content docutils">
 </div>
 </div>
 </details></section>
-<section id="field-reference">
-<h2>Field reference<a class="headerlink" href="#field-reference" title="Link to this heading">#</a></h2>
+<section id="fields">
+<h2>Fields<a class="headerlink" href="#fields" title="Link to this heading">#</a></h2>
 <p>Generated from the packaged JSON Schemas — the same files <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">validate</span></code> and the registry’s publish gate enforce. Every record also carries the shared envelope (<code class="docutils literal notranslate"><span class="pre">schema_version</span></code>, <code class="docutils literal notranslate"><span class="pre">provenance</span></code>, and optional <code class="docutils literal notranslate"><span class="pre">notes</span></code>, <code class="docutils literal notranslate"><span class="pre">funding</span></code>, <code class="docutils literal notranslate"><span class="pre">contributor</span></code>, <code class="docutils literal notranslate"><span class="pre">license</span></code>).</p>
 <section id="organization-fields">
 <h3>organization fields<a class="headerlink" href="#organization-fields" title="Link to this heading">#</a></h3>
@@ -870,12 +870,12 @@ Canonical record</label><div class="sd-tab-content docutils">
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reference-examples">Reference examples</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#define-one">Define one</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#a-manufacturer">A manufacturer</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common-examples">Common examples</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#field-reference">Field reference</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fields">Fields</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#organization-fields">organization fields</a></li>
 </ul>
 </li>

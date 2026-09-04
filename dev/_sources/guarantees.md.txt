@@ -149,7 +149,7 @@ Representative issue codes:
 - `semantic.temporal_order_invalid`
 - `semantic.electrode_holders_mixed` (with `semantic.electrode_role_expected` /
   `semantic.electrode_polarity_expected`: the electrode holders disagree with the
-  cell configuration — see [Electrodes](records/electrodes.md#half-cells-name-their-electrodes-by-role-not-by-polarity))
+  cell configuration — see [Electrodes](records/half-cells.md))
 - `publication.distribution_url_invalid`
 - `publication.jsonld_parse_error`
 

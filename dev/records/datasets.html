@@ -413,11 +413,12 @@
 </ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Record types</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="cells.html">Cells</a></li>
 <li class="toctree-l2"><a class="reference internal" href="materials.html">Materials</a></li>
 <li class="toctree-l2"><a class="reference internal" href="electrodes.html">Electrodes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="electrolytes.html">Electrolytes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="components.html">Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cells.html">Cells</a></li>
+<li class="toctree-l2"><a class="reference internal" href="half-cells.html">Half cells</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tests.html">Tests</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Datasets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="equipment.html">Equipment</a></li>
@@ -509,23 +510,13 @@
 <section id="datasets">
 <h1>Datasets<a class="headerlink" href="#datasets" title="Link to this heading">#</a></h1>
 <p>How to describe measured data: a <strong>dataset</strong> record per data artifact, and a <strong>dataset series</strong> (collection) record for the deposit or study they belong to.</p>
-<p>A dataset record describes measured data files — where they live
-(<code class="docutils literal notranslate"><span class="pre">access_url</span></code>, distributions with checksums), what they measure
-(<code class="docutils literal notranslate"><span class="pre">variable_measured</span></code>, techniques), and what they are about (<code class="docutils literal notranslate"><span class="pre">about</span></code> links to
-the cell and the test that produced them). The files themselves stay wherever
-they are published (Zenodo, an institutional store); the record is the
-semantic layer over them.</p>
-<p>A dataset <strong>series</strong> is the collection those datasets belong to — one record
-for a whole deposit or study. There is no separate record type: a series is
-an ordinary dataset flavored by <code class="docutils literal notranslate"><span class="pre">additional_type:</span> <span class="pre">[&quot;DatasetSeries&quot;]</span></code> (DCAT 3
-declares <code class="docutils literal notranslate"><span class="pre">dcat:DatasetSeries</span></code> a subclass of <code class="docutils literal notranslate"><span class="pre">dcat:Dataset</span></code>). Membership is
-stated on each member through <code class="docutils literal notranslate"><span class="pre">series_id</span></code>, which emits as <code class="docutils literal notranslate"><span class="pre">dcat:inSeries</span></code>
-and <code class="docutils literal notranslate"><span class="pre">schema:isPartOf</span></code>. Because members carry the forward edge, the collection
-publishes first. A series record carries no cell link of its own — its
-members do — and the strict validation policy admits that for the series
-flavor only.</p>
-<section id="reference-examples">
-<h2>Reference examples<a class="headerlink" href="#reference-examples" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>A dataset describes data files (URLs, checksums, measured variables); the files stay where they are published.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">about</span></code> links the cell and the test the data came from.</p></li>
+<li><p>A <strong>series</strong> is an ordinary dataset flavored <code class="docutils literal notranslate"><span class="pre">additional_type:</span> <span class="pre">[&quot;DatasetSeries&quot;]</span></code>; members point at it with <code class="docutils literal notranslate"><span class="pre">series_id</span></code>, so the collection publishes first.</p></li>
+</ul>
+<section id="define-one">
+<h2>Define one<a class="headerlink" href="#define-one" title="Link to this heading">#</a></h2>
 <section id="a-member-dataset">
 <h3>A member dataset<a class="headerlink" href="#a-member-dataset" title="Link to this heading">#</a></h3>
 <div class="sd-tab-set docutils">
@@ -1004,8 +995,8 @@ JSON-LD</label><div class="sd-tab-content docutils">
 </div>
 </div>
 </details></section>
-<section id="field-reference">
-<h2>Field reference<a class="headerlink" href="#field-reference" title="Link to this heading">#</a></h2>
+<section id="fields">
+<h2>Fields<a class="headerlink" href="#fields" title="Link to this heading">#</a></h2>
 <p>Generated from the packaged JSON Schemas — the same files <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">validate</span></code> and the registry’s publish gate enforce. Every record also carries the shared envelope (<code class="docutils literal notranslate"><span class="pre">schema_version</span></code>, <code class="docutils literal notranslate"><span class="pre">provenance</span></code>, and optional <code class="docutils literal notranslate"><span class="pre">notes</span></code>, <code class="docutils literal notranslate"><span class="pre">funding</span></code>, <code class="docutils literal notranslate"><span class="pre">contributor</span></code>, <code class="docutils literal notranslate"><span class="pre">license</span></code>).</p>
 <section id="dataset-fields">
 <h3>dataset fields<a class="headerlink" href="#dataset-fields" title="Link to this heading">#</a></h3>
@@ -1184,6 +1175,16 @@ JSON-LD</label><div class="sd-tab-content docutils">
 </div>
 </section>
 </section>
+<section id="design-notes">
+<h2>Design notes<a class="headerlink" href="#design-notes" title="Link to this heading">#</a></h2>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">The reasoning behind the model</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text"><strong>The record is the semantic layer over the files.</strong> Distributions carry the download URL, media type, byte size, and checksum verbatim from where the data is published; <code class="docutils literal notranslate"><span class="pre">variable_measured</span></code> and the measurement technique say what is inside without moving it.</p>
+<p class="sd-card-text"><strong>Self-reference has exactly three honest slots.</strong> A dataset’s own archive DOI belongs in <code class="docutils literal notranslate"><span class="pre">access_url</span></code> (where the file lives), <code class="docutils literal notranslate"><span class="pre">same_as</span></code> (the archived representation of this same dataset), and a citation typed <code class="docutils literal notranslate"><span class="pre">kind:</span> <span class="pre">&quot;dataset&quot;</span></code> (how the registry derives the DOI) — never in a plain provenance citation, which means “a paper this record supports” and would make the dataset cite itself as its own literature.</p>
+<p class="sd-card-text"><strong>Why the series is a flavor, not a type.</strong> DCAT 3 declares <code class="docutils literal notranslate"><span class="pre">dcat:DatasetSeries</span></code> a subclass of <code class="docutils literal notranslate"><span class="pre">dcat:Dataset</span></code>, so the collection is an ordinary dataset record flavored by <code class="docutils literal notranslate"><span class="pre">additional_type</span></code>, and membership is one edge: the member’s <code class="docutils literal notranslate"><span class="pre">series_id</span></code>, emitted as both <code class="docutils literal notranslate"><span class="pre">dcat:inSeries</span></code> and <code class="docutils literal notranslate"><span class="pre">schema:isPartOf</span></code>. Members carry the forward link, so the collection publishes first. A series record needs no cell link of its own — its members hold them — and the strict policy admits that for the series flavor only.</p>
+</div>
+</details></section>
 </section>
 
 
@@ -1233,16 +1234,17 @@ JSON-LD</label><div class="sd-tab-content docutils">
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reference-examples">Reference examples</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#define-one">Define one</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#a-member-dataset">A member dataset</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-collection-dataset-series">The collection (dataset series)</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common-examples">Common examples</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#field-reference">Field reference</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fields">Fields</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dataset-fields">dataset fields</a></li>
 </ul>
 </li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#design-notes">Design notes</a></li>
 </ul>
   </nav></div>
 

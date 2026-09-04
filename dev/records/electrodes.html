@@ -413,11 +413,12 @@
 </ul>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Record types</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="cells.html">Cells</a></li>
 <li class="toctree-l2"><a class="reference internal" href="materials.html">Materials</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Electrodes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="electrolytes.html">Electrolytes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="components.html">Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cells.html">Cells</a></li>
+<li class="toctree-l2"><a class="reference internal" href="half-cells.html">Half cells</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tests.html">Tests</a></li>
 <li class="toctree-l2"><a class="reference internal" href="datasets.html">Datasets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="equipment.html">Equipment</a></li>
@@ -509,287 +510,14 @@
 <section id="electrodes">
 <h1>Electrodes<a class="headerlink" href="#electrodes" title="Link to this heading">#</a></h1>
 <p>How to describe an electrode: the design as an <strong>electrode spec</strong> (composition, route, design values), a physical coated disc or batch as an <strong>electrode</strong> instance.</p>
-<p>The material spec describes the <strong>powder</strong>; the electrode spec describes the
-<strong>electrode</strong>. They are different things that people routinely conflate, and
-keeping them apart is what lets you say “every Si/Gr anode in the corpus,
-regardless of whose silicon it used”.</p>
-<p>Electrodes extend the materials model by one level rather than repeating it, so
-the chain from generic chemistry to the thing you actually put in a cell is four
-steps:</p>
-<div class="pst-scrollable-table-container"><table class="table">
-<thead>
-<tr class="row-odd"><th class="head"><p>Level</p></th>
-<th class="head"><p>What it is</p></th>
-<th class="head"><p>Form</p></th>
-<th class="head"><p>Example</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>1. <strong>kind</strong></p></td>
-<td><p>the <em>generic</em> active material</p></td>
-<td><p>curated vocabulary (not a record)</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">silicon_graphite</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p>2. <strong>material-spec</strong></p></td>
-<td><p>a <em>powder product</em></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">material-spec</span></code> record</p></td>
-<td><p>Targray NMC811, grade X</p></td>
-</tr>
-<tr class="row-even"><td><p>3. <strong>electrode-spec</strong></p></td>
-<td><p>a <em>designed electrode</em></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">electrode-spec</span></code> record</p></td>
-<td><p>Si-Gr anode, aqueous, 90/5/5</p></td>
-</tr>
-<tr class="row-odd"><td><p>4. <strong>electrode</strong></p></td>
-<td><p>an <em>actual coated batch</em></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">electrode</span></code> record</p></td>
-<td><p>batch <code class="docutils literal notranslate"><span class="pre">Si-AQ-1</span></code></p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p>Who references whom: an <code class="docutils literal notranslate"><span class="pre">electrode-spec</span></code> names a level-1 <code class="docutils literal notranslate"><span class="pre">kind</span></code> and <em>may</em> point at
-a level-2 <code class="docutils literal notranslate"><span class="pre">material-spec</span></code>; an <code class="docutils literal notranslate"><span class="pre">electrode</span></code> points at its <code class="docutils literal notranslate"><span class="pre">electrode-spec</span></code>; a
-<code class="docutils literal notranslate"><span class="pre">cell-spec</span></code> may point at an <code class="docutils literal notranslate"><span class="pre">electrode-spec</span></code> for either side. Every arrow points
-up the table, and every one except the batch → spec link is optional.</p>
-<section id="level-3-electrode-spec-the-designed-electrode">
-<h2>Level 3 — electrode-spec (the designed electrode)<a class="headerlink" href="#level-3-electrode-spec-the-designed-electrode" title="Link to this heading">#</a></h2>
-<section id="kind-is-required-the-powder-reference-is-not">
-<h3>Kind is required, the powder reference is not<a class="headerlink" href="#kind-is-required-the-powder-reference-is-not" title="Link to this heading">#</a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">kind</span></code> names the electrode’s <strong>active material</strong>, drawn from the same curated
-vocabulary the powders use (<code class="docutils literal notranslate"><span class="pre">battinfo.electrodes.electrode_kind_keys()</span></code> lists the
-active-material subset; aliases like <code class="docutils literal notranslate"><span class="pre">Si/Gr</span></code> and <code class="docutils literal notranslate"><span class="pre">NMC</span> <span class="pre">811</span></code> resolve on input).</p>
-<p><code class="docutils literal notranslate"><span class="pre">active_material_spec_id</span></code> — the link to the powder record — is <strong>optional</strong>. That
-asymmetry is the design, not an oversight: labs buy electrodes. A purchased
-NMC811 cathode sheet whose powder provenance nobody knows is still a first-class,
-queryable record that aggregates with every other NMC811 cathode. Author the
-powder reference when you have it, and the electrode joins the material corpus
-too; leave it out and you lose the powder link, not the record.</p>
-<p>A <code class="docutils literal notranslate"><span class="pre">kind</span></code> that resolves but is not an active material (a binder, a salt) is a
-<strong>warning</strong>, not an error — the record is still usable, and the author is better
-placed than the validator to fix the mix-up. <code class="docutils literal notranslate"><span class="pre">polarity</span></code> is <strong>derived</strong> from the
-kind’s family, so a record never states the same fact twice; stating a polarity
-that contradicts the kind (“LFP anode”) warns.</p>
-</section>
-<section id="composition-is-the-cell-spec-coating-shape">
-<h3>Composition is the cell-spec coating shape<a class="headerlink" href="#composition-is-the-cell-spec-coating-shape" title="Link to this heading">#</a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">coating.component</span></code> carries <code class="docutils literal notranslate"><span class="pre">active_material</span></code> / <code class="docutils literal notranslate"><span class="pre">binder</span></code> / <code class="docutils literal notranslate"><span class="pre">additive</span></code>, each a
-material holder with a weight fraction under <code class="docutils literal notranslate"><span class="pre">property.mass_fraction</span></code> and an
-optional <code class="docutils literal notranslate"><span class="pre">material_spec_id</span></code>. This is <em>the same shape</em> a cell-spec’s inline
-electrode coating already uses — a composition authored on an electrode-spec is a
-composition a cell reads, with no translation.</p>
-<p><code class="docutils literal notranslate"><span class="pre">composition=</span></code> is authoring shorthand for that shape, never a second stored form:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">composition</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;active&quot;</span><span class="p">:</span> <span class="mf">0.90</span><span class="p">,</span>                                  <span class="c1"># name derived from kind</span>
-             <span class="s2">&quot;binder&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CMC&quot;</span><span class="p">,</span> <span class="s2">&quot;fraction&quot;</span><span class="p">:</span> <span class="mf">0.05</span><span class="p">},</span>
-             <span class="s2">&quot;additive&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Carbon black&quot;</span><span class="p">,</span> <span class="s2">&quot;fraction&quot;</span><span class="p">:</span> <span class="mf">0.05</span><span class="p">}}</span>
-</pre></div>
-</div>
-</section>
-<section id="design-values">
-<h3>Design values<a class="headerlink" href="#design-values" title="Link to this heading">#</a></h3>
-<p>The open <code class="docutils literal notranslate"><span class="pre">property</span></code> map carries what the design specifies: <code class="docutils literal notranslate"><span class="pre">loading</span></code> (areal
-loading), <code class="docutils literal notranslate"><span class="pre">dry_thickness</span></code> and <code class="docutils literal notranslate"><span class="pre">calendered_thickness</span></code>, <code class="docutils literal notranslate"><span class="pre">areal_capacity</span></code>,
-<code class="docutils literal notranslate"><span class="pre">porosity</span></code>, <code class="docutils literal notranslate"><span class="pre">diameter</span></code> / <code class="docutils literal notranslate"><span class="pre">width</span></code> / <code class="docutils literal notranslate"><span class="pre">length</span></code>. <code class="docutils literal notranslate"><span class="pre">current_collector</span></code> carries the foil
-(material name and/or <code class="docutils literal notranslate"><span class="pre">material_spec_id</span></code>) with its <code class="docutils literal notranslate"><span class="pre">thickness</span></code>. Because the map is
-open, a design value nobody anticipated needs no schema change — the mapped keys
-emit curated EMMO classes (<code class="docutils literal notranslate"><span class="pre">ActiveMassLoading</span></code>, <code class="docutils literal notranslate"><span class="pre">DryCoatingThickness</span></code>,
-<code class="docutils literal notranslate"><span class="pre">CalenderedCoatingThickness</span></code>, <code class="docutils literal notranslate"><span class="pre">AreicCapacity</span></code>, <code class="docutils literal notranslate"><span class="pre">Thickness</span></code>), unmapped ones get the
-standard labeled fallback plus a warning.</p>
-</section>
-<section id="processing-is-spec-level-here-and-this-one-matters">
-<h3>Processing is spec-level here — and this one matters<a class="headerlink" href="#processing-is-spec-level-here-and-this-one-matters" title="Link to this heading">#</a></h3>
-<p>An electrode’s <code class="docutils literal notranslate"><span class="pre">processing</span></code> block (<code class="docutils literal notranslate"><span class="pre">route</span></code> = <code class="docutils literal notranslate"><span class="pre">aqueous</span></code> | <code class="docutils literal notranslate"><span class="pre">nmp</span></code> | <code class="docutils literal notranslate"><span class="pre">dry</span></code> | <code class="docutils literal notranslate"><span class="pre">other</span></code>,
-plus <code class="docutils literal notranslate"><span class="pre">solvent</span></code> and free-text <code class="docutils literal notranslate"><span class="pre">detail</span></code>) is part of the <strong>design</strong>. An
-aqueous-processed electrode is a different electrode from an NMP-processed one:
-different binder, different drying, different porosity, different performance. So
-the route is part of the spec identity, and the same recipe processed two ways
-mints two IRIs.</p>
-<p>Contrast the material model, where <code class="docutils literal notranslate"><span class="pre">processing</span></code> lives on the <strong>instance</strong>: a
-powder lot can legitimately be carbon-coated or not without becoming a different
-product. Same field name, deliberately opposite placement, because the two levels
-mean different things. Both emit the same way — a <code class="docutils literal notranslate"><span class="pre">prov:wasGeneratedBy</span></code>
-Manufacturing process carrying the route as a <code class="docutils literal notranslate"><span class="pre">schema:DefinedTerm</span></code> and the solvent
-as a typed substance.</p>
-</section>
-<section id="identity">
-<h3>Identity<a class="headerlink" href="#identity" title="Link to this heading">#</a></h3>
-<p>A deterministic, content-derived IRI minted from normalized <strong>(producer, product,
-grade, kind, processing route)</strong>. Re-authoring the same design is a no-op, never a
-duplicate; there is no random-id path. Electrode specs mint under the shared
-<code class="docutils literal notranslate"><span class="pre">spec/</span></code> segment, like every other spec (IDENTIFIER_POLICY §6.1).</p>
-</section>
-</section>
-<section id="level-4-electrode-the-coated-batch">
-<h2>Level 4 — electrode (the coated batch)<a class="headerlink" href="#level-4-electrode-the-coated-batch" title="Link to this heading">#</a></h2>
-<p>The physical thing on the bench: a coated web, a sheet, a stack of punched discs.</p>
 <ul class="simple">
-<li><p><strong><code class="docutils literal notranslate"><span class="pre">spec</span></code> link</strong> (required) — a built electrode without a design is not
-describable.</p></li>
-<li><p><strong><code class="docutils literal notranslate"><span class="pre">batch_id</span></code></strong> (e.g. <code class="docutils literal notranslate"><span class="pre">Si-AQ-1</span></code>), <code class="docutils literal notranslate"><span class="pre">lot_id</span></code> for purchased material, <code class="docutils literal notranslate"><span class="pre">supplier</span></code>,
-<code class="docutils literal notranslate"><span class="pre">manufactured_at</span></code> / <code class="docutils literal notranslate"><span class="pre">received_date</span></code> / <code class="docutils literal notranslate"><span class="pre">expires_at</span></code>, <code class="docutils literal notranslate"><span class="pre">amount</span></code> (coated area, web
-length, mass), <code class="docutils literal notranslate"><span class="pre">count</span></code> (discs), <code class="docutils literal notranslate"><span class="pre">storage</span></code>.</p></li>
-<li><p><strong>An OPEN <code class="docutils literal notranslate"><span class="pre">property</span></code> block</strong> for as-built actuals — measured loading, measured
-calendered thickness, measured porosity, disc diameter and mass. Whatever this
-batch was actually measured for is recordable without a schema change. The
-design values live on the spec; these are what the coater got.</p></li>
-<li><p><strong>Identity</strong> — deterministic from <strong>(spec_id, batch)</strong>. Electrode batches mint
-under the <code class="docutils literal notranslate"><span class="pre">electrode/</span></code> segment.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">kind</span></code> names the active material, from the same curated vocabulary as powders; a non-active kind warns but saves.</p></li>
+<li><p>The <strong>spec</strong> is the coated design (composition, route, design values); the <strong>electrode</strong> instance is a physical disc or batch.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">active_material_spec_id</span></code> cites the powder product, so a design never points at a bare vocabulary key.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">polarity</span></code> is authored or absent; half and three-electrode cells name electrodes by role instead (see <a class="reference internal" href="half-cells.html"><span class="std std-doc">half cells</span></a>).</p></li>
 </ul>
-</section>
-<section id="blessed-api">
-<h2>Blessed API<a class="headerlink" href="#blessed-api" title="Link to this heading">#</a></h2>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ws</span> <span class="o">=</span> <span class="n">battinfo</span><span class="o">.</span><span class="n">workspace</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
-<span class="n">ws</span><span class="o">.</span><span class="n">license</span><span class="p">(</span><span class="s2">&quot;cc-by-4.0&quot;</span><span class="p">);</span> <span class="n">ws</span><span class="o">.</span><span class="n">contributor</span><span class="p">(</span><span class="n">orcid</span><span class="o">=</span><span class="s2">&quot;0000-...&quot;</span><span class="p">)</span>
-
-<span class="n">gr</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;material_spec&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Targray Si/Gr&quot;</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;silicon_graphite&quot;</span><span class="p">,</span>
-            <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Targray&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-
-<span class="n">anode</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;electrode_spec&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Si-Gr anode&quot;</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;silicon_graphite&quot;</span><span class="p">,</span>
-               <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;SINTEF&quot;</span><span class="p">,</span> <span class="n">grade</span><span class="o">=</span><span class="s2">&quot;AQ&quot;</span><span class="p">,</span>
-               <span class="n">active_material_spec_id</span><span class="o">=</span><span class="n">gr</span><span class="p">[</span><span class="s2">&quot;material_spec&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
-               <span class="n">composition</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;active&quot;</span><span class="p">:</span> <span class="mf">0.90</span><span class="p">,</span>
-                            <span class="s2">&quot;binder&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CMC&quot;</span><span class="p">,</span> <span class="s2">&quot;fraction&quot;</span><span class="p">:</span> <span class="mf">0.05</span><span class="p">},</span>
-                            <span class="s2">&quot;additive&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Carbon black&quot;</span><span class="p">,</span> <span class="s2">&quot;fraction&quot;</span><span class="p">:</span> <span class="mf">0.05</span><span class="p">}},</span>
-               <span class="n">processing</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;route&quot;</span><span class="p">:</span> <span class="s2">&quot;aqueous&quot;</span><span class="p">,</span> <span class="s2">&quot;solvent&quot;</span><span class="p">:</span> <span class="s2">&quot;water&quot;</span><span class="p">},</span>
-               <span class="n">current_collector</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Copper foil&quot;</span><span class="p">,</span>
-                                  <span class="s2">&quot;thickness&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;um&quot;</span><span class="p">}},</span>
-               <span class="nb">property</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;loading&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">6.2</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;mg/cm2&quot;</span><span class="p">},</span>
-                         <span class="s2">&quot;areal_capacity&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">2.8</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;mAh/cm2&quot;</span><span class="p">}})[</span><span class="mi">0</span><span class="p">]</span>
-
-<span class="n">ws</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;electrode&quot;</span><span class="p">,</span> <span class="n">spec</span><span class="o">=</span><span class="n">anode</span><span class="p">,</span> <span class="n">batch</span><span class="o">=</span><span class="s2">&quot;Si-AQ-1&quot;</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">48</span><span class="p">,</span>
-       <span class="n">manufactured_at</span><span class="o">=</span><span class="s2">&quot;2026-03-04&quot;</span><span class="p">,</span> <span class="n">storage</span><span class="o">=</span><span class="s2">&quot;dry room&quot;</span><span class="p">,</span>
-       <span class="nb">property</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;loading&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">6.35</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;mg/cm2&quot;</span><span class="p">}})</span>
-
-<span class="n">ws</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>   <span class="c1"># writes + stamps contributor/license/funding onto both records</span>
-</pre></div>
-</div>
-<p><code class="docutils literal notranslate"><span class="pre">spec=</span></code> accepts the record returned by <code class="docutils literal notranslate"><span class="pre">ws.add</span></code>, an IRI, or a name added in this
-session. Attribution is stamped exactly as on every other record type, and
-<code class="docutils literal notranslate"><span class="pre">ws.submit()</span></code> sends electrodes along with everything else.</p>
-</section>
-<section id="linked-data">
-<h2>Linked data<a class="headerlink" href="#linked-data" title="Link to this heading">#</a></h2>
-<p>An electrode-spec node is typed from its kind and its polarity — the chemistry
-defined-classes say what it is made of, the polarity class says which side it is
-on:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;SiliconGraphiteElectrode&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;NegativeElectrode&quot;</span><span class="p">]</span>
-</pre></div>
-</div>
-<p>with the coating as an <code class="docutils literal notranslate"><span class="pre">ElectrodeCoating</span></code> (<code class="docutils literal notranslate"><span class="pre">hasActiveMaterial</span></code> / <code class="docutils literal notranslate"><span class="pre">hasBinder</span></code> /
-<code class="docutils literal notranslate"><span class="pre">hasConductiveAdditive</span></code>), the foil as <code class="docutils literal notranslate"><span class="pre">hasCurrentCollector</span></code>, the design values as
-<code class="docutils literal notranslate"><span class="pre">hasProperty</span></code>, the powder reference as <code class="docutils literal notranslate"><span class="pre">hasActiveMaterial</span></code> on the electrode
-itself, and the processing route as <code class="docutils literal notranslate"><span class="pre">prov:wasGeneratedBy</span></code>. A batch emits
-<code class="docutils literal notranslate"><span class="pre">schema:isVariantOf</span></code> → its spec, plus its batch label as a
-<code class="docutils literal notranslate"><span class="pre">schema:PropertyValue</span></code>.</p>
-</section>
-<section id="cells-reference-electrodes">
-<h2>Cells reference electrodes<a class="headerlink" href="#cells-reference-electrodes" title="Link to this heading">#</a></h2>
-<p>A cell-spec can cite a designed electrode two ways, both optional and both additive — existing embedded electrode fields stay valid. They say different things, so pick on meaning rather than taste:</p>
-<ul class="simple">
-<li><p><strong>Prefer</strong> the top-level <code class="docutils literal notranslate"><span class="pre">positive_electrode_spec_id</span></code> / <code class="docutils literal notranslate"><span class="pre">negative_electrode_spec_id</span></code> when the cell spec’s electrode simply <em>is</em> the published design. The spec’s <code class="docutils literal notranslate"><span class="pre">&#64;id</span></code> merges onto the emitted electrode node, so the cell spec and the design are one node in the graph.</p></li>
-<li><p>Use <code class="docutils literal notranslate"><span class="pre">electrode_spec_id</span></code> <strong>inside</strong> the <code class="docutils literal notranslate"><span class="pre">positive_electrode</span></code> / <code class="docutils literal notranslate"><span class="pre">negative_electrode</span></code> holder when the inline description is a <em>variant</em> of the design, or when both electrodes need independent inline detail. It emits <code class="docutils literal notranslate"><span class="pre">schema:isVariantOf</span></code> — the same seam <code class="docutils literal notranslate"><span class="pre">material_spec_id</span></code> gives an inline material — which states that the holder realizes the design without claiming to be it.</p></li>
-</ul>
-<p>Both are authorable from the model:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cs</span><span class="o">.</span><span class="n">positive_electrode_spec_id</span> <span class="o">=</span> <span class="s2">&quot;https://w3id.org/battinfo/spec/rkf4-xz0y-h8kz-rmxz&quot;</span>   <span class="c1"># preferred</span>
-<span class="n">cs</span><span class="o">.</span><span class="n">negative_electrode</span> <span class="o">=</span> <span class="n">electrode</span><span class="p">(</span><span class="n">bom</span><span class="o">=</span><span class="n">bom</span><span class="p">(</span><span class="n">active_material</span><span class="o">=</span><span class="n">material</span><span class="p">(</span><span class="s2">&quot;Graphite&quot;</span><span class="p">)))</span>
-<span class="n">cs</span><span class="o">.</span><span class="n">negative_electrode</span><span class="o">.</span><span class="n">electrode_spec_id</span> <span class="o">=</span> <span class="s2">&quot;https://w3id.org/battinfo/spec/d7qr-n581-74c3-7g7r&quot;</span>
-</pre></div>
-</div>
-<p>An inline current collector cites the foil material the same way, through <code class="docutils literal notranslate"><span class="pre">current_collector.material_spec_id</span></code>.</p>
-</section>
-<section id="half-cells-name-their-electrodes-by-role-not-by-polarity">
-<h2>Half cells name their electrodes by role, not by polarity<a class="headerlink" href="#half-cells-name-their-electrodes-by-role-not-by-polarity" title="Link to this heading">#</a></h2>
-<p>Positive and negative are properties of a <em>full</em> cell: they say which side of a working battery an electrode sits on. A half cell has no such sides. Neither does a three-electrode cell, where the point of the third electrode is to measure a potential that has no polarity of its own. Upstream ruling: <strong>do not use polarity in a half cell — use reference, working and counter electrode instead.</strong></p>
-<p>So a cell-spec has two holder families, and <code class="docutils literal notranslate"><span class="pre">cell_configuration</span></code> picks between them:</p>
-<div class="pst-scrollable-table-container"><table class="table">
-<thead>
-<tr class="row-odd"><th class="head"><p><code class="docutils literal notranslate"><span class="pre">cell_configuration</span></code></p></th>
-<th class="head"><p>Electrode holders</p></th>
-<th class="head"><p>Emitted as</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">full_cell</span></code> (or unstated)</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">positive_electrode</span></code>, <code class="docutils literal notranslate"><span class="pre">negative_electrode</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">hasPositiveElectrode</span></code>, <code class="docutils literal notranslate"><span class="pre">hasNegativeElectrode</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">half_cell</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">working_electrode</span></code>, <code class="docutils literal notranslate"><span class="pre">counter_electrode</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">hasWorkingElectrode</span></code>, <code class="docutils literal notranslate"><span class="pre">hasCounterElectrode</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">three_electrode_cell</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">working_electrode</span></code>, <code class="docutils literal notranslate"><span class="pre">counter_electrode</span></code>, plus <code class="docutils literal notranslate"><span class="pre">reference_electrode</span></code></p></td>
-<td><p>as above, with the reference named separately</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p>The role holders are the same shape as the polarity ones — inline <code class="docutils literal notranslate"><span class="pre">coating</span></code> / <code class="docutils literal notranslate"><span class="pre">current_collector</span></code> / <code class="docutils literal notranslate"><span class="pre">tab</span></code> / <code class="docutils literal notranslate"><span class="pre">property</span></code>, the <code class="docutils literal notranslate"><span class="pre">electrode_spec_id</span></code> seam, and the top-level <code class="docutils literal notranslate"><span class="pre">working_electrode_spec_id</span></code> / <code class="docutils literal notranslate"><span class="pre">counter_electrode_spec_id</span></code> siblings — because <em>what an electrode is made of does not depend on the role it is given</em>. Only the relation and the <code class="docutils literal notranslate"><span class="pre">&#64;type</span></code> change.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ws</span><span class="o">.</span><span class="n">describe_cell</span><span class="p">(</span>
-    <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Lab&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;HC-1&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;coin&quot;</span><span class="p">,</span> <span class="n">chemistry</span><span class="o">=</span><span class="s2">&quot;li-ion&quot;</span><span class="p">,</span>
-    <span class="n">cell_configuration</span><span class="o">=</span><span class="s2">&quot;half_cell&quot;</span><span class="p">,</span>
-    <span class="n">working_electrode</span><span class="o">=</span><span class="n">electrode</span><span class="p">(</span><span class="n">bom</span><span class="o">=</span><span class="n">bom</span><span class="p">(</span><span class="n">active_material</span><span class="o">=</span><span class="n">material</span><span class="p">(</span><span class="s2">&quot;Graphite&quot;</span><span class="p">))),</span>
-    <span class="n">counter_electrode</span><span class="o">=</span><span class="n">electrode</span><span class="p">(</span><span class="n">bom</span><span class="o">=</span><span class="n">bom</span><span class="p">(</span><span class="n">active_material</span><span class="o">=</span><span class="n">material</span><span class="p">(</span><span class="s2">&quot;Lithium&quot;</span><span class="p">))),</span>
-<span class="p">)</span>
-</pre></div>
-</div>
-<p>A half cell’s counter electrode is also its potential reference — there is no third electrode to be one. That is stated on the node rather than as a second relation, so the graph carries one electrode playing two roles instead of two electrodes:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;hasWorkingElectrode&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;WorkingElectrode&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;hasCoating&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;…&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;…&quot;</span><span class="p">}},</span>
-<span class="nt">&quot;hasCounterElectrode&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;CounterElectrode&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;ReferenceElectrode&quot;</span><span class="p">],</span><span class="w"> </span><span class="nt">&quot;…&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;…&quot;</span><span class="p">}</span>
-</pre></div>
-</div>
-<p>In a three-electrode cell the separate <code class="docutils literal notranslate"><span class="pre">reference_electrode</span></code> field carries the reference, so the counter electrode is typed <code class="docutils literal notranslate"><span class="pre">CounterElectrode</span></code> alone. The cell’s own typing is untouched by any of this: <code class="docutils literal notranslate"><span class="pre">half_cell</span></code> still stacks <code class="docutils literal notranslate"><span class="pre">BatteryHalfCell</span></code> + <code class="docutils literal notranslate"><span class="pre">HalfCellDevice</span></code>, <code class="docutils literal notranslate"><span class="pre">three_electrode_cell</span></code> still stacks <code class="docutils literal notranslate"><span class="pre">ThreeElectrodeCellDevice</span></code>.</p>
-<p><strong>Talking about half-cell voltage.</strong> Describe the measurement as working <em>versus</em> counter (or versus reference), not as positive versus negative. A graphite half cell measured against lithium metal has the graphite as the working electrode whichever direction the current runs; calling it the “positive electrode” because it happens to sit at the higher potential in this build states something about the build, not about the design.</p>
-<p><strong>Mixing the families warns.</strong> Authoring polarity holders on a stated half cell, role holders on a full cell, or both families at once each produce a save-time <strong>warning</strong> naming the pair that fits the configuration. Never an error: the funnel stays tolerant, both families round-trip, and an authored electrode is never dropped. What is dropped for a role-holder half cell is the polarity electrode node the emitter used to invent from <code class="docutils literal notranslate"><span class="pre">positive_electrode_basis</span></code> / <code class="docutils literal notranslate"><span class="pre">negative_electrode_basis</span></code> alone — those bases stay as chemistry descriptors and keep typing the cell, but they no longer put a polarity-named electrode in the graph beside the roles.</p>
-<p><strong>Roles are not <code class="docutils literal notranslate"><span class="pre">electrode_spec.polarity</span></code>.</strong> That field is the <em>design’s</em> intended full-cell side, derived from the electrode kind (an LFP cathode is a positive-electrode design). Roles are assigned at the cell level, by the holder an electrode sits in. So the same graphite anode design can be the working electrode of a half cell, and neither statement contradicts the other.</p>
-</section>
-<section id="cell-instances-cite-the-discs-they-were-built-from">
-<h2>Cell instances cite the discs they were built from<a class="headerlink" href="#cell-instances-cite-the-discs-they-were-built-from" title="Link to this heading">#</a></h2>
-<p>A cell spec says which electrode <em>design</em> a cell of this type uses. It cannot say which coating run, which sheet, which disc went into the cell on the bench — and in a coin-cell corpus there are as many electrode instances as cell instances, one punched disc each. <code class="docutils literal notranslate"><span class="pre">cell_instance</span></code> therefore carries <code class="docutils literal notranslate"><span class="pre">working_electrode_id</span></code> and <code class="docutils literal notranslate"><span class="pre">counter_electrode_id</span></code>, pointing at <code class="docutils literal notranslate"><span class="pre">electrode</span></code> records (the batch), not at <code class="docutils literal notranslate"><span class="pre">electrode-spec</span></code> records (the design). The schema enforces the <code class="docutils literal notranslate"><span class="pre">electrode/</span></code> segment, so aiming one of these at a spec is a validation error rather than a silent duplicate of the link the cell spec already has.</p>
-<p>The naming follows the role holders on the cell spec, for the reason given above: a cell that is not a full cell has no polarity to hand out, and role is what the cell assigns. The same disc is a working electrode in one build and a counter electrode in another, so the role belongs to the cell, not to the electrode record.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">disc</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;electrode&quot;</span><span class="p">,</span> <span class="n">spec</span><span class="o">=</span><span class="n">anode</span><span class="p">,</span> <span class="n">batch</span><span class="o">=</span><span class="s2">&quot;Si-AQ-1&quot;</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">48</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-
-<span class="c1"># One batch across a set of cells punched from the same web:</span>
-<span class="n">ws</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;cell&quot;</span><span class="p">,</span> <span class="n">spec</span><span class="o">=</span><span class="n">half_cell</span><span class="p">,</span> <span class="n">serial_numbers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;c-1&quot;</span><span class="p">,</span> <span class="s2">&quot;c-2&quot;</span><span class="p">,</span> <span class="s2">&quot;c-3&quot;</span><span class="p">],</span>
-       <span class="n">working_electrode_id</span><span class="o">=</span><span class="n">disc</span><span class="p">[</span><span class="s2">&quot;electrode&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
-       <span class="n">counter_electrode_id</span><span class="o">=</span><span class="n">li_disc</span><span class="p">[</span><span class="s2">&quot;electrode&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">])</span>
-
-<span class="c1"># Or one electrode record per cell, in cell order:</span>
-<span class="n">ws</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;cell&quot;</span><span class="p">,</span> <span class="n">spec</span><span class="o">=</span><span class="n">half_cell</span><span class="p">,</span> <span class="n">serial_numbers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;c-1&quot;</span><span class="p">,</span> <span class="s2">&quot;c-2&quot;</span><span class="p">,</span> <span class="s2">&quot;c-3&quot;</span><span class="p">],</span>
-       <span class="n">working_electrode_id</span><span class="o">=</span><span class="p">[</span><span class="n">disc_1</span><span class="p">,</span> <span class="n">disc_2</span><span class="p">,</span> <span class="n">disc_3</span><span class="p">])</span>
-</pre></div>
-</div>
-<p>A list of the wrong length is refused rather than zipped short — attaching the wrong physical disc to a physical cell is worse than failing.</p>
-<p>Emission is a <strong>linked node</strong>: the <code class="docutils literal notranslate"><span class="pre">&#64;id</span></code> is the electrode record’s own IRI, and the only thing the cell adds is the role class. The electrode’s chemistry, design link and as-built values stay on the electrode record and merge onto the same node in the graph, so nothing is restated in two places to drift apart.</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;hasWorkingElectrode&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/electrode/k81p-…&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;WorkingElectrode&quot;</span><span class="p">},</span>
-<span class="nt">&quot;hasCounterElectrode&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/electrode/m3x3-…&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;CounterElectrode&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;ReferenceElectrode&quot;</span><span class="p">]}</span>
-</pre></div>
-</div>
-<p>The second <code class="docutils literal notranslate"><span class="pre">&#64;type</span></code> there is the half-cell rule again, and it comes from the spec: an instance states no configuration of its own, so it reads the one it conforms to, the same way it inherits its physical type and its manufacturer. Where the spec is in hand — the publication graph, the deposit graph — a half cell’s counter electrode carries <code class="docutils literal notranslate"><span class="pre">ReferenceElectrode</span></code> too. <code class="docutils literal notranslate"><span class="pre">record_to_jsonld</span></code> transforms a single record and cannot resolve the spec, so there the counter electrode types as <code class="docutils literal notranslate"><span class="pre">CounterElectrode</span></code> alone; pass <code class="docutils literal notranslate"><span class="pre">cell_spec=</span></code> to <code class="docutils literal notranslate"><span class="pre">cell_instance_to_jsonld</span></code> when you have it. Silence about the configuration is not evidence of a half cell.</p>
-<p>The link is deliberately <strong>not</strong> part of the cell’s identity seed, which stays (spec, serial/batch/name). Folding an electrode into it would re-mint every published cell IRI the day a lab filled the field in.</p>
-</section>
-<section id="examples">
-<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading">#</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">examples/electrode-spec/*</span></code> and <code class="docutils literal notranslate"><span class="pre">examples/electrode/*</span></code>. The Si-Gr pair
-(<code class="docutils literal notranslate"><span class="pre">grade:</span> <span class="pre">AQ</span></code> and <code class="docutils literal notranslate"><span class="pre">grade:</span> <span class="pre">NMP</span></code>) exists specifically to show the identity rule: same
-recipe, same loading, two routes, two IRIs. The batch example shows measured
-actuals differing from the design values, which is exactly why the batch is its
-own record.</p>
-<p>See <a class="reference internal" href="materials.html"><span class="std std-doc">materials</span></a> for levels 1-2, and
-<a class="reference internal" href="components.html"><span class="std std-doc">components</span></a> for the remaining component families.</p>
-</section>
-<section id="tabs-and-coatings">
-<h2>Tabs and coatings<a class="headerlink" href="#tabs-and-coatings" title="Link to this heading">#</a></h2>
-<p>Two engineering parts belong to the electrode rather than the cell. A
-<strong>current-collector tab</strong> (<code class="docutils literal notranslate"><span class="pre">Electrode.tab</span></code>) carries <code class="docutils literal notranslate"><span class="pre">material</span></code>, the identity
-fields, and a <code class="docutils literal notranslate"><span class="pre">property</span></code> dict (width, thickness, length, weld width, tape
-width); it emits under <code class="docutils literal notranslate"><span class="pre">hasCurrentCollectorTab</span></code> on the electrode node. A
-<strong>coating</strong> carries the active/binder/additive composition and its own
-<code class="docutils literal notranslate"><span class="pre">property</span></code> dict — a secondary layer such as a ceramic coating is simply an
-additional coating holder, so no new field type is needed to express it.</p>
-</section>
-<section id="reference-examples">
-<h2>Reference examples<a class="headerlink" href="#reference-examples" title="Link to this heading">#</a></h2>
+<section id="define-one">
+<h2>Define one<a class="headerlink" href="#define-one" title="Link to this heading">#</a></h2>
 <section id="an-electrode-spec-the-design">
 <h3>An electrode spec (the design)<a class="headerlink" href="#an-electrode-spec-the-design" title="Link to this heading">#</a></h3>
 <div class="sd-tab-set docutils">
@@ -818,7 +546,6 @@ Canonical record</label><div class="sd-tab-content docutils">
 <span class="w">    </span><span class="nt">&quot;short_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kxwy5f&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NMC811 cathode design A&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;kind&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;nmc811&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;polarity&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;positive&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;active_material_spec_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5&quot;</span>
 <span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;provenance&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -843,10 +570,7 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <span class="w">      </span><span class="nt">&quot;battinfo&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/&quot;</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">    </span><span class="s2">&quot;LithiumNickelManganeseCobaltOxideElectrode&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;PositiveElectrode&quot;</span>
-<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;LithiumNickelManganeseCobaltOxideElectrode&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NMC811 cathode design A&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;hasActiveMaterial&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -2080,8 +1804,8 @@ JSON-LD</label><div class="sd-tab-content docutils">
 </div>
 </div>
 </details></section>
-<section id="field-reference">
-<h2>Field reference<a class="headerlink" href="#field-reference" title="Link to this heading">#</a></h2>
+<section id="fields">
+<h2>Fields<a class="headerlink" href="#fields" title="Link to this heading">#</a></h2>
 <p>Generated from the packaged JSON Schemas — the same files <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">validate</span></code> and the registry’s publish gate enforce. Every record also carries the shared envelope (<code class="docutils literal notranslate"><span class="pre">schema_version</span></code>, <code class="docutils literal notranslate"><span class="pre">provenance</span></code>, and optional <code class="docutils literal notranslate"><span class="pre">notes</span></code>, <code class="docutils literal notranslate"><span class="pre">funding</span></code>, <code class="docutils literal notranslate"><span class="pre">contributor</span></code>, <code class="docutils literal notranslate"><span class="pre">license</span></code>).</p>
 <section id="electrode-spec-fields">
 <h3>electrode-spec fields<a class="headerlink" href="#electrode-spec-fields" title="Link to this heading">#</a></h3>
@@ -2118,7 +1842,7 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">polarity</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">positive</span></code> | <code class="docutils literal notranslate"><span class="pre">negative</span></code> | <code class="docutils literal notranslate"><span class="pre">unknown</span></code></p></td>
 <td><p></p></td>
-<td><p>Electrode polarity. Derived from the kind’s family when not authored (active_cathode -&gt; positive, active_anode -&gt; negative).</p></td>
+<td><p>Electrode polarity, authored when the design has a side to state. Never derived from the kind: which side an active material sits on is system-relative (graphite is the positive electrode of a lithium-counter half cell). Role-based cells (half / three-electrode) name electrodes by role instead.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">grade</span></code></p></td>
 <td><p>string</p></td>
@@ -2281,10 +2005,18 @@ JSON-LD</label><div class="sd-tab-content docutils">
 </div>
 </section>
 </section>
-<section id="see-also">
-<h2>See also<a class="headerlink" href="#see-also" title="Link to this heading">#</a></h2>
-<p>Recipe: <a class="reference internal" href="../howto/build-a-cell-from-components.html"><span class="std std-doc">build a cell from components</span></a>.</p>
-</section>
+<section id="design-notes">
+<h2>Design notes<a class="headerlink" href="#design-notes" title="Link to this heading">#</a></h2>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">The reasoning behind the model</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text"><strong>Design vs disc.</strong> The spec is the <em>design</em>: composition (<code class="docutils literal notranslate"><span class="pre">coating.component</span></code> with active/binder/additive holders), processing route, design values, and batch statistics stated with the structured <code class="docutils literal notranslate"><span class="pre">standard_deviation</span></code> / <code class="docutils literal notranslate"><span class="pre">sample_count</span></code> fields. The instance is the physical disc or batch — the per-cell as-built figures (mass, loading, areal capacity) live here, because they were true before any test ran.</p>
+<p class="sd-card-text"><strong>Half cells name their electrodes by role, not by polarity.</strong> A half cell has no sides to name, and in the working-electrode convention a graphite working electrode charges toward 1 V vs Li/Li+ — polarity labels would mislead. <code class="docutils literal notranslate"><span class="pre">polarity</span></code> is therefore authored or absent, never derived from the kind: an “LFP negative electrode” is a legitimate design (lithium-counter half cell), not a typo, and nothing warns about it.</p>
+<p class="sd-card-text"><strong>Cells reference electrodes.</strong> Which electrode pair a cell uses follows from its <code class="docutils literal notranslate"><span class="pre">cell_configuration</span></code> — the polarity holders (<code class="docutils literal notranslate"><span class="pre">positive_electrode</span></code> / <code class="docutils literal notranslate"><span class="pre">negative_electrode</span></code>) for a full cell, the role holders (<code class="docutils literal notranslate"><span class="pre">working_electrode</span></code> / <code class="docutils literal notranslate"><span class="pre">counter_electrode</span></code>) for a half or three-electrode cell. A cell instance points at the physical disc inside it through <code class="docutils literal notranslate"><span class="pre">working_electrode_id</span></code>.</p>
+<p class="sd-card-text"><strong>Tabs and coatings</strong> belong to the electrode. A current-collector tab (<code class="docutils literal notranslate"><span class="pre">Electrode.tab</span></code>) carries identity fields plus a <code class="docutils literal notranslate"><span class="pre">property</span></code> dict (width, thickness, weld width) and emits under <code class="docutils literal notranslate"><span class="pre">hasCurrentCollectorTab</span></code>. A coating carries the composition and its own properties; a secondary layer such as a ceramic coating is simply an additional coating holder.</p>
+<p class="sd-card-text"><strong>Emission.</strong> The kind types the node with its chemistry electrode class (<code class="docutils literal notranslate"><span class="pre">GraphiteElectrode</span></code>, <code class="docutils literal notranslate"><span class="pre">LithiumIronPhosphateElectrode</span></code>, …); an authored polarity stacks <code class="docutils literal notranslate"><span class="pre">PositiveElectrode</span></code> / <code class="docutils literal notranslate"><span class="pre">NegativeElectrode</span></code> on top; role holders emit role types (<code class="docutils literal notranslate"><span class="pre">WorkingElectrode</span></code>, and the counter of a two-electrode half cell types as both <code class="docutils literal notranslate"><span class="pre">CounterElectrode</span></code> and <code class="docutils literal notranslate"><span class="pre">ReferenceElectrode</span></code>).</p>
+</div>
+</details></section>
 </section>
 
 
@@ -2334,34 +2066,18 @@ JSON-LD</label><div class="sd-tab-content docutils">
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#level-3-electrode-spec-the-designed-electrode">Level 3 — electrode-spec (the designed electrode)</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#kind-is-required-the-powder-reference-is-not">Kind is required, the powder reference is not</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#composition-is-the-cell-spec-coating-shape">Composition is the cell-spec coating shape</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#design-values">Design values</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#processing-is-spec-level-here-and-this-one-matters">Processing is spec-level here — and this one matters</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#identity">Identity</a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#level-4-electrode-the-coated-batch">Level 4 — electrode (the coated batch)</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#blessed-api">Blessed API</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#linked-data">Linked data</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cells-reference-electrodes">Cells reference electrodes</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#half-cells-name-their-electrodes-by-role-not-by-polarity">Half cells name their electrodes by role, not by polarity</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cell-instances-cite-the-discs-they-were-built-from">Cell instances cite the discs they were built from</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#examples">Examples</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tabs-and-coatings">Tabs and coatings</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reference-examples">Reference examples</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#define-one">Define one</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#an-electrode-spec-the-design">An electrode spec (the design)</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#an-electrode-the-disc-in-one-cell">An electrode (the disc in one cell)</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common-examples">Common examples</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#field-reference">Field reference</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fields">Fields</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#electrode-spec-fields">electrode-spec fields</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#electrode-fields">electrode fields</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#see-also">See also</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#design-notes">Design notes</a></li>
 </ul>
   </nav></div>
 
