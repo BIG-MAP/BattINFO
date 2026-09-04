@@ -322,4 +322,5 @@ def test_role_holder_materials_are_extracted_without_a_polarity() -> None:
     names = {s["material_spec"]["name"] for s in specs}
     assert {"Graphite", "Lithium"} <= names
     for spec in specs:
-        assert spec["material_spec"].get("electrode_polarity") in (None, "none")
+        # Polarity is an electrode property; extraction never stamps one.
+        assert "electrode_polarity" not in spec["material_spec"]

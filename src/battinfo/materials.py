@@ -175,7 +175,6 @@ def material_spec_from_component(
     component: Any,
     *,
     material_class: str | None = None,
-    electrode_polarity: str | None = None,
     uid_seed: str | None = None,
 ) -> dict[str, Any]:
     """Lift an embedded material holder to a standalone material-spec record.
@@ -203,8 +202,6 @@ def material_spec_from_component(
             fields[key] = holder[key]
     if material_class:
         fields["material_class"] = material_class
-    if electrode_polarity:
-        fields["electrode_polarity"] = electrode_polarity
     return create_material_spec(validate=False, **fields)
 
 
@@ -216,7 +213,11 @@ def link_component_to_spec(component: Any, material_spec_id: str) -> dict[str, A
 
 
 def _iter_embedded_materials(cell_spec_record: Mapping[str, Any]):
-    """Yield (holder_dict, material_class, electrode_polarity) for every embedded material."""
+    """Yield (holder_dict, material_class) for every embedded material.
+
+    No polarity is derived or stamped: polarity is an electrode property, never
+    a material's. The holder position says which electrode used the material;
+    the material record does not repeat it."""
     data = cell_spec_record
     # Electrode coatings: active_material / binder / additive
     group_class = {
@@ -224,14 +225,11 @@ def _iter_embedded_materials(cell_spec_record: Mapping[str, Any]):
         "binder": "binder",
         "additive": "conductive_additive",
     }
-    # Role holders carry no polarity: a half cell or a three-electrode cell has
-    # none to assign, so their active materials are extracted with "none" rather
-    # than a guessed side.
-    for electrode_key, polarity in (
-        ("positive_electrode", "positive"),
-        ("negative_electrode", "negative"),
-        ("working_electrode", "none"),
-        ("counter_electrode", "none"),
+    for electrode_key in (
+        "positive_electrode",
+        "negative_electrode",
+        "working_electrode",
+        "counter_electrode",
     ):
         electrode = data.get(electrode_key)
         if not isinstance(electrode, Mapping):
@@ -242,29 +240,28 @@ def _iter_embedded_materials(cell_spec_record: Mapping[str, Any]):
             for group, mclass in group_class.items():
                 for item in _as_material_list(component.get(group)):
                     if isinstance(item, Mapping) and item.get("name"):
-                        pol = polarity if group == "active_material" else "none"
-                        yield item, mclass, pol
+                        yield item, mclass
         collector = electrode.get("current_collector")
         if isinstance(collector, Mapping) and collector.get("name"):
-            yield collector, "current_collector", "none"
+            yield collector, "current_collector"
 
     electrolyte = data.get("electrolyte")
     if isinstance(electrolyte, Mapping):
         salt = electrolyte.get("salt")
         if isinstance(salt, Mapping) and salt.get("name"):
-            yield salt, "electrolyte_salt", "none"
+            yield salt, "electrolyte_salt"
         solvent_mixture = electrolyte.get("solvent_mixture")
         if isinstance(solvent_mixture, Mapping):
             for item in _as_material_list(solvent_mixture.get("component")):
                 if isinstance(item, Mapping) and item.get("name"):
-                    yield item, "electrolyte_solvent", "none"
+                    yield item, "electrolyte_solvent"
         for item in _as_material_list(electrolyte.get("additive")):
             if isinstance(item, Mapping) and item.get("name"):
-                yield item, "electrolyte_additive", "none"
+                yield item, "electrolyte_additive"
 
     separator = data.get("separator")
     if isinstance(separator, Mapping) and isinstance(separator.get("material"), str):
-        yield {"name": separator["material"]}, "separator_material", "none"
+        yield {"name": separator["material"]}, "separator_material"
 
 
 def extract_material_specs(cell_spec_record: Mapping[str, Any]) -> list[dict[str, Any]]:
@@ -276,7 +273,7 @@ def extract_material_specs(cell_spec_record: Mapping[str, Any]) -> list[dict[str
     """
     seen: dict[str, dict[str, Any]] = {}
     seen_identity: dict[str, tuple[Any, dict[str, Any]]] = {}
-    for holder, mclass, polarity in _iter_embedded_materials(cell_spec_record):
+    for holder, mclass in _iter_embedded_materials(cell_spec_record):
         key = str(holder["name"]).strip().lower()
         identity = (holder.get("molecular_formula"), _intrinsic_property(holder.get("property")))
         if key in seen:
@@ -292,8 +289,6 @@ def extract_material_specs(cell_spec_record: Mapping[str, Any]) -> list[dict[str
                     stacklevel=2,
                 )
             continue
-        seen[key] = material_spec_from_component(
-            holder, material_class=mclass, electrode_polarity=polarity
-        )
+        seen[key] = material_spec_from_component(holder, material_class=mclass)
         seen_identity[key] = identity
     return list(seen.values())

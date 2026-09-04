@@ -6,7 +6,6 @@
     "name": "LMFP",
     "kind": "lmfp",
     "material_class": "active_material",
-    "electrode_polarity": "positive",
     "formula": "LiMn0.7Fe0.3PO4",
     "chemistry_family": "olivine",
     "manufacturer": {

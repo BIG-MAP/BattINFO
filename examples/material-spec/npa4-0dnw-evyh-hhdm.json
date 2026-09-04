@@ -6,7 +6,6 @@
     "name": "NMC811",
     "kind": "nmc811",
     "material_class": "active_material",
-    "electrode_polarity": "positive",
     "formula": "LiNi0.8Mn0.1Co0.1O2",
     "chemistry_family": "layered-oxide",
     "manufacturer": {

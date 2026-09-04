@@ -6,7 +6,6 @@
     "name": "Silicon-graphite composite",
     "kind": "silicon_graphite",
     "material_class": "active_material",
-    "electrode_polarity": "negative",
     "formula": "Si/C",
     "property": {
       "specific_capacity": {

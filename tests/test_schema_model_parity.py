@@ -118,6 +118,7 @@ KNOWN_GAPS: dict[tuple[str, str], str] = {
 
     # schema.org descriptive fields the schema permits on a product record.
     ("cell-spec", "brand"): "schema:brand object; datasheets use manufacturer + model instead",
+    ("material-spec", "electrode_polarity"): "deprecated: polarity is an electrode property; schema accepts it for back-compat only, no authoring path",
     ("cell-spec", "category"): "schema:category; the emitter derives a category from battery_category/chemistry",
     ("cell-spec", "url"): "schema:url for the product page; datasheet_url/provenance.source_url carry this today",
     ("cell-spec", "additional_type"): "schema:additionalType; the emitter derives the EMMO type from format + chemistry",

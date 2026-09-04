@@ -6,6 +6,6 @@
 
 **The embedded ↔ standalone bridge.** A material described inline in a composition can be lifted to a standalone spec (`material_spec_from_component`) and a cell's inline holders decomposed and de-duplicated (`extract_material_specs`), so starting embedded never blocks graduating to first-class records.
 
-**One caveat pending review:** the record-level `electrode_polarity` field remains in the schema, but a material has no side of its own — prefer leaving it unset; the side belongs to the cell that uses the material.
+**Two deprecated record fields.** `electrode_polarity` is deprecated and has no authoring path: polarity is an electrode property, never a material's — the schema accepts the key only so existing records keep validating. `material_class` is deprecated in favor of the kind's `roles`: a single forced role is system-relative, and the kind carries strictly better information; the field stays accepted (importers still write it) until the next record-shape version.
 
 **Governance:** the vocabulary changes by PR only; tests pin that each kind's `emmo` class resolves in the bundled context and names the same substance as its `chemsub` anchor.

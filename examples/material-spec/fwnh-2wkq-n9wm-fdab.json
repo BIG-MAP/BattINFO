@@ -6,7 +6,6 @@
     "name": "MnO2",
     "kind": "mno2",
     "material_class": "active_material",
-    "electrode_polarity": "positive",
     "formula": "MnO2",
     "chemistry_family": "manganese-oxide",
     "property": {

@@ -57,7 +57,6 @@ class MaterialSpecInput(BaseModel):
     kind: str | None = None
     grade: str | None = None
     material_class: str | None = None
-    electrode_polarity: str | None = None
     formula: str | None = None
     chemistry_family: str | None = None
     emmo_type: str | None = None
@@ -287,7 +286,6 @@ def _record_from_material_spec(draft: MaterialSpecInput) -> dict[str, Any]:
         spec["grade"] = draft.grade
     for field_name in (
         "material_class",
-        "electrode_polarity",
         "formula",
         "chemistry_family",
         "emmo_type",

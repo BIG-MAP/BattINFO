@@ -6,7 +6,6 @@
     "name": "LNMO",
     "kind": "lnmo",
     "material_class": "active_material",
-    "electrode_polarity": "positive",
     "formula": "LiNi0.5Mn1.5O4",
     "chemistry_family": "spinel",
     "property": {

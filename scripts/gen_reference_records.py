@@ -137,7 +137,6 @@ def snippet_material_spec():
         uid="7d9k-2m4p-8t3x-6nq5",
         name="NMC811 cathode powder",
         kind="nmc811",                     # Level-1 key from the curated vocabulary
-        material_class="active_material",
         source_type="datasheet",
     )
     return record

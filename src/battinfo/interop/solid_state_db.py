@@ -235,7 +235,6 @@ def from_solid_state_db_row(
             uid=_uid_from_seed(seed, "material", role, name),
             name=name,
             material_class=material_class,
-            electrode_polarity=polarity,
             chemistry_family=family,
             source_type="literature",
             citation=citation,

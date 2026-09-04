@@ -7,6 +7,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Deprecated
+
+- **`material_spec.electrode_polarity` and `material_spec.material_class`.**
+  Polarity is an electrode property, never a material's, so
+  `electrode_polarity` loses its authoring path entirely: the API kwarg is
+  removed, the embedded-to-standalone bridge and `extract_material_specs`
+  stop stamping it, and the packaged examples drop it — the schema accepts
+  the key only so existing records keep validating. `material_class` is
+  deprecated in favor of the kind's `roles` (strictly better information,
+  multi-valued, curated); it stays accepted and importers still write it,
+  slated for removal at the next record-shape version. The parameter-set
+  claim scope named `electrode_polarity` is unrelated (it describes the
+  electrode context of a measurement) and is retained.
+
 ### Changed
 
 - **Material kinds carry `roles` (a list), replacing the single-valued
