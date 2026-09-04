@@ -18,8 +18,8 @@ Each page also carries a shelf of common, real examples — the docs' reasonable
 | [Electrodes](electrodes.md) | An electrode spec (the design) · An electrode (the disc in one cell) |
 | [Electrolytes](electrolytes.md) | An electrolyte spec (the formulation) · An electrolyte (one mixed batch) |
 | [Components](components.md) | A separator spec |
-| [Half cells](half-cells.md) | A coin half cell for electrode characterization |
 | [Cells](cells.md) | A cell spec, from its datasheet · A cell instance under that spec |
+| [Half cells](half-cells.md) | A coin half cell for electrode characterization |
 | [Tests](tests.md) | The protocol · The execution |
 | [Datasets](datasets.md) | A member dataset · The collection (dataset series) |
 | [Equipment](equipment.md) | An equipment spec (the product) · An equipment unit · A channel on that unit |
@@ -35,8 +35,8 @@ materials
 electrodes
 electrolytes
 components
-half-cells
 cells
+half-cells
 tests
 datasets
 equipment
