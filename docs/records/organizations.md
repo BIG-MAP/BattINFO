@@ -8,14 +8,11 @@
 
 How to describe an organization — the manufacturers, labs, and publishers other records point at.
 
-An organization record identifies a manufacturer, lab, or publisher that
-other records point at (`manufacturer.id` on specs, publisher on datasets).
-The identity that matters is the `same_as` link to a registry such as ROR;
-the record body carries the display name and its variants, and an
-`editorial` block records curation decisions (for example, a name change
-where one organization supersedes another's stub).
+- Identity is the `same_as` registry link (ROR, Wikidata); the body carries the display name and its variants.
+- Other records point here: `manufacturer.id` on specs, publisher on datasets.
+- An `editorial` block records curation decisions (for example, supersession on a name change).
 
-## Reference examples
+## Define one
 
 ### A manufacturer
 
@@ -165,7 +162,7 @@ record = json.loads(
 ::::::
 
 
-## Field reference
+## Fields
 
 Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`).
 

@@ -7,6 +7,27 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Material kinds carry `roles` (a list), replacing the single-valued
+  `family`.** The old axis forced one role onto substances that legitimately
+  play several and took sides on active materials (`active_anode` /
+  `active_cathode`) — but roles are system-relative: graphite is the positive
+  electrode of every lithium-counter half cell, FEC is both co-solvent and
+  additive, CMC both binder and thickener. `roles` lists the use-site slots a
+  substance is known to fill (coating roles, electrolyte constituents,
+  component films/foils/coatings); it is informative, never normative — no
+  validator rejects a use outside the listed roles. `active_material` is the
+  one load-bearing role: it gates `electrode_spec.kind` and anchors reference
+  properties. VC is refiled from solvent to additive; NMP carries an empty
+  list (a processing solvent fills no composition slot). With the sides gone,
+  the polarity-derivation chain retires: `create_electrode_spec` stamps
+  `polarity` only when authored, the emitted `@type` carries a polarity class
+  only for authored polarity, `semantic.electrode_polarity_conflict` is
+  removed, and `electrode_polarity_for_kind` (never exported from the package
+  root) is gone. Vocabulary 0.2.0 → 0.3.0. The registry re-vendors
+  `material_kinds.json` after this merge.
+
 ### Fixed
 
 - **The `modes` facet recurses into step groups.** A cycling protocol wrapped

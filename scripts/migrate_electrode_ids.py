@@ -6,7 +6,8 @@ uid it was handed, so existing corpora carry electrode-spec / electrode records
 whose ids say nothing about what they identify. This script re-mints them the way
 the engine now does — electrode-spec from (producer, product, grade, kind,
 processing route); electrode batch from (spec_id, batch) — backfills the required
-``kind`` (and the polarity it implies) from the record's own active material,
+``kind`` from the record's own active material (never a polarity — which side
+a material sits on is the cell's fact, not the material's),
 rewrites the record files, fixes cross-references (electrode batch -> spec;
 cell-spec ``positive/negative_electrode_spec_id`` and inline-holder
 ``electrode_spec_id``), and prints the old-id -> new-id map.
@@ -32,7 +33,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from battinfo.electrodes import electrode_polarity_for_kind, resolve_electrode_kind
+from battinfo.electrodes import resolve_electrode_kind
 from battinfo.entities import (
     electrode_identity_seed,
     electrode_spec_identity_seed,
@@ -135,9 +136,6 @@ def migrate(source_root: Path, *, write: bool) -> dict[str, str]:
         kind = _resolved_kind(body)
         if kind and body.get("kind") != kind:
             body["kind"] = kind
-        polarity = electrode_polarity_for_kind(kind)
-        if polarity and not body.get("polarity"):
-            body["polarity"] = polarity
         new_uid = _spec_uid(body, kind)
         new_id = f"{_SPEC_BASE}{new_uid}"
         if new_id != old_id:

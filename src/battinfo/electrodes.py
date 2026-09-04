@@ -21,13 +21,14 @@ from __future__ import annotations
 import re
 from typing import Any
 
-# Kind families that name an ACTIVE material, and the electrode polarity each
-# implies. A kind outside these families (a binder, a salt) is a semantic
-# warning, not a hard error — tolerant import beats a rejected record.
-ACTIVE_KIND_FAMILIES: dict[str, str] = {
-    "active_cathode": "positive",
-    "active_anode": "negative",
-}
+# The one load-bearing role in the kind vocabulary. A kind without it (a
+# binder, a salt) is a semantic warning as an electrode kind, not a hard
+# error — tolerant import beats a rejected record. Roles are informative and
+# system-relative; in particular the vocabulary does NOT encode which side an
+# active material sits on (graphite is the positive electrode of every
+# lithium-counter half cell), so polarity is authored on the electrode or
+# implied by the cell, never derived from the kind.
+ACTIVE_MATERIAL_ROLE = "active_material"
 
 #: Polarity -> the EMMO electrode-side class stacked onto an electrode node's
 #: ``@type``. Lives here, in a leaf module, so the JSON-LD emitter and the JSON-LD
@@ -120,7 +121,7 @@ def electrode_kind_keys() -> list[str]:
     """Sorted active-material kind keys — the values ``electrode_spec.kind`` names.
 
     A subset of :func:`battinfo.materials.material_kind_keys`: the kinds whose
-    family is an active-material family. Any material kind resolves on input
+    roles include ``active_material``. Any material kind resolves on input
     (tolerant), but only these are *meaningful* for an electrode, so they are
     what the error messages and docs advertise.
     """
@@ -128,7 +129,7 @@ def electrode_kind_keys() -> list[str]:
 
     kinds = material_kinds().get("kinds", {})
     return sorted(
-        key for key, entry in kinds.items() if entry.get("family") in ACTIVE_KIND_FAMILIES
+        key for key, entry in kinds.items() if ACTIVE_MATERIAL_ROLE in (entry.get("roles") or ())
     )
 
 
@@ -144,28 +145,21 @@ def resolve_electrode_kind(value: Any) -> str | None:
 
 
 def electrode_kind(value: Any) -> dict[str, Any] | None:
-    """Vocabulary entry for an electrode kind, with its derived ``polarity``.
+    """Vocabulary entry for an electrode kind (label, roles, formula, chemsub,
+    emmo, aliases, …), or ``None`` for an unknown kind.
 
-    Returns the material-kind entry (label, family, formula, chemsub, emmo,
-    aliases, …) plus ``polarity``, which is ``"positive"``/``"negative"`` for an
-    active family and ``None`` otherwise.
+    Deliberately carries no polarity: which side an active material sits on is
+    a fact about the cell it is built into, not about the material.
     """
     from battinfo.materials import material_kind
 
     entry = material_kind(value)
     if entry is None:
         return None
-    resolved = dict(entry)
-    resolved["polarity"] = ACTIVE_KIND_FAMILIES.get(str(entry.get("family")))
-    return resolved
-
-
-def electrode_polarity_for_kind(value: Any) -> str | None:
-    """Polarity implied by an electrode kind, or ``None`` when it implies none."""
-    entry = electrode_kind(value)
-    return entry.get("polarity") if entry is not None else None
+    return dict(entry)
 
 
 def is_active_kind(value: Any) -> bool:
-    """True when *value* resolves to a kind in an active-material family."""
-    return electrode_polarity_for_kind(value) is not None
+    """True when *value* resolves to a kind in the active-material family."""
+    entry = electrode_kind(value)
+    return entry is not None and ACTIVE_MATERIAL_ROLE in (entry.get("roles") or ())
