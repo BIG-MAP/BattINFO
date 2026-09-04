@@ -27,7 +27,6 @@ record = create_material_spec(
     uid="7d9k-2m4p-8t3x-6nq5",
     name="NMC811 cathode powder",
     kind="nmc811",                     # Level-1 key from the curated vocabulary
-    material_class="active_material",
     source_type="datasheet",
 )
 ```
@@ -41,8 +40,7 @@ record = create_material_spec(
     "id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
     "short_id": "7d9k2m",
     "name": "NMC811 cathode powder",
-    "kind": "nmc811",
-    "material_class": "active_material"
+    "kind": "nmc811"
   },
   "provenance": {
     "source_type": "datasheet",
@@ -1188,8 +1186,8 @@ Schema: [`material-spec.schema.json`](https://w3id.org/battinfo/schema/material-
 | `name` | string | yes | Human-readable material name / grade (e.g. 'LFP', 'Graphite', 'NMC811', 'PVDF'). |
 | `kind` | string |  | Required Level-1 MaterialKind key from the curated material_kinds vocabulary (e.g. 'graphite', 'lfp', 'nmc811'). The aggregation axis of the Battery Genome; resolves to the kind's chemical-substance class IRI. An unknown kind is rejected at save time. See battinfo.materials.material_kind_keys(). |
 | `grade` | string |  | Manufacturer grade / product version (e.g. 'grade X', 'v2'). Part of spec identity together with manufacturer and product. |
-| `material_class` | `active_material` \| `binder` \| `conductive_additive` \| `current_collector` … (13 values) |  | Functional role of this material in a cell, used for querying. |
-| `electrode_polarity` | `positive` \| `negative` \| `none` |  | For active materials: the electrode polarity this material is typically used at. |
+| `material_class` | `active_material` \| `binder` \| `conductive_additive` \| `current_collector` … (13 values) |  | Deprecated in favor of the kind’s roles (the curated vocabulary lists the use-site slots a kind is known to fill): a single forced role is system-relative. Accepted for back-compat and still written by importers; slated for removal at the next record-shape version. |
+| `electrode_polarity` | `positive` \| `negative` \| `none` |  | Deprecated, do not author: polarity is an electrode property, never a material’s — state it on the electrode or through the cell’s holders. Accepted only so existing records keep validating. |
 | `formula` | string |  | Chemical formula or idealized composition (e.g. 'LiFePO4', 'C', 'Zn', '(C2H2F2)n'). |
 | `chemistry_family` | string |  | Coarse chemistry family label (e.g. 'olivine', 'layered-oxide', 'spinel', 'graphitic-carbon'). |
 | `emmo_type` | string |  | Optional EMMO/domain-battery class label or IRI for this material; informs JSON-LD @type. |
@@ -1237,7 +1235,7 @@ Schema: [`material.schema.json`](https://w3id.org/battinfo/schema/material.schem
 
 **The embedded ↔ standalone bridge.** A material described inline in a composition can be lifted to a standalone spec (`material_spec_from_component`) and a cell's inline holders decomposed and de-duplicated (`extract_material_specs`), so starting embedded never blocks graduating to first-class records.
 
-**One caveat pending review:** the record-level `electrode_polarity` field remains in the schema, but a material has no side of its own — prefer leaving it unset; the side belongs to the cell that uses the material.
+**Two deprecated record fields.** `electrode_polarity` is deprecated and has no authoring path: polarity is an electrode property, never a material's — the schema accepts the key only so existing records keep validating. `material_class` is deprecated in favor of the kind's `roles`: a single forced role is system-relative, and the kind carries strictly better information; the field stays accepted (importers still write it) until the next record-shape version.
 
 **Governance:** the vocabulary changes by PR only; tests pin that each kind's `emmo` class resolves in the bundled context and names the same substance as its `chemsub` anchor.
 :::

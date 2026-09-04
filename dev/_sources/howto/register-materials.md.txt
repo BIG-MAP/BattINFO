@@ -5,8 +5,8 @@ Five lines per material — create it, save it into your library, keep the IRI:
 ```python
 from battinfo.api import create_material_spec, save_material_spec
 
-nmc = create_material_spec(name="NMC811", material_class="active_material",
-                           electrode_polarity="positive", formula="LiNi0.8Mn0.1Co0.1O2")
+nmc = create_material_spec(name="NMC811", kind="nmc811",
+                           formula="LiNi0.8Mn0.1Co0.1O2")
 saved = save_material_spec(nmc, source_root="my-library", mode="upsert")
 NMC811_IRI = saved["id"]   # e.g. https://w3id.org/battinfo/spec/3ypr-gngx-x28c-rarf
 ```
@@ -18,29 +18,25 @@ duplicate.
 
 ## Variants
 
-A binder, a conductive additive, a salt, a solvent — same five lines, different
-`material_class`:
+A binder, a salt — same five lines, different `kind`. The curated kind
+carries the material's identity and its known roles; the role a material
+plays in a given cell is stated where it is used:
 
 ```python
 pvdf = save_material_spec(create_material_spec(
-    name="PVDF", material_class="binder", formula="(C2H2F2)n"),
+    name="PVDF", kind="pvdf", formula="(C2H2F2)n"),
     source_root="my-library", mode="upsert")
 
 salt = save_material_spec(create_material_spec(
-    name="LiPF6", material_class="electrolyte_salt", formula="LiPF6"),
+    name="LiPF6", kind="lipf6", formula="LiPF6"),
     source_root="my-library", mode="upsert")
 ```
-
-Valid `material_class` values: `active_material`, `binder`,
-`conductive_additive`, `current_collector`, `separator_material`,
-`electrolyte_salt`, `electrolyte_solvent`, `electrolyte_additive`,
-`metal_electrode`, `coating`, `other`.
 
 With a manufacturer and a datasheet number:
 
 ```python
 graphite = save_material_spec(create_material_spec(
-    name="Graphite", material_class="active_material", electrode_polarity="negative",
+    name="Graphite", kind="graphite",
     formula="C", manufacturer="Targray",
     property={"specific_capacity": {"value": 355, "unit": "mAh/g"}}),
     source_root="my-library", mode="upsert")
