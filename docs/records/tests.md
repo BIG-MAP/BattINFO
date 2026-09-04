@@ -8,124 +8,12 @@
 
 How to describe testing: the plan as a **test protocol**, each execution on one cell as a **test**. Planned conditions live on the protocol; as-run conditions on the test; both are `{value, unit}` quantities by contract.
 
-A **test-spec** is the reusable, IRI-addressable description of a test
-procedure — the *spec* half of `test-spec` + `test`. A `test` (instance) links a cell-instance to
-a test-spec via `protocol_id` and to its `dataset`s.
+- The **protocol** is the plan; the **test** is one execution on one cell (`cell_id`), linked by `protocol_id`.
+- Conditions are `{value, unit}` quantities - planned ones on the protocol, as-run ones on the test.
+- PyBaMM-style `experiment` strings become structured `method` steps automatically.
+- Deviations from the plan go in the test's `conformance` block.
 
-> **One thing, three names.** A *test spec* is stored as a `test-protocol`
-> record on disk and authored as the `TestSpec` Python class — same object
-> throughout. The `kind=` argument (the workspace calls it `type=`) takes any
-> `BatteryTestType` value: `cycling`, `capacity_check`, `rate_capability`,
-> `hppc`, `ici`, `gitt`, `dcir`, `eis`, `impedance`, `calendar_ageing`,
-> `formation`, `rpt`, `quasi_ocv`, `field`, `duty_cycle`, `wltp`, `nedc`,
-> `sem`, `characterization`, `other`.
-
-## Authoring
-
-```python
-import battinfo
-
-battinfo.save_test_spec(battinfo.TestSpec(
-    name="Capacity Check — C/10 at 25 C",
-    kind="capacity_check",
-    description="CC-CV charge then slow C/10 discharge.",
-    experiment=["Charge at C/3 until 4.2 V", "Hold at 4.2 V until C/20", "Discharge at C/10 until 2.5 V"],
-    conditions={"ambient_temperature": {"value": 25.0, "unit": "degC"}},
-), source_root="examples", mode="upsert")
-```
-
-`experiment` PyBaMM-style strings parse into the structured `method[]` (steps with
-mode/direction/setpoints/termination); `facets` are derived automatically for filtering.
-The model is two-layer by design: a descriptive `method[]` (what the procedure is) plus
-actionable `artifacts[]` (runnable protocol files carried as linked distributions).
-
-## How each kind is modelled
-
-`examples/test-protocol/` carries **one example for every `BatteryTestType`** value (20
-kinds), enforced by `tests/test_test_contract.py::test_test_protocol_examples_cover_full_battery_test_type_enum`.
-
-| Kind | Modelled with |
-| --- | --- |
-| cycling, capacity_check, formation, rate_capability, hppc, ici, gitt, dcir, rpt, quasi_ocv, duty_cycle | structured `method[]` (CC/CV/rest/pulse steps) + `conditions` |
-| eis, impedance | an `eis` method step (frequency window + AC amplitude) + `conditions` |
-| calendar_ageing | storage `conditions` + check-up cadence |
-| wltp, nedc | drive-cycle power profile — `description` + `protocol_url`; the full time-resolved trace is carried as a linked actionable artifact |
-| sem, characterization, field, other | minimal `name` + `kind` + `description` (no electrochemical method) |
-
-> The `kind` enum in `test-protocol.schema.json` is kept in sync with the `BatteryTestType`
-> Python enum (`battinfo.bundle.BatteryTestType`); the coverage test guards against drift.
-
-## Going deeper: semantic depth of a test protocol
-
-*Everything below is background for ontology-curious readers — nothing in it
-is needed to author or run a test spec.*
-
-The current representation types the protocol at the class level and carries a free-text
-`description`. EMMO domain-electrochemistry has richer terms that allow a more explicit,
-machine-replicable representation — here is what is available and when to use it.
-
-### What the ontology provides
-
-| EMMO term | Meaning |
-|---|---|
-| `ConstantCurrentConstantVoltageCycling` | The complete CC-CV cycle-life protocol |
-| `ConstantCurrentConstantVoltageCharging` | A single CC-CV charge step |
-| `ConstantCurrentDischarging` | A single CC discharge step |
-| `Resting` | A rest / OCV hold step |
-| `ElectrochemicalTestingProcedure` | General electrochemical test container |
-| `SerialWorkflow` / `IterativeWorkflow` | Structural containers for step sequences |
-| `hasNext` / `precedes` / `follows` | Step-to-step sequencing predicates |
-| `StepDuration`, `StepSignalCurrent`, `StepSignalVoltage` | Per-step parameters |
-
-A 1C CC-CV cycle-life protocol could therefore be expressed as an `IterativeWorkflow`
-containing a `SerialWorkflow` whose steps are:
-`ConstantCurrentConstantVoltageCharging` → `Resting` → `ConstantCurrentDischarging` →
-`Resting`, each step carrying typed parameters for C-rate, voltage limit, cut-off
-current, rest duration, and temperature.
-
-### Pros of explicit step decomposition
-
-- **Machine-replicable**: the test can be reproduced from the JSON-LD alone without
-  parsing free text.
-- **SPARQL-queryable at step level**: structured queries like *"find all datasets charged
-  to 4.2 V at 1C CC-CV"* become precise rather than text-search-based.
-- **Parameter validation**: step parameters (C-rate, voltage limits, temperatures) can
-  be range-checked against cell specs and standards (IEC 62660, EUCAR) automatically.
-- **Stable protocol identity**: the semantic structure survives even if the free-text
-  description is incomplete or updated.
-
-### Cons and practical limits
-
-- **Authoring burden**: a four-step cycle becomes a graph of ~10 typed nodes. No
-  researcher will author this by hand, so tooling is a prerequisite.
-- **EMMO coverage gaps**: GITT, interspersed EIS, multi-rate formation sequences, and
-  temperature ramps do not yet have first-class EMMO step types. Mixed typed/free-text
-  nodes undermine the value of the graph.
-- **Cycler-file redundancy and false precision**: the ground-truth protocol is usually
-  the binary file in Biologic BT-Lab, Maccor, or Arbin format. A parallel step graph
-  that was hand-authored can silently diverge from what was actually run — which is
-  worse than no graph at all.
-- **Version fragility**: step-graph records couple tightly to specific EMMO term IRIs.
-  An upstream rename invalidates stored records in a way that a text description does
-  not.
-
-### Current recommendation
-
-Type the protocol at the class level (e.g. `ConstantCurrentConstantVoltageCycling`) and
-record protocol-level parameters (C-rate, voltage window, temperature, cut-off
-condition) as typed properties. Keep the free-text `description` as the human-readable
-ground truth. Reserve step-level decomposition for cases where:
-
-1. The protocol is simple enough to express without gaps (standard CC, CC-CV, or rest
-   steps only), **and**
-2. The step graph is generated programmatically from a machine-readable protocol
-   definition (e.g. a cycler script), not authored by hand.
-
-When the cycler file is included as a dataset distribution, it already carries the
-authoritative step definition — the EMMO class typing on the protocol record is
-then sufficient for discovery and filtering.
-
-## Reference examples
+## Define one
 
 ### The protocol
 
@@ -1407,7 +1295,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 ::::::
 
 
-## Field reference
+## Fields
 
 Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`).
 
@@ -1487,3 +1375,13 @@ The `test` block:
 
 Top-level `artifacts`: Actionable-layer links to runnable protocol/vendor files produced by or executed in this test.
 
+
+## Design notes
+
+:::{dropdown} The reasoning behind the model
+**Two layers on the protocol.** The descriptive layer is `method[]` — canonical structured steps (modes, directions, setpoints as quantities), authored directly or compiled from PyBaMM-style `experiment` strings — plus derived `facets` for querying. The actionable layer is `artifacts[]`: machine-runnable programs (cycler files, PyBaMM experiments) attached to the spec.
+
+**How the kinds are modelled.** Each test kind (cycling, capacity check, rate capability, formation, HPPC, ICI, GITT, DCIR, EIS, quasi-OCV) has a canonical method shape; the JSON-LD emits a typed EMMO process graph — `prov:Plan` / `schema:HowTo` with a typed method class (for example `GalvanostaticIntermittentTitrationTechnique`) over an `IterativeWorkflow` of typed steps with control and termination parameters.
+
+**Execution semantics.** A test links its cell (`hasTestObject` / `schema:object`) and protocol (`dcterms:conformsTo`); as-run conditions emit as `schema:PropertyValue` entries under `schema:additionalProperty`; deviations live in the `conformance` block with typed deviation entries, so a non-conformant run stays honest without losing the protocol link.
+:::

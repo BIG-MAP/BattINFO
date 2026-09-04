@@ -482,8 +482,6 @@ FAMILIES = [
             },
         ],
         "schemas": ["cell-spec.schema.json", "cell-instance.schema.json"],
-        "see_also": "Recipes: [label your cells](../howto/label-your-cells.md), "
-                    "[build a cell from components](../howto/build-a-cell-from-components.md).",
     },
     {
         "slug": "half-cells",
@@ -511,12 +509,10 @@ FAMILIES = [
         "schemas": [],
         "field_reference_note": (
             "Half cells are cell records — the field reference lives on "
-            "[Cells](cells.md#field-reference), and `cell_configuration`, "
+            "[Cells](cells.md#fields), and `cell_configuration`, "
             "the role holders, and their `*_spec_id` siblings appear in the "
             "cell-spec table there."
         ),
-        "see_also": "The role ruling: [electrodes](electrodes.md#half-cells-name-their-electrodes-by-role-not-by-polarity). "
-                    "Everything else half cells share with full cells: [cells](cells.md).",
     },
     {
         "slug": "materials",
@@ -547,7 +543,6 @@ FAMILIES = [
             },
         ],
         "schemas": ["material-spec.schema.json", "material.schema.json"],
-        "see_also": "Recipe: [register materials](../howto/register-materials.md).",
     },
     {
         "slug": "electrodes",
@@ -578,7 +573,6 @@ FAMILIES = [
             },
         ],
         "schemas": ["electrode-spec.schema.json", "electrode.schema.json"],
-        "see_also": "Recipe: [build a cell from components](../howto/build-a-cell-from-components.md).",
     },
     {
         "slug": "electrolytes",
@@ -615,7 +609,6 @@ FAMILIES = [
             },
         ],
         "schemas": ["electrolyte-spec.schema.json", "electrolyte.schema.json"],
-        "see_also": "Recipe: [build a cell from components](../howto/build-a-cell-from-components.md).",
     },
     {
         "slug": "components",
@@ -642,7 +635,6 @@ FAMILIES = [
             "current-collector-spec.schema.json", "current-collector.schema.json",
             "housing-spec.schema.json", "housing.schema.json",
         ],
-        "see_also": "Recipe: [build a cell from components](../howto/build-a-cell-from-components.md).",
     },
     {
         "slug": "tests",
@@ -677,7 +669,6 @@ FAMILIES = [
             },
         ],
         "schemas": ["test-protocol.schema.json", "test.schema.json"],
-        "see_also": None,
     },
     {
         "slug": "datasets",
@@ -714,7 +705,6 @@ FAMILIES = [
             },
         ],
         "schemas": ["dataset.schema.json"],
-        "see_also": None,
     },
     {
         "slug": "equipment",
@@ -746,7 +736,6 @@ FAMILIES = [
             },
         ],
         "schemas": ["equipment-spec.schema.json", "equipment.schema.json", "channel.schema.json"],
-        "see_also": "Recipe: [register equipment](../howto/register-equipment.md).",
     },
     {
         "slug": "parameter-sets",
@@ -769,7 +758,6 @@ FAMILIES = [
             },
         ],
         "schemas": ["parameter-set.schema.json"],
-        "see_also": None,
     },
     {
         "slug": "organizations",
@@ -793,7 +781,6 @@ FAMILIES = [
             },
         ],
         "schemas": ["organization.schema.json"],
-        "see_also": None,
     },
 ]
 
@@ -947,6 +934,73 @@ _PAGE_ORDER = [
 ]
 assert sorted(_PAGE_ORDER) == sorted(f["slug"] for f in FAMILIES)
 FAMILIES.sort(key=lambda f: _PAGE_ORDER.index(f["slug"]))
+
+
+# ── Visible rules per page: the facts that change what you type ──────────────
+# At most four per page; everything longer belongs in the design-notes
+# fragment or a how-to guide.
+PAGE_RULES: dict[str, list[str]] = {
+    "materials": [
+        "`kind` is required and curated: aliases resolve on input (NMC 811, LiFePO4, Si/Gr), an unknown kind is rejected at save.",
+        "A kind's `roles` list is informative, never restrictive - the role a material plays is stated where it is used.",
+        "The **spec** is the manufactured product (Targray NMC811, grade X); the **material** instance is one physical lot.",
+        "Other records reference a material at whichever level you know - kind key, spec IRI, or lot IRI - and upgrade later without re-modeling.",
+    ],
+    "electrodes": [
+        "`kind` names the active material, from the same curated vocabulary as powders; a non-active kind warns but saves.",
+        "The **spec** is the coated design (composition, route, design values); the **electrode** instance is a physical disc or batch.",
+        "`active_material_spec_id` cites the powder product, so a design never points at a bare vocabulary key.",
+        "`polarity` is authored or absent; half and three-electrode cells name electrodes by role instead (see [half cells](half-cells.md)).",
+    ],
+    "electrolytes": [
+        "`family` (organic, aqueous, ...) is required.",
+        "The composition is assembled from materials: `salt`, `solvent_mixture.component[]`, and `additive[]` each cite a material-spec by IRI.",
+        "The **spec** is the formulation; the **electrolyte** instance is one mixed batch.",
+    ],
+    "components": [
+        "Separator, current collector, and housing share one generic surface: `create_<family>_spec(...)` or `create_component_spec(family, ...)`, plus the instance equivalents.",
+        "Fields whose names collide with an argument go through `body={...}`.",
+        "Family identifiers use underscores (`current_collector`); IRIs use hyphens.",
+        "[Electrolytes](electrolytes.md) ride the same machinery but have their own page.",
+    ],
+    "half-cells": [
+        "Not a record type: a cell with `cell_configuration` set to `half_cell`.",
+        "Electrodes are named by **role** - `working_electrode` / `counter_electrode` (or their `*_spec_id` siblings) - never by polarity.",
+        "In a two-electrode half cell the counter also carries the reference role; a `three_electrode_cell` separates them.",
+        "Reference the working electrode's spec; describe the interchangeable counter (lithium foil) inline on its holder.",
+    ],
+    "cells": [
+        "The **spec** is the design (the datasheet); the **cell** instance is one physical unit - the (spec, serial) pair makes re-registration a no-op.",
+        "A spec composes from parts by IRI: seven optional `*_spec_id` reference fields (electrodes, electrolyte, separator, housing), checked at save.",
+        "The as-built engineering layer (housing, tabs, `construction` geometry) follows one pattern: identity fields plus a `property` dict of quantities.",
+        "An instance can name the physical parts inside it, e.g. `working_electrode_id` points at the disc.",
+    ],
+    "tests": [
+        "The **protocol** is the plan; the **test** is one execution on one cell (`cell_id`), linked by `protocol_id`.",
+        "Conditions are `{value, unit}` quantities - planned ones on the protocol, as-run ones on the test.",
+        "PyBaMM-style `experiment` strings become structured `method` steps automatically.",
+        "Deviations from the plan go in the test's `conformance` block.",
+    ],
+    "datasets": [
+        "A dataset describes data files (URLs, checksums, measured variables); the files stay where they are published.",
+        "`about` links the cell and the test the data came from.",
+        "A **series** is an ordinary dataset flavored `additional_type: [\"DatasetSeries\"]`; members point at it with `series_id`, so the collection publishes first.",
+    ],
+    "equipment": [
+        "**Spec** = the product; **equipment** = one bench unit (serial, location); **channel** = one addressable slot on a unit.",
+        "Channel identity is deterministic from (unit, index): re-registering a bench never duplicates channels.",
+        "Tests point at the unit and channel via `equipment_id` / `channel_id`.",
+    ],
+    "parameter-sets": [
+        "A batch of **claims** about a target: each names a curated parameter, a quantity or curve, and a provenance class (literature, measured, fitted, assumed).",
+        "Claims are records so sources can disagree; consumers select among them.",
+    ],
+    "organizations": [
+        "Identity is the `same_as` registry link (ROR, Wikidata); the body carries the display name and its variants.",
+        "Other records point here: `manufacturer.id` on specs, publisher on datasets.",
+        "An `editorial` block records curation decisions (for example, supersession on a name change).",
+    ],
+}
 
 
 # ── Common-example shelves ───────────────────────────────────────────────────
@@ -1122,16 +1176,44 @@ BANNER = (
 )
 
 
-def _fragment(slug: str) -> str:
-    path = FRAGMENT_DIR / f"{slug}.md"
+VISIBLE_FRAGMENT_BUDGET = 25  # non-empty lines; overflow goes to <slug>-notes.md or how-to
+
+
+def _notes_fragment(slug: str):
+    path = FRAGMENT_DIR / f"{slug}-notes.md"
+    if not path.exists():
+        return None
     return path.read_text(encoding="utf-8").replace("\r\n", "\n").rstrip() + NL
+
+
+def _fragment(slug: str) -> str:
+    """Optional extra VISIBLE prose. Hard-budgeted so pages stay scannable."""
+    path = FRAGMENT_DIR / f"{slug}.md"
+    if not path.exists():
+        return ""
+    text = path.read_text(encoding="utf-8").replace("\r\n", "\n").rstrip()
+    n = sum(1 for line in text.splitlines() if line.strip())
+    if n > VISIBLE_FRAGMENT_BUDGET:
+        raise SystemExit(
+            f"gen_reference_records: _fragments/{slug}.md carries {n} non-empty "
+            f"lines (budget {VISIBLE_FRAGMENT_BUDGET}). Visible prose stays slim: "
+            "move rationale to the design-notes fragment "
+            f"(_fragments/{slug}-notes.md) or a how-to guide."
+        )
+    return text + NL
 
 
 def render_page(family: dict, sections: list[dict]) -> str:
     parts = [BANNER, NL, f"# {family['title']}", NL, NL, family["intro"], NL, NL]
-    parts += [_fragment(family["slug"]), NL]
+    for rule in PAGE_RULES.get(family["slug"], []):
+        parts += [f"- {rule}", NL]
+    if PAGE_RULES.get(family["slug"]):
+        parts += [NL]
+    visible = _fragment(family["slug"])
+    if visible:
+        parts += [visible, NL]
 
-    parts += ["## Reference examples", NL]
+    parts += ["## Define one", NL]
     for section in sections:
         parts += [NL, f"### {section['heading']}", NL, NL]
         # One artifact, three views: the tabs mirror the Python/JSON pairing
@@ -1164,12 +1246,11 @@ def render_page(family: dict, sections: list[dict]) -> str:
 
     if not family["schemas"]:
         if family.get("field_reference_note"):
-            parts += [NL, "## Field reference", NL, NL, family["field_reference_note"], NL]
-        if family.get("see_also"):
-            parts += ["## See also", NL, NL, family["see_also"], NL]
+            parts += [NL, "## Fields", NL, NL, family["field_reference_note"], NL]
+        _append_notes(parts, family)
         return "".join(parts)
 
-    parts += [NL, "## Field reference", NL, NL]
+    parts += [NL, "## Fields", NL, NL]
     parts += [
         "Generated from the packaged JSON Schemas — the same files "
         "`battinfo validate` and the registry's publish gate enforce. Every "
@@ -1180,9 +1261,17 @@ def render_page(family: dict, sections: list[dict]) -> str:
     for schema_file in family["schemas"]:
         parts += [render_field_tables(schema_file)]
 
-    if family.get("see_also"):
-        parts += ["## See also", NL, NL, family["see_also"], NL]
+    _append_notes(parts, family)
     return "".join(parts)
+
+
+def _append_notes(parts: list, family: dict) -> None:
+    notes = _notes_fragment(family["slug"])
+    if notes is None:
+        return
+    parts += [NL, "## Design notes", NL, NL,
+              ":::{dropdown} The reasoning behind the model", NL,
+              notes, ":::", NL]
 
 
 def render_index() -> str:

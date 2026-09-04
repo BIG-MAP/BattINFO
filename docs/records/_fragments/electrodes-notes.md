@@ -1,0 +1,9 @@
+**Design vs disc.** The spec is the *design*: composition (`coating.component` with active/binder/additive holders), processing route, design values, and batch statistics stated with the structured `standard_deviation` / `sample_count` fields. The instance is the physical disc or batch — the per-cell as-built figures (mass, loading, areal capacity) live here, because they were true before any test ran.
+
+**Half cells name their electrodes by role, not by polarity.** A half cell has no sides to name, and in the working-electrode convention a graphite working electrode charges toward 1 V vs Li/Li+ — polarity labels would mislead. `polarity` is therefore authored or absent, never derived from the kind: an "LFP negative electrode" is a legitimate design (lithium-counter half cell), not a typo, and nothing warns about it.
+
+**Cells reference electrodes.** Which electrode pair a cell uses follows from its `cell_configuration` — the polarity holders (`positive_electrode` / `negative_electrode`) for a full cell, the role holders (`working_electrode` / `counter_electrode`) for a half or three-electrode cell. A cell instance points at the physical disc inside it through `working_electrode_id`.
+
+**Tabs and coatings** belong to the electrode. A current-collector tab (`Electrode.tab`) carries identity fields plus a `property` dict (width, thickness, weld width) and emits under `hasCurrentCollectorTab`. A coating carries the composition and its own properties; a secondary layer such as a ceramic coating is simply an additional coating holder.
+
+**Emission.** The kind types the node with its chemistry electrode class (`GraphiteElectrode`, `LithiumIronPhosphateElectrode`, …); an authored polarity stacks `PositiveElectrode` / `NegativeElectrode` on top; role holders emit role types (`WorkingElectrode`, and the counter of a two-electrode half cell types as both `CounterElectrode` and `ReferenceElectrode`).

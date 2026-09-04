@@ -1,0 +1,5 @@
+**Two layers on the protocol.** The descriptive layer is `method[]` — canonical structured steps (modes, directions, setpoints as quantities), authored directly or compiled from PyBaMM-style `experiment` strings — plus derived `facets` for querying. The actionable layer is `artifacts[]`: machine-runnable programs (cycler files, PyBaMM experiments) attached to the spec.
+
+**How the kinds are modelled.** Each test kind (cycling, capacity check, rate capability, formation, HPPC, ICI, GITT, DCIR, EIS, quasi-OCV) has a canonical method shape; the JSON-LD emits a typed EMMO process graph — `prov:Plan` / `schema:HowTo` with a typed method class (for example `GalvanostaticIntermittentTitrationTechnique`) over an `IterativeWorkflow` of typed steps with control and termination parameters.
+
+**Execution semantics.** A test links its cell (`hasTestObject` / `schema:object`) and protocol (`dcterms:conformsTo`); as-run conditions emit as `schema:PropertyValue` entries under `schema:additionalProperty`; deviations live in the `conformance` block with typed deviation entries, so a non-conformant run stays honest without losing the protocol link.

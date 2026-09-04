@@ -1,0 +1,5 @@
+**The record is the semantic layer over the files.** Distributions carry the download URL, media type, byte size, and checksum verbatim from where the data is published; `variable_measured` and the measurement technique say what is inside without moving it.
+
+**Self-reference has exactly three honest slots.** A dataset's own archive DOI belongs in `access_url` (where the file lives), `same_as` (the archived representation of this same dataset), and a citation typed `kind: "dataset"` (how the registry derives the DOI) — never in a plain provenance citation, which means "a paper this record supports" and would make the dataset cite itself as its own literature.
+
+**Why the series is a flavor, not a type.** DCAT 3 declares `dcat:DatasetSeries` a subclass of `dcat:Dataset`, so the collection is an ordinary dataset record flavored by `additional_type`, and membership is one edge: the member's `series_id`, emitted as both `dcat:inSeries` and `schema:isPartOf`. Members carry the forward link, so the collection publishes first. A series record needs no cell link of its own — its members hold them — and the strict policy admits that for the series flavor only.

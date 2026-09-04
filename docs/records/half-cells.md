@@ -8,30 +8,12 @@
 
 How to describe a half cell: one electrode under test against a counter/reference. Not a separate record type — a **cell** flavored by `cell_configuration: "half_cell"`, with electrodes named by role.
 
-A half cell puts one electrode under test against a counter electrode that
-also serves as the potential reference — the standard bench format for
-characterizing a single electrode (OCV, GITT, rate behaviour) without the
-other electrode's contribution.
+- Not a record type: a cell with `cell_configuration` set to `half_cell`.
+- Electrodes are named by **role** - `working_electrode` / `counter_electrode` (or their `*_spec_id` siblings) - never by polarity.
+- In a two-electrode half cell the counter also carries the reference role; a `three_electrode_cell` separates them.
+- Reference the working electrode's spec; describe the interchangeable counter (lithium foil) inline on its holder.
 
-There is no separate record type: a half cell is a **cell** with
-`cell_configuration: "half_cell"`, and its electrodes are named by **role**,
-not by polarity — `working_electrode` / `counter_electrode` holders (or
-their `*_spec_id` reference siblings) instead of positive/negative. The
-role-based naming is deliberate: a half cell has no sides to name, and in
-the working-electrode voltage convention (vs Li/Li+ for a lithium counter)
-a graphite working electrode *charges* toward 1 V — polarity labels would
-mislead. In a two-electrode half cell the counter also carries the
-reference role; a `three_electrode_cell` separates them.
-
-What is usually stated: the working electrode as a reference to its
-[electrode spec](electrodes.md) (the design under test), and the counter
-described inline on its holder — a lithium foil the lab treats as
-interchangeable earns a description, not an individually tracked record.
-See [electrodes — half cells name their electrodes by role](electrodes.md#half-cells-name-their-electrodes-by-role-not-by-polarity)
-for the ruling, and [cells](cells.md) for everything half cells share with
-full cells.
-
-## Reference examples
+## Define one
 
 ### A coin half cell for electrode characterization
 
@@ -170,9 +152,16 @@ What to notice:
 
 **Validated clean** — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).
 
-## Field reference
+## Fields
 
-Half cells are cell records — the field reference lives on [Cells](cells.md#field-reference), and `cell_configuration`, the role holders, and their `*_spec_id` siblings appear in the cell-spec table there.
-## See also
+Half cells are cell records — the field reference lives on [Cells](cells.md#fields), and `cell_configuration`, the role holders, and their `*_spec_id` siblings appear in the cell-spec table there.
 
-The role ruling: [electrodes](electrodes.md#half-cells-name-their-electrodes-by-role-not-by-polarity). Everything else half cells share with full cells: [cells](cells.md).
+## Design notes
+
+:::{dropdown} The reasoning behind the model
+**Why role, not polarity.** In the working-electrode voltage convention (vs Li/Li+ for a lithium counter) a graphite working electrode *charges* toward 1 V — the polarity labels of a full cell would mislead, so a half cell has no sides to name. The role-based holders are the ruling, not a convenience.
+
+**What is usually stated.** The working electrode as a reference to its [electrode spec](electrodes.md) — the design under test; the counter described inline on its holder, because a lithium foil the lab treats as interchangeable earns a description, not an individually tracked record.
+
+**Emission.** The described device types as `HalfCellDevice`; the working electrode emits under `hasWorkingElectrode`; in a two-electrode half cell the counter node types as both `CounterElectrode` and `ReferenceElectrode`.
+:::

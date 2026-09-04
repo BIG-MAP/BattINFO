@@ -1,0 +1,11 @@
+**Why three levels.** The kind (Level 1) is a curated vocabulary, not a record type — if generic materials were records, the corpus would grow fifty graphites. Level 2 (`material-spec`) is a manufactured product; Level 3 (`material`) is a physical lot. This mirrors cells: chemistry/format vocabulary above `cell-spec` above `cell`.
+
+**The kind's semantic identity** is its chemical-substance ontology class (`chemsub`), verified per release; the battinfo `key` is the ergonomic handle. Optional external anchors (`wikidata_qid`, `inchikey`, `pubchem_cid`, `mp_id`, `cas_rn`) each emit as a `skos:exactMatch` link and are populated only where verified — absent means unverified, never guessed. Kinds may carry curated, citable `reference_properties` (for example a theoretical specific capacity) that the genome compares reported distributions against.
+
+**Why `roles` is a list, and informative only.** Roles are system-relative: FEC is both co-solvent and additive, CMC both binder and thickener, and which electrode an active material serves depends on the cell (graphite is the positive electrode of a lithium-counter half cell). So the list means "known to fill these use-site slots", a use outside it is never an error, and the role a material actually plays is stated where it is used — coating role slots, electrolyte constituent slots, or the component spec that references it. `active_material` is the one load-bearing role: it gates electrode kinds and anchors reference properties. An empty list is honest too: NMP fills no composition slot (a processing solvent), which its `roles_note` says.
+
+**The embedded ↔ standalone bridge.** A material described inline in a composition can be lifted to a standalone spec (`material_spec_from_component`) and a cell's inline holders decomposed and de-duplicated (`extract_material_specs`), so starting embedded never blocks graduating to first-class records.
+
+**One caveat pending review:** the record-level `electrode_polarity` field remains in the schema, but a material has no side of its own — prefer leaving it unset; the side belongs to the cell that uses the material.
+
+**Governance:** the vocabulary changes by PR only; tests pin that each kind's `emmo` class resolves in the bundled context and names the same substance as its `chemsub` anchor.

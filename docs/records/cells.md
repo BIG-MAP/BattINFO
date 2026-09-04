@@ -8,87 +8,12 @@
 
 How to describe a cell: the design as a **cell spec**, each physical unit as a **cell instance** under it.
 
-A cell is described at two levels, the spec + instance pattern every family
-uses. The **cell spec** is the design — the datasheet: manufacturer, model,
-format, chemistry, and rated properties as `{value, unit}` quantities. The
-**cell instance** is one physical unit built to that design: a serial number
-and batch under `cell_spec_id`, plus what was measured on that unit. The
-(spec, serial) pair seeds the instance IRI, so re-registering the same cell
-is a no-op instead of a duplicate.
+- The **spec** is the design (the datasheet); the **cell** instance is one physical unit - the (spec, serial) pair makes re-registration a no-op.
+- A spec composes from parts by IRI: seven optional `*_spec_id` reference fields (electrodes, electrolyte, separator, housing), checked at save.
+- The as-built engineering layer (housing, tabs, `construction` geometry) follows one pattern: identity fields plus a `property` dict of quantities.
+- An instance can name the physical parts inside it, e.g. `working_electrode_id` points at the disc.
 
-A cell instance can also state which physical components went into it —
-`working_electrode_id` points at the electrode disc inside this cell (see
-[electrodes](electrodes.md)).
-
-## The engineering layer
-
-Beyond composition and nominal performance, a cell spec can carry the
-**as-designed engineering** description: how the cell is physically built.
-Two things are deliberately excluded: design-tool scratch math (intermediate
-volumes, slurry masses — recomputed, not stored) and state-dependent
-behaviour (swelling versus cycle, impedance decomposition — those belong to
-measurement series on a test or dataset, not to a spec).
-
-Every engineering part follows one **holder + property** principle: identity
-fields (`material` / `manufacturer` / `supplier` / `product_id`) plus a
-`property` dict of `{value, unit}` quantities. Unknown property keys are
-preserved in the record and flagged with a `semantic.property_unmapped`
-warning rather than dropped.
-
-Where each part lives:
-
-- The **housing** (case, cap, terminals, seals, discrete parts) is authored
-  inline on the cell spec or lifted into a standalone housing spec referenced
-  by `housing_spec_id` — its field tables are on the
-  [components page](components.md#housing-spec-fields).
-- **Current-collector tabs** and **coatings** belong to the electrode — see
-  [electrodes](electrodes.md).
-- The **electrode-assembly geometry** (wound or stacked: `assembly_type`,
-  layer and sheet counts, `winding_turns`, `electrode_length`,
-  `jellyroll_volume`) is the cell spec's own `construction` block — see the
-  cell-spec field table below.
-
-## Composing a cell from parts
-
-A cell-spec can be described from reusable, IRI-addressable parts: seven
-optional top-level reference fields sit beside the inline holders —
-
-| Field | Resolves to |
-| --- | --- |
-| `positive_electrode_spec_id` / `negative_electrode_spec_id` | `electrode-spec` |
-| `working_electrode_spec_id` / `counter_electrode_spec_id` | `electrode-spec` |
-| `electrolyte_spec_id` | `electrolyte-spec` |
-| `separator_spec_id` | `separator-spec` |
-| `housing_spec_id` | `housing-spec` |
-
-Which electrode pair a cell uses follows from its `cell_configuration` —
-polarity for a full cell, role for a half or three-electrode cell (see
-[electrodes](electrodes.md#cells-reference-electrodes)). A cell may
-**reference**, **inline**, or both — inline holders stay optional, so
-existing records are unaffected. The JSON-LD emits reference nodes
-(`hasPositiveElectrode: {"@id": <electrode-spec IRI>}`, etc.); when an
-inline node is also present, the `@id` merges onto it.
-
-References are **checked at save**: a `*_spec_id` that points at nothing
-fails the save with the missing IRI named (opt out with
-`resolve_references=False` for staged workflows; `save_batch` allows
-references within the batch and validates the completed set). The bench
-recipe is [How-to: build a cell from components](../howto/build-a-cell-from-components.md),
-and `extract_component_specs(cell_spec_record)` goes the other way, lifting
-a cell's inline holders into standalone component-specs so any inline cell
-can be decomposed and de-duplicated.
-
-The example cells on the shelf below use exactly this pattern — shared
-component-specs referenced by IRI across the fleet. The NMC811 coin shows
-the complete graph end-to-end:
-
-```text
-cell-spec COIN-NMC811-D  →  cell-instance (P025-CEL-001)  →  test (cycling)  →  dataset
-        ↓ references
-   electrode-spec / electrolyte-spec / separator-spec / housing-spec  →  material-specs
-```
-
-## Reference examples
+## Define one
 
 ### A cell spec, from its datasheet
 
@@ -2336,7 +2261,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 ::::::
 
 
-## Field reference
+## Fields
 
 Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`).
 
@@ -2451,6 +2376,21 @@ Top-level `measured`: Measured cell properties using the same keys as the spec's
 
 Top-level `datasets`: Datasets recorded for this cell. Back-reference to dataset records. dataset.about is the source of truth for what a dataset describes; when records are saved together through a workspace the library fills this list from each dataset's cell and test links, and hand-authored records may set it directly.
 
-## See also
 
-Recipes: [label your cells](../howto/label-your-cells.md), [build a cell from components](../howto/build-a-cell-from-components.md).
+## Design notes
+
+:::{dropdown} The reasoning behind the model
+**Composing a cell from parts.** The seven reference fields resolve as: `positive_electrode_spec_id` / `negative_electrode_spec_id` and `working_electrode_spec_id` / `counter_electrode_spec_id` → `electrode-spec` (which pair applies follows from `cell_configuration`); `electrolyte_spec_id` → `electrolyte-spec`; `separator_spec_id` → `separator-spec`; `housing_spec_id` → `housing-spec`. A cell may reference, inline, or both — inline holders stay optional, so existing records are unaffected. The JSON-LD emits reference nodes (`hasPositiveElectrode: {"@id": …}`), merging the `@id` onto an inline node when both are present.
+
+**References are checked at save.** A `*_spec_id` that points at nothing fails the save with the missing IRI named; `resolve_references=False` opts out for staged workflows, and `save_batch` allows references within the batch and validates the completed set. `extract_component_specs(cell_spec_record)` goes the other way, lifting inline holders into standalone specs so any inline cell can be decomposed and de-duplicated.
+
+**The engineering layer.** Beyond composition and rated performance, a spec can carry the as-designed build. Deliberately excluded: design-tool scratch math (recomputed, not stored) and state-dependent behaviour (belongs to tests and datasets). Every part follows holder + property: identity fields plus `{value, unit}` quantities, unknown keys preserved and warned rather than dropped. The housing (case, cap, terminals, seals, parts) is authored inline or as a standalone [housing spec](components.md); tabs and coatings belong to [the electrode](electrodes.md); the wound/stacked geometry is the spec's own `construction` block.
+
+**The full graph, end to end:**
+
+```text
+cell-spec  →  cell-instance  →  test  →  dataset
+     ↓ references
+electrode-spec / electrolyte-spec / separator-spec / housing-spec  →  material-specs
+```
+:::
