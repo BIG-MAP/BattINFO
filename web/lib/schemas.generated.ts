@@ -6411,7 +6411,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
                 "dispersant",
                 "other"
               ],
-              "description": "Functional role of this material in a cell, used for querying."
+              "description": "Deprecated in favor of the kind’s roles (the curated vocabulary lists the use-site slots a kind is known to fill): a single forced role is system-relative. Accepted for back-compat and still written by importers; slated for removal at the next record-shape version."
             },
             "electrode_polarity": {
               "type": "string",
@@ -6420,7 +6420,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
                 "negative",
                 "none"
               ],
-              "description": "For active materials: the electrode polarity this material is typically used at."
+              "description": "Deprecated, do not author: polarity is an electrode property, never a material’s — state it on the electrode or through the cell’s holders. Accepted only so existing records keep validating."
             },
             "formula": {
               "type": "string",

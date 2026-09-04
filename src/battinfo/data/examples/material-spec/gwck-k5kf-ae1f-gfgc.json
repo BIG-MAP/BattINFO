@@ -6,7 +6,6 @@
     "name": "Graphite",
     "kind": "graphite",
     "material_class": "active_material",
-    "electrode_polarity": "negative",
     "formula": "C",
     "chemistry_family": "graphitic-carbon",
     "manufacturer": {

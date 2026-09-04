@@ -6,7 +6,6 @@
     "name": "NMC622",
     "kind": "nmc622",
     "material_class": "active_material",
-    "electrode_polarity": "positive",
     "formula": "LiNi0.6Mn0.2Co0.2O2",
     "chemistry_family": "layered-oxide",
     "manufacturer": {

@@ -81,7 +81,6 @@ def test_material_spec_and_instance_roundtrip(tmp_path: Path) -> None:
         uid="abcd23456789abcd",
         name="LFP",
         material_class="active_material",
-        electrode_polarity="positive",
         formula="LiFePO4",
         property={"specific_capacity": {"value": 160, "unit": "mAh/g"}},
     )
