@@ -1259,8 +1259,8 @@ def render_page(family: dict, sections: list[dict]) -> str:
         "record also carries the shared envelope (`schema_version`, "
         "`provenance`, and optional `notes`, `funding`, `contributor`, "
         "`license`). Quantities are `{value, unit}` maps and may also carry "
-        "`co_type` (the nature of the value: `Measured`, `Conventional`, "
-        "`Rated`, or `Nominal`) and `conditions` (the parameters under which "
+        "`value_basis` (Measured, Conventional, Rated, or Nominal) and "
+        "`conditions` (the parameters under which "
         "the value holds, each itself a quantity)." + NL, NL,
     ]
     for schema_file in family["schemas"]:

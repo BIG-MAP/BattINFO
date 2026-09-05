@@ -56,7 +56,7 @@ def _dict_to_spec_value(v: Mapping[str, Any]) -> "SpecValue":
         sv_max_value=v.get("max_value"),
         sv_typical_value=v.get("typical_value"),
         sv_value_text=v.get("value_text"),
-        sv_co_type=v.get("co_type"),
+        sv_co_type=v.get("value_basis", v.get("co_type")),
         sv_conditions=dict(v["conditions"]) if isinstance(v.get("conditions"), Mapping) else None,
     )
 
@@ -76,7 +76,7 @@ def _spec_value_to_dict(sv: "SpecValue") -> dict[str, Any]:
     if sv.sv_value_text is not None:
         out["value_text"] = sv.sv_value_text
     if sv.sv_co_type is not None:
-        out["co_type"] = sv.sv_co_type
+        out["value_basis"] = sv.sv_co_type
     if sv.sv_conditions:
         out["conditions"] = dict(sv.sv_conditions)
     return out

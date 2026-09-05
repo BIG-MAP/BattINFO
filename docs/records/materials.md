@@ -291,7 +291,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.1
           },
           "schema:unitText": "C",
-          "rdfs:label": "discharge_c_rate"
+          "rdfs:label": "discharging_c_rate"
         },
         {
           "@type": [
@@ -456,7 +456,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.1
           },
           "schema:unitText": "C",
-          "rdfs:label": "discharge_c_rate"
+          "rdfs:label": "discharging_c_rate"
         },
         {
           "@type": [
@@ -621,7 +621,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.1
           },
           "schema:unitText": "C",
-          "rdfs:label": "discharge_c_rate"
+          "rdfs:label": "discharging_c_rate"
         },
         {
           "@type": [
@@ -839,7 +839,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.1
           },
           "schema:unitText": "C",
-          "rdfs:label": "discharge_c_rate"
+          "rdfs:label": "discharging_c_rate"
         },
         {
           "@type": [
@@ -1211,7 +1211,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 
 ## Fields
 
-Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`). Quantities are `{value, unit}` maps and may also carry `co_type` (the nature of the value: `Measured`, `Conventional`, `Rated`, or `Nominal`) and `conditions` (the parameters under which the value holds, each itself a quantity).
+Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`). Quantities are `{value, unit}` maps and may also carry `value_basis` (Measured, Conventional, Rated, or Nominal) and `conditions` (the parameters under which the value holds, each itself a quantity).
 
 ### material-spec fields
 

@@ -539,6 +539,10 @@ _CO_TYPE_CLASS: dict[str, str] = {
 # Keys without a resolvable class fall through to a generic node + rdfs:label.
 _MEASUREMENT_PARAMETER_TERMS: dict[str, str] = {
     "c_rate": "CRate",
+    # -ing names processes (discharging vs the noun charge); the -e spellings
+    # stay tolerated for existing records.
+    "discharging_c_rate": "CRate",
+    "charging_c_rate": "CRate",
     "discharge_c_rate": "CRate",
     "charge_c_rate": "CRate",
     "current": "ElectricCurrent",
@@ -605,7 +609,7 @@ def _descriptor_quantity_node(
         return None
 
     resolved_term = term or _property_type_term(name)
-    co_token = quantity.get("co_type")
+    co_token = quantity.get("value_basis", quantity.get("co_type"))
     co_class = _CO_TYPE_CLASS.get(co_token) if isinstance(co_token, str) else None
     node: dict[str, Any] = {"@type": [resolved_term, co_class or _property_co_type(name)]}
     # Human layer: carry the class prefLabel on the instance node so readers

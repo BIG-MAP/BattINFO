@@ -135,7 +135,7 @@ def test_material_property_conditions_emit_measurement_parameters() -> None:
     rec = api.create_material_spec(
         uid="abcd23456789abcd", name="LFP", material_class="active_material", formula="LiFePO4",
         property={"specific_capacity": {"value": 160, "unit": "mAh/g", "co_type": "Measured",
-                                        "conditions": {"discharge_c_rate": {"value": 0.1, "unit": "C"},
+                                        "conditions": {"discharging_c_rate": {"value": 0.1, "unit": "C"},
                                                        "lower_voltage_limit": {"value": 2.5, "unit": "V"},
                                                        "temperature": {"value": 25, "unit": "degC"}}}},
     )
@@ -146,7 +146,7 @@ def test_material_property_conditions_emit_measurement_parameters() -> None:
     assert "SpecificCapacity" in cap["@type"] and "MeasuredProperty" in cap["@type"]
     params = cap["hasMeasurementParameter"]
     labels = {p.get("rdfs:label") for p in params}
-    assert {"discharge_c_rate", "lower_voltage_limit", "temperature"}.issubset(labels)
+    assert {"discharging_c_rate", "lower_voltage_limit", "temperature"}.issubset(labels)
 
 
 def test_material_property_out_of_range_warns() -> None:

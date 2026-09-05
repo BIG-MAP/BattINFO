@@ -7,6 +7,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **`co_type` becomes `value_basis`; process condition keys take -ing names.**
+  The basis on which a value is stated (Measured / Nominal / Rated /
+  Conventional) is now authored as `value_basis` - `co_type` said nothing to
+  a reader. And the advertised condition keys for processes follow the -ing
+  convention that the direction-qualified capacity keys already use:
+  `discharging_c_rate` / `charging_c_rate` (disambiguating the process
+  "charging" from the noun "charge"). Both old spellings stay accepted:
+  `co_type` as a deprecated schema alias that normalizes to `value_basis` on
+  round-trip, the -e condition keys as tolerated inputs resolving to the
+  same EMMO classes.
+
 ### Deprecated
 
 - **`material_spec.electrode_polarity` and `material_spec.material_class`.**
