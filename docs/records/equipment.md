@@ -73,7 +73,6 @@ record = create_equipment_spec(
 No JSON-LD emitter exists for equipment records yet; the canonical record is the published form.
 ```
 
-**Validated clean** — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).
 
 ### An equipment unit
 
@@ -124,7 +123,6 @@ record = create_equipment(
 No JSON-LD emitter exists for equipment records yet.
 ```
 
-**Validated clean** — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).
 
 ### A channel on that unit
 
@@ -172,7 +170,6 @@ record = create_channel(
 No JSON-LD emitter exists for channel records yet.
 ```
 
-**Validated clean** — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).
 
 ## Common examples
 
@@ -235,7 +232,7 @@ record = json.loads(
 
 ## Fields
 
-Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`).
+Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`). Quantities are `{value, unit}` maps and may also carry `co_type` (the nature of the value: `Measured`, `Conventional`, `Rated`, or `Nominal`) and `conditions` (the parameters under which the value holds, each itself a quantity).
 
 ### equipment-spec fields
 

@@ -150,7 +150,6 @@ What to notice:
 - The described device types as `HalfCellDevice` (never `ElectrochemicalHalfCell`).
 - The working electrode emits under `hasWorkingElectrode` as a reference to its spec; the counter node types as BOTH `CounterElectrode` and `ReferenceElectrode`.
 
-**Validated clean** — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).
 
 ## Fields
 

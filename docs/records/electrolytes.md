@@ -266,7 +266,6 @@ What to notice:
 - The node types by its family (`OrganicElectrolyte`), and the composition emits as typed constituents: the salt under `hasSolute` (itself EMMO-typed, e.g. `LithiumHexafluorophosphate`), the solvents under `hasSolvent`, the additive under `hasAdditive`.
 - Every constituent cites its material-spec by IRI, so the formulation is assembled from materials, never retyped.
 
-**Validated clean** — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).
 
 ### An electrolyte (one mixed batch)
 
@@ -330,7 +329,6 @@ What to notice:
 
 - `spec_id` carries the formulation; the batch is what a cell build actually consumed.
 
-**Validated clean** — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).
 
 ## Common examples
 
@@ -549,7 +547,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 
 ## Fields
 
-Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`).
+Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`). Quantities are `{value, unit}` maps and may also carry `co_type` (the nature of the value: `Measured`, `Conventional`, `Rated`, or `Nominal`) and `conditions` (the parameters under which the value holds, each itself a quantity).
 
 ### electrolyte-spec fields
 

@@ -27,6 +27,10 @@ record = create_material_spec(
     uid="7d9k-2m4p-8t3x-6nq5",
     name="NMC811 cathode powder",
     kind="nmc811",                     # Level-1 key from the curated vocabulary
+    property={
+        "specific_capacity": {"value": 200, "unit": "mAh/g"},
+        "d50_particle_size": {"value": 10, "unit": "um"},
+    },
     source_type="datasheet",
 )
 ```
@@ -40,7 +44,17 @@ record = create_material_spec(
     "id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
     "short_id": "7d9k2m",
     "name": "NMC811 cathode powder",
-    "kind": "nmc811"
+    "kind": "nmc811",
+    "property": {
+      "specific_capacity": {
+        "value": 200,
+        "unit": "mAh/g"
+      },
+      "d50_particle_size": {
+        "value": 10,
+        "unit": "um"
+      }
+    }
   },
   "provenance": {
     "source_type": "datasheet",
@@ -74,7 +88,33 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "@id": "http://www.wikidata.org/entity/Q121086674"
     }
   ],
-  "schema:name": "NMC811 cathode powder"
+  "schema:name": "NMC811 cathode powder",
+  "hasProperty": [
+    {
+      "@type": [
+        "D50ParticleSize",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "D50ParticleSize",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 10
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
+    },
+    {
+      "@type": [
+        "SpecificCapacity",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "SpecificCapacity",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 200
+      },
+      "schema:unitText": "mAh/g"
+    }
+  ]
 }
 ```
 :::
@@ -85,7 +125,6 @@ What to notice:
 
 - The `kind` resolves to the chemical-substance class IRI that types the emitted node — the genome's aggregation axis.
 
-**Validated clean** — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).
 
 ### A material instance (one physical lot)
 
@@ -152,7 +191,6 @@ What to notice:
 
 - `material_spec_id` links the lot to its product; the lot is what an electrode batch actually consumed.
 
-**Validated clean** — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).
 
 ## Common examples
 
@@ -1173,7 +1211,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 
 ## Fields
 
-Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`).
+Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`). Quantities are `{value, unit}` maps and may also carry `co_type` (the nature of the value: `Measured`, `Conventional`, `Rated`, or `Nominal`) and `conditions` (the parameters under which the value holds, each itself a quantity).
 
 ### material-spec fields
 

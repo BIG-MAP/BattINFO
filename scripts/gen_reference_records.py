@@ -137,6 +137,10 @@ def snippet_material_spec():
         uid="7d9k-2m4p-8t3x-6nq5",
         name="NMC811 cathode powder",
         kind="nmc811",                     # Level-1 key from the curated vocabulary
+        property={
+            "specific_capacity": {"value": 200, "unit": "mAh/g"},
+            "d50_particle_size": {"value": 10, "unit": "um"},
+        },
         source_type="datasheet",
     )
     return record
@@ -1239,7 +1243,6 @@ def render_page(family: dict, sections: list[dict]) -> str:
             for line in section["notice"]:
                 parts += [f"- {line}", NL]
             parts += [NL]
-        parts += [section["verdict"], NL]
 
     parts += [render_shelf(family)]
 
@@ -1255,7 +1258,10 @@ def render_page(family: dict, sections: list[dict]) -> str:
         "`battinfo validate` and the registry's publish gate enforce. Every "
         "record also carries the shared envelope (`schema_version`, "
         "`provenance`, and optional `notes`, `funding`, `contributor`, "
-        "`license`)." + NL, NL,
+        "`license`). Quantities are `{value, unit}` maps and may also carry "
+        "`co_type` (the nature of the value: `Measured`, `Conventional`, "
+        "`Rated`, or `Nominal`) and `conditions` (the parameters under which "
+        "the value holds, each itself a quantity)." + NL, NL,
     ]
     for schema_file in family["schemas"]:
         parts += [render_field_tables(schema_file)]

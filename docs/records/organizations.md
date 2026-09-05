@@ -74,7 +74,6 @@ record = {
 Three gaps meet on this family: no authoring API (the record above is authored directly, data-first), no JSON-LD emitter, and no entities-registry kind — so organization records are outside the semantic validation path and are checked against the JSON Schema only.
 ```
 
-**Schema-validated** — 0 errors against `organization.schema.json` (battinfo 0.7.0); this family is outside the semantic validation path (see the known gap above).
 
 ## Common examples
 
@@ -164,7 +163,7 @@ record = json.loads(
 
 ## Fields
 
-Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`).
+Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`). Quantities are `{value, unit}` maps and may also carry `co_type` (the nature of the value: `Measured`, `Conventional`, `Rated`, or `Nominal`) and `conditions` (the parameters under which the value holds, each itself a quantity).
 
 ### organization fields
 

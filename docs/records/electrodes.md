@@ -83,7 +83,6 @@ What to notice:
 
 - `active_material_spec_id` cites the powder, so no design points at a bare vocabulary key.
 
-**Validated clean** — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).
 
 ### An electrode (the disc in one cell)
 
@@ -150,7 +149,6 @@ What to notice:
 
 - `electrode_spec_id` carries the design; a cell instance points at this disc through `working_electrode_id`.
 
-**Validated clean** — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).
 
 ## Common examples
 
@@ -935,7 +933,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 
 ## Fields
 
-Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`).
+Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`). Quantities are `{value, unit}` maps and may also carry `co_type` (the nature of the value: `Measured`, `Conventional`, `Rated`, or `Nominal`) and `conditions` (the parameters under which the value holds, each itself a quantity).
 
 ### electrode-spec fields
 

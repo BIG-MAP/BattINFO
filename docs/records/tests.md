@@ -300,7 +300,6 @@ What to notice:
 
 - The PyBaMM-style `experiment` strings become the structured `method` steps at the record top level, and the JSON-LD emits a typed EMMO workflow (`prov:Plan` / `schema:HowTo`).
 
-**Validated clean** — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).
 
 ### The execution
 
@@ -416,7 +415,6 @@ What to notice:
 - `hasTestObject` / `schema:object` point at the cell; `dcterms:conformsTo` points at the protocol.
 - As-run conditions emit as `schema:PropertyValue` entries under `schema:additionalProperty`.
 
-**Validated clean** — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).
 
 ## Common examples
 
@@ -1297,7 +1295,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 
 ## Fields
 
-Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`).
+Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`). Quantities are `{value, unit}` maps and may also carry `co_type` (the nature of the value: `Measured`, `Conventional`, `Rated`, or `Nominal`) and `conditions` (the parameters under which the value holds, each itself a quantity).
 
 ### test-protocol fields
 

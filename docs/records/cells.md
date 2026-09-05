@@ -170,7 +170,6 @@ What to notice:
 - The node is EMMO-typed (`BatteryCellSpecification`) and each spec property becomes a typed quantity under `hasProperty`.
 - `schema:manufacturer` and `schema:model` carry the identity that seeded the IRI.
 
-**Validated clean** — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).
 
 ### A cell instance under that spec
 
@@ -261,7 +260,6 @@ What to notice:
 - `cell_spec_id` is the instantiation edge; the JSON-LD states it as a reference to the spec node.
 - `schema:serialNumber` carries the physical identity.
 
-**Validated clean** — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).
 
 ## Common examples
 
@@ -2263,7 +2261,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 
 ## Fields
 
-Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`).
+Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`). Quantities are `{value, unit}` maps and may also carry `co_type` (the nature of the value: `Measured`, `Conventional`, `Rated`, or `Nominal`) and `conditions` (the parameters under which the value holds, each itself a quantity).
 
 ### cell-spec fields
 

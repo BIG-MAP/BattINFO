@@ -91,7 +91,8 @@ dev = [
   "mypy>=2.3.0"
 ]
 docs = [
-  "autodoc-pydantic>=2.2",  # renders pydantic Field(description=...) in the API reference
+  "autodoc-pydantic>=2.2",
+  "sphinx-copybutton>=0.5",  # copy button on every code block in the docs  # renders pydantic Field(description=...) in the API reference
   "sphinx>=7.3",
   "pydata-sphinx-theme>=0.20.0",
   "myst-parser>=3.0",

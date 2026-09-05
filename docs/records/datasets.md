@@ -157,7 +157,6 @@ What to notice:
 - `series_id` emits BOTH `dcat:inSeries` (the DCAT 3 membership edge) and `schema:isPartOf` (what dataset search engines read).
 - `about` links the cell and the test; the distribution carries the download URL and checksum.
 
-**Validated clean** — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).
 
 ### The collection (dataset series)
 
@@ -250,7 +249,6 @@ What to notice:
 - `@type` carries `dcat:DatasetSeries` alongside `dcat:Dataset` — no new record type exists.
 - No `about` and no distributions: the members hold the cell links and the files, and the strict policy admits that for the series flavor only.
 
-**Validated clean** — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).
 
 ## Common examples
 
@@ -419,7 +417,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 
 ## Fields
 
-Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`).
+Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`). Quantities are `{value, unit}` maps and may also carry `co_type` (the nature of the value: `Measured`, `Conventional`, `Rated`, or `Nominal`) and `conditions` (the parameters under which the value holds, each itself a quantity).
 
 ### dataset fields
 
