@@ -124,6 +124,22 @@ _EXTRA_CONTEXT_TERMS: tuple[str, ...] = (
     "MeasuredProperty",
     "NominalProperty",
     "hasMeasurementParameter",
+    # Measurement-provenance subtree: conditions ride an isOutputOf node.
+    "isOutputOf",
+    "BatteryMeasurement",
+    "hasStringValue",
+    # Metrological datum on voltage-dimensioned quantities (voltage_reference).
+    "hasMetrologicalReference",
+    "MetrologicalReference",
+    "ReferenceElectrode",
+    "LithiumElectrode",
+    "SodiumBasedElectrode",
+    "StandardHydrogenElectrode",
+    "NormalHydrogenElectrode",
+    "ReversibleHydrogenElectrode",
+    "SaturatedCalomelElectrode",
+    "SilverChlorideElectrode",
+    "ZincElectrode",
 )
 
 # Composition-tree terms emitted by the shared specification appliers

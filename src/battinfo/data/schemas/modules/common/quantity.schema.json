@@ -66,10 +66,19 @@
       ],
       "description": "The basis on which the value is stated. Nominal: the design or target value as specified (default for spec records). Measured: obtained by measurement on a physical item (default for instance records). Rated: a guaranteed value established under a stated rating procedure (datasheet rated capacity). Conventional: fixed by convention or standard practice."
     },
-        "co_type": {"type": "string", "enum": ["Measured", "Conventional", "Rated", "Nominal"], "description": "Deprecated alias of value_basis; accepted so existing records keep validating."},
+    "co_type": {
+      "type": "string",
+      "enum": [
+        "Measured",
+        "Conventional",
+        "Rated",
+        "Nominal"
+      ],
+      "description": "Deprecated alias of value_basis; accepted so existing records keep validating."
+    },
     "conditions": {
       "type": "object",
-      "description": "Measurement parameters or conditions under which this quantity holds, as a map of condition name to quantity (e.g. discharging_c_rate, lower_voltage_limit, upper_voltage_limit, temperature, counter_electrode, cycle_number). Emitted as hasMeasurementParameter in JSON-LD.",
+      "description": "Measurement parameters or conditions under which this quantity holds, as a map of condition name to quantity (e.g. discharging_c_rate, lower_voltage_limit, upper_voltage_limit, temperature, cycle_number, voltage_reference). A qualitative condition may carry value_text alone, with no unit. In JSON-LD, conditions emit as hasMeasurementParameter on a measurement node the quantity isOutputOf; the voltage_reference key instead emits as hasMetrologicalReference on the quantity itself.",
       "patternProperties": {
         "^[a-z][a-z0-9_]*$": {
           "$ref": "#"
@@ -118,6 +127,41 @@
         {
           "required": [
             "unit_text"
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "required": [
+                "value_text"
+              ]
+            },
+            {
+              "not": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "value"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "min_value"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "max_value"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "typical_value"
+                    ]
+                  }
+                ]
+              }
+            }
           ]
         }
       ]

@@ -666,8 +666,9 @@ FAMILIES = [
                 "notice": [
                     "`hasTestObject` / `schema:object` point at the cell; "
                     "`dcterms:conformsTo` points at the protocol.",
-                    "As-run conditions emit as `schema:PropertyValue` entries "
-                    "under `schema:additionalProperty`.",
+                    "As-run conditions emit as typed `hasMeasurementParameter` "
+                    "nodes on the test node (plus a `schema:PropertyValue` "
+                    "copy under `schema:additionalProperty`).",
                 ],
             },
         ],
@@ -1260,8 +1261,12 @@ def render_page(family: dict, sections: list[dict]) -> str:
         "`provenance`, and optional `notes`, `funding`, `contributor`, "
         "`license`). Quantities are `{value, unit}` maps and may also carry "
         "`value_basis` (Measured, Conventional, Rated, or Nominal) and "
-        "`conditions` (the parameters under which "
-        "the value holds, each itself a quantity)." + NL, NL,
+        "`conditions` (the parameters under which the value holds, each "
+        "itself a quantity; a qualitative condition may be `value_text` "
+        "alone). In JSON-LD, conditions ride a measurement node the quantity "
+        "`isOutputOf`; the `voltage_reference` key instead becomes a "
+        "`hasMetrologicalReference` datum on the quantity, beside its "
+        "unit." + NL, NL,
     ]
     for schema_file in family["schemas"]:
         parts += [render_field_tables(schema_file)]

@@ -9,6 +9,44 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- **Measurement conditions ride the measurement, not the quantity (JSON-LD
+  dialect change).** A quantity's `conditions` used to hang
+  `hasMeasurementParameter` directly on the property node - a CHAMEO domain
+  violation (a reasoner would classify the property as a process). They now
+  emit on an anonymous measurement node the quantity `isOutputOf`, typed
+  `BatteryMeasurement`, with each parameter carrying its condition key as
+  `skos:prefLabel` and qualitative values as `hasStringValue` (never a fake
+  quantity with unit "n/a"; `value_text` on a quantity likewise now emits as
+  `hasStringValue` instead of `schema:value`). The test emitter gains the
+  same shape: as-run conditions become typed `hasMeasurementParameter` nodes
+  on the test node itself - the test is the measurement activity - beside
+  the existing `schema:PropertyValue` copy. Already-published documents stay
+  valid; the old flat shape is simply no longer produced. The hosted records
+  context gains the new terms (append-only v1): re-vendor the registry
+  context before publishing new-dialect records.
+
+- **`voltage_reference` is a metrological datum.** "vs Li/Li+" qualifies the
+  quantity itself, not the measurement: the `voltage_reference` conditions
+  key (on quantities and on tests) now emits as EMMO's
+  `hasMetrologicalReference` - the relation family `hasMeasurementUnit`
+  belongs to; a potential carries two references, the volt as its scale and
+  the reference electrode as its zero. Recognized couples (Li/Li+, Na/Na+,
+  SHE, NHE, RHE, SCE, Ag/AgCl, Zn/Zn2+) resolve to class-typed
+  reference-electrode nodes (`[ReferenceElectrode, LithiumElectrode]`);
+  unrecognized notations keep an honest `MetrologicalReference` node
+  carrying the text. Stating a counter electrode inside `conditions` is
+  retired in the packaged examples: the datum is the reference couple, and
+  the setup fact belongs to the test cell's own record.
+
+- **A qualitative quantity needs no unit (the conditions ruling from #363).**
+  The quantity schema required a unit even when the only value was
+  `value_text`, which made honest qualitative conditions (`atmosphere:
+  argon`, `voltage_reference: Li/Li+`) unrepresentable without a `"n/a"`
+  unit hack. The unit requirement now exempts quantities carrying
+  `value_text` alone; any numeric field still demands a unit. Applied across
+  the quantity module, the cell-canonical `SpecItem`, the base-schema
+  `Quantity`, and the cell-spec profile fragment.
+
 - **`co_type` becomes `value_basis`; process condition keys take -ing names.**
   The basis on which a value is stated (Measured / Nominal / Rated /
   Conventional) is now authored as `value_basis` - `co_type` said nothing to

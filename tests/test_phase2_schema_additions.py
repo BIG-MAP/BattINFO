@@ -121,7 +121,11 @@ def test_cell_property_co_type_and_conditions_reach_jsonld() -> None:
     battery = _battery_node(spec)
     nodes = {tuple(_as_list(n["@type"])): n for n in _as_list(battery.get("hasProperty"))}
     nominal = next(n for types, n in nodes.items() if "MeasuredProperty" in types)
-    param = nominal["hasMeasurementParameter"]
+    # Conditions ride the producing measurement (isOutputOf), not the quantity.
+    assert "hasMeasurementParameter" not in nominal
+    measurement = nominal["isOutputOf"]
+    assert measurement["@type"] == "BatteryMeasurement"
+    param = measurement["hasMeasurementParameter"]
     assert "CRate" in _as_list(param["@type"])
     assert param["hasNumericalPart"]["hasNumberValue"] == 0.2
     # RatedProperty is not published in EMMO yet: Rated is exported as ConventionalProperty.

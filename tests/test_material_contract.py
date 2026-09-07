@@ -137,16 +137,31 @@ def test_material_property_conditions_emit_measurement_parameters() -> None:
         property={"specific_capacity": {"value": 160, "unit": "mAh/g", "co_type": "Measured",
                                         "conditions": {"discharging_c_rate": {"value": 0.1, "unit": "C"},
                                                        "lower_voltage_limit": {"value": 2.5, "unit": "V"},
-                                                       "temperature": {"value": 25, "unit": "degC"}}}},
+                                                       "temperature": {"value": 25, "unit": "degC"},
+                                                       "voltage_reference": {"value_text": "Li/Li+"},
+                                                       "atmosphere": {"value_text": "argon"}}}},
     )
     node = to_jsonld(rec, target="domain-battery")["@graph"][0]
     assert node["@type"] == "LithiumIronPhosphate"
     props = node["hasProperty"]
     cap = props if isinstance(props, dict) else props[0]
     assert "SpecificCapacity" in cap["@type"] and "MeasuredProperty" in cap["@type"]
-    params = cap["hasMeasurementParameter"]
-    labels = {p.get("rdfs:label") for p in params}
-    assert {"discharging_c_rate", "lower_voltage_limit", "temperature"}.issubset(labels)
+    # Conditions describe the producing measurement: they ride an anonymous
+    # isOutputOf node, never the quantity itself (CHAMEO domain).
+    assert "hasMeasurementParameter" not in cap
+    measurement = cap["isOutputOf"]
+    assert measurement["@type"] == "BatteryMeasurement"
+    params = measurement["hasMeasurementParameter"]
+    labels = {p.get("skos:prefLabel") for p in params}
+    assert {"discharging_c_rate", "lower_voltage_limit", "temperature", "atmosphere"}.issubset(labels)
+    # A qualitative condition is a hasStringValue node, not a fake quantity.
+    atmosphere = next(p for p in params if p["skos:prefLabel"] == "atmosphere")
+    assert atmosphere["hasStringValue"] == "argon"
+    # voltage_reference is a metrological datum of the quantity, not a
+    # parameter of the measurement: class-typed, beside the unit.
+    ref = cap["hasMetrologicalReference"]
+    assert set(ref["@type"]) == {"ReferenceElectrode", "LithiumElectrode"}
+    assert all(p["skos:prefLabel"] != "voltage_reference" for p in params)
 
 
 def test_material_property_out_of_range_warns() -> None:

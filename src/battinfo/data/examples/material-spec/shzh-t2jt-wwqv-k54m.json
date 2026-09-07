@@ -35,9 +35,8 @@
             "value": 25,
             "unit": "degC"
           },
-          "counter_electrode": {
-            "value_text": "Li metal",
-            "unit_text": "n/a"
+          "voltage_reference": {
+            "value_text": "Li/Li+"
           }
         }
       },
