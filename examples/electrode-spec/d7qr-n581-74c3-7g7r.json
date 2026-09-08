@@ -4,7 +4,7 @@
     "id": "https://w3id.org/battinfo/spec/d7qr-n581-74c3-7g7r",
     "short_id": "d7qrn5",
     "name": "Graphite anode",
-    "kind": "graphite",
+    "active_material_kind": "graphite",
     "active_material_spec_id": "https://w3id.org/battinfo/spec/gwck-k5kf-ae1f-gfgc",
     "coating": {
       "component": {

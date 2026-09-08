@@ -4,7 +4,7 @@
     "id": "https://w3id.org/battinfo/spec/277n-cp9k-3g4m-w40y",
     "short_id": "277ncp",
     "name": "MnO2 cathode",
-    "kind": "mno2",
+    "active_material_kind": "mno2",
     "active_material_spec_id": "https://w3id.org/battinfo/spec/fwnh-2wkq-n9wm-fdab",
     "coating": {
       "component": {

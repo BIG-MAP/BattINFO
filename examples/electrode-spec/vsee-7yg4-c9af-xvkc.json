@@ -4,7 +4,7 @@
     "id": "https://w3id.org/battinfo/spec/vsee-7yg4-c9af-xvkc",
     "short_id": "vsee7y",
     "name": "LMFP cathode",
-    "kind": "lmfp",
+    "active_material_kind": "lmfp",
     "active_material_spec_id": "https://w3id.org/battinfo/spec/qwae-x6cg-c61k-njw7",
     "coating": {
       "component": {

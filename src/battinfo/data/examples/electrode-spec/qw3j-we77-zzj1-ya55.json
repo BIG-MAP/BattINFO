@@ -4,7 +4,7 @@
     "id": "https://w3id.org/battinfo/spec/qw3j-we77-zzj1-ya55",
     "short_id": "qw3jwe",
     "name": "Si-Gr anode",
-    "kind": "silicon_graphite",
+    "active_material_kind": "silicon_graphite",
     "polarity": "negative",
     "grade": "AQ",
     "active_material_spec_id": "https://w3id.org/battinfo/spec/jnab-ggw9-cbn8-hhjr",

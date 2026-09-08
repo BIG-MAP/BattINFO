@@ -1689,6 +1689,16 @@ def _descriptor_electrode_coating_to_jsonld(coating: dict[str, Any] | None) -> d
     if prop_nodes:
         node["hasProperty"] = prop_nodes[0] if len(prop_nodes) == 1 else prop_nodes
 
+    # Sidedness has no EMMO class (OneSidedHeating/TwoSidedHeating are heating
+    # processes, not coating layouts), so it rides a named PropertyValue until
+    # one is published.
+    if isinstance(coating.get("double_sided"), bool):
+        node["schema:additionalProperty"] = {
+            "@type": "schema:PropertyValue",
+            "schema:name": "double_sided",
+            "schema:value": coating["double_sided"],
+        }
+
     comment = coating.get("comment")
     if comment:
         node["schema:description"] = comment
@@ -2693,9 +2703,11 @@ def _electrode_holder_node(
 def _to_domain_battery_jsonld_electrode(data: dict[str, Any]) -> dict[str, Any]:
     """Emit a standalone electrode-spec / electrode record as domain-battery JSON-LD.
 
-    The spec's ``kind`` is the semantic anchor, exactly as a material-spec's is:
-    it types the node with the chemistry-specific EMMO electrode class, stacked
-    with the polarity class. ``active_material_spec_id`` rides ``hasActiveMaterial``
+    The spec's ``active_material_kind`` is the semantic anchor: it derives the
+    chemistry-specific EMMO electrode class (stacked with the polarity class),
+    which types the anonymous physical individual under ``isDescriptionFor`` —
+    the spec node itself is a ``schema:CreativeWork``, an information artifact,
+    per the cell-spec pattern. ``active_material_spec_id`` rides ``hasActiveMaterial``
     as a linked node — the seam back to the powder record. ``processing`` becomes
     the ``prov:wasGeneratedBy`` Manufacturing process (the same emitter a material
     lot uses), which is why an aqueous and an NMP electrode are legible as
@@ -2711,8 +2723,21 @@ def _to_domain_battery_jsonld_electrode(data: dict[str, Any]) -> dict[str, Any]:
         # spec it realizes, which is not resolvable here, so it stays generic.
         spec_body = {}
     node = _electrode_holder_node(
-        body, kind=spec_body.get("kind"), polarity=spec_body.get("polarity")
+        body,
+        kind=spec_body.get("active_material_kind", spec_body.get("kind")),
+        polarity=spec_body.get("polarity"),
     )
+    if is_spec:
+        # The spec is an information artifact, not a physical electrode: it
+        # types as a description (the cell-spec pattern; no published
+        # ElectrodeSpecification class yet — see ontology-additions-needed)
+        # and the physical electrode class stack moves to an anonymous
+        # individual under isDescriptionFor.
+        described: dict[str, Any] = {"@type": node["@type"]}
+        if isinstance(body.get("name"), str) and body["name"]:
+            described["skos:prefLabel"] = body["name"]
+        node["@type"] = "schema:CreativeWork"
+        node["isDescriptionFor"] = described
     if isinstance(body.get("id"), str):
         node["@id"] = body["id"]
     if isinstance(body.get("name"), str) and body["name"]:

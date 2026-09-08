@@ -4,7 +4,7 @@
     "id": "https://w3id.org/battinfo/spec/t5eq-mx18-d29f-mcj1",
     "short_id": "t5eqmx",
     "name": "Si-Gr anode",
-    "kind": "silicon_graphite",
+    "active_material_kind": "silicon_graphite",
     "polarity": "negative",
     "grade": "NMP",
     "active_material_spec_id": "https://w3id.org/battinfo/spec/jnab-ggw9-cbn8-hhjr",

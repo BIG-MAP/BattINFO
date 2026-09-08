@@ -218,6 +218,12 @@ ALIASES: dict[tuple[str, str], str] = {
     ("cell-spec", "cell_format"): "format",
 }
 
+# Deprecated schema keys that to_record() rewrites to their canonical spelling:
+# the value must land in the record, but under the replacement key.
+NORMALIZED_ALIASES: dict[tuple[str, str], str] = {
+    ("electrode-spec", "kind"): "active_material_kind",
+}
+
 
 # ── Sampling a schema-valid value ─────────────────────────────────────────────
 
@@ -226,7 +232,9 @@ _SCHEMA_CACHE: dict[str, dict] = {}
 # Values for properties whose schema constraint a generic sampler cannot satisfy.
 SAMPLE_OVERRIDES: dict[tuple[str, str], Any] = {
     ("material-spec", "kind"): "graphite",  # closed vocabulary lives in code, not in the schema
-    # Same: the electrode kind names an ACTIVE material from that same vocabulary.
+    # Same vocabulary: the electrode names its ACTIVE material (`kind` is the
+    # deprecated alias spelling).
+    ("electrode-spec", "active_material_kind"): "graphite",
     ("electrode-spec", "kind"): "graphite",
     ("electrode-spec", "active_material_spec_id"): SPEC_IRI,
 }
@@ -417,7 +425,7 @@ def _sweep() -> tuple[list[str], list[str], int]:
             if not _is_scalar(subschema, root, kind.schema_file):
                 continue
             written = record.get(kind.record_key, {}) if location == "body" else record
-            if prop not in written:
+            if NORMALIZED_ALIASES.get((entity_type, prop), prop) not in written:
                 dropped.append(f"{entity_type}.{prop} ({location}) accepted a value but to_record() omitted it")
 
     return unreachable, dropped, exercised

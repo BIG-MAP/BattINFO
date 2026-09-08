@@ -26,8 +26,12 @@ from battinfo.api import create_electrode_spec
 record = create_electrode_spec(
     uid="kxwy-5f5f-f682-hhch",
     name="NMC811 cathode design A",
-    kind="nmc811",                     # the ACTIVE material's kind
+    active_material_kind="nmc811",     # from the curated material-kind vocabulary
     active_material_spec_id="https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+    composition={"active": 0.96,       # weight fractions -> coating.component
+                 "binder": {"name": "PVDF", "fraction": 0.02},
+                 "conductive_additive": {"name": "Carbon black", "fraction": 0.02}},
+    coating={"double_sided": False},   # coated on one side (a lab half-cell disc)
     source_type="lab",
 )
 ```
@@ -41,8 +45,47 @@ record = create_electrode_spec(
     "id": "https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
     "short_id": "kxwy5f",
     "name": "NMC811 cathode design A",
-    "kind": "nmc811",
-    "active_material_spec_id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5"
+    "active_material_kind": "nmc811",
+    "active_material_spec_id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+    "coating": {
+      "component": {
+        "active_material": [
+          {
+            "name": "NMC811 (LiNi0.8Mn0.1Co0.1O2)",
+            "property": {
+              "mass_fraction": {
+                "value": 0.96,
+                "unit": "1"
+              }
+            },
+            "material_spec_id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5"
+          }
+        ],
+        "binder": [
+          {
+            "name": "PVDF",
+            "property": {
+              "mass_fraction": {
+                "value": 0.02,
+                "unit": "1"
+              }
+            }
+          }
+        ],
+        "additive": [
+          {
+            "name": "Carbon black",
+            "property": {
+              "mass_fraction": {
+                "value": 0.02,
+                "unit": "1"
+              }
+            }
+          }
+        ]
+      },
+      "double_sided": false
+    }
   },
   "provenance": {
     "source_type": "lab",
@@ -66,7 +109,73 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "battinfo": "https://w3id.org/battinfo/"
     }
   ],
-  "@type": "LithiumNickelManganeseCobaltOxideElectrode",
+  "@type": "schema:CreativeWork",
+  "hasCoating": {
+    "@type": "ElectrodeCoating",
+    "hasActiveMaterial": {
+      "@type": "ActiveMaterial",
+      "schema:name": "NMC811 (LiNi0.8Mn0.1Co0.1O2)",
+      "schema:isVariantOf": {
+        "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5"
+      },
+      "hasProperty": {
+        "@type": [
+          "MassFraction",
+          "ConventionalProperty"
+        ],
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 0.96
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+      }
+    },
+    "hasBinder": {
+      "@type": [
+        "PolyvinylideneFluoride",
+        "Binder"
+      ],
+      "schema:name": "PVDF",
+      "hasProperty": {
+        "@type": [
+          "MassFraction",
+          "ConventionalProperty"
+        ],
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 0.02
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+      }
+    },
+    "hasConductiveAdditive": {
+      "@type": [
+        "CarbonBlack",
+        "ConductiveAdditive"
+      ],
+      "schema:name": "Carbon black",
+      "hasProperty": {
+        "@type": [
+          "MassFraction",
+          "ConventionalProperty"
+        ],
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 0.02
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+      }
+    },
+    "schema:additionalProperty": {
+      "@type": "schema:PropertyValue",
+      "schema:name": "double_sided",
+      "schema:value": false
+    }
+  },
+  "isDescriptionFor": {
+    "@type": "LithiumNickelManganeseCobaltOxideElectrode",
+    "skos:prefLabel": "NMC811 cathode design A"
+  },
   "@id": "https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
   "schema:name": "NMC811 cathode design A",
   "hasActiveMaterial": {
@@ -191,10 +300,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "battinfo": "https://w3id.org/battinfo/"
     }
   ],
-  "@type": [
-    "LithiumNickelManganeseCobaltOxideElectrode",
-    "PositiveElectrode"
-  ],
+  "@type": "schema:CreativeWork",
   "hasCoating": {
     "@type": "ElectrodeCoating",
     "hasActiveMaterial": {
@@ -307,6 +413,13 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
     }
   },
+  "isDescriptionFor": {
+    "@type": [
+      "LithiumNickelManganeseCobaltOxideElectrode",
+      "PositiveElectrode"
+    ],
+    "skos:prefLabel": "NMC811 cathode"
+  },
   "@id": "https://w3id.org/battinfo/spec/qfjh-7xyr-ga1k-tjez",
   "schema:name": "NMC811 cathode",
   "hasActiveMaterial": {
@@ -358,10 +471,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "battinfo": "https://w3id.org/battinfo/"
     }
   ],
-  "@type": [
-    "GraphiteElectrode",
-    "NegativeElectrode"
-  ],
+  "@type": "schema:CreativeWork",
   "hasCoating": {
     "@type": "ElectrodeCoating",
     "hasActiveMaterial": {
@@ -468,6 +578,13 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
     }
   },
+  "isDescriptionFor": {
+    "@type": [
+      "GraphiteElectrode",
+      "NegativeElectrode"
+    ],
+    "skos:prefLabel": "Graphite anode"
+  },
   "@id": "https://w3id.org/battinfo/spec/d7qr-n581-74c3-7g7r",
   "schema:name": "Graphite anode",
   "hasActiveMaterial": {
@@ -519,10 +636,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "battinfo": "https://w3id.org/battinfo/"
     }
   ],
-  "@type": [
-    "LithiumIronPhosphateElectrode",
-    "PositiveElectrode"
-  ],
+  "@type": "schema:CreativeWork",
   "hasCoating": {
     "@type": "ElectrodeCoating",
     "hasActiveMaterial": {
@@ -621,6 +735,13 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
     }
   },
+  "isDescriptionFor": {
+    "@type": [
+      "LithiumIronPhosphateElectrode",
+      "PositiveElectrode"
+    ],
+    "skos:prefLabel": "LFP cathode"
+  },
   "@id": "https://w3id.org/battinfo/spec/m6y0-tkfg-sn40-q10p",
   "schema:name": "LFP cathode",
   "hasActiveMaterial": {
@@ -672,10 +793,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "battinfo": "https://w3id.org/battinfo/"
     }
   ],
-  "@type": [
-    "SiliconGraphiteElectrode",
-    "NegativeElectrode"
-  ],
+  "@type": "schema:CreativeWork",
   "hasCoating": {
     "@type": "ElectrodeCoating",
     "hasActiveMaterial": {
@@ -820,6 +938,13 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
     }
   ],
+  "isDescriptionFor": {
+    "@type": [
+      "SiliconGraphiteElectrode",
+      "NegativeElectrode"
+    ],
+    "skos:prefLabel": "Si-Gr anode"
+  },
   "@id": "https://w3id.org/battinfo/spec/qw3j-we77-zzj1-ya55",
   "schema:name": "Si-Gr anode",
   "hasActiveMaterial": {
@@ -944,7 +1069,8 @@ Schema: [`electrode-spec.schema.json`](https://w3id.org/battinfo/schema/electrod
 | `id` | → ComponentSpecIri | yes |  |
 | `short_id` | → ShortId |  |  |
 | `name` | string | yes | Human-readable electrode name / designation (e.g. 'Si-Gr anode, aqueous', 'NMC811 cathode 96/2/2'). |
-| `kind` | string |  | Required Level-1 kind naming the ACTIVE material of this electrode, from the curated material-kind vocabulary (e.g. 'graphite', 'silicon_graphite', 'nmc811', 'lfp'). Required so a purchased electrode whose powder provenance is unknown is still queryable on the same aggregation axis as one built from an authored material-spec. Aliases resolve on input; an unknown kind is rejected at save time. See battinfo.electrodes.electrode_kind_keys(). |
+| `active_material_kind` | string |  | Required Level-1 kind naming the ACTIVE material of this electrode, from the curated material-kind vocabulary (e.g. 'graphite', 'silicon_graphite', 'nmc811', 'lfp'). Named for what it identifies: the electrode's active material, not the electrode's form. Required so a purchased electrode whose powder provenance is unknown is still queryable on the same aggregation axis as one built from an authored material-spec. Aliases resolve on input; an unknown kind is rejected at save time. See battinfo.electrodes.electrode_kind_keys(). |
+| `kind` | string |  | Deprecated alias of active_material_kind; accepted so existing records keep validating, normalized to active_material_kind on round-trip. |
 | `polarity` | `positive` \| `negative` \| `unknown` |  | Electrode polarity, authored when the design has a side to state. Never derived from the kind: which side an active material sits on is system-relative (graphite is the positive electrode of a lithium-counter half cell). Role-based cells (half / three-electrode) name electrodes by role instead. |
 | `grade` | string |  | Producer grade / design version (e.g. 'v2', 'rev B'). Part of spec identity together with the producer and the electrode name. |
 | `active_material_spec_id` | → MaterialSpecIri |  | Optional canonical IRI of the material-spec for this electrode's active material, present when the powder is known and authored. Absent for a purchased electrode of known chemistry but unknown powder — 'kind' still carries the chemistry. |
@@ -992,7 +1118,9 @@ Schema: [`electrode.schema.json`](https://w3id.org/battinfo/schema/electrode.sch
 
 **Cells reference electrodes.** Which electrode pair a cell uses follows from its `cell_configuration` — the polarity holders (`positive_electrode` / `negative_electrode`) for a full cell, the role holders (`working_electrode` / `counter_electrode`) for a half or three-electrode cell. A cell instance points at the physical disc inside it through `working_electrode_id`.
 
-**Tabs and coatings** belong to the electrode. A current-collector tab (`Electrode.tab`) carries identity fields plus a `property` dict (width, thickness, weld width) and emits under `hasCurrentCollectorTab`. A coating carries the composition and its own properties; a secondary layer such as a ceramic coating is simply an additional coating holder.
+**Tabs and coatings** belong to the electrode. A current-collector tab (`Electrode.tab`) carries identity fields plus a `property` dict (width, thickness, weld width) and emits under `hasCurrentCollectorTab`. A coating carries the composition, its own properties, and `double_sided` — whether the current collector is coated on both sides or one; a secondary layer such as a ceramic coating is simply an additional coating holder.
 
-**Emission.** The kind types the node with its chemistry electrode class (`GraphiteElectrode`, `LithiumIronPhosphateElectrode`, …); an authored polarity stacks `PositiveElectrode` / `NegativeElectrode` on top; role holders emit role types (`WorkingElectrode`, and the counter of a two-electrode half cell types as both `CounterElectrode` and `ReferenceElectrode`).
+**The active material is named for what it is.** `active_material_kind` names the electrode's active material from the curated material-kind vocabulary — not `kind`, which on an electrode would read as its form (porous, foil, rotating-disc). The old `kind` spelling stays accepted as a deprecated alias and normalizes on round-trip.
+
+**Emission.** The spec is an information artifact: it emits as a `schema:CreativeWork` whose `isDescriptionFor` node carries the physical typing — the chemistry electrode class derived from `active_material_kind` (`GraphiteElectrode`, `LithiumIronPhosphateElectrode`, …), with an authored polarity stacking `PositiveElectrode` / `NegativeElectrode` on top. (No `ElectrodeSpecification` class is published yet; it is on the upstream ask list.) Role holders emit role types (`WorkingElectrode`, and the counter of a two-electrode half cell types as both `CounterElectrode` and `ReferenceElectrode`).
 :::

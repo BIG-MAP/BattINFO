@@ -4,7 +4,7 @@
     "id": "https://w3id.org/battinfo/spec/m6y0-tkfg-sn40-q10p",
     "short_id": "m6y0tk",
     "name": "LFP cathode",
-    "kind": "lfp",
+    "active_material_kind": "lfp",
     "active_material_spec_id": "https://w3id.org/battinfo/spec/5ms1-9jv8-hr54-mn4e",
     "coating": {
       "component": {

@@ -1,19 +1,22 @@
 """Electrode kinds: the active-material axis of the electrode model.
 
 The material model describes the powder; the electrode model describes the
-electrode. An ``electrode-spec`` therefore does not re-declare a chemistry of its
-own — it names the **active material kind** from the same curated
-:mod:`battinfo.materials` vocabulary the powder uses, so a graphite anode built
-from an unknown supplier's powder and one built from an authored material-spec
-aggregate on the same axis.
+electrode. An ``electrode-spec`` therefore does not re-declare a chemistry of
+its own — its ``active_material_kind`` names the active material from the same
+curated :mod:`battinfo.materials` vocabulary the powder uses, so a graphite
+electrode built from an unknown supplier's powder and one built from an
+authored material-spec aggregate on the same axis. (The field is named for what
+it identifies: a bare ``kind`` on an electrode would read as the electrode's
+form — porous, foil, rotating-disc — not its chemistry. The old ``kind``
+spelling stays accepted as a deprecated alias.)
 
-That is the point of making ``kind`` required but ``active_material_spec_id``
-optional: a purchased electrode whose powder provenance nobody knows is still a
-first-class, queryable record.
+That is the point of making ``active_material_kind`` required but
+``active_material_spec_id`` optional: a purchased electrode whose powder
+provenance nobody knows is still a first-class, queryable record.
 
-Polarity is *derived* from the kind's family (``active_cathode`` -> positive,
-``active_anode`` -> negative) rather than authored twice, so a record cannot
-claim an LFP anode by typo.
+Polarity is authored or absent, never derived from the kind: which side an
+active material sits on is the cell's fact (graphite is the positive electrode
+of every lithium-counter half cell).
 """
 
 from __future__ import annotations
@@ -118,7 +121,7 @@ def electrode_role_link(role: str, electrode_id: str, configuration: Any = None)
 
 
 def electrode_kind_keys() -> list[str]:
-    """Sorted active-material kind keys — the values ``electrode_spec.kind`` names.
+    """Sorted active-material kind keys — the values ``electrode_spec.active_material_kind`` names.
 
     A subset of :func:`battinfo.materials.material_kind_keys`: the kinds whose
     roles include ``active_material``. Any material kind resolves on input

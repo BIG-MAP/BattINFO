@@ -9,6 +9,33 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- **`electrode_spec.kind` becomes `active_material_kind`.** The field names
+  the electrode's active material, so it now says so - a bare `kind` on an
+  electrode reads as the electrode's form (porous, foil, rotating-disc), not
+  its chemistry. The old spelling stays accepted as a deprecated alias (the
+  `kind=` kwarg included) and normalizes to `active_material_kind` on
+  round-trip; the packaged examples are rewritten to the canonical key.
+
+- **An electrode spec emits as a description, not an electrode.** Its
+  JSON-LD node was typed with the physical electrode class
+  (`GraphiteElectrode`, ...); a spec is an information artifact, so it now
+  types `schema:CreativeWork` with the physical class stack on the anonymous
+  individual under `isDescriptionFor` - the cell-spec pattern. No
+  `ElectrodeSpecification` class is published upstream yet; it stays on the
+  ontology-additions ask list and will stack alongside `schema:CreativeWork`
+  when it lands. Electrode instances are physical objects and keep their
+  typing.
+
+### Added
+
+- **`coating.double_sided`.** A boolean on the electrode-coating block (the
+  standalone electrode spec and the inline cell-spec holders share it)
+  stating whether the current collector is coated on both sides or one. No
+  EMMO class for coating sidedness exists, so it emits as a named
+  `schema:PropertyValue` on the coating node until one is published.
+
+### Changed
+
 - **Measurement conditions ride the measurement, not the quantity (JSON-LD
   dialect change).** A quantity's `conditions` used to hang
   `hasMeasurementParameter` directly on the property node - a CHAMEO domain

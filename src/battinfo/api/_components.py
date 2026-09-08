@@ -105,10 +105,13 @@ class MaterialInput(BaseModel):
 class ElectrodeSpecInput(BaseModel):
     """Typed input for saving a new canonical electrode-spec resource.
 
-    The coated electrode as a designed artifact. ``kind`` names the ACTIVE
-    material (from the curated material-kind vocabulary) and is required;
-    ``active_material_spec_id`` is optional, so a purchased electrode whose
-    powder provenance is unknown is still expressible.
+    The coated electrode as a designed artifact. ``active_material_kind`` names
+    the ACTIVE material (from the curated material-kind vocabulary) — named for
+    what it identifies, since a bare ``kind`` on an electrode reads as the
+    electrode's form (porous, foil, …), not its chemistry. ``kind`` stays
+    accepted as a deprecated alias. ``active_material_spec_id`` is optional, so
+    a purchased electrode whose powder provenance is unknown is still
+    expressible.
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -117,7 +120,9 @@ class ElectrodeSpecInput(BaseModel):
     id: str | None = None
     uid: str | None = None
     name: str
-    kind: str | None = None
+    active_material_kind: str | None = Field(
+        default=None, validation_alias=AliasChoices("active_material_kind", "kind")
+    )
     polarity: str | None = None
     grade: str | None = None
     active_material_spec_id: str | None = None
@@ -560,7 +565,9 @@ def _electrode_spec_identity_uid(draft: ElectrodeSpecInput, kind_key: str | None
 
 def _record_from_electrode_spec(draft: ElectrodeSpecInput) -> dict[str, Any]:
 
-    kind_key = _resolve_electrode_kind_or_raise(draft.kind, draft.name, draft.product_id)
+    kind_key = _resolve_electrode_kind_or_raise(
+        draft.active_material_kind, draft.name, draft.product_id
+    )
     if draft.id is not None:
         if not _spec_iri_re("electrode-spec").fullmatch(draft.id):
             raise ValueError("electrode spec id must match https://w3id.org/battinfo/spec/{uid}.")
@@ -590,7 +597,10 @@ def _record_from_electrode_spec(draft: ElectrodeSpecInput) -> dict[str, Any]:
     }
     spec.update(draft.body or {})
     if kind_key is not None:
-        spec["kind"] = kind_key
+        # Canonical key; the deprecated `kind` spelling (from a body pass-through
+        # or an old record round-tripping) normalizes away here.
+        spec["active_material_kind"] = kind_key
+        spec.pop("kind", None)
     # Polarity is authored or absent — never derived from the kind: which side
     # an active material sits on is the cell's fact, not the material's.
     if draft.polarity is not None:
@@ -812,6 +822,7 @@ def query_electrode_specs(
     id: str | None = None,
     short_id_prefix: str | None = None,
     name: str | None = None,
+    active_material_kind: str | None = None,
     kind: str | None = None,
     polarity: str | None = None,
     manufacturer: str | None = None,
@@ -822,6 +833,9 @@ def query_electrode_specs(
     offset: int = 0,
 ) -> list[dict[str, Any]]:
     """Query reusable electrode specifications.
+
+    ``active_material_kind`` filters on the electrode's active-material kind;
+    ``kind`` is its deprecated alias.
 
     Searches YOUR records under ``source_root`` (default: ``./examples``);
     bundled example records only with ``include_packaged_examples=True`` (hits
@@ -841,7 +855,9 @@ def query_electrode_specs(
             "id": spec.get("id"),
             "short_id": spec.get("short_id"),
             "name": spec.get("name"),
-            "kind": spec.get("kind"),
+            # Old records may still carry the deprecated `kind` spelling.
+            "active_material_kind": spec.get("active_material_kind", spec.get("kind")),
+            "kind": spec.get("active_material_kind", spec.get("kind")),
             "polarity": spec.get("polarity"),
             "manufacturer": spec.get("manufacturer"),
             "origin": origin,
@@ -857,7 +873,7 @@ def query_electrode_specs(
             continue
         if not _str_eq(rec.get("name"), name):
             continue
-        if not _str_eq(rec.get("kind"), kind):
+        if not _str_eq(rec.get("kind"), active_material_kind if active_material_kind is not None else kind):
             continue
         if not _str_eq(rec.get("polarity"), polarity):
             continue

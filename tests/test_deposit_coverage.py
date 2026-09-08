@@ -241,7 +241,11 @@ def test_electrode_nodes_carry_their_full_emission() -> None:
     by_id = {n["@id"]: n for n in doc["@graph"] if isinstance(n.get("@id"), str)}
 
     spec_node = by_id[_record_iri(record_sets["electrode-spec"][0])]
-    types = spec_node["@type"] if isinstance(spec_node["@type"], list) else [spec_node["@type"]]
+    # The spec is an information artifact; the physical typing lives on the
+    # anonymous individual under isDescriptionFor.
+    assert spec_node["@type"] == "schema:CreativeWork", spec_node["@type"]
+    described = spec_node["isDescriptionFor"]["@type"]
+    types = described if isinstance(described, list) else [described]
     assert "GraphiteElectrode" in types, types           # chemistry from the kind
     # No polarity class: the vocabulary assigns no side to an active material
     # (system-relative), so an unauthored polarity emits nothing.

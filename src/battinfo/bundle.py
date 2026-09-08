@@ -956,6 +956,9 @@ class Coating(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     component: dict[str, list[MaterialComponent]] = Field(default_factory=dict)
+    # True when the current collector is coated on both sides, false for a
+    # single-side coating.
+    double_sided: bool | None = None
     manufacturer: str | None = None
     supplier: str | None = None
     product_id: str | None = None

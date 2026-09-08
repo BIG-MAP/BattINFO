@@ -4,7 +4,7 @@
     "id": "https://w3id.org/battinfo/spec/qfjh-7xyr-ga1k-tjez",
     "short_id": "qfjh7x",
     "name": "NMC811 cathode",
-    "kind": "nmc811",
+    "active_material_kind": "nmc811",
     "active_material_spec_id": "https://w3id.org/battinfo/spec/npa4-0dnw-evyh-hhdm",
     "coating": {
       "component": {

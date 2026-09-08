@@ -113,6 +113,12 @@ building the voltage-reference couples table (`transform/json_to_jsonld.py`).
 | **`MeasurementParameter`** (or similar) | Class | chameo or domain-electrochemistry | A generic class for qualitative measurement parameters (`atmosphere: argon`). Such conditions currently type via the dynamic `battinfo:` fallback + `ConventionalProperty` and carry `hasStringValue`. |
 | measurement → procedure relation | Object property | chameo | Ties a measurement process to the procedure it followed. Until it exists, the emitter links protocols with `dcterms:conformsTo` (the in-house test→protocol predicate) — the one non-EMMO seam in the measurement subtree. |
 
+## 8. Coating sidedness (electrode review, 2026-09-08)
+
+| Term | Kind | Placement | Purpose |
+|---|---|---|---|
+| **`DoubleSideCoated`** / **`SingleSideCoated`** (or a `hasCoatedSides` datum) | Class or datum property | domain-electrochemistry, on `ElectrodeCoating` | Whether the current collector is coated on both sides or one — a first-class design fact of every real electrode. The closure has only `OneSidedHeating` / `TwoSidedHeating` (heating processes). Until published, the record key `coating.double_sided` (boolean) emits as a named `schema:PropertyValue` on the coating node (`_descriptor_electrode_coating_to_jsonld`). |
+
 ## Landed upstream — stubs flipped
 
 ### domain-electrochemistry 0.36.0

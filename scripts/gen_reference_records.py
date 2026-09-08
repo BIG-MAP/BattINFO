@@ -164,8 +164,12 @@ def snippet_electrode_spec():
     record = create_electrode_spec(
         uid="kxwy-5f5f-f682-hhch",
         name="NMC811 cathode design A",
-        kind="nmc811",                     # the ACTIVE material's kind
+        active_material_kind="nmc811",     # from the curated material-kind vocabulary
         active_material_spec_id="https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+        composition={"active": 0.96,       # weight fractions -> coating.component
+                     "binder": {"name": "PVDF", "fraction": 0.02},
+                     "conductive_additive": {"name": "Carbon black", "fraction": 0.02}},
+        coating={"double_sided": False},   # coated on one side (a lab half-cell disc)
         source_type="lab",
     )
     return record

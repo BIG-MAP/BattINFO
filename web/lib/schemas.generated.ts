@@ -4106,10 +4106,15 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "minLength": 1,
               "description": "Human-readable electrode name / designation (e.g. 'Si-Gr anode, aqueous', 'NMC811 cathode 96/2/2')."
             },
+            "active_material_kind": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Required Level-1 kind naming the ACTIVE material of this electrode, from the curated material-kind vocabulary (e.g. 'graphite', 'silicon_graphite', 'nmc811', 'lfp'). Named for what it identifies: the electrode's active material, not the electrode's form. Required so a purchased electrode whose powder provenance is unknown is still queryable on the same aggregation axis as one built from an authored material-spec. Aliases resolve on input; an unknown kind is rejected at save time. See battinfo.electrodes.electrode_kind_keys()."
+            },
             "kind": {
               "type": "string",
               "minLength": 1,
-              "description": "Required Level-1 kind naming the ACTIVE material of this electrode, from the curated material-kind vocabulary (e.g. 'graphite', 'silicon_graphite', 'nmc811', 'lfp'). Required so a purchased electrode whose powder provenance is unknown is still queryable on the same aggregation axis as one built from an authored material-spec. Aliases resolve on input; an unknown kind is rejected at save time. See battinfo.electrodes.electrode_kind_keys()."
+              "description": "Deprecated alias of active_material_kind; accepted so existing records keep validating, normalized to active_material_kind on round-trip."
             },
             "polarity": {
               "type": "string",
@@ -7801,6 +7806,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             }
           },
           "description": "Coating composition by role: active material, binder, conductive additive, and other additives. Each component carries its mass_fraction of the dry coating solids under property (0-1 with unit '1', or 0-100 with unit '%'); the fractions across all roles sum to 1."
+        },
+        "double_sided": {
+          "type": "boolean",
+          "description": "True when the current collector is coated on both sides, false for a single-side coating. Loadings and thicknesses elsewhere in this block are per-side values unless their own descriptions say otherwise."
         },
         "manufacturer": {
           "type": "string",

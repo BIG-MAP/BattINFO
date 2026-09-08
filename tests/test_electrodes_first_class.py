@@ -172,8 +172,24 @@ def test_purchased_electrode_needs_no_material_spec() -> None:
         name="Vendor NMC811 cathode sheet", kind="nmc811", manufacturer="Some Vendor",
         validate=False,
     )["electrode_spec"]
-    assert spec["kind"] == "nmc811"
+    # `kind=` is the deprecated alias kwarg: still accepted, and the record
+    # comes out normalized to the canonical key.
+    assert spec["active_material_kind"] == "nmc811"
+    assert "kind" not in spec
     assert "active_material_spec_id" not in spec
+
+
+def test_active_material_kind_is_the_canonical_spelling() -> None:
+    spec = api.create_electrode_spec(
+        name="Vendor NMC811 cathode sheet", active_material_kind="nmc811", validate=False,
+    )["electrode_spec"]
+    assert spec["active_material_kind"] == "nmc811"
+    # A round-trip through the body pass-through also normalizes the old key.
+    again = api.create_electrode_spec(
+        name="Old record", kind="graphite", body={"kind": "graphite"}, validate=False,
+    )["electrode_spec"]
+    assert again["active_material_kind"] == "graphite"
+    assert "kind" not in again
 
 
 # ── Composition: the cell-spec coating shape, not a divergent one ──────────────
@@ -246,15 +262,20 @@ def test_electrode_schemas_permit_attribution() -> None:
 # ── Emission ──────────────────────────────────────────────────────────────────
 
 def test_kind_types_the_node_and_authored_polarity_stacks() -> None:
+    """A spec is an information artifact: CreativeWork, with the physical
+    electrode class stack on the anonymous isDescriptionFor individual."""
     from battinfo.jsonld import record_to_jsonld
 
     spec = api.create_electrode_spec(name="Si-Gr electrode", kind="silicon_graphite", validate=False)
-    assert record_to_jsonld(spec, "electrode-spec")["@type"] == "SiliconGraphiteElectrode"
+    node = record_to_jsonld(spec, "electrode-spec")
+    assert node["@type"] == "schema:CreativeWork"
+    assert node["isDescriptionFor"]["@type"] == "SiliconGraphiteElectrode"
+    assert node["isDescriptionFor"]["skos:prefLabel"] == "Si-Gr electrode"
 
     cathode = api.create_electrode_spec(
         name="LFP positive electrode", kind="lfp", polarity="positive", validate=False
     )
-    assert record_to_jsonld(cathode, "electrode-spec")["@type"] == [
+    assert record_to_jsonld(cathode, "electrode-spec")["isDescriptionFor"]["@type"] == [
         "LithiumIronPhosphateElectrode", "PositiveElectrode",
     ]
 
@@ -272,7 +293,7 @@ def test_every_electrode_kind_types_the_node() -> None:
     chemistry_free = {"nca"}
     for kind in electrode_kind_keys():
         spec = api.create_electrode_spec(name=f"{kind} electrode", kind=kind, validate=False)
-        types = record_to_jsonld(spec, "electrode-spec")["@type"]
+        types = record_to_jsonld(spec, "electrode-spec")["isDescriptionFor"]["@type"]
         if kind in chemistry_free:
             # No chemistry electrode class (deliberate; NCA chemistry lives on
             # the cell's battery class) and no vocabulary-assigned side: the
@@ -280,6 +301,22 @@ def test_every_electrode_kind_types_the_node() -> None:
             assert types == "Electrode", f"{kind} typed as {types}"
             continue
         assert types and "Electrode" in str(types), f"{kind} untyped: {types}"
+
+
+def test_coating_sidedness_is_stated_and_emitted() -> None:
+    """`coating.double_sided` says whether the collector is coated on both
+    sides; with no EMMO class for sidedness it emits as a named PropertyValue."""
+    from battinfo.jsonld import record_to_jsonld
+
+    spec = api.create_electrode_spec(
+        name="Graphite anode", kind="graphite",
+        coating={"double_sided": True}, validate=False,
+    )
+    assert spec["electrode_spec"]["coating"]["double_sided"] is True
+    coating_node = record_to_jsonld(spec, "electrode-spec")["hasCoating"]
+    sidedness = coating_node["schema:additionalProperty"]
+    assert sidedness["schema:name"] == "double_sided"
+    assert sidedness["schema:value"] is True
 
 
 def test_active_material_reference_emits_as_a_linked_node() -> None:

@@ -4,7 +4,7 @@
     "id": "https://w3id.org/battinfo/spec/ntja-z7za-b92g-1qzh",
     "short_id": "ntjaz7",
     "name": "LNMO cathode",
-    "kind": "lnmo",
+    "active_material_kind": "lnmo",
     "active_material_spec_id": "https://w3id.org/battinfo/spec/83bd-jmk7-2x47-s04a",
     "coating": {
       "component": {
