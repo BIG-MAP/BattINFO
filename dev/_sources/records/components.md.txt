@@ -76,7 +76,6 @@ What to notice:
 
 - The same `create_component_spec(family, ...)` call authors every component family; the family picks the schema.
 
-**Validated clean** — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).
 
 ## Common examples
 
@@ -740,7 +739,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 
 ## Fields
 
-Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`).
+Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`). Quantities are `{value, unit}` maps and may also carry `value_basis` (Measured, Conventional, Rated, or Nominal) and `conditions` (the parameters under which the value holds, each itself a quantity; a qualitative condition may be `value_text` alone). In JSON-LD, conditions ride a measurement node the quantity `isOutputOf`; the `voltage_reference` key instead becomes a `hasMetrologicalReference` datum on the quantity, beside its unit.
 
 ### separator-spec fields
 

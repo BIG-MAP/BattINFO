@@ -31,6 +31,7 @@
 <link href="../_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/autodoc_pydantic.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../_static/tokens.css?v=ff8d36bc" />
@@ -45,6 +46,8 @@
     <script src="../_static/documentation_options.js?v=5929fcd5"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'records/cells';</script>
@@ -673,7 +676,6 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <li><p>The node is EMMO-typed (<code class="docutils literal notranslate"><span class="pre">BatteryCellSpecification</span></code>) and each spec property becomes a typed quantity under <code class="docutils literal notranslate"><span class="pre">hasProperty</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">schema:manufacturer</span></code> and <code class="docutils literal notranslate"><span class="pre">schema:model</span></code> carry the identity that seeded the IRI.</p></li>
 </ul>
-<p><strong>Validated clean</strong> — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).</p>
 </section>
 <section id="a-cell-instance-under-that-spec">
 <h3>A cell instance under that spec<a class="headerlink" href="#a-cell-instance-under-that-spec" title="Link to this heading">#</a></h3>
@@ -764,7 +766,6 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <li><p><code class="docutils literal notranslate"><span class="pre">cell_spec_id</span></code> is the instantiation edge; the JSON-LD states it as a reference to the spec node.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">schema:serialNumber</span></code> carries the physical identity.</p></li>
 </ul>
-<p><strong>Validated clean</strong> — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).</p>
 </section>
 </section>
 <section id="common-examples">
@@ -1183,7 +1184,7 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <span class="w">        </span><span class="s2">&quot;ConventionalProperty&quot;</span>
 <span class="w">      </span><span class="p">],</span>
 <span class="w">      </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CycleLife&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;schema:value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&gt;1000&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;hasStringValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&gt;1000&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">],</span>
@@ -3805,7 +3806,7 @@ JSON-LD</label><div class="sd-tab-content docutils">
 </details></section>
 <section id="fields">
 <h2>Fields<a class="headerlink" href="#fields" title="Link to this heading">#</a></h2>
-<p>Generated from the packaged JSON Schemas — the same files <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">validate</span></code> and the registry’s publish gate enforce. Every record also carries the shared envelope (<code class="docutils literal notranslate"><span class="pre">schema_version</span></code>, <code class="docutils literal notranslate"><span class="pre">provenance</span></code>, and optional <code class="docutils literal notranslate"><span class="pre">notes</span></code>, <code class="docutils literal notranslate"><span class="pre">funding</span></code>, <code class="docutils literal notranslate"><span class="pre">contributor</span></code>, <code class="docutils literal notranslate"><span class="pre">license</span></code>).</p>
+<p>Generated from the packaged JSON Schemas — the same files <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">validate</span></code> and the registry’s publish gate enforce. Every record also carries the shared envelope (<code class="docutils literal notranslate"><span class="pre">schema_version</span></code>, <code class="docutils literal notranslate"><span class="pre">provenance</span></code>, and optional <code class="docutils literal notranslate"><span class="pre">notes</span></code>, <code class="docutils literal notranslate"><span class="pre">funding</span></code>, <code class="docutils literal notranslate"><span class="pre">contributor</span></code>, <code class="docutils literal notranslate"><span class="pre">license</span></code>). Quantities are <code class="docutils literal notranslate"><span class="pre">{value,</span> <span class="pre">unit}</span></code> maps and may also carry <code class="docutils literal notranslate"><span class="pre">value_basis</span></code> (Measured, Conventional, Rated, or Nominal) and <code class="docutils literal notranslate"><span class="pre">conditions</span></code> (the parameters under which the value holds, each itself a quantity; a qualitative condition may be <code class="docutils literal notranslate"><span class="pre">value_text</span></code> alone). In JSON-LD, conditions ride a measurement node the quantity <code class="docutils literal notranslate"><span class="pre">isOutputOf</span></code>; the <code class="docutils literal notranslate"><span class="pre">voltage_reference</span></code> key instead becomes a <code class="docutils literal notranslate"><span class="pre">hasMetrologicalReference</span></code> datum on the quantity, beside its unit.</p>
 <section id="cell-spec-fields">
 <h3>cell-spec fields<a class="headerlink" href="#cell-spec-fields" title="Link to this heading">#</a></h3>
 <p>Schema: <a class="reference external" href="https://w3id.org/battinfo/schema/cell-spec.schema.json"><code class="docutils literal notranslate"><span class="pre">cell-spec.schema.json</span></code></a> · required at top level: <code class="docutils literal notranslate"><span class="pre">schema_version</span></code>, <code class="docutils literal notranslate"><span class="pre">cell_spec</span></code>, <code class="docutils literal notranslate"><span class="pre">provenance</span></code></p>

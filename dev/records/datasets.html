@@ -31,6 +31,7 @@
 <link href="../_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/autodoc_pydantic.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../_static/tokens.css?v=ff8d36bc" />
@@ -45,6 +46,8 @@
     <script src="../_static/documentation_options.js?v=5929fcd5"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'records/datasets';</script>
@@ -660,7 +663,6 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <li><p><code class="docutils literal notranslate"><span class="pre">series_id</span></code> emits BOTH <code class="docutils literal notranslate"><span class="pre">dcat:inSeries</span></code> (the DCAT 3 membership edge) and <code class="docutils literal notranslate"><span class="pre">schema:isPartOf</span></code> (what dataset search engines read).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">about</span></code> links the cell and the test; the distribution carries the download URL and checksum.</p></li>
 </ul>
-<p><strong>Validated clean</strong> — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).</p>
 </section>
 <section id="the-collection-dataset-series">
 <h3>The collection (dataset series)<a class="headerlink" href="#the-collection-dataset-series" title="Link to this heading">#</a></h3>
@@ -753,7 +755,6 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <li><p><code class="docutils literal notranslate"><span class="pre">&#64;type</span></code> carries <code class="docutils literal notranslate"><span class="pre">dcat:DatasetSeries</span></code> alongside <code class="docutils literal notranslate"><span class="pre">dcat:Dataset</span></code> — no new record type exists.</p></li>
 <li><p>No <code class="docutils literal notranslate"><span class="pre">about</span></code> and no distributions: the members hold the cell links and the files, and the strict policy admits that for the series flavor only.</p></li>
 </ul>
-<p><strong>Validated clean</strong> — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).</p>
 </section>
 </section>
 <section id="common-examples">
@@ -997,7 +998,7 @@ JSON-LD</label><div class="sd-tab-content docutils">
 </details></section>
 <section id="fields">
 <h2>Fields<a class="headerlink" href="#fields" title="Link to this heading">#</a></h2>
-<p>Generated from the packaged JSON Schemas — the same files <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">validate</span></code> and the registry’s publish gate enforce. Every record also carries the shared envelope (<code class="docutils literal notranslate"><span class="pre">schema_version</span></code>, <code class="docutils literal notranslate"><span class="pre">provenance</span></code>, and optional <code class="docutils literal notranslate"><span class="pre">notes</span></code>, <code class="docutils literal notranslate"><span class="pre">funding</span></code>, <code class="docutils literal notranslate"><span class="pre">contributor</span></code>, <code class="docutils literal notranslate"><span class="pre">license</span></code>).</p>
+<p>Generated from the packaged JSON Schemas — the same files <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">validate</span></code> and the registry’s publish gate enforce. Every record also carries the shared envelope (<code class="docutils literal notranslate"><span class="pre">schema_version</span></code>, <code class="docutils literal notranslate"><span class="pre">provenance</span></code>, and optional <code class="docutils literal notranslate"><span class="pre">notes</span></code>, <code class="docutils literal notranslate"><span class="pre">funding</span></code>, <code class="docutils literal notranslate"><span class="pre">contributor</span></code>, <code class="docutils literal notranslate"><span class="pre">license</span></code>). Quantities are <code class="docutils literal notranslate"><span class="pre">{value,</span> <span class="pre">unit}</span></code> maps and may also carry <code class="docutils literal notranslate"><span class="pre">value_basis</span></code> (Measured, Conventional, Rated, or Nominal) and <code class="docutils literal notranslate"><span class="pre">conditions</span></code> (the parameters under which the value holds, each itself a quantity; a qualitative condition may be <code class="docutils literal notranslate"><span class="pre">value_text</span></code> alone). In JSON-LD, conditions ride a measurement node the quantity <code class="docutils literal notranslate"><span class="pre">isOutputOf</span></code>; the <code class="docutils literal notranslate"><span class="pre">voltage_reference</span></code> key instead becomes a <code class="docutils literal notranslate"><span class="pre">hasMetrologicalReference</span></code> datum on the quantity, beside its unit.</p>
 <section id="dataset-fields">
 <h3>dataset fields<a class="headerlink" href="#dataset-fields" title="Link to this heading">#</a></h3>
 <p>Schema: <a class="reference external" href="https://w3id.org/battinfo/schema/dataset.schema.json"><code class="docutils literal notranslate"><span class="pre">dataset.schema.json</span></code></a> · required at top level: <code class="docutils literal notranslate"><span class="pre">schema_version</span></code>, <code class="docutils literal notranslate"><span class="pre">dataset</span></code>, <code class="docutils literal notranslate"><span class="pre">provenance</span></code></p>

@@ -31,6 +31,7 @@
 <link href="../_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/autodoc_pydantic.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../_static/tokens.css?v=ff8d36bc" />
@@ -45,6 +46,8 @@
     <script src="../_static/documentation_options.js?v=5929fcd5"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'records/tests';</script>
@@ -803,7 +806,6 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <ul class="simple">
 <li><p>The PyBaMM-style <code class="docutils literal notranslate"><span class="pre">experiment</span></code> strings become the structured <code class="docutils literal notranslate"><span class="pre">method</span></code> steps at the record top level, and the JSON-LD emits a typed EMMO workflow (<code class="docutils literal notranslate"><span class="pre">prov:Plan</span></code> / <code class="docutils literal notranslate"><span class="pre">schema:HowTo</span></code>).</p></li>
 </ul>
-<p><strong>Validated clean</strong> — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).</p>
 </section>
 <section id="the-execution">
 <h3>The execution<a class="headerlink" href="#the-execution" title="Link to this heading">#</a></h3>
@@ -904,6 +906,18 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <span class="w">      </span><span class="nt">&quot;schema:unitText&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;degC&quot;</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;hasMeasurementParameter&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;battinfo:ambientTemperature&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;ConventionalProperty&quot;</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ambient_temperature&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">24.6</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc&quot;</span>
+<span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;dcterms:source&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;prov:Entity&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;dcterms:type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;measurement&quot;</span><span class="p">,</span>
@@ -917,9 +931,8 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <p>What to notice:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">hasTestObject</span></code> / <code class="docutils literal notranslate"><span class="pre">schema:object</span></code> point at the cell; <code class="docutils literal notranslate"><span class="pre">dcterms:conformsTo</span></code> points at the protocol.</p></li>
-<li><p>As-run conditions emit as <code class="docutils literal notranslate"><span class="pre">schema:PropertyValue</span></code> entries under <code class="docutils literal notranslate"><span class="pre">schema:additionalProperty</span></code>.</p></li>
+<li><p>As-run conditions emit as typed <code class="docutils literal notranslate"><span class="pre">hasMeasurementParameter</span></code> nodes on the test node (plus a <code class="docutils literal notranslate"><span class="pre">schema:PropertyValue</span></code> copy under <code class="docutils literal notranslate"><span class="pre">schema:additionalProperty</span></code>).</p></li>
 </ul>
-<p><strong>Validated clean</strong> — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).</p>
 </section>
 </section>
 <section id="common-examples">
@@ -2365,7 +2378,7 @@ JSON-LD</label><div class="sd-tab-content docutils">
 </details></section>
 <section id="fields">
 <h2>Fields<a class="headerlink" href="#fields" title="Link to this heading">#</a></h2>
-<p>Generated from the packaged JSON Schemas — the same files <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">validate</span></code> and the registry’s publish gate enforce. Every record also carries the shared envelope (<code class="docutils literal notranslate"><span class="pre">schema_version</span></code>, <code class="docutils literal notranslate"><span class="pre">provenance</span></code>, and optional <code class="docutils literal notranslate"><span class="pre">notes</span></code>, <code class="docutils literal notranslate"><span class="pre">funding</span></code>, <code class="docutils literal notranslate"><span class="pre">contributor</span></code>, <code class="docutils literal notranslate"><span class="pre">license</span></code>).</p>
+<p>Generated from the packaged JSON Schemas — the same files <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">validate</span></code> and the registry’s publish gate enforce. Every record also carries the shared envelope (<code class="docutils literal notranslate"><span class="pre">schema_version</span></code>, <code class="docutils literal notranslate"><span class="pre">provenance</span></code>, and optional <code class="docutils literal notranslate"><span class="pre">notes</span></code>, <code class="docutils literal notranslate"><span class="pre">funding</span></code>, <code class="docutils literal notranslate"><span class="pre">contributor</span></code>, <code class="docutils literal notranslate"><span class="pre">license</span></code>). Quantities are <code class="docutils literal notranslate"><span class="pre">{value,</span> <span class="pre">unit}</span></code> maps and may also carry <code class="docutils literal notranslate"><span class="pre">value_basis</span></code> (Measured, Conventional, Rated, or Nominal) and <code class="docutils literal notranslate"><span class="pre">conditions</span></code> (the parameters under which the value holds, each itself a quantity; a qualitative condition may be <code class="docutils literal notranslate"><span class="pre">value_text</span></code> alone). In JSON-LD, conditions ride a measurement node the quantity <code class="docutils literal notranslate"><span class="pre">isOutputOf</span></code>; the <code class="docutils literal notranslate"><span class="pre">voltage_reference</span></code> key instead becomes a <code class="docutils literal notranslate"><span class="pre">hasMetrologicalReference</span></code> datum on the quantity, beside its unit.</p>
 <section id="test-protocol-fields">
 <h3>test-protocol fields<a class="headerlink" href="#test-protocol-fields" title="Link to this heading">#</a></h3>
 <p>Schema: <a class="reference external" href="https://w3id.org/battinfo/schema/test-protocol.schema.json"><code class="docutils literal notranslate"><span class="pre">test-protocol.schema.json</span></code></a> · required at top level: <code class="docutils literal notranslate"><span class="pre">schema_version</span></code>, <code class="docutils literal notranslate"><span class="pre">test_spec</span></code>, <code class="docutils literal notranslate"><span class="pre">provenance</span></code></p>
@@ -2629,7 +2642,7 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <span class="sd-summary-text">The reasoning behind the model</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
 <p class="sd-card-text"><strong>Two layers on the protocol.</strong> The descriptive layer is <code class="docutils literal notranslate"><span class="pre">method[]</span></code> — canonical structured steps (modes, directions, setpoints as quantities), authored directly or compiled from PyBaMM-style <code class="docutils literal notranslate"><span class="pre">experiment</span></code> strings — plus derived <code class="docutils literal notranslate"><span class="pre">facets</span></code> for querying. The actionable layer is <code class="docutils literal notranslate"><span class="pre">artifacts[]</span></code>: machine-runnable programs (cycler files, PyBaMM experiments) attached to the spec.</p>
 <p class="sd-card-text"><strong>How the kinds are modelled.</strong> Each test kind (cycling, capacity check, rate capability, formation, HPPC, ICI, GITT, DCIR, EIS, quasi-OCV) has a canonical method shape; the JSON-LD emits a typed EMMO process graph — <code class="docutils literal notranslate"><span class="pre">prov:Plan</span></code> / <code class="docutils literal notranslate"><span class="pre">schema:HowTo</span></code> with a typed method class (for example <code class="docutils literal notranslate"><span class="pre">GalvanostaticIntermittentTitrationTechnique</span></code>) over an <code class="docutils literal notranslate"><span class="pre">IterativeWorkflow</span></code> of typed steps with control and termination parameters.</p>
-<p class="sd-card-text"><strong>Execution semantics.</strong> A test links its cell (<code class="docutils literal notranslate"><span class="pre">hasTestObject</span></code> / <code class="docutils literal notranslate"><span class="pre">schema:object</span></code>) and protocol (<code class="docutils literal notranslate"><span class="pre">dcterms:conformsTo</span></code>); as-run conditions emit as <code class="docutils literal notranslate"><span class="pre">schema:PropertyValue</span></code> entries under <code class="docutils literal notranslate"><span class="pre">schema:additionalProperty</span></code>; deviations live in the <code class="docutils literal notranslate"><span class="pre">conformance</span></code> block with typed deviation entries, so a non-conformant run stays honest without losing the protocol link.</p>
+<p class="sd-card-text"><strong>Execution semantics.</strong> A test links its cell (<code class="docutils literal notranslate"><span class="pre">hasTestObject</span></code> / <code class="docutils literal notranslate"><span class="pre">schema:object</span></code>) and protocol (<code class="docutils literal notranslate"><span class="pre">dcterms:conformsTo</span></code>). The test is the measurement activity, so as-run conditions emit twice: as typed <code class="docutils literal notranslate"><span class="pre">hasMeasurementParameter</span></code> nodes on the test node itself (the same shape quantity-level conditions take on their <code class="docutils literal notranslate"><span class="pre">isOutputOf</span></code> measurement node), and as <code class="docutils literal notranslate"><span class="pre">schema:PropertyValue</span></code> entries under <code class="docutils literal notranslate"><span class="pre">schema:additionalProperty</span></code> for standards-only consumers. A <code class="docutils literal notranslate"><span class="pre">voltage_reference</span></code> condition is a metrological datum, not a parameter — it emits as <code class="docutils literal notranslate"><span class="pre">hasMetrologicalReference</span></code> with a class-typed reference-electrode node (<code class="docutils literal notranslate"><span class="pre">Li/Li+</span></code> → <code class="docutils literal notranslate"><span class="pre">[ReferenceElectrode,</span> <span class="pre">LithiumElectrode]</span></code>). Deviations live in the <code class="docutils literal notranslate"><span class="pre">conformance</span></code> block with typed deviation entries, so a non-conformant run stays honest without losing the protocol link.</p>
 </div>
 </details></section>
 </section>
