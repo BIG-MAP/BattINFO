@@ -203,6 +203,41 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
                   "required": [
                     "unit"
                   ]
+                },
+                {
+                  "allOf": [
+                    {
+                      "required": [
+                        "value_text"
+                      ]
+                    },
+                    {
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": [
+                              "value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "min_value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "max_value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "typical_value"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -856,7 +891,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "conditions": {
               "type": "object",
-              "description": "Measurement parameters or conditions under which this quantity holds, as a map of condition name to quantity (e.g. discharging_c_rate, lower_voltage_limit, upper_voltage_limit, temperature, counter_electrode, cycle_number). Emitted as hasMeasurementParameter in JSON-LD.",
+              "description": "Measurement parameters or conditions under which this quantity holds, as a map of condition name to quantity (e.g. discharging_c_rate, lower_voltage_limit, upper_voltage_limit, temperature, cycle_number, voltage_reference). A qualitative condition may carry value_text alone, with no unit. In JSON-LD, conditions emit as hasMeasurementParameter on a measurement node the quantity isOutputOf; the voltage_reference key instead emits as hasMetrologicalReference on the quantity itself.",
               "patternProperties": {
                 "^[a-z][a-z0-9_]*$": {
                   "$ref": "modules/common/quantity.schema.json"
@@ -915,11 +950,46 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
                   "required": [
                     "unit"
                   ]
+                },
+                {
+                  "allOf": [
+                    {
+                      "required": [
+                        "value_text"
+                      ]
+                    },
+                    {
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": [
+                              "value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "min_value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "max_value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "typical_value"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
                 }
               ]
             }
           ],
-          "description": "A single quantitative property: point value or range plus a unit, with optional verbatim extraction context, a co_type stating the nature of the value (Nominal, Measured, Rated, Conventional), and the conditions under which it holds."
+          "description": "A single quantitative property: point value or range plus a unit, with optional verbatim extraction context, a value_basis stating the nature of the value (Nominal, Measured, Rated, Conventional), and the conditions under which it holds."
         },
         "RangeSpec": {
           "type": "object",
@@ -7416,7 +7486,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "conditions": {
           "type": "object",
-          "description": "Measurement parameters or conditions under which this quantity holds, as a map of condition name to quantity (e.g. discharging_c_rate, lower_voltage_limit, upper_voltage_limit, temperature, counter_electrode, cycle_number). Emitted as hasMeasurementParameter in JSON-LD.",
+          "description": "Measurement parameters or conditions under which this quantity holds, as a map of condition name to quantity (e.g. discharging_c_rate, lower_voltage_limit, upper_voltage_limit, temperature, cycle_number, voltage_reference). A qualitative condition may carry value_text alone, with no unit. In JSON-LD, conditions emit as hasMeasurementParameter on a measurement node the quantity isOutputOf; the voltage_reference key instead emits as hasMetrologicalReference on the quantity itself.",
           "patternProperties": {
             "^[a-z][a-z0-9_]*$": {
               "$ref": "#"
@@ -7465,6 +7535,41 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             {
               "required": [
                 "unit_text"
+              ]
+            },
+            {
+              "allOf": [
+                {
+                  "required": [
+                    "value_text"
+                  ]
+                },
+                {
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "value"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "min_value"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "max_value"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "typical_value"
+                        ]
+                      }
+                    ]
+                  }
+                }
               ]
             }
           ]
