@@ -32,9 +32,9 @@
       "specific_capacity": {
         "value": 198,
         "unit": "mAh/g",
-        "co_type": "Measured",
+        "value_basis": "Measured",
         "conditions": {
-          "discharge_c_rate": {
+          "discharging_c_rate": {
             "value": 0.1,
             "unit": "C"
           },
@@ -50,9 +50,8 @@
             "value": 25,
             "unit": "degC"
           },
-          "counter_electrode": {
-            "value_text": "Li metal",
-            "unit_text": "n/a"
+          "voltage_reference": {
+            "value_text": "Li/Li+"
           }
         }
       }

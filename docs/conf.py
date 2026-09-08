@@ -11,6 +11,7 @@ author = "Simon Clark"
 
 extensions = [
     "myst_parser",
+    "sphinx_copybutton",
     "nbsphinx",
     "sphinx_design",
     "sphinx.ext.autodoc",

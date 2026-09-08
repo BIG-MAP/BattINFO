@@ -93,7 +93,7 @@ Retiring the served `ns#` catch-all namespace put every canonical record-body ke
 | Placeholder | Wanted upstream | Notes |
 |---|---|---|
 | `battinfo:ambientTemperature` | test-condition quantity, domain-electrochemistry or domain-battery | The transform deliberately types generic conditions as `ConventionalProperty`; a dedicated `AmbientTemperature` quantity would let both the emitter and the flat record layer ground it. |
-| `battinfo:voltageReference` | relation or annotation, domain-electrochemistry | Which electrode potentials are quoted against (e.g. Li/Li+). Zero candidates in the closure. |
+| `battinfo:voltageReference` | ~~relation~~ resolved in emission (2026-09-07) | The JSON-LD side no longer needs an upstream ask: the `voltage_reference` conditions key is intercepted and emitted as EMMO's own `hasMetrologicalReference` with class-typed reference-electrode nodes (see section 7). The placeholder remains only for the flat record key. |
 | `battinfo:stepMode` / `battinfo:stepDirection` | control-mode / direction quantities or a sanctioned literal pattern | Process classes (`ConstantCurrentCharging`, …) exist for typed emission; the flat step layer states mode/direction as literals and needs a predicate. |
 | `battinfo:lotId` | batch/lot identifier property, domain-battery | Sibling of `battinfo:batchId` (already a placeholder via `ci_batch_id`). |
 | `battinfo:chemistryFamily` / `battinfo:materialClass` | material classification relations, domain-battery or chemical-substance | Coarse family ("nmc") and class ("powder") of a material spec. |
@@ -101,6 +101,17 @@ Retiring the served `ns#` catch-all namespace put every canonical record-body ke
 | `battinfo:EquipmentSpec` / `battinfo:Equipment` / `battinfo:Channel` / `battinfo:ParameterSet` | equipment/channel/parameter-set classes, domain-battery | `hasTestEquipment` exists; the equipment classes themselves (and a measurement-channel class) do not. Parameter sets may re-home to a modelling vocabulary instead. |
 
 Not upstream asks (administrative, stays a placeholder or re-homes to a standard vocabulary if one appears): `battinfo:fundingProgramme`.
+
+## 7. Measurement-provenance cycle (2026-09-07)
+
+Found while moving quantity conditions onto their `isOutputOf` measurement node and
+building the voltage-reference couples table (`transform/json_to_jsonld.py`).
+
+| Term | Kind | Placement | Purpose |
+|---|---|---|---|
+| **`SodiumElectrode`** | Class | domain-electrochemistry, sibling of `LithiumElectrode`/`ZincElectrode` | A plain sodium-metal electrode. The closure has only `SodiumBasedElectrode` (any electrode containing sodium), which the couples table maps `Na/Na+` to meanwhile — too broad for a reference-electrode couple. Repoint `_VOLTAGE_REFERENCE_COUPLES["na/na+"]` when it lands. |
+| **`MeasurementParameter`** (or similar) | Class | chameo or domain-electrochemistry | A generic class for qualitative measurement parameters (`atmosphere: argon`). Such conditions currently type via the dynamic `battinfo:` fallback + `ConventionalProperty` and carry `hasStringValue`. |
+| measurement → procedure relation | Object property | chameo | Ties a measurement process to the procedure it followed. Until it exists, the emitter links protocols with `dcterms:conformsTo` (the in-house test→protocol predicate) — the one non-EMMO seam in the measurement subtree. |
 
 ## Landed upstream — stubs flipped
 

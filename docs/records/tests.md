@@ -300,7 +300,6 @@ What to notice:
 
 - The PyBaMM-style `experiment` strings become the structured `method` steps at the record top level, and the JSON-LD emits a typed EMMO workflow (`prov:Plan` / `schema:HowTo`).
 
-**Validated clean** — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).
 
 ### The execution
 
@@ -400,6 +399,18 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "schema:unitText": "degC"
     }
   ],
+  "hasMeasurementParameter": {
+    "@type": [
+      "battinfo:ambientTemperature",
+      "ConventionalProperty"
+    ],
+    "skos:prefLabel": "ambient_temperature",
+    "hasNumericalPart": {
+      "@type": "RealData",
+      "hasNumberValue": 24.6
+    },
+    "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
+  },
   "dcterms:source": {
     "@type": "prov:Entity",
     "dcterms:type": "measurement",
@@ -414,9 +425,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 What to notice:
 
 - `hasTestObject` / `schema:object` point at the cell; `dcterms:conformsTo` points at the protocol.
-- As-run conditions emit as `schema:PropertyValue` entries under `schema:additionalProperty`.
+- As-run conditions emit as typed `hasMeasurementParameter` nodes on the test node (plus a `schema:PropertyValue` copy under `schema:additionalProperty`).
 
-**Validated clean** — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).
 
 ## Common examples
 
@@ -1297,7 +1307,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 
 ## Fields
 
-Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`).
+Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`). Quantities are `{value, unit}` maps and may also carry `value_basis` (Measured, Conventional, Rated, or Nominal) and `conditions` (the parameters under which the value holds, each itself a quantity; a qualitative condition may be `value_text` alone). In JSON-LD, conditions ride a measurement node the quantity `isOutputOf`; the `voltage_reference` key instead becomes a `hasMetrologicalReference` datum on the quantity, beside its unit.
 
 ### test-protocol fields
 
@@ -1383,5 +1393,5 @@ Top-level `artifacts`: Actionable-layer links to runnable protocol/vendor files 
 
 **How the kinds are modelled.** Each test kind (cycling, capacity check, rate capability, formation, HPPC, ICI, GITT, DCIR, EIS, quasi-OCV) has a canonical method shape; the JSON-LD emits a typed EMMO process graph — `prov:Plan` / `schema:HowTo` with a typed method class (for example `GalvanostaticIntermittentTitrationTechnique`) over an `IterativeWorkflow` of typed steps with control and termination parameters.
 
-**Execution semantics.** A test links its cell (`hasTestObject` / `schema:object`) and protocol (`dcterms:conformsTo`); as-run conditions emit as `schema:PropertyValue` entries under `schema:additionalProperty`; deviations live in the `conformance` block with typed deviation entries, so a non-conformant run stays honest without losing the protocol link.
+**Execution semantics.** A test links its cell (`hasTestObject` / `schema:object`) and protocol (`dcterms:conformsTo`). The test is the measurement activity, so as-run conditions emit twice: as typed `hasMeasurementParameter` nodes on the test node itself (the same shape quantity-level conditions take on their `isOutputOf` measurement node), and as `schema:PropertyValue` entries under `schema:additionalProperty` for standards-only consumers. A `voltage_reference` condition is a metrological datum, not a parameter — it emits as `hasMetrologicalReference` with a class-typed reference-electrode node (`Li/Li+` → `[ReferenceElectrode, LithiumElectrode]`). Deviations live in the `conformance` block with typed deviation entries, so a non-conformant run stays honest without losing the protocol link.
 :::

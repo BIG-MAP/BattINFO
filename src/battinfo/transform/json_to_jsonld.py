@@ -536,9 +536,14 @@ _CO_TYPE_CLASS: dict[str, str] = {
 }
 
 # Measurement-parameter (condition) key -> EMMO class, for hasMeasurementParameter.
-# Keys without a resolvable class fall through to a generic node + rdfs:label.
+# Keys without a resolvable class fall through to a generic node; every
+# parameter node carries the condition key as its skos:prefLabel.
 _MEASUREMENT_PARAMETER_TERMS: dict[str, str] = {
     "c_rate": "CRate",
+    # -ing names processes (discharging vs the noun charge); the -e spellings
+    # stay tolerated for existing records.
+    "discharging_c_rate": "CRate",
+    "charging_c_rate": "CRate",
     "discharge_c_rate": "CRate",
     "charge_c_rate": "CRate",
     "current": "ElectricCurrent",
@@ -547,6 +552,51 @@ _MEASUREMENT_PARAMETER_TERMS: dict[str, str] = {
     "upper_voltage_limit": "UpperVoltageLimit",
     "voltage": "Voltage",
 }
+
+# Recognized reference-electrode couples: notation -> electrochemistry classes.
+# A potential "vs Li/Li+" is a metrological datum on the quantity, not a
+# measurement parameter — it emits as hasMetrologicalReference, the relation
+# family hasMeasurementUnit belongs to (a voltage carries two references: the
+# volt as its scale, the reference electrode as its zero). Nodes are fully
+# class-typed; the notation survives only as skos:prefLabel. Na/Na+ maps to
+# SodiumBasedElectrode — the domain has no plain sodium-metal electrode class
+# yet (see ontology-additions-needed).
+_VOLTAGE_REFERENCE_COUPLES: dict[str, tuple[str, ...]] = {
+    "li/li+": ("ReferenceElectrode", "LithiumElectrode"),
+    "na/na+": ("ReferenceElectrode", "SodiumBasedElectrode"),
+    "she": ("ReferenceElectrode", "StandardHydrogenElectrode"),
+    "nhe": ("ReferenceElectrode", "NormalHydrogenElectrode"),
+    "rhe": ("ReferenceElectrode", "ReversibleHydrogenElectrode"),
+    "sce": ("ReferenceElectrode", "SaturatedCalomelElectrode"),
+    "ag/agcl": ("ReferenceElectrode", "SilverChlorideElectrode"),
+    "zn/zn2+": ("ReferenceElectrode", "ZincElectrode"),
+}
+
+
+def _voltage_reference_node(raw_value: Any) -> dict[str, Any] | None:
+    """A ``voltage_reference`` condition value -> a class-typed reference node.
+
+    Accepts the quantity form (``{"value_text": "Li/Li+"}``) or a bare string;
+    a leading "vs"/"versus" is tolerated. A recognized couple resolves to
+    electrochemistry classes; an unrecognized notation still emits an honest
+    ``MetrologicalReference`` node carrying the text, so nothing is dropped.
+    """
+    if isinstance(raw_value, Mapping):
+        raw = raw_value.get("value_text") or raw_value.get("value")
+    else:
+        raw = raw_value
+    if not isinstance(raw, str) or not raw.strip():
+        return None
+    text = raw.strip()
+    key = text.lower()
+    for prefix in ("vs. ", "vs ", "versus "):
+        if key.startswith(prefix):
+            key = key[len(prefix):].strip()
+            break
+    classes = _VOLTAGE_REFERENCE_COUPLES.get(key)
+    if classes:
+        return {"@type": list(classes), "skos:prefLabel": text}
+    return {"@type": "MetrologicalReference", "hasStringValue": text}
 
 
 #: Sample-statistic key -> the ``schema:propertyID`` naming it on the qualifier
@@ -605,7 +655,7 @@ def _descriptor_quantity_node(
         return None
 
     resolved_term = term or _property_type_term(name)
-    co_token = quantity.get("co_type")
+    co_token = quantity.get("value_basis", quantity.get("co_type"))
     co_class = _CO_TYPE_CLASS.get(co_token) if isinstance(co_token, str) else None
     node: dict[str, Any] = {"@type": [resolved_term, co_class or _property_co_type(name)]}
     # Human layer: carry the class prefLabel on the instance node so readers
@@ -622,7 +672,7 @@ def _descriptor_quantity_node(
         node["hasNumericalPart"] = {"@type": "RealData", "hasNumberValue": primary}
 
     if quantity.get("value_text"):
-        node["schema:value"] = quantity["value_text"]
+        node["hasStringValue"] = quantity["value_text"]
 
     unit = quantity.get("unit") or quantity.get("unit_text")
     iri = _unit_iri(unit)
@@ -635,18 +685,32 @@ def _descriptor_quantity_node(
 
     conditions = quantity.get("conditions")
     if isinstance(conditions, dict):
+        # Conditions describe the measurement that produced the value, not the
+        # value itself: parameters ride an anonymous isOutputOf measurement node
+        # (CHAMEO's hasMeasurementParameter domain is the process — hanging it
+        # on the quantity would classify the property AS a process). The one
+        # exception is voltage_reference, a metrological datum of the quantity:
+        # it stays on the quantity as hasMetrologicalReference, beside the unit.
         params: list[dict[str, Any]] = []
         for ckey in sorted(conditions):
             cqty = conditions[ckey]
+            if ckey == "voltage_reference":
+                ref = _voltage_reference_node(cqty)
+                if ref is not None:
+                    node["hasMetrologicalReference"] = ref
+                continue
             if not isinstance(cqty, dict):
                 continue
             cterm = _MEASUREMENT_PARAMETER_TERMS.get(ckey)
             cnode = _descriptor_quantity_node(ckey, cqty, term=cterm)
             if cnode is not None:
-                cnode.setdefault("rdfs:label", ckey)
+                cnode["skos:prefLabel"] = ckey
                 params.append(cnode)
         if params:
-            node["hasMeasurementParameter"] = params[0] if len(params) == 1 else params
+            node["isOutputOf"] = {
+                "@type": "BatteryMeasurement",
+                "hasMeasurementParameter": params[0] if len(params) == 1 else params,
+            }
 
     # @type + skos:prefLabel alone carry no data - treat as empty (same
     # behaviour as before the prefLabel injection).

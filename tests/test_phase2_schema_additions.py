@@ -77,15 +77,15 @@ def _cell_spec_record(**overrides) -> dict:
 # --------------------------------------------------------------------------- #
 
 
-def test_spec_item_accepts_co_type_and_conditions() -> None:
+def test_spec_item_accepts_value_basis_and_conditions() -> None:
     record = _cell_spec_record(
         properties={
             "nominal_capacity": {
                 "value": 100,
                 "unit": "Ah",
-                "co_type": "Rated",
+                "value_basis": "Rated",
                 "conditions": {
-                    "discharge_c_rate": {"value": 0.2, "unit": "C"},
+                    "discharging_c_rate": {"value": 0.2, "unit": "C"},
                     "temperature": {"value": 25, "unit": "degC"},
                 },
             }
@@ -108,7 +108,7 @@ def test_cell_property_co_type_and_conditions_reach_jsonld() -> None:
         properties=properties(
             nominal_capacity={
                 "value": 100, "unit": "Ah", "co_type": "Measured",
-                "conditions": {"discharge_c_rate": {"value": 0.2, "unit": "C"}},
+                "conditions": {"discharging_c_rate": {"value": 0.2, "unit": "C"}},
             },
             rated_capacity={"value": 98, "unit": "Ah", "co_type": "Rated"},
         ),
@@ -116,12 +116,16 @@ def test_cell_property_co_type_and_conditions_reach_jsonld() -> None:
     # Round-trips through the library record unchanged.
     restored = CellSpecification.from_library_record(spec.to_library_record())
     assert restored.properties["nominal_capacity"]["co_type"] == "Measured"
-    assert restored.properties["nominal_capacity"]["conditions"]["discharge_c_rate"]["unit"] == "C"
+    assert restored.properties["nominal_capacity"]["conditions"]["discharging_c_rate"]["unit"] == "C"
 
     battery = _battery_node(spec)
     nodes = {tuple(_as_list(n["@type"])): n for n in _as_list(battery.get("hasProperty"))}
     nominal = next(n for types, n in nodes.items() if "MeasuredProperty" in types)
-    param = nominal["hasMeasurementParameter"]
+    # Conditions ride the producing measurement (isOutputOf), not the quantity.
+    assert "hasMeasurementParameter" not in nominal
+    measurement = nominal["isOutputOf"]
+    assert measurement["@type"] == "BatteryMeasurement"
+    param = measurement["hasMeasurementParameter"]
     assert "CRate" in _as_list(param["@type"])
     assert param["hasNumericalPart"]["hasNumberValue"] == 0.2
     # RatedProperty is not published in EMMO yet: Rated is exported as ConventionalProperty.
@@ -129,12 +133,17 @@ def test_cell_property_co_type_and_conditions_reach_jsonld() -> None:
     assert others and all("ConventionalProperty" in _as_list(n["@type"]) for n in others)
 
 
-def test_spec_value_model_round_trips_co_type_and_conditions() -> None:
-    payload = {"value": 3.2, "unit": "V", "co_type": "Nominal", "conditions": {"temperature": {"value": 25, "unit": "degC"}}}
+def test_spec_value_model_round_trips_value_basis_and_conditions() -> None:
+    payload = {"value": 3.2, "unit": "V", "value_basis": "Nominal", "conditions": {"temperature": {"value": 25, "unit": "degC"}}}
     sv = _dict_to_spec_value(payload)
     assert isinstance(sv, SpecValue)
     assert _spec_value_to_dict(sv) == payload
     assert _coerce_spec_value(sv) == payload
+
+    # The deprecated co_type alias is still read, and normalizes on the way out.
+    legacy = dict(payload)
+    legacy["co_type"] = legacy.pop("value_basis")
+    assert _spec_value_to_dict(_dict_to_spec_value(legacy)) == payload
 
 
 # --------------------------------------------------------------------------- #

@@ -82,6 +82,16 @@ def _load_test_method_context_terms() -> dict:
         "LowerVoltageLimit", "UpperVoltageLimit", "TerminationQuantity",
         "CRate", "ElectricCurrent", "Voltage", "Power", "ElectricalResistance",
         "Duration", "ConventionalProperty",
+        # Measurement-provenance subtree (as-run conditions emit typed
+        # hasMeasurementParameter nodes on the test node itself) and the
+        # metrological references the voltage_reference datum resolves to.
+        "hasMeasurementParameter", "isOutputOf", "BatteryMeasurement",
+        "hasStringValue", "hasMetrologicalReference", "MetrologicalReference",
+        "ReferenceElectrode", "LithiumElectrode", "SodiumBasedElectrode",
+        "StandardHydrogenElectrode", "NormalHydrogenElectrode",
+        "ReversibleHydrogenElectrode", "SaturatedCalomelElectrode",
+        "SilverChlorideElectrode", "ZincElectrode",
+        "RealData", "CelsiusTemperature", "MeasuredProperty", "NominalProperty",
         # Characterisation-method classes a test protocol types itself with
         # (see TEST_METHOD_CLASS). Pulled from the same bundled context, so the
         # emitter, the hosted context and the validator allowlist cannot drift.
@@ -826,12 +836,28 @@ def test_to_jsonld(record: dict) -> dict:
     if isinstance(conditions, Mapping) and conditions:
         # Per-execution conditions are an open snake_case map (temperature,
         # voltage window, C-rate, ...); values may be scalars, strings, or
-        # {value, unit} quantities. Emit each as a standards-only
-        # schema:PropertyValue (the same shape the cell-instance batch_id and the
-        # protocol-condition fallback already use) hung off schema:additionalProperty.
+        # {value, unit} quantities. The test IS the measurement activity, so
+        # each condition also emits as a typed hasMeasurementParameter node on
+        # this node — the same shape quantity-level conditions take on their
+        # isOutputOf measurement node, so one query reads both rungs. The
+        # schema:PropertyValue copy stays as the standards-legible layer.
+        # voltage_reference is a metrological datum, not a parameter: it emits
+        # only as hasMetrologicalReference.
+        from battinfo.transform.json_to_jsonld import (  # noqa: PLC0415
+            _MEASUREMENT_PARAMETER_TERMS,
+            _descriptor_quantity_node,
+            _voltage_reference_node,
+        )
+
         props: list[dict] = []
+        params: list[dict] = []
         for name in sorted(conditions):
             value = conditions[name]
+            if name == "voltage_reference":
+                ref = _voltage_reference_node(value)
+                if ref is not None:
+                    node["hasMetrologicalReference"] = ref
+                    continue
             pv: dict = {"@type": "schema:PropertyValue", "schema:name": name}
             if isinstance(value, Mapping) and "value" in value:
                 pv["schema:value"] = value.get("value")
@@ -840,7 +866,24 @@ def test_to_jsonld(record: dict) -> dict:
             else:
                 pv["schema:value"] = value
             props.append(pv)
-        node["schema:additionalProperty"] = props
+            if isinstance(value, Mapping):
+                quantity = dict(value)
+            elif isinstance(value, str):
+                quantity = {"value_text": value}
+            elif isinstance(value, (int, float)) and not isinstance(value, bool):
+                quantity = {"value": value}
+            else:
+                continue
+            pnode = _descriptor_quantity_node(
+                name, quantity, term=_MEASUREMENT_PARAMETER_TERMS.get(name)
+            )
+            if pnode is not None:
+                pnode["skos:prefLabel"] = name
+                params.append(pnode)
+        if props:
+            node["schema:additionalProperty"] = props
+        if params:
+            node["hasMeasurementParameter"] = params[0] if len(params) == 1 else params
     if prov:
         node["dcterms:source"] = _provenance(prov)
 

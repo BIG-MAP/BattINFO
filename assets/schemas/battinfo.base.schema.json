@@ -196,6 +196,41 @@
               "required": [
                 "unit"
               ]
+            },
+            {
+              "allOf": [
+                {
+                  "required": [
+                    "value_text"
+                  ]
+                },
+                {
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "value"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "min_value"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "max_value"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "typical_value"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
             }
           ]
         }

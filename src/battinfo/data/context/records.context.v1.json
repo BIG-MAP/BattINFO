@@ -736,6 +736,23 @@
     "Hertz": "emmo:Hertz",
     "KilogramPerCubicMetre": "emmo:KilogramPerCubicMetre",
     "CubicCentiMetre": "emmo:CubicCentiMetre",
-    "SquareCentiMetre": "emmo:SquareCentiMetre"
+    "SquareCentiMetre": "emmo:SquareCentiMetre",
+    "isOutputOf": {
+      "@id": "emmo:EMMO_2bb50428_568d_46e8_b8bf_59a4c5656461",
+      "@type": "@id"
+    },
+    "BatteryMeasurement": "battery:battery_6c481323_498b_42c6_915a_53490f409430",
+    "hasStringValue": "emmo:EMMO_02face50_43a1_40ce_a909_dfe54d5e186b",
+    "hasMetrologicalReference": {
+      "@id": "emmo:EMMO_67fc0a36_8dcb_4ffa_9a43_31074efa3296",
+      "@type": "@id"
+    },
+    "MetrologicalReference": "emmo:EMMO_18ce5200_00f5_45bb_8c6f_6fb128cd41ae",
+    "SodiumBasedElectrode": "electrochemistry:electrochemistry_df4dd678_9642_47c9_84dd_4bb09f369f53",
+    "StandardHydrogenElectrode": "electrochemistry:electrochemistry_2a40b878_7d09_49db_91b2_d0ee30192284",
+    "NormalHydrogenElectrode": "electrochemistry:electrochemistry_83ee23b3_2f5c_4afa_b972_ac85e91d7306",
+    "ReversibleHydrogenElectrode": "electrochemistry:electrochemistry_0d9ba00d_04bc_4bdc_85af_3380694f6f68",
+    "SaturatedCalomelElectrode": "electrochemistry:electrochemistry_82b66bfe_ec25_417b_ba65_b631ddaaca0e",
+    "SilverChlorideElectrode": "electrochemistry:electrochemistry_6ec59f99_5f26_4a7d_9b90_b52e0f8ad190"
   }
 }

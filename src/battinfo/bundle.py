@@ -471,7 +471,7 @@ def _coerce_spec_value(value: Any) -> Any:
             if value.sv_value_text is not None:
                 out["value_text"] = value.sv_value_text
             if value.sv_co_type is not None:
-                out["co_type"] = value.sv_co_type
+                out["value_basis"] = value.sv_co_type
             if value.sv_conditions:
                 out["conditions"] = dict(value.sv_conditions)
             return out

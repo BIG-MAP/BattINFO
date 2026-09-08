@@ -104,6 +104,19 @@ _EXPLICIT_ALLOWED_TYPE_TERMS = {
     # the entity_type_map sections, so listed explicitly)
     "PrimaryBattery",
     "SecondaryBattery",
+    # Measurement-provenance subtree (conditions ride an isOutputOf node) and
+    # metrological references (the voltage_reference datum on quantities)
+    "BatteryMeasurement",
+    "MetrologicalReference",
+    "ReferenceElectrode",
+    "LithiumElectrode",
+    "SodiumBasedElectrode",
+    "StandardHydrogenElectrode",
+    "NormalHydrogenElectrode",
+    "ReversibleHydrogenElectrode",
+    "SaturatedCalomelElectrode",
+    "SilverChlorideElectrode",
+    "ZincElectrode",
     # New in domain-battery 0.19.0
     "BatterySpecification",
     "BatteryCellSpecification",

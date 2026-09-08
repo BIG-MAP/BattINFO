@@ -402,7 +402,7 @@ export const jsonldGallery: {
             "ConventionalProperty"
           ],
           "skos:prefLabel": "CycleLife",
-          "schema:value": ">1000",
+          "hasStringValue": ">1000",
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
         }
       ],

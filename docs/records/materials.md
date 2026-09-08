@@ -27,6 +27,10 @@ record = create_material_spec(
     uid="7d9k-2m4p-8t3x-6nq5",
     name="NMC811 cathode powder",
     kind="nmc811",                     # Level-1 key from the curated vocabulary
+    property={
+        "specific_capacity": {"value": 200, "unit": "mAh/g"},
+        "d50_particle_size": {"value": 10, "unit": "um"},
+    },
     source_type="datasheet",
 )
 ```
@@ -40,7 +44,17 @@ record = create_material_spec(
     "id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
     "short_id": "7d9k2m",
     "name": "NMC811 cathode powder",
-    "kind": "nmc811"
+    "kind": "nmc811",
+    "property": {
+      "specific_capacity": {
+        "value": 200,
+        "unit": "mAh/g"
+      },
+      "d50_particle_size": {
+        "value": 10,
+        "unit": "um"
+      }
+    }
   },
   "provenance": {
     "source_type": "datasheet",
@@ -74,7 +88,33 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "@id": "http://www.wikidata.org/entity/Q121086674"
     }
   ],
-  "schema:name": "NMC811 cathode powder"
+  "schema:name": "NMC811 cathode powder",
+  "hasProperty": [
+    {
+      "@type": [
+        "D50ParticleSize",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "D50ParticleSize",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 10
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
+    },
+    {
+      "@type": [
+        "SpecificCapacity",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "SpecificCapacity",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 200
+      },
+      "schema:unitText": "mAh/g"
+    }
+  ]
 }
 ```
 :::
@@ -85,7 +125,6 @@ What to notice:
 
 - The `kind` resolves to the chemical-substance class IRI that types the emitted node — the genome's aggregation axis.
 
-**Validated clean** — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).
 
 ### A material instance (one physical lot)
 
@@ -152,7 +191,6 @@ What to notice:
 
 - `material_spec_id` links the lot to its product; the lot is what an electrode batch actually consumed.
 
-**Validated clean** — strict policy, 0 errors, 0 warnings (battinfo 0.7.0).
 
 ## Common examples
 
@@ -231,70 +269,66 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         "hasNumberValue": 200
       },
       "schema:unitText": "mAh/g",
-      "hasMeasurementParameter": [
-        {
-          "@type": [
-            "battinfo:counterElectrode",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "counterElectrode",
-          "schema:value": "Li metal",
-          "schema:unitText": "n/a",
-          "rdfs:label": "counter_electrode"
-        },
-        {
-          "@type": [
-            "CRate",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "CRate",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 0.1
+      "hasMetrologicalReference": {
+        "@type": [
+          "ReferenceElectrode",
+          "LithiumElectrode"
+        ],
+        "skos:prefLabel": "Li/Li+"
+      },
+      "isOutputOf": {
+        "@type": "BatteryMeasurement",
+        "hasMeasurementParameter": [
+          {
+            "@type": [
+              "CRate",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "discharging_c_rate",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 0.1
+            },
+            "schema:unitText": "C"
           },
-          "schema:unitText": "C",
-          "rdfs:label": "discharge_c_rate"
-        },
-        {
-          "@type": [
-            "LowerVoltageLimit",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "LowerVoltageLimit",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 3.0
+          {
+            "@type": [
+              "LowerVoltageLimit",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "lower_voltage_limit",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 3.0
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
           },
-          "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
-          "rdfs:label": "lower_voltage_limit"
-        },
-        {
-          "@type": [
-            "CelsiusTemperature",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "CelsiusTemperature",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 25
+          {
+            "@type": [
+              "CelsiusTemperature",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "temperature",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 25
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
           },
-          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc",
-          "rdfs:label": "temperature"
-        },
-        {
-          "@type": [
-            "UpperVoltageLimit",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "UpperVoltageLimit",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 4.3
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
-          "rdfs:label": "upper_voltage_limit"
-        }
-      ]
+          {
+            "@type": [
+              "UpperVoltageLimit",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "upper_voltage_limit",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 4.3
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
+          }
+        ]
+      }
     },
     {
       "@type": [
@@ -396,70 +430,66 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         "hasNumberValue": 160
       },
       "schema:unitText": "mAh/g",
-      "hasMeasurementParameter": [
-        {
-          "@type": [
-            "battinfo:counterElectrode",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "counterElectrode",
-          "schema:value": "Li metal",
-          "schema:unitText": "n/a",
-          "rdfs:label": "counter_electrode"
-        },
-        {
-          "@type": [
-            "CRate",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "CRate",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 0.1
+      "hasMetrologicalReference": {
+        "@type": [
+          "ReferenceElectrode",
+          "LithiumElectrode"
+        ],
+        "skos:prefLabel": "Li/Li+"
+      },
+      "isOutputOf": {
+        "@type": "BatteryMeasurement",
+        "hasMeasurementParameter": [
+          {
+            "@type": [
+              "CRate",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "discharging_c_rate",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 0.1
+            },
+            "schema:unitText": "C"
           },
-          "schema:unitText": "C",
-          "rdfs:label": "discharge_c_rate"
-        },
-        {
-          "@type": [
-            "LowerVoltageLimit",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "LowerVoltageLimit",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 2.5
+          {
+            "@type": [
+              "LowerVoltageLimit",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "lower_voltage_limit",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 2.5
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
           },
-          "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
-          "rdfs:label": "lower_voltage_limit"
-        },
-        {
-          "@type": [
-            "CelsiusTemperature",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "CelsiusTemperature",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 25
+          {
+            "@type": [
+              "CelsiusTemperature",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "temperature",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 25
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
           },
-          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc",
-          "rdfs:label": "temperature"
-        },
-        {
-          "@type": [
-            "UpperVoltageLimit",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "UpperVoltageLimit",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 3.65
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
-          "rdfs:label": "upper_voltage_limit"
-        }
-      ]
+          {
+            "@type": [
+              "UpperVoltageLimit",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "upper_voltage_limit",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 3.65
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
+          }
+        ]
+      }
     },
     {
       "@type": [
@@ -561,70 +591,66 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         "hasNumberValue": 360
       },
       "schema:unitText": "mAh/g",
-      "hasMeasurementParameter": [
-        {
-          "@type": [
-            "battinfo:counterElectrode",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "counterElectrode",
-          "schema:value": "Li metal",
-          "schema:unitText": "n/a",
-          "rdfs:label": "counter_electrode"
-        },
-        {
-          "@type": [
-            "CRate",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "CRate",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 0.1
+      "hasMetrologicalReference": {
+        "@type": [
+          "ReferenceElectrode",
+          "LithiumElectrode"
+        ],
+        "skos:prefLabel": "Li/Li+"
+      },
+      "isOutputOf": {
+        "@type": "BatteryMeasurement",
+        "hasMeasurementParameter": [
+          {
+            "@type": [
+              "CRate",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "discharging_c_rate",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 0.1
+            },
+            "schema:unitText": "C"
           },
-          "schema:unitText": "C",
-          "rdfs:label": "discharge_c_rate"
-        },
-        {
-          "@type": [
-            "LowerVoltageLimit",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "LowerVoltageLimit",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 0.01
+          {
+            "@type": [
+              "LowerVoltageLimit",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "lower_voltage_limit",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 0.01
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
           },
-          "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
-          "rdfs:label": "lower_voltage_limit"
-        },
-        {
-          "@type": [
-            "CelsiusTemperature",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "CelsiusTemperature",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 25
+          {
+            "@type": [
+              "CelsiusTemperature",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "temperature",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 25
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
           },
-          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc",
-          "rdfs:label": "temperature"
-        },
-        {
-          "@type": [
-            "UpperVoltageLimit",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "UpperVoltageLimit",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 1.5
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
-          "rdfs:label": "upper_voltage_limit"
-        }
-      ]
+          {
+            "@type": [
+              "UpperVoltageLimit",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "upper_voltage_limit",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 1.5
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
+          }
+        ]
+      }
     },
     {
       "@type": [
@@ -779,70 +805,66 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         "hasNumberValue": 140
       },
       "schema:unitText": "mAh/g",
-      "hasMeasurementParameter": [
-        {
-          "@type": [
-            "battinfo:counterElectrode",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "counterElectrode",
-          "schema:value": "Li metal",
-          "schema:unitText": "n/a",
-          "rdfs:label": "counter_electrode"
-        },
-        {
-          "@type": [
-            "CRate",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "CRate",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 0.1
+      "hasMetrologicalReference": {
+        "@type": [
+          "ReferenceElectrode",
+          "LithiumElectrode"
+        ],
+        "skos:prefLabel": "Li/Li+"
+      },
+      "isOutputOf": {
+        "@type": "BatteryMeasurement",
+        "hasMeasurementParameter": [
+          {
+            "@type": [
+              "CRate",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "discharging_c_rate",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 0.1
+            },
+            "schema:unitText": "C"
           },
-          "schema:unitText": "C",
-          "rdfs:label": "discharge_c_rate"
-        },
-        {
-          "@type": [
-            "LowerVoltageLimit",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "LowerVoltageLimit",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 3.5
+          {
+            "@type": [
+              "LowerVoltageLimit",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "lower_voltage_limit",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 3.5
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
           },
-          "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
-          "rdfs:label": "lower_voltage_limit"
-        },
-        {
-          "@type": [
-            "CelsiusTemperature",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "CelsiusTemperature",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 25
+          {
+            "@type": [
+              "CelsiusTemperature",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "temperature",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 25
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
           },
-          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc",
-          "rdfs:label": "temperature"
-        },
-        {
-          "@type": [
-            "UpperVoltageLimit",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "UpperVoltageLimit",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 4.9
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
-          "rdfs:label": "upper_voltage_limit"
-        }
-      ]
+          {
+            "@type": [
+              "UpperVoltageLimit",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "upper_voltage_limit",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 4.9
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
+          }
+        ]
+      }
     }
   ],
   "schema:comment": "High-voltage spinel cathode active material (synthetic reference example)."
@@ -1173,7 +1195,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 
 ## Fields
 
-Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`).
+Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`). Quantities are `{value, unit}` maps and may also carry `value_basis` (Measured, Conventional, Rated, or Nominal) and `conditions` (the parameters under which the value holds, each itself a quantity; a qualitative condition may be `value_text` alone). In JSON-LD, conditions ride a measurement node the quantity `isOutputOf`; the `voltage_reference` key instead becomes a `hasMetrologicalReference` datum on the quantity, beside its unit.
 
 ### material-spec fields
 

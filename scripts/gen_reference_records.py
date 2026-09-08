@@ -137,6 +137,10 @@ def snippet_material_spec():
         uid="7d9k-2m4p-8t3x-6nq5",
         name="NMC811 cathode powder",
         kind="nmc811",                     # Level-1 key from the curated vocabulary
+        property={
+            "specific_capacity": {"value": 200, "unit": "mAh/g"},
+            "d50_particle_size": {"value": 10, "unit": "um"},
+        },
         source_type="datasheet",
     )
     return record
@@ -662,8 +666,9 @@ FAMILIES = [
                 "notice": [
                     "`hasTestObject` / `schema:object` point at the cell; "
                     "`dcterms:conformsTo` points at the protocol.",
-                    "As-run conditions emit as `schema:PropertyValue` entries "
-                    "under `schema:additionalProperty`.",
+                    "As-run conditions emit as typed `hasMeasurementParameter` "
+                    "nodes on the test node (plus a `schema:PropertyValue` "
+                    "copy under `schema:additionalProperty`).",
                 ],
             },
         ],
@@ -1239,7 +1244,6 @@ def render_page(family: dict, sections: list[dict]) -> str:
             for line in section["notice"]:
                 parts += [f"- {line}", NL]
             parts += [NL]
-        parts += [section["verdict"], NL]
 
     parts += [render_shelf(family)]
 
@@ -1255,7 +1259,14 @@ def render_page(family: dict, sections: list[dict]) -> str:
         "`battinfo validate` and the registry's publish gate enforce. Every "
         "record also carries the shared envelope (`schema_version`, "
         "`provenance`, and optional `notes`, `funding`, `contributor`, "
-        "`license`)." + NL, NL,
+        "`license`). Quantities are `{value, unit}` maps and may also carry "
+        "`value_basis` (Measured, Conventional, Rated, or Nominal) and "
+        "`conditions` (the parameters under which the value holds, each "
+        "itself a quantity; a qualitative condition may be `value_text` "
+        "alone). In JSON-LD, conditions ride a measurement node the quantity "
+        "`isOutputOf`; the `voltage_reference` key instead becomes a "
+        "`hasMetrologicalReference` datum on the quantity, beside its "
+        "unit." + NL, NL,
     ]
     for schema_file in family["schemas"]:
         parts += [render_field_tables(schema_file)]
