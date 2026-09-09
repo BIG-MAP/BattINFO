@@ -20,48 +20,41 @@ How to describe an electrolyte: the formulation as an **electrolyte spec** (its 
 
 :::{tab-item} Python
 ```python
-from battinfo.api import create_component_spec
+from battinfo.api import create_electrolyte_spec
 
-record = create_component_spec(
-    "electrolyte",
+# Every constituent can cite its material-spec by IRI, so the formulation
+# is assembled from materials, never retyped — the salt's ions and
+# chemistry follow from its material identity.
+record = create_electrolyte_spec(
     uid="0rp6-kncv-cyem-qwcd",
     name="1M LiPF6 in EC:EMC 3:7 + 2% VC",
-    # Composition fields go through body= (the class field is also named
-    # "family" — the function's first argument). Every constituent can
-    # cite its material-spec by IRI, so the formulation is assembled from
-    # materials, never retyped.
-    body={
-        "family": "organic",
-        "salt": {
-            "name": "LiPF6",
-            "material_spec_id": "https://w3id.org/battinfo/spec/t4wz-ff8s-6vp6-af48",
-            "cation": "Li+",
-            "anion": "PF6-",
-            "property": {"concentration": {"value": 1.0, "unit": "mol/L"}},
-        },
-        "solvent_mixture": {
-            "component": [
-                {
-                    "name": "EC",
-                    "material_spec_id": "https://w3id.org/battinfo/spec/xcv1-hpy1-b0bw-z5s2",
-                    "property": {"volume_fraction": {"value": 0.3, "unit": "1"}},
-                },
-                {
-                    "name": "EMC",
-                    "material_spec_id": "https://w3id.org/battinfo/spec/7p3d-2e22-7yae-spyb",
-                    "property": {"volume_fraction": {"value": 0.7, "unit": "1"}},
-                },
-            ]
-        },
-        "additive": [
-            {
-                "name": "VC",
-                "material_spec_id": "https://w3id.org/battinfo/spec/s6y8-5mne-94gx-e5ve",
-                "property": {"mass_fraction": {"value": 0.02, "unit": "1"}},
-            }
-        ],
-        "property": {"conductivity": {"value": 10.0, "unit": "mS/cm"}},
+    family="organic",
+    salt={
+        "name": "LiPF6",
+        "material_spec_id": "https://w3id.org/battinfo/spec/t4wz-ff8s-6vp6-af48",
+        "property": {"concentration": {"value": 1.0, "unit": "mol/L"}},
     },
+    # One solvent component for a pure solvent, a list for a mixture.
+    solvent=[
+        {
+            "name": "EC",
+            "material_spec_id": "https://w3id.org/battinfo/spec/xcv1-hpy1-b0bw-z5s2",
+            "property": {"volume_fraction": {"value": 0.3, "unit": "1"}},
+        },
+        {
+            "name": "EMC",
+            "material_spec_id": "https://w3id.org/battinfo/spec/7p3d-2e22-7yae-spyb",
+            "property": {"volume_fraction": {"value": 0.7, "unit": "1"}},
+        },
+    ],
+    additive=[
+        {
+            "name": "VC",
+            "material_spec_id": "https://w3id.org/battinfo/spec/s6y8-5mne-94gx-e5ve",
+            "property": {"mass_fraction": {"value": 0.02, "unit": "1"}},
+        }
+    ],
+    property={"conductivity": {"value": 10.0, "unit": "mS/cm"}},
     source_type="datasheet",
 )
 ```
@@ -79,8 +72,6 @@ record = create_component_spec(
     "salt": {
       "name": "LiPF6",
       "material_spec_id": "https://w3id.org/battinfo/spec/t4wz-ff8s-6vp6-af48",
-      "cation": "Li+",
-      "anion": "PF6-",
       "property": {
         "concentration": {
           "value": 1.0,
@@ -88,30 +79,28 @@ record = create_component_spec(
         }
       }
     },
-    "solvent_mixture": {
-      "component": [
-        {
-          "name": "EC",
-          "material_spec_id": "https://w3id.org/battinfo/spec/xcv1-hpy1-b0bw-z5s2",
-          "property": {
-            "volume_fraction": {
-              "value": 0.3,
-              "unit": "1"
-            }
-          }
-        },
-        {
-          "name": "EMC",
-          "material_spec_id": "https://w3id.org/battinfo/spec/7p3d-2e22-7yae-spyb",
-          "property": {
-            "volume_fraction": {
-              "value": 0.7,
-              "unit": "1"
-            }
+    "solvent": [
+      {
+        "name": "EC",
+        "material_spec_id": "https://w3id.org/battinfo/spec/xcv1-hpy1-b0bw-z5s2",
+        "property": {
+          "volume_fraction": {
+            "value": 0.3,
+            "unit": "1"
           }
         }
-      ]
-    },
+      },
+      {
+        "name": "EMC",
+        "material_spec_id": "https://w3id.org/battinfo/spec/7p3d-2e22-7yae-spyb",
+        "property": {
+          "volume_fraction": {
+            "value": 0.7,
+            "unit": "1"
+          }
+        }
+      }
+    ],
     "additive": [
       {
         "name": "VC",
@@ -273,10 +262,9 @@ What to notice:
 
 :::{tab-item} Python
 ```python
-from battinfo.api import create_component_instance
+from battinfo.api import create_electrolyte
 
-record = create_component_instance(
-    "electrolyte",
+record = create_electrolyte(
     uid="me0t-k16f-eh5y-rq0k",
     spec_id="https://w3id.org/battinfo/spec/0rp6-kncv-cyem-qwcd",
 )
@@ -560,7 +548,8 @@ Schema: [`electrolyte-spec.schema.json`](https://w3id.org/battinfo/schema/electr
 | `name` | string | yes | Human-readable name of this formulation (e.g. 'LP57 + 2% VC'). |
 | `family` | → family | yes | Broad electrolyte class. |
 | `salt` | → salt |  | Conducting salt (e.g. LiPF6), with concentration under its property map. |
-| `solvent_mixture` | → solvent_mixture |  | Solvent mixture, with component fractions under each component's property map. |
+| `solvent` | → solvent |  | Solvent component(s): a single component object for a pure solvent, or an array for a mixture. Each component's fraction lives under its property map (volume_fraction v/v or mass_fraction w/w - one basis per formulation). |
+| `solvent_mixture` | → solvent_mixture |  | Deprecated alias of solvent (its {component: [...]} wrapper form); accepted so existing records keep validating, normalized to solvent on round-trip. |
 | `additive` | → additive |  | Functional additives (e.g. VC, FEC), each with its fraction under property. |
 | `property` | → quantitative-properties |  | Named quantity map of technical properties (snake_case key to value+unit quantity). |
 | `manufacturer` | → OrgRef |  | Manufacturer of the item. |
@@ -590,9 +579,11 @@ Schema: [`electrolyte.schema.json`](https://w3id.org/battinfo/schema/electrolyte
 ## Design notes
 
 :::{dropdown} The reasoning behind the model
-**Composition is assembled, never retyped.** `salt` + `solvent_mixture.component[]` + `additive[]` each reference a `material-spec` by IRI, so an organic 1M LiPF₆ EC:EMC 3:7 and an aqueous 7M KOH are built from the LiPF6/EC/EMC/KOH material-specs. Each constituent carries its own fraction or concentration under `property`.
+**Composition is assembled, never retyped.** `salt` + `solvent` + `additive[]` each reference a `material-spec` by IRI, so an organic 1M LiPF₆ EC:EMC 3:7 and an aqueous 7M KOH are built from the LiPF6/EC/EMC/KOH material-specs. Each constituent carries its own fraction or concentration under `property`. The salt's ions and chemistry follow from its material identity (the kind resolves to the chemical-substance class); the old `cation`/`anion` strings stay accepted as deprecated keys, never taught.
+
+**One solvent or many.** `solvent` takes a single component object for a pure solvent and a list for a mixture — no wrapper level. The old `solvent_mixture: {component: [...]}` spelling stays accepted as a deprecated alias and normalizes to `solvent` on round-trip.
 
 **Emission follows the composition.** A minimal spec types as the generic `ElectrolyteSolution`; a full formulation types by its family (`OrganicElectrolyte`, `AqueousElectrolyte`) and emits its constituents typed under `hasSolute` / `hasSolvent` / `hasAdditive`.
 
-**Authoring rides the generic component surface** (`create_electrolyte_spec`, or `create_component_spec("electrolyte", ...)` with composition through `body=` because the class field shares its name with the function's first argument) — see [components](components.md) for the shared machinery.
+**Authoring is first-class**: `create_electrolyte_spec(...)` / `create_electrolyte(...)` take the composition fields (`family=`, `salt=`, `solvent=`, `additive=`) as plain keyword arguments — see [components](components.md) for the shared machinery underneath.
 :::

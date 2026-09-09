@@ -1750,9 +1750,16 @@ def _descriptor_electrolyte_to_jsonld(electrolyte: dict[str, Any] | None) -> dic
         if salt_node:
             node["hasSolute"] = salt_node
 
-    solvent_mixture = electrolyte.get("solvent_mixture", {})
+    # `solvent` is one component or a list of them; the deprecated
+    # solvent_mixture {component: [...]} wrapper stays readable.
+    solvents = electrolyte.get("solvent")
+    if isinstance(solvents, dict):
+        solvents = [solvents]
+    if not isinstance(solvents, list):
+        solvent_mixture = electrolyte.get("solvent_mixture", {})
+        solvents = solvent_mixture.get("component", []) if isinstance(solvent_mixture, dict) else []
     solvent_nodes = [
-        c for s in (solvent_mixture.get("component", []) if isinstance(solvent_mixture, dict) else [])
+        c for s in solvents
         if (c := _typed_constituent_node(s, "Solvent", "VolumeFraction")) is not None
     ]
     if solvent_nodes:

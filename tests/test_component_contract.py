@@ -118,6 +118,51 @@ def test_electrolyte_assembles_material_specs(tmp_path):
     assert any(i.code == "reference.missing" for i in result.issues)
 
 
+def test_electrolyte_solvent_takes_one_or_many() -> None:
+    """`solvent` is a component or a list; the deprecated solvent_mixture
+    wrapper normalizes away on round-trip, and both emit under hasSolvent."""
+    from battinfo.api import create_electrolyte_spec
+    from battinfo.jsonld import record_to_jsonld
+
+    pure = create_electrolyte_spec(
+        uid="elyp23456789abcd", name="PC electrolyte", family="organic",
+        solvent={"name": "PC", "property": {"volume_fraction": {"value": 1.0, "unit": "1"}}},
+        validate=False,
+    )
+    assert pure["electrolyte_spec"]["solvent"]["name"] == "PC"
+
+    mixture = create_electrolyte_spec(
+        uid="elym23456789abcd", name="EC:EMC electrolyte", family="organic",
+        solvent=[{"name": "EC"}, {"name": "EMC"}],
+        validate=False,
+    )
+    solvents = record_to_jsonld(mixture, "electrolyte-spec")["hasSolvent"]
+    assert isinstance(solvents, list) and len(solvents) == 2
+
+    legacy = create_electrolyte_spec(
+        uid="elyl23456789abcd", name="Legacy spelling", family="organic",
+        solvent_mixture={"component": [{"name": "EC"}, {"name": "EMC"}]},
+        validate=False,
+    )
+    body = legacy["electrolyte_spec"]
+    assert "solvent_mixture" not in body
+    assert [c["name"] for c in body["solvent"]] == ["EC", "EMC"]
+
+
+def test_electrolyte_salt_ions_are_not_retyped() -> None:
+    """The salt's ions follow from its material identity; the deprecated
+    cation/anion keys stay accepted for existing records."""
+    from battinfo.api import create_electrolyte_spec
+    from battinfo.validate.record import validate_record_report
+
+    old = create_electrolyte_spec(
+        uid="elyi23456789abcd", name="1M LiPF6", family="organic",
+        salt={"name": "LiPF6", "cation": "Li+", "anion": "PF6-"},
+        validate=False,
+    )
+    assert validate_record_report(old).ok
+
+
 def test_superseded_spec_namespaces_still_load(tmp_path) -> None:
     """IDENTIFIER_POLICY 6.1: specs mint under spec/, but records and
     references minted under the superseded per-family namespaces must keep

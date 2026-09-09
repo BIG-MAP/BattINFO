@@ -4897,9 +4897,13 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "$ref": "modules/components/electrolyte.schema.json#/properties/salt",
               "description": "Conducting salt (e.g. LiPF6), with concentration under its property map."
             },
+            "solvent": {
+              "$ref": "modules/components/electrolyte.schema.json#/properties/solvent",
+              "description": "Solvent component(s): a single component object for a pure solvent, or an array for a mixture. Each component's fraction lives under its property map (volume_fraction v/v or mass_fraction w/w - one basis per formulation)."
+            },
             "solvent_mixture": {
               "$ref": "modules/components/electrolyte.schema.json#/properties/solvent_mixture",
-              "description": "Solvent mixture, with component fractions under each component's property map."
+              "description": "Deprecated alias of solvent (its {component: [...]} wrapper form); accepted so existing records keep validating, normalized to solvent on round-trip."
             },
             "additive": {
               "$ref": "modules/components/electrolyte.schema.json#/properties/additive",
@@ -7971,9 +7975,24 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           ],
           "description": "Broad electrolyte class. organic: non-aqueous liquid electrolyte, including carbonate and ether systems; aqueous: water-based liquid electrolyte; ionic_liquid: room-temperature ionic liquid electrolyte; solid: inorganic or polymer solid electrolyte; gel: polymer-swollen liquid (gel polymer) electrolyte; hybrid: combination of two families; unknown: not stated."
         },
+        "solvent": {
+          "anyOf": [
+            {
+              "$ref": "material-component.schema.json"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "material-component.schema.json"
+              },
+              "minItems": 1
+            }
+          ],
+          "description": "Solvent component(s): a single component object for a pure solvent, or an array for a mixture. Each component's fraction lives under its property map (volume_fraction v/v or mass_fraction w/w - one basis per formulation)."
+        },
         "solvent_mixture": {
           "$ref": "material-mixture.schema.json",
-          "description": "Solvent mixture, with each component's fraction under its property map: volume_fraction (v/v) or mass_fraction (w/w), one basis per mixture."
+          "description": "Deprecated alias of solvent (its {component: [...]} wrapper form); accepted so existing records keep validating, normalized to solvent on round-trip."
         },
         "salt": {
           "type": "object",
@@ -7994,11 +8013,11 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "cation": {
               "type": "string",
-              "description": "Cation of the salt (e.g. 'Li+')."
+              "description": "Deprecated: the salt's ions follow from its material identity (kind / material_spec_id), never retyped here. Accepted so existing records keep validating."
             },
             "anion": {
               "type": "string",
-              "description": "Anion of the salt (e.g. 'PF6-')."
+              "description": "Deprecated: the salt's ions follow from its material identity (kind / material_spec_id), never retyped here. Accepted so existing records keep validating."
             },
             "manufacturer": {
               "type": "string",

@@ -140,7 +140,10 @@ def test_eln_electrode_links_material_and_electrolyte_is_parsed() -> None:
     ely = next(r["electrolyte_spec"] for r in pkg.electrolyte_specs if "LiPF6" in r["electrolyte_spec"]["name"])
     assert ely["salt"]["name"] == "LiPF6"
     assert ely["salt"]["property"]["concentration"]["value"] == 1.0
-    fracs = [c["property"]["volume_fraction"]["value"] for c in ely["solvent_mixture"]["component"]]
+    # the deprecated solvent_mixture wrapper the importer authors normalizes
+    # to the canonical solvent list on the way through create_electrolyte_spec
+    assert "solvent_mixture" not in ely
+    fracs = [c["property"]["volume_fraction"]["value"] for c in ely["solvent"]]
     assert fracs == [0.3, 0.7]
 
 

@@ -204,58 +204,50 @@ def snippet_separator_spec():
 
 
 def snippet_electrolyte_spec():
-    from battinfo.api import create_component_spec
+    from battinfo.api import create_electrolyte_spec
 
-    record = create_component_spec(
-        "electrolyte",
+    # Every constituent can cite its material-spec by IRI, so the formulation
+    # is assembled from materials, never retyped — the salt's ions and
+    # chemistry follow from its material identity.
+    record = create_electrolyte_spec(
         uid="0rp6-kncv-cyem-qwcd",
         name="1M LiPF6 in EC:EMC 3:7 + 2% VC",
-        # Composition fields go through body= (the class field is also named
-        # "family" — the function's first argument). Every constituent can
-        # cite its material-spec by IRI, so the formulation is assembled from
-        # materials, never retyped.
-        body={
-            "family": "organic",
-            "salt": {
-                "name": "LiPF6",
-                "material_spec_id": "https://w3id.org/battinfo/spec/t4wz-ff8s-6vp6-af48",
-                "cation": "Li+",
-                "anion": "PF6-",
-                "property": {"concentration": {"value": 1.0, "unit": "mol/L"}},
-            },
-            "solvent_mixture": {
-                "component": [
-                    {
-                        "name": "EC",
-                        "material_spec_id": "https://w3id.org/battinfo/spec/xcv1-hpy1-b0bw-z5s2",
-                        "property": {"volume_fraction": {"value": 0.3, "unit": "1"}},
-                    },
-                    {
-                        "name": "EMC",
-                        "material_spec_id": "https://w3id.org/battinfo/spec/7p3d-2e22-7yae-spyb",
-                        "property": {"volume_fraction": {"value": 0.7, "unit": "1"}},
-                    },
-                ]
-            },
-            "additive": [
-                {
-                    "name": "VC",
-                    "material_spec_id": "https://w3id.org/battinfo/spec/s6y8-5mne-94gx-e5ve",
-                    "property": {"mass_fraction": {"value": 0.02, "unit": "1"}},
-                }
-            ],
-            "property": {"conductivity": {"value": 10.0, "unit": "mS/cm"}},
+        family="organic",
+        salt={
+            "name": "LiPF6",
+            "material_spec_id": "https://w3id.org/battinfo/spec/t4wz-ff8s-6vp6-af48",
+            "property": {"concentration": {"value": 1.0, "unit": "mol/L"}},
         },
+        # One solvent component for a pure solvent, a list for a mixture.
+        solvent=[
+            {
+                "name": "EC",
+                "material_spec_id": "https://w3id.org/battinfo/spec/xcv1-hpy1-b0bw-z5s2",
+                "property": {"volume_fraction": {"value": 0.3, "unit": "1"}},
+            },
+            {
+                "name": "EMC",
+                "material_spec_id": "https://w3id.org/battinfo/spec/7p3d-2e22-7yae-spyb",
+                "property": {"volume_fraction": {"value": 0.7, "unit": "1"}},
+            },
+        ],
+        additive=[
+            {
+                "name": "VC",
+                "material_spec_id": "https://w3id.org/battinfo/spec/s6y8-5mne-94gx-e5ve",
+                "property": {"mass_fraction": {"value": 0.02, "unit": "1"}},
+            }
+        ],
+        property={"conductivity": {"value": 10.0, "unit": "mS/cm"}},
         source_type="datasheet",
     )
     return record
 
 
 def snippet_electrolyte():
-    from battinfo.api import create_component_instance
+    from battinfo.api import create_electrolyte
 
-    record = create_component_instance(
-        "electrolyte",
+    record = create_electrolyte(
         uid="me0t-k16f-eh5y-rq0k",
         spec_id="https://w3id.org/battinfo/spec/0rp6-kncv-cyem-qwcd",
     )

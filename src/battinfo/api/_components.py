@@ -1247,7 +1247,7 @@ def query_materials(
 
 
 def _record_from_component_spec(
-    family: str,
+    component_family: str,
     *,
     name: str,
     body: dict[str, Any] | None = None,
@@ -1263,7 +1263,7 @@ def _record_from_component_spec(
     notes: list[str] | None = None,
     **extra: Any,
 ) -> dict[str, Any]:
-    legacy_namespace = f"{family.replace('_', '-')}-spec"
+    legacy_namespace = f"{component_family.replace('_', '-')}-spec"
     if id is not None:
         # Canonical spec/ form; the superseded per-family form is accepted so
         # pre-consolidation records keep their identity (never break an IRI).
@@ -1280,6 +1280,16 @@ def _record_from_component_spec(
     spec: dict[str, Any] = {"id": entity_id, "short_id": dashed_uid.replace("-", "")[:6], "name": name}
     spec.update(body or {})
     spec.update({k: v for k, v in extra.items() if v is not None})
+    if component_family == "electrolyte":
+        # The deprecated solvent_mixture wrapper normalizes to solvent when it
+        # carries nothing but its component list; a wrapper with its own extra
+        # facts is kept verbatim rather than silently losing them.
+        mixture = spec.get("solvent_mixture")
+        if "solvent" not in spec and isinstance(mixture, dict) and set(mixture) <= {"component"}:
+            components = mixture.get("component")
+            if isinstance(components, list) and components:
+                spec["solvent"] = components[0] if len(components) == 1 else components
+                spec.pop("solvent_mixture")
     for org_field, org_input in (("manufacturer", manufacturer), ("supplier", supplier)):
         org = _org_value(org_input)
         if org is not None:
@@ -1289,7 +1299,7 @@ def _record_from_component_spec(
 
     record: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
-        f"{family}_spec": spec,
+        f"{component_family}_spec": spec,
         "provenance": stamp_provenance({"source_type": source_type, "retrieved_at": _resolved_retrieved_at(retrieved_at)}),
     }
     if source_url is not None:
@@ -1303,7 +1313,7 @@ def _record_from_component_spec(
 
 
 def _record_from_component_instance(
-    family: str,
+    component_family: str,
     *,
     spec_id: str,
     body: dict[str, Any] | None = None,
@@ -1319,13 +1329,13 @@ def _record_from_component_instance(
     retrieved_at: int | str | None = None,
     notes: list[str] | None = None,
 ) -> dict[str, Any]:
-    base_namespace = family.replace("_", "-")
+    base_namespace = component_family.replace("_", "-")
     spec_namespace = f"{base_namespace}-spec"
     if not _spec_iri_re(spec_namespace).fullmatch(spec_id):
-        raise ValueError(f"{family}_spec_id must match https://w3id.org/battinfo/spec/{{uid}}.")
+        raise ValueError(f"{component_family}_spec_id must match https://w3id.org/battinfo/spec/{{uid}}.")
     if id is not None:
         if not _component_iri_re(base_namespace).fullmatch(id):
-            raise ValueError(f"{family} id must match https://w3id.org/battinfo/{base_namespace}/{{uid}}.")
+            raise ValueError(f"{component_family} id must match https://w3id.org/battinfo/{base_namespace}/{{uid}}.")
         if uid is not None:
             _assert_id_matches_uid(id, _normalized_dashed_uid(uid))
         entity_id = id
@@ -1336,7 +1346,7 @@ def _record_from_component_instance(
 
     instance: dict[str, Any] = {
         "id": entity_id,
-        f"{family}_spec_id": spec_id,
+        f"{component_family}_spec_id": spec_id,
         "short_id": dashed_uid.replace("-", "")[:6],
     }
     instance.update(body or {})
@@ -1355,7 +1365,7 @@ def _record_from_component_instance(
 
     record: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
-        family: instance,
+        component_family: instance,
         "provenance": stamp_provenance({"source_type": source_type, "retrieved_at": _resolved_retrieved_at(retrieved_at)}),
     }
     if source_url is not None:
@@ -1368,26 +1378,26 @@ def _record_from_component_instance(
     return record_to_snake_aliases(record)
 
 
-def create_component_spec(family: str, *, validate: bool = True, **fields: Any) -> dict[str, Any]:
-    """Create a canonical component-spec document for a family (electrode, separator, …)."""
-    record = _record_from_component_spec(family, **fields)
+def create_component_spec(component_family: str, *, validate: bool = True, **fields: Any) -> dict[str, Any]:
+    """Create a canonical component-spec document for a component family (electrode, separator, …)."""
+    record = _record_from_component_spec(component_family, **fields)
     if validate:
         _validate_canonical_record(record, policy=DEFAULT_POLICY)
     return record
 
 
-def create_component_instance(family: str, *, validate: bool = True, **fields: Any) -> dict[str, Any]:
-    """Create a canonical component (instance) document for a family.
+def create_component_instance(component_family: str, *, validate: bool = True, **fields: Any) -> dict[str, Any]:
+    """Create a canonical component (instance) document for a component family.
 
     ``spec_id=`` is the authoring kwarg (the record stores the canonical
-    ``<family>_spec_id`` key); the prefixed spelling is accepted too.
+    ``<component_family>_spec_id`` key); the prefixed spelling is accepted too.
     """
-    prefixed = fields.pop(f"{family}_spec_id", None)
+    prefixed = fields.pop(f"{component_family}_spec_id", None)
     if prefixed is not None:
         if fields.get("spec_id") not in (None, prefixed):
-            raise ValueError(f"spec_id and {family}_spec_id disagree.")
+            raise ValueError(f"spec_id and {component_family}_spec_id disagree.")
         fields["spec_id"] = prefixed
-    record = _record_from_component_instance(family, **fields)
+    record = _record_from_component_instance(component_family, **fields)
     if validate:
         _validate_canonical_record(record, policy=DEFAULT_POLICY)
     return record

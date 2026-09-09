@@ -1123,6 +1123,9 @@ class Electrolyte(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     family: str | None = None
+    # One component for a pure solvent, a list for a mixture. solvent_mixture
+    # is the deprecated wrapper spelling.
+    solvent: MaterialComponent | list[MaterialComponent] | None = None
     solvent_mixture: SolventMixture | None = None
     salt: Salt | None = None
     additive: list[MaterialComponent] = Field(default_factory=list)

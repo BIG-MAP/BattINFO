@@ -27,6 +27,33 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   generic `Description`. Electrode instances are physical objects and keep
   their typing.
 
+### Changed
+
+- **Electrolyte solvents lose their wrapper: `solvent` takes one or many.**
+  A pure solvent is a single component object, a mixture is a list - no
+  `solvent_mixture: {component: [...]}` level. The old spelling stays
+  accepted as a deprecated alias and normalizes to `solvent` on round-trip
+  (a wrapper carrying facts of its own is kept verbatim rather than
+  silently flattened). Emission under `hasSolvent` is unchanged.
+
+### Deprecated
+
+- **`salt.cation` / `salt.anion` on electrolyte specs.** The salt's ions
+  follow from its material identity - the kind resolves to the
+  chemical-substance class, and `material_spec_id` cites the powder record
+  - so they are never retyped in the formulation. The keys stay accepted so
+  existing records keep validating; the emitter never read them.
+
+### Fixed
+
+- **Electrolyte composition fields are plain kwargs.** The generic
+  component creators' first parameter was named `family`, colliding with
+  the electrolyte's own `family` field (organic/aqueous) and forcing
+  composition through `body=`. The parameter is now `component_family`
+  (positional use, the only use in the wild, is unaffected), so
+  `create_electrolyte_spec(family="organic", salt=..., solvent=...)` works
+  as it reads.
+
 ### Added
 
 - **`spec_id=` is the uniform authoring shorthand.** Every instance creator
