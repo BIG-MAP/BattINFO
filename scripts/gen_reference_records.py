@@ -192,13 +192,90 @@ def snippet_electrode():
 
 
 def snippet_separator_spec():
-    from battinfo.api import create_component_spec
+    from battinfo.api import create_separator_spec
 
-    record = create_component_spec(
-        "separator",
+    record = create_separator_spec(
         uid="6nec-h262-tthy-4rnt",
         name="Celgard 2500",
+        material="PP",
+        structure="monolayer",
+        property={
+            "thickness": {"value": 25, "unit": "um"},
+            "porosity": {"value": 0.55, "unit": "1"},
+        },
+        manufacturer="Celgard",
         source_type="datasheet",
+    )
+    return record
+
+
+def snippet_separator():
+    from battinfo.api import create_separator
+
+    record = create_separator(
+        uid="p2vx-4nq7-8mtk-3fhd",
+        spec_id="https://w3id.org/battinfo/spec/6nec-h262-tthy-4rnt",
+        lot_id="CG25-2026-114",
+    )
+    return record
+
+
+def snippet_current_collector_spec():
+    from battinfo.api import create_current_collector_spec
+
+    record = create_current_collector_spec(
+        uid="vq83-2hkm-7tpn-9fdx",
+        name="Aluminium foil",
+        material="Al",
+        form="foil",
+        property={"thickness": {"value": 15, "unit": "um"}},
+        source_type="datasheet",
+    )
+    return record
+
+
+def snippet_current_collector():
+    from battinfo.api import create_current_collector
+
+    record = create_current_collector(
+        uid="tr5k-8wq2-3npx-6mvh",
+        spec_id="https://w3id.org/battinfo/spec/vq83-2hkm-7tpn-9fdx",
+        lot_id="AL15-2026-031",
+    )
+    return record
+
+
+def snippet_housing_spec():
+    from battinfo.api import create_housing_spec
+
+    record = create_housing_spec(
+        uid="w2n8-6rkt-4mpv-8hcq",
+        name="CR2032 coin housing",
+        cell_format="coin",
+        case={
+            "size_code": "2032",
+            "material": "Stainless steel",
+            "property": {
+                "diameter": {"value": 20, "unit": "mm"},
+                "height": {"value": 3.2, "unit": "mm"},
+            },
+        },
+        parts=[
+            {"type": "spring", "material": "Stainless steel"},
+            {"type": "spacer", "material": "Stainless steel"},
+        ],
+        source_type="datasheet",
+    )
+    return record
+
+
+def snippet_housing():
+    from battinfo.api import create_housing
+
+    record = create_housing(
+        uid="x4fm-9tpk-2wqv-5nrh",
+        spec_id="https://w3id.org/battinfo/spec/w2n8-6rkt-4mpv-8hcq",
+        lot_id="CR2032-KIT-2026-07",
     )
     return record
 
@@ -614,30 +691,76 @@ FAMILIES = [
         "schemas": ["electrolyte-spec.schema.json", "electrolyte.schema.json"],
     },
     {
-        "slug": "components",
-        "title": "Components",
+        "slug": "separators",
+        "title": "Separators",
         "intro": (
-            "How to describe the remaining cell components — separator, "
-            "current collector, housing. The three families share one generic "
-            "spec + instance surface; only their fields differ. Electrolytes "
-            "ride the same machinery but have [their own page](electrolytes.md)."
+            "How to describe separators: a **separator-spec** is the membrane "
+            "product (Celgard 2500), a **separator** instance is one physical "
+            "roll or lot. A cell references the spec through "
+            "`separator_spec_id`, or describes a one-off inline on its holder."
         ),
         "sections": [
             {
-                "heading": "A separator spec",
+                "heading": "The product",
                 "fn": snippet_separator_spec,
                 "record_type": "separator-spec",
-                "notice": [
-                    "The same `create_component_spec(family, ...)` call authors "
-                    "every component family; the family picks the schema.",
-                ],
+            },
+            {
+                "heading": "A physical lot",
+                "fn": snippet_separator,
+                "record_type": "separator",
+            },
+        ],
+        "schemas": ["separator-spec.schema.json", "separator.schema.json"],
+    },
+    {
+        "slug": "current-collectors",
+        "title": "Current collectors",
+        "intro": (
+            "How to describe current collectors: a **current-collector-spec** "
+            "is the foil or mesh product, a **current-collector** instance is "
+            "one physical roll or lot. Electrodes usually describe their "
+            "collector inline; the standalone record is for a foil shared "
+            "across designs or tracked as its own supply."
+        ),
+        "sections": [
+            {
+                "heading": "The product",
+                "fn": snippet_current_collector_spec,
+                "record_type": "current-collector-spec",
+            },
+            {
+                "heading": "A physical lot",
+                "fn": snippet_current_collector,
+                "record_type": "current-collector",
             },
         ],
         "schemas": [
-            "separator-spec.schema.json", "separator.schema.json",
             "current-collector-spec.schema.json", "current-collector.schema.json",
-            "housing-spec.schema.json", "housing.schema.json",
         ],
+    },
+    {
+        "slug": "housings",
+        "title": "Housings",
+        "intro": (
+            "How to describe cell housings: a **housing-spec** is the case "
+            "set as a product (a CR2032 kit: case, cap, spring, spacer), a "
+            "**housing** instance is one physical batch. A cell references "
+            "it through `housing_spec_id`, or describes its housing inline."
+        ),
+        "sections": [
+            {
+                "heading": "The product",
+                "fn": snippet_housing_spec,
+                "record_type": "housing-spec",
+            },
+            {
+                "heading": "A physical batch",
+                "fn": snippet_housing,
+                "record_type": "housing",
+            },
+        ],
+        "schemas": ["housing-spec.schema.json", "housing.schema.json"],
     },
     {
         "slug": "tests",
@@ -933,8 +1056,9 @@ def build_sections(family: dict) -> list[dict]:
 # (materials up through components), then the flavored and full cells built
 # from them, then what is done with a cell and what comes out of it.
 _PAGE_ORDER = [
-    "materials", "electrodes", "electrolytes", "components", "cells",
-    "half-cells", "tests", "datasets", "equipment", "parameter-sets", "organizations",
+    "materials", "electrodes", "electrolytes", "separators",
+    "current-collectors", "housings", "cells", "half-cells",
+    "tests", "datasets", "equipment", "parameter-sets", "organizations",
 ]
 assert sorted(_PAGE_ORDER) == sorted(f["slug"] for f in FAMILIES)
 FAMILIES.sort(key=lambda f: _PAGE_ORDER.index(f["slug"]))
@@ -961,11 +1085,23 @@ PAGE_RULES: dict[str, list[str]] = {
         "The composition is assembled from materials: `salt`, `solvent_mixture.component[]`, and `additive[]` each cite a material-spec by IRI.",
         "The **spec** is the formulation; the **electrolyte** instance is one mixed batch.",
     ],
-    "components": [
-        "Separator, current collector, and housing share one generic surface: `create_<family>_spec(...)` or `create_component_spec(family, ...)`, plus the instance equivalents.",
-        "Fields whose names collide with an argument go through `body={...}`.",
-        "Family identifiers use underscores (`current_collector`); IRIs use hyphens.",
-        "[Electrolytes](electrolytes.md) ride the same machinery but have their own page.",
+    "separators": [
+        "The **spec** is the membrane product; a **separator** instance is one physical roll or lot.",
+        "`material` is the bulk polymer ('PP', 'PE', 'cellulose'); `structure` says how it is layered (monolayer, trilayer, ...).",
+        "`material_spec_id` cites a standalone material-spec when the membrane material is itself a record.",
+        "Author with `create_separator_spec(...)` / `create_separator(spec_id=...)`.",
+    ],
+    "current-collectors": [
+        "The **spec** is the foil or mesh product; an instance is one physical roll or lot.",
+        "The name and `material`/`form` derive the typed node: 'Aluminium foil' emits `[CurrentCollector, Aluminium, Foil]`.",
+        "Electrodes usually embed their collector inline (`current_collector` holder); the standalone record is for a shared or tracked foil, cited via `material_spec_id`.",
+        "Author with `create_current_collector_spec(...)` / `create_current_collector(spec_id=...)`.",
+    ],
+    "housings": [
+        "The **spec** is the case set as a product (case, cap, terminals, seals, parts); an instance is one physical batch.",
+        "`cell_format` picks the case class in JSON-LD (CoinCase, CylindricalCase, PouchCase, PrismaticCase).",
+        "`parts[]` entries type as their EMMO classes (Spring, Spacer, Gasket, SafetyVent, ...).",
+        "Author with `create_housing_spec(...)` / `create_housing(spec_id=...)`.",
     ],
     "half-cells": [
         "Not a record type: a cell with `cell_configuration` set to `half_cell`.",
@@ -1053,11 +1189,15 @@ SHELVES: dict[str, list[str]] = {
         "electrolyte-spec/gpkh-74nj-6sdb-vcsc.json",
         "electrolyte-spec/gzt2-hrqq-gsfn-sp94.json",
     ],
-    "components": [
+    "separators": [
         "separator-spec/wgym-4xfa-pws1-ek1b.json",
         "separator-spec/v94j-jm2h-t8d1-t5a6.json",
+    ],
+    "current-collectors": [
         "current-collector-spec/vkaf-f5bv-fwt2-e6yz.json",
         "current-collector-spec/z25y-gab5-hd3n-qfpr.json",
+    ],
+    "housings": [
         "housing-spec/38af-bpnv-1zmm-32hs.json",
         "housing-spec/k2q4-dk79-g890-7veq.json",
         "housing-spec/ypyh-v38v-r276-snmk.json",

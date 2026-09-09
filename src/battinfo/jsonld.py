@@ -1179,6 +1179,7 @@ _TRANSFORMERS = {
     "separator":      _component_to_jsonld,
     "current-collector-spec": _component_to_jsonld,
     "current_collector_spec": _component_to_jsonld,
+    "current-collector":      _component_to_jsonld,
     "current_collector":      _component_to_jsonld,
     "electrolyte-spec": _component_to_jsonld,
     "electrolyte_spec": _component_to_jsonld,

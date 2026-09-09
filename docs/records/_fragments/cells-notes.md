@@ -2,7 +2,7 @@
 
 **References are checked at save.** A `*_spec_id` that points at nothing fails the save with the missing IRI named; `resolve_references=False` opts out for staged workflows, and `save_batch` allows references within the batch and validates the completed set. `extract_component_specs(cell_spec_record)` goes the other way, lifting inline holders into standalone specs so any inline cell can be decomposed and de-duplicated.
 
-**The engineering layer.** Beyond composition and rated performance, a spec can carry the as-designed build. Deliberately excluded: design-tool scratch math (recomputed, not stored) and state-dependent behaviour (belongs to tests and datasets). Every part follows holder + property: identity fields plus `{value, unit}` quantities, unknown keys preserved and warned rather than dropped. The housing (case, cap, terminals, seals, parts) is authored inline or as a standalone [housing spec](components.md); tabs and coatings belong to [the electrode](electrodes.md); the wound/stacked geometry is the spec's own `construction` block.
+**The engineering layer.** Beyond composition and rated performance, a spec can carry the as-designed build. Deliberately excluded: design-tool scratch math (recomputed, not stored) and state-dependent behaviour (belongs to tests and datasets). Every part follows holder + property: identity fields plus `{value, unit}` quantities, unknown keys preserved and warned rather than dropped. The housing (case, cap, terminals, seals, parts) is authored inline or as a standalone [housing spec](housings.md); tabs and coatings belong to [the electrode](electrodes.md); the wound/stacked geometry is the spec's own `construction` block.
 
 **The full graph, end to end:**
 

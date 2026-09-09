@@ -143,7 +143,9 @@ This is shipped, working behavior — the five `*_spec_id` reference fields are
 part of the `CellSpec` model today, and the packaged
 [example cells](../records/cells.md) uses exactly this pattern. A cell may
 reference components, inline them, or both (inline holders remain optional —
-see [Components](../records/components.md)).
+see [Separators](../records/separators.md),
+[Current collectors](../records/current-collectors.md) and
+[Housings](../records/housings.md)).
 
 ## 5. The physical cells
 

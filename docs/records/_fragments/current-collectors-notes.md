@@ -1,0 +1,5 @@
+**Inline first, standalone when shared.** An electrode spec carries its collector inline (`current_collector` holder: name, form, thickness); that inline holder and this standalone record are the same shape, and both can cite the foil's material-spec via `material_spec_id` — so a lab that later starts tracking foil lots promotes the holder to a record without re-modeling.
+
+**Emission.** The name parses to a typed stack — 'Aluminium foil' → `[CurrentCollector, Aluminium, Foil]`, 'expanded mesh' variants reach `ExpandedMesh` / `WovenMesh` / `PerforatedFoil` — so substrate and form are classes, not strings.
+
+**Generated surface.** `create_current_collector_spec` and friends wrap the shared component machinery; family identifiers use underscores (`current_collector`), IRI namespaces use hyphens (`current-collector`), and the API derives one from the other.

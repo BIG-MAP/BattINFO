@@ -4,4 +4,4 @@
 
 **Emission follows the composition.** A minimal spec types as the generic `ElectrolyteSolution`; a full formulation types by its family (`OrganicElectrolyte`, `AqueousElectrolyte`) and emits its constituents typed under `hasSolute` / `hasSolvent` / `hasAdditive`.
 
-**Authoring is first-class**: `create_electrolyte_spec(...)` / `create_electrolyte(...)` take the composition fields (`family=`, `salt=`, `solvent=`, `additive=`) as plain keyword arguments — see [components](components.md) for the shared machinery underneath.
+**Authoring is first-class**: `create_electrolyte_spec(...)` / `create_electrolyte(...)` take the composition fields (`family=`, `salt=`, `solvent=`, `additive=`) as plain keyword arguments.
