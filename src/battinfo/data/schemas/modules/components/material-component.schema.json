@@ -36,6 +36,29 @@
       "type": "string",
       "description": "Optional chemical formula of the material (e.g. 'LiFePO4')."
     },
+    "label": {
+      "type": "string",
+      "description": "Preferred human-readable substance name stamped by the resolver (e.g. 'ethylene carbonate' for name 'EC')."
+    },
+    "inchikey": {
+      "type": "string",
+      "pattern": "^[A-Z]{14}-[A-Z]{10}-[A-Z]$",
+      "description": "Standard InChIKey of the substance — the canonical chemical-identity key. Stamped from the substances vocabulary at authoring; never hand-typed."
+    },
+    "pubchem_cid": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "PubChem Compound ID (crosswalk; identity lives in inchikey)."
+    },
+    "cas_number": {
+      "type": "string",
+      "pattern": "^\\d{2,7}-\\d{2}-\\d$",
+      "description": "CAS Registry Number (crosswalk)."
+    },
+    "smiles": {
+      "type": "string",
+      "description": "Connectivity SMILES of the substance (depiction and featurization payload; identity lives in inchikey)."
+    },
     "property": {
       "$ref": "../common/quantitative-properties.schema.json",
       "description": "Named quantity map of material-level properties (e.g. mass_fraction, volume_fraction, d50_particle_size, specific_capacity). mass_fraction in an electrode coating is the fraction of the dry coating solids, given either as 0-1 with unit '1' or as 0-100 with unit '%' (percentages are rescaled to 0-1 on JSON-LD export); the fractions across active material, binder, and additives sum to 1. In a solvent mixture use volume_fraction (v/v) or mass_fraction (w/w), one basis per mixture. For electrolyte additives mass_fraction is the fraction of the total electrolyte unless the comment states otherwise. See the property keys reference for the full list of recognised keys."

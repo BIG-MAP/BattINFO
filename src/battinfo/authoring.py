@@ -335,8 +335,13 @@ def electrolyte_recipe(
         solvent_comment: Free-text note about the solvent mixture.
         comment: Free-text note about the electrolyte as a whole.
     """
+    stamp_salt = True
     if isinstance(salt, Salt):
+        # Pre-built Salt objects pass through by identity (API contract): the
+        # expert path is never enriched behind the caller's back. The string and
+        # material(...) conveniences below are the stamped paths.
         salt_obj = salt
+        stamp_salt = False
     elif isinstance(salt, MaterialComponent):
         # Salts are materials like any other component; accept the same
         # material(...) form as solvents. molecular_formula has no home on a
@@ -352,6 +357,11 @@ def electrolyte_recipe(
             manufacturer=salt.manufacturer,
             supplier=salt.supplier,
             product_id=salt.product_id,
+            label=salt.label,
+            inchikey=salt.inchikey,
+            pubchem_cid=salt.pubchem_cid,
+            cas_number=salt.cas_number,
+            smiles=salt.smiles,
             property=salt.property,
             comment=salt.comment,
         )
@@ -363,7 +373,12 @@ def electrolyte_recipe(
     else:
         salt_obj = None
 
-    solvent_components = _component_list(solvents)
+    if salt_obj is not None and stamp_salt:
+        salt_obj = _stamp_salt_identity(salt_obj)
+
+    solvent_components = [
+        _stamp_component_identity(c, slot="solvent") for c in _component_list(solvents)
+    ]
     solvent_mixture = None
     if solvent_components:
         solvent_mixture = SolventMixture(component=solvent_components, comment=solvent_comment)
@@ -372,10 +387,56 @@ def electrolyte_recipe(
         family=family,
         solvent_mixture=solvent_mixture,
         salt=salt_obj,
-        additive=_component_list(additives),
+        additive=[_stamp_component_identity(c, slot="additive") for c in _component_list(additives)],
         property=properties or PropertySet(),
         comment=comment,
     )
+
+
+_IDENTITY_FIELDS = ("label", "inchikey", "pubchem_cid", "cas_number", "smiles")
+
+
+def _stamp_component_identity(comp: MaterialComponent, *, slot: str) -> MaterialComponent:
+    """Fill missing identity fields from the substances vocabulary; never overwrite.
+
+    Resolution is exact-match (the slot breaks symbol collisions like EC
+    solvent vs EC binder); an unknown name leaves the component untouched —
+    the save gate, not the builder, is where unresolved substances warn.
+    """
+    if comp.inchikey is not None:
+        return comp
+    from battinfo.substances import resolve
+
+    sub = resolve(comp.name, slot=slot) if comp.name else None
+    if sub is None:
+        return comp
+    update = {
+        key: value
+        for key, value in sub.identity_fields().items()
+        if key in _IDENTITY_FIELDS and getattr(comp, key, None) is None
+    }
+    return comp.model_copy(update=update) if update else comp
+
+
+def _stamp_salt_identity(salt_obj: Salt) -> Salt:
+    """Salt counterpart of :func:`_stamp_component_identity` (slot 'salt')."""
+    if salt_obj.inchikey is not None or not salt_obj.name:
+        return salt_obj
+    from battinfo.substances import resolve
+
+    sub = resolve(salt_obj.name, slot="salt")
+    if sub is None:
+        return salt_obj
+    update = {
+        key: value
+        for key, value in sub.identity_fields().items()
+        if key in _IDENTITY_FIELDS and getattr(salt_obj, key, None) is None
+    }
+    if not salt_obj.cation and sub.ions.get("cation"):
+        update["cation"] = sub.ions["cation"]
+    if not salt_obj.anion and sub.ions.get("anion"):
+        update["anion"] = sub.ions["anion"]
+    return salt_obj.model_copy(update=update) if update else salt_obj
 
 
 def separator_spec(
