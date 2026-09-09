@@ -260,6 +260,7 @@
 <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_ae782b14_88ce_4cdd_9418_12aca00be937> skos:prefLabel "CycleLife"@en .
 <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_b1cf9fee_2164_4f95_8204_90f717373a8a> skos:prefLabel "CylindricalCase"@en .
 <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_b3eb8c65_5644_45e3_9e17_0be6277c7962> skos:prefLabel "LithiumNickelManganeseCobaltOxideElectrode"@en .
+<https://w3id.org/emmo/domain/electrochemistry#electrochemistry_b5ea31c9_bb10_4276_980e_c3eceb1efc82> skos:prefLabel "ElectrochemicalComponent"@en .
 <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_b812e9d0_7c58_4455_b3e7_6847f10c8e8a> skos:prefLabel "AqueousElectrolyte"@en .
 <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_b90b1ad7_b9a8_44df_ad45_bfd25aac2e49> skos:prefLabel "MinimumChargingTemperature"@en .
 <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_ba7ac581_0e13_4815_b888_013c378932f5> skos:prefLabel "MaximumContinuousDischargingCurrent"@en .

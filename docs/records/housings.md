@@ -9,7 +9,7 @@
 How to describe cell housings: a **housing-spec** is the case set as a product (a CR2032 kit: case, cap, spring, spacer), a **housing** instance is one physical batch. A cell references it through `housing_spec_id`, or describes its housing inline.
 
 - The **spec** is the case set as a product (case, cap, terminals, seals, parts); an instance is one physical batch.
-- `cell_format` picks the case class in JSON-LD (CoinCase, CylindricalCase, PouchCase, PrismaticCase).
+- The record is the enclosure ASSEMBLY - the case is one part among cap, terminals, seals, and hardware, all listed uniformly under `hasConstituent` in JSON-LD; `cell_format` picks the case class (CoinCase, CylindricalCase, ...).
 - `parts[]` entries type as their EMMO classes (Spring, Spacer, Gasket, SafetyVent, ...).
 - Author with `create_housing_spec(...)` / `create_housing(spec_id=...)`.
 
@@ -105,39 +105,42 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     "schema:CreativeWork"
   ],
   "isDescriptionFor": {
-    "@type": "schema:Product",
-    "hasCase": {
-      "@type": "CoinCase",
-      "schema:size": "2032",
-      "schema:material": "Stainless steel",
-      "hasProperty": [
-        {
-          "@type": [
-            "Diameter",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "Diameter",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 20
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
-        },
-        {
-          "@type": [
-            "Height",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "Height",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 3.2
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
-        }
-      ]
-    },
+    "@type": [
+      "ElectrochemicalComponent",
+      "schema:Product"
+    ],
     "hasConstituent": [
+      {
+        "@type": "CoinCase",
+        "schema:size": "2032",
+        "schema:material": "Stainless steel",
+        "hasProperty": [
+          {
+            "@type": [
+              "Diameter",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "Diameter",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 20
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
+          },
+          {
+            "@type": [
+              "Height",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "Height",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 3.2
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
+          }
+        ]
+      },
       {
         "@type": "Spring",
         "schema:material": "Stainless steel"
@@ -206,7 +209,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "battinfo": "https://w3id.org/battinfo/"
     }
   ],
-  "@type": "schema:Product",
+  "@type": [
+    "ElectrochemicalComponent",
+    "schema:Product"
+  ],
   "@id": "https://w3id.org/battinfo/housing/7d9k-2m4p-8t3x-6nq5",
   "schema:isVariantOf": {
     "@id": "https://w3id.org/battinfo/spec/y9xy-kr0v-y5tn-dfj7"
@@ -264,39 +270,42 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     "schema:CreativeWork"
   ],
   "isDescriptionFor": {
-    "@type": "schema:Product",
-    "hasCase": {
-      "@type": "CoinCase",
-      "schema:size": "2032",
-      "schema:material": "Stainless steel",
-      "hasProperty": [
-        {
-          "@type": [
-            "Diameter",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "Diameter",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 20
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
-        },
-        {
-          "@type": [
-            "Height",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "Height",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 3.2
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
-        }
-      ]
-    },
+    "@type": [
+      "ElectrochemicalComponent",
+      "schema:Product"
+    ],
     "hasConstituent": [
+      {
+        "@type": "CoinCase",
+        "schema:size": "2032",
+        "schema:material": "Stainless steel",
+        "hasProperty": [
+          {
+            "@type": [
+              "Diameter",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "Diameter",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 20
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
+          },
+          {
+            "@type": [
+              "Height",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "Height",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 3.2
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
+          }
+        ]
+      },
       {
         "@type": "Spring",
         "schema:material": "Stainless steel"
@@ -371,38 +380,41 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     "schema:CreativeWork"
   ],
   "isDescriptionFor": {
-    "@type": "schema:Product",
-    "hasCase": {
-      "@type": "CylindricalCase",
-      "schema:material": "Nickel-plated steel",
-      "hasProperty": [
-        {
-          "@type": [
-            "Thickness",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "Thickness",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 0.25
+    "@type": [
+      "ElectrochemicalComponent",
+      "schema:Product"
+    ],
+    "hasConstituent": [
+      {
+        "@type": "CylindricalCase",
+        "schema:material": "Nickel-plated steel",
+        "hasProperty": [
+          {
+            "@type": [
+              "Thickness",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "Thickness",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 0.25
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
           },
-          "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
-        },
-        {
-          "@type": [
-            "Mass",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "Mass",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 15.0
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#Gram"
-        }
-      ]
-    },
-    "hasTerminal": [
+          {
+            "@type": [
+              "Mass",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "Mass",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 15.0
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#Gram"
+          }
+        ]
+      },
       {
         "@type": "Terminal",
         "schema:additionalType": "positive",
@@ -464,13 +476,13 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
           }
         ]
+      },
+      {
+        "@type": "SafetyVent",
+        "schema:material": "Aluminium",
+        "rdfs:comment": "Safety vent (CID / burst membrane) in the top cap."
       }
     ],
-    "hasConstituent": {
-      "@type": "SafetyVent",
-      "schema:material": "Aluminium",
-      "rdfs:comment": "Safety vent (CID / burst membrane) in the top cap."
-    },
     "skos:prefLabel": "21700 cylindrical housing"
   },
   "@id": "https://w3id.org/battinfo/spec/k2q4-dk79-g890-7veq",
@@ -524,40 +536,43 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     "schema:CreativeWork"
   ],
   "isDescriptionFor": {
-    "@type": "schema:Product",
-    "hasCase": {
-      "@type": [
-        "PrismaticCase",
-        "Aluminium"
-      ],
-      "hasProperty": [
-        {
-          "@type": [
-            "Thickness",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "Thickness",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 0.8
+    "@type": [
+      "ElectrochemicalComponent",
+      "schema:Product"
+    ],
+    "hasConstituent": [
+      {
+        "@type": [
+          "PrismaticCase",
+          "Aluminium"
+        ],
+        "hasProperty": [
+          {
+            "@type": [
+              "Thickness",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "Thickness",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 0.8
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
           },
-          "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
-        },
-        {
-          "@type": [
-            "Mass",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "Mass",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 95
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#Gram"
-        }
-      ]
-    },
-    "hasTerminal": [
+          {
+            "@type": [
+              "Mass",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "Mass",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 95
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#Gram"
+          }
+        ]
+      },
       {
         "@type": "Terminal",
         "schema:additionalType": "positive",
@@ -591,12 +606,12 @@ Emitted by `record_to_jsonld`, hosted-context mode.
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
         }
+      },
+      {
+        "@type": "Seal",
+        "schema:material": "Polypropylene"
       }
     ],
-    "hasConstituent": {
-      "@type": "Seal",
-      "schema:material": "Polypropylene"
-    },
     "skos:prefLabel": "LFP 100Ah prismatic housing"
   },
   "@id": "https://w3id.org/battinfo/spec/ypyh-v38v-r276-snmk",
@@ -656,7 +671,9 @@ Schema: [`housing.schema.json`](https://w3id.org/battinfo/schema/housing.schema.
 ## Design notes
 
 :::{dropdown} The reasoning behind the model
-**Holder + property, like everything else.** `case`, `cap`, `terminals`, `seals` and the open `parts[]` list each carry identity fields plus `{value, unit}` quantities. Part types resolve to their EMMO classes — `Spring`, `Spacer`, `Gasket`, `SafetyVent`, `CurrentInterruptDevice` — published in domain-electrochemistry 0.36.0 for exactly this layer.
+**Holder + property, like everything else.** `case`, `cap`, `terminals`, `seals` and the open `parts[]` list each carry identity fields plus `{value, unit}` quantities. Part types resolve to their EMMO classes — `CoinCase`, `CellLid`, `Terminal`, `Spring`, `Spacer`, `Gasket`, `SafetyVent`, `CurrentInterruptDevice` — published in domain-electrochemistry 0.36.0 for exactly this layer.
+
+**The housing is the assembly, not the case.** The case is one of its parts (EMMO's `CellLid` "closes the case"; terminals and seals are siblings), so the described individual types `ElectrochemicalComponent` — no `CellHousing` class is published yet; it is on the upstream ask list — and every part lists uniformly under `hasConstituent`. A cell keeps the published `hasCase` pattern for its case.
 
 **Inline or standalone.** A cell spec may describe its housing inline (the engineering-cell description path) or reference this record via `housing_spec_id`; a purchased coin-cell kit (case + cap + spring + spacer, one product id) is the classic standalone case.
 

@@ -1099,7 +1099,7 @@ PAGE_RULES: dict[str, list[str]] = {
     ],
     "housings": [
         "The **spec** is the case set as a product (case, cap, terminals, seals, parts); an instance is one physical batch.",
-        "`cell_format` picks the case class in JSON-LD (CoinCase, CylindricalCase, PouchCase, PrismaticCase).",
+        "The record is the enclosure ASSEMBLY - the case is one part among cap, terminals, seals, and hardware, all listed uniformly under `hasConstituent` in JSON-LD; `cell_format` picks the case class (CoinCase, CylindricalCase, ...).",
         "`parts[]` entries type as their EMMO classes (Spring, Spacer, Gasket, SafetyVent, ...).",
         "Author with `create_housing_spec(...)` / `create_housing(spec_id=...)`.",
     ],

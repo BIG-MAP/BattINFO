@@ -16,6 +16,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   `kind=` kwarg included) and normalizes to `active_material_kind` on
   round-trip; the packaged examples are rewritten to the canonical key.
 
+- **A housing is the enclosure assembly; all its parts ride
+  `hasConstituent`.** EMMO's own definitions separate the case (the
+  container) from the lid that closes it and the terminals, seals, and
+  hardware beside it - the housing record describes that assembly, not a
+  Case. Its described individual now types `ElectrochemicalComponent` (no
+  `CellHousing` class is published; it joined the upstream ask list with
+  `hasHousing` and `hasLid`) instead of the semantically empty
+  `schema:Product` alone, and every part - the case (typed
+  `CoinCase`/...), the cap (`CellLid`), terminals, seals, springs, spacers
+  - lists uniformly under `hasConstituent`. This also retires the
+  emission of `hasTerminal`, a relation with no term in the context. Cells
+  keep the published `hasCase` pattern for their case.
+
 - **Every component spec emits as a description, not the component.**
   Separator, current-collector, housing, and electrolyte specs had the same
   category error the electrode spec did: the JSON-LD node was typed as the

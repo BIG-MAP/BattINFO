@@ -127,6 +127,8 @@ _EXTRA_CONTEXT_TERMS: tuple[str, ...] = (
     # Generic information-artifact class: interim @type for specification
     # records whose own class (ElectrodeSpecification, ...) is unpublished.
     "Description",
+    # Interim class of the housing assembly (CellHousing is an upstream ask).
+    "ElectrochemicalComponent",
     # Measurement-provenance subtree: conditions ride an isOutputOf node.
     "isOutputOf",
     "BatteryMeasurement",

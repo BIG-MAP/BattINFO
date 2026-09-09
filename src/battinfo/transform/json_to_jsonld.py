@@ -2806,8 +2806,27 @@ def _component_holder_node(family: str, body: dict[str, Any]) -> dict[str, Any]:
     if family == "current_collector":
         return _descriptor_current_collector_to_jsonld(body) or {"@type": "CurrentCollector"}
     if family == "housing":
-        node: dict[str, Any] = {"@type": "schema:Product"}
-        node.update(_descriptor_housing_to_jsonld(body, body.get("cell_format")))
+        # A housing record describes the enclosure ASSEMBLY, not a Case: the
+        # case is one of its parts (EMMO's own definitions - the CellLid
+        # "closes the case", terminals and seals are siblings). No CellHousing
+        # class is published yet (upstream ask), so the assembly types as
+        # ElectrochemicalComponent - the honest published parent Case itself
+        # hangs from - plus schema:Product for the commercial layer, and
+        # EVERY part lists uniformly under hasConstituent: the case (typed
+        # CoinCase/...), the cap (CellLid), terminals, seals, hardware. The
+        # CELL emission path deliberately keeps hasCase for the case - the
+        # published axioms read CoinCell => hasCase some CoinCase.
+        relations = _descriptor_housing_to_jsonld(body, body.get("cell_format"))
+        constituents: list[Any] = []
+        for relation in ("hasCase", "hasTerminal", "hasConstituent"):
+            value = relations.pop(relation, None)
+            if value is None:
+                continue
+            constituents.extend(value if isinstance(value, list) else [value])
+        node: dict[str, Any] = {"@type": ["ElectrochemicalComponent", "schema:Product"]}
+        if constituents:
+            node["hasConstituent"] = constituents[0] if len(constituents) == 1 else constituents
+        node.update(relations)
         return node
     return {"@type": "schema:Thing"}
 

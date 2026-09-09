@@ -119,6 +119,18 @@ building the voltage-reference couples table (`transform/json_to_jsonld.py`).
 |---|---|---|---|
 | **`DoubleSideCoated`** / **`SingleSideCoated`** (or a `hasCoatedSides` datum) | Class or datum property | domain-electrochemistry, on `ElectrodeCoating` | Whether the current collector is coated on both sides or one — a first-class design fact of every real electrode. The closure has only `OneSidedHeating` / `TwoSidedHeating` (heating processes). Until published, the record key `coating.double_sided` (boolean) emits as a named `schema:PropertyValue` on the coating node (`_descriptor_electrode_coating_to_jsonld`). |
 
+## 9. Cell housing assembly (housing review, 2026-09-09)
+
+The housing record describes the enclosure assembly; the closure has the parts
+(`Case`, `CellLid`, `Terminal`, `Gasket`, `Spring`, …) but no class for the
+assembly itself, and `hasCase`'s published axioms relate the CELL to its case.
+
+| Term | Kind | Placement | Purpose |
+|---|---|---|---|
+| **`CellHousing`** | Class | domain-electrochemistry, sibling of `Case` under `ElectrochemicalComponent` | The assembly of components that enclose and mechanically support a cell: case, lid, terminals, seals, and internal hardware (a purchasable coin-cell kit is the canonical instance). Meanwhile the housing individual types `ElectrochemicalComponent` and lists every part under `hasConstituent` (`_component_holder_node`). |
+| **`hasHousing`** | Object property | domain-electrochemistry, cell → `CellHousing` | Relates a cell to its enclosure assembly. Meanwhile a cell's housing parts merge onto the cell node (`hasCase` for the case, per the published `CoinCell ⊑ hasCase some CoinCase` pattern). |
+| **`hasLid`** | Object property | domain-electrochemistry | `CellLid` "closes the case" but no relation states it; lids currently ride `hasConstituent`. |
+
 ## Landed upstream — stubs flipped
 
 ### domain-electrochemistry 0.36.0

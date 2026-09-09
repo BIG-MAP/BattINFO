@@ -160,6 +160,7 @@ def test_component_specs_emit_as_descriptions() -> None:
         "separator": "Separator",
         "current_collector": "CurrentCollector",
         "electrolyte": "ElectrolyteSolution",
+        "housing": "ElectrochemicalComponent",
     }
     for family, physical in cases.items():
         spec = create_component_spec(
