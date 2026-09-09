@@ -268,7 +268,9 @@ def test_kind_types_the_node_and_authored_polarity_stacks() -> None:
 
     spec = api.create_electrode_spec(name="Si-Gr electrode", kind="silicon_graphite", validate=False)
     node = record_to_jsonld(spec, "electrode-spec")
-    assert node["@type"] == "schema:CreativeWork"
+    # EMMO Description (BatterySpecification's own parent) until an
+    # ElectrodeSpecification class is published; CreativeWork for schema.org.
+    assert node["@type"] == ["Description", "schema:CreativeWork"]
     assert node["isDescriptionFor"]["@type"] == "SiliconGraphiteElectrode"
     assert node["isDescriptionFor"]["skos:prefLabel"] == "Si-Gr electrode"
 

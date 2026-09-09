@@ -2729,14 +2729,17 @@ def _to_domain_battery_jsonld_electrode(data: dict[str, Any]) -> dict[str, Any]:
     )
     if is_spec:
         # The spec is an information artifact, not a physical electrode: it
-        # types as a description (the cell-spec pattern; no published
-        # ElectrodeSpecification class yet — see ontology-additions-needed)
-        # and the physical electrode class stack moves to an anonymous
-        # individual under isDescriptionFor.
+        # types as EMMO's Description — the parent class BatterySpecification
+        # itself subclasses, and the domain side of isDescriptionFor — stacked
+        # with schema:CreativeWork for schema.org legibility (the cell-spec
+        # pattern). Swap Description for ElectrodeSpecification when that
+        # class is published (see ontology-additions-needed). The physical
+        # electrode class stack moves to an anonymous individual under
+        # isDescriptionFor.
         described: dict[str, Any] = {"@type": node["@type"]}
         if isinstance(body.get("name"), str) and body["name"]:
             described["skos:prefLabel"] = body["name"]
-        node["@type"] = "schema:CreativeWork"
+        node["@type"] = ["Description", "schema:CreativeWork"]
         node["isDescriptionFor"] = described
     if isinstance(body.get("id"), str):
         node["@id"] = body["id"]

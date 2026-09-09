@@ -124,6 +124,9 @@ _EXTRA_CONTEXT_TERMS: tuple[str, ...] = (
     "MeasuredProperty",
     "NominalProperty",
     "hasMeasurementParameter",
+    # Generic information-artifact class: interim @type for specification
+    # records whose own class (ElectrodeSpecification, ...) is unpublished.
+    "Description",
     # Measurement-provenance subtree: conditions ride an isOutputOf node.
     "isOutputOf",
     "BatteryMeasurement",

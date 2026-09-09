@@ -109,7 +109,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "battinfo": "https://w3id.org/battinfo/"
     }
   ],
-  "@type": "schema:CreativeWork",
+  "@type": [
+    "Description",
+    "schema:CreativeWork"
+  ],
   "hasCoating": {
     "@type": "ElectrodeCoating",
     "hasActiveMaterial": {
@@ -300,7 +303,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "battinfo": "https://w3id.org/battinfo/"
     }
   ],
-  "@type": "schema:CreativeWork",
+  "@type": [
+    "Description",
+    "schema:CreativeWork"
+  ],
   "hasCoating": {
     "@type": "ElectrodeCoating",
     "hasActiveMaterial": {
@@ -471,7 +477,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "battinfo": "https://w3id.org/battinfo/"
     }
   ],
-  "@type": "schema:CreativeWork",
+  "@type": [
+    "Description",
+    "schema:CreativeWork"
+  ],
   "hasCoating": {
     "@type": "ElectrodeCoating",
     "hasActiveMaterial": {
@@ -636,7 +645,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "battinfo": "https://w3id.org/battinfo/"
     }
   ],
-  "@type": "schema:CreativeWork",
+  "@type": [
+    "Description",
+    "schema:CreativeWork"
+  ],
   "hasCoating": {
     "@type": "ElectrodeCoating",
     "hasActiveMaterial": {
@@ -793,7 +805,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "battinfo": "https://w3id.org/battinfo/"
     }
   ],
-  "@type": "schema:CreativeWork",
+  "@type": [
+    "Description",
+    "schema:CreativeWork"
+  ],
   "hasCoating": {
     "@type": "ElectrodeCoating",
     "hasActiveMaterial": {
@@ -1122,5 +1137,5 @@ Schema: [`electrode.schema.json`](https://w3id.org/battinfo/schema/electrode.sch
 
 **The active material is named for what it is.** `active_material_kind` names the electrode's active material from the curated material-kind vocabulary — not `kind`, which on an electrode would read as its form (porous, foil, rotating-disc). The old `kind` spelling stays accepted as a deprecated alias and normalizes on round-trip.
 
-**Emission.** The spec is an information artifact: it emits as a `schema:CreativeWork` whose `isDescriptionFor` node carries the physical typing — the chemistry electrode class derived from `active_material_kind` (`GraphiteElectrode`, `LithiumIronPhosphateElectrode`, …), with an authored polarity stacking `PositiveElectrode` / `NegativeElectrode` on top. (No `ElectrodeSpecification` class is published yet; it is on the upstream ask list.) Role holders emit role types (`WorkingElectrode`, and the counter of a two-electrode half cell types as both `CounterElectrode` and `ReferenceElectrode`).
+**Emission.** The spec is an information artifact: it emits typed `[Description, schema:CreativeWork]` — EMMO's `Description` is the very class `BatterySpecification` subclasses, so the spec sits in the right family until an `ElectrodeSpecification` class is published (on the upstream ask list) — and its `isDescriptionFor` node carries the physical typing: the chemistry electrode class derived from `active_material_kind` (`GraphiteElectrode`, `LithiumIronPhosphateElectrode`, …), with an authored polarity stacking `PositiveElectrode` / `NegativeElectrode` on top. Role holders emit role types (`WorkingElectrode`, and the counter of a two-electrode half cell types as both `CounterElectrode` and `ReferenceElectrode`).
 :::

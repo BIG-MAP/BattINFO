@@ -16,6 +16,7 @@
 <https://w3id.org/emmo#EMMO_18ce5200_00f5_45bb_8c6f_6fb128cd41ae> skos:prefLabel "MetrologicalReference"@en .
 <https://w3id.org/emmo#EMMO_18d180e4_5e3e_42f7_820c_e08951223486> skos:prefLabel "RealData"@en .
 <https://w3id.org/emmo#EMMO_2bb50428_568d_46e8_b8bf_59a4c5656461> skos:prefLabel "isOutputOf"@en .
+<https://w3id.org/emmo#EMMO_35d4c439_fcb6_4399_a855_a89a207b41e9> skos:prefLabel "Description"@en .
 <https://w3id.org/emmo#EMMO_3a6578ac_aee0_43b9_9bc6_1eb208c8c9a9> skos:prefLabel "Porosity"@en .
 <https://w3id.org/emmo#EMMO_43003c86_9d15_433b_9789_ee2940920656> skos:prefLabel "Thickness"@en .
 <https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978> skos:prefLabel "UnitOne"@en .

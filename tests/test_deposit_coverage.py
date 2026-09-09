@@ -243,7 +243,7 @@ def test_electrode_nodes_carry_their_full_emission() -> None:
     spec_node = by_id[_record_iri(record_sets["electrode-spec"][0])]
     # The spec is an information artifact; the physical typing lives on the
     # anonymous individual under isDescriptionFor.
-    assert spec_node["@type"] == "schema:CreativeWork", spec_node["@type"]
+    assert spec_node["@type"] == ["Description", "schema:CreativeWork"], spec_node["@type"]
     described = spec_node["isDescriptionFor"]["@type"]
     types = described if isinstance(described, list) else [described]
     assert "GraphiteElectrode" in types, types           # chemistry from the kind

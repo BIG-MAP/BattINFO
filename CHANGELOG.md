@@ -19,12 +19,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **An electrode spec emits as a description, not an electrode.** Its
   JSON-LD node was typed with the physical electrode class
   (`GraphiteElectrode`, ...); a spec is an information artifact, so it now
-  types `schema:CreativeWork` with the physical class stack on the anonymous
-  individual under `isDescriptionFor` - the cell-spec pattern. No
-  `ElectrodeSpecification` class is published upstream yet; it stays on the
-  ontology-additions ask list and will stack alongside `schema:CreativeWork`
-  when it lands. Electrode instances are physical objects and keep their
-  typing.
+  types `[Description, schema:CreativeWork]` - EMMO's `Description` being
+  the parent class `BatterySpecification` itself subclasses - with the
+  physical class stack on the anonymous individual under `isDescriptionFor`,
+  the cell-spec pattern. When an `ElectrodeSpecification` class is published
+  upstream (it is on the ontology-additions ask list) it replaces the
+  generic `Description`. Electrode instances are physical objects and keep
+  their typing.
 
 ### Added
 
