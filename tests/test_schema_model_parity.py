@@ -238,7 +238,7 @@ SAMPLE_OVERRIDES: dict[tuple[str, str], Any] = {
     ("electrode-spec", "kind"): "graphite",
     ("electrode-spec", "active_material_spec_id"): SPEC_IRI,
     # Genealogy reference: the parent must be an electrode/ IRI.
-    ("electrode", "parent_electrode_id"): "https://w3id.org/battinfo/electrode/abcd-2345-6789-abcd",
+    ("electrode", "parent_id"): "https://w3id.org/battinfo/electrode/abcd-2345-6789-abcd",
 }
 
 _PATTERN_SAMPLES = {"short_id": "abcdef", "in_language": "en"}

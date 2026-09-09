@@ -43,7 +43,7 @@
           "type": "string",
           "description": "Producer / supplier lot number for a purchased electrode."
         },
-        "parent_electrode_id": {
+        "parent_id": {
           "$ref": "#/$defs/ComponentIri",
           "description": "Canonical IRI of the electrode this piece was cut from - the coated roll, web, or strip its siblings share. The parent is itself an electrode record (usually realizing the same spec), so genealogy chains compose: cell -> disc -> parent roll -> electrode-spec."
         },

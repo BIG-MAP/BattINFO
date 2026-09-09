@@ -175,9 +175,7 @@ class ElectrodeInput(BaseModel):
     lot_id: str | None = Field(default=None, validation_alias=AliasChoices("lot_id", "lot"))
     # Genealogy: the coated roll/web/strip this piece was cut from (itself an
     # electrode record), and the piece's label within it.
-    parent_electrode_id: str | None = Field(
-        default=None, validation_alias=AliasChoices("parent_electrode_id", "parent_id")
-    )
+    parent_id: str | None = None
     piece_id: str | None = None
     supplier: str | dict[str, Any] | None = None
     manufactured_at: int | str | None = None
@@ -670,10 +668,10 @@ def _record_from_electrode_spec(draft: ElectrodeSpecInput) -> dict[str, Any]:
 def _record_from_electrode(draft: ElectrodeInput) -> dict[str, Any]:
     if not _spec_iri_re("electrode-spec").fullmatch(draft.electrode_spec_id):
         raise ValueError("electrode_spec_id must match https://w3id.org/battinfo/spec/{uid}.")
-    if draft.parent_electrode_id is not None and not _component_iri_re("electrode").fullmatch(
-        draft.parent_electrode_id
+    if draft.parent_id is not None and not _component_iri_re("electrode").fullmatch(
+        draft.parent_id
     ):
-        raise ValueError("parent_electrode_id must match https://w3id.org/battinfo/electrode/{uid}.")
+        raise ValueError("parent_id must match https://w3id.org/battinfo/electrode/{uid}.")
     if draft.id is not None:
         if not _component_iri_re("electrode").fullmatch(draft.id):
             raise ValueError("electrode id must match https://w3id.org/battinfo/electrode/{uid}.")
@@ -692,7 +690,7 @@ def _record_from_electrode(draft: ElectrodeInput) -> dict[str, Any]:
                 electrode_identity_seed(
                     electrode_spec_id=draft.electrode_spec_id,
                     batch=batch,
-                    parent_electrode_id=draft.parent_electrode_id,
+                    parent_id=draft.parent_id,
                     piece_id=draft.piece_id,
                 )
             )
@@ -704,7 +702,7 @@ def _record_from_electrode(draft: ElectrodeInput) -> dict[str, Any]:
         "short_id": dashed_uid.replace("-", "")[:6],
     }
     electrode.update(draft.body or {})
-    for field_name in ("name", "batch_id", "lot_id", "parent_electrode_id", "piece_id", "storage", "comment"):
+    for field_name in ("name", "batch_id", "lot_id", "parent_id", "piece_id", "storage", "comment"):
         value = getattr(draft, field_name)
         if value is not None:
             electrode[field_name] = value

@@ -210,7 +210,7 @@ record = create_electrode(
     electrode_spec_id="https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
     # Genealogy: the coated strip this disc was punched from is itself an
     # electrode record; siblings cut from it share the same parent.
-    parent_electrode_id="https://w3id.org/battinfo/electrode/9m2k-4tqv-7xw3-1nfh",
+    parent_id="https://w3id.org/battinfo/electrode/9m2k-4tqv-7xw3-1nfh",
     piece_id="disc-07",
     source_type="lab",
 )
@@ -226,7 +226,7 @@ record = create_electrode(
     "electrode_spec_id": "https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
     "short_id": "3w870d",
     "name": "Cathode disc 07, cell LAB-2026-0001",
-    "parent_electrode_id": "https://w3id.org/battinfo/electrode/7d9k-2m4p-8t3x-6nq5",
+    "parent_id": "https://w3id.org/battinfo/electrode/7d9k-2m4p-8t3x-6nq5",
     "piece_id": "disc-07"
   },
   "provenance": {
@@ -1125,7 +1125,7 @@ Schema: [`electrode.schema.json`](https://w3id.org/battinfo/schema/electrode.sch
 | `short_id` | → ShortId |  |  |
 | `name` | string |  | Human-readable label for this batch. |
 | `lot_id` | string |  | Producer / supplier lot number for a purchased electrode. |
-| `parent_electrode_id` | → ComponentIri |  | Canonical IRI of the electrode this piece was cut from - the coated roll, web, or strip its siblings share. The parent is itself an electrode record (usually realizing the same spec), so genealogy chains compose: cell -> disc -> parent roll -> electrode-spec. |
+| `parent_id` | → ComponentIri |  | Canonical IRI of the electrode this piece was cut from - the coated roll, web, or strip its siblings share. The parent is itself an electrode record (usually realizing the same spec), so genealogy chains compose: cell -> disc -> parent roll -> electrode-spec. |
 | `piece_id` | string |  | Label of this cut piece within its parent (e.g. 'disc-07', 'strip-B'). Joins the identity seed, so pieces cut from the same parent mint distinct IRIs. |
 | `batch_id` | string |  | Coating batch label (e.g. 'Si-AQ-1'). Together with the spec IRI this is the batch's identity — the IRI is minted from the pair. |
 | `supplier` | → OrgRef |  | Supplier or vendor the item was sourced from. |
@@ -1145,7 +1145,7 @@ Schema: [`electrode.schema.json`](https://w3id.org/battinfo/schema/electrode.sch
 :::{dropdown} The reasoning behind the model
 **Design vs disc.** The spec is the *design*: composition (`coating.component` with active/binder/additive holders), processing route, design values, and batch statistics stated with the structured `standard_deviation` / `sample_count` fields. The instance is the physical disc or batch — the per-cell as-built figures (mass, loading, areal capacity) live here, because they were true before any test ran.
 
-**Genealogy: pieces are cut from a parent.** A coating run makes one big source — a roll in a factory, a strip in the lab — and the electrodes that reach cells are cut from it. Both are electrode records: the parent carries the batch facts (`batch_id`, `count`, `amount`, batch statistics), and each cut piece states `parent_electrode_id` (the record it was cut from) and `piece_id` (its label within the parent, e.g. `disc-07`, which joins the identity seed so siblings mint distinct IRIs). Chains compose — roll → sheet → disc is two hops of the same relation — and each hop emits as `prov:wasDerivedFrom`, so the full lineage cell → disc → roll → electrode-spec → material-spec is walkable in the graph.
+**Genealogy: pieces are cut from a parent.** A coating run makes one big source — a roll in a factory, a strip in the lab — and the electrodes that reach cells are cut from it. Both are electrode records: the parent carries the batch facts (`batch_id`, `count`, `amount`, batch statistics), and each cut piece states `parent_id` (the record it was cut from) and `piece_id` (its label within the parent, e.g. `disc-07`, which joins the identity seed so siblings mint distinct IRIs). Chains compose — roll → sheet → disc is two hops of the same relation — and each hop emits as `prov:wasDerivedFrom`, so the full lineage cell → disc → roll → electrode-spec → material-spec is walkable in the graph.
 
 **Half cells name their electrodes by role, not by polarity.** A half cell has no sides to name, and in the working-electrode convention a graphite working electrode charges toward 1 V vs Li/Li+ — polarity labels would mislead. `polarity` is therefore authored or absent, never derived from the kind: an "LFP negative electrode" is a legitimate design (lithium-counter half cell), not a typo, and nothing warns about it.
 

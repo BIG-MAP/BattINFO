@@ -29,10 +29,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
-- **Electrode genealogy: `parent_electrode_id` + `piece_id`.** A coating run
+- **Electrode genealogy: `parent_id` + `piece_id`.** A coating run
   makes one big source (a factory roll, a lab strip) and the electrodes that
   reach cells are cut from it. A cut piece now states which electrode record
-  it was cut from (`parent_electrode_id`) and its label within that parent
+  it was cut from (`parent_id`) and its label within that parent
   (`piece_id`, e.g. "disc-07", which joins the identity seed so siblings
   mint distinct IRIs; existing record IRIs are unchanged). Chains compose
   (roll -> sheet -> disc), each hop emits as `prov:wasDerivedFrom`, and the

@@ -319,14 +319,14 @@ def test_pieces_cut_from_a_parent_carry_the_genealogy() -> None:
     def disc(piece: str) -> dict:
         return api.create_electrode(
             electrode_spec_id=spec_iri, batch_id="Si-AQ-1",
-            parent_electrode_id=roll["id"], piece_id=piece, validate=False,
+            parent_id=roll["id"], piece_id=piece, validate=False,
         )["electrode"]
 
     d7, d8 = disc("disc-07"), disc("disc-08")
     # Distinct pieces mint distinct IRIs; re-authoring a piece is a no-op.
     assert len({roll["id"], d7["id"], d8["id"]}) == 3
     assert disc("disc-07")["id"] == d7["id"]
-    assert d7["parent_electrode_id"] == roll["id"]
+    assert d7["parent_id"] == roll["id"]
     assert d7["piece_id"] == "disc-07"
 
     node = record_to_jsonld(
@@ -340,11 +340,11 @@ def test_pieces_cut_from_a_parent_carry_the_genealogy() -> None:
             "schema:value": "disc-07"} in identifiers
 
 
-def test_parent_electrode_id_must_be_an_electrode_iri() -> None:
-    with pytest.raises(ValueError, match="parent_electrode_id"):
+def test_parent_id_must_be_an_electrode_iri() -> None:
+    with pytest.raises(ValueError, match="parent_id"):
         api.create_electrode(
             electrode_spec_id="https://w3id.org/battinfo/spec/abcd-2345-6789-abcd",
-            parent_electrode_id="https://w3id.org/battinfo/spec/abcd-2345-6789-abcd",
+            parent_id="https://w3id.org/battinfo/spec/abcd-2345-6789-abcd",
             validate=False,
         )
 

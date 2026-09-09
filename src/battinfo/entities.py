@@ -107,7 +107,7 @@ def electrode_identity_seed(
     *,
     electrode_spec_id: str | None,
     batch: str | None,
-    parent_electrode_id: str | None = None,
+    parent_id: str | None = None,
     piece_id: str | None = None,
 ) -> str:
     """Identity seed for a physical electrode — (spec IRI, batch label), plus
@@ -125,8 +125,8 @@ def electrode_identity_seed(
         (electrode_spec_id or "").strip(),
         (batch or "").strip(),
     ]
-    if parent_electrode_id and parent_electrode_id.strip():
-        parts.append(parent_electrode_id.strip())
+    if parent_id and parent_id.strip():
+        parts.append(parent_id.strip())
     if piece_id and piece_id.strip():
         parts.append(piece_id.strip())
     return "::".join(parts)
