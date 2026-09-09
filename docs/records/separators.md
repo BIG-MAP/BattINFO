@@ -89,40 +89,41 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     "Description",
     "schema:CreativeWork"
   ],
-  "schema:name": "PP",
-  "hasProperty": [
-    {
-      "@type": [
-        "Porosity",
-        "ConventionalProperty"
-      ],
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 0.55
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-    },
-    {
-      "@type": [
-        "Thickness",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "Thickness",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 25
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
-    }
-  ],
   "isDescriptionFor": {
     "@type": [
       "Polypropylene",
       "Separator"
     ],
+    "schema:name": "PP",
+    "hasProperty": [
+      {
+        "@type": [
+          "Porosity",
+          "ConventionalProperty"
+        ],
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 0.55
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+      },
+      {
+        "@type": [
+          "Thickness",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "Thickness",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 25
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
+      }
+    ],
     "skos:prefLabel": "Celgard 2500"
   },
-  "@id": "https://w3id.org/battinfo/spec/6nec-h262-tthy-4rnt"
+  "@id": "https://w3id.org/battinfo/spec/6nec-h262-tthy-4rnt",
+  "schema:name": "Celgard 2500"
 }
 ```
 :::
@@ -235,40 +236,41 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     "Description",
     "schema:CreativeWork"
   ],
-  "schema:name": "polypropylene",
-  "hasProperty": [
-    {
-      "@type": [
-        "Porosity",
-        "ConventionalProperty"
-      ],
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 0.41
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-    },
-    {
-      "@type": [
-        "Thickness",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "Thickness",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 25
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
-    }
-  ],
   "isDescriptionFor": {
     "@type": [
       "Polypropylene",
       "Separator"
     ],
+    "schema:name": "polypropylene",
+    "hasProperty": [
+      {
+        "@type": [
+          "Porosity",
+          "ConventionalProperty"
+        ],
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 0.41
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+      },
+      {
+        "@type": [
+          "Thickness",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "Thickness",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 25
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
+      }
+    ],
     "skos:prefLabel": "Celgard 2400"
   },
-  "@id": "https://w3id.org/battinfo/spec/wgym-4xfa-pws1-ek1b"
+  "@id": "https://w3id.org/battinfo/spec/wgym-4xfa-pws1-ek1b",
+  "schema:name": "Celgard 2400"
 }
 ```
 ::::
@@ -317,40 +319,41 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     "Description",
     "schema:CreativeWork"
   ],
-  "schema:name": "polyethylene",
-  "hasProperty": [
-    {
-      "@type": [
-        "Porosity",
-        "ConventionalProperty"
-      ],
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 0.42
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-    },
-    {
-      "@type": [
-        "Thickness",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "Thickness",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 20
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
-    }
-  ],
   "isDescriptionFor": {
     "@type": [
       "Polyethylene",
       "Separator"
     ],
+    "schema:name": "polyethylene",
+    "hasProperty": [
+      {
+        "@type": [
+          "Porosity",
+          "ConventionalProperty"
+        ],
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 0.42
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+      },
+      {
+        "@type": [
+          "Thickness",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "Thickness",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 20
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
+      }
+    ],
     "skos:prefLabel": "Ceramic-coated PE"
   },
-  "@id": "https://w3id.org/battinfo/spec/v94j-jm2h-t8d1-t5a6"
+  "@id": "https://w3id.org/battinfo/spec/v94j-jm2h-t8d1-t5a6",
+  "schema:name": "Ceramic-coated PE"
 }
 ```
 ::::

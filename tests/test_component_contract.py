@@ -136,7 +136,7 @@ def test_electrolyte_solvent_takes_one_or_many() -> None:
         solvent=[{"name": "EC"}, {"name": "EMC"}],
         validate=False,
     )
-    solvents = record_to_jsonld(mixture, "electrolyte-spec")["hasSolvent"]
+    solvents = record_to_jsonld(mixture, "electrolyte-spec")["isDescriptionFor"]["hasSolvent"]
     assert isinstance(solvents, list) and len(solvents) == 2
 
     legacy = create_electrolyte_spec(

@@ -77,28 +77,29 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     "Description",
     "schema:CreativeWork"
   ],
-  "schema:name": "Aluminium foil",
-  "hasProperty": {
-    "@type": [
-      "Thickness",
-      "ConventionalProperty"
-    ],
-    "skos:prefLabel": "Thickness",
-    "hasNumericalPart": {
-      "@type": "RealData",
-      "hasNumberValue": 15
-    },
-    "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
-  },
   "isDescriptionFor": {
     "@type": [
       "CurrentCollector",
       "Aluminium",
       "Foil"
     ],
+    "schema:name": "Aluminium foil",
+    "hasProperty": {
+      "@type": [
+        "Thickness",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "Thickness",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 15
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
+    },
     "skos:prefLabel": "Aluminium foil"
   },
-  "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5"
+  "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+  "schema:name": "Aluminium foil"
 }
 ```
 :::
@@ -211,42 +212,43 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     "Description",
     "schema:CreativeWork"
   ],
-  "schema:name": "Aluminium foil",
-  "hasProperty": [
-    {
-      "@type": [
-        "battinfo:arealMass",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "arealMass",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 4.05
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#MilliGramPerSquareCentiMetre"
-    },
-    {
-      "@type": [
-        "Thickness",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "Thickness",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 15
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
-    }
-  ],
   "isDescriptionFor": {
     "@type": [
       "CurrentCollector",
       "Aluminium",
       "Foil"
     ],
+    "schema:name": "Aluminium foil",
+    "hasProperty": [
+      {
+        "@type": [
+          "battinfo:arealMass",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "arealMass",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 4.05
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#MilliGramPerSquareCentiMetre"
+      },
+      {
+        "@type": [
+          "Thickness",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "Thickness",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 15
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
+      }
+    ],
     "skos:prefLabel": "Aluminium foil"
   },
-  "@id": "https://w3id.org/battinfo/spec/vkaf-f5bv-fwt2-e6yz"
+  "@id": "https://w3id.org/battinfo/spec/vkaf-f5bv-fwt2-e6yz",
+  "schema:name": "Aluminium foil"
 }
 ```
 ::::
@@ -295,28 +297,29 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     "Description",
     "schema:CreativeWork"
   ],
-  "schema:name": "Copper foil",
-  "hasProperty": {
-    "@type": [
-      "Thickness",
-      "ConventionalProperty"
-    ],
-    "skos:prefLabel": "Thickness",
-    "hasNumericalPart": {
-      "@type": "RealData",
-      "hasNumberValue": 10
-    },
-    "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
-  },
   "isDescriptionFor": {
     "@type": [
       "CurrentCollector",
       "Copper",
       "Foil"
     ],
+    "schema:name": "Copper foil",
+    "hasProperty": {
+      "@type": [
+        "Thickness",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "Thickness",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 10
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
+    },
     "skos:prefLabel": "Copper foil"
   },
-  "@id": "https://w3id.org/battinfo/spec/z25y-gab5-hd3n-qfpr"
+  "@id": "https://w3id.org/battinfo/spec/z25y-gab5-hd3n-qfpr",
+  "schema:name": "Copper foil"
 }
 ```
 ::::

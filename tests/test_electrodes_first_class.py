@@ -359,7 +359,7 @@ def test_coating_sidedness_is_stated_and_emitted() -> None:
         coating={"double_sided": True}, validate=False,
     )
     assert spec["electrode_spec"]["coating"]["double_sided"] is True
-    coating_node = record_to_jsonld(spec, "electrode-spec")["hasCoating"]
+    coating_node = record_to_jsonld(spec, "electrode-spec")["isDescriptionFor"]["hasCoating"]
     sidedness = coating_node["schema:additionalProperty"]
     assert sidedness["schema:name"] == "double_sided"
     assert sidedness["schema:value"] is True
@@ -372,7 +372,8 @@ def test_active_material_reference_emits_as_a_linked_node() -> None:
         name="Graphite anode", kind="graphite", active_material_spec_id=SPEC_IRI, validate=False
     )
     ld = record_to_jsonld(spec, "electrode-spec")
-    assert ld["hasActiveMaterial"] == {"@id": SPEC_IRI, "@type": "ActiveMaterial"}
+    # Physical fact of the described electrode, not the description node.
+    assert ld["isDescriptionFor"]["hasActiveMaterial"] == {"@id": SPEC_IRI, "@type": "ActiveMaterial"}
 
 
 def test_processing_emits_as_a_manufacturing_process() -> None:
@@ -382,7 +383,7 @@ def test_processing_emits_as_a_manufacturing_process() -> None:
         name="Si-Gr anode", kind="silicon_graphite",
         processing={"route": "nmp", "detail": "planetary mixing"}, validate=False,
     )
-    node = record_to_jsonld(spec, "electrode-spec")["prov:wasGeneratedBy"]
+    node = record_to_jsonld(spec, "electrode-spec")["isDescriptionFor"]["prov:wasGeneratedBy"]
     assert node["@type"] == "Manufacturing"
     assert node["dcterms:type"]["schema:termCode"] == "nmp"
     assert node["hasSolvent"]["schema:name"] == "nmp"  # the route names its own solvent
@@ -400,7 +401,7 @@ def test_design_values_map_to_emmo_classes() -> None:
                   "areal_capacity": {"value": 4.2, "unit": "mAh/cm2"}},
         validate=False,
     )
-    types = {t for p in record_to_jsonld(spec, "electrode-spec")["hasProperty"] for t in p["@type"]}
+    types = {t for p in record_to_jsonld(spec, "electrode-spec")["isDescriptionFor"]["hasProperty"] for t in p["@type"]}
     assert {"ActiveMassLoading", "DryCoatingThickness", "CalenderedCoatingThickness",
             "AreicCapacity"} <= types
 

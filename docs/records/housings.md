@@ -104,49 +104,49 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     "Description",
     "schema:CreativeWork"
   ],
-  "hasCase": {
-    "@type": "CoinCase",
-    "schema:size": "2032",
-    "schema:material": "Stainless steel",
-    "hasProperty": [
-      {
-        "@type": [
-          "Diameter",
-          "ConventionalProperty"
-        ],
-        "skos:prefLabel": "Diameter",
-        "hasNumericalPart": {
-          "@type": "RealData",
-          "hasNumberValue": 20
-        },
-        "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
-      },
-      {
-        "@type": [
-          "Height",
-          "ConventionalProperty"
-        ],
-        "skos:prefLabel": "Height",
-        "hasNumericalPart": {
-          "@type": "RealData",
-          "hasNumberValue": 3.2
-        },
-        "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
-      }
-    ]
-  },
-  "hasConstituent": [
-    {
-      "@type": "Spring",
-      "schema:material": "Stainless steel"
-    },
-    {
-      "@type": "Spacer",
-      "schema:material": "Stainless steel"
-    }
-  ],
   "isDescriptionFor": {
     "@type": "schema:Product",
+    "hasCase": {
+      "@type": "CoinCase",
+      "schema:size": "2032",
+      "schema:material": "Stainless steel",
+      "hasProperty": [
+        {
+          "@type": [
+            "Diameter",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "Diameter",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 20
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
+        },
+        {
+          "@type": [
+            "Height",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "Height",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 3.2
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
+        }
+      ]
+    },
+    "hasConstituent": [
+      {
+        "@type": "Spring",
+        "schema:material": "Stainless steel"
+      },
+      {
+        "@type": "Spacer",
+        "schema:material": "Stainless steel"
+      }
+    ],
     "skos:prefLabel": "CR2032 coin housing"
   },
   "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
@@ -263,61 +263,61 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     "Description",
     "schema:CreativeWork"
   ],
-  "hasCase": {
-    "@type": "CoinCase",
-    "schema:size": "2032",
-    "schema:material": "Stainless steel",
-    "hasProperty": [
-      {
-        "@type": [
-          "Diameter",
-          "ConventionalProperty"
-        ],
-        "skos:prefLabel": "Diameter",
-        "hasNumericalPart": {
-          "@type": "RealData",
-          "hasNumberValue": 20
-        },
-        "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
-      },
-      {
-        "@type": [
-          "Height",
-          "ConventionalProperty"
-        ],
-        "skos:prefLabel": "Height",
-        "hasNumericalPart": {
-          "@type": "RealData",
-          "hasNumberValue": 3.2
-        },
-        "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
-      }
-    ]
-  },
-  "hasConstituent": [
-    {
-      "@type": "Spring",
-      "schema:material": "Stainless steel"
-    },
-    {
-      "@type": "Spacer",
-      "schema:material": "Stainless steel",
-      "hasProperty": {
-        "@type": [
-          "Thickness",
-          "ConventionalProperty"
-        ],
-        "skos:prefLabel": "Thickness",
-        "hasNumericalPart": {
-          "@type": "RealData",
-          "hasNumberValue": 1.0
-        },
-        "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
-      }
-    }
-  ],
   "isDescriptionFor": {
     "@type": "schema:Product",
+    "hasCase": {
+      "@type": "CoinCase",
+      "schema:size": "2032",
+      "schema:material": "Stainless steel",
+      "hasProperty": [
+        {
+          "@type": [
+            "Diameter",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "Diameter",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 20
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
+        },
+        {
+          "@type": [
+            "Height",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "Height",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 3.2
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
+        }
+      ]
+    },
+    "hasConstituent": [
+      {
+        "@type": "Spring",
+        "schema:material": "Stainless steel"
+      },
+      {
+        "@type": "Spacer",
+        "schema:material": "Stainless steel",
+        "hasProperty": {
+          "@type": [
+            "Thickness",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "Thickness",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 1.0
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
+        }
+      }
+    ],
     "skos:prefLabel": "CR2032 coin housing"
   },
   "@id": "https://w3id.org/battinfo/spec/38af-bpnv-1zmm-32hs",
@@ -370,41 +370,11 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     "Description",
     "schema:CreativeWork"
   ],
-  "hasCase": {
-    "@type": "CylindricalCase",
-    "schema:material": "Nickel-plated steel",
-    "hasProperty": [
-      {
-        "@type": [
-          "Thickness",
-          "ConventionalProperty"
-        ],
-        "skos:prefLabel": "Thickness",
-        "hasNumericalPart": {
-          "@type": "RealData",
-          "hasNumberValue": 0.25
-        },
-        "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
-      },
-      {
-        "@type": [
-          "Mass",
-          "ConventionalProperty"
-        ],
-        "skos:prefLabel": "Mass",
-        "hasNumericalPart": {
-          "@type": "RealData",
-          "hasNumberValue": 15.0
-        },
-        "hasMeasurementUnit": "https://w3id.org/emmo#Gram"
-      }
-    ]
-  },
-  "hasTerminal": [
-    {
-      "@type": "Terminal",
-      "schema:additionalType": "positive",
-      "schema:material": "Aluminium",
+  "isDescriptionFor": {
+    "@type": "schema:Product",
+    "hasCase": {
+      "@type": "CylindricalCase",
+      "schema:material": "Nickel-plated steel",
       "hasProperty": [
         {
           "@type": [
@@ -414,63 +384,93 @@ Emitted by `record_to_jsonld`, hosted-context mode.
           "skos:prefLabel": "Thickness",
           "hasNumericalPart": {
             "@type": "RealData",
-            "hasNumberValue": 0.1
+            "hasNumberValue": 0.25
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
         },
         {
           "@type": [
-            "Width",
+            "Mass",
             "ConventionalProperty"
           ],
-          "skos:prefLabel": "Width",
+          "skos:prefLabel": "Mass",
           "hasNumericalPart": {
             "@type": "RealData",
-            "hasNumberValue": 6.0
+            "hasNumberValue": 15.0
           },
-          "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
+          "hasMeasurementUnit": "https://w3id.org/emmo#Gram"
         }
       ]
     },
-    {
-      "@type": "Terminal",
-      "schema:additionalType": "negative",
-      "schema:material": "Nickel",
-      "hasProperty": [
-        {
-          "@type": [
-            "Thickness",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "Thickness",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 0.1
+    "hasTerminal": [
+      {
+        "@type": "Terminal",
+        "schema:additionalType": "positive",
+        "schema:material": "Aluminium",
+        "hasProperty": [
+          {
+            "@type": [
+              "Thickness",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "Thickness",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 0.1
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
           },
-          "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
-        },
-        {
-          "@type": [
-            "Width",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "Width",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 5.0
+          {
+            "@type": [
+              "Width",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "Width",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 6.0
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
+          }
+        ]
+      },
+      {
+        "@type": "Terminal",
+        "schema:additionalType": "negative",
+        "schema:material": "Nickel",
+        "hasProperty": [
+          {
+            "@type": [
+              "Thickness",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "Thickness",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 0.1
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
           },
-          "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
-        }
-      ]
-    }
-  ],
-  "hasConstituent": {
-    "@type": "SafetyVent",
-    "schema:material": "Aluminium",
-    "rdfs:comment": "Safety vent (CID / burst membrane) in the top cap."
-  },
-  "isDescriptionFor": {
-    "@type": "schema:Product",
+          {
+            "@type": [
+              "Width",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "Width",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 5.0
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
+          }
+        ]
+      }
+    ],
+    "hasConstituent": {
+      "@type": "SafetyVent",
+      "schema:material": "Aluminium",
+      "rdfs:comment": "Safety vent (CID / burst membrane) in the top cap."
+    },
     "skos:prefLabel": "21700 cylindrical housing"
   },
   "@id": "https://w3id.org/battinfo/spec/k2q4-dk79-g890-7veq",
@@ -523,80 +523,80 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     "Description",
     "schema:CreativeWork"
   ],
-  "hasCase": {
-    "@type": [
-      "PrismaticCase",
-      "Aluminium"
-    ],
-    "hasProperty": [
-      {
-        "@type": [
-          "Thickness",
-          "ConventionalProperty"
-        ],
-        "skos:prefLabel": "Thickness",
-        "hasNumericalPart": {
-          "@type": "RealData",
-          "hasNumberValue": 0.8
-        },
-        "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
-      },
-      {
-        "@type": [
-          "Mass",
-          "ConventionalProperty"
-        ],
-        "skos:prefLabel": "Mass",
-        "hasNumericalPart": {
-          "@type": "RealData",
-          "hasNumberValue": 95
-        },
-        "hasMeasurementUnit": "https://w3id.org/emmo#Gram"
-      }
-    ]
-  },
-  "hasTerminal": [
-    {
-      "@type": "Terminal",
-      "schema:additionalType": "positive",
-      "schema:material": "Aluminium",
-      "hasProperty": {
-        "@type": [
-          "Width",
-          "ConventionalProperty"
-        ],
-        "skos:prefLabel": "Width",
-        "hasNumericalPart": {
-          "@type": "RealData",
-          "hasNumberValue": 20
-        },
-        "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
-      }
-    },
-    {
-      "@type": "Terminal",
-      "schema:additionalType": "negative",
-      "schema:material": "Copper",
-      "hasProperty": {
-        "@type": [
-          "Width",
-          "ConventionalProperty"
-        ],
-        "skos:prefLabel": "Width",
-        "hasNumericalPart": {
-          "@type": "RealData",
-          "hasNumberValue": 20
-        },
-        "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
-      }
-    }
-  ],
-  "hasConstituent": {
-    "@type": "Seal",
-    "schema:material": "Polypropylene"
-  },
   "isDescriptionFor": {
     "@type": "schema:Product",
+    "hasCase": {
+      "@type": [
+        "PrismaticCase",
+        "Aluminium"
+      ],
+      "hasProperty": [
+        {
+          "@type": [
+            "Thickness",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "Thickness",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 0.8
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
+        },
+        {
+          "@type": [
+            "Mass",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "Mass",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 95
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#Gram"
+        }
+      ]
+    },
+    "hasTerminal": [
+      {
+        "@type": "Terminal",
+        "schema:additionalType": "positive",
+        "schema:material": "Aluminium",
+        "hasProperty": {
+          "@type": [
+            "Width",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "Width",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 20
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
+        }
+      },
+      {
+        "@type": "Terminal",
+        "schema:additionalType": "negative",
+        "schema:material": "Copper",
+        "hasProperty": {
+          "@type": [
+            "Width",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "Width",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 20
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
+        }
+      }
+    ],
+    "hasConstituent": {
+      "@type": "Seal",
+      "schema:material": "Polypropylene"
+    },
     "skos:prefLabel": "LFP 100Ah prismatic housing"
   },
   "@id": "https://w3id.org/battinfo/spec/ypyh-v38v-r276-snmk",

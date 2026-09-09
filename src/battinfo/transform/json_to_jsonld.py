@@ -2734,27 +2734,34 @@ def _to_domain_battery_jsonld_electrode(data: dict[str, Any]) -> dict[str, Any]:
         kind=spec_body.get("active_material_kind", spec_body.get("kind")),
         polarity=spec_body.get("polarity"),
     )
+    # The active-material seam and the manufacturing route are facts about the
+    # physical electrode, so they stay with the physical node either way.
+    active_ref = body.get("active_material_spec_id")
+    if isinstance(active_ref, str) and active_ref:
+        node["hasActiveMaterial"] = {"@id": active_ref, "@type": "ActiveMaterial"}
+    processing = _processing_node(body.get("processing"))
+    if processing:
+        node["prov:wasGeneratedBy"] = processing
     if is_spec:
         # The spec is an information artifact, not a physical electrode: it
         # types as EMMO's Description — the parent class BatterySpecification
         # itself subclasses, and the domain side of isDescriptionFor — stacked
         # with schema:CreativeWork for schema.org legibility (the cell-spec
         # pattern). Swap Description for ElectrodeSpecification when that
-        # class is published (see ontology-additions-needed). The physical
-        # electrode class stack moves to an anonymous individual under
-        # isDescriptionFor.
-        described: dict[str, Any] = {"@type": node["@type"]}
+        # class is published (see ontology-additions-needed). The ENTIRE
+        # physical node — class stack, coating, collector, tab, properties,
+        # active-material seam, route — moves to the anonymous individual
+        # under isDescriptionFor: those are facts about the electrode
+        # described, not about the description. The spec node keeps only
+        # artifact facts (id, name, description, citation).
+        described = node
         if isinstance(body.get("name"), str) and body["name"]:
             described["skos:prefLabel"] = body["name"]
-        node["@type"] = ["Description", "schema:CreativeWork"]
-        node["isDescriptionFor"] = described
+        node = {"@type": ["Description", "schema:CreativeWork"], "isDescriptionFor": described}
     if isinstance(body.get("id"), str):
         node["@id"] = body["id"]
     if isinstance(body.get("name"), str) and body["name"]:
         node["schema:name"] = body["name"]
-    active_ref = body.get("active_material_spec_id")
-    if isinstance(active_ref, str) and active_ref:
-        node["hasActiveMaterial"] = {"@id": active_ref, "@type": "ActiveMaterial"}
     if isinstance(body.get("electrode_spec_id"), str):
         node["schema:isVariantOf"] = {"@id": body["electrode_spec_id"]}
     # Genealogy: a piece cut from a coated roll/web/strip derives from that
@@ -2770,9 +2777,6 @@ def _to_domain_battery_jsonld_electrode(data: dict[str, Any]) -> dict[str, Any]:
     ]
     if identifiers:
         node["schema:identifier"] = identifiers[0] if len(identifiers) == 1 else identifiers
-    processing = _processing_node(body.get("processing"))
-    if processing:
-        node["prov:wasGeneratedBy"] = processing
     if isinstance(body.get("description"), str) and body["description"]:
         node["schema:description"] = body["description"]
     citation = _citation_to_jsonld(data.get("provenance"))
@@ -2827,16 +2831,19 @@ def _to_domain_battery_jsonld_component(data: dict[str, Any]) -> dict[str, Any]:
     if is_spec:
         # A spec is an information artifact, not the physical component: it
         # types as EMMO's Description (the class the published
-        # Battery*Specification family subclasses) + schema:CreativeWork, and
-        # the physical typing (OrganicElectrolyte, Separator, CoinCase, ...)
-        # moves to the anonymous individual under isDescriptionFor — the same
-        # shape cell and electrode specs emit. Swap Description for the
-        # per-family specification class when one is published upstream.
-        described: dict[str, Any] = {"@type": node["@type"]}
+        # Battery*Specification family subclasses) + schema:CreativeWork. The
+        # ENTIRE physical node — typing (OrganicElectrolyte, Separator,
+        # CoinCase, ...), composition relations (hasCase, hasSolvent,
+        # hasConstituent, ...) and quantity properties — moves to the
+        # anonymous individual under isDescriptionFor: those are facts about
+        # the thing described, not about the description. The spec node keeps
+        # only artifact facts (id, name, manufacturer, citation). Swap
+        # Description for the per-family specification class when one is
+        # published upstream.
+        described = node
         if isinstance(body.get("name"), str) and body["name"]:
             described["skos:prefLabel"] = body["name"]
-        node["@type"] = ["Description", "schema:CreativeWork"]
-        node["isDescriptionFor"] = described
+        node = {"@type": ["Description", "schema:CreativeWork"], "isDescriptionFor": described}
     if isinstance(body.get("id"), str):
         node["@id"] = body["id"]
     if isinstance(body.get("name"), str) and body["name"] and "schema:name" not in node:

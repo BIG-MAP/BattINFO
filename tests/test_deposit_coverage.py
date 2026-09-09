@@ -250,7 +250,7 @@ def test_electrode_nodes_carry_their_full_emission() -> None:
     # No polarity class: the vocabulary assigns no side to an active material
     # (system-relative), so an unauthored polarity emits nothing.
     assert "NegativeElectrode" not in types, types
-    assert spec_node["hasProperty"]["@type"][0] == "AreicCapacity"
+    assert spec_node["isDescriptionFor"]["hasProperty"]["@type"][0] == "AreicCapacity"
 
     batch_node = by_id[_record_iri(record_sets["electrode"][0])]
     assert batch_node["schema:isVariantOf"] == {"@id": ELECTRODE_SPEC_IRI}

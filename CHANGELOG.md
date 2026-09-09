@@ -20,10 +20,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   Separator, current-collector, housing, and electrolyte specs had the same
   category error the electrode spec did: the JSON-LD node was typed as the
   physical thing. All spec records in these families now emit
-  `[Description, schema:CreativeWork]` with the physical typing
+  `[Description, schema:CreativeWork]`, and the ENTIRE physical node moves
+  to the anonymous individual under `isDescriptionFor` - the class stack
   (`Separator`, `[CurrentCollector, Aluminium, Foil]`, `CoinCase`,
-  `OrganicElectrolyte`, ...) on the anonymous individual under
-  `isDescriptionFor`. Instances keep their physical typing.
+  `OrganicElectrolyte`, ...) and the physical relations and quantities
+  (`hasCase`, `hasSolvent`, `hasCoating`, `hasConstituent`,
+  `hasProperty`, the electrode's active-material seam and manufacturing
+  route). The spec node keeps only artifact facts: id, name, manufacturer,
+  citation. Instances keep their physical typing.
 
 - **An electrode spec emits as a description, not an electrode.** Its
   JSON-LD node was typed with the physical electrode class
