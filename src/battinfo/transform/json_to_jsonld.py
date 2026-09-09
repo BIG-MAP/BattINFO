@@ -2750,11 +2750,15 @@ def _to_domain_battery_jsonld_electrode(data: dict[str, Any]) -> dict[str, Any]:
         node["hasActiveMaterial"] = {"@id": active_ref, "@type": "ActiveMaterial"}
     if isinstance(body.get("electrode_spec_id"), str):
         node["schema:isVariantOf"] = {"@id": body["electrode_spec_id"]}
+    # Genealogy: a piece cut from a coated roll/web/strip derives from that
+    # parent electrode record — one hop per cut, so chains compose.
+    if isinstance(body.get("parent_electrode_id"), str) and body["parent_electrode_id"].strip():
+        node["prov:wasDerivedFrom"] = {"@id": body["parent_electrode_id"]}
     # Batch identity: the strings tying this record to the physical stack of
     # electrodes on the bench, as named schema:PropertyValues (as materials do).
     identifiers = [
         {"@type": "schema:PropertyValue", "schema:name": key, "schema:value": body[key]}
-        for key in ("batch_id", "lot_id")
+        for key in ("batch_id", "lot_id", "piece_id")
         if isinstance(body.get(key), str) and body[key].strip()
     ]
     if identifiers:

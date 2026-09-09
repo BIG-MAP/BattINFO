@@ -180,8 +180,12 @@ def snippet_electrode():
 
     record = create_electrode(
         uid="3w87-0ddf-ryjg-evxe",
-        name="Cathode disc, cell LAB-2026-0001",
+        name="Cathode disc 07, cell LAB-2026-0001",
         electrode_spec_id="https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
+        # Genealogy: the coated strip this disc was punched from is itself an
+        # electrode record; siblings cut from it share the same parent.
+        parent_electrode_id="https://w3id.org/battinfo/electrode/9m2k-4tqv-7xw3-1nfh",
+        piece_id="disc-07",
         source_type="lab",
     )
     return record

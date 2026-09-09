@@ -43,6 +43,15 @@
           "type": "string",
           "description": "Producer / supplier lot number for a purchased electrode."
         },
+        "parent_electrode_id": {
+          "$ref": "#/$defs/ComponentIri",
+          "description": "Canonical IRI of the electrode this piece was cut from - the coated roll, web, or strip its siblings share. The parent is itself an electrode record (usually realizing the same spec), so genealogy chains compose: cell -> disc -> parent roll -> electrode-spec."
+        },
+        "piece_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Label of this cut piece within its parent (e.g. 'disc-07', 'strip-B'). Joins the identity seed, so pieces cut from the same parent mint distinct IRIs."
+        },
         "batch_id": {
           "type": "string",
           "description": "Coating batch label (e.g. 'Si-AQ-1'). Together with the spec IRI this is the batch's identity — the IRI is minted from the pair."

@@ -305,6 +305,50 @@ def test_every_electrode_kind_types_the_node() -> None:
         assert types and "Electrode" in str(types), f"{kind} untyped: {types}"
 
 
+def test_pieces_cut_from_a_parent_carry_the_genealogy() -> None:
+    """A coating run makes one big source; the electrodes in cells are cut from
+    it. Pieces reference their parent, piece identity joins the seed, and the
+    hop emits as prov:wasDerivedFrom."""
+    from battinfo.jsonld import record_to_jsonld
+
+    spec_iri = "https://w3id.org/battinfo/spec/abcd-2345-6789-abcd"
+    roll = api.create_electrode(
+        electrode_spec_id=spec_iri, batch_id="Si-AQ-1", count=24, validate=False,
+    )["electrode"]
+
+    def disc(piece: str) -> dict:
+        return api.create_electrode(
+            electrode_spec_id=spec_iri, batch_id="Si-AQ-1",
+            parent_electrode_id=roll["id"], piece_id=piece, validate=False,
+        )["electrode"]
+
+    d7, d8 = disc("disc-07"), disc("disc-08")
+    # Distinct pieces mint distinct IRIs; re-authoring a piece is a no-op.
+    assert len({roll["id"], d7["id"], d8["id"]}) == 3
+    assert disc("disc-07")["id"] == d7["id"]
+    assert d7["parent_electrode_id"] == roll["id"]
+    assert d7["piece_id"] == "disc-07"
+
+    node = record_to_jsonld(
+        {"schema_version": roll.get("schema_version", "0.2.0"), "electrode": d7},
+        "electrode",
+    )
+    assert node["prov:wasDerivedFrom"] == {"@id": roll["id"]}
+    identifiers = node["schema:identifier"]
+    identifiers = identifiers if isinstance(identifiers, list) else [identifiers]
+    assert {"@type": "schema:PropertyValue", "schema:name": "piece_id",
+            "schema:value": "disc-07"} in identifiers
+
+
+def test_parent_electrode_id_must_be_an_electrode_iri() -> None:
+    with pytest.raises(ValueError, match="parent_electrode_id"):
+        api.create_electrode(
+            electrode_spec_id="https://w3id.org/battinfo/spec/abcd-2345-6789-abcd",
+            parent_electrode_id="https://w3id.org/battinfo/spec/abcd-2345-6789-abcd",
+            validate=False,
+        )
+
+
 def test_coating_sidedness_is_stated_and_emitted() -> None:
     """`coating.double_sided` says whether the collector is coated on both
     sides; with no EMMO class for sidedness it emits as a named PropertyValue."""

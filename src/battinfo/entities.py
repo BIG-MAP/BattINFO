@@ -103,19 +103,33 @@ def electrode_spec_identity_seed(
     )
 
 
-def electrode_identity_seed(*, electrode_spec_id: str | None, batch: str | None) -> str:
-    """Identity seed for a physical electrode batch — (spec IRI, batch label).
+def electrode_identity_seed(
+    *,
+    electrode_spec_id: str | None,
+    batch: str | None,
+    parent_electrode_id: str | None = None,
+    piece_id: str | None = None,
+) -> str:
+    """Identity seed for a physical electrode — (spec IRI, batch label), plus
+    the genealogy coordinates for a cut piece.
 
     Mirrors the material-instance seed: re-authoring the same batch of the same
-    design lands on the existing record instead of minting a duplicate.
+    design lands on the existing record instead of minting a duplicate. A piece
+    cut from a parent (a roll, web, or strip) appends the parent IRI and its
+    piece label, so disc-07 of one roll and disc-07 of another mint distinct
+    IRIs — appended only when present, which keeps every pre-genealogy seed
+    (and therefore every existing record IRI) byte-identical.
     """
-    return "::".join(
-        [
-            "electrode",
-            (electrode_spec_id or "").strip(),
-            (batch or "").strip(),
-        ]
-    )
+    parts = [
+        "electrode",
+        (electrode_spec_id or "").strip(),
+        (batch or "").strip(),
+    ]
+    if parent_electrode_id and parent_electrode_id.strip():
+        parts.append(parent_electrode_id.strip())
+    if piece_id and piece_id.strip():
+        parts.append(piece_id.strip())
+    return "::".join(parts)
 
 
 @dataclass(frozen=True)
