@@ -152,7 +152,7 @@ def snippet_material():
     record = create_material(
         uid="y9xy-kr0v-y5tn-dfj7",
         name="NMC811 lot 2026-04",
-        material_spec_id="https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+        spec_id="https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
         source_type="lab",
     )
     return record
@@ -181,7 +181,7 @@ def snippet_electrode():
     record = create_electrode(
         uid="3w87-0ddf-ryjg-evxe",
         name="Cathode disc 07, cell LAB-2026-0001",
-        electrode_spec_id="https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
+        spec_id="https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
         # Genealogy: the coated strip this disc was punched from is itself an
         # electrode record; siblings cut from it share the same parent.
         parent_id="https://w3id.org/battinfo/electrode/9m2k-4tqv-7xw3-1nfh",
@@ -392,7 +392,7 @@ def snippet_equipment():
 
     record = create_equipment(
         id="https://w3id.org/battinfo/equipment/y9xy-kr0v-y5tn-dfj7",
-        equipment_spec_id="https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+        spec_id="https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
         serial_number="MC3K-2026-0001",
         name="Cycler 1",
         location="Lab B",
@@ -1274,7 +1274,9 @@ def render_page(family: dict, sections: list[dict]) -> str:
         "alone). In JSON-LD, conditions ride a measurement node the quantity "
         "`isOutputOf`; the `voltage_reference` key instead becomes a "
         "`hasMetrologicalReference` datum on the quantity, beside its "
-        "unit." + NL, NL,
+        "unit. When authoring, an instance references its spec with the "
+        "`spec_id=` kwarg; the record stores the self-describing "
+        "`<type>_spec_id` key shown in the tables below." + NL, NL,
     ]
     for schema_file in family["schemas"]:
         parts += [render_field_tables(schema_file)]

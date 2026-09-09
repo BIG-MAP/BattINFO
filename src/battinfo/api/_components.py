@@ -82,7 +82,9 @@ class MaterialInput(BaseModel):
     schema_version: str = SCHEMA_VERSION
     id: str | None = None
     uid: str | None = None
-    material_spec_id: str
+    material_spec_id: str = Field(
+        validation_alias=AliasChoices("material_spec_id", "spec_id")
+    )
     name: str | None = None
     lot_id: str | None = Field(default=None, validation_alias=AliasChoices("lot_id", "lot"))
     batch_id: str | None = None
@@ -1375,7 +1377,16 @@ def create_component_spec(family: str, *, validate: bool = True, **fields: Any) 
 
 
 def create_component_instance(family: str, *, validate: bool = True, **fields: Any) -> dict[str, Any]:
-    """Create a canonical component (instance) document for a family."""
+    """Create a canonical component (instance) document for a family.
+
+    ``spec_id=`` is the authoring kwarg (the record stores the canonical
+    ``<family>_spec_id`` key); the prefixed spelling is accepted too.
+    """
+    prefixed = fields.pop(f"{family}_spec_id", None)
+    if prefixed is not None:
+        if fields.get("spec_id") not in (None, prefixed):
+            raise ValueError(f"spec_id and {family}_spec_id disagree.")
+        fields["spec_id"] = prefixed
     record = _record_from_component_instance(family, **fields)
     if validate:
         _validate_canonical_record(record, policy=DEFAULT_POLICY)

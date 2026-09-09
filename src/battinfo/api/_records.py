@@ -877,6 +877,7 @@ def resolve_cell_spec_id(
 def create_cell_instance(
     *,
     cell_spec_id: str | None = None,
+    spec_id: str | None = None,
     cell_spec: dict[str, Any] | PathLike | None = None,
     model_name: str | None = None,
     manufacturer: str | None = None,
@@ -893,11 +894,16 @@ def create_cell_instance(
 ) -> dict[str, Any]:
     """Create a physical cell-instance document.
 
-    You can pass a canonical `cell_spec_id`, a `cell_spec` document/path, or metadata filters
-    (`model_name`, `manufacturer`, ...) to resolve the type. Metadata filters resolve against
+    You can pass a canonical `spec_id` (or its prefixed spelling `cell_spec_id`),
+    a `cell_spec` document/path, or metadata filters (`model_name`,
+    `manufacturer`, ...) to resolve the type. Metadata filters resolve against
     YOUR records under ``source_root`` (default ``./examples``); pass
     ``include_packaged_examples=True`` to also match the bundled demo fleet.
     """
+    if spec_id is not None:
+        if cell_spec_id not in (None, spec_id):
+            raise ValueError("spec_id and cell_spec_id disagree.")
+        cell_spec_id = spec_id
     resolved_cell_spec_id = cell_spec_id
 
     if cell_spec is not None:

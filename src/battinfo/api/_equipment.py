@@ -271,7 +271,16 @@ def create_equipment_spec(*, validate: bool = True, **fields: Any) -> dict[str, 
 
 
 def create_equipment(*, validate: bool = True, **fields: Any) -> dict[str, Any]:
-    """Create a canonical equipment (instance) document (the physical unit)."""
+    """Create a canonical equipment (instance) document (the physical unit).
+
+    ``spec_id=`` is the authoring kwarg for the equipment-spec reference; the
+    prefixed ``equipment_spec_id=`` spelling is accepted too.
+    """
+    shorthand = fields.pop("spec_id", None)
+    if shorthand is not None:
+        if fields.get("equipment_spec_id") not in (None, shorthand):
+            raise ValueError("spec_id and equipment_spec_id disagree.")
+        fields["equipment_spec_id"] = shorthand
     record = _record_from_equipment(**fields)
     if validate:
         _validate_canonical_record(record, policy=DEFAULT_POLICY)

@@ -29,6 +29,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **`spec_id=` is the uniform authoring shorthand.** Every instance creator
+  (material, electrode, cell, equipment, and the generic component families)
+  accepts `spec_id=` for its spec reference; the prefixed spelling
+  (`material_spec_id=`, ...) stays accepted, and disagreeing spellings raise
+  instead of silently picking one. Records are unchanged: they keep the
+  self-describing `<type>_spec_id` key, so a fragment seen without its
+  wrapper still says what kind of spec it points at.
+
 - **Electrode genealogy: `parent_id` + `piece_id`.** A coating run
   makes one big source (a factory roll, a lab strip) and the electrodes that
   reach cells are cut from it. A cut piece now states which electrode record
