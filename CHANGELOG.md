@@ -16,6 +16,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   `kind=` kwarg included) and normalizes to `active_material_kind` on
   round-trip; the packaged examples are rewritten to the canonical key.
 
+- **Every component spec emits as a description, not the component.**
+  Separator, current-collector, housing, and electrolyte specs had the same
+  category error the electrode spec did: the JSON-LD node was typed as the
+  physical thing. All spec records in these families now emit
+  `[Description, schema:CreativeWork]` with the physical typing
+  (`Separator`, `[CurrentCollector, Aluminium, Foil]`, `CoinCase`,
+  `OrganicElectrolyte`, ...) on the anonymous individual under
+  `isDescriptionFor`. Instances keep their physical typing.
+
 - **An electrode spec emits as a description, not an electrode.** Its
   JSON-LD node was typed with the physical electrode class
   (`GraphiteElectrode`, ...); a spec is an information artifact, so it now

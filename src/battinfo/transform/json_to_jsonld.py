@@ -2824,6 +2824,19 @@ def _to_domain_battery_jsonld_component(data: dict[str, Any]) -> dict[str, Any]:
     assert matched is not None
     family, body, is_spec = matched
     node = _component_holder_node(family, body)
+    if is_spec:
+        # A spec is an information artifact, not the physical component: it
+        # types as EMMO's Description (the class the published
+        # Battery*Specification family subclasses) + schema:CreativeWork, and
+        # the physical typing (OrganicElectrolyte, Separator, CoinCase, ...)
+        # moves to the anonymous individual under isDescriptionFor — the same
+        # shape cell and electrode specs emit. Swap Description for the
+        # per-family specification class when one is published upstream.
+        described: dict[str, Any] = {"@type": node["@type"]}
+        if isinstance(body.get("name"), str) and body["name"]:
+            described["skos:prefLabel"] = body["name"]
+        node["@type"] = ["Description", "schema:CreativeWork"]
+        node["isDescriptionFor"] = described
     if isinstance(body.get("id"), str):
         node["@id"] = body["id"]
     if isinstance(body.get("name"), str) and body["name"] and "schema:name" not in node:

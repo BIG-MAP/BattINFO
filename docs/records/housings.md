@@ -100,7 +100,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "battinfo": "https://w3id.org/battinfo/"
     }
   ],
-  "@type": "schema:Product",
+  "@type": [
+    "Description",
+    "schema:CreativeWork"
+  ],
   "hasCase": {
     "@type": "CoinCase",
     "schema:size": "2032",
@@ -142,6 +145,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "schema:material": "Stainless steel"
     }
   ],
+  "isDescriptionFor": {
+    "@type": "schema:Product",
+    "skos:prefLabel": "CR2032 coin housing"
+  },
   "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
   "schema:name": "CR2032 coin housing"
 }
@@ -252,7 +259,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "battinfo": "https://w3id.org/battinfo/"
     }
   ],
-  "@type": "schema:Product",
+  "@type": [
+    "Description",
+    "schema:CreativeWork"
+  ],
   "hasCase": {
     "@type": "CoinCase",
     "schema:size": "2032",
@@ -306,6 +316,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       }
     }
   ],
+  "isDescriptionFor": {
+    "@type": "schema:Product",
+    "skos:prefLabel": "CR2032 coin housing"
+  },
   "@id": "https://w3id.org/battinfo/spec/38af-bpnv-1zmm-32hs",
   "schema:name": "CR2032 coin housing"
 }
@@ -352,7 +366,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "battinfo": "https://w3id.org/battinfo/"
     }
   ],
-  "@type": "schema:Product",
+  "@type": [
+    "Description",
+    "schema:CreativeWork"
+  ],
   "hasCase": {
     "@type": "CylindricalCase",
     "schema:material": "Nickel-plated steel",
@@ -452,6 +469,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     "schema:material": "Aluminium",
     "rdfs:comment": "Safety vent (CID / burst membrane) in the top cap."
   },
+  "isDescriptionFor": {
+    "@type": "schema:Product",
+    "skos:prefLabel": "21700 cylindrical housing"
+  },
   "@id": "https://w3id.org/battinfo/spec/k2q4-dk79-g890-7veq",
   "schema:name": "21700 cylindrical housing"
 }
@@ -498,7 +519,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "battinfo": "https://w3id.org/battinfo/"
     }
   ],
-  "@type": "schema:Product",
+  "@type": [
+    "Description",
+    "schema:CreativeWork"
+  ],
   "hasCase": {
     "@type": [
       "PrismaticCase",
@@ -570,6 +594,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "hasConstituent": {
     "@type": "Seal",
     "schema:material": "Polypropylene"
+  },
+  "isDescriptionFor": {
+    "@type": "schema:Product",
+    "skos:prefLabel": "LFP 100Ah prismatic housing"
   },
   "@id": "https://w3id.org/battinfo/spec/ypyh-v38v-r276-snmk",
   "schema:name": "LFP 100Ah prismatic housing"

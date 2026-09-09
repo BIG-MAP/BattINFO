@@ -86,8 +86,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     }
   ],
   "@type": [
-    "Polypropylene",
-    "Separator"
+    "Description",
+    "schema:CreativeWork"
   ],
   "schema:name": "PP",
   "hasProperty": [
@@ -115,6 +115,13 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
     }
   ],
+  "isDescriptionFor": {
+    "@type": [
+      "Polypropylene",
+      "Separator"
+    ],
+    "skos:prefLabel": "Celgard 2500"
+  },
   "@id": "https://w3id.org/battinfo/spec/6nec-h262-tthy-4rnt"
 }
 ```
@@ -225,8 +232,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     }
   ],
   "@type": [
-    "Polypropylene",
-    "Separator"
+    "Description",
+    "schema:CreativeWork"
   ],
   "schema:name": "polypropylene",
   "hasProperty": [
@@ -254,6 +261,13 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
     }
   ],
+  "isDescriptionFor": {
+    "@type": [
+      "Polypropylene",
+      "Separator"
+    ],
+    "skos:prefLabel": "Celgard 2400"
+  },
   "@id": "https://w3id.org/battinfo/spec/wgym-4xfa-pws1-ek1b"
 }
 ```
@@ -300,8 +314,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     }
   ],
   "@type": [
-    "Polyethylene",
-    "Separator"
+    "Description",
+    "schema:CreativeWork"
   ],
   "schema:name": "polyethylene",
   "hasProperty": [
@@ -329,6 +343,13 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
     }
   ],
+  "isDescriptionFor": {
+    "@type": [
+      "Polyethylene",
+      "Separator"
+    ],
+    "skos:prefLabel": "Ceramic-coated PE"
+  },
   "@id": "https://w3id.org/battinfo/spec/v94j-jm2h-t8d1-t5a6"
 }
 ```

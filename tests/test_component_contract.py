@@ -149,6 +149,35 @@ def test_electrolyte_solvent_takes_one_or_many() -> None:
     assert [c["name"] for c in body["solvent"]] == ["EC", "EMC"]
 
 
+def test_component_specs_emit_as_descriptions() -> None:
+    """A spec is an information artifact: [Description, schema:CreativeWork],
+    with the physical typing on the isDescriptionFor individual — the same
+    shape cell and electrode specs emit. Instances stay physically typed."""
+    from battinfo.api import create_component_instance, create_component_spec
+    from battinfo.jsonld import record_to_jsonld
+
+    cases = {
+        "separator": "Separator",
+        "current_collector": "CurrentCollector",
+        "electrolyte": "ElectrolyteSolution",
+    }
+    for family, physical in cases.items():
+        spec = create_component_spec(
+            family, uid="abcd23456789abcd", name=f"{family} product", validate=False
+        )
+        node = record_to_jsonld(spec, f"{family}-spec".replace("_", "-"))
+        assert node["@type"] == ["Description", "schema:CreativeWork"], (family, node["@type"])
+        assert physical in str(node["isDescriptionFor"]["@type"]), (family, node["isDescriptionFor"])
+        assert node["isDescriptionFor"]["skos:prefLabel"] == f"{family} product"
+
+        inst = create_component_instance(
+            family, uid="bcde23456789abcd",
+            spec_id="https://w3id.org/battinfo/spec/abcd-2345-6789-abcd", validate=False
+        )
+        inst_node = record_to_jsonld(inst, family.replace("_", "-"))
+        assert "Description" not in str(inst_node["@type"]), (family, inst_node["@type"])
+
+
 def test_electrolyte_salt_ions_are_not_retyped() -> None:
     """The salt's ions follow from its material identity; the deprecated
     cation/anion keys stay accepted for existing records."""
