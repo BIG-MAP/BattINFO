@@ -19,7 +19,7 @@ Each page also carries a shelf of common, real examples — the docs' reasonable
 | [Electrolytes](electrolytes.md) | An electrolyte spec (the formulation) · An electrolyte (one mixed batch) |
 | [Separators](separators.md) | The product · A physical lot |
 | [Current collectors](current-collectors.md) | The product · A physical lot |
-| [Housings](housings.md) | The product · A pouch housing · A physical batch |
+| [Housings](housings.md) | The product · A physical batch |
 | [Cells](cells.md) | A cell spec, from its datasheet · A cell instance under that spec |
 | [Half cells](half-cells.md) | A coin half cell for electrode characterization |
 | [Tests](tests.md) | The protocol · The execution |

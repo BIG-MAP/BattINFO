@@ -269,33 +269,6 @@ def snippet_housing_spec():
     return record
 
 
-def snippet_housing_spec_pouch():
-    from battinfo.api import create_housing_spec
-
-    # A pouch has no rigid can: the "case" is the laminate film, the closure
-    # is a heat seal, and the terminals are the tab leads through it.
-    record = create_housing_spec(
-        uid="q7mf-3wtk-8npv-2hcx",
-        name="Pouch laminate housing, 60 x 45 mm",
-        cell_format="pouch",
-        case={
-            "material": "Aluminium laminate film",
-            "property": {
-                "thickness": {"value": 113, "unit": "um"},
-                "width": {"value": 45, "unit": "mm"},
-                "height": {"value": 60, "unit": "mm"},
-            },
-        },
-        seals=[{"material": "PP heat seal"}],
-        terminals=[
-            {"polarity": "positive", "material": "Al tab"},
-            {"polarity": "negative", "material": "Ni-plated Cu tab"},
-        ],
-        source_type="datasheet",
-    )
-    return record
-
-
 def snippet_housing():
     from battinfo.api import create_housing
 
@@ -782,16 +755,6 @@ FAMILIES = [
                 "record_type": "housing-spec",
             },
             {
-                "heading": "A pouch housing",
-                "fn": snippet_housing_spec_pouch,
-                "record_type": "housing-spec",
-                "notice": [
-                    "No rigid can: the case holder is the laminate film, the "
-                    "closure is a heat seal, and the terminals are the tab "
-                    "leads through it.",
-                ],
-            },
-            {
                 "heading": "A physical batch",
                 "fn": snippet_housing,
                 "record_type": "housing",
@@ -1238,6 +1201,7 @@ SHELVES: dict[str, list[str]] = {
         "housing-spec/38af-bpnv-1zmm-32hs.json",
         "housing-spec/k2q4-dk79-g890-7veq.json",
         "housing-spec/ypyh-v38v-r276-snmk.json",
+        "housing-spec/q7mf-3wtk-8npv-2hcx.json",
     ],
     "tests": [
         "test-protocol/test-protocol-8r2m-4v6k-9p3t-7n5x.json",
