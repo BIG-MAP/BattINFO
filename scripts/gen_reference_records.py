@@ -129,6 +129,28 @@ def snippet_half_cell_spec():
     return record
 
 
+def snippet_three_electrode_cell_spec():
+    from battinfo import CellSpec
+
+    spec = CellSpec(
+        id="https://w3id.org/battinfo/spec/q7mf-3wtk-8npv-2hcx",
+        manufacturer="Example Lab",
+        model="3E-GR-01",
+        format="pouch",
+        chemistry="Li-ion",
+        cell_configuration="three_electrode_cell",
+        working_electrode_spec_id="https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
+        counter_electrode={"material": {"name": "Lithium metal"}},
+        # The separated third electrode: unlike a half cell, the counter is
+        # only a counter, and the reference is its own (tiny) electrode - a
+        # lithium ring or wire, monolithic like the foil counter.
+        reference_electrode={"material": {"name": "Lithium metal"}},
+        source={"type": "lab", "retrieved_at": 1750000000},
+    )
+    record = spec.to_record()
+    return record
+
+
 def snippet_material_spec():
     from battinfo.api import create_material_spec
 
@@ -564,12 +586,16 @@ FAMILIES = [
     },
     {
         "slug": "half-cells",
-        "title": "Half cells",
+        "title": "Half cells & three-electrode cells",
         "intro": (
-            "How to describe a half cell: one electrode under test against a "
-            "counter/reference. Not a separate record type — a **cell** "
-            "flavored by `cell_configuration: \"half_cell\"`, with electrodes "
-            "named by role."
+            "How to describe the non-full-cell configurations: one electrode "
+            "under test against a counter. Neither is a separate record type "
+            "— both are a **cell** flavored by `cell_configuration` "
+            "(`half_cell` or `three_electrode_cell`), with electrodes named "
+            "by role. The one structural difference: in a half cell the "
+            "counter electrode IS the potential reference (one electrode, "
+            "two roles); a three-electrode cell separates them with a "
+            "dedicated `reference_electrode`."
         ),
         "sections": [
             {
@@ -584,13 +610,27 @@ FAMILIES = [
                     "BOTH `CounterElectrode` and `ReferenceElectrode`.",
                 ],
             },
+            {
+                "heading": "A three-electrode cell",
+                "fn": snippet_three_electrode_cell_spec,
+                "record_type": "cell-spec",
+                "notice": [
+                    "The described device types as `ThreeElectrodeCellDevice`; "
+                    "the counter is ONLY a counter here.",
+                    "The dedicated reference emits under "
+                    "`hasReferenceElectrode` typed `ReferenceElectrode` — a "
+                    "lithium ring or wire is a monolithic `material`, like "
+                    "the foil counter.",
+                ],
+            },
         ],
         "schemas": [],
         "field_reference_note": (
-            "Half cells are cell records — the field reference lives on "
-            "[Cells](cells.md#fields), and `cell_configuration`, "
-            "the role holders, and their `*_spec_id` siblings appear in the "
-            "cell-spec table there."
+            "Half cells and three-electrode cells are cell records — the "
+            "field reference lives on [Cells](cells.md#fields), and "
+            "`cell_configuration`, the role holders (`working_electrode` / "
+            "`counter_electrode` / `reference_electrode`), and their "
+            "`*_spec_id` siblings appear in the cell-spec table there."
         ),
     },
     {
@@ -1103,10 +1143,10 @@ PAGE_RULES: dict[str, list[str]] = {
         "Author with `create_housing_spec(...)` / `create_housing(spec_id=...)`.",
     ],
     "half-cells": [
-        "Not a record type: a cell with `cell_configuration` set to `half_cell`.",
-        "Electrodes are named by **role** - `working_electrode` / `counter_electrode` (or their `*_spec_id` siblings) - never by polarity.",
-        "In a two-electrode half cell the counter also carries the reference role; a `three_electrode_cell` separates them.",
-        "Reference the working electrode's spec; describe the interchangeable counter inline - a lithium foil is a monolithic `material`, never a `coating`.",
+        "Not record types: a cell with `cell_configuration` set to `half_cell` or `three_electrode_cell`.",
+        "Electrodes are named by **role** - `working_electrode` / `counter_electrode` / `reference_electrode` (or their `*_spec_id` siblings) - never by polarity.",
+        "The one structural difference: a half cell's counter also carries the reference role (one electrode, two classes); a three-electrode cell states a dedicated `reference_electrode`.",
+        "Reference the working electrode's spec; describe the interchangeable counter (and a reference ring or wire) inline - a metal foil is a monolithic `material`, never a `coating`.",
     ],
     "cells": [
         "The **spec** is the design (the datasheet); the **cell** instance is one physical unit - the (spec, serial) pair makes re-registration a no-op.",

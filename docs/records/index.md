@@ -21,7 +21,7 @@ Each page also carries a shelf of common, real examples — the docs' reasonable
 | [Current collectors](current-collectors.md) | The product · A physical lot |
 | [Housings](housings.md) | The product · A physical batch |
 | [Cells](cells.md) | A cell spec, from its datasheet · A cell instance under that spec |
-| [Half cells](half-cells.md) | A coin half cell for electrode characterization |
+| [Half cells & three-electrode cells](half-cells.md) | A coin half cell for electrode characterization · A three-electrode cell |
 | [Tests](tests.md) | The protocol · The execution |
 | [Datasets](datasets.md) | A member dataset · The collection (dataset series) |
 | [Equipment](equipment.md) | An equipment spec (the product) · An equipment unit · A channel on that unit |

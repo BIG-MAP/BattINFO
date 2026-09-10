@@ -4,14 +4,14 @@
      uv run python scripts/gen_reference_records.py
      tests/test_reference_records.py fails when this page drifts. -->
 
-# Half cells
+# Half cells & three-electrode cells
 
-How to describe a half cell: one electrode under test against a counter/reference. Not a separate record type — a **cell** flavored by `cell_configuration: "half_cell"`, with electrodes named by role.
+How to describe the non-full-cell configurations: one electrode under test against a counter. Neither is a separate record type — both are a **cell** flavored by `cell_configuration` (`half_cell` or `three_electrode_cell`), with electrodes named by role. The one structural difference: in a half cell the counter electrode IS the potential reference (one electrode, two roles); a three-electrode cell separates them with a dedicated `reference_electrode`.
 
-- Not a record type: a cell with `cell_configuration` set to `half_cell`.
-- Electrodes are named by **role** - `working_electrode` / `counter_electrode` (or their `*_spec_id` siblings) - never by polarity.
-- In a two-electrode half cell the counter also carries the reference role; a `three_electrode_cell` separates them.
-- Reference the working electrode's spec; describe the interchangeable counter inline - a lithium foil is a monolithic `material`, never a `coating`.
+- Not record types: a cell with `cell_configuration` set to `half_cell` or `three_electrode_cell`.
+- Electrodes are named by **role** - `working_electrode` / `counter_electrode` / `reference_electrode` (or their `*_spec_id` siblings) - never by polarity.
+- The one structural difference: a half cell's counter also carries the reference role (one electrode, two classes); a three-electrode cell states a dedicated `reference_electrode`.
+- Reference the working electrode's spec; describe the interchangeable counter (and a reference ring or wire) inline - a metal foil is a monolithic `material`, never a `coating`.
 
 ## Define one
 
@@ -143,9 +143,148 @@ What to notice:
 - The working electrode emits under `hasWorkingElectrode` as a reference to its spec; the counter node types as BOTH `CounterElectrode` and `ReferenceElectrode`.
 
 
+### A three-electrode cell
+
+::::{tab-set}
+
+:::{tab-item} Python
+```python
+from battinfo import CellSpec
+
+spec = CellSpec(
+    id="https://w3id.org/battinfo/spec/q7mf-3wtk-8npv-2hcx",
+    manufacturer="Example Lab",
+    model="3E-GR-01",
+    format="pouch",
+    chemistry="Li-ion",
+    cell_configuration="three_electrode_cell",
+    working_electrode_spec_id="https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
+    counter_electrode={"material": {"name": "Lithium metal"}},
+    # The separated third electrode: unlike a half cell, the counter is
+    # only a counter, and the reference is its own (tiny) electrode - a
+    # lithium ring or wire, monolithic like the foil counter.
+    reference_electrode={"material": {"name": "Lithium metal"}},
+    source={"type": "lab", "retrieved_at": 1750000000},
+)
+record = spec.to_record()
+```
+:::
+
+:::{tab-item} Canonical record
+```json
+{
+  "schema_version": "0.2.0",
+  "cell_spec": {
+    "id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+    "short_id": "7d9k2m",
+    "identifier": "cell-spec:7d9k-2m4p-8t3x-6nq5",
+    "name": "Example Lab 3E-GR-01",
+    "model": "3E-GR-01",
+    "manufacturer": {
+      "type": "Organization",
+      "name": "Example Lab"
+    },
+    "cell_format": "pouch",
+    "chemistry": "Li-ion",
+    "cell_configuration": "three_electrode_cell",
+    "reference_electrode": {
+      "material": {
+        "name": "Lithium metal",
+        "property": {}
+      },
+      "property": {}
+    }
+  },
+  "properties": {},
+  "provenance": {
+    "source_type": "lab",
+    "retrieved_at": 1750000000,
+    "battinfo_version": "0.7.0"
+  },
+  "working_electrode_spec_id": "https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
+  "counter_electrode": {
+    "material": {
+      "name": "Lithium metal",
+      "property": {}
+    },
+    "property": {}
+  }
+}
+```
+:::
+
+:::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@type": [
+    "BatteryCellSpecification",
+    "schema:CreativeWork"
+  ],
+  "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+  "schema:identifier": "7d9k-2m4p-8t3x-6nq5",
+  "schema:name": "Example Lab 3E-GR-01",
+  "schema:model": "3E-GR-01",
+  "schema:manufacturer": {
+    "@type": "schema:Organization",
+    "schema:name": "Example Lab"
+  },
+  "schema:url": "https://www.battery-genome.org/registry/spec/7d9k-2m4p-8t3x-6nq5",
+  "isDescriptionFor": {
+    "@type": [
+      "BatteryCell",
+      "PouchCell",
+      "ThreeElectrodeCellDevice",
+      "LithiumIonBattery"
+    ],
+    "skos:prefLabel": "Example Lab 3E-GR-01"
+  },
+  "schema:schemaVersion": "0.2.0",
+  "hasCounterElectrode": {
+    "hasActiveMaterial": {
+      "@type": [
+        "Lithium",
+        "ActiveMaterial"
+      ],
+      "schema:name": "Lithium metal"
+    },
+    "@type": "CounterElectrode"
+  },
+  "hasReferenceElectrode": {
+    "hasActiveMaterial": {
+      "@type": [
+        "Lithium",
+        "ActiveMaterial"
+      ],
+      "schema:name": "Lithium metal"
+    },
+    "@type": "ReferenceElectrode"
+  },
+  "hasWorkingElectrode": {
+    "@id": "https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch"
+  },
+  "dcterms:source": {
+    "@type": "prov:Entity",
+    "dcterms:type": "lab",
+    "prov:generatedAtTime": "2025-06-15T15:06:40+00:00"
+  }
+}
+```
+:::
+
+::::
+
+What to notice:
+
+- The described device types as `ThreeElectrodeCellDevice`; the counter is ONLY a counter here.
+- The dedicated reference emits under `hasReferenceElectrode` typed `ReferenceElectrode` — a lithium ring or wire is a monolithic `material`, like the foil counter.
+
+
 ## Fields
 
-Half cells are cell records — the field reference lives on [Cells](cells.md#fields), and `cell_configuration`, the role holders, and their `*_spec_id` siblings appear in the cell-spec table there.
+Half cells and three-electrode cells are cell records — the field reference lives on [Cells](cells.md#fields), and `cell_configuration`, the role holders (`working_electrode` / `counter_electrode` / `reference_electrode`), and their `*_spec_id` siblings appear in the cell-spec table there.
 
 ## Design notes
 
@@ -154,5 +293,7 @@ Half cells are cell records — the field reference lives on [Cells](cells.md#fi
 
 **What is usually stated.** The working electrode as a reference to its [electrode spec](electrodes.md) — the design under test; the counter described inline on its holder, because a lithium foil the lab treats as interchangeable earns a description, not an individually tracked record. A lithium counter is pure metal foil, not a coated electrode: state it as `material` (`{"material": {"name": "Lithium metal"}}`), never as a `coating` — there is no collector-plus-layer structure to describe.
 
-**Emission.** The described device types as `HalfCellDevice`; the working electrode emits under `hasWorkingElectrode`; in a two-electrode half cell the counter node types as both `CounterElectrode` and `ReferenceElectrode` — the counter *is* the potential reference. A monolithic counter's material emits as its `hasActiveMaterial`, class-typed (`Lithium`) through the material map.
+**Half cell vs three-electrode cell: one difference.** In a half cell the counter electrode *is* the potential reference — one physical electrode carrying two roles, which is why the counter node types as both `CounterElectrode` and `ReferenceElectrode` and why nothing goes in `reference_electrode`. Passing current through your reference polarizes it, so when that matters the three-electrode cell separates the roles: the counter is only a counter, and a dedicated `reference_electrode` (a lithium ring or wire near the working electrode — a monolithic `material`, or a `reference_electrode_spec_id`) carries the reference alone. Everything else — holders, schema, creators — is identical between the two configurations. Both facts are the cell's *physical arrangement*; the "vs what" of a measured voltage is stated where the number lives, as the quantity's `voltage_reference` datum.
+
+**Emission.** A half cell's described device types as `HalfCellDevice` (the counter dual-typed as above); a three-electrode cell's types as `ThreeElectrodeCellDevice`, with the dedicated reference under `hasReferenceElectrode` typed `ReferenceElectrode` (a legacy string shorthand like `"NHE"` still emits as a labeled `ReferenceElectrode` node). The working electrode emits under `hasWorkingElectrode`; a monolithic electrode's material emits as its `hasActiveMaterial`, class-typed (`Lithium`) through the material map.
 :::
