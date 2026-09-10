@@ -1364,7 +1364,7 @@ class CellSpec(BundleJsonModel):
     iec_code: str | None = Field(default=None, description="IEC 60086 or IEC 61960 code string (e.g. 'LR6', 'ICR18650').")
     country_of_origin: str | None = Field(default=None, description="Country where the cell is manufactured.")
     cell_configuration: CellConfiguration | None = Field(default=None, description="Electrode configuration as built: full_cell, half_cell, or three_electrode_cell. Absent means unstated; when stated it overrides the reference_electrode half-cell heuristic in the JSON-LD emitter.")
-    reference_electrode: str | None = Field(default=None, description="Counter/reference electrode used in a half-cell or three-electrode build (e.g. 'lithium', 'NHE').")
+    reference_electrode: Electrode | str | None = Field(default=None, description="The physical reference electrode of a three_electrode_cell build, as an inline electrode holder (a lithium ring or wire is a monolithic material=). The legacy string shorthand ('lithium', 'NHE') stays accepted. In a half_cell the counter IS the reference - state nothing here. Emitted as hasReferenceElectrode / @type ReferenceElectrode.")
     rechargeable: bool | None = Field(default=None, description="True for secondary (rechargeable) cells; false for primary.")
     year: int | None = Field(default=None, description="Year the product or its datasheet was released.")
     datasheet_revision: str | None = Field(default=None, description="Revision label of the source datasheet this spec was taken from.")
@@ -1387,6 +1387,7 @@ class CellSpec(BundleJsonModel):
     negative_electrode_spec_id: str | None = Field(default=None, description="IRI of a standalone negative-electrode-spec record.")
     working_electrode_spec_id: str | None = Field(default=None, description="IRI of a standalone electrode-spec record for the working electrode (role holder sibling).")
     counter_electrode_spec_id: str | None = Field(default=None, description="IRI of a standalone electrode-spec record for the counter electrode (role holder sibling).")
+    reference_electrode_spec_id: str | None = Field(default=None, description="IRI of a standalone electrode-spec record for the reference electrode of a three_electrode_cell build (role holder sibling).")
     electrolyte_spec_id: str | None = Field(default=None, description="IRI of a standalone electrolyte-spec record.")
     separator_spec_id: str | None = Field(default=None, description="IRI of a standalone separator-spec record.")
     housing_spec_id: str | None = Field(default=None, description="IRI of a standalone housing-spec record.")
@@ -1408,7 +1409,8 @@ class CellSpec(BundleJsonModel):
         return _mapping_from_object(value)
 
     @field_validator("positive_electrode", "negative_electrode", "working_electrode",
-                     "counter_electrode", "electrolyte", "separator", mode="before")
+                     "counter_electrode", "reference_electrode", "electrolyte", "separator",
+                     mode="before")
     @classmethod
     def _coerce_component(cls, value: Any) -> Any:
         if isinstance(value, Mapping):
@@ -1578,6 +1580,7 @@ class CellSpec(BundleJsonModel):
             negative_electrode_spec_id=record.get("negative_electrode_spec_id"),
             working_electrode_spec_id=record.get("working_electrode_spec_id"),
             counter_electrode_spec_id=record.get("counter_electrode_spec_id"),
+            reference_electrode_spec_id=record.get("reference_electrode_spec_id"),
             electrolyte_spec_id=record.get("electrolyte_spec_id"),
             separator_spec_id=record.get("separator_spec_id"),
             housing_spec_id=record.get("housing_spec_id"),
@@ -1715,7 +1718,11 @@ class CellSpec(BundleJsonModel):
         if self.cell_configuration is not None:
             record["cell_spec"]["cell_configuration"] = str(self.cell_configuration)
         if self.reference_electrode is not None:
-            record["cell_spec"]["reference_electrode"] = self.reference_electrode
+            record["cell_spec"]["reference_electrode"] = (
+                self.reference_electrode.model_dump(mode="json", exclude_none=True)
+                if isinstance(self.reference_electrode, Electrode)
+                else self.reference_electrode
+            )
         if self.rechargeable is not None:
             record["cell_spec"]["rechargeable"] = self.rechargeable
         if self.year is not None:
@@ -1726,6 +1733,7 @@ class CellSpec(BundleJsonModel):
             record["cell_spec"]["manufacturer"]["id"] = self.manufacturer_id
         for _ref in ("positive_electrode_spec_id", "negative_electrode_spec_id",
                      "working_electrode_spec_id", "counter_electrode_spec_id",
+                     "reference_electrode_spec_id",
                      "electrolyte_spec_id", "separator_spec_id", "housing_spec_id"):
             _ref_value = getattr(self, _ref)
             if _ref_value is not None:

@@ -205,6 +205,10 @@ def _entity_mapping(field: str, value: Any) -> dict[str, Any] | None:
 _ROLE_ELECTRODE_HOLDERS: tuple[tuple[str, str, tuple[str, ...]], ...] = (
     ("working_electrode", "hasWorkingElectrode", ("WorkingElectrode",)),
     ("counter_electrode", "hasCounterElectrode", ("CounterElectrode",)),
+    # The dedicated third electrode of a three-electrode cell. The field also
+    # accepts the legacy string shorthand ('lithium', 'NHE'), handled where
+    # the holders are applied.
+    ("reference_electrode", "hasReferenceElectrode", ("ReferenceElectrode",)),
 )
 
 
@@ -1923,6 +1927,11 @@ def _apply_specification_composition(battery: dict[str, Any], specification: dic
 
     for data_key, relation, role_types in _ROLE_ELECTRODE_HOLDERS:
         electrode_data = specification.get(data_key)
+        if data_key == "reference_electrode" and isinstance(electrode_data, str) and electrode_data.strip():
+            # Legacy string shorthand ('lithium', 'NHE'): a labeled typed node,
+            # so the fact reaches the graph instead of staying record-only.
+            battery[relation] = {"@type": "ReferenceElectrode", "skos:prefLabel": electrode_data.strip()}
+            continue
         if not isinstance(electrode_data, dict):
             continue
         electrode_node = _electrode_holder_body(electrode_data)
@@ -1974,6 +1983,7 @@ def _apply_specification_structure_and_refs(battery: dict[str, Any], specificati
         ("negative_electrode_spec_id", "hasNegativeElectrode"),
         ("working_electrode_spec_id", "hasWorkingElectrode"),
         ("counter_electrode_spec_id", "hasCounterElectrode"),
+        ("reference_electrode_spec_id", "hasReferenceElectrode"),
         ("electrolyte_spec_id", "hasElectrolyte"),
         ("separator_spec_id", "hasSeparator"),
     ):

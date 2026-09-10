@@ -1802,8 +1802,16 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "description": "Battery category per EU Battery Regulation Article 3."
             },
             "reference_electrode": {
-              "type": "string",
-              "description": "Counter/reference electrode for half-cell configurations (e.g. 'lithium', 'NHE')."
+              "anyOf": [
+                {
+                  "$ref": "modules/components/electrode.schema.json"
+                },
+                {
+                  "type": "string",
+                  "minLength": 1
+                }
+              ],
+              "description": "The physical reference electrode of a three-electrode build, as an inline electrode holder (a lithium ring or wire is a monolithic `material`). The legacy string shorthand (e.g. 'lithium', 'NHE') stays accepted. In a half_cell the counter electrode IS the reference - state nothing here. Emitted as hasReferenceElectrode with @type ReferenceElectrode."
             },
             "cell_configuration": {
               "type": "string",
@@ -1979,6 +1987,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         "counter_electrode_spec_id": {
           "$ref": "#/$defs/ElectrodeSpecIri",
           "description": "Optional canonical IRI of a standalone electrode-spec for the counter electrode."
+        },
+        "reference_electrode_spec_id": {
+          "$ref": "#/$defs/ElectrodeSpecIri",
+          "description": "Optional canonical IRI of a standalone electrode-spec for the reference electrode of a three-electrode build (used instead of, or alongside, the inline reference_electrode holder)."
         },
         "electrolyte_spec_id": {
           "$ref": "#/$defs/ElectrolyteSpecIri",

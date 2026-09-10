@@ -102,6 +102,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   new `*_id` field into forward links and a reverse cut-pieces panel on the
   parent once re-vendored.
 
+- **Three-electrode cells are fully expressible.** The configuration
+  existed in the `cell_configuration` enum but its distinguishing physics
+  did not: `reference_electrode` was a bare string. It now accepts a full
+  inline electrode holder (a lithium ring or wire is a monolithic
+  `material=`) beside the legacy string, with a new
+  `reference_electrode_spec_id` sibling; the `reference` role joins the
+  role-typing rule; the holder emits as `hasReferenceElectrode` with
+  `@type ReferenceElectrode` (a legacy string becomes a labeled typed node
+  instead of staying record-only); and a latent bug is fixed where the
+  enum value never reached the entity map, so `ThreeElectrodeCellDevice`
+  now actually types the described device. Kept as a configuration of the
+  cell record - the half-cell precedent - never a separate record type;
+  the cell states its physical electrode arrangement, while the "vs what"
+  of a measured voltage stays the quantity's `voltage_reference` datum.
+
 - **Monolithic electrodes: `material` on the electrode holders.** A lithium
   counter is pure metal foil, not a coated electrode - there is no
   collector-plus-layer structure to describe. The inline electrode holder

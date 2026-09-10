@@ -2294,7 +2294,7 @@ The `cell_spec` block:
 | `datasheet_revision` | string |  | Revision label of the datasheet the spec was taken from. |
 | `manufacturing_place` | string |  | Geographic location of the battery manufacturing plant (EU Battery Regulation Annex VI Part A). |
 | `battery_category` | `EV` \| `LMT` \| `industrial` \| `stationary` … (7 values) |  | Battery category per EU Battery Regulation Article 3. |
-| `reference_electrode` | string |  | Counter/reference electrode for half-cell configurations (e.g. 'lithium', 'NHE'). |
+| `reference_electrode` | → electrode or string |  | The physical reference electrode of a three-electrode build, as an inline electrode holder (a lithium ring or wire is a monolithic `material`). The legacy string shorthand (e.g. 'lithium', 'NHE') stays accepted. In a half_cell the counter electrode IS the reference - state nothing here. Emitted as hasReferenceElectrode with @type ReferenceElectrode. |
 | `cell_configuration` | `full_cell` \| `half_cell` \| `three_electrode_cell` |  | Electrode configuration as built. Optional; absent means unstated (read as a full cell unless a reference_electrode is present). Stated explicitly it overrides that heuristic: half_cell types the JSON-LD as BatteryHalfCell + HalfCellDevice, three_electrode_cell as ThreeElectrodeCellDevice, full_cell suppresses both. |
 
 Top-level `properties`: Datasheet-style quantitative properties of the cell model; each key holds a SpecItem quantity. Dimension keys follow the format rules: diameter for cylindrical and coin, length/width/thickness for prismatic and pouch, height for all.
@@ -2332,6 +2332,8 @@ Top-level `negative_electrode_spec_id`: IRI of the standalone electrode-spec use
 Top-level `working_electrode_spec_id`: Optional canonical IRI of a standalone electrode-spec for the working electrode (used instead of, or alongside, the inline working_electrode holder).
 
 Top-level `counter_electrode_spec_id`: Optional canonical IRI of a standalone electrode-spec for the counter electrode.
+
+Top-level `reference_electrode_spec_id`: Optional canonical IRI of a standalone electrode-spec for the reference electrode of a three-electrode build (used instead of, or alongside, the inline reference_electrode holder).
 
 Top-level `electrolyte_spec_id`: IRI of the standalone electrolyte-spec used in this cell model; may be given instead of, or alongside, the inline electrolyte holder.
 

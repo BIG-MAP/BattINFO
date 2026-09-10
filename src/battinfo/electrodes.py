@@ -55,6 +55,7 @@ PROCESSING_ROUTES: tuple[str, ...] = ("aqueous", "nmp", "dry", "other")
 ELECTRODE_ROLE_RELATIONS: dict[str, str] = {
     "working": "hasWorkingElectrode",
     "counter": "hasCounterElectrode",
+    "reference": "hasReferenceElectrode",
 }
 
 #: Cell configurations with no polarity to assign. Their electrodes are named by
@@ -99,6 +100,10 @@ def electrode_role_types(role: str, configuration: Any = None) -> list[str]:
     """
     if role == "working":
         return ["WorkingElectrode"]
+    if role == "reference":
+        # The dedicated third electrode of a three-electrode cell. In a half
+        # cell there is no third electrode - the counter carries the class.
+        return ["ReferenceElectrode"]
     if role != "counter":
         raise ValueError(
             f"Unknown electrode role {role!r}. Known roles: {sorted(ELECTRODE_ROLE_RELATIONS)}."

@@ -390,6 +390,44 @@ def test_half_cell_counter_foil_types_as_counter_and_reference() -> None:
     assert "hasCoating" not in counter
 
 
+def test_three_electrode_cell_carries_a_dedicated_reference() -> None:
+    """A three-electrode cell separates the roles: the counter is ONLY a
+    counter, the dedicated reference rides hasReferenceElectrode, and the
+    device types ThreeElectrodeCellDevice. The legacy string shorthand still
+    reaches the graph as a labeled node."""
+    from battinfo.bundle import CellSpec, ProvenanceInfo
+    from battinfo.jsonld import record_to_jsonld
+
+    spec = CellSpec(
+        id="https://w3id.org/battinfo/spec/abcd-2345-6789-abcd",
+        name="3E", manufacturer="Lab", model="3E-1", format="coin",
+        chemistry="lithium_ion", cell_configuration="three_electrode_cell",
+        working_electrode_spec_id="https://w3id.org/battinfo/spec/bcde-2345-6789-abcd",
+        counter_electrode={"material": {"name": "Lithium metal"}},
+        reference_electrode={"material": {"name": "Lithium metal"}},
+        source=ProvenanceInfo(type="lab"),
+    ).to_record()
+    assert spec["cell_spec"]["reference_electrode"]["material"]["name"] == "Lithium metal"
+
+    node = record_to_jsonld(spec, "cell-spec")
+    assert node["hasCounterElectrode"]["@type"] == "CounterElectrode"
+    ref = node["hasReferenceElectrode"]
+    assert ref["@type"] == "ReferenceElectrode"
+    assert set(ref["hasActiveMaterial"]["@type"]) == {"Lithium", "ActiveMaterial"}
+    described = node["isDescriptionFor"]["@type"]
+    assert "ThreeElectrodeCellDevice" in (described if isinstance(described, list) else [described])
+
+    legacy = CellSpec(
+        id="https://w3id.org/battinfo/spec/abcd-2345-6789-abcd",
+        name="3E", manufacturer="Lab", model="3E-1", format="coin",
+        chemistry="lithium_ion", cell_configuration="three_electrode_cell",
+        reference_electrode="NHE",
+        source=ProvenanceInfo(type="lab"),
+    ).to_record()
+    legacy_ref = record_to_jsonld(legacy, "cell-spec")["hasReferenceElectrode"]
+    assert legacy_ref == {"@type": "ReferenceElectrode", "skos:prefLabel": "NHE"}
+
+
 def test_coating_sidedness_is_stated_and_emitted() -> None:
     """`coating.double_sided` says whether the collector is coated on both
     sides; with no EMMO class for sidedness it emits as a named PropertyValue."""
