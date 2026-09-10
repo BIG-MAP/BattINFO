@@ -102,6 +102,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   new `*_id` field into forward links and a reverse cut-pieces panel on the
   parent once re-vendored.
 
+- **Monolithic electrodes: `material` on the electrode holders.** A lithium
+  counter is pure metal foil, not a coated electrode - there is no
+  collector-plus-layer structure to describe. The inline electrode holder
+  and the standalone electrode-spec gain `material` (a material-component:
+  name / kind / material_spec_id / property) for uncoated electrodes;
+  emission is the electrode's `hasActiveMaterial`, class-typed through the
+  material map (which gains lithium metal -> `Lithium` and zinc ->
+  `Zinc`). The half-cell exemplar's counter drops its coating wrapper for
+  `{"material": {"name": "Lithium metal"}}`.
+
 - **`coating.double_sided`.** A boolean on the electrode-coating block (the
   standalone electrode spec and the inline cell-spec holders share it)
   stating whether the current collector is coated on both sides or one. No

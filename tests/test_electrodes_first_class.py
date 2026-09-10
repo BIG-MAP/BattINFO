@@ -349,6 +349,47 @@ def test_parent_id_must_be_an_electrode_iri() -> None:
         )
 
 
+def test_monolithic_foil_electrode_is_material_not_coating() -> None:
+    """A lithium counter is pure metal foil: `material` states it directly -
+    no coating wrapper, no collector - and it emits as the electrode's
+    class-typed active material."""
+    from battinfo.jsonld import record_to_jsonld
+
+    spec = api.create_electrode_spec(
+        name="Lithium foil counter", kind="lithium_metal",
+        material={"name": "Lithium metal"},
+        validate=False,
+    )
+    body = spec["electrode_spec"]
+    assert body["material"]["name"] == "Lithium metal"
+    assert "coating" not in body
+
+    described = record_to_jsonld(spec, "electrode-spec")["isDescriptionFor"]
+    mat = described["hasActiveMaterial"]
+    assert set(mat["@type"]) == {"Lithium", "ActiveMaterial"}
+    assert "hasCoating" not in described
+
+
+def test_half_cell_counter_foil_types_as_counter_and_reference() -> None:
+    """The inline half-cell counter holder takes the same monolithic form,
+    and in a two-electrode half cell it is also the potential reference."""
+    from battinfo.bundle import CellSpec, ProvenanceInfo
+    from battinfo.jsonld import record_to_jsonld
+
+    spec = CellSpec(
+        id="https://w3id.org/battinfo/spec/abcd-2345-6789-abcd",
+        name="HC", manufacturer="Lab", model="HC-1", format="coin",
+        chemistry="lithium_ion", cell_configuration="half_cell",
+        counter_electrode={"material": {"name": "Lithium metal"}},
+        source=ProvenanceInfo(type="lab"),
+    ).to_record()
+    node = record_to_jsonld(spec, "cell-spec")
+    counter = node["hasCounterElectrode"]
+    assert set(counter["@type"]) == {"CounterElectrode", "ReferenceElectrode"}
+    assert set(counter["hasActiveMaterial"]["@type"]) == {"Lithium", "ActiveMaterial"}
+    assert "hasCoating" not in counter
+
+
 def test_coating_sidedness_is_stated_and_emitted() -> None:
     """`coating.double_sided` says whether the collector is coated on both
     sides; with no EMMO class for sidedness it emits as a named PropertyValue."""

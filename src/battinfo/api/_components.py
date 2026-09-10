@@ -134,6 +134,9 @@ class ElectrodeSpecInput(BaseModel):
     # divergent is ever stored.
     coating: dict[str, Any] | None = None
     composition: dict[str, Any] | None = None
+    # A monolithic uncoated electrode (lithium metal foil): the material IS
+    # the electrode - no coating, no separate current collector.
+    material: dict[str, Any] | None = None
     current_collector: dict[str, Any] | None = Field(
         default=None, validation_alias=AliasChoices("current_collector", "collector")
     )
@@ -611,7 +614,7 @@ def _record_from_electrode_spec(draft: ElectrodeSpecInput) -> dict[str, Any]:
     # an active material sits on is the cell's fact, not the material's.
     if draft.polarity is not None:
         spec["polarity"] = draft.polarity
-    for field_name in ("grade", "active_material_spec_id", "product_id", "description", "comment"):
+    for field_name in ("grade", "active_material_spec_id", "material", "product_id", "description", "comment"):
         value = getattr(draft, field_name)
         if value is not None:
             spec[field_name] = value

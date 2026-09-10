@@ -4133,6 +4133,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "$ref": "#/$defs/MaterialSpecIri",
               "description": "Optional canonical IRI of the material-spec for this electrode's active material, present when the powder is known and authored. Absent for a purchased electrode of known chemistry but unknown powder — 'kind' still carries the chemistry."
             },
+            "material": {
+              "$ref": "modules/components/material-component.schema.json",
+              "description": "The electrode body as a single monolithic material - an uncoated metal foil or disc (lithium metal counter, zinc foil). States the material directly; there is no coating and no separate current collector, the foil is both. Alternative to `coating` for uncoated electrodes."
+            },
             "coating": {
               "$ref": "modules/components/electrode-coating.schema.json",
               "description": "Coating composition and coating-level design values. 'component.active_material / binder / additive' each carry a weight fraction under property.mass_fraction — the same shape a cell-spec's inline electrode coating uses, so a composition authored here is the composition a cell reads."
@@ -7862,6 +7866,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "type": "string",
           "pattern": "^https://w3id\\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
           "description": "Optional canonical IRI of a standalone electrode-spec this inline holder realizes. Lets a cell-spec cite the designed electrode while keeping its embedded fields; the same reference seam material-component.schema.json gives materials."
+        },
+        "material": {
+          "$ref": "material-component.schema.json",
+          "description": "The electrode body as a single monolithic material - an uncoated metal foil or disc (lithium metal counter, zinc foil). States the material directly; there is no coating and no separate current collector, the foil is both. Alternative to `coating` for uncoated electrodes."
         },
         "coating": {
           "$ref": "electrode-coating.schema.json",

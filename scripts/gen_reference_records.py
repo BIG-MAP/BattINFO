@@ -120,10 +120,9 @@ def snippet_half_cell_spec():
         working_electrode_spec_id="https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
         # The counter is described inline: lithium foil the lab treats as
         # interchangeable earns a description, not a tracked record. In a
-        # two-electrode half cell it is also the potential reference.
-        counter_electrode={
-            "coating": {"component": {"active_material": [{"name": "Lithium metal"}]}}
-        },
+        # two-electrode half cell it is also the potential reference. A foil
+        # is a monolithic electrode - `material`, never a coating.
+        counter_electrode={"material": {"name": "Lithium metal"}},
         source={"type": "lab", "retrieved_at": 1750000000},
     )
     record = spec.to_record()
@@ -1107,7 +1106,7 @@ PAGE_RULES: dict[str, list[str]] = {
         "Not a record type: a cell with `cell_configuration` set to `half_cell`.",
         "Electrodes are named by **role** - `working_electrode` / `counter_electrode` (or their `*_spec_id` siblings) - never by polarity.",
         "In a two-electrode half cell the counter also carries the reference role; a `three_electrode_cell` separates them.",
-        "Reference the working electrode's spec; describe the interchangeable counter (lithium foil) inline on its holder.",
+        "Reference the working electrode's spec; describe the interchangeable counter inline - a lithium foil is a monolithic `material`, never a `coating`.",
     ],
     "cells": [
         "The **spec** is the design (the datasheet); the **cell** instance is one physical unit - the (spec, serial) pair makes re-registration a no-op.",

@@ -1819,6 +1819,13 @@ def _electrode_holder_body(electrode_data: Any) -> dict[str, Any]:
     node: dict[str, Any] = {}
     if not isinstance(electrode_data, dict):
         return node
+    # A monolithic uncoated electrode (lithium metal counter foil): the
+    # material IS the electrode's active material — no coating node.
+    material = electrode_data.get("material")
+    if isinstance(material, dict) and material.get("name"):
+        mat_node = _typed_constituent_node(material, "ActiveMaterial")
+        if mat_node is not None:
+            node["hasActiveMaterial"] = mat_node
     coating = _descriptor_electrode_coating_to_jsonld(electrode_data.get("coating"))
     if coating:
         node["hasCoating"] = coating
@@ -2683,6 +2690,13 @@ def _electrode_holder_node(
     cell-spec electrode holder, so there is one electrode emitter, never two.
     """
     node: dict[str, Any] = {"@type": _electrode_types(kind, polarity)}
+    # A monolithic uncoated electrode (lithium metal foil): the material IS
+    # the electrode's active material, at unit fraction — no coating node.
+    material = body.get("material")
+    if isinstance(material, dict) and material.get("name"):
+        mat_node = _typed_constituent_node(material, "ActiveMaterial")
+        if mat_node is not None:
+            node["hasActiveMaterial"] = mat_node
     coating = _descriptor_electrode_coating_to_jsonld(body.get("coating"))
     if coating:
         node["hasCoating"] = coating
@@ -2738,7 +2752,12 @@ def _to_domain_battery_jsonld_electrode(data: dict[str, Any]) -> dict[str, Any]:
     # physical electrode, so they stay with the physical node either way.
     active_ref = body.get("active_material_spec_id")
     if isinstance(active_ref, str) and active_ref:
-        node["hasActiveMaterial"] = {"@id": active_ref, "@type": "ActiveMaterial"}
+        if isinstance(node.get("hasActiveMaterial"), dict):
+            # A monolithic `material` already made the node; the spec IRI
+            # joins it rather than replacing it.
+            node["hasActiveMaterial"].setdefault("@id", active_ref)
+        else:
+            node["hasActiveMaterial"] = {"@id": active_ref, "@type": "ActiveMaterial"}
     processing = _processing_node(body.get("processing"))
     if processing:
         node["prov:wasGeneratedBy"] = processing

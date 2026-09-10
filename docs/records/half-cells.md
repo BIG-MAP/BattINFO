@@ -11,7 +11,7 @@ How to describe a half cell: one electrode under test against a counter/referenc
 - Not a record type: a cell with `cell_configuration` set to `half_cell`.
 - Electrodes are named by **role** - `working_electrode` / `counter_electrode` (or their `*_spec_id` siblings) - never by polarity.
 - In a two-electrode half cell the counter also carries the reference role; a `three_electrode_cell` separates them.
-- Reference the working electrode's spec; describe the interchangeable counter (lithium foil) inline on its holder.
+- Reference the working electrode's spec; describe the interchangeable counter inline - a lithium foil is a monolithic `material`, never a `coating`.
 
 ## Define one
 
@@ -35,10 +35,9 @@ spec = CellSpec(
     working_electrode_spec_id="https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
     # The counter is described inline: lithium foil the lab treats as
     # interchangeable earns a description, not a tracked record. In a
-    # two-electrode half cell it is also the potential reference.
-    counter_electrode={
-        "coating": {"component": {"active_material": [{"name": "Lithium metal"}]}}
-    },
+    # two-electrode half cell it is also the potential reference. A foil
+    # is a monolithic electrode - `material`, never a coating.
+    counter_electrode={"material": {"name": "Lithium metal"}},
     source={"type": "lab", "retrieved_at": 1750000000},
 )
 record = spec.to_record()
@@ -71,15 +70,8 @@ record = spec.to_record()
   },
   "working_electrode_spec_id": "https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
   "counter_electrode": {
-    "coating": {
-      "component": {
-        "active_material": [
-          {
-            "name": "Lithium metal",
-            "property": {}
-          }
-        ]
-      },
+    "material": {
+      "name": "Lithium metal",
       "property": {}
     },
     "property": {}
@@ -119,12 +111,12 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   },
   "schema:schemaVersion": "0.2.0",
   "hasCounterElectrode": {
-    "hasCoating": {
-      "@type": "ElectrodeCoating",
-      "hasActiveMaterial": {
-        "@type": "ActiveMaterial",
-        "schema:name": "Lithium metal"
-      }
+    "hasActiveMaterial": {
+      "@type": [
+        "Lithium",
+        "ActiveMaterial"
+      ],
+      "schema:name": "Lithium metal"
     },
     "@type": [
       "CounterElectrode",
@@ -160,7 +152,7 @@ Half cells are cell records — the field reference lives on [Cells](cells.md#fi
 :::{dropdown} The reasoning behind the model
 **Why role, not polarity.** In the working-electrode voltage convention (vs Li/Li+ for a lithium counter) a graphite working electrode *charges* toward 1 V — the polarity labels of a full cell would mislead, so a half cell has no sides to name. The role-based holders are the ruling, not a convenience.
 
-**What is usually stated.** The working electrode as a reference to its [electrode spec](electrodes.md) — the design under test; the counter described inline on its holder, because a lithium foil the lab treats as interchangeable earns a description, not an individually tracked record.
+**What is usually stated.** The working electrode as a reference to its [electrode spec](electrodes.md) — the design under test; the counter described inline on its holder, because a lithium foil the lab treats as interchangeable earns a description, not an individually tracked record. A lithium counter is pure metal foil, not a coated electrode: state it as `material` (`{"material": {"name": "Lithium metal"}}`), never as a `coating` — there is no collector-plus-layer structure to describe.
 
-**Emission.** The described device types as `HalfCellDevice`; the working electrode emits under `hasWorkingElectrode`; in a two-electrode half cell the counter node types as both `CounterElectrode` and `ReferenceElectrode`.
+**Emission.** The described device types as `HalfCellDevice`; the working electrode emits under `hasWorkingElectrode`; in a two-electrode half cell the counter node types as both `CounterElectrode` and `ReferenceElectrode` — the counter *is* the potential reference. A monolithic counter's material emits as its `hasActiveMaterial`, class-typed (`Lithium`) through the material map.
 :::

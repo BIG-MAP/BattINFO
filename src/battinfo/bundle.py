@@ -1050,6 +1050,10 @@ class Electrode(BaseModel):
 
     electrode_spec_id: str | None = Field(default=None, description="Optional canonical IRI of a standalone electrode-spec this inline holder realizes; emitted as schema:isVariantOf. Prefer the cell spec's matching *_electrode_spec_id sibling when the cell spec's electrode simply IS that design.")
     coating: Coating | None = None
+    # The electrode body as a single monolithic material - an uncoated metal
+    # foil or disc (lithium metal counter, zinc foil). No coating, no separate
+    # current collector: the foil is both.
+    material: MaterialComponent | None = None
     current_collector: CurrentCollector | None = None
     tab: CurrentCollectorTab | None = None
     manufacturer: str | None = None

@@ -761,6 +761,7 @@ export const recordsContext: Record<string, unknown> = {
     "SaturatedCalomelElectrode": "electrochemistry:electrochemistry_82b66bfe_ec25_417b_ba65_b631ddaaca0e",
     "SilverChlorideElectrode": "electrochemistry:electrochemistry_6ec59f99_5f26_4a7d_9b90_b52e0f8ad190",
     "Description": "emmo:EMMO_35d4c439_fcb6_4399_a855_a89a207b41e9",
-    "ElectrochemicalComponent": "electrochemistry:electrochemistry_b5ea31c9_bb10_4276_980e_c3eceb1efc82"
+    "ElectrochemicalComponent": "electrochemistry:electrochemistry_b5ea31c9_bb10_4276_980e_c3eceb1efc82",
+    "Lithium": "https://w3id.org/emmo/domain/chemical-substance#substance_c109ca45_08c7_4436_a818_a9c575785e2f"
   }
 };

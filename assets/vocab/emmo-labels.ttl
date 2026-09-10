@@ -141,6 +141,7 @@
 <https://w3id.org/emmo/domain/chemical-substance#substance_a0b57956_8ba1_4021_ade9_44a87d103d90> skos:prefLabel "LithiumNickelManganeseCobaltOxide111"@en .
 <https://w3id.org/emmo/domain/chemical-substance#substance_aa8e9cc4_5f66_4307_b1c8_26fac7653a90> skos:prefLabel "LithiumIronPhosphate"@en .
 <https://w3id.org/emmo/domain/chemical-substance#substance_bb20bdea_343c_4911_8c45_37fc1077d22f> skos:prefLabel "EthylMethylCarbonate"@en .
+<https://w3id.org/emmo/domain/chemical-substance#substance_c109ca45_08c7_4436_a818_a9c575785e2f> skos:prefLabel "Lithium"@en .
 <https://w3id.org/emmo/domain/chemical-substance#substance_c4a7d7bd_497e_457e_b858_ff73254266d0> skos:prefLabel "DimethylCarbonate"@en .
 <https://w3id.org/emmo/domain/chemical-substance#substance_c5cff8c2_581e_4341_a3e6_8ba8c8ce2d2b> skos:prefLabel "Polypropylene"@en .
 <https://w3id.org/emmo/domain/chemical-substance#substance_ccdce7d4_b695_4871_84c2_13679807d077> skos:prefLabel "PotassiumHydroxide"@en .
