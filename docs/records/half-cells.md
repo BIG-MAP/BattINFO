@@ -282,6 +282,355 @@ What to notice:
 - The dedicated reference emits under `hasReferenceElectrode` typed `ReferenceElectrode` — a lithium ring or wire is a monolithic `material`, like the foil counter.
 
 
+## Common examples
+
+A selection of real, validated records from the packaged examples corpus — each one click away, included from its single source under `examples/`. The full, living library is the registry: [browse it there](https://www.battery-genome.org/explore).
+
+::::::{dropdown} Graphite || Li coin half cell (cell-spec)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/cell-spec/cell-spec-g7hd-4wkq-2mtx-9npf.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/cell-spec/cell-spec-g7hd-4wkq-2mtx-9npf.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@type": [
+    "BatteryCellSpecification",
+    "schema:CreativeWork"
+  ],
+  "@id": "https://w3id.org/battinfo/spec/g7hd-4wkq-2mtx-9npf",
+  "schema:identifier": "g7hd-4wkq-2mtx-9npf",
+  "schema:name": "Graphite || Li coin half cell",
+  "schema:model": "HC-GR-02",
+  "schema:manufacturer": {
+    "@type": "schema:Organization",
+    "schema:name": "Example Lab"
+  },
+  "schema:url": "https://www.battery-genome.org/registry/spec/g7hd-4wkq-2mtx-9npf",
+  "isDescriptionFor": {
+    "@type": [
+      "BatteryCell",
+      "CoinCell",
+      "BatteryHalfCell",
+      "HalfCellDevice",
+      "LithiumIonBattery"
+    ],
+    "skos:prefLabel": "Graphite || Li coin half cell"
+  },
+  "schema:schemaVersion": "0.2.0",
+  "hasCounterElectrode": {
+    "hasActiveMaterial": {
+      "@type": [
+        "Lithium",
+        "ActiveMaterial"
+      ],
+      "schema:name": "Lithium metal"
+    },
+    "@type": [
+      "CounterElectrode",
+      "ReferenceElectrode"
+    ]
+  },
+  "hasWorkingElectrode": {
+    "@id": "https://w3id.org/battinfo/spec/d7qr-n581-74c3-7g7r"
+  },
+  "dcterms:source": {
+    "@type": "prov:Entity",
+    "dcterms:type": "lab",
+    "prov:generatedAtTime": "2025-06-15T15:06:40+00:00"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} NMC811 || Li coin half cell (cell-spec)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/cell-spec/cell-spec-n8mw-5tkx-3qvd-7hfp.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/cell-spec/cell-spec-n8mw-5tkx-3qvd-7hfp.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@type": [
+    "BatteryCellSpecification",
+    "schema:CreativeWork"
+  ],
+  "@id": "https://w3id.org/battinfo/spec/n8mw-5tkx-3qvd-7hfp",
+  "schema:identifier": "n8mw-5tkx-3qvd-7hfp",
+  "schema:name": "NMC811 || Li coin half cell",
+  "schema:model": "HC-NMC-01",
+  "schema:manufacturer": {
+    "@type": "schema:Organization",
+    "schema:name": "Example Lab"
+  },
+  "schema:url": "https://www.battery-genome.org/registry/spec/n8mw-5tkx-3qvd-7hfp",
+  "isDescriptionFor": {
+    "@type": [
+      "BatteryCell",
+      "CoinCell",
+      "BatteryHalfCell",
+      "HalfCellDevice",
+      "LithiumIonBattery"
+    ],
+    "skos:prefLabel": "NMC811 || Li coin half cell"
+  },
+  "schema:schemaVersion": "0.2.0",
+  "hasCounterElectrode": {
+    "hasActiveMaterial": {
+      "@type": [
+        "Lithium",
+        "ActiveMaterial"
+      ],
+      "schema:name": "Lithium metal"
+    },
+    "@type": [
+      "CounterElectrode",
+      "ReferenceElectrode"
+    ]
+  },
+  "hasWorkingElectrode": {
+    "@id": "https://w3id.org/battinfo/spec/qfjh-7xyr-ga1k-tjez"
+  },
+  "dcterms:source": {
+    "@type": "prov:Entity",
+    "dcterms:type": "lab",
+    "prov:generatedAtTime": "2025-06-15T15:06:40+00:00"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} Hard carbon || Na coin half cell (cell-spec)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/cell-spec/cell-spec-s4kt-8njw-6xpd-2mvh.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/cell-spec/cell-spec-s4kt-8njw-6xpd-2mvh.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@type": [
+    "BatteryCellSpecification",
+    "schema:CreativeWork"
+  ],
+  "@id": "https://w3id.org/battinfo/spec/s4kt-8njw-6xpd-2mvh",
+  "schema:identifier": "s4kt-8njw-6xpd-2mvh",
+  "schema:name": "Hard carbon || Na coin half cell",
+  "schema:model": "HC-HC-01",
+  "schema:manufacturer": {
+    "@type": "schema:Organization",
+    "schema:name": "Example Lab"
+  },
+  "schema:url": "https://www.battery-genome.org/registry/spec/s4kt-8njw-6xpd-2mvh",
+  "isDescriptionFor": {
+    "@type": [
+      "BatteryCell",
+      "CoinCell",
+      "BatteryHalfCell",
+      "HalfCellDevice",
+      "SodiumIonBattery"
+    ],
+    "skos:prefLabel": "Hard carbon || Na coin half cell"
+  },
+  "schema:schemaVersion": "0.2.0",
+  "hasWorkingElectrode": {
+    "hasCoating": {
+      "@type": "ElectrodeCoating",
+      "hasActiveMaterial": {
+        "@type": [
+          "HardCarbon",
+          "ActiveMaterial"
+        ],
+        "schema:name": "Hard carbon"
+      }
+    },
+    "@type": "WorkingElectrode"
+  },
+  "hasCounterElectrode": {
+    "hasActiveMaterial": {
+      "@type": [
+        "Sodium",
+        "ActiveMaterial"
+      ],
+      "schema:name": "Sodium metal"
+    },
+    "@type": [
+      "CounterElectrode",
+      "ReferenceElectrode"
+    ]
+  },
+  "dcterms:source": {
+    "@type": "prov:Entity",
+    "dcterms:type": "lab",
+    "prov:generatedAtTime": "2025-06-15T15:06:40+00:00"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} Si-Gr three-electrode pouch cell (cell-spec)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/cell-spec/cell-spec-w3fq-9rkm-4tpx-8nhd.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/cell-spec/cell-spec-w3fq-9rkm-4tpx-8nhd.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@type": [
+    "BatteryCellSpecification",
+    "schema:CreativeWork"
+  ],
+  "@id": "https://w3id.org/battinfo/spec/w3fq-9rkm-4tpx-8nhd",
+  "schema:identifier": "w3fq-9rkm-4tpx-8nhd",
+  "schema:name": "Si-Gr three-electrode pouch cell",
+  "schema:model": "3E-SIGR-01",
+  "schema:manufacturer": {
+    "@type": "schema:Organization",
+    "schema:name": "Example Lab"
+  },
+  "schema:url": "https://www.battery-genome.org/registry/spec/w3fq-9rkm-4tpx-8nhd",
+  "isDescriptionFor": {
+    "@type": [
+      "BatteryCell",
+      "PouchCell",
+      "ThreeElectrodeCellDevice",
+      "LithiumIonBattery"
+    ],
+    "skos:prefLabel": "Si-Gr three-electrode pouch cell"
+  },
+  "schema:schemaVersion": "0.2.0",
+  "hasCounterElectrode": {
+    "hasActiveMaterial": {
+      "@type": [
+        "Lithium",
+        "ActiveMaterial"
+      ],
+      "schema:name": "Lithium metal"
+    },
+    "@type": "CounterElectrode"
+  },
+  "hasReferenceElectrode": {
+    "hasActiveMaterial": {
+      "@type": [
+        "Lithium",
+        "ActiveMaterial"
+      ],
+      "schema:name": "Lithium metal"
+    },
+    "@type": "ReferenceElectrode"
+  },
+  "hasWorkingElectrode": {
+    "@id": "https://w3id.org/battinfo/spec/qw3j-we77-zzj1-ya55"
+  },
+  "dcterms:source": {
+    "@type": "prov:Entity",
+    "dcterms:type": "lab",
+    "prov:generatedAtTime": "2025-06-15T15:06:40+00:00"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+
 ## Fields
 
 Half cells and three-electrode cells are cell records — the field reference lives on [Cells](cells.md#fields), and `cell_configuration`, the role holders (`working_electrode` / `counter_electrode` / `reference_electrode`), and their `*_spec_id` siblings appear in the cell-spec table there.

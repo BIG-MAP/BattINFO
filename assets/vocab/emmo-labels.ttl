@@ -139,6 +139,7 @@
 <https://w3id.org/emmo/domain/chemical-substance#substance_8f7dd877_5ad0_48f1_bbec_84153d8215f4> skos:prefLabel "Aluminium"@en .
 <https://w3id.org/emmo/domain/chemical-substance#substance_9bd78e1c_a4dc_41b6_8013_adb51df1ffdc> skos:prefLabel "Zinc"@en .
 <https://w3id.org/emmo/domain/chemical-substance#substance_a0b57956_8ba1_4021_ade9_44a87d103d90> skos:prefLabel "LithiumNickelManganeseCobaltOxide111"@en .
+<https://w3id.org/emmo/domain/chemical-substance#substance_a16a1bae_7844_42fd_bb6d_979195d6c933> skos:prefLabel "Sodium"@en .
 <https://w3id.org/emmo/domain/chemical-substance#substance_aa8e9cc4_5f66_4307_b1c8_26fac7653a90> skos:prefLabel "LithiumIronPhosphate"@en .
 <https://w3id.org/emmo/domain/chemical-substance#substance_bb20bdea_343c_4911_8c45_37fc1077d22f> skos:prefLabel "EthylMethylCarbonate"@en .
 <https://w3id.org/emmo/domain/chemical-substance#substance_c109ca45_08c7_4436_a818_a9c575785e2f> skos:prefLabel "Lithium"@en .

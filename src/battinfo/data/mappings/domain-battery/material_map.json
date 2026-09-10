@@ -351,6 +351,17 @@
         "zinc foil"
       ],
       "emmo_class": "Zinc"
+    },
+    {
+      "symbol": "Na",
+      "aliases": [
+        "sodium metal",
+        "sodium",
+        "na metal",
+        "metallic sodium",
+        "sodium foil"
+      ],
+      "emmo_class": "Sodium"
     }
   ]
 }

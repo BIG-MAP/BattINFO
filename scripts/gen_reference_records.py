@@ -1196,6 +1196,12 @@ REGISTRY_BROWSE = {
 REGISTRY_BROWSE_DEFAULT = "https://www.battery-genome.org/explore"
 
 SHELVES: dict[str, list[str]] = {
+    "half-cells": [
+        "cell-spec/cell-spec-g7hd-4wkq-2mtx-9npf.json",
+        "cell-spec/cell-spec-n8mw-5tkx-3qvd-7hfp.json",
+        "cell-spec/cell-spec-s4kt-8njw-6xpd-2mvh.json",
+        "cell-spec/cell-spec-w3fq-9rkm-4tpx-8nhd.json",
+    ],
     "cells": [
         "cell-spec/A123__ANR26650M1-B.json",
         "cell-spec/research/cylindrical-detailed.example.json",

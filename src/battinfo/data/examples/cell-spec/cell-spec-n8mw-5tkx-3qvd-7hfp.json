@@ -1,0 +1,31 @@
+{
+  "schema_version": "0.2.0",
+  "cell_spec": {
+    "id": "https://w3id.org/battinfo/spec/n8mw-5tkx-3qvd-7hfp",
+    "short_id": "n8mw5t",
+    "identifier": "cell-spec:n8mw-5tkx-3qvd-7hfp",
+    "name": "NMC811 || Li coin half cell",
+    "model": "HC-NMC-01",
+    "manufacturer": {
+      "type": "Organization",
+      "name": "Example Lab"
+    },
+    "cell_format": "coin",
+    "chemistry": "Li-ion",
+    "cell_configuration": "half_cell"
+  },
+  "properties": {},
+  "provenance": {
+    "source_type": "lab",
+    "retrieved_at": 1750000000,
+    "battinfo_version": "0.7.0"
+  },
+  "working_electrode_spec_id": "https://w3id.org/battinfo/spec/qfjh-7xyr-ga1k-tjez",
+  "counter_electrode": {
+    "material": {
+      "name": "Lithium metal",
+      "property": {}
+    },
+    "property": {}
+  }
+}

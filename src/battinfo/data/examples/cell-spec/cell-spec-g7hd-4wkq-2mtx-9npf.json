@@ -1,0 +1,31 @@
+{
+  "schema_version": "0.2.0",
+  "cell_spec": {
+    "id": "https://w3id.org/battinfo/spec/g7hd-4wkq-2mtx-9npf",
+    "short_id": "g7hd4w",
+    "identifier": "cell-spec:g7hd-4wkq-2mtx-9npf",
+    "name": "Graphite || Li coin half cell",
+    "model": "HC-GR-02",
+    "manufacturer": {
+      "type": "Organization",
+      "name": "Example Lab"
+    },
+    "cell_format": "coin",
+    "chemistry": "Li-ion",
+    "cell_configuration": "half_cell"
+  },
+  "properties": {},
+  "provenance": {
+    "source_type": "lab",
+    "retrieved_at": 1750000000,
+    "battinfo_version": "0.7.0"
+  },
+  "working_electrode_spec_id": "https://w3id.org/battinfo/spec/d7qr-n581-74c3-7g7r",
+  "counter_electrode": {
+    "material": {
+      "name": "Lithium metal",
+      "property": {}
+    },
+    "property": {}
+  }
+}
