@@ -161,6 +161,184 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 ::::
 
 
+### A pouch housing
+
+::::{tab-set}
+
+:::{tab-item} Python
+```python
+from battinfo.api import create_housing_spec
+
+# A pouch has no rigid can: the "case" is the laminate film, the closure
+# is a heat seal, and the terminals are the tab leads through it.
+record = create_housing_spec(
+    uid="q7mf-3wtk-8npv-2hcx",
+    name="Pouch laminate housing, 60 x 45 mm",
+    cell_format="pouch",
+    case={
+        "material": "Aluminium laminate film",
+        "property": {
+            "thickness": {"value": 113, "unit": "um"},
+            "width": {"value": 45, "unit": "mm"},
+            "height": {"value": 60, "unit": "mm"},
+        },
+    },
+    seals=[{"material": "PP heat seal"}],
+    terminals=[
+        {"polarity": "positive", "material": "Al tab"},
+        {"polarity": "negative", "material": "Ni-plated Cu tab"},
+    ],
+    source_type="datasheet",
+)
+```
+:::
+
+:::{tab-item} Canonical record
+```json
+{
+  "schema_version": "0.2.0",
+  "housing_spec": {
+    "id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+    "short_id": "7d9k2m",
+    "name": "Pouch laminate housing, 60 x 45 mm",
+    "cell_format": "pouch",
+    "case": {
+      "material": "Aluminium laminate film",
+      "property": {
+        "thickness": {
+          "value": 113,
+          "unit": "um"
+        },
+        "width": {
+          "value": 45,
+          "unit": "mm"
+        },
+        "height": {
+          "value": 60,
+          "unit": "mm"
+        }
+      }
+    },
+    "seals": [
+      {
+        "material": "PP heat seal"
+      }
+    ],
+    "terminals": [
+      {
+        "polarity": "positive",
+        "material": "Al tab"
+      },
+      {
+        "polarity": "negative",
+        "material": "Ni-plated Cu tab"
+      }
+    ]
+  },
+  "provenance": {
+    "source_type": "datasheet",
+    "retrieved_at": 1750000000,
+    "battinfo_version": "0.7.0"
+  }
+}
+```
+:::
+
+:::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": [
+    "https://w3id.org/emmo/domain/battery/context",
+    {
+      "schema": "https://schema.org/",
+      "dcterms": "http://purl.org/dc/terms/",
+      "battinfo": "https://w3id.org/battinfo/"
+    }
+  ],
+  "@type": [
+    "Description",
+    "schema:CreativeWork"
+  ],
+  "isDescriptionFor": {
+    "@type": [
+      "ElectrochemicalComponent",
+      "schema:Product"
+    ],
+    "hasConstituent": [
+      {
+        "@type": "PouchCase",
+        "schema:material": "Aluminium laminate film",
+        "hasProperty": [
+          {
+            "@type": [
+              "Height",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "Height",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 60
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
+          },
+          {
+            "@type": [
+              "Thickness",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "Thickness",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 113
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
+          },
+          {
+            "@type": [
+              "Width",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "Width",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 45
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
+          }
+        ]
+      },
+      {
+        "@type": "Terminal",
+        "schema:additionalType": "positive",
+        "schema:material": "Al tab"
+      },
+      {
+        "@type": "Terminal",
+        "schema:additionalType": "negative",
+        "schema:material": "Ni-plated Cu tab"
+      },
+      {
+        "@type": "Seal",
+        "schema:material": "PP heat seal"
+      }
+    ],
+    "skos:prefLabel": "Pouch laminate housing, 60 x 45 mm"
+  },
+  "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+  "schema:name": "Pouch laminate housing, 60 x 45 mm"
+}
+```
+:::
+
+::::
+
+What to notice:
+
+- No rigid can: the case holder is the laminate film, the closure is a heat seal, and the terminals are the tab leads through it.
+
+
 ### A physical batch
 
 ::::{tab-set}
