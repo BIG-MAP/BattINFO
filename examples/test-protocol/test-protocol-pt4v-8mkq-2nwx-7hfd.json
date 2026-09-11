@@ -1,0 +1,80 @@
+{
+  "schema_version": "0.2.0",
+  "test_spec": {
+    "id": "https://w3id.org/battinfo/spec/pt4v-8mkq-2nwx-7hfd",
+    "short_id": "pt4v8m",
+    "identifier": "test-protocol:pt4v-8mkq-2nwx-7hfd",
+    "name": "PITT — Potentiostatic Intermittent Titration at 25°C",
+    "kind": "pitt",
+    "description": "Potentiostatic Intermittent Titration Technique (PITT) during charge from 3.0 V to 4.2 V at 25°C. The potential is stepped in 10 mV increments; each step is held until the current relaxes below C/50 or 30 minutes elapse. The current transient at each step yields the apparent solid-state diffusion coefficient as a function of potential, and the step charges integrate to a quasi-equilibrium OCV curve.",
+    "version": "1.0"
+  },
+  "conditions": {
+    "ambient_temperature": {
+      "value": 25.0,
+      "unit": "degC"
+    },
+    "voltage_step": {
+      "value": 10.0,
+      "unit": "mV"
+    },
+    "lower_voltage_limit": {
+      "value": 3.0,
+      "unit": "V"
+    },
+    "upper_voltage_limit": {
+      "value": 4.2,
+      "unit": "V"
+    }
+  },
+  "method": [
+    {
+      "mode": "cv",
+      "direction": "hold",
+      "setpoints": {
+        "voltage": {
+          "value": 3.0,
+          "unit": "V"
+        }
+      },
+      "termination": [
+        {
+          "quantity": "c_rate",
+          "value": 0.02,
+          "unit": "A/Ah",
+          "direction": "below"
+        }
+      ],
+      "description": "Equilibrate at 3.0 V until C/50"
+    },
+    {
+      "mode": "group",
+      "count": 120,
+      "description": "Titration staircase: step the potential +10 mV (3.0 V toward 4.2 V) and hold; the per-iteration setpoint is the previous step plus the voltage_step condition",
+      "steps": [
+        {
+          "mode": "cv",
+          "direction": "hold",
+          "termination": [
+            {
+              "quantity": "c_rate",
+              "value": 0.02,
+              "unit": "A/Ah",
+              "direction": "below"
+            },
+            {
+              "quantity": "duration",
+              "value": 1800.0,
+              "unit": "s"
+            }
+          ],
+          "description": "Hold at the stepped potential until C/50 or 30 minutes"
+        }
+      ]
+    }
+  ],
+  "provenance": {
+    "source_type": "manual",
+    "retrieved_at": 1757500000
+  }
+}

@@ -2806,6 +2806,176 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 :::::
 ::::::
 
+::::::{dropdown} DCIR — 10 s Pulse Resistance at 50% SOC, 25 C (test-protocol)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/test-protocol/test-protocol-ev9g-3eje-xfg8-n19f.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/test-protocol/test-protocol-ev9g-3eje-xfg8-n19f.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@type": [
+    "prov:Plan",
+    "schema:HowTo"
+  ],
+  "@id": "https://w3id.org/battinfo/spec/ev9g-3eje-xfg8-n19f",
+  "schema:name": "DCIR — 10 s Pulse Resistance at 50% SOC, 25 C",
+  "schema:additionalType": "dcir",
+  "schema:description": "DC internal resistance from a 10 s discharge pulse and rest at 50% state of charge.",
+  "hasTask": [
+    {
+      "@type": "OpenCircuitHold",
+      "rdfs:label": "Rest for 1 hour",
+      "hasTerminationParameter": [
+        {
+          "@type": "Duration",
+          "hasNumericalPart": {
+            "hasNumberValue": 3600.0
+          },
+          "hasMeasurementUnit": {
+            "@id": "emmo:Second"
+          }
+        }
+      ]
+    },
+    {
+      "@type": "ConstantCurrentDischarging",
+      "rdfs:label": "Discharge at 1C for 10 seconds",
+      "hasControlParameter": [
+        {
+          "@type": "CRate",
+          "hasNumericalPart": {
+            "hasNumberValue": 1.0
+          },
+          "hasMeasurementUnit": {
+            "@id": "electrochemistry:AmperePerAmpereHour"
+          }
+        }
+      ],
+      "hasTerminationParameter": [
+        {
+          "@type": "Duration",
+          "hasNumericalPart": {
+            "hasNumberValue": 10.0
+          },
+          "hasMeasurementUnit": {
+            "@id": "emmo:Second"
+          }
+        }
+      ]
+    },
+    {
+      "@type": "OpenCircuitHold",
+      "rdfs:label": "Rest for 40 seconds",
+      "hasTerminationParameter": [
+        {
+          "@type": "Duration",
+          "hasNumericalPart": {
+            "hasNumberValue": 40.0
+          },
+          "hasMeasurementUnit": {
+            "@id": "emmo:Second"
+          }
+        }
+      ]
+    },
+    {
+      "@type": "ConstantCurrentCharging",
+      "rdfs:label": "Charge at 0.75C for 10 seconds",
+      "hasControlParameter": [
+        {
+          "@type": "CRate",
+          "hasNumericalPart": {
+            "hasNumberValue": 0.75
+          },
+          "hasMeasurementUnit": {
+            "@id": "electrochemistry:AmperePerAmpereHour"
+          }
+        }
+      ],
+      "hasTerminationParameter": [
+        {
+          "@type": "Duration",
+          "hasNumericalPart": {
+            "hasNumberValue": 10.0
+          },
+          "hasMeasurementUnit": {
+            "@id": "emmo:Second"
+          }
+        }
+      ]
+    },
+    {
+      "@type": "OpenCircuitHold",
+      "rdfs:label": "Rest for 10 minutes",
+      "hasTerminationParameter": [
+        {
+          "@type": "Duration",
+          "hasNumericalPart": {
+            "hasNumberValue": 600.0
+          },
+          "hasMeasurementUnit": {
+            "@id": "emmo:Second"
+          }
+        }
+      ]
+    }
+  ],
+  "hasProperty": [
+    {
+      "@type": "ConventionalProperty",
+      "hasNumericalPart": {
+        "hasNumberValue": 25.0
+      },
+      "rdfs:label": "ambient temperature",
+      "hasMeasurementUnit": {
+        "@id": "emmo:DegreeCelsius"
+      }
+    }
+  ],
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "state_of_charge",
+      "schema:propertyID": "conditions",
+      "schema:value": 50.0,
+      "schema:unitText": "%"
+    }
+  ],
+  "dcterms:source": {
+    "@type": "prov:Entity",
+    "dcterms:type": "manual",
+    "prov:generatedAtTime": "2026-06-18T10:24:04+00:00"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
 ::::::{dropdown} GITT — Galvanostatic Intermittent Titration at 25°C (test-protocol)
 :::::{tab-set}
 
@@ -3007,6 +3177,157 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 :::::
 ::::::
 
+::::::{dropdown} PITT — Potentiostatic Intermittent Titration at 25°C (test-protocol)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/test-protocol/test-protocol-pt4v-8mkq-2nwx-7hfd.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/test-protocol/test-protocol-pt4v-8mkq-2nwx-7hfd.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@type": [
+    "prov:Plan",
+    "schema:HowTo"
+  ],
+  "@id": "https://w3id.org/battinfo/spec/pt4v-8mkq-2nwx-7hfd",
+  "schema:name": "PITT — Potentiostatic Intermittent Titration at 25°C",
+  "schema:additionalType": "pitt",
+  "schema:description": "Potentiostatic Intermittent Titration Technique (PITT) during charge from 3.0 V to 4.2 V at 25°C. The potential is stepped in 10 mV increments; each step is held until the current relaxes below C/50 or 30 minutes elapse. The current transient at each step yields the apparent solid-state diffusion coefficient as a function of potential, and the step charges integrate to a quasi-equilibrium OCV curve.",
+  "hasTask": [
+    {
+      "@type": "VoltageHold",
+      "rdfs:label": "Equilibrate at 3.0 V until C/50",
+      "hasControlParameter": [
+        {
+          "@type": "Voltage",
+          "hasNumericalPart": {
+            "hasNumberValue": 3.0
+          },
+          "hasMeasurementUnit": {
+            "@id": "emmo:Volt"
+          }
+        }
+      ],
+      "hasTerminationParameter": [
+        {
+          "@type": "TerminationQuantity",
+          "hasNumericalPart": {
+            "hasNumberValue": 0.02
+          },
+          "hasMeasurementUnit": {
+            "@id": "electrochemistry:AmperePerAmpereHour"
+          }
+        }
+      ]
+    },
+    {
+      "@type": "IterativeWorkflow",
+      "NumberOfIterations": {
+        "hasNumericalPart": {
+          "hasNumberValue": 120
+        }
+      },
+      "hasTask": [
+        {
+          "@type": "VoltageHold",
+          "rdfs:label": "Hold at the stepped potential until C/50 or 30 minutes",
+          "hasTerminationParameter": [
+            {
+              "@type": "TerminationQuantity",
+              "hasNumericalPart": {
+                "hasNumberValue": 0.02
+              },
+              "hasMeasurementUnit": {
+                "@id": "electrochemistry:AmperePerAmpereHour"
+              }
+            },
+            {
+              "@type": "Duration",
+              "hasNumericalPart": {
+                "hasNumberValue": 1800.0
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Second"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "hasProperty": [
+    {
+      "@type": "ConventionalProperty",
+      "hasNumericalPart": {
+        "hasNumberValue": 25.0
+      },
+      "rdfs:label": "ambient temperature",
+      "hasMeasurementUnit": {
+        "@id": "emmo:DegreeCelsius"
+      }
+    },
+    {
+      "@type": "LowerVoltageLimit",
+      "hasNumericalPart": {
+        "hasNumberValue": 3.0
+      },
+      "hasMeasurementUnit": {
+        "@id": "emmo:Volt"
+      }
+    },
+    {
+      "@type": "UpperVoltageLimit",
+      "hasNumericalPart": {
+        "hasNumberValue": 4.2
+      },
+      "hasMeasurementUnit": {
+        "@id": "emmo:Volt"
+      }
+    }
+  ],
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "voltage_step",
+      "schema:propertyID": "conditions",
+      "schema:value": 10.0,
+      "schema:unitText": "mV"
+    }
+  ],
+  "dcterms:source": {
+    "@type": "prov:Entity",
+    "dcterms:type": "manual",
+    "prov:generatedAtTime": "2025-09-10T10:26:40+00:00"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
 ::::::{dropdown} EIS Impedance — 100 kHz to 10 mHz at 50% SOC, 25 C (test-protocol)
 :::::{tab-set}
 
@@ -3076,6 +3397,133 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     "@type": "prov:Entity",
     "dcterms:type": "manual",
     "prov:generatedAtTime": "2026-06-18T10:24:04+00:00"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} Cyclic Voltammetry — 0.1 mV/s, 3.0–4.3 V (test-protocol)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/test-protocol/test-protocol-cv7k-3wpm-9qtx-4nfh.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/test-protocol/test-protocol-cv7k-3wpm-9qtx-4nfh.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@type": [
+    "prov:Plan",
+    "schema:HowTo",
+    "CyclicVoltammetry"
+  ],
+  "@id": "https://w3id.org/battinfo/spec/cv7k-3wpm-9qtx-4nfh",
+  "schema:name": "Cyclic Voltammetry — 0.1 mV/s, 3.0–4.3 V",
+  "schema:additionalType": "cyclic_voltammetry",
+  "schema:description": "Cyclic voltammetry at 0.1 mV/s between 3.0 V and 4.3 V at 25°C, three cycles. Peak positions and separations identify redox reactions and their reversibility; the slow scan rate keeps the response near-equilibrium for intercalation electrodes.",
+  "hasTask": [
+    {
+      "@type": "IterativeWorkflow",
+      "NumberOfIterations": {
+        "hasNumericalPart": {
+          "hasNumberValue": 3
+        }
+      },
+      "hasTask": [
+        {
+          "@type": "LinearScanVoltammetry",
+          "rdfs:label": "Anodic sweep at 0.1 mV/s to 4.3 V",
+          "hasControlParameter": [
+            {
+              "@type": "UpperVoltageLimit",
+              "hasNumericalPart": {
+                "hasNumberValue": 4.3
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Volt"
+              }
+            }
+          ],
+          "hasTerminationParameter": [
+            {
+              "@type": "UpperVoltageLimit",
+              "hasNumericalPart": {
+                "hasNumberValue": 4.3
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Volt"
+              }
+            }
+          ]
+        },
+        {
+          "@type": "LinearScanVoltammetry",
+          "rdfs:label": "Cathodic sweep at 0.1 mV/s to 3.0 V",
+          "hasControlParameter": [
+            {
+              "@type": "LowerVoltageLimit",
+              "hasNumericalPart": {
+                "hasNumberValue": 3.0
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Volt"
+              }
+            }
+          ],
+          "hasTerminationParameter": [
+            {
+              "@type": "LowerVoltageLimit",
+              "hasNumericalPart": {
+                "hasNumberValue": 3.0
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Volt"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "hasProperty": [
+    {
+      "@type": "ConventionalProperty",
+      "hasNumericalPart": {
+        "hasNumberValue": 25.0
+      },
+      "rdfs:label": "ambient temperature",
+      "hasMeasurementUnit": {
+        "@id": "emmo:DegreeCelsius"
+      }
+    }
+  ],
+  "dcterms:source": {
+    "@type": "prov:Entity",
+    "dcterms:type": "manual",
+    "prov:generatedAtTime": "2025-09-10T10:26:40+00:00"
   }
 }
 ```
@@ -3219,7 +3667,7 @@ The `test_spec` block:
 | `identifier` | string |  | Local identifier for the protocol (e.g. a lab protocol code). |
 | `name` | string | yes | Human-readable protocol name. |
 | `description` | string |  | Free-text description of the procedure. |
-| `kind` | `cycling` \| `capacity_check` \| `rate_capability` \| `hppc` … (20 values) | yes | Kind of test the protocol implements. |
+| `kind` | `cycling` \| `capacity_check` \| `rate_capability` \| `hppc` … (22 values) | yes | Kind of test the protocol implements. |
 | `version` | string |  | Protocol version label. |
 | `protocol_url` | string |  | URL of the protocol document. |
 
@@ -3267,7 +3715,7 @@ The `test` block:
 | `name` | string | yes | Human-readable test name. |
 | `protocol_id` | → SpecIri |  | IRI of the test-protocol (test spec) this test executed. |
 | `description` | string |  | Free-text description of the test. |
-| `kind` | `cycling` \| `capacity_check` \| `rate_capability` \| `quasi_ocv` … (20 values) | yes | Kind of test performed. |
+| `kind` | `cycling` \| `capacity_check` \| `rate_capability` \| `quasi_ocv` … (22 values) | yes | Kind of test performed. |
 | `status` | `planned` \| `running` \| `completed` \| `aborted` … (5 values) |  | Execution status of the test. |
 | `protocol_name` | string |  | Protocol name for display, when no protocol record is linked. |
 | `protocol_url` | string |  | URL of the protocol document. |

@@ -111,6 +111,7 @@ building the voltage-reference couples table (`transform/json_to_jsonld.py`).
 |---|---|---|---|
 | **`SodiumElectrode`** | Class | domain-electrochemistry, sibling of `LithiumElectrode`/`ZincElectrode` | A plain sodium-metal electrode. The closure has only `SodiumBasedElectrode` (any electrode containing sodium), which the couples table maps `Na/Na+` to meanwhile — too broad for a reference-electrode couple. Repoint `_VOLTAGE_REFERENCE_COUPLES["na/na+"]` when it lands. |
 | **`MeasurementParameter`** (or similar) | Class | chameo or domain-electrochemistry | A generic class for qualitative measurement parameters (`atmosphere: argon`). Such conditions currently type via the dynamic `battinfo:` fallback + `ConventionalProperty` and carry `hasStringValue`. |
+| **`PotentiostaticIntermittentTitrationTechnique`** | Class | chameo or domain-electrochemistry, sibling of `GalvanostaticIntermittentTitrationTechnique` | PITT — the potentiostatic twin of GITT (the closure has GITT but not PITT). Until published, `pitt` protocols emit an untyped plan node; add to `TEST_METHOD_CLASS` when it lands. |
 | measurement → procedure relation | Object property | chameo | Ties a measurement process to the procedure it followed. Until it exists, the emitter links protocols with `dcterms:conformsTo` (the in-house test→protocol predicate) — the one non-EMMO seam in the measurement subtree. |
 
 ## 8. Coating sidedness (electrode review, 2026-09-08)

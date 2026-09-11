@@ -108,6 +108,7 @@ def _load_test_method_context_terms() -> dict:
 TEST_METHOD_CLASS: dict[str, str] = {
     "gitt":            "GalvanostaticIntermittentTitrationTechnique",
     "quasi_ocv":       "PseudoOpenCircuitVoltageMethod",
+    "cyclic_voltammetry": "CyclicVoltammetry",
     "eis":             "ElectrochemicalImpedanceSpectroscopy",
     "impedance":       "ElectrochemicalImpedanceSpectroscopy",
     "hppc":            "HPPC",

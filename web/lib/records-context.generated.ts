@@ -764,6 +764,7 @@ export const recordsContext: Record<string, unknown> = {
     "ElectrochemicalComponent": "electrochemistry:electrochemistry_b5ea31c9_bb10_4276_980e_c3eceb1efc82",
     "Lithium": "https://w3id.org/emmo/domain/chemical-substance#substance_c109ca45_08c7_4436_a818_a9c575785e2f",
     "Sodium": "https://w3id.org/emmo/domain/chemical-substance#substance_a16a1bae_7844_42fd_bb6d_979195d6c933",
-    "StateOfCharge": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_8b2aaa50_bbe1_45da_8778_8898326246a2"
+    "StateOfCharge": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_8b2aaa50_bbe1_45da_8778_8898326246a2",
+    "CyclicVoltammetry": "https://w3id.org/emmo/domain/characterisation-methodology/chameo#CyclicVoltammetry"
   }
 };

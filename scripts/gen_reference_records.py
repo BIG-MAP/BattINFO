@@ -1260,8 +1260,11 @@ SHELVES: dict[str, list[str]] = {
         "test-protocol/test-protocol-5v3n-8x1m-4k7p-9r2t.json",
         "test-protocol/test-protocol-j19t-9cm0-f219-zh4y.json",
         "test-protocol/test-protocol-7m4t-1n9v-6r3k-2p8x.json",
+        "test-protocol/test-protocol-ev9g-3eje-xfg8-n19f.json",
         "test-protocol/test-protocol-3p7k-2m9r-6t4n-1v8x.json",
+        "test-protocol/test-protocol-pt4v-8mkq-2nwx-7hfd.json",
         "test-protocol/test-protocol-wmqd-1fbt-zyya-k4bw.json",
+        "test-protocol/test-protocol-cv7k-3wpm-9qtx-4nfh.json",
         "test-protocol/test-protocol-t163-7ba5-r0kn-h9my.json",
     ],
     "datasets": [

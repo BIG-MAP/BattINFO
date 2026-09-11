@@ -128,6 +128,7 @@ class BatteryTestType(str, Enum):
     Intermittent current interruption.
     """
     gitt = "gitt"
+    pitt = "pitt"
     """
     Galvanostatic intermittent titration technique.
     """
@@ -156,6 +157,7 @@ class BatteryTestType(str, Enum):
     Reference performance test.
     """
     quasi_ocv = "quasi_ocv"
+    cyclic_voltammetry = "cyclic_voltammetry"
     """
     Quasi-OCV / low-rate discharge.
     """
