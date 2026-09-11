@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import math
+import re
 import time
 from pathlib import Path
 from typing import Any
@@ -33,6 +34,7 @@ __all__ = [
     "import_aurora_unicycler",
     "import_pybamm_experiment",
     "import_bmgen_jsonld",
+    "import_ucp",
 ]
 
 
@@ -498,6 +500,215 @@ def import_bmgen_jsonld(source: Any, *, name: str | None = None, kind: str | Non
         description="Imported from a bmgen EMMO JSON-LD program.",
         method=steps,
         artifacts=_source_artifact("bmgen-jsonld", source_locator, None, _BMGEN_CONFORMS),
+        source=_provenance(source_locator),
+        comment=warnings,
+    )
+
+
+# ── ionworks Universal Cycler Protocol (UCP) ─────────────────────────────────
+
+_UCP_CONFORMS = "https://docs.ionworks.com/simulate/experiment-templates"
+
+# UCP step `mode` token → (step mode, setpoint key, unit). A Charge/Discharge
+# at mode Voltage is a CV hold (the CC leg is its own step in UCP, as in the
+# CCCV template).
+_UCP_MODE: dict[str, tuple[str, str, str]] = {
+    "c-rate": ("cc", "c_rate", "A/Ah"),
+    "voltage": ("cv", "voltage", "V"),
+    "current": ("cc", "current", "A"),
+    "power": ("cp", "power", "W"),
+}
+
+# UCP `ends` quantity token → (termination quantity, unit).
+_UCP_END_QUANTITY: dict[str, tuple[str, str]] = {
+    "voltage": ("voltage", "V"),
+    "c-rate": ("c_rate", "A/Ah"),
+    "current": ("current", "A"),
+    "capacity": ("capacity", "Ah"),
+    "soc": ("soc", "1"),
+    "time": ("duration", "s"),
+}
+
+_UCP_END_RE = re.compile(r"^\s*([A-Za-z-]+)\s*([<>])=?\s*([-+0-9.eE]+)\s*$")
+
+
+def _ucp_load(source: Any) -> dict[str, Any]:
+    """Accept a parsed dict, a YAML/JSON string, or a path to a .yaml/.json file."""
+    if isinstance(source, dict):
+        return source
+    # YAML content contains newlines; a path never does. (_looks_like_path is
+    # JSON-shaped and would mistake a YAML body for a path.)
+    raw = str(source)
+    is_path = isinstance(source, (str, Path)) and "\n" not in raw and len(raw) < 1024
+    text = Path(source).read_text(encoding="utf-8") if is_path else raw
+    if text.lstrip().startswith("{"):
+        doc = json.loads(text)
+    else:
+        try:
+            import yaml  # noqa: PLC0415 - optional dependency, YAML input only
+        except ImportError as exc:  # pragma: no cover - environment-dependent
+            raise ImportError(
+                "import_ucp needs PyYAML to read UCP YAML (pip install pyyaml); "
+                "an already-parsed dict or a JSON string is accepted without it."
+            ) from exc
+        doc = yaml.safe_load(text)
+    if not isinstance(doc, dict):
+        raise ValueError("A UCP document must be a mapping with a 'steps' key.")
+    return doc
+
+
+def _ucp_terminations(ends: Any, warnings: list[str]) -> list[Termination]:
+    """UCP ``ends`` entries → any-of Termination list.
+
+    Numeric comparisons ("Voltage < 2.5") import; expression-valued conditions
+    (input[...], VAR_*, ifelse) and goto actions are Layer-B behaviour and stay
+    with the artifact — recorded as warnings, never silently dropped.
+    """
+    out: list[Termination] = []
+    for raw in ends if isinstance(ends, list) else []:
+        expr, extras = raw, None
+        if isinstance(raw, dict):
+            if "expression" in raw:
+                expr, extras = raw.get("expression"), raw
+            elif len(raw) == 1:
+                (expr, extras), = raw.items()
+        match = _UCP_END_RE.match(expr) if isinstance(expr, str) else None
+        info = _UCP_END_QUANTITY.get(match.group(1).lower()) if match else None
+        if match and info:
+            quantity, unit = info
+            direction = None if quantity == "duration" else ("below" if match.group(2) == "<" else "above")
+            out.append(Termination(quantity=quantity, value=float(match.group(3)), unit=unit,
+                                   direction=direction))
+            if isinstance(extras, dict) and extras.get("goto"):
+                warnings.append(f"UCP end action goto={extras['goto']!r} not imported (artifact behaviour).")
+        else:
+            warnings.append(f"UCP end condition not imported (expression): {raw!r}")
+    return out
+
+
+def _ucp_leaf(step_type: str, params: dict, warnings: list[str]) -> Step | None:
+    low = step_type.strip().lower()
+    if low == "rest":
+        step = Step(mode="rest", direction="rest")
+    elif low == "eis":
+        step = Step(mode="eis", direction="none", description="EIS (parameters in the source protocol)")
+    elif low in ("charge", "discharge") or low.startswith("direction["):
+        direction = low if low in ("charge", "discharge") else "none"
+        if direction == "none":
+            warnings.append(f"UCP step direction is an expression ({step_type!r}); imported as direction 'none'.")
+        mode_token = str(params.get("mode") or "").strip().lower()
+        info = _UCP_MODE.get(mode_token)
+        if info is None:
+            warnings.append(f"UCP step mode {params.get('mode')!r} not recognized; step skipped.")
+            return None
+        mode, setpoint_key, unit = info
+        step = Step(mode=mode, direction="hold" if mode == "cv" else direction)
+        value = _num(params.get("value"))
+        if value is not None:
+            step.setpoints = {setpoint_key: _q(value, unit)}
+        else:
+            warnings.append(f"UCP {step_type} value is an expression ({params.get('value')!r}); setpoint omitted.")
+    else:
+        warnings.append(f"UCP step {step_type!r} not imported (computational/marker step).")
+        return None
+    duration = _num(params.get("duration"))
+    if duration is not None:
+        step.duration = _q(duration, "s")
+    terms = _ucp_terminations(params.get("ends"), warnings)
+    if terms:
+        step.termination = terms
+    if params.get("set_variable"):
+        warnings.append(f"UCP set_variable on {step_type!r} not imported (artifact behaviour).")
+    return step
+
+
+def _ucp_steps_to_method(items: Any, warnings: list[str]) -> list[Step]:
+    out: list[Step] = []
+    for item in items if isinstance(items, list) else []:
+        if isinstance(item, str):
+            warnings.append(f"UCP marker step {item!r} not imported.")
+            continue
+        if not isinstance(item, dict) or len(item) != 1:
+            warnings.append(f"UCP step not understood: {item!r}")
+            continue
+        (key, params), = item.items()
+        if isinstance(params, list):
+            # A named block given directly as a step list ("Final Rest Block").
+            sub = _ucp_steps_to_method(params, warnings)
+            if sub:
+                out.append(Step(mode="group", count=1, steps=sub, description=key))
+            continue
+        params = params if isinstance(params, dict) else {}
+        if "steps" in params:
+            # A named repeat block ("Pulse Block", "Cycle Block"): nested group.
+            sub = _ucp_steps_to_method(params.get("steps"), warnings)
+            repeat = _num(params.get("repeat"))
+            if repeat is None and params.get("repeat") is not None:
+                warnings.append(
+                    f"UCP repeat count is an expression ({params.get('repeat')!r}); imported as 1.")
+            if sub:
+                out.append(Step(mode="group", count=int(repeat) if repeat else 1,
+                                steps=sub, description=key))
+            continue
+        leaf = _ucp_leaf(key, params, warnings)
+        if leaf is not None:
+            out.append(leaf)
+    return out
+
+
+def import_ucp(source: Any, *, name: str | None = None, kind: str | None = None,
+               source_locator: str | None = None, source_sha256: str | None = None) -> TestSpec:
+    """Import an ionworks Universal Cycler Protocol (dict | YAML/JSON string | path).
+
+    The ``global`` block maps onto the blessed protocol conventions:
+    ``initial_temperature`` → ``conditions.ambient_temperature``,
+    ``initial_state_type: soc_percentage`` → ``conditions.initial_state_of_charge``
+    (unit "1"), ``resolution`` → ``record``. Computational steps (Control,
+    set_variable, goto actions) and expression-valued fields are Layer-B
+    behaviour: they stay with the linked artifact and are recorded as notes.
+    """
+    doc = _ucp_load(source)
+    warnings: list[str] = []
+    steps = _ucp_steps_to_method(doc.get("steps"), warnings)
+
+    conditions: dict[str, Any] = {}
+    global_block = doc.get("global") or {}
+    temperature = _num(global_block.get("initial_temperature"))
+    if temperature is not None:
+        conditions["ambient_temperature"] = {"value": temperature, "unit": "degC"}
+    state_type = str(global_block.get("initial_state_type") or "").strip().lower()
+    state_value = _num(global_block.get("initial_state_value"))
+    if state_type == "soc_percentage" and state_value is not None:
+        conditions["initial_state_of_charge"] = {"value": state_value / 100.0, "unit": "1"}
+    elif state_type and global_block.get("initial_state_value") is not None:
+        warnings.append(
+            f"UCP initial state ({state_type!r}={global_block.get('initial_state_value')!r}) not imported.")
+
+    record: dict[str, Any] = {}
+    resolution = global_block.get("resolution") or {}
+    time_s = _num(resolution.get("time"))
+    if time_s is not None:
+        record["time_s"] = time_s
+    voltage_v = _num(resolution.get("voltage"))
+    if voltage_v is not None:
+        record["voltage_V"] = voltage_v
+    current_a = _num(resolution.get("current"))
+    if current_a is not None:
+        record["current_mA"] = current_a * 1000.0
+
+    inferred_kind = kind or (
+        "eis" if any(s.mode == "eis" for s in steps)
+        else "cycling" if any(s.mode == "group" for s in steps)
+        else "other"
+    )
+    return TestSpec(
+        name=name or "Imported UCP protocol",
+        test_kind=inferred_kind,
+        description="Imported from an ionworks Universal Cycler Protocol (UCP) document.",
+        method=steps,
+        record=record,
+        conditions=conditions,
+        artifacts=_source_artifact("ionworks-ucp", source_locator, source_sha256, _UCP_CONFORMS),
         source=_provenance(source_locator),
         comment=warnings,
     )

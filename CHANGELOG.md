@@ -82,6 +82,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **`import_ucp`: ionworks Universal Cycler Protocol importer.** The
+  fourth member of `battinfo.interop.protocols` (beside aurora-unicycler,
+  PyBaMM, and bmgen): parses a UCP document (dict, YAML/JSON string, or
+  path) into a structured `method[]` TestSpec. Charge/Discharge/Rest/EIS
+  steps map by mode (C-rate/Voltage/Current/Power), `ends` comparisons
+  become any-of terminations (voltage, C-rate, current, capacity, SOC,
+  time), named repeat blocks become nested groups, and the `global` block
+  lands on the blessed conventions (`initial_state_of_charge`,
+  `ambient_temperature`, `resolution` -> `record`). Computational content
+  (Control, set_variable, goto actions, expression-valued fields) stays
+  with the linked `source_protocol` artifact and is recorded as notes,
+  never silently dropped. PyYAML is an optional dependency (dict/JSON
+  input works without it).
+
 - **SOC-based termination and the initial-state convention (protocol
   interop).** `soc` joins the termination quantities (schema enum, vocab,
   emission as `StateOfCharge`), so SOC-stepped procedures state their
