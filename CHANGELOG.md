@@ -82,6 +82,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **A test execution inherits its identity from the linked protocol.**
+  `Test(protocol=...)` accepts the `TestSpec` object itself: kind, protocol
+  name, and `protocol_id` all derive from the spec instead of being retyped
+  on the execution (an explicitly authored `kind=` still wins). The tests
+  exemplar teaches the linked form. The GITT, HPPC, and rate-capability
+  protocol examples gain full structured `method[]` step definitions
+  matching their own descriptions, so their EMMO process graphs
+  (`hasTask` chains with control and termination parameters) are no longer
+  empty.
+
 - **`spec_id=` is the uniform authoring shorthand.** Every instance creator
   (material, electrode, cell, equipment, and the generic component families)
   accepts `spec_id=` for its spec reference; the prefixed spelling

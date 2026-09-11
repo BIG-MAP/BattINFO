@@ -2472,6 +2472,10 @@ class Test(BundleJsonModel):
             data["cell_instance_id"] = data.pop("cell_id")
         if "kind" in data and "test_type" not in data:
             data["test_type"] = data.pop("kind")
+        # protocol= accepts the TestSpec object itself: kind, protocol name and
+        # protocol_id then derive from the spec instead of being retyped.
+        if isinstance(data.get("protocol"), TestSpec) and "protocol_entity" not in data:
+            data["protocol_entity"] = data.pop("protocol")
         if "instrument_name" in data and "instrument" not in data:
             data["instrument"] = data.pop("instrument_name")
         _protocol_name = data.pop("protocol_name", None)
@@ -2523,6 +2527,16 @@ class Test(BundleJsonModel):
     def _populate_links(self) -> Self:
         if self.cell_instance_id is None and self.cell is not None and self.cell.id is not None:
             self.cell_instance_id = self.cell.id
+        # A linked TestSpec is the single source of what the protocol IS: the
+        # execution inherits its identity facts rather than restating them.
+        entity = self.protocol_entity
+        if entity is not None:
+            if self.protocol_id is None and entity.id is not None:
+                self.protocol_id = entity.id
+            if self.protocol.name is None and entity.name is not None:
+                self.protocol.name = entity.name
+            if "test_type" not in self.model_fields_set and entity.test_type is not None:
+                self.test_type = entity.test_type
         if self.name is None:
             base = self.protocol.name or self.test_type
             cell_name = self.cell.name if self.cell is not None else None

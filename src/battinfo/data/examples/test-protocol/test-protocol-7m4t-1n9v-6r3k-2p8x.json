@@ -4,7 +4,7 @@
     "id": "https://w3id.org/battinfo/spec/7m4t-1n9v-6r3k-2p8x",
     "short_id": "7m4t1n",
     "identifier": "test-protocol:7m4t-1n9v-6r3k-2p8x",
-    "name": "HPPC \u2014 Pulse Power Characterisation at 25\u00b0C",
+    "name": "HPPC — Pulse Power Characterisation at 25°C",
     "kind": "hppc",
     "description": "Hybrid Pulse Power Characterisation (HPPC) per IEC 62660-1 / USABC methodology. Discharge and charge pulses are applied at nine SOC setpoints (90%, 80%, 70%, 60%, 50%, 40%, 30%, 20%, 10%) to determine DC internal resistance and the cell's power capability envelope as a function of state of charge. A 10s 2C discharge pulse followed by a 40s rest and a 10s 1.75C charge pulse is applied at each SOC level.",
     "version": "1.0",
@@ -16,6 +16,133 @@
       "unit": "degC"
     }
   },
+  "method": [
+    {
+      "mode": "cc",
+      "direction": "charge",
+      "setpoints": {
+        "c_rate": {
+          "value": 0.333,
+          "unit": "A/Ah"
+        }
+      },
+      "termination": [
+        {
+          "quantity": "voltage",
+          "value": 4.2,
+          "unit": "V",
+          "direction": "above"
+        }
+      ],
+      "description": "Charge at C/3 until 4.2 V"
+    },
+    {
+      "mode": "cv",
+      "direction": "hold",
+      "setpoints": {
+        "voltage": {
+          "value": 4.2,
+          "unit": "V"
+        }
+      },
+      "termination": [
+        {
+          "quantity": "c_rate",
+          "value": 0.05,
+          "unit": "A/Ah",
+          "direction": "below"
+        }
+      ],
+      "description": "Hold at 4.2 V until C/20"
+    },
+    {
+      "mode": "rest",
+      "direction": "rest",
+      "duration": {
+        "value": 3600.0,
+        "unit": "s"
+      },
+      "description": "Rest for 1 hour"
+    },
+    {
+      "mode": "group",
+      "count": 9,
+      "description": "Pulse set at each SOC level: 90% down to 10% in 10% steps",
+      "steps": [
+        {
+          "mode": "cc",
+          "direction": "discharge",
+          "setpoints": {
+            "c_rate": {
+              "value": 0.333,
+              "unit": "A/Ah"
+            }
+          },
+          "duration": {
+            "value": 1080.0,
+            "unit": "s"
+          },
+          "termination": [
+            {
+              "quantity": "voltage",
+              "value": 2.5,
+              "unit": "V",
+              "direction": "below"
+            }
+          ],
+          "description": "Discharge 10% SOC at C/3"
+        },
+        {
+          "mode": "rest",
+          "direction": "rest",
+          "duration": {
+            "value": 3600.0,
+            "unit": "s"
+          },
+          "description": "Rest for 1 hour to relax to OCV"
+        },
+        {
+          "mode": "cc",
+          "direction": "discharge",
+          "setpoints": {
+            "c_rate": {
+              "value": 2.0,
+              "unit": "A/Ah"
+            }
+          },
+          "duration": {
+            "value": 10.0,
+            "unit": "s"
+          },
+          "description": "10 s 2C discharge pulse"
+        },
+        {
+          "mode": "rest",
+          "direction": "rest",
+          "duration": {
+            "value": 40.0,
+            "unit": "s"
+          },
+          "description": "40 s rest"
+        },
+        {
+          "mode": "cc",
+          "direction": "charge",
+          "setpoints": {
+            "c_rate": {
+              "value": 1.75,
+              "unit": "A/Ah"
+            }
+          },
+          "duration": {
+            "value": 10.0,
+            "unit": "s"
+          },
+          "description": "10 s 1.75C charge pulse"
+        }
+      ]
+    }
+  ],
   "provenance": {
     "source_type": "manual",
     "source_file": "hppc-iec62660.protocol.json",

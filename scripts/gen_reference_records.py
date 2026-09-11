@@ -374,7 +374,7 @@ def snippet_test_protocol():
 
 
 def snippet_test():
-    from battinfo import Cell, CellSpec, Test
+    from battinfo import Cell, CellSpec, Test, TestSpec
 
     cell = Cell(
         id="https://w3id.org/battinfo/cell/y9xy-kr0v-y5tn-dfj7",
@@ -385,12 +385,15 @@ def snippet_test():
         ),
         serial_number="LAB-2026-0001",
     )
+    protocol = TestSpec(                   # the protocol defined above
+        id="https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
+        name="1C cycle life at 25 degC",
+        kind="cycling",
+    )
     test = Test(
         id="https://w3id.org/battinfo/test/3w87-0ddf-ryjg-evxe",
         cell=cell,                         # what you did, to which cell
-        kind="cycling",
-        protocol_id="https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
-        protocol="1C cycle life at 25 degC",
+        protocol=protocol,                 # kind, name, protocol_id all derive
         instrument="Biologic VMP-300",
         status="completed",
         # As-run conditions: what actually applied, as {value, unit}
@@ -828,6 +831,9 @@ FAMILIES = [
                 "notice": [
                     "`hasTestObject` / `schema:object` point at the cell; "
                     "`dcterms:conformsTo` points at the protocol.",
+                    "`protocol=` takes the TestSpec itself: kind, protocol "
+                    "name and `protocol_id` derive from it — stated once, on "
+                    "the protocol, never retyped on the execution.",
                     "As-run conditions emit as typed `hasMeasurementParameter` "
                     "nodes on the test node (plus a `schema:PropertyValue` "
                     "copy under `schema:additionalProperty`).",

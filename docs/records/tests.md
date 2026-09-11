@@ -307,7 +307,7 @@ What to notice:
 
 :::{tab-item} Python
 ```python
-from battinfo import Cell, CellSpec, Test
+from battinfo import Cell, CellSpec, Test, TestSpec
 
 cell = Cell(
     id="https://w3id.org/battinfo/cell/y9xy-kr0v-y5tn-dfj7",
@@ -318,12 +318,15 @@ cell = Cell(
     ),
     serial_number="LAB-2026-0001",
 )
+protocol = TestSpec(                   # the protocol defined above
+    id="https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
+    name="1C cycle life at 25 degC",
+    kind="cycling",
+)
 test = Test(
     id="https://w3id.org/battinfo/test/3w87-0ddf-ryjg-evxe",
     cell=cell,                         # what you did, to which cell
-    kind="cycling",
-    protocol_id="https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
-    protocol="1C cycle life at 25 degC",
+    protocol=protocol,                 # kind, name, protocol_id all derive
     instrument="Biologic VMP-300",
     status="completed",
     # As-run conditions: what actually applied, as {value, unit}
@@ -425,6 +428,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 What to notice:
 
 - `hasTestObject` / `schema:object` point at the cell; `dcterms:conformsTo` points at the protocol.
+- `protocol=` takes the TestSpec itself: kind, protocol name and `protocol_id` derive from it — stated once, on the protocol, never retyped on the execution.
 - As-run conditions emit as typed `hasMeasurementParameter` nodes on the test node (plus a `schema:PropertyValue` copy under `schema:additionalProperty`).
 
 
@@ -741,6 +745,729 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "schema:name": "Rate Capability: C/10 to 5C Discharge at 25°C",
   "schema:additionalType": "rate_capability",
   "schema:description": "Galvanostatic constant-current discharge at six C-rates (C/10, C/5, C/2, 1C, 2C, 5C) to measure deliverable capacity and energy as a function of rate. Each discharge is preceded by a full constant-current constant-voltage charge at C/5. Three cycles are recorded at each rate. A reference C/10 cycle is repeated at the end to confirm capacity recovery.",
+  "hasTask": [
+    {
+      "@type": "IterativeWorkflow",
+      "NumberOfIterations": {
+        "hasNumericalPart": {
+          "hasNumberValue": 3
+        }
+      },
+      "hasTask": [
+        {
+          "@type": "ConstantCurrentCharging",
+          "rdfs:label": "Charge at C/5 until 4.2 V",
+          "hasControlParameter": [
+            {
+              "@type": "CRate",
+              "hasNumericalPart": {
+                "hasNumberValue": 0.2
+              },
+              "hasMeasurementUnit": {
+                "@id": "electrochemistry:AmperePerAmpereHour"
+              }
+            }
+          ],
+          "hasTerminationParameter": [
+            {
+              "@type": "UpperVoltageLimit",
+              "hasNumericalPart": {
+                "hasNumberValue": 4.2
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Volt"
+              }
+            }
+          ]
+        },
+        {
+          "@type": "VoltageHold",
+          "rdfs:label": "Hold at 4.2 V until C/20",
+          "hasControlParameter": [
+            {
+              "@type": "Voltage",
+              "hasNumericalPart": {
+                "hasNumberValue": 4.2
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Volt"
+              }
+            }
+          ],
+          "hasTerminationParameter": [
+            {
+              "@type": "TerminationQuantity",
+              "hasNumericalPart": {
+                "hasNumberValue": 0.05
+              },
+              "hasMeasurementUnit": {
+                "@id": "electrochemistry:AmperePerAmpereHour"
+              }
+            }
+          ]
+        },
+        {
+          "@type": "OpenCircuitHold",
+          "rdfs:label": "Rest for 10 minutes",
+          "hasTerminationParameter": [
+            {
+              "@type": "Duration",
+              "hasNumericalPart": {
+                "hasNumberValue": 600.0
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Second"
+              }
+            }
+          ]
+        },
+        {
+          "@type": "ConstantCurrentDischarging",
+          "rdfs:label": "Discharge at C/10 until 2.5 V",
+          "hasControlParameter": [
+            {
+              "@type": "CRate",
+              "hasNumericalPart": {
+                "hasNumberValue": 0.1
+              },
+              "hasMeasurementUnit": {
+                "@id": "electrochemistry:AmperePerAmpereHour"
+              }
+            }
+          ],
+          "hasTerminationParameter": [
+            {
+              "@type": "LowerVoltageLimit",
+              "hasNumericalPart": {
+                "hasNumberValue": 2.5
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Volt"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "@type": "IterativeWorkflow",
+      "NumberOfIterations": {
+        "hasNumericalPart": {
+          "hasNumberValue": 3
+        }
+      },
+      "hasTask": [
+        {
+          "@type": "ConstantCurrentCharging",
+          "rdfs:label": "Charge at C/5 until 4.2 V",
+          "hasControlParameter": [
+            {
+              "@type": "CRate",
+              "hasNumericalPart": {
+                "hasNumberValue": 0.2
+              },
+              "hasMeasurementUnit": {
+                "@id": "electrochemistry:AmperePerAmpereHour"
+              }
+            }
+          ],
+          "hasTerminationParameter": [
+            {
+              "@type": "UpperVoltageLimit",
+              "hasNumericalPart": {
+                "hasNumberValue": 4.2
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Volt"
+              }
+            }
+          ]
+        },
+        {
+          "@type": "VoltageHold",
+          "rdfs:label": "Hold at 4.2 V until C/20",
+          "hasControlParameter": [
+            {
+              "@type": "Voltage",
+              "hasNumericalPart": {
+                "hasNumberValue": 4.2
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Volt"
+              }
+            }
+          ],
+          "hasTerminationParameter": [
+            {
+              "@type": "TerminationQuantity",
+              "hasNumericalPart": {
+                "hasNumberValue": 0.05
+              },
+              "hasMeasurementUnit": {
+                "@id": "electrochemistry:AmperePerAmpereHour"
+              }
+            }
+          ]
+        },
+        {
+          "@type": "OpenCircuitHold",
+          "rdfs:label": "Rest for 10 minutes",
+          "hasTerminationParameter": [
+            {
+              "@type": "Duration",
+              "hasNumericalPart": {
+                "hasNumberValue": 600.0
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Second"
+              }
+            }
+          ]
+        },
+        {
+          "@type": "ConstantCurrentDischarging",
+          "rdfs:label": "Discharge at C/5 until 2.5 V",
+          "hasControlParameter": [
+            {
+              "@type": "CRate",
+              "hasNumericalPart": {
+                "hasNumberValue": 0.2
+              },
+              "hasMeasurementUnit": {
+                "@id": "electrochemistry:AmperePerAmpereHour"
+              }
+            }
+          ],
+          "hasTerminationParameter": [
+            {
+              "@type": "LowerVoltageLimit",
+              "hasNumericalPart": {
+                "hasNumberValue": 2.5
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Volt"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "@type": "IterativeWorkflow",
+      "NumberOfIterations": {
+        "hasNumericalPart": {
+          "hasNumberValue": 3
+        }
+      },
+      "hasTask": [
+        {
+          "@type": "ConstantCurrentCharging",
+          "rdfs:label": "Charge at C/5 until 4.2 V",
+          "hasControlParameter": [
+            {
+              "@type": "CRate",
+              "hasNumericalPart": {
+                "hasNumberValue": 0.2
+              },
+              "hasMeasurementUnit": {
+                "@id": "electrochemistry:AmperePerAmpereHour"
+              }
+            }
+          ],
+          "hasTerminationParameter": [
+            {
+              "@type": "UpperVoltageLimit",
+              "hasNumericalPart": {
+                "hasNumberValue": 4.2
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Volt"
+              }
+            }
+          ]
+        },
+        {
+          "@type": "VoltageHold",
+          "rdfs:label": "Hold at 4.2 V until C/20",
+          "hasControlParameter": [
+            {
+              "@type": "Voltage",
+              "hasNumericalPart": {
+                "hasNumberValue": 4.2
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Volt"
+              }
+            }
+          ],
+          "hasTerminationParameter": [
+            {
+              "@type": "TerminationQuantity",
+              "hasNumericalPart": {
+                "hasNumberValue": 0.05
+              },
+              "hasMeasurementUnit": {
+                "@id": "electrochemistry:AmperePerAmpereHour"
+              }
+            }
+          ]
+        },
+        {
+          "@type": "OpenCircuitHold",
+          "rdfs:label": "Rest for 10 minutes",
+          "hasTerminationParameter": [
+            {
+              "@type": "Duration",
+              "hasNumericalPart": {
+                "hasNumberValue": 600.0
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Second"
+              }
+            }
+          ]
+        },
+        {
+          "@type": "ConstantCurrentDischarging",
+          "rdfs:label": "Discharge at C/2 until 2.5 V",
+          "hasControlParameter": [
+            {
+              "@type": "CRate",
+              "hasNumericalPart": {
+                "hasNumberValue": 0.5
+              },
+              "hasMeasurementUnit": {
+                "@id": "electrochemistry:AmperePerAmpereHour"
+              }
+            }
+          ],
+          "hasTerminationParameter": [
+            {
+              "@type": "LowerVoltageLimit",
+              "hasNumericalPart": {
+                "hasNumberValue": 2.5
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Volt"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "@type": "IterativeWorkflow",
+      "NumberOfIterations": {
+        "hasNumericalPart": {
+          "hasNumberValue": 3
+        }
+      },
+      "hasTask": [
+        {
+          "@type": "ConstantCurrentCharging",
+          "rdfs:label": "Charge at C/5 until 4.2 V",
+          "hasControlParameter": [
+            {
+              "@type": "CRate",
+              "hasNumericalPart": {
+                "hasNumberValue": 0.2
+              },
+              "hasMeasurementUnit": {
+                "@id": "electrochemistry:AmperePerAmpereHour"
+              }
+            }
+          ],
+          "hasTerminationParameter": [
+            {
+              "@type": "UpperVoltageLimit",
+              "hasNumericalPart": {
+                "hasNumberValue": 4.2
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Volt"
+              }
+            }
+          ]
+        },
+        {
+          "@type": "VoltageHold",
+          "rdfs:label": "Hold at 4.2 V until C/20",
+          "hasControlParameter": [
+            {
+              "@type": "Voltage",
+              "hasNumericalPart": {
+                "hasNumberValue": 4.2
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Volt"
+              }
+            }
+          ],
+          "hasTerminationParameter": [
+            {
+              "@type": "TerminationQuantity",
+              "hasNumericalPart": {
+                "hasNumberValue": 0.05
+              },
+              "hasMeasurementUnit": {
+                "@id": "electrochemistry:AmperePerAmpereHour"
+              }
+            }
+          ]
+        },
+        {
+          "@type": "OpenCircuitHold",
+          "rdfs:label": "Rest for 10 minutes",
+          "hasTerminationParameter": [
+            {
+              "@type": "Duration",
+              "hasNumericalPart": {
+                "hasNumberValue": 600.0
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Second"
+              }
+            }
+          ]
+        },
+        {
+          "@type": "ConstantCurrentDischarging",
+          "rdfs:label": "Discharge at 1C until 2.5 V",
+          "hasControlParameter": [
+            {
+              "@type": "CRate",
+              "hasNumericalPart": {
+                "hasNumberValue": 1.0
+              },
+              "hasMeasurementUnit": {
+                "@id": "electrochemistry:AmperePerAmpereHour"
+              }
+            }
+          ],
+          "hasTerminationParameter": [
+            {
+              "@type": "LowerVoltageLimit",
+              "hasNumericalPart": {
+                "hasNumberValue": 2.5
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Volt"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "@type": "IterativeWorkflow",
+      "NumberOfIterations": {
+        "hasNumericalPart": {
+          "hasNumberValue": 3
+        }
+      },
+      "hasTask": [
+        {
+          "@type": "ConstantCurrentCharging",
+          "rdfs:label": "Charge at C/5 until 4.2 V",
+          "hasControlParameter": [
+            {
+              "@type": "CRate",
+              "hasNumericalPart": {
+                "hasNumberValue": 0.2
+              },
+              "hasMeasurementUnit": {
+                "@id": "electrochemistry:AmperePerAmpereHour"
+              }
+            }
+          ],
+          "hasTerminationParameter": [
+            {
+              "@type": "UpperVoltageLimit",
+              "hasNumericalPart": {
+                "hasNumberValue": 4.2
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Volt"
+              }
+            }
+          ]
+        },
+        {
+          "@type": "VoltageHold",
+          "rdfs:label": "Hold at 4.2 V until C/20",
+          "hasControlParameter": [
+            {
+              "@type": "Voltage",
+              "hasNumericalPart": {
+                "hasNumberValue": 4.2
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Volt"
+              }
+            }
+          ],
+          "hasTerminationParameter": [
+            {
+              "@type": "TerminationQuantity",
+              "hasNumericalPart": {
+                "hasNumberValue": 0.05
+              },
+              "hasMeasurementUnit": {
+                "@id": "electrochemistry:AmperePerAmpereHour"
+              }
+            }
+          ]
+        },
+        {
+          "@type": "OpenCircuitHold",
+          "rdfs:label": "Rest for 10 minutes",
+          "hasTerminationParameter": [
+            {
+              "@type": "Duration",
+              "hasNumericalPart": {
+                "hasNumberValue": 600.0
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Second"
+              }
+            }
+          ]
+        },
+        {
+          "@type": "ConstantCurrentDischarging",
+          "rdfs:label": "Discharge at 2C until 2.5 V",
+          "hasControlParameter": [
+            {
+              "@type": "CRate",
+              "hasNumericalPart": {
+                "hasNumberValue": 2.0
+              },
+              "hasMeasurementUnit": {
+                "@id": "electrochemistry:AmperePerAmpereHour"
+              }
+            }
+          ],
+          "hasTerminationParameter": [
+            {
+              "@type": "LowerVoltageLimit",
+              "hasNumericalPart": {
+                "hasNumberValue": 2.5
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Volt"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "@type": "IterativeWorkflow",
+      "NumberOfIterations": {
+        "hasNumericalPart": {
+          "hasNumberValue": 3
+        }
+      },
+      "hasTask": [
+        {
+          "@type": "ConstantCurrentCharging",
+          "rdfs:label": "Charge at C/5 until 4.2 V",
+          "hasControlParameter": [
+            {
+              "@type": "CRate",
+              "hasNumericalPart": {
+                "hasNumberValue": 0.2
+              },
+              "hasMeasurementUnit": {
+                "@id": "electrochemistry:AmperePerAmpereHour"
+              }
+            }
+          ],
+          "hasTerminationParameter": [
+            {
+              "@type": "UpperVoltageLimit",
+              "hasNumericalPart": {
+                "hasNumberValue": 4.2
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Volt"
+              }
+            }
+          ]
+        },
+        {
+          "@type": "VoltageHold",
+          "rdfs:label": "Hold at 4.2 V until C/20",
+          "hasControlParameter": [
+            {
+              "@type": "Voltage",
+              "hasNumericalPart": {
+                "hasNumberValue": 4.2
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Volt"
+              }
+            }
+          ],
+          "hasTerminationParameter": [
+            {
+              "@type": "TerminationQuantity",
+              "hasNumericalPart": {
+                "hasNumberValue": 0.05
+              },
+              "hasMeasurementUnit": {
+                "@id": "electrochemistry:AmperePerAmpereHour"
+              }
+            }
+          ]
+        },
+        {
+          "@type": "OpenCircuitHold",
+          "rdfs:label": "Rest for 10 minutes",
+          "hasTerminationParameter": [
+            {
+              "@type": "Duration",
+              "hasNumericalPart": {
+                "hasNumberValue": 600.0
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Second"
+              }
+            }
+          ]
+        },
+        {
+          "@type": "ConstantCurrentDischarging",
+          "rdfs:label": "Discharge at 5C until 2.5 V",
+          "hasControlParameter": [
+            {
+              "@type": "CRate",
+              "hasNumericalPart": {
+                "hasNumberValue": 5.0
+              },
+              "hasMeasurementUnit": {
+                "@id": "electrochemistry:AmperePerAmpereHour"
+              }
+            }
+          ],
+          "hasTerminationParameter": [
+            {
+              "@type": "LowerVoltageLimit",
+              "hasNumericalPart": {
+                "hasNumberValue": 2.5
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Volt"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "@type": "IterativeWorkflow",
+      "NumberOfIterations": {
+        "hasNumericalPart": {
+          "hasNumberValue": 1
+        }
+      },
+      "hasTask": [
+        {
+          "@type": "ConstantCurrentCharging",
+          "rdfs:label": "Charge at C/5 until 4.2 V",
+          "hasControlParameter": [
+            {
+              "@type": "CRate",
+              "hasNumericalPart": {
+                "hasNumberValue": 0.2
+              },
+              "hasMeasurementUnit": {
+                "@id": "electrochemistry:AmperePerAmpereHour"
+              }
+            }
+          ],
+          "hasTerminationParameter": [
+            {
+              "@type": "UpperVoltageLimit",
+              "hasNumericalPart": {
+                "hasNumberValue": 4.2
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Volt"
+              }
+            }
+          ]
+        },
+        {
+          "@type": "VoltageHold",
+          "rdfs:label": "Hold at 4.2 V until C/20",
+          "hasControlParameter": [
+            {
+              "@type": "Voltage",
+              "hasNumericalPart": {
+                "hasNumberValue": 4.2
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Volt"
+              }
+            }
+          ],
+          "hasTerminationParameter": [
+            {
+              "@type": "TerminationQuantity",
+              "hasNumericalPart": {
+                "hasNumberValue": 0.05
+              },
+              "hasMeasurementUnit": {
+                "@id": "electrochemistry:AmperePerAmpereHour"
+              }
+            }
+          ]
+        },
+        {
+          "@type": "OpenCircuitHold",
+          "rdfs:label": "Rest for 10 minutes",
+          "hasTerminationParameter": [
+            {
+              "@type": "Duration",
+              "hasNumericalPart": {
+                "hasNumberValue": 600.0
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Second"
+              }
+            }
+          ]
+        },
+        {
+          "@type": "ConstantCurrentDischarging",
+          "rdfs:label": "Discharge at C/10 until 2.5 V",
+          "hasControlParameter": [
+            {
+              "@type": "CRate",
+              "hasNumericalPart": {
+                "hasNumberValue": 0.1
+              },
+              "hasMeasurementUnit": {
+                "@id": "electrochemistry:AmperePerAmpereHour"
+              }
+            }
+          ],
+          "hasTerminationParameter": [
+            {
+              "@type": "LowerVoltageLimit",
+              "hasNumericalPart": {
+                "hasNumberValue": 2.5
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Volt"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
   "hasProperty": [
     {
       "@type": "ConventionalProperty",
@@ -1014,6 +1741,202 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "schema:name": "HPPC — Pulse Power Characterisation at 25°C",
   "schema:additionalType": "hppc",
   "schema:description": "Hybrid Pulse Power Characterisation (HPPC) per IEC 62660-1 / USABC methodology. Discharge and charge pulses are applied at nine SOC setpoints (90%, 80%, 70%, 60%, 50%, 40%, 30%, 20%, 10%) to determine DC internal resistance and the cell's power capability envelope as a function of state of charge. A 10s 2C discharge pulse followed by a 40s rest and a 10s 1.75C charge pulse is applied at each SOC level.",
+  "hasTask": [
+    {
+      "@type": "ConstantCurrentCharging",
+      "rdfs:label": "Charge at C/3 until 4.2 V",
+      "hasControlParameter": [
+        {
+          "@type": "CRate",
+          "hasNumericalPart": {
+            "hasNumberValue": 0.333
+          },
+          "hasMeasurementUnit": {
+            "@id": "electrochemistry:AmperePerAmpereHour"
+          }
+        }
+      ],
+      "hasTerminationParameter": [
+        {
+          "@type": "UpperVoltageLimit",
+          "hasNumericalPart": {
+            "hasNumberValue": 4.2
+          },
+          "hasMeasurementUnit": {
+            "@id": "emmo:Volt"
+          }
+        }
+      ]
+    },
+    {
+      "@type": "VoltageHold",
+      "rdfs:label": "Hold at 4.2 V until C/20",
+      "hasControlParameter": [
+        {
+          "@type": "Voltage",
+          "hasNumericalPart": {
+            "hasNumberValue": 4.2
+          },
+          "hasMeasurementUnit": {
+            "@id": "emmo:Volt"
+          }
+        }
+      ],
+      "hasTerminationParameter": [
+        {
+          "@type": "TerminationQuantity",
+          "hasNumericalPart": {
+            "hasNumberValue": 0.05
+          },
+          "hasMeasurementUnit": {
+            "@id": "electrochemistry:AmperePerAmpereHour"
+          }
+        }
+      ]
+    },
+    {
+      "@type": "OpenCircuitHold",
+      "rdfs:label": "Rest for 1 hour",
+      "hasTerminationParameter": [
+        {
+          "@type": "Duration",
+          "hasNumericalPart": {
+            "hasNumberValue": 3600.0
+          },
+          "hasMeasurementUnit": {
+            "@id": "emmo:Second"
+          }
+        }
+      ]
+    },
+    {
+      "@type": "IterativeWorkflow",
+      "NumberOfIterations": {
+        "hasNumericalPart": {
+          "hasNumberValue": 9
+        }
+      },
+      "hasTask": [
+        {
+          "@type": "ConstantCurrentDischarging",
+          "rdfs:label": "Discharge 10% SOC at C/3",
+          "hasControlParameter": [
+            {
+              "@type": "CRate",
+              "hasNumericalPart": {
+                "hasNumberValue": 0.333
+              },
+              "hasMeasurementUnit": {
+                "@id": "electrochemistry:AmperePerAmpereHour"
+              }
+            }
+          ],
+          "hasTerminationParameter": [
+            {
+              "@type": "LowerVoltageLimit",
+              "hasNumericalPart": {
+                "hasNumberValue": 2.5
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Volt"
+              }
+            },
+            {
+              "@type": "Duration",
+              "hasNumericalPart": {
+                "hasNumberValue": 1080.0
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Second"
+              }
+            }
+          ]
+        },
+        {
+          "@type": "OpenCircuitHold",
+          "rdfs:label": "Rest for 1 hour to relax to OCV",
+          "hasTerminationParameter": [
+            {
+              "@type": "Duration",
+              "hasNumericalPart": {
+                "hasNumberValue": 3600.0
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Second"
+              }
+            }
+          ]
+        },
+        {
+          "@type": "ConstantCurrentDischarging",
+          "rdfs:label": "10 s 2C discharge pulse",
+          "hasControlParameter": [
+            {
+              "@type": "CRate",
+              "hasNumericalPart": {
+                "hasNumberValue": 2.0
+              },
+              "hasMeasurementUnit": {
+                "@id": "electrochemistry:AmperePerAmpereHour"
+              }
+            }
+          ],
+          "hasTerminationParameter": [
+            {
+              "@type": "Duration",
+              "hasNumericalPart": {
+                "hasNumberValue": 10.0
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Second"
+              }
+            }
+          ]
+        },
+        {
+          "@type": "OpenCircuitHold",
+          "rdfs:label": "40 s rest",
+          "hasTerminationParameter": [
+            {
+              "@type": "Duration",
+              "hasNumericalPart": {
+                "hasNumberValue": 40.0
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Second"
+              }
+            }
+          ]
+        },
+        {
+          "@type": "ConstantCurrentCharging",
+          "rdfs:label": "10 s 1.75C charge pulse",
+          "hasControlParameter": [
+            {
+              "@type": "CRate",
+              "hasNumericalPart": {
+                "hasNumberValue": 1.75
+              },
+              "hasMeasurementUnit": {
+                "@id": "electrochemistry:AmperePerAmpereHour"
+              }
+            }
+          ],
+          "hasTerminationParameter": [
+            {
+              "@type": "Duration",
+              "hasNumericalPart": {
+                "hasNumberValue": 10.0
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Second"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
   "hasProperty": [
     {
       "@type": "ConventionalProperty",
@@ -1077,6 +2000,135 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "schema:name": "GITT — Galvanostatic Intermittent Titration at 25°C",
   "schema:additionalType": "gitt",
   "schema:description": "Galvanostatic Intermittent Titration Technique (GITT) applied during discharge from 100% to ~5% SOC at 25°C. A 10-minute C/10 current pulse is applied followed by a 60-minute rest at open-circuit. The OCV relaxation transient after each pulse is used to calculate the apparent solid-state lithium diffusion coefficient (D_Li) in the electrode as a function of SOC. The full discharge GITT curve also yields a pseudo-equilibrium OCV profile.",
+  "hasTask": [
+    {
+      "@type": "ConstantCurrentCharging",
+      "rdfs:label": "Charge at C/10 until 4.2 V",
+      "hasControlParameter": [
+        {
+          "@type": "CRate",
+          "hasNumericalPart": {
+            "hasNumberValue": 0.1
+          },
+          "hasMeasurementUnit": {
+            "@id": "electrochemistry:AmperePerAmpereHour"
+          }
+        }
+      ],
+      "hasTerminationParameter": [
+        {
+          "@type": "UpperVoltageLimit",
+          "hasNumericalPart": {
+            "hasNumberValue": 4.2
+          },
+          "hasMeasurementUnit": {
+            "@id": "emmo:Volt"
+          }
+        }
+      ]
+    },
+    {
+      "@type": "VoltageHold",
+      "rdfs:label": "Hold at 4.2 V until C/50",
+      "hasControlParameter": [
+        {
+          "@type": "Voltage",
+          "hasNumericalPart": {
+            "hasNumberValue": 4.2
+          },
+          "hasMeasurementUnit": {
+            "@id": "emmo:Volt"
+          }
+        }
+      ],
+      "hasTerminationParameter": [
+        {
+          "@type": "TerminationQuantity",
+          "hasNumericalPart": {
+            "hasNumberValue": 0.02
+          },
+          "hasMeasurementUnit": {
+            "@id": "electrochemistry:AmperePerAmpereHour"
+          }
+        }
+      ]
+    },
+    {
+      "@type": "OpenCircuitHold",
+      "rdfs:label": "Rest for 1 hour to relax to OCV",
+      "hasTerminationParameter": [
+        {
+          "@type": "Duration",
+          "hasNumericalPart": {
+            "hasNumberValue": 3600.0
+          },
+          "hasMeasurementUnit": {
+            "@id": "emmo:Second"
+          }
+        }
+      ]
+    },
+    {
+      "@type": "IterativeWorkflow",
+      "NumberOfIterations": {
+        "hasNumericalPart": {
+          "hasNumberValue": 60
+        }
+      },
+      "hasTask": [
+        {
+          "@type": "ConstantCurrentDischarging",
+          "rdfs:label": "C/10 discharge pulse for 10 minutes",
+          "hasControlParameter": [
+            {
+              "@type": "CRate",
+              "hasNumericalPart": {
+                "hasNumberValue": 0.1
+              },
+              "hasMeasurementUnit": {
+                "@id": "electrochemistry:AmperePerAmpereHour"
+              }
+            }
+          ],
+          "hasTerminationParameter": [
+            {
+              "@type": "LowerVoltageLimit",
+              "hasNumericalPart": {
+                "hasNumberValue": 2.5
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Volt"
+              }
+            },
+            {
+              "@type": "Duration",
+              "hasNumericalPart": {
+                "hasNumberValue": 600.0
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Second"
+              }
+            }
+          ]
+        },
+        {
+          "@type": "OpenCircuitHold",
+          "rdfs:label": "Open-circuit relaxation for 60 minutes",
+          "hasTerminationParameter": [
+            {
+              "@type": "Duration",
+              "hasNumericalPart": {
+                "hasNumberValue": 3600.0
+              },
+              "hasMeasurementUnit": {
+                "@id": "emmo:Second"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
   "hasProperty": [
     {
       "@type": "ConventionalProperty",

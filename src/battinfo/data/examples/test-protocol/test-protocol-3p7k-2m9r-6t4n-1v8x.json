@@ -4,9 +4,9 @@
     "id": "https://w3id.org/battinfo/spec/3p7k-2m9r-6t4n-1v8x",
     "short_id": "3p7k2m",
     "identifier": "test-protocol:3p7k-2m9r-6t4n-1v8x",
-    "name": "GITT \u2014 Galvanostatic Intermittent Titration at 25\u00b0C",
+    "name": "GITT — Galvanostatic Intermittent Titration at 25°C",
     "kind": "gitt",
-    "description": "Galvanostatic Intermittent Titration Technique (GITT) applied during discharge from 100% to ~5% SOC at 25\u00b0C. A 10-minute C/10 current pulse is applied followed by a 60-minute rest at open-circuit. The OCV relaxation transient after each pulse is used to calculate the apparent solid-state lithium diffusion coefficient (D_Li) in the electrode as a function of SOC. The full discharge GITT curve also yields a pseudo-equilibrium OCV profile.",
+    "description": "Galvanostatic Intermittent Titration Technique (GITT) applied during discharge from 100% to ~5% SOC at 25°C. A 10-minute C/10 current pulse is applied followed by a 60-minute rest at open-circuit. The OCV relaxation transient after each pulse is used to calculate the apparent solid-state lithium diffusion coefficient (D_Li) in the electrode as a function of SOC. The full discharge GITT curve also yields a pseudo-equilibrium OCV profile.",
     "version": "1.0",
     "protocol_url": "https://example.org/protocols/gitt-discharge-25c"
   },
@@ -20,6 +20,94 @@
       "unit": "%"
     }
   },
+  "method": [
+    {
+      "mode": "cc",
+      "direction": "charge",
+      "setpoints": {
+        "c_rate": {
+          "value": 0.1,
+          "unit": "A/Ah"
+        }
+      },
+      "termination": [
+        {
+          "quantity": "voltage",
+          "value": 4.2,
+          "unit": "V",
+          "direction": "above"
+        }
+      ],
+      "description": "Charge at C/10 until 4.2 V"
+    },
+    {
+      "mode": "cv",
+      "direction": "hold",
+      "setpoints": {
+        "voltage": {
+          "value": 4.2,
+          "unit": "V"
+        }
+      },
+      "termination": [
+        {
+          "quantity": "c_rate",
+          "value": 0.02,
+          "unit": "A/Ah",
+          "direction": "below"
+        }
+      ],
+      "description": "Hold at 4.2 V until C/50"
+    },
+    {
+      "mode": "rest",
+      "direction": "rest",
+      "duration": {
+        "value": 3600.0,
+        "unit": "s"
+      },
+      "description": "Rest for 1 hour to relax to OCV"
+    },
+    {
+      "mode": "group",
+      "count": 60,
+      "description": "Titration sequence: repeat pulse + relaxation through the discharge (ends early below 2.5 V)",
+      "steps": [
+        {
+          "mode": "cc",
+          "direction": "discharge",
+          "setpoints": {
+            "c_rate": {
+              "value": 0.1,
+              "unit": "A/Ah"
+            }
+          },
+          "duration": {
+            "value": 600.0,
+            "unit": "s"
+          },
+          "termination": [
+            {
+              "quantity": "voltage",
+              "value": 2.5,
+              "unit": "V",
+              "direction": "below"
+            }
+          ],
+          "description": "C/10 discharge pulse for 10 minutes"
+        },
+        {
+          "mode": "rest",
+          "direction": "rest",
+          "duration": {
+            "value": 3600.0,
+            "unit": "s"
+          },
+          "description": "Open-circuit relaxation for 60 minutes"
+        }
+      ]
+    }
+  ],
   "provenance": {
     "source_type": "manual",
     "source_file": "gitt-discharge-25c.protocol.json",
