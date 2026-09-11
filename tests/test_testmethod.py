@@ -188,3 +188,19 @@ def test_facets_modes_recurse_into_nested_groups() -> None:
     facets = compute_facets([outer])
     assert facets["modes"] == ["cc", "rest"]
     assert "group" not in facets["modes"]
+
+
+def test_soc_termination_is_first_class() -> None:
+    """SOC joins the termination quantities (the UCP/HPPC seam): validated at
+    construction and emitted with the StateOfCharge class."""
+    from battinfo.jsonld import termination_emmo_class
+    from battinfo.testmethod import Step, Termination
+
+    step = Step(
+        mode="cc", direction="discharge",
+        setpoints={"c_rate": {"value": 0.333, "unit": "A/Ah"}},
+        termination=[Termination(quantity="soc", value=0.9, unit="1", direction="below")],
+        description="Discharge at C/3 to 90% SOC",
+    )
+    assert step.termination[0].quantity == "soc"
+    assert termination_emmo_class("soc", "below") == "StateOfCharge"

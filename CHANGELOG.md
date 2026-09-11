@@ -82,6 +82,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **SOC-based termination and the initial-state convention (protocol
+  interop).** `soc` joins the termination quantities (schema enum, vocab,
+  emission as `StateOfCharge`), so SOC-stepped procedures state their
+  levels directly - the HPPC example now encodes its nine levels as
+  explicit `soc`-terminated discharges instead of time-at-C/3
+  approximations - and UCP-style state cutoffs have a landing place. A
+  protocol that assumes a starting state declares
+  `conditions.initial_state_of_charge` (unit "1"), the blessed key
+  importers map initial-state settings onto; the EIS-at-50%-SOC example
+  demonstrates it.
+
 - **A test execution inherits its identity from the linked protocol.**
   `Test(protocol=...)` accepts the `TestSpec` object itself: kind, protocol
   name, and `protocol_id` all derive from the spec instead of being retyped

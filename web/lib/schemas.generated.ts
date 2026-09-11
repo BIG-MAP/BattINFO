@@ -10276,7 +10276,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "conditions": {
           "type": "object",
-          "description": "Planned protocol-level conditions, as a map of condition name to a {value, unit} quantity. Recommended keys: ambient_temperature, upper_voltage_limit, lower_voltage_limit, c_rate. As-run values or deviations are recorded on the test record.",
+          "description": "Planned protocol-level conditions, as a map of condition name to a {value, unit} quantity. Recommended keys: ambient_temperature, upper_voltage_limit, lower_voltage_limit, c_rate. As-run values or deviations are recorded on the test record. Recommended keys include initial_state_of_charge (unit '1') and ambient_temperature - the declared starting state of the cell, the convention protocol importers (aurora-unicycler, UCP) map initial-state settings onto.",
           "additionalProperties": {
             "$ref": "#/$defs/Quantity"
           }
@@ -10475,6 +10475,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
                 "current",
                 "c_rate",
                 "capacity",
+                "soc",
                 "duration"
               ],
               "description": "Quantity monitored for the termination condition."

@@ -80,6 +80,7 @@ def _load_test_method_context_terms() -> dict:
         "VoltageHold", "OpenCircuitHold", "IterativeWorkflow",
         "ElectrochemicalImpedanceSpectroscopy", "LinearScanVoltammetry",
         "LowerVoltageLimit", "UpperVoltageLimit", "TerminationQuantity",
+        "StateOfCharge",  # SOC-based termination (the UCP/HPPC seam)
         "CRate", "ElectricCurrent", "Voltage", "Power", "ElectricalResistance",
         "Duration", "ConventionalProperty",
         # Measurement-provenance subtree (as-run conditions emit typed

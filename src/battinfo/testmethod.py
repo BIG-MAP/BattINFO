@@ -56,7 +56,7 @@ __all__ = [
 # readiness report).
 STEP_MODES: tuple[str, ...] = ("cc", "cv", "cccv", "cp", "cr", "rest", "eis", "scan", "group")
 STEP_DIRECTIONS: tuple[str, ...] = ("charge", "discharge", "hold", "rest", "none")
-TERMINATION_QUANTITIES: tuple[str, ...] = ("voltage", "current", "c_rate", "capacity", "duration")
+TERMINATION_QUANTITIES: tuple[str, ...] = ("voltage", "current", "c_rate", "capacity", "soc", "duration")
 TERMINATION_DIRECTIONS: tuple[str, ...] = ("below", "above", "elapsed")
 
 
@@ -118,7 +118,7 @@ class Termination(BaseModel):
     step ends when the first condition is met — PyBaMM's ``or``)."""
 
     model_config = ConfigDict(extra="forbid")
-    quantity: str  # voltage | current | c_rate | capacity | duration
+    quantity: str  # voltage | current | c_rate | capacity | soc | duration
     value: float
     unit: str
     direction: Optional[str] = None  # below | above | elapsed (None for duration)
