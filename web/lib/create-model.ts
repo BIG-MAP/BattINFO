@@ -402,20 +402,26 @@ export const OBJECT_TYPES: ObjectDef[] = [
     },
     toJsonLd: (v, props) => {
       const specName = [v.manufacturer, v.model].filter(Boolean).join(" ").trim();
-      const specDoc: Record<string, unknown> = { "@type": ["BatteryCellSpecification", "schema:CreativeWork"] };
+      // The spec node is the datasheet (catalogue facts); the cell it
+      // describes — with its electrodes and properties — rides isDescriptionFor.
+      const specDoc: Record<string, unknown> = {
+        "@type": ["BatteryCellSpecification", "schema:ProductModel", "schema:CreativeWork"],
+      };
       if (specName) specDoc.name = specName;
       if (v.model) specDoc.model = v.model;
       if (v.manufacturer) specDoc.manufacturer = { "@type": "schema:Organization", name: v.manufacturer };
       const physical = ["BatteryCell"];
       if (FORMAT_CLASS[v.format]) physical.push(FORMAT_CLASS[v.format]);
       if (CHEMISTRY_CLASS[v.chemistry]) physical.push(CHEMISTRY_CLASS[v.chemistry]);
-      specDoc.isDescriptionFor = { "@type": physical };
+      const described: Record<string, unknown> = { "@type": physical };
+      if (specName) described["skos:prefLabel"] = specName;
       const pos = electrodeNode(v.positiveBasis);
       const neg = electrodeNode(v.negativeBasis);
-      if (pos) specDoc.hasPositiveElectrode = pos;
-      if (neg) specDoc.hasNegativeElectrode = neg;
+      if (pos) described.hasPositiveElectrode = pos;
+      if (neg) described.hasNegativeElectrode = neg;
       const hp = jsonldProps(inSection(props, "spec"), termMap(CELL_PROPS));
-      if (hp.length) specDoc.hasProperty = hp;
+      if (hp.length) described.hasProperty = hp;
+      specDoc.isDescriptionFor = described;
 
       const instanceDoc: Record<string, unknown> = { "@type": "BatteryCell" };
       if (v.instanceName) instanceDoc.name = v.instanceName;
@@ -497,11 +503,18 @@ export const OBJECT_TYPES: ObjectDef[] = [
       const types: string[] = [];
       if (SUBSTANCE[v.name]) types.push(SUBSTANCE[v.name]);
       if (MATERIAL_ROLE[v.material_class]) types.push(MATERIAL_ROLE[v.material_class]);
-      const specDoc: Record<string, unknown> = {};
-      if (types.length) specDoc["@type"] = types.length === 1 ? types[0] : types;
+      // The spec is a description of the grade; the substance typing and
+      // declared properties ride the described material under isDescriptionFor.
+      const specDoc: Record<string, unknown> = {
+        "@type": ["Description", "schema:ProductModel", "schema:CreativeWork"],
+      };
       if (v.name) specDoc.name = v.name;
+      const described: Record<string, unknown> = {};
+      if (types.length) described["@type"] = types.length === 1 ? types[0] : types;
+      if (v.name) described["skos:prefLabel"] = v.name;
       const sp = jsonldProps(inSection(props, "spec"), termMap(MATERIAL_PROPS));
-      if (sp.length) specDoc.hasProperty = sp;
+      if (sp.length) described.hasProperty = sp;
+      specDoc.isDescriptionFor = described;
 
       const instanceDoc: Record<string, unknown> = {};
       if (types.length) instanceDoc["@type"] = types.length === 1 ? types[0] : types;
@@ -587,13 +600,20 @@ export const OBJECT_TYPES: ObjectDef[] = [
       return lines.join("\n");
     },
     toJsonLd: (v, props) => {
-      const specDoc: Record<string, unknown> = { "@type": "Electrode" };
+      // The spec describes the electrode design; the physical typing and
+      // composition ride the described electrode under isDescriptionFor.
+      const specDoc: Record<string, unknown> = {
+        "@type": ["Description", "schema:ProductModel", "schema:CreativeWork"],
+      };
       if (v.name) specDoc.name = v.name;
+      const described: Record<string, unknown> = { "@type": "Electrode" };
+      if (v.name) described["skos:prefLabel"] = v.name;
       const active: Record<string, unknown> = SUBSTANCE[v.active] ? { "@type": SUBSTANCE[v.active], name: v.active } : { "@type": "ActiveMaterial", name: v.active };
-      specDoc.hasActiveMaterial = active;
-      if (v.collector) specDoc.hasCurrentCollector = { "@type": "CurrentCollector", name: v.collector };
+      described.hasActiveMaterial = active;
+      if (v.collector) described.hasCurrentCollector = { "@type": "CurrentCollector", name: v.collector };
       const sp = jsonldProps(inSection(props, "spec"), termMap(ELECTRODE_PROPS));
-      if (sp.length) specDoc.hasProperty = sp;
+      if (sp.length) described.hasProperty = sp;
+      specDoc.isDescriptionFor = described;
 
       const instanceDoc: Record<string, unknown> = { "@type": "Electrode" };
       instanceDoc.name = v.instanceName || v.name;
@@ -678,18 +698,25 @@ export const OBJECT_TYPES: ObjectDef[] = [
       return lines.join("\n");
     },
     toJsonLd: (v, props) => {
-      const specDoc: Record<string, unknown> = { "@type": "ElectrolyteSolution" };
+      // The spec describes the recipe; the solution typing, composition and
+      // declared properties ride the described electrolyte under isDescriptionFor.
+      const specDoc: Record<string, unknown> = {
+        "@type": ["Description", "schema:ProductModel", "schema:CreativeWork"],
+      };
       if (v.name) specDoc.name = v.name;
-      if (v.salt) specDoc.hasSolute = SUBSTANCE[v.salt] ? { "@type": SUBSTANCE[v.salt], name: v.salt } : { "@type": "Solute", name: v.salt };
+      const described: Record<string, unknown> = { "@type": "ElectrolyteSolution" };
+      if (v.name) described["skos:prefLabel"] = v.name;
+      if (v.salt) described.hasSolute = SUBSTANCE[v.salt] ? { "@type": SUBSTANCE[v.salt], name: v.salt } : { "@type": "Solute", name: v.salt };
       const solvents = v.solvents.split(",").map((s) => s.trim()).filter(Boolean);
       if (solvents.length) {
-        specDoc.hasSolvent = {
+        described.hasSolvent = {
           "@type": "Solvent",
           hasConstituent: solvents.map((name) => (SUBSTANCE[name] ? { "@type": SUBSTANCE[name], name } : { name })),
         };
       }
       const sp = jsonldProps(inSection(props, "spec"), termMap(ELECTROLYTE_PROPS));
-      if (sp.length) specDoc.hasProperty = sp;
+      if (sp.length) described.hasProperty = sp;
+      specDoc.isDescriptionFor = described;
 
       const instanceDoc: Record<string, unknown> = { "@type": "ElectrolyteSolution" };
       instanceDoc.name = v.instanceName || v.name;

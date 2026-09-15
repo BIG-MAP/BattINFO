@@ -3366,10 +3366,17 @@ class AuthoringWorkspace:
             # Skip typed stubs for externally-defined specs (no descriptive body):
             # they only assert @type + a pointer to where the real spec lives, so
             # there is nothing to reconstruct a CellSpec from — and doing so would
-            # mint an empty spec that shadows the authoritative remote one.
-            if not node.get("hasProperty") and not node.get("isDescriptionFor"):
+            # mint an empty spec that shadows the authoritative remote one. A stub
+            # is a node with no keys beyond identity/pointer ones — the canonical
+            # shape puts isDescriptionFor on EVERY spec node, so its mere presence
+            # is not a body (and a reference-only value is legal JSON-LD here).
+            phys = node.get("isDescriptionFor")
+            if not isinstance(phys, dict):
+                phys = {}
+            _stub_keys = {"@id", "@type", "rdfs:isDefinedBy", "dcterms:conformsTo", "isDescriptionFor"}
+            _phys_body = bool(set(phys) - {"@id", "@type", "skos:prefLabel"})
+            if not _phys_body and not (set(node) - _stub_keys):
                 continue
-            phys = node.get("isDescriptionFor", {})
             phys_types = phys.get("@type", [])
             if isinstance(phys_types, str):
                 phys_types = [phys_types]
@@ -3381,8 +3388,7 @@ class AuthoringWorkspace:
             # rides the described battery; older packages carried it on the
             # spec node - read both, described side first.
             specs = _specs_from_property_nodes(
-                (phys.get("hasProperty") if isinstance(phys, dict) else None)
-                or node.get("hasProperty", [])
+                phys.get("hasProperty") or node.get("hasProperty", [])
             )
 
             # size_code: the canonical shape emits it as schema:size; older
@@ -5744,6 +5750,7 @@ class AuthoringWorkspace:
                 "@id":   cell_iri,
                 "dcterms:conformsTo":  {"@id": cell_spec_id},   # instance-of link
                 "hasDescription":      {"@id": cell_spec_id},
+                "schema:isVariantOf":  {"@id": cell_spec_id},   # ProductModel persona
             }
             # The electrode records this cell was built from. The spec body is in
             # hand here, so a half cell's counter electrode also carries

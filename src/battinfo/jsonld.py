@@ -93,6 +93,10 @@ def _load_test_method_context_terms() -> dict:
         "ReversibleHydrogenElectrode", "SaturatedCalomelElectrode",
         "SilverChlorideElectrode", "ZincElectrode",
         "RealData", "CelsiusTemperature", "MeasuredProperty", "NominalProperty",
+        # Material-spec property classes the descriptor path can emit
+        # (specific_capacity mapped but its class was missing from the
+        # records context, so it silently dropped at expansion).
+        "SpecificCapacity",
         # Characterisation-method classes a test protocol types itself with
         # (see TEST_METHOD_CLASS). Pulled from the same bundled context, so the
         # emitter, the hosted context and the validator allowlist cannot drift.
@@ -668,10 +672,11 @@ def cell_spec_to_jsonld(record: dict) -> dict:
     (:func:`battinfo.transform.cell_spec_node.build_cell_spec_node`) so
     ``record_to_jsonld`` emits the exact node the resolver artifact and the
     Zenodo/local publication graph emit: ``@type ["BatteryCellSpecification",
-    "schema:CreativeWork"]``, the physical EMMO class stack under
-    ``isDescriptionFor`` (chemistry/format/electrode bases via @type stacking,
-    not literal predicates), quantities as an EMMO ``hasProperty`` array, and a
-    standard-vocabulary (dcterms/PROV) provenance node.
+    "schema:ProductModel", "schema:CreativeWork"]``, with the described battery
+    under ``isDescriptionFor`` carrying the physical EMMO class stack
+    (chemistry/format/electrode bases via @type stacking, not literal
+    predicates) plus the EMMO ``hasProperty`` quantities and composition, and a
+    standard-vocabulary (dcterms/PROV) provenance node on the spec.
 
     The inline ``@context`` is the records context extended with the
     prefLabel -> compact-IRI table, so every emitted ``@type`` resolves offline.

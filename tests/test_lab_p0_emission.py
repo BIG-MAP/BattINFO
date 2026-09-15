@@ -142,8 +142,9 @@ def _composed_record(*, inline: bool = True, refs: bool = True) -> dict:
 def _assert_composition_tree(node: dict) -> None:
     """The shared assertions: composition tree, mass fractions, five ref IRIs,
     and constituent → material-spec edges, on a cell-spec JSON-LD node (the
-    physical payload rides the described battery)."""
-    node = node.get("isDescriptionFor", node)
+    physical payload rides the described battery — indexed unconditionally so
+    a regression back to the flat shape fails loudly)."""
+    node = node["isDescriptionFor"]
     pe = node["hasPositiveElectrode"]
     assert pe["@id"] == REFS["positive_electrode_spec_id"]
     coating = pe["hasCoating"]

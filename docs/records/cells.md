@@ -168,7 +168,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 
 What to notice:
 
-- The node is EMMO-typed (`BatteryCellSpecification`) and each spec property becomes a typed quantity under `hasProperty`.
+- The spec node is the datasheet: name, manufacturer, codes. The cell it describes — with its capacity, voltage and electrodes — hangs off `isDescriptionFor`, because a document doesn't have a positive electrode.
 - `schema:manufacturer` and `schema:model` carry the identity that seeded the IRI.
 
 
@@ -2403,7 +2403,7 @@ cell-spec  →  cell-instance  →  test  →  dataset
 electrode-spec / electrolyte-spec / separator-spec / housing-spec  →  material-specs
 ```
 
-**What the spec node says.** One node, three personas: the EMMO information artifact (`BatteryCellSpecification` — id, schema version, provenance, citation), the schema.org catalogue entity (`schema:ProductModel` — name, manufacturer, brand, size and IEC codes, release date), and the record (`schema:CreativeWork`). Every EMMO-axiomatized physical fact — `hasProperty` quantities, electrode/electrolyte/separator/housing composition, construction — rides the described battery under `isDescriptionFor`: those relations' subjects must be electrochemical cells, never documents.
+**What the spec node says.** One node, three personas: the EMMO information artifact (`BatteryCellSpecification` — id, schema version, provenance, citation), the schema.org catalogue entity (`schema:ProductModel` — name, manufacturer, brand, size and IEC codes, release date), and the record (`schema:CreativeWork`). Every EMMO-axiomatized physical fact — `hasProperty` quantities, electrode/electrolyte/separator/housing composition, construction — rides the described battery under `isDescriptionFor`: those relations declare physical subjects (`hasProperty`'s domain is `Referent`, `hasElectrolyte`'s is `ElectrochemicalCell`), so asserting them on the document would entail a false typing.
 
-**The described battery, precisely.** The `isDescriptionFor` individual is an existential witness — "there exists a battery such that …" — satisfied by any conforming unit; it is not a prototype object and no identity holds between it and any cell instance. Declared values carry their epistemic status in the property-nature class (`NominalProperty` / `RatedProperty`), not in a universality claim. An instance links to its spec via `schema:isVariantOf` and carries its own physical typing — the schema.org ProductModel pattern on the schema layer, EMMO's own `BatterySpecification ⊑ isDescriptionFor some Battery` axiom on the semantic layer (which is also where the existential commitment for never-built designs comes from).
+**The described battery, precisely.** The `isDescriptionFor` individual is an existential witness — "there exists a battery such that …" — satisfied by at least one conforming unit (the universal reading a datasheet gestures at is not expressible at individual level); it is not a prototype object and no identity is asserted between it and any cell instance. Declared values carry their epistemic status in the property-nature class (today `ConventionalProperty`, a value attributed by agreement; `RatedProperty` joins when it is published upstream), not in a universality claim. An instance links to its spec via `hasDescription` and `schema:isVariantOf` and carries its own physical typing — the schema.org ProductModel pattern on the schema layer, EMMO's own `BatterySpecification ⊑ isDescriptionFor some Battery` axiom on the semantic layer (which is also where the existential commitment for never-built designs comes from). For SPARQL, the property path `isDescriptionFor?/hasProperty` reads both this shape and pre-pattern documents in one query.
 :::

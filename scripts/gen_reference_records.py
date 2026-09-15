@@ -568,8 +568,10 @@ FAMILIES = [
                 "fn": snippet_cell_spec,
                 "record_type": "cell-spec",
                 "notice": [
-                    "The node is EMMO-typed (`BatteryCellSpecification`) and each "
-                    "spec property becomes a typed quantity under `hasProperty`.",
+                    "The spec node is the datasheet: name, manufacturer, codes. "
+                    "The cell it describes — with its capacity, voltage and "
+                    "electrodes — hangs off `isDescriptionFor`, because a "
+                    "document doesn't have a positive electrode.",
                     "`schema:manufacturer` and `schema:model` carry the identity "
                     "that seeded the IRI.",
                 ],

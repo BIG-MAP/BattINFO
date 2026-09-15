@@ -38,8 +38,9 @@ def _battery_node(spec: CellSpec) -> dict:
         spec_dict["property"] = spec_dict["properties"]
     doc = to_jsonld({"schema_version": "1.0.0", "specification": spec_dict}, target="domain-battery")
     node = doc["@graph"][0]
-    # Physical payload rides the described battery on spec nodes.
-    return node.get("isDescriptionFor", node)
+    # Physical payload rides the described battery on spec nodes — index
+    # unconditionally so a regression to the flat shape fails loudly.
+    return node["isDescriptionFor"]
 
 
 def _as_list(value):
@@ -106,14 +107,13 @@ def test_housing_emits_format_typed_case_and_constituents() -> None:
     assert case_node["schema:size"] == "173x115x45"
     assert {"Volume", "Mass"} <= _prop_types(case_node)
 
-    terminals = _as_list(battery.get("hasTerminal"))
+    # Terminals ride hasConstituent with the other assembly parts — hasTerminal
+    # has no context term, so a dedicated relation would drop them at expansion.
+    constituent_nodes = [n for n in _as_list(battery.get("hasConstituent")) if isinstance(n, dict)]
+    terminals = [n for n in constituent_nodes if n.get("@type") == "Terminal"]
     assert {t.get("schema:additionalType") for t in terminals} == {"positive", "negative"}
-    assert all(t["@type"] == "Terminal" for t in terminals)
 
-    constituent_types = {
-        t for node in _as_list(battery.get("hasConstituent")) if isinstance(node, dict)
-        for t in (_as_list(node.get("@type")))
-    }
+    constituent_types = {t for node in constituent_nodes for t in _as_list(node.get("@type"))}
     assert "Seal" in constituent_types
     assert "CellLid" in constituent_types  # cap
 

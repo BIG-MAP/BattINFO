@@ -263,6 +263,85 @@ def test_import_reads_new_shape_package_with_descriptors_intact(tmp_path: Path) 
     assert spec.properties["nominal_voltage"]["unit"] == "V"
 
 
+def test_import_skips_external_spec_stub_with_reference_only_description(tmp_path: Path) -> None:
+    """A typed stub for an externally-defined spec must not import as an empty
+    spec — even when it carries a reference-only isDescriptionFor, which the
+    canonical shape puts on every spec node (so its mere presence is not a
+    descriptive body)."""
+    doc = {
+        "@context": {"schema": "https://schema.org/", "rdfs": "http://www.w3.org/2000/01/rdf-schema#"},
+        "@graph": [
+            {
+                "@id": SPEC_IRI,
+                "@type": "BatteryCellSpecification",
+                "rdfs:isDefinedBy": {"@id": SPEC_IRI},
+                "isDescriptionFor": {"@id": "https://example.org/cell/1"},
+            }
+        ],
+    }
+    ws, _counts = _import_package(tmp_path, doc)
+    assert ws._ws.cell_specs == []
+
+
+def test_import_tolerates_string_isDescriptionFor(tmp_path: Path) -> None:
+    """"isDescriptionFor": "<iri>" is legal JSON-LD under the @id-typed context
+    term; a spec node with a real body must import without crashing on it."""
+    doc = {
+        "@context": {"schema": "https://schema.org/"},
+        "@graph": [
+            {
+                "@id": SPEC_IRI,
+                "@type": ["BatteryCellSpecification", "schema:CreativeWork"],
+                "schema:name": "Hand-authored spec",
+                "schema:manufacturer": {"@type": "schema:Organization", "schema:name": "ACME"},
+                "isDescriptionFor": "https://example.org/cell/1",
+            }
+        ],
+    }
+    ws, _counts = _import_package(tmp_path, doc)
+    spec = ws._ws.cell_specs[0]
+    assert spec.id == SPEC_IRI
+    assert spec.manufacturer == "ACME"
+
+
+def test_import_keeps_minimal_spec_without_properties(tmp_path: Path) -> None:
+    """A spec with catalogue facts but no quantities or composition is a real
+    spec, not a stub — the stub guard must not skip it."""
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        node = build_cell_spec_node(
+            _cell_spec_record(properties={})
+        )
+    # Strip quantities entirely so only catalogue facts + typed witness remain.
+    node.get("isDescriptionFor", {}).pop("hasProperty", None)
+    doc = {"@context": _new_shape_package()["@context"], "@graph": [node]}
+    ws, _counts = _import_package(tmp_path, doc)
+    spec = ws._ws.cell_specs[0]
+    assert spec.id == SPEC_IRI
+    assert spec.format == "cylindrical"
+
+
+def test_batterypass_target_follows_the_description_pattern() -> None:
+    """target="batterypass" wraps the domain-battery emission, so its spec node
+    must carry the physical payload under isDescriptionFor too — this public
+    target had no shape pin at all."""
+    from battinfo.transform.json_to_jsonld import to_jsonld
+
+    record = _cell_spec_record()
+    doc = to_jsonld(
+        {
+            "schema_version": record["schema_version"],
+            "specification": {**record["cell_spec"], "property": record["properties"]},
+        },
+        target="batterypass",
+    )
+    assert "batterypass:BatteryPassportRecord" in doc["@type"]
+    node = doc["@graph"][0]
+    described = node["isDescriptionFor"]
+    assert "hasProperty" in described
+    assert not any(key.startswith("has") for key in node)
+
+
 # ── Step 3: C shares the builder with B ──────────────────────────────────────
 
 

@@ -454,8 +454,18 @@ function relationLabel(key: string): string {
 
 /** Pull a datasheet-style summary out of the framed canonical document. */
 export function extractSummary(framed: Record<string, unknown>): SummaryModel {
+  // Canonical shape: the physical payload (hasProperty, composition) rides the
+  // described individual under isDescriptionFor; older documents carry it on
+  // the node itself. Identity (name, manufacturer, @id) stays top-level either
+  // way, so read physics from both places and identity from the framed root.
+  const desc = framed["isDescriptionFor"];
+  const phys =
+    desc && typeof desc === "object" && !Array.isArray(desc)
+      ? (desc as Record<string, unknown>)
+      : framed;
+
   const props: PropertyRow[] = [];
-  const raw = framed["hasProperty"];
+  const raw = phys["hasProperty"] ?? framed["hasProperty"];
   const list = Array.isArray(raw) ? raw : raw ? [raw] : [];
   for (const item of list) {
     if (!item || typeof item !== "object") continue;
@@ -464,7 +474,11 @@ export function extractSummary(framed: Record<string, unknown>): SummaryModel {
   }
 
   const components: ComponentRow[] = [];
-  for (const [key, value] of Object.entries(framed)) {
+  const physEntries =
+    phys === framed
+      ? Object.entries(framed)
+      : [...Object.entries(framed), ...Object.entries(phys)];
+  for (const [key, value] of physEntries) {
     if (!key.startsWith("has") || key === "hasProperty") continue;
     const nodes = Array.isArray(value) ? value : [value];
     for (const n of nodes) {

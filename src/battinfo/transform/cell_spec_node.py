@@ -10,12 +10,16 @@ so the two paths emit byte-identical spec nodes for the same canonical record.
 
 The node shape is the canonical target shape:
 
-- ``@type: ["BatteryCellSpecification", "schema:CreativeWork"]`` — the spec is an
-  information artifact, not a physical battery.
-- ``isDescriptionFor.@type`` carries the physical EMMO class stack derived from the
-  descriptors (format / chemistry / electrode bases / IEC code / rechargeable) via
-  ``entity_type_map.json`` — chemistry and format are expressed through @type
-  stacking, not as literal predicates.
+- ``@type: ["BatteryCellSpecification", "schema:ProductModel", "schema:CreativeWork"]``
+  — the spec is an information artifact (EMMO Description subclass), a catalogue
+  entry (schema.org ProductModel) and a record (schema.org CreativeWork); never a
+  physical battery.
+- ``isDescriptionFor`` carries the described battery: the physical EMMO class stack
+  derived from the descriptors (format / chemistry / electrode bases / IEC code /
+  rechargeable) via ``entity_type_map.json`` — chemistry and format are expressed
+  through @type stacking, not as literal predicates — plus the ``hasProperty``
+  quantities, composition and construction. No physical relation stays on the
+  spec node.
 - Quantities use the EMMO ``hasProperty`` pattern via
   :func:`battinfo.transform.json_to_jsonld._descriptor_quantity_node`
   (list ``@type`` of ``[PropertyClass, co-type]``, ``hasNumericalPart`` typed
@@ -175,7 +179,6 @@ _COMPOSITION_CONTEXT_TERMS: tuple[str, ...] = (
     "hasSolvent",
     "hasAdditive",
     "hasCase",
-    "hasTerminal",
     "hasConstituent",
     # component / constituent classes
     "Electrode",

@@ -1005,7 +1005,7 @@ _HARDWARE_PART_TYPE = {
 
 
 def _descriptor_housing_to_jsonld(housing: Any, fmt: Any) -> dict[str, Any]:
-    """Emit the Housing model as JSON-LD relations (hasCase / hasTerminal / hasConstituent).
+    """Emit the Housing model as JSON-LD relations (hasCase / hasConstituent).
 
     Returns a {relation: node-or-list} dict to merge into the battery node. Each part is a
     holder; its ``property`` dict rides the generic property emitter.
@@ -1085,10 +1085,11 @@ def _descriptor_housing_to_jsonld(housing: Any, fmt: Any) -> dict[str, Any]:
         if props:
             node["hasProperty"] = props[0] if len(props) == 1 else props
         terminal_nodes.append(node)
-    if terminal_nodes:
-        relations["hasTerminal"] = terminal_nodes[0] if len(terminal_nodes) == 1 else terminal_nodes
 
-    constituents: list[dict[str, Any]] = []
+    # Terminals list under hasConstituent with the other assembly parts:
+    # hasTerminal has no term in the context or ontology (upstream ask), so
+    # emitting it would silently drop the terminals at expansion.
+    constituents: list[dict[str, Any]] = list(terminal_nodes)
     for seal in housing.get("seals") or []:
         if not isinstance(seal, dict):
             continue
@@ -2881,7 +2882,7 @@ def _component_holder_node(family: str, body: dict[str, Any]) -> dict[str, Any]:
         # published axioms read CoinCell => hasCase some CoinCase.
         relations = _descriptor_housing_to_jsonld(body, body.get("cell_format"))
         constituents: list[Any] = []
-        for relation in ("hasCase", "hasTerminal", "hasConstituent"):
+        for relation in ("hasCase", "hasConstituent"):
             value = relations.pop(relation, None)
             if value is None:
                 continue

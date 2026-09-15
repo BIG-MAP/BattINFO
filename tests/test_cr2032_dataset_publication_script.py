@@ -231,6 +231,11 @@ def test_publish_dataset_metadata_with_cell_spec_only(tmp_path: Path) -> None:
     assert bundle.cell_specification is not None
     assert bundle.cell_specification.id == bundle.cell_spec.id
     assert bundle.cell_spec.name == "ExampleCell 21700-A"
+    # Properties round-trip through the described battery under isDescriptionFor
+    # (the canonical location) — a silent {} here means the loader is reading
+    # the spec node top level only.
+    assert bundle.cell_spec.properties["nominal_voltage"]["value"] == 3.7
+    assert bundle.cell_spec.properties["nominal_voltage"]["unit"] == "V"
     assert bundle.test.protocol.name == "cycling"
     assert bundle.dataset.name == "ExampleCell 21700-A measurements for example-cell-001"
 

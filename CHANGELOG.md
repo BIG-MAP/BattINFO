@@ -26,14 +26,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   `isDescriptionFor`; a material spec types `[Description,
   schema:ProductModel, schema:CreativeWork]` with the substance node
   (chemsub class, identity anchors, formula, properties) on the described
-  individual. Spec nodes are dual-persona by design: the EMMO information
-  artifact plus `schema:ProductModel` (newly stacked on every spec family)
-  carrying the catalogue facts - name, manufacturer, brand, codes - in
-  their documented schema.org home, with instances linking by
+  individual. Spec nodes carry three personas by design: the EMMO
+  information artifact, `schema:ProductModel` (newly stacked on every spec
+  family) carrying the catalogue facts - name, manufacturer, brand, codes
+  - in their documented schema.org home, and `schema:CreativeWork` for the
+  record, with instances linking by `hasDescription` and
   `schema:isVariantOf`. The described individual is an existential
-  witness: satisfied by any conforming unit, no identity with any
-  instance, epistemic status carried by the property-nature classes
-  (documented in the cells design notes). The package importer reads the
+  witness: satisfied by at least one conforming unit, no identity asserted
+  with any instance, epistemic status carried by the property-nature
+  classes (documented in the cells design notes). The package importer reads the
   new location with old-shape fallback; published records stay valid
   forever - the old shape simply stops being produced, and the Flores v5
   corpus rebuild republishes in this final shape.

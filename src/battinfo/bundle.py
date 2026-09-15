@@ -3292,6 +3292,11 @@ class BattinfoBundle(BundleJsonModel):
         )
         properties: dict[str, Any] = {}
         property_source = cell_specification_node if cell_specification_node is not None else cell_spec_node
+        # Canonical shape: hasProperty rides the described individual under
+        # isDescriptionFor; older packages carried it on the spec node.
+        described_source = property_source.get("isDescriptionFor")
+        if isinstance(described_source, Mapping) and described_source.get("hasProperty"):
+            property_source = described_source
         for item in property_source.get("hasProperty", []):
             if isinstance(item, Mapping):
                 extracted = _extract_property_item(item)
