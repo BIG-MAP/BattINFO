@@ -49,7 +49,8 @@ def _as_list(value):
 
 
 def _battery_node(spec: CellSpecification) -> dict:
-    return to_jsonld(spec.to_library_record(), target="domain-battery")["@graph"][0]
+    # The physical payload rides the described battery on the spec node.
+    return to_jsonld(spec.to_library_record(), target="domain-battery")["@graph"][0]["isDescriptionFor"]
 
 
 SPEC_IRI = "https://w3id.org/battinfo/spec/0123-4567-89ab-cdef"

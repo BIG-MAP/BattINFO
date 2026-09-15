@@ -102,6 +102,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   ],
   "@type": [
     "Description",
+    "schema:ProductModel",
     "schema:CreativeWork"
   ],
   "isDescriptionFor": {
@@ -267,6 +268,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   ],
   "@type": [
     "Description",
+    "schema:ProductModel",
     "schema:CreativeWork"
   ],
   "isDescriptionFor": {
@@ -377,6 +379,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   ],
   "@type": [
     "Description",
+    "schema:ProductModel",
     "schema:CreativeWork"
   ],
   "isDescriptionFor": {
@@ -533,6 +536,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   ],
   "@type": [
     "Description",
+    "schema:ProductModel",
     "schema:CreativeWork"
   ],
   "isDescriptionFor": {
@@ -662,6 +666,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   ],
   "@type": [
     "Description",
+    "schema:ProductModel",
     "schema:CreativeWork"
   ],
   "isDescriptionFor": {

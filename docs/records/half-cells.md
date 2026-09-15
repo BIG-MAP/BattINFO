@@ -88,6 +88,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "@context": "https://w3id.org/battinfo/context/records/v1.json",
   "@type": [
     "BatteryCellSpecification",
+    "schema:ProductModel",
     "schema:CreativeWork"
   ],
   "@id": "https://w3id.org/battinfo/spec/t4wz-ff8s-6vp6-af48",
@@ -107,25 +108,25 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "HalfCellDevice",
       "LithiumIonBattery"
     ],
-    "skos:prefLabel": "Example Lab HC-GR-01"
+    "skos:prefLabel": "Example Lab HC-GR-01",
+    "hasCounterElectrode": {
+      "hasActiveMaterial": {
+        "@type": [
+          "Lithium",
+          "ActiveMaterial"
+        ],
+        "schema:name": "Lithium metal"
+      },
+      "@type": [
+        "CounterElectrode",
+        "ReferenceElectrode"
+      ]
+    },
+    "hasWorkingElectrode": {
+      "@id": "https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch"
+    }
   },
   "schema:schemaVersion": "0.2.0",
-  "hasCounterElectrode": {
-    "hasActiveMaterial": {
-      "@type": [
-        "Lithium",
-        "ActiveMaterial"
-      ],
-      "schema:name": "Lithium metal"
-    },
-    "@type": [
-      "CounterElectrode",
-      "ReferenceElectrode"
-    ]
-  },
-  "hasWorkingElectrode": {
-    "@id": "https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch"
-  },
   "dcterms:source": {
     "@type": "prov:Entity",
     "dcterms:type": "lab",
@@ -221,6 +222,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "@context": "https://w3id.org/battinfo/context/records/v1.json",
   "@type": [
     "BatteryCellSpecification",
+    "schema:ProductModel",
     "schema:CreativeWork"
   ],
   "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
@@ -239,32 +241,32 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "ThreeElectrodeCellDevice",
       "LithiumIonBattery"
     ],
-    "skos:prefLabel": "Example Lab 3E-GR-01"
+    "skos:prefLabel": "Example Lab 3E-GR-01",
+    "hasCounterElectrode": {
+      "hasActiveMaterial": {
+        "@type": [
+          "Lithium",
+          "ActiveMaterial"
+        ],
+        "schema:name": "Lithium metal"
+      },
+      "@type": "CounterElectrode"
+    },
+    "hasReferenceElectrode": {
+      "hasActiveMaterial": {
+        "@type": [
+          "Lithium",
+          "ActiveMaterial"
+        ],
+        "schema:name": "Lithium metal"
+      },
+      "@type": "ReferenceElectrode"
+    },
+    "hasWorkingElectrode": {
+      "@id": "https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch"
+    }
   },
   "schema:schemaVersion": "0.2.0",
-  "hasCounterElectrode": {
-    "hasActiveMaterial": {
-      "@type": [
-        "Lithium",
-        "ActiveMaterial"
-      ],
-      "schema:name": "Lithium metal"
-    },
-    "@type": "CounterElectrode"
-  },
-  "hasReferenceElectrode": {
-    "hasActiveMaterial": {
-      "@type": [
-        "Lithium",
-        "ActiveMaterial"
-      ],
-      "schema:name": "Lithium metal"
-    },
-    "@type": "ReferenceElectrode"
-  },
-  "hasWorkingElectrode": {
-    "@id": "https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch"
-  },
   "dcterms:source": {
     "@type": "prov:Entity",
     "dcterms:type": "lab",
@@ -318,6 +320,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "@context": "https://w3id.org/battinfo/context/records/v1.json",
   "@type": [
     "BatteryCellSpecification",
+    "schema:ProductModel",
     "schema:CreativeWork"
   ],
   "@id": "https://w3id.org/battinfo/spec/g7hd-4wkq-2mtx-9npf",
@@ -337,25 +340,25 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "HalfCellDevice",
       "LithiumIonBattery"
     ],
-    "skos:prefLabel": "Graphite || Li coin half cell"
+    "skos:prefLabel": "Graphite || Li coin half cell",
+    "hasCounterElectrode": {
+      "hasActiveMaterial": {
+        "@type": [
+          "Lithium",
+          "ActiveMaterial"
+        ],
+        "schema:name": "Lithium metal"
+      },
+      "@type": [
+        "CounterElectrode",
+        "ReferenceElectrode"
+      ]
+    },
+    "hasWorkingElectrode": {
+      "@id": "https://w3id.org/battinfo/spec/d7qr-n581-74c3-7g7r"
+    }
   },
   "schema:schemaVersion": "0.2.0",
-  "hasCounterElectrode": {
-    "hasActiveMaterial": {
-      "@type": [
-        "Lithium",
-        "ActiveMaterial"
-      ],
-      "schema:name": "Lithium metal"
-    },
-    "@type": [
-      "CounterElectrode",
-      "ReferenceElectrode"
-    ]
-  },
-  "hasWorkingElectrode": {
-    "@id": "https://w3id.org/battinfo/spec/d7qr-n581-74c3-7g7r"
-  },
   "dcterms:source": {
     "@type": "prov:Entity",
     "dcterms:type": "lab",
@@ -400,6 +403,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "@context": "https://w3id.org/battinfo/context/records/v1.json",
   "@type": [
     "BatteryCellSpecification",
+    "schema:ProductModel",
     "schema:CreativeWork"
   ],
   "@id": "https://w3id.org/battinfo/spec/n8mw-5tkx-3qvd-7hfp",
@@ -419,25 +423,25 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "HalfCellDevice",
       "LithiumIonBattery"
     ],
-    "skos:prefLabel": "NMC811 || Li coin half cell"
+    "skos:prefLabel": "NMC811 || Li coin half cell",
+    "hasCounterElectrode": {
+      "hasActiveMaterial": {
+        "@type": [
+          "Lithium",
+          "ActiveMaterial"
+        ],
+        "schema:name": "Lithium metal"
+      },
+      "@type": [
+        "CounterElectrode",
+        "ReferenceElectrode"
+      ]
+    },
+    "hasWorkingElectrode": {
+      "@id": "https://w3id.org/battinfo/spec/qfjh-7xyr-ga1k-tjez"
+    }
   },
   "schema:schemaVersion": "0.2.0",
-  "hasCounterElectrode": {
-    "hasActiveMaterial": {
-      "@type": [
-        "Lithium",
-        "ActiveMaterial"
-      ],
-      "schema:name": "Lithium metal"
-    },
-    "@type": [
-      "CounterElectrode",
-      "ReferenceElectrode"
-    ]
-  },
-  "hasWorkingElectrode": {
-    "@id": "https://w3id.org/battinfo/spec/qfjh-7xyr-ga1k-tjez"
-  },
   "dcterms:source": {
     "@type": "prov:Entity",
     "dcterms:type": "lab",
@@ -482,6 +486,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "@context": "https://w3id.org/battinfo/context/records/v1.json",
   "@type": [
     "BatteryCellSpecification",
+    "schema:ProductModel",
     "schema:CreativeWork"
   ],
   "@id": "https://w3id.org/battinfo/spec/s4kt-8njw-6xpd-2mvh",
@@ -501,35 +506,35 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "HalfCellDevice",
       "SodiumIonBattery"
     ],
-    "skos:prefLabel": "Hard carbon || Na coin half cell"
-  },
-  "schema:schemaVersion": "0.2.0",
-  "hasWorkingElectrode": {
-    "hasCoating": {
-      "@type": "ElectrodeCoating",
+    "skos:prefLabel": "Hard carbon || Na coin half cell",
+    "hasWorkingElectrode": {
+      "hasCoating": {
+        "@type": "ElectrodeCoating",
+        "hasActiveMaterial": {
+          "@type": [
+            "HardCarbon",
+            "ActiveMaterial"
+          ],
+          "schema:name": "Hard carbon"
+        }
+      },
+      "@type": "WorkingElectrode"
+    },
+    "hasCounterElectrode": {
       "hasActiveMaterial": {
         "@type": [
-          "HardCarbon",
+          "Sodium",
           "ActiveMaterial"
         ],
-        "schema:name": "Hard carbon"
-      }
-    },
-    "@type": "WorkingElectrode"
-  },
-  "hasCounterElectrode": {
-    "hasActiveMaterial": {
+        "schema:name": "Sodium metal"
+      },
       "@type": [
-        "Sodium",
-        "ActiveMaterial"
-      ],
-      "schema:name": "Sodium metal"
-    },
-    "@type": [
-      "CounterElectrode",
-      "ReferenceElectrode"
-    ]
+        "CounterElectrode",
+        "ReferenceElectrode"
+      ]
+    }
   },
+  "schema:schemaVersion": "0.2.0",
   "dcterms:source": {
     "@type": "prov:Entity",
     "dcterms:type": "lab",
@@ -574,6 +579,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "@context": "https://w3id.org/battinfo/context/records/v1.json",
   "@type": [
     "BatteryCellSpecification",
+    "schema:ProductModel",
     "schema:CreativeWork"
   ],
   "@id": "https://w3id.org/battinfo/spec/w3fq-9rkm-4tpx-8nhd",
@@ -592,32 +598,32 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "ThreeElectrodeCellDevice",
       "LithiumIonBattery"
     ],
-    "skos:prefLabel": "Si-Gr three-electrode pouch cell"
+    "skos:prefLabel": "Si-Gr three-electrode pouch cell",
+    "hasCounterElectrode": {
+      "hasActiveMaterial": {
+        "@type": [
+          "Lithium",
+          "ActiveMaterial"
+        ],
+        "schema:name": "Lithium metal"
+      },
+      "@type": "CounterElectrode"
+    },
+    "hasReferenceElectrode": {
+      "hasActiveMaterial": {
+        "@type": [
+          "Lithium",
+          "ActiveMaterial"
+        ],
+        "schema:name": "Lithium metal"
+      },
+      "@type": "ReferenceElectrode"
+    },
+    "hasWorkingElectrode": {
+      "@id": "https://w3id.org/battinfo/spec/qw3j-we77-zzj1-ya55"
+    }
   },
   "schema:schemaVersion": "0.2.0",
-  "hasCounterElectrode": {
-    "hasActiveMaterial": {
-      "@type": [
-        "Lithium",
-        "ActiveMaterial"
-      ],
-      "schema:name": "Lithium metal"
-    },
-    "@type": "CounterElectrode"
-  },
-  "hasReferenceElectrode": {
-    "hasActiveMaterial": {
-      "@type": [
-        "Lithium",
-        "ActiveMaterial"
-      ],
-      "schema:name": "Lithium metal"
-    },
-    "@type": "ReferenceElectrode"
-  },
-  "hasWorkingElectrode": {
-    "@id": "https://w3id.org/battinfo/spec/qw3j-we77-zzj1-ya55"
-  },
   "dcterms:source": {
     "@type": "prov:Entity",
     "dcterms:type": "lab",

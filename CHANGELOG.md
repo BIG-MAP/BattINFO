@@ -16,6 +16,28 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   `kind=` kwarg included) and normalizes to `active_material_kind` on
   round-trip; the packaged examples are rewritten to the canonical key.
 
+- **The description pattern is complete: cell and material specs emit as
+  descriptions (JSON-LD dialect change).** The last two spec families
+  carried their physical payload on the specification node - a reasoner
+  would classify the document as an electrochemical cell. Every
+  EMMO-axiomatized physical fact (hasProperty quantities, electrode /
+  electrolyte / separator / housing composition, construction, role
+  holders, reference merges) now rides the described battery under
+  `isDescriptionFor`; a material spec types `[Description,
+  schema:ProductModel, schema:CreativeWork]` with the substance node
+  (chemsub class, identity anchors, formula, properties) on the described
+  individual. Spec nodes are dual-persona by design: the EMMO information
+  artifact plus `schema:ProductModel` (newly stacked on every spec family)
+  carrying the catalogue facts - name, manufacturer, brand, codes - in
+  their documented schema.org home, with instances linking by
+  `schema:isVariantOf`. The described individual is an existential
+  witness: satisfied by any conforming unit, no identity with any
+  instance, epistemic status carried by the property-nature classes
+  (documented in the cells design notes). The package importer reads the
+  new location with old-shape fallback; published records stay valid
+  forever - the old shape simply stops being produced, and the Flores v5
+  corpus rebuild republishes in this final shape.
+
 - **A housing is the enclosure assembly; all its parts ride
   `hasConstituent`.** EMMO's own definitions separate the case (the
   container) from the lid that closes it and the terminals, seals, and

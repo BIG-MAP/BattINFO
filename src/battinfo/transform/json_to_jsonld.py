@@ -2049,8 +2049,11 @@ def _descriptor_specification_to_jsonld(specification: dict[str, Any]) -> dict[s
     battery_types_deduped = list(dict.fromkeys(battery_type_list))
     physical_type: str | list[str] = battery_types_deduped[0] if len(battery_types_deduped) == 1 else battery_types_deduped
 
+    # Three personas on one node (docs/records/cells.md): information
+    # artifact + schema.org ProductModel + record. Physical relations and
+    # quantities ride the DESCRIBED battery under isDescriptionFor.
     battery: dict[str, Any] = {
-        "@type": ["BatteryCellSpecification", "schema:CreativeWork"],
+        "@type": ["BatteryCellSpecification", "schema:ProductModel", "schema:CreativeWork"],
         "isDescriptionFor": {"@type": physical_type},
     }
     product_type = specification.get("product_type")
@@ -2075,7 +2078,8 @@ def _descriptor_specification_to_jsonld(specification: dict[str, Any]) -> dict[s
     if specification.get("size_code"):
         battery[size_code_target] = specification["size_code"]
 
-    _apply_specification_composition(battery, specification)
+    described = battery["isDescriptionFor"]
+    _apply_specification_composition(described, specification)
 
     properties = specification.get("property")
     if isinstance(properties, dict):
@@ -2085,9 +2089,9 @@ def _descriptor_specification_to_jsonld(specification: dict[str, Any]) -> dict[s
             if quant:
                 property_nodes.append(quant)
         if property_nodes:
-            battery["hasProperty"] = property_nodes
+            described["hasProperty"] = property_nodes
 
-    _apply_specification_structure_and_refs(battery, specification)
+    _apply_specification_structure_and_refs(described, specification)
 
     comment = _comment_value(specification.get("comment"))
     if comment is not None:
@@ -2624,8 +2628,38 @@ def _to_domain_battery_jsonld_parameter_set(data: dict[str, Any]) -> dict[str, A
 
 
 def _to_domain_battery_jsonld_material(data: dict[str, Any]) -> dict[str, Any]:
-    body = data.get("material_spec") if isinstance(data.get("material_spec"), dict) else data.get("material")
-    node = _material_node(body if isinstance(body, dict) else {})
+    is_spec = isinstance(data.get("material_spec"), dict)
+    body = data.get("material_spec") if is_spec else data.get("material")
+    body = body if isinstance(body, dict) else {}
+    node = _material_node(body)
+    if is_spec:
+        # A material spec is an information artifact + catalogue entity, not
+        # the substance: it types [Description, schema:ProductModel,
+        # schema:CreativeWork] (no MaterialSpecification class upstream yet -
+        # see ontology-additions-needed) and the ENTIRE substance node -
+        # chemsub class stack, sameAs/exactMatch identity, formula,
+        # properties, processing - moves under isDescriptionFor. Material
+        # LOTS are physical and keep their typing.
+        described = node
+        node = {"@type": ["Description", "schema:ProductModel", "schema:CreativeWork"]}
+        if "@id" in described:
+            node["@id"] = described.pop("@id")
+        name = body.get("name")
+        if isinstance(name, str) and name:
+            node["schema:name"] = name
+            described["skos:prefLabel"] = name
+            described.pop("schema:name", None)
+        manufacturer = body.get("manufacturer")
+        manufacturer_name = (
+            manufacturer.get("name") if isinstance(manufacturer, Mapping) else manufacturer
+        )
+        if isinstance(manufacturer_name, str) and manufacturer_name:
+            node["schema:manufacturer"] = {
+                "@type": "schema:Organization", "schema:name": manufacturer_name,
+            }
+        if isinstance(body.get("product_id"), str) and body["product_id"]:
+            node["schema:productID"] = body["product_id"]
+        node["isDescriptionFor"] = described
     citation = _citation_to_jsonld(data.get("provenance"))
     if citation is not None:
         node["schema:citation"] = citation
@@ -2786,7 +2820,7 @@ def _to_domain_battery_jsonld_electrode(data: dict[str, Any]) -> dict[str, Any]:
         described = node
         if isinstance(body.get("name"), str) and body["name"]:
             described["skos:prefLabel"] = body["name"]
-        node = {"@type": ["Description", "schema:CreativeWork"], "isDescriptionFor": described}
+        node = {"@type": ["Description", "schema:ProductModel", "schema:CreativeWork"], "isDescriptionFor": described}
     if isinstance(body.get("id"), str):
         node["@id"] = body["id"]
     if isinstance(body.get("name"), str) and body["name"]:
@@ -2891,7 +2925,7 @@ def _to_domain_battery_jsonld_component(data: dict[str, Any]) -> dict[str, Any]:
         described = node
         if isinstance(body.get("name"), str) and body["name"]:
             described["skos:prefLabel"] = body["name"]
-        node = {"@type": ["Description", "schema:CreativeWork"], "isDescriptionFor": described}
+        node = {"@type": ["Description", "schema:ProductModel", "schema:CreativeWork"], "isDescriptionFor": described}
     if isinstance(body.get("id"), str):
         node["@id"] = body["id"]
     if isinstance(body.get("name"), str) and body["name"] and "schema:name" not in node:

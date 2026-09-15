@@ -34,7 +34,7 @@ def test_fleet_cells_validate_with_component_references():
 
 def test_fleet_cells_emit_component_reference_nodes():
     for doc in _fleet_cells():
-        node = to_jsonld(doc, target="domain-battery")["@graph"][0]
+        node = to_jsonld(doc, target="domain-battery")["@graph"][0]["isDescriptionFor"]
         # Role-configured cells (half / three-electrode) have no polarity
         # holders: their reference seam is the working electrode.
         if doc["cell_spec"].get("cell_configuration") in ("half_cell", "three_electrode_cell"):

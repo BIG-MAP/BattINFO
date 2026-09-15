@@ -11,3 +11,7 @@ cell-spec  →  cell-instance  →  test  →  dataset
      ↓ references
 electrode-spec / electrolyte-spec / separator-spec / housing-spec  →  material-specs
 ```
+
+**What the spec node says.** One node, three personas: the EMMO information artifact (`BatteryCellSpecification` — id, schema version, provenance, citation), the schema.org catalogue entity (`schema:ProductModel` — name, manufacturer, brand, size and IEC codes, release date), and the record (`schema:CreativeWork`). Every EMMO-axiomatized physical fact — `hasProperty` quantities, electrode/electrolyte/separator/housing composition, construction — rides the described battery under `isDescriptionFor`: those relations' subjects must be electrochemical cells, never documents.
+
+**The described battery, precisely.** The `isDescriptionFor` individual is an existential witness — "there exists a battery such that …" — satisfied by any conforming unit; it is not a prototype object and no identity holds between it and any cell instance. Declared values carry their epistemic status in the property-nature class (`NominalProperty` / `RatedProperty`), not in a universality claim. An instance links to its spec via `schema:isVariantOf` and carries its own physical typing — the schema.org ProductModel pattern on the schema layer, EMMO's own `BatterySpecification ⊑ isDescriptionFor some Battery` axiom on the semantic layer (which is also where the existential commitment for never-built designs comes from).

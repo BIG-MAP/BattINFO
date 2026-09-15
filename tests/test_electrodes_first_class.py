@@ -270,7 +270,7 @@ def test_kind_types_the_node_and_authored_polarity_stacks() -> None:
     node = record_to_jsonld(spec, "electrode-spec")
     # EMMO Description (BatterySpecification's own parent) until an
     # ElectrodeSpecification class is published; CreativeWork for schema.org.
-    assert node["@type"] == ["Description", "schema:CreativeWork"]
+    assert node["@type"] == ["Description", "schema:ProductModel", "schema:CreativeWork"]
     assert node["isDescriptionFor"]["@type"] == "SiliconGraphiteElectrode"
     assert node["isDescriptionFor"]["skos:prefLabel"] == "Si-Gr electrode"
 
@@ -383,7 +383,7 @@ def test_half_cell_counter_foil_types_as_counter_and_reference() -> None:
         counter_electrode={"material": {"name": "Lithium metal"}},
         source=ProvenanceInfo(type="lab"),
     ).to_record()
-    node = record_to_jsonld(spec, "cell-spec")
+    node = record_to_jsonld(spec, "cell-spec")["isDescriptionFor"]
     counter = node["hasCounterElectrode"]
     assert set(counter["@type"]) == {"CounterElectrode", "ReferenceElectrode"}
     assert set(counter["hasActiveMaterial"]["@type"]) == {"Lithium", "ActiveMaterial"}
@@ -409,12 +409,12 @@ def test_three_electrode_cell_carries_a_dedicated_reference() -> None:
     ).to_record()
     assert spec["cell_spec"]["reference_electrode"]["material"]["name"] == "Lithium metal"
 
-    node = record_to_jsonld(spec, "cell-spec")
+    node = record_to_jsonld(spec, "cell-spec")["isDescriptionFor"]
     assert node["hasCounterElectrode"]["@type"] == "CounterElectrode"
     ref = node["hasReferenceElectrode"]
     assert ref["@type"] == "ReferenceElectrode"
     assert set(ref["hasActiveMaterial"]["@type"]) == {"Lithium", "ActiveMaterial"}
-    described = node["isDescriptionFor"]["@type"]
+    described = node["@type"]
     assert "ThreeElectrodeCellDevice" in (described if isinstance(described, list) else [described])
 
     legacy = CellSpec(
@@ -424,7 +424,7 @@ def test_three_electrode_cell_carries_a_dedicated_reference() -> None:
         reference_electrode="NHE",
         source=ProvenanceInfo(type="lab"),
     ).to_record()
-    legacy_ref = record_to_jsonld(legacy, "cell-spec")["hasReferenceElectrode"]
+    legacy_ref = record_to_jsonld(legacy, "cell-spec")["isDescriptionFor"]["hasReferenceElectrode"]
     assert legacy_ref == {"@type": "ReferenceElectrode", "skos:prefLabel": "NHE"}
 
 
@@ -527,7 +527,7 @@ def test_cell_spec_electrode_holder_may_cite_an_electrode_spec() -> None:
     }
     # Additive and tolerant: the embedded fields stay valid alongside the reference.
     assert validate_record(record).ok, validate_record(record).errors
-    node = to_jsonld(record, target="domain-battery")["@graph"][0]
+    node = to_jsonld(record, target="domain-battery")["@graph"][0]["isDescriptionFor"]
     assert node["hasNegativeElectrode"]["schema:isVariantOf"] == {"@id": SPEC_IRI}
 
 
@@ -563,7 +563,7 @@ def test_both_electrode_spec_seams_are_authorable_and_round_trip() -> None:
     assert reloaded.negative_electrode.electrode_spec_id == SPEC_IRI
     assert reloaded.to_record() == record
 
-    node = to_jsonld(record, target="domain-battery")["@graph"][0]
+    node = to_jsonld(record, target="domain-battery")["@graph"][0]["isDescriptionFor"]
     assert node["hasPositiveElectrode"]["@id"] == SPEC_IRI
     assert node["hasNegativeElectrode"]["schema:isVariantOf"] == {"@id": SPEC_IRI}
 
@@ -588,7 +588,7 @@ def test_inline_current_collector_cites_its_foil_material_spec() -> None:
     assert record["positive_electrode"]["current_collector"]["material_spec_id"] == material_spec
     assert CellSpec.from_record(record).to_record() == record
 
-    node = to_jsonld(record, target="domain-battery")["@graph"][0]
+    node = to_jsonld(record, target="domain-battery")["@graph"][0]["isDescriptionFor"]
     collector = node["hasPositiveElectrode"]["hasCurrentCollector"]
     assert collector["schema:isVariantOf"] == {"@id": material_spec}
 

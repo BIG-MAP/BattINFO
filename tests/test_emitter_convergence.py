@@ -70,7 +70,7 @@ def _cell_spec_record(**overrides) -> dict:
 def test_resolver_cell_spec_carries_all_descriptors() -> None:
     doc = _resolver_jsonld(_cell_spec_record())
 
-    assert doc["@type"] == ["BatteryCellSpecification", "schema:CreativeWork"]
+    assert doc["@type"] == ["BatteryCellSpecification", "schema:ProductModel", "schema:CreativeWork"]
     assert doc["@id"] == "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5"
     assert doc["schema:model"] == "ANR26650M1-B"
     assert doc["schema:productID"] == "IFpR26650"
@@ -116,7 +116,7 @@ def test_resolver_cell_spec_emits_standard_vocab_provenance() -> None:
 def test_resolver_cell_spec_quantity_nodes_use_canonical_shape() -> None:
     doc = _resolver_jsonld(_cell_spec_record())
 
-    nodes = {node["@type"][0]: node for node in doc["hasProperty"]}
+    nodes = {node["@type"][0]: node for node in doc["isDescriptionFor"]["hasProperty"]}
     capacity = nodes["NominalCapacity"]
     assert capacity["@type"] == ["NominalCapacity", "ConventionalProperty"]
     assert capacity["hasNumericalPart"] == {"@type": "RealData", "hasNumberValue": 2.5}
@@ -150,7 +150,7 @@ def test_unmapped_property_key_warns_at_emit_time() -> None:
     with pytest.warns(UserWarning, match="semantic.property_unmapped.*frobnication_index"):
         doc = build_cell_spec_node(record)
     # Emitted with the non-canonical fallback term rather than silently dropped.
-    assert doc["hasProperty"][0]["@type"][0] == "battinfo:frobnicationIndex"
+    assert doc["isDescriptionFor"]["hasProperty"][0]["@type"][0] == "battinfo:frobnicationIndex"
 
 
 def test_value_text_only_property_warns_at_emit_time() -> None:
@@ -307,7 +307,7 @@ def test_package_spec_node_drops_battinfo_literals_for_type_stack() -> None:
     physical = node["isDescriptionFor"]["@type"]
     assert "CylindricalBattery" in physical
     assert "LithiumIonBattery" in physical
-    capacity = next(p for p in node["hasProperty"] if p["@type"][0] == "NominalCapacity")
+    capacity = next(p for p in node["isDescriptionFor"]["hasProperty"] if p["@type"][0] == "NominalCapacity")
     assert capacity["@type"] == ["NominalCapacity", "ConventionalProperty"]
     assert capacity["hasNumericalPart"]["@type"] == "RealData"
     assert isinstance(capacity["hasMeasurementUnit"], str)

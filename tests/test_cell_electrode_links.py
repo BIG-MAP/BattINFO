@@ -266,7 +266,7 @@ def test_the_cell_spec_holder_emitter_uses_the_shared_rule() -> None:
             coating={"component": {"active_material": [{"name": "Lithium"}]}}
         ),
     )
-    holder = record_to_jsonld(spec.to_record(), "cell-spec")["hasCounterElectrode"]
+    holder = record_to_jsonld(spec.to_record(), "cell-spec")["isDescriptionFor"]["hasCounterElectrode"]
     link = electrode_role_link("counter", COUNTER_IRI, "half_cell")
     assert holder["@type"] == link["@type"]
 

@@ -141,7 +141,7 @@ def test_material_property_conditions_emit_measurement_parameters() -> None:
                                                        "voltage_reference": {"value_text": "Li/Li+"},
                                                        "atmosphere": {"value_text": "argon"}}}},
     )
-    node = to_jsonld(rec, target="domain-battery")["@graph"][0]
+    node = to_jsonld(rec, target="domain-battery")["@graph"][0]["isDescriptionFor"]
     assert node["@type"] == "LithiumIronPhosphate"
     props = node["hasProperty"]
     cap = props if isinstance(props, dict) else props[0]

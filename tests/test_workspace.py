@@ -646,7 +646,7 @@ def test_workspace_publish_stages_file_backed_dataset(tmp_path: Path) -> None:
     property_types = {
         # Canonical quantity nodes carry a list @type of [PropertyClass, co-type].
         entry["@type"][0] if isinstance(entry.get("@type"), list) else entry.get("@type")
-        for entry in cell_spec_node.get("hasProperty", [])
+        for entry in cell_spec_node.get("isDescriptionFor", {}).get("hasProperty", [])
         if isinstance(entry, dict)
     }
     # rated_energy maps to NominalEnergy (no distinct RatedEnergy class in EMMO).

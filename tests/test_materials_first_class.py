@@ -94,7 +94,10 @@ def test_m6_jsonld_emitted_for_spec_and_instance() -> None:
     from battinfo.jsonld import record_to_jsonld
 
     spec = api.create_material_spec(name="LFP", kind="lfp", validate=False)
-    ld = record_to_jsonld(spec, "material-spec")
+    doc = record_to_jsonld(spec, "material-spec")
+    # The spec is a description; the substance node rides isDescriptionFor.
+    assert doc["@type"] == ["Description", "schema:ProductModel", "schema:CreativeWork"]
+    ld = doc["isDescriptionFor"]
     assert ld["@type"] == "LithiumIronPhosphate"
     assert ld["schema:sameAs"]["@id"].startswith(
         "https://w3id.org/emmo/domain/chemical-substance#"
@@ -112,7 +115,7 @@ def test_m6_kind_without_emmo_class_uses_labeled_fallback() -> None:
     # bundled context resolves, so the node falls back to a labeled
     # schema:ChemicalSubstance that still carries the chemsub link.
     spec = api.create_material_spec(name="EMD cathode powder", kind="mno2", validate=False)
-    ld = record_to_jsonld(spec, "material-spec")
+    ld = record_to_jsonld(spec, "material-spec")["isDescriptionFor"]
     assert ld["@type"] == "schema:ChemicalSubstance"  # labeled fallback, not invented term
     assert ld["schema:sameAs"]["@id"].startswith(
         "https://w3id.org/emmo/domain/chemical-substance#"
@@ -188,7 +191,7 @@ def test_external_identity_anchors_emit_as_exact_match() -> None:
     from battinfo.jsonld import record_to_jsonld
 
     spec = api.create_material_spec(name="SLP30", kind="graphite", validate=False)
-    matches = {m["@id"] for m in record_to_jsonld(spec, "material-spec")["skos:exactMatch"]}
+    matches = {m["@id"] for m in record_to_jsonld(spec, "material-spec")["isDescriptionFor"]["skos:exactMatch"]}
     assert matches == {
         "http://www.wikidata.org/entity/Q5309",
         "https://pubchem.ncbi.nlm.nih.gov/compound/5462310",

@@ -3377,7 +3377,13 @@ class AuthoringWorkspace:
 
             mfr_node = node.get("schema:manufacturer", {})
             mfr_name  = mfr_node.get("schema:name", "") if isinstance(mfr_node, dict) else str(mfr_node)
-            specs = _specs_from_property_nodes(node.get("hasProperty", []))
+            # Canonical shape: the physical payload (hasProperty, composition)
+            # rides the described battery; older packages carried it on the
+            # spec node - read both, described side first.
+            specs = _specs_from_property_nodes(
+                (phys.get("hasProperty") if isinstance(phys, dict) else None)
+                or node.get("hasProperty", [])
+            )
 
             # size_code: the canonical shape emits it as schema:size; older
             # packages used schema:identifier. In the canonical shape

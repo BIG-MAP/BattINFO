@@ -37,7 +37,9 @@ def _battery_node(spec: CellSpec) -> dict:
     if "properties" in spec_dict and "property" not in spec_dict:
         spec_dict["property"] = spec_dict["properties"]
     doc = to_jsonld({"schema_version": "1.0.0", "specification": spec_dict}, target="domain-battery")
-    return doc["@graph"][0]
+    node = doc["@graph"][0]
+    # Physical payload rides the described battery on spec nodes.
+    return node.get("isDescriptionFor", node)
 
 
 def _as_list(value):

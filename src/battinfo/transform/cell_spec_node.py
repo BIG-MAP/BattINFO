@@ -464,8 +464,15 @@ def build_cell_spec_node(record: Mapping[str, Any]) -> dict[str, Any]:
         manufacturer.get("name") if isinstance(manufacturer, Mapping) else manufacturer
     )
 
+    # Three personas on one node (see docs/records/cells.md "What the spec
+    # node says"): the EMMO information artifact (BatteryCellSpecification),
+    # the schema.org catalogue entity (ProductModel: name, manufacturer,
+    # codes), and the record (CreativeWork: provenance, citation). Every
+    # EMMO-axiomatized physical relation and quantity rides the described
+    # battery under isDescriptionFor instead - those relations' subjects must
+    # be electrochemical cells, never documents.
     node: dict[str, Any] = {
-        "@type": ["BatteryCellSpecification", "schema:CreativeWork"],
+        "@type": ["BatteryCellSpecification", "schema:ProductModel", "schema:CreativeWork"],
     }
     if iri:
         node["@id"] = iri
@@ -518,20 +525,21 @@ def build_cell_spec_node(record: Mapping[str, Any]) -> dict[str, Any]:
     if schema_version:
         node["schema:schemaVersion"] = schema_version
 
+    described = node["isDescriptionFor"]
     property_nodes = cell_spec_property_nodes(
         record.get("properties"), context_label=str(iri or name or "cell-spec")
     )
     if property_nodes:
-        node["hasProperty"] = property_nodes
+        described["hasProperty"] = property_nodes
 
     # Composition + component references (emitter convergence): the SAME
     # appliers the descriptor path uses emit the inline electrode/electrolyte/
     # separator/housing tree, the construction details, the stack/jelly-roll
-    # geometry and the *_spec_id reference links — the canonical node carries
-    # everything the user authored, not just chemistry/format/properties.
+    # geometry and the *_spec_id reference links. They apply to the DESCRIBED
+    # battery: an information artifact has no electrodes.
     spec_view = _composition_view(record, cell)
-    _apply_specification_composition(node, spec_view)
-    _apply_specification_structure_and_refs(node, spec_view)
+    _apply_specification_composition(described, spec_view)
+    _apply_specification_structure_and_refs(described, spec_view)
 
     prov = provenance_node(record.get("provenance"))
     if prov is not None:

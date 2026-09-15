@@ -220,7 +220,7 @@ def test_the_cell_spec_emitter_carries_them_too() -> None:
         properties={"mass": {"value": 2.31, "unit": "g",
                              "standard_deviation": 0.04, "sample_count": 12}},
     )
-    node = record_to_jsonld(spec.to_record(), "cell-spec")
+    node = record_to_jsonld(spec.to_record(), "cell-spec")["isDescriptionFor"]
     properties = node["hasProperty"]
     if isinstance(properties, dict):
         properties = [properties]

@@ -167,7 +167,7 @@ def test_component_specs_emit_as_descriptions() -> None:
             family, uid="abcd23456789abcd", name=f"{family} product", validate=False
         )
         node = record_to_jsonld(spec, f"{family}-spec".replace("_", "-"))
-        assert node["@type"] == ["Description", "schema:CreativeWork"], (family, node["@type"])
+        assert node["@type"] == ["Description", "schema:ProductModel", "schema:CreativeWork"], (family, node["@type"])
         assert physical in str(node["isDescriptionFor"]["@type"]), (family, node["isDescriptionFor"])
         assert node["isDescriptionFor"]["skos:prefLabel"] == f"{family} product"
 
