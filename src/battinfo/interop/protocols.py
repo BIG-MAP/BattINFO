@@ -379,7 +379,8 @@ def _pybamm_config_to_method(config: dict) -> list[Step]:
 
 
 def import_pybamm_experiment(source: Any, *, name: str | None = None, kind: str | None = None,
-                             source_locator: str | None = None) -> TestSpec:
+                             source_locator: str | None = None,
+                             source_sha256: str | None = None) -> TestSpec:
     """Import a PyBaMM experiment definition into a TestSpec.
 
     Accepts either the list passed to ``pybamm.Experiment`` (strings for single
@@ -405,7 +406,7 @@ def import_pybamm_experiment(source: Any, *, name: str | None = None, kind: str 
         test_kind=inferred_kind,
         description="Imported from a PyBaMM experiment definition.",
         method=method,
-        artifacts=_source_artifact("pybamm-experiment", source_locator, None, _PYBAMM_CONFORMS),
+        artifacts=_source_artifact("pybamm-experiment", source_locator, source_sha256, _PYBAMM_CONFORMS),
         source=_provenance(source_locator),
     )
 
@@ -477,7 +478,8 @@ def _bmgen_step(node: dict) -> Step | None:
 
 
 def import_bmgen_jsonld(source: Any, *, name: str | None = None, kind: str | None = None,
-                        source_locator: str | None = None) -> TestSpec:
+                        source_locator: str | None = None,
+                        source_sha256: str | None = None) -> TestSpec:
     """Import a bmgen EMMO/BattINFO JSON-LD program into a TestSpec."""
     doc = _load(source)
     graph = doc.get("@graph", doc) if isinstance(doc, dict) else doc
@@ -499,7 +501,7 @@ def import_bmgen_jsonld(source: Any, *, name: str | None = None, kind: str | Non
         test_kind=kind or "other",
         description="Imported from a bmgen EMMO JSON-LD program.",
         method=steps,
-        artifacts=_source_artifact("bmgen-jsonld", source_locator, None, _BMGEN_CONFORMS),
+        artifacts=_source_artifact("bmgen-jsonld", source_locator, source_sha256, _BMGEN_CONFORMS),
         source=_provenance(source_locator),
         comment=warnings,
     )

@@ -82,6 +82,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Termination shorthand + the one-liner import (protocol usability).**
+  Structured steps accept comparison-string cutoffs - `termination:
+  ["Voltage > 4.2", "C-rate < C/50", "SOC < 0.05", "Time > 30 min"]` - the
+  spelling engineers and UCP's `ends` use, normalized to the structured
+  form at construction (stored records never carry the string; bad
+  quantities and unit/quantity mismatches fail with a pointed message).
+  And `battinfo import-protocol <file>` makes the whole import path one
+  command: sniffs the format (UCP YAML, aurora-unicycler JSON, PyBaMM
+  text/config, bmgen JSON-LD; `--format` overrides), emits the canonical
+  record to stdout or `--out`, links the source file as the
+  source_protocol artifact with its sha256, surfaces the lossy-import
+  notes, and mints a deterministic IRI from the file hash so re-running
+  the import is a no-op, not a duplicate. The pybamm and bmgen importers
+  gained the `source_sha256` parameter the others already had.
+
 - **`import_ucp`: ionworks Universal Cycler Protocol importer.** The
   fourth member of `battinfo.interop.protocols` (beside aurora-unicycler,
   PyBaMM, and bmgen): parses a UCP document (dict, YAML/JSON string, or
