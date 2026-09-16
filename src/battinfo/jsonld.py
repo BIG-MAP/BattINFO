@@ -869,15 +869,15 @@ def test_to_jsonld(record: dict) -> dict:
                 ref = _voltage_reference_node(value)
                 if ref is not None:
                     if ref.get("@type") == "schema:PropertyValue":
-                        pv = {**ref, "schema:name": name}
+                        ref_pv: dict = {**ref, "schema:name": name}
                     else:
-                        pv = {
+                        ref_pv = {
                             "@type": "schema:PropertyValue",
                             "schema:name": name,
                             "schema:value": ref.get("skos:prefLabel"),
                             "schema:valueReference": ref,
                         }
-                    props.append(pv)
+                    props.append(ref_pv)
                     continue
             pv: dict = {"@type": "schema:PropertyValue", "schema:name": name}
             if isinstance(value, Mapping) and "value" in value:
