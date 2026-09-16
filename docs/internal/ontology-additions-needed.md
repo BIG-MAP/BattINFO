@@ -294,6 +294,22 @@ closure. None is caused by this repo; each is worked around locally.
 - **Duplicate `CapacityLoss`.** `electrochemistry_652b94f1_…` has it as prefLabel while
   `electrochemistry_e3d3d21c_…` (`CapacityFade`) carries it as an altLabel, so the string
   resolves to two classes. battinfo maps neither by key; the label is allowlisted only.
+- **`NominalBatteryProperty` contradicts its own parent (red-team review, 2026-09-15).**
+  `battery_fb9baf9b_680e_493e_a755_da9bb1fc9fae` is elucidated "a battery property
+  defined by the manufacturer and determined under some specified conditions" - a
+  quantified datasheet rating - but subclasses `emmo:NominalProperty`
+  (`EMMO_909415d1_…`), VIM's nominal property: one that "has no magnitude" (colour,
+  blood type). The class as published means "a quantified property that cannot be
+  quantified". It should be reparented (ConventionalProperty is the natural home:
+  "a quantitative property attributed by agreement"). battinfo maps its `Nominal`
+  value basis to `ConventionalProperty` and does not emit either class of this pair.
+- **`LR6` entails zinc-carbon chemistry (red-team review, 2026-09-15).**
+  `AlkalineZincManganeseDioxideBattery` is declared `rdfs:subClassOf` both
+  `AlkalineCell` and `ZincCarbonBattery`; alkaline and zinc-carbon are distinct
+  chemistries, so every `LR6` (AA alkaline) individual is entailed to be a
+  zinc-carbon battery. The `ZincCarbonBattery` parent should be removed. battinfo
+  still emits `LR6` (the designation typing is correct); the false chemistry
+  entailment is upstream's to fix.
 - **Five context terms resolve to IRIs outside the import closure.** The published
   domain-battery 0.20.2 context maps `ChemicalMaterial`, `ElementalMaterial`,
   `ChemicallyDefinedMaterial`, `hasORCID` and `AngularWaveNumber` to

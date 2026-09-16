@@ -213,7 +213,9 @@ export const jsonldGallery: {
           "LithiumIonBattery",
           "LithiumIonIronPhosphateBattery"
         ],
+        "@id": "https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0#described",
         "skos:prefLabel": "A123 ANR26650M1-B",
+        "hasIECCode": "IFpR26650",
         "hasProperty": [
           {
             "@type": [
@@ -410,6 +412,26 @@ export const jsonldGallery: {
       },
       "schema:releaseDate": "2012-01-01",
       "schema:schemaVersion": "0.2.0",
+      "schema:weight": {
+        "@type": "schema:QuantitativeValue",
+        "schema:value": 76.0,
+        "schema:unitText": "g"
+      },
+      "schema:height": {
+        "@type": "schema:QuantitativeValue",
+        "schema:value": 65.0,
+        "schema:unitText": "mm"
+      },
+      "schema:width": {
+        "@type": "schema:QuantitativeValue",
+        "schema:value": 26.0,
+        "schema:unitText": "mm"
+      },
+      "schema:depth": {
+        "@type": "schema:QuantitativeValue",
+        "schema:value": 26.0,
+        "schema:unitText": "mm"
+      },
       "dcterms:source": {
         "@type": "prov:Entity",
         "dcterms:type": "datasheet",

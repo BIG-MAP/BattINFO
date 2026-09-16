@@ -121,7 +121,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
       }
     ],
-    "skos:prefLabel": "Celgard 2500"
+    "skos:prefLabel": "Celgard 2500",
+    "@id": "https://w3id.org/battinfo/spec/6nec-h262-tthy-4rnt#described"
   },
   "@id": "https://w3id.org/battinfo/spec/6nec-h262-tthy-4rnt",
   "schema:name": "Celgard 2500"
@@ -269,7 +270,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
       }
     ],
-    "skos:prefLabel": "Celgard 2400"
+    "skos:prefLabel": "Celgard 2400",
+    "@id": "https://w3id.org/battinfo/spec/wgym-4xfa-pws1-ek1b#described"
   },
   "@id": "https://w3id.org/battinfo/spec/wgym-4xfa-pws1-ek1b",
   "schema:name": "Celgard 2400"
@@ -353,7 +355,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
       }
     ],
-    "skos:prefLabel": "Ceramic-coated PE"
+    "skos:prefLabel": "Ceramic-coated PE",
+    "@id": "https://w3id.org/battinfo/spec/v94j-jm2h-t8d1-t5a6#described"
   },
   "@id": "https://w3id.org/battinfo/spec/v94j-jm2h-t8d1-t5a6",
   "schema:name": "Ceramic-coated PE"

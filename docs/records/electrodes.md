@@ -179,10 +179,11 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       }
     },
     "hasActiveMaterial": {
-      "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+      "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5#described",
       "@type": "ActiveMaterial"
     },
-    "skos:prefLabel": "NMC811 cathode design A"
+    "skos:prefLabel": "NMC811 cathode design A",
+    "@id": "https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch#described"
   },
   "@id": "https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
   "schema:name": "NMC811 cathode design A"
@@ -441,10 +442,11 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       }
     },
     "hasActiveMaterial": {
-      "@id": "https://w3id.org/battinfo/spec/npa4-0dnw-evyh-hhdm",
+      "@id": "https://w3id.org/battinfo/spec/npa4-0dnw-evyh-hhdm#described",
       "@type": "ActiveMaterial"
     },
-    "skos:prefLabel": "NMC811 cathode"
+    "skos:prefLabel": "NMC811 cathode",
+    "@id": "https://w3id.org/battinfo/spec/qfjh-7xyr-ga1k-tjez#described"
   },
   "@id": "https://w3id.org/battinfo/spec/qfjh-7xyr-ga1k-tjez",
   "schema:name": "NMC811 cathode",
@@ -610,10 +612,11 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       }
     },
     "hasActiveMaterial": {
-      "@id": "https://w3id.org/battinfo/spec/gwck-k5kf-ae1f-gfgc",
+      "@id": "https://w3id.org/battinfo/spec/gwck-k5kf-ae1f-gfgc#described",
       "@type": "ActiveMaterial"
     },
-    "skos:prefLabel": "Graphite anode"
+    "skos:prefLabel": "Graphite anode",
+    "@id": "https://w3id.org/battinfo/spec/d7qr-n581-74c3-7g7r#described"
   },
   "@id": "https://w3id.org/battinfo/spec/d7qr-n581-74c3-7g7r",
   "schema:name": "Graphite anode",
@@ -771,10 +774,11 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       }
     },
     "hasActiveMaterial": {
-      "@id": "https://w3id.org/battinfo/spec/5ms1-9jv8-hr54-mn4e",
+      "@id": "https://w3id.org/battinfo/spec/5ms1-9jv8-hr54-mn4e#described",
       "@type": "ActiveMaterial"
     },
-    "skos:prefLabel": "LFP cathode"
+    "skos:prefLabel": "LFP cathode",
+    "@id": "https://w3id.org/battinfo/spec/m6y0-tkfg-sn40-q10p#described"
   },
   "@id": "https://w3id.org/battinfo/spec/m6y0-tkfg-sn40-q10p",
   "schema:name": "LFP cathode",
@@ -978,7 +982,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       }
     ],
     "hasActiveMaterial": {
-      "@id": "https://w3id.org/battinfo/spec/jnab-ggw9-cbn8-hhjr",
+      "@id": "https://w3id.org/battinfo/spec/jnab-ggw9-cbn8-hhjr#described",
       "@type": "ActiveMaterial"
     },
     "prov:wasGeneratedBy": {
@@ -995,7 +999,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       },
       "schema:description": "planetary mixing, 80 degC drying, calendered to 35% porosity"
     },
-    "skos:prefLabel": "Si-Gr anode"
+    "skos:prefLabel": "Si-Gr anode",
+    "@id": "https://w3id.org/battinfo/spec/qw3j-we77-zzj1-ya55#described"
   },
   "@id": "https://w3id.org/battinfo/spec/qw3j-we77-zzj1-ya55",
   "schema:name": "Si-Gr anode",

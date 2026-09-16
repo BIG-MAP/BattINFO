@@ -532,12 +532,69 @@ def _profile_binding_target(path: str, default: str) -> str:
 
 # co_type token (on a quantity) -> EMMO property-nature class. RatedProperty is not
 # yet published, so it falls back to ConventionalProperty (see ontology-additions-needed).
+# "Nominal" also maps to ConventionalProperty: EMMO's NominalProperty is VIM's
+# nominal property - one with NO magnitude (colour, blood type) - so typing a
+# numeric datasheet value with it would be a false claim. A manufacturer's
+# nominal rating is a value attributed by agreement: exactly ConventionalProperty.
 _CO_TYPE_CLASS: dict[str, str] = {
     "Measured": "MeasuredProperty",
     "Conventional": "ConventionalProperty",
-    "Nominal": "NominalProperty",
+    "Nominal": "ConventionalProperty",
     "Rated": "ConventionalProperty",
 }
+
+
+def described_iri(spec_iri: Any) -> str | None:
+    """Skolem IRI for the described individual of a spec record.
+
+    ``<spec-IRI>#described`` names the individual under ``isDescriptionFor``
+    (the hash form dereferences to the spec document itself, needs no redirect
+    rules, and cannot be confused with the document). Naming the witness makes
+    repeated ingest idempotent and lets other records reference the design;
+    it asserts no identity with any instance.
+    """
+    if isinstance(spec_iri, str) and spec_iri and "#" not in spec_iri:
+        return f"{spec_iri}#described"
+    return None
+
+
+# schema.org dimension slot -> the property keys that fill it, first hit wins.
+# A cylinder's bounding box: diameter fills width AND depth.
+_SCHEMA_DIMENSION_SOURCES: tuple[tuple[str, tuple[str, ...]], ...] = (
+    ("schema:weight", ("mass",)),
+    ("schema:height", ("height",)),
+    ("schema:width", ("width", "diameter")),
+    ("schema:depth", ("thickness", "depth", "diameter")),
+)
+
+
+def schema_dimension_nodes(properties: Any) -> dict[str, Any]:
+    """schema.org dimension mirror for the ProductModel persona of a spec node.
+
+    A schema.org-only consumer (product search, rich results) reads weight and
+    dimensions off the product node; the EMMO quantities live on the described
+    individual, so without this mirror the catalogue entry has no size at all.
+    The EMMO encoding stays authoritative - these are convenience copies, the
+    same way Wikidata ships wdt: truthy links beside the full statement model.
+    """
+    out: dict[str, Any] = {}
+    if not isinstance(properties, Mapping):
+        return out
+    for target, keys in _SCHEMA_DIMENSION_SOURCES:
+        for key in keys:
+            quantity = properties.get(key)
+            if not isinstance(quantity, Mapping):
+                continue
+            value = quantity.get("value")
+            if value is None or isinstance(value, bool) or not isinstance(value, (int, float)):
+                continue
+            node: dict[str, Any] = {"@type": "schema:QuantitativeValue", "schema:value": value}
+            unit = quantity.get("unit") or quantity.get("unit_text")
+            if unit:
+                node["schema:unitText"] = unit
+            out[target] = node
+            break
+    return out
 
 # Measurement-parameter (condition) key -> EMMO class, for hasMeasurementParameter.
 # Keys without a resolvable class fall through to a generic node; every
@@ -558,13 +615,14 @@ _MEASUREMENT_PARAMETER_TERMS: dict[str, str] = {
 }
 
 # Recognized reference-electrode couples: notation -> electrochemistry classes.
-# A potential "vs Li/Li+" is a metrological datum on the quantity, not a
-# measurement parameter — it emits as hasMetrologicalReference, the relation
-# family hasMeasurementUnit belongs to (a voltage carries two references: the
-# volt as its scale, the reference electrode as its zero). Nodes are fully
-# class-typed; the notation survives only as skos:prefLabel. Na/Na+ maps to
-# SodiumBasedElectrode — the domain has no plain sodium-metal electrode class
-# yet (see ontology-additions-needed).
+# A potential "vs Li/Li+" is a datum about the quantity, not a measurement
+# parameter — it emits as a schema:valueReference qualifier on the quantity
+# node. NOT as hasMetrologicalReference: EMMO's Quantity carries an exact
+# cardinality of one MetrologicalReference, already filled by the unit, so a
+# second filler would entail owl:sameAs between the volt and the reference
+# electrode. Nodes are fully class-typed; the notation survives only as
+# skos:prefLabel. Na/Na+ maps to SodiumBasedElectrode — the domain has no
+# plain sodium-metal electrode class yet (see ontology-additions-needed).
 _VOLTAGE_REFERENCE_COUPLES: dict[str, tuple[str, ...]] = {
     "li/li+": ("ReferenceElectrode", "LithiumElectrode"),
     "na/na+": ("ReferenceElectrode", "SodiumBasedElectrode"),
@@ -583,7 +641,7 @@ def _voltage_reference_node(raw_value: Any) -> dict[str, Any] | None:
     Accepts the quantity form (``{"value_text": "Li/Li+"}``) or a bare string;
     a leading "vs"/"versus" is tolerated. A recognized couple resolves to
     electrochemistry classes; an unrecognized notation still emits an honest
-    ``MetrologicalReference`` node carrying the text, so nothing is dropped.
+    named ``schema:PropertyValue`` carrying the text, so nothing is dropped.
     """
     if isinstance(raw_value, Mapping):
         raw = raw_value.get("value_text") or raw_value.get("value")
@@ -600,7 +658,11 @@ def _voltage_reference_node(raw_value: Any) -> dict[str, Any] | None:
     classes = _VOLTAGE_REFERENCE_COUPLES.get(key)
     if classes:
         return {"@type": list(classes), "skos:prefLabel": text}
-    return {"@type": "MetrologicalReference", "hasStringValue": text}
+    return {
+        "@type": "schema:PropertyValue",
+        "schema:propertyID": "voltage_reference",
+        "schema:value": text,
+    }
 
 
 #: Sample-statistic key -> the ``schema:propertyID`` naming it on the qualifier
@@ -643,13 +705,44 @@ def _apply_sample_statistics(
         }
         if carries_unit and unit:
             qualifier["schema:unitText"] = unit
-        existing = node.get("schema:valueReference")
-        if existing is None:
-            node["schema:valueReference"] = qualifier
-        elif isinstance(existing, list):
-            existing.append(qualifier)
-        else:
-            node["schema:valueReference"] = [existing, qualifier]
+        _append_value_reference(node, qualifier)
+
+
+def _append_value_reference(node: dict[str, Any], qualifier: dict[str, Any]) -> None:
+    """Attach a qualifier under ``schema:valueReference``, growing a list as needed."""
+    existing = node.get("schema:valueReference")
+    if existing is None:
+        node["schema:valueReference"] = qualifier
+    elif isinstance(existing, list):
+        existing.append(qualifier)
+    else:
+        node["schema:valueReference"] = [existing, qualifier]
+
+
+def _condition_qualifier(ckey: str, cqty: Mapping[str, Any]) -> dict[str, Any] | None:
+    """A reference condition on a DECLARED value as a named qualifier.
+
+    Datasheet conditions ("at 0.2C, 25 degC") define the rating; they are not
+    evidence that a measurement occurred, so they must not ride ``isOutputOf``
+    (a mereological relation asserting a real process). A named
+    ``schema:PropertyValue`` under ``schema:valueReference`` states exactly
+    what is there: this number is qualified by that condition.
+    """
+    value = cqty.get("value")
+    if value is None:
+        value = cqty.get("typical_value")
+    text = cqty.get("value_text")
+    if value is None and not text:
+        return None
+    qualifier: dict[str, Any] = {
+        "@type": "schema:PropertyValue",
+        "schema:propertyID": ckey,
+        "schema:value": value if value is not None else text,
+    }
+    unit = cqty.get("unit") or cqty.get("unit_text")
+    if value is not None and unit:
+        qualifier["schema:unitText"] = unit
+    return qualifier
 
 
 def _descriptor_quantity_node(
@@ -689,27 +782,37 @@ def _descriptor_quantity_node(
 
     conditions = quantity.get("conditions")
     if isinstance(conditions, dict):
-        # Conditions describe the measurement that produced the value, not the
-        # value itself: parameters ride an anonymous isOutputOf measurement node
-        # (CHAMEO's hasMeasurementParameter domain is the process — hanging it
-        # on the quantity would classify the property AS a process). The one
-        # exception is voltage_reference, a metrological datum of the quantity:
-        # it stays on the quantity as hasMetrologicalReference, beside the unit.
+        # Conditions on a MEASURED value describe the measurement that produced
+        # it: parameters ride an anonymous isOutputOf measurement node (CHAMEO's
+        # hasMeasurementParameter domain is the process — hanging it on the
+        # quantity would classify the property AS a process). Conditions on a
+        # DECLARED value (Conventional/Nominal/Rated) define the rating — no
+        # measurement is asserted to have occurred, so they emit as named
+        # schema:valueReference qualifiers instead. voltage_reference is a
+        # datum of the quantity either way and always rides valueReference
+        # (never hasMetrologicalReference — the unit already fills EMMO's
+        # exactly-one MetrologicalReference slot).
+        measured = "MeasuredProperty" in node["@type"]
         params: list[dict[str, Any]] = []
         for ckey in sorted(conditions):
             cqty = conditions[ckey]
             if ckey == "voltage_reference":
                 ref = _voltage_reference_node(cqty)
                 if ref is not None:
-                    node["hasMetrologicalReference"] = ref
+                    _append_value_reference(node, ref)
                 continue
             if not isinstance(cqty, dict):
                 continue
-            cterm = _MEASUREMENT_PARAMETER_TERMS.get(ckey)
-            cnode = _descriptor_quantity_node(ckey, cqty, term=cterm)
-            if cnode is not None:
-                cnode["skos:prefLabel"] = ckey
-                params.append(cnode)
+            if measured:
+                cterm = _MEASUREMENT_PARAMETER_TERMS.get(ckey)
+                cnode = _descriptor_quantity_node(ckey, cqty, term=cterm)
+                if cnode is not None:
+                    cnode["skos:prefLabel"] = ckey
+                    params.append(cnode)
+            else:
+                qualifier = _condition_qualifier(ckey, cqty)
+                if qualifier is not None:
+                    _append_value_reference(node, qualifier)
         if params:
             node["isOutputOf"] = {
                 "@type": "BatteryMeasurement",
@@ -822,11 +925,13 @@ def _quantity_to_jsonld(quantity: dict[str, Any] | None) -> dict[str, Any] | Non
         out["schema:maxValue"] = quantity["max_value"]
         has_content = True
     if quantity.get("typical_value") is not None and "schema:value" not in out:
-        # A typical value is a nominal-by-convention value: emit it as the
+        # A typical value is a value attributed by convention: emit it as the
         # schema:value and co-type the node so the nature stays explicit
         # (no battinfo:typicalValue duplicate of the schema/EMMO forms).
+        # ConventionalProperty, never NominalProperty: EMMO's NominalProperty
+        # means a property with no magnitude.
         out["schema:value"] = quantity["typical_value"]
-        out["@type"] = ["schema:QuantitativeValue", "NominalProperty"]
+        out["@type"] = ["schema:QuantitativeValue", "ConventionalProperty"]
         has_content = True
     if quantity.get("value_text") and "schema:value" not in out:
         out["schema:value"] = quantity["value_text"]
@@ -1976,8 +2081,12 @@ def _apply_specification_structure_and_refs(battery: dict[str, Any], specificati
     for relation, value in housing_relations.items():
         battery[relation] = value
 
-    # Component-spec references: attach the @id of the referenced spec to each relation.
-    # If an inline holder / basis already produced a typed node, the @id is merged onto it;
+    # Component-spec references: physical relations must land on a physical
+    # individual, so each reference resolves to the target spec's DESCRIBED
+    # component (<spec-IRI>#described) - the spec document itself is a
+    # Description, and `battery hasElectrolyte <a document>` would entail a
+    # false typing under the relations' range axioms. If an inline holder /
+    # basis already produced a typed node, the described @id is merged onto it;
     # otherwise a bare {@id} reference node is emitted.
     for ref_field, relation in (
         ("positive_electrode_spec_id", "hasPositiveElectrode"),
@@ -1991,15 +2100,16 @@ def _apply_specification_structure_and_refs(battery: dict[str, Any], specificati
         ref_id = specification.get(ref_field)
         if not isinstance(ref_id, str):
             continue
+        ref_target = described_iri(ref_id) or ref_id
         existing = battery.get(relation)
         if isinstance(existing, dict) and "@id" not in existing:
-            existing["@id"] = ref_id
+            existing["@id"] = ref_target
         elif existing is None:
-            battery[relation] = {"@id": ref_id}
+            battery[relation] = {"@id": ref_target}
     housing_ref = specification.get("housing_spec_id")
     if isinstance(housing_ref, str):
         existing = battery.get("hasConstituent")
-        ref_node = {"@id": housing_ref}
+        ref_node = {"@id": described_iri(housing_ref) or housing_ref}
         if existing is None:
             battery["hasConstituent"] = ref_node
         elif isinstance(existing, list):
@@ -2063,6 +2173,9 @@ def _descriptor_specification_to_jsonld(specification: dict[str, Any]) -> dict[s
     spec_id = specification.get("id")
     if spec_id is not None:
         battery["@id"] = spec_id
+        witness_iri = described_iri(spec_id)
+        if witness_iri:
+            battery["isDescriptionFor"]["@id"] = witness_iri
 
     if isinstance(manufacturer, str) and manufacturer and isinstance(model, str) and model:
         battery["schema:name"] = f"{manufacturer} {model}"
@@ -2091,6 +2204,13 @@ def _descriptor_specification_to_jsonld(specification: dict[str, Any]) -> dict[s
                 property_nodes.append(quant)
         if property_nodes:
             described["hasProperty"] = property_nodes
+    # schema.org convenience mirror on the ProductModel persona.
+    battery.update(schema_dimension_nodes(properties))
+
+    iec_code = specification.get("iec_code")
+    if isinstance(iec_code, str) and iec_code:
+        battery["schema:productID"] = iec_code
+        described["hasIECCode"] = iec_code
 
     _apply_specification_structure_and_refs(described, specification)
 
@@ -2645,11 +2765,23 @@ def _to_domain_battery_jsonld_material(data: dict[str, Any]) -> dict[str, Any]:
         node = {"@type": ["Description", "schema:ProductModel", "schema:CreativeWork"]}
         if "@id" in described:
             node["@id"] = described.pop("@id")
+            witness_iri = described_iri(node["@id"])
+            if witness_iri:
+                described["@id"] = witness_iri
         name = body.get("name")
         if isinstance(name, str) and name:
             node["schema:name"] = name
             described["skos:prefLabel"] = name
             described.pop("schema:name", None)
+        # Identity anchors are catalogue-level facts: skos:exactMatch is
+        # SKOS-concept alignment (symmetric + transitive - on the described
+        # substance it would conflate every supplier's witness through the
+        # shared Wikidata IRI) and schema:sameAs names a reference page. Both
+        # ride the spec node; the substance's identity on the described side
+        # is its @type (the chemsub class).
+        for anchor in ("schema:sameAs", "skos:exactMatch"):
+            if anchor in described:
+                node[anchor] = described.pop(anchor)
         manufacturer = body.get("manufacturer")
         manufacturer_name = (
             manufacturer.get("name") if isinstance(manufacturer, Mapping) else manufacturer
@@ -2794,15 +2926,18 @@ def _to_domain_battery_jsonld_electrode(data: dict[str, Any]) -> dict[str, Any]:
         polarity=spec_body.get("polarity"),
     )
     # The active-material seam and the manufacturing route are facts about the
-    # physical electrode, so they stay with the physical node either way.
+    # physical electrode, so they stay with the physical node either way. The
+    # reference lands on the material spec's DESCRIBED substance (#described):
+    # the spec document is a Description, not an ActiveMaterial.
     active_ref = body.get("active_material_spec_id")
     if isinstance(active_ref, str) and active_ref:
+        active_target = described_iri(active_ref) or active_ref
         if isinstance(node.get("hasActiveMaterial"), dict):
-            # A monolithic `material` already made the node; the spec IRI
+            # A monolithic `material` already made the node; the described IRI
             # joins it rather than replacing it.
-            node["hasActiveMaterial"].setdefault("@id", active_ref)
+            node["hasActiveMaterial"].setdefault("@id", active_target)
         else:
-            node["hasActiveMaterial"] = {"@id": active_ref, "@type": "ActiveMaterial"}
+            node["hasActiveMaterial"] = {"@id": active_target, "@type": "ActiveMaterial"}
     processing = _processing_node(body.get("processing"))
     if processing:
         node["prov:wasGeneratedBy"] = processing
@@ -2821,6 +2956,9 @@ def _to_domain_battery_jsonld_electrode(data: dict[str, Any]) -> dict[str, Any]:
         described = node
         if isinstance(body.get("name"), str) and body["name"]:
             described["skos:prefLabel"] = body["name"]
+        witness_iri = described_iri(body.get("id"))
+        if witness_iri:
+            described["@id"] = witness_iri
         node = {"@type": ["Description", "schema:ProductModel", "schema:CreativeWork"], "isDescriptionFor": described}
     if isinstance(body.get("id"), str):
         node["@id"] = body["id"]
@@ -2926,6 +3064,9 @@ def _to_domain_battery_jsonld_component(data: dict[str, Any]) -> dict[str, Any]:
         described = node
         if isinstance(body.get("name"), str) and body["name"]:
             described["skos:prefLabel"] = body["name"]
+        witness_iri = described_iri(body.get("id"))
+        if witness_iri:
+            described["@id"] = witness_iri
         node = {"@type": ["Description", "schema:ProductModel", "schema:CreativeWork"], "isDescriptionFor": described}
     if isinstance(body.get("id"), str):
         node["@id"] = body["id"]

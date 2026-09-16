@@ -55,6 +55,8 @@ from battinfo.transform.json_to_jsonld import (
     _material_name_map,
     _property_type_map,
     _property_type_term,
+    described_iri,
+    schema_dimension_nodes,
 )
 
 # Public registry page for a cell spec (human-resolvable mirror of the IRI).
@@ -137,6 +139,8 @@ _EXTRA_CONTEXT_TERMS: tuple[str, ...] = (
     "isOutputOf",
     "BatteryMeasurement",
     "hasStringValue",
+    # IEC designation datatype slot on the described cell.
+    "hasIECCode",
     # Metrological datum on voltage-dimensioned quantities (voltage_reference).
     "hasMetrologicalReference",
     "MetrologicalReference",
@@ -320,6 +324,7 @@ def physical_type_stack(cell_spec: Mapping[str, Any]) -> list[str]:
         for battery_type in entry.get("battery_types", []):
             if battery_type not in types and battery_type in table:
                 types.append(battery_type)
+    types = _drop_disjoint_format_types(types, cell_spec)
     if not types:
         types.append("BatteryCell")
     rechargeable = cell_spec.get("rechargeable")
@@ -328,6 +333,42 @@ def physical_type_stack(cell_spec: Mapping[str, Any]) -> list[str]:
     elif rechargeable is False and "PrimaryBattery" not in types:
         types.append("PrimaryBattery")
     return types
+
+
+# The published format classes are pairwise owl:disjointWith in domain-battery
+# (a cell has one shape). An IEC code implies its own format family - CR2032 is
+# a CoinCell, LR6 a CylindricalBattery - so a conflicting `cell_format` would
+# stack disjoint classes on one individual and make any merged graph
+# OWL-inconsistent. The IEC code is the more specific claim: it wins, and the
+# conflicting format class is dropped with a warning. Each iec_code entry in
+# entity_type_map.json declares its family in a `format` field; coin and
+# button are one family (flat round cells), never in conflict with each other.
+_FORMAT_FAMILY_CLASSES: dict[str, frozenset[str]] = {
+    "coin": frozenset({"CoinCell", "ButtonCell"}),
+    "button": frozenset({"CoinCell", "ButtonCell"}),
+    "cylindrical": frozenset({"CylindricalBattery"}),
+    "prismatic": frozenset({"PrismaticBattery"}),
+    "pouch": frozenset({"PouchCell"}),
+}
+_ALL_FORMAT_CLASSES: frozenset[str] = frozenset().union(*_FORMAT_FAMILY_CLASSES.values())
+
+
+def _drop_disjoint_format_types(types: list[str], cell_spec: Mapping[str, Any]) -> list[str]:
+    iec_entry = _entity_mapping("iec_code", cell_spec.get("iec_code")) or {}
+    allowed = _FORMAT_FAMILY_CLASSES.get(str(iec_entry.get("format", "")))
+    if allowed is None:
+        return types
+    conflicting = [t for t in types if t in _ALL_FORMAT_CLASSES and t not in allowed]
+    if not conflicting:
+        return types
+    warnings.warn(
+        "semantic.format_iec_conflict: cell_format implies "
+        f"{conflicting} but iec_code {cell_spec.get('iec_code')!r} implies "
+        f"{sorted(allowed)}; these classes are disjoint in domain-battery, so "
+        "the format class is dropped and the IEC code's family kept.",
+        stacklevel=2,
+    )
+    return [t for t in types if t not in conflicting]
 
 
 def provenance_node(provenance: Any) -> dict[str, Any] | None:
@@ -493,13 +534,19 @@ def build_cell_spec_node(record: Mapping[str, Any]) -> dict[str, Any]:
         }
     if tail:
         node["schema:url"] = f"{REGISTRY_SPEC_URL_BASE}{tail}"
-    # isDescriptionFor links the spec (an information artifact) to an anonymous
-    # individual of the correct physical battery type. Chemistry, format,
-    # electrode bases and rechargeability are expressed through this @type stack.
+    # isDescriptionFor links the spec (an information artifact) to the described
+    # battery. Chemistry, format, electrode bases and rechargeability are
+    # expressed through this @type stack. The individual is skolemized as
+    # <spec-IRI>#described so repeated ingest merges instead of duplicating,
+    # other records can reference the design, and *_spec_id reference edges
+    # can land on a physical individual rather than a Description document.
     physical_types = physical_type_stack(cell)
     node["isDescriptionFor"] = {
         "@type": physical_types if len(physical_types) > 1 else physical_types[0],
     }
+    witness_iri = described_iri(iri)
+    if witness_iri:
+        node["isDescriptionFor"]["@id"] = witness_iri
     if name:
         # Human layer: label the anonymous physical individual with the name
         # already in hand, so the typed node reads without EMMO lookups.
@@ -507,7 +554,11 @@ def build_cell_spec_node(record: Mapping[str, Any]) -> dict[str, Any]:
     if cell.get("size_code"):
         node["schema:size"] = cell["size_code"]
     if cell.get("iec_code"):
+        # Dual encoding, both legitimate: the catalogue string on the spec
+        # (ProductModel persona) and the ontology's own hasIECCode datatype
+        # slot on the described cell.
         node["schema:productID"] = cell["iec_code"]
+        node["isDescriptionFor"]["hasIECCode"] = cell["iec_code"]
     if cell.get("product_type"):
         node["schema:additionalType"] = str(cell["product_type"])
     brand = cell.get("brand")
@@ -534,6 +585,9 @@ def build_cell_spec_node(record: Mapping[str, Any]) -> dict[str, Any]:
     )
     if property_nodes:
         described["hasProperty"] = property_nodes
+    # schema.org convenience mirror (weight/dimensions on the ProductModel
+    # persona); the EMMO quantities on the described cell stay authoritative.
+    node.update(schema_dimension_nodes(record.get("properties")))
 
     # Composition + component references (emitter convergence): the SAME
     # appliers the descriptor path uses emit the inline electrode/electrolyte/

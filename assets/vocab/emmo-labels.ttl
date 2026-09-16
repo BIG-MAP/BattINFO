@@ -176,6 +176,7 @@
 <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_1d5377a7_9f2b_4fdf_958a_7eeadce158d6> skos:prefLabel "Foil"@en .
 <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_1e33e37e_d7c9_4701_ba6d_a09456a13aaf> skos:prefLabel "CellLid"@en .
 <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_1eeb0e2a_229a_43f1_b197_348d475067ff> skos:prefLabel "ActiveMassLoading"@en .
+<https://w3id.org/emmo/domain/electrochemistry#electrochemistry_1f2d401c_eede_4178_9ff5_e5392bc2cb92> skos:prefLabel "hasIECCode"@en .
 <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_1f5ed349_d69b_4c38_bae3_1a7663bfc0ef> skos:prefLabel "CurrentInterruptDevice"@en .
 <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_212af058_3bbb_419f_a9c6_90ba9ebb3706> skos:prefLabel "CurrentCollector"@en .
 <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_22725105_c941_4b14_a4a2_fcb627958607> skos:prefLabel "Galvanostat"@en .

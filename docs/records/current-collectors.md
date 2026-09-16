@@ -97,7 +97,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       },
       "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
     },
-    "skos:prefLabel": "Aluminium foil"
+    "skos:prefLabel": "Aluminium foil",
+    "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5#described"
   },
   "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
   "schema:name": "Aluminium foil"
@@ -247,7 +248,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
       }
     ],
-    "skos:prefLabel": "Aluminium foil"
+    "skos:prefLabel": "Aluminium foil",
+    "@id": "https://w3id.org/battinfo/spec/vkaf-f5bv-fwt2-e6yz#described"
   },
   "@id": "https://w3id.org/battinfo/spec/vkaf-f5bv-fwt2-e6yz",
   "schema:name": "Aluminium foil"
@@ -319,7 +321,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       },
       "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
     },
-    "skos:prefLabel": "Copper foil"
+    "skos:prefLabel": "Copper foil",
+    "@id": "https://w3id.org/battinfo/spec/z25y-gab5-hd3n-qfpr#described"
   },
   "@id": "https://w3id.org/battinfo/spec/z25y-gab5-hd3n-qfpr",
   "schema:name": "Copper foil"
@@ -377,7 +380,7 @@ Schema: [`current-collector.schema.json`](https://w3id.org/battinfo/schema/curre
 :::{dropdown} The reasoning behind the model
 **Inline first, standalone when shared.** An electrode spec carries its collector inline (`current_collector` holder: name, form, thickness); that inline holder and this standalone record are the same shape, and both can cite the foil's material-spec via `material_spec_id` — so a lab that later starts tracking foil lots promotes the holder to a record without re-modeling.
 
-**Emission.** The name parses to a typed stack — 'Aluminium foil' → `[CurrentCollector, Aluminium, Foil]`, 'expanded mesh' variants reach `ExpandedMesh` / `WovenMesh` / `PerforatedFoil` — so substrate and form are classes, not strings. On a spec the stack rides the anonymous individual under `isDescriptionFor` (the spec itself is a `[Description, schema:ProductModel, schema:CreativeWork]`); on an instance it types the node directly.
+**Emission.** The name parses to a typed stack — 'Aluminium foil' → `[CurrentCollector, Aluminium, Foil]`, 'expanded mesh' variants reach `ExpandedMesh` / `WovenMesh` / `PerforatedFoil` — so substrate and form are classes, not strings. On a spec the stack rides the described individual (`<spec-IRI>#described`) under `isDescriptionFor` (the spec itself is a `[Description, schema:ProductModel, schema:CreativeWork]`); on an instance it types the node directly.
 
 **Generated surface.** `create_current_collector_spec` and friends wrap the shared component machinery; family identifiers use underscores (`current_collector`), IRI namespaces use hyphens (`current-collector`), and the API derives one from the other.
 :::

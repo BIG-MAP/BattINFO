@@ -85,16 +85,16 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   ],
   "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
   "schema:name": "NMC811 cathode powder",
+  "schema:sameAs": {
+    "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_e877987f_3b08_4e21_8f2e_c280e6bef52f"
+  },
+  "skos:exactMatch": [
+    {
+      "@id": "http://www.wikidata.org/entity/Q121086674"
+    }
+  ],
   "isDescriptionFor": {
     "@type": "LithiumNickelManganeseCobaltOxide811",
-    "schema:sameAs": {
-      "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_e877987f_3b08_4e21_8f2e_c280e6bef52f"
-    },
-    "skos:exactMatch": [
-      {
-        "@id": "http://www.wikidata.org/entity/Q121086674"
-      }
-    ],
     "hasProperty": [
       {
         "@type": [
@@ -121,6 +121,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         "schema:unitText": "mAh/g"
       }
     ],
+    "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5#described",
     "skos:prefLabel": "NMC811 cathode powder"
   }
 }
@@ -248,20 +249,20 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   ],
   "@id": "https://w3id.org/battinfo/spec/npa4-0dnw-evyh-hhdm",
   "schema:name": "NMC811",
+  "schema:sameAs": {
+    "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_e877987f_3b08_4e21_8f2e_c280e6bef52f"
+  },
+  "skos:exactMatch": [
+    {
+      "@id": "http://www.wikidata.org/entity/Q121086674"
+    }
+  ],
   "schema:manufacturer": {
     "@type": "schema:Organization",
     "schema:name": "Canrud"
   },
   "isDescriptionFor": {
     "@type": "LithiumNickelManganeseCobaltOxide811",
-    "schema:sameAs": {
-      "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_e877987f_3b08_4e21_8f2e_c280e6bef52f"
-    },
-    "skos:exactMatch": [
-      {
-        "@id": "http://www.wikidata.org/entity/Q121086674"
-      }
-    ],
     "schema:molecularFormula": "LiNi0.8Mn0.1Co0.1O2",
     "hasProperty": [
       {
@@ -287,7 +288,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
           "hasNumberValue": 200
         },
         "schema:unitText": "mAh/g",
-        "hasMetrologicalReference": {
+        "schema:valueReference": {
           "@type": [
             "ReferenceElectrode",
             "LithiumElectrode"
@@ -361,6 +362,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         "hasMeasurementUnit": "https://w3id.org/emmo#GramPerCubicCentiMetre"
       }
     ],
+    "@id": "https://w3id.org/battinfo/spec/npa4-0dnw-evyh-hhdm#described",
     "skos:prefLabel": "NMC811"
   },
   "schema:comment": "Nickel-rich layered oxide cathode. Discovery-Benchmark NMC811-Graphite cells."
@@ -415,26 +417,26 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   ],
   "@id": "https://w3id.org/battinfo/spec/5ms1-9jv8-hr54-mn4e",
   "schema:name": "LFP",
+  "schema:sameAs": {
+    "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_aa8e9cc4_5f66_4307_b1c8_26fac7653a90"
+  },
+  "skos:exactMatch": [
+    {
+      "@id": "http://www.wikidata.org/entity/Q3042400"
+    },
+    {
+      "@id": "https://pubchem.ncbi.nlm.nih.gov/compound/15320824"
+    },
+    {
+      "@id": "https://next-gen.materialsproject.org/materials/mp-19017"
+    }
+  ],
   "schema:manufacturer": {
     "@type": "schema:Organization",
     "schema:name": "Canrud"
   },
   "isDescriptionFor": {
     "@type": "LithiumIronPhosphate",
-    "schema:sameAs": {
-      "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_aa8e9cc4_5f66_4307_b1c8_26fac7653a90"
-    },
-    "skos:exactMatch": [
-      {
-        "@id": "http://www.wikidata.org/entity/Q3042400"
-      },
-      {
-        "@id": "https://pubchem.ncbi.nlm.nih.gov/compound/15320824"
-      },
-      {
-        "@id": "https://next-gen.materialsproject.org/materials/mp-19017"
-      }
-    ],
     "schema:molecularFormula": "LiFePO4",
     "hasProperty": [
       {
@@ -460,7 +462,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
           "hasNumberValue": 160
         },
         "schema:unitText": "mAh/g",
-        "hasMetrologicalReference": {
+        "schema:valueReference": {
           "@type": [
             "ReferenceElectrode",
             "LithiumElectrode"
@@ -534,6 +536,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         "hasMeasurementUnit": "https://w3id.org/emmo#GramPerCubicCentiMetre"
       }
     ],
+    "@id": "https://w3id.org/battinfo/spec/5ms1-9jv8-hr54-mn4e#described",
     "skos:prefLabel": "LFP"
   },
   "schema:comment": "Lithium iron phosphate cathode active material. Discovery-Benchmark LFP-Graphite cells."
@@ -588,26 +591,26 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   ],
   "@id": "https://w3id.org/battinfo/spec/gwck-k5kf-ae1f-gfgc",
   "schema:name": "Graphite",
+  "schema:sameAs": {
+    "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_d53259a7_0d9c_48b9_a6c1_4418169df303"
+  },
+  "skos:exactMatch": [
+    {
+      "@id": "http://www.wikidata.org/entity/Q5309"
+    },
+    {
+      "@id": "https://pubchem.ncbi.nlm.nih.gov/compound/5462310"
+    },
+    {
+      "@id": "https://next-gen.materialsproject.org/materials/mp-48"
+    }
+  ],
   "schema:manufacturer": {
     "@type": "schema:Organization",
     "schema:name": "Canrud"
   },
   "isDescriptionFor": {
     "@type": "Graphite",
-    "schema:sameAs": {
-      "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_d53259a7_0d9c_48b9_a6c1_4418169df303"
-    },
-    "skos:exactMatch": [
-      {
-        "@id": "http://www.wikidata.org/entity/Q5309"
-      },
-      {
-        "@id": "https://pubchem.ncbi.nlm.nih.gov/compound/5462310"
-      },
-      {
-        "@id": "https://next-gen.materialsproject.org/materials/mp-48"
-      }
-    ],
     "schema:molecularFormula": "C",
     "hasProperty": [
       {
@@ -633,7 +636,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
           "hasNumberValue": 360
         },
         "schema:unitText": "mAh/g",
-        "hasMetrologicalReference": {
+        "schema:valueReference": {
           "@type": [
             "ReferenceElectrode",
             "LithiumElectrode"
@@ -707,6 +710,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         "hasMeasurementUnit": "https://w3id.org/emmo#GramPerCubicCentiMetre"
       }
     ],
+    "@id": "https://w3id.org/battinfo/spec/gwck-k5kf-ae1f-gfgc#described",
     "skos:prefLabel": "Graphite"
   },
   "schema:comment": "Graphite anode active material. Grounded in the DIGIBAT Discovery-Benchmark coin-cell builds (Canrud anode)."
@@ -761,11 +765,11 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   ],
   "@id": "https://w3id.org/battinfo/spec/jnab-ggw9-cbn8-hhjr",
   "schema:name": "Silicon-graphite composite",
+  "schema:sameAs": {
+    "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_3f061928_e90f_4414_9308_d4c843ebb79a"
+  },
   "isDescriptionFor": {
     "@type": "SiliconGraphite",
-    "schema:sameAs": {
-      "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_3f061928_e90f_4414_9308_d4c843ebb79a"
-    },
     "schema:molecularFormula": "Si/C",
     "hasProperty": {
       "@type": [
@@ -779,6 +783,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       },
       "schema:unitText": "mAh/g"
     },
+    "@id": "https://w3id.org/battinfo/spec/jnab-ggw9-cbn8-hhjr#described",
     "skos:prefLabel": "Silicon-graphite composite"
   },
   "schema:comment": "Generic Si/Gr blend (nominal 450 mAh/g); a real grade carries its manufacturer and grade."
@@ -833,11 +838,11 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   ],
   "@id": "https://w3id.org/battinfo/spec/83bd-jmk7-2x47-s04a",
   "schema:name": "LNMO",
+  "schema:sameAs": {
+    "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_f3e7979a_e3ef_450a_8762_7d8778afe478"
+  },
   "isDescriptionFor": {
     "@type": "LithiumNickelManganeseOxide",
-    "schema:sameAs": {
-      "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_f3e7979a_e3ef_450a_8762_7d8778afe478"
-    },
     "schema:molecularFormula": "LiNi0.5Mn1.5O4",
     "hasProperty": [
       {
@@ -863,7 +868,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
           "hasNumberValue": 140
         },
         "schema:unitText": "mAh/g",
-        "hasMetrologicalReference": {
+        "schema:valueReference": {
           "@type": [
             "ReferenceElectrode",
             "LithiumElectrode"
@@ -925,6 +930,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         }
       }
     ],
+    "@id": "https://w3id.org/battinfo/spec/83bd-jmk7-2x47-s04a#described",
     "skos:prefLabel": "LNMO"
   },
   "schema:comment": "High-voltage spinel cathode active material (synthetic reference example)."
@@ -979,11 +985,11 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   ],
   "@id": "https://w3id.org/battinfo/spec/bkrw-7shb-tzbm-j664",
   "schema:name": "PVDF",
+  "schema:sameAs": {
+    "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_f2e48e9e_f774_4f42_939f_1fe522efb7c8"
+  },
   "isDescriptionFor": {
     "@type": "PolyvinylideneFluoride",
-    "schema:sameAs": {
-      "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_f2e48e9e_f774_4f42_939f_1fe522efb7c8"
-    },
     "schema:molecularFormula": "(C2H2F2)n",
     "hasProperty": [
       {
@@ -1011,6 +1017,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         "hasMeasurementUnit": "https://w3id.org/emmo#GramPerCubicCentiMetre"
       }
     ],
+    "@id": "https://w3id.org/battinfo/spec/bkrw-7shb-tzbm-j664#described",
     "skos:prefLabel": "PVDF"
   },
   "schema:comment": "Polyvinylidene fluoride binder."
@@ -1065,11 +1072,11 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   ],
   "@id": "https://w3id.org/battinfo/spec/r5xt-4hrh-jm2k-yg4m",
   "schema:name": "Carbon black",
+  "schema:sameAs": {
+    "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_0a5cb747_60cf_4929_a54a_712c54b49f3b"
+  },
   "isDescriptionFor": {
     "@type": "CarbonBlack",
-    "schema:sameAs": {
-      "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_0a5cb747_60cf_4929_a54a_712c54b49f3b"
-    },
     "schema:molecularFormula": "C",
     "hasProperty": [
       {
@@ -1097,6 +1104,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         "hasMeasurementUnit": "https://w3id.org/emmo#GramPerCubicCentiMetre"
       }
     ],
+    "@id": "https://w3id.org/battinfo/spec/r5xt-4hrh-jm2k-yg4m#described",
     "skos:prefLabel": "Carbon black"
   },
   "schema:comment": "Conductive carbon additive (e.g. Super P-grade)."
@@ -1151,26 +1159,26 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   ],
   "@id": "https://w3id.org/battinfo/spec/fpeg-3wg8-e6cs-2vn1",
   "schema:name": "LiPF6",
+  "schema:sameAs": {
+    "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_0deb4fe8_b0c0_4e3f_8848_64435e5c0771"
+  },
+  "skos:exactMatch": [
+    {
+      "@id": "http://www.wikidata.org/entity/Q2583808"
+    },
+    {
+      "@id": "https://pubchem.ncbi.nlm.nih.gov/compound/23688915"
+    },
+    {
+      "@id": "https://next-gen.materialsproject.org/materials/mp-9143"
+    }
+  ],
   "schema:manufacturer": {
     "@type": "schema:Organization",
     "schema:name": "Canrud"
   },
   "isDescriptionFor": {
     "@type": "LithiumHexafluorophosphate",
-    "schema:sameAs": {
-      "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_0deb4fe8_b0c0_4e3f_8848_64435e5c0771"
-    },
-    "skos:exactMatch": [
-      {
-        "@id": "http://www.wikidata.org/entity/Q2583808"
-      },
-      {
-        "@id": "https://pubchem.ncbi.nlm.nih.gov/compound/23688915"
-      },
-      {
-        "@id": "https://next-gen.materialsproject.org/materials/mp-9143"
-      }
-    ],
     "schema:molecularFormula": "LiPF6",
     "hasProperty": {
       "@type": [
@@ -1184,6 +1192,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       },
       "hasMeasurementUnit": "https://w3id.org/emmo#GramPerMole"
     },
+    "@id": "https://w3id.org/battinfo/spec/fpeg-3wg8-e6cs-2vn1#described",
     "skos:prefLabel": "LiPF6"
   },
   "schema:comment": "Lithium hexafluorophosphate; conducting salt for organic Li-ion electrolytes. Discovery-Benchmark 1M LiPF6 EC:EMC."
@@ -1238,19 +1247,19 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   ],
   "@id": "https://w3id.org/battinfo/spec/efxx-b9yg-wh00-d23a",
   "schema:name": "EC",
+  "schema:sameAs": {
+    "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_57339d90_0553_4a96_8da9_ff6c3684e226"
+  },
+  "skos:exactMatch": [
+    {
+      "@id": "http://www.wikidata.org/entity/Q421145"
+    },
+    {
+      "@id": "https://pubchem.ncbi.nlm.nih.gov/compound/7303"
+    }
+  ],
   "isDescriptionFor": {
     "@type": "EthyleneCarbonate",
-    "schema:sameAs": {
-      "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_57339d90_0553_4a96_8da9_ff6c3684e226"
-    },
-    "skos:exactMatch": [
-      {
-        "@id": "http://www.wikidata.org/entity/Q421145"
-      },
-      {
-        "@id": "https://pubchem.ncbi.nlm.nih.gov/compound/7303"
-      }
-    ],
     "schema:molecularFormula": "C3H4O3",
     "hasProperty": [
       {
@@ -1278,6 +1287,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         "hasMeasurementUnit": "https://w3id.org/emmo#GramPerMole"
       }
     ],
+    "@id": "https://w3id.org/battinfo/spec/efxx-b9yg-wh00-d23a#described",
     "skos:prefLabel": "EC"
   },
   "schema:comment": "Ethylene carbonate; cyclic carbonate solvent."
@@ -1357,5 +1367,5 @@ Schema: [`material.schema.json`](https://w3id.org/battinfo/schema/material.schem
 
 **Governance:** the vocabulary changes by PR only; tests pin that each kind's `emmo` class resolves in the bundled context and names the same substance as its `chemsub` anchor.
 
-**The spec describes; the substance node carries the chemistry.** A material spec emits as `[Description, schema:ProductModel, schema:CreativeWork]` (no `MaterialSpecification` class is published yet - upstream ask), with the substance node - chemsub class, `schema:sameAs`/`skos:exactMatch` identity anchors, formula, properties - on the anonymous individual under `isDescriptionFor`, read the same way as a cell spec's described battery. Material lots are physical and keep their typing.
+**The spec describes; the substance node carries the chemistry.** A material spec emits as `[Description, schema:ProductModel, schema:CreativeWork]` (no `MaterialSpecification` class is published yet - upstream ask), with the substance node - chemsub class, formula, properties - on the described individual (`<spec-IRI>#described`) under `isDescriptionFor`, read the same way as a cell spec's described battery. The `schema:sameAs`/`skos:exactMatch` identity anchors are catalogue facts and ride the spec node itself (`skos:exactMatch` is symmetric and transitive - on the described substance it would conflate every supplier's grade through the shared Wikidata IRI). Material lots are physical and keep their typing.
 :::

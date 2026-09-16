@@ -151,7 +151,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         "schema:material": "Stainless steel"
       }
     ],
-    "skos:prefLabel": "CR2032 coin housing"
+    "skos:prefLabel": "CR2032 coin housing",
+    "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5#described"
   },
   "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
   "schema:name": "CR2032 coin housing"
@@ -329,7 +330,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         }
       }
     ],
-    "skos:prefLabel": "CR2032 coin housing"
+    "skos:prefLabel": "CR2032 coin housing",
+    "@id": "https://w3id.org/battinfo/spec/38af-bpnv-1zmm-32hs#described"
   },
   "@id": "https://w3id.org/battinfo/spec/38af-bpnv-1zmm-32hs",
   "schema:name": "CR2032 coin housing"
@@ -486,7 +488,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         "rdfs:comment": "Safety vent (CID / burst membrane) in the top cap."
       }
     ],
-    "skos:prefLabel": "21700 cylindrical housing"
+    "skos:prefLabel": "21700 cylindrical housing",
+    "@id": "https://w3id.org/battinfo/spec/k2q4-dk79-g890-7veq#described"
   },
   "@id": "https://w3id.org/battinfo/spec/k2q4-dk79-g890-7veq",
   "schema:name": "21700 cylindrical housing"
@@ -616,7 +619,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         "schema:material": "Polypropylene"
       }
     ],
-    "skos:prefLabel": "LFP 100Ah prismatic housing"
+    "skos:prefLabel": "LFP 100Ah prismatic housing",
+    "@id": "https://w3id.org/battinfo/spec/ypyh-v38v-r276-snmk#described"
   },
   "@id": "https://w3id.org/battinfo/spec/ypyh-v38v-r276-snmk",
   "schema:name": "LFP 100Ah prismatic housing"
@@ -732,7 +736,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         "schema:material": "PP heat seal"
       }
     ],
-    "skos:prefLabel": "Pouch laminate housing, 60 x 45 mm"
+    "skos:prefLabel": "Pouch laminate housing, 60 x 45 mm",
+    "@id": "https://w3id.org/battinfo/spec/q7mf-3wtk-8npv-2hcx#described"
   },
   "@id": "https://w3id.org/battinfo/spec/q7mf-3wtk-8npv-2hcx",
   "schema:name": "Pouch laminate housing, 60 x 45 mm"

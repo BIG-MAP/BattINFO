@@ -451,8 +451,11 @@ def test_active_material_reference_emits_as_a_linked_node() -> None:
         name="Graphite anode", kind="graphite", active_material_spec_id=SPEC_IRI, validate=False
     )
     ld = record_to_jsonld(spec, "electrode-spec")
-    # Physical fact of the described electrode, not the description node.
-    assert ld["isDescriptionFor"]["hasActiveMaterial"] == {"@id": SPEC_IRI, "@type": "ActiveMaterial"}
+    # Physical fact of the described electrode, referencing the material
+    # spec's DESCRIBED substance - never the Description document.
+    assert ld["isDescriptionFor"]["hasActiveMaterial"] == {
+        "@id": f"{SPEC_IRI}#described", "@type": "ActiveMaterial",
+    }
 
 
 def test_processing_emits_as_a_manufacturing_process() -> None:
@@ -564,7 +567,7 @@ def test_both_electrode_spec_seams_are_authorable_and_round_trip() -> None:
     assert reloaded.to_record() == record
 
     node = to_jsonld(record, target="domain-battery")["@graph"][0]["isDescriptionFor"]
-    assert node["hasPositiveElectrode"]["@id"] == SPEC_IRI
+    assert node["hasPositiveElectrode"]["@id"] == f"{SPEC_IRI}#described"
     assert node["hasNegativeElectrode"]["schema:isVariantOf"] == {"@id": SPEC_IRI}
 
 

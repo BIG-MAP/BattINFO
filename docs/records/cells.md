@@ -111,6 +111,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "LithiumIonBattery",
       "LithiumIonIronPhosphateBattery"
     ],
+    "@id": "https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0#described",
     "skos:prefLabel": "A123 ANR26650M1-B",
     "hasProperty": [
       {
@@ -155,6 +156,11 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     }
   },
   "schema:schemaVersion": "0.2.0",
+  "schema:weight": {
+    "@type": "schema:QuantitativeValue",
+    "schema:value": 76.0,
+    "schema:unitText": "g"
+  },
   "dcterms:source": {
     "@type": "prov:Entity",
     "dcterms:type": "datasheet",
@@ -317,7 +323,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "LithiumIonBattery",
       "LithiumIonIronPhosphateBattery"
     ],
+    "@id": "https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0#described",
     "skos:prefLabel": "A123 ANR26650M1-B",
+    "hasIECCode": "IFpR26650",
     "hasProperty": [
       {
         "@type": [
@@ -514,6 +522,26 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   },
   "schema:releaseDate": "2012-01-01",
   "schema:schemaVersion": "0.2.0",
+  "schema:weight": {
+    "@type": "schema:QuantitativeValue",
+    "schema:value": 76.0,
+    "schema:unitText": "g"
+  },
+  "schema:height": {
+    "@type": "schema:QuantitativeValue",
+    "schema:value": 65.0,
+    "schema:unitText": "mm"
+  },
+  "schema:width": {
+    "@type": "schema:QuantitativeValue",
+    "schema:value": 26.0,
+    "schema:unitText": "mm"
+  },
+  "schema:depth": {
+    "@type": "schema:QuantitativeValue",
+    "schema:value": 26.0,
+    "schema:unitText": "mm"
+  },
   "dcterms:source": {
     "@type": "prov:Entity",
     "dcterms:type": "datasheet",
@@ -578,6 +606,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "LithiumIonIronPhosphateBattery",
       "LithiumIonGraphiteBattery"
     ],
+    "@id": "https://w3id.org/battinfo/spec/2d5n-8r4k-3p7t-6v9m#described",
     "skos:prefLabel": "ExampleLab CYL-LFP-18650",
     "hasProperty": [
       {
@@ -967,6 +996,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "LithiumIonIronPhosphateBattery",
       "LithiumIonGraphiteBattery"
     ],
+    "@id": "https://w3id.org/battinfo/spec/5j9r-4k7p-2m8t-6v3q#described",
     "skos:prefLabel": "ExampleLab PRISM-LFP-020",
     "hasProperty": [
       {
@@ -1317,6 +1347,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "LithiumIonIronPhosphateBattery",
       "LithiumIonGraphiteBattery"
     ],
+    "@id": "https://w3id.org/battinfo/spec/4h8p-3t6m-9q2k-7v5r#described",
     "skos:prefLabel": "ExampleLab POUCH-ML-LFP-018",
     "hasProperty": [
       {
@@ -1667,6 +1698,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "LithiumIonIronPhosphateBattery",
       "LithiumIonGraphiteBattery"
     ],
+    "@id": "https://w3id.org/battinfo/spec/1c4m-7p9q-2k6t-8v3r#described",
     "skos:prefLabel": "ExampleLab COIN-LFP-2032",
     "hasProperty": [
       {
@@ -1991,6 +2023,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "LithiumIonNickelManganeseCobaltOxideBattery",
       "LithiumIonGraphiteBattery"
     ],
+    "@id": "https://w3id.org/battinfo/spec/tme2-0sy6-q89b-8m92#described",
     "skos:prefLabel": "EMPA COIN-NMC811-D",
     "hasProperty": [
       {
@@ -2020,20 +2053,20 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     ],
     "hasPositiveElectrode": {
       "@type": "LithiumNickelManganeseCobaltOxideElectrode",
-      "@id": "https://w3id.org/battinfo/spec/qfjh-7xyr-ga1k-tjez"
+      "@id": "https://w3id.org/battinfo/spec/qfjh-7xyr-ga1k-tjez#described"
     },
     "hasNegativeElectrode": {
       "@type": "GraphiteElectrode",
-      "@id": "https://w3id.org/battinfo/spec/d7qr-n581-74c3-7g7r"
+      "@id": "https://w3id.org/battinfo/spec/d7qr-n581-74c3-7g7r#described"
     },
     "hasElectrolyte": {
-      "@id": "https://w3id.org/battinfo/spec/gpkh-74nj-6sdb-vcsc"
+      "@id": "https://w3id.org/battinfo/spec/gpkh-74nj-6sdb-vcsc#described"
     },
     "hasSeparator": {
-      "@id": "https://w3id.org/battinfo/spec/wgym-4xfa-pws1-ek1b"
+      "@id": "https://w3id.org/battinfo/spec/wgym-4xfa-pws1-ek1b#described"
     },
     "hasConstituent": {
-      "@id": "https://w3id.org/battinfo/spec/38af-bpnv-1zmm-32hs"
+      "@id": "https://w3id.org/battinfo/spec/38af-bpnv-1zmm-32hs#described"
     }
   },
   "schema:schemaVersion": "0.2.0",
@@ -2101,6 +2134,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "LithiumIonIronPhosphateBattery",
       "LithiumIonGraphiteBattery"
     ],
+    "@id": "https://w3id.org/battinfo/spec/86k6-6tzd-c4sf-5s01#described",
     "skos:prefLabel": "EMPA PRISM-LFP-100AH",
     "hasProperty": [
       {
@@ -2130,20 +2164,20 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     ],
     "hasPositiveElectrode": {
       "@type": "LithiumIronPhosphateElectrode",
-      "@id": "https://w3id.org/battinfo/spec/m6y0-tkfg-sn40-q10p"
+      "@id": "https://w3id.org/battinfo/spec/m6y0-tkfg-sn40-q10p#described"
     },
     "hasNegativeElectrode": {
       "@type": "GraphiteElectrode",
-      "@id": "https://w3id.org/battinfo/spec/d7qr-n581-74c3-7g7r"
+      "@id": "https://w3id.org/battinfo/spec/d7qr-n581-74c3-7g7r#described"
     },
     "hasElectrolyte": {
-      "@id": "https://w3id.org/battinfo/spec/gpkh-74nj-6sdb-vcsc"
+      "@id": "https://w3id.org/battinfo/spec/gpkh-74nj-6sdb-vcsc#described"
     },
     "hasSeparator": {
-      "@id": "https://w3id.org/battinfo/spec/wgym-4xfa-pws1-ek1b"
+      "@id": "https://w3id.org/battinfo/spec/wgym-4xfa-pws1-ek1b#described"
     },
     "hasConstituent": {
-      "@id": "https://w3id.org/battinfo/spec/ypyh-v38v-r276-snmk"
+      "@id": "https://w3id.org/battinfo/spec/ypyh-v38v-r276-snmk#described"
     }
   },
   "schema:schemaVersion": "0.2.0",
@@ -2209,6 +2243,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "CoinCell",
       "LithiumManganeseDioxideBattery"
     ],
+    "@id": "https://w3id.org/battinfo/spec/jgyy-x3h5-drmv-5tn5#described",
     "skos:prefLabel": "EMPA COIN-ZNMNO2-ALK",
     "hasProperty": [
       {
@@ -2238,20 +2273,20 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     ],
     "hasPositiveElectrode": {
       "@type": "ManganeseDioxideElectrode",
-      "@id": "https://w3id.org/battinfo/spec/277n-cp9k-3g4m-w40y"
+      "@id": "https://w3id.org/battinfo/spec/277n-cp9k-3g4m-w40y#described"
     },
     "hasNegativeElectrode": {
       "@type": "ZincElectrode",
-      "@id": "https://w3id.org/battinfo/spec/3abg-gxzh-6487-9eex"
+      "@id": "https://w3id.org/battinfo/spec/3abg-gxzh-6487-9eex#described"
     },
     "hasElectrolyte": {
-      "@id": "https://w3id.org/battinfo/spec/gzt2-hrqq-gsfn-sp94"
+      "@id": "https://w3id.org/battinfo/spec/gzt2-hrqq-gsfn-sp94#described"
     },
     "hasSeparator": {
-      "@id": "https://w3id.org/battinfo/spec/wgym-4xfa-pws1-ek1b"
+      "@id": "https://w3id.org/battinfo/spec/wgym-4xfa-pws1-ek1b#described"
     },
     "hasConstituent": {
-      "@id": "https://w3id.org/battinfo/spec/38af-bpnv-1zmm-32hs"
+      "@id": "https://w3id.org/battinfo/spec/38af-bpnv-1zmm-32hs#described"
     }
   },
   "schema:schemaVersion": "0.2.0",
@@ -2389,7 +2424,7 @@ Top-level `datasets`: Datasets recorded for this cell. Back-reference to dataset
 ## Design notes
 
 :::{dropdown} The reasoning behind the model
-**Composing a cell from parts.** The seven reference fields resolve as: `positive_electrode_spec_id` / `negative_electrode_spec_id` and `working_electrode_spec_id` / `counter_electrode_spec_id` → `electrode-spec` (which pair applies follows from `cell_configuration`); `electrolyte_spec_id` → `electrolyte-spec`; `separator_spec_id` → `separator-spec`; `housing_spec_id` → `housing-spec`. A cell may reference, inline, or both — inline holders stay optional, so existing records are unaffected. The JSON-LD emits reference nodes (`hasPositiveElectrode: {"@id": …}`), merging the `@id` onto an inline node when both are present.
+**Composing a cell from parts.** The seven reference fields resolve as: `positive_electrode_spec_id` / `negative_electrode_spec_id` and `working_electrode_spec_id` / `counter_electrode_spec_id` → `electrode-spec` (which pair applies follows from `cell_configuration`); `electrolyte_spec_id` → `electrolyte-spec`; `separator_spec_id` → `separator-spec`; `housing_spec_id` → `housing-spec`. A cell may reference, inline, or both — inline holders stay optional, so existing records are unaffected. The JSON-LD emits reference nodes pointing at the target spec's described component (`hasPositiveElectrode: {"@id": "…#described"}` — a physical relation lands on a physical individual, never on the spec document), merging the `@id` onto an inline node when both are present.
 
 **References are checked at save.** A `*_spec_id` that points at nothing fails the save with the missing IRI named; `resolve_references=False` opts out for staged workflows, and `save_batch` allows references within the batch and validates the completed set. `extract_component_specs(cell_spec_record)` goes the other way, lifting inline holders into standalone specs so any inline cell can be decomposed and de-duplicated.
 
@@ -2405,5 +2440,5 @@ electrode-spec / electrolyte-spec / separator-spec / housing-spec  →  material
 
 **What the spec node says.** One node, three personas: the EMMO information artifact (`BatteryCellSpecification` — id, schema version, provenance, citation), the schema.org catalogue entity (`schema:ProductModel` — name, manufacturer, brand, size and IEC codes, release date), and the record (`schema:CreativeWork`). Every EMMO-axiomatized physical fact — `hasProperty` quantities, electrode/electrolyte/separator/housing composition, construction — rides the described battery under `isDescriptionFor`: those relations declare physical subjects (`hasProperty`'s domain is `Referent`, `hasElectrolyte`'s is `ElectrochemicalCell`), so asserting them on the document would entail a false typing.
 
-**The described battery, precisely.** The `isDescriptionFor` individual is an existential witness — "there exists a battery such that …" — satisfied by at least one conforming unit (the universal reading a datasheet gestures at is not expressible at individual level); it is not a prototype object and no identity is asserted between it and any cell instance. Declared values carry their epistemic status in the property-nature class (today `ConventionalProperty`, a value attributed by agreement; `RatedProperty` joins when it is published upstream), not in a universality claim. An instance links to its spec via `hasDescription` and `schema:isVariantOf` and carries its own physical typing — the schema.org ProductModel pattern on the schema layer, EMMO's own `BatterySpecification ⊑ isDescriptionFor some Battery` axiom on the semantic layer (which is also where the existential commitment for never-built designs comes from). For SPARQL, the property path `isDescriptionFor?/hasProperty` reads both this shape and pre-pattern documents in one query.
+**The described battery, precisely.** The `isDescriptionFor` individual is an existential witness — "there exists a battery such that …" — satisfied by at least one conforming unit (the universal reading a datasheet gestures at is not expressible at individual level); it is not a prototype object and no identity is asserted between it and any cell instance. It carries a stable name, `<spec-IRI>#described`, so repeated ingest merges instead of duplicating, other records can reference the design, and `*_spec_id` reference edges resolve to physical individuals — naming the witness changes none of the above. Declared values carry their epistemic status in the property-nature class (today `ConventionalProperty`, a value attributed by agreement; `RatedProperty` joins when it is published upstream), not in a universality claim. An instance links to its spec via `hasDescription` and `schema:isVariantOf` and carries its own physical typing — the schema.org ProductModel pattern on the schema layer, EMMO's own `BatterySpecification ⊑ isDescriptionFor some Battery` axiom on the semantic layer (which is also where the existential commitment for never-built designs comes from). For SPARQL, the property path `isDescriptionFor?/hasProperty` reads both this shape and pre-pattern documents in one query.
 :::

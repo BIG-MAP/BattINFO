@@ -241,6 +241,7 @@ export const showcase: {
           "LithiumIonBattery",
           "LithiumIonIronPhosphateBattery"
         ],
+        "@id": "https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0#described",
         "skos:prefLabel": "A123 ANR26650M1-B",
         "hasProperty": [
           {
@@ -285,6 +286,11 @@ export const showcase: {
         }
       },
       "schema:schemaVersion": "0.2.0",
+      "schema:weight": {
+        "@type": "schema:QuantitativeValue",
+        "schema:value": 76.0,
+        "schema:unitText": "g"
+      },
       "dcterms:source": {
         "@type": "prov:Entity",
         "dcterms:type": "datasheet",

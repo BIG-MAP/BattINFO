@@ -146,7 +146,8 @@ def _assert_composition_tree(node: dict) -> None:
     a regression back to the flat shape fails loudly)."""
     node = node["isDescriptionFor"]
     pe = node["hasPositiveElectrode"]
-    assert pe["@id"] == REFS["positive_electrode_spec_id"]
+    # Physical relations reference the target spec's described individual.
+    assert pe["@id"] == REFS["positive_electrode_spec_id"] + "#described"
     coating = pe["hasCoating"]
     assert coating["@type"] == "ElectrodeCoating"
     active = coating["hasActiveMaterial"]
@@ -161,11 +162,11 @@ def _assert_composition_tree(node: dict) -> None:
     assert "CurrentCollector" in pe["hasCurrentCollector"]["@type"]
 
     ne = node["hasNegativeElectrode"]
-    assert ne["@id"] == REFS["negative_electrode_spec_id"]
+    assert ne["@id"] == REFS["negative_electrode_spec_id"] + "#described"
     assert ne["hasCoating"]["hasActiveMaterial"]["schema:name"] == "Graphite"
 
     elyte = node["hasElectrolyte"]
-    assert elyte["@id"] == REFS["electrolyte_spec_id"]
+    assert elyte["@id"] == REFS["electrolyte_spec_id"] + "#described"
     assert elyte["@type"] == "OrganicElectrolyte"
     assert elyte["hasSolute"]["schema:name"] == "LiPF6"
     assert elyte["hasSolute"]["schema:isVariantOf"] == {"@id": SALT_ID}
@@ -173,10 +174,10 @@ def _assert_composition_tree(node: dict) -> None:
     assert {s["schema:name"] for s in solvents} == {"EC", "EMC"}
 
     sep = node["hasSeparator"]
-    assert sep["@id"] == REFS["separator_spec_id"]
+    assert sep["@id"] == REFS["separator_spec_id"] + "#described"
     assert "Separator" in sep["@type"]
 
-    assert node["hasConstituent"] == {"@id": REFS["housing_spec_id"]}
+    assert node["hasConstituent"] == {"@id": REFS["housing_spec_id"] + "#described"}
 
 
 def _collect_bare_terms(value, out: set[str]) -> None:
@@ -250,11 +251,11 @@ def test_refs_only_cell_emits_reference_nodes() -> None:
     node = build_cell_spec_node(_composed_record(inline=False, refs=True))["isDescriptionFor"]
     for field, relation in _REF_RELATIONS.items():
         ref = node[relation]
-        assert ref["@id"] == REFS[field], relation
+        assert ref["@id"] == REFS[field] + "#described", relation
         # No inline holder: nothing beyond the reference and (for electrodes) the
         # basis-derived @type refinement may appear.
         assert set(ref) <= {"@id", "@type"}, relation
-    assert node["hasConstituent"] == {"@id": REFS["housing_spec_id"]}
+    assert node["hasConstituent"] == {"@id": REFS["housing_spec_id"] + "#described"}
 
 
 def test_inline_only_cell_emits_nested_holders_without_ids() -> None:
@@ -315,12 +316,12 @@ def test_preview_jsonld_emits_composition_and_refs(tmp_path: Path) -> None:
     coating = node["hasPositiveElectrode"]["hasCoating"]
     assert coating["hasActiveMaterial"]["schema:isVariantOf"] == {"@id": MAT_ID}
     assert coating["hasActiveMaterial"]["hasProperty"]["hasNumericalPart"]["hasNumberValue"] == 0.96
-    assert node["hasPositiveElectrode"]["@id"] == REFS["positive_electrode_spec_id"]
-    assert node["hasNegativeElectrode"]["@id"] == REFS["negative_electrode_spec_id"]
-    assert node["hasElectrolyte"]["@id"] == REFS["electrolyte_spec_id"]
+    assert node["hasPositiveElectrode"]["@id"] == REFS["positive_electrode_spec_id"] + "#described"
+    assert node["hasNegativeElectrode"]["@id"] == REFS["negative_electrode_spec_id"] + "#described"
+    assert node["hasElectrolyte"]["@id"] == REFS["electrolyte_spec_id"] + "#described"
     assert node["hasElectrolyte"]["hasSolute"]["schema:isVariantOf"] == {"@id": SALT_ID}
-    assert node["hasSeparator"]["@id"] == REFS["separator_spec_id"]
-    assert node["hasConstituent"] == {"@id": REFS["housing_spec_id"]}
+    assert node["hasSeparator"]["@id"] == REFS["separator_spec_id"] + "#described"
+    assert node["hasConstituent"] == {"@id": REFS["housing_spec_id"] + "#described"}
     # Every composition term resolves in the deposit's inline context.
     context = doc["@context"]
     terms: set[str] = set()

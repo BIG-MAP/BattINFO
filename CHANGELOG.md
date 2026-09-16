@@ -9,6 +9,46 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- **The described individual gets a name: `<spec-IRI>#described` (JSON-LD
+  dialect change, red-team ruling).** Every spec family's `isDescriptionFor`
+  individual is now skolemized with the hash form of the spec's own IRI -
+  dereferencing it fetches the spec document, repeated ingest merges instead
+  of duplicating the physics, and the design becomes addressable from tests
+  and BOMs. Nothing changes logically: no identity with any instance is
+  asserted, and the existential-witness reading survives verbatim.
+  `*_spec_id` reference edges now resolve to the target's described
+  component (`hasElectrolyte -> <electrolyte-spec>#described`) - a physical
+  relation lands on a physical individual, never on the Description
+  document the range axioms would otherwise mistype.
+
+- **Declared-value semantics tightened (red-team ruling).** `value_basis:
+  "Nominal"` co-types as `ConventionalProperty` (EMMO's `NominalProperty`
+  is VIM's no-magnitude property - colour, blood type - so it was a false
+  claim on a numeric rating; upstream ask filed on `NominalBatteryProperty`
+  too). Conditions on a declared value emit as named
+  `schema:valueReference` qualifiers - the `isOutputOf ->
+  BatteryMeasurement` subtree now appears only on `Measured` values, since
+  it asserts a real process occurred. `voltage_reference` rides
+  `schema:valueReference` everywhere (never `hasMetrologicalReference`,
+  whose exactly-one slot the unit already fills - a second filler entailed
+  `owl:sameAs` between the volt and the reference electrode). Material
+  identity anchors (`schema:sameAs`, `skos:exactMatch`) move from the
+  described substance to the spec node: `exactMatch` is symmetric and
+  transitive, so on the witness it conflated every supplier's grade
+  through the shared Wikidata IRI.
+
+- **Format/IEC disjointness guard.** `cell_format: cylindrical` +
+  `iec_code: cr2032` used to stack owl:disjointWith classes on one
+  individual, making any merged graph OWL-inconsistent from one typo. The
+  IEC code (the more specific claim) now wins with a warning; each
+  `iec_code` entry in `entity_type_map.json` declares its format family.
+
+- **ProductModel persona rounded out.** The described cell carries the
+  ontology's own `hasIECCode` datatype slot beside `schema:productID` on
+  the spec, and the spec node mirrors `schema:weight`/`height`/`width`/
+  `depth` from the EMMO quantities so a schema.org-only consumer sees the
+  product's dimensions (the EMMO encoding stays authoritative).
+
 - **`electrode_spec.kind` becomes `active_material_kind`.** The field names
   the electrode's active material, so it now says so - a bare `kind` on an
   electrode reads as the electrode's form (porous, foil, rotating-disc), not

@@ -188,8 +188,10 @@ def test_role_holders_carry_both_electrode_spec_seams() -> None:
     assert record["counter_electrode"]["electrode_spec_id"] == DESIGN_IRI
 
     node = record_to_jsonld(record, "cell-spec")["isDescriptionFor"]
-    # Top-level reference: the @id merges onto the emitted node (one node).
-    assert node["hasWorkingElectrode"]["@id"] == DESIGN_IRI
+    # Top-level reference: the described-electrode @id merges onto the emitted
+    # node (one node) — a physical relation lands on the design's described
+    # individual, never on the spec document.
+    assert node["hasWorkingElectrode"]["@id"] == f"{DESIGN_IRI}#described"
     # Inline reference: the holder realizes a design without claiming to be it.
     assert node["hasCounterElectrode"]["schema:isVariantOf"] == {"@id": DESIGN_IRI}
 
@@ -200,7 +202,7 @@ def test_a_role_spec_reference_without_an_inline_holder_emits_a_bare_reference()
                  working_electrode_spec_id=DESIGN_IRI).to_record(),
         "cell-spec",
     )["isDescriptionFor"]
-    assert node["hasWorkingElectrode"] == {"@id": DESIGN_IRI}
+    assert node["hasWorkingElectrode"] == {"@id": f"{DESIGN_IRI}#described"}
 
 
 def test_role_spec_references_are_validated_at_the_input_boundary() -> None:

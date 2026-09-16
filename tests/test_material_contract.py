@@ -157,9 +157,13 @@ def test_material_property_conditions_emit_measurement_parameters() -> None:
     # A qualitative condition is a hasStringValue node, not a fake quantity.
     atmosphere = next(p for p in params if p["skos:prefLabel"] == "atmosphere")
     assert atmosphere["hasStringValue"] == "argon"
-    # voltage_reference is a metrological datum of the quantity, not a
-    # parameter of the measurement: class-typed, beside the unit.
-    ref = cap["hasMetrologicalReference"]
+    # voltage_reference is a datum of the quantity, not a parameter of the
+    # measurement: the class-typed couple rides schema:valueReference (never
+    # hasMetrologicalReference - the unit already fills EMMO's exactly-one
+    # MetrologicalReference slot on a Quantity).
+    refs = cap["schema:valueReference"]
+    refs = refs if isinstance(refs, list) else [refs]
+    ref = next(r for r in refs if "ReferenceElectrode" in (r.get("@type") or []))
     assert set(ref["@type"]) == {"ReferenceElectrode", "LithiumElectrode"}
     assert all(p["skos:prefLabel"] != "voltage_reference" for p in params)
 

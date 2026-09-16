@@ -97,6 +97,9 @@ def _load_test_method_context_terms() -> dict:
         # (specific_capacity mapped but its class was missing from the
         # records context, so it silently dropped at expansion).
         "SpecificCapacity",
+        # IEC designation on the described cell (electrochemistry datatype
+        # property), beside the schema:productID catalogue string on the spec.
+        "hasIECCode",
         # Characterisation-method classes a test protocol types itself with
         # (see TEST_METHOD_CLASS). Pulled from the same bundled context, so the
         # emitter, the hosted context and the validator allowlist cannot drift.
@@ -848,8 +851,10 @@ def test_to_jsonld(record: dict) -> dict:
         # this node — the same shape quantity-level conditions take on their
         # isOutputOf measurement node, so one query reads both rungs. The
         # schema:PropertyValue copy stays as the standards-legible layer.
-        # voltage_reference is a metrological datum, not a parameter: it emits
-        # only as hasMetrologicalReference.
+        # voltage_reference is a datum, not a parameter: it emits as a
+        # PropertyValue whose valueReference carries the class-typed couple
+        # (never hasMetrologicalReference — that slot belongs to units on
+        # Quantity nodes, and a test activity is not a Quantity).
         from battinfo.transform.json_to_jsonld import (  # noqa: PLC0415
             _MEASUREMENT_PARAMETER_TERMS,
             _descriptor_quantity_node,
@@ -863,7 +868,16 @@ def test_to_jsonld(record: dict) -> dict:
             if name == "voltage_reference":
                 ref = _voltage_reference_node(value)
                 if ref is not None:
-                    node["hasMetrologicalReference"] = ref
+                    if ref.get("@type") == "schema:PropertyValue":
+                        pv = {**ref, "schema:name": name}
+                    else:
+                        pv = {
+                            "@type": "schema:PropertyValue",
+                            "schema:name": name,
+                            "schema:value": ref.get("skos:prefLabel"),
+                            "schema:valueReference": ref,
+                        }
+                    props.append(pv)
                     continue
             pv: dict = {"@type": "schema:PropertyValue", "schema:name": name}
             if isinstance(value, Mapping) and "value" in value:
