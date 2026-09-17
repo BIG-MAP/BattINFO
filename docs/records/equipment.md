@@ -59,7 +59,7 @@ record = create_equipment_spec(
   "provenance": {
     "source_type": "datasheet",
     "retrieved_at": 1750000000,
-    "battinfo_version": "0.7.0"
+    "battinfo_version": "0.8.0"
   }
 }
 ```
@@ -109,7 +109,7 @@ record = create_equipment(
   "provenance": {
     "source_type": "lab",
     "retrieved_at": 1750000000,
-    "battinfo_version": "0.7.0"
+    "battinfo_version": "0.8.0"
   }
 }
 ```
@@ -156,7 +156,7 @@ record = create_channel(
   "provenance": {
     "source_type": "lab",
     "retrieved_at": 1750000000,
-    "battinfo_version": "0.7.0"
+    "battinfo_version": "0.8.0"
   }
 }
 ```
