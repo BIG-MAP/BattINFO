@@ -1,0 +1,77 @@
+{
+  "schema_version": "0.2.0",
+  "test_spec": {
+    "id": "https://w3id.org/battinfo/spec/cv7k-3wpm-9qtx-4nfh",
+    "short_id": "cv7k3w",
+    "identifier": "test-protocol:cv7k-3wpm-9qtx-4nfh",
+    "name": "Cyclic Voltammetry — 0.1 mV/s, 3.0–4.3 V",
+    "kind": "cyclic_voltammetry",
+    "description": "Cyclic voltammetry at 0.1 mV/s between 3.0 V and 4.3 V at 25°C, three cycles. Peak positions and separations identify redox reactions and their reversibility; the slow scan rate keeps the response near-equilibrium for intercalation electrodes.",
+    "version": "1.0"
+  },
+  "conditions": {
+    "ambient_temperature": {
+      "value": 25.0,
+      "unit": "degC"
+    }
+  },
+  "method": [
+    {
+      "mode": "group",
+      "count": 3,
+      "description": "One full potential cycle per iteration",
+      "steps": [
+        {
+          "mode": "scan",
+          "direction": "charge",
+          "setpoints": {
+            "scan_rate": {
+              "value": 0.1,
+              "unit": "mV/s"
+            },
+            "upper_voltage_limit": {
+              "value": 4.3,
+              "unit": "V"
+            }
+          },
+          "termination": [
+            {
+              "quantity": "voltage",
+              "value": 4.3,
+              "unit": "V",
+              "direction": "above"
+            }
+          ],
+          "description": "Anodic sweep at 0.1 mV/s to 4.3 V"
+        },
+        {
+          "mode": "scan",
+          "direction": "discharge",
+          "setpoints": {
+            "scan_rate": {
+              "value": 0.1,
+              "unit": "mV/s"
+            },
+            "lower_voltage_limit": {
+              "value": 3.0,
+              "unit": "V"
+            }
+          },
+          "termination": [
+            {
+              "quantity": "voltage",
+              "value": 3.0,
+              "unit": "V",
+              "direction": "below"
+            }
+          ],
+          "description": "Cathodic sweep at 0.1 mV/s to 3.0 V"
+        }
+      ]
+    }
+  ],
+  "provenance": {
+    "source_type": "manual",
+    "retrieved_at": 1757500000
+  }
+}

@@ -575,11 +575,27 @@ def _refs(node, acc: set[str]) -> None:
             _refs(item, acc)
 
 
+def _defined_ids(node, acc: set[str]) -> None:
+    """Collect the @id of every node OBJECT (a dict carrying more than @id),
+    nested included — a spec's described individual (<spec>#described) is a
+    real graph node even though it rides inside the spec node."""
+    if isinstance(node, dict):
+        if isinstance(node.get("@id"), str) and len(node) > 1:
+            acc.add(node["@id"])
+        for value in node.values():
+            _defined_ids(value, acc)
+    elif isinstance(node, list):
+        for item in node:
+            _defined_ids(item, acc)
+
+
 def test_no_dangling_internal_references(tmp_path: Path) -> None:
     """Every referenced battinfo IRI resolves to a node in the graph — including the
     remote cell spec, which appears as a typed stub rather than a bare dangling @id."""
     graph = _build_doc(tmp_path)["@graph"]
-    node_ids = {n["@id"] for n in graph if "@id" in n}
+    node_ids: set[str] = set()
+    for n in graph:
+        _defined_ids(n, node_ids)
     referenced: set[str] = set()
     for n in graph:
         _refs(n, referenced)

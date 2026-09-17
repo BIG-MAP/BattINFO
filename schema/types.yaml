@@ -49,6 +49,7 @@ enums:
       hppc:                { description: "Hybrid pulse power characterisation." }
       ici:                 { description: "Intermittent current interruption." }
       gitt:                { description: "Galvanostatic intermittent titration technique." }
+      pitt:                { description: "Potentiostatic intermittent titration technique." }
       dcir:                { description: "DC internal resistance measurement." }
       eis:                 { description: "Electrochemical impedance spectroscopy." }
       impedance:           { description: "Generic impedance measurement." }
@@ -56,6 +57,7 @@ enums:
       formation:           { description: "Formation / conditioning cycling." }
       rpt:                 { description: "Reference performance test." }
       quasi_ocv:           { description: "Quasi-OCV / low-rate discharge." }
+      cyclic_voltammetry:  { description: "Cyclic voltammetry." }
       field:               { description: "Field / in-vehicle / application test." }
       duty_cycle:          { description: "Application duty-cycle test." }
       wltp:                { description: "Worldwide harmonised light-duty test procedure." }

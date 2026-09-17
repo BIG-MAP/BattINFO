@@ -26,8 +26,12 @@ from battinfo.api import create_electrode_spec
 record = create_electrode_spec(
     uid="kxwy-5f5f-f682-hhch",
     name="NMC811 cathode design A",
-    kind="nmc811",                     # the ACTIVE material's kind
+    active_material_kind="nmc811",     # from the curated material-kind vocabulary
     active_material_spec_id="https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+    composition={"active": 0.96,       # weight fractions -> coating.component
+                 "binder": {"name": "PVDF", "fraction": 0.02},
+                 "conductive_additive": {"name": "Carbon black", "fraction": 0.02}},
+    coating={"double_sided": False},   # coated on one side (a lab half-cell disc)
     source_type="lab",
 )
 ```
@@ -41,8 +45,47 @@ record = create_electrode_spec(
     "id": "https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
     "short_id": "kxwy5f",
     "name": "NMC811 cathode design A",
-    "kind": "nmc811",
-    "active_material_spec_id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5"
+    "active_material_kind": "nmc811",
+    "active_material_spec_id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+    "coating": {
+      "component": {
+        "active_material": [
+          {
+            "name": "NMC811 (LiNi0.8Mn0.1Co0.1O2)",
+            "property": {
+              "mass_fraction": {
+                "value": 0.96,
+                "unit": "1"
+              }
+            },
+            "material_spec_id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5"
+          }
+        ],
+        "binder": [
+          {
+            "name": "PVDF",
+            "property": {
+              "mass_fraction": {
+                "value": 0.02,
+                "unit": "1"
+              }
+            }
+          }
+        ],
+        "additive": [
+          {
+            "name": "Carbon black",
+            "property": {
+              "mass_fraction": {
+                "value": 0.02,
+                "unit": "1"
+              }
+            }
+          }
+        ]
+      },
+      "double_sided": false
+    }
   },
   "provenance": {
     "source_type": "lab",
@@ -66,13 +109,84 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "battinfo": "https://w3id.org/battinfo/"
     }
   ],
-  "@type": "LithiumNickelManganeseCobaltOxideElectrode",
+  "@type": [
+    "Description",
+    "schema:ProductModel",
+    "schema:CreativeWork"
+  ],
+  "isDescriptionFor": {
+    "@type": "LithiumNickelManganeseCobaltOxideElectrode",
+    "hasCoating": {
+      "@type": "ElectrodeCoating",
+      "hasActiveMaterial": {
+        "@type": "ActiveMaterial",
+        "schema:name": "NMC811 (LiNi0.8Mn0.1Co0.1O2)",
+        "schema:isVariantOf": {
+          "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5"
+        },
+        "hasProperty": {
+          "@type": [
+            "MassFraction",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 0.96
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+        }
+      },
+      "hasBinder": {
+        "@type": [
+          "PolyvinylideneFluoride",
+          "Binder"
+        ],
+        "schema:name": "PVDF",
+        "hasProperty": {
+          "@type": [
+            "MassFraction",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 0.02
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+        }
+      },
+      "hasConductiveAdditive": {
+        "@type": [
+          "CarbonBlack",
+          "ConductiveAdditive"
+        ],
+        "schema:name": "Carbon black",
+        "hasProperty": {
+          "@type": [
+            "MassFraction",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 0.02
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+        }
+      },
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "double_sided",
+        "schema:value": false
+      }
+    },
+    "hasActiveMaterial": {
+      "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5#described",
+      "@type": "ActiveMaterial"
+    },
+    "skos:prefLabel": "NMC811 cathode design A",
+    "@id": "https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch#described"
+  },
   "@id": "https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
-  "schema:name": "NMC811 cathode design A",
-  "hasActiveMaterial": {
-    "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
-    "@type": "ActiveMaterial"
-  }
+  "schema:name": "NMC811 cathode design A"
 }
 ```
 :::
@@ -94,8 +208,12 @@ from battinfo.api import create_electrode
 
 record = create_electrode(
     uid="3w87-0ddf-ryjg-evxe",
-    name="Cathode disc, cell LAB-2026-0001",
-    electrode_spec_id="https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
+    name="Cathode disc 07, cell LAB-2026-0001",
+    spec_id="https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
+    # Genealogy: the coated strip this disc was punched from is itself an
+    # electrode record; siblings cut from it share the same parent.
+    parent_id="https://w3id.org/battinfo/electrode/9m2k-4tqv-7xw3-1nfh",
+    piece_id="disc-07",
     source_type="lab",
 )
 ```
@@ -109,7 +227,9 @@ record = create_electrode(
     "id": "https://w3id.org/battinfo/electrode/3w87-0ddf-ryjg-evxe",
     "electrode_spec_id": "https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
     "short_id": "3w870d",
-    "name": "Cathode disc, cell LAB-2026-0001"
+    "name": "Cathode disc 07, cell LAB-2026-0001",
+    "parent_id": "https://w3id.org/battinfo/electrode/7d9k-2m4p-8t3x-6nq5",
+    "piece_id": "disc-07"
   },
   "provenance": {
     "source_type": "lab",
@@ -135,9 +255,17 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   ],
   "@type": "Electrode",
   "@id": "https://w3id.org/battinfo/electrode/3w87-0ddf-ryjg-evxe",
-  "schema:name": "Cathode disc, cell LAB-2026-0001",
+  "schema:name": "Cathode disc 07, cell LAB-2026-0001",
   "schema:isVariantOf": {
     "@id": "https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch"
+  },
+  "prov:wasDerivedFrom": {
+    "@id": "https://w3id.org/battinfo/electrode/7d9k-2m4p-8t3x-6nq5"
+  },
+  "schema:identifier": {
+    "@type": "schema:PropertyValue",
+    "schema:name": "piece_id",
+    "schema:value": "disc-07"
   }
 }
 ```
@@ -192,127 +320,136 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     }
   ],
   "@type": [
-    "LithiumNickelManganeseCobaltOxideElectrode",
-    "PositiveElectrode"
+    "Description",
+    "schema:ProductModel",
+    "schema:CreativeWork"
   ],
-  "hasCoating": {
-    "@type": "ElectrodeCoating",
-    "hasActiveMaterial": {
-      "@type": [
-        "LithiumNickelManganeseCobaltOxide811",
-        "ActiveMaterial"
-      ],
-      "schema:name": "NMC811",
-      "schema:isVariantOf": {
-        "@id": "https://w3id.org/battinfo/spec/npa4-0dnw-evyh-hhdm"
+  "isDescriptionFor": {
+    "@type": [
+      "LithiumNickelManganeseCobaltOxideElectrode",
+      "PositiveElectrode"
+    ],
+    "hasCoating": {
+      "@type": "ElectrodeCoating",
+      "hasActiveMaterial": {
+        "@type": [
+          "LithiumNickelManganeseCobaltOxide811",
+          "ActiveMaterial"
+        ],
+        "schema:name": "NMC811",
+        "schema:isVariantOf": {
+          "@id": "https://w3id.org/battinfo/spec/npa4-0dnw-evyh-hhdm"
+        },
+        "hasProperty": {
+          "@type": [
+            "MassFraction",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 0.96
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+        }
       },
+      "hasBinder": {
+        "@type": [
+          "PolyvinylideneFluoride",
+          "Binder"
+        ],
+        "schema:name": "PVDF",
+        "schema:isVariantOf": {
+          "@id": "https://w3id.org/battinfo/spec/bkrw-7shb-tzbm-j664"
+        },
+        "hasProperty": {
+          "@type": [
+            "MassFraction",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 0.02
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+        }
+      },
+      "hasConductiveAdditive": {
+        "@type": [
+          "CarbonBlack",
+          "ConductiveAdditive"
+        ],
+        "schema:name": "Carbon black",
+        "schema:isVariantOf": {
+          "@id": "https://w3id.org/battinfo/spec/r5xt-4hrh-jm2k-yg4m"
+        },
+        "hasProperty": {
+          "@type": [
+            "MassFraction",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 0.02
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+        }
+      },
+      "hasProperty": [
+        {
+          "@type": [
+            "ActiveMassLoading",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "ActiveMassLoading",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 21
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#MilliGramPerSquareCentiMetre"
+        },
+        {
+          "@type": [
+            "CalenderedCoatingThickness",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "CalenderedCoatingThickness",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 64
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
+        }
+      ]
+    },
+    "hasCurrentCollector": {
+      "@type": [
+        "CurrentCollector",
+        "Aluminium",
+        "Foil"
+      ],
+      "schema:name": "Aluminium foil",
       "hasProperty": {
         "@type": [
-          "MassFraction",
+          "Thickness",
           "ConventionalProperty"
         ],
+        "skos:prefLabel": "Thickness",
         "hasNumericalPart": {
           "@type": "RealData",
-          "hasNumberValue": 0.96
-        },
-        "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-      }
-    },
-    "hasBinder": {
-      "@type": [
-        "PolyvinylideneFluoride",
-        "Binder"
-      ],
-      "schema:name": "PVDF",
-      "schema:isVariantOf": {
-        "@id": "https://w3id.org/battinfo/spec/bkrw-7shb-tzbm-j664"
-      },
-      "hasProperty": {
-        "@type": [
-          "MassFraction",
-          "ConventionalProperty"
-        ],
-        "hasNumericalPart": {
-          "@type": "RealData",
-          "hasNumberValue": 0.02
-        },
-        "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-      }
-    },
-    "hasConductiveAdditive": {
-      "@type": [
-        "CarbonBlack",
-        "ConductiveAdditive"
-      ],
-      "schema:name": "Carbon black",
-      "schema:isVariantOf": {
-        "@id": "https://w3id.org/battinfo/spec/r5xt-4hrh-jm2k-yg4m"
-      },
-      "hasProperty": {
-        "@type": [
-          "MassFraction",
-          "ConventionalProperty"
-        ],
-        "hasNumericalPart": {
-          "@type": "RealData",
-          "hasNumberValue": 0.02
-        },
-        "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-      }
-    },
-    "hasProperty": [
-      {
-        "@type": [
-          "ActiveMassLoading",
-          "ConventionalProperty"
-        ],
-        "skos:prefLabel": "ActiveMassLoading",
-        "hasNumericalPart": {
-          "@type": "RealData",
-          "hasNumberValue": 21
-        },
-        "hasMeasurementUnit": "https://w3id.org/emmo#MilliGramPerSquareCentiMetre"
-      },
-      {
-        "@type": [
-          "CalenderedCoatingThickness",
-          "ConventionalProperty"
-        ],
-        "skos:prefLabel": "CalenderedCoatingThickness",
-        "hasNumericalPart": {
-          "@type": "RealData",
-          "hasNumberValue": 64
+          "hasNumberValue": 15
         },
         "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
       }
-    ]
-  },
-  "hasCurrentCollector": {
-    "@type": [
-      "CurrentCollector",
-      "Aluminium",
-      "Foil"
-    ],
-    "schema:name": "Aluminium foil",
-    "hasProperty": {
-      "@type": [
-        "Thickness",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "Thickness",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 15
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
-    }
+    },
+    "hasActiveMaterial": {
+      "@id": "https://w3id.org/battinfo/spec/npa4-0dnw-evyh-hhdm#described",
+      "@type": "ActiveMaterial"
+    },
+    "skos:prefLabel": "NMC811 cathode",
+    "@id": "https://w3id.org/battinfo/spec/qfjh-7xyr-ga1k-tjez#described"
   },
   "@id": "https://w3id.org/battinfo/spec/qfjh-7xyr-ga1k-tjez",
   "schema:name": "NMC811 cathode",
-  "hasActiveMaterial": {
-    "@id": "https://w3id.org/battinfo/spec/npa4-0dnw-evyh-hhdm",
-    "@type": "ActiveMaterial"
-  },
   "schema:comment": "NMC811 cathode (96/2/2 NMC811/PVDF/carbon black on Al foil). Discovery-Benchmark NMC811-Graphite cells."
 }
 ```
@@ -359,121 +496,130 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     }
   ],
   "@type": [
-    "GraphiteElectrode",
-    "NegativeElectrode"
+    "Description",
+    "schema:ProductModel",
+    "schema:CreativeWork"
   ],
-  "hasCoating": {
-    "@type": "ElectrodeCoating",
-    "hasActiveMaterial": {
+  "isDescriptionFor": {
+    "@type": [
+      "GraphiteElectrode",
+      "NegativeElectrode"
+    ],
+    "hasCoating": {
+      "@type": "ElectrodeCoating",
+      "hasActiveMaterial": {
+        "@type": [
+          "Graphite",
+          "ActiveMaterial"
+        ],
+        "schema:name": "Graphite",
+        "schema:isVariantOf": {
+          "@id": "https://w3id.org/battinfo/spec/gwck-k5kf-ae1f-gfgc"
+        },
+        "hasProperty": {
+          "@type": [
+            "MassFraction",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 0.95
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+        }
+      },
+      "hasBinder": {
+        "@type": "Binder",
+        "schema:name": "CMC/SBR",
+        "hasProperty": {
+          "@type": [
+            "MassFraction",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 0.04
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+        }
+      },
+      "hasConductiveAdditive": {
+        "@type": [
+          "CarbonBlack",
+          "ConductiveAdditive"
+        ],
+        "schema:name": "Carbon black",
+        "schema:isVariantOf": {
+          "@id": "https://w3id.org/battinfo/spec/r5xt-4hrh-jm2k-yg4m"
+        },
+        "hasProperty": {
+          "@type": [
+            "MassFraction",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 0.01
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+        }
+      },
+      "hasProperty": [
+        {
+          "@type": [
+            "ActiveMassLoading",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "ActiveMassLoading",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 11.5
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#MilliGramPerSquareCentiMetre"
+        },
+        {
+          "@type": [
+            "CalenderedCoatingThickness",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "CalenderedCoatingThickness",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 72
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
+        }
+      ]
+    },
+    "hasCurrentCollector": {
       "@type": [
-        "Graphite",
-        "ActiveMaterial"
+        "CurrentCollector",
+        "Copper",
+        "Foil"
       ],
-      "schema:name": "Graphite",
-      "schema:isVariantOf": {
-        "@id": "https://w3id.org/battinfo/spec/gwck-k5kf-ae1f-gfgc"
-      },
+      "schema:name": "Copper foil",
       "hasProperty": {
         "@type": [
-          "MassFraction",
+          "Thickness",
           "ConventionalProperty"
         ],
+        "skos:prefLabel": "Thickness",
         "hasNumericalPart": {
           "@type": "RealData",
-          "hasNumberValue": 0.95
-        },
-        "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-      }
-    },
-    "hasBinder": {
-      "@type": "Binder",
-      "schema:name": "CMC/SBR",
-      "hasProperty": {
-        "@type": [
-          "MassFraction",
-          "ConventionalProperty"
-        ],
-        "hasNumericalPart": {
-          "@type": "RealData",
-          "hasNumberValue": 0.04
-        },
-        "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-      }
-    },
-    "hasConductiveAdditive": {
-      "@type": [
-        "CarbonBlack",
-        "ConductiveAdditive"
-      ],
-      "schema:name": "Carbon black",
-      "schema:isVariantOf": {
-        "@id": "https://w3id.org/battinfo/spec/r5xt-4hrh-jm2k-yg4m"
-      },
-      "hasProperty": {
-        "@type": [
-          "MassFraction",
-          "ConventionalProperty"
-        ],
-        "hasNumericalPart": {
-          "@type": "RealData",
-          "hasNumberValue": 0.01
-        },
-        "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-      }
-    },
-    "hasProperty": [
-      {
-        "@type": [
-          "ActiveMassLoading",
-          "ConventionalProperty"
-        ],
-        "skos:prefLabel": "ActiveMassLoading",
-        "hasNumericalPart": {
-          "@type": "RealData",
-          "hasNumberValue": 11.5
-        },
-        "hasMeasurementUnit": "https://w3id.org/emmo#MilliGramPerSquareCentiMetre"
-      },
-      {
-        "@type": [
-          "CalenderedCoatingThickness",
-          "ConventionalProperty"
-        ],
-        "skos:prefLabel": "CalenderedCoatingThickness",
-        "hasNumericalPart": {
-          "@type": "RealData",
-          "hasNumberValue": 72
+          "hasNumberValue": 10
         },
         "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
       }
-    ]
-  },
-  "hasCurrentCollector": {
-    "@type": [
-      "CurrentCollector",
-      "Copper",
-      "Foil"
-    ],
-    "schema:name": "Copper foil",
-    "hasProperty": {
-      "@type": [
-        "Thickness",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "Thickness",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 10
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
-    }
+    },
+    "hasActiveMaterial": {
+      "@id": "https://w3id.org/battinfo/spec/gwck-k5kf-ae1f-gfgc#described",
+      "@type": "ActiveMaterial"
+    },
+    "skos:prefLabel": "Graphite anode",
+    "@id": "https://w3id.org/battinfo/spec/d7qr-n581-74c3-7g7r#described"
   },
   "@id": "https://w3id.org/battinfo/spec/d7qr-n581-74c3-7g7r",
   "schema:name": "Graphite anode",
-  "hasActiveMaterial": {
-    "@id": "https://w3id.org/battinfo/spec/gwck-k5kf-ae1f-gfgc",
-    "@type": "ActiveMaterial"
-  },
   "schema:comment": "Graphite anode (95/4/1 graphite/CMC-SBR/carbon black on Cu foil). Discovery-Benchmark cells."
 }
 ```
@@ -520,113 +666,122 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     }
   ],
   "@type": [
-    "LithiumIronPhosphateElectrode",
-    "PositiveElectrode"
+    "Description",
+    "schema:ProductModel",
+    "schema:CreativeWork"
   ],
-  "hasCoating": {
-    "@type": "ElectrodeCoating",
-    "hasActiveMaterial": {
-      "@type": [
-        "LithiumIronPhosphate",
-        "ActiveMaterial"
-      ],
-      "schema:name": "LFP",
-      "schema:isVariantOf": {
-        "@id": "https://w3id.org/battinfo/spec/5ms1-9jv8-hr54-mn4e"
-      },
-      "hasProperty": {
-        "@type": [
-          "MassFraction",
-          "ConventionalProperty"
-        ],
-        "hasNumericalPart": {
-          "@type": "RealData",
-          "hasNumberValue": 0.96
-        },
-        "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-      }
-    },
-    "hasBinder": {
-      "@type": [
-        "PolyvinylideneFluoride",
-        "Binder"
-      ],
-      "schema:name": "PVDF",
-      "schema:isVariantOf": {
-        "@id": "https://w3id.org/battinfo/spec/bkrw-7shb-tzbm-j664"
-      },
-      "hasProperty": {
-        "@type": [
-          "MassFraction",
-          "ConventionalProperty"
-        ],
-        "hasNumericalPart": {
-          "@type": "RealData",
-          "hasNumberValue": 0.02
-        },
-        "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-      }
-    },
-    "hasConductiveAdditive": {
-      "@type": [
-        "CarbonBlack",
-        "ConductiveAdditive"
-      ],
-      "schema:name": "Carbon black",
-      "schema:isVariantOf": {
-        "@id": "https://w3id.org/battinfo/spec/r5xt-4hrh-jm2k-yg4m"
-      },
-      "hasProperty": {
-        "@type": [
-          "MassFraction",
-          "ConventionalProperty"
-        ],
-        "hasNumericalPart": {
-          "@type": "RealData",
-          "hasNumberValue": 0.02
-        },
-        "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-      }
-    },
-    "hasProperty": {
-      "@type": [
-        "ActiveMassLoading",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "ActiveMassLoading",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 20
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#MilliGramPerSquareCentiMetre"
-    }
-  },
-  "hasCurrentCollector": {
+  "isDescriptionFor": {
     "@type": [
-      "CurrentCollector",
-      "Aluminium",
-      "Foil"
+      "LithiumIronPhosphateElectrode",
+      "PositiveElectrode"
     ],
-    "schema:name": "Aluminium foil",
-    "hasProperty": {
-      "@type": [
-        "Thickness",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "Thickness",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 15
+    "hasCoating": {
+      "@type": "ElectrodeCoating",
+      "hasActiveMaterial": {
+        "@type": [
+          "LithiumIronPhosphate",
+          "ActiveMaterial"
+        ],
+        "schema:name": "LFP",
+        "schema:isVariantOf": {
+          "@id": "https://w3id.org/battinfo/spec/5ms1-9jv8-hr54-mn4e"
+        },
+        "hasProperty": {
+          "@type": [
+            "MassFraction",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 0.96
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+        }
       },
-      "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
-    }
+      "hasBinder": {
+        "@type": [
+          "PolyvinylideneFluoride",
+          "Binder"
+        ],
+        "schema:name": "PVDF",
+        "schema:isVariantOf": {
+          "@id": "https://w3id.org/battinfo/spec/bkrw-7shb-tzbm-j664"
+        },
+        "hasProperty": {
+          "@type": [
+            "MassFraction",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 0.02
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+        }
+      },
+      "hasConductiveAdditive": {
+        "@type": [
+          "CarbonBlack",
+          "ConductiveAdditive"
+        ],
+        "schema:name": "Carbon black",
+        "schema:isVariantOf": {
+          "@id": "https://w3id.org/battinfo/spec/r5xt-4hrh-jm2k-yg4m"
+        },
+        "hasProperty": {
+          "@type": [
+            "MassFraction",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 0.02
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+        }
+      },
+      "hasProperty": {
+        "@type": [
+          "ActiveMassLoading",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "ActiveMassLoading",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 20
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#MilliGramPerSquareCentiMetre"
+      }
+    },
+    "hasCurrentCollector": {
+      "@type": [
+        "CurrentCollector",
+        "Aluminium",
+        "Foil"
+      ],
+      "schema:name": "Aluminium foil",
+      "hasProperty": {
+        "@type": [
+          "Thickness",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "Thickness",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 15
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
+      }
+    },
+    "hasActiveMaterial": {
+      "@id": "https://w3id.org/battinfo/spec/5ms1-9jv8-hr54-mn4e#described",
+      "@type": "ActiveMaterial"
+    },
+    "skos:prefLabel": "LFP cathode",
+    "@id": "https://w3id.org/battinfo/spec/m6y0-tkfg-sn40-q10p#described"
   },
   "@id": "https://w3id.org/battinfo/spec/m6y0-tkfg-sn40-q10p",
   "schema:name": "LFP cathode",
-  "hasActiveMaterial": {
-    "@id": "https://w3id.org/battinfo/spec/5ms1-9jv8-hr54-mn4e",
-    "@type": "ActiveMaterial"
-  },
   "schema:comment": "LFP cathode (96/2/2 LFP/PVDF/carbon black on Al foil)."
 }
 ```
@@ -673,173 +828,182 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     }
   ],
   "@type": [
-    "SiliconGraphiteElectrode",
-    "NegativeElectrode"
+    "Description",
+    "schema:ProductModel",
+    "schema:CreativeWork"
   ],
-  "hasCoating": {
-    "@type": "ElectrodeCoating",
-    "hasActiveMaterial": {
-      "@type": "ActiveMaterial",
-      "schema:name": "Silicon-graphite composite",
-      "schema:isVariantOf": {
-        "@id": "https://w3id.org/battinfo/spec/jnab-ggw9-cbn8-hhjr"
-      },
-      "hasProperty": {
-        "@type": [
-          "MassFraction",
-          "ConventionalProperty"
-        ],
-        "hasNumericalPart": {
-          "@type": "RealData",
-          "hasNumberValue": 0.9
-        },
-        "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-      }
-    },
-    "hasBinder": {
-      "@type": [
-        "CarboxymethylCellulose",
-        "Binder"
-      ],
-      "schema:name": "CMC",
-      "schema:isVariantOf": {
-        "@id": "https://w3id.org/battinfo/spec/5k8a-bj67-7v5w-6vvd"
-      },
-      "hasProperty": {
-        "@type": [
-          "MassFraction",
-          "ConventionalProperty"
-        ],
-        "hasNumericalPart": {
-          "@type": "RealData",
-          "hasNumberValue": 0.05
-        },
-        "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-      }
-    },
-    "hasConductiveAdditive": {
-      "@type": [
-        "CarbonBlack",
-        "ConductiveAdditive"
-      ],
-      "schema:name": "Carbon black",
-      "schema:isVariantOf": {
-        "@id": "https://w3id.org/battinfo/spec/r5xt-4hrh-jm2k-yg4m"
-      },
-      "hasProperty": {
-        "@type": [
-          "MassFraction",
-          "ConventionalProperty"
-        ],
-        "hasNumericalPart": {
-          "@type": "RealData",
-          "hasNumberValue": 0.05
-        },
-        "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-      }
-    }
-  },
-  "hasCurrentCollector": {
+  "isDescriptionFor": {
     "@type": [
-      "CurrentCollector",
-      "Copper",
-      "Foil"
+      "SiliconGraphiteElectrode",
+      "NegativeElectrode"
     ],
-    "schema:name": "Copper foil",
-    "hasProperty": {
-      "@type": [
-        "Thickness",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "Thickness",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 10
+    "hasCoating": {
+      "@type": "ElectrodeCoating",
+      "hasActiveMaterial": {
+        "@type": "ActiveMaterial",
+        "schema:name": "Silicon-graphite composite",
+        "schema:isVariantOf": {
+          "@id": "https://w3id.org/battinfo/spec/jnab-ggw9-cbn8-hhjr"
+        },
+        "hasProperty": {
+          "@type": [
+            "MassFraction",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 0.9
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+        }
       },
-      "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
-    }
+      "hasBinder": {
+        "@type": [
+          "CarboxymethylCellulose",
+          "Binder"
+        ],
+        "schema:name": "CMC",
+        "schema:isVariantOf": {
+          "@id": "https://w3id.org/battinfo/spec/5k8a-bj67-7v5w-6vvd"
+        },
+        "hasProperty": {
+          "@type": [
+            "MassFraction",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 0.05
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+        }
+      },
+      "hasConductiveAdditive": {
+        "@type": [
+          "CarbonBlack",
+          "ConductiveAdditive"
+        ],
+        "schema:name": "Carbon black",
+        "schema:isVariantOf": {
+          "@id": "https://w3id.org/battinfo/spec/r5xt-4hrh-jm2k-yg4m"
+        },
+        "hasProperty": {
+          "@type": [
+            "MassFraction",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 0.05
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+        }
+      }
+    },
+    "hasCurrentCollector": {
+      "@type": [
+        "CurrentCollector",
+        "Copper",
+        "Foil"
+      ],
+      "schema:name": "Copper foil",
+      "hasProperty": {
+        "@type": [
+          "Thickness",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "Thickness",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 10
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
+      }
+    },
+    "hasProperty": [
+      {
+        "@type": [
+          "AreicCapacity",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "AreicCapacity",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 2.8
+        },
+        "schema:unitText": "mAh/cm2"
+      },
+      {
+        "@type": [
+          "CalenderedCoatingThickness",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "CalenderedCoatingThickness",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 48
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
+      },
+      {
+        "@type": [
+          "DryCoatingThickness",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "DryCoatingThickness",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 62
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
+      },
+      {
+        "@type": [
+          "ActiveMassLoading",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "ActiveMassLoading",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 6.2
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#MilliGramPerSquareCentiMetre"
+      },
+      {
+        "@type": [
+          "Porosity",
+          "ConventionalProperty"
+        ],
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 0.35
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+      }
+    ],
+    "hasActiveMaterial": {
+      "@id": "https://w3id.org/battinfo/spec/jnab-ggw9-cbn8-hhjr#described",
+      "@type": "ActiveMaterial"
+    },
+    "prov:wasGeneratedBy": {
+      "@type": "Manufacturing",
+      "skos:prefLabel": "Manufacturing",
+      "dcterms:type": {
+        "@type": "schema:DefinedTerm",
+        "schema:termCode": "aqueous",
+        "schema:name": "Water-based (aqueous) processing"
+      },
+      "hasSolvent": {
+        "@type": "schema:ChemicalSubstance",
+        "schema:name": "water"
+      },
+      "schema:description": "planetary mixing, 80 degC drying, calendered to 35% porosity"
+    },
+    "skos:prefLabel": "Si-Gr anode",
+    "@id": "https://w3id.org/battinfo/spec/qw3j-we77-zzj1-ya55#described"
   },
-  "hasProperty": [
-    {
-      "@type": [
-        "AreicCapacity",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "AreicCapacity",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 2.8
-      },
-      "schema:unitText": "mAh/cm2"
-    },
-    {
-      "@type": [
-        "CalenderedCoatingThickness",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "CalenderedCoatingThickness",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 48
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
-    },
-    {
-      "@type": [
-        "DryCoatingThickness",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "DryCoatingThickness",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 62
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
-    },
-    {
-      "@type": [
-        "ActiveMassLoading",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "ActiveMassLoading",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 6.2
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#MilliGramPerSquareCentiMetre"
-    },
-    {
-      "@type": [
-        "Porosity",
-        "ConventionalProperty"
-      ],
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 0.35
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-    }
-  ],
   "@id": "https://w3id.org/battinfo/spec/qw3j-we77-zzj1-ya55",
   "schema:name": "Si-Gr anode",
-  "hasActiveMaterial": {
-    "@id": "https://w3id.org/battinfo/spec/jnab-ggw9-cbn8-hhjr",
-    "@type": "ActiveMaterial"
-  },
-  "prov:wasGeneratedBy": {
-    "@type": "Manufacturing",
-    "skos:prefLabel": "Manufacturing",
-    "dcterms:type": {
-      "@type": "schema:DefinedTerm",
-      "schema:termCode": "aqueous",
-      "schema:name": "Water-based (aqueous) processing"
-    },
-    "hasSolvent": {
-      "@type": "schema:ChemicalSubstance",
-      "schema:name": "water"
-    },
-    "schema:description": "planetary mixing, 80 degC drying, calendered to 35% porosity"
-  },
   "schema:comment": "Si-Gr anode, water-processed (CMC binder). The NMP-processed sibling of this recipe is a DIFFERENT electrode-spec: for an electrode the processing route is a design decision, so it is part of the spec identity."
 }
 ```
@@ -933,7 +1097,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 
 ## Fields
 
-Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`). Quantities are `{value, unit}` maps and may also carry `value_basis` (Measured, Conventional, Rated, or Nominal) and `conditions` (the parameters under which the value holds, each itself a quantity; a qualitative condition may be `value_text` alone). In JSON-LD, conditions ride a measurement node the quantity `isOutputOf`; the `voltage_reference` key instead becomes a `hasMetrologicalReference` datum on the quantity, beside its unit.
+Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`). Quantities are `{value, unit}` maps and may also carry `value_basis` (Measured, Conventional, Rated, or Nominal) and `conditions` (the parameters under which the value holds, each itself a quantity; a qualitative condition may be `value_text` alone). In JSON-LD, conditions ride a measurement node the quantity `isOutputOf`; the `voltage_reference` key instead becomes a `hasMetrologicalReference` datum on the quantity, beside its unit. When authoring, an instance references its spec with the `spec_id=` kwarg; the record stores the self-describing `<type>_spec_id` key shown in the tables below.
 
 ### electrode-spec fields
 
@@ -944,10 +1108,12 @@ Schema: [`electrode-spec.schema.json`](https://w3id.org/battinfo/schema/electrod
 | `id` | → ComponentSpecIri | yes |  |
 | `short_id` | → ShortId |  |  |
 | `name` | string | yes | Human-readable electrode name / designation (e.g. 'Si-Gr anode, aqueous', 'NMC811 cathode 96/2/2'). |
-| `kind` | string |  | Required Level-1 kind naming the ACTIVE material of this electrode, from the curated material-kind vocabulary (e.g. 'graphite', 'silicon_graphite', 'nmc811', 'lfp'). Required so a purchased electrode whose powder provenance is unknown is still queryable on the same aggregation axis as one built from an authored material-spec. Aliases resolve on input; an unknown kind is rejected at save time. See battinfo.electrodes.electrode_kind_keys(). |
+| `active_material_kind` | string |  | Required Level-1 kind naming the ACTIVE material of this electrode, from the curated material-kind vocabulary (e.g. 'graphite', 'silicon_graphite', 'nmc811', 'lfp'). Named for what it identifies: the electrode's active material, not the electrode's form. Required so a purchased electrode whose powder provenance is unknown is still queryable on the same aggregation axis as one built from an authored material-spec. Aliases resolve on input; an unknown kind is rejected at save time. See battinfo.electrodes.electrode_kind_keys(). |
+| `kind` | string |  | Deprecated alias of active_material_kind; accepted so existing records keep validating, normalized to active_material_kind on round-trip. |
 | `polarity` | `positive` \| `negative` \| `unknown` |  | Electrode polarity, authored when the design has a side to state. Never derived from the kind: which side an active material sits on is system-relative (graphite is the positive electrode of a lithium-counter half cell). Role-based cells (half / three-electrode) name electrodes by role instead. |
 | `grade` | string |  | Producer grade / design version (e.g. 'v2', 'rev B'). Part of spec identity together with the producer and the electrode name. |
 | `active_material_spec_id` | → MaterialSpecIri |  | Optional canonical IRI of the material-spec for this electrode's active material, present when the powder is known and authored. Absent for a purchased electrode of known chemistry but unknown powder — 'kind' still carries the chemistry. |
+| `material` | → material-component |  | The electrode body as a single monolithic material - an uncoated metal foil or disc (lithium metal counter, zinc foil). States the material directly; there is no coating and no separate current collector, the foil is both. Alternative to `coating` for uncoated electrodes. |
 | `coating` | → electrode-coating |  | Coating composition and coating-level design values. 'component.active_material / binder / additive' each carry a weight fraction under property.mass_fraction — the same shape a cell-spec's inline electrode coating uses, so a composition authored here is the composition a cell reads. |
 | `current_collector` | → current-collector |  | Current-collector foil: material (name and/or material_spec_id) and its thickness under property. |
 | `tab` | → tab |  | Electrode current-collector tab: material plus its dimensions (width, thickness, length, weld_width, tape_width) under property. |
@@ -970,6 +1136,8 @@ Schema: [`electrode.schema.json`](https://w3id.org/battinfo/schema/electrode.sch
 | `short_id` | → ShortId |  |  |
 | `name` | string |  | Human-readable label for this batch. |
 | `lot_id` | string |  | Producer / supplier lot number for a purchased electrode. |
+| `parent_id` | → ComponentIri |  | Canonical IRI of the electrode this piece was cut from - the coated roll, web, or strip its siblings share. The parent is itself an electrode record (usually realizing the same spec), so genealogy chains compose: cell -> disc -> parent roll -> electrode-spec. |
+| `piece_id` | string |  | Label of this cut piece within its parent (e.g. 'disc-07', 'strip-B'). Joins the identity seed, so pieces cut from the same parent mint distinct IRIs. |
 | `batch_id` | string |  | Coating batch label (e.g. 'Si-AQ-1'). Together with the spec IRI this is the batch's identity — the IRI is minted from the pair. |
 | `supplier` | → OrgRef |  | Supplier or vendor the item was sourced from. |
 | `manufactured_at` | → FlexDate |  | Date this batch was coated / built. |
@@ -988,11 +1156,15 @@ Schema: [`electrode.schema.json`](https://w3id.org/battinfo/schema/electrode.sch
 :::{dropdown} The reasoning behind the model
 **Design vs disc.** The spec is the *design*: composition (`coating.component` with active/binder/additive holders), processing route, design values, and batch statistics stated with the structured `standard_deviation` / `sample_count` fields. The instance is the physical disc or batch — the per-cell as-built figures (mass, loading, areal capacity) live here, because they were true before any test ran.
 
+**Genealogy: pieces are cut from a parent.** A coating run makes one big source — a roll in a factory, a strip in the lab — and the electrodes that reach cells are cut from it. Both are electrode records: the parent carries the batch facts (`batch_id`, `count`, `amount`, batch statistics), and each cut piece states `parent_id` (the record it was cut from) and `piece_id` (its label within the parent, e.g. `disc-07`, which joins the identity seed so siblings mint distinct IRIs). Chains compose — roll → sheet → disc is two hops of the same relation — and each hop emits as `prov:wasDerivedFrom`, so the full lineage cell → disc → roll → electrode-spec → material-spec is walkable in the graph.
+
 **Half cells name their electrodes by role, not by polarity.** A half cell has no sides to name, and in the working-electrode convention a graphite working electrode charges toward 1 V vs Li/Li+ — polarity labels would mislead. `polarity` is therefore authored or absent, never derived from the kind: an "LFP negative electrode" is a legitimate design (lithium-counter half cell), not a typo, and nothing warns about it.
 
 **Cells reference electrodes.** Which electrode pair a cell uses follows from its `cell_configuration` — the polarity holders (`positive_electrode` / `negative_electrode`) for a full cell, the role holders (`working_electrode` / `counter_electrode`) for a half or three-electrode cell. A cell instance points at the physical disc inside it through `working_electrode_id`.
 
-**Tabs and coatings** belong to the electrode. A current-collector tab (`Electrode.tab`) carries identity fields plus a `property` dict (width, thickness, weld width) and emits under `hasCurrentCollectorTab`. A coating carries the composition and its own properties; a secondary layer such as a ceramic coating is simply an additional coating holder.
+**Tabs and coatings** belong to the electrode. A current-collector tab (`Electrode.tab`) carries identity fields plus a `property` dict (width, thickness, weld width) and emits under `hasCurrentCollectorTab`. A coating carries the composition, its own properties, and `double_sided` — whether the current collector is coated on both sides or one; a secondary layer such as a ceramic coating is simply an additional coating holder.
 
-**Emission.** The kind types the node with its chemistry electrode class (`GraphiteElectrode`, `LithiumIronPhosphateElectrode`, …); an authored polarity stacks `PositiveElectrode` / `NegativeElectrode` on top; role holders emit role types (`WorkingElectrode`, and the counter of a two-electrode half cell types as both `CounterElectrode` and `ReferenceElectrode`).
+**The active material is named for what it is.** `active_material_kind` names the electrode's active material from the curated material-kind vocabulary — not `kind`, which on an electrode would read as its form (porous, foil, rotating-disc). The old `kind` spelling stays accepted as a deprecated alias and normalizes on round-trip.
+
+**Emission.** The spec is an information artifact: it emits typed `[Description, schema:ProductModel, schema:CreativeWork]` — EMMO's `Description` is the very class `BatterySpecification` subclasses, so the spec sits in the right family until an `ElectrodeSpecification` class is published (on the upstream ask list) — and its `isDescriptionFor` node carries the physical typing: the chemistry electrode class derived from `active_material_kind` (`GraphiteElectrode`, `LithiumIronPhosphateElectrode`, …), with an authored polarity stacking `PositiveElectrode` / `NegativeElectrode` on top. Role holders emit role types (`WorkingElectrode`, and the counter of a two-electrode half cell types as both `CounterElectrode` and `ReferenceElectrode`).
 :::

@@ -1,0 +1,46 @@
+{
+  "schema_version": "0.2.0",
+  "housing_spec": {
+    "id": "https://w3id.org/battinfo/spec/q7mf-3wtk-8npv-2hcx",
+    "short_id": "q7mf3w",
+    "name": "Pouch laminate housing, 60 x 45 mm",
+    "cell_format": "pouch",
+    "case": {
+      "material": "Aluminium laminate film",
+      "property": {
+        "thickness": {
+          "value": 113,
+          "unit": "um"
+        },
+        "width": {
+          "value": 45,
+          "unit": "mm"
+        },
+        "height": {
+          "value": 60,
+          "unit": "mm"
+        }
+      }
+    },
+    "seals": [
+      {
+        "material": "PP heat seal"
+      }
+    ],
+    "terminals": [
+      {
+        "polarity": "positive",
+        "material": "Al tab"
+      },
+      {
+        "polarity": "negative",
+        "material": "Ni-plated Cu tab"
+      }
+    ]
+  },
+  "provenance": {
+    "source_type": "datasheet",
+    "retrieved_at": 1789040331,
+    "battinfo_version": "0.7.0"
+  }
+}

@@ -76,6 +76,30 @@ for (const obj of OBJECT_TYPES) {
   }
 }
 
+// Shape guard: a spec document is a description (EMMO Description subclass +
+// schema:ProductModel + schema:CreativeWork personas) whose physical payload
+// (hasProperty, composition) rides the described individual under
+// isDescriptionFor — never the spec node itself. Test protocols (prov:Plan)
+// are information objects through and through and are exempt by typing.
+for (const obj of OBJECT_TYPES) {
+  const emitted = obj.toJsonLd(obj.defaults, obj.defaultProperties ?? []);
+  const docs = Array.isArray(emitted) ? emitted : [emitted];
+  for (const doc of docs) {
+    const d = doc as Record<string, unknown>;
+    const types = Array.isArray(d["@type"]) ? (d["@type"] as string[]) : [String(d["@type"] ?? "")];
+    const isSpec = types.some((t) => t === "Description" || t.endsWith("Specification"));
+    if (!isSpec) continue;
+    if (!("isDescriptionFor" in d)) {
+      failures.push(`${obj.key}.toJsonLd emits a spec doc without isDescriptionFor`);
+    }
+    for (const key of Object.keys(d)) {
+      if (key.startsWith("has")) {
+        failures.push(`${obj.key}.toJsonLd puts physical payload "${key}" on the spec node — it belongs under isDescriptionFor`);
+      }
+    }
+  }
+}
+
 if (failures.length > 0) {
   console.error(`Emitter drift check FAILED (${failures.length} problem(s), ${tokens.length} @type tokens checked):`);
   for (const f of failures) console.error(`  ${f}`);

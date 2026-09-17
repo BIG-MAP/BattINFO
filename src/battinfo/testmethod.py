@@ -39,6 +39,7 @@ __all__ = [
     "Step",
     "parse_experiment",
     "parse_step",
+    "parse_termination",
     "render_step",
     "render_method",
     "compute_facets",
@@ -56,7 +57,7 @@ __all__ = [
 # readiness report).
 STEP_MODES: tuple[str, ...] = ("cc", "cv", "cccv", "cp", "cr", "rest", "eis", "scan", "group")
 STEP_DIRECTIONS: tuple[str, ...] = ("charge", "discharge", "hold", "rest", "none")
-TERMINATION_QUANTITIES: tuple[str, ...] = ("voltage", "current", "c_rate", "capacity", "duration")
+TERMINATION_QUANTITIES: tuple[str, ...] = ("voltage", "current", "c_rate", "capacity", "soc", "duration")
 TERMINATION_DIRECTIONS: tuple[str, ...] = ("below", "above", "elapsed")
 
 
@@ -118,7 +119,7 @@ class Termination(BaseModel):
     step ends when the first condition is met — PyBaMM's ``or``)."""
 
     model_config = ConfigDict(extra="forbid")
-    quantity: str  # voltage | current | c_rate | capacity | duration
+    quantity: str  # voltage | current | c_rate | capacity | soc | duration
     value: float
     unit: str
     direction: Optional[str] = None  # below | above | elapsed (None for duration)
@@ -132,6 +133,74 @@ class Termination(BaseModel):
     @classmethod
     def _check_direction(cls, value: Any) -> Any:
         return _require_member(value, TERMINATION_DIRECTIONS, "Termination.direction")
+
+
+# Comparison-string termination shorthand ("Voltage > 4.2", "C-rate < C/50",
+# "SOC < 0.05", "Time > 30 min") — the way engineers write cutoffs, and the
+# way UCP's `ends` writes them. Parsed at construction into the structured
+# form; the stored record never carries the string.
+_SHORTHAND_QUANTITY: dict[str, tuple[str, str]] = {
+    "voltage": ("voltage", "V"),
+    "v": ("voltage", "V"),
+    "current": ("current", "A"),
+    "i": ("current", "A"),
+    "c-rate": ("c_rate", "A/Ah"),
+    "c_rate": ("c_rate", "A/Ah"),
+    "crate": ("c_rate", "A/Ah"),
+    "rate": ("c_rate", "A/Ah"),
+    "capacity": ("capacity", "Ah"),
+    "soc": ("soc", "1"),
+    "state of charge": ("soc", "1"),
+    "time": ("duration", "s"),
+    "duration": ("duration", "s"),
+}
+
+_SHORTHAND_RE = re.compile(r"^\s*(.+?)\s*([<>])=?\s*(.+?)\s*$")
+
+
+def parse_termination(text: str) -> Termination:
+    """Parse a comparison-string termination into the structured form.
+
+    ``"Voltage > 4.2"`` → voltage above 4.2 V; ``"C-rate < C/50"`` → c_rate
+    below 0.02 A/Ah; ``"Current < 50 mA"`` → current below 0.05 A;
+    ``"SOC < 0.05"`` → soc below 0.05; ``"Time > 30 min"`` → duration 1800 s.
+    The left side names the quantity, the operator gives the approach
+    direction (irrelevant for time), and the right side is a number in the
+    quantity's canonical unit or any magnitude ``_parse_value`` understands.
+    """
+    match = _SHORTHAND_RE.match(text or "")
+    if not match:
+        raise ExperimentSyntaxError(
+            f"Could not parse termination '{text}'. Expected e.g. 'Voltage > 4.2', "
+            "'C-rate < C/50', 'SOC < 0.05', 'Time > 30 min'."
+        )
+    lhs, op, rhs = match.group(1).strip().lower(), match.group(2), match.group(3).strip()
+    info = _SHORTHAND_QUANTITY.get(lhs)
+    if info is None:
+        raise ExperimentSyntaxError(
+            f"Unknown termination quantity '{match.group(1).strip()}' in '{text}'. "
+            f"Known: {sorted(set(q for q, _ in _SHORTHAND_QUANTITY.values()))}."
+        )
+    quantity, default_unit = info
+    if quantity == "duration":
+        time_match = _TIME_RE.match(rhs)
+        if time_match and time_match.group(2).lower() in _TIME_TABLE:
+            seconds = _to_float(time_match.group(1), text) * _TIME_TABLE[time_match.group(2).lower()]
+        else:
+            seconds = _to_float(rhs, text)
+        return Termination(quantity="duration", value=seconds, unit="s", direction="elapsed")
+    try:
+        value = float(rhs)
+        unit = default_unit
+    except ValueError:
+        kind, qty = _parse_value(rhs)
+        if kind != quantity:
+            raise ExperimentSyntaxError(
+                f"Termination '{text}' names {quantity} but its value parses as {kind}."
+            ) from None
+        value, unit = _require_value(qty, f"Termination '{text}'"), qty.unit
+    return Termination(quantity=quantity, value=value, unit=unit,
+                       direction="below" if op == "<" else "above")
 
 
 class Step(BaseModel):
@@ -152,6 +221,17 @@ class Step(BaseModel):
     # group-only
     count: Optional[int] = None
     steps: list["Step"] = Field(default_factory=list)
+
+    @field_validator("termination", mode="before")
+    @classmethod
+    def _coerce_termination(cls, value: Any) -> Any:
+        # Authoring shorthand: a comparison string (or a bare one outside a
+        # list) parses into the structured form at construction.
+        if isinstance(value, str):
+            value = [value]
+        if isinstance(value, list):
+            return [parse_termination(item) if isinstance(item, str) else item for item in value]
+        return value
 
     @field_validator("mode")
     @classmethod

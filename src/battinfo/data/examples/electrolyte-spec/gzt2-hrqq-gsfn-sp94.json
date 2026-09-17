@@ -5,24 +5,18 @@
     "short_id": "gzt2hr",
     "name": "7M KOH in H2O",
     "family": "aqueous",
+    "solvent": {
+      "name": "Water"
+    },
     "salt": {
       "name": "KOH",
       "material_spec_id": "https://w3id.org/battinfo/spec/s9h8-dfbw-zs4k-2qk8",
-      "cation": "K+",
-      "anion": "OH-",
       "property": {
         "concentration": {
           "value": 7.0,
           "unit": "mol/L"
         }
       }
-    },
-    "solvent_mixture": {
-      "component": [
-        {
-          "name": "Water"
-        }
-      ]
     },
     "property": {
       "conductivity": {

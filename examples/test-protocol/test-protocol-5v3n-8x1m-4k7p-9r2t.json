@@ -4,7 +4,7 @@
     "id": "https://w3id.org/battinfo/spec/5v3n-8x1m-4k7p-9r2t",
     "short_id": "5v3n8x",
     "identifier": "test-protocol:5v3n-8x1m-4k7p-9r2t",
-    "name": "Rate Capability: C/10 to 5C Discharge at 25\u00b0C",
+    "name": "Rate Capability: C/10 to 5C Discharge at 25°C",
     "kind": "rate_capability",
     "description": "Galvanostatic constant-current discharge at six C-rates (C/10, C/5, C/2, 1C, 2C, 5C) to measure deliverable capacity and energy as a function of rate. Each discharge is preceded by a full constant-current constant-voltage charge at C/5. Three cycles are recorded at each rate. A reference C/10 cycle is repeated at the end to confirm capacity recovery.",
     "version": "1.0",
@@ -16,6 +16,519 @@
       "unit": "degC"
     }
   },
+  "method": [
+    {
+      "mode": "group",
+      "count": 3,
+      "description": "Three cycles at C/10 discharge",
+      "steps": [
+        {
+          "mode": "cc",
+          "direction": "charge",
+          "setpoints": {
+            "c_rate": {
+              "value": 0.2,
+              "unit": "A/Ah"
+            }
+          },
+          "termination": [
+            {
+              "quantity": "voltage",
+              "value": 4.2,
+              "unit": "V",
+              "direction": "above"
+            }
+          ],
+          "description": "Charge at C/5 until 4.2 V"
+        },
+        {
+          "mode": "cv",
+          "direction": "hold",
+          "setpoints": {
+            "voltage": {
+              "value": 4.2,
+              "unit": "V"
+            }
+          },
+          "termination": [
+            {
+              "quantity": "c_rate",
+              "value": 0.05,
+              "unit": "A/Ah",
+              "direction": "below"
+            }
+          ],
+          "description": "Hold at 4.2 V until C/20"
+        },
+        {
+          "mode": "rest",
+          "direction": "rest",
+          "duration": {
+            "value": 600.0,
+            "unit": "s"
+          },
+          "description": "Rest for 10 minutes"
+        },
+        {
+          "mode": "cc",
+          "direction": "discharge",
+          "setpoints": {
+            "c_rate": {
+              "value": 0.1,
+              "unit": "A/Ah"
+            }
+          },
+          "termination": [
+            {
+              "quantity": "voltage",
+              "value": 2.5,
+              "unit": "V",
+              "direction": "below"
+            }
+          ],
+          "description": "Discharge at C/10 until 2.5 V"
+        }
+      ]
+    },
+    {
+      "mode": "group",
+      "count": 3,
+      "description": "Three cycles at C/5 discharge",
+      "steps": [
+        {
+          "mode": "cc",
+          "direction": "charge",
+          "setpoints": {
+            "c_rate": {
+              "value": 0.2,
+              "unit": "A/Ah"
+            }
+          },
+          "termination": [
+            {
+              "quantity": "voltage",
+              "value": 4.2,
+              "unit": "V",
+              "direction": "above"
+            }
+          ],
+          "description": "Charge at C/5 until 4.2 V"
+        },
+        {
+          "mode": "cv",
+          "direction": "hold",
+          "setpoints": {
+            "voltage": {
+              "value": 4.2,
+              "unit": "V"
+            }
+          },
+          "termination": [
+            {
+              "quantity": "c_rate",
+              "value": 0.05,
+              "unit": "A/Ah",
+              "direction": "below"
+            }
+          ],
+          "description": "Hold at 4.2 V until C/20"
+        },
+        {
+          "mode": "rest",
+          "direction": "rest",
+          "duration": {
+            "value": 600.0,
+            "unit": "s"
+          },
+          "description": "Rest for 10 minutes"
+        },
+        {
+          "mode": "cc",
+          "direction": "discharge",
+          "setpoints": {
+            "c_rate": {
+              "value": 0.2,
+              "unit": "A/Ah"
+            }
+          },
+          "termination": [
+            {
+              "quantity": "voltage",
+              "value": 2.5,
+              "unit": "V",
+              "direction": "below"
+            }
+          ],
+          "description": "Discharge at C/5 until 2.5 V"
+        }
+      ]
+    },
+    {
+      "mode": "group",
+      "count": 3,
+      "description": "Three cycles at C/2 discharge",
+      "steps": [
+        {
+          "mode": "cc",
+          "direction": "charge",
+          "setpoints": {
+            "c_rate": {
+              "value": 0.2,
+              "unit": "A/Ah"
+            }
+          },
+          "termination": [
+            {
+              "quantity": "voltage",
+              "value": 4.2,
+              "unit": "V",
+              "direction": "above"
+            }
+          ],
+          "description": "Charge at C/5 until 4.2 V"
+        },
+        {
+          "mode": "cv",
+          "direction": "hold",
+          "setpoints": {
+            "voltage": {
+              "value": 4.2,
+              "unit": "V"
+            }
+          },
+          "termination": [
+            {
+              "quantity": "c_rate",
+              "value": 0.05,
+              "unit": "A/Ah",
+              "direction": "below"
+            }
+          ],
+          "description": "Hold at 4.2 V until C/20"
+        },
+        {
+          "mode": "rest",
+          "direction": "rest",
+          "duration": {
+            "value": 600.0,
+            "unit": "s"
+          },
+          "description": "Rest for 10 minutes"
+        },
+        {
+          "mode": "cc",
+          "direction": "discharge",
+          "setpoints": {
+            "c_rate": {
+              "value": 0.5,
+              "unit": "A/Ah"
+            }
+          },
+          "termination": [
+            {
+              "quantity": "voltage",
+              "value": 2.5,
+              "unit": "V",
+              "direction": "below"
+            }
+          ],
+          "description": "Discharge at C/2 until 2.5 V"
+        }
+      ]
+    },
+    {
+      "mode": "group",
+      "count": 3,
+      "description": "Three cycles at 1C discharge",
+      "steps": [
+        {
+          "mode": "cc",
+          "direction": "charge",
+          "setpoints": {
+            "c_rate": {
+              "value": 0.2,
+              "unit": "A/Ah"
+            }
+          },
+          "termination": [
+            {
+              "quantity": "voltage",
+              "value": 4.2,
+              "unit": "V",
+              "direction": "above"
+            }
+          ],
+          "description": "Charge at C/5 until 4.2 V"
+        },
+        {
+          "mode": "cv",
+          "direction": "hold",
+          "setpoints": {
+            "voltage": {
+              "value": 4.2,
+              "unit": "V"
+            }
+          },
+          "termination": [
+            {
+              "quantity": "c_rate",
+              "value": 0.05,
+              "unit": "A/Ah",
+              "direction": "below"
+            }
+          ],
+          "description": "Hold at 4.2 V until C/20"
+        },
+        {
+          "mode": "rest",
+          "direction": "rest",
+          "duration": {
+            "value": 600.0,
+            "unit": "s"
+          },
+          "description": "Rest for 10 minutes"
+        },
+        {
+          "mode": "cc",
+          "direction": "discharge",
+          "setpoints": {
+            "c_rate": {
+              "value": 1.0,
+              "unit": "A/Ah"
+            }
+          },
+          "termination": [
+            {
+              "quantity": "voltage",
+              "value": 2.5,
+              "unit": "V",
+              "direction": "below"
+            }
+          ],
+          "description": "Discharge at 1C until 2.5 V"
+        }
+      ]
+    },
+    {
+      "mode": "group",
+      "count": 3,
+      "description": "Three cycles at 2C discharge",
+      "steps": [
+        {
+          "mode": "cc",
+          "direction": "charge",
+          "setpoints": {
+            "c_rate": {
+              "value": 0.2,
+              "unit": "A/Ah"
+            }
+          },
+          "termination": [
+            {
+              "quantity": "voltage",
+              "value": 4.2,
+              "unit": "V",
+              "direction": "above"
+            }
+          ],
+          "description": "Charge at C/5 until 4.2 V"
+        },
+        {
+          "mode": "cv",
+          "direction": "hold",
+          "setpoints": {
+            "voltage": {
+              "value": 4.2,
+              "unit": "V"
+            }
+          },
+          "termination": [
+            {
+              "quantity": "c_rate",
+              "value": 0.05,
+              "unit": "A/Ah",
+              "direction": "below"
+            }
+          ],
+          "description": "Hold at 4.2 V until C/20"
+        },
+        {
+          "mode": "rest",
+          "direction": "rest",
+          "duration": {
+            "value": 600.0,
+            "unit": "s"
+          },
+          "description": "Rest for 10 minutes"
+        },
+        {
+          "mode": "cc",
+          "direction": "discharge",
+          "setpoints": {
+            "c_rate": {
+              "value": 2.0,
+              "unit": "A/Ah"
+            }
+          },
+          "termination": [
+            {
+              "quantity": "voltage",
+              "value": 2.5,
+              "unit": "V",
+              "direction": "below"
+            }
+          ],
+          "description": "Discharge at 2C until 2.5 V"
+        }
+      ]
+    },
+    {
+      "mode": "group",
+      "count": 3,
+      "description": "Three cycles at 5C discharge",
+      "steps": [
+        {
+          "mode": "cc",
+          "direction": "charge",
+          "setpoints": {
+            "c_rate": {
+              "value": 0.2,
+              "unit": "A/Ah"
+            }
+          },
+          "termination": [
+            {
+              "quantity": "voltage",
+              "value": 4.2,
+              "unit": "V",
+              "direction": "above"
+            }
+          ],
+          "description": "Charge at C/5 until 4.2 V"
+        },
+        {
+          "mode": "cv",
+          "direction": "hold",
+          "setpoints": {
+            "voltage": {
+              "value": 4.2,
+              "unit": "V"
+            }
+          },
+          "termination": [
+            {
+              "quantity": "c_rate",
+              "value": 0.05,
+              "unit": "A/Ah",
+              "direction": "below"
+            }
+          ],
+          "description": "Hold at 4.2 V until C/20"
+        },
+        {
+          "mode": "rest",
+          "direction": "rest",
+          "duration": {
+            "value": 600.0,
+            "unit": "s"
+          },
+          "description": "Rest for 10 minutes"
+        },
+        {
+          "mode": "cc",
+          "direction": "discharge",
+          "setpoints": {
+            "c_rate": {
+              "value": 5.0,
+              "unit": "A/Ah"
+            }
+          },
+          "termination": [
+            {
+              "quantity": "voltage",
+              "value": 2.5,
+              "unit": "V",
+              "direction": "below"
+            }
+          ],
+          "description": "Discharge at 5C until 2.5 V"
+        }
+      ]
+    },
+    {
+      "mode": "group",
+      "count": 1,
+      "description": "Reference C/10 recovery cycle",
+      "steps": [
+        {
+          "mode": "cc",
+          "direction": "charge",
+          "setpoints": {
+            "c_rate": {
+              "value": 0.2,
+              "unit": "A/Ah"
+            }
+          },
+          "termination": [
+            {
+              "quantity": "voltage",
+              "value": 4.2,
+              "unit": "V",
+              "direction": "above"
+            }
+          ],
+          "description": "Charge at C/5 until 4.2 V"
+        },
+        {
+          "mode": "cv",
+          "direction": "hold",
+          "setpoints": {
+            "voltage": {
+              "value": 4.2,
+              "unit": "V"
+            }
+          },
+          "termination": [
+            {
+              "quantity": "c_rate",
+              "value": 0.05,
+              "unit": "A/Ah",
+              "direction": "below"
+            }
+          ],
+          "description": "Hold at 4.2 V until C/20"
+        },
+        {
+          "mode": "rest",
+          "direction": "rest",
+          "duration": {
+            "value": 600.0,
+            "unit": "s"
+          },
+          "description": "Rest for 10 minutes"
+        },
+        {
+          "mode": "cc",
+          "direction": "discharge",
+          "setpoints": {
+            "c_rate": {
+              "value": 0.1,
+              "unit": "A/Ah"
+            }
+          },
+          "termination": [
+            {
+              "quantity": "voltage",
+              "value": 2.5,
+              "unit": "V",
+              "direction": "below"
+            }
+          ],
+          "description": "Discharge at C/10 until 2.5 V"
+        }
+      ]
+    }
+  ],
   "provenance": {
     "source_type": "manual",
     "source_file": "rate-capability-c10-5c.protocol.json",

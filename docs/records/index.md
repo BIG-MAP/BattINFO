@@ -17,9 +17,11 @@ Each page also carries a shelf of common, real examples — the docs' reasonable
 | [Materials](materials.md) | A material spec (the powder as a product) · A material instance (one physical lot) |
 | [Electrodes](electrodes.md) | An electrode spec (the design) · An electrode (the disc in one cell) |
 | [Electrolytes](electrolytes.md) | An electrolyte spec (the formulation) · An electrolyte (one mixed batch) |
-| [Components](components.md) | A separator spec |
+| [Separators](separators.md) | The product · A physical lot |
+| [Current collectors](current-collectors.md) | The product · A physical lot |
+| [Housings](housings.md) | The product · A physical batch |
 | [Cells](cells.md) | A cell spec, from its datasheet · A cell instance under that spec |
-| [Half cells](half-cells.md) | A coin half cell for electrode characterization |
+| [Half cells & three-electrode cells](half-cells.md) | A coin half cell for electrode characterization · A three-electrode cell |
 | [Tests](tests.md) | The protocol · The execution |
 | [Datasets](datasets.md) | A member dataset · The collection (dataset series) |
 | [Equipment](equipment.md) | An equipment spec (the product) · An equipment unit · A channel on that unit |
@@ -34,7 +36,9 @@ Coverage accounting (every schema property exercised by a reference example, or 
 materials
 electrodes
 electrolytes
-components
+separators
+current-collectors
+housings
 cells
 half-cells
 tests

@@ -759,6 +759,14 @@ export const recordsContext: Record<string, unknown> = {
     "NormalHydrogenElectrode": "electrochemistry:electrochemistry_83ee23b3_2f5c_4afa_b972_ac85e91d7306",
     "ReversibleHydrogenElectrode": "electrochemistry:electrochemistry_0d9ba00d_04bc_4bdc_85af_3380694f6f68",
     "SaturatedCalomelElectrode": "electrochemistry:electrochemistry_82b66bfe_ec25_417b_ba65_b631ddaaca0e",
-    "SilverChlorideElectrode": "electrochemistry:electrochemistry_6ec59f99_5f26_4a7d_9b90_b52e0f8ad190"
+    "SilverChlorideElectrode": "electrochemistry:electrochemistry_6ec59f99_5f26_4a7d_9b90_b52e0f8ad190",
+    "Description": "emmo:EMMO_35d4c439_fcb6_4399_a855_a89a207b41e9",
+    "ElectrochemicalComponent": "electrochemistry:electrochemistry_b5ea31c9_bb10_4276_980e_c3eceb1efc82",
+    "Lithium": "https://w3id.org/emmo/domain/chemical-substance#substance_c109ca45_08c7_4436_a818_a9c575785e2f",
+    "Sodium": "https://w3id.org/emmo/domain/chemical-substance#substance_a16a1bae_7844_42fd_bb6d_979195d6c933",
+    "StateOfCharge": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_8b2aaa50_bbe1_45da_8778_8898326246a2",
+    "CyclicVoltammetry": "https://w3id.org/emmo/domain/characterisation-methodology/chameo#CyclicVoltammetry",
+    "SpecificCapacity": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_1e3dc60d_dd6b_47d6_8161_70004fc5ee30",
+    "hasIECCode": "electrochemistry:electrochemistry_1f2d401c_eede_4178_9ff5_e5392bc2cb92"
   }
 };

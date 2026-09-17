@@ -10,12 +10,16 @@ so the two paths emit byte-identical spec nodes for the same canonical record.
 
 The node shape is the canonical target shape:
 
-- ``@type: ["BatteryCellSpecification", "schema:CreativeWork"]`` — the spec is an
-  information artifact, not a physical battery.
-- ``isDescriptionFor.@type`` carries the physical EMMO class stack derived from the
-  descriptors (format / chemistry / electrode bases / IEC code / rechargeable) via
-  ``entity_type_map.json`` — chemistry and format are expressed through @type
-  stacking, not as literal predicates.
+- ``@type: ["BatteryCellSpecification", "schema:ProductModel", "schema:CreativeWork"]``
+  — the spec is an information artifact (EMMO Description subclass), a catalogue
+  entry (schema.org ProductModel) and a record (schema.org CreativeWork); never a
+  physical battery.
+- ``isDescriptionFor`` carries the described battery: the physical EMMO class stack
+  derived from the descriptors (format / chemistry / electrode bases / IEC code /
+  rechargeable) via ``entity_type_map.json`` — chemistry and format are expressed
+  through @type stacking, not as literal predicates — plus the ``hasProperty``
+  quantities, composition and construction. No physical relation stays on the
+  spec node.
 - Quantities use the EMMO ``hasProperty`` pattern via
   :func:`battinfo.transform.json_to_jsonld._descriptor_quantity_node`
   (list ``@type`` of ``[PropertyClass, co-type]``, ``hasNumericalPart`` typed
@@ -51,6 +55,8 @@ from battinfo.transform.json_to_jsonld import (
     _material_name_map,
     _property_type_map,
     _property_type_term,
+    described_iri,
+    schema_dimension_nodes,
 )
 
 # Public registry page for a cell spec (human-resolvable mirror of the IRI).
@@ -124,10 +130,17 @@ _EXTRA_CONTEXT_TERMS: tuple[str, ...] = (
     "MeasuredProperty",
     "NominalProperty",
     "hasMeasurementParameter",
+    # Generic information-artifact class: interim @type for specification
+    # records whose own class (ElectrodeSpecification, ...) is unpublished.
+    "Description",
+    # Interim class of the housing assembly (CellHousing is an upstream ask).
+    "ElectrochemicalComponent",
     # Measurement-provenance subtree: conditions ride an isOutputOf node.
     "isOutputOf",
     "BatteryMeasurement",
     "hasStringValue",
+    # IEC designation datatype slot on the described cell.
+    "hasIECCode",
     # Metrological datum on voltage-dimensioned quantities (voltage_reference).
     "hasMetrologicalReference",
     "MetrologicalReference",
@@ -170,7 +183,6 @@ _COMPOSITION_CONTEXT_TERMS: tuple[str, ...] = (
     "hasSolvent",
     "hasAdditive",
     "hasCase",
-    "hasTerminal",
     "hasConstituent",
     # component / constituent classes
     "Electrode",
@@ -312,6 +324,7 @@ def physical_type_stack(cell_spec: Mapping[str, Any]) -> list[str]:
         for battery_type in entry.get("battery_types", []):
             if battery_type not in types and battery_type in table:
                 types.append(battery_type)
+    types = _drop_disjoint_format_types(types, cell_spec)
     if not types:
         types.append("BatteryCell")
     rechargeable = cell_spec.get("rechargeable")
@@ -320,6 +333,42 @@ def physical_type_stack(cell_spec: Mapping[str, Any]) -> list[str]:
     elif rechargeable is False and "PrimaryBattery" not in types:
         types.append("PrimaryBattery")
     return types
+
+
+# The published format classes are pairwise owl:disjointWith in domain-battery
+# (a cell has one shape). An IEC code implies its own format family - CR2032 is
+# a CoinCell, LR6 a CylindricalBattery - so a conflicting `cell_format` would
+# stack disjoint classes on one individual and make any merged graph
+# OWL-inconsistent. The IEC code is the more specific claim: it wins, and the
+# conflicting format class is dropped with a warning. Each iec_code entry in
+# entity_type_map.json declares its family in a `format` field; coin and
+# button are one family (flat round cells), never in conflict with each other.
+_FORMAT_FAMILY_CLASSES: dict[str, frozenset[str]] = {
+    "coin": frozenset({"CoinCell", "ButtonCell"}),
+    "button": frozenset({"CoinCell", "ButtonCell"}),
+    "cylindrical": frozenset({"CylindricalBattery"}),
+    "prismatic": frozenset({"PrismaticBattery"}),
+    "pouch": frozenset({"PouchCell"}),
+}
+_ALL_FORMAT_CLASSES: frozenset[str] = frozenset().union(*_FORMAT_FAMILY_CLASSES.values())
+
+
+def _drop_disjoint_format_types(types: list[str], cell_spec: Mapping[str, Any]) -> list[str]:
+    iec_entry = _entity_mapping("iec_code", cell_spec.get("iec_code")) or {}
+    allowed = _FORMAT_FAMILY_CLASSES.get(str(iec_entry.get("format", "")))
+    if allowed is None:
+        return types
+    conflicting = [t for t in types if t in _ALL_FORMAT_CLASSES and t not in allowed]
+    if not conflicting:
+        return types
+    warnings.warn(
+        "semantic.format_iec_conflict: cell_format implies "
+        f"{conflicting} but iec_code {cell_spec.get('iec_code')!r} implies "
+        f"{sorted(allowed)}; these classes are disjoint in domain-battery, so "
+        "the format class is dropped and the IEC code's family kept.",
+        stacklevel=2,
+    )
+    return [t for t in types if t not in conflicting]
 
 
 def provenance_node(provenance: Any) -> dict[str, Any] | None:
@@ -459,8 +508,15 @@ def build_cell_spec_node(record: Mapping[str, Any]) -> dict[str, Any]:
         manufacturer.get("name") if isinstance(manufacturer, Mapping) else manufacturer
     )
 
+    # Three personas on one node (see docs/records/cells.md "What the spec
+    # node says"): the EMMO information artifact (BatteryCellSpecification),
+    # the schema.org catalogue entity (ProductModel: name, manufacturer,
+    # codes), and the record (CreativeWork: provenance, citation). Every
+    # EMMO-axiomatized physical relation and quantity rides the described
+    # battery under isDescriptionFor instead - those relations' subjects must
+    # be electrochemical cells, never documents.
     node: dict[str, Any] = {
-        "@type": ["BatteryCellSpecification", "schema:CreativeWork"],
+        "@type": ["BatteryCellSpecification", "schema:ProductModel", "schema:CreativeWork"],
     }
     if iri:
         node["@id"] = iri
@@ -478,13 +534,19 @@ def build_cell_spec_node(record: Mapping[str, Any]) -> dict[str, Any]:
         }
     if tail:
         node["schema:url"] = f"{REGISTRY_SPEC_URL_BASE}{tail}"
-    # isDescriptionFor links the spec (an information artifact) to an anonymous
-    # individual of the correct physical battery type. Chemistry, format,
-    # electrode bases and rechargeability are expressed through this @type stack.
+    # isDescriptionFor links the spec (an information artifact) to the described
+    # battery. Chemistry, format, electrode bases and rechargeability are
+    # expressed through this @type stack. The individual is skolemized as
+    # <spec-IRI>#described so repeated ingest merges instead of duplicating,
+    # other records can reference the design, and *_spec_id reference edges
+    # can land on a physical individual rather than a Description document.
     physical_types = physical_type_stack(cell)
     node["isDescriptionFor"] = {
         "@type": physical_types if len(physical_types) > 1 else physical_types[0],
     }
+    witness_iri = described_iri(iri)
+    if witness_iri:
+        node["isDescriptionFor"]["@id"] = witness_iri
     if name:
         # Human layer: label the anonymous physical individual with the name
         # already in hand, so the typed node reads without EMMO lookups.
@@ -492,7 +554,11 @@ def build_cell_spec_node(record: Mapping[str, Any]) -> dict[str, Any]:
     if cell.get("size_code"):
         node["schema:size"] = cell["size_code"]
     if cell.get("iec_code"):
+        # Dual encoding, both legitimate: the catalogue string on the spec
+        # (ProductModel persona) and the ontology's own hasIECCode datatype
+        # slot on the described cell.
         node["schema:productID"] = cell["iec_code"]
+        node["isDescriptionFor"]["hasIECCode"] = cell["iec_code"]
     if cell.get("product_type"):
         node["schema:additionalType"] = str(cell["product_type"])
     brand = cell.get("brand")
@@ -513,20 +579,24 @@ def build_cell_spec_node(record: Mapping[str, Any]) -> dict[str, Any]:
     if schema_version:
         node["schema:schemaVersion"] = schema_version
 
+    described = node["isDescriptionFor"]
     property_nodes = cell_spec_property_nodes(
         record.get("properties"), context_label=str(iri or name or "cell-spec")
     )
     if property_nodes:
-        node["hasProperty"] = property_nodes
+        described["hasProperty"] = property_nodes
+    # schema.org convenience mirror (weight/dimensions on the ProductModel
+    # persona); the EMMO quantities on the described cell stay authoritative.
+    node.update(schema_dimension_nodes(record.get("properties")))
 
     # Composition + component references (emitter convergence): the SAME
     # appliers the descriptor path uses emit the inline electrode/electrolyte/
     # separator/housing tree, the construction details, the stack/jelly-roll
-    # geometry and the *_spec_id reference links — the canonical node carries
-    # everything the user authored, not just chemistry/format/properties.
+    # geometry and the *_spec_id reference links. They apply to the DESCRIBED
+    # battery: an information artifact has no electrodes.
     spec_view = _composition_view(record, cell)
-    _apply_specification_composition(node, spec_view)
-    _apply_specification_structure_and_refs(node, spec_view)
+    _apply_specification_composition(described, spec_view)
+    _apply_specification_structure_and_refs(described, spec_view)
 
     prov = provenance_node(record.get("provenance"))
     if prov is not None:

@@ -4020,3 +4020,99 @@ def specs_show(
     typer.echo(f"category:    {detail['category']}")
     typer.echo(f"valid units: {detail['valid_units']}")
     typer.echo(f"example:     {json.dumps(detail['example'])}")
+
+
+@app.command("import-protocol")
+def import_protocol(
+    input_path: Path = typer.Argument(..., exists=True, readable=True, dir_okay=False,
+                                      help="Executable protocol file: UCP YAML, aurora-unicycler "
+                                           "JSON, PyBaMM experiment (text or to_config JSON), or "
+                                           "bmgen EMMO JSON-LD."),
+    protocol_format: str = typer.Option(
+        "auto", "--format",
+        help="Source format: auto|ucp|aurora|pybamm|bmgen (auto sniffs extension + content)."),
+    name: str | None = typer.Option(None, help="Protocol name (default: derived from the source)."),
+    kind: str | None = typer.Option(None, help="Test kind (e.g. cycling, gitt; default: inferred)."),
+    uid: str | None = typer.Option(None, help="Canonical uid (xxxx-xxxx-xxxx-xxxx); default: "
+                                              "derived deterministically from the file's sha256."),
+    out: Path | None = typer.Option(None, "--out", help="Write the canonical test-protocol record "
+                                                        "here (default: stdout)."),
+) -> None:
+    """One-liner protocol import: executable file in, canonical record out.
+
+    The structured method is a faithful, deliberately lossy summary; anything
+    computational stays with the source file, which is linked back as the
+    record's source_protocol artifact (with its sha256). Warnings list what
+    did not carry over.
+    """
+    import hashlib
+
+    from battinfo.entities import stable_uid
+    from battinfo.interop import (
+        import_aurora_unicycler,
+        import_bmgen_jsonld,
+        import_pybamm_experiment,
+        import_ucp,
+    )
+
+    raw = input_path.read_bytes()
+    sha256 = hashlib.sha256(raw).hexdigest()
+    text = raw.decode("utf-8")
+
+    fmt = protocol_format.strip().lower()
+    if fmt == "auto":
+        suffix = input_path.suffix.lower()
+        if suffix in (".yaml", ".yml"):
+            fmt = "ucp"
+        elif suffix == ".jsonld":
+            fmt = "bmgen"
+        else:
+            try:
+                doc = json.loads(text)
+            except ValueError:
+                fmt = "pybamm"  # a plain-text experiment string list
+            else:
+                if isinstance(doc, dict) and ("@graph" in doc or "@context" in doc):
+                    fmt = "bmgen"
+                elif isinstance(doc, dict) and isinstance(doc.get("method"), list):
+                    fmt = "aurora"
+                elif isinstance(doc, dict) and "steps" in doc:
+                    fmt = "ucp"
+                else:
+                    fmt = "pybamm"
+    importers = {
+        "ucp": import_ucp,
+        "aurora": import_aurora_unicycler,
+        "pybamm": import_pybamm_experiment,
+        "bmgen": import_bmgen_jsonld,
+    }
+    importer = importers.get(fmt)
+    if importer is None:
+        typer.secho(f"Unknown --format '{protocol_format}'. Choose from: auto, "
+                    + ", ".join(sorted(importers)) + ".", fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=2)
+
+    if fmt == "pybamm" and not text.lstrip().startswith(("{", "[")):
+        source: object = [line.strip() for line in text.splitlines() if line.strip()]
+    else:
+        source = text
+    spec = importer(source, name=name, kind=kind,
+                    source_locator=str(input_path), source_sha256=sha256)
+
+    # Deterministic identity: the same file imports to the same IRI.
+    dashed = uid or stable_uid(f"test-protocol-import::{sha256}")
+    spec.id = f"https://w3id.org/battinfo/spec/{dashed}"
+    record = spec.to_record()
+
+    for note in spec.comment or []:
+        typer.secho(f"note: {note}", fg=typer.colors.YELLOW, err=True)
+    step_count = len(spec.method or [])
+    typer.secho(f"Imported {fmt} protocol: kind={spec.test_kind}, {step_count} top-level steps, "
+                f"artifact sha256={sha256[:12]}…", err=True)
+
+    payload = json.dumps(record, indent=2, ensure_ascii=False)
+    if out is not None:
+        out.write_text(payload + "\n", encoding="utf-8", newline="\n")
+        typer.secho(f"Wrote {out}", err=True)
+    else:
+        typer.echo(payload)

@@ -77,3 +77,34 @@ def test_test_protocol_examples_cover_full_battery_test_type_enum() -> None:
     expected = {kind.value for kind in BatteryTestType}
     assert observed == expected, f"missing: {expected - observed}; extra: {observed - expected}"
 
+
+
+def test_execution_inherits_identity_from_the_linked_protocol() -> None:
+    """protocol= accepts the TestSpec itself: kind, protocol name and
+    protocol_id derive from the spec - stated once, on the protocol - while
+    an explicitly authored kind still wins."""
+    from battinfo import Test, TestSpec
+
+    protocol = TestSpec(
+        id="https://w3id.org/battinfo/spec/abcd-2345-6789-abcd",
+        name="1C cycle life at 25 degC",
+        kind="cycling",
+    )
+    test = Test(
+        id="https://w3id.org/battinfo/test/abcd-2345-6789-abcd",
+        cell_id="https://w3id.org/battinfo/cell/abcd-2345-6789-abcd",
+        protocol=protocol,
+    )
+    assert str(test.test_type) == "cycling"
+    assert test.protocol_id == protocol.id
+    assert test.protocol.name == "1C cycle life at 25 degC"
+    record = test.to_record()
+    assert record["test"]["kind"] == "cycling"
+    assert record["test"]["protocol_id"] == protocol.id
+
+    overridden = Test(
+        cell_id="https://w3id.org/battinfo/cell/abcd-2345-6789-abcd",
+        protocol=protocol,
+        kind="capacity_check",
+    )
+    assert str(overridden.test_type) == "capacity_check"

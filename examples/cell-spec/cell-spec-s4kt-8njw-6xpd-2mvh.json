@@ -1,0 +1,44 @@
+{
+  "schema_version": "0.2.0",
+  "cell_spec": {
+    "id": "https://w3id.org/battinfo/spec/s4kt-8njw-6xpd-2mvh",
+    "short_id": "s4kt8n",
+    "identifier": "cell-spec:s4kt-8njw-6xpd-2mvh",
+    "name": "Hard carbon || Na coin half cell",
+    "model": "HC-HC-01",
+    "manufacturer": {
+      "type": "Organization",
+      "name": "Example Lab"
+    },
+    "cell_format": "coin",
+    "chemistry": "Na-ion",
+    "cell_configuration": "half_cell"
+  },
+  "properties": {},
+  "provenance": {
+    "source_type": "lab",
+    "retrieved_at": 1750000000,
+    "battinfo_version": "0.7.0"
+  },
+  "working_electrode": {
+    "coating": {
+      "component": {
+        "active_material": [
+          {
+            "name": "Hard carbon",
+            "property": {}
+          }
+        ]
+      },
+      "property": {}
+    },
+    "property": {}
+  },
+  "counter_electrode": {
+    "material": {
+      "name": "Sodium metal",
+      "property": {}
+    },
+    "property": {}
+  }
+}

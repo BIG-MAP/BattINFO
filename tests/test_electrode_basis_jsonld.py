@@ -34,7 +34,7 @@ def _negative_electrode(basis: str) -> dict | None:
     }
     # to_jsonld validates its own output and raises on an unmapped @type, so a
     # returned graph already proves every emitted electrode class resolves.
-    return to_jsonld(record, target="domain-battery")["@graph"][0].get("hasNegativeElectrode")
+    return to_jsonld(record, target="domain-battery")["@graph"][0]["isDescriptionFor"].get("hasNegativeElectrode")
 
 
 def _types(node: dict | None) -> list[str]:

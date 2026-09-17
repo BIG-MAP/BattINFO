@@ -80,6 +80,7 @@ def _load_test_method_context_terms() -> dict:
         "VoltageHold", "OpenCircuitHold", "IterativeWorkflow",
         "ElectrochemicalImpedanceSpectroscopy", "LinearScanVoltammetry",
         "LowerVoltageLimit", "UpperVoltageLimit", "TerminationQuantity",
+        "StateOfCharge",  # SOC-based termination (the UCP/HPPC seam)
         "CRate", "ElectricCurrent", "Voltage", "Power", "ElectricalResistance",
         "Duration", "ConventionalProperty",
         # Measurement-provenance subtree (as-run conditions emit typed
@@ -92,6 +93,13 @@ def _load_test_method_context_terms() -> dict:
         "ReversibleHydrogenElectrode", "SaturatedCalomelElectrode",
         "SilverChlorideElectrode", "ZincElectrode",
         "RealData", "CelsiusTemperature", "MeasuredProperty", "NominalProperty",
+        # Material-spec property classes the descriptor path can emit
+        # (specific_capacity mapped but its class was missing from the
+        # records context, so it silently dropped at expansion).
+        "SpecificCapacity",
+        # IEC designation on the described cell (electrochemistry datatype
+        # property), beside the schema:productID catalogue string on the spec.
+        "hasIECCode",
         # Characterisation-method classes a test protocol types itself with
         # (see TEST_METHOD_CLASS). Pulled from the same bundled context, so the
         # emitter, the hosted context and the validator allowlist cannot drift.
@@ -107,6 +115,7 @@ def _load_test_method_context_terms() -> dict:
 TEST_METHOD_CLASS: dict[str, str] = {
     "gitt":            "GalvanostaticIntermittentTitrationTechnique",
     "quasi_ocv":       "PseudoOpenCircuitVoltageMethod",
+    "cyclic_voltammetry": "CyclicVoltammetry",
     "eis":             "ElectrochemicalImpedanceSpectroscopy",
     "impedance":       "ElectrochemicalImpedanceSpectroscopy",
     "hppc":            "HPPC",
@@ -666,10 +675,11 @@ def cell_spec_to_jsonld(record: dict) -> dict:
     (:func:`battinfo.transform.cell_spec_node.build_cell_spec_node`) so
     ``record_to_jsonld`` emits the exact node the resolver artifact and the
     Zenodo/local publication graph emit: ``@type ["BatteryCellSpecification",
-    "schema:CreativeWork"]``, the physical EMMO class stack under
-    ``isDescriptionFor`` (chemistry/format/electrode bases via @type stacking,
-    not literal predicates), quantities as an EMMO ``hasProperty`` array, and a
-    standard-vocabulary (dcterms/PROV) provenance node.
+    "schema:ProductModel", "schema:CreativeWork"]``, with the described battery
+    under ``isDescriptionFor`` carrying the physical EMMO class stack
+    (chemistry/format/electrode bases via @type stacking, not literal
+    predicates) plus the EMMO ``hasProperty`` quantities and composition, and a
+    standard-vocabulary (dcterms/PROV) provenance node on the spec.
 
     The inline ``@context`` is the records context extended with the
     prefLabel -> compact-IRI table, so every emitted ``@type`` resolves offline.
@@ -841,8 +851,10 @@ def test_to_jsonld(record: dict) -> dict:
         # this node — the same shape quantity-level conditions take on their
         # isOutputOf measurement node, so one query reads both rungs. The
         # schema:PropertyValue copy stays as the standards-legible layer.
-        # voltage_reference is a metrological datum, not a parameter: it emits
-        # only as hasMetrologicalReference.
+        # voltage_reference is a datum, not a parameter: it emits as a
+        # PropertyValue whose valueReference carries the class-typed couple
+        # (never hasMetrologicalReference — that slot belongs to units on
+        # Quantity nodes, and a test activity is not a Quantity).
         from battinfo.transform.json_to_jsonld import (  # noqa: PLC0415
             _MEASUREMENT_PARAMETER_TERMS,
             _descriptor_quantity_node,
@@ -856,7 +868,16 @@ def test_to_jsonld(record: dict) -> dict:
             if name == "voltage_reference":
                 ref = _voltage_reference_node(value)
                 if ref is not None:
-                    node["hasMetrologicalReference"] = ref
+                    if ref.get("@type") == "schema:PropertyValue":
+                        ref_pv: dict = {**ref, "schema:name": name}
+                    else:
+                        ref_pv = {
+                            "@type": "schema:PropertyValue",
+                            "schema:name": name,
+                            "schema:value": ref.get("skos:prefLabel"),
+                            "schema:valueReference": ref,
+                        }
+                    props.append(ref_pv)
                     continue
             pv: dict = {"@type": "schema:PropertyValue", "schema:name": name}
             if isinstance(value, Mapping) and "value" in value:
@@ -1179,6 +1200,7 @@ _TRANSFORMERS = {
     "separator":      _component_to_jsonld,
     "current-collector-spec": _component_to_jsonld,
     "current_collector_spec": _component_to_jsonld,
+    "current-collector":      _component_to_jsonld,
     "current_collector":      _component_to_jsonld,
     "electrolyte-spec": _component_to_jsonld,
     "electrolyte_spec": _component_to_jsonld,

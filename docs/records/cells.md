@@ -92,6 +92,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "@context": "https://w3id.org/battinfo/context/records/v1.json",
   "@type": [
     "BatteryCellSpecification",
+    "schema:ProductModel",
     "schema:CreativeWork"
   ],
   "@id": "https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0",
@@ -110,49 +111,55 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "LithiumIonBattery",
       "LithiumIonIronPhosphateBattery"
     ],
-    "skos:prefLabel": "A123 ANR26650M1-B"
+    "@id": "https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0#described",
+    "skos:prefLabel": "A123 ANR26650M1-B",
+    "hasProperty": [
+      {
+        "@type": [
+          "NominalCapacity",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "NominalCapacity",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 2.5
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
+      },
+      {
+        "@type": [
+          "NominalVoltage",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "NominalVoltage",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 3.3
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
+      },
+      {
+        "@type": [
+          "Mass",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "Mass",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 76.0
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#Gram"
+      }
+    ],
+    "hasPositiveElectrode": {
+      "@type": "LithiumIronPhosphateElectrode"
+    }
   },
   "schema:schemaVersion": "0.2.0",
-  "hasProperty": [
-    {
-      "@type": [
-        "NominalCapacity",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "NominalCapacity",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 2.5
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
-    },
-    {
-      "@type": [
-        "NominalVoltage",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "NominalVoltage",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 3.3
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
-    },
-    {
-      "@type": [
-        "Mass",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "Mass",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 76.0
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#Gram"
-    }
-  ],
-  "hasPositiveElectrode": {
-    "@type": "LithiumIronPhosphateElectrode"
+  "schema:weight": {
+    "@type": "schema:QuantitativeValue",
+    "schema:value": 76.0,
+    "schema:unitText": "g"
   },
   "dcterms:source": {
     "@type": "prov:Entity",
@@ -167,7 +174,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 
 What to notice:
 
-- The node is EMMO-typed (`BatteryCellSpecification`) and each spec property becomes a typed quantity under `hasProperty`.
+- The spec node is the datasheet: name, manufacturer, codes. The cell it describes — with its capacity, voltage and electrodes — hangs off `isDescriptionFor`, because a document doesn't have a positive electrode.
 - `schema:manufacturer` and `schema:model` carry the identity that seeded the IRI.
 
 
@@ -297,6 +304,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "@context": "https://w3id.org/battinfo/context/records/v1.json",
   "@type": [
     "BatteryCellSpecification",
+    "schema:ProductModel",
     "schema:CreativeWork"
   ],
   "@id": "https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0",
@@ -315,7 +323,191 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "LithiumIonBattery",
       "LithiumIonIronPhosphateBattery"
     ],
-    "skos:prefLabel": "A123 ANR26650M1-B"
+    "@id": "https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0#described",
+    "skos:prefLabel": "A123 ANR26650M1-B",
+    "hasIECCode": "IFpR26650",
+    "hasProperty": [
+      {
+        "@type": [
+          "NominalCapacity",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "NominalCapacity",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 2.5
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
+      },
+      {
+        "@type": [
+          "MinimumCapacity",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "MinimumCapacity",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 2.4
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
+      },
+      {
+        "@type": [
+          "NominalVoltage",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "NominalVoltage",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 3.3
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
+      },
+      {
+        "@type": [
+          "InternalResistance",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "InternalResistance",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 6.0
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#MilliOhm"
+      },
+      {
+        "@type": [
+          "Mass",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "Mass",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 76.0
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#Gram"
+      },
+      {
+        "@type": [
+          "Diameter",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "Diameter",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 26.0
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
+      },
+      {
+        "@type": [
+          "Height",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "Height",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 65.0
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
+      },
+      {
+        "@type": [
+          "MaximumPulseChargingCurrent",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "MaximumPulseChargingCurrent",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 10.0
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#Ampere"
+      },
+      {
+        "@type": [
+          "MaximumContinuousChargingCurrent",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "MaximumContinuousChargingCurrent",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 2.5
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#Ampere"
+      },
+      {
+        "@type": [
+          "MaximumContinuousDischargingCurrent",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "MaximumContinuousDischargingCurrent",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 50.0
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#Ampere"
+      },
+      {
+        "@type": [
+          "MinimumDischargingTemperature",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "MinimumDischargingTemperature",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": -30
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
+      },
+      {
+        "@type": [
+          "MaximumDischargingTemperature",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "MaximumDischargingTemperature",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 55
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
+      },
+      {
+        "@type": [
+          "MinimumStorageTemperature",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "MinimumStorageTemperature",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": -40
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
+      },
+      {
+        "@type": [
+          "MaximumStorageTemperature",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "MaximumStorageTemperature",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 60
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
+      },
+      {
+        "@type": [
+          "CycleLife",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "CycleLife",
+        "hasStringValue": ">1000",
+        "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+      }
+    ],
+    "hasPositiveElectrode": {
+      "@type": "LithiumIronPhosphateElectrode"
+    }
   },
   "schema:size": "R26650",
   "schema:productID": "IFpR26650",
@@ -330,187 +522,25 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   },
   "schema:releaseDate": "2012-01-01",
   "schema:schemaVersion": "0.2.0",
-  "hasProperty": [
-    {
-      "@type": [
-        "NominalCapacity",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "NominalCapacity",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 2.5
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
-    },
-    {
-      "@type": [
-        "MinimumCapacity",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "MinimumCapacity",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 2.4
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
-    },
-    {
-      "@type": [
-        "NominalVoltage",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "NominalVoltage",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 3.3
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
-    },
-    {
-      "@type": [
-        "InternalResistance",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "InternalResistance",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 6.0
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#MilliOhm"
-    },
-    {
-      "@type": [
-        "Mass",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "Mass",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 76.0
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#Gram"
-    },
-    {
-      "@type": [
-        "Diameter",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "Diameter",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 26.0
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
-    },
-    {
-      "@type": [
-        "Height",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "Height",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 65.0
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
-    },
-    {
-      "@type": [
-        "MaximumPulseChargingCurrent",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "MaximumPulseChargingCurrent",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 10.0
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#Ampere"
-    },
-    {
-      "@type": [
-        "MaximumContinuousChargingCurrent",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "MaximumContinuousChargingCurrent",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 2.5
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#Ampere"
-    },
-    {
-      "@type": [
-        "MaximumContinuousDischargingCurrent",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "MaximumContinuousDischargingCurrent",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 50.0
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#Ampere"
-    },
-    {
-      "@type": [
-        "MinimumDischargingTemperature",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "MinimumDischargingTemperature",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": -30
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
-    },
-    {
-      "@type": [
-        "MaximumDischargingTemperature",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "MaximumDischargingTemperature",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 55
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
-    },
-    {
-      "@type": [
-        "MinimumStorageTemperature",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "MinimumStorageTemperature",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": -40
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
-    },
-    {
-      "@type": [
-        "MaximumStorageTemperature",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "MaximumStorageTemperature",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 60
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
-    },
-    {
-      "@type": [
-        "CycleLife",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "CycleLife",
-      "hasStringValue": ">1000",
-      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-    }
-  ],
-  "hasPositiveElectrode": {
-    "@type": "LithiumIronPhosphateElectrode"
+  "schema:weight": {
+    "@type": "schema:QuantitativeValue",
+    "schema:value": 76.0,
+    "schema:unitText": "g"
+  },
+  "schema:height": {
+    "@type": "schema:QuantitativeValue",
+    "schema:value": 65.0,
+    "schema:unitText": "mm"
+  },
+  "schema:width": {
+    "@type": "schema:QuantitativeValue",
+    "schema:value": 26.0,
+    "schema:unitText": "mm"
+  },
+  "schema:depth": {
+    "@type": "schema:QuantitativeValue",
+    "schema:value": 26.0,
+    "schema:unitText": "mm"
   },
   "dcterms:source": {
     "@type": "prov:Entity",
@@ -556,6 +586,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "@context": "https://w3id.org/battinfo/context/records/v1.json",
   "@type": [
     "BatteryCellSpecification",
+    "schema:ProductModel",
     "schema:CreativeWork"
   ],
   "@id": "https://w3id.org/battinfo/spec/2d5n-8r4k-3p7t-6v9m",
@@ -575,107 +606,176 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "LithiumIonIronPhosphateBattery",
       "LithiumIonGraphiteBattery"
     ],
-    "skos:prefLabel": "ExampleLab CYL-LFP-18650"
-  },
-  "schema:size": "18650",
-  "schema:schemaVersion": "0.2.0",
-  "hasProperty": [
-    {
-      "@type": [
-        "NominalCapacity",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "NominalCapacity",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 1.5
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
-    },
-    {
-      "@type": [
-        "NominalVoltage",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "NominalVoltage",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 3.2
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
-    }
-  ],
-  "hasPositiveElectrode": {
-    "hasCoating": {
-      "@type": "ElectrodeCoating",
-      "hasActiveMaterial": {
+    "@id": "https://w3id.org/battinfo/spec/2d5n-8r4k-3p7t-6v9m#described",
+    "skos:prefLabel": "ExampleLab CYL-LFP-18650",
+    "hasProperty": [
+      {
         "@type": [
-          "LithiumIronPhosphate",
-          "ActiveMaterial"
+          "NominalCapacity",
+          "ConventionalProperty"
         ],
-        "schema:name": "LFP",
-        "hasProperty": {
-          "@type": [
-            "MassFraction",
-            "ConventionalProperty"
-          ],
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 0.94
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-        }
-      },
-      "hasBinder": {
-        "@type": [
-          "PolyvinylideneFluoride",
-          "Binder"
-        ],
-        "schema:name": "PVDF",
-        "hasProperty": {
-          "@type": [
-            "MassFraction",
-            "ConventionalProperty"
-          ],
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 0.03
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-        }
-      },
-      "hasConductiveAdditive": {
-        "@type": [
-          "CarbonBlack",
-          "ConductiveAdditive"
-        ],
-        "schema:name": "Carbon black",
-        "hasProperty": {
-          "@type": [
-            "MassFraction",
-            "ConventionalProperty"
-          ],
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 0.03
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-        }
-      },
-      "hasProperty": [
-        {
-          "@type": [
-            "ActiveMassLoading",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "ActiveMassLoading",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 17.5
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#MilliGramPerSquareCentiMetre"
+        "skos:prefLabel": "NominalCapacity",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 1.5
         },
-        {
+        "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
+      },
+      {
+        "@type": [
+          "NominalVoltage",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "NominalVoltage",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 3.2
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
+      }
+    ],
+    "hasPositiveElectrode": {
+      "hasCoating": {
+        "@type": "ElectrodeCoating",
+        "hasActiveMaterial": {
+          "@type": [
+            "LithiumIronPhosphate",
+            "ActiveMaterial"
+          ],
+          "schema:name": "LFP",
+          "hasProperty": {
+            "@type": [
+              "MassFraction",
+              "ConventionalProperty"
+            ],
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 0.94
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+          }
+        },
+        "hasBinder": {
+          "@type": [
+            "PolyvinylideneFluoride",
+            "Binder"
+          ],
+          "schema:name": "PVDF",
+          "hasProperty": {
+            "@type": [
+              "MassFraction",
+              "ConventionalProperty"
+            ],
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 0.03
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+          }
+        },
+        "hasConductiveAdditive": {
+          "@type": [
+            "CarbonBlack",
+            "ConductiveAdditive"
+          ],
+          "schema:name": "Carbon black",
+          "hasProperty": {
+            "@type": [
+              "MassFraction",
+              "ConventionalProperty"
+            ],
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 0.03
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+          }
+        },
+        "hasProperty": [
+          {
+            "@type": [
+              "ActiveMassLoading",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "ActiveMassLoading",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 17.5
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#MilliGramPerSquareCentiMetre"
+          },
+          {
+            "@type": [
+              "CalenderedCoatingThickness",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "CalenderedCoatingThickness",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 64.0
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
+          }
+        ]
+      },
+      "hasCurrentCollector": {
+        "@type": [
+          "CurrentCollector",
+          "Foil"
+        ],
+        "schema:name": "Al foil",
+        "hasProperty": {
+          "@type": [
+            "Thickness",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "Thickness",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 15.0
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
+        }
+      },
+      "@type": "LithiumIronPhosphateElectrode"
+    },
+    "hasNegativeElectrode": {
+      "hasCoating": {
+        "@type": "ElectrodeCoating",
+        "hasActiveMaterial": {
+          "@type": [
+            "Graphite",
+            "ActiveMaterial"
+          ],
+          "schema:name": "Graphite",
+          "hasProperty": {
+            "@type": [
+              "MassFraction",
+              "ConventionalProperty"
+            ],
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 0.95
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+          }
+        },
+        "hasBinder": {
+          "@type": "Binder",
+          "schema:name": "CMC/SBR",
+          "hasProperty": {
+            "@type": [
+              "MassFraction",
+              "ConventionalProperty"
+            ],
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 0.05
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+          }
+        },
+        "hasProperty": {
           "@type": [
             "CalenderedCoatingThickness",
             "ConventionalProperty"
@@ -683,18 +783,113 @@ Emitted by `record_to_jsonld`, hosted-context mode.
           "skos:prefLabel": "CalenderedCoatingThickness",
           "hasNumericalPart": {
             "@type": "RealData",
-            "hasNumberValue": 64.0
+            "hasNumberValue": 72.0
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
         }
-      ]
+      },
+      "hasCurrentCollector": {
+        "@type": [
+          "CurrentCollector",
+          "Foil"
+        ],
+        "schema:name": "Cu foil",
+        "hasProperty": {
+          "@type": [
+            "Thickness",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "Thickness",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 10.0
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
+        }
+      },
+      "@type": "GraphiteElectrode"
     },
-    "hasCurrentCollector": {
-      "@type": [
-        "CurrentCollector",
-        "Foil"
+    "hasElectrolyte": {
+      "@type": "OrganicElectrolyte",
+      "hasSolute": {
+        "@type": [
+          "LithiumHexafluorophosphate",
+          "Solute"
+        ],
+        "schema:name": "LiPF6",
+        "hasProperty": {
+          "@type": [
+            "AmountConcentration",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "AmountConcentration",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 1.0
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#MolePerLitre"
+        }
+      },
+      "hasSolvent": [
+        {
+          "@type": [
+            "EthyleneCarbonate",
+            "Solvent"
+          ],
+          "schema:name": "EC",
+          "hasProperty": {
+            "@type": [
+              "VolumeFraction",
+              "ConventionalProperty"
+            ],
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 0.3
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+          }
+        },
+        {
+          "@type": [
+            "EthylMethylCarbonate",
+            "Solvent"
+          ],
+          "schema:name": "EMC",
+          "hasProperty": {
+            "@type": [
+              "VolumeFraction",
+              "ConventionalProperty"
+            ],
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 0.7
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+          }
+        }
       ],
-      "schema:name": "Al foil",
+      "hasAdditive": {
+        "@type": [
+          "VinyleneCarbonate",
+          "ElectrolyteAdditive"
+        ],
+        "schema:name": "VC",
+        "hasProperty": {
+          "@type": [
+            "VolumeFraction",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 0.02
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+        }
+      }
+    },
+    "hasSeparator": {
+      "@type": "Separator",
+      "schema:name": "PE/PP trilayer",
       "hasProperty": {
         "@type": [
           "Thickness",
@@ -703,203 +898,40 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         "skos:prefLabel": "Thickness",
         "hasNumericalPart": {
           "@type": "RealData",
-          "hasNumberValue": 15.0
+          "hasNumberValue": 18.0
         },
         "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
       }
     },
-    "@type": "LithiumIronPhosphateElectrode"
-  },
-  "hasNegativeElectrode": {
-    "hasCoating": {
-      "@type": "ElectrodeCoating",
-      "hasActiveMaterial": {
-        "@type": [
-          "Graphite",
-          "ActiveMaterial"
-        ],
-        "schema:name": "Graphite",
-        "hasProperty": {
-          "@type": [
-            "MassFraction",
-            "ConventionalProperty"
-          ],
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 0.95
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-        }
-      },
-      "hasBinder": {
-        "@type": "Binder",
-        "schema:name": "CMC/SBR",
-        "hasProperty": {
-          "@type": [
-            "MassFraction",
-            "ConventionalProperty"
-          ],
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 0.05
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-        }
-      },
-      "hasProperty": {
-        "@type": [
-          "CalenderedCoatingThickness",
-          "ConventionalProperty"
-        ],
-        "skos:prefLabel": "CalenderedCoatingThickness",
-        "hasNumericalPart": {
-          "@type": "RealData",
-          "hasNumberValue": 72.0
-        },
-        "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
-      }
-    },
-    "hasCurrentCollector": {
-      "@type": [
-        "CurrentCollector",
-        "Foil"
-      ],
-      "schema:name": "Cu foil",
-      "hasProperty": {
-        "@type": [
-          "Thickness",
-          "ConventionalProperty"
-        ],
-        "skos:prefLabel": "Thickness",
-        "hasNumericalPart": {
-          "@type": "RealData",
-          "hasNumberValue": 10.0
-        },
-        "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
-      }
-    },
-    "@type": "GraphiteElectrode"
-  },
-  "hasElectrolyte": {
-    "@type": "OrganicElectrolyte",
-    "hasSolute": {
-      "@type": [
-        "LithiumHexafluorophosphate",
-        "Solute"
-      ],
-      "schema:name": "LiPF6",
-      "hasProperty": {
-        "@type": [
-          "AmountConcentration",
-          "ConventionalProperty"
-        ],
-        "skos:prefLabel": "AmountConcentration",
-        "hasNumericalPart": {
-          "@type": "RealData",
-          "hasNumberValue": 1.0
-        },
-        "hasMeasurementUnit": "https://w3id.org/emmo#MolePerLitre"
-      }
-    },
-    "hasSolvent": [
+    "schema:additionalProperty": [
       {
-        "@type": [
-          "EthyleneCarbonate",
-          "Solvent"
-        ],
-        "schema:name": "EC",
-        "hasProperty": {
-          "@type": [
-            "VolumeFraction",
-            "ConventionalProperty"
-          ],
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 0.3
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-        }
+        "@type": "schema:PropertyValue",
+        "schema:propertyID": "construction.assembly_type",
+        "schema:name": "Assembly Type",
+        "schema:value": "wound"
       },
       {
-        "@type": [
-          "EthylMethylCarbonate",
-          "Solvent"
-        ],
-        "schema:name": "EMC",
-        "hasProperty": {
-          "@type": [
-            "VolumeFraction",
-            "ConventionalProperty"
-          ],
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 0.7
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-        }
-      }
-    ],
-    "hasAdditive": {
-      "@type": [
-        "VinyleneCarbonate",
-        "ElectrolyteAdditive"
-      ],
-      "schema:name": "VC",
-      "hasProperty": {
-        "@type": [
-          "VolumeFraction",
-          "ConventionalProperty"
-        ],
-        "hasNumericalPart": {
-          "@type": "RealData",
-          "hasNumberValue": 0.02
-        },
-        "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-      }
-    }
-  },
-  "hasSeparator": {
-    "@type": "Separator",
-    "schema:name": "PE/PP trilayer",
-    "hasProperty": {
-      "@type": [
-        "Thickness",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "Thickness",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 18.0
+        "@type": "schema:PropertyValue",
+        "schema:propertyID": "construction.layering",
+        "schema:name": "Layering",
+        "schema:value": "multilayer"
       },
-      "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
-    }
+      {
+        "@type": "schema:PropertyValue",
+        "schema:propertyID": "construction.layer_count",
+        "schema:name": "Layer Count",
+        "schema:value": 32
+      },
+      {
+        "@type": "schema:PropertyValue",
+        "schema:propertyID": "construction.comment",
+        "schema:name": "Construction Comment",
+        "schema:value": "Jelly-roll cylindrical example fixture."
+      }
+    ]
   },
-  "schema:additionalProperty": [
-    {
-      "@type": "schema:PropertyValue",
-      "schema:propertyID": "construction.assembly_type",
-      "schema:name": "Assembly Type",
-      "schema:value": "wound"
-    },
-    {
-      "@type": "schema:PropertyValue",
-      "schema:propertyID": "construction.layering",
-      "schema:name": "Layering",
-      "schema:value": "multilayer"
-    },
-    {
-      "@type": "schema:PropertyValue",
-      "schema:propertyID": "construction.layer_count",
-      "schema:name": "Layer Count",
-      "schema:value": 32
-    },
-    {
-      "@type": "schema:PropertyValue",
-      "schema:propertyID": "construction.comment",
-      "schema:name": "Construction Comment",
-      "schema:value": "Jelly-roll cylindrical example fixture."
-    }
-  ],
+  "schema:size": "18650",
+  "schema:schemaVersion": "0.2.0",
   "dcterms:source": {
     "@type": "prov:Entity",
     "dcterms:type": "manual",
@@ -944,6 +976,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "@context": "https://w3id.org/battinfo/context/records/v1.json",
   "@type": [
     "BatteryCellSpecification",
+    "schema:ProductModel",
     "schema:CreativeWork"
   ],
   "@id": "https://w3id.org/battinfo/spec/5j9r-4k7p-2m8t-6v3q",
@@ -963,292 +996,293 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "LithiumIonIronPhosphateBattery",
       "LithiumIonGraphiteBattery"
     ],
-    "skos:prefLabel": "ExampleLab PRISM-LFP-020"
-  },
-  "schema:schemaVersion": "0.2.0",
-  "hasProperty": [
-    {
-      "@type": [
-        "NominalCapacity",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "NominalCapacity",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 20.0
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
-    },
-    {
-      "@type": [
-        "NominalVoltage",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "NominalVoltage",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 3.2
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
-    }
-  ],
-  "hasPositiveElectrode": {
-    "hasCoating": {
-      "@type": "ElectrodeCoating",
-      "hasActiveMaterial": {
-        "@type": [
-          "LithiumIronPhosphate",
-          "ActiveMaterial"
-        ],
-        "schema:name": "LFP",
-        "hasProperty": {
-          "@type": [
-            "MassFraction",
-            "ConventionalProperty"
-          ],
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 0.94
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-        }
-      },
-      "hasBinder": {
-        "@type": [
-          "PolyvinylideneFluoride",
-          "Binder"
-        ],
-        "schema:name": "PVDF",
-        "hasProperty": {
-          "@type": [
-            "MassFraction",
-            "ConventionalProperty"
-          ],
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 0.03
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-        }
-      },
-      "hasConductiveAdditive": {
-        "@type": [
-          "CarbonBlack",
-          "ConductiveAdditive"
-        ],
-        "schema:name": "Carbon black",
-        "hasProperty": {
-          "@type": [
-            "MassFraction",
-            "ConventionalProperty"
-          ],
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 0.03
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-        }
-      },
-      "hasProperty": {
-        "@type": [
-          "ActiveMassLoading",
-          "ConventionalProperty"
-        ],
-        "skos:prefLabel": "ActiveMassLoading",
-        "hasNumericalPart": {
-          "@type": "RealData",
-          "hasNumberValue": 24.0
-        },
-        "hasMeasurementUnit": "https://w3id.org/emmo#MilliGramPerSquareCentiMetre"
-      }
-    },
-    "hasCurrentCollector": {
-      "@type": [
-        "CurrentCollector",
-        "Foil"
-      ],
-      "schema:name": "Al foil"
-    },
-    "@type": "LithiumIronPhosphateElectrode"
-  },
-  "hasNegativeElectrode": {
-    "hasCoating": {
-      "@type": "ElectrodeCoating",
-      "hasActiveMaterial": {
-        "@type": [
-          "Graphite",
-          "ActiveMaterial"
-        ],
-        "schema:name": "Graphite",
-        "hasProperty": {
-          "@type": [
-            "MassFraction",
-            "ConventionalProperty"
-          ],
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 0.95
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-        }
-      },
-      "hasBinder": {
-        "@type": "Binder",
-        "schema:name": "CMC/SBR",
-        "hasProperty": {
-          "@type": [
-            "MassFraction",
-            "ConventionalProperty"
-          ],
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 0.05
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-        }
-      },
-      "hasProperty": {
-        "@type": [
-          "ActiveMassLoading",
-          "ConventionalProperty"
-        ],
-        "skos:prefLabel": "ActiveMassLoading",
-        "hasNumericalPart": {
-          "@type": "RealData",
-          "hasNumberValue": 13.0
-        },
-        "hasMeasurementUnit": "https://w3id.org/emmo#MilliGramPerSquareCentiMetre"
-      }
-    },
-    "hasCurrentCollector": {
-      "@type": [
-        "CurrentCollector",
-        "Foil"
-      ],
-      "schema:name": "Cu foil"
-    },
-    "@type": "GraphiteElectrode"
-  },
-  "hasElectrolyte": {
-    "@type": "OrganicElectrolyte",
-    "hasSolute": {
-      "@type": [
-        "LithiumHexafluorophosphate",
-        "Solute"
-      ],
-      "schema:name": "LiPF6",
-      "hasProperty": {
-        "@type": [
-          "AmountConcentration",
-          "ConventionalProperty"
-        ],
-        "skos:prefLabel": "AmountConcentration",
-        "hasNumericalPart": {
-          "@type": "RealData",
-          "hasNumberValue": 1.0
-        },
-        "hasMeasurementUnit": "https://w3id.org/emmo#MolePerLitre"
-      }
-    },
-    "hasSolvent": [
+    "@id": "https://w3id.org/battinfo/spec/5j9r-4k7p-2m8t-6v3q#described",
+    "skos:prefLabel": "ExampleLab PRISM-LFP-020",
+    "hasProperty": [
       {
         "@type": [
-          "EthyleneCarbonate",
-          "Solvent"
+          "NominalCapacity",
+          "ConventionalProperty"
         ],
-        "schema:name": "EC",
-        "hasProperty": {
-          "@type": [
-            "VolumeFraction",
-            "ConventionalProperty"
-          ],
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 0.25
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-        }
+        "skos:prefLabel": "NominalCapacity",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 20.0
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
       },
       {
         "@type": [
-          "EthylMethylCarbonate",
-          "Solvent"
+          "NominalVoltage",
+          "ConventionalProperty"
         ],
-        "schema:name": "EMC",
-        "hasProperty": {
-          "@type": [
-            "VolumeFraction",
-            "ConventionalProperty"
-          ],
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 0.75
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-        }
+        "skos:prefLabel": "NominalVoltage",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 3.2
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
       }
     ],
-    "hasAdditive": {
-      "@type": [
-        "FluoroethyleneCarbonate",
-        "ElectrolyteAdditive"
+    "hasPositiveElectrode": {
+      "hasCoating": {
+        "@type": "ElectrodeCoating",
+        "hasActiveMaterial": {
+          "@type": [
+            "LithiumIronPhosphate",
+            "ActiveMaterial"
+          ],
+          "schema:name": "LFP",
+          "hasProperty": {
+            "@type": [
+              "MassFraction",
+              "ConventionalProperty"
+            ],
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 0.94
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+          }
+        },
+        "hasBinder": {
+          "@type": [
+            "PolyvinylideneFluoride",
+            "Binder"
+          ],
+          "schema:name": "PVDF",
+          "hasProperty": {
+            "@type": [
+              "MassFraction",
+              "ConventionalProperty"
+            ],
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 0.03
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+          }
+        },
+        "hasConductiveAdditive": {
+          "@type": [
+            "CarbonBlack",
+            "ConductiveAdditive"
+          ],
+          "schema:name": "Carbon black",
+          "hasProperty": {
+            "@type": [
+              "MassFraction",
+              "ConventionalProperty"
+            ],
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 0.03
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+          }
+        },
+        "hasProperty": {
+          "@type": [
+            "ActiveMassLoading",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "ActiveMassLoading",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 24.0
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#MilliGramPerSquareCentiMetre"
+        }
+      },
+      "hasCurrentCollector": {
+        "@type": [
+          "CurrentCollector",
+          "Foil"
+        ],
+        "schema:name": "Al foil"
+      },
+      "@type": "LithiumIronPhosphateElectrode"
+    },
+    "hasNegativeElectrode": {
+      "hasCoating": {
+        "@type": "ElectrodeCoating",
+        "hasActiveMaterial": {
+          "@type": [
+            "Graphite",
+            "ActiveMaterial"
+          ],
+          "schema:name": "Graphite",
+          "hasProperty": {
+            "@type": [
+              "MassFraction",
+              "ConventionalProperty"
+            ],
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 0.95
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+          }
+        },
+        "hasBinder": {
+          "@type": "Binder",
+          "schema:name": "CMC/SBR",
+          "hasProperty": {
+            "@type": [
+              "MassFraction",
+              "ConventionalProperty"
+            ],
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 0.05
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+          }
+        },
+        "hasProperty": {
+          "@type": [
+            "ActiveMassLoading",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "ActiveMassLoading",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 13.0
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#MilliGramPerSquareCentiMetre"
+        }
+      },
+      "hasCurrentCollector": {
+        "@type": [
+          "CurrentCollector",
+          "Foil"
+        ],
+        "schema:name": "Cu foil"
+      },
+      "@type": "GraphiteElectrode"
+    },
+    "hasElectrolyte": {
+      "@type": "OrganicElectrolyte",
+      "hasSolute": {
+        "@type": [
+          "LithiumHexafluorophosphate",
+          "Solute"
+        ],
+        "schema:name": "LiPF6",
+        "hasProperty": {
+          "@type": [
+            "AmountConcentration",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "AmountConcentration",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 1.0
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#MolePerLitre"
+        }
+      },
+      "hasSolvent": [
+        {
+          "@type": [
+            "EthyleneCarbonate",
+            "Solvent"
+          ],
+          "schema:name": "EC",
+          "hasProperty": {
+            "@type": [
+              "VolumeFraction",
+              "ConventionalProperty"
+            ],
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 0.25
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+          }
+        },
+        {
+          "@type": [
+            "EthylMethylCarbonate",
+            "Solvent"
+          ],
+          "schema:name": "EMC",
+          "hasProperty": {
+            "@type": [
+              "VolumeFraction",
+              "ConventionalProperty"
+            ],
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 0.75
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+          }
+        }
       ],
-      "schema:name": "FEC",
+      "hasAdditive": {
+        "@type": [
+          "FluoroethyleneCarbonate",
+          "ElectrolyteAdditive"
+        ],
+        "schema:name": "FEC",
+        "hasProperty": {
+          "@type": [
+            "VolumeFraction",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 0.03
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+        }
+      }
+    },
+    "hasSeparator": {
+      "@type": "Separator",
+      "schema:name": "Ceramic-coated PP",
       "hasProperty": {
         "@type": [
-          "VolumeFraction",
+          "Thickness",
           "ConventionalProperty"
         ],
+        "skos:prefLabel": "Thickness",
         "hasNumericalPart": {
           "@type": "RealData",
-          "hasNumberValue": 0.03
+          "hasNumberValue": 18.0
         },
-        "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+        "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
       }
-    }
-  },
-  "hasSeparator": {
-    "@type": "Separator",
-    "schema:name": "Ceramic-coated PP",
-    "hasProperty": {
-      "@type": [
-        "Thickness",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "Thickness",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 18.0
+    },
+    "schema:additionalProperty": [
+      {
+        "@type": "schema:PropertyValue",
+        "schema:propertyID": "construction.assembly_type",
+        "schema:name": "Assembly Type",
+        "schema:value": "stacked"
       },
-      "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
-    }
+      {
+        "@type": "schema:PropertyValue",
+        "schema:propertyID": "construction.layering",
+        "schema:name": "Layering",
+        "schema:value": "multilayer"
+      },
+      {
+        "@type": "schema:PropertyValue",
+        "schema:propertyID": "construction.layer_count",
+        "schema:name": "Layer Count",
+        "schema:value": 24
+      },
+      {
+        "@type": "schema:PropertyValue",
+        "schema:propertyID": "construction.comment",
+        "schema:name": "Construction Comment",
+        "schema:value": "Stacked prismatic example fixture."
+      }
+    ]
   },
-  "schema:additionalProperty": [
-    {
-      "@type": "schema:PropertyValue",
-      "schema:propertyID": "construction.assembly_type",
-      "schema:name": "Assembly Type",
-      "schema:value": "stacked"
-    },
-    {
-      "@type": "schema:PropertyValue",
-      "schema:propertyID": "construction.layering",
-      "schema:name": "Layering",
-      "schema:value": "multilayer"
-    },
-    {
-      "@type": "schema:PropertyValue",
-      "schema:propertyID": "construction.layer_count",
-      "schema:name": "Layer Count",
-      "schema:value": 24
-    },
-    {
-      "@type": "schema:PropertyValue",
-      "schema:propertyID": "construction.comment",
-      "schema:name": "Construction Comment",
-      "schema:value": "Stacked prismatic example fixture."
-    }
-  ],
+  "schema:schemaVersion": "0.2.0",
   "dcterms:source": {
     "@type": "prov:Entity",
     "dcterms:type": "manual",
@@ -1293,6 +1327,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "@context": "https://w3id.org/battinfo/context/records/v1.json",
   "@type": [
     "BatteryCellSpecification",
+    "schema:ProductModel",
     "schema:CreativeWork"
   ],
   "@id": "https://w3id.org/battinfo/spec/4h8p-3t6m-9q2k-7v5r",
@@ -1312,292 +1347,293 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "LithiumIonIronPhosphateBattery",
       "LithiumIonGraphiteBattery"
     ],
-    "skos:prefLabel": "ExampleLab POUCH-ML-LFP-018"
-  },
-  "schema:schemaVersion": "0.2.0",
-  "hasProperty": [
-    {
-      "@type": [
-        "NominalCapacity",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "NominalCapacity",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 5.0
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
-    },
-    {
-      "@type": [
-        "NominalVoltage",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "NominalVoltage",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 3.2
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
-    }
-  ],
-  "hasPositiveElectrode": {
-    "hasCoating": {
-      "@type": "ElectrodeCoating",
-      "hasActiveMaterial": {
-        "@type": [
-          "LithiumIronPhosphate",
-          "ActiveMaterial"
-        ],
-        "schema:name": "LFP",
-        "hasProperty": {
-          "@type": [
-            "MassFraction",
-            "ConventionalProperty"
-          ],
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 0.94
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-        }
-      },
-      "hasBinder": {
-        "@type": [
-          "PolyvinylideneFluoride",
-          "Binder"
-        ],
-        "schema:name": "PVDF",
-        "hasProperty": {
-          "@type": [
-            "MassFraction",
-            "ConventionalProperty"
-          ],
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 0.03
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-        }
-      },
-      "hasConductiveAdditive": {
-        "@type": [
-          "CarbonBlack",
-          "ConductiveAdditive"
-        ],
-        "schema:name": "Carbon black",
-        "hasProperty": {
-          "@type": [
-            "MassFraction",
-            "ConventionalProperty"
-          ],
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 0.03
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-        }
-      },
-      "hasProperty": {
-        "@type": [
-          "ActiveMassLoading",
-          "ConventionalProperty"
-        ],
-        "skos:prefLabel": "ActiveMassLoading",
-        "hasNumericalPart": {
-          "@type": "RealData",
-          "hasNumberValue": 21.0
-        },
-        "hasMeasurementUnit": "https://w3id.org/emmo#MilliGramPerSquareCentiMetre"
-      }
-    },
-    "hasCurrentCollector": {
-      "@type": [
-        "CurrentCollector",
-        "Foil"
-      ],
-      "schema:name": "Al foil"
-    },
-    "@type": "LithiumIronPhosphateElectrode"
-  },
-  "hasNegativeElectrode": {
-    "hasCoating": {
-      "@type": "ElectrodeCoating",
-      "hasActiveMaterial": {
-        "@type": [
-          "Graphite",
-          "ActiveMaterial"
-        ],
-        "schema:name": "Graphite",
-        "hasProperty": {
-          "@type": [
-            "MassFraction",
-            "ConventionalProperty"
-          ],
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 0.95
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-        }
-      },
-      "hasBinder": {
-        "@type": "Binder",
-        "schema:name": "CMC/SBR",
-        "hasProperty": {
-          "@type": [
-            "MassFraction",
-            "ConventionalProperty"
-          ],
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 0.05
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-        }
-      },
-      "hasProperty": {
-        "@type": [
-          "ActiveMassLoading",
-          "ConventionalProperty"
-        ],
-        "skos:prefLabel": "ActiveMassLoading",
-        "hasNumericalPart": {
-          "@type": "RealData",
-          "hasNumberValue": 12.0
-        },
-        "hasMeasurementUnit": "https://w3id.org/emmo#MilliGramPerSquareCentiMetre"
-      }
-    },
-    "hasCurrentCollector": {
-      "@type": [
-        "CurrentCollector",
-        "Foil"
-      ],
-      "schema:name": "Cu foil"
-    },
-    "@type": "GraphiteElectrode"
-  },
-  "hasElectrolyte": {
-    "@type": "OrganicElectrolyte",
-    "hasSolute": {
-      "@type": [
-        "LithiumHexafluorophosphate",
-        "Solute"
-      ],
-      "schema:name": "LiPF6",
-      "hasProperty": {
-        "@type": [
-          "AmountConcentration",
-          "ConventionalProperty"
-        ],
-        "skos:prefLabel": "AmountConcentration",
-        "hasNumericalPart": {
-          "@type": "RealData",
-          "hasNumberValue": 1.1
-        },
-        "hasMeasurementUnit": "https://w3id.org/emmo#MolePerLitre"
-      }
-    },
-    "hasSolvent": [
+    "@id": "https://w3id.org/battinfo/spec/4h8p-3t6m-9q2k-7v5r#described",
+    "skos:prefLabel": "ExampleLab POUCH-ML-LFP-018",
+    "hasProperty": [
       {
         "@type": [
-          "EthyleneCarbonate",
-          "Solvent"
+          "NominalCapacity",
+          "ConventionalProperty"
         ],
-        "schema:name": "EC",
-        "hasProperty": {
-          "@type": [
-            "VolumeFraction",
-            "ConventionalProperty"
-          ],
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 0.3
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-        }
+        "skos:prefLabel": "NominalCapacity",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 5.0
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
       },
       {
         "@type": [
-          "EthylMethylCarbonate",
-          "Solvent"
+          "NominalVoltage",
+          "ConventionalProperty"
         ],
-        "schema:name": "EMC",
-        "hasProperty": {
-          "@type": [
-            "VolumeFraction",
-            "ConventionalProperty"
-          ],
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 0.7
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-        }
+        "skos:prefLabel": "NominalVoltage",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 3.2
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
       }
     ],
-    "hasAdditive": {
-      "@type": [
-        "VinyleneCarbonate",
-        "ElectrolyteAdditive"
+    "hasPositiveElectrode": {
+      "hasCoating": {
+        "@type": "ElectrodeCoating",
+        "hasActiveMaterial": {
+          "@type": [
+            "LithiumIronPhosphate",
+            "ActiveMaterial"
+          ],
+          "schema:name": "LFP",
+          "hasProperty": {
+            "@type": [
+              "MassFraction",
+              "ConventionalProperty"
+            ],
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 0.94
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+          }
+        },
+        "hasBinder": {
+          "@type": [
+            "PolyvinylideneFluoride",
+            "Binder"
+          ],
+          "schema:name": "PVDF",
+          "hasProperty": {
+            "@type": [
+              "MassFraction",
+              "ConventionalProperty"
+            ],
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 0.03
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+          }
+        },
+        "hasConductiveAdditive": {
+          "@type": [
+            "CarbonBlack",
+            "ConductiveAdditive"
+          ],
+          "schema:name": "Carbon black",
+          "hasProperty": {
+            "@type": [
+              "MassFraction",
+              "ConventionalProperty"
+            ],
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 0.03
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+          }
+        },
+        "hasProperty": {
+          "@type": [
+            "ActiveMassLoading",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "ActiveMassLoading",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 21.0
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#MilliGramPerSquareCentiMetre"
+        }
+      },
+      "hasCurrentCollector": {
+        "@type": [
+          "CurrentCollector",
+          "Foil"
+        ],
+        "schema:name": "Al foil"
+      },
+      "@type": "LithiumIronPhosphateElectrode"
+    },
+    "hasNegativeElectrode": {
+      "hasCoating": {
+        "@type": "ElectrodeCoating",
+        "hasActiveMaterial": {
+          "@type": [
+            "Graphite",
+            "ActiveMaterial"
+          ],
+          "schema:name": "Graphite",
+          "hasProperty": {
+            "@type": [
+              "MassFraction",
+              "ConventionalProperty"
+            ],
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 0.95
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+          }
+        },
+        "hasBinder": {
+          "@type": "Binder",
+          "schema:name": "CMC/SBR",
+          "hasProperty": {
+            "@type": [
+              "MassFraction",
+              "ConventionalProperty"
+            ],
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 0.05
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+          }
+        },
+        "hasProperty": {
+          "@type": [
+            "ActiveMassLoading",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "ActiveMassLoading",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 12.0
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#MilliGramPerSquareCentiMetre"
+        }
+      },
+      "hasCurrentCollector": {
+        "@type": [
+          "CurrentCollector",
+          "Foil"
+        ],
+        "schema:name": "Cu foil"
+      },
+      "@type": "GraphiteElectrode"
+    },
+    "hasElectrolyte": {
+      "@type": "OrganicElectrolyte",
+      "hasSolute": {
+        "@type": [
+          "LithiumHexafluorophosphate",
+          "Solute"
+        ],
+        "schema:name": "LiPF6",
+        "hasProperty": {
+          "@type": [
+            "AmountConcentration",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "AmountConcentration",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 1.1
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#MolePerLitre"
+        }
+      },
+      "hasSolvent": [
+        {
+          "@type": [
+            "EthyleneCarbonate",
+            "Solvent"
+          ],
+          "schema:name": "EC",
+          "hasProperty": {
+            "@type": [
+              "VolumeFraction",
+              "ConventionalProperty"
+            ],
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 0.3
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+          }
+        },
+        {
+          "@type": [
+            "EthylMethylCarbonate",
+            "Solvent"
+          ],
+          "schema:name": "EMC",
+          "hasProperty": {
+            "@type": [
+              "VolumeFraction",
+              "ConventionalProperty"
+            ],
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 0.7
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+          }
+        }
       ],
-      "schema:name": "VC",
+      "hasAdditive": {
+        "@type": [
+          "VinyleneCarbonate",
+          "ElectrolyteAdditive"
+        ],
+        "schema:name": "VC",
+        "hasProperty": {
+          "@type": [
+            "VolumeFraction",
+            "ConventionalProperty"
+          ],
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 0.02
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+        }
+      }
+    },
+    "hasSeparator": {
+      "@type": "Separator",
+      "schema:name": "Ceramic-coated PE",
       "hasProperty": {
         "@type": [
-          "VolumeFraction",
+          "Thickness",
           "ConventionalProperty"
         ],
+        "skos:prefLabel": "Thickness",
         "hasNumericalPart": {
           "@type": "RealData",
-          "hasNumberValue": 0.02
+          "hasNumberValue": 20.0
         },
-        "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+        "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
       }
-    }
-  },
-  "hasSeparator": {
-    "@type": "Separator",
-    "schema:name": "Ceramic-coated PE",
-    "hasProperty": {
-      "@type": [
-        "Thickness",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "Thickness",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 20.0
+    },
+    "schema:additionalProperty": [
+      {
+        "@type": "schema:PropertyValue",
+        "schema:propertyID": "construction.assembly_type",
+        "schema:name": "Assembly Type",
+        "schema:value": "stacked"
       },
-      "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
-    }
+      {
+        "@type": "schema:PropertyValue",
+        "schema:propertyID": "construction.layering",
+        "schema:name": "Layering",
+        "schema:value": "multilayer"
+      },
+      {
+        "@type": "schema:PropertyValue",
+        "schema:propertyID": "construction.layer_count",
+        "schema:name": "Layer Count",
+        "schema:value": 18
+      },
+      {
+        "@type": "schema:PropertyValue",
+        "schema:propertyID": "construction.comment",
+        "schema:name": "Construction Comment",
+        "schema:value": "Multilayer pouch example fixture."
+      }
+    ]
   },
-  "schema:additionalProperty": [
-    {
-      "@type": "schema:PropertyValue",
-      "schema:propertyID": "construction.assembly_type",
-      "schema:name": "Assembly Type",
-      "schema:value": "stacked"
-    },
-    {
-      "@type": "schema:PropertyValue",
-      "schema:propertyID": "construction.layering",
-      "schema:name": "Layering",
-      "schema:value": "multilayer"
-    },
-    {
-      "@type": "schema:PropertyValue",
-      "schema:propertyID": "construction.layer_count",
-      "schema:name": "Layer Count",
-      "schema:value": 18
-    },
-    {
-      "@type": "schema:PropertyValue",
-      "schema:propertyID": "construction.comment",
-      "schema:name": "Construction Comment",
-      "schema:value": "Multilayer pouch example fixture."
-    }
-  ],
+  "schema:schemaVersion": "0.2.0",
   "dcterms:source": {
     "@type": "prov:Entity",
     "dcterms:type": "manual",
@@ -1642,6 +1678,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "@context": "https://w3id.org/battinfo/context/records/v1.json",
   "@type": [
     "BatteryCellSpecification",
+    "schema:ProductModel",
     "schema:CreativeWork"
   ],
   "@id": "https://w3id.org/battinfo/spec/1c4m-7p9q-2k6t-8v3r",
@@ -1661,266 +1698,267 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "LithiumIonIronPhosphateBattery",
       "LithiumIonGraphiteBattery"
     ],
-    "skos:prefLabel": "ExampleLab COIN-LFP-2032"
-  },
-  "schema:size": "2032",
-  "schema:schemaVersion": "0.2.0",
-  "hasProperty": [
-    {
-      "@type": [
-        "NominalCapacity",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "NominalCapacity",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 0.04
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
-    },
-    {
-      "@type": [
-        "NominalVoltage",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "NominalVoltage",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 3.2
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
-    }
-  ],
-  "hasPositiveElectrode": {
-    "hasCoating": {
-      "@type": "ElectrodeCoating",
-      "hasActiveMaterial": {
+    "@id": "https://w3id.org/battinfo/spec/1c4m-7p9q-2k6t-8v3r#described",
+    "skos:prefLabel": "ExampleLab COIN-LFP-2032",
+    "hasProperty": [
+      {
         "@type": [
-          "LithiumIronPhosphate",
-          "ActiveMaterial"
-        ],
-        "schema:name": "LFP",
-        "hasProperty": {
-          "@type": [
-            "MassFraction",
-            "ConventionalProperty"
-          ],
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 0.92
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-        }
-      },
-      "hasBinder": {
-        "@type": [
-          "PolyvinylideneFluoride",
-          "Binder"
-        ],
-        "schema:name": "PVDF",
-        "hasProperty": {
-          "@type": [
-            "MassFraction",
-            "ConventionalProperty"
-          ],
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 0.04
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-        }
-      },
-      "hasConductiveAdditive": {
-        "@type": [
-          "CarbonBlack",
-          "ConductiveAdditive"
-        ],
-        "schema:name": "Carbon black",
-        "hasProperty": {
-          "@type": [
-            "MassFraction",
-            "ConventionalProperty"
-          ],
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 0.04
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-        }
-      },
-      "hasProperty": {
-        "@type": [
-          "CalenderedCoatingThickness",
+          "NominalCapacity",
           "ConventionalProperty"
         ],
-        "skos:prefLabel": "CalenderedCoatingThickness",
+        "skos:prefLabel": "NominalCapacity",
         "hasNumericalPart": {
           "@type": "RealData",
-          "hasNumberValue": 55.0
+          "hasNumberValue": 0.04
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
+      },
+      {
+        "@type": [
+          "NominalVoltage",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "NominalVoltage",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 3.2
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
+      }
+    ],
+    "hasPositiveElectrode": {
+      "hasCoating": {
+        "@type": "ElectrodeCoating",
+        "hasActiveMaterial": {
+          "@type": [
+            "LithiumIronPhosphate",
+            "ActiveMaterial"
+          ],
+          "schema:name": "LFP",
+          "hasProperty": {
+            "@type": [
+              "MassFraction",
+              "ConventionalProperty"
+            ],
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 0.92
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+          }
+        },
+        "hasBinder": {
+          "@type": [
+            "PolyvinylideneFluoride",
+            "Binder"
+          ],
+          "schema:name": "PVDF",
+          "hasProperty": {
+            "@type": [
+              "MassFraction",
+              "ConventionalProperty"
+            ],
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 0.04
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+          }
+        },
+        "hasConductiveAdditive": {
+          "@type": [
+            "CarbonBlack",
+            "ConductiveAdditive"
+          ],
+          "schema:name": "Carbon black",
+          "hasProperty": {
+            "@type": [
+              "MassFraction",
+              "ConventionalProperty"
+            ],
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 0.04
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+          }
+        },
+        "hasProperty": {
+          "@type": [
+            "CalenderedCoatingThickness",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "CalenderedCoatingThickness",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 55.0
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
+        }
+      },
+      "hasCurrentCollector": {
+        "@type": [
+          "CurrentCollector",
+          "Foil"
+        ],
+        "schema:name": "Al foil"
+      },
+      "@type": "LithiumIronPhosphateElectrode"
+    },
+    "hasNegativeElectrode": {
+      "hasCoating": {
+        "@type": "ElectrodeCoating",
+        "hasActiveMaterial": {
+          "@type": [
+            "Graphite",
+            "ActiveMaterial"
+          ],
+          "schema:name": "Graphite",
+          "hasProperty": {
+            "@type": [
+              "MassFraction",
+              "ConventionalProperty"
+            ],
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 0.95
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+          }
+        },
+        "hasBinder": {
+          "@type": "Binder",
+          "schema:name": "CMC/SBR",
+          "hasProperty": {
+            "@type": [
+              "MassFraction",
+              "ConventionalProperty"
+            ],
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 0.05
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+          }
+        },
+        "hasProperty": {
+          "@type": [
+            "CalenderedCoatingThickness",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "CalenderedCoatingThickness",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 48.0
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
+        }
+      },
+      "hasCurrentCollector": {
+        "@type": [
+          "CurrentCollector",
+          "Foil"
+        ],
+        "schema:name": "Cu foil"
+      },
+      "@type": "GraphiteElectrode"
+    },
+    "hasElectrolyte": {
+      "@type": "OrganicElectrolyte",
+      "hasSolute": {
+        "@type": [
+          "LithiumHexafluorophosphate",
+          "Solute"
+        ],
+        "schema:name": "LiPF6",
+        "hasProperty": {
+          "@type": [
+            "AmountConcentration",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "AmountConcentration",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 1.0
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#MolePerLitre"
+        }
+      },
+      "hasSolvent": [
+        {
+          "@type": [
+            "EthyleneCarbonate",
+            "Solvent"
+          ],
+          "schema:name": "EC",
+          "hasProperty": {
+            "@type": [
+              "VolumeFraction",
+              "ConventionalProperty"
+            ],
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 0.5
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+          }
+        },
+        {
+          "@type": "Solvent",
+          "schema:name": "DEC",
+          "hasProperty": {
+            "@type": [
+              "VolumeFraction",
+              "ConventionalProperty"
+            ],
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 0.5
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+          }
+        }
+      ]
+    },
+    "hasSeparator": {
+      "@type": "Separator",
+      "schema:name": "PP membrane",
+      "hasProperty": {
+        "@type": [
+          "Thickness",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "Thickness",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 20.0
         },
         "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
       }
     },
-    "hasCurrentCollector": {
-      "@type": [
-        "CurrentCollector",
-        "Foil"
-      ],
-      "schema:name": "Al foil"
-    },
-    "@type": "LithiumIronPhosphateElectrode"
-  },
-  "hasNegativeElectrode": {
-    "hasCoating": {
-      "@type": "ElectrodeCoating",
-      "hasActiveMaterial": {
-        "@type": [
-          "Graphite",
-          "ActiveMaterial"
-        ],
-        "schema:name": "Graphite",
-        "hasProperty": {
-          "@type": [
-            "MassFraction",
-            "ConventionalProperty"
-          ],
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 0.95
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-        }
-      },
-      "hasBinder": {
-        "@type": "Binder",
-        "schema:name": "CMC/SBR",
-        "hasProperty": {
-          "@type": [
-            "MassFraction",
-            "ConventionalProperty"
-          ],
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 0.05
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-        }
-      },
-      "hasProperty": {
-        "@type": [
-          "CalenderedCoatingThickness",
-          "ConventionalProperty"
-        ],
-        "skos:prefLabel": "CalenderedCoatingThickness",
-        "hasNumericalPart": {
-          "@type": "RealData",
-          "hasNumberValue": 48.0
-        },
-        "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
-      }
-    },
-    "hasCurrentCollector": {
-      "@type": [
-        "CurrentCollector",
-        "Foil"
-      ],
-      "schema:name": "Cu foil"
-    },
-    "@type": "GraphiteElectrode"
-  },
-  "hasElectrolyte": {
-    "@type": "OrganicElectrolyte",
-    "hasSolute": {
-      "@type": [
-        "LithiumHexafluorophosphate",
-        "Solute"
-      ],
-      "schema:name": "LiPF6",
-      "hasProperty": {
-        "@type": [
-          "AmountConcentration",
-          "ConventionalProperty"
-        ],
-        "skos:prefLabel": "AmountConcentration",
-        "hasNumericalPart": {
-          "@type": "RealData",
-          "hasNumberValue": 1.0
-        },
-        "hasMeasurementUnit": "https://w3id.org/emmo#MolePerLitre"
-      }
-    },
-    "hasSolvent": [
+    "schema:additionalProperty": [
       {
-        "@type": [
-          "EthyleneCarbonate",
-          "Solvent"
-        ],
-        "schema:name": "EC",
-        "hasProperty": {
-          "@type": [
-            "VolumeFraction",
-            "ConventionalProperty"
-          ],
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 0.5
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-        }
+        "@type": "schema:PropertyValue",
+        "schema:propertyID": "construction.assembly_type",
+        "schema:name": "Assembly Type",
+        "schema:value": "stacked"
       },
       {
-        "@type": "Solvent",
-        "schema:name": "DEC",
-        "hasProperty": {
-          "@type": [
-            "VolumeFraction",
-            "ConventionalProperty"
-          ],
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 0.5
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-        }
+        "@type": "schema:PropertyValue",
+        "schema:propertyID": "construction.layering",
+        "schema:name": "Layering",
+        "schema:value": "not_applicable"
+      },
+      {
+        "@type": "schema:PropertyValue",
+        "schema:propertyID": "construction.comment",
+        "schema:name": "Construction Comment",
+        "schema:value": "Coin-cell example fixture with stacked pellet-style components."
       }
     ]
   },
-  "hasSeparator": {
-    "@type": "Separator",
-    "schema:name": "PP membrane",
-    "hasProperty": {
-      "@type": [
-        "Thickness",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "Thickness",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 20.0
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
-    }
-  },
-  "schema:additionalProperty": [
-    {
-      "@type": "schema:PropertyValue",
-      "schema:propertyID": "construction.assembly_type",
-      "schema:name": "Assembly Type",
-      "schema:value": "stacked"
-    },
-    {
-      "@type": "schema:PropertyValue",
-      "schema:propertyID": "construction.layering",
-      "schema:name": "Layering",
-      "schema:value": "not_applicable"
-    },
-    {
-      "@type": "schema:PropertyValue",
-      "schema:propertyID": "construction.comment",
-      "schema:name": "Construction Comment",
-      "schema:value": "Coin-cell example fixture with stacked pellet-style components."
-    }
-  ],
+  "schema:size": "2032",
+  "schema:schemaVersion": "0.2.0",
   "dcterms:source": {
     "@type": "prov:Entity",
     "dcterms:type": "manual",
@@ -1965,6 +2003,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "@context": "https://w3id.org/battinfo/context/records/v1.json",
   "@type": [
     "BatteryCellSpecification",
+    "schema:ProductModel",
     "schema:CreativeWork"
   ],
   "@id": "https://w3id.org/battinfo/spec/tme2-0sy6-q89b-8m92",
@@ -1984,52 +2023,53 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "LithiumIonNickelManganeseCobaltOxideBattery",
       "LithiumIonGraphiteBattery"
     ],
-    "skos:prefLabel": "EMPA COIN-NMC811-D"
+    "@id": "https://w3id.org/battinfo/spec/tme2-0sy6-q89b-8m92#described",
+    "skos:prefLabel": "EMPA COIN-NMC811-D",
+    "hasProperty": [
+      {
+        "@type": [
+          "NominalCapacity",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "NominalCapacity",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 0.0038
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
+      },
+      {
+        "@type": [
+          "NominalVoltage",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "NominalVoltage",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 3.8
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
+      }
+    ],
+    "hasPositiveElectrode": {
+      "@type": "LithiumNickelManganeseCobaltOxideElectrode",
+      "@id": "https://w3id.org/battinfo/spec/qfjh-7xyr-ga1k-tjez#described"
+    },
+    "hasNegativeElectrode": {
+      "@type": "GraphiteElectrode",
+      "@id": "https://w3id.org/battinfo/spec/d7qr-n581-74c3-7g7r#described"
+    },
+    "hasElectrolyte": {
+      "@id": "https://w3id.org/battinfo/spec/gpkh-74nj-6sdb-vcsc#described"
+    },
+    "hasSeparator": {
+      "@id": "https://w3id.org/battinfo/spec/wgym-4xfa-pws1-ek1b#described"
+    },
+    "hasConstituent": {
+      "@id": "https://w3id.org/battinfo/spec/38af-bpnv-1zmm-32hs#described"
+    }
   },
   "schema:schemaVersion": "0.2.0",
-  "hasProperty": [
-    {
-      "@type": [
-        "NominalCapacity",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "NominalCapacity",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 0.0038
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
-    },
-    {
-      "@type": [
-        "NominalVoltage",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "NominalVoltage",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 3.8
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
-    }
-  ],
-  "hasPositiveElectrode": {
-    "@type": "LithiumNickelManganeseCobaltOxideElectrode",
-    "@id": "https://w3id.org/battinfo/spec/qfjh-7xyr-ga1k-tjez"
-  },
-  "hasNegativeElectrode": {
-    "@type": "GraphiteElectrode",
-    "@id": "https://w3id.org/battinfo/spec/d7qr-n581-74c3-7g7r"
-  },
-  "hasElectrolyte": {
-    "@id": "https://w3id.org/battinfo/spec/gpkh-74nj-6sdb-vcsc"
-  },
-  "hasSeparator": {
-    "@id": "https://w3id.org/battinfo/spec/wgym-4xfa-pws1-ek1b"
-  },
-  "hasConstituent": {
-    "@id": "https://w3id.org/battinfo/spec/38af-bpnv-1zmm-32hs"
-  },
   "dcterms:source": {
     "@type": "prov:Entity",
     "dcterms:type": "datasheet",
@@ -2074,6 +2114,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "@context": "https://w3id.org/battinfo/context/records/v1.json",
   "@type": [
     "BatteryCellSpecification",
+    "schema:ProductModel",
     "schema:CreativeWork"
   ],
   "@id": "https://w3id.org/battinfo/spec/86k6-6tzd-c4sf-5s01",
@@ -2093,52 +2134,53 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "LithiumIonIronPhosphateBattery",
       "LithiumIonGraphiteBattery"
     ],
-    "skos:prefLabel": "EMPA PRISM-LFP-100AH"
+    "@id": "https://w3id.org/battinfo/spec/86k6-6tzd-c4sf-5s01#described",
+    "skos:prefLabel": "EMPA PRISM-LFP-100AH",
+    "hasProperty": [
+      {
+        "@type": [
+          "NominalCapacity",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "NominalCapacity",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 100.0
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
+      },
+      {
+        "@type": [
+          "NominalVoltage",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "NominalVoltage",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 3.2
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
+      }
+    ],
+    "hasPositiveElectrode": {
+      "@type": "LithiumIronPhosphateElectrode",
+      "@id": "https://w3id.org/battinfo/spec/m6y0-tkfg-sn40-q10p#described"
+    },
+    "hasNegativeElectrode": {
+      "@type": "GraphiteElectrode",
+      "@id": "https://w3id.org/battinfo/spec/d7qr-n581-74c3-7g7r#described"
+    },
+    "hasElectrolyte": {
+      "@id": "https://w3id.org/battinfo/spec/gpkh-74nj-6sdb-vcsc#described"
+    },
+    "hasSeparator": {
+      "@id": "https://w3id.org/battinfo/spec/wgym-4xfa-pws1-ek1b#described"
+    },
+    "hasConstituent": {
+      "@id": "https://w3id.org/battinfo/spec/ypyh-v38v-r276-snmk#described"
+    }
   },
   "schema:schemaVersion": "0.2.0",
-  "hasProperty": [
-    {
-      "@type": [
-        "NominalCapacity",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "NominalCapacity",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 100.0
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
-    },
-    {
-      "@type": [
-        "NominalVoltage",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "NominalVoltage",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 3.2
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
-    }
-  ],
-  "hasPositiveElectrode": {
-    "@type": "LithiumIronPhosphateElectrode",
-    "@id": "https://w3id.org/battinfo/spec/m6y0-tkfg-sn40-q10p"
-  },
-  "hasNegativeElectrode": {
-    "@type": "GraphiteElectrode",
-    "@id": "https://w3id.org/battinfo/spec/d7qr-n581-74c3-7g7r"
-  },
-  "hasElectrolyte": {
-    "@id": "https://w3id.org/battinfo/spec/gpkh-74nj-6sdb-vcsc"
-  },
-  "hasSeparator": {
-    "@id": "https://w3id.org/battinfo/spec/wgym-4xfa-pws1-ek1b"
-  },
-  "hasConstituent": {
-    "@id": "https://w3id.org/battinfo/spec/ypyh-v38v-r276-snmk"
-  },
   "dcterms:source": {
     "@type": "prov:Entity",
     "dcterms:type": "datasheet",
@@ -2183,6 +2225,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "@context": "https://w3id.org/battinfo/context/records/v1.json",
   "@type": [
     "BatteryCellSpecification",
+    "schema:ProductModel",
     "schema:CreativeWork"
   ],
   "@id": "https://w3id.org/battinfo/spec/jgyy-x3h5-drmv-5tn5",
@@ -2200,52 +2243,53 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "CoinCell",
       "LithiumManganeseDioxideBattery"
     ],
-    "skos:prefLabel": "EMPA COIN-ZNMNO2-ALK"
+    "@id": "https://w3id.org/battinfo/spec/jgyy-x3h5-drmv-5tn5#described",
+    "skos:prefLabel": "EMPA COIN-ZNMNO2-ALK",
+    "hasProperty": [
+      {
+        "@type": [
+          "NominalCapacity",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "NominalCapacity",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 0.0015
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
+      },
+      {
+        "@type": [
+          "NominalVoltage",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "NominalVoltage",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 1.5
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
+      }
+    ],
+    "hasPositiveElectrode": {
+      "@type": "ManganeseDioxideElectrode",
+      "@id": "https://w3id.org/battinfo/spec/277n-cp9k-3g4m-w40y#described"
+    },
+    "hasNegativeElectrode": {
+      "@type": "ZincElectrode",
+      "@id": "https://w3id.org/battinfo/spec/3abg-gxzh-6487-9eex#described"
+    },
+    "hasElectrolyte": {
+      "@id": "https://w3id.org/battinfo/spec/gzt2-hrqq-gsfn-sp94#described"
+    },
+    "hasSeparator": {
+      "@id": "https://w3id.org/battinfo/spec/wgym-4xfa-pws1-ek1b#described"
+    },
+    "hasConstituent": {
+      "@id": "https://w3id.org/battinfo/spec/38af-bpnv-1zmm-32hs#described"
+    }
   },
   "schema:schemaVersion": "0.2.0",
-  "hasProperty": [
-    {
-      "@type": [
-        "NominalCapacity",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "NominalCapacity",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 0.0015
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
-    },
-    {
-      "@type": [
-        "NominalVoltage",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "NominalVoltage",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 1.5
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
-    }
-  ],
-  "hasPositiveElectrode": {
-    "@type": "ManganeseDioxideElectrode",
-    "@id": "https://w3id.org/battinfo/spec/277n-cp9k-3g4m-w40y"
-  },
-  "hasNegativeElectrode": {
-    "@type": "ZincElectrode",
-    "@id": "https://w3id.org/battinfo/spec/3abg-gxzh-6487-9eex"
-  },
-  "hasElectrolyte": {
-    "@id": "https://w3id.org/battinfo/spec/gzt2-hrqq-gsfn-sp94"
-  },
-  "hasSeparator": {
-    "@id": "https://w3id.org/battinfo/spec/wgym-4xfa-pws1-ek1b"
-  },
-  "hasConstituent": {
-    "@id": "https://w3id.org/battinfo/spec/38af-bpnv-1zmm-32hs"
-  },
   "dcterms:source": {
     "@type": "prov:Entity",
     "dcterms:type": "datasheet",
@@ -2261,7 +2305,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 
 ## Fields
 
-Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`). Quantities are `{value, unit}` maps and may also carry `value_basis` (Measured, Conventional, Rated, or Nominal) and `conditions` (the parameters under which the value holds, each itself a quantity; a qualitative condition may be `value_text` alone). In JSON-LD, conditions ride a measurement node the quantity `isOutputOf`; the `voltage_reference` key instead becomes a `hasMetrologicalReference` datum on the quantity, beside its unit.
+Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`). Quantities are `{value, unit}` maps and may also carry `value_basis` (Measured, Conventional, Rated, or Nominal) and `conditions` (the parameters under which the value holds, each itself a quantity; a qualitative condition may be `value_text` alone). In JSON-LD, conditions ride a measurement node the quantity `isOutputOf`; the `voltage_reference` key instead becomes a `hasMetrologicalReference` datum on the quantity, beside its unit. When authoring, an instance references its spec with the `spec_id=` kwarg; the record stores the self-describing `<type>_spec_id` key shown in the tables below.
 
 ### cell-spec fields
 
@@ -2294,7 +2338,7 @@ The `cell_spec` block:
 | `datasheet_revision` | string |  | Revision label of the datasheet the spec was taken from. |
 | `manufacturing_place` | string |  | Geographic location of the battery manufacturing plant (EU Battery Regulation Annex VI Part A). |
 | `battery_category` | `EV` \| `LMT` \| `industrial` \| `stationary` … (7 values) |  | Battery category per EU Battery Regulation Article 3. |
-| `reference_electrode` | string |  | Counter/reference electrode for half-cell configurations (e.g. 'lithium', 'NHE'). |
+| `reference_electrode` | → electrode or string |  | The physical reference electrode of a three-electrode build, as an inline electrode holder (a lithium ring or wire is a monolithic `material`). The legacy string shorthand (e.g. 'lithium', 'NHE') stays accepted. In a half_cell the counter electrode IS the reference - state nothing here. Emitted as hasReferenceElectrode with @type ReferenceElectrode. |
 | `cell_configuration` | `full_cell` \| `half_cell` \| `three_electrode_cell` |  | Electrode configuration as built. Optional; absent means unstated (read as a full cell unless a reference_electrode is present). Stated explicitly it overrides that heuristic: half_cell types the JSON-LD as BatteryHalfCell + HalfCellDevice, three_electrode_cell as ThreeElectrodeCellDevice, full_cell suppresses both. |
 
 Top-level `properties`: Datasheet-style quantitative properties of the cell model; each key holds a SpecItem quantity. Dimension keys follow the format rules: diameter for cylindrical and coin, length/width/thickness for prismatic and pouch, height for all.
@@ -2332,6 +2376,8 @@ Top-level `negative_electrode_spec_id`: IRI of the standalone electrode-spec use
 Top-level `working_electrode_spec_id`: Optional canonical IRI of a standalone electrode-spec for the working electrode (used instead of, or alongside, the inline working_electrode holder).
 
 Top-level `counter_electrode_spec_id`: Optional canonical IRI of a standalone electrode-spec for the counter electrode.
+
+Top-level `reference_electrode_spec_id`: Optional canonical IRI of a standalone electrode-spec for the reference electrode of a three-electrode build (used instead of, or alongside, the inline reference_electrode holder).
 
 Top-level `electrolyte_spec_id`: IRI of the standalone electrolyte-spec used in this cell model; may be given instead of, or alongside, the inline electrolyte holder.
 
@@ -2378,11 +2424,11 @@ Top-level `datasets`: Datasets recorded for this cell. Back-reference to dataset
 ## Design notes
 
 :::{dropdown} The reasoning behind the model
-**Composing a cell from parts.** The seven reference fields resolve as: `positive_electrode_spec_id` / `negative_electrode_spec_id` and `working_electrode_spec_id` / `counter_electrode_spec_id` → `electrode-spec` (which pair applies follows from `cell_configuration`); `electrolyte_spec_id` → `electrolyte-spec`; `separator_spec_id` → `separator-spec`; `housing_spec_id` → `housing-spec`. A cell may reference, inline, or both — inline holders stay optional, so existing records are unaffected. The JSON-LD emits reference nodes (`hasPositiveElectrode: {"@id": …}`), merging the `@id` onto an inline node when both are present.
+**Composing a cell from parts.** The seven reference fields resolve as: `positive_electrode_spec_id` / `negative_electrode_spec_id` and `working_electrode_spec_id` / `counter_electrode_spec_id` → `electrode-spec` (which pair applies follows from `cell_configuration`); `electrolyte_spec_id` → `electrolyte-spec`; `separator_spec_id` → `separator-spec`; `housing_spec_id` → `housing-spec`. A cell may reference, inline, or both — inline holders stay optional, so existing records are unaffected. The JSON-LD emits reference nodes pointing at the target spec's described component (`hasPositiveElectrode: {"@id": "…#described"}` — a physical relation lands on a physical individual, never on the spec document), merging the `@id` onto an inline node when both are present.
 
 **References are checked at save.** A `*_spec_id` that points at nothing fails the save with the missing IRI named; `resolve_references=False` opts out for staged workflows, and `save_batch` allows references within the batch and validates the completed set. `extract_component_specs(cell_spec_record)` goes the other way, lifting inline holders into standalone specs so any inline cell can be decomposed and de-duplicated.
 
-**The engineering layer.** Beyond composition and rated performance, a spec can carry the as-designed build. Deliberately excluded: design-tool scratch math (recomputed, not stored) and state-dependent behaviour (belongs to tests and datasets). Every part follows holder + property: identity fields plus `{value, unit}` quantities, unknown keys preserved and warned rather than dropped. The housing (case, cap, terminals, seals, parts) is authored inline or as a standalone [housing spec](components.md); tabs and coatings belong to [the electrode](electrodes.md); the wound/stacked geometry is the spec's own `construction` block.
+**The engineering layer.** Beyond composition and rated performance, a spec can carry the as-designed build. Deliberately excluded: design-tool scratch math (recomputed, not stored) and state-dependent behaviour (belongs to tests and datasets). Every part follows holder + property: identity fields plus `{value, unit}` quantities, unknown keys preserved and warned rather than dropped. The housing (case, cap, terminals, seals, parts) is authored inline or as a standalone [housing spec](housings.md); tabs and coatings belong to [the electrode](electrodes.md); the wound/stacked geometry is the spec's own `construction` block.
 
 **The full graph, end to end:**
 
@@ -2391,4 +2437,8 @@ cell-spec  →  cell-instance  →  test  →  dataset
      ↓ references
 electrode-spec / electrolyte-spec / separator-spec / housing-spec  →  material-specs
 ```
+
+**What the spec node says.** One node, three personas: the EMMO information artifact (`BatteryCellSpecification` — id, schema version, provenance, citation), the schema.org catalogue entity (`schema:ProductModel` — name, manufacturer, brand, size and IEC codes, release date), and the record (`schema:CreativeWork`). Every EMMO-axiomatized physical fact — `hasProperty` quantities, electrode/electrolyte/separator/housing composition, construction — rides the described battery under `isDescriptionFor`: those relations declare physical subjects (`hasProperty`'s domain is `Referent`, `hasElectrolyte`'s is `ElectrochemicalCell`), so asserting them on the document would entail a false typing.
+
+**The described battery, precisely.** The `isDescriptionFor` individual is an existential witness — "there exists a battery such that …" — satisfied by at least one conforming unit (the universal reading a datasheet gestures at is not expressible at individual level); it is not a prototype object and no identity is asserted between it and any cell instance. It carries a stable name, `<spec-IRI>#described`, so repeated ingest merges instead of duplicating, other records can reference the design, and `*_spec_id` reference edges resolve to physical individuals — naming the witness changes none of the above. Declared values carry their epistemic status in the property-nature class (today `ConventionalProperty`, a value attributed by agreement; `RatedProperty` joins when it is published upstream), not in a universality claim. An instance links to its spec via `hasDescription` and `schema:isVariantOf` and carries its own physical typing — the schema.org ProductModel pattern on the schema layer, EMMO's own `BatterySpecification ⊑ isDescriptionFor some Battery` axiom on the semantic layer (which is also where the existential commitment for never-built designs comes from). For SPARQL, the property path `isDescriptionFor?/hasProperty` reads both this shape and pre-pattern documents in one query.
 :::

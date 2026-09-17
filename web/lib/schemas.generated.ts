@@ -1802,8 +1802,16 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "description": "Battery category per EU Battery Regulation Article 3."
             },
             "reference_electrode": {
-              "type": "string",
-              "description": "Counter/reference electrode for half-cell configurations (e.g. 'lithium', 'NHE')."
+              "anyOf": [
+                {
+                  "$ref": "modules/components/electrode.schema.json"
+                },
+                {
+                  "type": "string",
+                  "minLength": 1
+                }
+              ],
+              "description": "The physical reference electrode of a three-electrode build, as an inline electrode holder (a lithium ring or wire is a monolithic `material`). The legacy string shorthand (e.g. 'lithium', 'NHE') stays accepted. In a half_cell the counter electrode IS the reference - state nothing here. Emitted as hasReferenceElectrode with @type ReferenceElectrode."
             },
             "cell_configuration": {
               "type": "string",
@@ -1979,6 +1987,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         "counter_electrode_spec_id": {
           "$ref": "#/$defs/ElectrodeSpecIri",
           "description": "Optional canonical IRI of a standalone electrode-spec for the counter electrode."
+        },
+        "reference_electrode_spec_id": {
+          "$ref": "#/$defs/ElectrodeSpecIri",
+          "description": "Optional canonical IRI of a standalone electrode-spec for the reference electrode of a three-electrode build (used instead of, or alongside, the inline reference_electrode holder)."
         },
         "electrolyte_spec_id": {
           "$ref": "#/$defs/ElectrolyteSpecIri",
@@ -4106,10 +4118,15 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "minLength": 1,
               "description": "Human-readable electrode name / designation (e.g. 'Si-Gr anode, aqueous', 'NMC811 cathode 96/2/2')."
             },
+            "active_material_kind": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Required Level-1 kind naming the ACTIVE material of this electrode, from the curated material-kind vocabulary (e.g. 'graphite', 'silicon_graphite', 'nmc811', 'lfp'). Named for what it identifies: the electrode's active material, not the electrode's form. Required so a purchased electrode whose powder provenance is unknown is still queryable on the same aggregation axis as one built from an authored material-spec. Aliases resolve on input; an unknown kind is rejected at save time. See battinfo.electrodes.electrode_kind_keys()."
+            },
             "kind": {
               "type": "string",
               "minLength": 1,
-              "description": "Required Level-1 kind naming the ACTIVE material of this electrode, from the curated material-kind vocabulary (e.g. 'graphite', 'silicon_graphite', 'nmc811', 'lfp'). Required so a purchased electrode whose powder provenance is unknown is still queryable on the same aggregation axis as one built from an authored material-spec. Aliases resolve on input; an unknown kind is rejected at save time. See battinfo.electrodes.electrode_kind_keys()."
+              "description": "Deprecated alias of active_material_kind; accepted so existing records keep validating, normalized to active_material_kind on round-trip."
             },
             "polarity": {
               "type": "string",
@@ -4127,6 +4144,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             "active_material_spec_id": {
               "$ref": "#/$defs/MaterialSpecIri",
               "description": "Optional canonical IRI of the material-spec for this electrode's active material, present when the powder is known and authored. Absent for a purchased electrode of known chemistry but unknown powder — 'kind' still carries the chemistry."
+            },
+            "material": {
+              "$ref": "modules/components/material-component.schema.json",
+              "description": "The electrode body as a single monolithic material - an uncoated metal foil or disc (lithium metal counter, zinc foil). States the material directly; there is no coating and no separate current collector, the foil is both. Alternative to `coating` for uncoated electrodes."
             },
             "coating": {
               "$ref": "modules/components/electrode-coating.schema.json",
@@ -4489,6 +4510,15 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             "lot_id": {
               "type": "string",
               "description": "Producer / supplier lot number for a purchased electrode."
+            },
+            "parent_id": {
+              "$ref": "#/$defs/ComponentIri",
+              "description": "Canonical IRI of the electrode this piece was cut from - the coated roll, web, or strip its siblings share. The parent is itself an electrode record (usually realizing the same spec), so genealogy chains compose: cell -> disc -> parent roll -> electrode-spec."
+            },
+            "piece_id": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Label of this cut piece within its parent (e.g. 'disc-07', 'strip-B'). Joins the identity seed, so pieces cut from the same parent mint distinct IRIs."
             },
             "batch_id": {
               "type": "string",
@@ -4883,9 +4913,13 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "$ref": "modules/components/electrolyte.schema.json#/properties/salt",
               "description": "Conducting salt (e.g. LiPF6), with concentration under its property map."
             },
+            "solvent": {
+              "$ref": "modules/components/electrolyte.schema.json#/properties/solvent",
+              "description": "Solvent component(s): a single component object for a pure solvent, or an array for a mixture. Each component's fraction lives under its property map (volume_fraction v/v or mass_fraction w/w - one basis per formulation)."
+            },
             "solvent_mixture": {
               "$ref": "modules/components/electrolyte.schema.json#/properties/solvent_mixture",
-              "description": "Solvent mixture, with component fractions under each component's property map."
+              "description": "Deprecated alias of solvent (its {component: [...]} wrapper form); accepted so existing records keep validating, normalized to solvent on round-trip."
             },
             "additive": {
               "$ref": "modules/components/electrolyte.schema.json#/properties/additive",
@@ -7802,6 +7836,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           },
           "description": "Coating composition by role: active material, binder, conductive additive, and other additives. Each component carries its mass_fraction of the dry coating solids under property (0-1 with unit '1', or 0-100 with unit '%'); the fractions across all roles sum to 1."
         },
+        "double_sided": {
+          "type": "boolean",
+          "description": "True when the current collector is coated on both sides, false for a single-side coating. Loadings and thicknesses elsewhere in this block are per-side values unless their own descriptions say otherwise."
+        },
         "manufacturer": {
           "type": "string",
           "description": "Manufacturer of the item."
@@ -7840,6 +7878,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "type": "string",
           "pattern": "^https://w3id\\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
           "description": "Optional canonical IRI of a standalone electrode-spec this inline holder realizes. Lets a cell-spec cite the designed electrode while keeping its embedded fields; the same reference seam material-component.schema.json gives materials."
+        },
+        "material": {
+          "$ref": "material-component.schema.json",
+          "description": "The electrode body as a single monolithic material - an uncoated metal foil or disc (lithium metal counter, zinc foil). States the material directly; there is no coating and no separate current collector, the foil is both. Alternative to `coating` for uncoated electrodes."
         },
         "coating": {
           "$ref": "electrode-coating.schema.json",
@@ -7953,9 +7995,24 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           ],
           "description": "Broad electrolyte class. organic: non-aqueous liquid electrolyte, including carbonate and ether systems; aqueous: water-based liquid electrolyte; ionic_liquid: room-temperature ionic liquid electrolyte; solid: inorganic or polymer solid electrolyte; gel: polymer-swollen liquid (gel polymer) electrolyte; hybrid: combination of two families; unknown: not stated."
         },
+        "solvent": {
+          "anyOf": [
+            {
+              "$ref": "material-component.schema.json"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "material-component.schema.json"
+              },
+              "minItems": 1
+            }
+          ],
+          "description": "Solvent component(s): a single component object for a pure solvent, or an array for a mixture. Each component's fraction lives under its property map (volume_fraction v/v or mass_fraction w/w - one basis per formulation)."
+        },
         "solvent_mixture": {
           "$ref": "material-mixture.schema.json",
-          "description": "Solvent mixture, with each component's fraction under its property map: volume_fraction (v/v) or mass_fraction (w/w), one basis per mixture."
+          "description": "Deprecated alias of solvent (its {component: [...]} wrapper form); accepted so existing records keep validating, normalized to solvent on round-trip."
         },
         "salt": {
           "type": "object",
@@ -7976,11 +8033,11 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "cation": {
               "type": "string",
-              "description": "Cation of the salt (e.g. 'Li+')."
+              "description": "Deprecated: the salt's ions follow from its material identity (kind / material_spec_id), never retyped here. Accepted so existing records keep validating."
             },
             "anion": {
               "type": "string",
-              "description": "Anion of the salt (e.g. 'PF6-')."
+              "description": "Deprecated: the salt's ions follow from its material identity (kind / material_spec_id), never retyped here. Accepted so existing records keep validating."
             },
             "manufacturer": {
               "type": "string",
@@ -10098,6 +10155,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
                 "hppc",
                 "ici",
                 "gitt",
+                "pitt",
                 "dcir",
                 "eis",
                 "impedance",
@@ -10105,6 +10163,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
                 "formation",
                 "rpt",
                 "quasi_ocv",
+                "cyclic_voltammetry",
                 "field",
                 "duty_cycle",
                 "wltp",
@@ -10219,7 +10278,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "conditions": {
           "type": "object",
-          "description": "Planned protocol-level conditions, as a map of condition name to a {value, unit} quantity. Recommended keys: ambient_temperature, upper_voltage_limit, lower_voltage_limit, c_rate. As-run values or deviations are recorded on the test record.",
+          "description": "Planned protocol-level conditions, as a map of condition name to a {value, unit} quantity. Recommended keys: ambient_temperature, upper_voltage_limit, lower_voltage_limit, c_rate. As-run values or deviations are recorded on the test record. Recommended keys include initial_state_of_charge (unit '1') and ambient_temperature - the declared starting state of the cell, the convention protocol importers (aurora-unicycler, UCP) map initial-state settings onto.",
           "additionalProperties": {
             "$ref": "#/$defs/Quantity"
           }
@@ -10418,6 +10477,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
                 "current",
                 "c_rate",
                 "capacity",
+                "soc",
                 "duration"
               ],
               "description": "Quantity monitored for the termination condition."
@@ -10807,9 +10867,11 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
                 "capacity_check",
                 "rate_capability",
                 "quasi_ocv",
+                "cyclic_voltammetry",
                 "hppc",
                 "ici",
                 "gitt",
+                "pitt",
                 "dcir",
                 "eis",
                 "impedance",

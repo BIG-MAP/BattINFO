@@ -2,6 +2,7 @@
   "@context": "https://w3id.org/battinfo/context/records/v1.json",
   "@type": [
     "BatteryCellSpecification",
+    "schema:ProductModel",
     "schema:CreativeWork"
   ],
   "@id": "https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0",
@@ -20,49 +21,55 @@
       "LithiumIonBattery",
       "LithiumIonIronPhosphateBattery"
     ],
-    "skos:prefLabel": "A123 ANR26650M1-B"
+    "@id": "https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0#described",
+    "skos:prefLabel": "A123 ANR26650M1-B",
+    "hasProperty": [
+      {
+        "@type": [
+          "NominalCapacity",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "NominalCapacity",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 2.5
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
+      },
+      {
+        "@type": [
+          "NominalVoltage",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "NominalVoltage",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 3.3
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
+      },
+      {
+        "@type": [
+          "Mass",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "Mass",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 76.0
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#Gram"
+      }
+    ],
+    "hasPositiveElectrode": {
+      "@type": "LithiumIronPhosphateElectrode"
+    }
   },
   "schema:schemaVersion": "0.2.0",
-  "hasProperty": [
-    {
-      "@type": [
-        "NominalCapacity",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "NominalCapacity",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 2.5
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
-    },
-    {
-      "@type": [
-        "NominalVoltage",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "NominalVoltage",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 3.3
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
-    },
-    {
-      "@type": [
-        "Mass",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "Mass",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 76.0
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#Gram"
-    }
-  ],
-  "hasPositiveElectrode": {
-    "@type": "LithiumIronPhosphateElectrode"
+  "schema:weight": {
+    "@type": "schema:QuantitativeValue",
+    "schema:value": 76.0,
+    "schema:unitText": "g"
   },
   "dcterms:source": {
     "@type": "prov:Entity",

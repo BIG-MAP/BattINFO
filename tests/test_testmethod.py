@@ -188,3 +188,50 @@ def test_facets_modes_recurse_into_nested_groups() -> None:
     facets = compute_facets([outer])
     assert facets["modes"] == ["cc", "rest"]
     assert "group" not in facets["modes"]
+
+
+def test_soc_termination_is_first_class() -> None:
+    """SOC joins the termination quantities (the UCP/HPPC seam): validated at
+    construction and emitted with the StateOfCharge class."""
+    from battinfo.jsonld import termination_emmo_class
+    from battinfo.testmethod import Step, Termination
+
+    step = Step(
+        mode="cc", direction="discharge",
+        setpoints={"c_rate": {"value": 0.333, "unit": "A/Ah"}},
+        termination=[Termination(quantity="soc", value=0.9, unit="1", direction="below")],
+        description="Discharge at C/3 to 90% SOC",
+    )
+    assert step.termination[0].quantity == "soc"
+    assert termination_emmo_class("soc", "below") == "StateOfCharge"
+
+
+def test_termination_comparison_string_shorthand() -> None:
+    """Structured steps accept "Voltage > 4.2"-style cutoffs - the way
+    engineers (and UCP's `ends`) write them - normalized at construction."""
+    from battinfo.testmethod import Step, parse_termination
+
+    step = Step(
+        mode="cc", direction="discharge",
+        setpoints={"c_rate": {"value": 0.333, "unit": "A/Ah"}},
+        termination=["Voltage < 2.5", "C-rate < C/50", "SOC < 0.05", "Time > 30 min"],
+    )
+    got = {(t.quantity, t.value, t.unit, t.direction) for t in step.termination}
+    assert got == {
+        ("voltage", 2.5, "V", "below"),
+        ("c_rate", 0.02, "A/Ah", "below"),
+        ("soc", 0.05, "1", "below"),
+        ("duration", 1800.0, "s", "elapsed"),
+    }
+
+    # A bare string (not a list) and unit-carrying magnitudes both work.
+    single = Step(mode="cv", direction="hold", termination="Current < 50 mA")
+    assert (single.termination[0].value, single.termination[0].unit) == (0.05, "A")
+
+    import pytest
+
+    from battinfo.testmethod import ExperimentSyntaxError
+    with pytest.raises(ExperimentSyntaxError, match="Unknown termination quantity"):
+        parse_termination("Frobnitz > 3")
+    with pytest.raises(ExperimentSyntaxError, match="names voltage but"):
+        parse_termination("Voltage > 200 mA")

@@ -141,9 +141,13 @@ def _composed_record(*, inline: bool = True, refs: bool = True) -> dict:
 
 def _assert_composition_tree(node: dict) -> None:
     """The shared assertions: composition tree, mass fractions, five ref IRIs,
-    and constituent → material-spec edges, on a cell-spec JSON-LD node."""
+    and constituent → material-spec edges, on a cell-spec JSON-LD node (the
+    physical payload rides the described battery — indexed unconditionally so
+    a regression back to the flat shape fails loudly)."""
+    node = node["isDescriptionFor"]
     pe = node["hasPositiveElectrode"]
-    assert pe["@id"] == REFS["positive_electrode_spec_id"]
+    # Physical relations reference the target spec's described individual.
+    assert pe["@id"] == REFS["positive_electrode_spec_id"] + "#described"
     coating = pe["hasCoating"]
     assert coating["@type"] == "ElectrodeCoating"
     active = coating["hasActiveMaterial"]
@@ -158,11 +162,11 @@ def _assert_composition_tree(node: dict) -> None:
     assert "CurrentCollector" in pe["hasCurrentCollector"]["@type"]
 
     ne = node["hasNegativeElectrode"]
-    assert ne["@id"] == REFS["negative_electrode_spec_id"]
+    assert ne["@id"] == REFS["negative_electrode_spec_id"] + "#described"
     assert ne["hasCoating"]["hasActiveMaterial"]["schema:name"] == "Graphite"
 
     elyte = node["hasElectrolyte"]
-    assert elyte["@id"] == REFS["electrolyte_spec_id"]
+    assert elyte["@id"] == REFS["electrolyte_spec_id"] + "#described"
     assert elyte["@type"] == "OrganicElectrolyte"
     assert elyte["hasSolute"]["schema:name"] == "LiPF6"
     assert elyte["hasSolute"]["schema:isVariantOf"] == {"@id": SALT_ID}
@@ -170,10 +174,10 @@ def _assert_composition_tree(node: dict) -> None:
     assert {s["schema:name"] for s in solvents} == {"EC", "EMC"}
 
     sep = node["hasSeparator"]
-    assert sep["@id"] == REFS["separator_spec_id"]
+    assert sep["@id"] == REFS["separator_spec_id"] + "#described"
     assert "Separator" in sep["@type"]
 
-    assert node["hasConstituent"] == {"@id": REFS["housing_spec_id"]}
+    assert node["hasConstituent"] == {"@id": REFS["housing_spec_id"] + "#described"}
 
 
 def _collect_bare_terms(value, out: set[str]) -> None:
@@ -201,9 +205,9 @@ def test_record_to_jsonld_emits_composition_and_refs() -> None:
     doc = record_to_jsonld(_composed_record(), "cell-spec")
     _assert_composition_tree(doc)
     # Canonical shape invariants are intact — extended, not reshaped.
-    assert doc["@type"] == ["BatteryCellSpecification", "schema:CreativeWork"]
+    assert doc["@type"] == ["BatteryCellSpecification", "schema:ProductModel", "schema:CreativeWork"]
     assert "isDescriptionFor" in doc
-    assert any(p["@type"][0] == "NominalCapacity" for p in doc["hasProperty"])
+    assert any(p["@type"][0] == "NominalCapacity" for p in doc["isDescriptionFor"]["hasProperty"])
     assert doc["dcterms:source"]["dcterms:type"] == "datasheet"
 
 
@@ -244,18 +248,18 @@ def test_resolver_artifact_emits_composition_and_refs() -> None:
 
 
 def test_refs_only_cell_emits_reference_nodes() -> None:
-    node = build_cell_spec_node(_composed_record(inline=False, refs=True))
+    node = build_cell_spec_node(_composed_record(inline=False, refs=True))["isDescriptionFor"]
     for field, relation in _REF_RELATIONS.items():
         ref = node[relation]
-        assert ref["@id"] == REFS[field], relation
+        assert ref["@id"] == REFS[field] + "#described", relation
         # No inline holder: nothing beyond the reference and (for electrodes) the
         # basis-derived @type refinement may appear.
         assert set(ref) <= {"@id", "@type"}, relation
-    assert node["hasConstituent"] == {"@id": REFS["housing_spec_id"]}
+    assert node["hasConstituent"] == {"@id": REFS["housing_spec_id"] + "#described"}
 
 
 def test_inline_only_cell_emits_nested_holders_without_ids() -> None:
-    node = build_cell_spec_node(_composed_record(inline=True, refs=False))
+    node = build_cell_spec_node(_composed_record(inline=True, refs=False))["isDescriptionFor"]
     assert "@id" not in node["hasPositiveElectrode"]
     assert node["hasPositiveElectrode"]["hasCoating"]["@type"] == "ElectrodeCoating"
     assert "@id" not in node["hasElectrolyte"]
@@ -263,7 +267,7 @@ def test_inline_only_cell_emits_nested_holders_without_ids() -> None:
 
 
 def test_inline_plus_ref_is_one_merged_node_per_component() -> None:
-    node = build_cell_spec_node(_composed_record(inline=True, refs=True))
+    node = build_cell_spec_node(_composed_record(inline=True, refs=True))["isDescriptionFor"]
     for relation in _REF_RELATIONS.values():
         merged = node[relation]
         assert isinstance(merged, dict), f"{relation} must stay a single node"
@@ -299,7 +303,7 @@ def _find_spec_node(graph: list[dict]) -> dict:
         if "BatteryCellSpecification" in (
             n["@type"] if isinstance(n.get("@type"), list) else [n.get("@type")]
         )
-        and "hasPositiveElectrode" in n
+        and "hasPositiveElectrode" in n.get("isDescriptionFor", {})
     )
 
 
@@ -307,17 +311,17 @@ def test_preview_jsonld_emits_composition_and_refs(tmp_path: Path) -> None:
     ws = _authored_workspace(tmp_path)
     out = ws.preview_jsonld(tmp_path / "preview.jsonld")
     doc = json.loads(out.read_text(encoding="utf-8"))
-    node = _find_spec_node(doc["@graph"])
+    node = _find_spec_node(doc["@graph"])["isDescriptionFor"]
     # The workspace mints the spec IRI at save; check content, not the fixture @id.
     coating = node["hasPositiveElectrode"]["hasCoating"]
     assert coating["hasActiveMaterial"]["schema:isVariantOf"] == {"@id": MAT_ID}
     assert coating["hasActiveMaterial"]["hasProperty"]["hasNumericalPart"]["hasNumberValue"] == 0.96
-    assert node["hasPositiveElectrode"]["@id"] == REFS["positive_electrode_spec_id"]
-    assert node["hasNegativeElectrode"]["@id"] == REFS["negative_electrode_spec_id"]
-    assert node["hasElectrolyte"]["@id"] == REFS["electrolyte_spec_id"]
+    assert node["hasPositiveElectrode"]["@id"] == REFS["positive_electrode_spec_id"] + "#described"
+    assert node["hasNegativeElectrode"]["@id"] == REFS["negative_electrode_spec_id"] + "#described"
+    assert node["hasElectrolyte"]["@id"] == REFS["electrolyte_spec_id"] + "#described"
     assert node["hasElectrolyte"]["hasSolute"]["schema:isVariantOf"] == {"@id": SALT_ID}
-    assert node["hasSeparator"]["@id"] == REFS["separator_spec_id"]
-    assert node["hasConstituent"] == {"@id": REFS["housing_spec_id"]}
+    assert node["hasSeparator"]["@id"] == REFS["separator_spec_id"] + "#described"
+    assert node["hasConstituent"] == {"@id": REFS["housing_spec_id"] + "#described"}
     # Every composition term resolves in the deposit's inline context.
     context = doc["@context"]
     terms: set[str] = set()
@@ -439,3 +443,18 @@ def test_instrument_string_only_keeps_legacy_named_node() -> None:
         )
     tnode = next(n for n in package["@graph"] if "BatteryTest" in (n.get("@type") or []))
     assert tnode["hasTestEquipment"]["schema:name"] == "Neware BTS-4000"
+
+
+def test_nothing_physical_remains_on_the_spec_node() -> None:
+    """The completion pin for the description pattern: every EMMO-axiomatized
+    physical relation rides the described battery; the spec node keeps only
+    artifact and catalogue facts."""
+    doc = build_cell_spec_node(_composed_record(inline=True, refs=True))
+    physical = {
+        "hasProperty", "hasPositiveElectrode", "hasNegativeElectrode",
+        "hasWorkingElectrode", "hasCounterElectrode", "hasReferenceElectrode",
+        "hasElectrolyte", "hasSeparator", "hasCase", "hasConstituent",
+    }
+    assert not physical & set(doc), physical & set(doc)
+    assert doc["@type"] == ["BatteryCellSpecification", "schema:ProductModel", "schema:CreativeWork"]
+    assert physical & set(doc["isDescriptionFor"])

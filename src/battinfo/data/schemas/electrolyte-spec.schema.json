@@ -45,9 +45,13 @@
           "$ref": "modules/components/electrolyte.schema.json#/properties/salt",
           "description": "Conducting salt (e.g. LiPF6), with concentration under its property map."
         },
+        "solvent": {
+          "$ref": "modules/components/electrolyte.schema.json#/properties/solvent",
+          "description": "Solvent component(s): a single component object for a pure solvent, or an array for a mixture. Each component's fraction lives under its property map (volume_fraction v/v or mass_fraction w/w - one basis per formulation)."
+        },
         "solvent_mixture": {
           "$ref": "modules/components/electrolyte.schema.json#/properties/solvent_mixture",
-          "description": "Solvent mixture, with component fractions under each component's property map."
+          "description": "Deprecated alias of solvent (its {component: [...]} wrapper form); accepted so existing records keep validating, normalized to solvent on round-trip."
         },
         "additive": {
           "$ref": "modules/components/electrolyte.schema.json#/properties/additive",

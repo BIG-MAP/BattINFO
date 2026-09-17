@@ -12,6 +12,7 @@ from battinfo.interop.protocols import (  # noqa: E402
     import_aurora_unicycler,
     import_bmgen_jsonld,
     import_pybamm_experiment,
+    import_ucp,
 )
 from battinfo.validate import validate_json  # noqa: E402
 
@@ -146,3 +147,95 @@ def test_import_bmgen_jsonld_reshapes_process_graph() -> None:
     assert spec.artifacts[0].format == "bmgen-jsonld"
     spec.id = SPEC_ID
     assert validate_json(spec.to_record(), profile="test-protocol").ok
+
+
+# ── ionworks UCP ──────────────────────────────────────────────────────────────
+
+UCP_YAML = """global:
+  initial_state_type: soc_percentage
+  initial_state_value: 50
+  initial_temperature: 25.0
+  resolution:
+    time: 1.0
+    voltage: 0.001
+steps:
+  - Charge:
+      mode: C-rate
+      value: "0.6"
+      ends:
+        - Voltage > 4.2
+  - Charge:
+      mode: Voltage
+      value: 4.2
+      ends:
+        - C-rate < 0.05
+  - Rest:
+      duration: 3600
+  - Control:
+      set_variable:
+        - name: VAR_X
+          eval: 1
+  - Cycle Block:
+      repeat: 3
+      steps:
+        - Discharge:
+            mode: C-rate
+            value: 1.0
+            ends:
+              - Voltage < 2.5
+              - Capacity > 2.0
+        - Rest:
+            duration: 600
+"""
+
+
+def test_import_ucp_maps_globals_steps_and_repeats() -> None:
+    spec = import_ucp(UCP_YAML, source_locator="protocol.yaml")
+
+    # global block -> the blessed conventions
+    assert spec.conditions["initial_state_of_charge"].value == 0.5
+    assert spec.conditions["initial_state_of_charge"].unit == "1"
+    assert spec.conditions["ambient_temperature"].value == 25.0
+    assert spec.record["time_s"] == 1.0
+    assert spec.record["voltage_V"] == 0.001
+
+    cc, cv, rest, cycle = spec.method
+    assert (cc.mode, cc.direction) == ("cc", "charge")
+    assert cc.setpoints["c_rate"].value == 0.6
+    assert cc.termination[0].quantity == "voltage"
+    assert cc.termination[0].direction == "above"
+
+    assert (cv.mode, cv.direction) == ("cv", "hold")
+    assert cv.setpoints["voltage"].value == 4.2
+    assert cv.termination[0].quantity == "c_rate"
+
+    assert rest.mode == "rest" and rest.duration.value == 3600.0
+
+    assert cycle.mode == "group" and cycle.count == 3
+    discharge = cycle.steps[0]
+    assert {t.quantity for t in discharge.termination} == {"voltage", "capacity"}
+
+    # the Control step is lossy-but-noted, and the artifact seam is linked
+    assert any("Control" in note for note in spec.comment)
+    assert spec.artifacts[0].format == "ionworks-ucp"
+    assert spec.artifacts[0].role == "source_protocol"
+    assert spec.source.type == "import"
+
+
+def test_import_ucp_keeps_expressions_as_notes_never_silently_drops() -> None:
+    doc = {
+        "global": {"initial_state_type": "soc_percentage",
+                   "initial_state_value": 'input["Initial SOC [%]"]'},
+        "steps": [
+            {"Discharge": {"mode": "C-rate", "value": 'input["C-rate"]',
+                           "ends": [{"Voltage < ifelse(VAR_IS_CHARGE == 1, 4.2, 1e9)": {"goto": "End"}}]}},
+            {"Pulse Block": {"repeat": 'input["N"]',
+                             "steps": [{"Rest": {"duration": 60}}]}},
+        ],
+    }
+    spec = import_ucp(doc)
+    pulse = spec.method[-1]
+    assert pulse.mode == "group" and pulse.count == 1  # expression repeat -> 1, noted
+    notes = " | ".join(spec.comment)
+    assert "expression" in notes
+    assert "repeat count is an expression" in notes

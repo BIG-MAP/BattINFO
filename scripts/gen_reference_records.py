@@ -120,10 +120,31 @@ def snippet_half_cell_spec():
         working_electrode_spec_id="https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
         # The counter is described inline: lithium foil the lab treats as
         # interchangeable earns a description, not a tracked record. In a
-        # two-electrode half cell it is also the potential reference.
-        counter_electrode={
-            "coating": {"component": {"active_material": [{"name": "Lithium metal"}]}}
-        },
+        # two-electrode half cell it is also the potential reference. A foil
+        # is a monolithic electrode - `material`, never a coating.
+        counter_electrode={"material": {"name": "Lithium metal"}},
+        source={"type": "lab", "retrieved_at": 1750000000},
+    )
+    record = spec.to_record()
+    return record
+
+
+def snippet_three_electrode_cell_spec():
+    from battinfo import CellSpec
+
+    spec = CellSpec(
+        id="https://w3id.org/battinfo/spec/q7mf-3wtk-8npv-2hcx",
+        manufacturer="Example Lab",
+        model="3E-GR-01",
+        format="pouch",
+        chemistry="Li-ion",
+        cell_configuration="three_electrode_cell",
+        working_electrode_spec_id="https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
+        counter_electrode={"material": {"name": "Lithium metal"}},
+        # The separated third electrode: unlike a half cell, the counter is
+        # only a counter, and the reference is its own (tiny) electrode - a
+        # lithium ring or wire, monolithic like the foil counter.
+        reference_electrode={"material": {"name": "Lithium metal"}},
         source={"type": "lab", "retrieved_at": 1750000000},
     )
     record = spec.to_record()
@@ -152,7 +173,7 @@ def snippet_material():
     record = create_material(
         uid="y9xy-kr0v-y5tn-dfj7",
         name="NMC811 lot 2026-04",
-        material_spec_id="https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+        spec_id="https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
         source_type="lab",
     )
     return record
@@ -164,8 +185,12 @@ def snippet_electrode_spec():
     record = create_electrode_spec(
         uid="kxwy-5f5f-f682-hhch",
         name="NMC811 cathode design A",
-        kind="nmc811",                     # the ACTIVE material's kind
+        active_material_kind="nmc811",     # from the curated material-kind vocabulary
         active_material_spec_id="https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+        composition={"active": 0.96,       # weight fractions -> coating.component
+                     "binder": {"name": "PVDF", "fraction": 0.02},
+                     "conductive_additive": {"name": "Carbon black", "fraction": 0.02}},
+        coating={"double_sided": False},   # coated on one side (a lab half-cell disc)
         source_type="lab",
     )
     return record
@@ -176,78 +201,151 @@ def snippet_electrode():
 
     record = create_electrode(
         uid="3w87-0ddf-ryjg-evxe",
-        name="Cathode disc, cell LAB-2026-0001",
-        electrode_spec_id="https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
+        name="Cathode disc 07, cell LAB-2026-0001",
+        spec_id="https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
+        # Genealogy: the coated strip this disc was punched from is itself an
+        # electrode record; siblings cut from it share the same parent.
+        parent_id="https://w3id.org/battinfo/electrode/9m2k-4tqv-7xw3-1nfh",
+        piece_id="disc-07",
         source_type="lab",
     )
     return record
 
 
 def snippet_separator_spec():
-    from battinfo.api import create_component_spec
+    from battinfo.api import create_separator_spec
 
-    record = create_component_spec(
-        "separator",
+    record = create_separator_spec(
         uid="6nec-h262-tthy-4rnt",
         name="Celgard 2500",
+        material="PP",
+        structure="monolayer",
+        property={
+            "thickness": {"value": 25, "unit": "um"},
+            "porosity": {"value": 0.55, "unit": "1"},
+        },
+        manufacturer="Celgard",
         source_type="datasheet",
     )
     return record
 
 
-def snippet_electrolyte_spec():
-    from battinfo.api import create_component_spec
+def snippet_separator():
+    from battinfo.api import create_separator
 
-    record = create_component_spec(
-        "electrolyte",
+    record = create_separator(
+        uid="p2vx-4nq7-8mtk-3fhd",
+        spec_id="https://w3id.org/battinfo/spec/6nec-h262-tthy-4rnt",
+        lot_id="CG25-2026-114",
+    )
+    return record
+
+
+def snippet_current_collector_spec():
+    from battinfo.api import create_current_collector_spec
+
+    record = create_current_collector_spec(
+        uid="vq83-2hkm-7tpn-9fdx",
+        name="Aluminium foil",
+        material="Al",
+        form="foil",
+        property={"thickness": {"value": 15, "unit": "um"}},
+        source_type="datasheet",
+    )
+    return record
+
+
+def snippet_current_collector():
+    from battinfo.api import create_current_collector
+
+    record = create_current_collector(
+        uid="tr5k-8wq2-3npx-6mvh",
+        spec_id="https://w3id.org/battinfo/spec/vq83-2hkm-7tpn-9fdx",
+        lot_id="AL15-2026-031",
+    )
+    return record
+
+
+def snippet_housing_spec():
+    from battinfo.api import create_housing_spec
+
+    record = create_housing_spec(
+        uid="w2n8-6rkt-4mpv-8hcq",
+        name="CR2032 coin housing",
+        cell_format="coin",
+        case={
+            "size_code": "2032",
+            "material": "Stainless steel",
+            "property": {
+                "diameter": {"value": 20, "unit": "mm"},
+                "height": {"value": 3.2, "unit": "mm"},
+            },
+        },
+        parts=[
+            {"type": "spring", "material": "Stainless steel"},
+            {"type": "spacer", "material": "Stainless steel"},
+        ],
+        source_type="datasheet",
+    )
+    return record
+
+
+def snippet_housing():
+    from battinfo.api import create_housing
+
+    record = create_housing(
+        uid="x4fm-9tpk-2wqv-5nrh",
+        spec_id="https://w3id.org/battinfo/spec/w2n8-6rkt-4mpv-8hcq",
+        lot_id="CR2032-KIT-2026-07",
+    )
+    return record
+
+
+def snippet_electrolyte_spec():
+    from battinfo.api import create_electrolyte_spec
+
+    # Every constituent can cite its material-spec by IRI, so the formulation
+    # is assembled from materials, never retyped — the salt's ions and
+    # chemistry follow from its material identity.
+    record = create_electrolyte_spec(
         uid="0rp6-kncv-cyem-qwcd",
         name="1M LiPF6 in EC:EMC 3:7 + 2% VC",
-        # Composition fields go through body= (the class field is also named
-        # "family" — the function's first argument). Every constituent can
-        # cite its material-spec by IRI, so the formulation is assembled from
-        # materials, never retyped.
-        body={
-            "family": "organic",
-            "salt": {
-                "name": "LiPF6",
-                "material_spec_id": "https://w3id.org/battinfo/spec/t4wz-ff8s-6vp6-af48",
-                "cation": "Li+",
-                "anion": "PF6-",
-                "property": {"concentration": {"value": 1.0, "unit": "mol/L"}},
-            },
-            "solvent_mixture": {
-                "component": [
-                    {
-                        "name": "EC",
-                        "material_spec_id": "https://w3id.org/battinfo/spec/xcv1-hpy1-b0bw-z5s2",
-                        "property": {"volume_fraction": {"value": 0.3, "unit": "1"}},
-                    },
-                    {
-                        "name": "EMC",
-                        "material_spec_id": "https://w3id.org/battinfo/spec/7p3d-2e22-7yae-spyb",
-                        "property": {"volume_fraction": {"value": 0.7, "unit": "1"}},
-                    },
-                ]
-            },
-            "additive": [
-                {
-                    "name": "VC",
-                    "material_spec_id": "https://w3id.org/battinfo/spec/s6y8-5mne-94gx-e5ve",
-                    "property": {"mass_fraction": {"value": 0.02, "unit": "1"}},
-                }
-            ],
-            "property": {"conductivity": {"value": 10.0, "unit": "mS/cm"}},
+        family="organic",
+        salt={
+            "name": "LiPF6",
+            "material_spec_id": "https://w3id.org/battinfo/spec/t4wz-ff8s-6vp6-af48",
+            "property": {"concentration": {"value": 1.0, "unit": "mol/L"}},
         },
+        # One solvent component for a pure solvent, a list for a mixture.
+        solvent=[
+            {
+                "name": "EC",
+                "material_spec_id": "https://w3id.org/battinfo/spec/xcv1-hpy1-b0bw-z5s2",
+                "property": {"volume_fraction": {"value": 0.3, "unit": "1"}},
+            },
+            {
+                "name": "EMC",
+                "material_spec_id": "https://w3id.org/battinfo/spec/7p3d-2e22-7yae-spyb",
+                "property": {"volume_fraction": {"value": 0.7, "unit": "1"}},
+            },
+        ],
+        additive=[
+            {
+                "name": "VC",
+                "material_spec_id": "https://w3id.org/battinfo/spec/s6y8-5mne-94gx-e5ve",
+                "property": {"mass_fraction": {"value": 0.02, "unit": "1"}},
+            }
+        ],
+        property={"conductivity": {"value": 10.0, "unit": "mS/cm"}},
         source_type="datasheet",
     )
     return record
 
 
 def snippet_electrolyte():
-    from battinfo.api import create_component_instance
+    from battinfo.api import create_electrolyte
 
-    record = create_component_instance(
-        "electrolyte",
+    record = create_electrolyte(
         uid="me0t-k16f-eh5y-rq0k",
         spec_id="https://w3id.org/battinfo/spec/0rp6-kncv-cyem-qwcd",
     )
@@ -276,7 +374,7 @@ def snippet_test_protocol():
 
 
 def snippet_test():
-    from battinfo import Cell, CellSpec, Test
+    from battinfo import Cell, CellSpec, Test, TestSpec
 
     cell = Cell(
         id="https://w3id.org/battinfo/cell/y9xy-kr0v-y5tn-dfj7",
@@ -287,12 +385,15 @@ def snippet_test():
         ),
         serial_number="LAB-2026-0001",
     )
+    protocol = TestSpec(                   # the protocol defined above
+        id="https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
+        name="1C cycle life at 25 degC",
+        kind="cycling",
+    )
     test = Test(
         id="https://w3id.org/battinfo/test/3w87-0ddf-ryjg-evxe",
         cell=cell,                         # what you did, to which cell
-        kind="cycling",
-        protocol_id="https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
-        protocol="1C cycle life at 25 degC",
+        protocol=protocol,                 # kind, name, protocol_id all derive
         instrument="Biologic VMP-300",
         status="completed",
         # As-run conditions: what actually applied, as {value, unit}
@@ -384,7 +485,7 @@ def snippet_equipment():
 
     record = create_equipment(
         id="https://w3id.org/battinfo/equipment/y9xy-kr0v-y5tn-dfj7",
-        equipment_spec_id="https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+        spec_id="https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
         serial_number="MC3K-2026-0001",
         name="Cycler 1",
         location="Lab B",
@@ -467,8 +568,10 @@ FAMILIES = [
                 "fn": snippet_cell_spec,
                 "record_type": "cell-spec",
                 "notice": [
-                    "The node is EMMO-typed (`BatteryCellSpecification`) and each "
-                    "spec property becomes a typed quantity under `hasProperty`.",
+                    "The spec node is the datasheet: name, manufacturer, codes. "
+                    "The cell it describes — with its capacity, voltage and "
+                    "electrodes — hangs off `isDescriptionFor`, because a "
+                    "document doesn't have a positive electrode.",
                     "`schema:manufacturer` and `schema:model` carry the identity "
                     "that seeded the IRI.",
                 ],
@@ -488,12 +591,16 @@ FAMILIES = [
     },
     {
         "slug": "half-cells",
-        "title": "Half cells",
+        "title": "Half cells & three-electrode cells",
         "intro": (
-            "How to describe a half cell: one electrode under test against a "
-            "counter/reference. Not a separate record type — a **cell** "
-            "flavored by `cell_configuration: \"half_cell\"`, with electrodes "
-            "named by role."
+            "How to describe the non-full-cell configurations: one electrode "
+            "under test against a counter. Neither is a separate record type "
+            "— both are a **cell** flavored by `cell_configuration` "
+            "(`half_cell` or `three_electrode_cell`), with electrodes named "
+            "by role. The one structural difference: in a half cell the "
+            "counter electrode IS the potential reference (one electrode, "
+            "two roles); a three-electrode cell separates them with a "
+            "dedicated `reference_electrode`."
         ),
         "sections": [
             {
@@ -508,13 +615,27 @@ FAMILIES = [
                     "BOTH `CounterElectrode` and `ReferenceElectrode`.",
                 ],
             },
+            {
+                "heading": "A three-electrode cell",
+                "fn": snippet_three_electrode_cell_spec,
+                "record_type": "cell-spec",
+                "notice": [
+                    "The described device types as `ThreeElectrodeCellDevice`; "
+                    "the counter is ONLY a counter here.",
+                    "The dedicated reference emits under "
+                    "`hasReferenceElectrode` typed `ReferenceElectrode` — a "
+                    "lithium ring or wire is a monolithic `material`, like "
+                    "the foil counter.",
+                ],
+            },
         ],
         "schemas": [],
         "field_reference_note": (
-            "Half cells are cell records — the field reference lives on "
-            "[Cells](cells.md#fields), and `cell_configuration`, "
-            "the role holders, and their `*_spec_id` siblings appear in the "
-            "cell-spec table there."
+            "Half cells and three-electrode cells are cell records — the "
+            "field reference lives on [Cells](cells.md#fields), and "
+            "`cell_configuration`, the role holders (`working_electrode` / "
+            "`counter_electrode` / `reference_electrode`), and their "
+            "`*_spec_id` siblings appear in the cell-spec table there."
         ),
     },
     {
@@ -614,30 +735,76 @@ FAMILIES = [
         "schemas": ["electrolyte-spec.schema.json", "electrolyte.schema.json"],
     },
     {
-        "slug": "components",
-        "title": "Components",
+        "slug": "separators",
+        "title": "Separators",
         "intro": (
-            "How to describe the remaining cell components — separator, "
-            "current collector, housing. The three families share one generic "
-            "spec + instance surface; only their fields differ. Electrolytes "
-            "ride the same machinery but have [their own page](electrolytes.md)."
+            "How to describe separators: a **separator-spec** is the membrane "
+            "product (Celgard 2500), a **separator** instance is one physical "
+            "roll or lot. A cell references the spec through "
+            "`separator_spec_id`, or describes a one-off inline on its holder."
         ),
         "sections": [
             {
-                "heading": "A separator spec",
+                "heading": "The product",
                 "fn": snippet_separator_spec,
                 "record_type": "separator-spec",
-                "notice": [
-                    "The same `create_component_spec(family, ...)` call authors "
-                    "every component family; the family picks the schema.",
-                ],
+            },
+            {
+                "heading": "A physical lot",
+                "fn": snippet_separator,
+                "record_type": "separator",
+            },
+        ],
+        "schemas": ["separator-spec.schema.json", "separator.schema.json"],
+    },
+    {
+        "slug": "current-collectors",
+        "title": "Current collectors",
+        "intro": (
+            "How to describe current collectors: a **current-collector-spec** "
+            "is the foil or mesh product, a **current-collector** instance is "
+            "one physical roll or lot. Electrodes usually describe their "
+            "collector inline; the standalone record is for a foil shared "
+            "across designs or tracked as its own supply."
+        ),
+        "sections": [
+            {
+                "heading": "The product",
+                "fn": snippet_current_collector_spec,
+                "record_type": "current-collector-spec",
+            },
+            {
+                "heading": "A physical lot",
+                "fn": snippet_current_collector,
+                "record_type": "current-collector",
             },
         ],
         "schemas": [
-            "separator-spec.schema.json", "separator.schema.json",
             "current-collector-spec.schema.json", "current-collector.schema.json",
-            "housing-spec.schema.json", "housing.schema.json",
         ],
+    },
+    {
+        "slug": "housings",
+        "title": "Housings",
+        "intro": (
+            "How to describe cell housings: a **housing-spec** is the case "
+            "set as a product (a CR2032 kit: case, cap, spring, spacer), a "
+            "**housing** instance is one physical batch. A cell references "
+            "it through `housing_spec_id`, or describes its housing inline."
+        ),
+        "sections": [
+            {
+                "heading": "The product",
+                "fn": snippet_housing_spec,
+                "record_type": "housing-spec",
+            },
+            {
+                "heading": "A physical batch",
+                "fn": snippet_housing,
+                "record_type": "housing",
+            },
+        ],
+        "schemas": ["housing-spec.schema.json", "housing.schema.json"],
     },
     {
         "slug": "tests",
@@ -666,6 +833,9 @@ FAMILIES = [
                 "notice": [
                     "`hasTestObject` / `schema:object` point at the cell; "
                     "`dcterms:conformsTo` points at the protocol.",
+                    "`protocol=` takes the TestSpec itself: kind, protocol "
+                    "name and `protocol_id` derive from it — stated once, on "
+                    "the protocol, never retyped on the execution.",
                     "As-run conditions emit as typed `hasMeasurementParameter` "
                     "nodes on the test node (plus a `schema:PropertyValue` "
                     "copy under `schema:additionalProperty`).",
@@ -933,8 +1103,9 @@ def build_sections(family: dict) -> list[dict]:
 # (materials up through components), then the flavored and full cells built
 # from them, then what is done with a cell and what comes out of it.
 _PAGE_ORDER = [
-    "materials", "electrodes", "electrolytes", "components", "cells",
-    "half-cells", "tests", "datasets", "equipment", "parameter-sets", "organizations",
+    "materials", "electrodes", "electrolytes", "separators",
+    "current-collectors", "housings", "cells", "half-cells",
+    "tests", "datasets", "equipment", "parameter-sets", "organizations",
 ]
 assert sorted(_PAGE_ORDER) == sorted(f["slug"] for f in FAMILIES)
 FAMILIES.sort(key=lambda f: _PAGE_ORDER.index(f["slug"]))
@@ -961,17 +1132,29 @@ PAGE_RULES: dict[str, list[str]] = {
         "The composition is assembled from materials: `salt`, `solvent_mixture.component[]`, and `additive[]` each cite a material-spec by IRI.",
         "The **spec** is the formulation; the **electrolyte** instance is one mixed batch.",
     ],
-    "components": [
-        "Separator, current collector, and housing share one generic surface: `create_<family>_spec(...)` or `create_component_spec(family, ...)`, plus the instance equivalents.",
-        "Fields whose names collide with an argument go through `body={...}`.",
-        "Family identifiers use underscores (`current_collector`); IRIs use hyphens.",
-        "[Electrolytes](electrolytes.md) ride the same machinery but have their own page.",
+    "separators": [
+        "The **spec** is the membrane product; a **separator** instance is one physical roll or lot.",
+        "`material` is the bulk polymer ('PP', 'PE', 'cellulose'); `structure` says how it is layered (monolayer, trilayer, ...).",
+        "`material_spec_id` cites a standalone material-spec when the membrane material is itself a record.",
+        "Author with `create_separator_spec(...)` / `create_separator(spec_id=...)`.",
+    ],
+    "current-collectors": [
+        "The **spec** is the foil or mesh product; an instance is one physical roll or lot.",
+        "The name and `material`/`form` derive the typed node: 'Aluminium foil' emits `[CurrentCollector, Aluminium, Foil]`.",
+        "Electrodes usually embed their collector inline (`current_collector` holder); the standalone record is for a shared or tracked foil, cited via `material_spec_id`.",
+        "Author with `create_current_collector_spec(...)` / `create_current_collector(spec_id=...)`.",
+    ],
+    "housings": [
+        "The **spec** is the case set as a product (case, cap, terminals, seals, parts); an instance is one physical batch.",
+        "The record is the enclosure ASSEMBLY - the case is one part among cap, terminals, seals, and hardware, all listed uniformly under `hasConstituent` in JSON-LD; `cell_format` picks the case class (CoinCase, CylindricalCase, ...).",
+        "`parts[]` entries type as their EMMO classes (Spring, Spacer, Gasket, SafetyVent, ...).",
+        "Author with `create_housing_spec(...)` / `create_housing(spec_id=...)`.",
     ],
     "half-cells": [
-        "Not a record type: a cell with `cell_configuration` set to `half_cell`.",
-        "Electrodes are named by **role** - `working_electrode` / `counter_electrode` (or their `*_spec_id` siblings) - never by polarity.",
-        "In a two-electrode half cell the counter also carries the reference role; a `three_electrode_cell` separates them.",
-        "Reference the working electrode's spec; describe the interchangeable counter (lithium foil) inline on its holder.",
+        "Not record types: a cell with `cell_configuration` set to `half_cell` or `three_electrode_cell`.",
+        "Electrodes are named by **role** - `working_electrode` / `counter_electrode` / `reference_electrode` (or their `*_spec_id` siblings) - never by polarity.",
+        "The one structural difference: a half cell's counter also carries the reference role (one electrode, two classes); a three-electrode cell states a dedicated `reference_electrode`.",
+        "Reference the working electrode's spec; describe the interchangeable counter (and a reference ring or wire) inline - a metal foil is a monolithic `material`, never a `coating`.",
     ],
     "cells": [
         "The **spec** is the design (the datasheet); the **cell** instance is one physical unit - the (spec, serial) pair makes re-registration a no-op.",
@@ -1021,6 +1204,12 @@ REGISTRY_BROWSE = {
 REGISTRY_BROWSE_DEFAULT = "https://www.battery-genome.org/explore"
 
 SHELVES: dict[str, list[str]] = {
+    "half-cells": [
+        "cell-spec/cell-spec-g7hd-4wkq-2mtx-9npf.json",
+        "cell-spec/cell-spec-n8mw-5tkx-3qvd-7hfp.json",
+        "cell-spec/cell-spec-s4kt-8njw-6xpd-2mvh.json",
+        "cell-spec/cell-spec-w3fq-9rkm-4tpx-8nhd.json",
+    ],
     "cells": [
         "cell-spec/A123__ANR26650M1-B.json",
         "cell-spec/research/cylindrical-detailed.example.json",
@@ -1053,14 +1242,19 @@ SHELVES: dict[str, list[str]] = {
         "electrolyte-spec/gpkh-74nj-6sdb-vcsc.json",
         "electrolyte-spec/gzt2-hrqq-gsfn-sp94.json",
     ],
-    "components": [
+    "separators": [
         "separator-spec/wgym-4xfa-pws1-ek1b.json",
         "separator-spec/v94j-jm2h-t8d1-t5a6.json",
+    ],
+    "current-collectors": [
         "current-collector-spec/vkaf-f5bv-fwt2-e6yz.json",
         "current-collector-spec/z25y-gab5-hd3n-qfpr.json",
+    ],
+    "housings": [
         "housing-spec/38af-bpnv-1zmm-32hs.json",
         "housing-spec/k2q4-dk79-g890-7veq.json",
         "housing-spec/ypyh-v38v-r276-snmk.json",
+        "housing-spec/q7mf-3wtk-8npv-2hcx.json",
     ],
     "tests": [
         "test-protocol/test-protocol-8r2m-4v6k-9p3t-7n5x.json",
@@ -1068,8 +1262,11 @@ SHELVES: dict[str, list[str]] = {
         "test-protocol/test-protocol-5v3n-8x1m-4k7p-9r2t.json",
         "test-protocol/test-protocol-j19t-9cm0-f219-zh4y.json",
         "test-protocol/test-protocol-7m4t-1n9v-6r3k-2p8x.json",
+        "test-protocol/test-protocol-ev9g-3eje-xfg8-n19f.json",
         "test-protocol/test-protocol-3p7k-2m9r-6t4n-1v8x.json",
+        "test-protocol/test-protocol-pt4v-8mkq-2nwx-7hfd.json",
         "test-protocol/test-protocol-wmqd-1fbt-zyya-k4bw.json",
+        "test-protocol/test-protocol-cv7k-3wpm-9qtx-4nfh.json",
         "test-protocol/test-protocol-t163-7ba5-r0kn-h9my.json",
     ],
     "datasets": [
@@ -1266,7 +1463,9 @@ def render_page(family: dict, sections: list[dict]) -> str:
         "alone). In JSON-LD, conditions ride a measurement node the quantity "
         "`isOutputOf`; the `voltage_reference` key instead becomes a "
         "`hasMetrologicalReference` datum on the quantity, beside its "
-        "unit." + NL, NL,
+        "unit. When authoring, an instance references its spec with the "
+        "`spec_id=` kwarg; the record stores the self-describing "
+        "`<type>_spec_id` key shown in the tables below." + NL, NL,
     ]
     for schema_file in family["schemas"]:
         parts += [render_field_tables(schema_file)]
