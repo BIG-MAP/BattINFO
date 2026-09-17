@@ -7,6 +7,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.8.0] — 2026-09-17
+
+First release published to PyPI (`pip install battinfo`). The version line
+continues the historical ontology releases; 0.7.0 was a development milestone
+that was never tagged or published.
+
 ### Changed
 
 - **The described individual gets a name: `<spec-IRI>#described` (JSON-LD

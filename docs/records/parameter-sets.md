@@ -60,7 +60,7 @@ record = create_parameter_set(
   "provenance": {
     "source_type": "literature",
     "retrieved_at": 1750000000,
-    "battinfo_version": "0.7.0"
+    "battinfo_version": "0.8.0"
   }
 }
 ```

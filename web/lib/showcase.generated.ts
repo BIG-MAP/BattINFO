@@ -31,7 +31,7 @@ export const showcase: {
       "provenance": {
         "source_type": "datasheet",
         "retrieved_at": 1750000000,
-        "battinfo_version": "0.7.0"
+        "battinfo_version": "0.8.0"
       }
     },
     "jsonld": null
@@ -215,7 +215,7 @@ export const showcase: {
       "provenance": {
         "source_type": "datasheet",
         "retrieved_at": 1750000000,
-        "battinfo_version": "0.7.0"
+        "battinfo_version": "0.8.0"
       }
     },
     "jsonld": {
@@ -315,7 +315,7 @@ export const showcase: {
         "manufactured_at": "2026-01-15"
       },
       "provenance": {
-        "battinfo_version": "0.7.0"
+        "battinfo_version": "0.8.0"
       }
     },
     "jsonld": null
@@ -336,7 +336,7 @@ export const showcase: {
         "kind": "cycling"
       },
       "provenance": {
-        "battinfo_version": "0.7.0"
+        "battinfo_version": "0.8.0"
       },
       "method": [
         {
@@ -531,7 +531,7 @@ export const showcase: {
         "instrument_name": "Biologic VMP-300"
       },
       "provenance": {
-        "battinfo_version": "0.7.0"
+        "battinfo_version": "0.8.0"
       }
     },
     "jsonld": {
@@ -573,7 +573,7 @@ export const showcase: {
         ]
       },
       "provenance": {
-        "battinfo_version": "0.7.0"
+        "battinfo_version": "0.8.0"
       }
     },
     "jsonld": {

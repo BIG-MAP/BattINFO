@@ -66,7 +66,7 @@ record = spec.to_record()
   "provenance": {
     "source_type": "lab",
     "retrieved_at": 1750000000,
-    "battinfo_version": "0.7.0"
+    "battinfo_version": "0.8.0"
   },
   "working_electrode_spec_id": "https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
   "counter_electrode": {
@@ -201,7 +201,7 @@ record = spec.to_record()
   "provenance": {
     "source_type": "lab",
     "retrieved_at": 1750000000,
-    "battinfo_version": "0.7.0"
+    "battinfo_version": "0.8.0"
   },
   "working_electrode_spec_id": "https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
   "counter_electrode": {

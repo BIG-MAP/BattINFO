@@ -88,7 +88,7 @@ record = dataset.to_record()
   "provenance": {
     "source_type": "measurement",
     "retrieved_at": 1750000000,
-    "battinfo_version": "0.7.0"
+    "battinfo_version": "0.8.0"
   }
 }
 ```
@@ -207,7 +207,7 @@ record = collection.to_record()
   "provenance": {
     "source_type": "catalog",
     "retrieved_at": 1750000000,
-    "battinfo_version": "0.7.0"
+    "battinfo_version": "0.8.0"
   }
 }
 ```
