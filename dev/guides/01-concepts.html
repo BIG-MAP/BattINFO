@@ -627,11 +627,6 @@
   &#39;raw&#39;: {&#39;text&#39;: &#39;Recommended Fast Charge Method to 80% SOC 10A to 3.6V CC, 12 min&#39;,
    &#39;page&#39;: 1,
    &#39;confidence&#39;: 0.8}},
- &#39;nominal_continuous_charging_current&#39;: {&#39;value&#39;: 2.5,
-  &#39;unit&#39;: &#39;A&#39;,
-  &#39;raw&#39;: {&#39;text&#39;: &#39;Recommended Standard Charge Method 2.5A to 3.6V CCCV, 60 min&#39;,
-   &#39;page&#39;: 1,
-   &#39;confidence&#39;: 0.8}},
  &#39;maximum_continuous_charging_current&#39;: {&#39;value&#39;: 2.5,
   &#39;unit&#39;: &#39;A&#39;,
   &#39;raw&#39;: {&#39;text&#39;: &#39;Recommended Standard Charge Method 2.5A to 3.6V CCCV, 60 min&#39;,
@@ -675,12 +670,13 @@
 <section id="CellSpec-—-the-specification">
 <h3>CellSpec — the specification<a class="headerlink" href="#CellSpec-—-the-specification" title="Link to this heading">#</a></h3>
 <p>A cell spec is a <strong>product specification</strong>: datasheet-level information about a battery model, not a physical item.</p>
-<p>In RDF it carries two parallel type assertions:</p>
+<p>In RDF it carries three parallel type assertions:</p>
 <ul class="simple">
 <li><p><strong>EMMO</strong>: <code class="docutils literal notranslate"><span class="pre">BatteryCellSpecification</span></code> (subclass of <code class="docutils literal notranslate"><span class="pre">emmo:Description</span></code> — an information entity describing a class of cells)</p></li>
+<li><p><strong>schema.org</strong>: <code class="docutils literal notranslate"><span class="pre">schema:ProductModel</span></code> (the catalogue entry — name, manufacturer, codes)</p></li>
 <li><p><strong>schema.org</strong>: <code class="docutils literal notranslate"><span class="pre">schema:CreativeWork</span></code> (the specification document as a creative artifact)</p></li>
 </ul>
-<p>The physical EMMO classes for format and chemistry (<code class="docutils literal notranslate"><span class="pre">BatteryCell</span></code>, <code class="docutils literal notranslate"><span class="pre">CylindricalBattery</span></code>, <code class="docutils literal notranslate"><span class="pre">LithiumIonBattery</span></code>, …) are placed on an <code class="docutils literal notranslate"><span class="pre">isDescriptionFor</span></code> anonymous node — not on the specification itself — because the specification is an information entity, not a physical cell.</p>
+<p>The physical content — the EMMO classes for format and chemistry (<code class="docutils literal notranslate"><span class="pre">BatteryCell</span></code>, <code class="docutils literal notranslate"><span class="pre">CylindricalBattery</span></code>, <code class="docutils literal notranslate"><span class="pre">LithiumIonBattery</span></code>, …) <strong>and</strong> the <code class="docutils literal notranslate"><span class="pre">hasProperty</span></code> quantities and composition — is placed on the described battery under <code class="docutils literal notranslate"><span class="pre">isDescriptionFor</span></code>, not on the specification itself, because the specification is an information entity, not a physical cell.</p>
 </section>
 <section id="Cell-—-the-physical-item">
 <h3>Cell — the physical item<a class="headerlink" href="#Cell-—-the-physical-item" title="Link to this heading">#</a></h3>
@@ -787,16 +783,18 @@ IRI: https://w3id.org/battinfo/spec/e4t5-w9re-mpq6-8g7e
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-@type: [&#39;BatteryCellSpecification&#39;, &#39;schema:CreativeWork&#39;]
+@type: [&#39;BatteryCellSpecification&#39;, &#39;schema:ProductModel&#39;, &#39;schema:CreativeWork&#39;]
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Each quantitative spec becomes a ConventionalProperty node</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Each quantitative spec becomes a ConventionalProperty node on the</span>
+<span class="c1"># described battery (the individual under isDescriptionFor).</span>
+<span class="n">described</span> <span class="o">=</span> <span class="n">jsonld</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;isDescriptionFor&quot;</span><span class="p">,</span> <span class="p">{})</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Properties:&quot;</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">jsonld</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hasProperty&quot;</span><span class="p">,</span> <span class="p">[]):</span>
+<span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">described</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hasProperty&quot;</span><span class="p">,</span> <span class="p">[]):</span>
     <span class="n">class_name</span> <span class="o">=</span> <span class="n">prop</span><span class="p">[</span><span class="s2">&quot;@type&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prop</span><span class="p">[</span><span class="s2">&quot;@type&quot;</span><span class="p">],</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="n">prop</span><span class="p">[</span><span class="s2">&quot;@type&quot;</span><span class="p">]</span>
     <span class="n">value</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hasNumericalPart&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hasNumberValue&quot;</span><span class="p">)</span>
     <span class="n">unit</span>  <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hasMeasurementUnit&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
@@ -833,7 +831,7 @@ Properties:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-JSON-LD exported to: &lt;repo&gt;\docs\guides\_scratch\guide-01\resolver\spec\e4t5-w9re-mpq6-8g7e\index.jsonld
+JSON-LD exported to: C:\t\bi-v5\docs\guides\_scratch\guide-01\resolver\spec\e4t5-w9re-mpq6-8g7e\index.jsonld
 
 {
   &#34;@context&#34;: [
@@ -847,6 +845,7 @@ JSON-LD exported to: &lt;repo&gt;\docs\guides\_scratch\guide-01\resolver\spec\e4
   ],
   &#34;@type&#34;: [
     &#34;BatteryCellSpecification&#34;,
+    &#34;schema:ProductModel&#34;,
     &#34;schema:CreativeWork&#34;
   ],
   &#34;@id&#34;: &#34;https://w3id.org/battinfo/spec/e4t5-w9re-mpq6-8g7e&#34;,
@@ -866,39 +865,46 @@ JSON-LD exported to: &lt;repo&gt;\docs\guides\_scratch\guide-01\resolver\spec\e4
       &#34;LithiumIonIronPhosphateBattery&#34;,
       &#34;LithiumIonGraphiteBattery&#34;
     ],
-    &#34;skos:prefLabel&#34;: &#34;A123 Systems ANR26650M1-B&#34;
+    &#34;@id&#34;: &#34;https://w3id.org/battinfo/spec/e4t5-w9re-mpq6-8g7e#described&#34;,
+    &#34;skos:prefLabel&#34;: &#34;A123 Systems ANR26650M1-B&#34;,
+    &#34;hasProperty&#34;: [
+      {
+        &#34;@type&#34;: [
+          &#34;NominalCapacity&#34;,
+          &#34;ConventionalProperty&#34;
+        ],
+        &#34;skos:prefLabel&#34;: &#34;NominalCapacity&#34;,
+        &#34;hasNumericalPart&#34;: {
+          &#34;@type&#34;: &#34;RealData&#34;,
+          &#34;hasNumberValue&#34;: 2.5
+        },
+        &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#AmpereHour&#34;
+      },
+      {
+        &#34;@type&#34;: [
+          &#34;NominalVoltage&#34;,
+          &#34;ConventionalProperty&#34;
+        ],
+        &#34;skos:prefLabel&#34;: &#34;NominalVoltage&#34;,
+        &#34;hasNumericalPart&#34;: {
+          &#34;@type&#34;: &#34;RealData&#34;,
+          &#34;hasNumberValue&#34;: 3.3
+        },
+        &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#Volt&#34;
+      }
+    ],
+    &#34;hasPositiveElectrode&#34;: {
+      &#34;@type&#34;: &#34;LithiumIronPhosphateElectrode&#34;
+    },
+    &#34;hasNegativeElectrode&#34;: {
+      &#34;@type&#34;: &#34;GraphiteElectrode&#34;
+    }
   },
   &#34;schema:schemaVersion&#34;: &#34;0.2.0&#34;,
-  &#34;hasProperty&#34;: [
-    {
-      &#34;@type&#34;: [
-        &#34;NominalCapacity&#34;,
-        &#34;ConventionalProperty&#34;
-      ],
-      &#34;skos:prefLabel&#34;: &#34;NominalCapacity&#34;,
-      &#34;hasNumericalPart&#34;: {
-        &#34;@type&#34;: &#34;RealData&#34;,
-        &#34;hasNumberValue&#34;: 2.5
-      },
-      &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#AmpereHour&#34;
-    },
-    {
-      &#34;@type&#34;: [
-        &#34;NominalVoltage&#34;,
-        &#34;ConventionalProperty&#34;
-      ],
-      &#34;skos:prefLabel&#34;: &#34;NominalVoltage&#34;,
-      &#34;hasNumericalPart&#34;: {
-        &#34;@type&#34;: &#34;RealData&#34;,
-        &#34;hasNumberValue&#34;: 3.3
-      },
-      &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#Volt&#34;
-    }
-  ],
   &#34;dcterms:source&#34;: {
     &#34;@type&#34;: &#34;prov:Entity&#34;,
     &#34;dcterms:type&#34;: &#34;datasheet&#34;,
-    &#34;prov:generatedAtTime&#34;: &#34;2026-07-08T22:01:57+00:00&#34;
+    &#34;prov:generatedAtTime&#34;: &#34;2026-09-15T14:08:28+00:00&#34;
   }
 }
 </pre></div></div>

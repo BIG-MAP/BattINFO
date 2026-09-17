@@ -419,9 +419,11 @@
 <li class="toctree-l2"><a class="reference internal" href="materials.html">Materials</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Electrodes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="electrolytes.html">Electrolytes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="components.html">Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="separators.html">Separators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="current-collectors.html">Current collectors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="housings.html">Housings</a></li>
 <li class="toctree-l2"><a class="reference internal" href="cells.html">Cells</a></li>
-<li class="toctree-l2"><a class="reference internal" href="half-cells.html">Half cells</a></li>
+<li class="toctree-l2"><a class="reference internal" href="half-cells.html">Half cells &amp; three-electrode cells</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tests.html">Tests</a></li>
 <li class="toctree-l2"><a class="reference internal" href="datasets.html">Datasets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="equipment.html">Equipment</a></li>
@@ -532,8 +534,12 @@ Python</label><div class="sd-tab-content docutils">
 <span class="n">record</span> <span class="o">=</span> <span class="n">create_electrode_spec</span><span class="p">(</span>
     <span class="n">uid</span><span class="o">=</span><span class="s2">&quot;kxwy-5f5f-f682-hhch&quot;</span><span class="p">,</span>
     <span class="n">name</span><span class="o">=</span><span class="s2">&quot;NMC811 cathode design A&quot;</span><span class="p">,</span>
-    <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;nmc811&quot;</span><span class="p">,</span>                     <span class="c1"># the ACTIVE material&#39;s kind</span>
+    <span class="n">active_material_kind</span><span class="o">=</span><span class="s2">&quot;nmc811&quot;</span><span class="p">,</span>     <span class="c1"># from the curated material-kind vocabulary</span>
     <span class="n">active_material_spec_id</span><span class="o">=</span><span class="s2">&quot;https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5&quot;</span><span class="p">,</span>
+    <span class="n">composition</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;active&quot;</span><span class="p">:</span> <span class="mf">0.96</span><span class="p">,</span>       <span class="c1"># weight fractions -&gt; coating.component</span>
+                 <span class="s2">&quot;binder&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;PVDF&quot;</span><span class="p">,</span> <span class="s2">&quot;fraction&quot;</span><span class="p">:</span> <span class="mf">0.02</span><span class="p">},</span>
+                 <span class="s2">&quot;conductive_additive&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Carbon black&quot;</span><span class="p">,</span> <span class="s2">&quot;fraction&quot;</span><span class="p">:</span> <span class="mf">0.02</span><span class="p">}},</span>
+    <span class="n">coating</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;double_sided&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>   <span class="c1"># coated on one side (a lab half-cell disc)</span>
     <span class="n">source_type</span><span class="o">=</span><span class="s2">&quot;lab&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
@@ -548,8 +554,47 @@ Canonical record</label><div class="sd-tab-content docutils">
 <span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;short_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kxwy5f&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NMC811 cathode design A&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;kind&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;nmc811&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;active_material_spec_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5&quot;</span>
+<span class="w">    </span><span class="nt">&quot;active_material_kind&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;nmc811&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;active_material_spec_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;coating&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;component&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;active_material&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NMC811 (LiNi0.8Mn0.1Co0.1O2)&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">              </span><span class="nt">&quot;mass_fraction&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.96</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span>
+<span class="w">              </span><span class="p">}</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="nt">&quot;material_spec_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5&quot;</span>
+<span class="w">          </span><span class="p">}</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;binder&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PVDF&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">              </span><span class="nt">&quot;mass_fraction&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.02</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span>
+<span class="w">              </span><span class="p">}</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">          </span><span class="p">}</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;additive&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Carbon black&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">              </span><span class="nt">&quot;mass_fraction&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.02</span><span class="p">,</span>
+<span class="w">                </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span>
+<span class="w">              </span><span class="p">}</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">          </span><span class="p">}</span>
+<span class="w">        </span><span class="p">]</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;double_sided&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;provenance&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;source_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;lab&quot;</span><span class="p">,</span>
@@ -573,13 +618,84 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <span class="w">      </span><span class="nt">&quot;battinfo&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/&quot;</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;LithiumNickelManganeseCobaltOxideElectrode&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;Description&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;schema:ProductModel&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;schema:CreativeWork&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;isDescriptionFor&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;LithiumNickelManganeseCobaltOxideElectrode&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;hasCoating&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ElectrodeCoating&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;hasActiveMaterial&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ActiveMaterial&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NMC811 (LiNi0.8Mn0.1Co0.1O2)&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">&quot;MassFraction&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;ConventionalProperty&quot;</span>
+<span class="w">          </span><span class="p">],</span>
+<span class="w">          </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.96</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">          </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;hasBinder&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;PolyvinylideneFluoride&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;Binder&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PVDF&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">&quot;MassFraction&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;ConventionalProperty&quot;</span>
+<span class="w">          </span><span class="p">],</span>
+<span class="w">          </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.02</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">          </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;hasConductiveAdditive&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;CarbonBlack&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;ConductiveAdditive&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Carbon black&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">&quot;MassFraction&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;ConventionalProperty&quot;</span>
+<span class="w">          </span><span class="p">],</span>
+<span class="w">          </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.02</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">          </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;schema:additionalProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;schema:PropertyValue&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;double_sided&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;schema:value&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;hasActiveMaterial&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5#described&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ActiveMaterial&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NMC811 cathode design A&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch#described&quot;</span>
+<span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NMC811 cathode design A&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;hasActiveMaterial&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ActiveMaterial&quot;</span>
-<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NMC811 cathode design A&quot;</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -600,8 +716,12 @@ Python</label><div class="sd-tab-content docutils">
 
 <span class="n">record</span> <span class="o">=</span> <span class="n">create_electrode</span><span class="p">(</span>
     <span class="n">uid</span><span class="o">=</span><span class="s2">&quot;3w87-0ddf-ryjg-evxe&quot;</span><span class="p">,</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Cathode disc, cell LAB-2026-0001&quot;</span><span class="p">,</span>
-    <span class="n">electrode_spec_id</span><span class="o">=</span><span class="s2">&quot;https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch&quot;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Cathode disc 07, cell LAB-2026-0001&quot;</span><span class="p">,</span>
+    <span class="n">spec_id</span><span class="o">=</span><span class="s2">&quot;https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch&quot;</span><span class="p">,</span>
+    <span class="c1"># Genealogy: the coated strip this disc was punched from is itself an</span>
+    <span class="c1"># electrode record; siblings cut from it share the same parent.</span>
+    <span class="n">parent_id</span><span class="o">=</span><span class="s2">&quot;https://w3id.org/battinfo/electrode/9m2k-4tqv-7xw3-1nfh&quot;</span><span class="p">,</span>
+    <span class="n">piece_id</span><span class="o">=</span><span class="s2">&quot;disc-07&quot;</span><span class="p">,</span>
     <span class="n">source_type</span><span class="o">=</span><span class="s2">&quot;lab&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
@@ -616,7 +736,9 @@ Canonical record</label><div class="sd-tab-content docutils">
 <span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/electrode/3w87-0ddf-ryjg-evxe&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;electrode_spec_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;short_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3w870d&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Cathode disc, cell LAB-2026-0001&quot;</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Cathode disc 07, cell LAB-2026-0001&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;parent_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/electrode/7d9k-2m4p-8t3x-6nq5&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;piece_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disc-07&quot;</span>
 <span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;provenance&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;source_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;lab&quot;</span><span class="p">,</span>
@@ -642,9 +764,17 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <span class="w">  </span><span class="p">],</span>
 <span class="w">  </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Electrode&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/electrode/3w87-0ddf-ryjg-evxe&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Cathode disc, cell LAB-2026-0001&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Cathode disc 07, cell LAB-2026-0001&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;prov:wasDerivedFrom&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/electrode/7d9k-2m4p-8t3x-6nq5&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;schema:identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;schema:PropertyValue&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;piece_id&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;schema:value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disc-07&quot;</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
@@ -688,7 +818,7 @@ Canonical record</label><div class="sd-tab-content docutils">
 <span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/qfjh-7xyr-ga1k-tjez&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;short_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;qfjh7x&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NMC811 cathode&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;kind&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;nmc811&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;active_material_kind&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;nmc811&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;active_material_spec_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/npa4-0dnw-evyh-hhdm&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;coating&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">      </span><span class="nt">&quot;component&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -781,127 +911,136 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">],</span>
 <span class="w">  </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">    </span><span class="s2">&quot;LithiumNickelManganeseCobaltOxideElectrode&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;PositiveElectrode&quot;</span>
+<span class="w">    </span><span class="s2">&quot;Description&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;schema:ProductModel&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;schema:CreativeWork&quot;</span>
 <span class="w">  </span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;hasCoating&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ElectrodeCoating&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;hasActiveMaterial&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;LithiumNickelManganeseCobaltOxide811&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;ActiveMaterial&quot;</span>
-<span class="w">      </span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NMC811&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/npa4-0dnw-evyh-hhdm&quot;</span>
+<span class="w">  </span><span class="nt">&quot;isDescriptionFor&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;LithiumNickelManganeseCobaltOxideElectrode&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;PositiveElectrode&quot;</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;hasCoating&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ElectrodeCoating&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;hasActiveMaterial&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;LithiumNickelManganeseCobaltOxide811&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;ActiveMaterial&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NMC811&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/npa4-0dnw-evyh-hhdm&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">&quot;MassFraction&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;ConventionalProperty&quot;</span>
+<span class="w">          </span><span class="p">],</span>
+<span class="w">          </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.96</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">          </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
+<span class="w">        </span><span class="p">}</span>
 <span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;hasBinder&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;PolyvinylideneFluoride&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;Binder&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PVDF&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/bkrw-7shb-tzbm-j664&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">&quot;MassFraction&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;ConventionalProperty&quot;</span>
+<span class="w">          </span><span class="p">],</span>
+<span class="w">          </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.02</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">          </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;hasConductiveAdditive&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;CarbonBlack&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;ConductiveAdditive&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Carbon black&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/r5xt-4hrh-jm2k-yg4m&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">&quot;MassFraction&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;ConventionalProperty&quot;</span>
+<span class="w">          </span><span class="p">],</span>
+<span class="w">          </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.02</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">          </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">&quot;ActiveMassLoading&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;ConventionalProperty&quot;</span>
+<span class="w">          </span><span class="p">],</span>
+<span class="w">          </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ActiveMassLoading&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">21</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">          </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#MilliGramPerSquareCentiMetre&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">&quot;CalenderedCoatingThickness&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;ConventionalProperty&quot;</span>
+<span class="w">          </span><span class="p">],</span>
+<span class="w">          </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CalenderedCoatingThickness&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">64</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">          </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#MicroMetre&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">]</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;hasCurrentCollector&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;CurrentCollector&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;Aluminium&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;Foil&quot;</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Aluminium foil&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">          </span><span class="s2">&quot;MassFraction&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;Thickness&quot;</span><span class="p">,</span>
 <span class="w">          </span><span class="s2">&quot;ConventionalProperty&quot;</span>
 <span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Thickness&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.96</span>
-<span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
-<span class="w">      </span><span class="p">}</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;hasBinder&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;PolyvinylideneFluoride&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;Binder&quot;</span>
-<span class="w">      </span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PVDF&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/bkrw-7shb-tzbm-j664&quot;</span>
-<span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">          </span><span class="s2">&quot;MassFraction&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s2">&quot;ConventionalProperty&quot;</span>
-<span class="w">        </span><span class="p">],</span>
-<span class="w">        </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.02</span>
-<span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
-<span class="w">      </span><span class="p">}</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;hasConductiveAdditive&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;CarbonBlack&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;ConductiveAdditive&quot;</span>
-<span class="w">      </span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Carbon black&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/r5xt-4hrh-jm2k-yg4m&quot;</span>
-<span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">          </span><span class="s2">&quot;MassFraction&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s2">&quot;ConventionalProperty&quot;</span>
-<span class="w">        </span><span class="p">],</span>
-<span class="w">        </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.02</span>
-<span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
-<span class="w">      </span><span class="p">}</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">      </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">          </span><span class="s2">&quot;ActiveMassLoading&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s2">&quot;ConventionalProperty&quot;</span>
-<span class="w">        </span><span class="p">],</span>
-<span class="w">        </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ActiveMassLoading&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">21</span>
-<span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#MilliGramPerSquareCentiMetre&quot;</span>
-<span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">          </span><span class="s2">&quot;CalenderedCoatingThickness&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s2">&quot;ConventionalProperty&quot;</span>
-<span class="w">        </span><span class="p">],</span>
-<span class="w">        </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CalenderedCoatingThickness&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">64</span>
+<span class="w">          </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">15</span>
 <span class="w">        </span><span class="p">},</span>
 <span class="w">        </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#MicroMetre&quot;</span>
 <span class="w">      </span><span class="p">}</span>
-<span class="w">    </span><span class="p">]</span>
-<span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;hasCurrentCollector&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">      </span><span class="s2">&quot;CurrentCollector&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="s2">&quot;Aluminium&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="s2">&quot;Foil&quot;</span>
-<span class="w">    </span><span class="p">],</span>
-<span class="w">    </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Aluminium foil&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;Thickness&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;ConventionalProperty&quot;</span>
-<span class="w">      </span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Thickness&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">15</span>
-<span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#MicroMetre&quot;</span>
-<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;hasActiveMaterial&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/npa4-0dnw-evyh-hhdm#described&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ActiveMaterial&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NMC811 cathode&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/qfjh-7xyr-ga1k-tjez#described&quot;</span>
 <span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/qfjh-7xyr-ga1k-tjez&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NMC811 cathode&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;hasActiveMaterial&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/npa4-0dnw-evyh-hhdm&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ActiveMaterial&quot;</span>
-<span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;schema:comment&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NMC811 cathode (96/2/2 NMC811/PVDF/carbon black on Al foil). Discovery-Benchmark NMC811-Graphite cells.&quot;</span>
 <span class="p">}</span>
 </pre></div>
@@ -937,7 +1076,7 @@ Canonical record</label><div class="sd-tab-content docutils">
 <span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/d7qr-n581-74c3-7g7r&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;short_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;d7qrn5&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Graphite anode&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;kind&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;graphite&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;active_material_kind&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;graphite&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;active_material_spec_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/gwck-k5kf-ae1f-gfgc&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;coating&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">      </span><span class="nt">&quot;component&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -1029,121 +1168,130 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">],</span>
 <span class="w">  </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">    </span><span class="s2">&quot;GraphiteElectrode&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;NegativeElectrode&quot;</span>
+<span class="w">    </span><span class="s2">&quot;Description&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;schema:ProductModel&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;schema:CreativeWork&quot;</span>
 <span class="w">  </span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;hasCoating&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ElectrodeCoating&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;hasActiveMaterial&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;isDescriptionFor&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;GraphiteElectrode&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;NegativeElectrode&quot;</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;hasCoating&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ElectrodeCoating&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;hasActiveMaterial&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;Graphite&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;ActiveMaterial&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Graphite&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/gwck-k5kf-ae1f-gfgc&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">&quot;MassFraction&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;ConventionalProperty&quot;</span>
+<span class="w">          </span><span class="p">],</span>
+<span class="w">          </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.95</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">          </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;hasBinder&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Binder&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CMC/SBR&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">&quot;MassFraction&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;ConventionalProperty&quot;</span>
+<span class="w">          </span><span class="p">],</span>
+<span class="w">          </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.04</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">          </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;hasConductiveAdditive&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;CarbonBlack&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;ConductiveAdditive&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Carbon black&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/r5xt-4hrh-jm2k-yg4m&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">&quot;MassFraction&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;ConventionalProperty&quot;</span>
+<span class="w">          </span><span class="p">],</span>
+<span class="w">          </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.01</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">          </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">&quot;ActiveMassLoading&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;ConventionalProperty&quot;</span>
+<span class="w">          </span><span class="p">],</span>
+<span class="w">          </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ActiveMassLoading&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">11.5</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">          </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#MilliGramPerSquareCentiMetre&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">&quot;CalenderedCoatingThickness&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;ConventionalProperty&quot;</span>
+<span class="w">          </span><span class="p">],</span>
+<span class="w">          </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CalenderedCoatingThickness&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">72</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">          </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#MicroMetre&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">]</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;hasCurrentCollector&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;Graphite&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;ActiveMaterial&quot;</span>
+<span class="w">        </span><span class="s2">&quot;CurrentCollector&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;Copper&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;Foil&quot;</span>
 <span class="w">      </span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Graphite&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/gwck-k5kf-ae1f-gfgc&quot;</span>
-<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Copper foil&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">          </span><span class="s2">&quot;MassFraction&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;Thickness&quot;</span><span class="p">,</span>
 <span class="w">          </span><span class="s2">&quot;ConventionalProperty&quot;</span>
 <span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Thickness&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.95</span>
-<span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
-<span class="w">      </span><span class="p">}</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;hasBinder&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Binder&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CMC/SBR&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">          </span><span class="s2">&quot;MassFraction&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s2">&quot;ConventionalProperty&quot;</span>
-<span class="w">        </span><span class="p">],</span>
-<span class="w">        </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.04</span>
-<span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
-<span class="w">      </span><span class="p">}</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;hasConductiveAdditive&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;CarbonBlack&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;ConductiveAdditive&quot;</span>
-<span class="w">      </span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Carbon black&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/r5xt-4hrh-jm2k-yg4m&quot;</span>
-<span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">          </span><span class="s2">&quot;MassFraction&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s2">&quot;ConventionalProperty&quot;</span>
-<span class="w">        </span><span class="p">],</span>
-<span class="w">        </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.01</span>
-<span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
-<span class="w">      </span><span class="p">}</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">      </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">          </span><span class="s2">&quot;ActiveMassLoading&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s2">&quot;ConventionalProperty&quot;</span>
-<span class="w">        </span><span class="p">],</span>
-<span class="w">        </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ActiveMassLoading&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">11.5</span>
-<span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#MilliGramPerSquareCentiMetre&quot;</span>
-<span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">          </span><span class="s2">&quot;CalenderedCoatingThickness&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s2">&quot;ConventionalProperty&quot;</span>
-<span class="w">        </span><span class="p">],</span>
-<span class="w">        </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CalenderedCoatingThickness&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">72</span>
+<span class="w">          </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span>
 <span class="w">        </span><span class="p">},</span>
 <span class="w">        </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#MicroMetre&quot;</span>
 <span class="w">      </span><span class="p">}</span>
-<span class="w">    </span><span class="p">]</span>
-<span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;hasCurrentCollector&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">      </span><span class="s2">&quot;CurrentCollector&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="s2">&quot;Copper&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="s2">&quot;Foil&quot;</span>
-<span class="w">    </span><span class="p">],</span>
-<span class="w">    </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Copper foil&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;Thickness&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;ConventionalProperty&quot;</span>
-<span class="w">      </span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Thickness&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span>
-<span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#MicroMetre&quot;</span>
-<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;hasActiveMaterial&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/gwck-k5kf-ae1f-gfgc#described&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ActiveMaterial&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Graphite anode&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/d7qr-n581-74c3-7g7r#described&quot;</span>
 <span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/d7qr-n581-74c3-7g7r&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Graphite anode&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;hasActiveMaterial&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/gwck-k5kf-ae1f-gfgc&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ActiveMaterial&quot;</span>
-<span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;schema:comment&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Graphite anode (95/4/1 graphite/CMC-SBR/carbon black on Cu foil). Discovery-Benchmark cells.&quot;</span>
 <span class="p">}</span>
 </pre></div>
@@ -1179,7 +1327,7 @@ Canonical record</label><div class="sd-tab-content docutils">
 <span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/m6y0-tkfg-sn40-q10p&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;short_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;m6y0tk&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;LFP cathode&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;kind&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;lfp&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;active_material_kind&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;lfp&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;active_material_spec_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/5ms1-9jv8-hr54-mn4e&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;coating&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">      </span><span class="nt">&quot;component&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -1268,113 +1416,122 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">],</span>
 <span class="w">  </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">    </span><span class="s2">&quot;LithiumIronPhosphateElectrode&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;PositiveElectrode&quot;</span>
+<span class="w">    </span><span class="s2">&quot;Description&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;schema:ProductModel&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;schema:CreativeWork&quot;</span>
 <span class="w">  </span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;hasCoating&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ElectrodeCoating&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;hasActiveMaterial&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;LithiumIronPhosphate&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;ActiveMaterial&quot;</span>
-<span class="w">      </span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;LFP&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/5ms1-9jv8-hr54-mn4e&quot;</span>
-<span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">          </span><span class="s2">&quot;MassFraction&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s2">&quot;ConventionalProperty&quot;</span>
-<span class="w">        </span><span class="p">],</span>
-<span class="w">        </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.96</span>
-<span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
-<span class="w">      </span><span class="p">}</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;hasBinder&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;PolyvinylideneFluoride&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;Binder&quot;</span>
-<span class="w">      </span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PVDF&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/bkrw-7shb-tzbm-j664&quot;</span>
-<span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">          </span><span class="s2">&quot;MassFraction&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s2">&quot;ConventionalProperty&quot;</span>
-<span class="w">        </span><span class="p">],</span>
-<span class="w">        </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.02</span>
-<span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
-<span class="w">      </span><span class="p">}</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;hasConductiveAdditive&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;CarbonBlack&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;ConductiveAdditive&quot;</span>
-<span class="w">      </span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Carbon black&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/r5xt-4hrh-jm2k-yg4m&quot;</span>
-<span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">          </span><span class="s2">&quot;MassFraction&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s2">&quot;ConventionalProperty&quot;</span>
-<span class="w">        </span><span class="p">],</span>
-<span class="w">        </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.02</span>
-<span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
-<span class="w">      </span><span class="p">}</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;ActiveMassLoading&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;ConventionalProperty&quot;</span>
-<span class="w">      </span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ActiveMassLoading&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span>
-<span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#MilliGramPerSquareCentiMetre&quot;</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;hasCurrentCollector&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;isDescriptionFor&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">      </span><span class="s2">&quot;CurrentCollector&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="s2">&quot;Aluminium&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="s2">&quot;Foil&quot;</span>
+<span class="w">      </span><span class="s2">&quot;LithiumIronPhosphateElectrode&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;PositiveElectrode&quot;</span>
 <span class="w">    </span><span class="p">],</span>
-<span class="w">    </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Aluminium foil&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;Thickness&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;ConventionalProperty&quot;</span>
-<span class="w">      </span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Thickness&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">15</span>
+<span class="w">    </span><span class="nt">&quot;hasCoating&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ElectrodeCoating&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;hasActiveMaterial&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;LithiumIronPhosphate&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;ActiveMaterial&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;LFP&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/5ms1-9jv8-hr54-mn4e&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">&quot;MassFraction&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;ConventionalProperty&quot;</span>
+<span class="w">          </span><span class="p">],</span>
+<span class="w">          </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.96</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">          </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
+<span class="w">        </span><span class="p">}</span>
 <span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#MicroMetre&quot;</span>
-<span class="w">    </span><span class="p">}</span>
+<span class="w">      </span><span class="nt">&quot;hasBinder&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;PolyvinylideneFluoride&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;Binder&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PVDF&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/bkrw-7shb-tzbm-j664&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">&quot;MassFraction&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;ConventionalProperty&quot;</span>
+<span class="w">          </span><span class="p">],</span>
+<span class="w">          </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.02</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">          </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;hasConductiveAdditive&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;CarbonBlack&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;ConductiveAdditive&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Carbon black&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/r5xt-4hrh-jm2k-yg4m&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">&quot;MassFraction&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;ConventionalProperty&quot;</span>
+<span class="w">          </span><span class="p">],</span>
+<span class="w">          </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.02</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">          </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;ActiveMassLoading&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;ConventionalProperty&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ActiveMassLoading&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#MilliGramPerSquareCentiMetre&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;hasCurrentCollector&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;CurrentCollector&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;Aluminium&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;Foil&quot;</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Aluminium foil&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;Thickness&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;ConventionalProperty&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Thickness&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">15</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#MicroMetre&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;hasActiveMaterial&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/5ms1-9jv8-hr54-mn4e#described&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ActiveMaterial&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;LFP cathode&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/m6y0-tkfg-sn40-q10p#described&quot;</span>
 <span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/m6y0-tkfg-sn40-q10p&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;LFP cathode&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;hasActiveMaterial&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/5ms1-9jv8-hr54-mn4e&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ActiveMaterial&quot;</span>
-<span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;schema:comment&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;LFP cathode (96/2/2 LFP/PVDF/carbon black on Al foil).&quot;</span>
 <span class="p">}</span>
 </pre></div>
@@ -1410,7 +1567,7 @@ Canonical record</label><div class="sd-tab-content docutils">
 <span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/qw3j-we77-zzj1-ya55&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;short_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;qw3jwe&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Si-Gr anode&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;kind&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;silicon_graphite&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;active_material_kind&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;silicon_graphite&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;polarity&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;negative&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;grade&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AQ&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;active_material_spec_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/jnab-ggw9-cbn8-hhjr&quot;</span><span class="p">,</span>
@@ -1521,173 +1678,182 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">],</span>
 <span class="w">  </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">    </span><span class="s2">&quot;SiliconGraphiteElectrode&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;NegativeElectrode&quot;</span>
+<span class="w">    </span><span class="s2">&quot;Description&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;schema:ProductModel&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;schema:CreativeWork&quot;</span>
 <span class="w">  </span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;hasCoating&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ElectrodeCoating&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;hasActiveMaterial&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ActiveMaterial&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Silicon-graphite composite&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/jnab-ggw9-cbn8-hhjr&quot;</span>
-<span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">          </span><span class="s2">&quot;MassFraction&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s2">&quot;ConventionalProperty&quot;</span>
-<span class="w">        </span><span class="p">],</span>
-<span class="w">        </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.9</span>
-<span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
-<span class="w">      </span><span class="p">}</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;hasBinder&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;CarboxymethylCellulose&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;Binder&quot;</span>
-<span class="w">      </span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CMC&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/5k8a-bj67-7v5w-6vvd&quot;</span>
-<span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">          </span><span class="s2">&quot;MassFraction&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s2">&quot;ConventionalProperty&quot;</span>
-<span class="w">        </span><span class="p">],</span>
-<span class="w">        </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.05</span>
-<span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
-<span class="w">      </span><span class="p">}</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;hasConductiveAdditive&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;CarbonBlack&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;ConductiveAdditive&quot;</span>
-<span class="w">      </span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Carbon black&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/r5xt-4hrh-jm2k-yg4m&quot;</span>
-<span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">          </span><span class="s2">&quot;MassFraction&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s2">&quot;ConventionalProperty&quot;</span>
-<span class="w">        </span><span class="p">],</span>
-<span class="w">        </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.05</span>
-<span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
-<span class="w">      </span><span class="p">}</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;hasCurrentCollector&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;isDescriptionFor&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">      </span><span class="s2">&quot;CurrentCollector&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="s2">&quot;Copper&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="s2">&quot;Foil&quot;</span>
+<span class="w">      </span><span class="s2">&quot;SiliconGraphiteElectrode&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;NegativeElectrode&quot;</span>
 <span class="w">    </span><span class="p">],</span>
-<span class="w">    </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Copper foil&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;Thickness&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;ConventionalProperty&quot;</span>
-<span class="w">      </span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Thickness&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span>
+<span class="w">    </span><span class="nt">&quot;hasCoating&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ElectrodeCoating&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;hasActiveMaterial&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ActiveMaterial&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Silicon-graphite composite&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/jnab-ggw9-cbn8-hhjr&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">&quot;MassFraction&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;ConventionalProperty&quot;</span>
+<span class="w">          </span><span class="p">],</span>
+<span class="w">          </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.9</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">          </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
+<span class="w">        </span><span class="p">}</span>
 <span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#MicroMetre&quot;</span>
-<span class="w">    </span><span class="p">}</span>
+<span class="w">      </span><span class="nt">&quot;hasBinder&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;CarboxymethylCellulose&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;Binder&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CMC&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/5k8a-bj67-7v5w-6vvd&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">&quot;MassFraction&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;ConventionalProperty&quot;</span>
+<span class="w">          </span><span class="p">],</span>
+<span class="w">          </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.05</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">          </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;hasConductiveAdditive&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;CarbonBlack&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;ConductiveAdditive&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Carbon black&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/r5xt-4hrh-jm2k-yg4m&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">&quot;MassFraction&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;ConventionalProperty&quot;</span>
+<span class="w">          </span><span class="p">],</span>
+<span class="w">          </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.05</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">          </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;hasCurrentCollector&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;CurrentCollector&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;Copper&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;Foil&quot;</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Copper foil&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;Thickness&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;ConventionalProperty&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Thickness&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#MicroMetre&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;AreicCapacity&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;ConventionalProperty&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AreicCapacity&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">2.8</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;schema:unitText&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;mAh/cm2&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;CalenderedCoatingThickness&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;ConventionalProperty&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CalenderedCoatingThickness&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">48</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#MicroMetre&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;DryCoatingThickness&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;ConventionalProperty&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DryCoatingThickness&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">62</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#MicroMetre&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;ActiveMassLoading&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;ConventionalProperty&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ActiveMassLoading&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">6.2</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#MilliGramPerSquareCentiMetre&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;Porosity&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;ConventionalProperty&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.35</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;hasActiveMaterial&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/jnab-ggw9-cbn8-hhjr#described&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ActiveMaterial&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;prov:wasGeneratedBy&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Manufacturing&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Manufacturing&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;dcterms:type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;schema:DefinedTerm&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;schema:termCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;aqueous&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Water-based (aqueous) processing&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;hasSolvent&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;schema:ChemicalSubstance&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;water&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;schema:description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;planetary mixing, 80 degC drying, calendered to 35% porosity&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Si-Gr anode&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/qw3j-we77-zzj1-ya55#described&quot;</span>
 <span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;AreicCapacity&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;ConventionalProperty&quot;</span>
-<span class="w">      </span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AreicCapacity&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">2.8</span>
-<span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;schema:unitText&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;mAh/cm2&quot;</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;CalenderedCoatingThickness&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;ConventionalProperty&quot;</span>
-<span class="w">      </span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CalenderedCoatingThickness&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">48</span>
-<span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#MicroMetre&quot;</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;DryCoatingThickness&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;ConventionalProperty&quot;</span>
-<span class="w">      </span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DryCoatingThickness&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">62</span>
-<span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#MicroMetre&quot;</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;ActiveMassLoading&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;ConventionalProperty&quot;</span>
-<span class="w">      </span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ActiveMassLoading&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">6.2</span>
-<span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#MilliGramPerSquareCentiMetre&quot;</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;Porosity&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;ConventionalProperty&quot;</span>
-<span class="w">      </span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.35</span>
-<span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">  </span><span class="p">],</span>
 <span class="w">  </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/qw3j-we77-zzj1-ya55&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Si-Gr anode&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;hasActiveMaterial&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/jnab-ggw9-cbn8-hhjr&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ActiveMaterial&quot;</span>
-<span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;prov:wasGeneratedBy&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Manufacturing&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Manufacturing&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;dcterms:type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;schema:DefinedTerm&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;schema:termCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;aqueous&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Water-based (aqueous) processing&quot;</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;hasSolvent&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;schema:ChemicalSubstance&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;water&quot;</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;schema:description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;planetary mixing, 80 degC drying, calendered to 35% porosity&quot;</span>
-<span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;schema:comment&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Si-Gr anode, water-processed (CMC binder). The NMP-processed sibling of this recipe is a DIFFERENT electrode-spec: for an electrode the processing route is a design decision, so it is part of the spec identity.&quot;</span>
 <span class="p">}</span>
 </pre></div>
@@ -1807,7 +1973,7 @@ JSON-LD</label><div class="sd-tab-content docutils">
 </details></section>
 <section id="fields">
 <h2>Fields<a class="headerlink" href="#fields" title="Link to this heading">#</a></h2>
-<p>Generated from the packaged JSON Schemas — the same files <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">validate</span></code> and the registry’s publish gate enforce. Every record also carries the shared envelope (<code class="docutils literal notranslate"><span class="pre">schema_version</span></code>, <code class="docutils literal notranslate"><span class="pre">provenance</span></code>, and optional <code class="docutils literal notranslate"><span class="pre">notes</span></code>, <code class="docutils literal notranslate"><span class="pre">funding</span></code>, <code class="docutils literal notranslate"><span class="pre">contributor</span></code>, <code class="docutils literal notranslate"><span class="pre">license</span></code>). Quantities are <code class="docutils literal notranslate"><span class="pre">{value,</span> <span class="pre">unit}</span></code> maps and may also carry <code class="docutils literal notranslate"><span class="pre">value_basis</span></code> (Measured, Conventional, Rated, or Nominal) and <code class="docutils literal notranslate"><span class="pre">conditions</span></code> (the parameters under which the value holds, each itself a quantity; a qualitative condition may be <code class="docutils literal notranslate"><span class="pre">value_text</span></code> alone). In JSON-LD, conditions ride a measurement node the quantity <code class="docutils literal notranslate"><span class="pre">isOutputOf</span></code>; the <code class="docutils literal notranslate"><span class="pre">voltage_reference</span></code> key instead becomes a <code class="docutils literal notranslate"><span class="pre">hasMetrologicalReference</span></code> datum on the quantity, beside its unit.</p>
+<p>Generated from the packaged JSON Schemas — the same files <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">validate</span></code> and the registry’s publish gate enforce. Every record also carries the shared envelope (<code class="docutils literal notranslate"><span class="pre">schema_version</span></code>, <code class="docutils literal notranslate"><span class="pre">provenance</span></code>, and optional <code class="docutils literal notranslate"><span class="pre">notes</span></code>, <code class="docutils literal notranslate"><span class="pre">funding</span></code>, <code class="docutils literal notranslate"><span class="pre">contributor</span></code>, <code class="docutils literal notranslate"><span class="pre">license</span></code>). Quantities are <code class="docutils literal notranslate"><span class="pre">{value,</span> <span class="pre">unit}</span></code> maps and may also carry <code class="docutils literal notranslate"><span class="pre">value_basis</span></code> (Measured, Conventional, Rated, or Nominal) and <code class="docutils literal notranslate"><span class="pre">conditions</span></code> (the parameters under which the value holds, each itself a quantity; a qualitative condition may be <code class="docutils literal notranslate"><span class="pre">value_text</span></code> alone). In JSON-LD, conditions ride a measurement node the quantity <code class="docutils literal notranslate"><span class="pre">isOutputOf</span></code>; the <code class="docutils literal notranslate"><span class="pre">voltage_reference</span></code> key instead becomes a <code class="docutils literal notranslate"><span class="pre">hasMetrologicalReference</span></code> datum on the quantity, beside its unit. When authoring, an instance references its spec with the <code class="docutils literal notranslate"><span class="pre">spec_id=</span></code> kwarg; the record stores the self-describing <code class="docutils literal notranslate"><span class="pre">&lt;type&gt;_spec_id</span></code> key shown in the tables below.</p>
 <section id="electrode-spec-fields">
 <h3>electrode-spec fields<a class="headerlink" href="#electrode-spec-fields" title="Link to this heading">#</a></h3>
 <p>Schema: <a class="reference external" href="https://w3id.org/battinfo/schema/electrode-spec.schema.json"><code class="docutils literal notranslate"><span class="pre">electrode-spec.schema.json</span></code></a> · required at top level: <code class="docutils literal notranslate"><span class="pre">schema_version</span></code>, <code class="docutils literal notranslate"><span class="pre">electrode_spec</span></code>, <code class="docutils literal notranslate"><span class="pre">provenance</span></code></p>
@@ -1835,25 +2001,35 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <td><p>yes</p></td>
 <td><p>Human-readable electrode name / designation (e.g. ‘Si-Gr anode, aqueous’, ‘NMC811 cathode 96/2/2’).</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">kind</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">active_material_kind</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
-<td><p>Required Level-1 kind naming the ACTIVE material of this electrode, from the curated material-kind vocabulary (e.g. ‘graphite’, ‘silicon_graphite’, ‘nmc811’, ‘lfp’). Required so a purchased electrode whose powder provenance is unknown is still queryable on the same aggregation axis as one built from an authored material-spec. Aliases resolve on input; an unknown kind is rejected at save time. See battinfo.electrodes.electrode_kind_keys().</p></td>
+<td><p>Required Level-1 kind naming the ACTIVE material of this electrode, from the curated material-kind vocabulary (e.g. ‘graphite’, ‘silicon_graphite’, ‘nmc811’, ‘lfp’). Named for what it identifies: the electrode’s active material, not the electrode’s form. Required so a purchased electrode whose powder provenance is unknown is still queryable on the same aggregation axis as one built from an authored material-spec. Aliases resolve on input; an unknown kind is rejected at save time. See battinfo.electrodes.electrode_kind_keys().</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">polarity</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">kind</span></code></p></td>
+<td><p>string</p></td>
+<td><p></p></td>
+<td><p>Deprecated alias of active_material_kind; accepted so existing records keep validating, normalized to active_material_kind on round-trip.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">polarity</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">positive</span></code> | <code class="docutils literal notranslate"><span class="pre">negative</span></code> | <code class="docutils literal notranslate"><span class="pre">unknown</span></code></p></td>
 <td><p></p></td>
 <td><p>Electrode polarity, authored when the design has a side to state. Never derived from the kind: which side an active material sits on is system-relative (graphite is the positive electrode of a lithium-counter half cell). Role-based cells (half / three-electrode) name electrodes by role instead.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">grade</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">grade</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Producer grade / design version (e.g. ‘v2’, ‘rev B’). Part of spec identity together with the producer and the electrode name.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">active_material_spec_id</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">active_material_spec_id</span></code></p></td>
 <td><p>→ MaterialSpecIri</p></td>
 <td><p></p></td>
 <td><p>Optional canonical IRI of the material-spec for this electrode’s active material, present when the powder is known and authored. Absent for a purchased electrode of known chemistry but unknown powder — ‘kind’ still carries the chemistry.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">material</span></code></p></td>
+<td><p>→ material-component</p></td>
+<td><p></p></td>
+<td><p>The electrode body as a single monolithic material - an uncoated metal foil or disc (lithium metal counter, zinc foil). States the material directly; there is no coating and no separate current collector, the foil is both. Alternative to <code class="docutils literal notranslate"><span class="pre">coating</span></code> for uncoated electrodes.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">coating</span></code></p></td>
 <td><p>→ electrode-coating</p></td>
@@ -1946,6 +2122,16 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <td><p></p></td>
 <td><p>Producer / supplier lot number for a purchased electrode.</p></td>
 </tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">parent_id</span></code></p></td>
+<td><p>→ ComponentIri</p></td>
+<td><p></p></td>
+<td><p>Canonical IRI of the electrode this piece was cut from - the coated roll, web, or strip its siblings share. The parent is itself an electrode record (usually realizing the same spec), so genealogy chains compose: cell -&gt; disc -&gt; parent roll -&gt; electrode-spec.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">piece_id</span></code></p></td>
+<td><p>string</p></td>
+<td><p></p></td>
+<td><p>Label of this cut piece within its parent (e.g. ‘disc-07’, ‘strip-B’). Joins the identity seed, so pieces cut from the same parent mint distinct IRIs.</p></td>
+</tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">batch_id</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
@@ -2012,10 +2198,12 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <summary class="sd-summary-title sd-card-header">
 <span class="sd-summary-text">The reasoning behind the model</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
 <p class="sd-card-text"><strong>Design vs disc.</strong> The spec is the <em>design</em>: composition (<code class="docutils literal notranslate"><span class="pre">coating.component</span></code> with active/binder/additive holders), processing route, design values, and batch statistics stated with the structured <code class="docutils literal notranslate"><span class="pre">standard_deviation</span></code> / <code class="docutils literal notranslate"><span class="pre">sample_count</span></code> fields. The instance is the physical disc or batch — the per-cell as-built figures (mass, loading, areal capacity) live here, because they were true before any test ran.</p>
+<p class="sd-card-text"><strong>Genealogy: pieces are cut from a parent.</strong> A coating run makes one big source — a roll in a factory, a strip in the lab — and the electrodes that reach cells are cut from it. Both are electrode records: the parent carries the batch facts (<code class="docutils literal notranslate"><span class="pre">batch_id</span></code>, <code class="docutils literal notranslate"><span class="pre">count</span></code>, <code class="docutils literal notranslate"><span class="pre">amount</span></code>, batch statistics), and each cut piece states <code class="docutils literal notranslate"><span class="pre">parent_id</span></code> (the record it was cut from) and <code class="docutils literal notranslate"><span class="pre">piece_id</span></code> (its label within the parent, e.g. <code class="docutils literal notranslate"><span class="pre">disc-07</span></code>, which joins the identity seed so siblings mint distinct IRIs). Chains compose — roll → sheet → disc is two hops of the same relation — and each hop emits as <code class="docutils literal notranslate"><span class="pre">prov:wasDerivedFrom</span></code>, so the full lineage cell → disc → roll → electrode-spec → material-spec is walkable in the graph.</p>
 <p class="sd-card-text"><strong>Half cells name their electrodes by role, not by polarity.</strong> A half cell has no sides to name, and in the working-electrode convention a graphite working electrode charges toward 1 V vs Li/Li+ — polarity labels would mislead. <code class="docutils literal notranslate"><span class="pre">polarity</span></code> is therefore authored or absent, never derived from the kind: an “LFP negative electrode” is a legitimate design (lithium-counter half cell), not a typo, and nothing warns about it.</p>
 <p class="sd-card-text"><strong>Cells reference electrodes.</strong> Which electrode pair a cell uses follows from its <code class="docutils literal notranslate"><span class="pre">cell_configuration</span></code> — the polarity holders (<code class="docutils literal notranslate"><span class="pre">positive_electrode</span></code> / <code class="docutils literal notranslate"><span class="pre">negative_electrode</span></code>) for a full cell, the role holders (<code class="docutils literal notranslate"><span class="pre">working_electrode</span></code> / <code class="docutils literal notranslate"><span class="pre">counter_electrode</span></code>) for a half or three-electrode cell. A cell instance points at the physical disc inside it through <code class="docutils literal notranslate"><span class="pre">working_electrode_id</span></code>.</p>
-<p class="sd-card-text"><strong>Tabs and coatings</strong> belong to the electrode. A current-collector tab (<code class="docutils literal notranslate"><span class="pre">Electrode.tab</span></code>) carries identity fields plus a <code class="docutils literal notranslate"><span class="pre">property</span></code> dict (width, thickness, weld width) and emits under <code class="docutils literal notranslate"><span class="pre">hasCurrentCollectorTab</span></code>. A coating carries the composition and its own properties; a secondary layer such as a ceramic coating is simply an additional coating holder.</p>
-<p class="sd-card-text"><strong>Emission.</strong> The kind types the node with its chemistry electrode class (<code class="docutils literal notranslate"><span class="pre">GraphiteElectrode</span></code>, <code class="docutils literal notranslate"><span class="pre">LithiumIronPhosphateElectrode</span></code>, …); an authored polarity stacks <code class="docutils literal notranslate"><span class="pre">PositiveElectrode</span></code> / <code class="docutils literal notranslate"><span class="pre">NegativeElectrode</span></code> on top; role holders emit role types (<code class="docutils literal notranslate"><span class="pre">WorkingElectrode</span></code>, and the counter of a two-electrode half cell types as both <code class="docutils literal notranslate"><span class="pre">CounterElectrode</span></code> and <code class="docutils literal notranslate"><span class="pre">ReferenceElectrode</span></code>).</p>
+<p class="sd-card-text"><strong>Tabs and coatings</strong> belong to the electrode. A current-collector tab (<code class="docutils literal notranslate"><span class="pre">Electrode.tab</span></code>) carries identity fields plus a <code class="docutils literal notranslate"><span class="pre">property</span></code> dict (width, thickness, weld width) and emits under <code class="docutils literal notranslate"><span class="pre">hasCurrentCollectorTab</span></code>. A coating carries the composition, its own properties, and <code class="docutils literal notranslate"><span class="pre">double_sided</span></code> — whether the current collector is coated on both sides or one; a secondary layer such as a ceramic coating is simply an additional coating holder.</p>
+<p class="sd-card-text"><strong>The active material is named for what it is.</strong> <code class="docutils literal notranslate"><span class="pre">active_material_kind</span></code> names the electrode’s active material from the curated material-kind vocabulary — not <code class="docutils literal notranslate"><span class="pre">kind</span></code>, which on an electrode would read as its form (porous, foil, rotating-disc). The old <code class="docutils literal notranslate"><span class="pre">kind</span></code> spelling stays accepted as a deprecated alias and normalizes on round-trip.</p>
+<p class="sd-card-text"><strong>Emission.</strong> The spec is an information artifact: it emits typed <code class="docutils literal notranslate"><span class="pre">[Description,</span> <span class="pre">schema:ProductModel,</span> <span class="pre">schema:CreativeWork]</span></code> — EMMO’s <code class="docutils literal notranslate"><span class="pre">Description</span></code> is the very class <code class="docutils literal notranslate"><span class="pre">BatterySpecification</span></code> subclasses, so the spec sits in the right family until an <code class="docutils literal notranslate"><span class="pre">ElectrodeSpecification</span></code> class is published (on the upstream ask list) — and its <code class="docutils literal notranslate"><span class="pre">isDescriptionFor</span></code> node carries the physical typing: the chemistry electrode class derived from <code class="docutils literal notranslate"><span class="pre">active_material_kind</span></code> (<code class="docutils literal notranslate"><span class="pre">GraphiteElectrode</span></code>, <code class="docutils literal notranslate"><span class="pre">LithiumIronPhosphateElectrode</span></code>, …), with an authored polarity stacking <code class="docutils literal notranslate"><span class="pre">PositiveElectrode</span></code> / <code class="docutils literal notranslate"><span class="pre">NegativeElectrode</span></code> on top. Role holders emit role types (<code class="docutils literal notranslate"><span class="pre">WorkingElectrode</span></code>, and the counter of a two-electrode half cell types as both <code class="docutils literal notranslate"><span class="pre">CounterElectrode</span></code> and <code class="docutils literal notranslate"><span class="pre">ReferenceElectrode</span></code>).</p>
 </div>
 </details></section>
 </section>

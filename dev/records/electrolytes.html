@@ -62,7 +62,7 @@
     <link rel="icon" href="../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Components" href="components.html" />
+    <link rel="next" title="Separators" href="separators.html" />
     <link rel="prev" title="Electrodes" href="electrodes.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -419,9 +419,11 @@
 <li class="toctree-l2"><a class="reference internal" href="materials.html">Materials</a></li>
 <li class="toctree-l2"><a class="reference internal" href="electrodes.html">Electrodes</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Electrolytes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="components.html">Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="separators.html">Separators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="current-collectors.html">Current collectors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="housings.html">Housings</a></li>
 <li class="toctree-l2"><a class="reference internal" href="cells.html">Cells</a></li>
-<li class="toctree-l2"><a class="reference internal" href="half-cells.html">Half cells</a></li>
+<li class="toctree-l2"><a class="reference internal" href="half-cells.html">Half cells &amp; three-electrode cells</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tests.html">Tests</a></li>
 <li class="toctree-l2"><a class="reference internal" href="datasets.html">Datasets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="equipment.html">Equipment</a></li>
@@ -526,48 +528,41 @@
 <input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
 <label class="sd-tab-label" for="sd-tab-item-0">
 Python</label><div class="sd-tab-content docutils">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_component_spec</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_electrolyte_spec</span>
 
-<span class="n">record</span> <span class="o">=</span> <span class="n">create_component_spec</span><span class="p">(</span>
-    <span class="s2">&quot;electrolyte&quot;</span><span class="p">,</span>
+<span class="c1"># Every constituent can cite its material-spec by IRI, so the formulation</span>
+<span class="c1"># is assembled from materials, never retyped — the salt&#39;s ions and</span>
+<span class="c1"># chemistry follow from its material identity.</span>
+<span class="n">record</span> <span class="o">=</span> <span class="n">create_electrolyte_spec</span><span class="p">(</span>
     <span class="n">uid</span><span class="o">=</span><span class="s2">&quot;0rp6-kncv-cyem-qwcd&quot;</span><span class="p">,</span>
     <span class="n">name</span><span class="o">=</span><span class="s2">&quot;1M LiPF6 in EC:EMC 3:7 + 2% VC&quot;</span><span class="p">,</span>
-    <span class="c1"># Composition fields go through body= (the class field is also named</span>
-    <span class="c1"># &quot;family&quot; — the function&#39;s first argument). Every constituent can</span>
-    <span class="c1"># cite its material-spec by IRI, so the formulation is assembled from</span>
-    <span class="c1"># materials, never retyped.</span>
-    <span class="n">body</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;family&quot;</span><span class="p">:</span> <span class="s2">&quot;organic&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;salt&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;LiPF6&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;material_spec_id&quot;</span><span class="p">:</span> <span class="s2">&quot;https://w3id.org/battinfo/spec/t4wz-ff8s-6vp6-af48&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;cation&quot;</span><span class="p">:</span> <span class="s2">&quot;Li+&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;anion&quot;</span><span class="p">:</span> <span class="s2">&quot;PF6-&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;concentration&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;mol/L&quot;</span><span class="p">}},</span>
-        <span class="p">},</span>
-        <span class="s2">&quot;solvent_mixture&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;component&quot;</span><span class="p">:</span> <span class="p">[</span>
-                <span class="p">{</span>
-                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;EC&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;material_spec_id&quot;</span><span class="p">:</span> <span class="s2">&quot;https://w3id.org/battinfo/spec/xcv1-hpy1-b0bw-z5s2&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;volume_fraction&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">}},</span>
-                <span class="p">},</span>
-                <span class="p">{</span>
-                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;EMC&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;material_spec_id&quot;</span><span class="p">:</span> <span class="s2">&quot;https://w3id.org/battinfo/spec/7p3d-2e22-7yae-spyb&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;volume_fraction&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">0.7</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">}},</span>
-                <span class="p">},</span>
-            <span class="p">]</span>
-        <span class="p">},</span>
-        <span class="s2">&quot;additive&quot;</span><span class="p">:</span> <span class="p">[</span>
-            <span class="p">{</span>
-                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;VC&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;material_spec_id&quot;</span><span class="p">:</span> <span class="s2">&quot;https://w3id.org/battinfo/spec/s6y8-5mne-94gx-e5ve&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;mass_fraction&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">0.02</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">}},</span>
-            <span class="p">}</span>
-        <span class="p">],</span>
-        <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;conductivity&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">10.0</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;mS/cm&quot;</span><span class="p">}},</span>
+    <span class="n">family</span><span class="o">=</span><span class="s2">&quot;organic&quot;</span><span class="p">,</span>
+    <span class="n">salt</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;LiPF6&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;material_spec_id&quot;</span><span class="p">:</span> <span class="s2">&quot;https://w3id.org/battinfo/spec/t4wz-ff8s-6vp6-af48&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;concentration&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;mol/L&quot;</span><span class="p">}},</span>
     <span class="p">},</span>
+    <span class="c1"># One solvent component for a pure solvent, a list for a mixture.</span>
+    <span class="n">solvent</span><span class="o">=</span><span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;EC&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;material_spec_id&quot;</span><span class="p">:</span> <span class="s2">&quot;https://w3id.org/battinfo/spec/xcv1-hpy1-b0bw-z5s2&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;volume_fraction&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">}},</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;EMC&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;material_spec_id&quot;</span><span class="p">:</span> <span class="s2">&quot;https://w3id.org/battinfo/spec/7p3d-2e22-7yae-spyb&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;volume_fraction&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">0.7</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">}},</span>
+        <span class="p">},</span>
+    <span class="p">],</span>
+    <span class="n">additive</span><span class="o">=</span><span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;VC&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;material_spec_id&quot;</span><span class="p">:</span> <span class="s2">&quot;https://w3id.org/battinfo/spec/s6y8-5mne-94gx-e5ve&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;mass_fraction&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">0.02</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">}},</span>
+        <span class="p">}</span>
+    <span class="p">],</span>
+    <span class="nb">property</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;conductivity&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">10.0</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;mS/cm&quot;</span><span class="p">}},</span>
     <span class="n">source_type</span><span class="o">=</span><span class="s2">&quot;datasheet&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
@@ -586,8 +581,6 @@ Canonical record</label><div class="sd-tab-content docutils">
 <span class="w">    </span><span class="nt">&quot;salt&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;LiPF6&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="nt">&quot;material_spec_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/t4wz-ff8s-6vp6-af48&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;cation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Li+&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;anion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PF6-&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="nt">&quot;concentration&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">          </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span>
@@ -595,30 +588,28 @@ Canonical record</label><div class="sd-tab-content docutils">
 <span class="w">        </span><span class="p">}</span>
 <span class="w">      </span><span class="p">}</span>
 <span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;solvent_mixture&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;component&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EC&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;material_spec_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/xcv1-hpy1-b0bw-z5s2&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="nt">&quot;volume_fraction&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">              </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.3</span><span class="p">,</span>
-<span class="w">              </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span>
-<span class="w">            </span><span class="p">}</span>
-<span class="w">          </span><span class="p">}</span>
-<span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EMC&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;material_spec_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/7p3d-2e22-7yae-spyb&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="nt">&quot;volume_fraction&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">              </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.7</span><span class="p">,</span>
-<span class="w">              </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span>
-<span class="w">            </span><span class="p">}</span>
+<span class="w">    </span><span class="nt">&quot;solvent&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EC&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;material_spec_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/xcv1-hpy1-b0bw-z5s2&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;volume_fraction&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.3</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span>
 <span class="w">          </span><span class="p">}</span>
 <span class="w">        </span><span class="p">}</span>
-<span class="w">      </span><span class="p">]</span>
-<span class="w">    </span><span class="p">},</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EMC&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;material_spec_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/7p3d-2e22-7yae-spyb&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;volume_fraction&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.7</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span>
+<span class="w">          </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
 <span class="w">    </span><span class="nt">&quot;additive&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">      </span><span class="p">{</span>
 <span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;VC&quot;</span><span class="p">,</span>
@@ -660,105 +651,114 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <span class="w">      </span><span class="nt">&quot;battinfo&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/&quot;</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;OrganicElectrolyte&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;hasSolute&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">      </span><span class="s2">&quot;LithiumHexafluorophosphate&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="s2">&quot;Solute&quot;</span>
-<span class="w">    </span><span class="p">],</span>
-<span class="w">    </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;LiPF6&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/t4wz-ff8s-6vp6-af48&quot;</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;AmountConcentration&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;ConventionalProperty&quot;</span>
-<span class="w">      </span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AmountConcentration&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span>
-<span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#MolePerLitre&quot;</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;hasSolvent&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;EthyleneCarbonate&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;Solvent&quot;</span>
-<span class="w">      </span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EC&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/xcv1-hpy1-b0bw-z5s2&quot;</span>
-<span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">          </span><span class="s2">&quot;VolumeFraction&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s2">&quot;ConventionalProperty&quot;</span>
-<span class="w">        </span><span class="p">],</span>
-<span class="w">        </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.3</span>
-<span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
-<span class="w">      </span><span class="p">}</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;EthylMethylCarbonate&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;Solvent&quot;</span>
-<span class="w">      </span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EMC&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/7p3d-2e22-7yae-spyb&quot;</span>
-<span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">          </span><span class="s2">&quot;VolumeFraction&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s2">&quot;ConventionalProperty&quot;</span>
-<span class="w">        </span><span class="p">],</span>
-<span class="w">        </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.7</span>
-<span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
-<span class="w">      </span><span class="p">}</span>
-<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;Description&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;schema:ProductModel&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;schema:CreativeWork&quot;</span>
 <span class="w">  </span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;hasAdditive&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">      </span><span class="s2">&quot;VinyleneCarbonate&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="s2">&quot;ElectrolyteAdditive&quot;</span>
+<span class="w">  </span><span class="nt">&quot;isDescriptionFor&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;OrganicElectrolyte&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;hasSolute&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;LithiumHexafluorophosphate&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;Solute&quot;</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;LiPF6&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/t4wz-ff8s-6vp6-af48&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;AmountConcentration&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;ConventionalProperty&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AmountConcentration&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#MolePerLitre&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;hasSolvent&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;EthyleneCarbonate&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;Solvent&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EC&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/xcv1-hpy1-b0bw-z5s2&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">&quot;VolumeFraction&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;ConventionalProperty&quot;</span>
+<span class="w">          </span><span class="p">],</span>
+<span class="w">          </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.3</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">          </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;EthylMethylCarbonate&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;Solvent&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EMC&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/7p3d-2e22-7yae-spyb&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">&quot;VolumeFraction&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;ConventionalProperty&quot;</span>
+<span class="w">          </span><span class="p">],</span>
+<span class="w">          </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.7</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">          </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
 <span class="w">    </span><span class="p">],</span>
-<span class="w">    </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;VC&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/s6y8-5mne-94gx-e5ve&quot;</span>
+<span class="w">    </span><span class="nt">&quot;hasAdditive&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;VinyleneCarbonate&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;ElectrolyteAdditive&quot;</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;VC&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/s6y8-5mne-94gx-e5ve&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;MassFraction&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;ConventionalProperty&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.02</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
+<span class="w">      </span><span class="p">}</span>
 <span class="w">    </span><span class="p">},</span>
 <span class="w">    </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;MassFraction&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;ElectrolyticConductivity&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="s2">&quot;ConventionalProperty&quot;</span>
 <span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ElectrolyticConductivity&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.02</span>
+<span class="w">        </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">10.0</span>
 <span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">      </span><span class="s2">&quot;ElectrolyticConductivity&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="s2">&quot;ConventionalProperty&quot;</span>
-<span class="w">    </span><span class="p">],</span>
-<span class="w">    </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ElectrolyticConductivity&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">10.0</span>
+<span class="w">      </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#MilliSiemensPerCentiMetre&quot;</span>
 <span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#MilliSiemensPerCentiMetre&quot;</span>
+<span class="w">    </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1M LiPF6 in EC:EMC 3:7 + 2% VC&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/0rp6-kncv-cyem-qwcd#described&quot;</span>
 <span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/0rp6-kncv-cyem-qwcd&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1M LiPF6 in EC:EMC 3:7 + 2% VC&quot;</span>
@@ -779,10 +779,9 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <input checked="checked" id="sd-tab-item-3" name="sd-tab-set-1" type="radio">
 <label class="sd-tab-label" for="sd-tab-item-3">
 Python</label><div class="sd-tab-content docutils">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_component_instance</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_electrolyte</span>
 
-<span class="n">record</span> <span class="o">=</span> <span class="n">create_component_instance</span><span class="p">(</span>
-    <span class="s2">&quot;electrolyte&quot;</span><span class="p">,</span>
+<span class="n">record</span> <span class="o">=</span> <span class="n">create_electrolyte</span><span class="p">(</span>
     <span class="n">uid</span><span class="o">=</span><span class="s2">&quot;me0t-k16f-eh5y-rq0k&quot;</span><span class="p">,</span>
     <span class="n">spec_id</span><span class="o">=</span><span class="s2">&quot;https://w3id.org/battinfo/spec/0rp6-kncv-cyem-qwcd&quot;</span><span class="p">,</span>
 <span class="p">)</span>
@@ -869,41 +868,37 @@ Canonical record</label><div class="sd-tab-content docutils">
 <span class="w">    </span><span class="nt">&quot;short_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;gpkh74&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1M LiPF6 in EC:EMC 3:7&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;family&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;organic&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;solvent&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EC&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;material_spec_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/efxx-b9yg-wh00-d23a&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;volume_fraction&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.3</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span>
+<span class="w">          </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EMC&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;material_spec_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/hy9g-22sd-czdb-nmm4&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;volume_fraction&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.7</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span>
+<span class="w">          </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
 <span class="w">    </span><span class="nt">&quot;salt&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;LiPF6&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="nt">&quot;material_spec_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/fpeg-3wg8-e6cs-2vn1&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;cation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Li+&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;anion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PF6-&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="nt">&quot;concentration&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">          </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span>
 <span class="w">          </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;mol/L&quot;</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">      </span><span class="p">}</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;solvent_mixture&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;component&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EC&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;material_spec_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/efxx-b9yg-wh00-d23a&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="nt">&quot;volume_fraction&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">              </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.3</span><span class="p">,</span>
-<span class="w">              </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span>
-<span class="w">            </span><span class="p">}</span>
-<span class="w">          </span><span class="p">}</span>
-<span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EMC&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;material_spec_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/hy9g-22sd-czdb-nmm4&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="nt">&quot;volume_fraction&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">              </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.7</span><span class="p">,</span>
-<span class="w">              </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span>
-<span class="w">            </span><span class="p">}</span>
-<span class="w">          </span><span class="p">}</span>
-<span class="w">        </span><span class="p">}</span>
-<span class="w">      </span><span class="p">]</span>
 <span class="w">    </span><span class="p">},</span>
 <span class="w">    </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">      </span><span class="nt">&quot;conductivity&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -941,84 +936,93 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <span class="w">      </span><span class="nt">&quot;battinfo&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/&quot;</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;OrganicElectrolyte&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;hasSolute&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">      </span><span class="s2">&quot;LithiumHexafluorophosphate&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="s2">&quot;Solute&quot;</span>
-<span class="w">    </span><span class="p">],</span>
-<span class="w">    </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;LiPF6&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/fpeg-3wg8-e6cs-2vn1&quot;</span>
+<span class="w">  </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;Description&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;schema:ProductModel&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;schema:CreativeWork&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;isDescriptionFor&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;OrganicElectrolyte&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;hasSolute&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;LithiumHexafluorophosphate&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;Solute&quot;</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;LiPF6&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/fpeg-3wg8-e6cs-2vn1&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;AmountConcentration&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;ConventionalProperty&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AmountConcentration&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#MolePerLitre&quot;</span>
+<span class="w">      </span><span class="p">}</span>
 <span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;hasSolvent&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;EthyleneCarbonate&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;Solvent&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EC&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/efxx-b9yg-wh00-d23a&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">&quot;VolumeFraction&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;ConventionalProperty&quot;</span>
+<span class="w">          </span><span class="p">],</span>
+<span class="w">          </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.3</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">          </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;EthylMethylCarbonate&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;Solvent&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EMC&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/hy9g-22sd-czdb-nmm4&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">&quot;VolumeFraction&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;ConventionalProperty&quot;</span>
+<span class="w">          </span><span class="p">],</span>
+<span class="w">          </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.7</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">          </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
 <span class="w">    </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;AmountConcentration&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;ElectrolyticConductivity&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="s2">&quot;ConventionalProperty&quot;</span>
 <span class="w">      </span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AmountConcentration&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ElectrolyticConductivity&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span>
+<span class="w">        </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">10.0</span>
 <span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#MolePerLitre&quot;</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;hasSolvent&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;EthyleneCarbonate&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;Solvent&quot;</span>
-<span class="w">      </span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EC&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/efxx-b9yg-wh00-d23a&quot;</span>
-<span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">          </span><span class="s2">&quot;VolumeFraction&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s2">&quot;ConventionalProperty&quot;</span>
-<span class="w">        </span><span class="p">],</span>
-<span class="w">        </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.3</span>
-<span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
-<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#MilliSiemensPerCentiMetre&quot;</span>
 <span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;EthylMethylCarbonate&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;Solvent&quot;</span>
-<span class="w">      </span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EMC&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/hy9g-22sd-czdb-nmm4&quot;</span>
-<span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">          </span><span class="s2">&quot;VolumeFraction&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="s2">&quot;ConventionalProperty&quot;</span>
-<span class="w">        </span><span class="p">],</span>
-<span class="w">        </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.7</span>
-<span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&quot;</span>
-<span class="w">      </span><span class="p">}</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">  </span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">      </span><span class="s2">&quot;ElectrolyticConductivity&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="s2">&quot;ConventionalProperty&quot;</span>
-<span class="w">    </span><span class="p">],</span>
-<span class="w">    </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ElectrolyticConductivity&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">10.0</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#MilliSiemensPerCentiMetre&quot;</span>
+<span class="w">    </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1M LiPF6 in EC:EMC 3:7&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/gpkh-74nj-6sdb-vcsc#described&quot;</span>
 <span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/gpkh-74nj-6sdb-vcsc&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1M LiPF6 in EC:EMC 3:7&quot;</span>
@@ -1057,24 +1061,18 @@ Canonical record</label><div class="sd-tab-content docutils">
 <span class="w">    </span><span class="nt">&quot;short_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;gzt2hr&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;7M KOH in H2O&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;family&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;aqueous&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;solvent&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Water&quot;</span>
+<span class="w">    </span><span class="p">},</span>
 <span class="w">    </span><span class="nt">&quot;salt&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;KOH&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="nt">&quot;material_spec_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/s9h8-dfbw-zs4k-2qk8&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;cation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;K+&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;anion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;OH-&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="nt">&quot;concentration&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">          </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">7.0</span><span class="p">,</span>
 <span class="w">          </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;mol/L&quot;</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">      </span><span class="p">}</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;solvent_mixture&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;component&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Water&quot;</span>
-<span class="w">        </span><span class="p">}</span>
-<span class="w">      </span><span class="p">]</span>
 <span class="w">    </span><span class="p">},</span>
 <span class="w">    </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">      </span><span class="nt">&quot;conductivity&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -1107,44 +1105,53 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <span class="w">      </span><span class="nt">&quot;battinfo&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/&quot;</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AqueousElectrolyte&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;hasSolute&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">      </span><span class="s2">&quot;PotassiumHydroxide&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="s2">&quot;Solute&quot;</span>
-<span class="w">    </span><span class="p">],</span>
-<span class="w">    </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;KOH&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/s9h8-dfbw-zs4k-2qk8&quot;</span>
+<span class="w">  </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;Description&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;schema:ProductModel&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;schema:CreativeWork&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;isDescriptionFor&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AqueousElectrolyte&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;hasSolute&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;PotassiumHydroxide&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;Solute&quot;</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;KOH&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/s9h8-dfbw-zs4k-2qk8&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;AmountConcentration&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;ConventionalProperty&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AmountConcentration&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">7.0</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#MolePerLitre&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;hasSolvent&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Solvent&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Water&quot;</span>
 <span class="w">    </span><span class="p">},</span>
 <span class="w">    </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;AmountConcentration&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;ElectrolyticConductivity&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="s2">&quot;ConventionalProperty&quot;</span>
 <span class="w">      </span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AmountConcentration&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ElectrolyticConductivity&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">7.0</span>
+<span class="w">        </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">600.0</span>
 <span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#MolePerLitre&quot;</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;hasSolvent&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Solvent&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Water&quot;</span>
-<span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">      </span><span class="s2">&quot;ElectrolyticConductivity&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="s2">&quot;ConventionalProperty&quot;</span>
-<span class="w">    </span><span class="p">],</span>
-<span class="w">    </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ElectrolyticConductivity&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">600.0</span>
+<span class="w">      </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#MilliSiemensPerCentiMetre&quot;</span>
 <span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/emmo#MilliSiemensPerCentiMetre&quot;</span>
+<span class="w">    </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;7M KOH in H2O&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/gzt2-hrqq-gsfn-sp94#described&quot;</span>
 <span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/gzt2-hrqq-gsfn-sp94&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;7M KOH in H2O&quot;</span>
@@ -1157,7 +1164,7 @@ JSON-LD</label><div class="sd-tab-content docutils">
 </details></section>
 <section id="fields">
 <h2>Fields<a class="headerlink" href="#fields" title="Link to this heading">#</a></h2>
-<p>Generated from the packaged JSON Schemas — the same files <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">validate</span></code> and the registry’s publish gate enforce. Every record also carries the shared envelope (<code class="docutils literal notranslate"><span class="pre">schema_version</span></code>, <code class="docutils literal notranslate"><span class="pre">provenance</span></code>, and optional <code class="docutils literal notranslate"><span class="pre">notes</span></code>, <code class="docutils literal notranslate"><span class="pre">funding</span></code>, <code class="docutils literal notranslate"><span class="pre">contributor</span></code>, <code class="docutils literal notranslate"><span class="pre">license</span></code>). Quantities are <code class="docutils literal notranslate"><span class="pre">{value,</span> <span class="pre">unit}</span></code> maps and may also carry <code class="docutils literal notranslate"><span class="pre">value_basis</span></code> (Measured, Conventional, Rated, or Nominal) and <code class="docutils literal notranslate"><span class="pre">conditions</span></code> (the parameters under which the value holds, each itself a quantity; a qualitative condition may be <code class="docutils literal notranslate"><span class="pre">value_text</span></code> alone). In JSON-LD, conditions ride a measurement node the quantity <code class="docutils literal notranslate"><span class="pre">isOutputOf</span></code>; the <code class="docutils literal notranslate"><span class="pre">voltage_reference</span></code> key instead becomes a <code class="docutils literal notranslate"><span class="pre">hasMetrologicalReference</span></code> datum on the quantity, beside its unit.</p>
+<p>Generated from the packaged JSON Schemas — the same files <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">validate</span></code> and the registry’s publish gate enforce. Every record also carries the shared envelope (<code class="docutils literal notranslate"><span class="pre">schema_version</span></code>, <code class="docutils literal notranslate"><span class="pre">provenance</span></code>, and optional <code class="docutils literal notranslate"><span class="pre">notes</span></code>, <code class="docutils literal notranslate"><span class="pre">funding</span></code>, <code class="docutils literal notranslate"><span class="pre">contributor</span></code>, <code class="docutils literal notranslate"><span class="pre">license</span></code>). Quantities are <code class="docutils literal notranslate"><span class="pre">{value,</span> <span class="pre">unit}</span></code> maps and may also carry <code class="docutils literal notranslate"><span class="pre">value_basis</span></code> (Measured, Conventional, Rated, or Nominal) and <code class="docutils literal notranslate"><span class="pre">conditions</span></code> (the parameters under which the value holds, each itself a quantity; a qualitative condition may be <code class="docutils literal notranslate"><span class="pre">value_text</span></code> alone). In JSON-LD, conditions ride a measurement node the quantity <code class="docutils literal notranslate"><span class="pre">isOutputOf</span></code>; the <code class="docutils literal notranslate"><span class="pre">voltage_reference</span></code> key instead becomes a <code class="docutils literal notranslate"><span class="pre">hasMetrologicalReference</span></code> datum on the quantity, beside its unit. When authoring, an instance references its spec with the <code class="docutils literal notranslate"><span class="pre">spec_id=</span></code> kwarg; the record stores the self-describing <code class="docutils literal notranslate"><span class="pre">&lt;type&gt;_spec_id</span></code> key shown in the tables below.</p>
 <section id="electrolyte-spec-fields">
 <h3>electrolyte-spec fields<a class="headerlink" href="#electrolyte-spec-fields" title="Link to this heading">#</a></h3>
 <p>Schema: <a class="reference external" href="https://w3id.org/battinfo/schema/electrolyte-spec.schema.json"><code class="docutils literal notranslate"><span class="pre">electrolyte-spec.schema.json</span></code></a> · required at top level: <code class="docutils literal notranslate"><span class="pre">schema_version</span></code>, <code class="docutils literal notranslate"><span class="pre">electrolyte_spec</span></code>, <code class="docutils literal notranslate"><span class="pre">provenance</span></code></p>
@@ -1195,37 +1202,42 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <td><p></p></td>
 <td><p>Conducting salt (e.g. LiPF6), with concentration under its property map.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">solvent_mixture</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">solvent</span></code></p></td>
+<td><p>→ solvent</p></td>
+<td><p></p></td>
+<td><p>Solvent component(s): a single component object for a pure solvent, or an array for a mixture. Each component’s fraction lives under its property map (volume_fraction v/v or mass_fraction w/w - one basis per formulation).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">solvent_mixture</span></code></p></td>
 <td><p>→ solvent_mixture</p></td>
 <td><p></p></td>
-<td><p>Solvent mixture, with component fractions under each component’s property map.</p></td>
+<td><p>Deprecated alias of solvent (its {component: […]} wrapper form); accepted so existing records keep validating, normalized to solvent on round-trip.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">additive</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">additive</span></code></p></td>
 <td><p>→ additive</p></td>
 <td><p></p></td>
 <td><p>Functional additives (e.g. VC, FEC), each with its fraction under property.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">property</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">property</span></code></p></td>
 <td><p>→ quantitative-properties</p></td>
 <td><p></p></td>
 <td><p>Named quantity map of technical properties (snake_case key to value+unit quantity).</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">manufacturer</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">manufacturer</span></code></p></td>
 <td><p>→ OrgRef</p></td>
 <td><p></p></td>
 <td><p>Manufacturer of the item.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">supplier</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">supplier</span></code></p></td>
 <td><p>→ OrgRef</p></td>
 <td><p></p></td>
 <td><p>Supplier or vendor the item was sourced from.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">product_id</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">product_id</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Manufacturer or supplier product/grade identifier.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">comment</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">comment</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Free-text comment.</p></td>
@@ -1311,9 +1323,10 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
 <summary class="sd-summary-title sd-card-header">
 <span class="sd-summary-text">The reasoning behind the model</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
-<p class="sd-card-text"><strong>Composition is assembled, never retyped.</strong> <code class="docutils literal notranslate"><span class="pre">salt</span></code> + <code class="docutils literal notranslate"><span class="pre">solvent_mixture.component[]</span></code> + <code class="docutils literal notranslate"><span class="pre">additive[]</span></code> each reference a <code class="docutils literal notranslate"><span class="pre">material-spec</span></code> by IRI, so an organic 1M LiPF₆ EC:EMC 3:7 and an aqueous 7M KOH are built from the LiPF6/EC/EMC/KOH material-specs. Each constituent carries its own fraction or concentration under <code class="docutils literal notranslate"><span class="pre">property</span></code>.</p>
-<p class="sd-card-text"><strong>Emission follows the composition.</strong> A minimal spec types as the generic <code class="docutils literal notranslate"><span class="pre">ElectrolyteSolution</span></code>; a full formulation types by its family (<code class="docutils literal notranslate"><span class="pre">OrganicElectrolyte</span></code>, <code class="docutils literal notranslate"><span class="pre">AqueousElectrolyte</span></code>) and emits its constituents typed under <code class="docutils literal notranslate"><span class="pre">hasSolute</span></code> / <code class="docutils literal notranslate"><span class="pre">hasSolvent</span></code> / <code class="docutils literal notranslate"><span class="pre">hasAdditive</span></code>.</p>
-<p class="sd-card-text"><strong>Authoring rides the generic component surface</strong> (<code class="docutils literal notranslate"><span class="pre">create_electrolyte_spec</span></code>, or <code class="docutils literal notranslate"><span class="pre">create_component_spec(&quot;electrolyte&quot;,</span> <span class="pre">...)</span></code> with composition through <code class="docutils literal notranslate"><span class="pre">body=</span></code> because the class field shares its name with the function’s first argument) — see <a class="reference internal" href="components.html"><span class="std std-doc">components</span></a> for the shared machinery.</p>
+<p class="sd-card-text"><strong>Composition is assembled, never retyped.</strong> <code class="docutils literal notranslate"><span class="pre">salt</span></code> + <code class="docutils literal notranslate"><span class="pre">solvent</span></code> + <code class="docutils literal notranslate"><span class="pre">additive[]</span></code> each reference a <code class="docutils literal notranslate"><span class="pre">material-spec</span></code> by IRI, so an organic 1M LiPF₆ EC:EMC 3:7 and an aqueous 7M KOH are built from the LiPF6/EC/EMC/KOH material-specs. Each constituent carries its own fraction or concentration under <code class="docutils literal notranslate"><span class="pre">property</span></code>. The salt’s ions and chemistry follow from its material identity (the kind resolves to the chemical-substance class); the old <code class="docutils literal notranslate"><span class="pre">cation</span></code>/<code class="docutils literal notranslate"><span class="pre">anion</span></code> strings stay accepted as deprecated keys, never taught.</p>
+<p class="sd-card-text"><strong>One solvent or many.</strong> <code class="docutils literal notranslate"><span class="pre">solvent</span></code> takes a single component object for a pure solvent and a list for a mixture — no wrapper level. The old <code class="docutils literal notranslate"><span class="pre">solvent_mixture:</span> <span class="pre">{component:</span> <span class="pre">[...]}</span></code> spelling stays accepted as a deprecated alias and normalizes to <code class="docutils literal notranslate"><span class="pre">solvent</span></code> on round-trip.</p>
+<p class="sd-card-text"><strong>Emission follows the composition.</strong> The spec is an information artifact — it types <code class="docutils literal notranslate"><span class="pre">[Description,</span> <span class="pre">schema:ProductModel,</span> <span class="pre">schema:CreativeWork]</span></code>, and the physical typing rides the described individual (<code class="docutils literal notranslate"><span class="pre">&lt;spec-IRI&gt;#described</span></code>) under <code class="docutils literal notranslate"><span class="pre">isDescriptionFor</span></code>: the generic <code class="docutils literal notranslate"><span class="pre">ElectrolyteSolution</span></code> for a minimal spec, the family class (<code class="docutils literal notranslate"><span class="pre">OrganicElectrolyte</span></code>, <code class="docutils literal notranslate"><span class="pre">AqueousElectrolyte</span></code>) for a full formulation, with constituents typed under <code class="docutils literal notranslate"><span class="pre">hasSolute</span></code> / <code class="docutils literal notranslate"><span class="pre">hasSolvent</span></code> / <code class="docutils literal notranslate"><span class="pre">hasAdditive</span></code>.</p>
+<p class="sd-card-text"><strong>Authoring is first-class</strong>: <code class="docutils literal notranslate"><span class="pre">create_electrolyte_spec(...)</span></code> / <code class="docutils literal notranslate"><span class="pre">create_electrolyte(...)</span></code> take the composition fields (<code class="docutils literal notranslate"><span class="pre">family=</span></code>, <code class="docutils literal notranslate"><span class="pre">salt=</span></code>, <code class="docutils literal notranslate"><span class="pre">solvent=</span></code>, <code class="docutils literal notranslate"><span class="pre">additive=</span></code>) as plain keyword arguments.</p>
 </div>
 </details></section>
 </section>
@@ -1338,11 +1351,11 @@ JSON-LD</label><div class="sd-tab-content docutils">
       </div>
     </a>
     <a class="right-next"
-       href="components.html"
+       href="separators.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Components</p>
+        <p class="prev-next-title">Separators</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

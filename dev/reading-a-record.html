@@ -489,7 +489,7 @@ the node types, and how to follow the links.</p>
  │                                    ├─ dcat:distribution ─▶ dcat:Distribution (downloadURL, checksum)
  │                                    ├─ schema:distribution ─▶ schema:DataDownload (contentUrl, sha256)  ← schema.org mirror
  │                                    └─ schema:about ─▶ BatteryCell
- ├─ BatteryCellSpecification          ── the cell spec (EMMO classes + hasProperty quantities), or a typed stub if remote
+ ├─ BatteryCellSpecification          ── the cell spec (catalogue facts; the described battery with its hasProperty quantities rides isDescriptionFor), or a typed stub if remote
  ├─ BatteryCell (one per cell)        ── conformsTo / hasDescription ─▶ the spec
  ├─ prov:Plan / schema:HowTo          ── the test protocol (+ structured conditions, see below)
  └─ BatteryTest / prov:Activity       ── hasTestObject ─▶ cell ; prov:used ─▶ cell+spec ; prov:generated / hasOutput ─▶ dataset

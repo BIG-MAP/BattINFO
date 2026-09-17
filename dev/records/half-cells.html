@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Half cells &#8212; BattINFO  documentation</title>
+    <title>Half cells &amp; three-electrode cells &#8212; BattINFO  documentation</title>
   
   
   
@@ -419,9 +419,11 @@
 <li class="toctree-l2"><a class="reference internal" href="materials.html">Materials</a></li>
 <li class="toctree-l2"><a class="reference internal" href="electrodes.html">Electrodes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="electrolytes.html">Electrolytes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="components.html">Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="separators.html">Separators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="current-collectors.html">Current collectors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="housings.html">Housings</a></li>
 <li class="toctree-l2"><a class="reference internal" href="cells.html">Cells</a></li>
-<li class="toctree-l2 current active"><a class="current reference internal" href="#">Half cells</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Half cells &amp; three-electrode cells</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tests.html">Tests</a></li>
 <li class="toctree-l2"><a class="reference internal" href="datasets.html">Datasets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="equipment.html">Equipment</a></li>
@@ -488,7 +490,7 @@
     
     <li class="breadcrumb-item"><a href="index.html" class="nav-link">Record types</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Half cells</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Half cells &amp; three-electrode cells</span></li>
   </ul>
 </nav>
 </div>
@@ -510,14 +512,14 @@
      edit the fragment, then regenerate:
      uv run python scripts/gen_reference_records.py
      tests/test_reference_records.py fails when this page drifts. -->
-<section id="half-cells">
-<h1>Half cells<a class="headerlink" href="#half-cells" title="Link to this heading">#</a></h1>
-<p>How to describe a half cell: one electrode under test against a counter/reference. Not a separate record type — a <strong>cell</strong> flavored by <code class="docutils literal notranslate"><span class="pre">cell_configuration:</span> <span class="pre">&quot;half_cell&quot;</span></code>, with electrodes named by role.</p>
+<section id="half-cells-three-electrode-cells">
+<h1>Half cells &amp; three-electrode cells<a class="headerlink" href="#half-cells-three-electrode-cells" title="Link to this heading">#</a></h1>
+<p>How to describe the non-full-cell configurations: one electrode under test against a counter. Neither is a separate record type — both are a <strong>cell</strong> flavored by <code class="docutils literal notranslate"><span class="pre">cell_configuration</span></code> (<code class="docutils literal notranslate"><span class="pre">half_cell</span></code> or <code class="docutils literal notranslate"><span class="pre">three_electrode_cell</span></code>), with electrodes named by role. The one structural difference: in a half cell the counter electrode IS the potential reference (one electrode, two roles); a three-electrode cell separates them with a dedicated <code class="docutils literal notranslate"><span class="pre">reference_electrode</span></code>.</p>
 <ul class="simple">
-<li><p>Not a record type: a cell with <code class="docutils literal notranslate"><span class="pre">cell_configuration</span></code> set to <code class="docutils literal notranslate"><span class="pre">half_cell</span></code>.</p></li>
-<li><p>Electrodes are named by <strong>role</strong> - <code class="docutils literal notranslate"><span class="pre">working_electrode</span></code> / <code class="docutils literal notranslate"><span class="pre">counter_electrode</span></code> (or their <code class="docutils literal notranslate"><span class="pre">*_spec_id</span></code> siblings) - never by polarity.</p></li>
-<li><p>In a two-electrode half cell the counter also carries the reference role; a <code class="docutils literal notranslate"><span class="pre">three_electrode_cell</span></code> separates them.</p></li>
-<li><p>Reference the working electrode’s spec; describe the interchangeable counter (lithium foil) inline on its holder.</p></li>
+<li><p>Not record types: a cell with <code class="docutils literal notranslate"><span class="pre">cell_configuration</span></code> set to <code class="docutils literal notranslate"><span class="pre">half_cell</span></code> or <code class="docutils literal notranslate"><span class="pre">three_electrode_cell</span></code>.</p></li>
+<li><p>Electrodes are named by <strong>role</strong> - <code class="docutils literal notranslate"><span class="pre">working_electrode</span></code> / <code class="docutils literal notranslate"><span class="pre">counter_electrode</span></code> / <code class="docutils literal notranslate"><span class="pre">reference_electrode</span></code> (or their <code class="docutils literal notranslate"><span class="pre">*_spec_id</span></code> siblings) - never by polarity.</p></li>
+<li><p>The one structural difference: a half cell’s counter also carries the reference role (one electrode, two classes); a three-electrode cell states a dedicated <code class="docutils literal notranslate"><span class="pre">reference_electrode</span></code>.</p></li>
+<li><p>Reference the working electrode’s spec; describe the interchangeable counter (and a reference ring or wire) inline - a metal foil is a monolithic <code class="docutils literal notranslate"><span class="pre">material</span></code>, never a <code class="docutils literal notranslate"><span class="pre">coating</span></code>.</p></li>
 </ul>
 <section id="define-one">
 <h2>Define one<a class="headerlink" href="#define-one" title="Link to this heading">#</a></h2>
@@ -541,10 +543,9 @@ Python</label><div class="sd-tab-content docutils">
     <span class="n">working_electrode_spec_id</span><span class="o">=</span><span class="s2">&quot;https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch&quot;</span><span class="p">,</span>
     <span class="c1"># The counter is described inline: lithium foil the lab treats as</span>
     <span class="c1"># interchangeable earns a description, not a tracked record. In a</span>
-    <span class="c1"># two-electrode half cell it is also the potential reference.</span>
-    <span class="n">counter_electrode</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;coating&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;component&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;active_material&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Lithium metal&quot;</span><span class="p">}]}}</span>
-    <span class="p">},</span>
+    <span class="c1"># two-electrode half cell it is also the potential reference. A foil</span>
+    <span class="c1"># is a monolithic electrode - `material`, never a coating.</span>
+    <span class="n">counter_electrode</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;material&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Lithium metal&quot;</span><span class="p">}},</span>
     <span class="n">source</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span> <span class="s2">&quot;retrieved_at&quot;</span><span class="p">:</span> <span class="mi">1750000000</span><span class="p">},</span>
 <span class="p">)</span>
 <span class="n">record</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">to_record</span><span class="p">()</span>
@@ -578,15 +579,8 @@ Canonical record</label><div class="sd-tab-content docutils">
 <span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;working_electrode_spec_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;counter_electrode&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;coating&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;component&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;active_material&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">          </span><span class="p">{</span>
-<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lithium metal&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
-<span class="w">          </span><span class="p">}</span>
-<span class="w">        </span><span class="p">]</span>
-<span class="w">      </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;material&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lithium metal&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
 <span class="w">    </span><span class="p">},</span>
 <span class="w">    </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
@@ -603,6 +597,7 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <span class="w">  </span><span class="nt">&quot;@context&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/context/records/v1.json&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="s2">&quot;BatteryCellSpecification&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;schema:ProductModel&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="s2">&quot;schema:CreativeWork&quot;</span>
 <span class="w">  </span><span class="p">],</span>
 <span class="w">  </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/t4wz-ff8s-6vp6-af48&quot;</span><span class="p">,</span>
@@ -622,25 +617,26 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <span class="w">      </span><span class="s2">&quot;HalfCellDevice&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="s2">&quot;LithiumIonBattery&quot;</span>
 <span class="w">    </span><span class="p">],</span>
-<span class="w">    </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Example Lab HC-GR-01&quot;</span>
+<span class="w">    </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/t4wz-ff8s-6vp6-af48#described&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Example Lab HC-GR-01&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;hasCounterElectrode&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;hasActiveMaterial&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;Lithium&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;ActiveMaterial&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lithium metal&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;CounterElectrode&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;ReferenceElectrode&quot;</span>
+<span class="w">      </span><span class="p">]</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;hasWorkingElectrode&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch#described&quot;</span>
+<span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;schema:schemaVersion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;hasCounterElectrode&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;hasCoating&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ElectrodeCoating&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;hasActiveMaterial&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ActiveMaterial&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lithium metal&quot;</span>
-<span class="w">      </span><span class="p">}</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">      </span><span class="s2">&quot;CounterElectrode&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="s2">&quot;ReferenceElectrode&quot;</span>
-<span class="w">    </span><span class="p">]</span>
-<span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;hasWorkingElectrode&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch&quot;</span>
-<span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;dcterms:source&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;prov:Entity&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;dcterms:type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;lab&quot;</span><span class="p">,</span>
@@ -657,10 +653,651 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <li><p>The working electrode emits under <code class="docutils literal notranslate"><span class="pre">hasWorkingElectrode</span></code> as a reference to its spec; the counter node types as BOTH <code class="docutils literal notranslate"><span class="pre">CounterElectrode</span></code> and <code class="docutils literal notranslate"><span class="pre">ReferenceElectrode</span></code>.</p></li>
 </ul>
 </section>
+<section id="a-three-electrode-cell">
+<h3>A three-electrode cell<a class="headerlink" href="#a-three-electrode-cell" title="Link to this heading">#</a></h3>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-3" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-3">
+Python</label><div class="sd-tab-content docutils">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">CellSpec</span>
+
+<span class="n">spec</span> <span class="o">=</span> <span class="n">CellSpec</span><span class="p">(</span>
+    <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;https://w3id.org/battinfo/spec/q7mf-3wtk-8npv-2hcx&quot;</span><span class="p">,</span>
+    <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Example Lab&quot;</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="s2">&quot;3E-GR-01&quot;</span><span class="p">,</span>
+    <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;pouch&quot;</span><span class="p">,</span>
+    <span class="n">chemistry</span><span class="o">=</span><span class="s2">&quot;Li-ion&quot;</span><span class="p">,</span>
+    <span class="n">cell_configuration</span><span class="o">=</span><span class="s2">&quot;three_electrode_cell&quot;</span><span class="p">,</span>
+    <span class="n">working_electrode_spec_id</span><span class="o">=</span><span class="s2">&quot;https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch&quot;</span><span class="p">,</span>
+    <span class="n">counter_electrode</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;material&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Lithium metal&quot;</span><span class="p">}},</span>
+    <span class="c1"># The separated third electrode: unlike a half cell, the counter is</span>
+    <span class="c1"># only a counter, and the reference is its own (tiny) electrode - a</span>
+    <span class="c1"># lithium ring or wire, monolithic like the foil counter.</span>
+    <span class="n">reference_electrode</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;material&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Lithium metal&quot;</span><span class="p">}},</span>
+    <span class="n">source</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span> <span class="s2">&quot;retrieved_at&quot;</span><span class="p">:</span> <span class="mi">1750000000</span><span class="p">},</span>
+<span class="p">)</span>
+<span class="n">record</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">to_record</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-4" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-4">
+Canonical record</label><div class="sd-tab-content docutils">
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;schema_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;cell_spec&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;short_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;7d9k2m&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cell-spec:7d9k-2m4p-8t3x-6nq5&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Example Lab 3E-GR-01&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3E-GR-01&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;manufacturer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Organization&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Example Lab&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;cell_format&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pouch&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;chemistry&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Li-ion&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;cell_configuration&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;three_electrode_cell&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;reference_electrode&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;material&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lithium metal&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">  </span><span class="nt">&quot;provenance&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;source_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;lab&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;retrieved_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1750000000</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;battinfo_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.7.0&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;working_electrode_spec_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;counter_electrode&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;material&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lithium metal&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-5" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-5">
+JSON-LD</label><div class="sd-tab-content docutils">
+<p>Emitted by <code class="docutils literal notranslate"><span class="pre">record_to_jsonld</span></code>, hosted-context mode.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;@context&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/context/records/v1.json&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;BatteryCellSpecification&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;schema:ProductModel&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;schema:CreativeWork&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;7d9k-2m4p-8t3x-6nq5&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Example Lab 3E-GR-01&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:model&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3E-GR-01&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:manufacturer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;schema:Organization&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Example Lab&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;schema:url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://www.battery-genome.org/registry/spec/7d9k-2m4p-8t3x-6nq5&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;isDescriptionFor&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;BatteryCell&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;PouchCell&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;ThreeElectrodeCellDevice&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;LithiumIonBattery&quot;</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5#described&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Example Lab 3E-GR-01&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;hasCounterElectrode&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;hasActiveMaterial&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;Lithium&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;ActiveMaterial&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lithium metal&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CounterElectrode&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;hasReferenceElectrode&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;hasActiveMaterial&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;Lithium&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;ActiveMaterial&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lithium metal&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ReferenceElectrode&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;hasWorkingElectrode&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch#described&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;schema:schemaVersion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;dcterms:source&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;prov:Entity&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;dcterms:type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;lab&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;prov:generatedAtTime&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-06-15T15:06:40+00:00&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>What to notice:</p>
+<ul class="simple">
+<li><p>The described device types as <code class="docutils literal notranslate"><span class="pre">ThreeElectrodeCellDevice</span></code>; the counter is ONLY a counter here.</p></li>
+<li><p>The dedicated reference emits under <code class="docutils literal notranslate"><span class="pre">hasReferenceElectrode</span></code> typed <code class="docutils literal notranslate"><span class="pre">ReferenceElectrode</span></code> — a lithium ring or wire is a monolithic <code class="docutils literal notranslate"><span class="pre">material</span></code>, like the foil counter.</p></li>
+</ul>
 </section>
+</section>
+<section id="common-examples">
+<h2>Common examples<a class="headerlink" href="#common-examples" title="Link to this heading">#</a></h2>
+<p>A selection of real, validated records from the packaged examples corpus — each one click away, included from its single source under <code class="docutils literal notranslate"><span class="pre">examples/</span></code>. The full, living library is the registry: <a class="reference external" href="https://www.battery-genome.org/explore">browse it there</a>.</p>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">Graphite || Li coin half cell (cell-spec)</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-6" name="sd-tab-set-2" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-6">
+Python</label><div class="sd-tab-content docutils">
+<p class="sd-card-text">The record ships in the installed wheel — load it as a starting point:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">importlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">resources</span>
+
+<span class="n">record</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span>
+    <span class="n">resources</span><span class="o">.</span><span class="n">files</span><span class="p">(</span><span class="s2">&quot;battinfo&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;data/examples/cell-spec/cell-spec-g7hd-4wkq-2mtx-9npf.json&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-7" name="sd-tab-set-2" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-7">
+Canonical record</label><div class="sd-tab-content docutils">
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;schema_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;cell_spec&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/g7hd-4wkq-2mtx-9npf&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;short_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;g7hd4w&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cell-spec:g7hd-4wkq-2mtx-9npf&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Graphite || Li coin half cell&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;HC-GR-02&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;manufacturer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Organization&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Example Lab&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;cell_format&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;coin&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;chemistry&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Li-ion&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;cell_configuration&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;half_cell&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">  </span><span class="nt">&quot;provenance&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;source_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;lab&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;retrieved_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1750000000</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;battinfo_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.7.0&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;working_electrode_spec_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/d7qr-n581-74c3-7g7r&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;counter_electrode&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;material&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lithium metal&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-8" name="sd-tab-set-2" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-8">
+JSON-LD</label><div class="sd-tab-content docutils">
+<p class="sd-card-text">Emitted by <code class="docutils literal notranslate"><span class="pre">record_to_jsonld</span></code>, hosted-context mode.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;@context&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/context/records/v1.json&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;BatteryCellSpecification&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;schema:ProductModel&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;schema:CreativeWork&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/g7hd-4wkq-2mtx-9npf&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;g7hd-4wkq-2mtx-9npf&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Graphite || Li coin half cell&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:model&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;HC-GR-02&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:manufacturer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;schema:Organization&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Example Lab&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;schema:url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://www.battery-genome.org/registry/spec/g7hd-4wkq-2mtx-9npf&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;isDescriptionFor&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;BatteryCell&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;CoinCell&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;BatteryHalfCell&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;HalfCellDevice&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;LithiumIonBattery&quot;</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/g7hd-4wkq-2mtx-9npf#described&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Graphite || Li coin half cell&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;hasCounterElectrode&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;hasActiveMaterial&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;Lithium&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;ActiveMaterial&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lithium metal&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;CounterElectrode&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;ReferenceElectrode&quot;</span>
+<span class="w">      </span><span class="p">]</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;hasWorkingElectrode&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/d7qr-n581-74c3-7g7r#described&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;schema:schemaVersion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;dcterms:source&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;prov:Entity&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;dcterms:type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;lab&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;prov:generatedAtTime&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-06-15T15:06:40+00:00&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</details><details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">NMC811 || Li coin half cell (cell-spec)</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-9" name="sd-tab-set-3" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-9">
+Python</label><div class="sd-tab-content docutils">
+<p class="sd-card-text">The record ships in the installed wheel — load it as a starting point:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">importlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">resources</span>
+
+<span class="n">record</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span>
+    <span class="n">resources</span><span class="o">.</span><span class="n">files</span><span class="p">(</span><span class="s2">&quot;battinfo&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;data/examples/cell-spec/cell-spec-n8mw-5tkx-3qvd-7hfp.json&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-10" name="sd-tab-set-3" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-10">
+Canonical record</label><div class="sd-tab-content docutils">
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;schema_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;cell_spec&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/n8mw-5tkx-3qvd-7hfp&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;short_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;n8mw5t&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cell-spec:n8mw-5tkx-3qvd-7hfp&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NMC811 || Li coin half cell&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;HC-NMC-01&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;manufacturer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Organization&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Example Lab&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;cell_format&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;coin&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;chemistry&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Li-ion&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;cell_configuration&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;half_cell&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">  </span><span class="nt">&quot;provenance&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;source_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;lab&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;retrieved_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1750000000</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;battinfo_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.7.0&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;working_electrode_spec_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/qfjh-7xyr-ga1k-tjez&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;counter_electrode&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;material&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lithium metal&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-11" name="sd-tab-set-3" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-11">
+JSON-LD</label><div class="sd-tab-content docutils">
+<p class="sd-card-text">Emitted by <code class="docutils literal notranslate"><span class="pre">record_to_jsonld</span></code>, hosted-context mode.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;@context&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/context/records/v1.json&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;BatteryCellSpecification&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;schema:ProductModel&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;schema:CreativeWork&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/n8mw-5tkx-3qvd-7hfp&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;n8mw-5tkx-3qvd-7hfp&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NMC811 || Li coin half cell&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:model&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;HC-NMC-01&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:manufacturer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;schema:Organization&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Example Lab&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;schema:url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://www.battery-genome.org/registry/spec/n8mw-5tkx-3qvd-7hfp&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;isDescriptionFor&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;BatteryCell&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;CoinCell&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;BatteryHalfCell&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;HalfCellDevice&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;LithiumIonBattery&quot;</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/n8mw-5tkx-3qvd-7hfp#described&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NMC811 || Li coin half cell&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;hasCounterElectrode&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;hasActiveMaterial&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;Lithium&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;ActiveMaterial&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lithium metal&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;CounterElectrode&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;ReferenceElectrode&quot;</span>
+<span class="w">      </span><span class="p">]</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;hasWorkingElectrode&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/qfjh-7xyr-ga1k-tjez#described&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;schema:schemaVersion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;dcterms:source&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;prov:Entity&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;dcterms:type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;lab&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;prov:generatedAtTime&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-06-15T15:06:40+00:00&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</details><details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">Hard carbon || Na coin half cell (cell-spec)</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-12" name="sd-tab-set-4" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-12">
+Python</label><div class="sd-tab-content docutils">
+<p class="sd-card-text">The record ships in the installed wheel — load it as a starting point:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">importlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">resources</span>
+
+<span class="n">record</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span>
+    <span class="n">resources</span><span class="o">.</span><span class="n">files</span><span class="p">(</span><span class="s2">&quot;battinfo&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;data/examples/cell-spec/cell-spec-s4kt-8njw-6xpd-2mvh.json&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-13" name="sd-tab-set-4" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-13">
+Canonical record</label><div class="sd-tab-content docutils">
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;schema_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;cell_spec&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/s4kt-8njw-6xpd-2mvh&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;short_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;s4kt8n&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cell-spec:s4kt-8njw-6xpd-2mvh&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Hard carbon || Na coin half cell&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;HC-HC-01&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;manufacturer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Organization&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Example Lab&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;cell_format&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;coin&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;chemistry&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Na-ion&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;cell_configuration&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;half_cell&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">  </span><span class="nt">&quot;provenance&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;source_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;lab&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;retrieved_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1750000000</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;battinfo_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.7.0&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;working_electrode&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;coating&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;component&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;active_material&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Hard carbon&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">          </span><span class="p">}</span>
+<span class="w">        </span><span class="p">]</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;counter_electrode&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;material&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Sodium metal&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-14" name="sd-tab-set-4" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-14">
+JSON-LD</label><div class="sd-tab-content docutils">
+<p class="sd-card-text">Emitted by <code class="docutils literal notranslate"><span class="pre">record_to_jsonld</span></code>, hosted-context mode.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;@context&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/context/records/v1.json&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;BatteryCellSpecification&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;schema:ProductModel&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;schema:CreativeWork&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/s4kt-8njw-6xpd-2mvh&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;s4kt-8njw-6xpd-2mvh&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Hard carbon || Na coin half cell&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:model&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;HC-HC-01&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:manufacturer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;schema:Organization&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Example Lab&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;schema:url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://www.battery-genome.org/registry/spec/s4kt-8njw-6xpd-2mvh&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;isDescriptionFor&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;BatteryCell&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;CoinCell&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;BatteryHalfCell&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;HalfCellDevice&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;SodiumIonBattery&quot;</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/s4kt-8njw-6xpd-2mvh#described&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Hard carbon || Na coin half cell&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;hasWorkingElectrode&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;hasCoating&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ElectrodeCoating&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;hasActiveMaterial&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">&quot;HardCarbon&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;ActiveMaterial&quot;</span>
+<span class="w">          </span><span class="p">],</span>
+<span class="w">          </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Hard carbon&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;WorkingElectrode&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;hasCounterElectrode&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;hasActiveMaterial&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;Sodium&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;ActiveMaterial&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Sodium metal&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;CounterElectrode&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;ReferenceElectrode&quot;</span>
+<span class="w">      </span><span class="p">]</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;schema:schemaVersion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;dcterms:source&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;prov:Entity&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;dcterms:type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;lab&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;prov:generatedAtTime&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-06-15T15:06:40+00:00&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</details><details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">Si-Gr three-electrode pouch cell (cell-spec)</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-15" name="sd-tab-set-5" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-15">
+Python</label><div class="sd-tab-content docutils">
+<p class="sd-card-text">The record ships in the installed wheel — load it as a starting point:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">importlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">resources</span>
+
+<span class="n">record</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span>
+    <span class="n">resources</span><span class="o">.</span><span class="n">files</span><span class="p">(</span><span class="s2">&quot;battinfo&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;data/examples/cell-spec/cell-spec-w3fq-9rkm-4tpx-8nhd.json&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-16" name="sd-tab-set-5" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-16">
+Canonical record</label><div class="sd-tab-content docutils">
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;schema_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;cell_spec&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/w3fq-9rkm-4tpx-8nhd&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;short_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;w3fq9r&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cell-spec:w3fq-9rkm-4tpx-8nhd&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Si-Gr three-electrode pouch cell&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3E-SIGR-01&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;manufacturer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Organization&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Example Lab&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;cell_format&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pouch&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;chemistry&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Li-ion&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;cell_configuration&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;three_electrode_cell&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;reference_electrode&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;material&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lithium metal&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">  </span><span class="nt">&quot;provenance&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;source_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;lab&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;retrieved_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1750000000</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;battinfo_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.7.0&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;working_electrode_spec_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/qw3j-we77-zzj1-ya55&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;counter_electrode&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;material&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lithium metal&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-17" name="sd-tab-set-5" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-17">
+JSON-LD</label><div class="sd-tab-content docutils">
+<p class="sd-card-text">Emitted by <code class="docutils literal notranslate"><span class="pre">record_to_jsonld</span></code>, hosted-context mode.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;@context&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/context/records/v1.json&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;BatteryCellSpecification&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;schema:ProductModel&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;schema:CreativeWork&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/w3fq-9rkm-4tpx-8nhd&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;w3fq-9rkm-4tpx-8nhd&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Si-Gr three-electrode pouch cell&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:model&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3E-SIGR-01&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:manufacturer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;schema:Organization&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Example Lab&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;schema:url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://www.battery-genome.org/registry/spec/w3fq-9rkm-4tpx-8nhd&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;isDescriptionFor&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;BatteryCell&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;PouchCell&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;ThreeElectrodeCellDevice&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;LithiumIonBattery&quot;</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/w3fq-9rkm-4tpx-8nhd#described&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Si-Gr three-electrode pouch cell&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;hasCounterElectrode&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;hasActiveMaterial&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;Lithium&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;ActiveMaterial&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lithium metal&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CounterElectrode&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;hasReferenceElectrode&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;hasActiveMaterial&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;Lithium&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;ActiveMaterial&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lithium metal&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ReferenceElectrode&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;hasWorkingElectrode&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/qw3j-we77-zzj1-ya55#described&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;schema:schemaVersion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;dcterms:source&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;prov:Entity&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;dcterms:type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;lab&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;prov:generatedAtTime&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-06-15T15:06:40+00:00&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</details></section>
 <section id="fields">
 <h2>Fields<a class="headerlink" href="#fields" title="Link to this heading">#</a></h2>
-<p>Half cells are cell records — the field reference lives on <a class="reference internal" href="cells.html#fields"><span class="std std-ref">Cells</span></a>, and <code class="docutils literal notranslate"><span class="pre">cell_configuration</span></code>, the role holders, and their <code class="docutils literal notranslate"><span class="pre">*_spec_id</span></code> siblings appear in the cell-spec table there.</p>
+<p>Half cells and three-electrode cells are cell records — the field reference lives on <a class="reference internal" href="cells.html#fields"><span class="std std-ref">Cells</span></a>, and <code class="docutils literal notranslate"><span class="pre">cell_configuration</span></code>, the role holders (<code class="docutils literal notranslate"><span class="pre">working_electrode</span></code> / <code class="docutils literal notranslate"><span class="pre">counter_electrode</span></code> / <code class="docutils literal notranslate"><span class="pre">reference_electrode</span></code>), and their <code class="docutils literal notranslate"><span class="pre">*_spec_id</span></code> siblings appear in the cell-spec table there.</p>
 </section>
 <section id="design-notes">
 <h2>Design notes<a class="headerlink" href="#design-notes" title="Link to this heading">#</a></h2>
@@ -668,8 +1305,9 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <summary class="sd-summary-title sd-card-header">
 <span class="sd-summary-text">The reasoning behind the model</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
 <p class="sd-card-text"><strong>Why role, not polarity.</strong> In the working-electrode voltage convention (vs Li/Li+ for a lithium counter) a graphite working electrode <em>charges</em> toward 1 V — the polarity labels of a full cell would mislead, so a half cell has no sides to name. The role-based holders are the ruling, not a convenience.</p>
-<p class="sd-card-text"><strong>What is usually stated.</strong> The working electrode as a reference to its <a class="reference internal" href="electrodes.html"><span class="std std-doc">electrode spec</span></a> — the design under test; the counter described inline on its holder, because a lithium foil the lab treats as interchangeable earns a description, not an individually tracked record.</p>
-<p class="sd-card-text"><strong>Emission.</strong> The described device types as <code class="docutils literal notranslate"><span class="pre">HalfCellDevice</span></code>; the working electrode emits under <code class="docutils literal notranslate"><span class="pre">hasWorkingElectrode</span></code>; in a two-electrode half cell the counter node types as both <code class="docutils literal notranslate"><span class="pre">CounterElectrode</span></code> and <code class="docutils literal notranslate"><span class="pre">ReferenceElectrode</span></code>.</p>
+<p class="sd-card-text"><strong>What is usually stated.</strong> The working electrode as a reference to its <a class="reference internal" href="electrodes.html"><span class="std std-doc">electrode spec</span></a> — the design under test; the counter described inline on its holder, because a lithium foil the lab treats as interchangeable earns a description, not an individually tracked record. A lithium counter is pure metal foil, not a coated electrode: state it as <code class="docutils literal notranslate"><span class="pre">material</span></code> (<code class="docutils literal notranslate"><span class="pre">{&quot;material&quot;:</span> <span class="pre">{&quot;name&quot;:</span> <span class="pre">&quot;Lithium</span> <span class="pre">metal&quot;}}</span></code>), never as a <code class="docutils literal notranslate"><span class="pre">coating</span></code> — there is no collector-plus-layer structure to describe.</p>
+<p class="sd-card-text"><strong>Half cell vs three-electrode cell: one difference.</strong> In a half cell the counter electrode <em>is</em> the potential reference — one physical electrode carrying two roles, which is why the counter node types as both <code class="docutils literal notranslate"><span class="pre">CounterElectrode</span></code> and <code class="docutils literal notranslate"><span class="pre">ReferenceElectrode</span></code> and why nothing goes in <code class="docutils literal notranslate"><span class="pre">reference_electrode</span></code>. Passing current through your reference polarizes it, so when that matters the three-electrode cell separates the roles: the counter is only a counter, and a dedicated <code class="docutils literal notranslate"><span class="pre">reference_electrode</span></code> (a lithium ring or wire near the working electrode — a monolithic <code class="docutils literal notranslate"><span class="pre">material</span></code>, or a <code class="docutils literal notranslate"><span class="pre">reference_electrode_spec_id</span></code>) carries the reference alone. Everything else — holders, schema, creators — is identical between the two configurations. Both facts are the cell’s <em>physical arrangement</em>; the “vs what” of a measured voltage is stated where the number lives, as the quantity’s <code class="docutils literal notranslate"><span class="pre">voltage_reference</span></code> datum.</p>
+<p class="sd-card-text"><strong>Emission.</strong> A half cell’s described device types as <code class="docutils literal notranslate"><span class="pre">HalfCellDevice</span></code> (the counter dual-typed as above); a three-electrode cell’s types as <code class="docutils literal notranslate"><span class="pre">ThreeElectrodeCellDevice</span></code>, with the dedicated reference under <code class="docutils literal notranslate"><span class="pre">hasReferenceElectrode</span></code> typed <code class="docutils literal notranslate"><span class="pre">ReferenceElectrode</span></code> (a legacy string shorthand like <code class="docutils literal notranslate"><span class="pre">&quot;NHE&quot;</span></code> still emits as a labeled <code class="docutils literal notranslate"><span class="pre">ReferenceElectrode</span></code> node). The working electrode emits under <code class="docutils literal notranslate"><span class="pre">hasWorkingElectrode</span></code>; a monolithic electrode’s material emits as its <code class="docutils literal notranslate"><span class="pre">hasActiveMaterial</span></code>, class-typed (<code class="docutils literal notranslate"><span class="pre">Lithium</span></code>) through the material map.</p>
 </div>
 </details></section>
 </section>
@@ -723,8 +1361,10 @@ JSON-LD</label><div class="sd-tab-content docutils">
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#define-one">Define one</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#a-coin-half-cell-for-electrode-characterization">A coin half cell for electrode characterization</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#a-three-electrode-cell">A three-electrode cell</a></li>
 </ul>
 </li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common-examples">Common examples</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fields">Fields</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#design-notes">Design notes</a></li>
 </ul>

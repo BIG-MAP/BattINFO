@@ -18,6 +18,7 @@ $ battinfo [OPTIONS] COMMAND [ARGS]...
 * `init`: Create a minimal workspace scaffold with...
 * `map`: Map canonical JSON to JSON-LD for a target.
 * `push`: Publish battery data to Zenodo in one...
+* `import-protocol`: One-liner protocol import: executable file...
 * `query`: Query BattINFO resources.
 * `create`: Create BattINFO resources.
 * `publish`: Publish BattINFO resolver artifacts.
@@ -139,6 +140,34 @@ $ battinfo push [OPTIONS] {folder}
 * `--dry-run`: Package only — do not upload.
 * `--staging <path>`: Override staging directory.
 * `--json`: Emit machine-readable JSON to stdout.
+* `--help`: Show this message and exit.
+
+## `battinfo import-protocol`
+
+One-liner protocol import: executable file in, canonical record out.
+
+The structured method is a faithful, deliberately lossy summary; anything
+computational stays with the source file, which is linked back as the
+record&#x27;s source_protocol artifact (with its sha256). Warnings list what
+did not carry over.
+
+**Usage**:
+
+```console
+$ battinfo import-protocol [OPTIONS] {input_path}
+```
+
+**Arguments**:
+
+* `input_path`: Executable protocol file: UCP YAML, aurora-unicycler JSON, PyBaMM experiment (text or to_config JSON), or bmgen EMMO JSON-LD.  [required]
+
+**Options**:
+
+* `--format <str>`: Source format: auto|ucp|aurora|pybamm|bmgen (auto sniffs extension + content).  [default: auto]
+* `--name <str>`: Protocol name (default: derived from the source).
+* `--kind <str>`: Test kind (e.g. cycling, gitt; default: inferred).
+* `--uid <str>`: Canonical uid (xxxx-xxxx-xxxx-xxxx); default: derived deterministically from the file&#x27;s sha256.
+* `--out <path>`: Write the canonical test-protocol record here (default: stdout).
 * `--help`: Show this message and exit.
 
 ## `battinfo query`

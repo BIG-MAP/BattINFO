@@ -25,10 +25,10 @@
    "id": "d1bde660",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-08T22:01:56.828345Z",
-     "iopub.status.busy": "2026-07-08T22:01:56.828345Z",
-     "iopub.status.idle": "2026-07-08T22:01:56.838844Z",
-     "shell.execute_reply": "2026-07-08T22:01:56.837331Z"
+     "iopub.execute_input": "2026-09-16T09:37:13.761899Z",
+     "iopub.status.busy": "2026-09-16T09:37:13.760553Z",
+     "iopub.status.idle": "2026-09-16T09:37:13.796417Z",
+     "shell.execute_reply": "2026-09-16T09:37:13.796417Z"
     }
    },
    "outputs": [],
@@ -82,10 +82,10 @@
    "id": "af9f7f36",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-08T22:01:56.842843Z",
-     "iopub.status.busy": "2026-07-08T22:01:56.842843Z",
-     "iopub.status.idle": "2026-07-08T22:01:56.851498Z",
-     "shell.execute_reply": "2026-07-08T22:01:56.850491Z"
+     "iopub.execute_input": "2026-09-16T09:37:13.806951Z",
+     "iopub.status.busy": "2026-09-16T09:37:13.806951Z",
+     "iopub.status.idle": "2026-09-16T09:37:13.837269Z",
+     "shell.execute_reply": "2026-09-16T09:37:13.836204Z"
     }
    },
    "outputs": [
@@ -117,10 +117,10 @@
    "id": "2876af4e",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-08T22:01:56.855551Z",
-     "iopub.status.busy": "2026-07-08T22:01:56.855551Z",
-     "iopub.status.idle": "2026-07-08T22:01:56.864996Z",
-     "shell.execute_reply": "2026-07-08T22:01:56.863990Z"
+     "iopub.execute_input": "2026-09-16T09:37:13.848346Z",
+     "iopub.status.busy": "2026-09-16T09:37:13.844765Z",
+     "iopub.status.idle": "2026-09-16T09:37:13.858867Z",
+     "shell.execute_reply": "2026-09-16T09:37:13.858867Z"
     }
    },
    "outputs": [
@@ -163,10 +163,10 @@
    "id": "8d47a257",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-08T22:01:56.868996Z",
-     "iopub.status.busy": "2026-07-08T22:01:56.868005Z",
-     "iopub.status.idle": "2026-07-08T22:01:56.876216Z",
-     "shell.execute_reply": "2026-07-08T22:01:56.875209Z"
+     "iopub.execute_input": "2026-09-16T09:37:13.865526Z",
+     "iopub.status.busy": "2026-09-16T09:37:13.865526Z",
+     "iopub.status.idle": "2026-09-16T09:37:13.883153Z",
+     "shell.execute_reply": "2026-09-16T09:37:13.883153Z"
     }
    },
    "outputs": [
@@ -203,11 +203,6 @@
        " 'pulse_charging_current': {'value': 10.0,\n",
        "  'unit': 'A',\n",
        "  'raw': {'text': 'Recommended Fast Charge Method to 80% SOC 10A to 3.6V CC, 12 min',\n",
-       "   'page': 1,\n",
-       "   'confidence': 0.8}},\n",
-       " 'nominal_continuous_charging_current': {'value': 2.5,\n",
-       "  'unit': 'A',\n",
-       "  'raw': {'text': 'Recommended Standard Charge Method 2.5A to 3.6V CCCV, 60 min',\n",
        "   'page': 1,\n",
        "   'confidence': 0.8}},\n",
        " 'maximum_continuous_charging_current': {'value': 2.5,\n",
@@ -268,11 +263,12 @@
     "\n",
     "A cell spec is a **product specification**: datasheet-level information about a battery model, not a physical item.\n",
     "\n",
-    "In RDF it carries two parallel type assertions:\n",
+    "In RDF it carries three parallel type assertions:\n",
     "- **EMMO**: `BatteryCellSpecification` (subclass of `emmo:Description` — an information entity describing a class of cells)\n",
+    "- **schema.org**: `schema:ProductModel` (the catalogue entry — name, manufacturer, codes)\n",
     "- **schema.org**: `schema:CreativeWork` (the specification document as a creative artifact)\n",
     "\n",
-    "The physical EMMO classes for format and chemistry (`BatteryCell`, `CylindricalBattery`, `LithiumIonBattery`, ...) are placed on an `isDescriptionFor` anonymous node — not on the specification itself — because the specification is an information entity, not a physical cell.\n",
+    "The physical content — the EMMO classes for format and chemistry (`BatteryCell`, `CylindricalBattery`, `LithiumIonBattery`, ...) **and** the `hasProperty` quantities and composition — is placed on the described battery under `isDescriptionFor`, not on the specification itself, because the specification is an information entity, not a physical cell.\n",
     "\n",
     "### Cell — the physical item\n",
     "\n",
@@ -303,10 +299,10 @@
    "id": "e85e0b8a",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-08T22:01:56.879215Z",
-     "iopub.status.busy": "2026-07-08T22:01:56.879215Z",
-     "iopub.status.idle": "2026-07-08T22:01:56.883232Z",
-     "shell.execute_reply": "2026-07-08T22:01:56.882227Z"
+     "iopub.execute_input": "2026-09-16T09:37:13.890455Z",
+     "iopub.status.busy": "2026-09-16T09:37:13.890455Z",
+     "iopub.status.idle": "2026-09-16T09:37:13.902337Z",
+     "shell.execute_reply": "2026-09-16T09:37:13.902337Z"
     }
    },
    "outputs": [
@@ -356,10 +352,10 @@
    "id": "e670cfbb",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-08T22:01:56.885235Z",
-     "iopub.status.busy": "2026-07-08T22:01:56.885235Z",
-     "iopub.status.idle": "2026-07-08T22:01:57.577885Z",
-     "shell.execute_reply": "2026-07-08T22:01:57.577885Z"
+     "iopub.execute_input": "2026-09-16T09:37:13.902337Z",
+     "iopub.status.busy": "2026-09-16T09:37:13.902337Z",
+     "iopub.status.idle": "2026-09-16T09:37:15.430506Z",
+     "shell.execute_reply": "2026-09-16T09:37:15.430506Z"
     }
    },
    "outputs": [
@@ -397,10 +393,10 @@
    "id": "0f9bd621",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-08T22:01:57.579890Z",
-     "iopub.status.busy": "2026-07-08T22:01:57.579890Z",
-     "iopub.status.idle": "2026-07-08T22:01:57.994645Z",
-     "shell.execute_reply": "2026-07-08T22:01:57.993637Z"
+     "iopub.execute_input": "2026-09-16T09:37:15.444270Z",
+     "iopub.status.busy": "2026-09-16T09:37:15.444270Z",
+     "iopub.status.idle": "2026-09-16T09:37:16.123432Z",
+     "shell.execute_reply": "2026-09-16T09:37:16.123432Z"
     }
    },
    "outputs": [
@@ -408,7 +404,7 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "@type: ['BatteryCellSpecification', 'schema:CreativeWork']\n"
+      "@type: ['BatteryCellSpecification', 'schema:ProductModel', 'schema:CreativeWork']\n"
      ]
     }
    ],
@@ -433,10 +429,10 @@
    "id": "50971f8b",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-08T22:01:57.998666Z",
-     "iopub.status.busy": "2026-07-08T22:01:57.997687Z",
-     "iopub.status.idle": "2026-07-08T22:01:58.004207Z",
-     "shell.execute_reply": "2026-07-08T22:01:58.003686Z"
+     "iopub.execute_input": "2026-09-16T09:37:16.123432Z",
+     "iopub.status.busy": "2026-09-16T09:37:16.123432Z",
+     "iopub.status.idle": "2026-09-16T09:37:16.133777Z",
+     "shell.execute_reply": "2026-09-16T09:37:16.133777Z"
     }
    },
    "outputs": [
@@ -451,9 +447,11 @@
     }
    ],
    "source": [
-    "# Each quantitative spec becomes a ConventionalProperty node\n",
+    "# Each quantitative spec becomes a ConventionalProperty node on the\n",
+    "# described battery (the individual under isDescriptionFor).\n",
+    "described = jsonld.get(\"isDescriptionFor\", {})\n",
     "print(\"Properties:\")\n",
-    "for prop in jsonld.get(\"hasProperty\", []):\n",
+    "for prop in described.get(\"hasProperty\", []):\n",
     "    class_name = prop[\"@type\"][0] if isinstance(prop[\"@type\"], list) else prop[\"@type\"]\n",
     "    value = prop.get(\"hasNumericalPart\", {}).get(\"hasNumberValue\")\n",
     "    unit  = prop.get(\"hasMeasurementUnit\", \"\").split(\"#\")[-1]\n",
@@ -476,10 +474,10 @@
    "id": "4bb41daf",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-08T22:01:58.006242Z",
-     "iopub.status.busy": "2026-07-08T22:01:58.006242Z",
-     "iopub.status.idle": "2026-07-08T22:01:58.010754Z",
-     "shell.execute_reply": "2026-07-08T22:01:58.010243Z"
+     "iopub.execute_input": "2026-09-16T09:37:16.138852Z",
+     "iopub.status.busy": "2026-09-16T09:37:16.133777Z",
+     "iopub.status.idle": "2026-09-16T09:37:16.145000Z",
+     "shell.execute_reply": "2026-09-16T09:37:16.145000Z"
     }
    },
    "outputs": [
@@ -487,7 +485,7 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "JSON-LD exported to: <repo>\\docs\\guides\\_scratch\\guide-01\\resolver\\spec\\e4t5-w9re-mpq6-8g7e\\index.jsonld\n",
+      "JSON-LD exported to: C:\\t\\bi-v5\\docs\\guides\\_scratch\\guide-01\\resolver\\spec\\e4t5-w9re-mpq6-8g7e\\index.jsonld\n",
       "\n",
       "{\n",
       "  \"@context\": [\n",
@@ -501,6 +499,7 @@
       "  ],\n",
       "  \"@type\": [\n",
       "    \"BatteryCellSpecification\",\n",
+      "    \"schema:ProductModel\",\n",
       "    \"schema:CreativeWork\"\n",
       "  ],\n",
       "  \"@id\": \"https://w3id.org/battinfo/spec/e4t5-w9re-mpq6-8g7e\",\n",
@@ -520,39 +519,46 @@
       "      \"LithiumIonIronPhosphateBattery\",\n",
       "      \"LithiumIonGraphiteBattery\"\n",
       "    ],\n",
-      "    \"skos:prefLabel\": \"A123 Systems ANR26650M1-B\"\n",
+      "    \"@id\": \"https://w3id.org/battinfo/spec/e4t5-w9re-mpq6-8g7e#described\",\n",
+      "    \"skos:prefLabel\": \"A123 Systems ANR26650M1-B\",\n",
+      "    \"hasProperty\": [\n",
+      "      {\n",
+      "        \"@type\": [\n",
+      "          \"NominalCapacity\",\n",
+      "          \"ConventionalProperty\"\n",
+      "        ],\n",
+      "        \"skos:prefLabel\": \"NominalCapacity\",\n",
+      "        \"hasNumericalPart\": {\n",
+      "          \"@type\": \"RealData\",\n",
+      "          \"hasNumberValue\": 2.5\n",
+      "        },\n",
+      "        \"hasMeasurementUnit\": \"https://w3id.org/emmo#AmpereHour\"\n",
+      "      },\n",
+      "      {\n",
+      "        \"@type\": [\n",
+      "          \"NominalVoltage\",\n",
+      "          \"ConventionalProperty\"\n",
+      "        ],\n",
+      "        \"skos:prefLabel\": \"NominalVoltage\",\n",
+      "        \"hasNumericalPart\": {\n",
+      "          \"@type\": \"RealData\",\n",
+      "          \"hasNumberValue\": 3.3\n",
+      "        },\n",
+      "        \"hasMeasurementUnit\": \"https://w3id.org/emmo#Volt\"\n",
+      "      }\n",
+      "    ],\n",
+      "    \"hasPositiveElectrode\": {\n",
+      "      \"@type\": \"LithiumIronPhosphateElectrode\"\n",
+      "    },\n",
+      "    \"hasNegativeElectrode\": {\n",
+      "      \"@type\": \"GraphiteElectrode\"\n",
+      "    }\n",
       "  },\n",
       "  \"schema:schemaVersion\": \"0.2.0\",\n",
-      "  \"hasProperty\": [\n",
-      "    {\n",
-      "      \"@type\": [\n",
-      "        \"NominalCapacity\",\n",
-      "        \"ConventionalProperty\"\n",
-      "      ],\n",
-      "      \"skos:prefLabel\": \"NominalCapacity\",\n",
-      "      \"hasNumericalPart\": {\n",
-      "        \"@type\": \"RealData\",\n",
-      "        \"hasNumberValue\": 2.5\n",
-      "      },\n",
-      "      \"hasMeasurementUnit\": \"https://w3id.org/emmo#AmpereHour\"\n",
-      "    },\n",
-      "    {\n",
-      "      \"@type\": [\n",
-      "        \"NominalVoltage\",\n",
-      "        \"ConventionalProperty\"\n",
-      "      ],\n",
-      "      \"skos:prefLabel\": \"NominalVoltage\",\n",
-      "      \"hasNumericalPart\": {\n",
-      "        \"@type\": \"RealData\",\n",
-      "        \"hasNumberValue\": 3.3\n",
-      "      },\n",
-      "      \"hasMeasurementUnit\": \"https://w3id.org/emmo#Volt\"\n",
-      "    }\n",
-      "  ],\n",
       "  \"dcterms:source\": {\n",
       "    \"@type\": \"prov:Entity\",\n",
       "    \"dcterms:type\": \"datasheet\",\n",
-      "    \"prov:generatedAtTime\": \"2026-07-08T22:01:57+00:00\"\n",
+      "    \"prov:generatedAtTime\": \"2026-09-15T14:08:28+00:00\"\n",
       "  }\n",
       "}\n"
      ]
@@ -585,10 +591,10 @@
    "id": "bfc0b477",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-08T22:01:58.012765Z",
-     "iopub.status.busy": "2026-07-08T22:01:58.012765Z",
-     "iopub.status.idle": "2026-07-08T22:01:58.033975Z",
-     "shell.execute_reply": "2026-07-08T22:01:58.032958Z"
+     "iopub.execute_input": "2026-09-16T09:37:16.148784Z",
+     "iopub.status.busy": "2026-09-16T09:37:16.148784Z",
+     "iopub.status.idle": "2026-09-16T09:37:16.187752Z",
+     "shell.execute_reply": "2026-09-16T09:37:16.187752Z"
     }
    },
    "outputs": [
@@ -641,7 +647,7 @@
    "name": "python",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
-   "version": "3.11.1"
+   "version": "3.11.15"
   }
  },
  "nbformat": 4,
