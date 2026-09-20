@@ -921,21 +921,36 @@ FAMILIES = [
             {
                 "heading": "An equipment spec (the product)",
                 "fn": snippet_equipment_spec,
-                "record_type": None,
-                "gap": "No JSON-LD emitter exists for equipment records yet; the "
-                       "canonical record is the published form.",
+                "record_type": "equipment-spec",
+                "notice": [
+                    "The spec follows the description pattern like every other "
+                    "product: catalogue facts on the `[Description, "
+                    "schema:ProductModel, schema:CreativeWork]` node, the "
+                    "described unit (instrument class + `schema:Product`) "
+                    "under `isDescriptionFor`.",
+                    "Equipment quantities emit as named `schema:PropertyValue`s "
+                    "— lab hardware sits outside the battery vocabulary, and "
+                    "battinfo never mints domain classes for it.",
+                ],
             },
             {
                 "heading": "An equipment unit",
                 "fn": snippet_equipment,
-                "record_type": None,
-                "gap": "No JSON-LD emitter exists for equipment records yet.",
+                "record_type": "equipment",
+                "notice": [
+                    "The SAME node shape the deposit graph builds for "
+                    "`hasTestEquipment` targets, so a standalone record and a "
+                    "published test agree about the unit.",
+                ],
             },
             {
                 "heading": "A channel on that unit",
                 "fn": snippet_channel,
-                "record_type": None,
-                "gap": "No JSON-LD emitter exists for channel records yet.",
+                "record_type": "channel",
+                "notice": [
+                    "`schema:isPartOf` carries the parent link; "
+                    "`schema:position` the index.",
+                ],
             },
         ],
         "schemas": ["equipment-spec.schema.json", "equipment.schema.json", "channel.schema.json"],

@@ -1322,6 +1322,178 @@ def _organization_to_jsonld(record: dict) -> dict:
     return node
 
 
+def _property_value_nodes(property_map: Any) -> list[dict]:
+    """A record ``property`` dict -> named schema:PropertyValue nodes.
+
+    Equipment quantities (voltage range, max current, ...) are lab-hardware
+    facts outside the battery domain vocabulary, so they emit as honest named
+    PropertyValues rather than through the EMMO property map (which would
+    warn on every key and mint battinfo: fallbacks).
+    """
+    out: list[dict] = []
+    if not isinstance(property_map, Mapping):
+        return out
+    for name in sorted(property_map):
+        quantity = property_map[name]
+        if not isinstance(quantity, Mapping):
+            continue
+        value = quantity.get("value", quantity.get("value_text"))
+        if value is None:
+            continue
+        node: dict = {"@type": "schema:PropertyValue", "schema:name": name, "schema:value": value}
+        if quantity.get("unit"):
+            node["schema:unitText"] = quantity["unit"]
+        out.append(node)
+    return out
+
+
+def _equipment_spec_to_jsonld(record: dict) -> dict:
+    """Transform an equipment-spec record: the description pattern, for hardware.
+
+    The spec node is the product description ([Description, schema:ProductModel,
+    schema:CreativeWork], catalogue facts only); the described unit rides
+    isDescriptionFor as <spec-IRI>#described, typed with the instrument class
+    the deposit graph already derives (BatteryCycler / Potentiostat /
+    MeasuringInstrument) plus schema:Product. Equipment quantities emit as
+    named PropertyValues — lab hardware is outside the battery vocabulary, and
+    battinfo never mints domain classes for it.
+    """
+    from battinfo._emmo_instruments import _instrument_emmo_type
+    from battinfo.transform.json_to_jsonld import described_iri
+
+    spec = record.get("equipment_spec") or {}
+    prov = record.get("provenance") or {}
+
+    node: dict = {
+        "@context": dict(_CONTEXT_INLINE),
+        "@type": ["Description", "schema:ProductModel", "schema:CreativeWork"],
+    }
+    if spec.get("id"):
+        node["@id"] = spec["id"]
+    if spec.get("name"):
+        node["schema:name"] = spec["name"]
+    if spec.get("model"):
+        node["schema:model"] = spec["model"]
+    for org_field, term in (("manufacturer", "schema:manufacturer"), ("supplier", "schema:provider")):
+        org = spec.get(org_field)
+        org_name = org.get("name") if isinstance(org, Mapping) else org
+        if isinstance(org_name, str) and org_name:
+            node[term] = {"@type": "schema:Organization", "schema:name": org_name}
+    if spec.get("product_id"):
+        node["schema:productID"] = spec["product_id"]
+
+    class_seed = " ".join(
+        str(v) for v in (spec.get("equipment_class"), spec.get("name"), spec.get("model")) if v
+    )
+    described: dict = {"@type": [_instrument_emmo_type(class_seed), "schema:Product"]}
+    witness = described_iri(spec.get("id"))
+    if witness:
+        described["@id"] = witness
+    if spec.get("name"):
+        described["skos:prefLabel"] = spec["name"]
+    extra_properties = _property_value_nodes(spec.get("property"))
+    if spec.get("equipment_class"):
+        extra_properties.insert(0, {
+            "@type": "schema:PropertyValue",
+            "schema:name": "equipment_class",
+            "schema:value": spec["equipment_class"],
+        })
+    if spec.get("channel_count") is not None:
+        extra_properties.append({
+            "@type": "schema:PropertyValue",
+            "schema:name": "channel_count",
+            "schema:value": spec["channel_count"],
+        })
+    chems = spec.get("supported_chemistries")
+    if isinstance(chems, list) and chems:
+        extra_properties.append({
+            "@type": "schema:PropertyValue",
+            "schema:name": "supported_chemistries",
+            "schema:value": list(chems),
+        })
+    if extra_properties:
+        described["schema:additionalProperty"] = (
+            extra_properties[0] if len(extra_properties) == 1 else extra_properties
+        )
+    node["isDescriptionFor"] = described
+    if spec.get("comment"):
+        node["schema:description"] = spec["comment"]
+    if prov:
+        node["dcterms:source"] = _provenance(prov)
+    return node
+
+
+def _equipment_to_jsonld(record: dict) -> dict:
+    """Transform an equipment (unit) record — the SAME node shape the deposit
+    graph builds for hasTestEquipment targets, so both emitters agree."""
+    from battinfo._emmo_instruments import _instrument_emmo_type
+
+    body = record.get("equipment") or {}
+    prov = record.get("provenance") or {}
+    node: dict = {
+        "@context": dict(_CONTEXT_INLINE),
+        "@type": [_instrument_emmo_type(str(body.get("name") or "")), "prov:Entity"],
+    }
+    if body.get("id"):
+        node["@id"] = body["id"]
+    if body.get("name"):
+        node["schema:name"] = body["name"]
+    if body.get("serial_number"):
+        node["schema:serialNumber"] = body["serial_number"]
+    if body.get("location"):
+        node["schema:location"] = body["location"]
+    if body.get("equipment_spec_id"):
+        node["hasDescription"] = {"@id": body["equipment_spec_id"]}
+        node["dcterms:conformsTo"] = {"@id": body["equipment_spec_id"]}
+        node["schema:isVariantOf"] = {"@id": body["equipment_spec_id"]}
+    extra_properties = _property_value_nodes(body.get("property"))
+    if body.get("status"):
+        extra_properties.insert(0, {
+            "@type": "schema:PropertyValue", "schema:name": "status",
+            "schema:value": body["status"],
+        })
+    if extra_properties:
+        node["schema:additionalProperty"] = (
+            extra_properties[0] if len(extra_properties) == 1 else extra_properties
+        )
+    if body.get("comment"):
+        node["schema:description"] = body["comment"]
+    if prov:
+        node["dcterms:source"] = _provenance(prov)
+    return node
+
+
+def _channel_to_jsonld(record: dict) -> dict:
+    """Transform a channel record — the deposit graph's channel node shape."""
+    body = record.get("channel") or {}
+    prov = record.get("provenance") or {}
+    node: dict = {
+        "@context": dict(_CONTEXT_INLINE),
+        "@type": ["schema:Thing", "prov:Entity"],
+    }
+    if body.get("id"):
+        node["@id"] = body["id"]
+    label = body.get("label") or (
+        f"CH{body['index']}" if isinstance(body.get("index"), int) else None
+    )
+    if label:
+        node["schema:name"] = label
+    if isinstance(body.get("index"), int):
+        node["schema:position"] = body["index"]
+    if body.get("equipment_id"):
+        node["schema:isPartOf"] = {"@id": body["equipment_id"]}
+    if body.get("status"):
+        node["schema:additionalProperty"] = {
+            "@type": "schema:PropertyValue", "schema:name": "status",
+            "schema:value": body["status"],
+        }
+    if body.get("comment"):
+        node["schema:description"] = body["comment"]
+    if prov:
+        node["dcterms:source"] = _provenance(prov)
+    return node
+
+
 # ── Public dispatcher ─────────────────────────────────────────────────────────
 
 _TRANSFORMERS = {
@@ -1357,6 +1529,10 @@ _TRANSFORMERS = {
     "parameter-set": _parameter_set_to_jsonld,
     "parameter_set": _parameter_set_to_jsonld,
     "organization": _organization_to_jsonld,
+    "equipment-spec": _equipment_spec_to_jsonld,
+    "equipment_spec": _equipment_spec_to_jsonld,
+    "equipment": _equipment_to_jsonld,
+    "channel": _channel_to_jsonld,
 }
 
 

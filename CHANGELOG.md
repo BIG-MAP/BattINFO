@@ -9,6 +9,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Equipment, equipment specs, and channels emit JSON-LD (0.8.0
+  core-features ruling).** The last "no JSON-LD emitter" gaps close. An
+  equipment spec follows the description pattern like every other
+  product: catalogue facts on the `[Description, schema:ProductModel,
+  schema:CreativeWork]` node, the described unit (instrument class +
+  `schema:Product`) under `isDescriptionFor` as `<spec-IRI>#described`,
+  and quantities as named `schema:PropertyValue`s - lab hardware sits
+  outside the battery vocabulary and battinfo mints no domain classes
+  for it. A standalone equipment record emits the SAME node shape the
+  deposit graph builds for `hasTestEquipment` targets (instrument class
+  + `prov:Entity`, serial number, location, the spec seam as
+  `hasDescription`/`dcterms:conformsTo`/`schema:isVariantOf`), so both
+  doors agree about a unit; channels carry `schema:isPartOf` +
+  `schema:position`.
+
 - **Organizations become first-class records (0.8.0 core-features
   ruling).** The documented triple gap closes: `create_organization` /
   `save_organization` / `query_organizations` (new IRIs mint
