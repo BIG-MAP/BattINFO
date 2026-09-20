@@ -200,12 +200,18 @@ def test_the_emitted_terms_resolve_offline() -> None:
 
 
 def test_a_cell_without_electrode_links_keeps_the_plain_context() -> None:
-    """No role terms are added to a document that names no role."""
+    """One context authority (0.8.0 review F4): the inline context is the full
+    v1 context whether or not the document names a role — no per-document term
+    injection, so an unused role term being present is correct, not leakage."""
     plain = record_to_jsonld(
         Cell(id=CELL_IRI, cell_spec_id=SPEC_IRI, source=ProvenanceInfo(type="lab")).to_record(),
         "cell-instance", context="inline",
     )
-    assert "hasWorkingElectrode" not in plain["@context"]
+    v1 = json.loads(
+        (ROOT / "src" / "battinfo" / "data" / "context" / "records.context.v1.json")
+        .read_text(encoding="utf-8")
+    )["@context"]
+    assert plain["@context"] == v1
 
 
 def test_url_and_inline_contexts_agree_on_the_role_terms() -> None:

@@ -173,5 +173,8 @@ jobs:
       - name: Upload distribution
         uses: actions/upload-artifact@v7
         with:
-          name: dist
+          # Not "dist": release.yml runs this workflow as its CI gate and then
+          # uploads its own "dist" artifact in the same run — a duplicate name
+          # fails the second upload and would kill every release run.
+          name: ci-dist
           path: dist/

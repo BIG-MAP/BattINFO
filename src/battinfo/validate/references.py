@@ -362,6 +362,7 @@ def validate_references_report(
             ("negative_electrode_spec_id", "electrode-spec"),
             ("working_electrode_spec_id", "electrode-spec"),
             ("counter_electrode_spec_id", "electrode-spec"),
+            ("reference_electrode_spec_id", "electrode-spec"),
             ("electrolyte_spec_id", "electrolyte-spec"),
             ("separator_spec_id", "separator-spec"),
             ("housing_spec_id", "housing-spec"),
@@ -425,6 +426,29 @@ def validate_references_report(
                 ),
                 allow_missing=allow_missing,
             )
+        for ref_field, expected_type, label in (
+            ("equipment_id", "equipment", "equipment"),
+            ("channel_id", "channel", "channel"),
+        ):
+            ref_id = doc["test"].get(ref_field)
+            if isinstance(ref_id, str):
+                _check_reference(
+                    issues=issues,
+                    ref_id=ref_id,
+                    expected_type=expected_type,
+                    path=f"test.{ref_field}",
+                    source_root=root,
+                    resource_type=resource_type,
+                    missing_message=(
+                        f"Referenced {label} not found in source_root. Register the {label} "
+                        f"record first or disable resolve_references. Missing: {ref_id}"
+                    ),
+                    mismatch_message=(
+                        f"Referenced test.{ref_field} must resolve to a {expected_type} record "
+                        f"in source_root. Found a different record type for: {ref_id}"
+                    ),
+                    allow_missing=allow_missing,
+                )
         dataset_ids = doc["test"].get("dataset_ids")
         if isinstance(dataset_ids, list):
             for idx, dataset_id in enumerate(dataset_ids):
