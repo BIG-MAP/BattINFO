@@ -20,6 +20,15 @@
       "confidence": 1.0
     },
     {
+      "key": "areal_mass",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo#EMMO_afea89af_ef16_4bdb_99d5_f3b2f4c85a6c",
+      "class_qname": "emmo:AreaDensity",
+      "class_pref_label": "AreaDensity",
+      "class_label": "AreaDensity",
+      "confidence": 1.0
+    },
+    {
       "key": "available_volume",
       "status": "curated",
       "class_iri": "https://w3id.org/emmo#EMMO_f1a51559_aa3d_43a0_9327_918039f0dfed",
@@ -143,6 +152,15 @@
       "confidence": 1.0
     },
     {
+      "key": "conductivity_activation_energy",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_8c16cb12_41c1_43bd_9e7c_2eea7b06a1f0",
+      "class_qname": "emmo:ActivationEnergyOfElectrolyteConductivity",
+      "class_pref_label": "ActivationEnergyOfElectrolyteConductivity",
+      "class_label": "ActivationEnergyOfElectrolyteConductivity",
+      "confidence": 1.0
+    },
+    {
       "key": "continuous_charging_current",
       "status": "curated",
       "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_39d8a6ee_cd55_4855_8b5b_d42bef95ac78",
@@ -188,12 +206,30 @@
       "confidence": 1.0
     },
     {
+      "key": "density",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo#EMMO_06448f64_8db6_4304_8b2c_e785dba82044",
+      "class_qname": "emmo:Density",
+      "class_pref_label": "Density",
+      "class_label": "Density",
+      "confidence": 1.0
+    },
+    {
       "key": "diameter",
       "status": "curated",
       "class_iri": "https://w3id.org/emmo#EMMO_c1c8ac3c_8a1c_4777_8e0b_14c1f9f9b0c6",
       "class_qname": "emmo:Diameter",
       "class_pref_label": "Diameter",
       "class_label": "Diameter",
+      "confidence": 1.0
+    },
+    {
+      "key": "diffusivity_activation_energy",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_d7f8cab9_b035_4ecd_be63_292672572526",
+      "class_qname": "emmo:ActivationEnergy",
+      "class_pref_label": "ActivationEnergy",
+      "class_label": "ActivationEnergy",
       "confidence": 1.0
     },
     {
@@ -253,12 +289,48 @@
       "confidence": 1.0
     },
     {
+      "key": "electrode_area",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo#EMMO_96f39f77_44dc_491b_8fa7_30d887fe0890",
+      "class_qname": "emmo:Area",
+      "class_pref_label": "Area",
+      "class_label": "Area",
+      "confidence": 1.0
+    },
+    {
+      "key": "electrolyte_diffusivity",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_4c274506_af5b_4ef1_8217_829ffd459f28",
+      "class_qname": "emmo:ChargeCarrierDiffusivityInElectrolyte",
+      "class_pref_label": "ChargeCarrierDiffusivityInElectrolyte",
+      "class_label": "ChargeCarrierDiffusivityInElectrolyte",
+      "confidence": 1.0
+    },
+    {
+      "key": "electronic_conductivity",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_ce74d2dc_d496_4116_b2fb_3e83d88bc744",
+      "class_qname": "emmo:ElectronicConductivity",
+      "class_pref_label": "ElectronicConductivity",
+      "class_label": "ElectronicConductivity",
+      "confidence": 1.0
+    },
+    {
       "key": "energy_density",
       "status": "curated",
       "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_4aa1b96e_44a0_4b1a_a0ac_723d0223d80b",
       "class_qname": "emmo:EnergyDensity",
       "class_pref_label": "EnergyDensity",
       "class_label": "EnergyDensity",
+      "confidence": 1.0
+    },
+    {
+      "key": "external_surface_area",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo#EMMO_96f39f77_44dc_491b_8fa7_30d887fe0890",
+      "class_qname": "emmo:Area",
+      "class_pref_label": "Area",
+      "class_label": "Area",
       "confidence": 1.0
     },
     {
@@ -307,6 +379,15 @@
       "confidence": 1.0
     },
     {
+      "key": "ionic_conductivity",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_25dabdc2_68bf_4a38_8cbe_11be017358bc",
+      "class_qname": "emmo:IonicConductivity",
+      "class_pref_label": "IonicConductivity",
+      "class_label": "IonicConductivity",
+      "confidence": 1.0
+    },
+    {
       "key": "length",
       "status": "curated",
       "class_iri": "https://w3id.org/emmo#EMMO_cd2cd0de_e0cc_4ef1_b27e_2e88db027bac",
@@ -322,6 +403,15 @@
       "class_qname": "emmo:Mass",
       "class_pref_label": "Mass",
       "class_label": "Mass",
+      "confidence": 1.0
+    },
+    {
+      "key": "max_concentration",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_47287d09_6108_45ca_ac65_8b9451b1065e",
+      "class_qname": "emmo:MaximumConcentration",
+      "class_pref_label": "MaximumConcentration",
+      "class_label": "MaximumConcentration",
       "confidence": 1.0
     },
     {
@@ -488,6 +578,15 @@
       "confidence": 1.0
     },
     {
+      "key": "ocp",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_9c657fdc_b9d3_4964_907c_f9a6e8c5f52b",
+      "class_qname": "emmo:OpenCircuitVoltage",
+      "class_pref_label": "OpenCircuitVoltage",
+      "class_label": "OpenCircuitVoltage",
+      "confidence": 1.0
+    },
+    {
       "key": "operating_temperature_max",
       "status": "curated",
       "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_e999bd7d_93ad_47fb_8d8d_dd667e4ef553",
@@ -506,6 +605,24 @@
       "class_label": "MinimumOperatingTemperature",
       "confidence": 1.0,
       "notes": "New in domain-electrochemistry 0.36.0; previously emitted as a battinfo: fallback term."
+    },
+    {
+      "key": "particle_radius",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_b92e382f_5109_4f60_ab5e_c89d340419a9",
+      "class_qname": "emmo:ParticleRadius",
+      "class_pref_label": "ParticleRadius",
+      "class_label": "ParticleRadius",
+      "confidence": 1.0
+    },
+    {
+      "key": "porosity",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo#EMMO_3a6578ac_aee0_43b9_9bc6_1eb208c8c9a9",
+      "class_qname": "emmo:Porosity",
+      "class_pref_label": "Porosity",
+      "class_label": "Porosity",
+      "confidence": 1.0
     },
     {
       "key": "power_capability",
@@ -607,6 +724,24 @@
       "co_type_pending_note": "Upgrade co_type to RatedProperty once published in domain-battery."
     },
     {
+      "key": "reaction_rate_activation_energy",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_d7f8cab9_b035_4ecd_be63_292672572526",
+      "class_qname": "emmo:ActivationEnergy",
+      "class_pref_label": "ActivationEnergy",
+      "class_label": "ActivationEnergy",
+      "confidence": 1.0
+    },
+    {
+      "key": "reaction_rate_constant",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_0335e3f6_d1d8_4daa_8376_a9285f1bc9f1",
+      "class_qname": "emmo:ReactionRateConstant",
+      "class_pref_label": "ReactionRateConstant",
+      "class_label": "ReactionRateConstant",
+      "confidence": 1.0
+    },
+    {
       "key": "round_trip_energy_efficiency",
       "status": "curated",
       "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c413d29a_b814_4d88_8db0_0fd0171cff11",
@@ -626,12 +761,30 @@
       "confidence": 1.0
     },
     {
+      "key": "series_resistance",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_9bf40017_3f58_4030_ada7_cb37a3dfda2d",
+      "class_qname": "emmo:InternalResistance",
+      "class_pref_label": "InternalResistance",
+      "class_label": "InternalResistance",
+      "confidence": 1.0
+    },
+    {
       "key": "single_side_loading",
       "status": "curated",
       "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c955c089_6ee1_41a2_95fc_d534c5cfd3d5",
       "class_qname": "emmo:MassLoading",
       "class_pref_label": "MassLoading",
       "class_label": "MassLoading",
+      "confidence": 1.0
+    },
+    {
+      "key": "specific_capacity",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_1e3dc60d_dd6b_47d6_8161_70004fc5ee30",
+      "class_qname": "emmo:SpecificCapacity",
+      "class_pref_label": "SpecificCapacity",
+      "class_label": "SpecificCapacity",
       "confidence": 1.0
     },
     {
@@ -662,6 +815,24 @@
       "confidence": 1.0
     },
     {
+      "key": "stoichiometry_max",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_95ef8c3c_62fe_467f_b5d4_dd0cd18a7ea8",
+      "class_qname": "emmo:MaximumStoichiometricCoefficient",
+      "class_pref_label": "MaximumStoichiometricCoefficient",
+      "class_label": "MaximumStoichiometricCoefficient",
+      "confidence": 1.0
+    },
+    {
+      "key": "stoichiometry_min",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_86324806_4263_4d80_b5af_1a7be844ab5b",
+      "class_qname": "emmo:MinimumStoichiometricCoefficient",
+      "class_pref_label": "MinimumStoichiometricCoefficient",
+      "class_label": "MinimumStoichiometricCoefficient",
+      "confidence": 1.0
+    },
+    {
       "key": "storage_temperature_max",
       "status": "curated",
       "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_0ea4d188_9701_4699_a5ca_812a98a9afa7",
@@ -677,6 +848,15 @@
       "class_qname": "emmo:MinimumStorageTemperature",
       "class_pref_label": "MinimumStorageTemperature",
       "class_label": "MinimumStorageTemperature",
+      "confidence": 1.0
+    },
+    {
+      "key": "surface_area_per_volume",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_a5571263_f153_448f_84a3_cd18092cf8fa",
+      "class_qname": "emmo:VolumetricSurfaceArea",
+      "class_pref_label": "VolumetricSurfaceArea",
+      "class_label": "VolumetricSurfaceArea",
       "confidence": 1.0
     },
     {
@@ -704,6 +884,15 @@
       "class_qname": "emmo:Tortuosity",
       "class_pref_label": "Tortuosity",
       "class_label": "Tortuosity",
+      "confidence": 1.0
+    },
+    {
+      "key": "transference_number",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_e3e78df2_d568_4ab7_8c0d_d3a2ee3ae282",
+      "class_qname": "emmo:ChargeCarrierTransportNumber",
+      "class_pref_label": "ChargeCarrierTransportNumber",
+      "class_label": "ChargeCarrierTransportNumber",
       "confidence": 1.0
     },
     {
@@ -769,24 +958,6 @@
       "class_qname": "emmo:Width",
       "class_pref_label": "Width",
       "class_label": "Width",
-      "confidence": 1.0
-    },
-    {
-      "key": "electrode_area",
-      "status": "curated",
-      "class_iri": "https://w3id.org/emmo#EMMO_96f39f77_44dc_491b_8fa7_30d887fe0890",
-      "class_qname": "emmo:Area",
-      "class_pref_label": "Area",
-      "class_label": "Area",
-      "confidence": 1.0
-    },
-    {
-      "key": "external_surface_area",
-      "status": "curated",
-      "class_iri": "https://w3id.org/emmo#EMMO_96f39f77_44dc_491b_8fa7_30d887fe0890",
-      "class_qname": "emmo:Area",
-      "class_pref_label": "Area",
-      "class_label": "Area",
       "confidence": 1.0
     }
   ]

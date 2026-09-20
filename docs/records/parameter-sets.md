@@ -87,10 +87,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   },
   "hasProperty": {
     "@type": [
-      "battinfo:density",
+      "Density",
       "ConventionalProperty"
     ],
-    "skos:prefLabel": "density",
+    "skos:prefLabel": "Density",
     "hasNumericalPart": {
       "@type": "RealData",
       "hasNumberValue": 2.26
@@ -182,10 +182,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "hasProperty": [
     {
       "@type": [
-        "battinfo:particleRadius",
+        "ParticleRadius",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "particleRadius",
+      "skos:prefLabel": "ParticleRadius",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 5.86e-06
@@ -199,10 +199,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:maxConcentration",
+        "MaximumConcentration",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "maxConcentration",
+      "skos:prefLabel": "MaximumConcentration",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 33133.0
@@ -216,10 +216,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:reactionRateConstant",
+        "ReactionRateConstant",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "reactionRateConstant",
+      "skos:prefLabel": "ReactionRateConstant",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 6.716e-06
@@ -233,10 +233,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:stoichiometryMin",
+        "MinimumStoichiometricCoefficient",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "stoichiometryMin",
+      "skos:prefLabel": "MinimumStoichiometricCoefficient",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.0279
@@ -250,10 +250,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:stoichiometryMax",
+        "MaximumStoichiometricCoefficient",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "stoichiometryMax",
+      "skos:prefLabel": "MaximumStoichiometricCoefficient",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.9014
@@ -457,10 +457,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "hasProperty": [
     {
       "@type": [
-        "battinfo:diffusivityActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "diffusivityActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 17100.0
@@ -491,10 +491,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:transferenceNumber",
+        "ChargeCarrierTransportNumber",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "transferenceNumber",
+      "skos:prefLabel": "ChargeCarrierTransportNumber",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.259
@@ -508,10 +508,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:conductivityActivationEnergy",
+        "ActivationEnergyOfElectrolyteConductivity",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "conductivityActivationEnergy",
+      "skos:prefLabel": "ActivationEnergyOfElectrolyteConductivity",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 17100.0
@@ -655,10 +655,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:electronicConductivity",
+        "ElectronicConductivity",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "electronicConductivity",
+      "skos:prefLabel": "ElectronicConductivity",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 7.46
@@ -672,10 +672,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:surfaceAreaPerVolume",
+        "VolumetricSurfaceArea",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "surfaceAreaPerVolume",
+      "skos:prefLabel": "VolumetricSurfaceArea",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 473004.0
@@ -808,10 +808,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "hasProperty": [
     {
       "@type": [
-        "battinfo:particleRadius",
+        "ParticleRadius",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "particleRadius",
+      "skos:prefLabel": "ParticleRadius",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 4.8e-06
@@ -842,10 +842,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:reactionRateConstant",
+        "ReactionRateConstant",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "reactionRateConstant",
+      "skos:prefLabel": "ReactionRateConstant",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 6.872e-06
@@ -859,10 +859,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:stoichiometryMin",
+        "MinimumStoichiometricCoefficient",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "stoichiometryMin",
+      "skos:prefLabel": "MinimumStoichiometricCoefficient",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.0016261
@@ -876,10 +876,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:stoichiometryMax",
+        "MaximumStoichiometricCoefficient",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "stoichiometryMax",
+      "skos:prefLabel": "MaximumStoichiometricCoefficient",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.82258
@@ -893,10 +893,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:maxConcentration",
+        "MaximumConcentration",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "maxConcentration",
+      "skos:prefLabel": "MaximumConcentration",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 31400.0
@@ -910,10 +910,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:diffusivityActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "diffusivityActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 30000.0
@@ -927,10 +927,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:reactionRateActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "reactionRateActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 55000.0
@@ -1074,10 +1074,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:electronicConductivity",
+        "ElectronicConductivity",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "electronicConductivity",
+      "skos:prefLabel": "ElectronicConductivity",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.8
@@ -1091,10 +1091,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:surfaceAreaPerVolume",
+        "VolumetricSurfaceArea",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "surfaceAreaPerVolume",
+      "skos:prefLabel": "VolumetricSurfaceArea",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 4418460.0
@@ -1227,10 +1227,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "hasProperty": [
     {
       "@type": [
-        "battinfo:particleRadius",
+        "ParticleRadius",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "particleRadius",
+      "skos:prefLabel": "ParticleRadius",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 5e-07
@@ -1261,10 +1261,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:reactionRateConstant",
+        "ReactionRateConstant",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "reactionRateConstant",
+      "skos:prefLabel": "ReactionRateConstant",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 9.736e-07
@@ -1278,10 +1278,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:stoichiometryMin",
+        "MinimumStoichiometricCoefficient",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "stoichiometryMin",
+      "skos:prefLabel": "MinimumStoichiometricCoefficient",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.0875
@@ -1295,10 +1295,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:stoichiometryMax",
+        "MaximumStoichiometricCoefficient",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "stoichiometryMax",
+      "skos:prefLabel": "MaximumStoichiometricCoefficient",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.95038
@@ -1312,10 +1312,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:maxConcentration",
+        "MaximumConcentration",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "maxConcentration",
+      "skos:prefLabel": "MaximumConcentration",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 21200.0
@@ -1329,10 +1329,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:diffusivityActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "diffusivityActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 80000.0
@@ -1346,10 +1346,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:reactionRateActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "reactionRateActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 35000.0
@@ -1704,10 +1704,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "hasProperty": [
     {
       "@type": [
-        "battinfo:diffusivityActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "diffusivityActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 17100.0
@@ -1738,10 +1738,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:transferenceNumber",
+        "ChargeCarrierTransportNumber",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "transferenceNumber",
+      "skos:prefLabel": "ChargeCarrierTransportNumber",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.2594
@@ -1755,10 +1755,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:conductivityActivationEnergy",
+        "ActivationEnergyOfElectrolyteConductivity",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "conductivityActivationEnergy",
+      "skos:prefLabel": "ActivationEnergyOfElectrolyteConductivity",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 17100.0
@@ -1902,10 +1902,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:electronicConductivity",
+        "ElectronicConductivity",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "electronicConductivity",
+      "skos:prefLabel": "ElectronicConductivity",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.222
@@ -1919,10 +1919,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:surfaceAreaPerVolume",
+        "VolumetricSurfaceArea",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "surfaceAreaPerVolume",
+      "skos:prefLabel": "VolumetricSurfaceArea",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 499522.0
@@ -2055,10 +2055,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "hasProperty": [
     {
       "@type": [
-        "battinfo:particleRadius",
+        "ParticleRadius",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "particleRadius",
+      "skos:prefLabel": "ParticleRadius",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 4.12e-06
@@ -2089,10 +2089,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:reactionRateConstant",
+        "ReactionRateConstant",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "reactionRateConstant",
+      "skos:prefLabel": "ReactionRateConstant",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 5.199e-06
@@ -2106,10 +2106,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:stoichiometryMin",
+        "MinimumStoichiometricCoefficient",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "stoichiometryMin",
+      "skos:prefLabel": "MinimumStoichiometricCoefficient",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.005504
@@ -2123,10 +2123,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:stoichiometryMax",
+        "MaximumStoichiometricCoefficient",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "stoichiometryMax",
+      "skos:prefLabel": "MaximumStoichiometricCoefficient",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.75668
@@ -2140,10 +2140,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:maxConcentration",
+        "MaximumConcentration",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "maxConcentration",
+      "skos:prefLabel": "MaximumConcentration",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 29730.0
@@ -2157,10 +2157,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:diffusivityActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "diffusivityActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 30000.0
@@ -2174,10 +2174,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:reactionRateActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "reactionRateActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 55000.0
@@ -2321,10 +2321,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:electronicConductivity",
+        "ElectronicConductivity",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "electronicConductivity",
+      "skos:prefLabel": "ElectronicConductivity",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.789
@@ -2338,10 +2338,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:surfaceAreaPerVolume",
+        "VolumetricSurfaceArea",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "surfaceAreaPerVolume",
+      "skos:prefLabel": "VolumetricSurfaceArea",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 432072.0
@@ -2474,10 +2474,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "hasProperty": [
     {
       "@type": [
-        "battinfo:particleRadius",
+        "ParticleRadius",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "particleRadius",
+      "skos:prefLabel": "ParticleRadius",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 4.6e-06
@@ -2525,10 +2525,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:reactionRateConstant",
+        "ReactionRateConstant",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "reactionRateConstant",
+      "skos:prefLabel": "ReactionRateConstant",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 2.305e-05
@@ -2542,10 +2542,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:stoichiometryMin",
+        "MinimumStoichiometricCoefficient",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "stoichiometryMin",
+      "skos:prefLabel": "MinimumStoichiometricCoefficient",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.42424
@@ -2559,10 +2559,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:stoichiometryMax",
+        "MaximumStoichiometricCoefficient",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "stoichiometryMax",
+      "skos:prefLabel": "MaximumStoichiometricCoefficient",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.9621
@@ -2576,10 +2576,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:maxConcentration",
+        "MaximumConcentration",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "maxConcentration",
+      "skos:prefLabel": "MaximumConcentration",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 46200.0
@@ -2593,10 +2593,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:diffusivityActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "diffusivityActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 15000.0
@@ -2610,10 +2610,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:reactionRateActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "reactionRateActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 35000.0
@@ -2971,10 +2971,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:surfaceAreaPerVolume",
+        "VolumetricSurfaceArea",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "surfaceAreaPerVolume",
+      "skos:prefLabel": "VolumetricSurfaceArea",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 499522.0
@@ -3074,10 +3074,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "hasProperty": [
     {
       "@type": [
-        "battinfo:particleRadius",
+        "ParticleRadius",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "particleRadius",
+      "skos:prefLabel": "ParticleRadius",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 4.12e-06
@@ -3108,10 +3108,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:reactionRateConstant",
+        "ReactionRateConstant",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "reactionRateConstant",
+      "skos:prefLabel": "ReactionRateConstant",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 5.199e-06
@@ -3125,10 +3125,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:stoichiometryMin",
+        "MinimumStoichiometricCoefficient",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "stoichiometryMin",
+      "skos:prefLabel": "MinimumStoichiometricCoefficient",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.005504
@@ -3142,10 +3142,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:stoichiometryMax",
+        "MaximumStoichiometricCoefficient",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "stoichiometryMax",
+      "skos:prefLabel": "MaximumStoichiometricCoefficient",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.75668
@@ -3159,10 +3159,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:maxConcentration",
+        "MaximumConcentration",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "maxConcentration",
+      "skos:prefLabel": "MaximumConcentration",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 29730.0
@@ -3176,10 +3176,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:diffusivityActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "diffusivityActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 30000.0
@@ -3193,10 +3193,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:reactionRateActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "reactionRateActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 55000.0
@@ -3340,10 +3340,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:surfaceAreaPerVolume",
+        "VolumetricSurfaceArea",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "surfaceAreaPerVolume",
+      "skos:prefLabel": "VolumetricSurfaceArea",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 432072.0
@@ -3443,10 +3443,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "hasProperty": [
     {
       "@type": [
-        "battinfo:particleRadius",
+        "ParticleRadius",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "particleRadius",
+      "skos:prefLabel": "ParticleRadius",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 4.6e-06
@@ -3494,10 +3494,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:reactionRateConstant",
+        "ReactionRateConstant",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "reactionRateConstant",
+      "skos:prefLabel": "ReactionRateConstant",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 2.305e-05
@@ -3511,10 +3511,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:stoichiometryMin",
+        "MinimumStoichiometricCoefficient",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "stoichiometryMin",
+      "skos:prefLabel": "MinimumStoichiometricCoefficient",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.42424
@@ -3528,10 +3528,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:stoichiometryMax",
+        "MaximumStoichiometricCoefficient",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "stoichiometryMax",
+      "skos:prefLabel": "MaximumStoichiometricCoefficient",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.9621
@@ -3545,10 +3545,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:maxConcentration",
+        "MaximumConcentration",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "maxConcentration",
+      "skos:prefLabel": "MaximumConcentration",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 46200.0
@@ -3562,10 +3562,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:diffusivityActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "diffusivityActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 15000.0
@@ -3579,10 +3579,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:reactionRateActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "reactionRateActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 35000.0
@@ -3785,10 +3785,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "hasProperty": [
     {
       "@type": [
-        "battinfo:diffusivityActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "diffusivityActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 17100.0
@@ -3819,10 +3819,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:transferenceNumber",
+        "ChargeCarrierTransportNumber",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "transferenceNumber",
+      "skos:prefLabel": "ChargeCarrierTransportNumber",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.2594
@@ -3836,10 +3836,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:conductivityActivationEnergy",
+        "ActivationEnergyOfElectrolyteConductivity",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "conductivityActivationEnergy",
+      "skos:prefLabel": "ActivationEnergyOfElectrolyteConductivity",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 17100.0
@@ -3982,10 +3982,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:electronicConductivity",
+        "ElectronicConductivity",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "electronicConductivity",
+      "skos:prefLabel": "ElectronicConductivity",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.222
@@ -3999,10 +3999,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:surfaceAreaPerVolume",
+        "VolumetricSurfaceArea",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "surfaceAreaPerVolume",
+      "skos:prefLabel": "VolumetricSurfaceArea",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 499522.0
@@ -4134,10 +4134,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "hasProperty": [
     {
       "@type": [
-        "battinfo:particleRadius",
+        "ParticleRadius",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "particleRadius",
+      "skos:prefLabel": "ParticleRadius",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 4.12e-06
@@ -4168,10 +4168,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:reactionRateConstant",
+        "ReactionRateConstant",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "reactionRateConstant",
+      "skos:prefLabel": "ReactionRateConstant",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 5.199e-06
@@ -4185,10 +4185,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:stoichiometryMin",
+        "MinimumStoichiometricCoefficient",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "stoichiometryMin",
+      "skos:prefLabel": "MinimumStoichiometricCoefficient",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.005504
@@ -4202,10 +4202,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:stoichiometryMax",
+        "MaximumStoichiometricCoefficient",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "stoichiometryMax",
+      "skos:prefLabel": "MaximumStoichiometricCoefficient",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.75668
@@ -4219,10 +4219,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:maxConcentration",
+        "MaximumConcentration",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "maxConcentration",
+      "skos:prefLabel": "MaximumConcentration",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 29730.0
@@ -4236,10 +4236,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:diffusivityActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "diffusivityActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 30000.0
@@ -4253,10 +4253,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:reactionRateActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "reactionRateActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 55000.0
@@ -4399,10 +4399,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:electronicConductivity",
+        "ElectronicConductivity",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "electronicConductivity",
+      "skos:prefLabel": "ElectronicConductivity",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.789
@@ -4763,10 +4763,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "hasProperty": [
     {
       "@type": [
-        "battinfo:diffusivityActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "diffusivityActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 17100.0
@@ -4797,10 +4797,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:transferenceNumber",
+        "ChargeCarrierTransportNumber",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "transferenceNumber",
+      "skos:prefLabel": "ChargeCarrierTransportNumber",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.2594
@@ -4814,10 +4814,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:conductivityActivationEnergy",
+        "ActivationEnergyOfElectrolyteConductivity",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "conductivityActivationEnergy",
+      "skos:prefLabel": "ActivationEnergyOfElectrolyteConductivity",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 17100.0
@@ -4960,10 +4960,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:electronicConductivity",
+        "ElectronicConductivity",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "electronicConductivity",
+      "skos:prefLabel": "ElectronicConductivity",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.222
@@ -4977,10 +4977,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:surfaceAreaPerVolume",
+        "VolumetricSurfaceArea",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "surfaceAreaPerVolume",
+      "skos:prefLabel": "VolumetricSurfaceArea",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 499522.0
@@ -5112,10 +5112,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "hasProperty": [
     {
       "@type": [
-        "battinfo:particleRadius",
+        "ParticleRadius",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "particleRadius",
+      "skos:prefLabel": "ParticleRadius",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 4.12e-06
@@ -5146,10 +5146,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:ocp",
+        "OpenCircuitVoltage",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "ocp",
+      "skos:prefLabel": "OpenCircuitVoltage",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.0
@@ -5163,10 +5163,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:reactionRateConstant",
+        "ReactionRateConstant",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "reactionRateConstant",
+      "skos:prefLabel": "ReactionRateConstant",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 5.199e-06
@@ -5180,10 +5180,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:stoichiometryMin",
+        "MinimumStoichiometricCoefficient",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "stoichiometryMin",
+      "skos:prefLabel": "MinimumStoichiometricCoefficient",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.005504
@@ -5197,10 +5197,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:stoichiometryMax",
+        "MaximumStoichiometricCoefficient",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "stoichiometryMax",
+      "skos:prefLabel": "MaximumStoichiometricCoefficient",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.75668
@@ -5214,10 +5214,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:maxConcentration",
+        "MaximumConcentration",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "maxConcentration",
+      "skos:prefLabel": "MaximumConcentration",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 29730.0
@@ -5231,10 +5231,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:diffusivityActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "diffusivityActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 30000.0
@@ -5248,10 +5248,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:reactionRateActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "reactionRateActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 55000.0
@@ -5381,10 +5381,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:electronicConductivity",
+        "ElectronicConductivity",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "electronicConductivity",
+      "skos:prefLabel": "ElectronicConductivity",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.789
@@ -5398,10 +5398,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:surfaceAreaPerVolume",
+        "VolumetricSurfaceArea",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "surfaceAreaPerVolume",
+      "skos:prefLabel": "VolumetricSurfaceArea",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 432072.0
@@ -5533,10 +5533,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "hasProperty": [
     {
       "@type": [
-        "battinfo:particleRadius",
+        "ParticleRadius",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "particleRadius",
+      "skos:prefLabel": "ParticleRadius",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 4.6e-06
@@ -5584,10 +5584,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:reactionRateConstant",
+        "ReactionRateConstant",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "reactionRateConstant",
+      "skos:prefLabel": "ReactionRateConstant",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 2.305e-05
@@ -5601,10 +5601,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:stoichiometryMin",
+        "MinimumStoichiometricCoefficient",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "stoichiometryMin",
+      "skos:prefLabel": "MinimumStoichiometricCoefficient",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.42424
@@ -5618,10 +5618,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:stoichiometryMax",
+        "MaximumStoichiometricCoefficient",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "stoichiometryMax",
+      "skos:prefLabel": "MaximumStoichiometricCoefficient",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.9621
@@ -5635,10 +5635,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:maxConcentration",
+        "MaximumConcentration",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "maxConcentration",
+      "skos:prefLabel": "MaximumConcentration",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 46200.0
@@ -5652,10 +5652,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:diffusivityActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "diffusivityActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 15000.0
@@ -5669,10 +5669,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:reactionRateActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "reactionRateActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 35000.0

@@ -771,6 +771,21 @@ export const recordsContext: Record<string, unknown> = {
     "csvw": "http://www.w3.org/ns/csvw#",
     "Area": "emmo:EMMO_96f39f77_44dc_491b_8fa7_30d887fe0890",
     "electrode_area": "emmo:EMMO_96f39f77_44dc_491b_8fa7_30d887fe0890",
-    "external_surface_area": "emmo:EMMO_96f39f77_44dc_491b_8fa7_30d887fe0890"
+    "external_surface_area": "emmo:EMMO_96f39f77_44dc_491b_8fa7_30d887fe0890",
+    "ActivationEnergyOfElectrolyteConductivity": "electrochemistry:electrochemistry_8c16cb12_41c1_43bd_9e7c_2eea7b06a1f0",
+    "ChargeCarrierDiffusivityInElectrolyte": "electrochemistry:electrochemistry_4c274506_af5b_4ef1_8217_829ffd459f28",
+    "ElectronicConductivity": "electrochemistry:electrochemistry_ce74d2dc_d496_4116_b2fb_3e83d88bc744",
+    "IonicConductivity": "electrochemistry:electrochemistry_25dabdc2_68bf_4a38_8cbe_11be017358bc",
+    "MaximumConcentration": "electrochemistry:electrochemistry_47287d09_6108_45ca_ac65_8b9451b1065e",
+    "OpenCircuitVoltage": "electrochemistry:electrochemistry_9c657fdc_b9d3_4964_907c_f9a6e8c5f52b",
+    "ParticleRadius": "electrochemistry:electrochemistry_b92e382f_5109_4f60_ab5e_c89d340419a9",
+    "ReactionRateConstant": "electrochemistry:electrochemistry_0335e3f6_d1d8_4daa_8376_a9285f1bc9f1",
+    "MaximumStoichiometricCoefficient": "electrochemistry:electrochemistry_95ef8c3c_62fe_467f_b5d4_dd0cd18a7ea8",
+    "MinimumStoichiometricCoefficient": "electrochemistry:electrochemistry_86324806_4263_4d80_b5af_1a7be844ab5b",
+    "VolumetricSurfaceArea": "electrochemistry:electrochemistry_a5571263_f153_448f_84a3_cd18092cf8fa",
+    "ChargeCarrierTransportNumber": "electrochemistry:electrochemistry_e3e78df2_d568_4ab7_8c0d_d3a2ee3ae282",
+    "ThermodynamicTemperature": "emmo:EMMO_affe07e4_e9bc_4852_86c6_69e26182a17f",
+    "AreaDensity": "emmo:EMMO_afea89af_ef16_4bdb_99d5_f3b2f4c85a6c",
+    "ActivationEnergy": "electrochemistry:electrochemistry_d7f8cab9_b035_4ecd_be63_292672572526"
   }
 };
