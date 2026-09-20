@@ -225,10 +225,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     "hasProperty": [
       {
         "@type": [
-          "battinfo:arealMass",
+          "AreaDensity",
           "ConventionalProperty"
         ],
-        "skos:prefLabel": "arealMass",
+        "skos:prefLabel": "AreaDensity",
         "hasNumericalPart": {
           "@type": "RealData",
           "hasNumberValue": 4.05
