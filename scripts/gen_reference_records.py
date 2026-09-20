@@ -963,6 +963,10 @@ FAMILIES = [
                     "The claim batch emits as one `schema:Dataset` node: scalar "
                     "claims as EMMO-typed quantities, the target on "
                     "`schema:about`.",
+                    "A BPX file imports the same way: "
+                    "`from_bpx_parameters(...).to_records(materials=...)` turns "
+                    "its physics blocks into claim records, header lineage "
+                    "included (see the design notes).",
                 ],
             },
         ],

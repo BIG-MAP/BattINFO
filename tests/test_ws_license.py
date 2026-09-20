@@ -106,7 +106,7 @@ def test_license_stamped_into_record_to_jsonld(tmp_path: Path) -> None:
     for sub, rt in (("cell-spec", "cell-spec"), ("cell-instance", "cell-instance"),
                     ("test", "test"), ("dataset", "dataset")):
         ld = record_to_jsonld(_read_one(ws, sub), rt)
-        assert ld.get("dcterms:license") == {"@id": "cc-by-4.0"}, sub
+        assert ld.get("dcterms:license") == {"@id": "https://spdx.org/licenses/CC-BY-4.0.html"}, sub
 
 
 def test_no_license_means_no_stamp(tmp_path: Path) -> None:

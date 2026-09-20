@@ -133,6 +133,20 @@ def _extract_header(data: dict[str, Any]) -> tuple[str | None, str | None, str |
     )
 
 
+def _extract_references(data: dict[str, Any]) -> str | None:
+    """The BPX ``Header.References`` provenance string, if present."""
+    header = data.get("Header") or data.get("header") or {}
+    if not isinstance(header, Mapping):
+        return None
+    references = header.get("References") or header.get("references")
+    if isinstance(references, list):
+        parts = [str(item).strip() for item in references if str(item).strip()]
+        return "; ".join(parts) or None
+    if references is not None and str(references).strip():
+        return str(references).strip()
+    return None
+
+
 def _extract_specs(
     cell_params: dict[str, Any],
     warnings: list[str],
@@ -653,6 +667,9 @@ class BpxParameterImportResult:
         ``quantity``/``curve``/``expression``).
     title / bpx_version / model_type / description / source_file:
         BPX header fields, as in :class:`BpxImportResult`.
+    references:
+        The ``Header.References`` provenance string, carried onto every minted
+        record as its provenance citation (unless the caller passes one).
     warnings:
         Unmapped fields and skipped values.
     """
@@ -663,6 +680,7 @@ class BpxParameterImportResult:
     model_type: str | None
     description: str | None
     source_file: str | None
+    references: str | None = None
     warnings: list[str] = field(default_factory=list)
 
     def to_records(
@@ -691,6 +709,31 @@ class BpxParameterImportResult:
 
         materials = dict(materials or {})
         base = name or self.title or self.source_file or "BPX import"
+        # Header lineage rides every record: Description as the record
+        # description; References as the provenance citation when it is a
+        # URL/DOI, otherwise verbatim as a note (provenance.citation is
+        # URI-typed). Caller-supplied values win; the model context
+        # (tool/model/version) is stamped unconditionally below — a DFN-fitted
+        # value is not model-free.
+        from battinfo._util import _citation_url_value  # noqa: PLC0415
+
+        record_kwargs = dict(record_kwargs)
+        if self.description is not None:
+            record_kwargs.setdefault("description", self.description)
+        if (
+            self.references is not None
+            and "citation" not in record_kwargs
+            and "citation_doi" not in record_kwargs
+        ):
+            citation_value = _citation_url_value(self.references)
+            if isinstance(citation_value, str) and citation_value.startswith(
+                ("http://", "https://")
+            ):
+                record_kwargs["citation"] = self.references
+            else:
+                notes = list(record_kwargs.get("notes") or [])
+                notes.append(f"BPX Header.References: {self.references}")
+                record_kwargs["notes"] = notes
         model_context = {
             "tool": "BPX",
             **({"name": self.title} if self.title else {}),
@@ -883,6 +926,26 @@ def from_bpx_parameters(source: Mapping[str, Any] | str | Path) -> BpxParameterI
             if merged:
                 claims[bpx_block] = merged
 
+    # No silent drops: name what this importer does not read. The User-defined
+    # block is BPX's blessed extension point (tool- and study-specific keys with
+    # no standard semantics), and the Cell block belongs to from_bpx (spec
+    # properties, not claims) — both are stated, never swallowed.
+    user_defined = params_raw.get("User-defined")
+    if isinstance(user_defined, Mapping) and user_defined:
+        keys = [str(k) for k in user_defined]
+        listed = ", ".join(keys[:8]) + (" …" if len(keys) > 8 else "")
+        warnings.append(
+            f"BPX User-defined block not imported ({len(keys)} keys: {listed}). "
+            "These carry no standard semantics; author them as explicit claims "
+            "if they matter."
+        )
+    _handled_blocks = {*_BPX_ELECTRODE_BLOCKS.values(), "Separator", "Electrolyte", "Cell", "User-defined"}
+    for block_name in params_raw:
+        if block_name not in _handled_blocks:
+            warnings.append(
+                f"BPX Parameterisation block '{block_name}' is not recognised; ignored."
+            )
+
     if not claims:
         warnings.append("No parameter claims found in BPX electrode/separator/electrolyte blocks.")
 
@@ -893,6 +956,7 @@ def from_bpx_parameters(source: Mapping[str, Any] | str | Path) -> BpxParameterI
         model_type=model_type,
         description=description,
         source_file=source_file,
+        references=_extract_references(data),
         warnings=warnings,
     )
 

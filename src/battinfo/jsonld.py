@@ -408,6 +408,40 @@ def _checksum_parts(checksum: Any) -> tuple[str, str] | None:
     return algorithm.strip().lower(), value.strip()
 
 
+# License slug -> the SPDX license page IRI. Records store licenses either as
+# full URLs (datasets: the creativecommons.org deed) or as SPDX-style slugs
+# (parameter sets: "cc-by-sa-4.0", set at ingest as a condition of the source).
+_LICENSE_SLUG_IRIS: dict[str, str] = {
+    "cc-by-4.0": "https://spdx.org/licenses/CC-BY-4.0.html",
+    "cc-by-sa-4.0": "https://spdx.org/licenses/CC-BY-SA-4.0.html",
+    "cc-by-nc-4.0": "https://spdx.org/licenses/CC-BY-NC-4.0.html",
+    "cc0-1.0": "https://spdx.org/licenses/CC0-1.0.html",
+    "mit": "https://spdx.org/licenses/MIT.html",
+    "apache-2.0": "https://spdx.org/licenses/Apache-2.0.html",
+    "gpl-3.0": "https://spdx.org/licenses/GPL-3.0-only.html",
+    "gpl-3.0-or-later": "https://spdx.org/licenses/GPL-3.0-or-later.html",
+}
+
+
+def license_node(value: Any) -> dict | str | None:
+    """A record ``license`` value -> a ``dcterms:license`` object or literal.
+
+    A bare slug emitted as ``{"@id": "cc-by-sa-4.0"}`` is a RELATIVE IRI that
+    resolves against the document base into garbage. URLs pass through as IRI
+    references, known slugs map to their SPDX page, and anything else emits as
+    a plain literal — honest text beats a broken link.
+    """
+    if not isinstance(value, str) or not value.strip():
+        return None
+    text = value.strip()
+    if text.startswith(("http://", "https://")):
+        return {"@id": text}
+    iri = _LICENSE_SLUG_IRIS.get(text.lower())
+    if iri:
+        return {"@id": iri}
+    return text
+
+
 def checksum_node(checksum: Any) -> dict | None:
     """A record ``checksum`` block -> an ``spdx:Checksum`` node, or None.
 
@@ -1011,7 +1045,9 @@ def dataset_to_jsonld(record: dict) -> dict:
         node["dcterms:description"] = ds["description"]
         node["schema:description"] = ds["description"]
     if ds.get("license"):
-        node["dcterms:license"] = {"@id": ds["license"]}
+        license_value = license_node(ds["license"])
+        if license_value is not None:
+            node["dcterms:license"] = license_value
     if ds.get("access_url"):
         node["dcat:accessURL"] = {"@id": ds["access_url"]}
     keywords = [k for k in (ds.get("keywords") or []) if isinstance(k, str) and k.strip()]
@@ -1180,14 +1216,21 @@ def _parameter_set_to_jsonld(record: dict) -> dict:
     Same delegation as materials: the domain-battery emitter builds the
     schema:Dataset claim node (scalar claims as EMMO-typed hasProperty
     quantities, curves/expressions under schema:variableMeasured, the target
-    on schema:about).
+    on schema:about). Unlike materials, the node carries the RECORDS context
+    (inline dict, swapped for the hosted v1 URL in ``context="url"`` mode):
+    parameter-set records are the payload the BPX "Metadata" seam embeds, so
+    they must expand against the same versioned vocabulary every other
+    published record uses — not the live EMMO context, which can drift.
     """
+    from battinfo.transform.cell_spec_node import label_to_compact
     from battinfo.transform.json_to_jsonld import to_jsonld
 
     doc = to_jsonld(record, target="domain-battery")
     graph = doc.get("@graph") or []
     node = dict(graph[0]) if graph else {}
-    return {"@context": doc.get("@context"), **node}
+    context: dict = dict(_CONTEXT_INLINE)
+    context.update(label_to_compact())
+    return {"@context": context, **node}
 
 
 # Same delegation for component spec/instance records (electrode, separator, …).
@@ -1310,7 +1353,9 @@ def record_to_jsonld(record: dict, record_type: str, *, context: str = "url") ->
     # on the dataset body and emit it from dataset_to_jsonld, so this only
     # reaches the non-dataset record kinds.
     if record.get("license") and "dcterms:license" not in node:
-        node["dcterms:license"] = {"@id": record["license"]}
+        license_value = license_node(record["license"])
+        if license_value is not None:
+            node["dcterms:license"] = license_value
     if context == "url" and isinstance(node.get("@context"), dict):
         # Swap the inline records context for the hosted reference. Only the
         # records-context nodes (a dict @context) are affected; material/component
