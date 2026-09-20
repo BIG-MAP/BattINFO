@@ -574,6 +574,12 @@ class SpecSet(ConfiguredBaseModel):
     volume: Optional[SpecValue] = Field(default=None, description="""External volume of the cell.""", json_schema_extra = { "linkml_meta": {'aliases': ['Volume [mL]'],
          'domain_of': ['SpecSet'],
          'slot_uri': 'emmo:EMMO_f1a51559_aa3d_43a0_9327_918039f0dfed'} })
+    electrode_area: Optional[SpecValue] = Field(default=None, description="""Active electrode area per electrode pair (the BPX-required as-designed geometry).""", json_schema_extra = { "linkml_meta": {'aliases': ['Electrode area [cm2]'],
+         'domain_of': ['SpecSet'],
+         'slot_uri': 'emmo:EMMO_96f39f77_44dc_491b_8fa7_30d887fe0890'} })
+    external_surface_area: Optional[SpecValue] = Field(default=None, description="""External surface area of the cell.""", json_schema_extra = { "linkml_meta": {'aliases': ['External surface area [cm2]'],
+         'domain_of': ['SpecSet'],
+         'slot_uri': 'emmo:EMMO_96f39f77_44dc_491b_8fa7_30d887fe0890'} })
     maximum_charging_temperature: Optional[SpecValue] = Field(default=None, description="""Maximum allowed cell temperature during charging.""", json_schema_extra = { "linkml_meta": {'aliases': ['Maximum charging temperature [degC]'],
          'domain_of': ['SpecSet'],
          'slot_uri': 'electrochemistry:electrochemistry_4a354510_4dc2_4803_8845_f4024a1a7260'} })

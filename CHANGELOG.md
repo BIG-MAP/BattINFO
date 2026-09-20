@@ -9,6 +9,35 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Parameterisation sets: one record that names a complete, runnable
+  parameterisation.** A parameter-set record can now carry `members`
+  instead of `claims`: a block map (negative_material,
+  negative_electrode, positive_material, positive_electrode, separator,
+  electrolyte) pointing at the member parameter-set records that
+  together form one source's complete cell parameterisation - the same
+  set/member split the dataset-series pattern uses. Members carry a
+  `set_id` backlink; the JSON-LD emits `dcterms:hasPart` on the set and
+  `schema:isPartOf` on each member. `from_bpx_parameters` mints the set
+  automatically whenever it imports a whole file against a cell spec,
+  `load_parameter_set_members()` resolves a set back to its member
+  records, and `to_bpx` accepts the loaded map directly - so "import a
+  BPX file, export it back" round-trips through one set record. A
+  record is a set XOR a per-source claims record, never both
+  (schema-enforced).
+
+- **The BPX repository's five official examples join the corpus.** All
+  five FaradayInstitution/BPX examples (MIT, (c) 2022 University of
+  Oxford) import through the public `from_bpx` / `from_bpx_parameters`
+  path into 32 parameter-set records (27 per-component members + 5
+  parameterisation sets) and 5 BPX-derived cell specs - real DFN, SPM,
+  blended-electrode, and hysteresis (`User-defined`) files, licensed
+  `mit`, cited to the repository, shelved on the parameter-sets
+  reference page. The import exposed a gap it also fixes:
+  `electrode_area` and `external_surface_area` (a Phase-1 ruling) had
+  never reached the cell-spec SpecSet, so `from_bpx` output failed
+  schema validation; both now live in the yaml/schema/pydantic/
+  authoring-fields chain like every other spec property.
+
 - **Chemical substances get pinned, machine-verifiable identity (0.8.0
   core-features ruling; PR #371 un-parked).** A shipped vocabulary
   (`tools/substances/seed.csv` -> `build_vocab.py` ->
@@ -88,30 +117,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   name every key instead of truncating at eight.
 
 ### Changed
+
 - `ws.status()` and `ws.pending()` now send the publisher API key from `ws.login()` (or `BATTINFO_ADMIN_TOKEN` when set). The registry's workspace views became credentialed because they list staged, not-yet-public submissions; without a key these two calls now print a hint and return an empty list instead of listing the queue.
-
-### Changed
-
-- **BPX import drops nothing silently (parameter-plan Phase 0).** The
-  `User-defined` block — BPX's extension point, previously ignored without
-  a word - is now reported key-by-key, and unrecognised Parameterisation
-  blocks are named. Header lineage rides every minted parameter-set
-  record: `Description` as the record description and `References` as the
-  provenance citation (verbatim as a note when it is not a URL/DOI),
-  beside the model context the importer already stamped. A synthetic
-  full-DFN golden fixture (structural twin of a published BattMo export,
-  fabricated values - the original is GPL-3.0) pins the contract: every
-  parameter in the file becomes a claim, a spec property, or a named
-  warning.
-
-- **Parameter-set records emit against the records context.** The
-  parameter-set JSON-LD - the payload the BPX "Metadata" seam embeds -
-  now carries the hosted versioned records context
-  (`context/records/v1.json`) instead of the live EMMO context, and every
-  vocabulary parameter's terms resolve in it. License slugs
-  (`cc-by-sa-4.0`) map to their absolute SPDX page IRI instead of
-  emitting as relative IRIs; unknown values emit as literals, never
-  broken links (applies to dataset records too).
 
 - **BPX import drops nothing silently (parameter-plan Phase 0).** The
   `User-defined` block — BPX's extension point, previously ignored without

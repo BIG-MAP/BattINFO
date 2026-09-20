@@ -1,0 +1,113 @@
+{
+  "schema_version": "0.2.0",
+  "parameter_set": {
+    "id": "https://w3id.org/battinfo/spec/nzk2-dv72-c12e-497h",
+    "short_id": "nzk2dv",
+    "name": "BPX NMC111 pouch - negative electrode material",
+    "material_kind": "graphite",
+    "scope": "material",
+    "claims": [
+      {
+        "parameter": "particle_radius",
+        "quantity": {
+          "value": 4.12e-06,
+          "unit": "m"
+        },
+        "provenance_class": "fitted"
+      },
+      {
+        "parameter": "solid_diffusivity",
+        "quantity": {
+          "value": 2.728e-14,
+          "unit": "m2/s"
+        },
+        "provenance_class": "fitted"
+      },
+      {
+        "parameter": "ocp",
+        "expression": {
+          "text": "9.47057878e-01 * exp(-1.59418743e+02  * x) - 3.50928033e+04 + 1.64230269e-01 * tanh(-4.55509094e+01 * (x - 3.24116012e-02 )) + 3.69968491e-02 * tanh(-1.96718868e+01 * (x - 1.68334476e-01)) + 1.91517003e+04 * tanh(3.19648312e+00 * (x - 1.85139824e+00)) + 5.42448511e+04 * tanh(-3.19009848e+00 * (x - 2.01660395e+00))",
+          "language": "bpx",
+          "argument": "x"
+        },
+        "provenance_class": "fitted"
+      },
+      {
+        "parameter": "entropic_coefficient",
+        "expression": {
+          "text": "(-0.1112 * x + 0.02914 + 0.3561 * exp(-((x - 0.08309) ** 2) / 0.004616)) / 1000",
+          "language": "bpx",
+          "argument": "x"
+        },
+        "provenance_class": "fitted"
+      },
+      {
+        "parameter": "reaction_rate_constant",
+        "quantity": {
+          "value": 5.199e-06,
+          "unit": "mol.m-2.s-1"
+        },
+        "provenance_class": "fitted"
+      },
+      {
+        "parameter": "stoichiometry_min",
+        "quantity": {
+          "value": 0.005504,
+          "unit": "1"
+        },
+        "provenance_class": "fitted"
+      },
+      {
+        "parameter": "stoichiometry_max",
+        "quantity": {
+          "value": 0.75668,
+          "unit": "1"
+        },
+        "provenance_class": "fitted"
+      },
+      {
+        "parameter": "max_concentration",
+        "quantity": {
+          "value": 29730.0,
+          "unit": "mol/m3"
+        },
+        "provenance_class": "fitted"
+      },
+      {
+        "parameter": "diffusivity_activation_energy",
+        "quantity": {
+          "value": 30000.0,
+          "unit": "J/mol"
+        },
+        "provenance_class": "fitted"
+      },
+      {
+        "parameter": "reaction_rate_activation_energy",
+        "quantity": {
+          "value": 55000.0,
+          "unit": "J/mol"
+        },
+        "provenance_class": "fitted"
+      }
+    ],
+    "model_context": {
+      "tool": "BPX",
+      "name": "Parameterisation example of an NMC111|graphite 12.5 Ah pouch cell",
+      "model": "DFN",
+      "version": "0.1.0"
+    },
+    "description": "NMC111|graphite 12.5 Ah pouch cell. Parameterisation by About:Energy Limited (aboutenergy.io), December 2022, based on cell cycling data, and electrode data gathered after cell teardown. Electrolyte properties from Nyman et al. 2008 (doi:10.1016/j.electacta.2008.04.023). Negative electrode entropic coefficient data are from O'Regan et al. 2022 (doi:10.1016/j.electacta.2022.140700). Positive electrode entropic coefficient data are from Viswanathan et al. 2010 (doi:10.1016/j.jpowsour.2009.11.103). Other thermal properties are estimated.",
+    "set_id": "https://w3id.org/battinfo/spec/ma31-1g1r-m2x1-h7d2"
+  },
+  "provenance": {
+    "source_type": "literature",
+    "retrieved_at": 1789900000,
+    "battinfo_version": "0.7.0",
+    "source_url": "https://github.com/FaradayInstitution/BPX/blob/main/examples/nmc_pouch_cell_BPX.json",
+    "citation": "https://github.com/FaradayInstitution/BPX"
+  },
+  "license": "mit",
+  "notes": [
+    "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford)."
+  ]
+}

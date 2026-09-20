@@ -291,6 +291,5562 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 :::::
 ::::::
 
+::::::{dropdown} BPX LFP 18650 (parameter-set)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/parameter-set/parameter-set-1e31-69dh-s500-h9j4.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/parameter-set/parameter-set-1e31-69dh-s500-h9j4.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@id": "https://w3id.org/battinfo/spec/1e31-69dh-s500-h9j4",
+  "@type": "schema:Dataset",
+  "schema:name": "BPX LFP 18650",
+  "schema:description": "LFP|graphite 2 Ah cylindrical 18650 cell. Parameterisation by About:Energy Limited (aboutenergy.io), December 2022, based on cell cycling data, and electrode data gathered after cell teardown. Electrolyte properties from Nyman et al. 2008 (doi:10.1016/j.electacta.2008.04.023). Negative electrode entropic coefficient data are from O'Regan et al. 2022 (doi:10.1016/j.electacta.2022.140700). Positive electrode entropic coefficient data are from Gerver and Meyers 2011 (doi:10.1149/1.3591799). Other thermal properties are estimated.",
+  "schema:about": {
+    "@id": "https://w3id.org/battinfo/spec/b10q-6qh6-3v2x-4sp7"
+  },
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "scope",
+      "schema:value": "cell"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_model",
+      "schema:value": "DFN"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_name",
+      "schema:value": "Parameterisation example of an LFP|graphite 2 Ah cylindrical 18650 cell."
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_tool",
+      "schema:value": "BPX"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_version",
+      "schema:value": "0.1.0"
+    }
+  ],
+  "dcterms:hasPart": [
+    {
+      "@id": "https://w3id.org/battinfo/spec/ayt4-483v-13dj-hqgc"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/a979-b0s3-rzzt-4m57"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/2563-gee9-ppq0-8p2r"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/sa76-qhyc-pesq-jvge"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/956b-frrf-hfg6-m4d9"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/4gvn-f7sq-cchp-36rm"
+    }
+  ],
+  "schema:citation": {
+    "@id": "https://github.com/FaradayInstitution/BPX",
+    "@type": "schema:CreativeWork"
+  },
+  "schema:comment": "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford).",
+  "dcterms:license": {
+    "@id": "https://spdx.org/licenses/MIT.html"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} BPX LFP 18650 - electrolyte (parameter-set)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/parameter-set/parameter-set-ayt4-483v-13dj-hqgc.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/parameter-set/parameter-set-ayt4-483v-13dj-hqgc.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@id": "https://w3id.org/battinfo/spec/ayt4-483v-13dj-hqgc",
+  "@type": "schema:Dataset",
+  "schema:name": "BPX LFP 18650 - electrolyte",
+  "schema:description": "LFP|graphite 2 Ah cylindrical 18650 cell. Parameterisation by About:Energy Limited (aboutenergy.io), December 2022, based on cell cycling data, and electrode data gathered after cell teardown. Electrolyte properties from Nyman et al. 2008 (doi:10.1016/j.electacta.2008.04.023). Negative electrode entropic coefficient data are from O'Regan et al. 2022 (doi:10.1016/j.electacta.2022.140700). Positive electrode entropic coefficient data are from Gerver and Meyers 2011 (doi:10.1149/1.3591799). Other thermal properties are estimated.",
+  "schema:about": {
+    "@id": "https://w3id.org/battinfo/spec/b10q-6qh6-3v2x-4sp7"
+  },
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "scope",
+      "schema:value": "electrolyte"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_model",
+      "schema:value": "DFN"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_name",
+      "schema:value": "Parameterisation example of an LFP|graphite 2 Ah cylindrical 18650 cell."
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_tool",
+      "schema:value": "BPX"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_version",
+      "schema:value": "0.1.0"
+    }
+  ],
+  "hasProperty": [
+    {
+      "@type": [
+        "battinfo:diffusivityActivationEnergy",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "diffusivityActivationEnergy",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 17100.0
+      },
+      "schema:unitText": "J/mol",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:initialConcentration",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "initialConcentration",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 1000.0
+      },
+      "schema:unitText": "mol/m3",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:transferenceNumber",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "transferenceNumber",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.259
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:conductivityActivationEnergy",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "conductivityActivationEnergy",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 17100.0
+      },
+      "schema:unitText": "J/mol",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    }
+  ],
+  "schema:variableMeasured": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "ionic_conductivity",
+      "schema:value": "0.1297 * (x / 1000) ** 3 - 2.51 * (x / 1000) ** 1.5 + 3.329 * (x / 1000)",
+      "schema:description": "expression (bpx)",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "electrolyte_diffusivity",
+      "schema:value": "8.794e-11 * (x / 1000) ** 2 - 3.972e-10 * (x / 1000) + 4.862e-10",
+      "schema:description": "expression (bpx)",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    }
+  ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/1e31-69dh-s500-h9j4"
+  },
+  "schema:citation": {
+    "@id": "https://github.com/FaradayInstitution/BPX",
+    "@type": "schema:CreativeWork"
+  },
+  "schema:comment": "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford).",
+  "dcterms:license": {
+    "@id": "https://spdx.org/licenses/MIT.html"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} BPX LFP 18650 - negative electrode build (parameter-set)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/parameter-set/parameter-set-a979-b0s3-rzzt-4m57.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/parameter-set/parameter-set-a979-b0s3-rzzt-4m57.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@id": "https://w3id.org/battinfo/spec/a979-b0s3-rzzt-4m57",
+  "@type": "schema:Dataset",
+  "schema:name": "BPX LFP 18650 - negative electrode build",
+  "schema:description": "LFP|graphite 2 Ah cylindrical 18650 cell. Parameterisation by About:Energy Limited (aboutenergy.io), December 2022, based on cell cycling data, and electrode data gathered after cell teardown. Electrolyte properties from Nyman et al. 2008 (doi:10.1016/j.electacta.2008.04.023). Negative electrode entropic coefficient data are from O'Regan et al. 2022 (doi:10.1016/j.electacta.2022.140700). Positive electrode entropic coefficient data are from Gerver and Meyers 2011 (doi:10.1149/1.3591799). Other thermal properties are estimated.",
+  "schema:about": {
+    "@id": "https://w3id.org/battinfo/spec/b10q-6qh6-3v2x-4sp7"
+  },
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "scope",
+      "schema:value": "electrode"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "electrode_polarity",
+      "schema:value": "negative"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_model",
+      "schema:value": "DFN"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_name",
+      "schema:value": "Parameterisation example of an LFP|graphite 2 Ah cylindrical 18650 cell."
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_tool",
+      "schema:value": "BPX"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_version",
+      "schema:value": "0.1.0"
+    }
+  ],
+  "hasProperty": [
+    {
+      "@type": [
+        "Thickness",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "Thickness",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 4.44e-05
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:electronicConductivity",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "electronicConductivity",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 7.46
+      },
+      "schema:unitText": "S/m",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:surfaceAreaPerVolume",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "surfaceAreaPerVolume",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 473004.0
+      },
+      "schema:unitText": "1/m",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "Porosity",
+        "ConventionalProperty"
+      ],
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.20666
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:transportEfficiency",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "transportEfficiency",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.09395
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    }
+  ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/1e31-69dh-s500-h9j4"
+  },
+  "schema:citation": {
+    "@id": "https://github.com/FaradayInstitution/BPX",
+    "@type": "schema:CreativeWork"
+  },
+  "schema:comment": "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford).",
+  "dcterms:license": {
+    "@id": "https://spdx.org/licenses/MIT.html"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} BPX LFP 18650 - negative electrode material (parameter-set)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/parameter-set/parameter-set-2563-gee9-ppq0-8p2r.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/parameter-set/parameter-set-2563-gee9-ppq0-8p2r.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@id": "https://w3id.org/battinfo/spec/2563-gee9-ppq0-8p2r",
+  "@type": "schema:Dataset",
+  "schema:name": "BPX LFP 18650 - negative electrode material",
+  "schema:description": "LFP|graphite 2 Ah cylindrical 18650 cell. Parameterisation by About:Energy Limited (aboutenergy.io), December 2022, based on cell cycling data, and electrode data gathered after cell teardown. Electrolyte properties from Nyman et al. 2008 (doi:10.1016/j.electacta.2008.04.023). Negative electrode entropic coefficient data are from O'Regan et al. 2022 (doi:10.1016/j.electacta.2022.140700). Positive electrode entropic coefficient data are from Gerver and Meyers 2011 (doi:10.1149/1.3591799). Other thermal properties are estimated.",
+  "schema:about": {
+    "@type": "Graphite",
+    "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_d53259a7_0d9c_48b9_a6c1_4418169df303",
+    "schema:name": "Graphite"
+  },
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "scope",
+      "schema:value": "material"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_model",
+      "schema:value": "DFN"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_name",
+      "schema:value": "Parameterisation example of an LFP|graphite 2 Ah cylindrical 18650 cell."
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_tool",
+      "schema:value": "BPX"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_version",
+      "schema:value": "0.1.0"
+    }
+  ],
+  "hasProperty": [
+    {
+      "@type": [
+        "battinfo:particleRadius",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "particleRadius",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 4.8e-06
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:solidDiffusivity",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "solidDiffusivity",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 9.6e-15
+      },
+      "schema:unitText": "m2/s",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:reactionRateConstant",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "reactionRateConstant",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 6.872e-06
+      },
+      "schema:unitText": "mol.m-2.s-1",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:stoichiometryMin",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "stoichiometryMin",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.0016261
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:stoichiometryMax",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "stoichiometryMax",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.82258
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:maxConcentration",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "maxConcentration",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 31400.0
+      },
+      "schema:unitText": "mol/m3",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:diffusivityActivationEnergy",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "diffusivityActivationEnergy",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 30000.0
+      },
+      "schema:unitText": "J/mol",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:reactionRateActivationEnergy",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "reactionRateActivationEnergy",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 55000.0
+      },
+      "schema:unitText": "J/mol",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    }
+  ],
+  "schema:variableMeasured": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "ocp",
+      "schema:value": "5.29210878e+01 * exp(-1.72699386e+02 * x) - 1.17963399e+03 + 1.20956356e+03 * tanh(6.72033948e+01 * (x + 2.44746396e-02)) + 4.52430314e-02 * tanh(-1.47542326e+01 * (x - 1.62746053e-01)) + 2.01855800e+01 * tanh(-2.46666302e+01 * (x - 1.12986136e+00)) + 2.01708039e-02 * tanh(-1.19900231e+01 * (x - 5.49773440e-01)) + 4.99616805e+01 * tanh(-6.11370883e+01 * (x + 4.69382558e-03))",
+      "schema:description": "expression (bpx)",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "entropic_coefficient",
+      "schema:value": "(-0.1112 * x + 0.02914 + 0.3561 * exp(-((x - 0.08309) ** 2) / 0.004616)) / 1000",
+      "schema:description": "expression (bpx)",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    }
+  ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/1e31-69dh-s500-h9j4"
+  },
+  "schema:citation": {
+    "@id": "https://github.com/FaradayInstitution/BPX",
+    "@type": "schema:CreativeWork"
+  },
+  "schema:comment": "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford).",
+  "dcterms:license": {
+    "@id": "https://spdx.org/licenses/MIT.html"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} BPX LFP 18650 - positive electrode build (parameter-set)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/parameter-set/parameter-set-sa76-qhyc-pesq-jvge.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/parameter-set/parameter-set-sa76-qhyc-pesq-jvge.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@id": "https://w3id.org/battinfo/spec/sa76-qhyc-pesq-jvge",
+  "@type": "schema:Dataset",
+  "schema:name": "BPX LFP 18650 - positive electrode build",
+  "schema:description": "LFP|graphite 2 Ah cylindrical 18650 cell. Parameterisation by About:Energy Limited (aboutenergy.io), December 2022, based on cell cycling data, and electrode data gathered after cell teardown. Electrolyte properties from Nyman et al. 2008 (doi:10.1016/j.electacta.2008.04.023). Negative electrode entropic coefficient data are from O'Regan et al. 2022 (doi:10.1016/j.electacta.2022.140700). Positive electrode entropic coefficient data are from Gerver and Meyers 2011 (doi:10.1149/1.3591799). Other thermal properties are estimated.",
+  "schema:about": {
+    "@id": "https://w3id.org/battinfo/spec/b10q-6qh6-3v2x-4sp7"
+  },
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "scope",
+      "schema:value": "electrode"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "electrode_polarity",
+      "schema:value": "positive"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_model",
+      "schema:value": "DFN"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_name",
+      "schema:value": "Parameterisation example of an LFP|graphite 2 Ah cylindrical 18650 cell."
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_tool",
+      "schema:value": "BPX"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_version",
+      "schema:value": "0.1.0"
+    }
+  ],
+  "hasProperty": [
+    {
+      "@type": [
+        "Thickness",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "Thickness",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 6.43e-05
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:electronicConductivity",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "electronicConductivity",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.8
+      },
+      "schema:unitText": "S/m",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:surfaceAreaPerVolume",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "surfaceAreaPerVolume",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 4418460.0
+      },
+      "schema:unitText": "1/m",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "Porosity",
+        "ConventionalProperty"
+      ],
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.20359
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:transportEfficiency",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "transportEfficiency",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.09186
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    }
+  ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/1e31-69dh-s500-h9j4"
+  },
+  "schema:citation": {
+    "@id": "https://github.com/FaradayInstitution/BPX",
+    "@type": "schema:CreativeWork"
+  },
+  "schema:comment": "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford).",
+  "dcterms:license": {
+    "@id": "https://spdx.org/licenses/MIT.html"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} BPX LFP 18650 - positive electrode material (parameter-set)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/parameter-set/parameter-set-956b-frrf-hfg6-m4d9.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/parameter-set/parameter-set-956b-frrf-hfg6-m4d9.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@id": "https://w3id.org/battinfo/spec/956b-frrf-hfg6-m4d9",
+  "@type": "schema:Dataset",
+  "schema:name": "BPX LFP 18650 - positive electrode material",
+  "schema:description": "LFP|graphite 2 Ah cylindrical 18650 cell. Parameterisation by About:Energy Limited (aboutenergy.io), December 2022, based on cell cycling data, and electrode data gathered after cell teardown. Electrolyte properties from Nyman et al. 2008 (doi:10.1016/j.electacta.2008.04.023). Negative electrode entropic coefficient data are from O'Regan et al. 2022 (doi:10.1016/j.electacta.2022.140700). Positive electrode entropic coefficient data are from Gerver and Meyers 2011 (doi:10.1149/1.3591799). Other thermal properties are estimated.",
+  "schema:about": {
+    "@type": "LithiumIronPhosphate",
+    "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_aa8e9cc4_5f66_4307_b1c8_26fac7653a90",
+    "schema:name": "Lithium iron phosphate (LFP)"
+  },
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "scope",
+      "schema:value": "material"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_model",
+      "schema:value": "DFN"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_name",
+      "schema:value": "Parameterisation example of an LFP|graphite 2 Ah cylindrical 18650 cell."
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_tool",
+      "schema:value": "BPX"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_version",
+      "schema:value": "0.1.0"
+    }
+  ],
+  "hasProperty": [
+    {
+      "@type": [
+        "battinfo:particleRadius",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "particleRadius",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 5e-07
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:solidDiffusivity",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "solidDiffusivity",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 6.873e-17
+      },
+      "schema:unitText": "m2/s",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:reactionRateConstant",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "reactionRateConstant",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 9.736e-07
+      },
+      "schema:unitText": "mol.m-2.s-1",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:stoichiometryMin",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "stoichiometryMin",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.0875
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:stoichiometryMax",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "stoichiometryMax",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.95038
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:maxConcentration",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "maxConcentration",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 21200.0
+      },
+      "schema:unitText": "mol/m3",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:diffusivityActivationEnergy",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "diffusivityActivationEnergy",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 80000.0
+      },
+      "schema:unitText": "J/mol",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:reactionRateActivationEnergy",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "reactionRateActivationEnergy",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 35000.0
+      },
+      "schema:unitText": "J/mol",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    }
+  ],
+  "schema:variableMeasured": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "ocp",
+      "schema:value": "3.41285712e+00 - 1.49721852e-02 * x + 3.54866018e+14 * exp(-3.95729493e+02 * x) - 1.45998465e+00 * exp(-1.10108622e+02 * (1 - x))",
+      "schema:description": "expression (bpx)",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "entropic_coefficient",
+      "schema:description": "tabulated curve vs stoichiometry, 21 points",
+      "schema:unitText": "V/K",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    }
+  ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/1e31-69dh-s500-h9j4"
+  },
+  "schema:citation": {
+    "@id": "https://github.com/FaradayInstitution/BPX",
+    "@type": "schema:CreativeWork"
+  },
+  "schema:comment": "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford).",
+  "dcterms:license": {
+    "@id": "https://spdx.org/licenses/MIT.html"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} BPX LFP 18650 - separator (parameter-set)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/parameter-set/parameter-set-4gvn-f7sq-cchp-36rm.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/parameter-set/parameter-set-4gvn-f7sq-cchp-36rm.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@id": "https://w3id.org/battinfo/spec/4gvn-f7sq-cchp-36rm",
+  "@type": "schema:Dataset",
+  "schema:name": "BPX LFP 18650 - separator",
+  "schema:description": "LFP|graphite 2 Ah cylindrical 18650 cell. Parameterisation by About:Energy Limited (aboutenergy.io), December 2022, based on cell cycling data, and electrode data gathered after cell teardown. Electrolyte properties from Nyman et al. 2008 (doi:10.1016/j.electacta.2008.04.023). Negative electrode entropic coefficient data are from O'Regan et al. 2022 (doi:10.1016/j.electacta.2022.140700). Positive electrode entropic coefficient data are from Gerver and Meyers 2011 (doi:10.1149/1.3591799). Other thermal properties are estimated.",
+  "schema:about": {
+    "@id": "https://w3id.org/battinfo/spec/b10q-6qh6-3v2x-4sp7"
+  },
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "scope",
+      "schema:value": "separator"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_model",
+      "schema:value": "DFN"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_name",
+      "schema:value": "Parameterisation example of an LFP|graphite 2 Ah cylindrical 18650 cell."
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_tool",
+      "schema:value": "BPX"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_version",
+      "schema:value": "0.1.0"
+    }
+  ],
+  "hasProperty": [
+    {
+      "@type": [
+        "Thickness",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "Thickness",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 2e-05
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "Porosity",
+        "ConventionalProperty"
+      ],
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.47
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:transportEfficiency",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "transportEfficiency",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.3222
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    }
+  ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/1e31-69dh-s500-h9j4"
+  },
+  "schema:citation": {
+    "@id": "https://github.com/FaradayInstitution/BPX",
+    "@type": "schema:CreativeWork"
+  },
+  "schema:comment": "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford).",
+  "dcterms:license": {
+    "@id": "https://spdx.org/licenses/MIT.html"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} BPX NMC111 pouch (parameter-set)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/parameter-set/parameter-set-ma31-1g1r-m2x1-h7d2.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/parameter-set/parameter-set-ma31-1g1r-m2x1-h7d2.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@id": "https://w3id.org/battinfo/spec/ma31-1g1r-m2x1-h7d2",
+  "@type": "schema:Dataset",
+  "schema:name": "BPX NMC111 pouch",
+  "schema:description": "NMC111|graphite 12.5 Ah pouch cell. Parameterisation by About:Energy Limited (aboutenergy.io), December 2022, based on cell cycling data, and electrode data gathered after cell teardown. Electrolyte properties from Nyman et al. 2008 (doi:10.1016/j.electacta.2008.04.023). Negative electrode entropic coefficient data are from O'Regan et al. 2022 (doi:10.1016/j.electacta.2022.140700). Positive electrode entropic coefficient data are from Viswanathan et al. 2010 (doi:10.1016/j.jpowsour.2009.11.103). Other thermal properties are estimated.",
+  "schema:about": {
+    "@id": "https://w3id.org/battinfo/spec/h9a9-pzge-8bvf-gss4"
+  },
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "scope",
+      "schema:value": "cell"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_model",
+      "schema:value": "DFN"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_name",
+      "schema:value": "Parameterisation example of an NMC111|graphite 12.5 Ah pouch cell"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_tool",
+      "schema:value": "BPX"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_version",
+      "schema:value": "0.1.0"
+    }
+  ],
+  "dcterms:hasPart": [
+    {
+      "@id": "https://w3id.org/battinfo/spec/2p6b-xrjf-jtcr-57hx"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/ftg3-krew-9dq5-mntm"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/nzk2-dv72-c12e-497h"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/wdd4-4r9a-zcc8-wnj1"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/vdek-3ryx-83cq-0fcc"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/2wm3-4t64-h09k-ackh"
+    }
+  ],
+  "schema:citation": {
+    "@id": "https://github.com/FaradayInstitution/BPX",
+    "@type": "schema:CreativeWork"
+  },
+  "schema:comment": "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford).",
+  "dcterms:license": {
+    "@id": "https://spdx.org/licenses/MIT.html"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} BPX NMC111 pouch - electrolyte (parameter-set)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/parameter-set/parameter-set-2p6b-xrjf-jtcr-57hx.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/parameter-set/parameter-set-2p6b-xrjf-jtcr-57hx.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@id": "https://w3id.org/battinfo/spec/2p6b-xrjf-jtcr-57hx",
+  "@type": "schema:Dataset",
+  "schema:name": "BPX NMC111 pouch - electrolyte",
+  "schema:description": "NMC111|graphite 12.5 Ah pouch cell. Parameterisation by About:Energy Limited (aboutenergy.io), December 2022, based on cell cycling data, and electrode data gathered after cell teardown. Electrolyte properties from Nyman et al. 2008 (doi:10.1016/j.electacta.2008.04.023). Negative electrode entropic coefficient data are from O'Regan et al. 2022 (doi:10.1016/j.electacta.2022.140700). Positive electrode entropic coefficient data are from Viswanathan et al. 2010 (doi:10.1016/j.jpowsour.2009.11.103). Other thermal properties are estimated.",
+  "schema:about": {
+    "@id": "https://w3id.org/battinfo/spec/h9a9-pzge-8bvf-gss4"
+  },
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "scope",
+      "schema:value": "electrolyte"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_model",
+      "schema:value": "DFN"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_name",
+      "schema:value": "Parameterisation example of an NMC111|graphite 12.5 Ah pouch cell"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_tool",
+      "schema:value": "BPX"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_version",
+      "schema:value": "0.1.0"
+    }
+  ],
+  "hasProperty": [
+    {
+      "@type": [
+        "battinfo:diffusivityActivationEnergy",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "diffusivityActivationEnergy",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 17100.0
+      },
+      "schema:unitText": "J/mol",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:initialConcentration",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "initialConcentration",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 1000.0
+      },
+      "schema:unitText": "mol/m3",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:transferenceNumber",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "transferenceNumber",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.2594
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:conductivityActivationEnergy",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "conductivityActivationEnergy",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 17100.0
+      },
+      "schema:unitText": "J/mol",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    }
+  ],
+  "schema:variableMeasured": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "ionic_conductivity",
+      "schema:value": "0.1297 * (x / 1000) ** 3 - 2.51 * (x / 1000) ** 1.5 + 3.329 * (x / 1000)",
+      "schema:description": "expression (bpx)",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "electrolyte_diffusivity",
+      "schema:value": "8.794e-11 * (x / 1000) ** 2 - 3.972e-10 * (x / 1000) + 4.862e-10",
+      "schema:description": "expression (bpx)",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    }
+  ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/ma31-1g1r-m2x1-h7d2"
+  },
+  "schema:citation": {
+    "@id": "https://github.com/FaradayInstitution/BPX",
+    "@type": "schema:CreativeWork"
+  },
+  "schema:comment": "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford).",
+  "dcterms:license": {
+    "@id": "https://spdx.org/licenses/MIT.html"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} BPX NMC111 pouch - negative electrode build (parameter-set)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/parameter-set/parameter-set-ftg3-krew-9dq5-mntm.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/parameter-set/parameter-set-ftg3-krew-9dq5-mntm.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@id": "https://w3id.org/battinfo/spec/ftg3-krew-9dq5-mntm",
+  "@type": "schema:Dataset",
+  "schema:name": "BPX NMC111 pouch - negative electrode build",
+  "schema:description": "NMC111|graphite 12.5 Ah pouch cell. Parameterisation by About:Energy Limited (aboutenergy.io), December 2022, based on cell cycling data, and electrode data gathered after cell teardown. Electrolyte properties from Nyman et al. 2008 (doi:10.1016/j.electacta.2008.04.023). Negative electrode entropic coefficient data are from O'Regan et al. 2022 (doi:10.1016/j.electacta.2022.140700). Positive electrode entropic coefficient data are from Viswanathan et al. 2010 (doi:10.1016/j.jpowsour.2009.11.103). Other thermal properties are estimated.",
+  "schema:about": {
+    "@id": "https://w3id.org/battinfo/spec/h9a9-pzge-8bvf-gss4"
+  },
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "scope",
+      "schema:value": "electrode"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "electrode_polarity",
+      "schema:value": "negative"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_model",
+      "schema:value": "DFN"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_name",
+      "schema:value": "Parameterisation example of an NMC111|graphite 12.5 Ah pouch cell"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_tool",
+      "schema:value": "BPX"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_version",
+      "schema:value": "0.1.0"
+    }
+  ],
+  "hasProperty": [
+    {
+      "@type": [
+        "Thickness",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "Thickness",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 5.62e-05
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:electronicConductivity",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "electronicConductivity",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.222
+      },
+      "schema:unitText": "S/m",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:surfaceAreaPerVolume",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "surfaceAreaPerVolume",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 499522.0
+      },
+      "schema:unitText": "1/m",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "Porosity",
+        "ConventionalProperty"
+      ],
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.253991
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:transportEfficiency",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "transportEfficiency",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.128
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    }
+  ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/ma31-1g1r-m2x1-h7d2"
+  },
+  "schema:citation": {
+    "@id": "https://github.com/FaradayInstitution/BPX",
+    "@type": "schema:CreativeWork"
+  },
+  "schema:comment": "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford).",
+  "dcterms:license": {
+    "@id": "https://spdx.org/licenses/MIT.html"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} BPX NMC111 pouch - negative electrode material (parameter-set)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/parameter-set/parameter-set-nzk2-dv72-c12e-497h.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/parameter-set/parameter-set-nzk2-dv72-c12e-497h.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@id": "https://w3id.org/battinfo/spec/nzk2-dv72-c12e-497h",
+  "@type": "schema:Dataset",
+  "schema:name": "BPX NMC111 pouch - negative electrode material",
+  "schema:description": "NMC111|graphite 12.5 Ah pouch cell. Parameterisation by About:Energy Limited (aboutenergy.io), December 2022, based on cell cycling data, and electrode data gathered after cell teardown. Electrolyte properties from Nyman et al. 2008 (doi:10.1016/j.electacta.2008.04.023). Negative electrode entropic coefficient data are from O'Regan et al. 2022 (doi:10.1016/j.electacta.2022.140700). Positive electrode entropic coefficient data are from Viswanathan et al. 2010 (doi:10.1016/j.jpowsour.2009.11.103). Other thermal properties are estimated.",
+  "schema:about": {
+    "@type": "Graphite",
+    "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_d53259a7_0d9c_48b9_a6c1_4418169df303",
+    "schema:name": "Graphite"
+  },
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "scope",
+      "schema:value": "material"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_model",
+      "schema:value": "DFN"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_name",
+      "schema:value": "Parameterisation example of an NMC111|graphite 12.5 Ah pouch cell"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_tool",
+      "schema:value": "BPX"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_version",
+      "schema:value": "0.1.0"
+    }
+  ],
+  "hasProperty": [
+    {
+      "@type": [
+        "battinfo:particleRadius",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "particleRadius",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 4.12e-06
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:solidDiffusivity",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "solidDiffusivity",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 2.728e-14
+      },
+      "schema:unitText": "m2/s",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:reactionRateConstant",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "reactionRateConstant",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 5.199e-06
+      },
+      "schema:unitText": "mol.m-2.s-1",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:stoichiometryMin",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "stoichiometryMin",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.005504
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:stoichiometryMax",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "stoichiometryMax",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.75668
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:maxConcentration",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "maxConcentration",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 29730.0
+      },
+      "schema:unitText": "mol/m3",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:diffusivityActivationEnergy",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "diffusivityActivationEnergy",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 30000.0
+      },
+      "schema:unitText": "J/mol",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:reactionRateActivationEnergy",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "reactionRateActivationEnergy",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 55000.0
+      },
+      "schema:unitText": "J/mol",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    }
+  ],
+  "schema:variableMeasured": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "ocp",
+      "schema:value": "9.47057878e-01 * exp(-1.59418743e+02  * x) - 3.50928033e+04 + 1.64230269e-01 * tanh(-4.55509094e+01 * (x - 3.24116012e-02 )) + 3.69968491e-02 * tanh(-1.96718868e+01 * (x - 1.68334476e-01)) + 1.91517003e+04 * tanh(3.19648312e+00 * (x - 1.85139824e+00)) + 5.42448511e+04 * tanh(-3.19009848e+00 * (x - 2.01660395e+00))",
+      "schema:description": "expression (bpx)",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "entropic_coefficient",
+      "schema:value": "(-0.1112 * x + 0.02914 + 0.3561 * exp(-((x - 0.08309) ** 2) / 0.004616)) / 1000",
+      "schema:description": "expression (bpx)",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    }
+  ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/ma31-1g1r-m2x1-h7d2"
+  },
+  "schema:citation": {
+    "@id": "https://github.com/FaradayInstitution/BPX",
+    "@type": "schema:CreativeWork"
+  },
+  "schema:comment": "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford).",
+  "dcterms:license": {
+    "@id": "https://spdx.org/licenses/MIT.html"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} BPX NMC111 pouch - positive electrode build (parameter-set)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/parameter-set/parameter-set-wdd4-4r9a-zcc8-wnj1.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/parameter-set/parameter-set-wdd4-4r9a-zcc8-wnj1.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@id": "https://w3id.org/battinfo/spec/wdd4-4r9a-zcc8-wnj1",
+  "@type": "schema:Dataset",
+  "schema:name": "BPX NMC111 pouch - positive electrode build",
+  "schema:description": "NMC111|graphite 12.5 Ah pouch cell. Parameterisation by About:Energy Limited (aboutenergy.io), December 2022, based on cell cycling data, and electrode data gathered after cell teardown. Electrolyte properties from Nyman et al. 2008 (doi:10.1016/j.electacta.2008.04.023). Negative electrode entropic coefficient data are from O'Regan et al. 2022 (doi:10.1016/j.electacta.2022.140700). Positive electrode entropic coefficient data are from Viswanathan et al. 2010 (doi:10.1016/j.jpowsour.2009.11.103). Other thermal properties are estimated.",
+  "schema:about": {
+    "@id": "https://w3id.org/battinfo/spec/h9a9-pzge-8bvf-gss4"
+  },
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "scope",
+      "schema:value": "electrode"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "electrode_polarity",
+      "schema:value": "positive"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_model",
+      "schema:value": "DFN"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_name",
+      "schema:value": "Parameterisation example of an NMC111|graphite 12.5 Ah pouch cell"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_tool",
+      "schema:value": "BPX"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_version",
+      "schema:value": "0.1.0"
+    }
+  ],
+  "hasProperty": [
+    {
+      "@type": [
+        "Thickness",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "Thickness",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 5.23e-05
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:electronicConductivity",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "electronicConductivity",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.789
+      },
+      "schema:unitText": "S/m",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:surfaceAreaPerVolume",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "surfaceAreaPerVolume",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 432072.0
+      },
+      "schema:unitText": "1/m",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "Porosity",
+        "ConventionalProperty"
+      ],
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.277493
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:transportEfficiency",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "transportEfficiency",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.1462
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    }
+  ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/ma31-1g1r-m2x1-h7d2"
+  },
+  "schema:citation": {
+    "@id": "https://github.com/FaradayInstitution/BPX",
+    "@type": "schema:CreativeWork"
+  },
+  "schema:comment": "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford).",
+  "dcterms:license": {
+    "@id": "https://spdx.org/licenses/MIT.html"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} BPX NMC111 pouch - positive electrode material (parameter-set)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/parameter-set/parameter-set-vdek-3ryx-83cq-0fcc.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/parameter-set/parameter-set-vdek-3ryx-83cq-0fcc.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@id": "https://w3id.org/battinfo/spec/vdek-3ryx-83cq-0fcc",
+  "@type": "schema:Dataset",
+  "schema:name": "BPX NMC111 pouch - positive electrode material",
+  "schema:description": "NMC111|graphite 12.5 Ah pouch cell. Parameterisation by About:Energy Limited (aboutenergy.io), December 2022, based on cell cycling data, and electrode data gathered after cell teardown. Electrolyte properties from Nyman et al. 2008 (doi:10.1016/j.electacta.2008.04.023). Negative electrode entropic coefficient data are from O'Regan et al. 2022 (doi:10.1016/j.electacta.2022.140700). Positive electrode entropic coefficient data are from Viswanathan et al. 2010 (doi:10.1016/j.jpowsour.2009.11.103). Other thermal properties are estimated.",
+  "schema:about": {
+    "@type": "LithiumNickelManganeseCobaltOxide111",
+    "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_a0b57956_8ba1_4021_ade9_44a87d103d90",
+    "schema:name": "NMC111 (LiNi1/3Mn1/3Co1/3O2)"
+  },
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "scope",
+      "schema:value": "material"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_model",
+      "schema:value": "DFN"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_name",
+      "schema:value": "Parameterisation example of an NMC111|graphite 12.5 Ah pouch cell"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_tool",
+      "schema:value": "BPX"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_version",
+      "schema:value": "0.1.0"
+    }
+  ],
+  "hasProperty": [
+    {
+      "@type": [
+        "battinfo:particleRadius",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "particleRadius",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 4.6e-06
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:solidDiffusivity",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "solidDiffusivity",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 3.2e-14
+      },
+      "schema:unitText": "m2/s",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:entropicCoefficient",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "entropicCoefficient",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": -0.0001
+      },
+      "schema:unitText": "V/K",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:reactionRateConstant",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "reactionRateConstant",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 2.305e-05
+      },
+      "schema:unitText": "mol.m-2.s-1",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:stoichiometryMin",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "stoichiometryMin",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.42424
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:stoichiometryMax",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "stoichiometryMax",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.9621
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:maxConcentration",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "maxConcentration",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 46200.0
+      },
+      "schema:unitText": "mol/m3",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:diffusivityActivationEnergy",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "diffusivityActivationEnergy",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 15000.0
+      },
+      "schema:unitText": "J/mol",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:reactionRateActivationEnergy",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "reactionRateActivationEnergy",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 35000.0
+      },
+      "schema:unitText": "J/mol",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    }
+  ],
+  "schema:variableMeasured": {
+    "@type": "schema:PropertyValue",
+    "schema:name": "ocp",
+    "schema:value": "-3.04420906 * x + 10.04892207 - 0.65637536 * tanh(-4.02134095 * (x - 0.80063948)) + 4.24678547 * tanh(12.17805062 * (x - 7.57659337)) - 0.3757068 * tanh(59.33067782 * (x - 0.99784492))",
+    "schema:description": "expression (bpx)",
+    "schema:additionalProperty": {
+      "@type": "schema:PropertyValue",
+      "schema:name": "provenance_class",
+      "schema:value": "fitted"
+    }
+  },
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/ma31-1g1r-m2x1-h7d2"
+  },
+  "schema:citation": {
+    "@id": "https://github.com/FaradayInstitution/BPX",
+    "@type": "schema:CreativeWork"
+  },
+  "schema:comment": "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford).",
+  "dcterms:license": {
+    "@id": "https://spdx.org/licenses/MIT.html"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} BPX NMC111 pouch - separator (parameter-set)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/parameter-set/parameter-set-2wm3-4t64-h09k-ackh.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/parameter-set/parameter-set-2wm3-4t64-h09k-ackh.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@id": "https://w3id.org/battinfo/spec/2wm3-4t64-h09k-ackh",
+  "@type": "schema:Dataset",
+  "schema:name": "BPX NMC111 pouch - separator",
+  "schema:description": "NMC111|graphite 12.5 Ah pouch cell. Parameterisation by About:Energy Limited (aboutenergy.io), December 2022, based on cell cycling data, and electrode data gathered after cell teardown. Electrolyte properties from Nyman et al. 2008 (doi:10.1016/j.electacta.2008.04.023). Negative electrode entropic coefficient data are from O'Regan et al. 2022 (doi:10.1016/j.electacta.2022.140700). Positive electrode entropic coefficient data are from Viswanathan et al. 2010 (doi:10.1016/j.jpowsour.2009.11.103). Other thermal properties are estimated.",
+  "schema:about": {
+    "@id": "https://w3id.org/battinfo/spec/h9a9-pzge-8bvf-gss4"
+  },
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "scope",
+      "schema:value": "separator"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_model",
+      "schema:value": "DFN"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_name",
+      "schema:value": "Parameterisation example of an NMC111|graphite 12.5 Ah pouch cell"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_tool",
+      "schema:value": "BPX"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_version",
+      "schema:value": "0.1.0"
+    }
+  ],
+  "hasProperty": [
+    {
+      "@type": [
+        "Thickness",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "Thickness",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 2e-05
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "Porosity",
+        "ConventionalProperty"
+      ],
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.47
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:transportEfficiency",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "transportEfficiency",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.3222
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    }
+  ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/ma31-1g1r-m2x1-h7d2"
+  },
+  "schema:citation": {
+    "@id": "https://github.com/FaradayInstitution/BPX",
+    "@type": "schema:CreativeWork"
+  },
+  "schema:comment": "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford).",
+  "dcterms:license": {
+    "@id": "https://spdx.org/licenses/MIT.html"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} BPX NMC111 pouch SPM (parameter-set)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/parameter-set/parameter-set-zwap-fsws-m4yx-p5pp.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/parameter-set/parameter-set-zwap-fsws-m4yx-p5pp.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@id": "https://w3id.org/battinfo/spec/zwap-fsws-m4yx-p5pp",
+  "@type": "schema:Dataset",
+  "schema:name": "BPX NMC111 pouch SPM",
+  "schema:description": "NMC111|graphite 12.5 Ah pouch cell. Parameterisation by About:Energy Limited (aboutenergy.io), December 2022, based on cell cycling data, and electrode data gathered after cell teardown. Negative electrode entropic coefficient data are from O'Regan et al. 2022 (doi:10.1016/j.electacta.2022.140700). Positive electrode entropic coefficient data are from Viswanathan et al. 2010 (doi:10.1016/j.jpowsour.2009.11.103). Other thermal properties are estimated.",
+  "schema:about": {
+    "@id": "https://w3id.org/battinfo/spec/a91f-kqde-1hrg-fenr"
+  },
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "scope",
+      "schema:value": "cell"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_model",
+      "schema:value": "SPM"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_name",
+      "schema:value": "Test case: Single Particle Model (SPM) parameterisation example based on nmc_pouch_cell_BPX.json from About:Energy open-source release."
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_tool",
+      "schema:value": "BPX"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_version",
+      "schema:value": "0.4.0"
+    }
+  ],
+  "dcterms:hasPart": [
+    {
+      "@id": "https://w3id.org/battinfo/spec/3n1b-f8n3-zrtc-psjs"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/z3ac-1me1-hsfd-pa56"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/dgjc-w8j1-evf7-e2kb"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/f4tg-ahwq-1mgt-xn7x"
+    }
+  ],
+  "schema:citation": {
+    "@id": "https://github.com/FaradayInstitution/BPX",
+    "@type": "schema:CreativeWork"
+  },
+  "schema:comment": "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford).",
+  "dcterms:license": {
+    "@id": "https://spdx.org/licenses/MIT.html"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} BPX NMC111 pouch SPM - negative electrode build (parameter-set)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/parameter-set/parameter-set-3n1b-f8n3-zrtc-psjs.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/parameter-set/parameter-set-3n1b-f8n3-zrtc-psjs.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@id": "https://w3id.org/battinfo/spec/3n1b-f8n3-zrtc-psjs",
+  "@type": "schema:Dataset",
+  "schema:name": "BPX NMC111 pouch SPM - negative electrode build",
+  "schema:description": "NMC111|graphite 12.5 Ah pouch cell. Parameterisation by About:Energy Limited (aboutenergy.io), December 2022, based on cell cycling data, and electrode data gathered after cell teardown. Negative electrode entropic coefficient data are from O'Regan et al. 2022 (doi:10.1016/j.electacta.2022.140700). Positive electrode entropic coefficient data are from Viswanathan et al. 2010 (doi:10.1016/j.jpowsour.2009.11.103). Other thermal properties are estimated.",
+  "schema:about": {
+    "@id": "https://w3id.org/battinfo/spec/a91f-kqde-1hrg-fenr"
+  },
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "scope",
+      "schema:value": "electrode"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "electrode_polarity",
+      "schema:value": "negative"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_model",
+      "schema:value": "SPM"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_name",
+      "schema:value": "Test case: Single Particle Model (SPM) parameterisation example based on nmc_pouch_cell_BPX.json from About:Energy open-source release."
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_tool",
+      "schema:value": "BPX"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_version",
+      "schema:value": "0.4.0"
+    }
+  ],
+  "hasProperty": [
+    {
+      "@type": [
+        "Thickness",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "Thickness",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 5.62e-05
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:surfaceAreaPerVolume",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "surfaceAreaPerVolume",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 499522.0
+      },
+      "schema:unitText": "1/m",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    }
+  ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/zwap-fsws-m4yx-p5pp"
+  },
+  "schema:citation": {
+    "@id": "https://github.com/FaradayInstitution/BPX",
+    "@type": "schema:CreativeWork"
+  },
+  "schema:comment": "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford).",
+  "dcterms:license": {
+    "@id": "https://spdx.org/licenses/MIT.html"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} BPX NMC111 pouch SPM - negative electrode material (parameter-set)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/parameter-set/parameter-set-z3ac-1me1-hsfd-pa56.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/parameter-set/parameter-set-z3ac-1me1-hsfd-pa56.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@id": "https://w3id.org/battinfo/spec/z3ac-1me1-hsfd-pa56",
+  "@type": "schema:Dataset",
+  "schema:name": "BPX NMC111 pouch SPM - negative electrode material",
+  "schema:description": "NMC111|graphite 12.5 Ah pouch cell. Parameterisation by About:Energy Limited (aboutenergy.io), December 2022, based on cell cycling data, and electrode data gathered after cell teardown. Negative electrode entropic coefficient data are from O'Regan et al. 2022 (doi:10.1016/j.electacta.2022.140700). Positive electrode entropic coefficient data are from Viswanathan et al. 2010 (doi:10.1016/j.jpowsour.2009.11.103). Other thermal properties are estimated.",
+  "schema:about": {
+    "@type": "Graphite",
+    "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_d53259a7_0d9c_48b9_a6c1_4418169df303",
+    "schema:name": "Graphite"
+  },
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "scope",
+      "schema:value": "material"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_model",
+      "schema:value": "SPM"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_name",
+      "schema:value": "Test case: Single Particle Model (SPM) parameterisation example based on nmc_pouch_cell_BPX.json from About:Energy open-source release."
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_tool",
+      "schema:value": "BPX"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_version",
+      "schema:value": "0.4.0"
+    }
+  ],
+  "hasProperty": [
+    {
+      "@type": [
+        "battinfo:particleRadius",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "particleRadius",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 4.12e-06
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:solidDiffusivity",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "solidDiffusivity",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 2.728e-14
+      },
+      "schema:unitText": "m2/s",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:reactionRateConstant",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "reactionRateConstant",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 5.199e-06
+      },
+      "schema:unitText": "mol.m-2.s-1",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:stoichiometryMin",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "stoichiometryMin",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.005504
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:stoichiometryMax",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "stoichiometryMax",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.75668
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:maxConcentration",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "maxConcentration",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 29730.0
+      },
+      "schema:unitText": "mol/m3",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:diffusivityActivationEnergy",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "diffusivityActivationEnergy",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 30000.0
+      },
+      "schema:unitText": "J/mol",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:reactionRateActivationEnergy",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "reactionRateActivationEnergy",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 55000.0
+      },
+      "schema:unitText": "J/mol",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    }
+  ],
+  "schema:variableMeasured": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "ocp",
+      "schema:value": "9.47057878e-01 * exp(-1.59418743e+02  * x) - 3.50928033e+04 + 1.64230269e-01 * tanh(-4.55509094e+01 * (x - 3.24116012e-02 )) + 3.69968491e-02 * tanh(-1.96718868e+01 * (x - 1.68334476e-01)) + 1.91517003e+04 * tanh(3.19648312e+00 * (x - 1.85139824e+00)) + 5.42448511e+04 * tanh(-3.19009848e+00 * (x - 2.01660395e+00))",
+      "schema:description": "expression (bpx)",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "entropic_coefficient",
+      "schema:value": "(-0.1112 * x + 0.02914 + 0.3561 * exp(-((x - 0.08309) ** 2) / 0.004616)) / 1000",
+      "schema:description": "expression (bpx)",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    }
+  ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/zwap-fsws-m4yx-p5pp"
+  },
+  "schema:citation": {
+    "@id": "https://github.com/FaradayInstitution/BPX",
+    "@type": "schema:CreativeWork"
+  },
+  "schema:comment": "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford).",
+  "dcterms:license": {
+    "@id": "https://spdx.org/licenses/MIT.html"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} BPX NMC111 pouch SPM - positive electrode build (parameter-set)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/parameter-set/parameter-set-dgjc-w8j1-evf7-e2kb.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/parameter-set/parameter-set-dgjc-w8j1-evf7-e2kb.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@id": "https://w3id.org/battinfo/spec/dgjc-w8j1-evf7-e2kb",
+  "@type": "schema:Dataset",
+  "schema:name": "BPX NMC111 pouch SPM - positive electrode build",
+  "schema:description": "NMC111|graphite 12.5 Ah pouch cell. Parameterisation by About:Energy Limited (aboutenergy.io), December 2022, based on cell cycling data, and electrode data gathered after cell teardown. Negative electrode entropic coefficient data are from O'Regan et al. 2022 (doi:10.1016/j.electacta.2022.140700). Positive electrode entropic coefficient data are from Viswanathan et al. 2010 (doi:10.1016/j.jpowsour.2009.11.103). Other thermal properties are estimated.",
+  "schema:about": {
+    "@id": "https://w3id.org/battinfo/spec/a91f-kqde-1hrg-fenr"
+  },
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "scope",
+      "schema:value": "electrode"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "electrode_polarity",
+      "schema:value": "positive"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_model",
+      "schema:value": "SPM"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_name",
+      "schema:value": "Test case: Single Particle Model (SPM) parameterisation example based on nmc_pouch_cell_BPX.json from About:Energy open-source release."
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_tool",
+      "schema:value": "BPX"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_version",
+      "schema:value": "0.4.0"
+    }
+  ],
+  "hasProperty": [
+    {
+      "@type": [
+        "Thickness",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "Thickness",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 5.23e-05
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:surfaceAreaPerVolume",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "surfaceAreaPerVolume",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 432072.0
+      },
+      "schema:unitText": "1/m",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    }
+  ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/zwap-fsws-m4yx-p5pp"
+  },
+  "schema:citation": {
+    "@id": "https://github.com/FaradayInstitution/BPX",
+    "@type": "schema:CreativeWork"
+  },
+  "schema:comment": "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford).",
+  "dcterms:license": {
+    "@id": "https://spdx.org/licenses/MIT.html"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} BPX NMC111 pouch SPM - positive electrode material (parameter-set)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/parameter-set/parameter-set-f4tg-ahwq-1mgt-xn7x.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/parameter-set/parameter-set-f4tg-ahwq-1mgt-xn7x.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@id": "https://w3id.org/battinfo/spec/f4tg-ahwq-1mgt-xn7x",
+  "@type": "schema:Dataset",
+  "schema:name": "BPX NMC111 pouch SPM - positive electrode material",
+  "schema:description": "NMC111|graphite 12.5 Ah pouch cell. Parameterisation by About:Energy Limited (aboutenergy.io), December 2022, based on cell cycling data, and electrode data gathered after cell teardown. Negative electrode entropic coefficient data are from O'Regan et al. 2022 (doi:10.1016/j.electacta.2022.140700). Positive electrode entropic coefficient data are from Viswanathan et al. 2010 (doi:10.1016/j.jpowsour.2009.11.103). Other thermal properties are estimated.",
+  "schema:about": {
+    "@type": "LithiumNickelManganeseCobaltOxide111",
+    "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_a0b57956_8ba1_4021_ade9_44a87d103d90",
+    "schema:name": "NMC111 (LiNi1/3Mn1/3Co1/3O2)"
+  },
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "scope",
+      "schema:value": "material"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_model",
+      "schema:value": "SPM"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_name",
+      "schema:value": "Test case: Single Particle Model (SPM) parameterisation example based on nmc_pouch_cell_BPX.json from About:Energy open-source release."
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_tool",
+      "schema:value": "BPX"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_version",
+      "schema:value": "0.4.0"
+    }
+  ],
+  "hasProperty": [
+    {
+      "@type": [
+        "battinfo:particleRadius",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "particleRadius",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 4.6e-06
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:solidDiffusivity",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "solidDiffusivity",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 3.2e-14
+      },
+      "schema:unitText": "m2/s",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:entropicCoefficient",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "entropicCoefficient",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": -0.0001
+      },
+      "schema:unitText": "V/K",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:reactionRateConstant",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "reactionRateConstant",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 2.305e-05
+      },
+      "schema:unitText": "mol.m-2.s-1",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:stoichiometryMin",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "stoichiometryMin",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.42424
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:stoichiometryMax",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "stoichiometryMax",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.9621
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:maxConcentration",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "maxConcentration",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 46200.0
+      },
+      "schema:unitText": "mol/m3",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:diffusivityActivationEnergy",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "diffusivityActivationEnergy",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 15000.0
+      },
+      "schema:unitText": "J/mol",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:reactionRateActivationEnergy",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "reactionRateActivationEnergy",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 35000.0
+      },
+      "schema:unitText": "J/mol",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    }
+  ],
+  "schema:variableMeasured": {
+    "@type": "schema:PropertyValue",
+    "schema:name": "ocp",
+    "schema:value": "-3.04420906 * x + 10.04892207 - 0.65637536 * tanh(-4.02134095 * (x - 0.80063948)) + 4.24678547 * tanh(12.17805062 * (x - 7.57659337)) - 0.3757068 * tanh(59.33067782 * (x - 0.99784492))",
+    "schema:description": "expression (bpx)",
+    "schema:additionalProperty": {
+      "@type": "schema:PropertyValue",
+      "schema:name": "provenance_class",
+      "schema:value": "fitted"
+    }
+  },
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/zwap-fsws-m4yx-p5pp"
+  },
+  "schema:citation": {
+    "@id": "https://github.com/FaradayInstitution/BPX",
+    "@type": "schema:CreativeWork"
+  },
+  "schema:comment": "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford).",
+  "dcterms:license": {
+    "@id": "https://spdx.org/licenses/MIT.html"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} BPX NMC111 pouch blended (parameter-set)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/parameter-set/parameter-set-pyss-2m8j-y8c1-rmcb.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/parameter-set/parameter-set-pyss-2m8j-y8c1-rmcb.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@id": "https://w3id.org/battinfo/spec/pyss-2m8j-y8c1-rmcb",
+  "@type": "schema:Dataset",
+  "schema:name": "BPX NMC111 pouch blended",
+  "schema:about": {
+    "@id": "https://w3id.org/battinfo/spec/vtz0-b7fc-6jdr-8ndn"
+  },
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "scope",
+      "schema:value": "cell"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_model",
+      "schema:value": "DFN"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_name",
+      "schema:value": "Test case: blended electrode definition with two particle sizes but equivalent chemistry. Compare to nmc_pouch_cell_BPX.json in About:Energy open-source release."
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_tool",
+      "schema:value": "BPX"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_version",
+      "schema:value": "0.4.0"
+    }
+  ],
+  "dcterms:hasPart": [
+    {
+      "@id": "https://w3id.org/battinfo/spec/0kaz-t3ef-8ehm-yhhb"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/q3dk-9sq9-7s86-43vw"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/baez-0ppf-14qx-6rt0"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/9cwx-f2pf-6sv6-3n9e"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/e04y-e56s-wz45-yvk4"
+    }
+  ],
+  "schema:citation": {
+    "@id": "https://github.com/FaradayInstitution/BPX",
+    "@type": "schema:CreativeWork"
+  },
+  "schema:comment": "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford).",
+  "dcterms:license": {
+    "@id": "https://spdx.org/licenses/MIT.html"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} BPX NMC111 pouch blended - electrolyte (parameter-set)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/parameter-set/parameter-set-0kaz-t3ef-8ehm-yhhb.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/parameter-set/parameter-set-0kaz-t3ef-8ehm-yhhb.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@id": "https://w3id.org/battinfo/spec/0kaz-t3ef-8ehm-yhhb",
+  "@type": "schema:Dataset",
+  "schema:name": "BPX NMC111 pouch blended - electrolyte",
+  "schema:about": {
+    "@id": "https://w3id.org/battinfo/spec/vtz0-b7fc-6jdr-8ndn"
+  },
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "scope",
+      "schema:value": "electrolyte"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_model",
+      "schema:value": "DFN"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_name",
+      "schema:value": "Test case: blended electrode definition with two particle sizes but equivalent chemistry. Compare to nmc_pouch_cell_BPX.json in About:Energy open-source release."
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_tool",
+      "schema:value": "BPX"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_version",
+      "schema:value": "0.4.0"
+    }
+  ],
+  "hasProperty": [
+    {
+      "@type": [
+        "battinfo:diffusivityActivationEnergy",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "diffusivityActivationEnergy",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 17100.0
+      },
+      "schema:unitText": "J/mol",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:initialConcentration",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "initialConcentration",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 1000.0
+      },
+      "schema:unitText": "mol/m3",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:transferenceNumber",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "transferenceNumber",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.2594
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:conductivityActivationEnergy",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "conductivityActivationEnergy",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 17100.0
+      },
+      "schema:unitText": "J/mol",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    }
+  ],
+  "schema:variableMeasured": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "ionic_conductivity",
+      "schema:value": "0.1297 * (x / 1000) ** 3 - 2.51 * (x / 1000) ** 1.5 + 3.329 * (x / 1000)",
+      "schema:description": "expression (bpx)",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "electrolyte_diffusivity",
+      "schema:value": "8.794e-11 * (x / 1000) ** 2 - 3.972e-10 * (x / 1000) + 4.862e-10",
+      "schema:description": "expression (bpx)",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    }
+  ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/pyss-2m8j-y8c1-rmcb"
+  },
+  "schema:citation": {
+    "@id": "https://github.com/FaradayInstitution/BPX",
+    "@type": "schema:CreativeWork"
+  },
+  "schema:comment": "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford).",
+  "dcterms:license": {
+    "@id": "https://spdx.org/licenses/MIT.html"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} BPX NMC111 pouch blended - negative electrode build (parameter-set)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/parameter-set/parameter-set-q3dk-9sq9-7s86-43vw.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/parameter-set/parameter-set-q3dk-9sq9-7s86-43vw.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@id": "https://w3id.org/battinfo/spec/q3dk-9sq9-7s86-43vw",
+  "@type": "schema:Dataset",
+  "schema:name": "BPX NMC111 pouch blended - negative electrode build",
+  "schema:about": {
+    "@id": "https://w3id.org/battinfo/spec/vtz0-b7fc-6jdr-8ndn"
+  },
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "scope",
+      "schema:value": "electrode"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "electrode_polarity",
+      "schema:value": "negative"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_model",
+      "schema:value": "DFN"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_name",
+      "schema:value": "Test case: blended electrode definition with two particle sizes but equivalent chemistry. Compare to nmc_pouch_cell_BPX.json in About:Energy open-source release."
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_tool",
+      "schema:value": "BPX"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_version",
+      "schema:value": "0.4.0"
+    }
+  ],
+  "hasProperty": [
+    {
+      "@type": [
+        "Thickness",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "Thickness",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 5.62e-05
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:electronicConductivity",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "electronicConductivity",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.222
+      },
+      "schema:unitText": "S/m",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:surfaceAreaPerVolume",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "surfaceAreaPerVolume",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 499522.0
+      },
+      "schema:unitText": "1/m",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "Porosity",
+        "ConventionalProperty"
+      ],
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.253991
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:transportEfficiency",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "transportEfficiency",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.128
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    }
+  ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/pyss-2m8j-y8c1-rmcb"
+  },
+  "schema:citation": {
+    "@id": "https://github.com/FaradayInstitution/BPX",
+    "@type": "schema:CreativeWork"
+  },
+  "schema:comment": "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford).",
+  "dcterms:license": {
+    "@id": "https://spdx.org/licenses/MIT.html"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} BPX NMC111 pouch blended - negative electrode material (parameter-set)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/parameter-set/parameter-set-baez-0ppf-14qx-6rt0.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/parameter-set/parameter-set-baez-0ppf-14qx-6rt0.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@id": "https://w3id.org/battinfo/spec/baez-0ppf-14qx-6rt0",
+  "@type": "schema:Dataset",
+  "schema:name": "BPX NMC111 pouch blended - negative electrode material",
+  "schema:about": {
+    "@type": "Graphite",
+    "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_d53259a7_0d9c_48b9_a6c1_4418169df303",
+    "schema:name": "Graphite"
+  },
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "scope",
+      "schema:value": "material"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_model",
+      "schema:value": "DFN"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_name",
+      "schema:value": "Test case: blended electrode definition with two particle sizes but equivalent chemistry. Compare to nmc_pouch_cell_BPX.json in About:Energy open-source release."
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_tool",
+      "schema:value": "BPX"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_version",
+      "schema:value": "0.4.0"
+    }
+  ],
+  "hasProperty": [
+    {
+      "@type": [
+        "battinfo:particleRadius",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "particleRadius",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 4.12e-06
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:solidDiffusivity",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "solidDiffusivity",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 2.728e-14
+      },
+      "schema:unitText": "m2/s",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:reactionRateConstant",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "reactionRateConstant",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 5.199e-06
+      },
+      "schema:unitText": "mol.m-2.s-1",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:stoichiometryMin",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "stoichiometryMin",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.005504
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:stoichiometryMax",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "stoichiometryMax",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.75668
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:maxConcentration",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "maxConcentration",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 29730.0
+      },
+      "schema:unitText": "mol/m3",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:diffusivityActivationEnergy",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "diffusivityActivationEnergy",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 30000.0
+      },
+      "schema:unitText": "J/mol",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:reactionRateActivationEnergy",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "reactionRateActivationEnergy",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 55000.0
+      },
+      "schema:unitText": "J/mol",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    }
+  ],
+  "schema:variableMeasured": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "ocp",
+      "schema:value": "9.47057878e-01 * exp(-1.59418743e+02  * x) - 3.50928033e+04 + 1.64230269e-01 * tanh(-4.55509094e+01 * (x - 3.24116012e-02 )) + 3.69968491e-02 * tanh(-1.96718868e+01 * (x - 1.68334476e-01)) + 1.91517003e+04 * tanh(3.19648312e+00 * (x - 1.85139824e+00)) + 5.42448511e+04 * tanh(-3.19009848e+00 * (x - 2.01660395e+00))",
+      "schema:description": "expression (bpx)",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "entropic_coefficient",
+      "schema:value": "(-0.1112 * x + 0.02914 + 0.3561 * exp(-((x - 0.08309) ** 2) / 0.004616)) / 1000",
+      "schema:description": "expression (bpx)",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    }
+  ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/pyss-2m8j-y8c1-rmcb"
+  },
+  "schema:citation": {
+    "@id": "https://github.com/FaradayInstitution/BPX",
+    "@type": "schema:CreativeWork"
+  },
+  "schema:comment": "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford).",
+  "dcterms:license": {
+    "@id": "https://spdx.org/licenses/MIT.html"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} BPX NMC111 pouch blended - positive electrode build (parameter-set)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/parameter-set/parameter-set-9cwx-f2pf-6sv6-3n9e.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/parameter-set/parameter-set-9cwx-f2pf-6sv6-3n9e.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@id": "https://w3id.org/battinfo/spec/9cwx-f2pf-6sv6-3n9e",
+  "@type": "schema:Dataset",
+  "schema:name": "BPX NMC111 pouch blended - positive electrode build",
+  "schema:about": {
+    "@id": "https://w3id.org/battinfo/spec/vtz0-b7fc-6jdr-8ndn"
+  },
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "scope",
+      "schema:value": "electrode"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "electrode_polarity",
+      "schema:value": "positive"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_model",
+      "schema:value": "DFN"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_name",
+      "schema:value": "Test case: blended electrode definition with two particle sizes but equivalent chemistry. Compare to nmc_pouch_cell_BPX.json in About:Energy open-source release."
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_tool",
+      "schema:value": "BPX"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_version",
+      "schema:value": "0.4.0"
+    }
+  ],
+  "hasProperty": [
+    {
+      "@type": [
+        "Thickness",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "Thickness",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 5.23e-05
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:electronicConductivity",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "electronicConductivity",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.789
+      },
+      "schema:unitText": "S/m",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "Porosity",
+        "ConventionalProperty"
+      ],
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.277493
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:transportEfficiency",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "transportEfficiency",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.1462
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    }
+  ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/pyss-2m8j-y8c1-rmcb"
+  },
+  "schema:citation": {
+    "@id": "https://github.com/FaradayInstitution/BPX",
+    "@type": "schema:CreativeWork"
+  },
+  "schema:comment": "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford).",
+  "dcterms:license": {
+    "@id": "https://spdx.org/licenses/MIT.html"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} BPX NMC111 pouch blended - separator (parameter-set)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/parameter-set/parameter-set-e04y-e56s-wz45-yvk4.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/parameter-set/parameter-set-e04y-e56s-wz45-yvk4.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@id": "https://w3id.org/battinfo/spec/e04y-e56s-wz45-yvk4",
+  "@type": "schema:Dataset",
+  "schema:name": "BPX NMC111 pouch blended - separator",
+  "schema:about": {
+    "@id": "https://w3id.org/battinfo/spec/vtz0-b7fc-6jdr-8ndn"
+  },
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "scope",
+      "schema:value": "separator"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_model",
+      "schema:value": "DFN"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_name",
+      "schema:value": "Test case: blended electrode definition with two particle sizes but equivalent chemistry. Compare to nmc_pouch_cell_BPX.json in About:Energy open-source release."
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_tool",
+      "schema:value": "BPX"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_version",
+      "schema:value": "0.4.0"
+    }
+  ],
+  "hasProperty": [
+    {
+      "@type": [
+        "Thickness",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "Thickness",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 2e-05
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "Porosity",
+        "ConventionalProperty"
+      ],
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.47
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:transportEfficiency",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "transportEfficiency",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.3222
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    }
+  ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/pyss-2m8j-y8c1-rmcb"
+  },
+  "schema:citation": {
+    "@id": "https://github.com/FaradayInstitution/BPX",
+    "@type": "schema:CreativeWork"
+  },
+  "schema:comment": "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford).",
+  "dcterms:license": {
+    "@id": "https://spdx.org/licenses/MIT.html"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} BPX NMC111-Si pouch hysteresis (parameter-set)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/parameter-set/parameter-set-5rjm-2a2w-4x8c-5dqy.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/parameter-set/parameter-set-5rjm-2a2w-4x8c-5dqy.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@id": "https://w3id.org/battinfo/spec/5rjm-2a2w-4x8c-5dqy",
+  "@type": "schema:Dataset",
+  "schema:name": "BPX NMC111-Si pouch hysteresis",
+  "schema:about": {
+    "@id": "https://w3id.org/battinfo/spec/41wx-hskh-xk9g-z9fh"
+  },
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "scope",
+      "schema:value": "cell"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_model",
+      "schema:value": "DFN"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_name",
+      "schema:value": "Test case: user-defined 0th-order hysteresis for graphite-Si blend in negative electrode. Compare to nmc_pouch_cell_BPX.json in About:Energy open-source release."
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_tool",
+      "schema:value": "BPX"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_version",
+      "schema:value": "0.4.0"
+    }
+  ],
+  "dcterms:hasPart": [
+    {
+      "@id": "https://w3id.org/battinfo/spec/5znm-m359-cbp5-77hn"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/340n-s2eb-qy4g-h2rh"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/4afn-7wan-67hf-nwys"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/geyv-hp0x-jhrh-c44z"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/sdw7-cp7b-nsst-tvvy"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/smjg-7gh6-93vg-geh5"
+    }
+  ],
+  "schema:citation": {
+    "@id": "https://github.com/FaradayInstitution/BPX",
+    "@type": "schema:CreativeWork"
+  },
+  "schema:comment": "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford).",
+  "dcterms:license": {
+    "@id": "https://spdx.org/licenses/MIT.html"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} BPX NMC111-Si pouch hysteresis - electrolyte (parameter-set)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/parameter-set/parameter-set-5znm-m359-cbp5-77hn.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/parameter-set/parameter-set-5znm-m359-cbp5-77hn.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@id": "https://w3id.org/battinfo/spec/5znm-m359-cbp5-77hn",
+  "@type": "schema:Dataset",
+  "schema:name": "BPX NMC111-Si pouch hysteresis - electrolyte",
+  "schema:about": {
+    "@id": "https://w3id.org/battinfo/spec/41wx-hskh-xk9g-z9fh"
+  },
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "scope",
+      "schema:value": "electrolyte"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_model",
+      "schema:value": "DFN"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_name",
+      "schema:value": "Test case: user-defined 0th-order hysteresis for graphite-Si blend in negative electrode. Compare to nmc_pouch_cell_BPX.json in About:Energy open-source release."
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_tool",
+      "schema:value": "BPX"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_version",
+      "schema:value": "0.4.0"
+    }
+  ],
+  "hasProperty": [
+    {
+      "@type": [
+        "battinfo:diffusivityActivationEnergy",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "diffusivityActivationEnergy",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 17100.0
+      },
+      "schema:unitText": "J/mol",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:initialConcentration",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "initialConcentration",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 1000.0
+      },
+      "schema:unitText": "mol/m3",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:transferenceNumber",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "transferenceNumber",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.2594
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:conductivityActivationEnergy",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "conductivityActivationEnergy",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 17100.0
+      },
+      "schema:unitText": "J/mol",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    }
+  ],
+  "schema:variableMeasured": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "ionic_conductivity",
+      "schema:value": "0.1297 * (x / 1000) ** 3 - 2.51 * (x / 1000) ** 1.5 + 3.329 * (x / 1000)",
+      "schema:description": "expression (bpx)",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "electrolyte_diffusivity",
+      "schema:value": "8.794e-11 * (x / 1000) ** 2 - 3.972e-10 * (x / 1000) + 4.862e-10",
+      "schema:description": "expression (bpx)",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    }
+  ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/5rjm-2a2w-4x8c-5dqy"
+  },
+  "schema:citation": {
+    "@id": "https://github.com/FaradayInstitution/BPX",
+    "@type": "schema:CreativeWork"
+  },
+  "schema:comment": "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford).",
+  "dcterms:license": {
+    "@id": "https://spdx.org/licenses/MIT.html"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} BPX NMC111-Si pouch hysteresis - negative electrode build (parameter-set)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/parameter-set/parameter-set-340n-s2eb-qy4g-h2rh.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/parameter-set/parameter-set-340n-s2eb-qy4g-h2rh.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@id": "https://w3id.org/battinfo/spec/340n-s2eb-qy4g-h2rh",
+  "@type": "schema:Dataset",
+  "schema:name": "BPX NMC111-Si pouch hysteresis - negative electrode build",
+  "schema:about": {
+    "@id": "https://w3id.org/battinfo/spec/41wx-hskh-xk9g-z9fh"
+  },
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "scope",
+      "schema:value": "electrode"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "electrode_polarity",
+      "schema:value": "negative"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_model",
+      "schema:value": "DFN"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_name",
+      "schema:value": "Test case: user-defined 0th-order hysteresis for graphite-Si blend in negative electrode. Compare to nmc_pouch_cell_BPX.json in About:Energy open-source release."
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_tool",
+      "schema:value": "BPX"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_version",
+      "schema:value": "0.4.0"
+    }
+  ],
+  "hasProperty": [
+    {
+      "@type": [
+        "Thickness",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "Thickness",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 5.62e-05
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:electronicConductivity",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "electronicConductivity",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.222
+      },
+      "schema:unitText": "S/m",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:surfaceAreaPerVolume",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "surfaceAreaPerVolume",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 499522.0
+      },
+      "schema:unitText": "1/m",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "Porosity",
+        "ConventionalProperty"
+      ],
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.253991
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:transportEfficiency",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "transportEfficiency",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.128
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    }
+  ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/5rjm-2a2w-4x8c-5dqy"
+  },
+  "schema:citation": {
+    "@id": "https://github.com/FaradayInstitution/BPX",
+    "@type": "schema:CreativeWork"
+  },
+  "schema:comment": "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford).",
+  "dcterms:license": {
+    "@id": "https://spdx.org/licenses/MIT.html"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} BPX NMC111-Si pouch hysteresis - negative electrode material (parameter-set)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/parameter-set/parameter-set-4afn-7wan-67hf-nwys.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/parameter-set/parameter-set-4afn-7wan-67hf-nwys.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@id": "https://w3id.org/battinfo/spec/4afn-7wan-67hf-nwys",
+  "@type": "schema:Dataset",
+  "schema:name": "BPX NMC111-Si pouch hysteresis - negative electrode material",
+  "schema:about": {
+    "@type": "SiliconGraphite",
+    "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_3f061928_e90f_4414_9308_d4c843ebb79a",
+    "schema:name": "Silicon-graphite composite"
+  },
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "scope",
+      "schema:value": "material"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_model",
+      "schema:value": "DFN"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_name",
+      "schema:value": "Test case: user-defined 0th-order hysteresis for graphite-Si blend in negative electrode. Compare to nmc_pouch_cell_BPX.json in About:Energy open-source release."
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_tool",
+      "schema:value": "BPX"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_version",
+      "schema:value": "0.4.0"
+    }
+  ],
+  "hasProperty": [
+    {
+      "@type": [
+        "battinfo:particleRadius",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "particleRadius",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 4.12e-06
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:solidDiffusivity",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "solidDiffusivity",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 2.728e-14
+      },
+      "schema:unitText": "m2/s",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:ocp",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "ocp",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.0
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:reactionRateConstant",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "reactionRateConstant",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 5.199e-06
+      },
+      "schema:unitText": "mol.m-2.s-1",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:stoichiometryMin",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "stoichiometryMin",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.005504
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:stoichiometryMax",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "stoichiometryMax",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.75668
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:maxConcentration",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "maxConcentration",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 29730.0
+      },
+      "schema:unitText": "mol/m3",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:diffusivityActivationEnergy",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "diffusivityActivationEnergy",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 30000.0
+      },
+      "schema:unitText": "J/mol",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:reactionRateActivationEnergy",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "reactionRateActivationEnergy",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 55000.0
+      },
+      "schema:unitText": "J/mol",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    }
+  ],
+  "schema:variableMeasured": {
+    "@type": "schema:PropertyValue",
+    "schema:name": "entropic_coefficient",
+    "schema:value": "(-0.1112 * x + 0.02914 + 0.3561 * exp(-((x - 0.08309) ** 2) / 0.004616)) / 1000",
+    "schema:description": "expression (bpx)",
+    "schema:additionalProperty": {
+      "@type": "schema:PropertyValue",
+      "schema:name": "provenance_class",
+      "schema:value": "fitted"
+    }
+  },
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/5rjm-2a2w-4x8c-5dqy"
+  },
+  "schema:citation": {
+    "@id": "https://github.com/FaradayInstitution/BPX",
+    "@type": "schema:CreativeWork"
+  },
+  "schema:comment": "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford).",
+  "dcterms:license": {
+    "@id": "https://spdx.org/licenses/MIT.html"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} BPX NMC111-Si pouch hysteresis - positive electrode build (parameter-set)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/parameter-set/parameter-set-geyv-hp0x-jhrh-c44z.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/parameter-set/parameter-set-geyv-hp0x-jhrh-c44z.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@id": "https://w3id.org/battinfo/spec/geyv-hp0x-jhrh-c44z",
+  "@type": "schema:Dataset",
+  "schema:name": "BPX NMC111-Si pouch hysteresis - positive electrode build",
+  "schema:about": {
+    "@id": "https://w3id.org/battinfo/spec/41wx-hskh-xk9g-z9fh"
+  },
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "scope",
+      "schema:value": "electrode"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "electrode_polarity",
+      "schema:value": "positive"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_model",
+      "schema:value": "DFN"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_name",
+      "schema:value": "Test case: user-defined 0th-order hysteresis for graphite-Si blend in negative electrode. Compare to nmc_pouch_cell_BPX.json in About:Energy open-source release."
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_tool",
+      "schema:value": "BPX"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_version",
+      "schema:value": "0.4.0"
+    }
+  ],
+  "hasProperty": [
+    {
+      "@type": [
+        "Thickness",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "Thickness",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 5.23e-05
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:electronicConductivity",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "electronicConductivity",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.789
+      },
+      "schema:unitText": "S/m",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:surfaceAreaPerVolume",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "surfaceAreaPerVolume",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 432072.0
+      },
+      "schema:unitText": "1/m",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "Porosity",
+        "ConventionalProperty"
+      ],
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.277493
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:transportEfficiency",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "transportEfficiency",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.1462
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    }
+  ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/5rjm-2a2w-4x8c-5dqy"
+  },
+  "schema:citation": {
+    "@id": "https://github.com/FaradayInstitution/BPX",
+    "@type": "schema:CreativeWork"
+  },
+  "schema:comment": "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford).",
+  "dcterms:license": {
+    "@id": "https://spdx.org/licenses/MIT.html"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} BPX NMC111-Si pouch hysteresis - positive electrode material (parameter-set)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/parameter-set/parameter-set-sdw7-cp7b-nsst-tvvy.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/parameter-set/parameter-set-sdw7-cp7b-nsst-tvvy.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@id": "https://w3id.org/battinfo/spec/sdw7-cp7b-nsst-tvvy",
+  "@type": "schema:Dataset",
+  "schema:name": "BPX NMC111-Si pouch hysteresis - positive electrode material",
+  "schema:about": {
+    "@type": "LithiumNickelManganeseCobaltOxide111",
+    "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_a0b57956_8ba1_4021_ade9_44a87d103d90",
+    "schema:name": "NMC111 (LiNi1/3Mn1/3Co1/3O2)"
+  },
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "scope",
+      "schema:value": "material"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_model",
+      "schema:value": "DFN"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_name",
+      "schema:value": "Test case: user-defined 0th-order hysteresis for graphite-Si blend in negative electrode. Compare to nmc_pouch_cell_BPX.json in About:Energy open-source release."
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_tool",
+      "schema:value": "BPX"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_version",
+      "schema:value": "0.4.0"
+    }
+  ],
+  "hasProperty": [
+    {
+      "@type": [
+        "battinfo:particleRadius",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "particleRadius",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 4.6e-06
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:solidDiffusivity",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "solidDiffusivity",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 3.2e-14
+      },
+      "schema:unitText": "m2/s",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:entropicCoefficient",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "entropicCoefficient",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": -0.0001
+      },
+      "schema:unitText": "V/K",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:reactionRateConstant",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "reactionRateConstant",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 2.305e-05
+      },
+      "schema:unitText": "mol.m-2.s-1",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:stoichiometryMin",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "stoichiometryMin",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.42424
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:stoichiometryMax",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "stoichiometryMax",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.9621
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:maxConcentration",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "maxConcentration",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 46200.0
+      },
+      "schema:unitText": "mol/m3",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:diffusivityActivationEnergy",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "diffusivityActivationEnergy",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 15000.0
+      },
+      "schema:unitText": "J/mol",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:reactionRateActivationEnergy",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "reactionRateActivationEnergy",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 35000.0
+      },
+      "schema:unitText": "J/mol",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    }
+  ],
+  "schema:variableMeasured": {
+    "@type": "schema:PropertyValue",
+    "schema:name": "ocp",
+    "schema:value": "-3.04420906 * x + 10.04892207 - 0.65637536 * tanh(-4.02134095 * (x - 0.80063948)) + 4.24678547 * tanh(12.17805062 * (x - 7.57659337)) - 0.3757068 * tanh(59.33067782 * (x - 0.99784492))",
+    "schema:description": "expression (bpx)",
+    "schema:additionalProperty": {
+      "@type": "schema:PropertyValue",
+      "schema:name": "provenance_class",
+      "schema:value": "fitted"
+    }
+  },
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/5rjm-2a2w-4x8c-5dqy"
+  },
+  "schema:citation": {
+    "@id": "https://github.com/FaradayInstitution/BPX",
+    "@type": "schema:CreativeWork"
+  },
+  "schema:comment": "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford).",
+  "dcterms:license": {
+    "@id": "https://spdx.org/licenses/MIT.html"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} BPX NMC111-Si pouch hysteresis - separator (parameter-set)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/parameter-set/parameter-set-smjg-7gh6-93vg-geh5.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/parameter-set/parameter-set-smjg-7gh6-93vg-geh5.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@id": "https://w3id.org/battinfo/spec/smjg-7gh6-93vg-geh5",
+  "@type": "schema:Dataset",
+  "schema:name": "BPX NMC111-Si pouch hysteresis - separator",
+  "schema:about": {
+    "@id": "https://w3id.org/battinfo/spec/41wx-hskh-xk9g-z9fh"
+  },
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "scope",
+      "schema:value": "separator"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_model",
+      "schema:value": "DFN"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_name",
+      "schema:value": "Test case: user-defined 0th-order hysteresis for graphite-Si blend in negative electrode. Compare to nmc_pouch_cell_BPX.json in About:Energy open-source release."
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_tool",
+      "schema:value": "BPX"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_version",
+      "schema:value": "0.4.0"
+    }
+  ],
+  "hasProperty": [
+    {
+      "@type": [
+        "Thickness",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "Thickness",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 2e-05
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "Porosity",
+        "ConventionalProperty"
+      ],
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.47
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    },
+    {
+      "@type": [
+        "battinfo:transportEfficiency",
+        "ConventionalProperty"
+      ],
+      "skos:prefLabel": "transportEfficiency",
+      "hasNumericalPart": {
+        "@type": "RealData",
+        "hasNumberValue": 0.3222
+      },
+      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "provenance_class",
+        "schema:value": "fitted"
+      }
+    }
+  ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/5rjm-2a2w-4x8c-5dqy"
+  },
+  "schema:citation": {
+    "@id": "https://github.com/FaradayInstitution/BPX",
+    "@type": "schema:CreativeWork"
+  },
+  "schema:comment": "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford).",
+  "dcterms:license": {
+    "@id": "https://spdx.org/licenses/MIT.html"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
 
 ## Fields
 
@@ -311,10 +5867,12 @@ Schema: [`parameter-set.schema.json`](https://w3id.org/battinfo/schema/parameter
 | `scope` | `material` \| `electrode` \| `separator` \| `electrolyte` … (5 values) |  | Physical scope the claims describe. Defaults (in the builder) to 'material' for material targets and 'cell' for cell-spec targets. Electrode/separator/electrolyte scopes carry manufactured-build parameters (thickness, porosity, transport) that belong to a cell design, not to a powder. |
 | `electrode_polarity` | `positive` \| `negative` |  | For electrode-scope claims on a cell-spec target: which electrode the claims describe. |
 | `model_context` | object |  | The digital artifact these claims came from, when they were imported from a modelling parameter set (BPX file, PyBaMM parameter set, ...). |
-| `claims` | array of → Claim | yes |  |
+| `claims` | array of → Claim |  |  |
 | `description` | string |  |  |
 | `comment` | string |  |  |
 | `annex` | object |  | Source-file extension entries carried verbatim (e.g. a BPX User-defined block): original key -> raw value. No standard semantics are claimed for these; they exist so a re-export reproduces the source file and nothing is silently lost. |
+| `members` | object |  | Parameterisation-set flavor: the explicit block map of member parameter-set records that constitute one co-fitted, runnable parameterisation. A set record carries members INSTEAD of claims (the strict policy admits the empty claims for this flavor only); side assignment lives here because which material parameterises which electrode is a fact of the set, not of the material. |
+| `set_id` | → SpecIri |  | Membership in a parameterisation set (the record listing this one under members). Emitted as schema:isPartOf; the set emits dcterms:hasPart. Members carry the backlink; the set publishes with the members. |
 
 
 ## Design notes
@@ -323,4 +5881,6 @@ Schema: [`parameter-set.schema.json`](https://w3id.org/battinfo/schema/parameter
 **Why claims, not properties.** It is tempting to say a diffusivity of graphite is a property of graphite and file it on a material record. Four facts break that model. Most claims target a *kind* (graphite as such), and kinds are vocabulary, not records — there is no bearer to carry the property. Sources disagree — five published graphite OCPs, fitted diffusivities an order of magnitude apart — and a record's properties presuppose one adjudicated value, while the spread *is* the data. Many parameters are not properties of the material at all but of a model fit — a reaction rate constant fitted under DFN belongs to (material × model × calibration), and asserting it on the material would poison the record with model artifacts. And a calibration is a joint estimate: values fitted together are only valid together, so the set is the unit of self-consistency. Hence one record per source, `provenance_class` per claim, resolution downstream. The describer's own declarations (a datasheet density) stay properties of the description; third-party and model-bound assertions are claims about the target — the same epistemics rule as spec vs instance.
 
 **BPX interop, both directions.** `from_bpx_parameters` imports a BPX file's electrode/separator/electrolyte physics as claims — scalars, tables as curves, function strings as expressions — splitting material-intrinsic claims (stoichiometry window, diffusivity, OCP) from build claims (thickness, porosity) that target the cell design instead. Header lineage rides along: `Model` and BPX version in `model_context` (a DFN-fitted value is not model-free), `Description` on the record, `References` as citation or note; the `User-defined` block travels verbatim as each record's `annex`, and Cell-block fields become spec properties (or verbatim extras) via `from_bpx` — nothing in the file is dropped silently. The reverse: `to_bpx(spec, parameter_sets=...)` turns ONE source's records back into a runnable BPX file — claims at full precision, `Header.Model` from the source's own model context, `State` sections for BPX ≥ 1.1 — and the official `bpx` parser accepts the result. One source per file, deliberately: a calibration is a joint estimate, so mixing sources across blocks would produce a file no validation supports (a labeled composed mode is a planned refinement).
+
+**Complete and part, both.** Breaking a BPX file into per-component records serves re-use — the graphite claims can inform any graphite cell — but a simulation needs the *whole* parameterisation, and "which six records go together" must be a stated fact, not a filename convention. So a parameter set comes in two flavors, the same split the dataset-series pattern established. A per-source *member* record carries claims about one target. A *parameterisation set* carries `members` instead of claims: a block map naming the member records that jointly form one source's complete cell parameterisation, targeting the cell spec. Members point back via `set_id`; in JSON-LD the set asserts `dcterms:hasPart` and each member `schema:isPartOf`, mirroring series ↔ dataset. The set is where the joint-estimate epistemics live explicitly: it says these particular records were calibrated together and are valid together. `from_bpx_parameters` mints the set whenever it imports a whole file against a cell spec, `load_parameter_set_members()` resolves it back to the member records, and `to_bpx` accepts that map directly, so the complete-file round trip is one load away from the re-usable parts.
 :::

@@ -1,0 +1,55 @@
+{
+  "schema_version": "0.2.0",
+  "cell_spec": {
+    "id": "https://w3id.org/battinfo/spec/b10q-6qh6-3v2x-4sp7",
+    "short_id": "b10q6q",
+    "name": "BPX example: LFP|graphite 2 Ah 18650",
+    "model": "LFP|graphite 2 Ah 18650",
+    "manufacturer": {
+      "type": "Organization",
+      "name": "About:Energy (BPX example)"
+    },
+    "cell_format": "cylindrical",
+    "chemistry": "Li-ion"
+  },
+  "properties": {
+    "discharging_cutoff_voltage": {
+      "value": 2.0,
+      "unit": "V"
+    },
+    "charging_cutoff_voltage": {
+      "value": 3.65,
+      "unit": "V"
+    },
+    "nominal_capacity": {
+      "value": 2.0,
+      "unit": "Ah"
+    },
+    "electrode_area": {
+      "value": 896.0,
+      "unit": "cm2"
+    },
+    "external_surface_area": {
+      "value": 43.1,
+      "unit": "cm2"
+    },
+    "volume": {
+      "value": 17.0,
+      "unit": "cm3"
+    },
+    "mass": {
+      "value": 32.98,
+      "unit": "g"
+    }
+  },
+  "provenance": {
+    "source_type": "literature",
+    "source_url": "https://github.com/FaradayInstitution/BPX/blob/main/examples/lfp_18650_cell_BPX.json",
+    "citation": "https://github.com/FaradayInstitution/BPX",
+    "retrieved_at": 1789900000
+  },
+  "license": "mit",
+  "notes": [
+    "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford)."
+  ]
+}

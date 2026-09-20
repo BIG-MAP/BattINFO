@@ -2738,6 +2738,20 @@ def _to_domain_battery_jsonld_parameter_set(data: dict[str, Any]) -> dict[str, A
             variable_nodes[0] if len(variable_nodes) == 1 else variable_nodes
         )
 
+    # Parameterisation-set flavor: the set lists its members (dcterms:hasPart),
+    # members carry the backlink (schema:isPartOf) — the dataset-series edges.
+    members = body.get("members")
+    if isinstance(members, dict) and members:
+        part_refs = [
+            {"@id": member_iri}
+            for _block, member_iri in sorted(members.items())
+            if isinstance(member_iri, str) and member_iri
+        ]
+        if part_refs:
+            node["dcterms:hasPart"] = part_refs[0] if len(part_refs) == 1 else part_refs
+    if isinstance(body.get("set_id"), str) and body["set_id"]:
+        node["schema:isPartOf"] = {"@id": body["set_id"]}
+
     citation = _citation_to_jsonld(data.get("provenance"))
     if citation is not None:
         node["schema:citation"] = citation

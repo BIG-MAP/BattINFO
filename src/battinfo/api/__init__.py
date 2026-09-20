@@ -121,6 +121,7 @@ from battinfo.api._organizations import (
 from battinfo.api._parameters import (
     _record_from_parameter_set,
     create_parameter_set,
+    load_parameter_set_members,
     query_parameter_sets,
     save_parameter_set,
     template_parameter_set,
@@ -373,6 +374,7 @@ __all__ = [
     "create_parameter_set",
     "save_parameter_set",
     "query_parameter_sets",
+    "load_parameter_set_members",
     "template_parameter_set",
     "create_organization",
     "save_organization",

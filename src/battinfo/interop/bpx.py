@@ -784,11 +784,30 @@ def _physics_blocks_from_parameter_sets(
     claims_by_scope: dict[str, list[Any]] = {}
 
     for block_key, record in parameter_sets.items():
+        if block_key == "set":
+            # The parameterisation-set record itself: no claims, but it
+            # carries the set-level lineage (model context, annex,
+            # references) — harvest those and move on.
+            set_body = record.get("parameter_set", record) if isinstance(record, Mapping) else {}
+            set_context = set_body.get("model_context") or {}
+            if isinstance(set_context.get("model"), str):
+                model_hints.add(set_context["model"])
+            if isinstance(set_context.get("version"), str):
+                version_hints.add(set_context["version"])
+            set_annex = set_body.get("annex")
+            if isinstance(set_annex, Mapping):
+                for annex_key, annex_value in set_annex.items():
+                    annex.setdefault(annex_key, annex_value)
+            if isinstance(record, Mapping):
+                for note in record.get("notes", []):
+                    if isinstance(note, str) and note.startswith(_ANNEX_NOTE_PREFIX):
+                        references.append(note[len(_ANNEX_NOTE_PREFIX):])
+            continue
         target = _EXPORT_BLOCK_TARGETS.get(block_key)
         if target is None:
             warnings.append(
                 f"parameter_sets key {block_key!r} is not a BPX export block "
-                f"(valid: {', '.join(_EXPORT_BLOCK_TARGETS)}); skipped."
+                f"(valid: set, {', '.join(_EXPORT_BLOCK_TARGETS)}); skipped."
             )
             continue
         bpx_block_name, vocab_block = target
@@ -1141,6 +1160,30 @@ class BpxParameterImportResult:
                     f"{block} claims skipped: pass cell_spec_id=... (or a "
                     f"materials={{'{block}': ...}} target)."
                 )
+
+        # One BPX file = one co-fitted parameterisation: mint the SET record
+        # (the dataset-series flavor) so the whole is addressable, its block
+        # map states side assignment, and to_bpx can reassemble the runnable
+        # file from the set alone. Members are stamped with the backlink after
+        # minting (the set's deterministic id needs the member ids first).
+        if cell_spec_id is not None and records_by_block:
+            set_record = create_parameter_set(
+                name=base,
+                cell_spec_id=cell_spec_id,
+                scope="cell",
+                members={
+                    block: record["parameter_set"]["id"]
+                    for block, record in records_by_block.items()
+                },
+                model_context=model_context,
+                **({"annex": dict(self.user_defined)} if self.user_defined else {}),
+                **record_kwargs,
+            )
+            set_iri = set_record["parameter_set"]["id"]
+            for record in records:
+                record["parameter_set"]["set_id"] = set_iri
+            records.append(set_record)
+            records_by_block["set"] = set_record
         return records_by_block if by_block else records
 
 

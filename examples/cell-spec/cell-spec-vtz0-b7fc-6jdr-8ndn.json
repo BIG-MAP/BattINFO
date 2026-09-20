@@ -1,0 +1,55 @@
+{
+  "schema_version": "0.2.0",
+  "cell_spec": {
+    "id": "https://w3id.org/battinfo/spec/vtz0-b7fc-6jdr-8ndn",
+    "short_id": "vtz0b7",
+    "name": "BPX example: NMC111|graphite pouch (blended positive)",
+    "model": "NMC111|graphite pouch (blended positive)",
+    "manufacturer": {
+      "type": "Organization",
+      "name": "About:Energy (BPX example)"
+    },
+    "cell_format": "pouch",
+    "chemistry": "Li-ion"
+  },
+  "properties": {
+    "discharging_cutoff_voltage": {
+      "value": 2.7,
+      "unit": "V"
+    },
+    "charging_cutoff_voltage": {
+      "value": 4.2,
+      "unit": "V"
+    },
+    "nominal_capacity": {
+      "value": 12.5,
+      "unit": "Ah"
+    },
+    "electrode_area": {
+      "value": 168.08,
+      "unit": "cm2"
+    },
+    "external_surface_area": {
+      "value": 379.0,
+      "unit": "cm2"
+    },
+    "volume": {
+      "value": 128.0,
+      "unit": "cm3"
+    },
+    "mass": {
+      "value": 236.416,
+      "unit": "g"
+    }
+  },
+  "provenance": {
+    "source_type": "literature",
+    "source_url": "https://github.com/FaradayInstitution/BPX/blob/main/examples/nmc_pouch_cell_BPX_blended_electrode.json",
+    "citation": "https://github.com/FaradayInstitution/BPX",
+    "retrieved_at": 1789900000
+  },
+  "license": "mit",
+  "notes": [
+    "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford)."
+  ]
+}

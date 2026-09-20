@@ -1,0 +1,34 @@
+{
+  "schema_version": "0.2.0",
+  "parameter_set": {
+    "id": "https://w3id.org/battinfo/spec/pyss-2m8j-y8c1-rmcb",
+    "short_id": "pyss2m",
+    "name": "BPX NMC111 pouch blended",
+    "cell_spec_id": "https://w3id.org/battinfo/spec/vtz0-b7fc-6jdr-8ndn",
+    "scope": "cell",
+    "members": {
+      "negative_material": "https://w3id.org/battinfo/spec/baez-0ppf-14qx-6rt0",
+      "negative_electrode": "https://w3id.org/battinfo/spec/q3dk-9sq9-7s86-43vw",
+      "positive_electrode": "https://w3id.org/battinfo/spec/9cwx-f2pf-6sv6-3n9e",
+      "separator": "https://w3id.org/battinfo/spec/e04y-e56s-wz45-yvk4",
+      "electrolyte": "https://w3id.org/battinfo/spec/0kaz-t3ef-8ehm-yhhb"
+    },
+    "model_context": {
+      "tool": "BPX",
+      "name": "Test case: blended electrode definition with two particle sizes but equivalent chemistry. Compare to nmc_pouch_cell_BPX.json in About:Energy open-source release.",
+      "model": "DFN",
+      "version": "0.4.0"
+    }
+  },
+  "provenance": {
+    "source_type": "literature",
+    "retrieved_at": 1789900000,
+    "battinfo_version": "0.7.0",
+    "source_url": "https://github.com/FaradayInstitution/BPX/blob/main/examples/nmc_pouch_cell_BPX_blended_electrode.json",
+    "citation": "https://github.com/FaradayInstitution/BPX"
+  },
+  "license": "mit",
+  "notes": [
+    "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford)."
+  ]
+}

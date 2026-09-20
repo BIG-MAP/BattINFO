@@ -116,6 +116,8 @@
     "length": "emmo:EMMO_cd2cd0de_e0cc_4ef1_b27e_2e88db027bac",
     "thickness": "emmo:EMMO_43003c86_9d15_433b_9789_ee2940920656",
     "volume": "emmo:EMMO_f1a51559_aa3d_43a0_9327_918039f0dfed",
+    "electrode_area": "emmo:EMMO_96f39f77_44dc_491b_8fa7_30d887fe0890",
+    "external_surface_area": "emmo:EMMO_96f39f77_44dc_491b_8fa7_30d887fe0890",
     "maximum_charging_temperature": "electrochemistry:electrochemistry_4a354510_4dc2_4803_8845_f4024a1a7260",
     "minimum_charging_temperature": "electrochemistry:electrochemistry_b90b1ad7_b9a8_44df_ad45_bfd25aac2e49",
     "maximum_discharging_temperature": "electrochemistry:electrochemistry_de612af2_a029_4a02_8090_4a75ab13271d",
