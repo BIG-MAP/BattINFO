@@ -1,0 +1,100 @@
+{
+  "Header": {
+    "BPX": 1.0,
+    "Title": "Synthetic DFN parameter set (golden fixture)",
+    "Description": "Structural twin of a published BattMo-exported BPX file (full DFN parameterisation, tables for OCPs and electrolyte transport, a populated User-defined block, and a Validation section). Every value is fabricated: the upstream publication file is GPL-3.0 and cannot be vendored here, so this fixture reproduces its structure, not its data.",
+    "References": "Synthetic fixture; structure follows Schmitt et al. 2026 (arXiv:2601.10507)",
+    "Model": "DFN"
+  },
+  "Parameterisation": {
+    "Cell": {
+      "Electrode area [m2]": 0.002,
+      "External surface area [m2]": 0.005,
+      "Volume [m3]": 9e-06,
+      "Number of electrode pairs connected in parallel to make a cell": 20,
+      "Lower voltage cut-off [V]": 3.0,
+      "Upper voltage cut-off [V]": 4.4,
+      "Nominal cell capacity [A.h]": 1.0,
+      "Ambient temperature [K]": 298.15,
+      "Initial temperature [K]": 298.15,
+      "Reference temperature [K]": 298.15
+    },
+    "Electrolyte": {
+      "Initial concentration [mol.m-3]": 1000.0,
+      "Cation transference number": 0.25,
+      "Diffusivity [m2.s-1]": {
+        "x": [0.0, 1000.0, 2000.0, 3000.0],
+        "y": [3e-10, 2.5e-10, 2e-10, 1.5e-10]
+      },
+      "Conductivity [S.m-1]": {
+        "x": [0.0, 1000.0, 2000.0, 3000.0],
+        "y": [0.1, 1.0, 0.9, 0.6]
+      }
+    },
+    "Negative electrode": {
+      "Minimum stoichiometry": 0.01,
+      "Maximum stoichiometry": 0.8,
+      "Maximum concentration [mol.m-3]": 30000.0,
+      "Particle radius [m]": 1e-05,
+      "Surface area per unit volume [m-1]": 200000.0,
+      "Diffusivity [m2.s-1]": 1e-13,
+      "Diffusivity activation energy [J.mol-1]": 14000.0,
+      "OCP [V]": {
+        "x": [0.0, 0.25, 0.5, 0.75, 1.0],
+        "y": [1.2, 0.25, 0.15, 0.12, 0.08]
+      },
+      "Entropic change coefficient [V.K-1]": 0.0,
+      "Reaction rate constant [mol.m-2.s-1]": 0.005,
+      "Thickness [m]": 6e-05,
+      "Porosity": 0.4,
+      "Transport efficiency": 0.25,
+      "Conductivity [S.m-1]": 20.0
+    },
+    "Positive electrode": {
+      "Minimum stoichiometry": 0.13,
+      "Maximum stoichiometry": 0.88,
+      "Maximum concentration [mol.m-3]": 24000.0,
+      "Particle radius [m]": 9e-06,
+      "Surface area per unit volume [m-1]": 190000.0,
+      "Diffusivity [m2.s-1]": 3e-14,
+      "Diffusivity activation energy [J.mol-1]": 5600.0,
+      "OCP [V]": {
+        "x": [0.13, 0.3, 0.5, 0.7, 0.88],
+        "y": [4.35, 4.2, 4.05, 3.85, 3.55]
+      },
+      "Entropic change coefficient [V.K-1]": 0.0,
+      "Reaction rate constant [mol.m-2.s-1]": 1e-05,
+      "Reaction rate constant activation energy [J.mol-1]": 40000.0,
+      "Thickness [m]": 7.5e-05,
+      "Porosity": 0.33,
+      "Transport efficiency": 0.11,
+      "Conductivity [S.m-1]": 5.0
+    },
+    "Separator": {
+      "Thickness [m]": 2e-05,
+      "Porosity": 0.5,
+      "Transport efficiency": 0.35
+    },
+    "User-defined": {
+      "Negative electrode active material volume fraction": 0.56,
+      "Positive electrode active material volume fraction": 0.55,
+      "Negative electrode inactive solid volume fraction": 0.04,
+      "Positive electrode inactive solid volume fraction": 0.11,
+      "Open-circuit voltage at 0% SOC [V]": 3.05,
+      "Open-circuit voltage at 100% SOC [V]": 4.35,
+      "Tool-specific negative electrode volumetric surface area [m-1]": 4900000.0,
+      "Tool-specific positive electrode volumetric surface area [m-1]": 101000.0,
+      "Exchange-current density j0 [A.m-2]": {
+        "x": [0.1, 0.5, 0.9],
+        "y": [0.6, 1.1, 0.7]
+      }
+    }
+  },
+  "Validation": {
+    "Discharge rate 1": {
+      "Time [s]": [0.0, 1800.0, 3600.0],
+      "Current [A]": [0.5, 0.5, 0.5],
+      "Voltage [V]": [4.3, 3.9, 3.2]
+    }
+  }
+}

@@ -64,6 +64,7 @@ from battinfo.api import (  # noqa: E402
     create_equipment_spec,
     create_material,
     create_material_spec,
+    create_organization,
     create_parameter_set,
 )
 from battinfo.bundle import Cell, CellSpec, Dataset, Test, TestSpec  # noqa: E402
@@ -118,11 +119,13 @@ KNOWN_GAPS: dict[tuple[str, str], str] = {
 
     # schema.org descriptive fields the schema permits on a product record.
     ("cell-spec", "brand"): "schema:brand object; datasheets use manufacturer + model instead",
+    ("material-spec", "electrode_polarity"): "deprecated: polarity is an electrode property; schema accepts it for back-compat only, no authoring path",
     ("cell-spec", "category"): "schema:category; the emitter derives a category from battery_category/chemistry",
     ("cell-spec", "url"): "schema:url for the product page; datasheet_url/provenance.source_url carry this today",
     ("cell-spec", "additional_type"): "schema:additionalType; the emitter derives the EMMO type from format + chemistry",
     ("cell-spec", "manufacturing_place"): "schema:manufacturingPlace; country_of_origin carries this today",
     ("cell-spec", "editorial"): "internal curation metadata; deliberately not part of the published model",
+    ("organization", "editorial"): "internal curation metadata; deliberately not part of the published model",
     ("dataset", "about"): "schema:about link to the entity studied; main_entity is the modeled equivalent",
 
     # Instance links whose modeled form is a list of IRIs, not the record's
@@ -197,6 +200,7 @@ def _builders() -> dict[str, Callable[..., dict]]:
                 "provenance_class": "literature",
             }],
         }),
+        "organization": _api_builder(create_organization, {"uid": UID, "name": "probe"}),
     }
     for family in COMPONENT_FAMILIES:
         hyphen = family.replace("_", "-")
@@ -217,6 +221,19 @@ ALIASES: dict[tuple[str, str], str] = {
     ("cell-spec", "cell_format"): "format",
 }
 
+# Deprecated schema keys that to_record() rewrites to their canonical spelling:
+# the value must land in the record, but under the replacement key.
+NORMALIZED_ALIASES: dict[tuple[str, str], str] = {
+    ("electrode-spec", "kind"): "active_material_kind",
+    # Organization records predate the snake_case migration; the camelCase
+    # spellings are accepted forever and normalize on round-trip.
+    ("organization", "legalName"): "legal_name",
+    ("organization", "alternateName"): "alternate_name",
+    ("organization", "foundingDate"): "founding_date",
+    ("organization", "dissolutionDate"): "dissolution_date",
+    ("organization", "parentOrganization"): "parent_organization",
+}
+
 
 # ── Sampling a schema-valid value ─────────────────────────────────────────────
 
@@ -225,9 +242,13 @@ _SCHEMA_CACHE: dict[str, dict] = {}
 # Values for properties whose schema constraint a generic sampler cannot satisfy.
 SAMPLE_OVERRIDES: dict[tuple[str, str], Any] = {
     ("material-spec", "kind"): "graphite",  # closed vocabulary lives in code, not in the schema
-    # Same: the electrode kind names an ACTIVE material from that same vocabulary.
+    # Same vocabulary: the electrode names its ACTIVE material (`kind` is the
+    # deprecated alias spelling).
+    ("electrode-spec", "active_material_kind"): "graphite",
     ("electrode-spec", "kind"): "graphite",
     ("electrode-spec", "active_material_spec_id"): SPEC_IRI,
+    # Genealogy reference: the parent must be an electrode/ IRI.
+    ("electrode", "parent_id"): "https://w3id.org/battinfo/electrode/abcd-2345-6789-abcd",
 }
 
 _PATTERN_SAMPLES = {"short_id": "abcdef", "in_language": "en"}
@@ -416,7 +437,7 @@ def _sweep() -> tuple[list[str], list[str], int]:
             if not _is_scalar(subschema, root, kind.schema_file):
                 continue
             written = record.get(kind.record_key, {}) if location == "body" else record
-            if prop not in written:
+            if NORMALIZED_ALIASES.get((entity_type, prop), prop) not in written:
                 dropped.append(f"{entity_type}.{prop} ({location}) accepted a value but to_record() omitted it")
 
     return unreachable, dropped, exercised
@@ -431,7 +452,15 @@ def _sweep() -> tuple[list[str], list[str], int]:
 # collector was found with it.
 
 # Nested location -> why it is not reachable, same contract as KNOWN_GAPS.
-KNOWN_NESTED_GAPS: dict[tuple[str, str], str] = {}
+KNOWN_NESTED_GAPS: dict[tuple[str, str], str] = {
+    # Not gaps but normalizations: the deprecated camelCase location keys are
+    # accepted and land under their snake_case replacements (address_region,
+    # ...), so the value survives — just not at the deprecated key this sweep
+    # checks. The organization contract tests pin the normalization itself.
+    ("organization", "location.addressCountry"): "camelCase alias; value lands under address_country",
+    ("organization", "location.addressRegion"): "camelCase alias; value lands under address_region",
+    ("organization", "location.addressLocality"): "camelCase alias; value lands under address_locality",
+}
 
 # How deep to open holders. 3 reaches cell-spec.positive_electrode.coating
 # .component (holder -> sub-holder -> material component), which is the deepest

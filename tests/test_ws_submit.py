@@ -466,3 +466,99 @@ def test_changed_content_is_resubmitted(tmp_path: Path, monkeypatch: pytest.Monk
     outcomes = ws.submit(**_CREDS)
     assert fake.calls == 2, "changed content must be re-submitted"
     assert outcomes[0]["status"] == "validated"
+
+
+# ── G11: equipment / channel / parameter-set reach the registry ───────────────
+# ws.add("equipment", ...) writes records at add()-time; before this fix they
+# were absent from the submit sweep AND from the session set, so an
+# equipment-only workspace published nothing, silently.
+
+_EQUIPMENT_SPEC_EXAMPLE = (
+    ROOT / "src" / "battinfo" / "data" / "examples" / "equipment-spec"
+    / "rchb-csx8-3vp8-ekcs.json"
+)
+
+
+def test_add_equipment_then_submit_sends_spec_unit_and_channels(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
+    ws.add("equipment", spec=str(_EQUIPMENT_SPEC_EXAMPLE),
+           serial_number="AA:BB:CC:DD:EE:FF", name="Bench unit", channels=2)
+    fake = _patch_registry(monkeypatch, lambda p: _result("validated"))
+
+    # No ws.save() call: the add()-written records themselves are the session.
+    outcomes = ws.submit(**_CREDS)
+
+    types = [p["resource"]["resource_type"] for p in fake.payloads]
+    assert types == ["equipment_spec", "equipment", "channel", "channel"]
+    assert all(o["ok"] for o in outcomes)
+
+    eq_payload = fake.payloads[1]
+    eq_links = eq_payload["resource"].get("related_resources") or []
+    assert {ln["relationship"] for ln in eq_links} == {"instanceOf", "hasChannel"}
+    channel_links = [ln for ln in eq_links if ln["relationship"] == "hasChannel"]
+    assert len(channel_links) == 2
+    assert all(ln["resource_type"] == "channel" for ln in channel_links)
+    assert all(ln.get("title") for ln in channel_links), "channel labels ride as titles"
+
+    for ch_payload in fake.payloads[2:]:
+        ch_links = ch_payload["resource"].get("related_resources") or []
+        assert [ln["relationship"] for ln in ch_links] == ["channelOf"]
+        assert ch_links[0]["resource_type"] == "equipment"
+        assert ch_links[0]["canonical_iri"] == eq_payload["resource"]["semantic_payload"]["battinfo_records"]["equipment"]["equipment"]["id"]
+
+
+def test_only_equipment_filters_the_sweep(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
+    ws.add("equipment", spec=str(_EQUIPMENT_SPEC_EXAMPLE),
+           serial_number="AA:BB:CC:DD:EE:FF", channels=1)
+    fake = _patch_registry(monkeypatch, lambda p: _result("validated"))
+    ws.submit(only=["equipment_spec", "channel"], **_CREDS)
+    assert [p["resource"]["resource_type"] for p in fake.payloads] == ["equipment_spec", "channel"]
+
+
+def test_unknown_only_token_lists_the_new_types(tmp_path: Path) -> None:
+    ws = _saved_ws(tmp_path)
+    with pytest.raises(ValueError, match="equipment-spec, equipment, channel, parameter-set"):
+        ws.submit(only="gadget", **_CREDS)
+
+
+def test_parameter_set_submits_with_about_link(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    ws = _saved_ws(tmp_path)
+    spec_file = sorted((ws._ws.source_root / "cell-spec").glob("*.json"))[0]
+    import json as _json
+    spec_iri = _json.loads(spec_file.read_text(encoding="utf-8"))["cell_spec"]["id"]
+
+    ws.add("parameter_set", name="Acme fit v1", cell_spec_id=spec_iri,
+           citation_doi="10.1000/example", default_provenance_class="fitted",
+           claims=[{"parameter": "nominal_voltage", "quantity": {"value": 3.0, "unit": "V"}}])
+    ws.save(validation_policy="strict")
+    fake = _patch_registry(monkeypatch, lambda p: _result("validated"))
+
+    ws.submit(only="parameter_set", **_CREDS)
+
+    assert [p["resource"]["resource_type"] for p in fake.payloads] == ["parameter_set"]
+    links = fake.payloads[0]["resource"].get("related_resources") or []
+    assert {(ln["relationship"], ln["resource_type"]) for ln in links} == {("about", "cell_spec")}
+    assert links[0]["canonical_iri"] == spec_iri
+
+
+def test_component_family_records_warn_instead_of_vanishing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture
+) -> None:
+    ws = _saved_ws(tmp_path)
+    sep_dir = ws._ws.source_root / "separator-spec"
+    sep_dir.mkdir(parents=True, exist_ok=True)
+    (sep_dir / "separator-spec-test.json").write_text("{}", encoding="utf-8")
+
+    fake = _patch_registry(monkeypatch, lambda p: _result("validated"))
+    ws.submit(submit_all=True, **_CREDS)
+
+    out = capsys.readouterr().out
+    assert "not submitted" in out and "separator-spec" in out
+    assert all(p["resource"]["resource_type"] != "separator_spec" for p in fake.payloads)

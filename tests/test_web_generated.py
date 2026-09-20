@@ -35,7 +35,7 @@ def test_gallery_shows_type_stacking() -> None:
     doc = cell_spec["jsonld"]
     # Canonical shape: the spec node is an information artifact; the physical
     # EMMO class stack lives under isDescriptionFor.
-    assert doc.get("@type") == ["BatteryCellSpecification", "schema:CreativeWork"]
+    assert doc.get("@type") == ["BatteryCellSpecification", "schema:ProductModel", "schema:CreativeWork"]
     physical = doc.get("isDescriptionFor", {}).get("@type")
     assert isinstance(physical, list) and len(physical) >= 3, (
         "the flagship cell-spec JSON-LD should stack multiple EMMO types under "

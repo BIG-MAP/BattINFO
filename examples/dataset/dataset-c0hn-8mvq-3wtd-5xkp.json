@@ -1,0 +1,22 @@
+{
+  "schema_version": "0.2.0",
+  "dataset": {
+    "id": "https://w3id.org/battinfo/dataset/c0hn-8mvq-3wtd-5xkp",
+    "short_id": "c0hn8m",
+    "identifier": "dataset:c0hn-8mvq-3wtd-5xkp",
+    "name": "NMC811 coin cell cycling study",
+    "description": "All cycling datasets of the NMC811-Graphite coin cell study; one member dataset per cell.",
+    "additional_type": [
+      "DatasetSeries"
+    ],
+    "license": "https://creativecommons.org/licenses/by/4.0/",
+    "access_url": "https://example.org/dataset/c0hn-8mvq-3wtd-5xkp",
+    "created_at": 1781772876,
+    "modified_at": 1781772876,
+    "published_at": 1781772876
+  },
+  "provenance": {
+    "source_type": "catalog",
+    "retrieved_at": 1781772876
+  }
+}

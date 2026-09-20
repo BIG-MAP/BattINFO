@@ -4,7 +4,7 @@
     "id": "https://w3id.org/battinfo/spec/2k9p-7t4r-3m6x-5n1v",
     "short_id": "2k9p7t",
     "identifier": "test-protocol:2k9p-7t4r-3m6x-5n1v",
-    "name": "EIS at 50% SOC, 25\u00b0C",
+    "name": "EIS at 50% SOC, 25°C",
     "kind": "eis",
     "description": "Electrochemical impedance spectroscopy sweep from 100 kHz to 10 mHz with a 10 mV AC perturbation amplitude. Cell is brought to 50% state of charge before measurement and held at open-circuit potential for 2 hours to reach equilibrium. Galvanostatic EIS mode.",
     "version": "1.0",
@@ -38,6 +38,10 @@
     }
   ],
   "conditions": {
+    "initial_state_of_charge": {
+      "value": 0.5,
+      "unit": "1"
+    },
     "ambient_temperature": {
       "value": 25.0,
       "unit": "degC"

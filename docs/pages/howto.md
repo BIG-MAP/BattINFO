@@ -12,7 +12,7 @@ recipes assume, and the [glossary](glossary.md) decodes the vocabulary.
 | **Describe a cell I built** from its parts (electrodes, electrolyte, separator, housing) | [Build a cell from components](../howto/build-a-cell-from-components.md) |
 | **Log the cells on my bench** (lab names, no serial numbers) | [Label your cells](../howto/label-your-cells.md) |
 | **Register my cycler and its channels** | [Register equipment](../howto/register-equipment.md) |
-| **Define a test protocol** (CC-CV cycling, capacity check, EIS, …) | [Test specs](../test-specs.md) |
+| **Define a test protocol** (CC-CV cycling, capacity check, EIS, …) | [Test specs](../records/tests.md) |
 | **Log a test run** linked to a cell, a protocol, and a channel | [Workspace authoring](../workspace-authoring.md) · [Tutorial 3, Linked records](../guides/03-linked-records.ipynb) |
 | **Convert a cycler export** to a tidy table (NEWARE, Biologic, Maccor CSV, …) | [Tutorial 6, Stage 1: Convert](../guides/06-publish-your-data.ipynb) · unmapped columns? see [troubleshooting](troubleshooting.md#converted-file-is-missing-columns) |
 | **Validate my records and fix what's wrong** | [Fix validation errors](../howto/fix-validation-errors.md) |

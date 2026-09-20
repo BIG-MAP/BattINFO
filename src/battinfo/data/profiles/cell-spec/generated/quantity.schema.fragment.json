@@ -13,20 +13,25 @@
           "type": "string",
           "minLength": 1
         }
-      ]
+      ],
+      "description": "Point value, numeric or as a string when the source value is not purely numeric."
     },
     "min_value": {
-      "type": "number"
+      "type": "number",
+      "description": "Lower bound when the source specifies a range."
     },
     "max_value": {
-      "type": "number"
+      "type": "number",
+      "description": "Upper bound when the source specifies a range."
     },
     "typical_value": {
-      "type": "number"
+      "type": "number",
+      "description": "Typical value when the source distinguishes typical from nominal or limit values."
     },
     "value_text": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "Verbatim value text when the source value cannot be parsed to a number."
     },
     "standard_deviation": {
       "type": "number",
@@ -40,12 +45,23 @@
     },
     "unit_text": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "Human-readable unit text as written in the source (schema.org unitText)."
     },
     "unit": {
       "type": "string",
       "minLength": 1,
       "description": "Canonical compact unit symbol/code, for example V, A, Ah, Wh/kg."
+    },
+    "value_basis": {
+      "type": "string",
+      "enum": [
+        "Measured",
+        "Conventional",
+        "Rated",
+        "Nominal"
+      ],
+      "description": "The basis on which the value is stated. Nominal: the design or target value as specified (default for spec records). Measured: obtained by measurement on a physical item (default for instance records). Rated: a guaranteed value established under a stated rating procedure (datasheet rated capacity). Conventional: fixed by convention or standard practice."
     },
     "co_type": {
       "type": "string",
@@ -55,11 +71,11 @@
         "Rated",
         "Nominal"
       ],
-      "description": "Nature of the value: a directly Measured property, a declared Conventional/Nominal value, or a Rated value established under a rating procedure. Drives the EMMO property-nature co-type in JSON-LD."
+      "description": "Deprecated alias of value_basis; accepted so existing records keep validating."
     },
     "conditions": {
       "type": "object",
-      "description": "Measurement parameters/conditions under which this quantity holds (e.g. discharge_c_rate, lower_voltage_limit, upper_voltage_limit, temperature, counter_electrode, cycle_number). Each entry is itself a quantity; emitted as hasMeasurementParameter in JSON-LD.",
+      "description": "Measurement parameters or conditions under which this quantity holds, as a map of condition name to quantity (e.g. discharging_c_rate, lower_voltage_limit, upper_voltage_limit, temperature, cycle_number, voltage_reference). A qualitative condition may carry value_text alone, with no unit. In JSON-LD, conditions emit as hasMeasurementParameter on a measurement node the quantity isOutputOf; the voltage_reference key instead emits as hasMetrologicalReference on the quantity itself.",
       "patternProperties": {
         "^[a-z][a-z0-9_]*$": {
           "$ref": "#"
@@ -108,6 +124,41 @@
         {
           "required": [
             "unit_text"
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "required": [
+                "value_text"
+              ]
+            },
+            {
+              "not": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "value"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "min_value"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "max_value"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "typical_value"
+                    ]
+                  }
+                ]
+              }
+            }
           ]
         }
       ]

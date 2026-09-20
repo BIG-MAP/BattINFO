@@ -541,16 +541,16 @@ def _validate_electrode_kind(
         resolve_electrode_kind,
     )
 
-    kind = spec.get("kind")
+    kind = spec.get("active_material_kind", spec.get("kind"))
     if not isinstance(kind, str) or not kind.strip():
         _append_issue(
             issues,
             code="semantic.electrode_kind_missing",
             severity=issue_severity,
-            path="electrode_spec.kind",
+            path="electrode_spec.active_material_kind",
             message=(
-                "electrode spec has no kind. Set the active material's kind from the "
-                f"curated vocabulary. Valid kinds: {', '.join(electrode_kind_keys())}."
+                "electrode spec has no active_material_kind. Set the active material's "
+                f"kind from the curated vocabulary. Valid kinds: {', '.join(electrode_kind_keys())}."
             ),
             resource_type=resource_type,
         )
@@ -560,7 +560,7 @@ def _validate_electrode_kind(
             issues,
             code="semantic.electrode_kind_unknown",
             severity="error",
-            path="electrode_spec.kind",
+            path="electrode_spec.active_material_kind",
             message=(
                 f"unknown electrode kind '{kind}'. Valid kinds: "
                 f"{', '.join(electrode_kind_keys())}."
@@ -573,7 +573,7 @@ def _validate_electrode_kind(
             issues,
             code="semantic.electrode_kind_not_active",
             severity="warning",
-            path="electrode_spec.kind",
+            path="electrode_spec.active_material_kind",
             message=(
                 f"electrode kind '{kind}' is not an active material. An electrode's kind "
                 "names what it stores charge with, not its binder or additive. Valid "
@@ -582,24 +582,10 @@ def _validate_electrode_kind(
             resource_type=resource_type,
         )
         return
-    # Polarity and kind must agree: an LFP anode is a typo, not a design.
-    from battinfo.electrodes import electrode_polarity_for_kind
-
-    polarity = spec.get("polarity")
-    implied = electrode_polarity_for_kind(kind)
-    if isinstance(polarity, str) and polarity in ("positive", "negative") and polarity != implied:
-        _append_issue(
-            issues,
-            code="semantic.electrode_polarity_conflict",
-            severity="warning",
-            path="electrode_spec.polarity",
-            message=(
-                f"polarity '{polarity}' disagrees with kind '{kind}', which is a "
-                f"{implied} active material. Drop the polarity to let it be derived, "
-                "or correct one of the two."
-            ),
-            resource_type=resource_type,
-        )
+    # No kind-vs-polarity check: the vocabulary no longer assigns a side to an
+    # active material (system-relative — graphite is the positive electrode of
+    # a lithium-counter half cell), so an authored polarity cannot conflict
+    # with the kind.
 
 
 def _validate_size_code(

@@ -1,4 +1,5 @@
 """Tests for the PyBaMM-string front-end and structured test-method model."""
+
 from __future__ import annotations
 
 import sys
@@ -75,9 +76,7 @@ def test_parse_errors_are_explicit() -> None:
 
 
 def test_cycles_wraps_in_group() -> None:
-    method = parse_experiment(
-        ["Charge at 1 C until 4.2 V", "Discharge at 1 C until 2.5 V"], cycles=3
-    )
+    method = parse_experiment(["Charge at 1 C until 4.2 V", "Discharge at 1 C until 2.5 V"], cycles=3)
     assert len(method) == 1
     grp = method[0]
     assert grp.mode == "group" and grp.count == 3
@@ -99,8 +98,7 @@ def _strip_descriptions(steps: list[Step]) -> list[Step]:
     "strings,cycles",
     [
         (["Discharge at C/10 until 3.3 V"], None),
-        (["Charge at 1 C until 4.2 V", "Hold at 4.2 V until C/50",
-          "Discharge at 0.5 C until 2.5 V"], None),
+        (["Charge at 1 C until 4.2 V", "Hold at 4.2 V until C/50", "Discharge at 0.5 C until 2.5 V"], None),
         (["Charge at 200 mA until 4.1 V", "Rest for 30 minutes"], 5),
         (["Discharge at 5 W for 1 hour or until 3 V"], None),
     ],
@@ -122,21 +120,53 @@ def test_render_crate_forms() -> None:
 def test_render_is_total_for_non_pybamm_modes() -> None:
     """render_step must never raise on a structured method (eis/scan/cccv) — the
     .experiment property and the bundle adapter depend on this."""
-    eis = Step(mode="eis", direction="hold",
-               setpoints={"start_frequency": Quantity(value=1e5, unit="Hz")})
+    eis = Step(mode="eis", direction="hold", setpoints={"start_frequency": Quantity(value=1e5, unit="Hz")})
     assert isinstance(render_step(eis), str)  # no crash
-    cccv = Step(mode="cccv", direction="charge",
-                setpoints={"c_rate": Quantity(value=1.0, unit="A/Ah"),
-                           "voltage": Quantity(value=4.2, unit="V")})
+    cccv = Step(
+        mode="cccv",
+        direction="charge",
+        setpoints={"c_rate": Quantity(value=1.0, unit="A/Ah"), "voltage": Quantity(value=4.2, unit="V")},
+    )
     assert "hold" in render_step(cccv).lower()
     strings, _ = render_method([eis])
     assert strings and isinstance(strings[0], str)
 
 
+def test_step_id_is_accepted_and_optional() -> None:
+    assert Step(mode="rest").step_id is None
+    assert Step(mode="rest", step_id=3).step_id == 3
+
+
+def test_step_id_survives_serialization_roundtrip() -> None:
+    step = Step(mode="cc", direction="discharge", step_id=7)
+    dumped = step.model_dump()
+    assert dumped["step_id"] == 7
+    assert Step.model_validate(dumped).step_id == 7
+
+
+def test_step_id_validates_against_test_protocol_schema() -> None:
+    import json
+
+    from jsonschema import Draft202012Validator
+
+    schema_path = ROOT / "src" / "battinfo" / "data" / "schemas" / "test-protocol.schema.json"
+    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    step_schema = schema["$defs"]["Step"]
+    Draft202012Validator.check_schema(step_schema)
+    validator = Draft202012Validator(step_schema)
+
+    step = Step(mode="cc", direction="discharge", step_id=7)
+    validator.validate(step.model_dump(exclude_none=True))
+
+
 def test_facets_rollup() -> None:
     method = parse_experiment(
-        ["Charge at 1 C until 4.2 V", "Hold at 4.2 V until C/50",
-         "Rest for 10 minutes", "Discharge at 0.5 C until 2.5 V"],
+        [
+            "Charge at 1 C until 4.2 V",
+            "Hold at 4.2 V until C/50",
+            "Rest for 10 minutes",
+            "Discharge at 0.5 C until 2.5 V",
+        ],
         cycles=3,
     )
     facets = compute_facets(method)
@@ -147,4 +177,61 @@ def test_facets_rollup() -> None:
     assert facets["control_modes"] == ["current", "voltage"]
     assert facets["c_rates"] == [0.02, 0.5, 1.0]
     assert facets["voltage_window_V"] == [2.5, 4.2]
-    assert facets["modes"] == ["group"]
+    # modes recurses into the cycle group: leaf modes in first-encounter
+    # order, never "group" itself (#361).
+    assert facets["modes"] == ["cc", "cv", "rest"]
+
+
+def test_facets_modes_recurse_into_nested_groups() -> None:
+    inner = parse_experiment(["Charge at 1 C until 4.2 V", "Rest for 5 minutes"], cycles=2)
+    outer = Step(mode="group", count=3, steps=inner)
+    facets = compute_facets([outer])
+    assert facets["modes"] == ["cc", "rest"]
+    assert "group" not in facets["modes"]
+
+
+def test_soc_termination_is_first_class() -> None:
+    """SOC joins the termination quantities (the UCP/HPPC seam): validated at
+    construction and emitted with the StateOfCharge class."""
+    from battinfo.jsonld import termination_emmo_class
+    from battinfo.testmethod import Step, Termination
+
+    step = Step(
+        mode="cc", direction="discharge",
+        setpoints={"c_rate": {"value": 0.333, "unit": "A/Ah"}},
+        termination=[Termination(quantity="soc", value=0.9, unit="1", direction="below")],
+        description="Discharge at C/3 to 90% SOC",
+    )
+    assert step.termination[0].quantity == "soc"
+    assert termination_emmo_class("soc", "below") == "StateOfCharge"
+
+
+def test_termination_comparison_string_shorthand() -> None:
+    """Structured steps accept "Voltage > 4.2"-style cutoffs - the way
+    engineers (and UCP's `ends`) write them - normalized at construction."""
+    from battinfo.testmethod import Step, parse_termination
+
+    step = Step(
+        mode="cc", direction="discharge",
+        setpoints={"c_rate": {"value": 0.333, "unit": "A/Ah"}},
+        termination=["Voltage < 2.5", "C-rate < C/50", "SOC < 0.05", "Time > 30 min"],
+    )
+    got = {(t.quantity, t.value, t.unit, t.direction) for t in step.termination}
+    assert got == {
+        ("voltage", 2.5, "V", "below"),
+        ("c_rate", 0.02, "A/Ah", "below"),
+        ("soc", 0.05, "1", "below"),
+        ("duration", 1800.0, "s", "elapsed"),
+    }
+
+    # A bare string (not a list) and unit-carrying magnitudes both work.
+    single = Step(mode="cv", direction="hold", termination="Current < 50 mA")
+    assert (single.termination[0].value, single.termination[0].unit) == (0.05, "A")
+
+    import pytest
+
+    from battinfo.testmethod import ExperimentSyntaxError
+    with pytest.raises(ExperimentSyntaxError, match="Unknown termination quantity"):
+        parse_termination("Frobnitz > 3")
+    with pytest.raises(ExperimentSyntaxError, match="names voltage but"):
+        parse_termination("Voltage > 200 mA")

@@ -119,7 +119,7 @@ def test_entity_type_map_silicon_graphite_anode_emits_electrode_node() -> None:
     from battinfo.transform.json_to_jsonld import _descriptor_specification_to_jsonld
     spec = {"format": "cylindrical", "chemistry": "li-ion",
             "positive_electrode_basis": "nmc", "negative_electrode_basis": "silicon-graphite"}
-    node = _descriptor_specification_to_jsonld(spec)
+    node = _descriptor_specification_to_jsonld(spec)["isDescriptionFor"]
     neg = node.get("hasNegativeElectrode", {})
     assert neg.get("@type") == "SiliconGraphiteElectrode", f"Expected SiliconGraphiteElectrode, got: {neg}"
 
@@ -128,7 +128,7 @@ def test_entity_type_map_hard_carbon_anode_emits_electrode_node() -> None:
     from battinfo.transform.json_to_jsonld import _descriptor_specification_to_jsonld
     spec = {"format": "prismatic", "chemistry": "na-ion",
             "positive_electrode_basis": "unknown", "negative_electrode_basis": "hard-carbon"}
-    node = _descriptor_specification_to_jsonld(spec)
+    node = _descriptor_specification_to_jsonld(spec)["isDescriptionFor"]
     neg = node.get("hasNegativeElectrode", {})
     assert neg.get("@type") == "HardCarbonElectrode", f"Expected HardCarbonElectrode, got: {neg}"
 

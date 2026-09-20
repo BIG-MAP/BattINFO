@@ -5,25 +5,44 @@
   "additionalProperties": false,
   "required": [
     "id",
-    "manufacturer",
+    "name",
     "model",
-    "format",
-    "chemistry",
-    "positive_electrode_basis",
-    "negative_electrode_basis"
+    "manufacturer",
+    "cell_format",
+    "chemistry"
   ],
   "properties": {
     "id": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+      "pattern": "^https://w3id\\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+      "description": "Canonical BattINFO IRI of the cell spec (spec/ namespace)."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable display name, typically manufacturer plus model."
     },
     "manufacturer": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "Cell manufacturer name."
     },
     "model": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "Manufacturer model designation."
+    },
+    "cell_format": {
+      "type": "string",
+      "enum": [
+        "cylindrical",
+        "prismatic",
+        "pouch",
+        "coin",
+        "other",
+        "unknown"
+      ],
+      "description": "Mechanical format of the cell."
     },
     "format": {
       "type": "string",
@@ -34,19 +53,23 @@
         "coin",
         "other",
         "unknown"
-      ]
+      ],
+      "description": "Legacy key of the internal descriptor shape, equivalent to cell_format. New records should use cell_format."
     },
     "chemistry": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "Overall cell chemistry label (e.g. 'Li-ion', 'NiMH', 'Zn-MnO2'). Use the recognised labels where they apply (see the property keys reference); other values are carried as literals."
     },
     "positive_electrode_basis": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "Positive-electrode active material basis (e.g. 'LFP', 'NMC811'). Use the recognised labels where they apply (see the property keys reference); other values are carried as literals."
     },
     "negative_electrode_basis": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "Negative-electrode active material basis (e.g. 'graphite', 'LTO', 'Si-C'). Use the recognised labels where they apply (see the property keys reference); other values are carried as literals."
     },
     "product_type": {
       "type": "string",
@@ -54,80 +77,32 @@
         "commercial",
         "research",
         "prototype"
-      ]
+      ],
+      "description": "Whether this cell spec is a commercial product, a research cell, or a prototype."
     },
     "size_code": {
-      "type": "string"
+      "type": "string",
+      "description": "Standard size designation (e.g. '18650')."
     },
     "construction": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "assembly_type": {
-          "type": "string",
-          "enum": [
-            "wound",
-            "stacked",
-            "other",
-            "unknown"
-          ]
-        },
-        "layering": {
-          "type": "string",
-          "enum": [
-            "single_layer",
-            "multilayer",
-            "not_applicable",
-            "unknown"
-          ]
-        },
-        "layer_count": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "assembly_sequence": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "minLength": 1
-          }
-        },
-        "comment": {
-          "type": "string"
-        },
-        "cathode_sheet_count": {
-          "type": "integer"
-        },
-        "anode_sheet_count": {
-          "type": "integer"
-        },
-        "separator_sheet_count": {
-          "type": "integer"
-        },
-        "winding_turns": {
-          "type": "number"
-        },
-        "electrode_length": {
-          "type": "object",
-          "description": "Quantity (value/unit)."
-        },
-        "jellyroll_volume": {
-          "type": "object",
-          "description": "Quantity (value/unit)."
-        }
-      }
+      "$ref": "construction.schema.json",
+      "description": "Internal construction: assembly type, layering, sheet counts, and electrode-assembly geometry."
     },
     "property": {
-      "$ref": "../common/quantitative-properties.schema.json"
+      "$ref": "../common/quantitative-properties.schema.json",
+      "description": "Named quantity map of cell-level properties."
     },
     "positive_electrode": {
-      "$ref": "electrode.schema.json"
+      "$ref": "electrode.schema.json",
+      "description": "Inline description of the positive electrode (coating, current collector, tab, properties)."
     },
     "negative_electrode": {
-      "$ref": "electrode.schema.json"
+      "$ref": "electrode.schema.json",
+      "description": "Inline description of the negative electrode (coating, current collector, tab, properties)."
     },
     "electrolyte": {
-      "$ref": "electrolyte.schema.json"
+      "$ref": "electrolyte.schema.json",
+      "description": "Inline electrolyte description (family, salt, solvents, additives)."
     },
     "separator": {
       "type": "object",
@@ -136,37 +111,70 @@
         "material"
       ],
       "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Common material or product name, e.g. 'Celgard 2400', 'glass fibre', 'ceramic-coated PP'."
+        },
         "material": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Base material family, e.g. 'polyethylene', 'polypropylene', 'polyethylene-polypropylene', 'glass fibre', 'ceramic'. Use the recognised labels where they apply (see the property keys reference); other values are carried as literals."
+        },
+        "material_spec_id": {
+          "type": "string",
+          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "description": "IRI of the material-spec this separator base material realizes."
+        },
+        "structure": {
+          "type": "string",
+          "enum": [
+            "monolayer",
+            "bilayer",
+            "trilayer",
+            "composite",
+            "other",
+            "unknown"
+          ],
+          "description": "Physical layer structure of the separator membrane."
+        },
+        "coating": {
+          "type": "string",
+          "description": "Surface coating applied to the base membrane, e.g. 'Al2O3', 'SiO2', 'PVDF', 'ceramic'."
         },
         "manufacturer": {
-          "type": "string"
+          "type": "string",
+          "description": "Manufacturer of the item."
         },
         "supplier": {
-          "type": "string"
+          "type": "string",
+          "description": "Supplier or vendor the item was sourced from."
         },
         "product_id": {
-          "type": "string"
+          "type": "string",
+          "description": "Manufacturer or supplier product/grade identifier."
         },
         "property": {
-          "$ref": "../common/quantitative-properties.schema.json"
+          "$ref": "../common/quantitative-properties.schema.json",
+          "description": "Named quantity map of separator properties (e.g. thickness, porosity, gurley_number, ionic_conductivity). See the property keys reference for the full list of recognised keys."
         },
         "comment": {
-          "type": "string"
+          "type": "string",
+          "description": "Free-text comment."
         }
-      }
+      },
+      "description": "Inline separator description (material, structure, coating, and properties); use separator_spec_id instead to reference a standalone separator-spec."
     },
     "housing": {
-      "type": "object",
-      "title": "Housing",
-      "description": "Cell mechanical housing (case, terminals, seals, parts)."
+      "$ref": "housing.schema.json",
+      "description": "Inline housing description (case, cap, terminals, seals, parts); use housing_spec_id instead to reference a standalone housing-spec."
     },
     "comment": {
       "type": "array",
       "items": {
         "type": "string"
-      }
+      },
+      "description": "Free-text comment lines."
     }
   }
 }

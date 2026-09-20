@@ -227,7 +227,6 @@ class _Builder:
                 uid=_uid("discovery", "material", name),
                 name=name,
                 material_class="active_material",
-                electrode_polarity=polarity,
                 chemistry_family=family,
                 emmo_type=emmo_type,
                 source_type="literature",

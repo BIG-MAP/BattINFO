@@ -43,11 +43,20 @@ _BPX_CELL_MAP: dict[str, tuple[str, str, float]] = {
     "Electrode width [m]":                ("width",                      "mm",   1000.0),
     "Cell thickness [m]":                 ("thickness",                  "mm",   1000.0),
     "Nominal cell resistance [Ohm]":      ("internal_resistance",        "Ω",    1.0),
+    # As-designed geometry (the BPX-required electrode area included): these
+    # are engineering facts of the cell design, so they live as spec
+    # properties and round-trip through to_bpx.
+    "Electrode area [m2]":                ("electrode_area",         "cm2",  1e4),
+    "External surface area [m2]":         ("external_surface_area",  "cm2",  1e4),
+    "Volume [m3]":                        ("volume",                 "cm3",  1e6),
+    "Cell volume [m3]":                   ("volume",                 "cm3",  1e6),
     "Specific heat capacity [J.K-1.kg-1]": None,   # no battinfo spec equivalent
     "Thermal conductivity [W.m-1.K-1]":   None,
-    "Cell volume [m3]":                   None,
     "Initial temperature [K]":            None,
     "Ambient temperature [K]":            None,
+    # The temperature parameters are stated conditions of the parameterisation
+    # (model conventions), not properties of the cell design.
+    "Reference temperature [K]":          None,
     "Number of electrode pairs connected in parallel to make a cell": None,
     "External temperature [K]":           None,
 }
@@ -90,6 +99,7 @@ class BpxImportResult:
     model_type: str | None
     description: str | None
     source_file: str | None
+    extras: dict[str, Any] = field(default_factory=dict)
     warnings: list[str] = field(default_factory=list)
 
     def to_cell_spec_kwargs(self) -> dict[str, Any]:
@@ -133,24 +143,46 @@ def _extract_header(data: dict[str, Any]) -> tuple[str | None, str | None, str |
     )
 
 
+def _extract_references(data: dict[str, Any]) -> str | None:
+    """The BPX ``Header.References`` provenance string, if present."""
+    header = data.get("Header") or data.get("header") or {}
+    if not isinstance(header, Mapping):
+        return None
+    references = header.get("References") or header.get("references")
+    if isinstance(references, list):
+        parts = [str(item).strip() for item in references if str(item).strip()]
+        return "; ".join(parts) or None
+    if references is not None and str(references).strip():
+        return str(references).strip()
+    return None
+
+
 def _extract_specs(
     cell_params: dict[str, Any],
     warnings: list[str],
-) -> dict[str, Any]:
-    """Map BPX Cell parameters to BattINFO spec-property dicts."""
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Map BPX Cell parameters to BattINFO spec-property dicts.
+
+    Returns ``(specs, extras)``: mapped spec properties, plus every Cell key
+    with no spec home carried VERBATIM — the same nothing-silently-lost rule
+    the parameter annex follows, so :func:`to_bpx` can re-emit them.
+    """
     specs: dict[str, Any] = {}
+    extras: dict[str, Any] = {}
     known_no_spec: list[str] = []  # in our table, deliberately no BattINFO equivalent
     unknown: list[str] = []        # not in our table at all
 
     for bpx_key, raw_value in cell_params.items():
         if bpx_key not in _BPX_CELL_MAP:
             unknown.append(bpx_key)
+            extras[bpx_key] = raw_value
             continue
         mapping = _BPX_CELL_MAP[bpx_key]
         if mapping is None:
-            # Explicitly mapped to None — a recognised physics/transport parameter
-            # with no cell-level spec equivalent.
+            # Explicitly mapped to None — a recognised parameter with no
+            # cell-level spec equivalent (model conventions, pair count, ...).
             known_no_spec.append(bpx_key)
+            extras[bpx_key] = raw_value
             continue
         battinfo_key, unit, scale = mapping
         if not isinstance(raw_value, (int, float)) or isinstance(raw_value, bool):
@@ -172,20 +204,18 @@ def _extract_specs(
         if battinfo_key not in specs:
             specs[battinfo_key] = {"value": value, "unit": unit}
 
+    # EVERY key is named — a truncated list is a silent drop for the rest.
     if known_no_spec:
         warnings.append(
-            f"BPX Cell parameters with no BattINFO spec equivalent "
-            f"(physics/transport parameters — not cell-level specs): "
-            f"{', '.join(known_no_spec[:8])}"
-            + (" …" if len(known_no_spec) > 8 else "")
+            f"BPX Cell parameters with no BattINFO spec equivalent, carried "
+            f"verbatim in extras: {', '.join(known_no_spec)}"
         )
     if unknown:
         warnings.append(
-            f"Unknown BPX Cell parameters (not recognised): "
-            f"{', '.join(unknown[:8])}"
-            + (" …" if len(unknown) > 8 else "")
+            f"Unknown BPX Cell parameters, carried verbatim in extras: "
+            f"{', '.join(unknown)}"
         )
-    return specs
+    return specs, extras
 
 
 # ── Public API ────────────────────────────────────────────────────────────────
@@ -266,7 +296,7 @@ def from_bpx(
     else:
         cell_params = dict(cell_params_raw)
 
-    specs = _extract_specs(cell_params, warnings if extra_warnings else [])
+    specs, extras = _extract_specs(cell_params, warnings if extra_warnings else [])
 
     # Recover cell mass from Density x Volume when it wasn't carried as a cell-level
     # mass field: to_bpx emits mass only as Density [kg.m-3] (with Volume [m3]), so
@@ -297,6 +327,7 @@ def from_bpx(
         model_type=model_type,
         description=description,
         source_file=source_file,
+        extras=extras,
         warnings=warnings,
     )
 
@@ -327,15 +358,20 @@ _MASS_TO_KG: dict[str, float] = {"kg": 1.0, "g": 1e-3, "mg": 1e-6}
 
 # BattINFO property key → (BPX Cell key, unit table, required-in-BPX?)
 # Scalars that map straight through to the BPX ``Parameterisation.Cell`` block.
+_AREA_TO_M2: dict[str, float] = {"m2": 1.0, "cm2": 1e-4, "mm2": 1e-6}
+_VOL_TO_M3: dict[str, float] = {"m3": 1.0, "cm3": 1e-6, "mm3": 1e-9, "L": 1e-3, "mL": 1e-6}
+
 _BPX_EXPORT_DIRECT: dict[str, tuple[str, dict[str, float], bool]] = {
     "nominal_capacity":            ("Nominal cell capacity [A.h]", _CAP_TO_AH, True),
     "charging_cutoff_voltage":     ("Upper voltage cut-off [V]",   _VOLT_TO_V, True),
     "discharging_cutoff_voltage":  ("Lower voltage cut-off [V]",   _VOLT_TO_V, True),
+    "electrode_area":              ("Electrode area [m2]",         _AREA_TO_M2, True),
+    "external_surface_area":       ("External surface area [m2]",  _AREA_TO_M2, False),
+    "volume":                      ("Volume [m3]",                 _VOL_TO_M3, False),
 }
 
 # Required BPX Cell keys that a cell spec can never supply on its own.
 _BPX_REQUIRED_UNFILLABLE: tuple[str, ...] = (
-    "Electrode area [m2]",
     "Number of electrode pairs connected in parallel to make a cell",
 )
 
@@ -455,17 +491,35 @@ def to_bpx(
     source: Any,
     *,
     cell_instance: Mapping[str, Any] | Any | None = None,
-    model: str = "Partial",
-    bpx_version: str = _BPX_VERSION,
+    parameter_sets: Mapping[str, Any] | None = None,
+    cell_extras: Mapping[str, Any] | None = None,
+    model: str | None = None,
+    bpx_version: str | None = None,
     reference_temperature_k: float | None = _DEFAULT_REFERENCE_TEMPERATURE_K,
     title: str | None = None,
 ) -> BpxExportResult:
     """Export a BattINFO cell spec (and optional instance) to a BPX document.
 
     Populates the BPX ``Parameterisation.Cell`` block with everything derivable
-    from the specification — nominal capacity, voltage cut-offs, and (when cell
-    dimensions are present) volume, external surface area, and density — and
-    reports the required physics parameters that a spec cannot provide.
+    from the specification — nominal capacity, voltage cut-offs, electrode
+    area, and (when cell dimensions are present) volume, external surface
+    area, and density — and reports the required physics parameters that a
+    spec cannot provide.
+
+    ``parameter_sets`` adds the physics: a mapping of block keys —
+    ``negative_material`` / ``negative_electrode`` / ``positive_material`` /
+    ``positive_electrode`` / ``separator`` / ``electrolyte``, the same keys
+    :func:`from_bpx_parameters` produces — to ONE parameter-set record each.
+    This is the per-source export: the records of one co-fitted source become
+    the electrode/separator/electrolyte blocks, claim values at full precision
+    (scalars verbatim, curves as ``{"x", "y"}`` tables, expressions as BPX
+    function strings), annex entries reassembled into ``User-defined``.
+    ``Header.Model`` resolves as: explicit ``model`` argument, else the
+    records' own consistent ``model_context.model`` (a fitted set knows which
+    model it was fitted under), else the tier heuristic (p2d → DFN,
+    spme → SPMe, spm → SPM), else ``"Partial"``. Do NOT mix sources across
+    blocks here — a calibration is a joint estimate; composed exports are a
+    separate, labeled mode (planned).
 
     Parameters
     ----------
@@ -522,20 +576,22 @@ def to_bpx(
         cell[bpx_key] = _sig6(si)
         filled.append(bpx_key)
 
-    # 2. Geometry-derived volume, surface area, and density.
+    # 2. Geometry-derived volume and surface area — fallback only: explicit
+    # electrode_area/external_surface_area/volume properties (step 1) win.
     volume, area = _geometry(props, meta.get("cell_format"), warnings)
-    if volume is not None:
+    if volume is not None and "Volume [m3]" not in cell:
         cell["Volume [m3]"] = volume
         filled.append("Volume [m3]")
-    if area is not None:
+    if area is not None and "External surface area [m2]" not in cell:
         cell["External surface area [m2]"] = area
         filled.append("External surface area [m2]")
 
     mass = _scalar(props, "mass")
-    if mass is not None and volume:
+    emitted_volume = cell.get("Volume [m3]")
+    if mass is not None and emitted_volume:
         mass_kg = _convert(mass[0], mass[1], _MASS_TO_KG, warnings, "mass")
         if mass_kg is not None:
-            cell["Density [kg.m-3]"] = _sig6(mass_kg / volume)
+            cell["Density [kg.m-3]"] = _sig6(mass_kg / emitted_volume)
             filled.append("Density [kg.m-3]")
 
     # 3. Conventional reference temperature.
@@ -543,13 +599,33 @@ def to_bpx(
         cell["Reference temperature [K]"] = float(reference_temperature_k)
         filled.append("Reference temperature [K]")
 
-    # 4. Required BPX Cell keys a spec can never supply.
+    # 3b. Verbatim Cell extras (e.g. :attr:`BpxImportResult.extras` from a
+    # round trip): temperatures, pair count — BPX Cell fields with no spec
+    # home. Spec-derived values always win; extras only fill gaps.
+    for extra_key, extra_value in (cell_extras or {}).items():
+        if extra_key not in cell:
+            cell[extra_key] = extra_value
+            filled.append(extra_key)
+
+    # 4. Physics blocks from one source's parameter-set records.
+    physics_blocks: dict[str, dict[str, Any]] = {}
+    annex: dict[str, Any] = {}
+    model_hints: set[str] = set()
+    version_hints: set[str] = set()
+    reference_hints: list[str] = []
+    claims_by_scope: dict[str, list[Any]] = {}
+    if parameter_sets:
+        physics_blocks, annex, model_hints, version_hints, reference_hints, claims_by_scope = (
+            _physics_blocks_from_parameter_sets(parameter_sets, warnings)
+        )
+
+    # 5. Required BPX Cell keys a spec can never supply.
     missing_required = [
         bpx_key
         for _bi_key, (bpx_key, _table, required) in _BPX_EXPORT_DIRECT.items()
         if required and bpx_key not in cell
     ]
-    missing_required.extend(_BPX_REQUIRED_UNFILLABLE)
+    missing_required.extend(k for k in _BPX_REQUIRED_UNFILLABLE if k not in cell)
 
     if missing_required:
         warnings.append(
@@ -557,29 +633,97 @@ def to_bpx(
             "(supply these before driving a full model): "
             + ", ".join(missing_required)
         )
-    warnings.append(
-        "Electrode, electrolyte, and separator physics parameters "
-        "(thickness, porosity, transport, OCP, particle data) are not part of a "
-        "cell specification and were not emitted. Header.Model is 'Partial'."
-    )
 
-    header: dict[str, Any] = {"BPX": bpx_version, "Model": model}
+    # 6. Model resolution: explicit argument, else the source's own model
+    # context (a fitted set knows which model it was fitted under), else the
+    # tier heuristic, else Partial.
+    resolved_model = model
+    if resolved_model is None and len(model_hints) == 1:
+        resolved_model = next(iter(model_hints))
+    if resolved_model is None and claims_by_scope:
+        from battinfo.parameters import cell_completeness  # noqa: PLC0415
+
+        tiers = cell_completeness(claims_by_scope)
+        for tier, bpx_model in (("p2d", "DFN"), ("spme", "SPMe"), ("spm", "SPM")):
+            if tiers.get(tier, {}).get("satisfied"):
+                resolved_model = bpx_model
+                break
+    if resolved_model is None:
+        resolved_model = "Partial"
+    if model is None and len(model_hints) > 1:
+        warnings.append(
+            f"parameter_sets disagree on model_context.model ({', '.join(sorted(model_hints))}); "
+            f"Header.Model resolved to {resolved_model!r} — pass model=... to override."
+        )
+
+    if not physics_blocks:
+        warnings.append(
+            "Electrode, electrolyte, and separator physics parameters "
+            "(thickness, porosity, transport, OCP, particle data) are not part of a "
+            f"cell specification and were not emitted. Header.Model is {resolved_model!r}."
+        )
+
+    resolved_version = bpx_version
+    if resolved_version is None and len(version_hints) == 1:
+        resolved_version = next(iter(version_hints))
+    if resolved_version is None:
+        resolved_version = _BPX_VERSION
+    # The bpx schema types Header.BPX as a number; emit one when the version
+    # is float-shaped ("1.0" -> 1.0) and keep multi-part strings as strings.
+    header_version: Any = resolved_version
+    try:
+        as_float = float(resolved_version)
+    except (TypeError, ValueError):
+        pass
+    else:
+        if str(as_float) == str(resolved_version) or resolved_version.count(".") <= 1:
+            header_version = as_float
+
+    header: dict[str, Any] = {"BPX": header_version, "Model": resolved_model}
     if name:
         header["Title"] = str(name)
-    header["Description"] = (
-        "Partial BPX exported from a BattINFO cell specification"
-        + (f" ('{name}')" if name else "")
-        + ". Cell-level parameters only; physics parameters are not derivable "
-        "from a specification and must be added separately."
-    )
-    references = _instance_reference(meta, cell_instance)
-    if references:
-        header["References"] = references
+    if physics_blocks:
+        header["Description"] = (
+            "BPX exported from BattINFO parameter-set records"
+            + (f" for '{name}'" if name else "")
+            + ". Physics blocks carry one source's co-fitted claims at full "
+            "precision; the Cell block is derived from the specification."
+        )
+    else:
+        header["Description"] = (
+            "Partial BPX exported from a BattINFO cell specification"
+            + (f" ('{name}')" if name else "")
+            + ". Cell-level parameters only; physics parameters are not derivable "
+            "from a specification and must be added separately."
+        )
+    references_parts = list(dict.fromkeys(reference_hints))
+    instance_reference = _instance_reference(meta, cell_instance)
+    if instance_reference:
+        references_parts.append(instance_reference)
+    if references_parts:
+        header["References"] = "; ".join(references_parts)
+
+    parameterisation: dict[str, Any] = {"Cell": cell}
+    for block_name in ("Electrolyte", "Negative electrode", "Positive electrode", "Separator"):
+        if block_name in physics_blocks:
+            parameterisation[block_name] = physics_blocks[block_name]
+    if annex:
+        parameterisation["User-defined"] = annex
+
+    # BPX >= 1.1 moved the state-like fields out of Cell/Electrolyte into a
+    # top-level State section (Initial conditions / Thermal environment); the
+    # 1.1 parser rejects the old placement, so the export follows the layout
+    # of the version it declares.
+    state_block: dict[str, Any] = {}
+    if _bpx_version_tuple(resolved_version) >= (1, 1):
+        state_block = _relocate_state_fields_1_1(parameterisation)
 
     bpx_doc: dict[str, Any] = {
         "Header": header,
-        "Parameterisation": {"Cell": cell},
+        "Parameterisation": parameterisation,
     }
+    if state_block:
+        bpx_doc["State"] = state_block
 
     return BpxExportResult(
         bpx=bpx_doc,
@@ -587,6 +731,193 @@ def to_bpx(
         missing_required=missing_required,
         warnings=warnings,
     )
+
+
+# Export block key -> (BPX block name, vocabulary block for field lookup).
+# The same keys :func:`from_bpx_parameters` produces, so import and export are
+# symmetric by construction.
+_EXPORT_BLOCK_TARGETS: dict[str, tuple[str, str]] = {
+    "negative_material": ("Negative electrode", "electrode"),
+    "negative_electrode": ("Negative electrode", "electrode"),
+    "positive_material": ("Positive electrode", "electrode"),
+    "positive_electrode": ("Positive electrode", "electrode"),
+    "separator": ("Separator", "separator"),
+    "electrolyte": ("Electrolyte", "electrolyte"),
+}
+
+# Export block key -> the cell_completeness scope key its claims count toward.
+_EXPORT_BLOCK_SCOPES: dict[str, str] = {
+    "negative_material": "material_negative",
+    "negative_electrode": "electrode_negative",
+    "positive_material": "material_positive",
+    "positive_electrode": "electrode_positive",
+    "separator": "separator",
+    "electrolyte": "electrolyte",
+}
+
+_ANNEX_NOTE_PREFIX = "BPX Header.References: "
+
+
+def _physics_blocks_from_parameter_sets(
+    parameter_sets: Mapping[str, Any], warnings: list[str]
+) -> tuple[
+    dict[str, dict[str, Any]],
+    dict[str, Any],
+    set[str],
+    set[str],
+    list[str],
+    dict[str, list[Any]],
+]:
+    """One source's parameter-set records -> BPX physics blocks + header hints.
+
+    Returns ``(blocks, annex, model_hints, version_hints, references, claims_by_scope)``.
+    Claim values export at full precision — sig-fig rounding is a presentation
+    choice for spec-derived Cell values, never for claims.
+    """
+    from battinfo.parameters import parameter_entry  # noqa: PLC0415
+
+    blocks: dict[str, dict[str, Any]] = {}
+    annex: dict[str, Any] = {}
+    model_hints: set[str] = set()
+    version_hints: set[str] = set()
+    references: list[str] = []
+    claims_by_scope: dict[str, list[Any]] = {}
+
+    for block_key, record in parameter_sets.items():
+        target = _EXPORT_BLOCK_TARGETS.get(block_key)
+        if target is None:
+            warnings.append(
+                f"parameter_sets key {block_key!r} is not a BPX export block "
+                f"(valid: {', '.join(_EXPORT_BLOCK_TARGETS)}); skipped."
+            )
+            continue
+        bpx_block_name, vocab_block = target
+        body = record.get("parameter_set", record) if isinstance(record, Mapping) else None
+        if not isinstance(body, Mapping):
+            warnings.append(f"parameter_sets[{block_key!r}] is not a parameter-set record; skipped.")
+            continue
+
+        claims = body.get("claims") or []
+        claims_by_scope.setdefault(_EXPORT_BLOCK_SCOPES[block_key], []).extend(claims)
+        block = blocks.setdefault(bpx_block_name, {})
+        for claim in claims:
+            if not isinstance(claim, Mapping):
+                continue
+            key = claim.get("parameter")
+            entry = parameter_entry(key)
+            field_name = ((entry or {}).get("bpx") or {}).get(vocab_block)
+            if field_name is None:
+                warnings.append(
+                    f"claim parameter {key!r} ({block_key}) has no BPX field name; skipped."
+                )
+                continue
+            value = _claim_to_bpx_value(claim, entry or {}, warnings, block_key)
+            if value is None:
+                continue
+            if field_name in block and block[field_name] != value:
+                warnings.append(
+                    f"BPX field {field_name!r} set by more than one claim in "
+                    f"{bpx_block_name!r}; keeping the first value."
+                )
+                continue
+            block[field_name] = value
+
+        model_context = body.get("model_context") or {}
+        if isinstance(model_context.get("model"), str):
+            model_hints.add(model_context["model"])
+        if isinstance(model_context.get("version"), str):
+            version_hints.add(model_context["version"])
+        for note in record.get("notes", []) if isinstance(record, Mapping) else []:
+            if isinstance(note, str) and note.startswith(_ANNEX_NOTE_PREFIX):
+                references.append(note[len(_ANNEX_NOTE_PREFIX):])
+        provenance = record.get("provenance", {}) if isinstance(record, Mapping) else {}
+        for prov_key in ("citation", "citation_doi"):
+            prov_value = provenance.get(prov_key)
+            if isinstance(prov_value, str) and prov_value:
+                references.append(prov_value)
+
+        record_annex = body.get("annex")
+        if isinstance(record_annex, Mapping):
+            for annex_key, annex_value in record_annex.items():
+                if annex_key in annex and annex[annex_key] != annex_value:
+                    warnings.append(
+                        f"annex entry {annex_key!r} differs between records; keeping the first."
+                    )
+                    continue
+                annex[annex_key] = annex_value
+
+    blocks = {name: block for name, block in blocks.items() if block}
+    return blocks, annex, model_hints, version_hints, references, claims_by_scope
+
+
+def _claim_to_bpx_value(
+    claim: Mapping[str, Any], entry: Mapping[str, Any], warnings: list[str], block_key: str
+) -> Any | None:
+    """One claim's value form -> its BPX value (full precision), or None."""
+    quantity = claim.get("quantity")
+    if isinstance(quantity, Mapping):
+        value = quantity.get("value")
+        if not isinstance(value, (int, float)) or isinstance(value, bool):
+            return None
+        unit = quantity.get("unit")
+        expected = entry.get("unit")
+        if unit is not None and expected is not None and str(unit) != str(expected):
+            warnings.append(
+                f"claim {claim.get('parameter')!r} ({block_key}) carries unit "
+                f"{unit!r} but BPX expects the vocabulary unit {expected!r}; skipped."
+            )
+            return None
+        return float(value)
+    curve = claim.get("curve")
+    if isinstance(curve, Mapping):
+        xs, ys = curve.get("x"), curve.get("y")
+        if isinstance(xs, list) and isinstance(ys, list) and len(xs) == len(ys):
+            return {"x": [float(v) for v in xs], "y": [float(v) for v in ys]}
+        return None
+    expression = claim.get("expression")
+    if isinstance(expression, Mapping):
+        text = expression.get("text")
+        if isinstance(text, str) and text.strip():
+            if expression.get("language") not in (None, "bpx"):
+                warnings.append(
+                    f"claim {claim.get('parameter')!r} ({block_key}) carries a "
+                    f"{expression.get('language')!r} expression; BPX expects its own "
+                    "function syntax — emitted verbatim."
+                )
+            return text.strip()
+    return None
+
+
+def _bpx_version_tuple(version: Any) -> tuple[int, ...]:
+    """A comparable prefix tuple from a BPX version string; ``()`` when unparseable."""
+    parts: list[int] = []
+    for piece in str(version).split("."):
+        if not piece.isdigit():
+            break
+        parts.append(int(piece))
+    return tuple(parts)
+
+
+def _relocate_state_fields_1_1(parameterisation: dict[str, Any]) -> dict[str, Any]:
+    """Move BPX 1.1 State fields out of Cell/Electrolyte, returning the State block."""
+    initial_conditions: dict[str, Any] = {}
+    thermal: dict[str, Any] = {}
+    cell = parameterisation.get("Cell") or {}
+    if "Initial temperature [K]" in cell:
+        initial_conditions["Initial temperature [K]"] = cell.pop("Initial temperature [K]")
+    if "Ambient temperature [K]" in cell:
+        thermal["Ambient temperature [K]"] = cell.pop("Ambient temperature [K]")
+    electrolyte = parameterisation.get("Electrolyte") or {}
+    if "Initial concentration [mol.m-3]" in electrolyte:
+        initial_conditions["Initial electrolyte concentration [mol.m-3]"] = electrolyte.pop(
+            "Initial concentration [mol.m-3]"
+        )
+    state: dict[str, Any] = {}
+    if initial_conditions:
+        state["Initial conditions"] = initial_conditions
+    if thermal:
+        state["Thermal environment"] = thermal
+    return state
 
 
 def save_bpx(source: Any, path: PathLike, **kwargs: Any) -> Path:
@@ -653,6 +984,13 @@ class BpxParameterImportResult:
         ``quantity``/``curve``/``expression``).
     title / bpx_version / model_type / description / source_file:
         BPX header fields, as in :class:`BpxImportResult`.
+    references:
+        The ``Header.References`` provenance string, carried onto every minted
+        record as its provenance citation (unless the caller passes one).
+    user_defined:
+        The ``Parameterisation.User-defined`` block verbatim — BPX's extension
+        point, with no standard semantics. Carried onto every minted record as
+        its ``annex`` so a re-export reproduces the file and nothing is lost.
     warnings:
         Unmapped fields and skipped values.
     """
@@ -663,6 +1001,8 @@ class BpxParameterImportResult:
     model_type: str | None
     description: str | None
     source_file: str | None
+    references: str | None = None
+    user_defined: dict[str, Any] = field(default_factory=dict)
     warnings: list[str] = field(default_factory=list)
 
     def to_records(
@@ -672,8 +1012,9 @@ class BpxParameterImportResult:
         cell_spec_id: str | None = None,
         name: str | None = None,
         default_provenance_class: str = "fitted",
+        by_block: bool = False,
         **record_kwargs: Any,
-    ) -> list[dict[str, Any]]:
+    ) -> list[dict[str, Any]] | dict[str, dict[str, Any]]:
         """Build canonical parameter-set records from the imported claims.
 
         ``materials`` maps ``"negative"`` / ``"positive"`` (and optionally
@@ -686,11 +1027,40 @@ class BpxParameterImportResult:
 
         ``record_kwargs`` (citation_doi, source_url, notes, ...) pass through to
         every record. Records validate against the parameter-set schema.
+
+        ``by_block=True`` returns ``{block_key: record}`` instead of a flat
+        list — the exact mapping :func:`to_bpx`'s ``parameter_sets`` argument
+        takes, so import → records → export is symmetric by construction.
         """
         from battinfo.api import create_parameter_set  # noqa: PLC0415
 
         materials = dict(materials or {})
         base = name or self.title or self.source_file or "BPX import"
+        # Header lineage rides every record: Description as the record
+        # description; References as the provenance citation when it is a
+        # URL/DOI, otherwise verbatim as a note (provenance.citation is
+        # URI-typed). Caller-supplied values win; the model context
+        # (tool/model/version) is stamped unconditionally below — a DFN-fitted
+        # value is not model-free.
+        from battinfo._util import _citation_url_value  # noqa: PLC0415
+
+        record_kwargs = dict(record_kwargs)
+        if self.description is not None:
+            record_kwargs.setdefault("description", self.description)
+        if (
+            self.references is not None
+            and "citation" not in record_kwargs
+            and "citation_doi" not in record_kwargs
+        ):
+            citation_value = _citation_url_value(self.references)
+            if isinstance(citation_value, str) and citation_value.startswith(
+                ("http://", "https://")
+            ):
+                record_kwargs["citation"] = self.references
+            else:
+                notes = list(record_kwargs.get("notes") or [])
+                notes.append(f"BPX Header.References: {self.references}")
+                record_kwargs["notes"] = notes
         model_context = {
             "tool": "BPX",
             **({"name": self.title} if self.title else {}),
@@ -712,22 +1082,27 @@ class BpxParameterImportResult:
             )
 
         records: list[dict[str, Any]] = []
+        records_by_block: dict[str, dict[str, Any]] = {}
 
         def _emit(block: str, scope: str, label: str, **target: str) -> None:
             block_claims = self.claims.get(block) or []
             if not block_claims:
                 return
-            records.append(
-                create_parameter_set(
-                    name=f"{base} - {label}",
-                    scope=scope,
-                    claims=block_claims,
-                    model_context=model_context,
-                    default_provenance_class=default_provenance_class,
-                    **target,
-                    **record_kwargs,
-                )
+            record = create_parameter_set(
+                name=f"{base} - {label}",
+                scope=scope,
+                claims=block_claims,
+                model_context=model_context,
+                # The User-defined block rides every record from this file (the
+                # same file-level duplication model_context already uses), so a
+                # single record is enough to re-export the source faithfully.
+                **({"annex": dict(self.user_defined)} if self.user_defined else {}),
+                default_provenance_class=default_provenance_class,
+                **target,
+                **record_kwargs,
             )
+            records.append(record)
+            records_by_block[block] = record
 
         for side in ("negative", "positive"):
             material_target = materials.get(side)
@@ -766,7 +1141,7 @@ class BpxParameterImportResult:
                     f"{block} claims skipped: pass cell_spec_id=... (or a "
                     f"materials={{'{block}': ...}} target)."
                 )
-        return records
+        return records_by_block if by_block else records
 
 
 def _bpx_value_to_claim(key: str, raw_value: Any, entry: Mapping[str, Any]) -> dict[str, Any] | None:
@@ -883,6 +1258,31 @@ def from_bpx_parameters(source: Mapping[str, Any] | str | Path) -> BpxParameterI
             if merged:
                 claims[bpx_block] = merged
 
+    # No silent drops: name what this importer does not read as claims. The
+    # User-defined block is BPX's blessed extension point (tool- and
+    # study-specific keys with no standard semantics): its entries are carried
+    # VERBATIM as each minted record's annex, so a re-export reproduces the
+    # file — named here so the carry is visible. The Cell block belongs to
+    # from_bpx (spec properties, not claims).
+    user_defined_raw = params_raw.get("User-defined")
+    user_defined: dict[str, Any] = (
+        dict(user_defined_raw) if isinstance(user_defined_raw, Mapping) else {}
+    )
+    if user_defined:
+        keys = [str(k) for k in user_defined]
+        # EVERY key is named — a truncated list is a silent drop for the rest.
+        warnings.append(
+            f"BPX User-defined block carried verbatim as the records' annex, "
+            f"not as claims ({len(keys)} keys: {', '.join(keys)}). These have "
+            "no standard semantics; author them as explicit claims if they matter."
+        )
+    _handled_blocks = {*_BPX_ELECTRODE_BLOCKS.values(), "Separator", "Electrolyte", "Cell", "User-defined"}
+    for block_name in params_raw:
+        if block_name not in _handled_blocks:
+            warnings.append(
+                f"BPX Parameterisation block '{block_name}' is not recognised; ignored."
+            )
+
     if not claims:
         warnings.append("No parameter claims found in BPX electrode/separator/electrolyte blocks.")
 
@@ -893,6 +1293,8 @@ def from_bpx_parameters(source: Mapping[str, Any] | str | Path) -> BpxParameterI
         model_type=model_type,
         description=description,
         source_file=source_file,
+        references=_extract_references(data),
+        user_defined=user_defined,
         warnings=warnings,
     )
 

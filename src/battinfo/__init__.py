@@ -167,6 +167,7 @@ _LAZY_EXPORTS: dict[str, str] = {
     "import_aurora_unicycler": "battinfo.interop",
     "import_bdc_record": "battinfo.interop",
     "import_bmgen_jsonld": "battinfo.interop",
+    "import_ucp": "battinfo.interop",
     "import_converter_jsonld": "battinfo.interop",
     "import_converter_jsonld_record": "battinfo.interop",
     "import_converter_package": "battinfo.interop",

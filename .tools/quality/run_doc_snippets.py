@@ -43,8 +43,7 @@ SNIPPET_FILES = (
     "docs/howto/label-your-cells.md",
     "docs/howto/register-equipment.md",
     "docs/howto/register-materials.md",
-    "docs/test-specs.md",
-)
+    )
 
 SKIP_MARKERS = ("<!-- doc-snippet: skip -->", ".. doc-snippet: skip")
 CLI_LANGS = {"bash", "powershell", "shell", "console", "sh"}

@@ -104,6 +104,26 @@ _EXPLICIT_ALLOWED_TYPE_TERMS = {
     # the entity_type_map sections, so listed explicitly)
     "PrimaryBattery",
     "SecondaryBattery",
+    # EMMO's generic information-artifact class: the parent BatterySpecification
+    # subclasses, and the interim @type of specification records whose own
+    # class (ElectrodeSpecification, ...) is not published yet.
+    "Description",
+    # The housing assembly's interim class (a CellHousing class is an
+    # upstream ask): the published parent Case itself hangs from.
+    "ElectrochemicalComponent",
+    # Measurement-provenance subtree (conditions ride an isOutputOf node) and
+    # metrological references (the voltage_reference datum on quantities)
+    "BatteryMeasurement",
+    "MetrologicalReference",
+    "ReferenceElectrode",
+    "LithiumElectrode",
+    "SodiumBasedElectrode",
+    "StandardHydrogenElectrode",
+    "NormalHydrogenElectrode",
+    "ReversibleHydrogenElectrode",
+    "SaturatedCalomelElectrode",
+    "SilverChlorideElectrode",
+    "ZincElectrode",
     # New in domain-battery 0.19.0
     "BatterySpecification",
     "BatteryCellSpecification",
@@ -137,6 +157,7 @@ _EXPLICIT_ALLOWED_TYPE_TERMS = {
     "CalenderedCoatingThickness",
     "CalenderedDensity",
     "CelsiusTemperature",
+    "Additive",
     "ConductiveAdditive",
     "D50ParticleSize",
     "Density",

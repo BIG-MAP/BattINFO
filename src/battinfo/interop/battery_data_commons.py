@@ -209,7 +209,7 @@ def import_bdc_record(record: Mapping[str, Any], *, validate: bool = True,
         if clean not in materials:
             materials[clean] = create_material_spec(
                 validate=validate, uid=_uid("bdc", "material", clean), name=clean,
-                material_class="active_material", electrode_polarity=polarity,
+                material_class="active_material",
                 emmo_type=clean if _looks_emmo(clean) else None,
                 source_type="literature", citation=citation,
             )

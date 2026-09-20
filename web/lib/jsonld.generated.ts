@@ -194,6 +194,7 @@ export const jsonldGallery: {
       "@context": "https://w3id.org/battinfo/context/records/v1.json",
       "@type": [
         "BatteryCellSpecification",
+        "schema:ProductModel",
         "schema:CreativeWork"
       ],
       "@id": "https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0",
@@ -212,7 +213,191 @@ export const jsonldGallery: {
           "LithiumIonBattery",
           "LithiumIonIronPhosphateBattery"
         ],
-        "skos:prefLabel": "A123 ANR26650M1-B"
+        "@id": "https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0#described",
+        "skos:prefLabel": "A123 ANR26650M1-B",
+        "hasIECCode": "IFpR26650",
+        "hasProperty": [
+          {
+            "@type": [
+              "NominalCapacity",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "NominalCapacity",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 2.5
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
+          },
+          {
+            "@type": [
+              "MinimumCapacity",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "MinimumCapacity",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 2.4
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
+          },
+          {
+            "@type": [
+              "NominalVoltage",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "NominalVoltage",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 3.3
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
+          },
+          {
+            "@type": [
+              "InternalResistance",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "InternalResistance",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 6.0
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#MilliOhm"
+          },
+          {
+            "@type": [
+              "Mass",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "Mass",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 76.0
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#Gram"
+          },
+          {
+            "@type": [
+              "Diameter",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "Diameter",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 26.0
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
+          },
+          {
+            "@type": [
+              "Height",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "Height",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 65.0
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
+          },
+          {
+            "@type": [
+              "MaximumPulseChargingCurrent",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "MaximumPulseChargingCurrent",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 10.0
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#Ampere"
+          },
+          {
+            "@type": [
+              "MaximumContinuousChargingCurrent",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "MaximumContinuousChargingCurrent",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 2.5
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#Ampere"
+          },
+          {
+            "@type": [
+              "MaximumContinuousDischargingCurrent",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "MaximumContinuousDischargingCurrent",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 50.0
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#Ampere"
+          },
+          {
+            "@type": [
+              "MinimumDischargingTemperature",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "MinimumDischargingTemperature",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": -30
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
+          },
+          {
+            "@type": [
+              "MaximumDischargingTemperature",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "MaximumDischargingTemperature",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 55
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
+          },
+          {
+            "@type": [
+              "MinimumStorageTemperature",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "MinimumStorageTemperature",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": -40
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
+          },
+          {
+            "@type": [
+              "MaximumStorageTemperature",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "MaximumStorageTemperature",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 60
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
+          },
+          {
+            "@type": [
+              "CycleLife",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "CycleLife",
+            "hasStringValue": ">1000",
+            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
+          }
+        ],
+        "hasPositiveElectrode": {
+          "@type": "LithiumIronPhosphateElectrode"
+        }
       },
       "schema:size": "R26650",
       "schema:productID": "IFpR26650",
@@ -227,187 +412,25 @@ export const jsonldGallery: {
       },
       "schema:releaseDate": "2012-01-01",
       "schema:schemaVersion": "0.2.0",
-      "hasProperty": [
-        {
-          "@type": [
-            "NominalCapacity",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "NominalCapacity",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 2.5
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
-        },
-        {
-          "@type": [
-            "MinimumCapacity",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "MinimumCapacity",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 2.4
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
-        },
-        {
-          "@type": [
-            "NominalVoltage",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "NominalVoltage",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 3.3
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
-        },
-        {
-          "@type": [
-            "InternalResistance",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "InternalResistance",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 6.0
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#MilliOhm"
-        },
-        {
-          "@type": [
-            "Mass",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "Mass",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 76.0
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#Gram"
-        },
-        {
-          "@type": [
-            "Diameter",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "Diameter",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 26.0
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
-        },
-        {
-          "@type": [
-            "Height",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "Height",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 65.0
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#MilliMetre"
-        },
-        {
-          "@type": [
-            "MaximumPulseChargingCurrent",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "MaximumPulseChargingCurrent",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 10.0
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#Ampere"
-        },
-        {
-          "@type": [
-            "MaximumContinuousChargingCurrent",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "MaximumContinuousChargingCurrent",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 2.5
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#Ampere"
-        },
-        {
-          "@type": [
-            "MaximumContinuousDischargingCurrent",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "MaximumContinuousDischargingCurrent",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 50.0
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#Ampere"
-        },
-        {
-          "@type": [
-            "MinimumDischargingTemperature",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "MinimumDischargingTemperature",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": -30
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
-        },
-        {
-          "@type": [
-            "MaximumDischargingTemperature",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "MaximumDischargingTemperature",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 55
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
-        },
-        {
-          "@type": [
-            "MinimumStorageTemperature",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "MinimumStorageTemperature",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": -40
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
-        },
-        {
-          "@type": [
-            "MaximumStorageTemperature",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "MaximumStorageTemperature",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 60
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
-        },
-        {
-          "@type": [
-            "CycleLife",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "CycleLife",
-          "schema:value": ">1000",
-          "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-        }
-      ],
-      "hasPositiveElectrode": {
-        "@type": "LithiumIronPhosphateElectrode"
+      "schema:weight": {
+        "@type": "schema:QuantitativeValue",
+        "schema:value": 76.0,
+        "schema:unitText": "g"
+      },
+      "schema:height": {
+        "@type": "schema:QuantitativeValue",
+        "schema:value": 65.0,
+        "schema:unitText": "mm"
+      },
+      "schema:width": {
+        "@type": "schema:QuantitativeValue",
+        "schema:value": 26.0,
+        "schema:unitText": "mm"
+      },
+      "schema:depth": {
+        "@type": "schema:QuantitativeValue",
+        "schema:value": 26.0,
+        "schema:unitText": "mm"
       },
       "dcterms:source": {
         "@type": "prov:Entity",

@@ -4,7 +4,7 @@
     "id": "https://w3id.org/battinfo/spec/3abg-gxzh-6487-9eex",
     "short_id": "3abggx",
     "name": "Zn anode",
-    "kind": "zinc",
+    "active_material_kind": "zinc",
     "active_material_spec_id": "https://w3id.org/battinfo/spec/kg0e-vqce-3439-bnfk",
     "coating": {
       "component": {

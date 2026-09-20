@@ -244,6 +244,7 @@ export const showcase: {
       "@context": "https://w3id.org/battinfo/context/records/v1.json",
       "@type": [
         "BatteryCellSpecification",
+        "schema:ProductModel",
         "schema:CreativeWork"
       ],
       "@id": "https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0",
@@ -262,49 +263,55 @@ export const showcase: {
           "LithiumIonBattery",
           "LithiumIonIronPhosphateBattery"
         ],
-        "skos:prefLabel": "A123 ANR26650M1-B"
+        "@id": "https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0#described",
+        "skos:prefLabel": "A123 ANR26650M1-B",
+        "hasProperty": [
+          {
+            "@type": [
+              "NominalCapacity",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "NominalCapacity",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 2.5
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
+          },
+          {
+            "@type": [
+              "NominalVoltage",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "NominalVoltage",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 3.3
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
+          },
+          {
+            "@type": [
+              "Mass",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "Mass",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 76.0
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#Gram"
+          }
+        ],
+        "hasPositiveElectrode": {
+          "@type": "LithiumIronPhosphateElectrode"
+        }
       },
       "schema:schemaVersion": "0.2.0",
-      "hasProperty": [
-        {
-          "@type": [
-            "NominalCapacity",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "NominalCapacity",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 2.5
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
-        },
-        {
-          "@type": [
-            "NominalVoltage",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "NominalVoltage",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 3.3
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
-        },
-        {
-          "@type": [
-            "Mass",
-            "ConventionalProperty"
-          ],
-          "skos:prefLabel": "Mass",
-          "hasNumericalPart": {
-            "@type": "RealData",
-            "hasNumberValue": 76.0
-          },
-          "hasMeasurementUnit": "https://w3id.org/emmo#Gram"
-        }
-      ],
-      "hasPositiveElectrode": {
-        "@type": "LithiumIronPhosphateElectrode"
+      "schema:weight": {
+        "@type": "schema:QuantitativeValue",
+        "schema:value": 76.0,
+        "schema:unitText": "g"
       },
       "dcterms:source": {
         "@type": "prov:Entity",
@@ -324,7 +331,7 @@ export const showcase: {
       "cell_instance": {
         "id": "https://w3id.org/battinfo/cell/y9xy-kr0v-y5tn-dfj7",
         "short_id": "y9xykr",
-        "cell_spec_id": "https://w3id.org/battinfo/spec/y9xy-kr0v-y5tn-dfj7",
+        "cell_spec_id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
         "name": "LAB-2026-0001",
         "serial_number": "LAB-2026-0001",
         "manufactured_at": "2026-01-15"
@@ -344,9 +351,9 @@ export const showcase: {
     "record": {
       "schema_version": "0.2.0",
       "test_spec": {
-        "id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
-        "short_id": "7d9k2m",
-        "identifier": "test-protocol:7d9k-2m4p-8t3x-6nq5",
+        "id": "https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
+        "short_id": "kxwy5f",
+        "identifier": "test-protocol:kxwy-5f5f-f682-hhch",
         "name": "1C cycle life at 25 °C",
         "kind": "cycling"
       },
@@ -540,7 +547,7 @@ export const showcase: {
         "identifier": "test:ygnc-b2j3-bc55-rbn1",
         "name": "LAB-2026-0001 C/10 constant-current discharge",
         "kind": "capacity_check",
-        "cell_id": "https://w3id.org/battinfo/cell/7d9k-2m4p-8t3x-6nq5",
+        "cell_id": "https://w3id.org/battinfo/cell/y9xy-kr0v-y5tn-dfj7",
         "status": "completed",
         "protocol_name": "C/10 constant-current discharge",
         "instrument_name": "Biologic VMP-300"
@@ -563,7 +570,7 @@ export const showcase: {
       "schema:measurementTechnique": "C/10 constant-current discharge",
       "schema:actionStatus": "completed",
       "hasTestObject": {
-        "@id": "https://w3id.org/battinfo/cell/7d9k-2m4p-8t3x-6nq5"
+        "@id": "https://w3id.org/battinfo/cell/y9xy-kr0v-y5tn-dfj7"
       }
     }
   },
@@ -583,8 +590,8 @@ export const showcase: {
         "license": "CC-BY-4.0",
         "access_url": "https://doi.org/10.5281/zenodo.1234567",
         "about": [
-          "https://w3id.org/battinfo/cell/7d9k-2m4p-8t3x-6nq5",
-          "https://w3id.org/battinfo/test/y9xy-kr0v-y5tn-dfj7"
+          "https://w3id.org/battinfo/cell/y9xy-kr0v-y5tn-dfj7",
+          "https://w3id.org/battinfo/test/6nec-h262-tthy-4rnt"
         ]
       },
       "provenance": {
@@ -597,17 +604,17 @@ export const showcase: {
       "@id": "https://w3id.org/battinfo/dataset/yssz-kccw-16g6-s21q",
       "dcterms:title": "INR21700-50E cycle-life dataset",
       "dcterms:license": {
-        "@id": "CC-BY-4.0"
+        "@id": "https://spdx.org/licenses/CC-BY-4.0.html"
       },
       "dcat:accessURL": {
         "@id": "https://doi.org/10.5281/zenodo.1234567"
       },
       "dcterms:subject": [
         {
-          "@id": "https://w3id.org/battinfo/cell/7d9k-2m4p-8t3x-6nq5"
+          "@id": "https://w3id.org/battinfo/cell/y9xy-kr0v-y5tn-dfj7"
         },
         {
-          "@id": "https://w3id.org/battinfo/test/y9xy-kr0v-y5tn-dfj7"
+          "@id": "https://w3id.org/battinfo/test/6nec-h262-tthy-4rnt"
         }
       ]
     }

@@ -14,7 +14,8 @@
   "properties": {
     "schema_version": {
       "type": "string",
-      "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$",
+      "description": "Version of the record schema this document conforms to (semantic versioning); stamped by the library on save."
     },
     "electrode_spec": {
       "type": "object",
@@ -35,10 +36,15 @@
           "minLength": 1,
           "description": "Human-readable electrode name / designation (e.g. 'Si-Gr anode, aqueous', 'NMC811 cathode 96/2/2')."
         },
+        "active_material_kind": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Required Level-1 kind naming the ACTIVE material of this electrode, from the curated material-kind vocabulary (e.g. 'graphite', 'silicon_graphite', 'nmc811', 'lfp'). Named for what it identifies: the electrode's active material, not the electrode's form. Required so a purchased electrode whose powder provenance is unknown is still queryable on the same aggregation axis as one built from an authored material-spec. Aliases resolve on input; an unknown kind is rejected at save time. See battinfo.electrodes.electrode_kind_keys()."
+        },
         "kind": {
           "type": "string",
           "minLength": 1,
-          "description": "Required Level-1 kind naming the ACTIVE material of this electrode, from the curated material-kind vocabulary (e.g. 'graphite', 'silicon_graphite', 'nmc811', 'lfp'). Required so a purchased electrode whose powder provenance is unknown is still queryable on the same aggregation axis as one built from an authored material-spec. Aliases resolve on input; an unknown kind is rejected at save time. See battinfo.electrodes.electrode_kind_keys()."
+          "description": "Deprecated alias of active_material_kind; accepted so existing records keep validating, normalized to active_material_kind on round-trip."
         },
         "polarity": {
           "type": "string",
@@ -47,7 +53,7 @@
             "negative",
             "unknown"
           ],
-          "description": "Electrode polarity. Derived from the kind's family when not authored (active_cathode -> positive, active_anode -> negative)."
+          "description": "Electrode polarity, authored when the design has a side to state. Never derived from the kind: which side an active material sits on is system-relative (graphite is the positive electrode of a lithium-counter half cell). Role-based cells (half / three-electrode) name electrodes by role instead."
         },
         "grade": {
           "type": "string",
@@ -56,6 +62,10 @@
         "active_material_spec_id": {
           "$ref": "#/$defs/MaterialSpecIri",
           "description": "Optional canonical IRI of the material-spec for this electrode's active material, present when the powder is known and authored. Absent for a purchased electrode of known chemistry but unknown powder — 'kind' still carries the chemistry."
+        },
+        "material": {
+          "$ref": "modules/components/material-component.schema.json",
+          "description": "The electrode body as a single monolithic material - an uncoated metal foil or disc (lithium metal counter, zinc foil). States the material directly; there is no coating and no separate current collector, the foil is both. Alternative to `coating` for uncoated electrodes."
         },
         "coating": {
           "$ref": "modules/components/electrode-coating.schema.json",
@@ -66,9 +76,8 @@
           "description": "Current-collector foil: material (name and/or material_spec_id) and its thickness under property."
         },
         "tab": {
-          "type": "object",
-          "title": "CurrentCollectorTab",
-          "description": "Electrode current-collector tab (width, thickness, length, weld_width, tape_width)."
+          "$ref": "modules/components/electrode.schema.json#/properties/tab",
+          "description": "Electrode current-collector tab: material plus its dimensions (width, thickness, length, weld_width, tape_width) under property."
         },
         "processing": {
           "$ref": "#/$defs/Processing"
@@ -78,7 +87,8 @@
           "description": "Producer of this electrode design — a vendor for a purchased electrode, or the lab that designed it for an in-house coating. Part of spec identity."
         },
         "supplier": {
-          "$ref": "#/$defs/OrgRef"
+          "$ref": "#/$defs/OrgRef",
+          "description": "Supplier or vendor the item was sourced from."
         },
         "product_id": {
           "type": "string",
@@ -92,12 +102,15 @@
           "type": "string"
         },
         "comment": {
-          "type": "string"
+          "type": "string",
+          "description": "Free-text comment."
         }
-      }
+      },
+      "description": "The electrode design being specified."
     },
     "provenance": {
-      "$ref": "#/$defs/Provenance"
+      "$ref": "#/$defs/Provenance",
+      "description": "Where the information in this record came from: source type, file or URL, citation, and retrieval time."
     },
     "notes": {
       "type": "array",
@@ -133,11 +146,13 @@
     },
     "ShortId": {
       "type": "string",
-      "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$"
+      "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$",
+      "description": "Short human-friendly identifier derived from the record IRI (Crockford base32, 6-16 characters)."
     },
     "UnixTime": {
       "type": "integer",
-      "minimum": 0
+      "minimum": 0,
+      "description": "Unix timestamp in whole seconds since 1970-01-01T00:00:00Z."
     },
     "Processing": {
       "type": "object",
@@ -166,7 +181,8 @@
     },
     "OrganizationIri": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+      "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+      "description": "Canonical BattINFO IRI in the organization/ namespace (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx)."
     },
     "Organization": {
       "type": "object",
@@ -176,20 +192,25 @@
       ],
       "properties": {
         "type": {
-          "const": "Organization"
+          "const": "Organization",
+          "description": "JSON-LD type discriminator."
         },
         "id": {
-          "$ref": "#/$defs/OrganizationIri"
+          "$ref": "#/$defs/OrganizationIri",
+          "description": "Canonical BattINFO organization IRI linking this party to its organization record."
         },
         "name": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Organization name."
         },
         "url": {
           "type": "string",
-          "format": "uri"
+          "format": "uri",
+          "description": "Homepage URL."
         }
-      }
+      },
+      "description": "An organization referenced by name, with an optional canonical BattINFO organization IRI."
     },
     "OrgRef": {
       "oneOf": [
@@ -200,7 +221,8 @@
         {
           "$ref": "#/$defs/Organization"
         }
-      ]
+      ],
+      "description": "An organization, as either a plain name string or a structured Organization object that can carry a canonical organization IRI."
     },
     "Funding": {
       "type": "object",
@@ -312,13 +334,16 @@
             "literature",
             "manual",
             "other"
-          ]
+          ],
+          "description": "Kind of source this record was created from."
         },
         "source_name": {
-          "type": "string"
+          "type": "string",
+          "description": "Human-readable name of the source (document title, instrument, lab, or system)."
         },
         "source_file": {
-          "type": "string"
+          "type": "string",
+          "description": "Filename or path of the source file, when the record was derived from a file."
         },
         "source_url": {
           "oneOf": [
@@ -329,37 +354,30 @@
             {
               "type": "null"
             }
-          ]
+          ],
+          "description": "URL of the source document or landing page, when available."
         },
         "citation": {
           "type": "string",
-          "format": "uri"
+          "format": "uri",
+          "description": "Resolvable citation target to use for attribution, typically a DOI URL."
         },
         "citation_doi": {
           "type": "string",
-          "pattern": "^10\\.\\d{4,9}/[-._;()/:A-Za-z0-9]+$"
+          "pattern": "^10\\.\\d{4,9}/[-._;()/:A-Za-z0-9]+$",
+          "description": "DOI of the source publication (bare '10.xxxx/...' form). Prefer provenance.citation with a DOI resolver URL."
         },
         "retrieved_at": {
-          "$ref": "#/$defs/UnixTime"
-        },
-        "file_hash": {
-          "type": "string",
-          "pattern": "^[A-Fa-f0-9]{64}$"
-        },
-        "workflow_version": {
-          "type": "string"
-        },
-        "curated_by": {
-          "type": "string"
-        },
-        "comment": {
-          "type": "string"
+          "$ref": "#/$defs/UnixTime",
+          "description": "Unix timestamp (seconds since epoch, UTC) when the source was retrieved or the record was captured."
         },
         "battinfo_version": {
           "type": "string",
-          "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+          "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$",
+          "description": "Version of the battinfo library that wrote this record (semantic versioning); stamped on save."
         }
-      }
+      },
+      "description": "Where the information in this record came from: source type, file or URL, citation, and retrieval time."
     }
   }
 }

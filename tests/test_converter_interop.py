@@ -240,10 +240,11 @@ def test_imported_converter_record_renders_to_coin_cell_jsonld() -> None:
         physical_types = [physical_types]
     assert "CoinCell" in physical_types
     assert battery_node["schema:model"] == "Empa-bco-000007"
-    assert battery_node["hasCase"]["@type"] == "CoinCase"
-    assert battery_node["hasCase"]["schema:size"] == "R2032"
+    physical_node = battery_node["isDescriptionFor"]
+    assert physical_node["hasCase"]["@type"] == "CoinCase"
+    assert physical_node["hasCase"]["schema:size"] == "R2032"
     # Coin hardware now uses real EMMO @types (was schema:Thing + additionalType).
-    assert battery_node["hasConstituent"][0]["@type"] == "Spring"
+    assert physical_node["hasConstituent"][0]["@type"] == "Spring"
     assert mapped["@graph"][1]["schema:serialNumber"] == "Empa-bco-000007"
 
 

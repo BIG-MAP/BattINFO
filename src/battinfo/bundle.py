@@ -44,6 +44,7 @@ class BatteryTestType(StrEnum):
     HPPC = "hppc"
     ICI = "ici"
     GITT = "gitt"
+    PITT = "pitt"
     DCIR = "dcir"
     EIS = "eis"
     IMPEDANCE = "impedance"
@@ -51,6 +52,7 @@ class BatteryTestType(StrEnum):
     FORMATION = "formation"
     RPT = "rpt"
     QUASI_OCV = "quasi_ocv"
+    CYCLIC_VOLTAMMETRY = "cyclic_voltammetry"
     FIELD = "field"
     DUTY_CYCLE = "duty_cycle"
     WLTP = "wltp"
@@ -468,6 +470,12 @@ def _coerce_spec_value(value: Any) -> Any:
                 out["max_value"] = value.sv_max_value
             if value.sv_typical_value is not None:
                 out["typical_value"] = value.sv_typical_value
+            if value.sv_value_text is not None:
+                out["value_text"] = value.sv_value_text
+            if value.sv_co_type is not None:
+                out["value_basis"] = value.sv_co_type
+            if value.sv_conditions:
+                out["conditions"] = dict(value.sv_conditions)
             return out
     except ImportError:
         pass
@@ -558,10 +566,17 @@ class BillOfMaterials(BaseModel):
 
     active_material: list["MaterialComponent"] = Field(default_factory=list)
     binder: list["MaterialComponent"] = Field(default_factory=list)
+    # ``additive`` is the legacy conductive-additive slot (kept for compatibility);
+    # ``conductive_additive`` is the explicit role and ``other_additive`` holds
+    # non-conductive functional additives (thickener, dispersant, ...).
     additive: list["MaterialComponent"] = Field(default_factory=list)
+    conductive_additive: list["MaterialComponent"] = Field(default_factory=list)
+    other_additive: list["MaterialComponent"] = Field(default_factory=list)
 
     def to_mapping(self) -> dict[str, Any]:
-        return self.model_dump(mode="json", exclude_none=True)
+        out = self.model_dump(mode="json", exclude_none=True)
+        # Empty roles are noise in the record (the schema treats every role as optional).
+        return {key: value for key, value in out.items() if value}
 
 
 def _mapping_from_object(value: Any) -> Any:
@@ -948,6 +963,9 @@ class Coating(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     component: dict[str, list[MaterialComponent]] = Field(default_factory=dict)
+    # True when the current collector is coated on both sides, false for a
+    # single-side coating.
+    double_sided: bool | None = None
     manufacturer: str | None = None
     supplier: str | None = None
     product_id: str | None = None
@@ -976,6 +994,8 @@ class CurrentCollector(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     name: str | None = None
+    material: str | None = None  # substrate, e.g. "Al", "Cu", "carbon-coated Al"
+    form: str | None = None  # foil | mesh | foam | perforated | other
     material_spec_id: str | None = Field(default=None, description="Optional canonical IRI of a standalone material-spec for the foil material — the same MaterialSpec -> component reference seam MaterialComponent carries.")
     manufacturer: str | None = None
     supplier: str | None = None
@@ -1037,6 +1057,10 @@ class Electrode(BaseModel):
 
     electrode_spec_id: str | None = Field(default=None, description="Optional canonical IRI of a standalone electrode-spec this inline holder realizes; emitted as schema:isVariantOf. Prefer the cell spec's matching *_electrode_spec_id sibling when the cell spec's electrode simply IS that design.")
     coating: Coating | None = None
+    # The electrode body as a single monolithic material - an uncoated metal
+    # foil or disc (lithium metal counter, zinc foil). No coating, no separate
+    # current collector: the foil is both.
+    material: MaterialComponent | None = None
     current_collector: CurrentCollector | None = None
     tab: CurrentCollectorTab | None = None
     manufacturer: str | None = None
@@ -1094,7 +1118,11 @@ class Salt(BaseModel):
 class Separator(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
+    name: str | None = None
     material: str | None = None
+    material_spec_id: str | None = None
+    structure: str | None = None  # monolayer | bilayer | trilayer | composite | other | unknown
+    coating: str | None = None
     manufacturer: str | None = None
     supplier: str | None = None
     product_id: str | None = None
@@ -1111,6 +1139,9 @@ class Electrolyte(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     family: str | None = None
+    # One component for a pure solvent, a list for a mixture. solvent_mixture
+    # is the deprecated wrapper spelling.
+    solvent: MaterialComponent | list[MaterialComponent] | None = None
     solvent_mixture: SolventMixture | None = None
     salt: Salt | None = None
     additive: list[MaterialComponent] = Field(default_factory=list)
@@ -1141,6 +1172,7 @@ class Terminal(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     polarity: str | None = None  # "positive" | "negative"
+    type: str | None = None  # tab | rivet | stud | threaded_post | other
     material: str | None = None
     manufacturer: str | None = None
     supplier: str | None = None
@@ -1222,10 +1254,19 @@ class Housing(BaseModel):
     terminals: list[Terminal] = Field(default_factory=list)
     seals: list[Seal] = Field(default_factory=list)
     parts: list[HardwarePart] = Field(default_factory=list)  # spring/spacer/other
+    property: dict[str, Any] = Field(default_factory=dict)  # housing-level: mass, wall_thickness
     comment: str | None = None
 
+    @field_validator("property", mode="before")
+    @classmethod
+    def _coerce_property(cls, value: Any) -> Any:
+        return _mapping_from_object(value)
+
     def to_mapping(self) -> dict[str, Any]:
-        return self.model_dump(mode="json", exclude_none=True)
+        out = self.model_dump(mode="json", exclude_none=True)
+        if not out.get("property"):
+            out.pop("property", None)
+        return out
 
 
 _COIN_HARDWARE_PART_KEYS = ("lid", "can", "spring", "spacer")
@@ -1335,7 +1376,7 @@ class CellSpec(BundleJsonModel):
     iec_code: str | None = Field(default=None, description="IEC 60086 or IEC 61960 code string (e.g. 'LR6', 'ICR18650').")
     country_of_origin: str | None = Field(default=None, description="Country where the cell is manufactured.")
     cell_configuration: CellConfiguration | None = Field(default=None, description="Electrode configuration as built: full_cell, half_cell, or three_electrode_cell. Absent means unstated; when stated it overrides the reference_electrode half-cell heuristic in the JSON-LD emitter.")
-    reference_electrode: str | None = Field(default=None, description="Counter/reference electrode used in a half-cell or three-electrode build (e.g. 'lithium', 'NHE').")
+    reference_electrode: Electrode | str | None = Field(default=None, description="The physical reference electrode of a three_electrode_cell build, as an inline electrode holder (a lithium ring or wire is a monolithic material=). The legacy string shorthand ('lithium', 'NHE') stays accepted. In a half_cell the counter IS the reference - state nothing here. Emitted as hasReferenceElectrode / @type ReferenceElectrode.")
     rechargeable: bool | None = Field(default=None, description="True for secondary (rechargeable) cells; false for primary.")
     year: int | None = Field(default=None, description="Year the product or its datasheet was released.")
     datasheet_revision: str | None = Field(default=None, description="Revision label of the source datasheet this spec was taken from.")
@@ -1358,6 +1399,7 @@ class CellSpec(BundleJsonModel):
     negative_electrode_spec_id: str | None = Field(default=None, description="IRI of a standalone negative-electrode-spec record.")
     working_electrode_spec_id: str | None = Field(default=None, description="IRI of a standalone electrode-spec record for the working electrode (role holder sibling).")
     counter_electrode_spec_id: str | None = Field(default=None, description="IRI of a standalone electrode-spec record for the counter electrode (role holder sibling).")
+    reference_electrode_spec_id: str | None = Field(default=None, description="IRI of a standalone electrode-spec record for the reference electrode of a three_electrode_cell build (role holder sibling).")
     electrolyte_spec_id: str | None = Field(default=None, description="IRI of a standalone electrolyte-spec record.")
     separator_spec_id: str | None = Field(default=None, description="IRI of a standalone separator-spec record.")
     housing_spec_id: str | None = Field(default=None, description="IRI of a standalone housing-spec record.")
@@ -1379,7 +1421,8 @@ class CellSpec(BundleJsonModel):
         return _mapping_from_object(value)
 
     @field_validator("positive_electrode", "negative_electrode", "working_electrode",
-                     "counter_electrode", "electrolyte", "separator", mode="before")
+                     "counter_electrode", "reference_electrode", "electrolyte", "separator",
+                     mode="before")
     @classmethod
     def _coerce_component(cls, value: Any) -> Any:
         if isinstance(value, Mapping):
@@ -1549,6 +1592,7 @@ class CellSpec(BundleJsonModel):
             negative_electrode_spec_id=record.get("negative_electrode_spec_id"),
             working_electrode_spec_id=record.get("working_electrode_spec_id"),
             counter_electrode_spec_id=record.get("counter_electrode_spec_id"),
+            reference_electrode_spec_id=record.get("reference_electrode_spec_id"),
             electrolyte_spec_id=record.get("electrolyte_spec_id"),
             separator_spec_id=record.get("separator_spec_id"),
             housing_spec_id=record.get("housing_spec_id"),
@@ -1686,7 +1730,11 @@ class CellSpec(BundleJsonModel):
         if self.cell_configuration is not None:
             record["cell_spec"]["cell_configuration"] = str(self.cell_configuration)
         if self.reference_electrode is not None:
-            record["cell_spec"]["reference_electrode"] = self.reference_electrode
+            record["cell_spec"]["reference_electrode"] = (
+                self.reference_electrode.model_dump(mode="json", exclude_none=True)
+                if isinstance(self.reference_electrode, Electrode)
+                else self.reference_electrode
+            )
         if self.rechargeable is not None:
             record["cell_spec"]["rechargeable"] = self.rechargeable
         if self.year is not None:
@@ -1697,6 +1745,7 @@ class CellSpec(BundleJsonModel):
             record["cell_spec"]["manufacturer"]["id"] = self.manufacturer_id
         for _ref in ("positive_electrode_spec_id", "negative_electrode_spec_id",
                      "working_electrode_spec_id", "counter_electrode_spec_id",
+                     "reference_electrode_spec_id",
                      "electrolyte_spec_id", "separator_spec_id", "housing_spec_id"):
             _ref_value = getattr(self, _ref)
             if _ref_value is not None:
@@ -2435,6 +2484,10 @@ class Test(BundleJsonModel):
             data["cell_instance_id"] = data.pop("cell_id")
         if "kind" in data and "test_type" not in data:
             data["test_type"] = data.pop("kind")
+        # protocol= accepts the TestSpec object itself: kind, protocol name and
+        # protocol_id then derive from the spec instead of being retyped.
+        if isinstance(data.get("protocol"), TestSpec) and "protocol_entity" not in data:
+            data["protocol_entity"] = data.pop("protocol")
         if "instrument_name" in data and "instrument" not in data:
             data["instrument"] = data.pop("instrument_name")
         _protocol_name = data.pop("protocol_name", None)
@@ -2486,6 +2539,16 @@ class Test(BundleJsonModel):
     def _populate_links(self) -> Self:
         if self.cell_instance_id is None and self.cell is not None and self.cell.id is not None:
             self.cell_instance_id = self.cell.id
+        # A linked TestSpec is the single source of what the protocol IS: the
+        # execution inherits its identity facts rather than restating them.
+        entity = self.protocol_entity
+        if entity is not None:
+            if self.protocol_id is None and entity.id is not None:
+                self.protocol_id = entity.id
+            if self.protocol.name is None and entity.name is not None:
+                self.protocol.name = entity.name
+            if "test_type" not in self.model_fields_set and entity.test_type is not None:
+                self.test_type = entity.test_type
         if self.name is None:
             base = self.protocol.name or self.test_type
             cell_name = self.cell.name if self.cell is not None else None
@@ -3239,6 +3302,11 @@ class BattinfoBundle(BundleJsonModel):
         )
         properties: dict[str, Any] = {}
         property_source = cell_specification_node if cell_specification_node is not None else cell_spec_node
+        # Canonical shape: hasProperty rides the described individual under
+        # isDescriptionFor; older packages carried it on the spec node.
+        described_source = property_source.get("isDescriptionFor")
+        if isinstance(described_source, Mapping) and described_source.get("hasProperty"):
+            property_source = described_source
         for item in property_source.get("hasProperty", []):
             if isinstance(item, Mapping):
                 extracted = _extract_property_item(item)

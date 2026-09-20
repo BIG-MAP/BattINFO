@@ -40,6 +40,7 @@ from battinfo.api import (  # noqa: E402
     create_equipment_spec,
     create_material,
     create_material_spec,
+    create_organization,
     create_parameter_set,
 )
 from battinfo.bundle import Cell, CellSpec, Dataset, ProvenanceInfo, Test, TestSpec  # noqa: E402
@@ -127,6 +128,7 @@ def _record_sets() -> dict[str, list[dict]]:
         access_url="https://example.org/data.parquet",
         source=ProvenanceInfo(type="measurement"),
     ).to_record()
+    organization = create_organization(validate=False, name="Demo Co", type="Manufacturer")
 
     sets: dict[str, list[dict]] = {
         "cell-spec": [cell_spec],
@@ -142,6 +144,7 @@ def _record_sets() -> dict[str, list[dict]]:
         "equipment": [equipment],
         "channel": [channel],
         "parameter-set": [parameter_set],
+        "organization": [organization],
     }
     # Generic component families (separator, current-collector, electrolyte,
     # housing): spec + instance, so the sweep sees them too.
@@ -241,10 +244,16 @@ def test_electrode_nodes_carry_their_full_emission() -> None:
     by_id = {n["@id"]: n for n in doc["@graph"] if isinstance(n.get("@id"), str)}
 
     spec_node = by_id[_record_iri(record_sets["electrode-spec"][0])]
-    types = spec_node["@type"] if isinstance(spec_node["@type"], list) else [spec_node["@type"]]
+    # The spec is an information artifact; the physical typing lives on the
+    # anonymous individual under isDescriptionFor.
+    assert spec_node["@type"] == ["Description", "schema:ProductModel", "schema:CreativeWork"], spec_node["@type"]
+    described = spec_node["isDescriptionFor"]["@type"]
+    types = described if isinstance(described, list) else [described]
     assert "GraphiteElectrode" in types, types           # chemistry from the kind
-    assert "NegativeElectrode" in types, types           # polarity derived from the kind
-    assert spec_node["hasProperty"]["@type"][0] == "AreicCapacity"
+    # No polarity class: the vocabulary assigns no side to an active material
+    # (system-relative), so an unauthored polarity emits nothing.
+    assert "NegativeElectrode" not in types, types
+    assert spec_node["isDescriptionFor"]["hasProperty"]["@type"][0] == "AreicCapacity"
 
     batch_node = by_id[_record_iri(record_sets["electrode"][0])]
     assert batch_node["schema:isVariantOf"] == {"@id": ELECTRODE_SPEC_IRI}

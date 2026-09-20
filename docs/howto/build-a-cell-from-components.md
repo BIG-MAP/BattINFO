@@ -23,15 +23,13 @@ def material(name, **kw):
     return save_material_spec(create_material_spec(name=name, **kw),
                               source_root=LAB, mode="upsert")["id"]
 
-NMC811_IRI   = material("NMC811", material_class="active_material",
-                        electrode_polarity="positive", formula="LiNi0.8Mn0.1Co0.1O2")
-GRAPHITE_IRI = material("Graphite", material_class="active_material",
-                        electrode_polarity="negative", formula="C")
-PVDF_IRI     = material("PVDF", material_class="binder", formula="(C2H2F2)n")
-CB_IRI       = material("Carbon black", material_class="conductive_additive", formula="C")
-LIPF6_IRI    = material("LiPF6", material_class="electrolyte_salt", formula="LiPF6")
-EC_IRI       = material("EC", material_class="electrolyte_solvent", formula="C3H4O3")
-EMC_IRI      = material("EMC", material_class="electrolyte_solvent", formula="C4H8O3")
+NMC811_IRI   = material("NMC811", kind="nmc811", formula="LiNi0.8Mn0.1Co0.1O2")
+GRAPHITE_IRI = material("Graphite", kind="graphite", formula="C")
+PVDF_IRI     = material("PVDF", kind="pvdf", formula="(C2H2F2)n")
+CB_IRI       = material("Carbon black", kind="carbon_black", formula="C")
+LIPF6_IRI    = material("LiPF6", kind="lipf6", formula="LiPF6")
+EC_IRI       = material("EC", kind="ec", formula="C3H4O3")
+EMC_IRI      = material("EMC", kind="emc", formula="C4H8O3")
 ```
 
 (electrode-recipe)=
@@ -143,9 +141,11 @@ CELL_IRI = save_cell_spec(cell, source_root=LAB, mode="upsert")["id"]
 
 This is shipped, working behavior — the five `*_spec_id` reference fields are
 part of the `CellSpec` model today, and the packaged
-[example fleet](../cell-fleet.md) uses exactly this pattern. A cell may
+[example cells](../records/cells.md) uses exactly this pattern. A cell may
 reference components, inline them, or both (inline holders remain optional —
-see [Components](../component-specs.md)).
+see [Separators](../records/separators.md),
+[Current collectors](../records/current-collectors.md) and
+[Housings](../records/housings.md)).
 
 ## 5. The physical cells
 
@@ -197,6 +197,6 @@ a finished set.
 A three-level graph on disk — cell → components → materials — where every node
 is a schema-valid record with a permanent IRI, and shared parts (that binder,
 that electrolyte) are registered once and referenced everywhere. The
-[cell fleet page](../cell-fleet.md) shows the same pattern across the packaged
+[cells page](../records/cells.md) shows the same pattern across the packaged
 example fleet, and [Find existing records](find-existing-records.md) shows how
 to query what you have built.

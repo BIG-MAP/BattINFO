@@ -14,7 +14,8 @@
   "properties": {
     "schema_version": {
       "type": "string",
-      "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$",
+      "description": "Version of the record schema this document conforms to (semantic versioning); stamped by the library on save."
     },
     "housing_spec": {
       "type": "object",
@@ -32,7 +33,8 @@
         },
         "name": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Human-readable name of this housing design (e.g. 'CR2032 SS316L case')."
         },
         "cell_format": {
           "type": "string",
@@ -43,57 +45,71 @@
             "prismatic",
             "other",
             "unknown"
-          ]
+          ],
+          "description": "Cell format this housing is for."
         },
         "case": {
-          "$ref": "#/$defs/Case"
+          "$ref": "modules/components/housing.schema.json#/$defs/Case",
+          "description": "Main case or can of the housing."
         },
         "cap": {
-          "$ref": "#/$defs/HardwarePart"
+          "$ref": "modules/components/housing.schema.json#/$defs/HardwarePart",
+          "description": "Cap or lid part."
         },
         "terminals": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/Terminal"
-          }
+            "$ref": "modules/components/housing.schema.json#/$defs/Terminal"
+          },
+          "description": "Electrical terminals, with polarity and material."
         },
         "seals": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/Seal"
-          }
+            "$ref": "modules/components/housing.schema.json#/$defs/Seal"
+          },
+          "description": "Seals and gaskets."
         },
         "parts": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/HardwarePart"
-          }
+            "$ref": "modules/components/housing.schema.json#/$defs/HardwarePart"
+          },
+          "description": "Other hardware parts (springs, spacers, ...)."
         },
         "property": {
-          "$ref": "modules/common/quantitative-properties.schema.json"
+          "$ref": "modules/common/quantitative-properties.schema.json",
+          "description": "Named quantity map of housing-level properties (e.g. mass, wall_thickness). See the property keys reference for the full list of recognised keys."
         },
         "manufacturer": {
-          "$ref": "#/$defs/OrgRef"
+          "$ref": "#/$defs/OrgRef",
+          "description": "Manufacturer of the item."
         },
         "supplier": {
-          "$ref": "#/$defs/OrgRef"
+          "$ref": "#/$defs/OrgRef",
+          "description": "Supplier or vendor the item was sourced from."
         },
         "product_id": {
-          "type": "string"
+          "type": "string",
+          "description": "Manufacturer or supplier product/grade identifier."
         },
         "comment": {
-          "type": "string"
+          "type": "string",
+          "description": "Free-text comment."
         }
-      }
+      },
+      "description": "The housing design being specified."
     },
     "provenance": {
-      "$ref": "#/$defs/Provenance"
+      "$ref": "#/$defs/Provenance",
+      "description": "Where the information in this record came from: source type, file or URL, citation, and retrieval time."
     },
     "notes": {
       "type": "array",
       "items": {
         "type": "string"
-      }
+      },
+      "description": "Free-text notes carried with the record."
     }
   },
   "$defs": {
@@ -103,15 +119,18 @@
     },
     "ShortId": {
       "type": "string",
-      "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$"
+      "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$",
+      "description": "Short human-friendly identifier derived from the record IRI (Crockford base32, 6-16 characters)."
     },
     "UnixTime": {
       "type": "integer",
-      "minimum": 0
+      "minimum": 0,
+      "description": "Unix timestamp in whole seconds since 1970-01-01T00:00:00Z."
     },
     "OrganizationIri": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+      "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+      "description": "Canonical BattINFO IRI in the organization/ namespace (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx)."
     },
     "Organization": {
       "type": "object",
@@ -121,20 +140,25 @@
       ],
       "properties": {
         "type": {
-          "const": "Organization"
+          "const": "Organization",
+          "description": "JSON-LD type discriminator."
         },
         "id": {
-          "$ref": "#/$defs/OrganizationIri"
+          "$ref": "#/$defs/OrganizationIri",
+          "description": "Canonical BattINFO organization IRI linking this party to its organization record."
         },
         "name": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Organization name."
         },
         "url": {
           "type": "string",
-          "format": "uri"
+          "format": "uri",
+          "description": "Homepage URL."
         }
-      }
+      },
+      "description": "An organization referenced by name, with an optional canonical BattINFO organization IRI."
     },
     "OrgRef": {
       "oneOf": [
@@ -145,7 +169,8 @@
         {
           "$ref": "#/$defs/Organization"
         }
-      ]
+      ],
+      "description": "An organization, as either a plain name string or a structured Organization object that can carry a canonical organization IRI."
     },
     "Provenance": {
       "type": "object",
@@ -164,13 +189,16 @@
             "literature",
             "manual",
             "other"
-          ]
+          ],
+          "description": "Kind of source this record was created from."
         },
         "source_name": {
-          "type": "string"
+          "type": "string",
+          "description": "Human-readable name of the source (document title, instrument, lab, or system)."
         },
         "source_file": {
-          "type": "string"
+          "type": "string",
+          "description": "Filename or path of the source file, when the record was derived from a file."
         },
         "source_url": {
           "oneOf": [
@@ -181,22 +209,27 @@
             {
               "type": "null"
             }
-          ]
+          ],
+          "description": "URL of the source document or landing page, when available."
         },
         "citation": {
           "type": "string",
-          "format": "uri"
+          "format": "uri",
+          "description": "Resolvable citation target to use for attribution, typically a DOI URL."
         },
         "citation_doi": {
           "type": "string",
-          "pattern": "^10\\.\\d{4,9}/[-._;()/:A-Za-z0-9]+$"
+          "pattern": "^10\\.\\d{4,9}/[-._;()/:A-Za-z0-9]+$",
+          "description": "DOI of the source publication (bare '10.xxxx/...' form). Prefer provenance.citation with a DOI resolver URL."
         },
         "retrieved_at": {
-          "$ref": "#/$defs/UnixTime"
+          "$ref": "#/$defs/UnixTime",
+          "description": "Unix timestamp (seconds since epoch, UTC) when the source was retrieved or the record was captured."
         },
         "battinfo_version": {
           "type": "string",
-          "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+          "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$",
+          "description": "Version of the battinfo library that wrote this record (semantic versioning); stamped on save."
         }
       }
     },
@@ -322,7 +355,8 @@
         "comment": {
           "type": "string"
         }
-      }
+      },
+      "description": "Where the information in this record came from: source type, file or URL, citation, and retrieval time."
     }
   }
 }

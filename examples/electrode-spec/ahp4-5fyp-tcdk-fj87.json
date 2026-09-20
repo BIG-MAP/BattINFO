@@ -4,7 +4,7 @@
     "id": "https://w3id.org/battinfo/spec/ahp4-5fyp-tcdk-fj87",
     "short_id": "ahp45f",
     "name": "LCO cathode",
-    "kind": "lco",
+    "active_material_kind": "lco",
     "active_material_spec_id": "https://w3id.org/battinfo/spec/shzh-t2jt-wwqv-k54m",
     "coating": {
       "component": {

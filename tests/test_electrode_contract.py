@@ -81,13 +81,16 @@ def test_electrode_schemas_and_examples_synced_between_assets_and_package() -> N
 
 
 def test_every_example_carries_a_kind() -> None:
-    """Kind is the aggregation axis; an example without one teaches the wrong thing."""
+    """The active-material kind is the aggregation axis; an example without one
+    teaches the wrong thing — and examples teach the canonical spelling, never
+    the deprecated `kind` alias."""
     from battinfo.electrodes import resolve_electrode_kind
 
     for path in sorted((ROOT / "examples" / "electrode-spec").glob("*.json")):
         body = json.loads(path.read_text(encoding="utf-8"))["electrode_spec"]
-        kind = body.get("kind")
-        assert kind, f"{path.name} has no kind"
+        assert "kind" not in body, f"{path.name} still uses the deprecated `kind` key"
+        kind = body.get("active_material_kind")
+        assert kind, f"{path.name} has no active_material_kind"
         assert resolve_electrode_kind(kind) == kind, f"{path.name} kind {kind!r} is not canonical"
 
 

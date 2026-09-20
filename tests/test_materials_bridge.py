@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def test_material_spec_from_component_lifts_holder() -> None:
     holder = {"name": "LFP", "molecular_formula": "LiFePO4",
               "property": {"mass_fraction": {"value": 0.94, "unit": "1"}, "particle_d50": {"value": 1.8, "unit": "um"}}}
-    spec = bi.material_spec_from_component(holder, material_class="active_material", electrode_polarity="positive")
+    spec = bi.material_spec_from_component(holder, material_class="active_material")
     body = spec["material_spec"]
     assert body["name"] == "LFP"
     assert body["formula"] == "LiFePO4"

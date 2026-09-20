@@ -9,6 +9,440 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Equipment, equipment specs, and channels emit JSON-LD (0.8.0
+  core-features ruling).** The last "no JSON-LD emitter" gaps close. An
+  equipment spec follows the description pattern like every other
+  product: catalogue facts on the `[Description, schema:ProductModel,
+  schema:CreativeWork]` node, the described unit (instrument class +
+  `schema:Product`) under `isDescriptionFor` as `<spec-IRI>#described`,
+  and quantities as named `schema:PropertyValue`s - lab hardware sits
+  outside the battery vocabulary and battinfo mints no domain classes
+  for it. A standalone equipment record emits the SAME node shape the
+  deposit graph builds for `hasTestEquipment` targets (instrument class
+  + `prov:Entity`, serial number, location, the spec seam as
+  `hasDescription`/`dcterms:conformsTo`/`schema:isVariantOf`), so both
+  doors agree about a unit; channels carry `schema:isPartOf` +
+  `schema:position`.
+
+- **Organizations become first-class records (0.8.0 core-features
+  ruling).** The documented triple gap closes: `create_organization` /
+  `save_organization` / `query_organizations` (new IRIs mint
+  deterministically from the normalized name, so re-creating "A123
+  Systems" collates instead of duplicating; existing random-minted IRIs
+  stay valid), a JSON-LD emitter (pure schema.org - `schema:Organization`
+  with `Corporation`/`ResearchOrganization`/... stacked when the type IS
+  a schema.org class, `same_as` as the Wikidata/ROR identity anchors,
+  hosted records context), and an entities-registry kind, which puts
+  organization records on the same validation path as every other
+  family. The family's keys go snake_case (`legal_name`,
+  `founding_date`, `parent_organization`, `address_country`, ...); the
+  original camelCase spellings stay accepted forever as deprecated
+  aliases - as kwargs and in stored records - and normalize on
+  round-trip. Packaged examples rewritten to the canonical keys.
+
+- **BPX round trip: parameter-set records export back to a runnable BPX
+  file (parameter-plan Phase 1).** `to_bpx(spec, parameter_sets=...)`
+  takes ONE source's records (the block-keyed mapping
+  `to_records(by_block=True)` returns) and rebuilds the
+  electrode/separator/electrolyte blocks: claim values at full precision
+  - scalars verbatim, curves as {x, y} tables, expressions as BPX
+  function strings - with the User-defined annex reassembled and
+  `Header.Model` taken from the source's own model context (battinfo's
+  tier contracts require more than a BPX DFN file carries, so deriving
+  from tiers alone would demote an honest DFN source; the tier heuristic
+  is the fallback). Exports declaring BPX >= 1.1 follow the 1.1 layout
+  (temperatures and initial electrolyte concentration move to the State
+  section), and the official `bpx` parser accepts the result - pinned in
+  CI with `bpx` as a dev dependency. Per-source only, deliberately: a
+  calibration is a joint estimate, and mixing sources across blocks
+  would produce a file no validation supports.
+
+- **Cell geometry gets a home (BPX Cell-block ruling).** `electrode_area`
+  and `external_surface_area` join the curated property vocabulary
+  (EMMO `Area`), beside the existing `volume` - as-designed engineering
+  facts of the cell. `from_bpx` maps the BPX Cell fields onto them and
+  `to_bpx` fills the BPX-required `Electrode area [m2]` from the spec;
+  Cell fields with no spec home (temperatures - stated conventions -
+  and the electrode-pair count) are carried verbatim in
+  `BpxImportResult.extras` and re-emitted by `to_bpx(cell_extras=...)`,
+  so the whole Cell block round-trips. The two Cell-import warnings now
+  name every key instead of truncating at eight.
+
+### Changed
+
+- **BPX import drops nothing silently (parameter-plan Phase 0).** The
+  `User-defined` block — BPX's extension point, previously ignored without
+  a word - is now reported key-by-key, and unrecognised Parameterisation
+  blocks are named. Header lineage rides every minted parameter-set
+  record: `Description` as the record description and `References` as the
+  provenance citation (verbatim as a note when it is not a URL/DOI),
+  beside the model context the importer already stamped. A synthetic
+  full-DFN golden fixture (structural twin of a published BattMo export,
+  fabricated values - the original is GPL-3.0) pins the contract: every
+  parameter in the file becomes a claim, a spec property, or a named
+  warning.
+
+- **Parameter-set records emit against the records context.** The
+  parameter-set JSON-LD - the payload the BPX "Metadata" seam embeds -
+  now carries the hosted versioned records context
+  (`context/records/v1.json`) instead of the live EMMO context, and every
+  vocabulary parameter's terms resolve in it. License slugs
+  (`cc-by-sa-4.0`) map to their absolute SPDX page IRI instead of
+  emitting as relative IRIs; unknown values emit as literals, never
+  broken links (applies to dataset records too).
+
+- **The described individual gets a name: `<spec-IRI>#described` (JSON-LD
+  dialect change, red-team ruling).** Every spec family's `isDescriptionFor`
+  individual is now skolemized with the hash form of the spec's own IRI -
+  dereferencing it fetches the spec document, repeated ingest merges instead
+  of duplicating the physics, and the design becomes addressable from tests
+  and BOMs. Nothing changes logically: no identity with any instance is
+  asserted, and the existential-witness reading survives verbatim.
+  `*_spec_id` reference edges now resolve to the target's described
+  component (`hasElectrolyte -> <electrolyte-spec>#described`) - a physical
+  relation lands on a physical individual, never on the Description
+  document the range axioms would otherwise mistype.
+
+- **Declared-value semantics tightened (red-team ruling).** `value_basis:
+  "Nominal"` co-types as `ConventionalProperty` (EMMO's `NominalProperty`
+  is VIM's no-magnitude property - colour, blood type - so it was a false
+  claim on a numeric rating; upstream ask filed on `NominalBatteryProperty`
+  too). Conditions on a declared value emit as named
+  `schema:valueReference` qualifiers - the `isOutputOf ->
+  BatteryMeasurement` subtree now appears only on `Measured` values, since
+  it asserts a real process occurred. `voltage_reference` rides
+  `schema:valueReference` everywhere (never `hasMetrologicalReference`,
+  whose exactly-one slot the unit already fills - a second filler entailed
+  `owl:sameAs` between the volt and the reference electrode). Material
+  identity anchors (`schema:sameAs`, `skos:exactMatch`) move from the
+  described substance to the spec node: `exactMatch` is symmetric and
+  transitive, so on the witness it conflated every supplier's grade
+  through the shared Wikidata IRI.
+
+- **Format/IEC disjointness guard.** `cell_format: cylindrical` +
+  `iec_code: cr2032` used to stack owl:disjointWith classes on one
+  individual, making any merged graph OWL-inconsistent from one typo. The
+  IEC code (the more specific claim) now wins with a warning; each
+  `iec_code` entry in `entity_type_map.json` declares its format family.
+
+- **ProductModel persona rounded out.** The described cell carries the
+  ontology's own `hasIECCode` datatype slot beside `schema:productID` on
+  the spec, and the spec node mirrors `schema:weight`/`height`/`width`/
+  `depth` from the EMMO quantities so a schema.org-only consumer sees the
+  product's dimensions (the EMMO encoding stays authoritative).
+
+- **`electrode_spec.kind` becomes `active_material_kind`.** The field names
+  the electrode's active material, so it now says so - a bare `kind` on an
+  electrode reads as the electrode's form (porous, foil, rotating-disc), not
+  its chemistry. The old spelling stays accepted as a deprecated alias (the
+  `kind=` kwarg included) and normalizes to `active_material_kind` on
+  round-trip; the packaged examples are rewritten to the canonical key.
+
+- **The description pattern is complete: cell and material specs emit as
+  descriptions (JSON-LD dialect change).** The last two spec families
+  carried their physical payload on the specification node - a reasoner
+  would classify the document as an electrochemical cell. Every
+  EMMO-axiomatized physical fact (hasProperty quantities, electrode /
+  electrolyte / separator / housing composition, construction, role
+  holders, reference merges) now rides the described battery under
+  `isDescriptionFor`; a material spec types `[Description,
+  schema:ProductModel, schema:CreativeWork]` with the substance node
+  (chemsub class, identity anchors, formula, properties) on the described
+  individual. Spec nodes carry three personas by design: the EMMO
+  information artifact, `schema:ProductModel` (newly stacked on every spec
+  family) carrying the catalogue facts - name, manufacturer, brand, codes
+  - in their documented schema.org home, and `schema:CreativeWork` for the
+  record, with instances linking by `hasDescription` and
+  `schema:isVariantOf`. The described individual is an existential
+  witness: satisfied by at least one conforming unit, no identity asserted
+  with any instance, epistemic status carried by the property-nature
+  classes (documented in the cells design notes). The package importer reads the
+  new location with old-shape fallback; published records stay valid
+  forever - the old shape simply stops being produced, and the Flores v5
+  corpus rebuild republishes in this final shape.
+
+- **A housing is the enclosure assembly; all its parts ride
+  `hasConstituent`.** EMMO's own definitions separate the case (the
+  container) from the lid that closes it and the terminals, seals, and
+  hardware beside it - the housing record describes that assembly, not a
+  Case. Its described individual now types `ElectrochemicalComponent` (no
+  `CellHousing` class is published; it joined the upstream ask list with
+  `hasHousing` and `hasLid`) instead of the semantically empty
+  `schema:Product` alone, and every part - the case (typed
+  `CoinCase`/...), the cap (`CellLid`), terminals, seals, springs, spacers
+  - lists uniformly under `hasConstituent`. This also retires the
+  emission of `hasTerminal`, a relation with no term in the context. Cells
+  keep the published `hasCase` pattern for their case.
+
+- **Every component spec emits as a description, not the component.**
+  Separator, current-collector, housing, and electrolyte specs had the same
+  category error the electrode spec did: the JSON-LD node was typed as the
+  physical thing. All spec records in these families now emit
+  `[Description, schema:CreativeWork]`, and the ENTIRE physical node moves
+  to the anonymous individual under `isDescriptionFor` - the class stack
+  (`Separator`, `[CurrentCollector, Aluminium, Foil]`, `CoinCase`,
+  `OrganicElectrolyte`, ...) and the physical relations and quantities
+  (`hasCase`, `hasSolvent`, `hasCoating`, `hasConstituent`,
+  `hasProperty`, the electrode's active-material seam and manufacturing
+  route). The spec node keeps only artifact facts: id, name, manufacturer,
+  citation. Instances keep their physical typing.
+
+- **An electrode spec emits as a description, not an electrode.** Its
+  JSON-LD node was typed with the physical electrode class
+  (`GraphiteElectrode`, ...); a spec is an information artifact, so it now
+  types `[Description, schema:CreativeWork]` - EMMO's `Description` being
+  the parent class `BatterySpecification` itself subclasses - with the
+  physical class stack on the anonymous individual under `isDescriptionFor`,
+  the cell-spec pattern. When an `ElectrodeSpecification` class is published
+  upstream (it is on the ontology-additions ask list) it replaces the
+  generic `Description`. Electrode instances are physical objects and keep
+  their typing.
+
+### Changed
+
+- **Electrolyte solvents lose their wrapper: `solvent` takes one or many.**
+  A pure solvent is a single component object, a mixture is a list - no
+  `solvent_mixture: {component: [...]}` level. The old spelling stays
+  accepted as a deprecated alias and normalizes to `solvent` on round-trip
+  (a wrapper carrying facts of its own is kept verbatim rather than
+  silently flattened). Emission under `hasSolvent` is unchanged.
+
+### Deprecated
+
+- **`salt.cation` / `salt.anion` on electrolyte specs.** The salt's ions
+  follow from its material identity - the kind resolves to the
+  chemical-substance class, and `material_spec_id` cites the powder record
+  - so they are never retyped in the formulation. The keys stay accepted so
+  existing records keep validating; the emitter never read them.
+
+### Fixed
+
+- **Electrolyte composition fields are plain kwargs.** The generic
+  component creators' first parameter was named `family`, colliding with
+  the electrolyte's own `family` field (organic/aqueous) and forcing
+  composition through `body=`. The parameter is now `component_family`
+  (positional use, the only use in the wild, is unaffected), so
+  `create_electrolyte_spec(family="organic", salt=..., solvent=...)` works
+  as it reads.
+
+### Added
+
+- **Termination shorthand + the one-liner import (protocol usability).**
+  Structured steps accept comparison-string cutoffs - `termination:
+  ["Voltage > 4.2", "C-rate < C/50", "SOC < 0.05", "Time > 30 min"]` - the
+  spelling engineers and UCP's `ends` use, normalized to the structured
+  form at construction (stored records never carry the string; bad
+  quantities and unit/quantity mismatches fail with a pointed message).
+  And `battinfo import-protocol <file>` makes the whole import path one
+  command: sniffs the format (UCP YAML, aurora-unicycler JSON, PyBaMM
+  text/config, bmgen JSON-LD; `--format` overrides), emits the canonical
+  record to stdout or `--out`, links the source file as the
+  source_protocol artifact with its sha256, surfaces the lossy-import
+  notes, and mints a deterministic IRI from the file hash so re-running
+  the import is a no-op, not a duplicate. The pybamm and bmgen importers
+  gained the `source_sha256` parameter the others already had.
+
+- **`import_ucp`: ionworks Universal Cycler Protocol importer.** The
+  fourth member of `battinfo.interop.protocols` (beside aurora-unicycler,
+  PyBaMM, and bmgen): parses a UCP document (dict, YAML/JSON string, or
+  path) into a structured `method[]` TestSpec. Charge/Discharge/Rest/EIS
+  steps map by mode (C-rate/Voltage/Current/Power), `ends` comparisons
+  become any-of terminations (voltage, C-rate, current, capacity, SOC,
+  time), named repeat blocks become nested groups, and the `global` block
+  lands on the blessed conventions (`initial_state_of_charge`,
+  `ambient_temperature`, `resolution` -> `record`). Computational content
+  (Control, set_variable, goto actions, expression-valued fields) stays
+  with the linked `source_protocol` artifact and is recorded as notes,
+  never silently dropped. PyYAML is an optional dependency (dict/JSON
+  input works without it).
+
+- **SOC-based termination and the initial-state convention (protocol
+  interop).** `soc` joins the termination quantities (schema enum, vocab,
+  emission as `StateOfCharge`), so SOC-stepped procedures state their
+  levels directly - the HPPC example now encodes its nine levels as
+  explicit `soc`-terminated discharges instead of time-at-C/3
+  approximations - and UCP-style state cutoffs have a landing place. A
+  protocol that assumes a starting state declares
+  `conditions.initial_state_of_charge` (unit "1"), the blessed key
+  importers map initial-state settings onto; the EIS-at-50%-SOC example
+  demonstrates it.
+
+- **A test execution inherits its identity from the linked protocol.**
+  `Test(protocol=...)` accepts the `TestSpec` object itself: kind, protocol
+  name, and `protocol_id` all derive from the spec instead of being retyped
+  on the execution (an explicitly authored `kind=` still wins). The tests
+  exemplar teaches the linked form. The GITT, HPPC, and rate-capability
+  protocol examples gain full structured `method[]` step definitions
+  matching their own descriptions, so their EMMO process graphs
+  (`hasTask` chains with control and termination parameters) are no longer
+  empty.
+
+- **`spec_id=` is the uniform authoring shorthand.** Every instance creator
+  (material, electrode, cell, equipment, and the generic component families)
+  accepts `spec_id=` for its spec reference; the prefixed spelling
+  (`material_spec_id=`, ...) stays accepted, and disagreeing spellings raise
+  instead of silently picking one. Records are unchanged: they keep the
+  self-describing `<type>_spec_id` key, so a fragment seen without its
+  wrapper still says what kind of spec it points at.
+
+- **Electrode genealogy: `parent_id` + `piece_id`.** A coating run
+  makes one big source (a factory roll, a lab strip) and the electrodes that
+  reach cells are cut from it. A cut piece now states which electrode record
+  it was cut from (`parent_id`) and its label within that parent
+  (`piece_id`, e.g. "disc-07", which joins the identity seed so siblings
+  mint distinct IRIs; existing record IRIs are unchanged). Chains compose
+  (roll -> sheet -> disc), each hop emits as `prov:wasDerivedFrom`, and the
+  full lineage cell -> disc -> roll -> electrode-spec -> material-spec is
+  walkable in the graph. The registry's reference-field machinery turns the
+  new `*_id` field into forward links and a reverse cut-pieces panel on the
+  parent once re-vendored.
+
+- **Three-electrode cells are fully expressible.** The configuration
+  existed in the `cell_configuration` enum but its distinguishing physics
+  did not: `reference_electrode` was a bare string. It now accepts a full
+  inline electrode holder (a lithium ring or wire is a monolithic
+  `material=`) beside the legacy string, with a new
+  `reference_electrode_spec_id` sibling; the `reference` role joins the
+  role-typing rule; the holder emits as `hasReferenceElectrode` with
+  `@type ReferenceElectrode` (a legacy string becomes a labeled typed node
+  instead of staying record-only); and a latent bug is fixed where the
+  enum value never reached the entity map, so `ThreeElectrodeCellDevice`
+  now actually types the described device. Kept as a configuration of the
+  cell record - the half-cell precedent - never a separate record type;
+  the cell states its physical electrode arrangement, while the "vs what"
+  of a measured voltage stays the quantity's `voltage_reference` datum.
+
+- **Monolithic electrodes: `material` on the electrode holders.** A lithium
+  counter is pure metal foil, not a coated electrode - there is no
+  collector-plus-layer structure to describe. The inline electrode holder
+  and the standalone electrode-spec gain `material` (a material-component:
+  name / kind / material_spec_id / property) for uncoated electrodes;
+  emission is the electrode's `hasActiveMaterial`, class-typed through the
+  material map (which gains lithium metal -> `Lithium` and zinc ->
+  `Zinc`). The half-cell exemplar's counter drops its coating wrapper for
+  `{"material": {"name": "Lithium metal"}}`.
+
+- **`coating.double_sided`.** A boolean on the electrode-coating block (the
+  standalone electrode spec and the inline cell-spec holders share it)
+  stating whether the current collector is coated on both sides or one. No
+  EMMO class for coating sidedness exists, so it emits as a named
+  `schema:PropertyValue` on the coating node until one is published.
+
+### Changed
+
+- **Measurement conditions ride the measurement, not the quantity (JSON-LD
+  dialect change).** A quantity's `conditions` used to hang
+  `hasMeasurementParameter` directly on the property node - a CHAMEO domain
+  violation (a reasoner would classify the property as a process). They now
+  emit on an anonymous measurement node the quantity `isOutputOf`, typed
+  `BatteryMeasurement`, with each parameter carrying its condition key as
+  `skos:prefLabel` and qualitative values as `hasStringValue` (never a fake
+  quantity with unit "n/a"; `value_text` on a quantity likewise now emits as
+  `hasStringValue` instead of `schema:value`). The test emitter gains the
+  same shape: as-run conditions become typed `hasMeasurementParameter` nodes
+  on the test node itself - the test is the measurement activity - beside
+  the existing `schema:PropertyValue` copy. Already-published documents stay
+  valid; the old flat shape is simply no longer produced. The hosted records
+  context gains the new terms (append-only v1): re-vendor the registry
+  context before publishing new-dialect records.
+
+- **`voltage_reference` is a metrological datum.** "vs Li/Li+" qualifies the
+  quantity itself, not the measurement: the `voltage_reference` conditions
+  key (on quantities and on tests) now emits as EMMO's
+  `hasMetrologicalReference` - the relation family `hasMeasurementUnit`
+  belongs to; a potential carries two references, the volt as its scale and
+  the reference electrode as its zero. Recognized couples (Li/Li+, Na/Na+,
+  SHE, NHE, RHE, SCE, Ag/AgCl, Zn/Zn2+) resolve to class-typed
+  reference-electrode nodes (`[ReferenceElectrode, LithiumElectrode]`);
+  unrecognized notations keep an honest `MetrologicalReference` node
+  carrying the text. Stating a counter electrode inside `conditions` is
+  retired in the packaged examples: the datum is the reference couple, and
+  the setup fact belongs to the test cell's own record.
+
+- **A qualitative quantity needs no unit (the conditions ruling from #363).**
+  The quantity schema required a unit even when the only value was
+  `value_text`, which made honest qualitative conditions (`atmosphere:
+  argon`, `voltage_reference: Li/Li+`) unrepresentable without a `"n/a"`
+  unit hack. The unit requirement now exempts quantities carrying
+  `value_text` alone; any numeric field still demands a unit. Applied across
+  the quantity module, the cell-canonical `SpecItem`, the base-schema
+  `Quantity`, and the cell-spec profile fragment.
+
+- **`co_type` becomes `value_basis`; process condition keys take -ing names.**
+  The basis on which a value is stated (Measured / Nominal / Rated /
+  Conventional) is now authored as `value_basis` - `co_type` said nothing to
+  a reader. And the advertised condition keys for processes follow the -ing
+  convention that the direction-qualified capacity keys already use:
+  `discharging_c_rate` / `charging_c_rate` (disambiguating the process
+  "charging" from the noun "charge"). Both old spellings stay accepted:
+  `co_type` as a deprecated schema alias that normalizes to `value_basis` on
+  round-trip, the -e condition keys as tolerated inputs resolving to the
+  same EMMO classes.
+
+### Deprecated
+
+- **`material_spec.electrode_polarity` and `material_spec.material_class`.**
+  Polarity is an electrode property, never a material's, so
+  `electrode_polarity` loses its authoring path entirely: the API kwarg is
+  removed, the embedded-to-standalone bridge and `extract_material_specs`
+  stop stamping it, and the packaged examples drop it — the schema accepts
+  the key only so existing records keep validating. `material_class` is
+  deprecated in favor of the kind's `roles` (strictly better information,
+  multi-valued, curated); it stays accepted and importers still write it,
+  slated for removal at the next record-shape version. The parameter-set
+  claim scope named `electrode_polarity` is unrelated (it describes the
+  electrode context of a measurement) and is retained.
+
+### Changed
+
+- **Material kinds carry `roles` (a list), replacing the single-valued
+  `family`.** The old axis forced one role onto substances that legitimately
+  play several and took sides on active materials (`active_anode` /
+  `active_cathode`) — but roles are system-relative: graphite is the positive
+  electrode of every lithium-counter half cell, FEC is both co-solvent and
+  additive, CMC both binder and thickener. `roles` lists the use-site slots a
+  substance is known to fill (coating roles, electrolyte constituents,
+  component films/foils/coatings); it is informative, never normative — no
+  validator rejects a use outside the listed roles. `active_material` is the
+  one load-bearing role: it gates `electrode_spec.kind` and anchors reference
+  properties. VC is refiled from solvent to additive; NMP carries an empty
+  list (a processing solvent fills no composition slot). With the sides gone,
+  the polarity-derivation chain retires: `create_electrode_spec` stamps
+  `polarity` only when authored, the emitted `@type` carries a polarity class
+  only for authored polarity, `semantic.electrode_polarity_conflict` is
+  removed, and `electrode_polarity_for_kind` (never exported from the package
+  root) is gone. Vocabulary 0.2.0 → 0.3.0. The registry re-vendors
+  `material_kinds.json` after this merge.
+
+### Fixed
+
+- **The `modes` facet recurses into step groups.** A cycling protocol wrapped
+  in a repeat group faceted as `modes: ["group"]`, so any consumer filtering
+  on `modes` missed every cycling protocol; `control_modes`, `directions`,
+  and the `has_*` flags already recursed. `modes` now lists leaf-step modes
+  in first-encounter order and never contains `group` — group nesting stays
+  visible in the method graph itself. Facets are stamped at publish time, so
+  already-published records carry the old shape until re-emitted (#361).
+
+- **Registry listings paginate; lookups no longer miss older records.** A
+  single GET of `/resources` is capped by the server at one page (100 rows,
+  newest first), and both the cell-spec search cache and the cell/serial
+  lookup treated that first page as the whole catalog. Once the corpus
+  outgrew a page, `ws.search` reported registered specs as missing and the
+  cell lookup silently re-minted IRIs for serials that already had canonical
+  ones (#340, #341). The client now pages with `limit`/`offset` until the
+  listing is exhausted, and stops safely against a registry that predates
+  pagination support.
+
+### Added
+
+- **`Step` gains an optional `step_id`.** A test-protocol method step can now
+  carry the identifier assigned to it in the test program or schedule. The
+  field name and semantics align with BDF `step_id`, but BattINFO does not
+  depend on the BDF ontology; the field is not zero-based, contiguous,
+  monotonic, or unique. `step_id` is unset by default and omitted when not
+  given.
+
 - **`theoretical_specific_capacity` joins the parameter vocabulary.** The curated
   material-kind reference anchors (graphite 372 mAh/g, silicon 3579, lithium
   metal 3862, LFP 170) are theoretical stoichiometric capacities, while

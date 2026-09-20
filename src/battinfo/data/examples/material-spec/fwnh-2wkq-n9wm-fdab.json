@@ -6,16 +6,15 @@
     "name": "MnO2",
     "kind": "mno2",
     "material_class": "active_material",
-    "electrode_polarity": "positive",
     "formula": "MnO2",
     "chemistry_family": "manganese-oxide",
     "property": {
       "specific_capacity": {
         "value": 290,
         "unit": "mAh/g",
-        "co_type": "Measured",
+        "value_basis": "Measured",
         "conditions": {
-          "discharge_c_rate": {
+          "discharging_c_rate": {
             "value": 0.1,
             "unit": "C"
           },

@@ -1,0 +1,38 @@
+{
+  "schema_version": "0.2.0",
+  "cell_spec": {
+    "id": "https://w3id.org/battinfo/spec/w3fq-9rkm-4tpx-8nhd",
+    "short_id": "w3fq9r",
+    "identifier": "cell-spec:w3fq-9rkm-4tpx-8nhd",
+    "name": "Si-Gr three-electrode pouch cell",
+    "model": "3E-SIGR-01",
+    "manufacturer": {
+      "type": "Organization",
+      "name": "Example Lab"
+    },
+    "cell_format": "pouch",
+    "chemistry": "Li-ion",
+    "cell_configuration": "three_electrode_cell",
+    "reference_electrode": {
+      "material": {
+        "name": "Lithium metal",
+        "property": {}
+      },
+      "property": {}
+    }
+  },
+  "properties": {},
+  "provenance": {
+    "source_type": "lab",
+    "retrieved_at": 1750000000,
+    "battinfo_version": "0.7.0"
+  },
+  "working_electrode_spec_id": "https://w3id.org/battinfo/spec/qw3j-we77-zzj1-ya55",
+  "counter_electrode": {
+    "material": {
+      "name": "Lithium metal",
+      "property": {}
+    },
+    "property": {}
+  }
+}

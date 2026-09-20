@@ -94,9 +94,14 @@ def test_m6_jsonld_emitted_for_spec_and_instance() -> None:
     from battinfo.jsonld import record_to_jsonld
 
     spec = api.create_material_spec(name="LFP", kind="lfp", validate=False)
-    ld = record_to_jsonld(spec, "material-spec")
+    doc = record_to_jsonld(spec, "material-spec")
+    # The spec is a description; the substance node rides isDescriptionFor.
+    assert doc["@type"] == ["Description", "schema:ProductModel", "schema:CreativeWork"]
+    ld = doc["isDescriptionFor"]
     assert ld["@type"] == "LithiumIronPhosphate"
-    assert ld["schema:sameAs"]["@id"].startswith(
+    # Identity anchors are catalogue facts: they ride the SPEC node, not the
+    # described substance (whose identity is its @type).
+    assert doc["schema:sameAs"]["@id"].startswith(
         "https://w3id.org/emmo/domain/chemical-substance#"
     )  # kind -> chemical-substance class node
 
@@ -112,9 +117,10 @@ def test_m6_kind_without_emmo_class_uses_labeled_fallback() -> None:
     # bundled context resolves, so the node falls back to a labeled
     # schema:ChemicalSubstance that still carries the chemsub link.
     spec = api.create_material_spec(name="EMD cathode powder", kind="mno2", validate=False)
-    ld = record_to_jsonld(spec, "material-spec")
+    doc = record_to_jsonld(spec, "material-spec")
+    ld = doc["isDescriptionFor"]
     assert ld["@type"] == "schema:ChemicalSubstance"  # labeled fallback, not invented term
-    assert ld["schema:sameAs"]["@id"].startswith(
+    assert doc["schema:sameAs"]["@id"].startswith(
         "https://w3id.org/emmo/domain/chemical-substance#"
     )
 
@@ -188,12 +194,17 @@ def test_external_identity_anchors_emit_as_exact_match() -> None:
     from battinfo.jsonld import record_to_jsonld
 
     spec = api.create_material_spec(name="SLP30", kind="graphite", validate=False)
-    matches = {m["@id"] for m in record_to_jsonld(spec, "material-spec")["skos:exactMatch"]}
+    # Anchors ride the SPEC node: exactMatch is SKOS-concept alignment
+    # (symmetric + transitive), so on the described substance it would
+    # conflate every supplier's witness through the shared external IRI.
+    doc = record_to_jsonld(spec, "material-spec")
+    matches = {m["@id"] for m in doc["skos:exactMatch"]}
     assert matches == {
         "http://www.wikidata.org/entity/Q5309",
         "https://pubchem.ncbi.nlm.nih.gov/compound/5462310",
         "https://next-gen.materialsproject.org/materials/mp-48",
     }
+    assert "skos:exactMatch" not in doc["isDescriptionFor"]
     # a kind with no verified anchors emits none, rather than a guessed one
     plain = api.create_material_spec(name="PVDF binder", kind="pvdf", validate=False)
     assert "skos:exactMatch" not in record_to_jsonld(plain, "material-spec")
@@ -210,7 +221,7 @@ def test_anchor_fields_stay_inside_the_declared_set() -> None:
     """A typo'd anchor key would silently emit nothing; pin the field names."""
     from battinfo.materials import EXTERNAL_ID_FIELDS, EXTERNAL_ID_IRI_TEMPLATES
 
-    known = {"label", "family", "family_note", "formula", "chemsub", "emmo",
+    known = {"label", "roles", "roles_note", "formula", "chemsub", "emmo",
              "aliases", "reference_properties", *EXTERNAL_ID_FIELDS}
     for key, entry in battinfo.material_kinds()["kinds"].items():
         unexpected = set(entry) - known

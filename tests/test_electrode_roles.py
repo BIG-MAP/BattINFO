@@ -63,7 +63,7 @@ def test_half_cell_emits_role_relations_and_counter_is_also_the_reference() -> N
     are non-disjoint upstream). Stated as a second @type on the one node rather
     than as a second relation, so the graph never claims two electrodes.
     """
-    node = record_to_jsonld(_half_cell().to_record(), "cell-spec")
+    node = record_to_jsonld(_half_cell().to_record(), "cell-spec")["isDescriptionFor"]
 
     assert node["hasWorkingElectrode"]["@type"] == "WorkingElectrode"
     assert node["hasCounterElectrode"]["@type"] == ["CounterElectrode", "ReferenceElectrode"]
@@ -74,11 +74,11 @@ def test_half_cell_emits_role_relations_and_counter_is_also_the_reference() -> N
 
 def test_role_holders_carry_the_same_composition_as_a_polarity_holder() -> None:
     """An electrode's active-material typing is role-independent."""
-    role = record_to_jsonld(_half_cell().to_record(), "cell-spec")["hasWorkingElectrode"]
+    role = record_to_jsonld(_half_cell().to_record(), "cell-spec")["isDescriptionFor"]["hasWorkingElectrode"]
     polarity = record_to_jsonld(
         CellSpec(**_IDENTITY, positive_electrode=_electrode("Graphite")).to_record(),
         "cell-spec",
-    )["hasPositiveElectrode"]
+    )["isDescriptionFor"]["hasPositiveElectrode"]
 
     assert role["hasCoating"] == polarity["hasCoating"]
     assert role["hasCoating"]["hasActiveMaterial"]["@type"] == ["Graphite", "ActiveMaterial"]
@@ -89,12 +89,13 @@ def test_three_electrode_cell_types_all_three_roles() -> None:
     spec = _half_cell()
     spec.cell_configuration = "three_electrode_cell"
     spec.reference_electrode = "lithium"
-    node = record_to_jsonld(spec.to_record(), "cell-spec")
+    doc = record_to_jsonld(spec.to_record(), "cell-spec")
+    node = doc["isDescriptionFor"]
 
     assert node["hasWorkingElectrode"]["@type"] == "WorkingElectrode"
     assert node["hasCounterElectrode"]["@type"] == "CounterElectrode"
     assert "ReferenceElectrode" not in json.dumps(node["hasCounterElectrode"])
-    assert "ThreeElectrodeCellDevice" in node["isDescriptionFor"]["@type"]
+    assert "ThreeElectrodeCellDevice" in node["@type"]
 
 
 def test_cell_typing_is_unchanged_by_the_role_holders() -> None:
@@ -117,12 +118,12 @@ def test_full_cell_emission_is_untouched() -> None:
             negative_electrode=_electrode("Graphite"),
         ).to_record(),
         "cell-spec",
-    )
+    )["isDescriptionFor"]
     assert node["hasPositiveElectrode"]["@type"] == "LithiumIronPhosphateElectrode"
     assert node["hasNegativeElectrode"]["@type"] == "GraphiteElectrode"
     assert "hasWorkingElectrode" not in node
     assert "hasCounterElectrode" not in node
-    assert not {"BatteryHalfCell", "HalfCellDevice"} & set(node["isDescriptionFor"]["@type"])
+    assert not {"BatteryHalfCell", "HalfCellDevice"} & set(node["@type"])
 
 
 def test_a_chemistry_basis_does_not_invent_a_polarity_electrode_for_a_half_cell() -> None:
@@ -136,18 +137,18 @@ def test_a_chemistry_basis_does_not_invent_a_polarity_electrode_for_a_half_cell(
     node = record_to_jsonld(
         _half_cell(positive_electrode_basis="graphite", negative_electrode_basis="lithium").to_record(),
         "cell-spec",
-    )
+    )["isDescriptionFor"]
     assert "hasPositiveElectrode" not in node
     assert "hasNegativeElectrode" not in node
     # The chemistry survives where it belongs: on the cell.
-    assert "LithiumMetalBattery" in node["isDescriptionFor"]["@type"]
+    assert "LithiumMetalBattery" in node["@type"]
 
 
 def test_an_authored_polarity_holder_is_never_dropped_by_the_configuration() -> None:
     """Suppression applies to the basis fallback only — never to authored data."""
     spec = _half_cell()
     spec.positive_electrode = _electrode("NMC811")
-    node = record_to_jsonld(spec.to_record(), "cell-spec")
+    node = record_to_jsonld(spec.to_record(), "cell-spec")["isDescriptionFor"]
     assert node["hasPositiveElectrode"]["hasCoating"]["hasActiveMaterial"]["schema:name"] == "NMC811"
     assert node["hasWorkingElectrode"]["@type"] == "WorkingElectrode"
 
@@ -155,12 +156,12 @@ def test_an_authored_polarity_holder_is_never_dropped_by_the_configuration() -> 
 def test_descriptor_path_agrees_with_the_canonical_path() -> None:
     """Emitter convergence: both user-facing emitters type the roles identically."""
     record = _half_cell().to_record()
-    canonical = record_to_jsonld(record, "cell-spec")
-    descriptor = to_jsonld(record, target="domain-battery")["@graph"][0]
+    canonical = record_to_jsonld(record, "cell-spec")["isDescriptionFor"]
+    descriptor = to_jsonld(record, target="domain-battery")["@graph"][0]["isDescriptionFor"]
 
     for relation in ("hasWorkingElectrode", "hasCounterElectrode"):
         assert descriptor[relation]["@type"] == canonical[relation]["@type"]
-    assert descriptor["isDescriptionFor"]["@type"] == canonical["isDescriptionFor"]["@type"]
+    assert descriptor["@type"] == canonical["@type"]
 
 
 def test_every_emitted_role_term_resolves_in_the_published_context() -> None:
@@ -186,9 +187,11 @@ def test_role_holders_carry_both_electrode_spec_seams() -> None:
     assert record["working_electrode_spec_id"] == DESIGN_IRI
     assert record["counter_electrode"]["electrode_spec_id"] == DESIGN_IRI
 
-    node = record_to_jsonld(record, "cell-spec")
-    # Top-level reference: the @id merges onto the emitted node (one node).
-    assert node["hasWorkingElectrode"]["@id"] == DESIGN_IRI
+    node = record_to_jsonld(record, "cell-spec")["isDescriptionFor"]
+    # Top-level reference: the described-electrode @id merges onto the emitted
+    # node (one node) — a physical relation lands on the design's described
+    # individual, never on the spec document.
+    assert node["hasWorkingElectrode"]["@id"] == f"{DESIGN_IRI}#described"
     # Inline reference: the holder realizes a design without claiming to be it.
     assert node["hasCounterElectrode"]["schema:isVariantOf"] == {"@id": DESIGN_IRI}
 
@@ -198,8 +201,8 @@ def test_a_role_spec_reference_without_an_inline_holder_emits_a_bare_reference()
         CellSpec(**_IDENTITY, cell_configuration="half_cell",
                  working_electrode_spec_id=DESIGN_IRI).to_record(),
         "cell-spec",
-    )
-    assert node["hasWorkingElectrode"] == {"@id": DESIGN_IRI}
+    )["isDescriptionFor"]
+    assert node["hasWorkingElectrode"] == {"@id": f"{DESIGN_IRI}#described"}
 
 
 def test_role_spec_references_are_validated_at_the_input_boundary() -> None:
@@ -228,7 +231,7 @@ def test_authoring_round_trips_through_save_and_emission(tmp_path: Path) -> None
     assert record["working_electrode"]["coating"]["component"]["active_material"][0]["name"] == "Graphite"
     assert record["counter_electrode"]["coating"]["component"]["active_material"][0]["name"] == "Lithium"
 
-    node = record_to_jsonld(record, "cell-spec")
+    node = record_to_jsonld(record, "cell-spec")["isDescriptionFor"]
     assert node["hasCounterElectrode"]["@type"] == ["CounterElectrode", "ReferenceElectrode"]
 
 
@@ -322,4 +325,5 @@ def test_role_holder_materials_are_extracted_without_a_polarity() -> None:
     names = {s["material_spec"]["name"] for s in specs}
     assert {"Graphite", "Lithium"} <= names
     for spec in specs:
-        assert spec["material_spec"].get("electrode_polarity") in (None, "none")
+        # Polarity is an electrode property; extraction never stamps one.
+        assert "electrode_polarity" not in spec["material_spec"]

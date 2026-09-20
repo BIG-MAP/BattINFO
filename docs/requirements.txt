@@ -3,3 +3,4 @@ pydata-sphinx-theme>=0.20.0
 myst-parser>=3.0
 nbsphinx>=0.9
 sphinx-design>=0.6
+sphinx-copybutton>=0.5

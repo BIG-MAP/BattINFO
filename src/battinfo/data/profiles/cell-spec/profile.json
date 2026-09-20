@@ -29,14 +29,16 @@
     "specification": {
       "required_core": [
         "id",
-        "manufacturer",
+        "name",
         "model",
-        "format",
-        "chemistry",
-        "positive_electrode_basis",
-        "negative_electrode_basis"
+        "manufacturer",
+        "cell_format",
+        "chemistry"
       ],
       "optional_extensions": [
+        "format",
+        "negative_electrode_basis",
+        "positive_electrode_basis",
         "size_code",
         "property",
         "positive_electrode",
@@ -105,7 +107,11 @@
       "properties": {
         "id": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
         },
         "manufacturer": {
           "type": "string",
@@ -114,6 +120,10 @@
         "model": {
           "type": "string",
           "minLength": 1
+        },
+        "cell_format": {
+          "type": "string",
+          "enum_from": "controlled_values.specification.cell_format"
         },
         "format": {
           "type": "string",
@@ -424,6 +434,10 @@
       "kind": "identifier",
       "jsonld_target": "@id"
     },
+    "specification.name": {
+      "kind": "generic_metadata",
+      "jsonld_target": "schema:name"
+    },
     "specification.manufacturer": {
       "kind": "generic_metadata",
       "jsonld_target": "schema:manufacturer"
@@ -431,6 +445,11 @@
     "specification.model": {
       "kind": "generic_metadata",
       "jsonld_target": "schema:model"
+    },
+    "specification.cell_format": {
+      "kind": "battery_semantic_binding",
+      "binding_source": "assets/mappings/domain-battery/entity_type_map.json#/mappings/format",
+      "jsonld_target": "@type"
     },
     "specification.format": {
       "kind": "battery_semantic_binding",
@@ -528,6 +547,17 @@
   },
   "controlled_values": {
     "specification.format": {
+      "values": [
+        "cylindrical",
+        "prismatic",
+        "pouch",
+        "coin",
+        "other",
+        "unknown"
+      ],
+      "binding_source": "assets/mappings/domain-battery/entity_type_map.json#/mappings/format"
+    },
+    "specification.cell_format": {
       "values": [
         "cylindrical",
         "prismatic",

@@ -36,6 +36,7 @@ from battinfo.interop.protocols import (
     import_aurora_unicycler,
     import_bmgen_jsonld,
     import_pybamm_experiment,
+    import_ucp,
 )
 from battinfo.interop.solid_state_db import (
     SolidStateImportResult,
@@ -74,6 +75,7 @@ __all__ = [
     "to_bpx",
     "import_aurora_unicycler",
     "import_bmgen_jsonld",
+    "import_ucp",
     "import_converter_package",
     "import_converter_jsonld",
     "import_converter_jsonld_record",

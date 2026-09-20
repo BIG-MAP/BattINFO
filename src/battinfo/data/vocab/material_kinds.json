@@ -1,21 +1,22 @@
 {
-  "version": "0.2.0",
-  "description": "Curated, shipped vocabulary of generic material kinds (Level 1 of the three-level materials model). A kind is the universal reference identity of a material (graphite, LFP, NMC811, ...): the aggregation axis of the Battery Genome. Every material-spec carries a required `kind`; every material instance links a spec. Each kind's canonical semantic identity is its chemical-substance domain-ontology class IRI (`chemsub`); the battinfo `key` is the ergonomic handle. Kinds missing an ontology class omit `chemsub` and go on the ontology-additions backlog (labeled ns# fallback until upstreamed). This is a governance-by-PR vocabulary, NOT a user-authored record type. `chemsub` values use the domain-chemical-substance namespace (https://w3id.org/emmo/domain/chemical-substance#), verified against release 0.15.0. `emmo` values are the domain-battery class local-name used to type JSON-LD nodes (must resolve in the bundled domain-battery context). `reference_properties` carry curated, citable generic anchors (value/unit/citation) that the genome compares datasheet- and measurement-reported distributions against; present only where a citable source exists. Optional EXTERNAL IDENTITY ANCHORS (`wikidata_qid`, `inchikey`, `pubchem_cid`, `mp_id`, `cas_rn`) tie a kind to the identifier systems the rest of materials science already uses; each is emitted as a `skos:exactMatch` link. They are populated only where the value has been verified — an absent anchor means unverified, never guessed. `mp_id` denotes a representative ORDERED structure in the Materials Project, so solid-solution families (NMC, NCA, LMFP) legitimately carry none. NMP is a processing solvent, not an electrolyte solvent; the families enum has no processing-solvent value, so it sits under `other` until one is added.",
-  "families": [
-    "active_anode",
-    "active_cathode",
+  "version": "0.3.0",
+  "description": "Curated, shipped vocabulary of generic material kinds (Level 1 of the three-level materials model). A kind is the universal reference identity of a material (graphite, LFP, NMC811, ...): the aggregation axis of the Battery Genome. Every material-spec carries a required `kind`; every material instance links a spec. Each kind's canonical semantic identity is its chemical-substance domain-ontology class IRI (`chemsub`); the battinfo `key` is the ergonomic handle. Kinds missing an ontology class omit `chemsub` and go on the ontology-additions backlog (labeled ns# fallback until upstreamed). This is a governance-by-PR vocabulary, NOT a user-authored record type. `chemsub` values use the domain-chemical-substance namespace (https://w3id.org/emmo/domain/chemical-substance#), verified against release 0.15.0. `emmo` values are the domain-battery class local-name used to type JSON-LD nodes (must resolve in the bundled domain-battery context). `reference_properties` carry curated, citable generic anchors (value/unit/citation) that the genome compares datasheet- and measurement-reported distributions against; present only where a citable source exists. Optional EXTERNAL IDENTITY ANCHORS (`wikidata_qid`, `inchikey`, `pubchem_cid`, `mp_id`, `cas_rn`) tie a kind to the identifier systems the rest of materials science already uses; each is emitted as a `skos:exactMatch` link. They are populated only where the value has been verified — an absent anchor means unverified, never guessed. `mp_id` denotes a representative ORDERED structure in the Materials Project, so solid-solution families (NMC, NCA, LMFP) legitimately carry none. Each kind carries `roles`: the use-site slots this substance is KNOWN to fill (coating roles, electrolyte constituents, component films/foils/coatings). The list is informative, never normative — it means 'known to serve as', not 'may only serve as': roles are system-relative (FEC is both co-solvent and additive; CMC both binder and thickener), a use outside the listed roles is never an error, and the role a material actually plays in a given cell is stated at the use site. `active_material` is the one load-bearing role: it gates electrode kinds and anchors reference properties. An empty list (NMP) means the kind fills no composition slot at all.",
+  "roles": [
+    "active_material",
     "binder",
     "conductive_additive",
-    "electrolyte_solvent",
-    "electrolyte_salt",
-    "separator_material",
-    "current_collector_material",
-    "other"
+    "other_additive",
+    "salt",
+    "solvent",
+    "additive",
+    "separator",
+    "current_collector",
+    "coating"
   ],
   "kinds": {
     "graphite": {
       "label": "Graphite",
-      "family": "active_anode",
+      "roles": ["active_material"],
       "formula": "C",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_d53259a7_0d9c_48b9_a6c1_4418169df303",
       "emmo": "Graphite",
@@ -30,7 +31,7 @@
     },
     "silicon": {
       "label": "Silicon",
-      "family": "active_anode",
+      "roles": ["active_material"],
       "formula": "Si",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_68c0876b_cb62_41cd_846d_95cc9d9a8733",
       "emmo": "Silicon",
@@ -43,7 +44,7 @@
     },
     "silicon_graphite": {
       "label": "Silicon-graphite composite",
-      "family": "active_anode",
+      "roles": ["active_material"],
       "formula": "Si/C",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_3f061928_e90f_4414_9308_d4c843ebb79a",
       "emmo": "SiliconGraphite",
@@ -51,7 +52,7 @@
     },
     "hard_carbon": {
       "label": "Hard carbon",
-      "family": "active_anode",
+      "roles": ["active_material"],
       "formula": "C",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_5cee19d2_f916_4264_a8ed_efed13a808d2",
       "emmo": "HardCarbon",
@@ -59,7 +60,7 @@
     },
     "lto": {
       "label": "Lithium titanate (LTO)",
-      "family": "active_anode",
+      "roles": ["active_material"],
       "formula": "Li4Ti5O12",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_acdb232f_8041_4e11_8a11_5db2d2baae4d",
       "emmo": "LithiumTitanate",
@@ -67,7 +68,7 @@
     },
     "lithium_metal": {
       "label": "Lithium metal",
-      "family": "active_anode",
+      "roles": ["active_material"],
       "formula": "Li",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_c109ca45_08c7_4436_a818_a9c575785e2f",
       "mp_id": "mp-135",
@@ -78,7 +79,7 @@
     },
     "zinc": {
       "label": "Zinc metal",
-      "family": "active_anode",
+      "roles": ["active_material"],
       "formula": "Zn",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_9bd78e1c_a4dc_41b6_8013_adb51df1ffdc",
       "emmo": "Zinc",
@@ -86,7 +87,7 @@
     },
     "lfp": {
       "label": "Lithium iron phosphate (LFP)",
-      "family": "active_cathode",
+      "roles": ["active_material"],
       "formula": "LiFePO4",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_aa8e9cc4_5f66_4307_b1c8_26fac7653a90",
       "emmo": "LithiumIronPhosphate",
@@ -100,7 +101,7 @@
     },
     "lmfp": {
       "label": "Lithium manganese iron phosphate (LMFP)",
-      "family": "active_cathode",
+      "roles": ["active_material"],
       "formula": "LiMnxFe1-xPO4",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_40c605fd_4e47_4e90_a055_185f749d834c",
       "emmo": "LithiumManganeseIronPhosphate",
@@ -108,7 +109,7 @@
     },
     "lco": {
       "label": "Lithium cobalt oxide (LCO)",
-      "family": "active_cathode",
+      "roles": ["active_material"],
       "formula": "LiCoO2",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_4c62d334_a124_40b3_9fd1_fe713d01a6af",
       "emmo": "LithiumCobaltOxide",
@@ -117,7 +118,7 @@
     },
     "lmo": {
       "label": "Lithium manganese oxide (LMO)",
-      "family": "active_cathode",
+      "roles": ["active_material"],
       "formula": "LiMn2O4",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_e8fafdc8_6cd3_4dd0_9630_10ca8e3f1827",
       "emmo": "LithiumManganeseOxide",
@@ -126,7 +127,7 @@
     },
     "lnmo": {
       "label": "Lithium nickel manganese oxide (LNMO)",
-      "family": "active_cathode",
+      "roles": ["active_material"],
       "formula": "LiNi0.5Mn1.5O4",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_f3e7979a_e3ef_450a_8762_7d8778afe478",
       "emmo": "LithiumNickelManganeseOxide",
@@ -134,7 +135,7 @@
     },
     "nmc111": {
       "label": "NMC111 (LiNi1/3Mn1/3Co1/3O2)",
-      "family": "active_cathode",
+      "roles": ["active_material"],
       "formula": "LiNi0.33Mn0.33Co0.33O2",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_a0b57956_8ba1_4021_ade9_44a87d103d90",
       "emmo": "LithiumNickelManganeseCobaltOxide111",
@@ -142,7 +143,7 @@
     },
     "nmc532": {
       "label": "NMC532 (LiNi0.5Mn0.3Co0.2O2)",
-      "family": "active_cathode",
+      "roles": ["active_material"],
       "formula": "LiNi0.5Mn0.3Co0.2O2",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_592acd61_23c8_4a1a_b41b_1eeabedc0710",
       "emmo": "LithiumNickelManganeseCobaltOxide532",
@@ -151,7 +152,7 @@
     },
     "nmc622": {
       "label": "NMC622 (LiNi0.6Mn0.2Co0.2O2)",
-      "family": "active_cathode",
+      "roles": ["active_material"],
       "formula": "LiNi0.6Mn0.2Co0.2O2",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_cfcde9c2_3a9c_4add_b27e_0ba0cedf1c70",
       "emmo": "LithiumNickelManganeseCobaltOxide622",
@@ -160,7 +161,7 @@
     },
     "nmc811": {
       "label": "NMC811 (LiNi0.8Mn0.1Co0.1O2)",
-      "family": "active_cathode",
+      "roles": ["active_material"],
       "formula": "LiNi0.8Mn0.1Co0.1O2",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_e877987f_3b08_4e21_8f2e_c280e6bef52f",
       "emmo": "LithiumNickelManganeseCobaltOxide811",
@@ -169,7 +170,7 @@
     },
     "nca": {
       "label": "NCA (lithium nickel cobalt aluminium oxide)",
-      "family": "active_cathode",
+      "roles": ["active_material"],
       "formula": "LiNixCoyAlzO2",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_cd17ca33_ae3d_4738_8930_547673bf6c1f",
       "emmo": "LithiumNickelCobaltAluminiumOxide",
@@ -177,14 +178,14 @@
     },
     "mno2": {
       "label": "Manganese dioxide",
-      "family": "active_cathode",
+      "roles": ["active_material"],
       "formula": "MnO2",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_dcdbdbed_2e20_40d1_a7a5_5761de7f0618",
       "aliases": ["mno2", "manganese dioxide", "manganese(iv) oxide", "emd"]
     },
     "pvdf": {
       "label": "Polyvinylidene fluoride (PVDF)",
-      "family": "binder",
+      "roles": ["binder"],
       "formula": "(C2H2F2)n",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_f2e48e9e_f774_4f42_939f_1fe522efb7c8",
       "emmo": "PolyvinylideneFluoride",
@@ -192,21 +193,21 @@
     },
     "cmc": {
       "label": "Carboxymethyl cellulose (CMC)",
-      "family": "binder",
+      "roles": ["binder", "other_additive"],
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_d36fbe2f_6b0a_4178_b6ca_7373bdefcb51",
       "emmo": "CarboxymethylCellulose",
       "aliases": ["cmc", "carboxymethyl cellulose", "carboxymethylcellulose", "sodium cmc"]
     },
     "sbr": {
       "label": "Styrene-butadiene rubber (SBR)",
-      "family": "binder",
+      "roles": ["binder"],
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_210edf30_ad63_438c_97db_f817942db49b",
       "emmo": "StyreneButadiene",
       "aliases": ["sbr", "styrene butadiene rubber", "styrene-butadiene", "styrene-butadiene rubber"]
     },
     "carbon_black": {
       "label": "Carbon black",
-      "family": "conductive_additive",
+      "roles": ["conductive_additive"],
       "formula": "C",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_0a5cb747_60cf_4929_a54a_712c54b49f3b",
       "emmo": "CarbonBlack",
@@ -214,7 +215,7 @@
     },
     "lipf6": {
       "label": "Lithium hexafluorophosphate (LiPF6)",
-      "family": "electrolyte_salt",
+      "roles": ["salt"],
       "formula": "LiPF6",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_0deb4fe8_b0c0_4e3f_8848_64435e5c0771",
       "emmo": "LithiumHexafluorophosphate",
@@ -225,7 +226,7 @@
     },
     "litfsi": {
       "label": "Lithium bis(trifluoromethanesulfonyl)imide (LiTFSI)",
-      "family": "electrolyte_salt",
+      "roles": ["salt"],
       "formula": "LiC2F6NO4S2",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_8267551d_7572_42f6_888d_96ff0c78f3aa",
       "emmo": "LithiumBistrifluoromethanesulfonylimide",
@@ -233,7 +234,7 @@
     },
     "lifsi": {
       "label": "Lithium bis(fluorosulfonyl)imide (LiFSI)",
-      "family": "electrolyte_salt",
+      "roles": ["salt"],
       "formula": "LiF2NO4S2",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_f12d9fa2_a9a8_44e9_8f24_ceb9e74b0731",
       "emmo": "LithiumBisfluorosulfonylimide",
@@ -241,7 +242,7 @@
     },
     "koh": {
       "label": "Potassium hydroxide (KOH)",
-      "family": "electrolyte_salt",
+      "roles": ["salt"],
       "formula": "KOH",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_ccdce7d4_b695_4871_84c2_13679807d077",
       "emmo": "PotassiumHydroxide",
@@ -249,7 +250,7 @@
     },
     "ec": {
       "label": "Ethylene carbonate (EC)",
-      "family": "electrolyte_solvent",
+      "roles": ["solvent"],
       "formula": "C3H4O3",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_57339d90_0553_4a96_8da9_ff6c3684e226",
       "emmo": "EthyleneCarbonate",
@@ -259,7 +260,7 @@
     },
     "emc": {
       "label": "Ethyl methyl carbonate (EMC)",
-      "family": "electrolyte_solvent",
+      "roles": ["solvent"],
       "formula": "C4H8O3",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_bb20bdea_343c_4911_8c45_37fc1077d22f",
       "emmo": "EthylMethylCarbonate",
@@ -267,7 +268,7 @@
     },
     "dmc": {
       "label": "Dimethyl carbonate (DMC)",
-      "family": "electrolyte_solvent",
+      "roles": ["solvent"],
       "formula": "C3H6O3",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_c4a7d7bd_497e_457e_b858_ff73254266d0",
       "emmo": "DimethylCarbonate",
@@ -275,7 +276,7 @@
     },
     "pc": {
       "label": "Propylene carbonate (PC)",
-      "family": "electrolyte_solvent",
+      "roles": ["solvent"],
       "formula": "C4H6O3",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_46e9f253_40cb_4b48_b8d0_0b976ea4e156",
       "emmo": "PropyleneCarbonate",
@@ -283,7 +284,7 @@
     },
     "fec": {
       "label": "Fluoroethylene carbonate (FEC)",
-      "family": "electrolyte_solvent",
+      "roles": ["solvent", "additive"],
       "formula": "C3H3FO3",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_20004d19_02cf_4667_a09f_b5c595b44b1f",
       "emmo": "FluoroethyleneCarbonate",
@@ -291,7 +292,7 @@
     },
     "vc": {
       "label": "Vinylene carbonate (VC)",
-      "family": "electrolyte_solvent",
+      "roles": ["additive"],
       "formula": "C3H2O3",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_31d0d139_7b45_4d1e_8603_92cc12da2fad",
       "emmo": "VinyleneCarbonate",
@@ -299,7 +300,7 @@
     },
     "polypropylene": {
       "label": "Polypropylene (PP) separator",
-      "family": "separator_material",
+      "roles": ["separator"],
       "formula": "(C3H6)n",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_c5cff8c2_581e_4341_a3e6_8ba8c8ce2d2b",
       "emmo": "Polypropylene",
@@ -307,7 +308,7 @@
     },
     "polyethylene": {
       "label": "Polyethylene (PE) separator",
-      "family": "separator_material",
+      "roles": ["separator"],
       "formula": "(C2H4)n",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_79220ea3_3426_47a0_9b41_33012d565fc2",
       "emmo": "Polyethylene",
@@ -315,7 +316,7 @@
     },
     "aluminium": {
       "label": "Aluminium current collector",
-      "family": "current_collector_material",
+      "roles": ["current_collector"],
       "formula": "Al",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_8f7dd877_5ad0_48f1_bbec_84153d8215f4",
       "emmo": "Aluminium",
@@ -323,7 +324,7 @@
     },
     "copper": {
       "label": "Copper current collector",
-      "family": "current_collector_material",
+      "roles": ["current_collector"],
       "formula": "Cu",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_0993cbab_ff7f_4ec3_8a6c_cd67497d54d9",
       "emmo": "Copper",
@@ -331,15 +332,15 @@
     },
     "alumina": {
       "label": "Alumina (Al2O3) coating",
-      "family": "other",
+      "roles": ["coating"],
       "formula": "Al2O3",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_a2b46543_4d0f_488a_b51a_7ed3a4149170",
       "aliases": ["alumina", "aluminium oxide", "aluminum oxide", "al2o3", "al2o3 particles"]
     },
     "nmp": {
       "label": "N-methyl-2-pyrrolidone (NMP)",
-      "family": "other",
-      "family_note": "Processing solvent (slurry casting), not an electrolyte solvent. The families enum has no processing_solvent value yet, so this sits under `other`.",
+      "roles": [],
+      "roles_note": "Processing solvent (slurry casting): fills no composition slot, hence no roles.",
       "formula": "C5H9NO",
       "chemsub": "https://w3id.org/emmo/domain/chemical-substance#substance_59c65403_b7f9_4852_a37a_e6295c7b026c",
       "emmo": "NMethyl2Pyrrolidone",

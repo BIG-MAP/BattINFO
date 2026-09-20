@@ -154,6 +154,7 @@ def _record_from_parameter_set(
     scope: str | None = None,
     electrode_polarity: str | None = None,
     model_context: Mapping[str, Any] | None = None,
+    annex: Mapping[str, Any] | None = None,
     default_provenance_class: str | None = None,
     description: str | None = None,
     comment: str | None = None,
@@ -218,6 +219,10 @@ def _record_from_parameter_set(
         body["electrode_polarity"] = electrode_polarity
     if model_context:
         body["model_context"] = dict(model_context)
+    if annex:
+        # Source-file extension entries (e.g. a BPX User-defined block),
+        # verbatim: no semantics claimed, carried so re-export loses nothing.
+        body["annex"] = dict(annex)
     if description is not None:
         body["description"] = description
     if comment is not None:

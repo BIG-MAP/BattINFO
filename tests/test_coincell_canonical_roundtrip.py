@@ -92,7 +92,7 @@ def test_domain_battery_export_uses_canonical_capacity_types() -> None:
     package = import_converter_package(REFERENCE)
     # to_jsonld validates internally for the domain-battery target; a failure raises.
     doc = to_jsonld(_descriptor_input(package.specification.to_json()), target="domain-battery")
-    battery = doc["@graph"][0]
+    battery = doc["@graph"][0]["isDescriptionFor"]
 
     electrode_types: set[str] = set()
     for relation in ("hasPositiveElectrode", "hasNegativeElectrode"):

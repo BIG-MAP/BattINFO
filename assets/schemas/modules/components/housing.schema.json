@@ -1,0 +1,262 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w3id.org/battinfo/schema/modules/components/housing.schema.json",
+  "title": "Housing",
+  "description": "Cell mechanical housing: case, cap, terminals, seals, and other hardware parts. Shared by the inline cell-spec holder and the standalone housing-spec record.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "case": {
+      "$ref": "#/$defs/Case",
+      "description": "Main case or can of the housing."
+    },
+    "cap": {
+      "$ref": "#/$defs/HardwarePart",
+      "description": "Cap or lid part."
+    },
+    "terminals": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Terminal"
+      },
+      "description": "Electrical terminals, with polarity and material."
+    },
+    "seals": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Seal"
+      },
+      "description": "Seals and gaskets."
+    },
+    "parts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/HardwarePart"
+      },
+      "description": "Other hardware parts (springs, spacers, ...)."
+    },
+    "property": {
+      "$ref": "../common/quantitative-properties.schema.json",
+      "description": "Named quantity map of housing-level properties (e.g. mass, wall_thickness). See the property keys reference for the full list of recognised keys."
+    },
+    "comment": {
+      "type": "string",
+      "description": "Free-text comment."
+    }
+  },
+  "$defs": {
+    "OrganizationIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+      "description": "Canonical BattINFO IRI in the organization/ namespace (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx)."
+    },
+    "Organization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "type": {
+          "const": "Organization",
+          "description": "JSON-LD type discriminator."
+        },
+        "id": {
+          "$ref": "#/$defs/OrganizationIri",
+          "description": "Canonical BattINFO organization IRI linking this party to its organization record."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Organization name."
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Homepage URL."
+        }
+      },
+      "description": "An organization referenced by name, with an optional canonical BattINFO organization IRI."
+    },
+    "OrgRef": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "$ref": "#/$defs/Organization"
+        }
+      ],
+      "description": "An organization, as either a plain name string or a structured Organization object that can carry a canonical organization IRI."
+    },
+    "Case": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "size_code": {
+          "type": "string",
+          "description": "Standard size code of the case; follows the same convention as cell_spec.size_code (e.g. 'CR2032', '18650')."
+        },
+        "coating": {
+          "type": "string",
+          "description": "Surface coating or plating of the part."
+        },
+        "material": {
+          "type": "string",
+          "description": "Part material (e.g. 'stainless steel 316L', 'aluminium')."
+        },
+        "manufacturer": {
+          "$ref": "#/$defs/OrgRef",
+          "description": "Manufacturer of the item."
+        },
+        "supplier": {
+          "$ref": "#/$defs/OrgRef",
+          "description": "Supplier or vendor the item was sourced from."
+        },
+        "product_id": {
+          "type": "string",
+          "description": "Manufacturer or supplier product/grade identifier."
+        },
+        "property": {
+          "$ref": "../common/quantitative-properties.schema.json",
+          "description": "Named quantity map of part properties (e.g. thickness, mass, diameter). See the property keys reference for the full list of recognised keys."
+        },
+        "comment": {
+          "type": "string",
+          "description": "Free-text comment."
+        }
+      },
+      "description": "The main case or can of the housing."
+    },
+    "Terminal": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "polarity": {
+          "type": "string",
+          "enum": [
+            "positive",
+            "negative"
+          ],
+          "description": "Terminal polarity."
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "tab",
+            "rivet",
+            "stud",
+            "threaded_post",
+            "other"
+          ],
+          "description": "Mechanical kind of terminal."
+        },
+        "material": {
+          "type": "string",
+          "description": "Part material (e.g. 'stainless steel 316L', 'aluminium')."
+        },
+        "manufacturer": {
+          "$ref": "#/$defs/OrgRef",
+          "description": "Manufacturer of the item."
+        },
+        "supplier": {
+          "$ref": "#/$defs/OrgRef",
+          "description": "Supplier or vendor the item was sourced from."
+        },
+        "product_id": {
+          "type": "string",
+          "description": "Manufacturer or supplier product/grade identifier."
+        },
+        "property": {
+          "$ref": "../common/quantitative-properties.schema.json",
+          "description": "Named quantity map of part properties (e.g. thickness, mass, diameter). See the property keys reference for the full list of recognised keys."
+        },
+        "comment": {
+          "type": "string",
+          "description": "Free-text comment."
+        }
+      },
+      "description": "An electrical terminal of the housing."
+    },
+    "Seal": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "material": {
+          "type": "string",
+          "description": "Seal material (e.g. 'polypropylene gasket', 'PFA')."
+        },
+        "manufacturer": {
+          "$ref": "#/$defs/OrgRef",
+          "description": "Manufacturer of the item."
+        },
+        "supplier": {
+          "$ref": "#/$defs/OrgRef",
+          "description": "Supplier or vendor the item was sourced from."
+        },
+        "product_id": {
+          "type": "string",
+          "description": "Manufacturer or supplier product/grade identifier."
+        },
+        "property": {
+          "$ref": "../common/quantitative-properties.schema.json",
+          "description": "Named quantity map of part properties (e.g. thickness, mass, diameter). See the property keys reference for the full list of recognised keys."
+        },
+        "comment": {
+          "type": "string",
+          "description": "Free-text comment."
+        }
+      },
+      "description": "A seal or gasket of the housing."
+    },
+    "HardwarePart": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "cap",
+            "lid",
+            "can",
+            "spring",
+            "spacer",
+            "vent",
+            "other"
+          ],
+          "description": "Kind of hardware part, for parts without a dedicated field; use case/cap for those."
+        },
+        "coating": {
+          "type": "string",
+          "description": "Surface coating or plating of the part."
+        },
+        "material": {
+          "type": "string",
+          "description": "Part material (e.g. 'stainless steel 316L', 'aluminium')."
+        },
+        "manufacturer": {
+          "$ref": "#/$defs/OrgRef",
+          "description": "Manufacturer of the item."
+        },
+        "supplier": {
+          "$ref": "#/$defs/OrgRef",
+          "description": "Supplier or vendor the item was sourced from."
+        },
+        "product_id": {
+          "type": "string",
+          "description": "Manufacturer or supplier product/grade identifier."
+        },
+        "property": {
+          "$ref": "../common/quantitative-properties.schema.json",
+          "description": "Named quantity map of part properties (e.g. thickness, mass, diameter). See the property keys reference for the full list of recognised keys."
+        },
+        "comment": {
+          "type": "string",
+          "description": "Free-text comment."
+        }
+      },
+      "description": "A discrete hardware part of the housing (cap, lid, can, spring, spacer, ...)."
+    }
+  }
+}

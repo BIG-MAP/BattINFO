@@ -6,7 +6,6 @@
     "name": "Zinc",
     "kind": "zinc",
     "material_class": "metal_electrode",
-    "electrode_polarity": "negative",
     "formula": "Zn",
     "chemistry_family": "metal",
     "property": {

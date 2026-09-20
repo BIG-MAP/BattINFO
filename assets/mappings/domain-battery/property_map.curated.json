@@ -770,6 +770,24 @@
       "class_pref_label": "Width",
       "class_label": "Width",
       "confidence": 1.0
+    },
+    {
+      "key": "electrode_area",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo#EMMO_96f39f77_44dc_491b_8fa7_30d887fe0890",
+      "class_qname": "emmo:Area",
+      "class_pref_label": "Area",
+      "class_label": "Area",
+      "confidence": 1.0
+    },
+    {
+      "key": "external_surface_area",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo#EMMO_96f39f77_44dc_491b_8fa7_30d887fe0890",
+      "class_qname": "emmo:Area",
+      "class_pref_label": "Area",
+      "class_label": "Area",
+      "confidence": 1.0
     }
   ]
 }

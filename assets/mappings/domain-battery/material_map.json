@@ -331,6 +331,37 @@
         "1-methyl-2-pyrrolidone"
       ],
       "emmo_class": "NMethyl2Pyrrolidone"
+    },
+    {
+      "symbol": "Li",
+      "aliases": [
+        "lithium metal",
+        "lithium",
+        "li metal",
+        "metallic lithium",
+        "lithium foil"
+      ],
+      "emmo_class": "Lithium"
+    },
+    {
+      "symbol": "Zn",
+      "aliases": [
+        "zinc",
+        "zinc metal",
+        "zinc foil"
+      ],
+      "emmo_class": "Zinc"
+    },
+    {
+      "symbol": "Na",
+      "aliases": [
+        "sodium metal",
+        "sodium",
+        "na metal",
+        "metallic sodium",
+        "sodium foil"
+      ],
+      "emmo_class": "Sodium"
     }
   ]
 }

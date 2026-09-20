@@ -292,7 +292,10 @@ def build_index(
         return rows
 
     electrode_specs = _index_electrodes(
-        "electrode-spec", "electrode_spec", ("kind", "polarity", "active_material_spec_id")
+        "electrode-spec",
+        "electrode_spec",
+        # `kind` kept beside its replacement so pre-rename records still index.
+        ("active_material_kind", "kind", "polarity", "active_material_spec_id"),
     )
     electrodes = _index_electrodes(
         "electrode", "electrode", ("electrode_spec_id", "batch_id", "lot_id")

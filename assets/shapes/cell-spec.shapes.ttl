@@ -13,12 +13,17 @@
 # These shapes apply to the *quantity nodes* in the canonical BattINFO cell-spec
 # JSON-LD (produced by battinfo.jsonld.cell_spec_to_jsonld, which shares the
 # canonical builder with the resolver and publication emitters).  Each quantity
-# is an entry of the spec node's EMMO `hasProperty` array, typed with its EMMO
+# is an entry of the `hasProperty` array on the described battery (the
+# individual under the spec's `isDescriptionFor`), typed with its EMMO
 # property class (plus a property-nature co-type):
 #
-#   <spec-IRI>  hasProperty  [ a <PropertyClass>, ConventionalProperty ;
-#                              hasNumericalPart [ a RealData ; hasNumberValue <num> ] ;
-#                              hasMeasurementUnit <unit-IRI> ] .
+#   <spec-IRI>  isDescriptionFor  [ a BatteryCell ;
+#       hasProperty  [ a <PropertyClass>, ConventionalProperty ;
+#                      hasNumericalPart [ a RealData ; hasNumberValue <num> ] ;
+#                      hasMeasurementUnit <unit-IRI> ] ] .
+#
+# (Targeting is by quantity class, so pre-pattern documents with hasProperty
+# on the spec node itself validate identically.)
 #
 # SHACL sh:targetClass selects the typed quantity nodes; sh:property then
 # constrains the EMMO numerical value (hasNumericalPart/hasNumberValue) on

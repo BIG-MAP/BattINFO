@@ -23,7 +23,9 @@ interface GEdge {
   label: string;
 }
 
-const MAX_DEPTH = 3;
+// Depth 4 keeps the full canonical chain visible: spec → isDescriptionFor →
+// electrode → coating → active material.
+const MAX_DEPTH = 4;
 const MAX_CHILDREN = 6;
 const MAX_NODES = 48;
 

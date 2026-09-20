@@ -57,7 +57,6 @@ class MaterialSpecInput(BaseModel):
     kind: str | None = None
     grade: str | None = None
     material_class: str | None = None
-    electrode_polarity: str | None = None
     formula: str | None = None
     chemistry_family: str | None = None
     emmo_type: str | None = None
@@ -83,7 +82,9 @@ class MaterialInput(BaseModel):
     schema_version: str = SCHEMA_VERSION
     id: str | None = None
     uid: str | None = None
-    material_spec_id: str
+    material_spec_id: str = Field(
+        validation_alias=AliasChoices("material_spec_id", "spec_id")
+    )
     name: str | None = None
     lot_id: str | None = Field(default=None, validation_alias=AliasChoices("lot_id", "lot"))
     batch_id: str | None = None
@@ -106,10 +107,13 @@ class MaterialInput(BaseModel):
 class ElectrodeSpecInput(BaseModel):
     """Typed input for saving a new canonical electrode-spec resource.
 
-    The coated electrode as a designed artifact. ``kind`` names the ACTIVE
-    material (from the curated material-kind vocabulary) and is required;
-    ``active_material_spec_id`` is optional, so a purchased electrode whose
-    powder provenance is unknown is still expressible.
+    The coated electrode as a designed artifact. ``active_material_kind`` names
+    the ACTIVE material (from the curated material-kind vocabulary) — named for
+    what it identifies, since a bare ``kind`` on an electrode reads as the
+    electrode's form (porous, foil, …), not its chemistry. ``kind`` stays
+    accepted as a deprecated alias. ``active_material_spec_id`` is optional, so
+    a purchased electrode whose powder provenance is unknown is still
+    expressible.
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -118,7 +122,9 @@ class ElectrodeSpecInput(BaseModel):
     id: str | None = None
     uid: str | None = None
     name: str
-    kind: str | None = None
+    active_material_kind: str | None = Field(
+        default=None, validation_alias=AliasChoices("active_material_kind", "kind")
+    )
     polarity: str | None = None
     grade: str | None = None
     active_material_spec_id: str | None = None
@@ -128,6 +134,9 @@ class ElectrodeSpecInput(BaseModel):
     # divergent is ever stored.
     coating: dict[str, Any] | None = None
     composition: dict[str, Any] | None = None
+    # A monolithic uncoated electrode (lithium metal foil): the material IS
+    # the electrode - no coating, no separate current collector.
+    material: dict[str, Any] | None = None
     current_collector: dict[str, Any] | None = Field(
         default=None, validation_alias=AliasChoices("current_collector", "collector")
     )
@@ -169,6 +178,10 @@ class ElectrodeInput(BaseModel):
     name: str | None = None
     batch_id: str | None = Field(default=None, validation_alias=AliasChoices("batch_id", "batch"))
     lot_id: str | None = Field(default=None, validation_alias=AliasChoices("lot_id", "lot"))
+    # Genealogy: the coated roll/web/strip this piece was cut from (itself an
+    # electrode record), and the piece's label within it.
+    parent_id: str | None = None
+    piece_id: str | None = None
     supplier: str | dict[str, Any] | None = None
     manufactured_at: int | str | None = None
     received_date: int | str | None = None
@@ -287,7 +300,6 @@ def _record_from_material_spec(draft: MaterialSpecInput) -> dict[str, Any]:
         spec["grade"] = draft.grade
     for field_name in (
         "material_class",
-        "electrode_polarity",
         "formula",
         "chemistry_family",
         "emmo_type",
@@ -499,7 +511,7 @@ def _current_collector_value(value: Any) -> dict[str, Any] | None:
     name = value.get("name") or value.get("material")
     if isinstance(name, str) and name.strip():
         holder["name"] = name.strip()
-    for key in ("material_spec_id", "manufacturer", "supplier", "product_id", "comment"):
+    for key in ("material", "form", "material_spec_id", "manufacturer", "supplier", "product_id", "comment"):
         if value.get(key) is not None:
             holder[key] = value[key]
     prop = dict(value.get("property") or {})
@@ -561,9 +573,10 @@ def _electrode_spec_identity_uid(draft: ElectrodeSpecInput, kind_key: str | None
 
 
 def _record_from_electrode_spec(draft: ElectrodeSpecInput) -> dict[str, Any]:
-    from battinfo.electrodes import electrode_polarity_for_kind
 
-    kind_key = _resolve_electrode_kind_or_raise(draft.kind, draft.name, draft.product_id)
+    kind_key = _resolve_electrode_kind_or_raise(
+        draft.active_material_kind, draft.name, draft.product_id
+    )
     if draft.id is not None:
         if not _spec_iri_re("electrode-spec").fullmatch(draft.id):
             raise ValueError("electrode spec id must match https://w3id.org/battinfo/spec/{uid}.")
@@ -593,13 +606,15 @@ def _record_from_electrode_spec(draft: ElectrodeSpecInput) -> dict[str, Any]:
     }
     spec.update(draft.body or {})
     if kind_key is not None:
-        spec["kind"] = kind_key
-    # Polarity is derived from the kind's family when not authored, so a record
-    # never has to state the same fact twice (and cannot disagree with itself).
-    polarity = draft.polarity or electrode_polarity_for_kind(kind_key)
-    if polarity is not None:
-        spec["polarity"] = polarity
-    for field_name in ("grade", "active_material_spec_id", "product_id", "description", "comment"):
+        # Canonical key; the deprecated `kind` spelling (from a body pass-through
+        # or an old record round-tripping) normalizes away here.
+        spec["active_material_kind"] = kind_key
+        spec.pop("kind", None)
+    # Polarity is authored or absent — never derived from the kind: which side
+    # an active material sits on is the cell's fact, not the material's.
+    if draft.polarity is not None:
+        spec["polarity"] = draft.polarity
+    for field_name in ("grade", "active_material_spec_id", "material", "product_id", "description", "comment"):
         value = getattr(draft, field_name)
         if value is not None:
             spec[field_name] = value
@@ -658,6 +673,10 @@ def _record_from_electrode_spec(draft: ElectrodeSpecInput) -> dict[str, Any]:
 def _record_from_electrode(draft: ElectrodeInput) -> dict[str, Any]:
     if not _spec_iri_re("electrode-spec").fullmatch(draft.electrode_spec_id):
         raise ValueError("electrode_spec_id must match https://w3id.org/battinfo/spec/{uid}.")
+    if draft.parent_id is not None and not _component_iri_re("electrode").fullmatch(
+        draft.parent_id
+    ):
+        raise ValueError("parent_id must match https://w3id.org/battinfo/electrode/{uid}.")
     if draft.id is not None:
         if not _component_iri_re("electrode").fullmatch(draft.id):
             raise ValueError("electrode id must match https://w3id.org/battinfo/electrode/{uid}.")
@@ -674,7 +693,10 @@ def _record_from_electrode(draft: ElectrodeInput) -> dict[str, Any]:
             batch = draft.batch_id or draft.lot_id or draft.name or ""
             dashed_uid = stable_uid(
                 electrode_identity_seed(
-                    electrode_spec_id=draft.electrode_spec_id, batch=batch
+                    electrode_spec_id=draft.electrode_spec_id,
+                    batch=batch,
+                    parent_id=draft.parent_id,
+                    piece_id=draft.piece_id,
                 )
             )
         entity_id = f"https://w3id.org/battinfo/electrode/{dashed_uid}"
@@ -685,7 +707,7 @@ def _record_from_electrode(draft: ElectrodeInput) -> dict[str, Any]:
         "short_id": dashed_uid.replace("-", "")[:6],
     }
     electrode.update(draft.body or {})
-    for field_name in ("name", "batch_id", "lot_id", "storage", "comment"):
+    for field_name in ("name", "batch_id", "lot_id", "parent_id", "piece_id", "storage", "comment"):
         value = getattr(draft, field_name)
         if value is not None:
             electrode[field_name] = value
@@ -816,6 +838,7 @@ def query_electrode_specs(
     id: str | None = None,
     short_id_prefix: str | None = None,
     name: str | None = None,
+    active_material_kind: str | None = None,
     kind: str | None = None,
     polarity: str | None = None,
     manufacturer: str | None = None,
@@ -826,6 +849,9 @@ def query_electrode_specs(
     offset: int = 0,
 ) -> list[dict[str, Any]]:
     """Query reusable electrode specifications.
+
+    ``active_material_kind`` filters on the electrode's active-material kind;
+    ``kind`` is its deprecated alias.
 
     Searches YOUR records under ``source_root`` (default: ``./examples``);
     bundled example records only with ``include_packaged_examples=True`` (hits
@@ -845,7 +871,9 @@ def query_electrode_specs(
             "id": spec.get("id"),
             "short_id": spec.get("short_id"),
             "name": spec.get("name"),
-            "kind": spec.get("kind"),
+            # Old records may still carry the deprecated `kind` spelling.
+            "active_material_kind": spec.get("active_material_kind", spec.get("kind")),
+            "kind": spec.get("active_material_kind", spec.get("kind")),
             "polarity": spec.get("polarity"),
             "manufacturer": spec.get("manufacturer"),
             "origin": origin,
@@ -861,7 +889,7 @@ def query_electrode_specs(
             continue
         if not _str_eq(rec.get("name"), name):
             continue
-        if not _str_eq(rec.get("kind"), kind):
+        if not _str_eq(rec.get("kind"), active_material_kind if active_material_kind is not None else kind):
             continue
         if not _str_eq(rec.get("polarity"), polarity):
             continue
@@ -1222,7 +1250,7 @@ def query_materials(
 
 
 def _record_from_component_spec(
-    family: str,
+    component_family: str,
     *,
     name: str,
     body: dict[str, Any] | None = None,
@@ -1238,7 +1266,7 @@ def _record_from_component_spec(
     notes: list[str] | None = None,
     **extra: Any,
 ) -> dict[str, Any]:
-    legacy_namespace = f"{family.replace('_', '-')}-spec"
+    legacy_namespace = f"{component_family.replace('_', '-')}-spec"
     if id is not None:
         # Canonical spec/ form; the superseded per-family form is accepted so
         # pre-consolidation records keep their identity (never break an IRI).
@@ -1255,6 +1283,16 @@ def _record_from_component_spec(
     spec: dict[str, Any] = {"id": entity_id, "short_id": dashed_uid.replace("-", "")[:6], "name": name}
     spec.update(body or {})
     spec.update({k: v for k, v in extra.items() if v is not None})
+    if component_family == "electrolyte":
+        # The deprecated solvent_mixture wrapper normalizes to solvent when it
+        # carries nothing but its component list; a wrapper with its own extra
+        # facts is kept verbatim rather than silently losing them.
+        mixture = spec.get("solvent_mixture")
+        if "solvent" not in spec and isinstance(mixture, dict) and set(mixture) <= {"component"}:
+            components = mixture.get("component")
+            if isinstance(components, list) and components:
+                spec["solvent"] = components[0] if len(components) == 1 else components
+                spec.pop("solvent_mixture")
     for org_field, org_input in (("manufacturer", manufacturer), ("supplier", supplier)):
         org = _org_value(org_input)
         if org is not None:
@@ -1264,7 +1302,7 @@ def _record_from_component_spec(
 
     record: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
-        f"{family}_spec": spec,
+        f"{component_family}_spec": spec,
         "provenance": stamp_provenance({"source_type": source_type, "retrieved_at": _resolved_retrieved_at(retrieved_at)}),
     }
     if source_url is not None:
@@ -1278,7 +1316,7 @@ def _record_from_component_spec(
 
 
 def _record_from_component_instance(
-    family: str,
+    component_family: str,
     *,
     spec_id: str,
     body: dict[str, Any] | None = None,
@@ -1294,13 +1332,13 @@ def _record_from_component_instance(
     retrieved_at: int | str | None = None,
     notes: list[str] | None = None,
 ) -> dict[str, Any]:
-    base_namespace = family.replace("_", "-")
+    base_namespace = component_family.replace("_", "-")
     spec_namespace = f"{base_namespace}-spec"
     if not _spec_iri_re(spec_namespace).fullmatch(spec_id):
-        raise ValueError(f"{family}_spec_id must match https://w3id.org/battinfo/spec/{{uid}}.")
+        raise ValueError(f"{component_family}_spec_id must match https://w3id.org/battinfo/spec/{{uid}}.")
     if id is not None:
         if not _component_iri_re(base_namespace).fullmatch(id):
-            raise ValueError(f"{family} id must match https://w3id.org/battinfo/{base_namespace}/{{uid}}.")
+            raise ValueError(f"{component_family} id must match https://w3id.org/battinfo/{base_namespace}/{{uid}}.")
         if uid is not None:
             _assert_id_matches_uid(id, _normalized_dashed_uid(uid))
         entity_id = id
@@ -1311,7 +1349,7 @@ def _record_from_component_instance(
 
     instance: dict[str, Any] = {
         "id": entity_id,
-        f"{family}_spec_id": spec_id,
+        f"{component_family}_spec_id": spec_id,
         "short_id": dashed_uid.replace("-", "")[:6],
     }
     instance.update(body or {})
@@ -1330,7 +1368,7 @@ def _record_from_component_instance(
 
     record: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
-        family: instance,
+        component_family: instance,
         "provenance": stamp_provenance({"source_type": source_type, "retrieved_at": _resolved_retrieved_at(retrieved_at)}),
     }
     if source_url is not None:
@@ -1343,17 +1381,26 @@ def _record_from_component_instance(
     return record_to_snake_aliases(record)
 
 
-def create_component_spec(family: str, *, validate: bool = True, **fields: Any) -> dict[str, Any]:
-    """Create a canonical component-spec document for a family (electrode, separator, …)."""
-    record = _record_from_component_spec(family, **fields)
+def create_component_spec(component_family: str, *, validate: bool = True, **fields: Any) -> dict[str, Any]:
+    """Create a canonical component-spec document for a component family (electrode, separator, …)."""
+    record = _record_from_component_spec(component_family, **fields)
     if validate:
         _validate_canonical_record(record, policy=DEFAULT_POLICY)
     return record
 
 
-def create_component_instance(family: str, *, validate: bool = True, **fields: Any) -> dict[str, Any]:
-    """Create a canonical component (instance) document for a family."""
-    record = _record_from_component_instance(family, **fields)
+def create_component_instance(component_family: str, *, validate: bool = True, **fields: Any) -> dict[str, Any]:
+    """Create a canonical component (instance) document for a component family.
+
+    ``spec_id=`` is the authoring kwarg (the record stores the canonical
+    ``<component_family>_spec_id`` key); the prefixed spelling is accepted too.
+    """
+    prefixed = fields.pop(f"{component_family}_spec_id", None)
+    if prefixed is not None:
+        if fields.get("spec_id") not in (None, prefixed):
+            raise ValueError(f"spec_id and {component_family}_spec_id disagree.")
+        fields["spec_id"] = prefixed
+    record = _record_from_component_instance(component_family, **fields)
     if validate:
         _validate_canonical_record(record, policy=DEFAULT_POLICY)
     return record

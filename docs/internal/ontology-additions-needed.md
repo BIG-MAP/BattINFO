@@ -93,7 +93,7 @@ Retiring the served `ns#` catch-all namespace put every canonical record-body ke
 | Placeholder | Wanted upstream | Notes |
 |---|---|---|
 | `battinfo:ambientTemperature` | test-condition quantity, domain-electrochemistry or domain-battery | The transform deliberately types generic conditions as `ConventionalProperty`; a dedicated `AmbientTemperature` quantity would let both the emitter and the flat record layer ground it. |
-| `battinfo:voltageReference` | relation or annotation, domain-electrochemistry | Which electrode potentials are quoted against (e.g. Li/Li+). Zero candidates in the closure. |
+| `battinfo:voltageReference` | ~~relation~~ resolved in emission (2026-09-07) | The JSON-LD side no longer needs an upstream ask: the `voltage_reference` conditions key is intercepted and emitted as EMMO's own `hasMetrologicalReference` with class-typed reference-electrode nodes (see section 7). The placeholder remains only for the flat record key. |
 | `battinfo:stepMode` / `battinfo:stepDirection` | control-mode / direction quantities or a sanctioned literal pattern | Process classes (`ConstantCurrentCharging`, …) exist for typed emission; the flat step layer states mode/direction as literals and needs a predicate. |
 | `battinfo:lotId` | batch/lot identifier property, domain-battery | Sibling of `battinfo:batchId` (already a placeholder via `ci_batch_id`). |
 | `battinfo:chemistryFamily` / `battinfo:materialClass` | material classification relations, domain-battery or chemical-substance | Coarse family ("nmc") and class ("powder") of a material spec. |
@@ -101,6 +101,36 @@ Retiring the served `ns#` catch-all namespace put every canonical record-body ke
 | `battinfo:EquipmentSpec` / `battinfo:Equipment` / `battinfo:Channel` / `battinfo:ParameterSet` | equipment/channel/parameter-set classes, domain-battery | `hasTestEquipment` exists; the equipment classes themselves (and a measurement-channel class) do not. Parameter sets may re-home to a modelling vocabulary instead. |
 
 Not upstream asks (administrative, stays a placeholder or re-homes to a standard vocabulary if one appears): `battinfo:fundingProgramme`.
+
+## 7. Measurement-provenance cycle (2026-09-07)
+
+Found while moving quantity conditions onto their `isOutputOf` measurement node and
+building the voltage-reference couples table (`transform/json_to_jsonld.py`).
+
+| Term | Kind | Placement | Purpose |
+|---|---|---|---|
+| **`SodiumElectrode`** | Class | domain-electrochemistry, sibling of `LithiumElectrode`/`ZincElectrode` | A plain sodium-metal electrode. The closure has only `SodiumBasedElectrode` (any electrode containing sodium), which the couples table maps `Na/Na+` to meanwhile — too broad for a reference-electrode couple. Repoint `_VOLTAGE_REFERENCE_COUPLES["na/na+"]` when it lands. |
+| **`MeasurementParameter`** (or similar) | Class | chameo or domain-electrochemistry | A generic class for qualitative measurement parameters (`atmosphere: argon`). Such conditions currently type via the dynamic `battinfo:` fallback + `ConventionalProperty` and carry `hasStringValue`. |
+| **`PotentiostaticIntermittentTitrationTechnique`** | Class | chameo or domain-electrochemistry, sibling of `GalvanostaticIntermittentTitrationTechnique` | PITT — the potentiostatic twin of GITT (the closure has GITT but not PITT). Until published, `pitt` protocols emit an untyped plan node; add to `TEST_METHOD_CLASS` when it lands. |
+| measurement → procedure relation | Object property | chameo | Ties a measurement process to the procedure it followed. Until it exists, the emitter links protocols with `dcterms:conformsTo` (the in-house test→protocol predicate) — the one non-EMMO seam in the measurement subtree. |
+
+## 8. Coating sidedness (electrode review, 2026-09-08)
+
+| Term | Kind | Placement | Purpose |
+|---|---|---|---|
+| **`DoubleSideCoated`** / **`SingleSideCoated`** (or a `hasCoatedSides` datum) | Class or datum property | domain-electrochemistry, on `ElectrodeCoating` | Whether the current collector is coated on both sides or one — a first-class design fact of every real electrode. The closure has only `OneSidedHeating` / `TwoSidedHeating` (heating processes). Until published, the record key `coating.double_sided` (boolean) emits as a named `schema:PropertyValue` on the coating node (`_descriptor_electrode_coating_to_jsonld`). |
+
+## 9. Cell housing assembly (housing review, 2026-09-09)
+
+The housing record describes the enclosure assembly; the closure has the parts
+(`Case`, `CellLid`, `Terminal`, `Gasket`, `Spring`, …) but no class for the
+assembly itself, and `hasCase`'s published axioms relate the CELL to its case.
+
+| Term | Kind | Placement | Purpose |
+|---|---|---|---|
+| **`CellHousing`** | Class | domain-electrochemistry, sibling of `Case` under `ElectrochemicalComponent` | The assembly of components that enclose and mechanically support a cell: case, lid, terminals, seals, and internal hardware (a purchasable coin-cell kit is the canonical instance). Meanwhile the housing individual types `ElectrochemicalComponent` and lists every part under `hasConstituent` (`_component_holder_node`). |
+| **`hasHousing`** | Object property | domain-electrochemistry, cell → `CellHousing` | Relates a cell to its enclosure assembly. Meanwhile a cell's housing parts merge onto the cell node (`hasCase` for the case, per the published `CoinCell ⊑ hasCase some CoinCase` pattern). |
+| **`hasLid`** | Object property | domain-electrochemistry | `CellLid` "closes the case" but no relation states it; lids currently ride `hasConstituent`. |
 
 ## Landed upstream — stubs flipped
 
@@ -264,6 +294,22 @@ closure. None is caused by this repo; each is worked around locally.
 - **Duplicate `CapacityLoss`.** `electrochemistry_652b94f1_…` has it as prefLabel while
   `electrochemistry_e3d3d21c_…` (`CapacityFade`) carries it as an altLabel, so the string
   resolves to two classes. battinfo maps neither by key; the label is allowlisted only.
+- **`NominalBatteryProperty` contradicts its own parent (red-team review, 2026-09-15).**
+  `battery_fb9baf9b_680e_493e_a755_da9bb1fc9fae` is elucidated "a battery property
+  defined by the manufacturer and determined under some specified conditions" - a
+  quantified datasheet rating - but subclasses `emmo:NominalProperty`
+  (`EMMO_909415d1_…`), VIM's nominal property: one that "has no magnitude" (colour,
+  blood type). The class as published means "a quantified property that cannot be
+  quantified". It should be reparented (ConventionalProperty is the natural home:
+  "a quantitative property attributed by agreement"). battinfo maps its `Nominal`
+  value basis to `ConventionalProperty` and does not emit either class of this pair.
+- **`LR6` entails zinc-carbon chemistry (red-team review, 2026-09-15).**
+  `AlkalineZincManganeseDioxideBattery` is declared `rdfs:subClassOf` both
+  `AlkalineCell` and `ZincCarbonBattery`; alkaline and zinc-carbon are distinct
+  chemistries, so every `LR6` (AA alkaline) individual is entailed to be a
+  zinc-carbon battery. The `ZincCarbonBattery` parent should be removed. battinfo
+  still emits `LR6` (the designation typing is correct); the false chemistry
+  entailment is upstream's to fix.
 - **Five context terms resolve to IRIs outside the import closure.** The published
   domain-battery 0.20.2 context maps `ChemicalMaterial`, `ElementalMaterial`,
   `ChemicallyDefinedMaterial`, `hasORCID` and `AngularWaveNumber` to

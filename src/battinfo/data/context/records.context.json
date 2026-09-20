@@ -19,6 +19,7 @@
     "spdx": "http://spdx.org/rdf/terms#",
     "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
     "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "csvw": "http://www.w3.org/ns/csvw#",
     "BatteryCell": "battery:battery_68ed592a_7924_45d0_a108_94d6275d57f0",
     "BatteryCellSpecification": "battery:battery_1cfbba6c_8824_4932_a23e_2141483acef7",
     "CylindricalBattery": "battery:battery_ac604ecd_cc60_4b98_b57c_74cd5d3ccd40",
