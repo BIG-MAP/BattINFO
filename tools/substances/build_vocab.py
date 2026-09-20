@@ -182,9 +182,22 @@ def main() -> int:
                 formula=p.get("MolecularFormula", ""),
                 molar_mass=float(p["MolecularWeight"]) if p.get("MolecularWeight") else None,
             )
-            cas = pubchem_cas(cid, args.refresh)
-            if cas:
-                entry["cas_number"] = cas
+            # Hand-verified preferred CAS wins over the synonym-derived one:
+            # PubChem's first CAS-shaped synonym can belong to a different
+            # registry line than the number the literature cites (LiTFSI's
+            # ionic-form entry lists 2043073-41-0 while papers cite the
+            # neutral-salt 90076-65-6). The override is a reviewed seed value,
+            # so it is format-checked, never guessed.
+            preferred_cas = (r.get("preferred_cas") or "").strip()
+            if preferred_cas:
+                if not CAS_RE.match(preferred_cas):
+                    errors.append(f"{sym}: preferred_cas {preferred_cas!r} is not CAS-shaped")
+                    continue
+                entry["cas_number"] = preferred_cas
+            else:
+                cas = pubchem_cas(cid, args.refresh)
+                if cas:
+                    entry["cas_number"] = cas
             cs = chemsub.get(cid)
             if cs:
                 entry["chemsub_iri"] = cs["iri"]

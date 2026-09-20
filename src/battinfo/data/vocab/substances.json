@@ -1,7 +1,7 @@
 {
  "version": "0.1.0",
  "generated_from": {
-  "seed_sha256": "4b9a4d3a2f16759a7221b0f6ed294d0e6b21ababf7acc4a78e2cdd90da43a67b",
+  "seed_sha256": "4ec19a2afe6c835dc87b6af2fb81b185612a8ac1c37436d105457a3fe5fe42e4",
   "chemsub_version": "0.14.2-14-g3347cc2",
   "pubchem_fixture": "tools/substances/fixtures/"
  },
@@ -720,7 +720,7 @@
   {
    "symbol": "LiTFSI",
    "roles": [],
-   "note": "lithium bis(trifluoromethanesulfonyl)imide, ionic-form entry",
+   "note": "lithium bis(trifluoromethanesulfonyl)imide, ionic-form entry; preferred CAS is the neutral-salt registry number the literature cites (PubChem ionic-form entry lists 2043073-41-0)",
    "identity_basis": "structure",
    "inchikey": "QSZMZKBZAYQGRS-UHFFFAOYSA-N",
    "pubchem_cid": 3816071,
@@ -728,7 +728,7 @@
    "smiles": "[Li+].C(F)(F)(F)S(=O)(=O)[N-]S(=O)(=O)C(F)(F)F",
    "formula": "C2F6LiNO4S2",
    "molar_mass": 287.1,
-   "cas_number": "2043073-41-0",
+   "cas_number": "90076-65-6",
    "chemsub_iri": "https://w3id.org/emmo/domain/chemical-substance#substance_8267551d_7572_42f6_888d_96ff0c78f3aa",
    "chemsub_label": "LithiumBistrifluoromethanesulfonylimide",
    "ions": {

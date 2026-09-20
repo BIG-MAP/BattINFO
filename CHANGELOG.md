@@ -9,6 +9,25 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Chemical substances get pinned, machine-verifiable identity (0.8.0
+  core-features ruling; PR #371 un-parked).** A shipped vocabulary
+  (`tools/substances/seed.csv` -> `build_vocab.py` ->
+  `data/vocab/substances.json`) maps the symbols battery people write
+  ("EC", "LiPF6", "TTE") to InChIKey (canonical), PubChem CID, CAS,
+  SMILES, and the chemical-substance EMMO class; `battinfo.substances`
+  resolves and stamps identity at authoring time (exact-match only,
+  record slot breaks symbol collisions, did-you-mean on typos);
+  components and salts gain five optional identity fields; the JSON-LD
+  emits `schema:inChIKey` / `schema:smiles` and the PubChem page as
+  `schema:sameAs` on the physical substance nodes - placement checked
+  against the description-pattern rulings (chemistry literals ride
+  physical individuals; a compound page is a reference page, not a
+  class or a SKOS concept). Save gates warn (never error) on
+  unresolvable names. The seed gains a hand-verified `preferred_cas`
+  override - PubChem's ionic-form LiTFSI entry lists 2043073-41-0
+  while the literature cites the neutral-salt 90076-65-6, so the
+  reviewed number wins over the first synonym.
+
 - **Equipment, equipment specs, and channels emit JSON-LD (0.8.0
   core-features ruling).** The last "no JSON-LD emitter" gaps close. An
   equipment spec follows the description pattern like every other
