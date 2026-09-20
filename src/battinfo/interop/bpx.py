@@ -933,11 +933,11 @@ def from_bpx_parameters(source: Mapping[str, Any] | str | Path) -> BpxParameterI
     user_defined = params_raw.get("User-defined")
     if isinstance(user_defined, Mapping) and user_defined:
         keys = [str(k) for k in user_defined]
-        listed = ", ".join(keys[:8]) + (" …" if len(keys) > 8 else "")
+        # EVERY key is named — a truncated list is a silent drop for the rest.
         warnings.append(
-            f"BPX User-defined block not imported ({len(keys)} keys: {listed}). "
-            "These carry no standard semantics; author them as explicit claims "
-            "if they matter."
+            f"BPX User-defined block not imported ({len(keys)} keys: "
+            f"{', '.join(keys)}). These carry no standard semantics; author "
+            "them as explicit claims if they matter."
         )
     _handled_blocks = {*_BPX_ELECTRODE_BLOCKS.values(), "Separator", "Electrolyte", "Cell", "User-defined"}
     for block_name in params_raw:

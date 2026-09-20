@@ -78,7 +78,12 @@
     "User-defined": {
       "Negative electrode active material volume fraction": 0.56,
       "Positive electrode active material volume fraction": 0.55,
+      "Negative electrode inactive solid volume fraction": 0.04,
+      "Positive electrode inactive solid volume fraction": 0.11,
+      "Open-circuit voltage at 0% SOC [V]": 3.05,
       "Open-circuit voltage at 100% SOC [V]": 4.35,
+      "Tool-specific negative electrode volumetric surface area [m-1]": 4900000.0,
+      "Tool-specific positive electrode volumetric surface area [m-1]": 101000.0,
       "Exchange-current density j0 [A.m-2]": {
         "x": [0.1, 0.5, 0.9],
         "y": [0.6, 1.1, 0.7]
