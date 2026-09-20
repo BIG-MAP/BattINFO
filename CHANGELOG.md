@@ -118,6 +118,28 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- **Seventeen quantity keys stop emitting minted `battinfo:` fallbacks and
+  type as their published EMMO classes.** An audit of the parameter-claims
+  corpus found the curated property map had never been wired for the
+  parameter vocabulary, so every claim quantity except thickness emitted a
+  `battinfo:` camelCase term with no ontology entity behind it. The
+  seventeen keys with existing upstream classes now resolve: density,
+  porosity, ocp (OpenCircuitVoltage), particle_radius,
+  reaction_rate_constant, specific_capacity, stoichiometry_min/max
+  (Minimum/MaximumStoichiometricCoefficient), surface_area_per_volume
+  (VolumetricSurfaceArea), max_concentration, ionic_conductivity,
+  electronic_conductivity, transference_number
+  (ChargeCarrierTransportNumber), electrolyte_diffusivity
+  (ChargeCarrierDiffusivityInElectrolyte), conductivity_activation_energy
+  (ActivationEnergyOfElectrolyteConductivity), series_resistance
+  (InternalResistance), and areal_mass (AreaDensity). The fallbacks that
+  remain are deliberate — the classes do not exist upstream yet
+  (polarity-free generics, TransportEfficiency, InitialConcentration,
+  first-cycle efficiency, theoretical specific capacity), or the published
+  flat context already pins the key to its placeholder
+  (ambient_temperature, append-only context policy); the asks are filed
+  in `docs/internal/ontology-additions-needed.md` section 10.
+
 - `ws.status()` and `ws.pending()` now send the publisher API key from `ws.login()` (or `BATTINFO_ADMIN_TOKEN` when set). The registry's workspace views became credentialed because they list staged, not-yet-public submissions; without a key these two calls now print a hint and return an empty list instead of listing the queue.
 
 - **BPX import drops nothing silently (parameter-plan Phase 0).** The

@@ -480,7 +480,7 @@ def test_jsonld_scalar_claims_are_emmo_quantities_with_provenance() -> None:
     node = _emitted()
     props = node["hasProperty"]
     props = props if isinstance(props, list) else [props]
-    radius = next(p for p in props if "particleRadius" in str(p.get("@type")))
+    radius = next(p for p in props if "ParticleRadius" in str(p.get("@type")))
     assert radius["hasNumericalPart"]["hasNumberValue"] == 5.86e-06
     annotation = radius["schema:additionalProperty"]
     assert annotation["schema:name"] == "provenance_class"

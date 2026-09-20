@@ -92,7 +92,7 @@ Retiring the served `ns#` catch-all namespace put every canonical record-body ke
 
 | Placeholder | Wanted upstream | Notes |
 |---|---|---|
-| `battinfo:ambientTemperature` | test-condition quantity, domain-electrochemistry or domain-battery | The transform deliberately types generic conditions as `ConventionalProperty`; a dedicated `AmbientTemperature` quantity would let both the emitter and the flat record layer ground it. |
+| `battinfo:ambientTemperature` | test-condition quantity, domain-electrochemistry or domain-battery | The transform deliberately types generic conditions as `ConventionalProperty`; a dedicated `AmbientTemperature` quantity would let both the emitter and the flat record layer ground it. The 2026-09-20 parameter sweep considered typing it `ThermodynamicTemperature` via the property map but reverted: the published flat context already expands the key to this placeholder, and the context is append-only — the repoint waits for the class or the next context version, per this section's policy. |
 | `battinfo:voltageReference` | ~~relation~~ resolved in emission (2026-09-07) | The JSON-LD side no longer needs an upstream ask: the `voltage_reference` conditions key is intercepted and emitted as EMMO's own `hasMetrologicalReference` with class-typed reference-electrode nodes (see section 7). The placeholder remains only for the flat record key. |
 | `battinfo:stepMode` / `battinfo:stepDirection` | control-mode / direction quantities or a sanctioned literal pattern | Process classes (`ConstantCurrentCharging`, …) exist for typed emission; the flat step layer states mode/direction as literals and needs a predicate. |
 | `battinfo:lotId` | batch/lot identifier property, domain-battery | Sibling of `battinfo:batchId` (already a placeholder via `ci_batch_id`). |
@@ -131,6 +131,53 @@ assembly itself, and `hasCase`'s published axioms relate the CELL to its case.
 | **`CellHousing`** | Class | domain-electrochemistry, sibling of `Case` under `ElectrochemicalComponent` | The assembly of components that enclose and mechanically support a cell: case, lid, terminals, seals, and internal hardware (a purchasable coin-cell kit is the canonical instance). Meanwhile the housing individual types `ElectrochemicalComponent` and lists every part under `hasConstituent` (`_component_holder_node`). |
 | **`hasHousing`** | Object property | domain-electrochemistry, cell → `CellHousing` | Relates a cell to its enclosure assembly. Meanwhile a cell's housing parts merge onto the cell node (`hasCase` for the case, per the published `CoinCell ⊑ hasCase some CoinCase` pattern). |
 | **`hasLid`** | Object property | domain-electrochemistry | `CellLid` "closes the case" but no relation states it; lids currently ride `hasConstituent`. |
+
+## 10. Parameter-vocabulary sweep (2026-09-20)
+
+Audit of every `battinfo:` fallback the parameter-claims corpus emitted. Seventeen keys
+turned out to have existing upstream classes and were wired into
+`property_map.curated.json` (both copies) on 2026-09-20 — density, porosity, ocp,
+particle_radius, reaction_rate_constant, specific_capacity, stoichiometry_min/max,
+surface_area_per_volume, max_concentration, ionic_conductivity, electronic_conductivity,
+transference_number, electrolyte_diffusivity, conductivity_activation_energy,
+series_resistance, areal_mass — no ontology work needed for those.
+(`ambient_temperature` also has a usable class, `ThermodynamicTemperature`, but stays a
+placeholder: the published flat context pins the key, see section 6.) What remains
+splits three ways.
+
+### 10a. Polarity-free generics (domain-battery / domain-electrochemistry)
+
+Parameter claims are polarity-agnostic by design: a claim targets the material kind
+(graphite as such) and the BPX block supplies polarity downstream. The closure has these
+quantities only as polarity-qualified pairs; add the parent class above each pair and
+repoint the curated map at it.
+
+| Wanted term | Existing polarity pair | Parameter key |
+|---|---|---|
+| **`GuestDiffusivityInActiveMaterial`** | `GuestDiffusivityIn{Negative,Positive}ElectrodeActiveMaterial` | `solid_diffusivity` |
+| **`ActivationEnergyOfGuestDiffusivityInActiveMaterial`** | `ActivationEnergyOfGuestDiffusivityIn{Negative,Positive}ElectrodeActiveMaterial` | `diffusivity_activation_energy` |
+| **`ActivationEnergyOfReaction`** | `{Negative,Postive}ElectrodeActivationEnergyOfReaction` (sic — see defects) | `reaction_rate_activation_energy` |
+| **`EntropicChangeCoefficient`** | `{Negative,Positive}ElectrodeEntropicChangeCoefficient` | `entropic_coefficient` |
+
+### 10b. Battery-general quantities missing entirely (domain-battery)
+
+| Wanted term | Parameter key | Notes |
+|---|---|---|
+| **`FirstCycleCoulombicEfficiency`** | `first_cycle_efficiency` | `CoulombicEfficiency` exists; the first-cycle (formation) form — the number every anode paper reports — does not. |
+| **`TheoreticalSpecificCapacity`** | `theoretical_specific_capacity` | `TheoreticalCapacity` exists but is a capacity, not a specific capacity; the gravimetric form anchors every BotE estimate. |
+
+### 10c. BPX application ontology (meaning fixed by the BPX standard, not physics)
+
+| Wanted term | Parameter key | Notes |
+|---|---|---|
+| **`TransportEfficiency`** | `transport_efficiency` | BPX defines it operationally as ε^p (porosity to the Bruggeman exponent). `BruggemanCoefficient` exists upstream but is the *exponent* — a different quantity. Because the definition is BPX's convention, the BPX application ontology is the honest home; a domain-battery `EffectiveTransportRatio` would also serve if preferred. |
+| **`InitialConcentration`** | `initial_concentration` | An initial condition of the simulation (BPX ≥ 1.1 State family: initial temperature, initial SOC, initial concentrations), not a property of any material. Model-state quantities belong with the model standard. |
+| *(optional)* BPX-normalized `ReactionRateConstant` subclass | `reaction_rate_constant` | BPX's rate constant carries mol·m⁻²·s⁻¹ — a normalization convention of the standard. The generic `ReactionRateConstant` elucidation is dimensionally uncommitted, so the interim curated mapping to it (wired 2026-09-20) is defensible; a BPX-scoped subclass would make the convention explicit. |
+
+To wire after any of these publish: curated entry in
+`assets/mappings/domain-battery/property_map.curated.json` + the `src/battinfo/data`
+mirror, then `scripts/gen_context.py` and `scripts/gen_reference_records.py`; the
+`battinfo:` fallback retires automatically.
 
 ## Landed upstream — stubs flipped
 
@@ -294,6 +341,9 @@ closure. None is caused by this repo; each is worked around locally.
 - **Duplicate `CapacityLoss`.** `electrochemistry_652b94f1_…` has it as prefLabel while
   `electrochemistry_e3d3d21c_…` (`CapacityFade`) carries it as an altLabel, so the string
   resolves to two classes. battinfo maps neither by key; the label is allowlisted only.
+- **`PostiveElectrodeActivationEnergyOfReaction` typo (domain-battery).** The prefLabel
+  is missing the first "i" in "Positive". Found during the 2026-09-20 parameter sweep;
+  fix alongside the polarity-free parents in section 10a.
 - **`NominalBatteryProperty` contradicts its own parent (red-team review, 2026-09-15).**
   `battery_fb9baf9b_680e_493e_a755_da9bb1fc9fae` is elucidated "a battery property
   defined by the manufacturer and determined under some specified conditions" - a

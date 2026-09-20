@@ -9,7 +9,7 @@ unit IRI, by the curated mapping tables under
 `assets/mappings/domain-battery/` — the single source of truth for the
 semantics of emitted JSON-LD. This page is generated from those tables.
 
-## Properties (83)
+## Properties (100)
 
 The keys accepted in `properties={...}` on a cell spec, and the EMMO
 class each becomes in JSON-LD:
@@ -17,6 +17,7 @@ class each becomes in JSON-LD:
 | Key | EMMO class |
 |---|---|
 | `ac_internal_resistance` | [ACInternalResistance](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_964cd426_f3cf_4a52_8c5d_0490cf48edb5) |
+| `areal_mass` | [AreaDensity](https://w3id.org/emmo#EMMO_afea89af_ef16_4bdb_99d5_f3b2f4c85a6c) |
 | `available_volume` | [Volume](https://w3id.org/emmo#EMMO_f1a51559_aa3d_43a0_9327_918039f0dfed) |
 | `calendar_life` | [CalendarLife](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_743c71a3_b80c_42e3_92fa_13a67b8167df) |
 | `cap_assembly_weight` | [Mass](https://w3id.org/emmo#EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405) |
@@ -30,11 +31,13 @@ class each becomes in JSON-LD:
 | `charging_temperature_min` | [MinimumChargingTemperature](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_b90b1ad7_b9a8_44df_ad45_bfd25aac2e49) |
 | `charging_time` | [ChargingTime](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_a3d54f83_4dc2_4833_acc2_c8652702d9b7) |
 | `charging_voltage` | [ChargingVoltage](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_79a9e1be_35b0_4c3c_8087_b5f967ca0e87) |
+| `conductivity_activation_energy` | [ActivationEnergyOfElectrolyteConductivity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_8c16cb12_41c1_43bd_9e7c_2eea7b06a1f0) |
 | `continuous_charging_current` | [MaximumContinuousChargingCurrent](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_39d8a6ee_cd55_4855_8b5b_d42bef95ac78) |
 | `continuous_discharging_current` | [MaximumContinuousDischargingCurrent](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_ba7ac581_0e13_4815_b888_013c378932f5) |
 | `cycle_life` | [CycleLife](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_ae782b14_88ce_4cdd_9418_12aca00be937) |
 | `d50_particle_size` | [D50ParticleSize](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_3cfdfc10_a5cb_4e3e_b1a1_281010d1465c) |
 | `dc_internal_resistance` | [DCInternalResistance](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_7b3eb826_b968_493a_8396_cc3a5f09ecb3) |
+| `density` | [Density](https://w3id.org/emmo#EMMO_06448f64_8db6_4304_8b2c_e785dba82044) |
 | `diameter` | [Diameter](https://w3id.org/emmo#EMMO_c1c8ac3c_8a1c_4777_8e0b_14c1f9f9b0c6) |
 | `discharging_capacity` | [DischargingCapacity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_0141b5c2_9f15_46f4_82e6_92a104faa476) |
 | `discharging_cutoff_voltage` | [LowerVoltageLimit](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_534dd59c_904c_45d9_8550_ae9d2eb6bbc9) |
@@ -43,6 +46,8 @@ class each becomes in JSON-LD:
 | `discharging_temperature_min` | [MinimumDischargingTemperature](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_2a1de79f_e927_45a2_9619_3799a0d61e9b) |
 | `double_side_loading` | [MassLoading](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c955c089_6ee1_41a2_95fc_d534c5cfd3d5) |
 | `electrode_area` | [Area](https://w3id.org/emmo#EMMO_96f39f77_44dc_491b_8fa7_30d887fe0890) |
+| `electrolyte_diffusivity` | [ChargeCarrierDiffusivityInElectrolyte](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_4c274506_af5b_4ef1_8217_829ffd459f28) |
+| `electronic_conductivity` | [ElectronicConductivity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_ce74d2dc_d496_4116_b2fb_3e83d88bc744) |
 | `energy_density` | [EnergyDensity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_4aa1b96e_44a0_4b1a_a0ac_723d0223d80b) |
 | `external_surface_area` | [Area](https://w3id.org/emmo#EMMO_96f39f77_44dc_491b_8fa7_30d887fe0890) |
 | `foil_thickness` | [Thickness](https://w3id.org/emmo#EMMO_43003c86_9d15_433b_9789_ee2940920656) |
@@ -50,8 +55,10 @@ class each becomes in JSON-LD:
 | `impedance` | [ElectricImpedance](https://w3id.org/emmo#EMMO_79a02de5_b884_4eab_bc18_f67997d597a2) |
 | `initial_coulombic_efficiency` | [InitialCoulombicEfficiency](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_469b9516_a96d_4aa2_b8e5_05ae982e2084) |
 | `internal_resistance` | [InternalResistance](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_9bf40017_3f58_4030_ada7_cb37a3dfda2d) |
+| `ionic_conductivity` | [IonicConductivity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_25dabdc2_68bf_4a38_8cbe_11be017358bc) |
 | `length` | [Length](https://w3id.org/emmo#EMMO_cd2cd0de_e0cc_4ef1_b27e_2e88db027bac) |
 | `mass` | [Mass](https://w3id.org/emmo#EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405) |
+| `max_concentration` | [MaximumConcentration](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_47287d09_6108_45ca_ac65_8b9451b1065e) |
 | `maximum_charging_temperature` | [MaximumChargingTemperature](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_4a354510_4dc2_4803_8845_f4024a1a7260) |
 | `maximum_continuous_charging_current` | [MaximumContinuousChargingCurrent](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_39d8a6ee_cd55_4855_8b5b_d42bef95ac78) |
 | `maximum_continuous_discharging_current` | [MaximumContinuousDischargingCurrent](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_ba7ac581_0e13_4815_b888_013c378932f5) |
@@ -69,8 +76,11 @@ class each becomes in JSON-LD:
 | `nominal_capacity` | [NominalCapacity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_8abde9d0_84f6_4b4f_a87e_86028a397100) |
 | `nominal_energy` | [NominalEnergy](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d) |
 | `nominal_voltage` | [NominalVoltage](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_639b844a_e801_436b_985d_28926129ead6) |
+| `ocp` | [OpenCircuitVoltage](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_9c657fdc_b9d3_4964_907c_f9a6e8c5f52b) |
 | `operating_temperature_max` | [MaximumOperatingTemperature](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_e999bd7d_93ad_47fb_8d8d_dd667e4ef553) |
 | `operating_temperature_min` | [MinimumOperatingTemperature](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_08a73f4b_3242_4356_af24_68ba0bf66d51) |
+| `particle_radius` | [ParticleRadius](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_b92e382f_5109_4f60_ab5e_c89d340419a9) |
+| `porosity` | [Porosity](https://w3id.org/emmo#EMMO_3a6578ac_aee0_43b9_9bc6_1eb208c8c9a9) |
 | `power_capability` | [MaximumPower](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_4e6c4e9d_64cb_4c24_a0f3_5b4146ebbeb0) |
 | `power_density` | [PowerDensity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_a7eb870c_4ef7_4ccd_85e8_4b7b726d7a2a) |
 | `power_energy_ratio` | [PowerToEnergyRatio](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_917660a7_2d98_4564_9ce7_6b5d1087de2c) |
@@ -81,17 +91,24 @@ class each becomes in JSON-LD:
 | `rated_capacity` | [RatedCapacity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_9b3b4668_0795_4a35_9965_2af383497a26) |
 | `rated_energy` | [NominalEnergy](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d) |
 | `rated_specific_discharge_capacity` | [DischargingSpecificCapacity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_884650fd_6cc6_4ec6_8264_c18fbe6b90ee) |
+| `reaction_rate_constant` | [ReactionRateConstant](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_0335e3f6_d1d8_4daa_8376_a9285f1bc9f1) |
 | `round_trip_energy_efficiency` | [RoundTripEnergyEfficiency](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c413d29a_b814_4d88_8db0_0fd0171cff11) |
 | `self_discharge_rate` | [SelfDischargeRate](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c3e97d58_1854_4c23_bb42_d2972172865e) |
+| `series_resistance` | [InternalResistance](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_9bf40017_3f58_4030_ada7_cb37a3dfda2d) |
 | `single_side_loading` | [MassLoading](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c955c089_6ee1_41a2_95fc_d534c5cfd3d5) |
+| `specific_capacity` | [SpecificCapacity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_1e3dc60d_dd6b_47d6_8161_70004fc5ee30) |
 | `specific_energy` | [SpecificEnergy](https://w3id.org/emmo#EMMO_e218c625_6a39_47a9_8d08_a2ef41c152a9) |
 | `specific_power` | [SpecificPower](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c762a928_5a74_46fd_9929_4ac2d7a3a8d7) |
 | `state_of_health` | [StateOfHealth](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_a7a4614f_2426_46f3_8475_cda4a9fabfce) |
+| `stoichiometry_max` | [MaximumStoichiometricCoefficient](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_95ef8c3c_62fe_467f_b5d4_dd0cd18a7ea8) |
+| `stoichiometry_min` | [MinimumStoichiometricCoefficient](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_86324806_4263_4d80_b5af_1a7be844ab5b) |
 | `storage_temperature_max` | [MaximumStorageTemperature](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_0ea4d188_9701_4699_a5ca_812a98a9afa7) |
 | `storage_temperature_min` | [MinimumStorageTemperature](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_0ddfd57a_d338_4690_be45_b26884ed6302) |
+| `surface_area_per_volume` | [VolumetricSurfaceArea](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_a5571263_f153_448f_84a3_cd18092cf8fa) |
 | `theoretical_capacity` | [TheoreticalCapacity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_372c89d0_adab_4585_9662_33c912acef23) |
 | `thickness` | [Thickness](https://w3id.org/emmo#EMMO_43003c86_9d15_433b_9789_ee2940920656) |
 | `tortuosity` | [Tortuosity](https://w3id.org/emmo#EMMO_c413d96f_c57b_4c70_9ac1_312db6c009a8) |
+| `transference_number` | [ChargeCarrierTransportNumber](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_e3e78df2_d568_4ab7_8c0d_d3a2ee3ae282) |
 | `typical_capacity` | [TypicalCapacity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_34d6cdd9_d3a7_4302_a54d_9dbd8a3b5e68) |
 | `typical_energy` | [NominalEnergy](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d) |
 | `upper_voltage_limit` | [UpperVoltageLimit](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_6dcd5baf_58cd_43f5_a692_51508e036c88) |
