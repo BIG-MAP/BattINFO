@@ -1,44 +1,24 @@
 {
   "schema_version": "0.2.0",
   "parameter_set": {
-    "id": "https://w3id.org/battinfo/spec/e04y-e56s-wz45-yvk4",
-    "short_id": "e04ye5",
-    "name": "BPX NMC111 pouch blended - separator",
+    "id": "https://w3id.org/battinfo/spec/pyss-2m8j-y8c1-rmcb",
+    "short_id": "pyss2m",
+    "name": "BPX NMC111 pouch blended",
     "cell_spec_id": "https://w3id.org/battinfo/spec/vtz0-b7fc-6jdr-8ndn",
-    "scope": "separator",
-    "claims": [
-      {
-        "parameter": "thickness",
-        "quantity": {
-          "value": 2e-05,
-          "unit": "m"
-        },
-        "provenance_class": "fitted"
-      },
-      {
-        "parameter": "porosity",
-        "quantity": {
-          "value": 0.47,
-          "unit": "1"
-        },
-        "provenance_class": "fitted"
-      },
-      {
-        "parameter": "transport_efficiency",
-        "quantity": {
-          "value": 0.3222,
-          "unit": "1"
-        },
-        "provenance_class": "fitted"
-      }
-    ],
+    "scope": "cell",
+    "members": {
+      "negative_material": "https://w3id.org/battinfo/spec/baez-0ppf-14qx-6rt0",
+      "negative_electrode": "https://w3id.org/battinfo/spec/q3dk-9sq9-7s86-43vw",
+      "positive_electrode": "https://w3id.org/battinfo/spec/9cwx-f2pf-6sv6-3n9e",
+      "separator": "https://w3id.org/battinfo/spec/e04y-e56s-wz45-yvk4",
+      "electrolyte": "https://w3id.org/battinfo/spec/0kaz-t3ef-8ehm-yhhb"
+    },
     "model_context": {
       "tool": "BPX",
       "name": "Test case: blended electrode definition with two particle sizes but equivalent chemistry. Compare to nmc_pouch_cell_BPX.json in About:Energy open-source release.",
       "model": "DFN",
       "version": "0.4.0"
-    },
-    "set_id": "https://w3id.org/battinfo/spec/pyss-2m8j-y8c1-rmcb"
+    }
   },
   "provenance": {
     "source_type": "literature",

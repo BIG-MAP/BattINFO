@@ -144,10 +144,19 @@ def _resolved_target(
     return field, str(value)
 
 
+_SET_MEMBER_BLOCKS = (
+    "negative_material", "negative_electrode",
+    "positive_material", "positive_electrode",
+    "separator", "electrolyte",
+)
+
+
 def _record_from_parameter_set(
     *,
     name: str,
-    claims: list[Any],
+    claims: list[Any] | None = None,
+    members: Mapping[str, str] | None = None,
+    set_id: str | None = None,
     material_kind: str | None = None,
     material_spec_id: str | None = None,
     cell_spec_id: str | None = None,
@@ -181,11 +190,46 @@ def _record_from_parameter_set(
         if scope != "electrode":
             raise ValueError("electrode_polarity only applies to scope='electrode' claims.")
 
-    if not isinstance(claims, list) or not claims:
-        raise ValueError("claims must be a non-empty list of claim dicts.")
-    checked_claims = [
-        _checked_claim(claim, i, default_provenance_class) for i, claim in enumerate(claims)
-    ]
+    # A parameterisation SET is a flavor, not a type (the dataset-series
+    # precedent): it carries members INSTEAD of claims — one co-fitted,
+    # runnable parameterisation named as a whole, its block map stating which
+    # member parameterises which side (a fact of the set, never of the
+    # material). Exactly one of claims / members, always.
+    checked_members: dict[str, str] = {}
+    if members is not None:
+        if claims:
+            raise ValueError(
+                "a parameterisation set carries members INSTEAD of claims — "
+                "pass exactly one of claims= or members=."
+            )
+        if not isinstance(members, Mapping) or not members:
+            raise ValueError("members must be a non-empty mapping of block key -> parameter-set IRI.")
+        for block in members:
+            if block not in _SET_MEMBER_BLOCKS:
+                raise ValueError(
+                    f"unknown members block {block!r}; valid blocks: {', '.join(_SET_MEMBER_BLOCKS)}."
+                )
+        for block in _SET_MEMBER_BLOCKS:  # canonical order
+            member_iri = members.get(block)
+            if member_iri is None:
+                continue
+            if not isinstance(member_iri, str) or not SPEC_IRI_RE.fullmatch(member_iri):
+                raise ValueError(
+                    f"members[{block!r}] must be a https://w3id.org/battinfo/spec/{{uid}} IRI."
+                )
+            checked_members[block] = member_iri
+        checked_claims: list[dict[str, Any]] = []
+    else:
+        if not isinstance(claims, list) or not claims:
+            raise ValueError(
+                "claims must be a non-empty list of claim dicts "
+                "(or pass members= for a parameterisation set)."
+            )
+        checked_claims = [
+            _checked_claim(claim, i, default_provenance_class) for i, claim in enumerate(claims)
+        ]
+    if set_id is not None and not SPEC_IRI_RE.fullmatch(set_id):
+        raise ValueError("set_id must be a https://w3id.org/battinfo/spec/{uid} IRI.")
 
     if id is not None:
         if not SPEC_IRI_RE.fullmatch(id):
@@ -213,8 +257,13 @@ def _record_from_parameter_set(
         "name": name.strip(),
         target_field: target_value,
         "scope": scope,
-        "claims": checked_claims,
     }
+    if checked_members:
+        body["members"] = checked_members
+    else:
+        body["claims"] = checked_claims
+    if set_id is not None:
+        body["set_id"] = set_id
     if electrode_polarity is not None:
         body["electrode_polarity"] = electrode_polarity
     if model_context:
@@ -331,6 +380,49 @@ def save_parameter_set(
         dry_run=dry_run,
         stamp=stamp,
     )
+
+
+def load_parameter_set_members(
+    set_record: Mapping[str, Any] | PathLike,
+    *,
+    source_root: PathLike | None = None,
+    include_packaged_examples: bool = True,
+) -> dict[str, dict[str, Any]]:
+    """Resolve a parameterisation set's block map to its member records.
+
+    Returns ``{"set": <the set record>, <block>: <member record>, ...}`` — the
+    exact mapping :func:`battinfo.interop.to_bpx`'s ``parameter_sets`` argument
+    takes, so "fetch the set, export the runnable file" is two calls. Raises
+    when a member cannot be found under *source_root* (a set with missing
+    members is not runnable, and silence here would export a partial file).
+    """
+    if isinstance(set_record, (str, Path)):
+        set_record = _load_json(_as_path(set_record))
+    body = set_record.get("parameter_set") if isinstance(set_record, Mapping) else None
+    if not isinstance(body, Mapping) or not isinstance(body.get("members"), Mapping):
+        raise ValueError(
+            "load_parameter_set_members expects a parameterisation-set record "
+            "(a parameter-set record carrying a members block map)."
+        )
+    out: dict[str, dict[str, Any]] = {"set": dict(set_record)}
+    missing: list[str] = []
+    for block, member_iri in body["members"].items():
+        rows = query_parameter_sets(
+            id=member_iri,
+            source_root=source_root,
+            include_packaged_examples=include_packaged_examples,
+            limit=1,
+        )
+        if not rows:
+            missing.append(f"{block} -> {member_iri}")
+            continue
+        out[block] = rows[0]["record"]
+    if missing:
+        raise ValueError(
+            "parameterisation-set members not found (a partial set is not "
+            "runnable): " + "; ".join(missing)
+        )
+    return out
 
 
 def query_parameter_sets(

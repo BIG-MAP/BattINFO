@@ -63,7 +63,8 @@
       "name": "Test case: blended electrode definition with two particle sizes but equivalent chemistry. Compare to nmc_pouch_cell_BPX.json in About:Energy open-source release.",
       "model": "DFN",
       "version": "0.4.0"
-    }
+    },
+    "set_id": "https://w3id.org/battinfo/spec/pyss-2m8j-y8c1-rmcb"
   },
   "provenance": {
     "source_type": "literature",

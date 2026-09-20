@@ -140,6 +140,7 @@ def test_round_trip_export_reproduces_the_physics_exactly() -> None:
         "negative_material", "negative_electrode",
         "positive_material", "positive_electrode",
         "separator", "electrolyte",
+        "set",  # the parameterisation-set record naming the whole file
     }
 
     out = to_bpx(spec_record, parameter_sets=by_block, cell_extras=cell.extras)
@@ -193,6 +194,95 @@ def test_exported_document_validates_with_the_bpx_package() -> None:
     assert "State" in out.bpx
     parsed = bpx_lib.parse_bpx_obj(out.bpx)
     assert parsed.header.model == "DFN"
+
+
+def test_import_mints_the_parameterisation_set() -> None:
+    """One BPX file = one co-fitted parameterisation: the set record (the
+    dataset-series flavor) names the whole, its block map assigns sides, and
+    members carry the backlink."""
+    res = from_bpx_parameters(FIXTURE)
+    by_block = res.to_records(
+        materials={"negative": "graphite", "positive": "nmc811"},
+        cell_spec_id="https://w3id.org/battinfo/spec/0000-0000-0000-0000",
+        by_block=True,
+    )
+    body = by_block["set"]["parameter_set"]
+    assert body["scope"] == "cell"
+    assert "claims" not in body  # members INSTEAD of claims, never both
+    assert set(body["members"]) == {
+        "negative_material", "negative_electrode",
+        "positive_material", "positive_electrode",
+        "separator", "electrolyte",
+    }
+    set_iri = body["id"]
+    for block, record in by_block.items():
+        if block == "set":
+            continue
+        assert body["members"][block] == record["parameter_set"]["id"], block
+        assert record["parameter_set"]["set_id"] == set_iri, block
+    # The set carries the file-level lineage: annex + model context.
+    assert body["annex"] == _doc()["Parameterisation"]["User-defined"]
+    assert body["model_context"]["model"] == "DFN"
+    from battinfo.validate.record import validate_record as _validate
+
+    assert _validate(by_block["set"]).ok
+
+
+def test_set_round_trip_from_saved_records(tmp_path) -> None:
+    """The complete door: save the family, load the set, export the file."""
+    import pytest
+
+    from battinfo.api import load_parameter_set_members, save_parameter_set
+    from battinfo.interop.bpx import to_bpx
+
+    cell = from_bpx(FIXTURE)
+    res = from_bpx_parameters(FIXTURE)
+    records = res.to_records(
+        materials={"negative": "graphite", "positive": "nmc811"},
+        cell_spec_id="https://w3id.org/battinfo/spec/0000-0000-0000-0000",
+    )
+    for record in records:
+        save_parameter_set(record, source_root=tmp_path, resolve_references=False)
+    set_record = next(r for r in records if "members" in r["parameter_set"])
+
+    loaded = load_parameter_set_members(
+        set_record, source_root=tmp_path, include_packaged_examples=False
+    )
+    spec_record = {
+        "schema_version": "0.2.0",
+        "cell_spec": {"name": "Golden fixture cell", "cell_format": "pouch"},
+        "properties": cell.specs,
+    }
+    out = to_bpx(spec_record, parameter_sets=loaded, cell_extras=cell.extras)
+    original = _doc()["Parameterisation"]
+    for block in ("Negative electrode", "Positive electrode", "Separator", "Electrolyte"):
+        assert out.bpx["Parameterisation"][block] == original[block], block
+    assert out.bpx["Parameterisation"]["User-defined"] == original["User-defined"]
+    assert out.bpx["Header"]["Model"] == "DFN"
+
+    # A set with a missing member must refuse loudly — a partial set is not
+    # a runnable parameterisation.
+    broken = json.loads(json.dumps(set_record))
+    broken["parameter_set"]["members"]["separator"] = (
+        "https://w3id.org/battinfo/spec/0000-0000-0000-0001"
+    )
+    with pytest.raises(ValueError, match="not found"):
+        load_parameter_set_members(broken, source_root=tmp_path, include_packaged_examples=False)
+
+
+def test_set_flavor_rejects_claims_and_members_together() -> None:
+    import pytest
+
+    from battinfo.api import create_parameter_set
+
+    with pytest.raises(ValueError, match="INSTEAD of claims"):
+        create_parameter_set(
+            name="Bad set", cell_spec_id="https://w3id.org/battinfo/spec/0000-0000-0000-0000",
+            claims=[{"parameter": "thickness", "quantity": {"value": 1e-5, "unit": "m"},
+                     "provenance_class": "literature"}],
+            members={"separator": "https://w3id.org/battinfo/spec/0000-0000-0000-0002"},
+            validate=False,
+        )
 
 
 def test_emitted_jsonld_uses_the_records_context_and_absolute_license() -> None:

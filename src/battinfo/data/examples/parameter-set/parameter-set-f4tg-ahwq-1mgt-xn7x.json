@@ -95,7 +95,8 @@
       "model": "SPM",
       "version": "0.4.0"
     },
-    "description": "NMC111|graphite 12.5 Ah pouch cell. Parameterisation by About:Energy Limited (aboutenergy.io), December 2022, based on cell cycling data, and electrode data gathered after cell teardown. Negative electrode entropic coefficient data are from O'Regan et al. 2022 (doi:10.1016/j.electacta.2022.140700). Positive electrode entropic coefficient data are from Viswanathan et al. 2010 (doi:10.1016/j.jpowsour.2009.11.103). Other thermal properties are estimated."
+    "description": "NMC111|graphite 12.5 Ah pouch cell. Parameterisation by About:Energy Limited (aboutenergy.io), December 2022, based on cell cycling data, and electrode data gathered after cell teardown. Negative electrode entropic coefficient data are from O'Regan et al. 2022 (doi:10.1016/j.electacta.2022.140700). Positive electrode entropic coefficient data are from Viswanathan et al. 2010 (doi:10.1016/j.jpowsour.2009.11.103). Other thermal properties are estimated.",
+    "set_id": "https://w3id.org/battinfo/spec/zwap-fsws-m4yx-p5pp"
   },
   "provenance": {
     "source_type": "literature",

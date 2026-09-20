@@ -9092,8 +9092,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "additionalProperties": false,
           "required": [
             "id",
-            "name",
-            "claims"
+            "name"
           ],
           "properties": {
             "id": {
@@ -9180,6 +9179,42 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "type": "object",
               "additionalProperties": true,
               "description": "Source-file extension entries carried verbatim (e.g. a BPX User-defined block): original key -> raw value. No standard semantics are claimed for these; they exist so a re-export reproduces the source file and nothing is silently lost."
+            },
+            "members": {
+              "type": "object",
+              "additionalProperties": false,
+              "minProperties": 1,
+              "properties": {
+                "negative_material": {
+                  "$ref": "#/$defs/SpecIri",
+                  "description": "The member parameter-set record carrying the negative material claims."
+                },
+                "negative_electrode": {
+                  "$ref": "#/$defs/SpecIri",
+                  "description": "The member parameter-set record carrying the negative electrode claims."
+                },
+                "positive_material": {
+                  "$ref": "#/$defs/SpecIri",
+                  "description": "The member parameter-set record carrying the positive material claims."
+                },
+                "positive_electrode": {
+                  "$ref": "#/$defs/SpecIri",
+                  "description": "The member parameter-set record carrying the positive electrode claims."
+                },
+                "separator": {
+                  "$ref": "#/$defs/SpecIri",
+                  "description": "The member parameter-set record carrying the separator claims."
+                },
+                "electrolyte": {
+                  "$ref": "#/$defs/SpecIri",
+                  "description": "The member parameter-set record carrying the electrolyte claims."
+                }
+              },
+              "description": "Parameterisation-set flavor: the explicit block map of member parameter-set records that constitute one co-fitted, runnable parameterisation. A set record carries members INSTEAD of claims (the strict policy admits the empty claims for this flavor only); side assignment lives here because which material parameterises which electrode is a fact of the set, not of the material."
+            },
+            "set_id": {
+              "$ref": "#/$defs/SpecIri",
+              "description": "Membership in a parameterisation set (the record listing this one under members). Emitted as schema:isPartOf; the set emits dcterms:hasPart. Members carry the backlink; the set publishes with the members."
             }
           },
           "oneOf": [
@@ -9239,6 +9274,18 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
                   }
                 ]
               }
+            }
+          ],
+          "anyOf": [
+            {
+              "required": [
+                "claims"
+              ]
+            },
+            {
+              "required": [
+                "members"
+              ]
             }
           ]
         },

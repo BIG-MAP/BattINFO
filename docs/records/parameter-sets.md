@@ -291,6 +291,105 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 :::::
 ::::::
 
+::::::{dropdown} BPX LFP 18650 (parameter-set)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/parameter-set/parameter-set-1e31-69dh-s500-h9j4.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/parameter-set/parameter-set-1e31-69dh-s500-h9j4.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@id": "https://w3id.org/battinfo/spec/1e31-69dh-s500-h9j4",
+  "@type": "schema:Dataset",
+  "schema:name": "BPX LFP 18650",
+  "schema:description": "LFP|graphite 2 Ah cylindrical 18650 cell. Parameterisation by About:Energy Limited (aboutenergy.io), December 2022, based on cell cycling data, and electrode data gathered after cell teardown. Electrolyte properties from Nyman et al. 2008 (doi:10.1016/j.electacta.2008.04.023). Negative electrode entropic coefficient data are from O'Regan et al. 2022 (doi:10.1016/j.electacta.2022.140700). Positive electrode entropic coefficient data are from Gerver and Meyers 2011 (doi:10.1149/1.3591799). Other thermal properties are estimated.",
+  "schema:about": {
+    "@id": "https://w3id.org/battinfo/spec/b10q-6qh6-3v2x-4sp7"
+  },
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "scope",
+      "schema:value": "cell"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_model",
+      "schema:value": "DFN"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_name",
+      "schema:value": "Parameterisation example of an LFP|graphite 2 Ah cylindrical 18650 cell."
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_tool",
+      "schema:value": "BPX"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_version",
+      "schema:value": "0.1.0"
+    }
+  ],
+  "dcterms:hasPart": [
+    {
+      "@id": "https://w3id.org/battinfo/spec/ayt4-483v-13dj-hqgc"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/a979-b0s3-rzzt-4m57"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/2563-gee9-ppq0-8p2r"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/sa76-qhyc-pesq-jvge"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/956b-frrf-hfg6-m4d9"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/4gvn-f7sq-cchp-36rm"
+    }
+  ],
+  "schema:citation": {
+    "@id": "https://github.com/FaradayInstitution/BPX",
+    "@type": "schema:CreativeWork"
+  },
+  "schema:comment": "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford).",
+  "dcterms:license": {
+    "@id": "https://spdx.org/licenses/MIT.html"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
 ::::::{dropdown} BPX LFP 18650 - electrolyte (parameter-set)
 :::::{tab-set}
 
@@ -449,6 +548,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       }
     }
   ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/1e31-69dh-s500-h9j4"
+  },
   "schema:citation": {
     "@id": "https://github.com/FaradayInstitution/BPX",
     "@type": "schema:CreativeWork"
@@ -619,6 +721,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       }
     }
   ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/1e31-69dh-s500-h9j4"
+  },
   "schema:citation": {
     "@id": "https://github.com/FaradayInstitution/BPX",
     "@type": "schema:CreativeWork"
@@ -862,6 +967,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       }
     }
   ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/1e31-69dh-s500-h9j4"
+  },
   "schema:citation": {
     "@id": "https://github.com/FaradayInstitution/BPX",
     "@type": "schema:CreativeWork"
@@ -1032,6 +1140,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       }
     }
   ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/1e31-69dh-s500-h9j4"
+  },
   "schema:citation": {
     "@id": "https://github.com/FaradayInstitution/BPX",
     "@type": "schema:CreativeWork"
@@ -1275,6 +1386,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       }
     }
   ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/1e31-69dh-s500-h9j4"
+  },
   "schema:citation": {
     "@id": "https://github.com/FaradayInstitution/BPX",
     "@type": "schema:CreativeWork"
@@ -1404,6 +1518,108 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         "schema:name": "provenance_class",
         "schema:value": "fitted"
       }
+    }
+  ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/1e31-69dh-s500-h9j4"
+  },
+  "schema:citation": {
+    "@id": "https://github.com/FaradayInstitution/BPX",
+    "@type": "schema:CreativeWork"
+  },
+  "schema:comment": "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford).",
+  "dcterms:license": {
+    "@id": "https://spdx.org/licenses/MIT.html"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} BPX NMC111 pouch (parameter-set)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/parameter-set/parameter-set-ma31-1g1r-m2x1-h7d2.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/parameter-set/parameter-set-ma31-1g1r-m2x1-h7d2.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@id": "https://w3id.org/battinfo/spec/ma31-1g1r-m2x1-h7d2",
+  "@type": "schema:Dataset",
+  "schema:name": "BPX NMC111 pouch",
+  "schema:description": "NMC111|graphite 12.5 Ah pouch cell. Parameterisation by About:Energy Limited (aboutenergy.io), December 2022, based on cell cycling data, and electrode data gathered after cell teardown. Electrolyte properties from Nyman et al. 2008 (doi:10.1016/j.electacta.2008.04.023). Negative electrode entropic coefficient data are from O'Regan et al. 2022 (doi:10.1016/j.electacta.2022.140700). Positive electrode entropic coefficient data are from Viswanathan et al. 2010 (doi:10.1016/j.jpowsour.2009.11.103). Other thermal properties are estimated.",
+  "schema:about": {
+    "@id": "https://w3id.org/battinfo/spec/h9a9-pzge-8bvf-gss4"
+  },
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "scope",
+      "schema:value": "cell"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_model",
+      "schema:value": "DFN"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_name",
+      "schema:value": "Parameterisation example of an NMC111|graphite 12.5 Ah pouch cell"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_tool",
+      "schema:value": "BPX"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_version",
+      "schema:value": "0.1.0"
+    }
+  ],
+  "dcterms:hasPart": [
+    {
+      "@id": "https://w3id.org/battinfo/spec/2p6b-xrjf-jtcr-57hx"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/ftg3-krew-9dq5-mntm"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/nzk2-dv72-c12e-497h"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/wdd4-4r9a-zcc8-wnj1"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/vdek-3ryx-83cq-0fcc"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/2wm3-4t64-h09k-ackh"
     }
   ],
   "schema:citation": {
@@ -1579,6 +1795,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       }
     }
   ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/ma31-1g1r-m2x1-h7d2"
+  },
   "schema:citation": {
     "@id": "https://github.com/FaradayInstitution/BPX",
     "@type": "schema:CreativeWork"
@@ -1749,6 +1968,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       }
     }
   ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/ma31-1g1r-m2x1-h7d2"
+  },
   "schema:citation": {
     "@id": "https://github.com/FaradayInstitution/BPX",
     "@type": "schema:CreativeWork"
@@ -1992,6 +2214,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       }
     }
   ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/ma31-1g1r-m2x1-h7d2"
+  },
   "schema:citation": {
     "@id": "https://github.com/FaradayInstitution/BPX",
     "@type": "schema:CreativeWork"
@@ -2162,6 +2387,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       }
     }
   ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/ma31-1g1r-m2x1-h7d2"
+  },
   "schema:citation": {
     "@id": "https://github.com/FaradayInstitution/BPX",
     "@type": "schema:CreativeWork"
@@ -2409,6 +2637,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "schema:value": "fitted"
     }
   },
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/ma31-1g1r-m2x1-h7d2"
+  },
   "schema:citation": {
     "@id": "https://github.com/FaradayInstitution/BPX",
     "@type": "schema:CreativeWork"
@@ -2540,6 +2771,102 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       }
     }
   ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/ma31-1g1r-m2x1-h7d2"
+  },
+  "schema:citation": {
+    "@id": "https://github.com/FaradayInstitution/BPX",
+    "@type": "schema:CreativeWork"
+  },
+  "schema:comment": "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford).",
+  "dcterms:license": {
+    "@id": "https://spdx.org/licenses/MIT.html"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} BPX NMC111 pouch SPM (parameter-set)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/parameter-set/parameter-set-zwap-fsws-m4yx-p5pp.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/parameter-set/parameter-set-zwap-fsws-m4yx-p5pp.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@id": "https://w3id.org/battinfo/spec/zwap-fsws-m4yx-p5pp",
+  "@type": "schema:Dataset",
+  "schema:name": "BPX NMC111 pouch SPM",
+  "schema:description": "NMC111|graphite 12.5 Ah pouch cell. Parameterisation by About:Energy Limited (aboutenergy.io), December 2022, based on cell cycling data, and electrode data gathered after cell teardown. Negative electrode entropic coefficient data are from O'Regan et al. 2022 (doi:10.1016/j.electacta.2022.140700). Positive electrode entropic coefficient data are from Viswanathan et al. 2010 (doi:10.1016/j.jpowsour.2009.11.103). Other thermal properties are estimated.",
+  "schema:about": {
+    "@id": "https://w3id.org/battinfo/spec/a91f-kqde-1hrg-fenr"
+  },
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "scope",
+      "schema:value": "cell"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_model",
+      "schema:value": "SPM"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_name",
+      "schema:value": "Test case: Single Particle Model (SPM) parameterisation example based on nmc_pouch_cell_BPX.json from About:Energy open-source release."
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_tool",
+      "schema:value": "BPX"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_version",
+      "schema:value": "0.4.0"
+    }
+  ],
+  "dcterms:hasPart": [
+    {
+      "@id": "https://w3id.org/battinfo/spec/3n1b-f8n3-zrtc-psjs"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/z3ac-1me1-hsfd-pa56"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/dgjc-w8j1-evf7-e2kb"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/f4tg-ahwq-1mgt-xn7x"
+    }
+  ],
   "schema:citation": {
     "@id": "https://github.com/FaradayInstitution/BPX",
     "@type": "schema:CreativeWork"
@@ -2660,6 +2987,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       }
     }
   ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/zwap-fsws-m4yx-p5pp"
+  },
   "schema:citation": {
     "@id": "https://github.com/FaradayInstitution/BPX",
     "@type": "schema:CreativeWork"
@@ -2903,6 +3233,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       }
     }
   ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/zwap-fsws-m4yx-p5pp"
+  },
   "schema:citation": {
     "@id": "https://github.com/FaradayInstitution/BPX",
     "@type": "schema:CreativeWork"
@@ -3023,6 +3356,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       }
     }
   ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/zwap-fsws-m4yx-p5pp"
+  },
   "schema:citation": {
     "@id": "https://github.com/FaradayInstitution/BPX",
     "@type": "schema:CreativeWork"
@@ -3270,6 +3606,104 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "schema:value": "fitted"
     }
   },
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/zwap-fsws-m4yx-p5pp"
+  },
+  "schema:citation": {
+    "@id": "https://github.com/FaradayInstitution/BPX",
+    "@type": "schema:CreativeWork"
+  },
+  "schema:comment": "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford).",
+  "dcterms:license": {
+    "@id": "https://spdx.org/licenses/MIT.html"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} BPX NMC111 pouch blended (parameter-set)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/parameter-set/parameter-set-pyss-2m8j-y8c1-rmcb.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/parameter-set/parameter-set-pyss-2m8j-y8c1-rmcb.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@id": "https://w3id.org/battinfo/spec/pyss-2m8j-y8c1-rmcb",
+  "@type": "schema:Dataset",
+  "schema:name": "BPX NMC111 pouch blended",
+  "schema:about": {
+    "@id": "https://w3id.org/battinfo/spec/vtz0-b7fc-6jdr-8ndn"
+  },
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "scope",
+      "schema:value": "cell"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_model",
+      "schema:value": "DFN"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_name",
+      "schema:value": "Test case: blended electrode definition with two particle sizes but equivalent chemistry. Compare to nmc_pouch_cell_BPX.json in About:Energy open-source release."
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_tool",
+      "schema:value": "BPX"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_version",
+      "schema:value": "0.4.0"
+    }
+  ],
+  "dcterms:hasPart": [
+    {
+      "@id": "https://w3id.org/battinfo/spec/0kaz-t3ef-8ehm-yhhb"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/q3dk-9sq9-7s86-43vw"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/baez-0ppf-14qx-6rt0"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/9cwx-f2pf-6sv6-3n9e"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/e04y-e56s-wz45-yvk4"
+    }
+  ],
   "schema:citation": {
     "@id": "https://github.com/FaradayInstitution/BPX",
     "@type": "schema:CreativeWork"
@@ -3442,6 +3876,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       }
     }
   ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/pyss-2m8j-y8c1-rmcb"
+  },
   "schema:citation": {
     "@id": "https://github.com/FaradayInstitution/BPX",
     "@type": "schema:CreativeWork"
@@ -3611,6 +4048,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       }
     }
   ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/pyss-2m8j-y8c1-rmcb"
+  },
   "schema:citation": {
     "@id": "https://github.com/FaradayInstitution/BPX",
     "@type": "schema:CreativeWork"
@@ -3853,6 +4293,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       }
     }
   ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/pyss-2m8j-y8c1-rmcb"
+  },
   "schema:citation": {
     "@id": "https://github.com/FaradayInstitution/BPX",
     "@type": "schema:CreativeWork"
@@ -4005,6 +4448,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       }
     }
   ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/pyss-2m8j-y8c1-rmcb"
+  },
   "schema:citation": {
     "@id": "https://github.com/FaradayInstitution/BPX",
     "@type": "schema:CreativeWork"
@@ -4133,6 +4579,107 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         "schema:name": "provenance_class",
         "schema:value": "fitted"
       }
+    }
+  ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/pyss-2m8j-y8c1-rmcb"
+  },
+  "schema:citation": {
+    "@id": "https://github.com/FaradayInstitution/BPX",
+    "@type": "schema:CreativeWork"
+  },
+  "schema:comment": "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford).",
+  "dcterms:license": {
+    "@id": "https://spdx.org/licenses/MIT.html"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} BPX NMC111-Si pouch hysteresis (parameter-set)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/parameter-set/parameter-set-5rjm-2a2w-4x8c-5dqy.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/parameter-set/parameter-set-5rjm-2a2w-4x8c-5dqy.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@id": "https://w3id.org/battinfo/spec/5rjm-2a2w-4x8c-5dqy",
+  "@type": "schema:Dataset",
+  "schema:name": "BPX NMC111-Si pouch hysteresis",
+  "schema:about": {
+    "@id": "https://w3id.org/battinfo/spec/41wx-hskh-xk9g-z9fh"
+  },
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "scope",
+      "schema:value": "cell"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_model",
+      "schema:value": "DFN"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_name",
+      "schema:value": "Test case: user-defined 0th-order hysteresis for graphite-Si blend in negative electrode. Compare to nmc_pouch_cell_BPX.json in About:Energy open-source release."
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_tool",
+      "schema:value": "BPX"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_version",
+      "schema:value": "0.4.0"
+    }
+  ],
+  "dcterms:hasPart": [
+    {
+      "@id": "https://w3id.org/battinfo/spec/5znm-m359-cbp5-77hn"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/340n-s2eb-qy4g-h2rh"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/4afn-7wan-67hf-nwys"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/geyv-hp0x-jhrh-c44z"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/sdw7-cp7b-nsst-tvvy"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/smjg-7gh6-93vg-geh5"
     }
   ],
   "schema:citation": {
@@ -4307,6 +4854,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       }
     }
   ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/5rjm-2a2w-4x8c-5dqy"
+  },
   "schema:citation": {
     "@id": "https://github.com/FaradayInstitution/BPX",
     "@type": "schema:CreativeWork"
@@ -4476,6 +5026,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       }
     }
   ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/5rjm-2a2w-4x8c-5dqy"
+  },
   "schema:citation": {
     "@id": "https://github.com/FaradayInstitution/BPX",
     "@type": "schema:CreativeWork"
@@ -4722,6 +5275,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "schema:value": "fitted"
     }
   },
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/5rjm-2a2w-4x8c-5dqy"
+  },
   "schema:citation": {
     "@id": "https://github.com/FaradayInstitution/BPX",
     "@type": "schema:CreativeWork"
@@ -4891,6 +5447,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       }
     }
   ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/5rjm-2a2w-4x8c-5dqy"
+  },
   "schema:citation": {
     "@id": "https://github.com/FaradayInstitution/BPX",
     "@type": "schema:CreativeWork"
@@ -5137,6 +5696,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "schema:value": "fitted"
     }
   },
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/5rjm-2a2w-4x8c-5dqy"
+  },
   "schema:citation": {
     "@id": "https://github.com/FaradayInstitution/BPX",
     "@type": "schema:CreativeWork"
@@ -5267,6 +5829,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       }
     }
   ],
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/spec/5rjm-2a2w-4x8c-5dqy"
+  },
   "schema:citation": {
     "@id": "https://github.com/FaradayInstitution/BPX",
     "@type": "schema:CreativeWork"
@@ -5302,10 +5867,12 @@ Schema: [`parameter-set.schema.json`](https://w3id.org/battinfo/schema/parameter
 | `scope` | `material` \| `electrode` \| `separator` \| `electrolyte` … (5 values) |  | Physical scope the claims describe. Defaults (in the builder) to 'material' for material targets and 'cell' for cell-spec targets. Electrode/separator/electrolyte scopes carry manufactured-build parameters (thickness, porosity, transport) that belong to a cell design, not to a powder. |
 | `electrode_polarity` | `positive` \| `negative` |  | For electrode-scope claims on a cell-spec target: which electrode the claims describe. |
 | `model_context` | object |  | The digital artifact these claims came from, when they were imported from a modelling parameter set (BPX file, PyBaMM parameter set, ...). |
-| `claims` | array of → Claim | yes |  |
+| `claims` | array of → Claim |  |  |
 | `description` | string |  |  |
 | `comment` | string |  |  |
 | `annex` | object |  | Source-file extension entries carried verbatim (e.g. a BPX User-defined block): original key -> raw value. No standard semantics are claimed for these; they exist so a re-export reproduces the source file and nothing is silently lost. |
+| `members` | object |  | Parameterisation-set flavor: the explicit block map of member parameter-set records that constitute one co-fitted, runnable parameterisation. A set record carries members INSTEAD of claims (the strict policy admits the empty claims for this flavor only); side assignment lives here because which material parameterises which electrode is a fact of the set, not of the material. |
+| `set_id` | → SpecIri |  | Membership in a parameterisation set (the record listing this one under members). Emitted as schema:isPartOf; the set emits dcterms:hasPart. Members carry the backlink; the set publishes with the members. |
 
 
 ## Design notes
@@ -5314,4 +5881,6 @@ Schema: [`parameter-set.schema.json`](https://w3id.org/battinfo/schema/parameter
 **Why claims, not properties.** It is tempting to say a diffusivity of graphite is a property of graphite and file it on a material record. Four facts break that model. Most claims target a *kind* (graphite as such), and kinds are vocabulary, not records — there is no bearer to carry the property. Sources disagree — five published graphite OCPs, fitted diffusivities an order of magnitude apart — and a record's properties presuppose one adjudicated value, while the spread *is* the data. Many parameters are not properties of the material at all but of a model fit — a reaction rate constant fitted under DFN belongs to (material × model × calibration), and asserting it on the material would poison the record with model artifacts. And a calibration is a joint estimate: values fitted together are only valid together, so the set is the unit of self-consistency. Hence one record per source, `provenance_class` per claim, resolution downstream. The describer's own declarations (a datasheet density) stay properties of the description; third-party and model-bound assertions are claims about the target — the same epistemics rule as spec vs instance.
 
 **BPX interop, both directions.** `from_bpx_parameters` imports a BPX file's electrode/separator/electrolyte physics as claims — scalars, tables as curves, function strings as expressions — splitting material-intrinsic claims (stoichiometry window, diffusivity, OCP) from build claims (thickness, porosity) that target the cell design instead. Header lineage rides along: `Model` and BPX version in `model_context` (a DFN-fitted value is not model-free), `Description` on the record, `References` as citation or note; the `User-defined` block travels verbatim as each record's `annex`, and Cell-block fields become spec properties (or verbatim extras) via `from_bpx` — nothing in the file is dropped silently. The reverse: `to_bpx(spec, parameter_sets=...)` turns ONE source's records back into a runnable BPX file — claims at full precision, `Header.Model` from the source's own model context, `State` sections for BPX ≥ 1.1 — and the official `bpx` parser accepts the result. One source per file, deliberately: a calibration is a joint estimate, so mixing sources across blocks would produce a file no validation supports (a labeled composed mode is a planned refinement).
+
+**Complete and part, both.** Breaking a BPX file into per-component records serves re-use — the graphite claims can inform any graphite cell — but a simulation needs the *whole* parameterisation, and "which six records go together" must be a stated fact, not a filename convention. So a parameter set comes in two flavors, the same split the dataset-series pattern established. A per-source *member* record carries claims about one target. A *parameterisation set* carries `members` instead of claims: a block map naming the member records that jointly form one source's complete cell parameterisation, targeting the cell spec. Members point back via `set_id`; in JSON-LD the set asserts `dcterms:hasPart` and each member `schema:isPartOf`, mirroring series ↔ dataset. The set is where the joint-estimate epistemics live explicitly: it says these particular records were calibrated together and are valid together. `from_bpx_parameters` mints the set whenever it imports a whole file against a cell spec, `load_parameter_set_members()` resolves it back to the member records, and `to_bpx` accepts that map directly, so the complete-file round trip is one load away from the re-usable parts.
 :::
