@@ -457,10 +457,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "hasProperty": [
     {
       "@type": [
-        "battinfo:diffusivityActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "diffusivityActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 17100.0
@@ -910,10 +910,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:diffusivityActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "diffusivityActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 30000.0
@@ -927,10 +927,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:reactionRateActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "reactionRateActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 55000.0
@@ -1329,10 +1329,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:diffusivityActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "diffusivityActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 80000.0
@@ -1346,10 +1346,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:reactionRateActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "reactionRateActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 35000.0
@@ -1704,10 +1704,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "hasProperty": [
     {
       "@type": [
-        "battinfo:diffusivityActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "diffusivityActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 17100.0
@@ -2157,10 +2157,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:diffusivityActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "diffusivityActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 30000.0
@@ -2174,10 +2174,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:reactionRateActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "reactionRateActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 55000.0
@@ -2593,10 +2593,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:diffusivityActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "diffusivityActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 15000.0
@@ -2610,10 +2610,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:reactionRateActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "reactionRateActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 35000.0
@@ -3176,10 +3176,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:diffusivityActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "diffusivityActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 30000.0
@@ -3193,10 +3193,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:reactionRateActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "reactionRateActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 55000.0
@@ -3562,10 +3562,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:diffusivityActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "diffusivityActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 15000.0
@@ -3579,10 +3579,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:reactionRateActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "reactionRateActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 35000.0
@@ -3785,10 +3785,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "hasProperty": [
     {
       "@type": [
-        "battinfo:diffusivityActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "diffusivityActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 17100.0
@@ -4236,10 +4236,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:diffusivityActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "diffusivityActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 30000.0
@@ -4253,10 +4253,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:reactionRateActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "reactionRateActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 55000.0
@@ -4763,10 +4763,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "hasProperty": [
     {
       "@type": [
-        "battinfo:diffusivityActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "diffusivityActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 17100.0
@@ -5231,10 +5231,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:diffusivityActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "diffusivityActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 30000.0
@@ -5248,10 +5248,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:reactionRateActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "reactionRateActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 55000.0
@@ -5652,10 +5652,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:diffusivityActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "diffusivityActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 15000.0
@@ -5669,10 +5669,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:reactionRateActivationEnergy",
+        "ActivationEnergy",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "reactionRateActivationEnergy",
+      "skos:prefLabel": "ActivationEnergy",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 35000.0

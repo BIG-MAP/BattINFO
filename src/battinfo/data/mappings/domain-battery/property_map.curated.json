@@ -224,6 +224,15 @@
       "confidence": 1.0
     },
     {
+      "key": "diffusivity_activation_energy",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_d7f8cab9_b035_4ecd_be63_292672572526",
+      "class_qname": "emmo:ActivationEnergy",
+      "class_pref_label": "ActivationEnergy",
+      "class_label": "ActivationEnergy",
+      "confidence": 1.0
+    },
+    {
       "key": "discharging_capacity",
       "status": "curated",
       "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_0141b5c2_9f15_46f4_82e6_92a104faa476",
@@ -713,6 +722,15 @@
       "co_type": "ConventionalProperty",
       "co_type_pending": "RatedProperty",
       "co_type_pending_note": "Upgrade co_type to RatedProperty once published in domain-battery."
+    },
+    {
+      "key": "reaction_rate_activation_energy",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_d7f8cab9_b035_4ecd_be63_292672572526",
+      "class_qname": "emmo:ActivationEnergy",
+      "class_pref_label": "ActivationEnergy",
+      "class_label": "ActivationEnergy",
+      "confidence": 1.0
     },
     {
       "key": "reaction_rate_constant",

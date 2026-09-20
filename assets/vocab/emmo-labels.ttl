@@ -299,6 +299,7 @@
 <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_d10b3c03_8d4c_4aa2_882f_5d8f680a85ed> skos:prefLabel "DryCoatingThickness"@en .
 <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_d3a135f6_ac0c_4f94_b9dd_b1bcf1ba2800> skos:prefLabel "Seal"@en .
 <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_d3c0078e_c1d3_461e_873d_e5c3adf441c5> skos:prefLabel "MinimumCapacity"@en .
+<https://w3id.org/emmo/domain/electrochemistry#electrochemistry_d7f8cab9_b035_4ecd_be63_292672572526> skos:prefLabel "ActivationEnergy"@en .
 <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_db37b358_b2f0_4e06_b6ae_8c56c8fbb6ba> skos:prefLabel "VolumePercent"@en .
 <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_de612af2_a029_4a02_8090_4a75ab13271d> skos:prefLabel "MaximumDischargingTemperature"@en .
 <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_df4dd678_9642_47c9_84dd_4bb09f369f53> skos:prefLabel "SodiumBasedElectrode"@en .

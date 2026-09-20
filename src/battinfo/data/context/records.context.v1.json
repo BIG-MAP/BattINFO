@@ -779,6 +779,7 @@
     "VolumetricSurfaceArea": "electrochemistry:electrochemistry_a5571263_f153_448f_84a3_cd18092cf8fa",
     "ChargeCarrierTransportNumber": "electrochemistry:electrochemistry_e3e78df2_d568_4ab7_8c0d_d3a2ee3ae282",
     "ThermodynamicTemperature": "emmo:EMMO_affe07e4_e9bc_4852_86c6_69e26182a17f",
-    "AreaDensity": "emmo:EMMO_afea89af_ef16_4bdb_99d5_f3b2f4c85a6c"
+    "AreaDensity": "emmo:EMMO_afea89af_ef16_4bdb_99d5_f3b2f4c85a6c",
+    "ActivationEnergy": "electrochemistry:electrochemistry_d7f8cab9_b035_4ecd_be63_292672572526"
   }
 }
