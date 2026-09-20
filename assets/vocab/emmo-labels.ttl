@@ -27,6 +27,7 @@
 <https://w3id.org/emmo#EMMO_873b0ab3_88e6_4054_b901_5531e01f14a4> skos:prefLabel "MeasuredProperty"@en .
 <https://w3id.org/emmo#EMMO_908da3d5_775e_425e_af96_33914618eb66> skos:prefLabel "DynamicViscosity"@en .
 <https://w3id.org/emmo#EMMO_909415d1_7c43_4d5e_bbeb_7e1910159f66> skos:prefLabel "NominalProperty"@en .
+<https://w3id.org/emmo#EMMO_96f39f77_44dc_491b_8fa7_30d887fe0890> skos:prefLabel "Area"@en .
 <https://w3id.org/emmo#EMMO_a8eb87b5_4d10_4137_a75c_e04ee59ca095> skos:prefLabel "VolumeFraction"@en .
 <https://w3id.org/emmo#EMMO_c1c8ac3c_8a1c_4777_8e0b_14c1f9f9b0c6> skos:prefLabel "Diameter"@en .
 <https://w3id.org/emmo#EMMO_c413d96f_c57b_4c70_9ac1_312db6c009a8> skos:prefLabel "Tortuosity"@en .

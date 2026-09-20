@@ -4,7 +4,7 @@
   "@id": "https://w3id.org/battinfo/dataset/yssz-kccw-16g6-s21q",
   "dcterms:title": "INR21700-50E cycle-life dataset",
   "dcterms:license": {
-    "@id": "CC-BY-4.0"
+    "@id": "https://spdx.org/licenses/CC-BY-4.0.html"
   },
   "dcat:accessURL": {
     "@id": "https://doi.org/10.5281/zenodo.1234567"

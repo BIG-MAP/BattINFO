@@ -289,7 +289,9 @@ def test_from_bpx_dict_reads_header() -> None:
 def test_from_bpx_dict_physics_params_produce_warning() -> None:
     result = from_bpx(_make_bpx_dict())
     # Specific heat capacity etc. should appear in warnings
-    assert any("physics" in w.lower() or "transport" in w.lower() for w in result.warnings)
+    # Reworded when the extras carry-through landed: recognised Cell fields
+    # with no spec home are named and carried verbatim, never dropped.
+    assert any("no BattINFO spec equivalent" in w for w in result.warnings)
 
 
 def test_from_bpx_dict_unknown_physics_params_produce_warning() -> None:

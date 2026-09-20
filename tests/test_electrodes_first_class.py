@@ -504,7 +504,7 @@ def test_attribution_reaches_the_emitted_electrode_node() -> None:
     spec["license"] = "cc-by-4.0"
     spec["funding"] = {"type": "Grant", "identifier": "101069765"}
     ld = record_to_jsonld(spec, "electrode-spec")
-    assert ld["dcterms:license"] == {"@id": "cc-by-4.0"}
+    assert ld["dcterms:license"] == {"@id": "https://spdx.org/licenses/CC-BY-4.0.html"}  # slug -> SPDX IRI, never a relative IRI
     assert ld["schema:funding"]["schema:identifier"] == "101069765"
 
 

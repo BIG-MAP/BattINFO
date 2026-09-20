@@ -20,25 +20,19 @@ How to describe an organization — the manufacturers, labs, and publishers othe
 
 :::{tab-item} Python
 ```python
-# No authoring API exists for organizations yet, so the reference example
-# is the record itself (data-first, the documented fallback).
-record = {
-    "schema_version": "0.2.0",
-    "organization": {
-        "id": "https://w3id.org/battinfo/organization/s6y8-5mne-94gx-e5ve",
-        "short_id": "s6y85m",
-        "type": "Manufacturer",
-        "name": "Example Instruments",
-        "url": "https://www.example-instruments.test",
-        "same_as": ["https://ror.org/000000000"],
-        "description": "Fictional bench-equipment manufacturer for this example.",
-    },
-    "provenance": {
-        "source_type": "manual",
-        "source_url": "https://www.example-instruments.test",
-        "retrieved_at": 1750000000,
-    },
-}
+from battinfo.api import create_organization
+
+record = create_organization(
+    name="Example Instruments",
+    type="Manufacturer",
+    legal_name="Example Instruments GmbH",
+    url="https://www.example-instruments.test",
+    same_as=["https://ror.org/000000000"],
+    location={"address_country": "DE", "address_locality": "Ulm"},
+    description="Fictional bench-equipment manufacturer for this example.",
+    source_url="https://www.example-instruments.test",
+    retrieved_at=1750000000,
+)
 ```
 :::
 
@@ -47,20 +41,59 @@ record = {
 {
   "schema_version": "0.2.0",
   "organization": {
-    "id": "https://w3id.org/battinfo/organization/s6y8-5mne-94gx-e5ve",
-    "short_id": "s6y85m",
-    "type": "Manufacturer",
+    "id": "https://w3id.org/battinfo/organization/7d9k-2m4p-8t3x-6nq5",
+    "short_id": "7d9k2m",
     "name": "Example Instruments",
+    "type": "Manufacturer",
+    "legal_name": "Example Instruments GmbH",
     "url": "https://www.example-instruments.test",
     "same_as": [
       "https://ror.org/000000000"
     ],
+    "location": {
+      "address_country": "DE",
+      "address_locality": "Ulm"
+    },
     "description": "Fictional bench-equipment manufacturer for this example."
   },
   "provenance": {
     "source_type": "manual",
-    "source_url": "https://www.example-instruments.test",
-    "retrieved_at": 1750000000
+    "retrieved_at": 1750000000,
+    "battinfo_version": "0.7.0",
+    "source_url": "https://www.example-instruments.test"
+  }
+}
+```
+:::
+
+:::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@type": "schema:Organization",
+  "@id": "https://w3id.org/battinfo/organization/7d9k-2m4p-8t3x-6nq5",
+  "schema:name": "Example Instruments",
+  "schema:legalName": "Example Instruments GmbH",
+  "schema:additionalType": "Manufacturer",
+  "schema:url": "https://www.example-instruments.test",
+  "schema:sameAs": {
+    "@id": "https://ror.org/000000000"
+  },
+  "schema:address": {
+    "@type": "schema:PostalAddress",
+    "schema:addressCountry": "DE",
+    "schema:addressLocality": "Ulm"
+  },
+  "schema:description": "Fictional bench-equipment manufacturer for this example.",
+  "dcterms:source": {
+    "@type": "prov:Entity",
+    "dcterms:type": "manual",
+    "prov:hadPrimarySource": {
+      "@id": "https://www.example-instruments.test"
+    },
+    "prov:generatedAtTime": "2025-06-15T15:06:40+00:00"
   }
 }
 ```
@@ -68,11 +101,10 @@ record = {
 
 ::::
 
-```{admonition} Known gap
-:class: warning
+What to notice:
 
-Three gaps meet on this family: no authoring API (the record above is authored directly, data-first), no JSON-LD emitter, and no entities-registry kind — so organization records are outside the semantic validation path and are checked against the JSON Schema only.
-```
+- `create_organization` mints the IRI deterministically from the normalized name — creating "A123 Systems" twice lands on the same record.
+- Pure schema.org emission (`schema:Organization`, with `Corporation`/`ResearchOrganization`/... stacked when the type IS a schema.org class); `same_as` carries the Wikidata/ROR identity anchors.
 
 
 ## Common examples
@@ -177,15 +209,30 @@ The `organization` block:
 | `short_id` | → ShortId |  |  |
 | `type` | `Organization` \| `Corporation` \| `Manufacturer` \| `ResearchOrganization` … (8 values) |  | Organization kind (schema.org type). |
 | `name` | string | yes | Current preferred name of the organization. |
-| `legalName` | string |  | Full legal name, if different from name. |
-| `alternateName` | string or array of string |  | Former names, abbreviations, or brand names (e.g. 'LG Chem' for LG Energy Solution). |
+| `legalName` | string |  | DEPRECATED alias of `legal_name` (pre-snake_case spelling): accepted forever, normalized on round-trip, never taught. |
+| `alternateName` | string or array of string |  | DEPRECATED alias of `alternate_name` (pre-snake_case spelling): accepted forever, normalized on round-trip, never taught. |
 | `url` | string |  | Official website URL. |
 | `same_as` | string or array of string |  | Canonical external IRIs (Wikidata, ROR, GRID, LEI) that identify this organization. |
 | `location` | object |  | Headquarters or principal location. |
-| `foundingDate` | string |  | Year or ISO 8601 date the organization was founded. |
-| `dissolutionDate` | string |  | Year or ISO 8601 date the organization was dissolved, if applicable. |
+| `foundingDate` | string |  | DEPRECATED alias of `founding_date` (pre-snake_case spelling): accepted forever, normalized on round-trip, never taught. |
+| `dissolutionDate` | string |  | DEPRECATED alias of `dissolution_date` (pre-snake_case spelling): accepted forever, normalized on round-trip, never taught. |
 | `description` | string |  | Short description of the organization. |
-| `parentOrganization` | → OrganizationIri or object |  | Parent organization, if this is a subsidiary or division. |
+| `parentOrganization` | → OrganizationIri or object |  | DEPRECATED alias of `parent_organization` (pre-snake_case spelling): accepted forever, normalized on round-trip, never taught. |
+| `legal_name` | string |  | Full legal name, if different from name. |
+| `alternate_name` | string or array of string |  | Former names, abbreviations, or brand names (e.g. 'LG Chem' for LG Energy Solution). |
+| `founding_date` | string |  | Year or ISO 8601 date the organization was founded. |
+| `dissolution_date` | string |  | Year or ISO 8601 date the organization was dissolved, if applicable. |
+| `parent_organization` | → OrganizationIri or object |  | Parent organization, if this is a subsidiary or division. |
 
 Top-level `editorial`: Internal editorial metadata — not forwarded to the registry semantic payload.
 
+
+## Design notes
+
+:::{dropdown} The reasoning behind the model
+**Identity is the whole job.** An organization record exists so other records can point at one thing: `manufacturer` on a spec, `publisher` and `funders` on a dataset, `supplier` on equipment. New IRIs mint deterministically from the normalized name, so independently created records for the same organization collate instead of duplicating; `same_as` carries the external anchors (Wikidata, ROR, GRID, LEI) that make the identity verifiable beyond the registry.
+
+**The one pure schema.org family.** Everything an organization record says already has a home in schema.org — name, legal name, address, founding date, parent organization — so the JSON-LD emits a plain `schema:Organization` node with no EMMO terms and nothing minted. Where the `type` value is itself a schema.org class (`Corporation`, `ResearchOrganization`, `EducationalOrganization`, `GovernmentOrganization`, `NGO`) it stacks as a second `@type`; `Manufacturer` is a schema.org *property*, not a class, so it stays data under `schema:additionalType`.
+
+**Spelling.** Organization records predate the snake_case migration; the canonical keys are now `legal_name`, `alternate_name`, `founding_date`, `dissolution_date`, `parent_organization` (and `address_country`/`address_region`/`address_locality` in `location`). The original camelCase spellings stay accepted forever as deprecated aliases — as kwargs and in stored records — and normalize on round-trip, never taught.
+:::

@@ -43,10 +43,41 @@ dataset = Dataset(
     test=test,
     license="https://creativecommons.org/licenses/by/4.0/",
     access_url="https://doi.org/10.5281/zenodo.1234567",
-    download_url="https://zenodo.org/records/1234567/files/run.parquet",
-    data_format="application/x-parquet",
-    checksum_algorithm="md5",
-    checksum_value="9e107d9d372bb6826bd81d3542a419d6",
+    # One distribution per published file: the processed time series and
+    # the raw cycler export it was converted from.
+    distributions=[
+        {
+            "name": "run.bdf.parquet",
+            "description": "Cycling time series in BDF column vocabulary.",
+            "content_url": "https://zenodo.org/records/1234567/files/run.bdf.parquet",
+            "encoding_format": "application/x-parquet",
+            "role": "processed",
+            "checksum": {"algorithm": "md5", "value": "9e107d9d372bb6826bd81d3542a419d6"},
+        },
+        {
+            "name": "run.ndax",
+            "description": "Raw Neware export, exactly as the cycler wrote it.",
+            "content_url": "https://zenodo.org/records/1234567/files/run.ndax",
+            "encoding_format": "application/octet-stream",
+            "role": "raw",
+            "checksum": {"algorithm": "md5", "value": "e4d909c290d0fb1ca068ffaddf22cbd0"},
+        },
+    ],
+    # The table schema of the processed file (CSVW): column names,
+    # datatypes and units, so a consumer knows the shape of the data
+    # without downloading it.
+    main_entity=[{
+        "type": "Table",
+        "url": "run.bdf.parquet",
+        "table_schema": {
+            "columns": [
+                {"name": "test_time_s", "datatype": "number", "unit_text": "s"},
+                {"name": "voltage_v", "datatype": "number", "unit_text": "V"},
+                {"name": "current_a", "datatype": "number", "unit_text": "A"},
+                {"name": "discharging_capacity_ah", "datatype": "number", "unit_text": "Ah"},
+            ],
+        },
+    }],
     # Membership in a dataset series (a collection record): emitted as
     # dcat:inSeries and schema:isPartOf. The collection publishes first.
     series_id="https://w3id.org/battinfo/dataset/0rp6-kncv-cyem-qwcd",
@@ -73,14 +104,57 @@ record = dataset.to_record()
       "https://w3id.org/battinfo/test/3w87-0ddf-ryjg-evxe"
     ],
     "series_id": "https://w3id.org/battinfo/dataset/0rp6-kncv-cyem-qwcd",
+    "main_entity": [
+      {
+        "type": "Table",
+        "url": "run.bdf.parquet",
+        "table_schema": {
+          "columns": [
+            {
+              "name": "test_time_s",
+              "datatype": "number",
+              "unit_text": "s"
+            },
+            {
+              "name": "voltage_v",
+              "datatype": "number",
+              "unit_text": "V"
+            },
+            {
+              "name": "current_a",
+              "datatype": "number",
+              "unit_text": "A"
+            },
+            {
+              "name": "discharging_capacity_ah",
+              "datatype": "number",
+              "unit_text": "Ah"
+            }
+          ]
+        }
+      }
+    ],
     "distributions": [
       {
-        "type": "DataDownload",
-        "content_url": "https://zenodo.org/records/1234567/files/run.parquet",
+        "name": "run.bdf.parquet",
+        "description": "Cycling time series in BDF column vocabulary.",
+        "content_url": "https://zenodo.org/records/1234567/files/run.bdf.parquet",
         "encoding_format": "application/x-parquet",
+        "role": "processed",
         "checksum": {
           "algorithm": "md5",
           "value": "9e107d9d372bb6826bd81d3542a419d6"
+        }
+      },
+      {
+        "name": "run.ndax",
+        "description": "Raw Neware export, exactly as the cycler wrote it.",
+        "content_url": "https://zenodo.org/records/1234567/files/run.ndax",
+        "encoding_format": "application/octet-stream",
+        "role": "raw",
+        "checksum": {
+          "algorithm": "md5",
+          "value": "e4d909c290d0fb1ca068ffaddf22cbd0"
         }
       }
     ]
@@ -128,8 +202,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "dcat:distribution": [
     {
       "@type": "dcat:Distribution",
+      "schema:name": "run.bdf.parquet",
+      "schema:description": "Cycling time series in BDF column vocabulary.",
       "dcat:downloadURL": {
-        "@id": "https://zenodo.org/records/1234567/files/run.parquet"
+        "@id": "https://zenodo.org/records/1234567/files/run.bdf.parquet"
       },
       "dcat:mediaType": "application/x-parquet",
       "spdx:checksum": {
@@ -139,8 +215,57 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         },
         "spdx:checksumValue": "9e107d9d372bb6826bd81d3542a419d6"
       }
+    },
+    {
+      "@type": "dcat:Distribution",
+      "schema:name": "run.ndax",
+      "schema:description": "Raw Neware export, exactly as the cycler wrote it.",
+      "dcat:downloadURL": {
+        "@id": "https://zenodo.org/records/1234567/files/run.ndax"
+      },
+      "dcat:mediaType": "application/octet-stream",
+      "spdx:checksum": {
+        "@type": "spdx:Checksum",
+        "spdx:checksumAlgorithm": {
+          "@id": "spdx:checksumAlgorithm_md5"
+        },
+        "spdx:checksumValue": "e4d909c290d0fb1ca068ffaddf22cbd0"
+      }
     }
   ],
+  "schema:mainEntity": {
+    "@type": "csvw:Table",
+    "csvw:url": "run.bdf.parquet",
+    "csvw:tableSchema": {
+      "@type": "csvw:Schema",
+      "csvw:column": [
+        {
+          "@type": "csvw:Column",
+          "csvw:name": "test_time_s",
+          "csvw:datatype": "number",
+          "schema:unitText": "s"
+        },
+        {
+          "@type": "csvw:Column",
+          "csvw:name": "voltage_v",
+          "csvw:datatype": "number",
+          "schema:unitText": "V"
+        },
+        {
+          "@type": "csvw:Column",
+          "csvw:name": "current_a",
+          "csvw:datatype": "number",
+          "schema:unitText": "A"
+        },
+        {
+          "@type": "csvw:Column",
+          "csvw:name": "discharging_capacity_ah",
+          "csvw:datatype": "number",
+          "schema:unitText": "Ah"
+        }
+      ]
+    }
+  },
   "dcterms:source": {
     "@type": "prov:Entity",
     "dcterms:type": "measurement",
@@ -155,7 +280,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 What to notice:
 
 - `series_id` emits BOTH `dcat:inSeries` (the DCAT 3 membership edge) and `schema:isPartOf` (what dataset search engines read).
-- `about` links the cell and the test; the distribution carries the download URL and checksum.
+- One `distributions[]` entry per published file — URL, media type, role (`processed`/`raw`) and checksum — emitted as `dcat:distribution`.
+- `main_entity` carries the file's own table schema (CSVW): column names, datatypes and units, emitted as `schema:mainEntity` → `csvw:Table` → `csvw:tableSchema`.
 
 
 ### The collection (dataset series)
@@ -287,6 +413,12 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "@type": "http://www.w3.org/ns/dcat#Dataset",
   "@id": "https://w3id.org/battinfo/dataset/nns1-gh5p-v5n1-td17",
   "dcterms:title": "NMC811 coin cell cycling data",
+  "dcat:inSeries": {
+    "@id": "https://w3id.org/battinfo/dataset/c0hn-8mvq-3wtd-5xkp"
+  },
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/dataset/c0hn-8mvq-3wtd-5xkp"
+  },
   "dcterms:description": "Raw galvanostatic cycling export for one NMC811-Graphite coin cell.",
   "schema:description": "Raw galvanostatic cycling export for one NMC811-Graphite coin cell.",
   "dcterms:license": {
@@ -330,9 +462,136 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "@id": "https://w3id.org/battinfo/test/ezwb-tj8t-0474-7dgh"
     }
   ],
+  "dcat:distribution": [
+    {
+      "@type": "dcat:Distribution",
+      "schema:name": "cell-01.bdf.parquet",
+      "schema:description": "Cycling time series in BDF column vocabulary.",
+      "dcat:downloadURL": {
+        "@id": "https://example.org/files/nns1/cell-01.bdf.parquet"
+      },
+      "dcat:mediaType": "application/x-parquet",
+      "spdx:checksum": {
+        "@type": "spdx:Checksum",
+        "spdx:checksumAlgorithm": {
+          "@id": "spdx:checksumAlgorithm_sha256"
+        },
+        "spdx:checksumValue": "6cd3556deb0da54bca060b4c39479839e6c4e0dc7dcb84a3ea2f722b9dbc1a8f"
+      }
+    },
+    {
+      "@type": "dcat:Distribution",
+      "schema:name": "cell-01.ndax",
+      "schema:description": "Raw Neware export, exactly as the cycler wrote it.",
+      "dcat:downloadURL": {
+        "@id": "https://example.org/files/nns1/cell-01.ndax"
+      },
+      "dcat:mediaType": "application/octet-stream",
+      "spdx:checksum": {
+        "@type": "spdx:Checksum",
+        "spdx:checksumAlgorithm": {
+          "@id": "spdx:checksumAlgorithm_sha256"
+        },
+        "spdx:checksumValue": "b7e23ec29af22b0b4e41da31e868d57226121c84c7d0f7c62ea4a8f9d0f3e1c2"
+      }
+    }
+  ],
+  "schema:mainEntity": {
+    "@type": "csvw:Table",
+    "csvw:url": "cell-01.bdf.parquet",
+    "csvw:tableSchema": {
+      "@type": "csvw:Schema",
+      "csvw:column": [
+        {
+          "@type": "csvw:Column",
+          "csvw:name": "test_time_s",
+          "csvw:datatype": "number",
+          "schema:unitText": "s"
+        },
+        {
+          "@type": "csvw:Column",
+          "csvw:name": "voltage_v",
+          "csvw:datatype": "number",
+          "schema:unitText": "V"
+        },
+        {
+          "@type": "csvw:Column",
+          "csvw:name": "current_a",
+          "csvw:datatype": "number",
+          "schema:unitText": "A"
+        },
+        {
+          "@type": "csvw:Column",
+          "csvw:name": "discharging_capacity_ah",
+          "csvw:datatype": "number",
+          "schema:unitText": "Ah"
+        }
+      ]
+    }
+  },
   "dcterms:source": {
     "@type": "prov:Entity",
     "dcterms:type": "measurement",
+    "prov:generatedAtTime": "2026-06-18T08:54:36+00:00"
+  }
+}
+```
+::::
+
+:::::
+::::::
+
+::::::{dropdown} NMC811 coin cell cycling study (dataset)
+:::::{tab-set}
+
+::::{tab-item} Python
+The record ships in the installed wheel — load it as a starting point:
+
+```python
+import json
+from importlib import resources
+
+record = json.loads(
+    resources.files("battinfo")
+    .joinpath("data/examples/dataset/dataset-c0hn-8mvq-3wtd-5xkp.json")
+    .read_text(encoding="utf-8")
+)
+```
+::::
+
+::::{tab-item} Canonical record
+```{literalinclude} ../../examples/dataset/dataset-c0hn-8mvq-3wtd-5xkp.json
+:language: json
+```
+::::
+
+::::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@type": [
+    "http://www.w3.org/ns/dcat#Dataset",
+    "http://www.w3.org/ns/dcat#DatasetSeries"
+  ],
+  "@id": "https://w3id.org/battinfo/dataset/c0hn-8mvq-3wtd-5xkp",
+  "dcterms:title": "NMC811 coin cell cycling study",
+  "dcterms:description": "All cycling datasets of the NMC811-Graphite coin cell study; one member dataset per cell.",
+  "schema:description": "All cycling datasets of the NMC811-Graphite coin cell study; one member dataset per cell.",
+  "dcterms:license": {
+    "@id": "https://creativecommons.org/licenses/by/4.0/"
+  },
+  "dcat:accessURL": {
+    "@id": "https://example.org/dataset/c0hn-8mvq-3wtd-5xkp"
+  },
+  "dcterms:created": "2026-06-18T08:54:36Z",
+  "dcterms:modified": "2026-06-18T08:54:36Z",
+  "dcterms:issued": "2026-06-18T08:54:36Z",
+  "schema:datePublished": "2026-06-18T08:54:36Z",
+  "dcterms:source": {
+    "@type": "prov:Entity",
+    "dcterms:type": "catalog",
     "prov:generatedAtTime": "2026-06-18T08:54:36+00:00"
   }
 }
@@ -462,7 +721,9 @@ Schema: [`dataset.schema.json`](https://w3id.org/battinfo/schema/dataset.schema.
 ## Design notes
 
 :::{dropdown} The reasoning behind the model
-**The record is the semantic layer over the files.** Distributions carry the download URL, media type, byte size, and checksum verbatim from where the data is published; `variable_measured` and the measurement technique say what is inside without moving it.
+**The record is the semantic layer over the files.** Distributions carry the download URL, media type, byte size, and checksum verbatim from where the data is published — one `distributions[]` entry per file, with `role` separating the processed time series from the raw cycler export; `variable_measured` and the measurement technique say what is inside without moving it.
+
+**The table schema travels with the record.** `main_entity` documents the tabular file itself as a CSVW table: each column's name, datatype, and unit, plus an optional `same_as` linking a column to the property IRI it realizes. It emits as `schema:mainEntity` → `csvw:Table` → `csvw:tableSchema` in both the record JSON-LD and the publication graph, so a consumer can bind columns to semantics before downloading a byte. `variable_measured` stays the discovery-level summary (what was measured); the table schema is the file-level contract (which column holds it).
 
 **Self-reference has exactly three honest slots.** A dataset's own archive DOI belongs in `access_url` (where the file lives), `same_as` (the archived representation of this same dataset), and a citation typed `kind: "dataset"` (how the registry derives the DOI) — never in a plain provenance citation, which means "a paper this record supports" and would make the dataset cite itself as its own literature.
 

@@ -7,10 +7,92 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Equipment, equipment specs, and channels emit JSON-LD (0.8.0
+  core-features ruling).** The last "no JSON-LD emitter" gaps close. An
+  equipment spec follows the description pattern like every other
+  product: catalogue facts on the `[Description, schema:ProductModel,
+  schema:CreativeWork]` node, the described unit (instrument class +
+  `schema:Product`) under `isDescriptionFor` as `<spec-IRI>#described`,
+  and quantities as named `schema:PropertyValue`s - lab hardware sits
+  outside the battery vocabulary and battinfo mints no domain classes
+  for it. A standalone equipment record emits the SAME node shape the
+  deposit graph builds for `hasTestEquipment` targets (instrument class
+  + `prov:Entity`, serial number, location, the spec seam as
+  `hasDescription`/`dcterms:conformsTo`/`schema:isVariantOf`), so both
+  doors agree about a unit; channels carry `schema:isPartOf` +
+  `schema:position`.
+
+- **Organizations become first-class records (0.8.0 core-features
+  ruling).** The documented triple gap closes: `create_organization` /
+  `save_organization` / `query_organizations` (new IRIs mint
+  deterministically from the normalized name, so re-creating "A123
+  Systems" collates instead of duplicating; existing random-minted IRIs
+  stay valid), a JSON-LD emitter (pure schema.org - `schema:Organization`
+  with `Corporation`/`ResearchOrganization`/... stacked when the type IS
+  a schema.org class, `same_as` as the Wikidata/ROR identity anchors,
+  hosted records context), and an entities-registry kind, which puts
+  organization records on the same validation path as every other
+  family. The family's keys go snake_case (`legal_name`,
+  `founding_date`, `parent_organization`, `address_country`, ...); the
+  original camelCase spellings stay accepted forever as deprecated
+  aliases - as kwargs and in stored records - and normalize on
+  round-trip. Packaged examples rewritten to the canonical keys.
+
+- **BPX round trip: parameter-set records export back to a runnable BPX
+  file (parameter-plan Phase 1).** `to_bpx(spec, parameter_sets=...)`
+  takes ONE source's records (the block-keyed mapping
+  `to_records(by_block=True)` returns) and rebuilds the
+  electrode/separator/electrolyte blocks: claim values at full precision
+  - scalars verbatim, curves as {x, y} tables, expressions as BPX
+  function strings - with the User-defined annex reassembled and
+  `Header.Model` taken from the source's own model context (battinfo's
+  tier contracts require more than a BPX DFN file carries, so deriving
+  from tiers alone would demote an honest DFN source; the tier heuristic
+  is the fallback). Exports declaring BPX >= 1.1 follow the 1.1 layout
+  (temperatures and initial electrolyte concentration move to the State
+  section), and the official `bpx` parser accepts the result - pinned in
+  CI with `bpx` as a dev dependency. Per-source only, deliberately: a
+  calibration is a joint estimate, and mixing sources across blocks
+  would produce a file no validation supports.
+
+- **Cell geometry gets a home (BPX Cell-block ruling).** `electrode_area`
+  and `external_surface_area` join the curated property vocabulary
+  (EMMO `Area`), beside the existing `volume` - as-designed engineering
+  facts of the cell. `from_bpx` maps the BPX Cell fields onto them and
+  `to_bpx` fills the BPX-required `Electrode area [m2]` from the spec;
+  Cell fields with no spec home (temperatures - stated conventions -
+  and the electrode-pair count) are carried verbatim in
+  `BpxImportResult.extras` and re-emitted by `to_bpx(cell_extras=...)`,
+  so the whole Cell block round-trips. The two Cell-import warnings now
+  name every key instead of truncating at eight.
+
 ### Changed
 - `ws.status()` and `ws.pending()` now send the publisher API key from `ws.login()` (or `BATTINFO_ADMIN_TOKEN` when set). The registry's workspace views became credentialed because they list staged, not-yet-public submissions; without a key these two calls now print a hint and return an empty list instead of listing the queue.
 
 ### Changed
+
+- **BPX import drops nothing silently (parameter-plan Phase 0).** The
+  `User-defined` block — BPX's extension point, previously ignored without
+  a word - is now reported key-by-key, and unrecognised Parameterisation
+  blocks are named. Header lineage rides every minted parameter-set
+  record: `Description` as the record description and `References` as the
+  provenance citation (verbatim as a note when it is not a URL/DOI),
+  beside the model context the importer already stamped. A synthetic
+  full-DFN golden fixture (structural twin of a published BattMo export,
+  fabricated values - the original is GPL-3.0) pins the contract: every
+  parameter in the file becomes a claim, a spec property, or a named
+  warning.
+
+- **Parameter-set records emit against the records context.** The
+  parameter-set JSON-LD - the payload the BPX "Metadata" seam embeds -
+  now carries the hosted versioned records context
+  (`context/records/v1.json`) instead of the live EMMO context, and every
+  vocabulary parameter's terms resolve in it. License slugs
+  (`cc-by-sa-4.0`) map to their absolute SPDX page IRI instead of
+  emitting as relative IRIs; unknown values emit as literals, never
+  broken links (applies to dataset records too).
 
 - **The described individual gets a name: `<spec-IRI>#described` (JSON-LD
   dialect change, red-team ruling).** Every spec family's `isDescriptionFor`

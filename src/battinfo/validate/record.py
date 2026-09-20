@@ -22,10 +22,10 @@ from battinfo.validate.shacl import validate_shacl_report
 def _entity_schema_rel_path(doc: dict[str, Any]) -> str:
     kind = kind_for_doc(doc)
     if kind is None:
-        raise ValueError(
-            "Unsupported record type: expected cell_spec, cell_instance, test_spec, "
-            "test, dataset, material_spec, or material."
-        )
+        from battinfo.entities import ENTITY_KINDS  # noqa: PLC0415
+
+        expected = ", ".join(k.record_key for k in ENTITY_KINDS)
+        raise ValueError(f"Unsupported record type: expected one of {expected}.")
     return kind.schema_file
 
 

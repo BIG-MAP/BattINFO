@@ -65,13 +65,69 @@ record = create_equipment_spec(
 ```
 :::
 
+:::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@type": [
+    "Description",
+    "schema:ProductModel",
+    "schema:CreativeWork"
+  ],
+  "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+  "schema:name": "SkyRC MC3000",
+  "schema:model": "MC3000",
+  "schema:manufacturer": {
+    "@type": "schema:Organization",
+    "schema:name": "SkyRC"
+  },
+  "isDescriptionFor": {
+    "@type": [
+      "BatteryCycler",
+      "schema:Product"
+    ],
+    "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5#described",
+    "skos:prefLabel": "SkyRC MC3000",
+    "schema:additionalProperty": [
+      {
+        "@type": "schema:PropertyValue",
+        "schema:name": "equipment_class",
+        "schema:value": "cycler"
+      },
+      {
+        "@type": "schema:PropertyValue",
+        "schema:name": "channel_count",
+        "schema:value": 4
+      },
+      {
+        "@type": "schema:PropertyValue",
+        "schema:name": "supported_chemistries",
+        "schema:value": [
+          "NiMH",
+          "Li-ion",
+          "LiFePO4",
+          "Na-ion"
+        ]
+      }
+    ]
+  },
+  "dcterms:source": {
+    "@type": "prov:Entity",
+    "dcterms:type": "datasheet",
+    "prov:generatedAtTime": "2025-06-15T15:06:40+00:00"
+  }
+}
+```
+:::
+
 ::::
 
-```{admonition} Known gap
-:class: warning
+What to notice:
 
-No JSON-LD emitter exists for equipment records yet; the canonical record is the published form.
-```
+- The spec follows the description pattern like every other product: catalogue facts on the `[Description, schema:ProductModel, schema:CreativeWork]` node, the described unit (instrument class + `schema:Product`) under `isDescriptionFor`.
+- Equipment quantities emit as named `schema:PropertyValue`s — lab hardware sits outside the battery vocabulary, and battinfo never mints domain classes for it.
 
 
 ### An equipment unit
@@ -115,13 +171,48 @@ record = create_equipment(
 ```
 :::
 
+:::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@type": [
+    "BatteryCycler",
+    "prov:Entity"
+  ],
+  "@id": "https://w3id.org/battinfo/equipment/y9xy-kr0v-y5tn-dfj7",
+  "schema:name": "Cycler 1",
+  "schema:serialNumber": "MC3K-2026-0001",
+  "schema:location": "Lab B",
+  "hasDescription": {
+    "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5"
+  },
+  "dcterms:conformsTo": {
+    "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5"
+  },
+  "schema:isVariantOf": {
+    "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5"
+  },
+  "schema:additionalProperty": {
+    "@type": "schema:PropertyValue",
+    "schema:name": "status",
+    "schema:value": "active"
+  },
+  "dcterms:source": {
+    "@type": "prov:Entity",
+    "dcterms:type": "lab",
+    "prov:generatedAtTime": "2025-06-15T15:06:40+00:00"
+  }
+}
+```
+:::
+
 ::::
 
-```{admonition} Known gap
-:class: warning
+What to notice:
 
-No JSON-LD emitter exists for equipment records yet.
-```
+- The SAME node shape the deposit graph builds for `hasTestEquipment` targets, so a standalone record and a published test agree about the unit.
 
 
 ### A channel on that unit
@@ -162,13 +253,36 @@ record = create_channel(
 ```
 :::
 
+:::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@type": [
+    "schema:Thing",
+    "prov:Entity"
+  ],
+  "@id": "https://w3id.org/battinfo/channel/7d9k-2m4p-8t3x-6nq5",
+  "schema:name": "MC3000-A/CH1",
+  "schema:position": 1,
+  "schema:isPartOf": {
+    "@id": "https://w3id.org/battinfo/equipment/y9xy-kr0v-y5tn-dfj7"
+  },
+  "dcterms:source": {
+    "@type": "prov:Entity",
+    "dcterms:type": "lab",
+    "prov:generatedAtTime": "2025-06-15T15:06:40+00:00"
+  }
+}
+```
+:::
+
 ::::
 
-```{admonition} Known gap
-:class: warning
+What to notice:
 
-No JSON-LD emitter exists for channel records yet.
-```
+- `schema:isPartOf` carries the parent link; `schema:position` the index.
 
 
 ## Common examples
@@ -285,3 +399,13 @@ Schema: [`channel.schema.json`](https://w3id.org/battinfo/schema/channel.schema.
 | `property` | → quantitative-properties |  |  |
 | `comment` | string |  |  |
 
+
+## Design notes
+
+:::{dropdown} The reasoning behind the model
+**Category is data, never a namespace.** `equipment_class` ("cycler", "glovebox", …) is a string field, and battinfo mints no domain classes for lab hardware. The JSON-LD types a unit with the closest published instrument class the name resolves to (`BatteryCycler`, `Potentiostat`, `Galvanostat`, falling back to `MeasuringInstrument`) — an honest coarse classification, not an invented taxonomy.
+
+**One shape for both doors.** A standalone equipment record and a published test emit the same unit node: instrument class + `prov:Entity`, `schema:serialNumber`, `schema:location`, and `hasDescription`/`dcterms:conformsTo`/`schema:isVariantOf` up to the spec. The deposit graph already built these nodes for `hasTestEquipment` targets; the record emitter now matches it, so nothing about a unit depends on which artifact you read.
+
+**The spec is a product description.** Equipment specs follow the same description pattern as every other product family: the spec node carries the catalogue facts (`schema:ProductModel` persona — name, manufacturer, model, product id), and the described unit rides `isDescriptionFor` as `<spec-IRI>#described`. Quantities (channel count, current range, supported chemistries) emit as named `schema:PropertyValue`s rather than through the EMMO property map — lab hardware is outside the battery vocabulary, and honest named values beat minted fallback terms.
+:::

@@ -408,6 +408,40 @@ def _checksum_parts(checksum: Any) -> tuple[str, str] | None:
     return algorithm.strip().lower(), value.strip()
 
 
+# License slug -> the SPDX license page IRI. Records store licenses either as
+# full URLs (datasets: the creativecommons.org deed) or as SPDX-style slugs
+# (parameter sets: "cc-by-sa-4.0", set at ingest as a condition of the source).
+_LICENSE_SLUG_IRIS: dict[str, str] = {
+    "cc-by-4.0": "https://spdx.org/licenses/CC-BY-4.0.html",
+    "cc-by-sa-4.0": "https://spdx.org/licenses/CC-BY-SA-4.0.html",
+    "cc-by-nc-4.0": "https://spdx.org/licenses/CC-BY-NC-4.0.html",
+    "cc0-1.0": "https://spdx.org/licenses/CC0-1.0.html",
+    "mit": "https://spdx.org/licenses/MIT.html",
+    "apache-2.0": "https://spdx.org/licenses/Apache-2.0.html",
+    "gpl-3.0": "https://spdx.org/licenses/GPL-3.0-only.html",
+    "gpl-3.0-or-later": "https://spdx.org/licenses/GPL-3.0-or-later.html",
+}
+
+
+def license_node(value: Any) -> dict | str | None:
+    """A record ``license`` value -> a ``dcterms:license`` object or literal.
+
+    A bare slug emitted as ``{"@id": "cc-by-sa-4.0"}`` is a RELATIVE IRI that
+    resolves against the document base into garbage. URLs pass through as IRI
+    references, known slugs map to their SPDX page, and anything else emits as
+    a plain literal — honest text beats a broken link.
+    """
+    if not isinstance(value, str) or not value.strip():
+        return None
+    text = value.strip()
+    if text.startswith(("http://", "https://")):
+        return {"@id": text}
+    iri = _LICENSE_SLUG_IRIS.get(text.lower())
+    if iri:
+        return {"@id": iri}
+    return text
+
+
 def checksum_node(checksum: Any) -> dict | None:
     """A record ``checksum`` block -> an ``spdx:Checksum`` node, or None.
 
@@ -1011,7 +1045,9 @@ def dataset_to_jsonld(record: dict) -> dict:
         node["dcterms:description"] = ds["description"]
         node["schema:description"] = ds["description"]
     if ds.get("license"):
-        node["dcterms:license"] = {"@id": ds["license"]}
+        license_value = license_node(ds["license"])
+        if license_value is not None:
+            node["dcterms:license"] = license_value
     if ds.get("access_url"):
         node["dcat:accessURL"] = {"@id": ds["access_url"]}
     keywords = [k for k in (ds.get("keywords") or []) if isinstance(k, str) and k.strip()]
@@ -1071,6 +1107,24 @@ def dataset_to_jsonld(record: dict) -> dict:
                 dist["spdx:checksum"] = checksum
             ld_dists.append(dist)
         node["dcat:distribution"] = ld_dists
+
+    # The dataset's own table schema (CSVW): main_entity carries the columns
+    # of the tabular file — names, datatypes, units — so a consumer knows the
+    # shape of the data without downloading it. Reuses the publication-graph
+    # builders so both emitters produce one CSVW shape.
+    main_entities = ds.get("main_entity") or []
+    if isinstance(main_entities, Mapping):
+        main_entities = [main_entities]
+    if main_entities:
+        from battinfo.publication import _schema_main_entity_node  # noqa: PLC0415
+
+        me_nodes = [
+            me
+            for item in main_entities
+            if isinstance(item, Mapping) and (me := _schema_main_entity_node(item)) is not None
+        ]
+        if me_nodes:
+            node["schema:mainEntity"] = me_nodes[0] if len(me_nodes) == 1 else me_nodes
 
     if prov:
         node["dcterms:source"] = _provenance(prov)
@@ -1162,18 +1216,282 @@ def _parameter_set_to_jsonld(record: dict) -> dict:
     Same delegation as materials: the domain-battery emitter builds the
     schema:Dataset claim node (scalar claims as EMMO-typed hasProperty
     quantities, curves/expressions under schema:variableMeasured, the target
-    on schema:about).
+    on schema:about). Unlike materials, the node carries the RECORDS context
+    (inline dict, swapped for the hosted v1 URL in ``context="url"`` mode):
+    parameter-set records are the payload the BPX "Metadata" seam embeds, so
+    they must expand against the same versioned vocabulary every other
+    published record uses — not the live EMMO context, which can drift.
     """
+    from battinfo.transform.cell_spec_node import label_to_compact
     from battinfo.transform.json_to_jsonld import to_jsonld
 
     doc = to_jsonld(record, target="domain-battery")
     graph = doc.get("@graph") or []
     node = dict(graph[0]) if graph else {}
-    return {"@context": doc.get("@context"), **node}
+    context: dict = dict(_CONTEXT_INLINE)
+    context.update(label_to_compact())
+    return {"@context": context, **node}
 
 
 # Same delegation for component spec/instance records (electrode, separator, …).
 _component_to_jsonld = _material_to_jsonld
+
+
+# Organization type enum values that ARE schema.org classes get stacked as a
+# second @type; the rest (Manufacturer is a schema.org PROPERTY, not a class)
+# stay data under schema:additionalType.
+_ORGANIZATION_SCHEMA_TYPES = {
+    "Corporation": "schema:Corporation",
+    "ResearchOrganization": "schema:ResearchOrganization",
+    "EducationalOrganization": "schema:EducationalOrganization",
+    "GovernmentOrganization": "schema:GovernmentOrganization",
+    "NGO": "schema:NGO",
+}
+
+
+def _organization_to_jsonld(record: dict) -> dict:
+    """Transform an organization record to a schema:Organization node.
+
+    Pure schema.org: organizations are the one record family whose whole
+    vocabulary already exists there — no EMMO terms, no minted battinfo terms.
+    Deprecated camelCase keys normalize before emission, so old records emit
+    identically to canonical ones.
+    """
+    from battinfo.canonical_aliases import record_to_snake_aliases
+
+    normalized = record_to_snake_aliases(record)
+    org = normalized.get("organization") or {}
+    prov = normalized.get("provenance") or {}
+
+    org_type = org.get("type")
+    schema_class = _ORGANIZATION_SCHEMA_TYPES.get(org_type or "")
+    node: dict = {
+        "@context": dict(_CONTEXT_INLINE),
+        "@type": ["schema:Organization", schema_class] if schema_class else "schema:Organization",
+    }
+    if org.get("id"):
+        node["@id"] = org["id"]
+    if org.get("name"):
+        node["schema:name"] = org["name"]
+    if org.get("legal_name"):
+        node["schema:legalName"] = org["legal_name"]
+    alternate = org.get("alternate_name")
+    if alternate:
+        node["schema:alternateName"] = alternate if isinstance(alternate, list) else [alternate]
+    if org_type and not schema_class and org_type != "Organization":
+        node["schema:additionalType"] = org_type
+    if org.get("url"):
+        node["schema:url"] = org["url"]
+    same_as = org.get("same_as")
+    if same_as:
+        iris = same_as if isinstance(same_as, list) else [same_as]
+        refs = [{"@id": iri} for iri in iris if isinstance(iri, str) and iri]
+        if refs:
+            node["schema:sameAs"] = refs[0] if len(refs) == 1 else refs
+    location = org.get("location")
+    if isinstance(location, Mapping):
+        address: dict = {"@type": "schema:PostalAddress"}
+        for src, term in (
+            ("address_country", "schema:addressCountry"),
+            ("address_region", "schema:addressRegion"),
+            ("address_locality", "schema:addressLocality"),
+        ):
+            if location.get(src):
+                address[term] = location[src]
+        if len(address) > 1:
+            node["schema:address"] = address
+    if org.get("founding_date"):
+        node["schema:foundingDate"] = org["founding_date"]
+    if org.get("dissolution_date"):
+        node["schema:dissolutionDate"] = org["dissolution_date"]
+    parent = org.get("parent_organization")
+    if isinstance(parent, str) and parent:
+        node["schema:parentOrganization"] = {"@id": parent}
+    elif isinstance(parent, Mapping):
+        parent_node: dict = {"@type": "schema:Organization"}
+        if parent.get("id"):
+            parent_node["@id"] = parent["id"]
+        if parent.get("name"):
+            parent_node["schema:name"] = parent["name"]
+        if len(parent_node) > 1:
+            node["schema:parentOrganization"] = parent_node
+    if org.get("description"):
+        node["schema:description"] = org["description"]
+    if prov:
+        node["dcterms:source"] = _provenance(prov)
+    return node
+
+
+def _property_value_nodes(property_map: Any) -> list[dict]:
+    """A record ``property`` dict -> named schema:PropertyValue nodes.
+
+    Equipment quantities (voltage range, max current, ...) are lab-hardware
+    facts outside the battery domain vocabulary, so they emit as honest named
+    PropertyValues rather than through the EMMO property map (which would
+    warn on every key and mint battinfo: fallbacks).
+    """
+    out: list[dict] = []
+    if not isinstance(property_map, Mapping):
+        return out
+    for name in sorted(property_map):
+        quantity = property_map[name]
+        if not isinstance(quantity, Mapping):
+            continue
+        value = quantity.get("value", quantity.get("value_text"))
+        if value is None:
+            continue
+        node: dict = {"@type": "schema:PropertyValue", "schema:name": name, "schema:value": value}
+        if quantity.get("unit"):
+            node["schema:unitText"] = quantity["unit"]
+        out.append(node)
+    return out
+
+
+def _equipment_spec_to_jsonld(record: dict) -> dict:
+    """Transform an equipment-spec record: the description pattern, for hardware.
+
+    The spec node is the product description ([Description, schema:ProductModel,
+    schema:CreativeWork], catalogue facts only); the described unit rides
+    isDescriptionFor as <spec-IRI>#described, typed with the instrument class
+    the deposit graph already derives (BatteryCycler / Potentiostat /
+    MeasuringInstrument) plus schema:Product. Equipment quantities emit as
+    named PropertyValues — lab hardware is outside the battery vocabulary, and
+    battinfo never mints domain classes for it.
+    """
+    from battinfo._emmo_instruments import _instrument_emmo_type
+    from battinfo.transform.json_to_jsonld import described_iri
+
+    spec = record.get("equipment_spec") or {}
+    prov = record.get("provenance") or {}
+
+    node: dict = {
+        "@context": dict(_CONTEXT_INLINE),
+        "@type": ["Description", "schema:ProductModel", "schema:CreativeWork"],
+    }
+    if spec.get("id"):
+        node["@id"] = spec["id"]
+    if spec.get("name"):
+        node["schema:name"] = spec["name"]
+    if spec.get("model"):
+        node["schema:model"] = spec["model"]
+    for org_field, term in (("manufacturer", "schema:manufacturer"), ("supplier", "schema:provider")):
+        org = spec.get(org_field)
+        org_name = org.get("name") if isinstance(org, Mapping) else org
+        if isinstance(org_name, str) and org_name:
+            node[term] = {"@type": "schema:Organization", "schema:name": org_name}
+    if spec.get("product_id"):
+        node["schema:productID"] = spec["product_id"]
+
+    class_seed = " ".join(
+        str(v) for v in (spec.get("equipment_class"), spec.get("name"), spec.get("model")) if v
+    )
+    described: dict = {"@type": [_instrument_emmo_type(class_seed), "schema:Product"]}
+    witness = described_iri(spec.get("id"))
+    if witness:
+        described["@id"] = witness
+    if spec.get("name"):
+        described["skos:prefLabel"] = spec["name"]
+    extra_properties = _property_value_nodes(spec.get("property"))
+    if spec.get("equipment_class"):
+        extra_properties.insert(0, {
+            "@type": "schema:PropertyValue",
+            "schema:name": "equipment_class",
+            "schema:value": spec["equipment_class"],
+        })
+    if spec.get("channel_count") is not None:
+        extra_properties.append({
+            "@type": "schema:PropertyValue",
+            "schema:name": "channel_count",
+            "schema:value": spec["channel_count"],
+        })
+    chems = spec.get("supported_chemistries")
+    if isinstance(chems, list) and chems:
+        extra_properties.append({
+            "@type": "schema:PropertyValue",
+            "schema:name": "supported_chemistries",
+            "schema:value": list(chems),
+        })
+    if extra_properties:
+        described["schema:additionalProperty"] = (
+            extra_properties[0] if len(extra_properties) == 1 else extra_properties
+        )
+    node["isDescriptionFor"] = described
+    if spec.get("comment"):
+        node["schema:description"] = spec["comment"]
+    if prov:
+        node["dcterms:source"] = _provenance(prov)
+    return node
+
+
+def _equipment_to_jsonld(record: dict) -> dict:
+    """Transform an equipment (unit) record — the SAME node shape the deposit
+    graph builds for hasTestEquipment targets, so both emitters agree."""
+    from battinfo._emmo_instruments import _instrument_emmo_type
+
+    body = record.get("equipment") or {}
+    prov = record.get("provenance") or {}
+    node: dict = {
+        "@context": dict(_CONTEXT_INLINE),
+        "@type": [_instrument_emmo_type(str(body.get("name") or "")), "prov:Entity"],
+    }
+    if body.get("id"):
+        node["@id"] = body["id"]
+    if body.get("name"):
+        node["schema:name"] = body["name"]
+    if body.get("serial_number"):
+        node["schema:serialNumber"] = body["serial_number"]
+    if body.get("location"):
+        node["schema:location"] = body["location"]
+    if body.get("equipment_spec_id"):
+        node["hasDescription"] = {"@id": body["equipment_spec_id"]}
+        node["dcterms:conformsTo"] = {"@id": body["equipment_spec_id"]}
+        node["schema:isVariantOf"] = {"@id": body["equipment_spec_id"]}
+    extra_properties = _property_value_nodes(body.get("property"))
+    if body.get("status"):
+        extra_properties.insert(0, {
+            "@type": "schema:PropertyValue", "schema:name": "status",
+            "schema:value": body["status"],
+        })
+    if extra_properties:
+        node["schema:additionalProperty"] = (
+            extra_properties[0] if len(extra_properties) == 1 else extra_properties
+        )
+    if body.get("comment"):
+        node["schema:description"] = body["comment"]
+    if prov:
+        node["dcterms:source"] = _provenance(prov)
+    return node
+
+
+def _channel_to_jsonld(record: dict) -> dict:
+    """Transform a channel record — the deposit graph's channel node shape."""
+    body = record.get("channel") or {}
+    prov = record.get("provenance") or {}
+    node: dict = {
+        "@context": dict(_CONTEXT_INLINE),
+        "@type": ["schema:Thing", "prov:Entity"],
+    }
+    if body.get("id"):
+        node["@id"] = body["id"]
+    label = body.get("label") or (
+        f"CH{body['index']}" if isinstance(body.get("index"), int) else None
+    )
+    if label:
+        node["schema:name"] = label
+    if isinstance(body.get("index"), int):
+        node["schema:position"] = body["index"]
+    if body.get("equipment_id"):
+        node["schema:isPartOf"] = {"@id": body["equipment_id"]}
+    if body.get("status"):
+        node["schema:additionalProperty"] = {
+            "@type": "schema:PropertyValue", "schema:name": "status",
+            "schema:value": body["status"],
+        }
+    if body.get("comment"):
+        node["schema:description"] = body["comment"]
+    if prov:
+        node["dcterms:source"] = _provenance(prov)
+    return node
 
 
 # ── Public dispatcher ─────────────────────────────────────────────────────────
@@ -1210,6 +1528,11 @@ _TRANSFORMERS = {
     "housing":      _component_to_jsonld,
     "parameter-set": _parameter_set_to_jsonld,
     "parameter_set": _parameter_set_to_jsonld,
+    "organization": _organization_to_jsonld,
+    "equipment-spec": _equipment_spec_to_jsonld,
+    "equipment_spec": _equipment_spec_to_jsonld,
+    "equipment": _equipment_to_jsonld,
+    "channel": _channel_to_jsonld,
 }
 
 
@@ -1292,7 +1615,9 @@ def record_to_jsonld(record: dict, record_type: str, *, context: str = "url") ->
     # on the dataset body and emit it from dataset_to_jsonld, so this only
     # reaches the non-dataset record kinds.
     if record.get("license") and "dcterms:license" not in node:
-        node["dcterms:license"] = {"@id": record["license"]}
+        license_value = license_node(record["license"])
+        if license_value is not None:
+            node["dcterms:license"] = license_value
     if context == "url" and isinstance(node.get("@context"), dict):
         # Swap the inline records context for the hosted reference. Only the
         # records-context nodes (a dict @context) are affected; material/component

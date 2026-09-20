@@ -71,14 +71,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 
 ```json
 {
-  "@context": [
-    "https://w3id.org/emmo/domain/battery/context",
-    {
-      "schema": "https://schema.org/",
-      "dcterms": "http://purl.org/dc/terms/",
-      "battinfo": "https://w3id.org/battinfo/"
-    }
-  ],
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
   "@id": "https://w3id.org/battinfo/spec/fm9p-sqkk-tbx3-rr66",
   "@type": "schema:Dataset",
   "schema:name": "Graphite density claims, Smith 2026",
@@ -118,6 +111,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 What to notice:
 
 - The claim batch emits as one `schema:Dataset` node: scalar claims as EMMO-typed quantities, the target on `schema:about`.
+- A BPX file imports the same way: `from_bpx_parameters(...).to_records(materials=...)` turns its physics blocks into claim records, header lineage included (see the design notes).
 
 
 ## Common examples
@@ -153,15 +147,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 
 ```json
 {
-  "@context": [
-    "https://w3id.org/emmo/domain/battery/context",
-    {
-      "schema": "https://schema.org/",
-      "dcterms": "http://purl.org/dc/terms/",
-      "bibo": "http://purl.org/ontology/bibo/",
-      "battinfo": "https://w3id.org/battinfo/"
-    }
-  ],
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
   "@id": "https://w3id.org/battinfo/spec/8qqs-rh43-wt8d-172n",
   "@type": "schema:Dataset",
   "schema:name": "Chen 2020 - graphite",
@@ -328,4 +314,13 @@ Schema: [`parameter-set.schema.json`](https://w3id.org/battinfo/schema/parameter
 | `claims` | array of → Claim | yes |  |
 | `description` | string |  |  |
 | `comment` | string |  |  |
+| `annex` | object |  | Source-file extension entries carried verbatim (e.g. a BPX User-defined block): original key -> raw value. No standard semantics are claimed for these; they exist so a re-export reproduces the source file and nothing is silently lost. |
 
+
+## Design notes
+
+:::{dropdown} The reasoning behind the model
+**Why claims, not properties.** It is tempting to say a diffusivity of graphite is a property of graphite and file it on a material record. Four facts break that model. Most claims target a *kind* (graphite as such), and kinds are vocabulary, not records — there is no bearer to carry the property. Sources disagree — five published graphite OCPs, fitted diffusivities an order of magnitude apart — and a record's properties presuppose one adjudicated value, while the spread *is* the data. Many parameters are not properties of the material at all but of a model fit — a reaction rate constant fitted under DFN belongs to (material × model × calibration), and asserting it on the material would poison the record with model artifacts. And a calibration is a joint estimate: values fitted together are only valid together, so the set is the unit of self-consistency. Hence one record per source, `provenance_class` per claim, resolution downstream. The describer's own declarations (a datasheet density) stay properties of the description; third-party and model-bound assertions are claims about the target — the same epistemics rule as spec vs instance.
+
+**BPX interop, both directions.** `from_bpx_parameters` imports a BPX file's electrode/separator/electrolyte physics as claims — scalars, tables as curves, function strings as expressions — splitting material-intrinsic claims (stoichiometry window, diffusivity, OCP) from build claims (thickness, porosity) that target the cell design instead. Header lineage rides along: `Model` and BPX version in `model_context` (a DFN-fitted value is not model-free), `Description` on the record, `References` as citation or note; the `User-defined` block travels verbatim as each record's `annex`, and Cell-block fields become spec properties (or verbatim extras) via `from_bpx` — nothing in the file is dropped silently. The reverse: `to_bpx(spec, parameter_sets=...)` turns ONE source's records back into a runnable BPX file — claims at full precision, `Header.Model` from the source's own model context, `State` sections for BPX ≥ 1.1 — and the official `bpx` parser accepts the result. One source per file, deliberately: a calibration is a joint estimate, so mixing sources across blocks would produce a file no validation supports (a labeled composed mode is a planned refinement).
+:::

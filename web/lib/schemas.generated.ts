@@ -8764,7 +8764,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             "legalName": {
               "type": "string",
               "minLength": 1,
-              "description": "Full legal name, if different from name."
+              "description": "DEPRECATED alias of `legal_name` (pre-snake_case spelling): accepted forever, normalized on round-trip, never taught."
             },
             "alternateName": {
               "anyOf": [
@@ -8782,7 +8782,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
                   "uniqueItems": true
                 }
               ],
-              "description": "Former names, abbreviations, or brand names (e.g. 'LG Chem' for LG Energy Solution)."
+              "description": "DEPRECATED alias of `alternate_name` (pre-snake_case spelling): accepted forever, normalized on round-trip, never taught."
             },
             "url": {
               "type": "string",
@@ -8814,13 +8814,26 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
                 "addressCountry": {
                   "type": "string",
                   "pattern": "^[A-Z]{2}$",
-                  "description": "ISO 3166-1 alpha-2 country code."
+                  "description": "DEPRECATED alias of `address_country`: accepted forever, normalized on round-trip, never taught."
                 },
                 "addressRegion": {
                   "type": "string",
-                  "description": "State, province, or region."
+                  "description": "DEPRECATED alias of `address_region`: accepted forever, normalized on round-trip, never taught."
                 },
                 "addressLocality": {
+                  "type": "string",
+                  "description": "DEPRECATED alias of `address_locality`: accepted forever, normalized on round-trip, never taught."
+                },
+                "address_country": {
+                  "type": "string",
+                  "pattern": "^[A-Z]{2}$",
+                  "description": "ISO 3166-1 alpha-2 country code."
+                },
+                "address_region": {
+                  "type": "string",
+                  "description": "State, province, or region."
+                },
+                "address_locality": {
                   "type": "string",
                   "description": "City or locality."
                 }
@@ -8829,17 +8842,74 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "foundingDate": {
               "type": "string",
-              "description": "Year or ISO 8601 date the organization was founded."
+              "description": "DEPRECATED alias of `founding_date` (pre-snake_case spelling): accepted forever, normalized on round-trip, never taught."
             },
             "dissolutionDate": {
               "type": "string",
-              "description": "Year or ISO 8601 date the organization was dissolved, if applicable."
+              "description": "DEPRECATED alias of `dissolution_date` (pre-snake_case spelling): accepted forever, normalized on round-trip, never taught."
             },
             "description": {
               "type": "string",
               "description": "Short description of the organization."
             },
             "parentOrganization": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/OrganizationIri"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "name"
+                  ],
+                  "properties": {
+                    "id": {
+                      "$ref": "#/$defs/OrganizationIri",
+                      "description": "Canonical IRI of the parent organization record."
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Name of the parent organization."
+                    }
+                  }
+                }
+              ],
+              "description": "DEPRECATED alias of `parent_organization` (pre-snake_case spelling): accepted forever, normalized on round-trip, never taught."
+            },
+            "legal_name": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Full legal name, if different from name."
+            },
+            "alternate_name": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "minItems": 1,
+                  "uniqueItems": true
+                }
+              ],
+              "description": "Former names, abbreviations, or brand names (e.g. 'LG Chem' for LG Energy Solution)."
+            },
+            "founding_date": {
+              "type": "string",
+              "description": "Year or ISO 8601 date the organization was founded."
+            },
+            "dissolution_date": {
+              "type": "string",
+              "description": "Year or ISO 8601 date the organization was dissolved, if applicable."
+            },
+            "parent_organization": {
               "anyOf": [
                 {
                   "$ref": "#/$defs/OrganizationIri"
@@ -9051,6 +9121,11 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "comment": {
               "type": "string"
+            },
+            "annex": {
+              "type": "object",
+              "additionalProperties": true,
+              "description": "Source-file extension entries carried verbatim (e.g. a BPX User-defined block): original key -> raw value. No standard semantics are claimed for these; they exist so a re-export reproduces the source file and nothing is silently lost."
             }
           },
           "oneOf": [

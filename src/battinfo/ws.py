@@ -863,6 +863,12 @@ DEPOSIT_COVERAGE_EXEMPT: dict[str, str] = {
             "housing-spec", "housing",
         )
     },
+    "organization": (
+        "identity record: the deposit inlines schema:manufacturer / "
+        "schema:publisher agent nodes on the records that name them rather "
+        "than shipping the registry's organization records; organization "
+        "publication is a registry catalog concern, not a deposit one"
+    ),
 }
 
 
