@@ -589,6 +589,14 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "$ref": "#/$defs/SpecItem",
               "description": "Cell volume."
             },
+            "electrode_area": {
+              "$ref": "#/$defs/SpecItem",
+              "description": "Active electrode area per electrode pair (the BPX-required as-designed geometry)."
+            },
+            "external_surface_area": {
+              "$ref": "#/$defs/SpecItem",
+              "description": "External surface area of the cell."
+            },
             "pulse_charging_current": {
               "$ref": "#/$defs/SpecItem",
               "description": "Maximum pulse charging current."

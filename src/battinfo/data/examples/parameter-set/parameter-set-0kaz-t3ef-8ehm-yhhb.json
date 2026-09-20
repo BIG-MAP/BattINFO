@@ -1,0 +1,79 @@
+{
+  "schema_version": "0.2.0",
+  "parameter_set": {
+    "id": "https://w3id.org/battinfo/spec/0kaz-t3ef-8ehm-yhhb",
+    "short_id": "0kazt3",
+    "name": "BPX NMC111 pouch blended - electrolyte",
+    "cell_spec_id": "https://w3id.org/battinfo/spec/vtz0-b7fc-6jdr-8ndn",
+    "scope": "electrolyte",
+    "claims": [
+      {
+        "parameter": "diffusivity_activation_energy",
+        "quantity": {
+          "value": 17100.0,
+          "unit": "J/mol"
+        },
+        "provenance_class": "fitted"
+      },
+      {
+        "parameter": "initial_concentration",
+        "quantity": {
+          "value": 1000.0,
+          "unit": "mol/m3"
+        },
+        "provenance_class": "fitted"
+      },
+      {
+        "parameter": "transference_number",
+        "quantity": {
+          "value": 0.2594,
+          "unit": "1"
+        },
+        "provenance_class": "fitted"
+      },
+      {
+        "parameter": "ionic_conductivity",
+        "expression": {
+          "text": "0.1297 * (x / 1000) ** 3 - 2.51 * (x / 1000) ** 1.5 + 3.329 * (x / 1000)",
+          "language": "bpx",
+          "argument": "x"
+        },
+        "provenance_class": "fitted"
+      },
+      {
+        "parameter": "electrolyte_diffusivity",
+        "expression": {
+          "text": "8.794e-11 * (x / 1000) ** 2 - 3.972e-10 * (x / 1000) + 4.862e-10",
+          "language": "bpx",
+          "argument": "x"
+        },
+        "provenance_class": "fitted"
+      },
+      {
+        "parameter": "conductivity_activation_energy",
+        "quantity": {
+          "value": 17100.0,
+          "unit": "J/mol"
+        },
+        "provenance_class": "fitted"
+      }
+    ],
+    "model_context": {
+      "tool": "BPX",
+      "name": "Test case: blended electrode definition with two particle sizes but equivalent chemistry. Compare to nmc_pouch_cell_BPX.json in About:Energy open-source release.",
+      "model": "DFN",
+      "version": "0.4.0"
+    }
+  },
+  "provenance": {
+    "source_type": "literature",
+    "retrieved_at": 1789900000,
+    "battinfo_version": "0.7.0",
+    "source_url": "https://github.com/FaradayInstitution/BPX/blob/main/examples/nmc_pouch_cell_BPX_blended_electrode.json",
+    "citation": "https://github.com/FaradayInstitution/BPX"
+  },
+  "license": "mit",
+  "notes": [
+    "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford)."
+  ]
+}

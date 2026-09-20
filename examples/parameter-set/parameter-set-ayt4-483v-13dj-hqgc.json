@@ -1,0 +1,80 @@
+{
+  "schema_version": "0.2.0",
+  "parameter_set": {
+    "id": "https://w3id.org/battinfo/spec/ayt4-483v-13dj-hqgc",
+    "short_id": "ayt448",
+    "name": "BPX LFP 18650 - electrolyte",
+    "cell_spec_id": "https://w3id.org/battinfo/spec/b10q-6qh6-3v2x-4sp7",
+    "scope": "electrolyte",
+    "claims": [
+      {
+        "parameter": "diffusivity_activation_energy",
+        "quantity": {
+          "value": 17100.0,
+          "unit": "J/mol"
+        },
+        "provenance_class": "fitted"
+      },
+      {
+        "parameter": "initial_concentration",
+        "quantity": {
+          "value": 1000.0,
+          "unit": "mol/m3"
+        },
+        "provenance_class": "fitted"
+      },
+      {
+        "parameter": "transference_number",
+        "quantity": {
+          "value": 0.259,
+          "unit": "1"
+        },
+        "provenance_class": "fitted"
+      },
+      {
+        "parameter": "ionic_conductivity",
+        "expression": {
+          "text": "0.1297 * (x / 1000) ** 3 - 2.51 * (x / 1000) ** 1.5 + 3.329 * (x / 1000)",
+          "language": "bpx",
+          "argument": "x"
+        },
+        "provenance_class": "fitted"
+      },
+      {
+        "parameter": "electrolyte_diffusivity",
+        "expression": {
+          "text": "8.794e-11 * (x / 1000) ** 2 - 3.972e-10 * (x / 1000) + 4.862e-10",
+          "language": "bpx",
+          "argument": "x"
+        },
+        "provenance_class": "fitted"
+      },
+      {
+        "parameter": "conductivity_activation_energy",
+        "quantity": {
+          "value": 17100.0,
+          "unit": "J/mol"
+        },
+        "provenance_class": "fitted"
+      }
+    ],
+    "model_context": {
+      "tool": "BPX",
+      "name": "Parameterisation example of an LFP|graphite 2 Ah cylindrical 18650 cell.",
+      "model": "DFN",
+      "version": "0.1.0"
+    },
+    "description": "LFP|graphite 2 Ah cylindrical 18650 cell. Parameterisation by About:Energy Limited (aboutenergy.io), December 2022, based on cell cycling data, and electrode data gathered after cell teardown. Electrolyte properties from Nyman et al. 2008 (doi:10.1016/j.electacta.2008.04.023). Negative electrode entropic coefficient data are from O'Regan et al. 2022 (doi:10.1016/j.electacta.2022.140700). Positive electrode entropic coefficient data are from Gerver and Meyers 2011 (doi:10.1149/1.3591799). Other thermal properties are estimated."
+  },
+  "provenance": {
+    "source_type": "literature",
+    "retrieved_at": 1789900000,
+    "battinfo_version": "0.7.0",
+    "source_url": "https://github.com/FaradayInstitution/BPX/blob/main/examples/lfp_18650_cell_BPX.json",
+    "citation": "https://github.com/FaradayInstitution/BPX"
+  },
+  "license": "mit",
+  "notes": [
+    "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford)."
+  ]
+}

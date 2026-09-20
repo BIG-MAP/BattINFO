@@ -1,0 +1,157 @@
+{
+  "schema_version": "0.2.0",
+  "parameter_set": {
+    "id": "https://w3id.org/battinfo/spec/956b-frrf-hfg6-m4d9",
+    "short_id": "956bfr",
+    "name": "BPX LFP 18650 - positive electrode material",
+    "material_kind": "lfp",
+    "scope": "material",
+    "claims": [
+      {
+        "parameter": "particle_radius",
+        "quantity": {
+          "value": 5e-07,
+          "unit": "m"
+        },
+        "provenance_class": "fitted"
+      },
+      {
+        "parameter": "solid_diffusivity",
+        "quantity": {
+          "value": 6.873e-17,
+          "unit": "m2/s"
+        },
+        "provenance_class": "fitted"
+      },
+      {
+        "parameter": "ocp",
+        "expression": {
+          "text": "3.41285712e+00 - 1.49721852e-02 * x + 3.54866018e+14 * exp(-3.95729493e+02 * x) - 1.45998465e+00 * exp(-1.10108622e+02 * (1 - x))",
+          "language": "bpx",
+          "argument": "x"
+        },
+        "provenance_class": "fitted"
+      },
+      {
+        "parameter": "entropic_coefficient",
+        "curve": {
+          "x_quantity": "stoichiometry",
+          "x": [
+            0.0,
+            0.05,
+            0.1,
+            0.15,
+            0.2,
+            0.25,
+            0.3,
+            0.35,
+            0.4,
+            0.45,
+            0.5,
+            0.55,
+            0.6,
+            0.65,
+            0.7,
+            0.75,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            1.0
+          ],
+          "y": [
+            0.0001,
+            4.7145e-05,
+            3.7666e-05,
+            2.0299e-05,
+            5.9833e-06,
+            -4.6859e-06,
+            -1.3966e-05,
+            -2.3528e-05,
+            -3.3593e-05,
+            -4.3433e-05,
+            -5.2311e-05,
+            -6.0211e-05,
+            -6.8006e-05,
+            -7.6939e-05,
+            -8.7641e-05,
+            -9.913e-05,
+            -0.00010855,
+            -0.00011266,
+            -0.00011238,
+            -0.00010921,
+            -0.00022539
+          ],
+          "y_unit": "V/K"
+        },
+        "provenance_class": "fitted"
+      },
+      {
+        "parameter": "reaction_rate_constant",
+        "quantity": {
+          "value": 9.736e-07,
+          "unit": "mol.m-2.s-1"
+        },
+        "provenance_class": "fitted"
+      },
+      {
+        "parameter": "stoichiometry_min",
+        "quantity": {
+          "value": 0.0875,
+          "unit": "1"
+        },
+        "provenance_class": "fitted"
+      },
+      {
+        "parameter": "stoichiometry_max",
+        "quantity": {
+          "value": 0.95038,
+          "unit": "1"
+        },
+        "provenance_class": "fitted"
+      },
+      {
+        "parameter": "max_concentration",
+        "quantity": {
+          "value": 21200.0,
+          "unit": "mol/m3"
+        },
+        "provenance_class": "fitted"
+      },
+      {
+        "parameter": "diffusivity_activation_energy",
+        "quantity": {
+          "value": 80000.0,
+          "unit": "J/mol"
+        },
+        "provenance_class": "fitted"
+      },
+      {
+        "parameter": "reaction_rate_activation_energy",
+        "quantity": {
+          "value": 35000.0,
+          "unit": "J/mol"
+        },
+        "provenance_class": "fitted"
+      }
+    ],
+    "model_context": {
+      "tool": "BPX",
+      "name": "Parameterisation example of an LFP|graphite 2 Ah cylindrical 18650 cell.",
+      "model": "DFN",
+      "version": "0.1.0"
+    },
+    "description": "LFP|graphite 2 Ah cylindrical 18650 cell. Parameterisation by About:Energy Limited (aboutenergy.io), December 2022, based on cell cycling data, and electrode data gathered after cell teardown. Electrolyte properties from Nyman et al. 2008 (doi:10.1016/j.electacta.2008.04.023). Negative electrode entropic coefficient data are from O'Regan et al. 2022 (doi:10.1016/j.electacta.2022.140700). Positive electrode entropic coefficient data are from Gerver and Meyers 2011 (doi:10.1149/1.3591799). Other thermal properties are estimated."
+  },
+  "provenance": {
+    "source_type": "literature",
+    "retrieved_at": 1789900000,
+    "battinfo_version": "0.7.0",
+    "source_url": "https://github.com/FaradayInstitution/BPX/blob/main/examples/lfp_18650_cell_BPX.json",
+    "citation": "https://github.com/FaradayInstitution/BPX"
+  },
+  "license": "mit",
+  "notes": [
+    "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford)."
+  ]
+}

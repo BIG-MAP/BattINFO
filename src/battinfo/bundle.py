@@ -517,6 +517,8 @@ CELL_TYPE_AUTHORING_PROPERTY_FIELDS: tuple[str, ...] = (
     "width",
     "length",
     "thickness",
+    "electrode_area",
+    "external_surface_area",
     "pulse_charging_current",
     "continuous_charging_current",
     "nominal_continuous_charging_current",

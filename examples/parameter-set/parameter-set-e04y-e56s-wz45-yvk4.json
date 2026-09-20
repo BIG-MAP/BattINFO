@@ -1,0 +1,53 @@
+{
+  "schema_version": "0.2.0",
+  "parameter_set": {
+    "id": "https://w3id.org/battinfo/spec/e04y-e56s-wz45-yvk4",
+    "short_id": "e04ye5",
+    "name": "BPX NMC111 pouch blended - separator",
+    "cell_spec_id": "https://w3id.org/battinfo/spec/vtz0-b7fc-6jdr-8ndn",
+    "scope": "separator",
+    "claims": [
+      {
+        "parameter": "thickness",
+        "quantity": {
+          "value": 2e-05,
+          "unit": "m"
+        },
+        "provenance_class": "fitted"
+      },
+      {
+        "parameter": "porosity",
+        "quantity": {
+          "value": 0.47,
+          "unit": "1"
+        },
+        "provenance_class": "fitted"
+      },
+      {
+        "parameter": "transport_efficiency",
+        "quantity": {
+          "value": 0.3222,
+          "unit": "1"
+        },
+        "provenance_class": "fitted"
+      }
+    ],
+    "model_context": {
+      "tool": "BPX",
+      "name": "Test case: blended electrode definition with two particle sizes but equivalent chemistry. Compare to nmc_pouch_cell_BPX.json in About:Energy open-source release.",
+      "model": "DFN",
+      "version": "0.4.0"
+    }
+  },
+  "provenance": {
+    "source_type": "literature",
+    "retrieved_at": 1789900000,
+    "battinfo_version": "0.7.0",
+    "source_url": "https://github.com/FaradayInstitution/BPX/blob/main/examples/nmc_pouch_cell_BPX_blended_electrode.json",
+    "citation": "https://github.com/FaradayInstitution/BPX"
+  },
+  "license": "mit",
+  "notes": [
+    "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford)."
+  ]
+}

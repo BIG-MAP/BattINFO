@@ -118,6 +118,8 @@ classes:
       - length
       - thickness
       - volume
+      - electrode_area
+      - external_surface_area
 
     # ── Temperature ───────────────────────────────────────────────────────────
       - maximum_charging_temperature
@@ -658,6 +660,20 @@ slots:
     description: External volume of the cell.
     aliases:
       - "Volume [mL]"
+
+  electrode_area:
+    slot_uri: emmo:EMMO_96f39f77_44dc_491b_8fa7_30d887fe0890
+    range: SpecValue
+    description: Active electrode area per electrode pair (the BPX-required as-designed geometry).
+    aliases:
+      - "Electrode area [cm2]"
+
+  external_surface_area:
+    slot_uri: emmo:EMMO_96f39f77_44dc_491b_8fa7_30d887fe0890
+    range: SpecValue
+    description: External surface area of the cell.
+    aliases:
+      - "External surface area [cm2]"
 
   # Temperature
   maximum_charging_temperature:

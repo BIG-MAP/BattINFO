@@ -1,0 +1,71 @@
+{
+  "schema_version": "0.2.0",
+  "parameter_set": {
+    "id": "https://w3id.org/battinfo/spec/ftg3-krew-9dq5-mntm",
+    "short_id": "ftg3kr",
+    "name": "BPX NMC111 pouch - negative electrode build",
+    "cell_spec_id": "https://w3id.org/battinfo/spec/h9a9-pzge-8bvf-gss4",
+    "scope": "electrode",
+    "claims": [
+      {
+        "parameter": "thickness",
+        "quantity": {
+          "value": 5.62e-05,
+          "unit": "m"
+        },
+        "provenance_class": "fitted"
+      },
+      {
+        "parameter": "electronic_conductivity",
+        "quantity": {
+          "value": 0.222,
+          "unit": "S/m"
+        },
+        "provenance_class": "fitted"
+      },
+      {
+        "parameter": "surface_area_per_volume",
+        "quantity": {
+          "value": 499522.0,
+          "unit": "1/m"
+        },
+        "provenance_class": "fitted"
+      },
+      {
+        "parameter": "porosity",
+        "quantity": {
+          "value": 0.253991,
+          "unit": "1"
+        },
+        "provenance_class": "fitted"
+      },
+      {
+        "parameter": "transport_efficiency",
+        "quantity": {
+          "value": 0.128,
+          "unit": "1"
+        },
+        "provenance_class": "fitted"
+      }
+    ],
+    "electrode_polarity": "negative",
+    "model_context": {
+      "tool": "BPX",
+      "name": "Parameterisation example of an NMC111|graphite 12.5 Ah pouch cell",
+      "model": "DFN",
+      "version": "0.1.0"
+    },
+    "description": "NMC111|graphite 12.5 Ah pouch cell. Parameterisation by About:Energy Limited (aboutenergy.io), December 2022, based on cell cycling data, and electrode data gathered after cell teardown. Electrolyte properties from Nyman et al. 2008 (doi:10.1016/j.electacta.2008.04.023). Negative electrode entropic coefficient data are from O'Regan et al. 2022 (doi:10.1016/j.electacta.2022.140700). Positive electrode entropic coefficient data are from Viswanathan et al. 2010 (doi:10.1016/j.jpowsour.2009.11.103). Other thermal properties are estimated."
+  },
+  "provenance": {
+    "source_type": "literature",
+    "retrieved_at": 1789900000,
+    "battinfo_version": "0.7.0",
+    "source_url": "https://github.com/FaradayInstitution/BPX/blob/main/examples/nmc_pouch_cell_BPX.json",
+    "citation": "https://github.com/FaradayInstitution/BPX"
+  },
+  "license": "mit",
+  "notes": [
+    "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford)."
+  ]
+}
