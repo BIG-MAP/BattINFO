@@ -9,6 +9,25 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Chemical substances get pinned, machine-verifiable identity (0.8.0
+  core-features ruling; PR #371 un-parked).** A shipped vocabulary
+  (`tools/substances/seed.csv` -> `build_vocab.py` ->
+  `data/vocab/substances.json`) maps the symbols battery people write
+  ("EC", "LiPF6", "TTE") to InChIKey (canonical), PubChem CID, CAS,
+  SMILES, and the chemical-substance EMMO class; `battinfo.substances`
+  resolves and stamps identity at authoring time (exact-match only,
+  record slot breaks symbol collisions, did-you-mean on typos);
+  components and salts gain five optional identity fields; the JSON-LD
+  emits `schema:inChIKey` / `schema:smiles` and the PubChem page as
+  `schema:sameAs` on the physical substance nodes - placement checked
+  against the description-pattern rulings (chemistry literals ride
+  physical individuals; a compound page is a reference page, not a
+  class or a SKOS concept). Save gates warn (never error) on
+  unresolvable names. The seed gains a hand-verified `preferred_cas`
+  override - PubChem's ionic-form LiTFSI entry lists 2043073-41-0
+  while the literature cites the neutral-salt 90076-65-6, so the
+  reviewed number wins over the first synonym.
+
 - **Equipment, equipment specs, and channels emit JSON-LD (0.8.0
   core-features ruling).** The last "no JSON-LD emitter" gaps close. An
   equipment spec follows the description pattern like every other
@@ -72,6 +91,27 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `ws.status()` and `ws.pending()` now send the publisher API key from `ws.login()` (or `BATTINFO_ADMIN_TOKEN` when set). The registry's workspace views became credentialed because they list staged, not-yet-public submissions; without a key these two calls now print a hint and return an empty list instead of listing the queue.
 
 ### Changed
+
+- **BPX import drops nothing silently (parameter-plan Phase 0).** The
+  `User-defined` block — BPX's extension point, previously ignored without
+  a word - is now reported key-by-key, and unrecognised Parameterisation
+  blocks are named. Header lineage rides every minted parameter-set
+  record: `Description` as the record description and `References` as the
+  provenance citation (verbatim as a note when it is not a URL/DOI),
+  beside the model context the importer already stamped. A synthetic
+  full-DFN golden fixture (structural twin of a published BattMo export,
+  fabricated values - the original is GPL-3.0) pins the contract: every
+  parameter in the file becomes a claim, a spec property, or a named
+  warning.
+
+- **Parameter-set records emit against the records context.** The
+  parameter-set JSON-LD - the payload the BPX "Metadata" seam embeds -
+  now carries the hosted versioned records context
+  (`context/records/v1.json`) instead of the live EMMO context, and every
+  vocabulary parameter's terms resolve in it. License slugs
+  (`cc-by-sa-4.0`) map to their absolute SPDX page IRI instead of
+  emitting as relative IRIs; unknown values emit as literals, never
+  broken links (applies to dataset records too).
 
 - **BPX import drops nothing silently (parameter-plan Phase 0).** The
   `User-defined` block — BPX's extension point, previously ignored without

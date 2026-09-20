@@ -110,6 +110,11 @@ export const showcase: {
         "component": [
           {
             "name": "EC",
+            "label": "Ethylene carbonate",
+            "inchikey": "KMTRUDSVKNLOMY-UHFFFAOYSA-N",
+            "pubchem_cid": 7303,
+            "cas_number": "96-49-1",
+            "smiles": "C1COC(=O)O1",
             "property": {
               "volume_fraction": {
                 "value": 50,
@@ -119,6 +124,11 @@ export const showcase: {
           },
           {
             "name": "DMC",
+            "label": "Dimethyl Carbonate",
+            "inchikey": "IEJIGPNLZYLLBP-UHFFFAOYSA-N",
+            "pubchem_cid": 12021,
+            "cas_number": "616-38-6",
+            "smiles": "COC(=O)OC",
             "property": {
               "volume_fraction": {
                 "value": 50,
@@ -131,6 +141,13 @@ export const showcase: {
       },
       "salt": {
         "name": "LiPF6",
+        "cation": "Li+",
+        "anion": "PF6-",
+        "label": "Lithium hexafluorophosphate",
+        "inchikey": "AXPLOJNSKRXQPA-UHFFFAOYSA-N",
+        "pubchem_cid": 23688915,
+        "cas_number": "21324-40-3",
+        "smiles": "[Li+].F[P-](F)(F)(F)(F)F",
         "property": {
           "concentration": {
             "value": 1.0,
@@ -141,6 +158,11 @@ export const showcase: {
       "additive": [
         {
           "name": "VC",
+          "label": "Vinylene carbonate",
+          "inchikey": "VAYTZRYEBVHVLE-UHFFFAOYSA-N",
+          "pubchem_cid": 13385,
+          "cas_number": "872-36-6",
+          "smiles": "C1=COC(=O)O1",
           "property": {
             "mass_fraction": {
               "value": 2.0,
