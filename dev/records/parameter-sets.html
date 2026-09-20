@@ -580,14 +580,7 @@ Canonical record</label><div class="sd-tab-content docutils">
 JSON-LD</label><div class="sd-tab-content docutils">
 <p>Emitted by <code class="docutils literal notranslate"><span class="pre">record_to_jsonld</span></code>, hosted-context mode.</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;@context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">    </span><span class="s2">&quot;https://w3id.org/emmo/domain/battery/context&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://schema.org/&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;dcterms&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://purl.org/dc/terms/&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;battinfo&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/&quot;</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;@context&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/context/records/v1.json&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/fm9p-sqkk-tbx3-rr66&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;schema:Dataset&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Graphite density claims, Smith 2026&quot;</span><span class="p">,</span>
@@ -626,6 +619,7 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <p>What to notice:</p>
 <ul class="simple">
 <li><p>The claim batch emits as one <code class="docutils literal notranslate"><span class="pre">schema:Dataset</span></code> node: scalar claims as EMMO-typed quantities, the target on <code class="docutils literal notranslate"><span class="pre">schema:about</span></code>.</p></li>
+<li><p>A BPX file imports the same way: <code class="docutils literal notranslate"><span class="pre">from_bpx_parameters(...).to_records(materials=...)</span></code> turns its physics blocks into claim records, header lineage included (see the design notes).</p></li>
 </ul>
 </section>
 </section>
@@ -762,15 +756,7 @@ Canonical record</label><div class="sd-tab-content docutils">
 JSON-LD</label><div class="sd-tab-content docutils">
 <p class="sd-card-text">Emitted by <code class="docutils literal notranslate"><span class="pre">record_to_jsonld</span></code>, hosted-context mode.</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;@context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">    </span><span class="s2">&quot;https://w3id.org/emmo/domain/battery/context&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://schema.org/&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;dcterms&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://purl.org/dc/terms/&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;bibo&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://purl.org/ontology/bibo/&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;battinfo&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/&quot;</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;@context&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/context/records/v1.json&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/8qqs-rh43-wt8d-172n&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;schema:Dataset&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Chen 2020 - graphite&quot;</span><span class="p">,</span>
@@ -989,11 +975,25 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <td><p></p></td>
 <td><p></p></td>
 </tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">annex</span></code></p></td>
+<td><p>object</p></td>
+<td><p></p></td>
+<td><p>Source-file extension entries carried verbatim (e.g. a BPX User-defined block): original key -&gt; raw value. No standard semantics are claimed for these; they exist so a re-export reproduces the source file and nothing is silently lost.</p></td>
+</tr>
 </tbody>
 </table>
 </div>
 </section>
 </section>
+<section id="design-notes">
+<h2>Design notes<a class="headerlink" href="#design-notes" title="Link to this heading">#</a></h2>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">The reasoning behind the model</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text"><strong>Why claims, not properties.</strong> It is tempting to say a diffusivity of graphite is a property of graphite and file it on a material record. Four facts break that model. Most claims target a <em>kind</em> (graphite as such), and kinds are vocabulary, not records — there is no bearer to carry the property. Sources disagree — five published graphite OCPs, fitted diffusivities an order of magnitude apart — and a record’s properties presuppose one adjudicated value, while the spread <em>is</em> the data. Many parameters are not properties of the material at all but of a model fit — a reaction rate constant fitted under DFN belongs to (material × model × calibration), and asserting it on the material would poison the record with model artifacts. And a calibration is a joint estimate: values fitted together are only valid together, so the set is the unit of self-consistency. Hence one record per source, <code class="docutils literal notranslate"><span class="pre">provenance_class</span></code> per claim, resolution downstream. The describer’s own declarations (a datasheet density) stay properties of the description; third-party and model-bound assertions are claims about the target — the same epistemics rule as spec vs instance.</p>
+<p class="sd-card-text"><strong>BPX interop, both directions.</strong> <code class="docutils literal notranslate"><span class="pre">from_bpx_parameters</span></code> imports a BPX file’s electrode/separator/electrolyte physics as claims — scalars, tables as curves, function strings as expressions — splitting material-intrinsic claims (stoichiometry window, diffusivity, OCP) from build claims (thickness, porosity) that target the cell design instead. Header lineage rides along: <code class="docutils literal notranslate"><span class="pre">Model</span></code> and BPX version in <code class="docutils literal notranslate"><span class="pre">model_context</span></code> (a DFN-fitted value is not model-free), <code class="docutils literal notranslate"><span class="pre">Description</span></code> on the record, <code class="docutils literal notranslate"><span class="pre">References</span></code> as citation or note; the <code class="docutils literal notranslate"><span class="pre">User-defined</span></code> block travels verbatim as each record’s <code class="docutils literal notranslate"><span class="pre">annex</span></code>, and Cell-block fields become spec properties (or verbatim extras) via <code class="docutils literal notranslate"><span class="pre">from_bpx</span></code> — nothing in the file is dropped silently. The reverse: <code class="docutils literal notranslate"><span class="pre">to_bpx(spec,</span> <span class="pre">parameter_sets=...)</span></code> turns ONE source’s records back into a runnable BPX file — claims at full precision, <code class="docutils literal notranslate"><span class="pre">Header.Model</span></code> from the source’s own model context, <code class="docutils literal notranslate"><span class="pre">State</span></code> sections for BPX ≥ 1.1 — and the official <code class="docutils literal notranslate"><span class="pre">bpx</span></code> parser accepts the result. One source per file, deliberately: a calibration is a joint estimate, so mixing sources across blocks would produce a file no validation supports (a labeled composed mode is a planned refinement).</p>
+</div>
+</details></section>
 </section>
 
 
@@ -1052,6 +1052,7 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#parameter-set-fields">parameter-set fields</a></li>
 </ul>
 </li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#design-notes">Design notes</a></li>
 </ul>
   </nav></div>
 

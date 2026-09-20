@@ -528,25 +528,19 @@
 <input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
 <label class="sd-tab-label" for="sd-tab-item-0">
 Python</label><div class="sd-tab-content docutils">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># No authoring API exists for organizations yet, so the reference example</span>
-<span class="c1"># is the record itself (data-first, the documented fallback).</span>
-<span class="n">record</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;schema_version&quot;</span><span class="p">:</span> <span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;organization&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;https://w3id.org/battinfo/organization/s6y8-5mne-94gx-e5ve&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;short_id&quot;</span><span class="p">:</span> <span class="s2">&quot;s6y85m&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;Manufacturer&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Example Instruments&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;https://www.example-instruments.test&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;same_as&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;https://ror.org/000000000&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Fictional bench-equipment manufacturer for this example.&quot;</span><span class="p">,</span>
-    <span class="p">},</span>
-    <span class="s2">&quot;provenance&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;source_type&quot;</span><span class="p">:</span> <span class="s2">&quot;manual&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;source_url&quot;</span><span class="p">:</span> <span class="s2">&quot;https://www.example-instruments.test&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;retrieved_at&quot;</span><span class="p">:</span> <span class="mi">1750000000</span><span class="p">,</span>
-    <span class="p">},</span>
-<span class="p">}</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_organization</span>
+
+<span class="n">record</span> <span class="o">=</span> <span class="n">create_organization</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Example Instruments&quot;</span><span class="p">,</span>
+    <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;Manufacturer&quot;</span><span class="p">,</span>
+    <span class="n">legal_name</span><span class="o">=</span><span class="s2">&quot;Example Instruments GmbH&quot;</span><span class="p">,</span>
+    <span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://www.example-instruments.test&quot;</span><span class="p">,</span>
+    <span class="n">same_as</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;https://ror.org/000000000&quot;</span><span class="p">],</span>
+    <span class="n">location</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;address_country&quot;</span><span class="p">:</span> <span class="s2">&quot;DE&quot;</span><span class="p">,</span> <span class="s2">&quot;address_locality&quot;</span><span class="p">:</span> <span class="s2">&quot;Ulm&quot;</span><span class="p">},</span>
+    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Fictional bench-equipment manufacturer for this example.&quot;</span><span class="p">,</span>
+    <span class="n">source_url</span><span class="o">=</span><span class="s2">&quot;https://www.example-instruments.test&quot;</span><span class="p">,</span>
+    <span class="n">retrieved_at</span><span class="o">=</span><span class="mi">1750000000</span><span class="p">,</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -556,30 +550,70 @@ Canonical record</label><div class="sd-tab-content docutils">
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;schema_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;organization&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/organization/s6y8-5mne-94gx-e5ve&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;short_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;s6y85m&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Manufacturer&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/organization/7d9k-2m4p-8t3x-6nq5&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;short_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;7d9k2m&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Example Instruments&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Manufacturer&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;legal_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Example Instruments GmbH&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://www.example-instruments.test&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;same_as&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">      </span><span class="s2">&quot;https://ror.org/000000000&quot;</span>
 <span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;address_country&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DE&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;address_locality&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ulm&quot;</span>
+<span class="w">    </span><span class="p">},</span>
 <span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Fictional bench-equipment manufacturer for this example.&quot;</span>
 <span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;provenance&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;source_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;manual&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;source_url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://www.example-instruments.test&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;retrieved_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1750000000</span>
+<span class="w">    </span><span class="nt">&quot;retrieved_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1750000000</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;battinfo_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.7.0&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;source_url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://www.example-instruments.test&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-2" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-2">
+JSON-LD</label><div class="sd-tab-content docutils">
+<p>Emitted by <code class="docutils literal notranslate"><span class="pre">record_to_jsonld</span></code>, hosted-context mode.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;@context&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/context/records/v1.json&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;schema:Organization&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/organization/7d9k-2m4p-8t3x-6nq5&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Example Instruments&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:legalName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Example Instruments GmbH&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:additionalType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Manufacturer&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://www.example-instruments.test&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:sameAs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://ror.org/000000000&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;schema:address&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;schema:PostalAddress&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;schema:addressCountry&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DE&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;schema:addressLocality&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ulm&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;schema:description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Fictional bench-equipment manufacturer for this example.&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;dcterms:source&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;prov:Entity&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;dcterms:type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;manual&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;prov:hadPrimarySource&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://www.example-instruments.test&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;prov:generatedAtTime&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-06-15T15:06:40+00:00&quot;</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
 </div>
 </div>
 </div>
-<div class="warning admonition">
-<p class="admonition-title">Known gap</p>
-<p>Three gaps meet on this family: no authoring API (the record above is authored directly, data-first), no JSON-LD emitter, and no entities-registry kind — so organization records are outside the semantic validation path and are checked against the JSON Schema only.</p>
-</div>
+<p>What to notice:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">create_organization</span></code> mints the IRI deterministically from the normalized name — creating “A123 Systems” twice lands on the same record.</p></li>
+<li><p>Pure schema.org emission (<code class="docutils literal notranslate"><span class="pre">schema:Organization</span></code>, with <code class="docutils literal notranslate"><span class="pre">Corporation</span></code>/<code class="docutils literal notranslate"><span class="pre">ResearchOrganization</span></code>/… stacked when the type IS a schema.org class); <code class="docutils literal notranslate"><span class="pre">same_as</span></code> carries the Wikidata/ROR identity anchors.</p></li>
+</ul>
 </section>
 </section>
 <section id="common-examples">
@@ -589,8 +623,8 @@ Canonical record</label><div class="sd-tab-content docutils">
 <summary class="sd-summary-title sd-card-header">
 <span class="sd-summary-text">A123 Systems (organization)</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
 <div class="sd-tab-set docutils">
-<input checked="checked" id="sd-tab-item-2" name="sd-tab-set-1" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-2">
+<input checked="checked" id="sd-tab-item-3" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-3">
 Python</label><div class="sd-tab-content docutils">
 <p class="sd-card-text">The record ships in the installed wheel — load it as a starting point:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
@@ -604,8 +638,8 @@ Python</label><div class="sd-tab-content docutils">
 </pre></div>
 </div>
 </div>
-<input id="sd-tab-item-3" name="sd-tab-set-1" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-3">
+<input id="sd-tab-item-4" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-4">
 Canonical record</label><div class="sd-tab-content docutils">
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;schema_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
@@ -614,19 +648,19 @@ Canonical record</label><div class="sd-tab-content docutils">
 <span class="w">    </span><span class="nt">&quot;short_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;8z6jn7&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Manufacturer&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A123 Systems&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;legalName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A123 Systems LLC&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;alternateName&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">      </span><span class="s2">&quot;A123&quot;</span>
-<span class="w">    </span><span class="p">],</span>
 <span class="w">    </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://www.a123systems.com&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;same_as&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">      </span><span class="s2">&quot;https://www.wikidata.org/wiki/Q279389&quot;</span>
 <span class="w">    </span><span class="p">],</span>
 <span class="w">    </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;addressCountry&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;US&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;addressRegion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Massachusetts&quot;</span>
+<span class="w">      </span><span class="nt">&quot;address_country&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;US&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;address_region&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Massachusetts&quot;</span>
 <span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lithium iron phosphate cell and battery system manufacturer.&quot;</span>
+<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lithium iron phosphate cell and battery system manufacturer.&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;legal_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A123 Systems LLC&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;alternate_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;A123&quot;</span>
+<span class="w">    </span><span class="p">]</span>
 <span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;provenance&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;source_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;manual&quot;</span><span class="p">,</span>
@@ -643,8 +677,8 @@ Canonical record</label><div class="sd-tab-content docutils">
 <summary class="sd-summary-title sd-card-header">
 <span class="sd-summary-text">Celgard (organization)</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
 <div class="sd-tab-set docutils">
-<input checked="checked" id="sd-tab-item-4" name="sd-tab-set-2" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-4">
+<input checked="checked" id="sd-tab-item-5" name="sd-tab-set-2" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-5">
 Python</label><div class="sd-tab-content docutils">
 <p class="sd-card-text">The record ships in the installed wheel — load it as a starting point:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
@@ -658,8 +692,8 @@ Python</label><div class="sd-tab-content docutils">
 </pre></div>
 </div>
 </div>
-<input id="sd-tab-item-5" name="sd-tab-set-2" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-5">
+<input id="sd-tab-item-6" name="sd-tab-set-2" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-6">
 Canonical record</label><div class="sd-tab-content docutils">
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;schema_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
@@ -685,8 +719,8 @@ Canonical record</label><div class="sd-tab-content docutils">
 <summary class="sd-summary-title sd-card-header">
 <span class="sd-summary-text">Empa (organization)</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
 <div class="sd-tab-set docutils">
-<input checked="checked" id="sd-tab-item-6" name="sd-tab-set-3" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-6">
+<input checked="checked" id="sd-tab-item-7" name="sd-tab-set-3" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-7">
 Python</label><div class="sd-tab-content docutils">
 <p class="sd-card-text">The record ships in the installed wheel — load it as a starting point:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
@@ -700,8 +734,8 @@ Python</label><div class="sd-tab-content docutils">
 </pre></div>
 </div>
 </div>
-<input id="sd-tab-item-7" name="sd-tab-set-3" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-7">
+<input id="sd-tab-item-8" name="sd-tab-set-3" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-8">
 Canonical record</label><div class="sd-tab-content docutils">
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;schema_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
@@ -710,21 +744,21 @@ Canonical record</label><div class="sd-tab-content docutils">
 <span class="w">    </span><span class="nt">&quot;short_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;mtf884&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ResearchOrganization&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Empa&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;legalName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Swiss Federal Laboratories for Materials Science and Technology&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;alternateName&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">      </span><span class="s2">&quot;EMPA&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="s2">&quot;Empa&quot;</span>
-<span class="w">    </span><span class="p">],</span>
 <span class="w">    </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://www.empa.ch&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;same_as&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">      </span><span class="s2">&quot;https://ror.org/02x681a42&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="s2">&quot;https://www.wikidata.org/wiki/Q683116&quot;</span>
 <span class="w">    </span><span class="p">],</span>
 <span class="w">    </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;addressCountry&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CH&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;addressLocality&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Dübendorf&quot;</span>
+<span class="w">      </span><span class="nt">&quot;address_country&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CH&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;address_locality&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Dübendorf&quot;</span>
 <span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Swiss Federal Laboratories for Materials Science and Technology, an interdisciplinary research institute of the ETH Domain with battery materials and electrochemistry activity.&quot;</span>
+<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Swiss Federal Laboratories for Materials Science and Technology, an interdisciplinary research institute of the ETH Domain with battery materials and electrochemistry activity.&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;legal_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Swiss Federal Laboratories for Materials Science and Technology&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;alternate_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;EMPA&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;Empa&quot;</span>
+<span class="w">    </span><span class="p">]</span>
 <span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;provenance&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;source_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;manual&quot;</span><span class="p">,</span>
@@ -777,12 +811,12 @@ Canonical record</label><div class="sd-tab-content docutils">
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">legalName</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
-<td><p>Full legal name, if different from name.</p></td>
+<td><p>DEPRECATED alias of <code class="docutils literal notranslate"><span class="pre">legal_name</span></code> (pre-snake_case spelling): accepted forever, normalized on round-trip, never taught.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">alternateName</span></code></p></td>
 <td><p>string or array of string</p></td>
 <td><p></p></td>
-<td><p>Former names, abbreviations, or brand names (e.g. ‘LG Chem’ for LG Energy Solution).</p></td>
+<td><p>DEPRECATED alias of <code class="docutils literal notranslate"><span class="pre">alternate_name</span></code> (pre-snake_case spelling): accepted forever, normalized on round-trip, never taught.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">url</span></code></p></td>
 <td><p>string</p></td>
@@ -802,12 +836,12 @@ Canonical record</label><div class="sd-tab-content docutils">
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">foundingDate</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
-<td><p>Year or ISO 8601 date the organization was founded.</p></td>
+<td><p>DEPRECATED alias of <code class="docutils literal notranslate"><span class="pre">founding_date</span></code> (pre-snake_case spelling): accepted forever, normalized on round-trip, never taught.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dissolutionDate</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
-<td><p>Year or ISO 8601 date the organization was dissolved, if applicable.</p></td>
+<td><p>DEPRECATED alias of <code class="docutils literal notranslate"><span class="pre">dissolution_date</span></code> (pre-snake_case spelling): accepted forever, normalized on round-trip, never taught.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">description</span></code></p></td>
 <td><p>string</p></td>
@@ -815,6 +849,31 @@ Canonical record</label><div class="sd-tab-content docutils">
 <td><p>Short description of the organization.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">parentOrganization</span></code></p></td>
+<td><p>→ OrganizationIri or object</p></td>
+<td><p></p></td>
+<td><p>DEPRECATED alias of <code class="docutils literal notranslate"><span class="pre">parent_organization</span></code> (pre-snake_case spelling): accepted forever, normalized on round-trip, never taught.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">legal_name</span></code></p></td>
+<td><p>string</p></td>
+<td><p></p></td>
+<td><p>Full legal name, if different from name.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">alternate_name</span></code></p></td>
+<td><p>string or array of string</p></td>
+<td><p></p></td>
+<td><p>Former names, abbreviations, or brand names (e.g. ‘LG Chem’ for LG Energy Solution).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">founding_date</span></code></p></td>
+<td><p>string</p></td>
+<td><p></p></td>
+<td><p>Year or ISO 8601 date the organization was founded.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dissolution_date</span></code></p></td>
+<td><p>string</p></td>
+<td><p></p></td>
+<td><p>Year or ISO 8601 date the organization was dissolved, if applicable.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">parent_organization</span></code></p></td>
 <td><p>→ OrganizationIri or object</p></td>
 <td><p></p></td>
 <td><p>Parent organization, if this is a subsidiary or division.</p></td>
@@ -825,6 +884,16 @@ Canonical record</label><div class="sd-tab-content docutils">
 <p>Top-level <code class="docutils literal notranslate"><span class="pre">editorial</span></code>: Internal editorial metadata — not forwarded to the registry semantic payload.</p>
 </section>
 </section>
+<section id="design-notes">
+<h2>Design notes<a class="headerlink" href="#design-notes" title="Link to this heading">#</a></h2>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">The reasoning behind the model</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text"><strong>Identity is the whole job.</strong> An organization record exists so other records can point at one thing: <code class="docutils literal notranslate"><span class="pre">manufacturer</span></code> on a spec, <code class="docutils literal notranslate"><span class="pre">publisher</span></code> and <code class="docutils literal notranslate"><span class="pre">funders</span></code> on a dataset, <code class="docutils literal notranslate"><span class="pre">supplier</span></code> on equipment. New IRIs mint deterministically from the normalized name, so independently created records for the same organization collate instead of duplicating; <code class="docutils literal notranslate"><span class="pre">same_as</span></code> carries the external anchors (Wikidata, ROR, GRID, LEI) that make the identity verifiable beyond the registry.</p>
+<p class="sd-card-text"><strong>The one pure schema.org family.</strong> Everything an organization record says already has a home in schema.org — name, legal name, address, founding date, parent organization — so the JSON-LD emits a plain <code class="docutils literal notranslate"><span class="pre">schema:Organization</span></code> node with no EMMO terms and nothing minted. Where the <code class="docutils literal notranslate"><span class="pre">type</span></code> value is itself a schema.org class (<code class="docutils literal notranslate"><span class="pre">Corporation</span></code>, <code class="docutils literal notranslate"><span class="pre">ResearchOrganization</span></code>, <code class="docutils literal notranslate"><span class="pre">EducationalOrganization</span></code>, <code class="docutils literal notranslate"><span class="pre">GovernmentOrganization</span></code>, <code class="docutils literal notranslate"><span class="pre">NGO</span></code>) it stacks as a second <code class="docutils literal notranslate"><span class="pre">&#64;type</span></code>; <code class="docutils literal notranslate"><span class="pre">Manufacturer</span></code> is a schema.org <em>property</em>, not a class, so it stays data under <code class="docutils literal notranslate"><span class="pre">schema:additionalType</span></code>.</p>
+<p class="sd-card-text"><strong>Spelling.</strong> Organization records predate the snake_case migration; the canonical keys are now <code class="docutils literal notranslate"><span class="pre">legal_name</span></code>, <code class="docutils literal notranslate"><span class="pre">alternate_name</span></code>, <code class="docutils literal notranslate"><span class="pre">founding_date</span></code>, <code class="docutils literal notranslate"><span class="pre">dissolution_date</span></code>, <code class="docutils literal notranslate"><span class="pre">parent_organization</span></code> (and <code class="docutils literal notranslate"><span class="pre">address_country</span></code>/<code class="docutils literal notranslate"><span class="pre">address_region</span></code>/<code class="docutils literal notranslate"><span class="pre">address_locality</span></code> in <code class="docutils literal notranslate"><span class="pre">location</span></code>). The original camelCase spellings stay accepted forever as deprecated aliases — as kwargs and in stored records — and normalize on round-trip, never taught.</p>
+</div>
+</details></section>
 </section>
 
 
@@ -883,6 +952,7 @@ Canonical record</label><div class="sd-tab-content docutils">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#organization-fields">organization fields</a></li>
 </ul>
 </li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#design-notes">Design notes</a></li>
 </ul>
   </nav></div>
 

@@ -551,10 +551,41 @@ Python</label><div class="sd-tab-content docutils">
     <span class="n">test</span><span class="o">=</span><span class="n">test</span><span class="p">,</span>
     <span class="n">license</span><span class="o">=</span><span class="s2">&quot;https://creativecommons.org/licenses/by/4.0/&quot;</span><span class="p">,</span>
     <span class="n">access_url</span><span class="o">=</span><span class="s2">&quot;https://doi.org/10.5281/zenodo.1234567&quot;</span><span class="p">,</span>
-    <span class="n">download_url</span><span class="o">=</span><span class="s2">&quot;https://zenodo.org/records/1234567/files/run.parquet&quot;</span><span class="p">,</span>
-    <span class="n">data_format</span><span class="o">=</span><span class="s2">&quot;application/x-parquet&quot;</span><span class="p">,</span>
-    <span class="n">checksum_algorithm</span><span class="o">=</span><span class="s2">&quot;md5&quot;</span><span class="p">,</span>
-    <span class="n">checksum_value</span><span class="o">=</span><span class="s2">&quot;9e107d9d372bb6826bd81d3542a419d6&quot;</span><span class="p">,</span>
+    <span class="c1"># One distribution per published file: the processed time series and</span>
+    <span class="c1"># the raw cycler export it was converted from.</span>
+    <span class="n">distributions</span><span class="o">=</span><span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;run.bdf.parquet&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Cycling time series in BDF column vocabulary.&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;content_url&quot;</span><span class="p">:</span> <span class="s2">&quot;https://zenodo.org/records/1234567/files/run.bdf.parquet&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;encoding_format&quot;</span><span class="p">:</span> <span class="s2">&quot;application/x-parquet&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;processed&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;checksum&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;algorithm&quot;</span><span class="p">:</span> <span class="s2">&quot;md5&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;9e107d9d372bb6826bd81d3542a419d6&quot;</span><span class="p">},</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;run.ndax&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Raw Neware export, exactly as the cycler wrote it.&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;content_url&quot;</span><span class="p">:</span> <span class="s2">&quot;https://zenodo.org/records/1234567/files/run.ndax&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;encoding_format&quot;</span><span class="p">:</span> <span class="s2">&quot;application/octet-stream&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;raw&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;checksum&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;algorithm&quot;</span><span class="p">:</span> <span class="s2">&quot;md5&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;e4d909c290d0fb1ca068ffaddf22cbd0&quot;</span><span class="p">},</span>
+        <span class="p">},</span>
+    <span class="p">],</span>
+    <span class="c1"># The table schema of the processed file (CSVW): column names,</span>
+    <span class="c1"># datatypes and units, so a consumer knows the shape of the data</span>
+    <span class="c1"># without downloading it.</span>
+    <span class="n">main_entity</span><span class="o">=</span><span class="p">[{</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;Table&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;run.bdf.parquet&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;table_schema&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;columns&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;test_time_s&quot;</span><span class="p">,</span> <span class="s2">&quot;datatype&quot;</span><span class="p">:</span> <span class="s2">&quot;number&quot;</span><span class="p">,</span> <span class="s2">&quot;unit_text&quot;</span><span class="p">:</span> <span class="s2">&quot;s&quot;</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;voltage_v&quot;</span><span class="p">,</span> <span class="s2">&quot;datatype&quot;</span><span class="p">:</span> <span class="s2">&quot;number&quot;</span><span class="p">,</span> <span class="s2">&quot;unit_text&quot;</span><span class="p">:</span> <span class="s2">&quot;V&quot;</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;current_a&quot;</span><span class="p">,</span> <span class="s2">&quot;datatype&quot;</span><span class="p">:</span> <span class="s2">&quot;number&quot;</span><span class="p">,</span> <span class="s2">&quot;unit_text&quot;</span><span class="p">:</span> <span class="s2">&quot;A&quot;</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;discharging_capacity_ah&quot;</span><span class="p">,</span> <span class="s2">&quot;datatype&quot;</span><span class="p">:</span> <span class="s2">&quot;number&quot;</span><span class="p">,</span> <span class="s2">&quot;unit_text&quot;</span><span class="p">:</span> <span class="s2">&quot;Ah&quot;</span><span class="p">},</span>
+            <span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">}],</span>
     <span class="c1"># Membership in a dataset series (a collection record): emitted as</span>
     <span class="c1"># dcat:inSeries and schema:isPartOf. The collection publishes first.</span>
     <span class="n">series_id</span><span class="o">=</span><span class="s2">&quot;https://w3id.org/battinfo/dataset/0rp6-kncv-cyem-qwcd&quot;</span><span class="p">,</span>
@@ -582,14 +613,57 @@ Canonical record</label><div class="sd-tab-content docutils">
 <span class="w">      </span><span class="s2">&quot;https://w3id.org/battinfo/test/3w87-0ddf-ryjg-evxe&quot;</span>
 <span class="w">    </span><span class="p">],</span>
 <span class="w">    </span><span class="nt">&quot;series_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/dataset/0rp6-kncv-cyem-qwcd&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;main_entity&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Table&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;run.bdf.parquet&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;table_schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;columns&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">              </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test_time_s&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;datatype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;number&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;unit_text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;s&quot;</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">              </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;voltage_v&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;datatype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;number&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;unit_text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;V&quot;</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">              </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;current_a&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;datatype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;number&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;unit_text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A&quot;</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">              </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;discharging_capacity_ah&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;datatype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;number&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;unit_text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ah&quot;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">          </span><span class="p">]</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
 <span class="w">    </span><span class="nt">&quot;distributions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">      </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DataDownload&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;content_url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://zenodo.org/records/1234567/files/run.parquet&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;run.bdf.parquet&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Cycling time series in BDF column vocabulary.&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;content_url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://zenodo.org/records/1234567/files/run.bdf.parquet&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;encoding_format&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;application/x-parquet&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;processed&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;checksum&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">          </span><span class="nt">&quot;algorithm&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;md5&quot;</span><span class="p">,</span>
 <span class="w">          </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;9e107d9d372bb6826bd81d3542a419d6&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;run.ndax&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Raw Neware export, exactly as the cycler wrote it.&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;content_url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://zenodo.org/records/1234567/files/run.ndax&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;encoding_format&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;application/octet-stream&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;raw&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;checksum&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;algorithm&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;md5&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;e4d909c290d0fb1ca068ffaddf22cbd0&quot;</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">      </span><span class="p">}</span>
 <span class="w">    </span><span class="p">]</span>
@@ -637,8 +711,10 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <span class="w">  </span><span class="nt">&quot;dcat:distribution&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="p">{</span>
 <span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dcat:Distribution&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;run.bdf.parquet&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;schema:description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Cycling time series in BDF column vocabulary.&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="nt">&quot;dcat:downloadURL&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://zenodo.org/records/1234567/files/run.parquet&quot;</span>
+<span class="w">        </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://zenodo.org/records/1234567/files/run.bdf.parquet&quot;</span>
 <span class="w">      </span><span class="p">},</span>
 <span class="w">      </span><span class="nt">&quot;dcat:mediaType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;application/x-parquet&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="nt">&quot;spdx:checksum&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -648,8 +724,57 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <span class="w">        </span><span class="p">},</span>
 <span class="w">        </span><span class="nt">&quot;spdx:checksumValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;9e107d9d372bb6826bd81d3542a419d6&quot;</span>
 <span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dcat:Distribution&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;run.ndax&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;schema:description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Raw Neware export, exactly as the cycler wrote it.&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;dcat:downloadURL&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://zenodo.org/records/1234567/files/run.ndax&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;dcat:mediaType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;application/octet-stream&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;spdx:checksum&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;spdx:Checksum&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;spdx:checksumAlgorithm&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;spdx:checksumAlgorithm_md5&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;spdx:checksumValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;e4d909c290d0fb1ca068ffaddf22cbd0&quot;</span>
+<span class="w">      </span><span class="p">}</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;schema:mainEntity&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;csvw:Table&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;csvw:url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;run.bdf.parquet&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;csvw:tableSchema&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;csvw:Schema&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;csvw:column&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;csvw:Column&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;csvw:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test_time_s&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;csvw:datatype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;number&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;schema:unitText&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;s&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;csvw:Column&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;csvw:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;voltage_v&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;csvw:datatype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;number&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;schema:unitText&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;V&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;csvw:Column&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;csvw:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;current_a&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;csvw:datatype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;number&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;schema:unitText&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;csvw:Column&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;csvw:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;discharging_capacity_ah&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;csvw:datatype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;number&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;schema:unitText&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ah&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">]</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;dcterms:source&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;prov:Entity&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;dcterms:type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;measurement&quot;</span><span class="p">,</span>
@@ -663,7 +788,8 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <p>What to notice:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">series_id</span></code> emits BOTH <code class="docutils literal notranslate"><span class="pre">dcat:inSeries</span></code> (the DCAT 3 membership edge) and <code class="docutils literal notranslate"><span class="pre">schema:isPartOf</span></code> (what dataset search engines read).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">about</span></code> links the cell and the test; the distribution carries the download URL and checksum.</p></li>
+<li><p>One <code class="docutils literal notranslate"><span class="pre">distributions[]</span></code> entry per published file — URL, media type, role (<code class="docutils literal notranslate"><span class="pre">processed</span></code>/<code class="docutils literal notranslate"><span class="pre">raw</span></code>) and checksum — emitted as <code class="docutils literal notranslate"><span class="pre">dcat:distribution</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">main_entity</span></code> carries the file’s own table schema (CSVW): column names, datatypes and units, emitted as <code class="docutils literal notranslate"><span class="pre">schema:mainEntity</span></code> → <code class="docutils literal notranslate"><span class="pre">csvw:Table</span></code> → <code class="docutils literal notranslate"><span class="pre">csvw:tableSchema</span></code>.</p></li>
 </ul>
 </section>
 <section id="the-collection-dataset-series">
@@ -794,6 +920,63 @@ Canonical record</label><div class="sd-tab-content docutils">
 <span class="w">    </span><span class="nt">&quot;access_url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://example.org/dataset/nns1-gh5p-v5n1-td17&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Raw galvanostatic cycling export for one NMC811-Graphite coin cell.&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;license&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://creativecommons.org/licenses/by/4.0/&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;series_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/dataset/c0hn-8mvq-3wtd-5xkp&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;distributions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DataDownload&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cell-01.bdf.parquet&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Cycling time series in BDF column vocabulary.&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;content_url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://example.org/files/nns1/cell-01.bdf.parquet&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;encoding_format&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;application/x-parquet&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;processed&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;checksum&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;algorithm&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sha256&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;6cd3556deb0da54bca060b4c39479839e6c4e0dc7dcb84a3ea2f722b9dbc1a8f&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DataDownload&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cell-01.ndax&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Raw Neware export, exactly as the cycler wrote it.&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;content_url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://example.org/files/nns1/cell-01.ndax&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;encoding_format&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;application/octet-stream&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;raw&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;checksum&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;algorithm&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sha256&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;b7e23ec29af22b0b4e41da31e868d57226121c84c7d0f7c62ea4a8f9d0f3e1c2&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;main_entity&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Table&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cell-01.bdf.parquet&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;table_schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;columns&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">              </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test_time_s&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;datatype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;number&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;unit_text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;s&quot;</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">              </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;voltage_v&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;datatype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;number&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;unit_text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;V&quot;</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">              </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;current_a&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;datatype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;number&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;unit_text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A&quot;</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">              </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;discharging_capacity_ah&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;datatype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;number&quot;</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">&quot;unit_text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ah&quot;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">          </span><span class="p">]</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
 <span class="w">    </span><span class="nt">&quot;measurement_techniques&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">      </span><span class="s2">&quot;cycling&quot;</span>
 <span class="w">    </span><span class="p">],</span>
@@ -839,6 +1022,12 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <span class="w">  </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://www.w3.org/ns/dcat#Dataset&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/dataset/nns1-gh5p-v5n1-td17&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;dcterms:title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NMC811 coin cell cycling data&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;dcat:inSeries&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/dataset/c0hn-8mvq-3wtd-5xkp&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;schema:isPartOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/dataset/c0hn-8mvq-3wtd-5xkp&quot;</span>
+<span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;dcterms:description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Raw galvanostatic cycling export for one NMC811-Graphite coin cell.&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;schema:description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Raw galvanostatic cycling export for one NMC811-Graphite coin cell.&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;dcterms:license&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -882,6 +1071,73 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <span class="w">      </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/test/ezwb-tj8t-0474-7dgh&quot;</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;dcat:distribution&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dcat:Distribution&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cell-01.bdf.parquet&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;schema:description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Cycling time series in BDF column vocabulary.&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;dcat:downloadURL&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://example.org/files/nns1/cell-01.bdf.parquet&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;dcat:mediaType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;application/x-parquet&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;spdx:checksum&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;spdx:Checksum&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;spdx:checksumAlgorithm&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;spdx:checksumAlgorithm_sha256&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;spdx:checksumValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;6cd3556deb0da54bca060b4c39479839e6c4e0dc7dcb84a3ea2f722b9dbc1a8f&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dcat:Distribution&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cell-01.ndax&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;schema:description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Raw Neware export, exactly as the cycler wrote it.&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;dcat:downloadURL&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://example.org/files/nns1/cell-01.ndax&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;dcat:mediaType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;application/octet-stream&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;spdx:checksum&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;spdx:Checksum&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;spdx:checksumAlgorithm&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;spdx:checksumAlgorithm_sha256&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;spdx:checksumValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;b7e23ec29af22b0b4e41da31e868d57226121c84c7d0f7c62ea4a8f9d0f3e1c2&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;schema:mainEntity&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;csvw:Table&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;csvw:url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cell-01.bdf.parquet&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;csvw:tableSchema&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;csvw:Schema&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;csvw:column&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;csvw:Column&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;csvw:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test_time_s&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;csvw:datatype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;number&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;schema:unitText&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;s&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;csvw:Column&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;csvw:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;voltage_v&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;csvw:datatype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;number&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;schema:unitText&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;V&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;csvw:Column&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;csvw:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;current_a&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;csvw:datatype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;number&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;schema:unitText&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;csvw:Column&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;csvw:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;discharging_capacity_ah&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;csvw:datatype&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;number&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;schema:unitText&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ah&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">]</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;dcterms:source&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;prov:Entity&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;dcterms:type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;measurement&quot;</span><span class="p">,</span>
@@ -895,10 +1151,92 @@ JSON-LD</label><div class="sd-tab-content docutils">
 </div>
 </details><details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
 <summary class="sd-summary-title sd-card-header">
-<span class="sd-summary-text">NMC811 powder XRD pattern (dataset)</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<span class="sd-summary-text">NMC811 coin cell cycling study (dataset)</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
 <div class="sd-tab-set docutils">
 <input checked="checked" id="sd-tab-item-9" name="sd-tab-set-3" type="radio">
 <label class="sd-tab-label" for="sd-tab-item-9">
+Python</label><div class="sd-tab-content docutils">
+<p class="sd-card-text">The record ships in the installed wheel — load it as a starting point:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">importlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">resources</span>
+
+<span class="n">record</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span>
+    <span class="n">resources</span><span class="o">.</span><span class="n">files</span><span class="p">(</span><span class="s2">&quot;battinfo&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;data/examples/dataset/dataset-c0hn-8mvq-3wtd-5xkp.json&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-10" name="sd-tab-set-3" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-10">
+Canonical record</label><div class="sd-tab-content docutils">
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;schema_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;dataset&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/dataset/c0hn-8mvq-3wtd-5xkp&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;short_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;c0hn8m&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dataset:c0hn-8mvq-3wtd-5xkp&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NMC811 coin cell cycling study&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;All cycling datasets of the NMC811-Graphite coin cell study; one member dataset per cell.&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;additional_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;DatasetSeries&quot;</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;license&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://creativecommons.org/licenses/by/4.0/&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;access_url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://example.org/dataset/c0hn-8mvq-3wtd-5xkp&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;created_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1781772876</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;modified_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1781772876</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;published_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1781772876</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;provenance&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;source_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;catalog&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;retrieved_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1781772876</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-11" name="sd-tab-set-3" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-11">
+JSON-LD</label><div class="sd-tab-content docutils">
+<p class="sd-card-text">Emitted by <code class="docutils literal notranslate"><span class="pre">record_to_jsonld</span></code>, hosted-context mode.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;@context&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/context/records/v1.json&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;http://www.w3.org/ns/dcat#Dataset&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;http://www.w3.org/ns/dcat#DatasetSeries&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/dataset/c0hn-8mvq-3wtd-5xkp&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;dcterms:title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NMC811 coin cell cycling study&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;dcterms:description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;All cycling datasets of the NMC811-Graphite coin cell study; one member dataset per cell.&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;All cycling datasets of the NMC811-Graphite coin cell study; one member dataset per cell.&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;dcterms:license&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://creativecommons.org/licenses/by/4.0/&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;dcat:accessURL&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://example.org/dataset/c0hn-8mvq-3wtd-5xkp&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;dcterms:created&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-06-18T08:54:36Z&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;dcterms:modified&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-06-18T08:54:36Z&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;dcterms:issued&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-06-18T08:54:36Z&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:datePublished&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-06-18T08:54:36Z&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;dcterms:source&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;prov:Entity&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;dcterms:type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;catalog&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;prov:generatedAtTime&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-06-18T08:54:36+00:00&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</details><details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">NMC811 powder XRD pattern (dataset)</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-12" name="sd-tab-set-4" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-12">
 Python</label><div class="sd-tab-content docutils">
 <p class="sd-card-text">The record ships in the installed wheel — load it as a starting point:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
@@ -912,8 +1250,8 @@ Python</label><div class="sd-tab-content docutils">
 </pre></div>
 </div>
 </div>
-<input id="sd-tab-item-10" name="sd-tab-set-3" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-10">
+<input id="sd-tab-item-13" name="sd-tab-set-4" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-13">
 Canonical record</label><div class="sd-tab-content docutils">
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;schema_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
@@ -950,8 +1288,8 @@ Canonical record</label><div class="sd-tab-content docutils">
 </pre></div>
 </div>
 </div>
-<input id="sd-tab-item-11" name="sd-tab-set-3" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-11">
+<input id="sd-tab-item-14" name="sd-tab-set-4" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-14">
 JSON-LD</label><div class="sd-tab-content docutils">
 <p class="sd-card-text">Emitted by <code class="docutils literal notranslate"><span class="pre">record_to_jsonld</span></code>, hosted-context mode.</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
@@ -1183,7 +1521,8 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
 <summary class="sd-summary-title sd-card-header">
 <span class="sd-summary-text">The reasoning behind the model</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
-<p class="sd-card-text"><strong>The record is the semantic layer over the files.</strong> Distributions carry the download URL, media type, byte size, and checksum verbatim from where the data is published; <code class="docutils literal notranslate"><span class="pre">variable_measured</span></code> and the measurement technique say what is inside without moving it.</p>
+<p class="sd-card-text"><strong>The record is the semantic layer over the files.</strong> Distributions carry the download URL, media type, byte size, and checksum verbatim from where the data is published — one <code class="docutils literal notranslate"><span class="pre">distributions[]</span></code> entry per file, with <code class="docutils literal notranslate"><span class="pre">role</span></code> separating the processed time series from the raw cycler export; <code class="docutils literal notranslate"><span class="pre">variable_measured</span></code> and the measurement technique say what is inside without moving it.</p>
+<p class="sd-card-text"><strong>The table schema travels with the record.</strong> <code class="docutils literal notranslate"><span class="pre">main_entity</span></code> documents the tabular file itself as a CSVW table: each column’s name, datatype, and unit, plus an optional <code class="docutils literal notranslate"><span class="pre">same_as</span></code> linking a column to the property IRI it realizes. It emits as <code class="docutils literal notranslate"><span class="pre">schema:mainEntity</span></code> → <code class="docutils literal notranslate"><span class="pre">csvw:Table</span></code> → <code class="docutils literal notranslate"><span class="pre">csvw:tableSchema</span></code> in both the record JSON-LD and the publication graph, so a consumer can bind columns to semantics before downloading a byte. <code class="docutils literal notranslate"><span class="pre">variable_measured</span></code> stays the discovery-level summary (what was measured); the table schema is the file-level contract (which column holds it).</p>
 <p class="sd-card-text"><strong>Self-reference has exactly three honest slots.</strong> A dataset’s own archive DOI belongs in <code class="docutils literal notranslate"><span class="pre">access_url</span></code> (where the file lives), <code class="docutils literal notranslate"><span class="pre">same_as</span></code> (the archived representation of this same dataset), and a citation typed <code class="docutils literal notranslate"><span class="pre">kind:</span> <span class="pre">&quot;dataset&quot;</span></code> (how the registry derives the DOI) — never in a plain provenance citation, which means “a paper this record supports” and would make the dataset cite itself as its own literature.</p>
 <p class="sd-card-text"><strong>Why the series is a flavor, not a type.</strong> DCAT 3 declares <code class="docutils literal notranslate"><span class="pre">dcat:DatasetSeries</span></code> a subclass of <code class="docutils literal notranslate"><span class="pre">dcat:Dataset</span></code>, so the collection is an ordinary dataset record flavored by <code class="docutils literal notranslate"><span class="pre">additional_type</span></code>, and membership is one edge: the member’s <code class="docutils literal notranslate"><span class="pre">series_id</span></code>, emitted as both <code class="docutils literal notranslate"><span class="pre">dcat:inSeries</span></code> and <code class="docutils literal notranslate"><span class="pre">schema:isPartOf</span></code>. Members carry the forward link, so the collection publishes first. A series record needs no cell link of its own — its members hold them — and the strict policy admits that for the series flavor only.</p>
 </div>

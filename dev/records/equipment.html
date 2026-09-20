@@ -574,17 +574,75 @@ Canonical record</label><div class="sd-tab-content docutils">
 </pre></div>
 </div>
 </div>
+<input id="sd-tab-item-2" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-2">
+JSON-LD</label><div class="sd-tab-content docutils">
+<p>Emitted by <code class="docutils literal notranslate"><span class="pre">record_to_jsonld</span></code>, hosted-context mode.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;@context&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/context/records/v1.json&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;Description&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;schema:ProductModel&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;schema:CreativeWork&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SkyRC MC3000&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:model&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MC3000&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:manufacturer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;schema:Organization&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SkyRC&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;isDescriptionFor&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;BatteryCycler&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;schema:Product&quot;</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5#described&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SkyRC MC3000&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;schema:additionalProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;schema:PropertyValue&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;equipment_class&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;schema:value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cycler&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;schema:PropertyValue&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;channel_count&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;schema:value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;schema:PropertyValue&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;supported_chemistries&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;schema:value&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="s2">&quot;NiMH&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;Li-ion&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;LiFePO4&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="s2">&quot;Na-ion&quot;</span>
+<span class="w">        </span><span class="p">]</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;dcterms:source&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;prov:Entity&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;dcterms:type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;datasheet&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;prov:generatedAtTime&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-06-15T15:06:40+00:00&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
 </div>
-<div class="warning admonition">
-<p class="admonition-title">Known gap</p>
-<p>No JSON-LD emitter exists for equipment records yet; the canonical record is the published form.</p>
 </div>
+</div>
+<p>What to notice:</p>
+<ul class="simple">
+<li><p>The spec follows the description pattern like every other product: catalogue facts on the <code class="docutils literal notranslate"><span class="pre">[Description,</span> <span class="pre">schema:ProductModel,</span> <span class="pre">schema:CreativeWork]</span></code> node, the described unit (instrument class + <code class="docutils literal notranslate"><span class="pre">schema:Product</span></code>) under <code class="docutils literal notranslate"><span class="pre">isDescriptionFor</span></code>.</p></li>
+<li><p>Equipment quantities emit as named <code class="docutils literal notranslate"><span class="pre">schema:PropertyValue</span></code>s — lab hardware sits outside the battery vocabulary, and battinfo never mints domain classes for it.</p></li>
+</ul>
 </section>
 <section id="an-equipment-unit">
 <h3>An equipment unit<a class="headerlink" href="#an-equipment-unit" title="Link to this heading">#</a></h3>
 <div class="sd-tab-set docutils">
-<input checked="checked" id="sd-tab-item-2" name="sd-tab-set-1" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-2">
+<input checked="checked" id="sd-tab-item-3" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-3">
 Python</label><div class="sd-tab-content docutils">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_equipment</span>
 
@@ -599,8 +657,8 @@ Python</label><div class="sd-tab-content docutils">
 </pre></div>
 </div>
 </div>
-<input id="sd-tab-item-3" name="sd-tab-set-1" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-3">
+<input id="sd-tab-item-4" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-4">
 Canonical record</label><div class="sd-tab-content docutils">
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;schema_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
@@ -622,17 +680,54 @@ Canonical record</label><div class="sd-tab-content docutils">
 </pre></div>
 </div>
 </div>
+<input id="sd-tab-item-5" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-5">
+JSON-LD</label><div class="sd-tab-content docutils">
+<p>Emitted by <code class="docutils literal notranslate"><span class="pre">record_to_jsonld</span></code>, hosted-context mode.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;@context&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/context/records/v1.json&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;BatteryCycler&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;prov:Entity&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/equipment/y9xy-kr0v-y5tn-dfj7&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Cycler 1&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:serialNumber&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MC3K-2026-0001&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lab B&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;hasDescription&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;dcterms:conformsTo&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;schema:isVariantOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;schema:additionalProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;schema:PropertyValue&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;status&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;schema:value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;active&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;dcterms:source&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;prov:Entity&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;dcterms:type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;lab&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;prov:generatedAtTime&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-06-15T15:06:40+00:00&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
 </div>
-<div class="warning admonition">
-<p class="admonition-title">Known gap</p>
-<p>No JSON-LD emitter exists for equipment records yet.</p>
 </div>
+</div>
+<p>What to notice:</p>
+<ul class="simple">
+<li><p>The SAME node shape the deposit graph builds for <code class="docutils literal notranslate"><span class="pre">hasTestEquipment</span></code> targets, so a standalone record and a published test agree about the unit.</p></li>
+</ul>
 </section>
 <section id="a-channel-on-that-unit">
 <h3>A channel on that unit<a class="headerlink" href="#a-channel-on-that-unit" title="Link to this heading">#</a></h3>
 <div class="sd-tab-set docutils">
-<input checked="checked" id="sd-tab-item-4" name="sd-tab-set-2" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-4">
+<input checked="checked" id="sd-tab-item-6" name="sd-tab-set-2" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-6">
 Python</label><div class="sd-tab-content docutils">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_channel</span>
 
@@ -646,8 +741,8 @@ Python</label><div class="sd-tab-content docutils">
 </pre></div>
 </div>
 </div>
-<input id="sd-tab-item-5" name="sd-tab-set-2" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-5">
+<input id="sd-tab-item-7" name="sd-tab-set-2" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-7">
 Canonical record</label><div class="sd-tab-content docutils">
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;schema_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
@@ -667,11 +762,36 @@ Canonical record</label><div class="sd-tab-content docutils">
 </pre></div>
 </div>
 </div>
+<input id="sd-tab-item-8" name="sd-tab-set-2" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-8">
+JSON-LD</label><div class="sd-tab-content docutils">
+<p>Emitted by <code class="docutils literal notranslate"><span class="pre">record_to_jsonld</span></code>, hosted-context mode.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;@context&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/context/records/v1.json&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;schema:Thing&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;prov:Entity&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/channel/7d9k-2m4p-8t3x-6nq5&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MC3000-A/CH1&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:position&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;schema:isPartOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/equipment/y9xy-kr0v-y5tn-dfj7&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;dcterms:source&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;prov:Entity&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;dcterms:type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;lab&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;prov:generatedAtTime&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-06-15T15:06:40+00:00&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
 </div>
-<div class="warning admonition">
-<p class="admonition-title">Known gap</p>
-<p>No JSON-LD emitter exists for channel records yet.</p>
 </div>
+</div>
+<p>What to notice:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">schema:isPartOf</span></code> carries the parent link; <code class="docutils literal notranslate"><span class="pre">schema:position</span></code> the index.</p></li>
+</ul>
 </section>
 </section>
 <section id="common-examples">
@@ -681,8 +801,8 @@ Canonical record</label><div class="sd-tab-content docutils">
 <summary class="sd-summary-title sd-card-header">
 <span class="sd-summary-text">SkyRC MC3000 (equipment-spec)</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
 <div class="sd-tab-set docutils">
-<input checked="checked" id="sd-tab-item-6" name="sd-tab-set-3" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-6">
+<input checked="checked" id="sd-tab-item-9" name="sd-tab-set-3" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-9">
 Python</label><div class="sd-tab-content docutils">
 <p class="sd-card-text">The record ships in the installed wheel — load it as a starting point:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
@@ -696,8 +816,8 @@ Python</label><div class="sd-tab-content docutils">
 </pre></div>
 </div>
 </div>
-<input id="sd-tab-item-7" name="sd-tab-set-3" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-7">
+<input id="sd-tab-item-10" name="sd-tab-set-3" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-10">
 Canonical record</label><div class="sd-tab-content docutils">
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;schema_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
@@ -800,8 +920,8 @@ Canonical record</label><div class="sd-tab-content docutils">
 <summary class="sd-summary-title sd-card-header">
 <span class="sd-summary-text">Cycler 1 (equipment)</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
 <div class="sd-tab-set docutils">
-<input checked="checked" id="sd-tab-item-8" name="sd-tab-set-4" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-8">
+<input checked="checked" id="sd-tab-item-11" name="sd-tab-set-4" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-11">
 Python</label><div class="sd-tab-content docutils">
 <p class="sd-card-text">The record ships in the installed wheel — load it as a starting point:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
@@ -815,8 +935,8 @@ Python</label><div class="sd-tab-content docutils">
 </pre></div>
 </div>
 </div>
-<input id="sd-tab-item-9" name="sd-tab-set-4" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-9">
+<input id="sd-tab-item-12" name="sd-tab-set-4" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-12">
 Canonical record</label><div class="sd-tab-content docutils">
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;schema_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
@@ -1047,6 +1167,16 @@ Canonical record</label><div class="sd-tab-content docutils">
 </div>
 </section>
 </section>
+<section id="design-notes">
+<h2>Design notes<a class="headerlink" href="#design-notes" title="Link to this heading">#</a></h2>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">The reasoning behind the model</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text"><strong>Category is data, never a namespace.</strong> <code class="docutils literal notranslate"><span class="pre">equipment_class</span></code> (“cycler”, “glovebox”, …) is a string field, and battinfo mints no domain classes for lab hardware. The JSON-LD types a unit with the closest published instrument class the name resolves to (<code class="docutils literal notranslate"><span class="pre">BatteryCycler</span></code>, <code class="docutils literal notranslate"><span class="pre">Potentiostat</span></code>, <code class="docutils literal notranslate"><span class="pre">Galvanostat</span></code>, falling back to <code class="docutils literal notranslate"><span class="pre">MeasuringInstrument</span></code>) — an honest coarse classification, not an invented taxonomy.</p>
+<p class="sd-card-text"><strong>One shape for both doors.</strong> A standalone equipment record and a published test emit the same unit node: instrument class + <code class="docutils literal notranslate"><span class="pre">prov:Entity</span></code>, <code class="docutils literal notranslate"><span class="pre">schema:serialNumber</span></code>, <code class="docutils literal notranslate"><span class="pre">schema:location</span></code>, and <code class="docutils literal notranslate"><span class="pre">hasDescription</span></code>/<code class="docutils literal notranslate"><span class="pre">dcterms:conformsTo</span></code>/<code class="docutils literal notranslate"><span class="pre">schema:isVariantOf</span></code> up to the spec. The deposit graph already built these nodes for <code class="docutils literal notranslate"><span class="pre">hasTestEquipment</span></code> targets; the record emitter now matches it, so nothing about a unit depends on which artifact you read.</p>
+<p class="sd-card-text"><strong>The spec is a product description.</strong> Equipment specs follow the same description pattern as every other product family: the spec node carries the catalogue facts (<code class="docutils literal notranslate"><span class="pre">schema:ProductModel</span></code> persona — name, manufacturer, model, product id), and the described unit rides <code class="docutils literal notranslate"><span class="pre">isDescriptionFor</span></code> as <code class="docutils literal notranslate"><span class="pre">&lt;spec-IRI&gt;#described</span></code>. Quantities (channel count, current range, supported chemistries) emit as named <code class="docutils literal notranslate"><span class="pre">schema:PropertyValue</span></code>s rather than through the EMMO property map — lab hardware is outside the battery vocabulary, and honest named values beat minted fallback terms.</p>
+</div>
+</details></section>
 </section>
 
 
@@ -1109,6 +1239,7 @@ Canonical record</label><div class="sd-tab-content docutils">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#channel-fields">channel fields</a></li>
 </ul>
 </li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#design-notes">Design notes</a></li>
 </ul>
   </nav></div>
 

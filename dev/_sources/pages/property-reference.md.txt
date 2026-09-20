@@ -9,7 +9,7 @@ unit IRI, by the curated mapping tables under
 `assets/mappings/domain-battery/` — the single source of truth for the
 semantics of emitted JSON-LD. This page is generated from those tables.
 
-## Properties (81)
+## Properties (83)
 
 The keys accepted in `properties={...}` on a cell spec, and the EMMO
 class each becomes in JSON-LD:
@@ -42,7 +42,9 @@ class each becomes in JSON-LD:
 | `discharging_temperature_max` | [MaximumDischargingTemperature](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_de612af2_a029_4a02_8090_4a75ab13271d) |
 | `discharging_temperature_min` | [MinimumDischargingTemperature](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_2a1de79f_e927_45a2_9619_3799a0d61e9b) |
 | `double_side_loading` | [MassLoading](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c955c089_6ee1_41a2_95fc_d534c5cfd3d5) |
+| `electrode_area` | [Area](https://w3id.org/emmo#EMMO_96f39f77_44dc_491b_8fa7_30d887fe0890) |
 | `energy_density` | [EnergyDensity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_4aa1b96e_44a0_4b1a_a0ac_723d0223d80b) |
+| `external_surface_area` | [Area](https://w3id.org/emmo#EMMO_96f39f77_44dc_491b_8fa7_30d887fe0890) |
 | `foil_thickness` | [Thickness](https://w3id.org/emmo#EMMO_43003c86_9d15_433b_9789_ee2940920656) |
 | `height` | [Height](https://w3id.org/emmo#EMMO_08bcf1d6_e719_46c8_bb21_24bc9bf34dba) |
 | `impedance` | [ElectricImpedance](https://w3id.org/emmo#EMMO_79a02de5_b884_4eab_bc18_f67997d597a2) |
