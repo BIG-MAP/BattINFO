@@ -1237,6 +1237,91 @@ def _parameter_set_to_jsonld(record: dict) -> dict:
 _component_to_jsonld = _material_to_jsonld
 
 
+# Organization type enum values that ARE schema.org classes get stacked as a
+# second @type; the rest (Manufacturer is a schema.org PROPERTY, not a class)
+# stay data under schema:additionalType.
+_ORGANIZATION_SCHEMA_TYPES = {
+    "Corporation": "schema:Corporation",
+    "ResearchOrganization": "schema:ResearchOrganization",
+    "EducationalOrganization": "schema:EducationalOrganization",
+    "GovernmentOrganization": "schema:GovernmentOrganization",
+    "NGO": "schema:NGO",
+}
+
+
+def _organization_to_jsonld(record: dict) -> dict:
+    """Transform an organization record to a schema:Organization node.
+
+    Pure schema.org: organizations are the one record family whose whole
+    vocabulary already exists there — no EMMO terms, no minted battinfo terms.
+    Deprecated camelCase keys normalize before emission, so old records emit
+    identically to canonical ones.
+    """
+    from battinfo.canonical_aliases import record_to_snake_aliases
+
+    normalized = record_to_snake_aliases(record)
+    org = normalized.get("organization") or {}
+    prov = normalized.get("provenance") or {}
+
+    org_type = org.get("type")
+    schema_class = _ORGANIZATION_SCHEMA_TYPES.get(org_type or "")
+    node: dict = {
+        "@context": dict(_CONTEXT_INLINE),
+        "@type": ["schema:Organization", schema_class] if schema_class else "schema:Organization",
+    }
+    if org.get("id"):
+        node["@id"] = org["id"]
+    if org.get("name"):
+        node["schema:name"] = org["name"]
+    if org.get("legal_name"):
+        node["schema:legalName"] = org["legal_name"]
+    alternate = org.get("alternate_name")
+    if alternate:
+        node["schema:alternateName"] = alternate if isinstance(alternate, list) else [alternate]
+    if org_type and not schema_class and org_type != "Organization":
+        node["schema:additionalType"] = org_type
+    if org.get("url"):
+        node["schema:url"] = org["url"]
+    same_as = org.get("same_as")
+    if same_as:
+        iris = same_as if isinstance(same_as, list) else [same_as]
+        refs = [{"@id": iri} for iri in iris if isinstance(iri, str) and iri]
+        if refs:
+            node["schema:sameAs"] = refs[0] if len(refs) == 1 else refs
+    location = org.get("location")
+    if isinstance(location, Mapping):
+        address: dict = {"@type": "schema:PostalAddress"}
+        for src, term in (
+            ("address_country", "schema:addressCountry"),
+            ("address_region", "schema:addressRegion"),
+            ("address_locality", "schema:addressLocality"),
+        ):
+            if location.get(src):
+                address[term] = location[src]
+        if len(address) > 1:
+            node["schema:address"] = address
+    if org.get("founding_date"):
+        node["schema:foundingDate"] = org["founding_date"]
+    if org.get("dissolution_date"):
+        node["schema:dissolutionDate"] = org["dissolution_date"]
+    parent = org.get("parent_organization")
+    if isinstance(parent, str) and parent:
+        node["schema:parentOrganization"] = {"@id": parent}
+    elif isinstance(parent, Mapping):
+        parent_node: dict = {"@type": "schema:Organization"}
+        if parent.get("id"):
+            parent_node["@id"] = parent["id"]
+        if parent.get("name"):
+            parent_node["schema:name"] = parent["name"]
+        if len(parent_node) > 1:
+            node["schema:parentOrganization"] = parent_node
+    if org.get("description"):
+        node["schema:description"] = org["description"]
+    if prov:
+        node["dcterms:source"] = _provenance(prov)
+    return node
+
+
 # ── Public dispatcher ─────────────────────────────────────────────────────────
 
 _TRANSFORMERS = {
@@ -1271,6 +1356,7 @@ _TRANSFORMERS = {
     "housing":      _component_to_jsonld,
     "parameter-set": _parameter_set_to_jsonld,
     "parameter_set": _parameter_set_to_jsonld,
+    "organization": _organization_to_jsonld,
 }
 
 

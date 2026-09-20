@@ -557,25 +557,19 @@ def snippet_parameter_set():
 
 
 def snippet_organization():
-    # No authoring API exists for organizations yet, so the reference example
-    # is the record itself (data-first, the documented fallback).
-    record = {
-        "schema_version": "0.2.0",
-        "organization": {
-            "id": "https://w3id.org/battinfo/organization/s6y8-5mne-94gx-e5ve",
-            "short_id": "s6y85m",
-            "type": "Manufacturer",
-            "name": "Example Instruments",
-            "url": "https://www.example-instruments.test",
-            "same_as": ["https://ror.org/000000000"],
-            "description": "Fictional bench-equipment manufacturer for this example.",
-        },
-        "provenance": {
-            "source_type": "manual",
-            "source_url": "https://www.example-instruments.test",
-            "retrieved_at": 1750000000,
-        },
-    }
+    from battinfo.api import create_organization
+
+    record = create_organization(
+        name="Example Instruments",
+        type="Manufacturer",
+        legal_name="Example Instruments GmbH",
+        url="https://www.example-instruments.test",
+        same_as=["https://ror.org/000000000"],
+        location={"address_country": "DE", "address_locality": "Ulm"},
+        description="Fictional bench-equipment manufacturer for this example.",
+        source_url="https://www.example-instruments.test",
+        retrieved_at=1750000000,
+    )
     return record
 
 
@@ -983,14 +977,16 @@ FAMILIES = [
             {
                 "heading": "A manufacturer",
                 "fn": snippet_organization,
-                "record_type": None,
-                "gap": "Three gaps meet on this family: no authoring API "
-                       "(the record above is authored directly, data-first), "
-                       "no JSON-LD emitter, and no entities-registry kind — "
-                       "so organization records are outside the semantic "
-                       "validation path and are checked against the JSON "
-                       "Schema only.",
-                "schema_only": "organization.schema.json",
+                "record_type": "organization",
+                "notice": [
+                    "`create_organization` mints the IRI deterministically "
+                    "from the normalized name — creating \"A123 Systems\" "
+                    "twice lands on the same record.",
+                    "Pure schema.org emission (`schema:Organization`, with "
+                    "`Corporation`/`ResearchOrganization`/... stacked when "
+                    "the type IS a schema.org class); `same_as` carries the "
+                    "Wikidata/ROR identity anchors.",
+                ],
             },
         ],
         "schemas": ["organization.schema.json"],

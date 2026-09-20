@@ -5,20 +5,23 @@
     "short_id": "3k9m7t",
     "type": "ResearchOrganization",
     "name": "SINTEF Industry",
-    "legalName": "SINTEF AS",
-    "alternateName": ["SINTEF", "SINTEF Materials and Chemistry"],
     "url": "https://www.sintef.no/en/sintef-industry/",
     "same_as": [
       "https://www.wikidata.org/wiki/Q3041255",
       "https://ror.org/01f677e56"
     ],
     "location": {
-      "addressCountry": "NO",
-      "addressRegion": "Trøndelag",
-      "addressLocality": "Trondheim"
+      "address_country": "NO",
+      "address_region": "Trøndelag",
+      "address_locality": "Trondheim"
     },
-    "foundingDate": "1950",
-    "description": "SINTEF is one of Europe's largest independent research organisations. SINTEF Industry conducts applied research in materials science, energy technology, and manufacturing, including significant activity in battery materials, electrochemistry, and battery data infrastructure."
+    "description": "SINTEF is one of Europe's largest independent research organisations. SINTEF Industry conducts applied research in materials science, energy technology, and manufacturing, including significant activity in battery materials, electrochemistry, and battery data infrastructure.",
+    "legal_name": "SINTEF AS",
+    "alternate_name": [
+      "SINTEF",
+      "SINTEF Materials and Chemistry"
+    ],
+    "founding_date": "1950"
   },
   "provenance": {
     "source_type": "manual",

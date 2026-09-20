@@ -9,6 +9,22 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Organizations become first-class records (0.8.0 core-features
+  ruling).** The documented triple gap closes: `create_organization` /
+  `save_organization` / `query_organizations` (new IRIs mint
+  deterministically from the normalized name, so re-creating "A123
+  Systems" collates instead of duplicating; existing random-minted IRIs
+  stay valid), a JSON-LD emitter (pure schema.org - `schema:Organization`
+  with `Corporation`/`ResearchOrganization`/... stacked when the type IS
+  a schema.org class, `same_as` as the Wikidata/ROR identity anchors,
+  hosted records context), and an entities-registry kind, which puts
+  organization records on the same validation path as every other
+  family. The family's keys go snake_case (`legal_name`,
+  `founding_date`, `parent_organization`, `address_country`, ...); the
+  original camelCase spellings stay accepted forever as deprecated
+  aliases - as kwargs and in stored records - and normalize on
+  round-trip. Packaged examples rewritten to the canonical keys.
+
 - **BPX round trip: parameter-set records export back to a runnable BPX
   file (parameter-plan Phase 1).** `to_bpx(spec, parameter_sets=...)`
   takes ONE source's records (the block-keyed mapping

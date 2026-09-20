@@ -40,6 +40,7 @@ from battinfo.api import (  # noqa: E402
     create_equipment_spec,
     create_material,
     create_material_spec,
+    create_organization,
     create_parameter_set,
 )
 from battinfo.bundle import Cell, CellSpec, Dataset, ProvenanceInfo, Test, TestSpec  # noqa: E402
@@ -127,6 +128,7 @@ def _record_sets() -> dict[str, list[dict]]:
         access_url="https://example.org/data.parquet",
         source=ProvenanceInfo(type="measurement"),
     ).to_record()
+    organization = create_organization(validate=False, name="Demo Co", type="Manufacturer")
 
     sets: dict[str, list[dict]] = {
         "cell-spec": [cell_spec],
@@ -142,6 +144,7 @@ def _record_sets() -> dict[str, list[dict]]:
         "equipment": [equipment],
         "channel": [channel],
         "parameter-set": [parameter_set],
+        "organization": [organization],
     }
     # Generic component families (separator, current-collector, electrolyte,
     # housing): spec + instance, so the sweep sees them too.

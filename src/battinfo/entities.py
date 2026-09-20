@@ -234,6 +234,12 @@ ENTITY_KINDS: tuple[EntityKind, ...] = (
     # cell_spec_id) lives in the record body, uid minted deterministically from
     # (target, name) so re-importing the same source is idempotent.
     EntityKind("parameter-set", "parameter_set", "parameter-set.schema.json", "parameter-set", "spec"),
+    # Organizations are identity records (manufacturers, labs, publishers)
+    # other records point at. Instance-only, minted under organization/; NEW
+    # uids derive deterministically from the normalized name so re-creating
+    # "A123 Systems" is idempotent (existing random-minted IRIs stay valid
+    # forever).
+    EntityKind("organization", "organization", "organization.schema.json", "organization", "organization"),
 )
 
 

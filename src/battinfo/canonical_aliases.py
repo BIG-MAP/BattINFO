@@ -45,6 +45,21 @@ _DATASET_TO_SNAKE = {
 }
 
 _AGENT_TO_SNAKE = {"sameAs": "same_as"}
+# Organization records predate the snake_case migration; the camelCase keys
+# stay accepted forever and normalize here on round-trip.
+_ORGANIZATION_TO_SNAKE = {
+    "legalName": "legal_name",
+    "alternateName": "alternate_name",
+    "foundingDate": "founding_date",
+    "dissolutionDate": "dissolution_date",
+    "parentOrganization": "parent_organization",
+    "sameAs": "same_as",
+}
+_ORG_LOCATION_TO_SNAKE = {
+    "addressCountry": "address_country",
+    "addressRegion": "address_region",
+    "addressLocality": "address_locality",
+}
 _DATA_CATALOG_TO_SNAKE = {"sameAs": "same_as"}
 _VARIABLE_TO_SNAKE = {"sameAs": "same_as"}
 _DISTRIBUTION_TO_SNAKE = {
@@ -64,6 +79,19 @@ def record_to_snake_aliases(record: Mapping[str, Any]) -> dict[str, Any]:
         normalized["cell_spec"] = _map_keys(dict(normalized["cell_spec"]), _CELL_TYPE_PRODUCT_TO_SNAKE)
     if isinstance(normalized.get("dataset"), Mapping):
         normalized["dataset"] = _dataset_to_snake(dict(normalized["dataset"]))
+    if isinstance(normalized.get("organization"), Mapping):
+        normalized["organization"] = _organization_to_snake(dict(normalized["organization"]))
+    return normalized
+
+
+def _organization_to_snake(organization: dict[str, Any]) -> dict[str, Any]:
+    normalized = _map_keys(organization, _ORGANIZATION_TO_SNAKE)
+    if isinstance(normalized.get("location"), Mapping):
+        normalized["location"] = _map_keys(dict(normalized["location"]), _ORG_LOCATION_TO_SNAKE)
+    if isinstance(normalized.get("parent_organization"), Mapping):
+        normalized["parent_organization"] = _map_keys(
+            dict(normalized["parent_organization"]), _ORGANIZATION_TO_SNAKE
+        )
     return normalized
 
 
