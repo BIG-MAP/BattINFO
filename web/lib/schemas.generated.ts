@@ -9051,6 +9051,11 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "comment": {
               "type": "string"
+            },
+            "annex": {
+              "type": "object",
+              "additionalProperties": true,
+              "description": "Source-file extension entries carried verbatim (e.g. a BPX User-defined block): original key -> raw value. No standard semantics are claimed for these; they exist so a re-export reproduces the source file and nothing is silently lost."
             }
           },
           "oneOf": [

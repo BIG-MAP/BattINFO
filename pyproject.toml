@@ -212,3 +212,8 @@ source = ["battinfo"]
 # regressions. Ratchet up as cli.py / ws.py coverage improves.
 fail_under = 72
 show_missing = true
+
+[dependency-groups]
+dev = [
+    "bpx>=1.0",
+]

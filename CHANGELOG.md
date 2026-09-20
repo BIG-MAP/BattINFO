@@ -7,6 +7,36 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **BPX round trip: parameter-set records export back to a runnable BPX
+  file (parameter-plan Phase 1).** `to_bpx(spec, parameter_sets=...)`
+  takes ONE source's records (the block-keyed mapping
+  `to_records(by_block=True)` returns) and rebuilds the
+  electrode/separator/electrolyte blocks: claim values at full precision
+  - scalars verbatim, curves as {x, y} tables, expressions as BPX
+  function strings - with the User-defined annex reassembled and
+  `Header.Model` taken from the source's own model context (battinfo's
+  tier contracts require more than a BPX DFN file carries, so deriving
+  from tiers alone would demote an honest DFN source; the tier heuristic
+  is the fallback). Exports declaring BPX >= 1.1 follow the 1.1 layout
+  (temperatures and initial electrolyte concentration move to the State
+  section), and the official `bpx` parser accepts the result - pinned in
+  CI with `bpx` as a dev dependency. Per-source only, deliberately: a
+  calibration is a joint estimate, and mixing sources across blocks
+  would produce a file no validation supports.
+
+- **Cell geometry gets a home (BPX Cell-block ruling).** `electrode_area`
+  and `external_surface_area` join the curated property vocabulary
+  (EMMO `Area`), beside the existing `volume` - as-designed engineering
+  facts of the cell. `from_bpx` maps the BPX Cell fields onto them and
+  `to_bpx` fills the BPX-required `Electrode area [m2]` from the spec;
+  Cell fields with no spec home (temperatures - stated conventions -
+  and the electrode-pair count) are carried verbatim in
+  `BpxImportResult.extras` and re-emitted by `to_bpx(cell_extras=...)`,
+  so the whole Cell block round-trips. The two Cell-import warnings now
+  name every key instead of truncating at eight.
+
 ### Changed
 
 - **BPX import drops nothing silently (parameter-plan Phase 0).** The

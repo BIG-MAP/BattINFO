@@ -107,6 +107,94 @@ def test_caller_supplied_lineage_wins_over_the_header() -> None:
     assert records[0]["provenance"]["citation"] == "https://doi.org/10.5281/zenodo.0000000"
 
 
+def test_user_defined_block_rides_every_record_as_annex() -> None:
+    doc = _doc()
+    res = from_bpx_parameters(FIXTURE)
+    records = res.to_records(materials={"negative": "graphite"})
+    assert records[0]["parameter_set"]["annex"] == doc["Parameterisation"]["User-defined"]
+
+
+def test_round_trip_export_reproduces_the_physics_exactly() -> None:
+    """The Phase 1 conformance contract: import(export(x)) is exact on the
+    physics blocks and User-defined (claims export at full precision), with
+    only the declared Cell-block deltas (temperatures and pair count are
+    model conventions / unhomed; spec-derived values pass through sig-6)."""
+    import pytest
+
+    from battinfo.interop.bpx import to_bpx
+
+    doc = _doc()
+    cell = from_bpx(FIXTURE)
+    spec_record = {
+        "schema_version": "0.2.0",
+        "cell_spec": {"name": "Golden fixture cell", "cell_format": "pouch"},
+        "properties": cell.specs,
+    }
+    res = from_bpx_parameters(FIXTURE)
+    by_block = res.to_records(
+        materials={"negative": "graphite", "positive": "nmc811"},
+        cell_spec_id="https://w3id.org/battinfo/spec/0000-0000-0000-0000",
+        by_block=True,
+    )
+    assert set(by_block) == {
+        "negative_material", "negative_electrode",
+        "positive_material", "positive_electrode",
+        "separator", "electrolyte",
+    }
+
+    out = to_bpx(spec_record, parameter_sets=by_block, cell_extras=cell.extras)
+    exported = out.bpx["Parameterisation"]
+    original = doc["Parameterisation"]
+
+    # Physics: exact, full precision — no rounding of claim values, ever.
+    for block in ("Negative electrode", "Positive electrode", "Separator", "Electrolyte"):
+        assert exported[block] == original[block], block
+    assert exported["User-defined"] == original["User-defined"]
+
+    # Cell: the geometry ruling routes area/surface/volume through the spec,
+    # and the verbatim extras carry what has no spec home (temperatures, pair
+    # count) — so the WHOLE block round-trips, within sig-6 of unit scaling.
+    assert set(exported["Cell"]) == set(original["Cell"])
+    for key, value in original["Cell"].items():
+        assert exported["Cell"][key] == pytest.approx(value, rel=1e-6), key
+
+    # Header lineage: the source's own model context wins (battinfo's tier
+    # contracts require MORE than a BPX DFN file carries, so deriving from
+    # tiers alone would dishonestly demote a DFN source).
+    header = out.bpx["Header"]
+    assert header["Model"] == "DFN"
+    assert header["BPX"] == 1.0
+    assert "Schmitt et al. 2026" in header.get("References", "")
+    assert not out.missing_required
+
+
+def test_exported_document_validates_with_the_bpx_package() -> None:
+    """The export drives real tools: the official bpx parser accepts it."""
+    bpx_lib = __import__("pytest").importorskip("bpx")
+
+    cell = from_bpx(FIXTURE)
+    spec_record = {
+        "schema_version": "0.2.0",
+        "cell_spec": {"name": "Golden fixture cell", "cell_format": "pouch"},
+        "properties": cell.specs,
+    }
+    by_block = from_bpx_parameters(FIXTURE).to_records(
+        materials={"negative": "graphite", "positive": "nmc811"},
+        cell_spec_id="https://w3id.org/battinfo/spec/0000-0000-0000-0000",
+        by_block=True,
+    )
+    from battinfo.interop.bpx import to_bpx
+
+    # Target the current standard's layout: 1.1 moved the state-like fields
+    # (temperatures, initial concentration) into the State section.
+    out = to_bpx(
+        spec_record, parameter_sets=by_block, cell_extras=cell.extras, bpx_version="1.1"
+    )
+    assert "State" in out.bpx
+    parsed = bpx_lib.parse_bpx_obj(out.bpx)
+    assert parsed.header.model == "DFN"
+
+
 def test_emitted_jsonld_uses_the_records_context_and_absolute_license() -> None:
     """Parameter-set records are the BPX Metadata payload: they must expand
     against the hosted, versioned records context, and a license slug must
