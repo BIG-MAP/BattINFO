@@ -88,6 +88,30 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   name every key instead of truncating at eight.
 
 ### Changed
+- `ws.status()` and `ws.pending()` now send the publisher API key from `ws.login()` (or `BATTINFO_ADMIN_TOKEN` when set). The registry's workspace views became credentialed because they list staged, not-yet-public submissions; without a key these two calls now print a hint and return an empty list instead of listing the queue.
+
+### Changed
+
+- **BPX import drops nothing silently (parameter-plan Phase 0).** The
+  `User-defined` block — BPX's extension point, previously ignored without
+  a word - is now reported key-by-key, and unrecognised Parameterisation
+  blocks are named. Header lineage rides every minted parameter-set
+  record: `Description` as the record description and `References` as the
+  provenance citation (verbatim as a note when it is not a URL/DOI),
+  beside the model context the importer already stamped. A synthetic
+  full-DFN golden fixture (structural twin of a published BattMo export,
+  fabricated values - the original is GPL-3.0) pins the contract: every
+  parameter in the file becomes a claim, a spec property, or a named
+  warning.
+
+- **Parameter-set records emit against the records context.** The
+  parameter-set JSON-LD - the payload the BPX "Metadata" seam embeds -
+  now carries the hosted versioned records context
+  (`context/records/v1.json`) instead of the live EMMO context, and every
+  vocabulary parameter's terms resolve in it. License slugs
+  (`cc-by-sa-4.0`) map to their absolute SPDX page IRI instead of
+  emitting as relative IRIs; unknown values emit as literals, never
+  broken links (applies to dataset records too).
 
 - **BPX import drops nothing silently (parameter-plan Phase 0).** The
   `User-defined` block — BPX's extension point, previously ignored without

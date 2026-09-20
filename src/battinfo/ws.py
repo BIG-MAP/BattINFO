@@ -1401,6 +1401,22 @@ class AuthoringWorkspace:
             pass
         return path
 
+    def _registry_read_headers(self) -> dict[str, str]:
+        """Headers for the registry's credentialed workspace views.
+
+        Sends the admin token when one is configured (reviewers), otherwise the
+        publisher API key stored by :meth:`login`. Either opens a workspace's own
+        submission queue; an empty dict lets the registry answer 401 with guidance.
+        """
+        headers = {"User-Agent": "battinfo-client/1.0"}
+        admin_token = os.environ.get("BATTINFO_ADMIN_TOKEN")
+        if admin_token:
+            headers["X-Battinfo-Admin-Token"] = admin_token
+        api_key = self._credential("BATTINFO_API_KEY")
+        if api_key:
+            headers["X-Battinfo-API-Key"] = api_key
+        return headers
+
     def _credential(self, key: str, default: str | None = None) -> str | None:
         """Look up a credential without relying on process-global state.
 
@@ -2905,9 +2921,21 @@ class AuthoringWorkspace:
             )
 
         endpoint = f"{url.rstrip('/')}/workspaces/{wid}/submissions"
+        # The registry's workspace views are credentialed (they list staged, not yet
+        # public submissions): send the publisher key from login(), or the admin token.
+        req = urllib.request.Request(endpoint, headers=self._registry_read_headers())
         try:
-            with urllib.request.urlopen(endpoint, timeout=10) as resp:  # noqa: S310
+            with urllib.request.urlopen(req, timeout=10) as resp:  # noqa: S310
                 submissions = json.loads(resp.read().decode())
+        except urllib.error.HTTPError as exc:
+            if exc.code in (401, 403):
+                print(
+                    "  The registry needs your publisher API key to list this workspace. "
+                    "Run ws.login(api_key=...) or set BATTINFO_API_KEY."
+                )
+                return []
+            print(f"  Could not reach registry at {url}: {exc}")
+            return []
         except Exception as exc:
             print(f"  Could not reach registry at {url}: {exc}")
             return []
@@ -4194,7 +4222,10 @@ class AuthoringWorkspace:
             raise RuntimeError("workspace_id required. Pass it or set BATTINFO_WORKSPACE_ID.")
 
         endpoint = f"{url.rstrip('/')}/workspaces/{wid}/submissions?status_filter=validated"
-        with urllib.request.urlopen(endpoint, timeout=10) as resp:  # noqa: S310
+        # Credentialed on the registry side; the admin token (the reviewer's credential)
+        # or this workspace's publisher key both open the queue.
+        req = urllib.request.Request(endpoint, headers=self._registry_read_headers())
+        with urllib.request.urlopen(req, timeout=10) as resp:  # noqa: S310
             submissions = json.loads(resp.read().decode())
 
         if not submissions:
