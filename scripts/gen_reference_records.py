@@ -430,10 +430,41 @@ def snippet_dataset():
         test=test,
         license="https://creativecommons.org/licenses/by/4.0/",
         access_url="https://doi.org/10.5281/zenodo.1234567",
-        download_url="https://zenodo.org/records/1234567/files/run.parquet",
-        data_format="application/x-parquet",
-        checksum_algorithm="md5",
-        checksum_value="9e107d9d372bb6826bd81d3542a419d6",
+        # One distribution per published file: the processed time series and
+        # the raw cycler export it was converted from.
+        distributions=[
+            {
+                "name": "run.bdf.parquet",
+                "description": "Cycling time series in BDF column vocabulary.",
+                "content_url": "https://zenodo.org/records/1234567/files/run.bdf.parquet",
+                "encoding_format": "application/x-parquet",
+                "role": "processed",
+                "checksum": {"algorithm": "md5", "value": "9e107d9d372bb6826bd81d3542a419d6"},
+            },
+            {
+                "name": "run.ndax",
+                "description": "Raw Neware export, exactly as the cycler wrote it.",
+                "content_url": "https://zenodo.org/records/1234567/files/run.ndax",
+                "encoding_format": "application/octet-stream",
+                "role": "raw",
+                "checksum": {"algorithm": "md5", "value": "e4d909c290d0fb1ca068ffaddf22cbd0"},
+            },
+        ],
+        # The table schema of the processed file (CSVW): column names,
+        # datatypes and units, so a consumer knows the shape of the data
+        # without downloading it.
+        main_entity=[{
+            "type": "Table",
+            "url": "run.bdf.parquet",
+            "table_schema": {
+                "columns": [
+                    {"name": "test_time_s", "datatype": "number", "unit_text": "s"},
+                    {"name": "voltage_v", "datatype": "number", "unit_text": "V"},
+                    {"name": "current_a", "datatype": "number", "unit_text": "A"},
+                    {"name": "discharging_capacity_ah", "datatype": "number", "unit_text": "Ah"},
+                ],
+            },
+        }],
         # Membership in a dataset series (a collection record): emitted as
         # dcat:inSeries and schema:isPartOf. The collection publishes first.
         series_id="https://w3id.org/battinfo/dataset/0rp6-kncv-cyem-qwcd",
@@ -861,8 +892,12 @@ FAMILIES = [
                     "`series_id` emits BOTH `dcat:inSeries` (the DCAT 3 "
                     "membership edge) and `schema:isPartOf` (what dataset "
                     "search engines read).",
-                    "`about` links the cell and the test; the distribution "
-                    "carries the download URL and checksum.",
+                    "One `distributions[]` entry per published file — URL, "
+                    "media type, role (`processed`/`raw`) and checksum — "
+                    "emitted as `dcat:distribution`.",
+                    "`main_entity` carries the file's own table schema "
+                    "(CSVW): column names, datatypes and units, emitted as "
+                    "`schema:mainEntity` → `csvw:Table` → `csvw:tableSchema`.",
                 ],
             },
             {
@@ -1271,6 +1306,7 @@ SHELVES: dict[str, list[str]] = {
     ],
     "datasets": [
         "dataset/dataset-nns1-gh5p-v5n1-td17.json",
+        "dataset/dataset-c0hn-8mvq-3wtd-5xkp.json",
         "dataset/dataset-nxv4-ecrt-9wnm-a2yt.json",
     ],
     "equipment": [

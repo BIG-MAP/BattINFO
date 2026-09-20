@@ -59,6 +59,9 @@ PREFIXES: dict[str, str] = {
     "spdx":             "http://spdx.org/rdf/terms#",
     "rdfs":             "http://www.w3.org/2000/01/rdf-schema#",
     "xsd":              "http://www.w3.org/2001/XMLSchema#",
+    # Backs the CSVW main-entity emission (a dataset's own table schema:
+    # csvw:Table / csvw:tableSchema / csvw:Column on schema:mainEntity).
+    "csvw":             "http://www.w3.org/ns/csvw#",
 }
 
 # ── EMMO battery class types ───────────────────────────────────────────────────

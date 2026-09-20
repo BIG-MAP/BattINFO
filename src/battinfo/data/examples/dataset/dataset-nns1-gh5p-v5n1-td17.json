@@ -8,6 +8,63 @@
     "access_url": "https://example.org/dataset/nns1-gh5p-v5n1-td17",
     "description": "Raw galvanostatic cycling export for one NMC811-Graphite coin cell.",
     "license": "https://creativecommons.org/licenses/by/4.0/",
+    "series_id": "https://w3id.org/battinfo/dataset/c0hn-8mvq-3wtd-5xkp",
+    "distributions": [
+      {
+        "type": "DataDownload",
+        "name": "cell-01.bdf.parquet",
+        "description": "Cycling time series in BDF column vocabulary.",
+        "content_url": "https://example.org/files/nns1/cell-01.bdf.parquet",
+        "encoding_format": "application/x-parquet",
+        "role": "processed",
+        "checksum": {
+          "algorithm": "sha256",
+          "value": "6cd3556deb0da54bca060b4c39479839e6c4e0dc7dcb84a3ea2f722b9dbc1a8f"
+        }
+      },
+      {
+        "type": "DataDownload",
+        "name": "cell-01.ndax",
+        "description": "Raw Neware export, exactly as the cycler wrote it.",
+        "content_url": "https://example.org/files/nns1/cell-01.ndax",
+        "encoding_format": "application/octet-stream",
+        "role": "raw",
+        "checksum": {
+          "algorithm": "sha256",
+          "value": "b7e23ec29af22b0b4e41da31e868d57226121c84c7d0f7c62ea4a8f9d0f3e1c2"
+        }
+      }
+    ],
+    "main_entity": [
+      {
+        "type": "Table",
+        "url": "cell-01.bdf.parquet",
+        "table_schema": {
+          "columns": [
+            {
+              "name": "test_time_s",
+              "datatype": "number",
+              "unit_text": "s"
+            },
+            {
+              "name": "voltage_v",
+              "datatype": "number",
+              "unit_text": "V"
+            },
+            {
+              "name": "current_a",
+              "datatype": "number",
+              "unit_text": "A"
+            },
+            {
+              "name": "discharging_capacity_ah",
+              "datatype": "number",
+              "unit_text": "Ah"
+            }
+          ]
+        }
+      }
+    ],
     "measurement_techniques": [
       "cycling"
     ],

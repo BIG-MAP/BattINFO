@@ -1072,6 +1072,24 @@ def dataset_to_jsonld(record: dict) -> dict:
             ld_dists.append(dist)
         node["dcat:distribution"] = ld_dists
 
+    # The dataset's own table schema (CSVW): main_entity carries the columns
+    # of the tabular file — names, datatypes, units — so a consumer knows the
+    # shape of the data without downloading it. Reuses the publication-graph
+    # builders so both emitters produce one CSVW shape.
+    main_entities = ds.get("main_entity") or []
+    if isinstance(main_entities, Mapping):
+        main_entities = [main_entities]
+    if main_entities:
+        from battinfo.publication import _schema_main_entity_node  # noqa: PLC0415
+
+        me_nodes = [
+            me
+            for item in main_entities
+            if isinstance(item, Mapping) and (me := _schema_main_entity_node(item)) is not None
+        ]
+        if me_nodes:
+            node["schema:mainEntity"] = me_nodes[0] if len(me_nodes) == 1 else me_nodes
+
     if prov:
         node["dcterms:source"] = _provenance(prov)
 

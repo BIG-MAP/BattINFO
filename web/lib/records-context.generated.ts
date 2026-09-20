@@ -767,6 +767,7 @@ export const recordsContext: Record<string, unknown> = {
     "StateOfCharge": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_8b2aaa50_bbe1_45da_8778_8898326246a2",
     "CyclicVoltammetry": "https://w3id.org/emmo/domain/characterisation-methodology/chameo#CyclicVoltammetry",
     "SpecificCapacity": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_1e3dc60d_dd6b_47d6_8161_70004fc5ee30",
-    "hasIECCode": "electrochemistry:electrochemistry_1f2d401c_eede_4178_9ff5_e5392bc2cb92"
+    "hasIECCode": "electrochemistry:electrochemistry_1f2d401c_eede_4178_9ff5_e5392bc2cb92",
+    "csvw": "http://www.w3.org/ns/csvw#"
   }
 };
