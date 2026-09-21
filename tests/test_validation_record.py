@@ -205,3 +205,38 @@ def test_validate_record_report_checks_reference_electrode_spec_reference() -> N
         i.code == "reference.missing" and i.path == "reference_electrode_spec_id"
         for i in report.errors
     )
+
+
+def test_validate_record_report_checks_active_material_spec_reference() -> None:
+    """electrode_spec.active_material_spec_id joins the validated links
+    (found by the schema-link inventory gate, 0.8.0 review F6 family)."""
+    import glob as _glob
+    path = sorted(_glob.glob(str(ROOT / "src/battinfo/data/examples/electrode-spec/*.json")))[0]
+    doc = json.loads(Path(path).read_text(encoding="utf-8"))
+    doc["electrode_spec"]["active_material_spec_id"] = (
+        "https://w3id.org/battinfo/spec/0000-0000-0000-0004"
+    )
+    report = validate_record_report(
+        doc, source_root=ROOT / "src" / "battinfo" / "data" / "examples", policy=STRICT
+    )
+    assert not report.ok
+    assert any(
+        i.code == "reference.missing" and i.path == "electrode_spec.active_material_spec_id"
+        for i in report.errors
+    )
+
+
+def test_validate_record_report_checks_channel_equipment_reference() -> None:
+    """channel.equipment_id joins the validated links (F6 family)."""
+    import glob as _glob
+    path = sorted(_glob.glob(str(ROOT / "src/battinfo/data/examples/channel/*.json")))[0]
+    doc = json.loads(Path(path).read_text(encoding="utf-8"))
+    doc["channel"]["equipment_id"] = "https://w3id.org/battinfo/spec/0000-0000-0000-0005"
+    report = validate_record_report(
+        doc, source_root=ROOT / "src" / "battinfo" / "data" / "examples", policy=STRICT
+    )
+    assert not report.ok
+    assert any(
+        i.code == "reference.missing" and i.path == "channel.equipment_id"
+        for i in report.errors
+    )

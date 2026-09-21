@@ -356,6 +356,48 @@ def validate_references_report(
                 allow_missing=allow_missing,
             )
 
+    if isinstance(doc.get("electrode_spec"), Mapping):
+        material_ref = doc["electrode_spec"].get("active_material_spec_id")
+        if isinstance(material_ref, str):
+            _check_reference(
+                issues=issues,
+                ref_id=material_ref,
+                expected_type="material-spec",
+                path="electrode_spec.active_material_spec_id",
+                source_root=root,
+                resource_type=resource_type,
+                missing_message=(
+                    "Referenced material spec not found in source_root. Register it first "
+                    f"or disable resolve_references. Missing: {material_ref}"
+                ),
+                mismatch_message=(
+                    "Referenced active_material_spec_id must resolve to a material-spec record "
+                    f"in source_root. Found a different record type for: {material_ref}"
+                ),
+                allow_missing=allow_missing,
+            )
+
+    if isinstance(doc.get("channel"), Mapping):
+        equipment_ref = doc["channel"].get("equipment_id")
+        if isinstance(equipment_ref, str):
+            _check_reference(
+                issues=issues,
+                ref_id=equipment_ref,
+                expected_type="equipment",
+                path="channel.equipment_id",
+                source_root=root,
+                resource_type=resource_type,
+                missing_message=(
+                    "Referenced equipment not found in source_root. Register the equipment "
+                    f"record first or disable resolve_references. Missing: {equipment_ref}"
+                ),
+                mismatch_message=(
+                    "Referenced channel.equipment_id must resolve to an equipment record "
+                    f"in source_root. Found a different record type for: {equipment_ref}"
+                ),
+                allow_missing=allow_missing,
+            )
+
     if isinstance(doc.get("cell_spec"), Mapping):
         for ref_field, expected_type in (
             ("positive_electrode_spec_id", "electrode-spec"),

@@ -20,6 +20,7 @@ from __future__ import annotations
 import json
 import re
 from collections.abc import Mapping
+from functools import lru_cache
 from pathlib import Path
 from typing import Any, Callable
 
@@ -1625,5 +1626,86 @@ def record_to_jsonld(record: dict, record_type: str, *, context: str = "url") ->
         # Swap the inline records context for the hosted reference. Only the
         # records-context nodes (a dict @context) are affected; material/component
         # nodes carry a domain-battery context and are left as-is.
-        node = {"@context": _CONTEXT_URL, **{k: v for k, v in node.items() if k != "@context"}}
+        ctx_value = _url_context_with_overrides(node["@context"], node)
+        node = {"@context": ctx_value, **{k: v for k, v in node.items() if k != "@context"}}
     return node
+
+
+def _url_context_with_overrides(doc_context: dict, node: Mapping) -> str | list:
+    """The hosted context URL, plus a local patch for any term this DOCUMENT
+    uses whose per-document mapping disagrees with the published v1 context.
+
+    v1 is append-only, so when upstream renames a class during a deprecation
+    window (PrismaticBattery's underscore twin replacing the deprecated
+    hyphen-named original, domain-battery 0.20.2 issue #73) the published
+    term cannot be repointed until a v2 context. The document then carries
+    the correction the way JSON-LD intends — a local ``@context`` entry that
+    wins over the referenced one — so BOTH emission modes expand to the same
+    graph and emit the current (non-deprecated) class. Only terms the
+    document actually uses ride the patch; with no disagreements (the common
+    case) the plain URL string is returned unchanged.
+    """
+    used = _bare_terms_used(node)
+    overrides = {
+        term: value
+        for term, value in doc_context.items()
+        if term in used and not _same_term_semantics(value, _CONTEXT_INLINE.get(term))
+    }
+    if not overrides:
+        return _CONTEXT_URL
+    return [_CONTEXT_URL, overrides]
+
+
+def _bare_terms_used(node: Any) -> set[str]:
+    """Every bare (unprefixed) key and @type token a document uses."""
+    out: set[str] = set()
+
+    def walk(value: Any) -> None:
+        if isinstance(value, list):
+            for item in value:
+                walk(item)
+        elif isinstance(value, Mapping):
+            for key, val in value.items():
+                if key == "@context":
+                    continue
+                if not key.startswith("@") and ":" not in key:
+                    out.add(key)
+                if key == "@type":
+                    for token in val if isinstance(val, list) else [val]:
+                        if isinstance(token, str) and ":" not in token:
+                            out.add(token)
+                else:
+                    walk(val)
+
+    walk(node)
+    return out
+
+
+@lru_cache(maxsize=1)
+def _context_prefixes() -> dict:
+    return {
+        term: value
+        for term, value in _CONTEXT_INLINE.items()
+        if isinstance(value, str) and value.endswith(("#", "/"))
+    }
+
+
+def _term_semantics(value: Any) -> tuple:
+    """(expanded IRI, @type, @container) — what a term contributes to the
+    graph, independent of compact-vs-absolute spelling."""
+    if isinstance(value, Mapping):
+        iri, kind, container = value.get("@id"), value.get("@type"), value.get("@container")
+    else:
+        iri, kind, container = value, None, None
+    if isinstance(iri, str) and "://" not in iri and ":" in iri:
+        prefix, _, local = iri.partition(":")
+        base = _context_prefixes().get(prefix)
+        if isinstance(base, str):
+            iri = base + local
+    return (iri, kind, container)
+
+
+def _same_term_semantics(a: Any, b: Any) -> bool:
+    if b is None:
+        return False
+    return _term_semantics(a) == _term_semantics(b)
