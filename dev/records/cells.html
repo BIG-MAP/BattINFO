@@ -2107,7 +2107,12 @@ Canonical record</label><div class="sd-tab-content docutils">
 JSON-LD</label><div class="sd-tab-content docutils">
 <p class="sd-card-text">Emitted by <code class="docutils literal notranslate"><span class="pre">record_to_jsonld</span></code>, hosted-context mode.</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;@context&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/context/records/v1.json&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;@context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;https://w3id.org/battinfo/context/records/v1.json&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;PrismaticBattery&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;battery:battery_86c9ca80_de6f_417f_afdc_a7e52fa6322d&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">],</span>
 <span class="w">  </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="s2">&quot;BatteryCellSpecification&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="s2">&quot;schema:ProductModel&quot;</span><span class="p">,</span>
@@ -3686,7 +3691,12 @@ Canonical record</label><div class="sd-tab-content docutils">
 JSON-LD</label><div class="sd-tab-content docutils">
 <p class="sd-card-text">Emitted by <code class="docutils literal notranslate"><span class="pre">record_to_jsonld</span></code>, hosted-context mode.</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;@context&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/context/records/v1.json&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;@context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;https://w3id.org/battinfo/context/records/v1.json&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;PrismaticBattery&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;battery:battery_86c9ca80_de6f_417f_afdc_a7e52fa6322d&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">],</span>
 <span class="w">  </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="s2">&quot;BatteryCellSpecification&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="s2">&quot;schema:ProductModel&quot;</span><span class="p">,</span>
