@@ -145,6 +145,10 @@ Validate the record you just created (step 1 wrote it under
 `.battinfo/quickstart/examples/`); `--source-root` tells the validator where
 linked records live:
 
+<!-- Not runner-executable: depends on the record step 1 just wrote (the
+     snippet runner executes blocks in isolation); verified by hand in an
+     empty directory. -->
+<!-- doc-snippet: skip -->
 ```powershell
 # step 1 printed the exact filename (result.debug_paths["canonical_record_path"])
 .venv\Scripts\battinfo validate .battinfo/quickstart/examples/cell-spec/cell-spec-<id>.json `

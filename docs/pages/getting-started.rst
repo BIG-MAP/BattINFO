@@ -137,8 +137,9 @@ BattINFO ships a command-line interface for validation and querying:
 
 .. code-block:: bash
 
-   # Validate a cell-spec record (any record you created or downloaded)
-   battinfo validate path/to/cell-spec-record.json --profile cell-spec
+   # Validate a cell-spec record (here one of the repository examples;
+   # point it at any record you created or downloaded)
+   battinfo validate examples/cell-spec/A123__ANR26650M1-B.json --profile cell-spec
 
    # Query the example cell specs packaged with BattINFO — the flag searches
    # the bundled corpus, so this works outside a repository checkout (for
