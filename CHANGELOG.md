@@ -7,6 +7,35 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Semantic contracts, first slice (post-review hardening roadmap).**
+  Three new contract gates make the emission promises machine-checked by
+  an independent consumer:
+  - *Graph equivalence:* inline and URL emission modes are compared as
+    RDF GRAPHS (rdflib + structural blank-node hashing) over the whole
+    packaged corpus - not as JSON spelling, so a defect shared by a
+    generator and its expected output can no longer certify itself. The
+    sweep caught a residual mode divergence: the per-document context
+    override that keeps PrismaticBattery on its current underscore-named
+    class (the hyphen twin is deprecated upstream, domain-battery 0.20.2
+    issue #73) was silently dropped in URL mode. URL mode now emits the
+    hosted context plus a local override patch whenever a document term
+    disagrees with the append-only v1 context, so both modes expand to
+    the same graph and carry the current class.
+  - *SPARQL domain questions:* the merged corpus graph answers consumer
+    questions with independently stated expectations - every cell
+    instance names a spec the corpus describes, a nominal capacity is
+    retrievable by class and explicitly a ConventionalProperty with the
+    record's own value, and parameter claims expose their epistemic
+    basis (provenance_class) per claim.
+  - *Reference-link inventory:* every schema-declared record-IRI link
+    must be either resolved by strict reference validation or exempted
+    with a stated reason - adding a link field to a schema now forces the
+    decision (the F6 class of defect cannot recur silently). The gate
+    immediately surfaced two more unvalidated links, both now validated:
+    `electrode_spec.active_material_spec_id` and `channel.equipment_id`.
+
 ### Fixed
 
 - **Release-review fixes (independent 0.8.0 pre-release review, F1-F6 +
@@ -31,8 +60,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - *Inline JSON-LD context (F4):* inline emission now embeds the
     versioned hosted context (`records.context.v1.json`) instead of the
     stale flat assembled context, which had missing equipment terms
-    (Description, BatteryCycler, ...), a non-existent PrismaticBattery
-    IRI, retired power-key IRIs, and the pre-0.37.1 CapacityFade class.
+    (Description, BatteryCycler, ...), the deprecated hyphen-named
+    PrismaticBattery IRI, retired power-key IRIs, and the pre-0.37.1
+    CapacityFade class.
     Inline and URL modes now expand identically by construction. A new
     corpus-wide sweep asserts every emitted bare `@type` resolves in the
     context — it caught five more unresolved classes (Manufacturing,
