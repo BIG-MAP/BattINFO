@@ -245,6 +245,41 @@
         </div>
       
       
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
         <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
         <li class="nav-item">
@@ -378,6 +413,41 @@
     
       <div class="sidebar-header-items__end">
         
+          <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
           <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
         <li class="nav-item">
@@ -501,6 +571,15 @@ pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot
 pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;battinfo[publish]&quot;</span><span class="w">       </span><span class="c1"># RO-Crate validation for publishing</span>
 </pre></div>
 </div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">processing</span></code> extra depends on the BDF converter (<code class="docutils literal notranslate"><span class="pre">batterydf</span></code>),
+which is not yet published to PyPI, so the extra cannot resolve there
+today. Until it lands, install the converter from source instead:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;git+https://github.com/battery-data-alliance/battery-data-format.git&quot;</span><span class="w"> </span>matplotlib<span class="w"> </span>plotly
+</pre></div>
+</div>
+</div>
 </section>
 <section id="if-you-have-data-the-workspace">
 <h2>If you have data: the workspace<a class="headerlink" href="#if-you-have-data-the-workspace" title="Link to this heading">#</a></h2>
@@ -570,15 +649,19 @@ directory. It is a dot-directory, so a plain <code class="docutils literal notra
 <section id="cli-quick-reference">
 <h2>CLI quick reference<a class="headerlink" href="#cli-quick-reference" title="Link to this heading">#</a></h2>
 <p>BattINFO ships a command-line interface for validation and querying:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Validate a cell-spec record</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Validate a cell-spec record (here one of the repository examples;</span>
+<span class="c1"># point it at any record you created or downloaded)</span>
 battinfo<span class="w"> </span>validate<span class="w"> </span>examples/cell-spec/A123__ANR26650M1-B.json<span class="w"> </span>--profile<span class="w"> </span>cell-spec
 
-<span class="c1"># Query the example cell specs packaged with BattINFO (for your own</span>
-<span class="c1"># library, use the Python query_* functions with an explicit directory)</span>
-battinfo<span class="w"> </span>query<span class="w"> </span>cell-spec
+<span class="c1"># Query the example cell specs packaged with BattINFO — the flag searches</span>
+<span class="c1"># the bundled corpus, so this works outside a repository checkout (for</span>
+<span class="c1"># your own library, use the Python query_* functions with an explicit</span>
+<span class="c1"># directory)</span>
+battinfo<span class="w"> </span>query<span class="w"> </span>cell-spec<span class="w"> </span>--include-packaged-examples
 
-<span class="c1"># Save a cell record from a draft file</span>
-battinfo<span class="w"> </span>save<span class="w"> </span>cell-instance<span class="w"> </span>--input<span class="w"> </span>draft.json<span class="w"> </span>--source-root<span class="w"> </span>examples
+<span class="c1"># Save a cell record from a draft file (--source-root is where your</span>
+<span class="c1"># linked records live)</span>
+battinfo<span class="w"> </span>save<span class="w"> </span>cell-instance<span class="w"> </span>--input<span class="w"> </span>draft.json<span class="w"> </span>--source-root<span class="w"> </span>records
 </pre></div>
 </div>
 <p>See the <a class="reference internal" href="cli-reference.html"><span class="doc">CLI reference</span></a> for every command.</p>

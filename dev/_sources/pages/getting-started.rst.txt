@@ -41,6 +41,16 @@ naming the extra to install):
    pip install "battinfo[tabular]"       # CSV/Parquet/XLSX readers
    pip install "battinfo[publish]"       # RO-Crate validation for publishing
 
+.. note::
+
+   The ``processing`` extra depends on the BDF converter (``batterydf``),
+   which is not yet published to PyPI, so the extra cannot resolve there
+   today. Until it lands, install the converter from source instead:
+
+   .. code-block:: bash
+
+      pip install "git+https://github.com/battery-data-alliance/battery-data-format.git" matplotlib plotly
+
 
 If you have data: the workspace
 -------------------------------
@@ -127,15 +137,19 @@ BattINFO ships a command-line interface for validation and querying:
 
 .. code-block:: bash
 
-   # Validate a cell-spec record
+   # Validate a cell-spec record (here one of the repository examples;
+   # point it at any record you created or downloaded)
    battinfo validate examples/cell-spec/A123__ANR26650M1-B.json --profile cell-spec
 
-   # Query the example cell specs packaged with BattINFO (for your own
-   # library, use the Python query_* functions with an explicit directory)
-   battinfo query cell-spec
+   # Query the example cell specs packaged with BattINFO — the flag searches
+   # the bundled corpus, so this works outside a repository checkout (for
+   # your own library, use the Python query_* functions with an explicit
+   # directory)
+   battinfo query cell-spec --include-packaged-examples
 
-   # Save a cell record from a draft file
-   battinfo save cell-instance --input draft.json --source-root examples
+   # Save a cell record from a draft file (--source-root is where your
+   # linked records live)
+   battinfo save cell-instance --input draft.json --source-root records
 
 See the :doc:`CLI reference <cli-reference>` for every command.
 
