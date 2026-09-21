@@ -786,6 +786,11 @@ export const recordsContext: Record<string, unknown> = {
     "ChargeCarrierTransportNumber": "electrochemistry:electrochemistry_e3e78df2_d568_4ab7_8c0d_d3a2ee3ae282",
     "ThermodynamicTemperature": "emmo:EMMO_affe07e4_e9bc_4852_86c6_69e26182a17f",
     "AreaDensity": "emmo:EMMO_afea89af_ef16_4bdb_99d5_f3b2f4c85a6c",
-    "ActivationEnergy": "electrochemistry:electrochemistry_d7f8cab9_b035_4ecd_be63_292672572526"
+    "ActivationEnergy": "electrochemistry:electrochemistry_d7f8cab9_b035_4ecd_be63_292672572526",
+    "Manufacturing": "emmo:EMMO_a4d66059_5dd3_4b90_b4cb_10960559441b",
+    "NegativeElectrode": "electrochemistry:electrochemistry_c94c041b_8ea6_43e7_85cc_d2bce7785b4c",
+    "PositiveElectrode": "electrochemistry:electrochemistry_aff732a9_238a_4734_977c_b2ba202af126",
+    "MolarMass": "emmo:EMMO_e980389d_6dfe_4156_9b40_32050c9644a5",
+    "SpecificSurfaceArea": "electrochemistry:electrochemistry_cf54e7c1_f359_4715_b61d_0350b890d597"
   }
 };

@@ -26,11 +26,14 @@ from typing import Any, Callable
 from battinfo._util import is_dataset_series
 
 _DATA = Path(__file__).parent / "data"
-_CONTEXT_PATH = _DATA / "context" / "records.context.json"
+# Inline emission must expand identically to the hosted context the URL names,
+# so both load the same versioned file — never the flat assembled context,
+# whose stale copies have emitted retired or non-existent IRIs.
+_CONTEXT_PATH = _DATA / "context" / "records.context.v1.json"
 _CONTEXT_URL  = "https://w3id.org/battinfo/context/records/v1.json"
 
 # Inline context dict — loaded once so files are self-contained and parseable
-# without network access. The URL above is the future hosted reference.
+# without network access.
 _CONTEXT_INLINE: dict = json.loads(_CONTEXT_PATH.read_text(encoding="utf-8"))["@context"]
 
 # ── Mapping tables (loaded once at module import) ─────────────────────────────

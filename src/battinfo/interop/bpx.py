@@ -218,6 +218,52 @@ def _extract_specs(
     return specs, extras
 
 
+def _fold_state_block(
+    data: Mapping[str, Any], warnings: list[str]
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Fold a BPX >= 1.1 top-level ``State`` block back into its 1.0 homes.
+
+    The exact inverse of :func:`_relocate_state_fields_1_1`: initial/ambient
+    temperatures return to the Cell block (where the importer carries them as
+    verbatim extras) and the initial electrolyte concentration returns to the
+    Electrolyte block (where it becomes an ``initial_concentration`` claim).
+    Returns ``(cell_fields, electrolyte_fields)``; anything unrecognized is
+    named in a warning — never dropped silently.
+    """
+    state = data.get("State")
+    if not isinstance(state, Mapping) or not state:
+        return {}, {}
+    cell_fields: dict[str, Any] = {}
+    electrolyte_fields: dict[str, Any] = {}
+    unknown: list[str] = []
+    initial = state.get("Initial conditions")
+    if isinstance(initial, Mapping):
+        for key, value in initial.items():
+            if key == "Initial temperature [K]":
+                cell_fields[key] = value
+            elif key == "Initial electrolyte concentration [mol.m-3]":
+                electrolyte_fields["Initial concentration [mol.m-3]"] = value
+            else:
+                unknown.append(f"Initial conditions.{key}")
+    thermal = state.get("Thermal environment")
+    if isinstance(thermal, Mapping):
+        for key, value in thermal.items():
+            if key == "Ambient temperature [K]":
+                cell_fields[key] = value
+            else:
+                unknown.append(f"Thermal environment.{key}")
+    for section in state:
+        if section not in ("Initial conditions", "Thermal environment"):
+            unknown.append(str(section))
+    if unknown:
+        # EVERY key is named — a truncated list is a silent drop for the rest.
+        warnings.append(
+            "BPX State entries with no BattINFO home were skipped: "
+            + ", ".join(sorted(unknown))
+        )
+    return cell_fields, electrolyte_fields
+
+
 # ── Public API ────────────────────────────────────────────────────────────────
 
 
@@ -295,6 +341,13 @@ def from_bpx(
         cell_params: dict[str, Any] = {}
     else:
         cell_params = dict(cell_params_raw)
+
+    # BPX >= 1.1 moves the temperatures into a top-level State block; fold
+    # them back so they ride the extras path like their 1.0 counterparts
+    # (and re-emit into State on a >= 1.1 export). Explicit Cell values win.
+    state_cell_fields, _state_electrolyte = _fold_state_block(data, warnings)
+    for state_key, state_value in state_cell_fields.items():
+        cell_params.setdefault(state_key, state_value)
 
     specs, extras = _extract_specs(cell_params, warnings if extra_warnings else [])
 
@@ -495,7 +548,7 @@ def to_bpx(
     cell_extras: Mapping[str, Any] | None = None,
     model: str | None = None,
     bpx_version: str | None = None,
-    reference_temperature_k: float | None = _DEFAULT_REFERENCE_TEMPERATURE_K,
+    reference_temperature_k: float | None | str = "auto",
     title: str | None = None,
 ) -> BpxExportResult:
     """Export a BattINFO cell spec (and optional instance) to a BPX document.
@@ -538,8 +591,12 @@ def to_bpx(
     bpx_version:
         Value stamped into ``Header.BPX``.
     reference_temperature_k:
-        Conventional ``"Reference temperature [K]"`` to emit when the spec gives
-        none. Pass ``None`` to omit it.
+        ``"Reference temperature [K]"`` handling. The default ``"auto"``
+        keeps a value carried by ``cell_extras`` (so a round-tripped file
+        comes back with its own temperature) and falls back to the
+        298.15 K convention only when nothing provides the field. Pass a
+        float to force that value, or ``None`` to emit none of our own
+        (extras still pass through verbatim).
     title:
         Override ``Header.Title``; defaults to the spec name/model.
 
@@ -594,8 +651,9 @@ def to_bpx(
             cell["Density [kg.m-3]"] = _sig6(mass_kg / emitted_volume)
             filled.append("Density [kg.m-3]")
 
-    # 3. Conventional reference temperature.
-    if reference_temperature_k is not None:
+    # 3. Explicitly forced reference temperature (a caller-passed float
+    # wins over everything, including imported extras).
+    if isinstance(reference_temperature_k, (int, float)):
         cell["Reference temperature [K]"] = float(reference_temperature_k)
         filled.append("Reference temperature [K]")
 
@@ -606,6 +664,14 @@ def to_bpx(
         if extra_key not in cell:
             cell[extra_key] = extra_value
             filled.append(extra_key)
+
+    # 3c. Conventional reference temperature, LAST: under "auto" the
+    # 298.15 K convention fills the field only when neither the caller nor
+    # the imported extras carried one — a round-tripped file's own
+    # temperature must never be silently replaced by the convention.
+    if reference_temperature_k == "auto" and "Reference temperature [K]" not in cell:
+        cell["Reference temperature [K]"] = _DEFAULT_REFERENCE_TEMPERATURE_K
+        filled.append("Reference temperature [K]")
 
     # 4. Physics blocks from one source's parameter-set records.
     physics_blocks: dict[str, dict[str, Any]] = {}
@@ -1284,6 +1350,13 @@ def from_bpx_parameters(source: Mapping[str, Any] | str | Path) -> BpxParameterI
         warnings.append("BPX file has no 'Parameterisation' block; no claims extracted.")
         params_raw = {}
 
+    # BPX >= 1.1 moves the initial electrolyte concentration into the
+    # top-level State block; fold it back into the Electrolyte block so it
+    # mints the same initial_concentration claim as a 1.0 file (the export
+    # side relocates it into State again for >= 1.1). Explicit block values
+    # win. Temperatures fold on the from_bpx side.
+    _state_cell, state_electrolyte_fields = _fold_state_block(data, warnings)
+
     for side, block_name in _BPX_ELECTRODE_BLOCKS.items():
         block = params_raw.get(block_name)
         if isinstance(block, Mapping) and block:
@@ -1295,7 +1368,11 @@ def from_bpx_parameters(source: Mapping[str, Any] | str | Path) -> BpxParameterI
 
     for block_name, bpx_block in (("Separator", "separator"), ("Electrolyte", "electrolyte")):
         block = params_raw.get(block_name)
-        if isinstance(block, Mapping) and block:
+        block = dict(block) if isinstance(block, Mapping) else {}
+        if bpx_block == "electrolyte":
+            for state_key, state_value in state_electrolyte_fields.items():
+                block.setdefault(state_key, state_value)
+        if block:
             split = _extract_block_claims(block, bpx_block, warnings, block_name)
             merged = split["material"] + split["build"]
             if merged:

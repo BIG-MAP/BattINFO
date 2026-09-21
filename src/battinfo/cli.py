@@ -798,7 +798,9 @@ def ingest_publish(
         except ImportError:
             typer.echo(
                 "Warning: --process-artifacts requires battinfo[processing]. "
-                "Install with: pip install 'battinfo[processing]'"
+                "Install with: pip install 'battinfo[processing]' — or, until "
+                "batterydf is published to PyPI: pip install "
+                "'git+https://github.com/battery-data-alliance/battery-data-format.git'"
             )
 
     fmt = _check_workspace_output_format(output_format)

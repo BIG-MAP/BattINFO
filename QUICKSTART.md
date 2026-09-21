@@ -115,7 +115,7 @@ jsonld = json.loads(
     Path(output["output_dir"], "index.jsonld").read_text()
 )
 print(jsonld["@type"])
-# ['BatteryCellSpecification', 'schema:CreativeWork']
+# ['BatteryCellSpecification', 'schema:ProductModel', 'schema:CreativeWork']
 
 print(jsonld["schema:name"])     # Panasonic NCR18650B
 print(jsonld["schema:size"])     # R18650
@@ -123,7 +123,8 @@ print(jsonld["schema:size"])     # R18650
 
 A cell spec is an *information entity* — a datasheet as data — not the physical
 cell it describes. So its `@type` is `BatteryCellSpecification` (an EMMO
-information object) stacked with `schema:CreativeWork`, and an `isDescriptionFor`
+information object) stacked with `schema:ProductModel` and
+`schema:CreativeWork`, and an `isDescriptionFor`
 link points from the spec to the cell type it specifies. The EMMO type stacking
 that describes the physical cell itself — `BatteryCell`, `CylindricalBattery`,
 `LithiumIonBattery`, and friends — lives on the cell node inside the full
@@ -140,11 +141,18 @@ quantitative specification — is produced when you publish (see
 
 ## 4. Validate a record
 
-Canonical cell-spec records are validated with `--source-root`:
+Validate the record you just created (step 1 wrote it under
+`.battinfo/quickstart/examples/`); `--source-root` tells the validator where
+linked records live:
 
+<!-- Not runner-executable: depends on the record step 1 just wrote (the
+     snippet runner executes blocks in isolation); verified by hand in an
+     empty directory. -->
+<!-- doc-snippet: skip -->
 ```powershell
-.venv\Scripts\battinfo validate examples/cell-spec/A123__ANR26650M1-B.json `
-    --source-root examples --format json
+# step 1 printed the exact filename (result.debug_paths["canonical_record_path"])
+.venv\Scripts\battinfo validate .battinfo/quickstart/examples/cell-spec/cell-spec-<id>.json `
+    --source-root .battinfo/quickstart/examples --format json
 ```
 
 ```json
@@ -153,40 +161,17 @@ Canonical cell-spec records are validated with `--source-root`:
   "mode": "record",
   "policy": "default",
   "profile": null,
-  "source_root": "examples",
-  "issue_count": 2,
+  "source_root": ".battinfo/quickstart/examples",
+  "issue_count": 0,
   "error_count": 0,
-  "warning_count": 2,
   "errors": [],
-  "issues": [
-    {
-      "code": "semantic.value_text_only",
-      "severity": "warning",
-      "path": "properties.cycle_life",
-      "message": "'cycle_life' carries only value_text - the JSON-LD export emits numeric quantities, so this property will be OMITTED there.",
-      "hint": null,
-      "validator": "semantic",
-      "resource_type": "cell-spec",
-      "profile": null
-    },
-    {
-      "code": "shacl.unavailable",
-      "severity": "warning",
-      "path": "",
-      "message": "pyshacl is not installed; SHACL validation skipped. Install with: pip install pyshacl",
-      "hint": null,
-      "validator": "shacl",
-      "resource_type": null,
-      "profile": null
-    }
-  ]
+  "issues": []
 }
 ```
 
-The record is valid (`error_count: 0`). The two warnings are expected on a core
-install: one flags that `cycle_life` carries only free text so it is omitted from
-the numeric JSON-LD export, and the other notes that optional SHACL validation is
-skipped because `pyshacl` is not installed (it ships with `battinfo[dev]`).
+The record is valid (`error_count: 0`). On a core install you will also see one
+expected warning: optional SHACL validation is skipped because `pyshacl` is not
+installed (it ships with `battinfo[dev]`).
 
 ---
 

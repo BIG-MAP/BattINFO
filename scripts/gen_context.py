@@ -40,6 +40,18 @@ OUT = ROOT / "src" / "battinfo" / "data" / "context" / "records.context.v1.json"
 # self-describing.
 LICENSE = "https://www.apache.org/licenses/LICENSE-2.0"
 
+# Class terms the emitters stack on nodes but that no other source carries —
+# IRIs verified against the vendored domain contexts. The corpus-wide sweep in
+# tests/test_jsonld_type_guards.py fails whenever an emitted bare @type is
+# missing from the context, so additions land here (0.8.0 review follow-up).
+EMITTER_CLASS_TERMS = {
+    "Manufacturing": "emmo:EMMO_a4d66059_5dd3_4b90_b4cb_10960559441b",
+    "NegativeElectrode": "electrochemistry:electrochemistry_c94c041b_8ea6_43e7_85cc_d2bce7785b4c",
+    "PositiveElectrode": "electrochemistry:electrochemistry_aff732a9_238a_4734_977c_b2ba202af126",
+    "MolarMass": "emmo:EMMO_e980389d_6dfe_4156_9b40_32050c9644a5",
+    "SpecificSurfaceArea": "electrochemistry:electrochemistry_cf54e7c1_f359_4715_b61d_0350b890d597",
+}
+
 
 def _published() -> dict:
     """The v1 terms already served at the hosted URL, or ``{}`` before first write."""
@@ -65,6 +77,7 @@ def build() -> dict:
         label_to_compact(),
         TEST_METHOD_CONTEXT_TERMS,
         TEST_PROTOCOL_CONTEXT_TERMS,
+        EMITTER_CLASS_TERMS,
     ):
         for term, value in source.items():
             context.setdefault(term, value)

@@ -155,3 +155,53 @@ def test_string_number_value_fails_loud() -> None:
     report = validate_record_report(doc, policy=STRICT)
     assert not report.ok
     assert any("nominal_capacity" in i.path and i.severity == "error" for i in report.issues)
+
+
+def test_validate_record_report_checks_equipment_and_channel_references() -> None:
+    """Strict reference validation covers test.equipment_id / test.channel_id
+    (0.8.0 review F6: missing hardware links used to pass silently)."""
+    doc = _load_json("src/battinfo/data/examples/test/test-5p7v-2n8k-4m3t-6q9r.json")
+    doc["test"]["equipment_id"] = "https://w3id.org/battinfo/spec/0000-0000-0000-0001"
+    doc["test"]["channel_id"] = "https://w3id.org/battinfo/spec/0000-0000-0000-0002"
+    report = validate_record_report(
+        doc, source_root=ROOT / "src" / "battinfo" / "data" / "examples", policy=STRICT
+    )
+    assert not report.ok
+    missing = {i.path for i in report.errors if i.code == "reference.missing"}
+    assert "test.equipment_id" in missing
+    assert "test.channel_id" in missing
+
+
+def test_validate_record_report_flags_equipment_reference_of_wrong_kind() -> None:
+    """A test.equipment_id resolving to a non-equipment record is a type
+    mismatch, not a pass."""
+    doc = _load_json("src/battinfo/data/examples/test/test-5p7v-2n8k-4m3t-6q9r.json")
+    # A real record id — but a cell spec, not equipment.
+    doc["test"]["equipment_id"] = "https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0"
+    report = validate_record_report(
+        doc, source_root=ROOT / "src" / "battinfo" / "data" / "examples", policy=STRICT
+    )
+    assert not report.ok
+    assert any(
+        i.code == "reference.type_mismatch" and i.path == "test.equipment_id"
+        for i in report.errors
+    )
+
+
+def test_validate_record_report_checks_reference_electrode_spec_reference() -> None:
+    """cell_spec.reference_electrode_spec_id joins the validated links (0.8.0
+    review F6: a three-electrode build's reference electrode went unchecked)."""
+    doc = _load_json("src/battinfo/data/examples/cell-spec/A123__ANR26650M1-B.json")
+    # Link fields ride the record top level (cell-spec.schema.json), beside
+    # working/counter_electrode_spec_id.
+    doc["reference_electrode_spec_id"] = (
+        "https://w3id.org/battinfo/spec/0000-0000-0000-0003"
+    )
+    report = validate_record_report(
+        doc, source_root=ROOT / "src" / "battinfo" / "data" / "examples", policy=STRICT
+    )
+    assert not report.ok
+    assert any(
+        i.code == "reference.missing" and i.path == "reference_electrode_spec_id"
+        for i in report.errors
+    )

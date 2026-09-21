@@ -7,6 +7,53 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Release-review fixes (independent 0.8.0 pre-release review, F1-F6 +
+  onboarding).** An external review of the release candidate reproduced
+  real defects; all confirmed items are fixed with regression tests:
+  - *Release workflow (F1):* the CI workflow's distribution artifact is
+    renamed `ci-dist` — release.yml runs CI as its gate and then uploads
+    its own `dist` in the same run, and the duplicate name would have
+    failed every release run at the second upload.
+  - *BPX temperature masking (F2):* `to_bpx` no longer overwrites an
+    imported `Reference temperature [K]` with the 298.15 K convention.
+    The new default `"auto"` keeps the value carried by cell extras and
+    applies the convention only when nothing provides the field; an
+    explicit float still forces, `None` still omits.
+  - *BPX 1.1 State import (F3):* `from_bpx` / `from_bpx_parameters` now
+    fold a top-level `State` block back into its 1.0 homes (initial and
+    ambient temperature to Cell extras, initial electrolyte concentration
+    to an `initial_concentration` claim) — the exact inverse of the
+    export-side relocation, so 1.1 → records → 1.1 round-trips with state
+    values intact. Unrecognized State entries are skipped by NAME, never
+    silently.
+  - *Inline JSON-LD context (F4):* inline emission now embeds the
+    versioned hosted context (`records.context.v1.json`) instead of the
+    stale flat assembled context, which had missing equipment terms
+    (Description, BatteryCycler, ...), a non-existent PrismaticBattery
+    IRI, retired power-key IRIs, and the pre-0.37.1 CapacityFade class.
+    Inline and URL modes now expand identically by construction. A new
+    corpus-wide sweep asserts every emitted bare `@type` resolves in the
+    context — it caught five more unresolved classes (Manufacturing,
+    Negative/PositiveElectrode, MolarMass, SpecificSurfaceArea), now
+    appended to the context.
+  - *Reference validation (F6):* strict reference checking now validates
+    `reference_electrode_spec_id` (cell specs) and `equipment_id` /
+    `channel_id` (tests) against their expected record kinds — missing
+    hardware links used to pass silently.
+  - *Onboarding (F8, F7 docs):* the Quickstart validates the record the
+    reader just created instead of a repository checkout file, states the
+    full emitted `@type` stack, and the getting-started CLI examples use
+    `--include-packaged-examples` so they work outside a checkout; the
+    processing-extra install note and the runtime `convert()` error both
+    name the batterydf Git workaround.
+  - *Small fixes:* the BDC export docstring now states it is a partial
+    inverse (measurement-availability flags are not reconstituted, F9);
+    the docs navbar no longer loses the version/theme switchers to a
+    duplicated `navbar_end` key (F11); the Neware tutorial sample's
+    DateTime column agrees with its elapsed-time axis (F15).
+
 ### Added
 
 - **Parameterisation sets: one record that names a complete, runnable

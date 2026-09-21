@@ -97,7 +97,6 @@ html_theme_options = {
         {"name": "Convert", "url": "https://battinfo.org/convert"},
     ],
     "navbar_align": "left",
-    "navbar_end": ["navbar-icon-links"],
     "secondary_sidebar_items": ["page-toc"],
     "footer_start": ["copyright"],
     "footer_end": [],

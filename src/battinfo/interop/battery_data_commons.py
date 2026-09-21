@@ -361,9 +361,14 @@ def to_bdc_record(cell_spec: Mapping[str, Any], *, dataset: Mapping[str, Any] | 
                   bdc_id: str | None = None) -> dict[str, Any]:
     """Render a BattINFO cell-spec (+ optional dataset) as a BDC canonical dict.
 
-    The inverse of :func:`import_bdc_record` — enough to contribute a
-    BattINFO-authored cell/dataset to the commons. ``cell_spec`` /
-    ``dataset`` are canonical BattINFO record dicts.
+    A partial inverse of :func:`import_bdc_record` — enough to contribute a
+    BattINFO-authored cell/dataset to the commons, NOT a lossless round
+    trip: this export reads only the cell-spec and dataset records, so the
+    BDC measurement-availability flags the import turns into test records
+    (capacity checks, EIS) are not reconstituted, and a re-import of the
+    export yields no tests. Catalogue facts (manufacturer, model, format,
+    capacity) survive. ``cell_spec`` / ``dataset`` are canonical BattINFO
+    record dicts.
     """
     cs = cell_spec.get("cell_spec", cell_spec)
     manufacturer = cs.get("manufacturer")

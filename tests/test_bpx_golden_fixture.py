@@ -322,3 +322,113 @@ def test_emitted_jsonld_uses_the_records_context_and_absolute_license() -> None:
     bare_terms({k: v for k, v in inline.items() if k != "@context"}, terms)
     unresolved = sorted(t for t in terms if t not in context)
     assert not unresolved, f"terms missing from the inline records context: {unresolved}"
+
+
+def _as_1_1(doc: dict) -> dict:
+    """Derive the same document in BPX >= 1.1 layout: the temperatures and the
+    initial electrolyte concentration move into the top-level State block."""
+    import copy
+
+    d = copy.deepcopy(doc)
+    d["Header"]["BPX"] = 1.1
+    cell = d["Parameterisation"]["Cell"]
+    electrolyte = d["Parameterisation"]["Electrolyte"]
+    d["State"] = {
+        "Initial conditions": {
+            "Initial temperature [K]": cell.pop("Initial temperature [K]"),
+            "Initial electrolyte concentration [mol.m-3]": electrolyte.pop(
+                "Initial concentration [mol.m-3]"
+            ),
+        },
+        "Thermal environment": {
+            "Ambient temperature [K]": cell.pop("Ambient temperature [K]"),
+        },
+    }
+    return d
+
+
+def test_reference_temperature_survives_the_round_trip() -> None:
+    """A file's own reference temperature comes back unchanged: the 298.15 K
+    convention fills the field only when nothing carries it (0.8.0 review F2 —
+    the default used to overwrite the imported value silently)."""
+    from battinfo.interop.bpx import to_bpx
+
+    doc = _doc()
+    doc["Parameterisation"]["Cell"]["Reference temperature [K]"] = 310.15
+    cell = from_bpx(doc)
+    spec_record = {
+        "schema_version": "0.2.0",
+        "cell_spec": {"name": "Golden fixture cell", "cell_format": "pouch"},
+        "properties": cell.specs,
+    }
+
+    out = to_bpx(spec_record, cell_extras=cell.extras)
+    assert out.bpx["Parameterisation"]["Cell"]["Reference temperature [K]"] == 310.15
+
+    # The convention still fills the gap when nothing carries the field.
+    out_default = to_bpx(spec_record)
+    assert out_default.bpx["Parameterisation"]["Cell"]["Reference temperature [K]"] == 298.15
+
+    # An explicit float forces the value over imported extras; None emits
+    # none of our own (extras would still pass through verbatim).
+    out_forced = to_bpx(spec_record, cell_extras=cell.extras, reference_temperature_k=305.0)
+    assert out_forced.bpx["Parameterisation"]["Cell"]["Reference temperature [K]"] == 305.0
+    out_none = to_bpx(spec_record, reference_temperature_k=None)
+    assert "Reference temperature [K]" not in out_none.bpx["Parameterisation"]["Cell"]
+
+
+def test_bpx_1_1_state_round_trips() -> None:
+    """A BPX >= 1.1 State block is imported, not discarded, and re-emitted
+    with its values intact: 1.1 -> records -> 1.1 (0.8.0 review F3)."""
+    from battinfo.interop.bpx import to_bpx
+
+    doc = _as_1_1(_doc())
+    original_state = json.loads(json.dumps(doc["State"]))
+
+    cell = from_bpx(doc)
+    assert (
+        cell.extras["Initial temperature [K]"]
+        == original_state["Initial conditions"]["Initial temperature [K]"]
+    )
+    assert (
+        cell.extras["Ambient temperature [K]"]
+        == original_state["Thermal environment"]["Ambient temperature [K]"]
+    )
+
+    res = from_bpx_parameters(doc)
+    initial = [
+        c for c in res.claims["electrolyte"] if c.get("parameter") == "initial_concentration"
+    ]
+    assert len(initial) == 1
+    assert (
+        initial[0]["quantity"]["value"]
+        == original_state["Initial conditions"]["Initial electrolyte concentration [mol.m-3]"]
+    )
+
+    spec_record = {
+        "schema_version": "0.2.0",
+        "cell_spec": {"name": "Golden fixture cell", "cell_format": "pouch"},
+        "properties": cell.specs,
+    }
+    by_block = res.to_records(
+        materials={"negative": "graphite", "positive": "nmc811"},
+        cell_spec_id="https://w3id.org/battinfo/spec/0000-0000-0000-0000",
+        by_block=True,
+    )
+    out = to_bpx(
+        spec_record, parameter_sets=by_block, cell_extras=cell.extras, bpx_version="1.1"
+    )
+    assert out.bpx["State"] == original_state
+
+
+def test_unknown_state_entries_are_named_never_dropped() -> None:
+    """Drop-nothing-silently extends to State: entries with no BattINFO home
+    are skipped by NAME."""
+    doc = _as_1_1(_doc())
+    doc["State"]["Initial conditions"]["Initial state of charge"] = 0.5
+    doc["State"]["Magic"] = {"x": 1}
+
+    cell = from_bpx(doc)
+    joined = "\n".join(cell.warnings)
+    assert "Initial conditions.Initial state of charge" in joined
+    assert "Magic" in joined
