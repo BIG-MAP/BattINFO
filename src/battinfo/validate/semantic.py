@@ -206,6 +206,23 @@ def _controlled_value_map() -> dict[str, set[str]]:
     return out
 
 
+@lru_cache(maxsize=1)
+def _controlled_value_aliases() -> dict[str, dict[str, tuple[str, str]]]:
+    """Older spellings that still resolve: ``{field: {alias: (use_instead, why)}}``."""
+    mappings = _load_mapping_json("entity_type_map.json").get("mappings", {})
+    out: dict[str, dict[str, tuple[str, str]]] = {}
+    for key, values in mappings.items():
+        if not isinstance(values, Mapping):
+            continue
+        for name, entry in values.items():
+            if isinstance(entry, Mapping) and isinstance(entry.get("alias_of"), str):
+                out.setdefault(key, {})[str(name).strip().lower()] = (
+                    entry["alias_of"],
+                    str(entry.get("note") or ""),
+                )
+    return out
+
+
 def _entity_from_doc(doc: dict[str, Any]) -> tuple[str, Mapping[str, Any]] | None:
     for resource_type, keys in INTERNAL_IDENTIFIER_PREFIX.items():
         for key in keys:
@@ -342,6 +359,21 @@ def _validate_controlled_values(
                 severity="warning",
                 path=f"product.{field}",
                 message=f"value '{value}' is not present in the controlled mapping for '{mapping_key}'.",
+                resource_type=resource_type,
+            )
+            continue
+        superseded = _controlled_value_aliases().get(mapping_key, {}).get(normalized)
+        if superseded is not None:
+            use_instead, why = superseded
+            _append_issue(
+                issues,
+                code="semantic.controlled_value_superseded",
+                severity="warning",
+                path=f"product.{field}",
+                message=(
+                    f"value '{value}' still resolves, but '{use_instead}' is the label to use for "
+                    f"'{mapping_key}'. {why}"
+                ).strip(),
                 resource_type=resource_type,
             )
 

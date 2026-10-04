@@ -130,6 +130,21 @@ def test_semantic_validation_warns_for_unmapped_controlled_value() -> None:
     assert report.warnings[0].code == "semantic.controlled_value_unmapped"
 
 
+def test_semantic_validation_flags_a_superseded_chemistry_label() -> None:
+    doc = _load_json("src/battinfo/data/examples/cell-spec/A123__ANR26650M1-B.json")
+    doc["cell_spec"]["chemistry"] = "Li-primary"
+    report = validate_semantic_report(doc)
+    assert report.ok  # the old label still resolves
+    flagged = [w for w in report.warnings if w.code == "semantic.controlled_value_superseded"]
+    assert len(flagged) == 1
+    assert "'li-metal'" in flagged[0].message
+    assert "rechargeable" in flagged[0].message
+
+    doc["cell_spec"]["chemistry"] = "Li-MnO2"
+    report = validate_semantic_report(doc)
+    assert not [w for w in report.warnings if w.code.startswith("semantic.controlled_value")]
+
+
 def test_semantic_validation_defaults_to_warning_mode_for_hard_rules() -> None:
     doc = _load_json("src/battinfo/data/examples/test/test-5p7v-2n8k-4m3t-6q9r.json")
     doc["test"]["short_id"] = "xxxxxx"

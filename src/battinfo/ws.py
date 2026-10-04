@@ -3329,6 +3329,8 @@ class AuthoringWorkspace:
                 if field not in ("format", "chemistry", "iec_code"):
                     continue
                 for value, entry in entries.items():
+                    if "alias_of" in entry:
+                        continue  # an older spelling: never the value to reconstruct
                     for cls in entry.get("battery_types", []):
                         _etype_rev.setdefault(cls, {})[field] = value
 

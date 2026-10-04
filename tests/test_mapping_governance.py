@@ -212,3 +212,75 @@ def test_battinfo_application_ontology_imports_are_pinned() -> None:
     assert "battinfo:hasInstance a owl:ObjectProperty" not in content
 
 
+
+
+# ── chemistry vocabulary (entity_type_map 0.6.0) ──────────────────────────────
+
+def _chemistry_map() -> dict[str, dict[str, Any]]:
+    path = ROOT / "src" / "battinfo" / "data" / "mappings" / "domain-battery" / "entity_type_map.json"
+    return _load_json(path)["mappings"]["chemistry"]
+
+
+def test_chemistry_aliases_point_at_a_recommended_label() -> None:
+    chemistry = _chemistry_map()
+    for key, entry in chemistry.items():
+        if "alias_of" not in entry:
+            continue
+        target = chemistry.get(entry["alias_of"])
+        assert target is not None, f"{key}: alias_of names an unknown label {entry['alias_of']!r}"
+        assert "alias_of" not in target, f"{key}: alias_of must name a recommended label, not another alias"
+        assert entry.get("note"), f"{key}: an alias states why it was superseded"
+
+
+def test_chemistry_broader_links_form_a_tree_of_recommended_labels() -> None:
+    chemistry = _chemistry_map()
+    for key, entry in chemistry.items():
+        seen = {key}
+        current = entry
+        while current.get("broader"):
+            parent_key = current["broader"]
+            assert parent_key in chemistry, f"{key}: broader names an unknown label {parent_key!r}"
+            assert "alias_of" not in chemistry[parent_key], f"{key}: broader must not be an alias"
+            assert parent_key not in seen, f"{key}: broader links loop back to {parent_key!r}"
+            seen.add(parent_key)
+            current = chemistry[parent_key]
+
+
+def test_recommended_chemistry_labels_each_own_their_battery_class() -> None:
+    # Importing JSON-LD turns a battery class back into a chemistry label. Two
+    # recommended labels on one class would make that a coin toss.
+    owner: dict[str, str] = {}
+    for key, entry in _chemistry_map().items():
+        if "alias_of" in entry:
+            continue
+        for battery_class in entry["battery_types"]:
+            assert battery_class not in owner, (
+                f"{battery_class} is claimed by both {owner[battery_class]!r} and {key!r}"
+            )
+            owner[battery_class] = key
+
+
+def test_specific_lithium_metal_system_emits_its_own_class() -> None:
+    types = _type_stack({"format": "coin", "chemistry": "Li-MnO2",
+                         "positive_electrode_basis": "unknown", "negative_electrode_basis": "unknown"})
+    assert "LithiumManganeseDioxideBattery" in types, types
+
+
+def test_li_primary_alias_keeps_resolving_and_says_primary() -> None:
+    types = _type_stack({"format": "coin", "chemistry": "Li-primary",
+                         "positive_electrode_basis": "unknown", "negative_electrode_basis": "unknown"})
+    assert "LithiumMetalBattery" in types, types
+    assert "PrimaryBattery" in types, types
+
+
+def test_zinc_manganese_dioxide_variants_are_told_apart() -> None:
+    chemistry = _chemistry_map()
+    # The bare couple does not claim an electrolyte.
+    assert chemistry["zn-mno2"]["battery_types"] == ["ZincBattery"]
+    assert chemistry["alkaline-zn-mno2"]["battery_types"] == ["AlkalineZincManganeseDioxideBattery"]
+    # zinc-carbon is the non-alkaline branch; it used to resolve to AlkalineCell.
+    assert chemistry["zinc-carbon"]["battery_types"] == ["ZincCarbonBattery"]
+    assert chemistry["leclanche"]["broader"] == chemistry["zinc-chloride"]["broader"] == "zinc-carbon"
+    assert chemistry["zinc-carbon"]["broader"] == chemistry["alkaline-zn-mno2"]["broader"] == "zn-mno2"
+    # "alkaline" alone still resolves, to the alkaline zinc cell it has always meant.
+    assert chemistry["alkaline"]["alias_of"] == "alkaline-zn-mno2"

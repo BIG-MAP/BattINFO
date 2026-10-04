@@ -1,5 +1,5 @@
 {
-  "version": "0.5.0",
+  "version": "0.6.0",
   "status": "curated",
   "source_ontology": "https://w3id.org/emmo/domain/battery/inferred",
   "notes": [
@@ -8,7 +8,8 @@
     "IRIs verified against EMMO domain-battery 0.20.2, domain-electrochemistry 0.37.2, domain-chemical-substance 0.15.0 and EMMO 1.0.2.",
     "0.3.0: added zn-mno2/alkaline chemistry entries and iec_code section.",
     "0.4.0: added the cell_configuration section. A battery half-cell types as the DEVICE classes BatteryHalfCell (domain-battery, a BatteryCell) and HalfCellDevice (domain-electrochemistry) - never as ElectrochemicalHalfCell, which upstream annotates with an explicit warning against that conflation (it is one electrode plus one electrolyte, not an experimental setup).",
-    "0.4.1: cell_configuration gained the three-electrode-cell key, the normalized form of the cell-spec schema's three_electrode_cell enum value; three-electrode stays as the tolerant-import spelling."
+    "0.4.1: cell_configuration gained the three-electrode-cell key, the normalized form of the cell-spec schema's three_electrode_cell enum value; three-electrode stays as the tolerant-import spelling.",
+    "0.6.0: chemistry became a two-level vocabulary of electrochemical couples. An entry may name a 'broader' value (li-mno2 is a li-metal system; leclanche is a zinc-carbon system, which is a zn-mno2 system); a record stating the narrower value is also a member of the broader one. Rechargeability stays in the cell-spec 'rechargeable' field and electrode pairing in the electrode basis fields. Entries with 'alias_of' are older spellings that keep resolving but are never recommended. Corrections: zn-mno2 mapped to the alkaline class, which is one of its three variants, and now maps to ZincBattery because domain-battery 0.20.2 has no neutral zinc manganese dioxide class (ZincCarbonBattery is published as the parent of the alkaline class); zinc-carbon mapped to AlkalineCell and now maps to ZincCarbonBattery."
   ],
   "mappings": {
     "format": {
@@ -74,45 +75,198 @@
           "LithiumIonBattery"
         ]
       },
-      "li-primary": {
+      "li-metal": {
         "battery_types": [
           "LithiumMetalBattery"
         ]
+      },
+      "li-mno2": {
+        "battery_types": [
+          "LithiumManganeseDioxideBattery"
+        ],
+        "broader": "li-metal"
+      },
+      "li-fes2": {
+        "battery_types": [
+          "LithiumIronDisulphideBattery"
+        ],
+        "broader": "li-metal"
+      },
+      "li-cfx": {
+        "battery_types": [
+          "LithiumCarbonMonofluorideBattery"
+        ],
+        "broader": "li-metal"
+      },
+      "li-socl2": {
+        "battery_types": [
+          "LithiumThionylChlorideBattery"
+        ],
+        "broader": "li-metal"
+      },
+      "li-cuo": {
+        "battery_types": [
+          "LithiumCopperOxideBattery"
+        ],
+        "broader": "li-metal"
+      },
+      "li-s": {
+        "battery_types": [
+          "LithiumSulfurBattery"
+        ],
+        "broader": "li-metal"
+      },
+      "li-air": {
+        "battery_types": [
+          "LithiumAirBattery"
+        ],
+        "broader": "li-metal"
       },
       "na-ion": {
         "battery_types": [
           "SodiumIonBattery"
         ]
       },
+      "k-ion": {
+        "battery_types": [
+          "PotassiumIonBattery"
+        ]
+      },
+      "mg-ion": {
+        "battery_types": [
+          "MagnesiumIonBattery"
+        ]
+      },
+      "ca-ion": {
+        "battery_types": [
+          "CalciumIonBattery"
+        ]
+      },
       "zn-mno2": {
         "battery_types": [
-          "AlkalineZincManganeseDioxideBattery"
+          "ZincBattery"
         ]
+      },
+      "alkaline-zn-mno2": {
+        "battery_types": [
+          "AlkalineZincManganeseDioxideBattery"
+        ],
+        "broader": "zn-mno2"
+      },
+      "zinc-carbon": {
+        "battery_types": [
+          "ZincCarbonBattery"
+        ],
+        "broader": "zn-mno2"
+      },
+      "leclanche": {
+        "battery_types": [
+          "LeclancheBattery"
+        ],
+        "broader": "zinc-carbon"
+      },
+      "zinc-chloride": {
+        "battery_types": [
+          "ZincChlorideBattery"
+        ],
+        "broader": "zinc-carbon"
+      },
+      "zn-air": {
+        "battery_types": [
+          "ZincAirBattery"
+        ]
+      },
+      "zn-hgo": {
+        "battery_types": [
+          "MercuryBattery"
+        ]
+      },
+      "ni-mh": {
+        "battery_types": [
+          "NickelMetalHydrideBattery"
+        ]
+      },
+      "ni-cd": {
+        "battery_types": [
+          "NickelCadmiumBattery"
+        ]
+      },
+      "ni-fe": {
+        "battery_types": [
+          "NickelIronBattery"
+        ]
+      },
+      "ni-zn": {
+        "battery_types": [
+          "NickelZincBattery"
+        ]
+      },
+      "lead-acid": {
+        "battery_types": [
+          "LeadAcidBattery"
+        ]
+      },
+      "al-air": {
+        "battery_types": [
+          "AluminiumAirBattery"
+        ]
+      },
+      "fe-air": {
+        "battery_types": [
+          "IronAirBattery"
+        ]
+      },
+      "mg-air": {
+        "battery_types": [
+          "MagnesiumAirBattery"
+        ]
+      },
+      "si-air": {
+        "battery_types": [
+          "SiliconAirBattery"
+        ]
+      },
+      "na-air": {
+        "battery_types": [
+          "SodiumAirBattery"
+        ]
+      },
+      "vanadium-flow": {
+        "battery_types": [
+          "VanadiumRedoxFlowBattery"
+        ]
+      },
+      "zn-br-flow": {
+        "battery_types": [
+          "ZincBromineFlowBattery"
+        ]
+      },
+      "fe-flow": {
+        "battery_types": [
+          "IronRedoxFlowBattery"
+        ]
+      },
+      "li-primary": {
+        "battery_types": [
+          "LithiumMetalBattery",
+          "PrimaryBattery"
+        ],
+        "alias_of": "li-metal",
+        "note": "Rechargeability is not a chemistry. Write li-metal (or the specific system, e.g. li-mno2) and set rechargeable to false."
       },
       "alkaline": {
         "battery_types": [
           "AlkalineZincManganeseDioxideBattery"
-        ]
+        ],
+        "alias_of": "alkaline-zn-mno2",
+        "note": "Alkaline names an electrolyte; several couples use one. Write alkaline-zn-mno2."
       },
       "znmno2": {
         "battery_types": [
-          "AlkalineZincManganeseDioxideBattery"
-        ]
-      },
-      "zinc-carbon": {
-        "battery_types": [
-          "AlkalineCell"
-        ]
-      },
-      "li-mno2": {
-        "battery_types": [
-          "LithiumManganeseDioxideBattery"
-        ]
-      },
-      "li-metal": {
-        "battery_types": [
-          "LithiumMetalBattery"
-        ]
+          "ZincBattery"
+        ],
+        "alias_of": "zn-mno2",
+        "note": "Spelling variant. Write zn-mno2."
       }
     },
     "iec_code": {

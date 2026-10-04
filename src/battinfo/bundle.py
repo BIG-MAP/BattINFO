@@ -1370,7 +1370,7 @@ class CellSpec(BundleJsonModel):
     manufacturer_id: str | None = Field(default=None, description="Canonical IRI of the manufacturer's organization record.")
     model: str = Field(default="", description="Manufacturer's product model number or name (authoring alias: model_name=).")
     format: str = Field(default="unknown", description="Physical format (geometry) of the cell housing: cylindrical, prismatic, pouch, coin, other, or unknown.")
-    chemistry: str = Field(default="unknown", description="Cell chemistry label (e.g. 'LFP', 'NMC', 'Li-primary').")
+    chemistry: str = Field(default="unknown", description="Overall cell chemistry label naming the electrochemical couple (e.g. 'Li-ion', 'Li-MnO2', 'Ni-MH').")
     product_type: CellProductType | None = Field(default=None, description="Product maturity level (e.g. commercial, prototype, research).")
     positive_electrode_basis: str | None = Field(default=None, description="Primary active material basis of the positive electrode (e.g. 'NMC811').")
     negative_electrode_basis: str | None = Field(default=None, description="Primary active material basis of the negative electrode (e.g. 'graphite').")
