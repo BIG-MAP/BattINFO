@@ -20,6 +20,7 @@ recipes assume, and the [glossary](glossary.md) decodes the vocabulary.
 | **Put labels / QR codes on my cells** | [Label your cells](../howto/label-your-cells.md) |
 | **Find out what already exists** (my session, my library, the registry) | [Find existing records](../howto/find-existing-records.md) |
 | **Ingest a whole folder** of raw data files at once | [Bulk ingest](../howto/bulk-ingest.md) |
+| **Load published datasets** into a data pipeline | [Read data from the registry](../howto/read-registry-data.md) |
 | **Resume a submission** I started earlier | [Resume a submission](../howto/resume-a-submission.md) |
 | **Tag records with funding and my ORCID** | [Tag funding and ORCID](../howto/tag-funding-and-orcid.md) |
 
@@ -48,6 +49,7 @@ or cite in a paper. The {doc}`tutorials <guides>` build this up properly.
 ../howto/label-your-cells
 ../howto/register-equipment
 ../howto/find-existing-records
+../howto/read-registry-data
 ../howto/bulk-ingest
 ../howto/fix-validation-errors
 ../howto/resume-a-submission

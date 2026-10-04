@@ -9,6 +9,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Read side of the registry: `battinfo.registry.Registry`.** Until now
+  the package could publish to a registry and search titles, but offered
+  no way to get from a dataset record to its measurement data. `Registry`
+  lists records of any type with full pagination, fetches a full record
+  with its links and files, downloads a dataset's data file with SHA-256
+  verification into a local cache, and loads it as a DataFrame.
+  `Registry.catalog()` returns one row per dataset joined with its test
+  kind, cell, cell spec, format, chemistry and stated capacity, which is
+  the table to filter before downloading. `read()` renames columns to
+  machine-readable BDF names by default, because published files spell
+  them in more than one way. Listing and lookup need only the core
+  install; `read()` and `catalog()` need the `tabular` extra. Marked
+  provisional: method names are expected to stay, catalog columns may
+  grow. How-to: docs/howto/read-registry-data.md.
+
 - **Semantic contracts, first slice (post-review hardening roadmap).**
   Three new contract gates make the emission promises machine-checked by
   an independent consumer:
