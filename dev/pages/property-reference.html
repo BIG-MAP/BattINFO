@@ -1062,6 +1062,185 @@ to (EMMO where a term exists, QUDT as the documented fallback):</p>
 </tbody>
 </table>
 </div>
+</section>
+<section id="chemistry-labels-33">
+<h2>Chemistry labels (33)<a class="headerlink" href="#chemistry-labels-33" title="Link to this heading">#</a></h2>
+<p>The recognised values of <code class="docutils literal notranslate"><span class="pre">chemistry</span></code> on a cell spec. A label names the
+electrochemical couple and nothing else. Whether the cell is rechargeable
+goes in <code class="docutils literal notranslate"><span class="pre">rechargeable</span></code>, and the electrode materials of a Li-ion cell go
+in <code class="docutils literal notranslate"><span class="pre">positive_electrode_basis</span></code> and <code class="docutils literal notranslate"><span class="pre">negative_electrode_basis</span></code>.</p>
+<p>Some labels are narrower than others: a <code class="docutils literal notranslate"><span class="pre">li-mno2</span></code> cell is also a
+<code class="docutils literal notranslate"><span class="pre">li-metal</span></code> cell. State the narrowest one you know. Matching ignores case,
+so <code class="docutils literal notranslate"><span class="pre">Li-ion</span></code> and <code class="docutils literal notranslate"><span class="pre">li-ion</span></code> are the same label. A value that is not listed is
+kept as plain text and the record gets no battery class from it.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Label</p></th>
+<th class="head"><p>Narrower than</p></th>
+<th class="head"><p>Battery class</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">li-ion</span></code></p></td>
+<td><p></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/battery#battery_96addc62_ea04_449a_8237_4cd541dd8e5f">LithiumIonBattery</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">li-metal</span></code></p></td>
+<td><p></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/battery#battery_ada13509_4eed_4e40_a7b1_4cc488144154">LithiumMetalBattery</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">li-mno2</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">li-metal</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/battery#battery_05adf5d2_0fbd_4c58_906e_4b875a7f2363">LithiumManganeseDioxideBattery</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">li-fes2</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">li-metal</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/battery#battery_fcbbda5e_7ba3_4355_8817_b90159e59847">LithiumIronDisulphideBattery</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">li-cfx</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">li-metal</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/battery#battery_126e9af4_41b4_45b8_81ca_b36af2841d5b">LithiumCarbonMonofluorideBattery</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">li-socl2</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">li-metal</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/battery#battery_f5fea163_410c_4e35_9408_15d5732c9f32">LithiumThionylChlorideBattery</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">li-cuo</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">li-metal</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/battery#battery_eb37da80_4500_49c6_ac9b_da2b3d810efc">LithiumCopperOxideBattery</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">li-s</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">li-metal</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/battery#battery_a5c1aa29_5404_4746_a9d0_0262c44ca419">LithiumSulfurBattery</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">li-air</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">li-metal</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/battery#battery_aea9d6ae_7ac4_4dcd_b6ef_5afcde1ccd22">LithiumAirBattery</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">na-ion</span></code></p></td>
+<td><p></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/battery#battery_42329a95_03fe_4ec1_83cb_b7e8ed52f68a">SodiumIonBattery</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">k-ion</span></code></p></td>
+<td><p></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/battery#battery_22cd1325_5cbb_4fb3_b6a6_ae7aab5554a5">PotassiumIonBattery</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">mg-ion</span></code></p></td>
+<td><p></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/battery#battery_9c262b93_0a38_4f0e_9e29_ca958ebfa24e">MagnesiumIonBattery</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ca-ion</span></code></p></td>
+<td><p></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/battery#battery_2099e6d6_680b_476c_a123_f6c89ff93389">CalciumIonBattery</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">zn-mno2</span></code></p></td>
+<td><p></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/battery#battery_e1d7fb00_03b9_46ea_90c9_501f538dfc11">ZincBattery</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">alkaline-zn-mno2</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">zn-mno2</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/battery#battery_b572826a_b4e4_4986_b57d_f7b945061f8b">AlkalineZincManganeseDioxideBattery</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">zinc-carbon</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">zn-mno2</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/battery#battery_aaaa6f4b_435b_425b_acb1_e8a427c3489a">ZincCarbonBattery</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">leclanche</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">zinc-carbon</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/battery#battery_1d3a2bb3_1d39_4cdb_9a28_c73d663388ab">LeclancheBattery</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">zinc-chloride</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">zinc-carbon</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/battery#battery_55a8a42d_0f83_473d_82b0_32640114b7db">ZincChlorideBattery</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">zn-air</span></code></p></td>
+<td><p></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/battery#battery_e8eada73_3811_4bbe_8f65_f6ee089d439f">ZincAirBattery</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">zn-hgo</span></code></p></td>
+<td><p></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/battery#battery_04d0ea52_8528_4e09_8751_2f55897a8f6e">MercuryBattery</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ni-mh</span></code></p></td>
+<td><p></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/battery#battery_75cab90d_4bff_472a_be0f_48e61a272d01">NickelMetalHydrideBattery</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ni-cd</span></code></p></td>
+<td><p></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/battery#battery_14ffa830_2789_429d_8c05_d2ae0ca51732">NickelCadmiumBattery</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ni-fe</span></code></p></td>
+<td><p></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/battery#battery_a316de25_e469_4a60_81fa_fcb0f372502f">NickelIronBattery</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ni-zn</span></code></p></td>
+<td><p></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/battery#battery_46b8433d_fd57_4819_b34f_1636b72ad12e">NickelZincBattery</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">lead-acid</span></code></p></td>
+<td><p></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/battery#battery_7eb62323_1001_4320_8fb5_c590ce93d3ce">LeadAcidBattery</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">al-air</span></code></p></td>
+<td><p></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/battery#battery_44cb1e3b_480c_4594_a79a_4e4f001050ea">AluminiumAirBattery</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">fe-air</span></code></p></td>
+<td><p></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/battery#battery_361a67aa_a7d5_4c2b_98e5_7c8e9a919d79">IronAirBattery</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">mg-air</span></code></p></td>
+<td><p></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/battery#battery_80c5a33a_db50_4560_8c04_ba1ce014177e">MagnesiumAirBattery</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">si-air</span></code></p></td>
+<td><p></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/battery#battery_67c336e7_4d06_44b0_8f4d_5ab0c4d12a92">SiliconAirBattery</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">na-air</span></code></p></td>
+<td><p></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/battery#battery_7b8c74b3_0fa5_41d5_bb43_6230f5e293c8">SodiumAirBattery</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">vanadium-flow</span></code></p></td>
+<td><p></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/battery#battery_e2aac68e_f880_4be5_87e6_73eba9f75955">VanadiumRedoxFlowBattery</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">zn-br-flow</span></code></p></td>
+<td><p></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/battery#battery_7b28d3a1_24d5_477b_afd8_af2bac480724">ZincBromineFlowBattery</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">fe-flow</span></code></p></td>
+<td><p></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/battery#battery_31a80cd5_d4eb_4f7d_a990_f32a5a75ea86">IronRedoxFlowBattery</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Older spellings that still resolve. Validation flags them with the label
+to use instead:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Older label</p></th>
+<th class="head"><p>Use</p></th>
+<th class="head"><p>Why</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">li-primary</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">li-metal</span></code></p></td>
+<td><p>Rechargeability is not a chemistry. Write li-metal (or the specific system, e.g. li-mno2) and set rechargeable to false.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">alkaline</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">alkaline-zn-mno2</span></code></p></td>
+<td><p>Alkaline names an electrolyte; several couples use one. Write alkaline-zn-mno2.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">znmno2</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">zn-mno2</span></code></p></td>
+<td><p>Spelling variant. Write zn-mno2.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
 <p>Unknown keys and symbols are refused, not guessed — see the
 <a class="reference internal" href="../guarantees.html#validation-contract"><span class="std std-ref">validation contract</span></a> for how mapping gaps
 surface as machine-readable issues.</p>
@@ -1117,6 +1296,7 @@ surface as machine-readable issues.</p>
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#properties-102">Properties (102)</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#units-48">Units (48)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chemistry-labels-33">Chemistry labels (33)</a></li>
 </ul>
   </nav></div>
 

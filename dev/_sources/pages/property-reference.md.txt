@@ -175,6 +175,63 @@ to (EMMO where a term exists, QUDT as the documented fallback):
 | `µm` | [MicroMetre](https://w3id.org/emmo#MicroMetre) |
 | `Ω` | [Ohm](https://w3id.org/emmo#Ohm) |
 
+## Chemistry labels (33)
+
+The recognised values of `chemistry` on a cell spec. A label names the
+electrochemical couple and nothing else. Whether the cell is rechargeable
+goes in `rechargeable`, and the electrode materials of a Li-ion cell go
+in `positive_electrode_basis` and `negative_electrode_basis`.
+
+Some labels are narrower than others: a `li-mno2` cell is also a
+`li-metal` cell. State the narrowest one you know. Matching ignores case,
+so `Li-ion` and `li-ion` are the same label. A value that is not listed is
+kept as plain text and the record gets no battery class from it.
+
+| Label | Narrower than | Battery class |
+|---|---|---|
+| `li-ion` |  | [LithiumIonBattery](https://w3id.org/emmo/domain/battery#battery_96addc62_ea04_449a_8237_4cd541dd8e5f) |
+| `li-metal` |  | [LithiumMetalBattery](https://w3id.org/emmo/domain/battery#battery_ada13509_4eed_4e40_a7b1_4cc488144154) |
+| `li-mno2` | `li-metal` | [LithiumManganeseDioxideBattery](https://w3id.org/emmo/domain/battery#battery_05adf5d2_0fbd_4c58_906e_4b875a7f2363) |
+| `li-fes2` | `li-metal` | [LithiumIronDisulphideBattery](https://w3id.org/emmo/domain/battery#battery_fcbbda5e_7ba3_4355_8817_b90159e59847) |
+| `li-cfx` | `li-metal` | [LithiumCarbonMonofluorideBattery](https://w3id.org/emmo/domain/battery#battery_126e9af4_41b4_45b8_81ca_b36af2841d5b) |
+| `li-socl2` | `li-metal` | [LithiumThionylChlorideBattery](https://w3id.org/emmo/domain/battery#battery_f5fea163_410c_4e35_9408_15d5732c9f32) |
+| `li-cuo` | `li-metal` | [LithiumCopperOxideBattery](https://w3id.org/emmo/domain/battery#battery_eb37da80_4500_49c6_ac9b_da2b3d810efc) |
+| `li-s` | `li-metal` | [LithiumSulfurBattery](https://w3id.org/emmo/domain/battery#battery_a5c1aa29_5404_4746_a9d0_0262c44ca419) |
+| `li-air` | `li-metal` | [LithiumAirBattery](https://w3id.org/emmo/domain/battery#battery_aea9d6ae_7ac4_4dcd_b6ef_5afcde1ccd22) |
+| `na-ion` |  | [SodiumIonBattery](https://w3id.org/emmo/domain/battery#battery_42329a95_03fe_4ec1_83cb_b7e8ed52f68a) |
+| `k-ion` |  | [PotassiumIonBattery](https://w3id.org/emmo/domain/battery#battery_22cd1325_5cbb_4fb3_b6a6_ae7aab5554a5) |
+| `mg-ion` |  | [MagnesiumIonBattery](https://w3id.org/emmo/domain/battery#battery_9c262b93_0a38_4f0e_9e29_ca958ebfa24e) |
+| `ca-ion` |  | [CalciumIonBattery](https://w3id.org/emmo/domain/battery#battery_2099e6d6_680b_476c_a123_f6c89ff93389) |
+| `zn-mno2` |  | [ZincBattery](https://w3id.org/emmo/domain/battery#battery_e1d7fb00_03b9_46ea_90c9_501f538dfc11) |
+| `alkaline-zn-mno2` | `zn-mno2` | [AlkalineZincManganeseDioxideBattery](https://w3id.org/emmo/domain/battery#battery_b572826a_b4e4_4986_b57d_f7b945061f8b) |
+| `zinc-carbon` | `zn-mno2` | [ZincCarbonBattery](https://w3id.org/emmo/domain/battery#battery_aaaa6f4b_435b_425b_acb1_e8a427c3489a) |
+| `leclanche` | `zinc-carbon` | [LeclancheBattery](https://w3id.org/emmo/domain/battery#battery_1d3a2bb3_1d39_4cdb_9a28_c73d663388ab) |
+| `zinc-chloride` | `zinc-carbon` | [ZincChlorideBattery](https://w3id.org/emmo/domain/battery#battery_55a8a42d_0f83_473d_82b0_32640114b7db) |
+| `zn-air` |  | [ZincAirBattery](https://w3id.org/emmo/domain/battery#battery_e8eada73_3811_4bbe_8f65_f6ee089d439f) |
+| `zn-hgo` |  | [MercuryBattery](https://w3id.org/emmo/domain/battery#battery_04d0ea52_8528_4e09_8751_2f55897a8f6e) |
+| `ni-mh` |  | [NickelMetalHydrideBattery](https://w3id.org/emmo/domain/battery#battery_75cab90d_4bff_472a_be0f_48e61a272d01) |
+| `ni-cd` |  | [NickelCadmiumBattery](https://w3id.org/emmo/domain/battery#battery_14ffa830_2789_429d_8c05_d2ae0ca51732) |
+| `ni-fe` |  | [NickelIronBattery](https://w3id.org/emmo/domain/battery#battery_a316de25_e469_4a60_81fa_fcb0f372502f) |
+| `ni-zn` |  | [NickelZincBattery](https://w3id.org/emmo/domain/battery#battery_46b8433d_fd57_4819_b34f_1636b72ad12e) |
+| `lead-acid` |  | [LeadAcidBattery](https://w3id.org/emmo/domain/battery#battery_7eb62323_1001_4320_8fb5_c590ce93d3ce) |
+| `al-air` |  | [AluminiumAirBattery](https://w3id.org/emmo/domain/battery#battery_44cb1e3b_480c_4594_a79a_4e4f001050ea) |
+| `fe-air` |  | [IronAirBattery](https://w3id.org/emmo/domain/battery#battery_361a67aa_a7d5_4c2b_98e5_7c8e9a919d79) |
+| `mg-air` |  | [MagnesiumAirBattery](https://w3id.org/emmo/domain/battery#battery_80c5a33a_db50_4560_8c04_ba1ce014177e) |
+| `si-air` |  | [SiliconAirBattery](https://w3id.org/emmo/domain/battery#battery_67c336e7_4d06_44b0_8f4d_5ab0c4d12a92) |
+| `na-air` |  | [SodiumAirBattery](https://w3id.org/emmo/domain/battery#battery_7b8c74b3_0fa5_41d5_bb43_6230f5e293c8) |
+| `vanadium-flow` |  | [VanadiumRedoxFlowBattery](https://w3id.org/emmo/domain/battery#battery_e2aac68e_f880_4be5_87e6_73eba9f75955) |
+| `zn-br-flow` |  | [ZincBromineFlowBattery](https://w3id.org/emmo/domain/battery#battery_7b28d3a1_24d5_477b_afd8_af2bac480724) |
+| `fe-flow` |  | [IronRedoxFlowBattery](https://w3id.org/emmo/domain/battery#battery_31a80cd5_d4eb_4f7d_a990_f32a5a75ea86) |
+
+Older spellings that still resolve. Validation flags them with the label
+to use instead:
+
+| Older label | Use | Why |
+|---|---|---|
+| `li-primary` | `li-metal` | Rechargeability is not a chemistry. Write li-metal (or the specific system, e.g. li-mno2) and set rechargeable to false. |
+| `alkaline` | `alkaline-zn-mno2` | Alkaline names an electrolyte; several couples use one. Write alkaline-zn-mno2. |
+| `znmno2` | `zn-mno2` | Spelling variant. Write zn-mno2. |
+
 Unknown keys and symbols are refused, not guessed — see the
 [validation contract](../guarantees.md#validation-contract) for how mapping gaps
 surface as machine-readable issues.
