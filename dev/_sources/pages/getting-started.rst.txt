@@ -49,7 +49,7 @@ naming the extra to install):
 
    .. code-block:: bash
 
-      pip install "git+https://github.com/battery-data-alliance/battery-data-format.git" matplotlib plotly
+      pip install "batterydf[nda,excel,mat] @ git+https://github.com/battery-data-alliance/battery-data-format.git@07dd7a6923ae12fba0ea1079c5034883c14ebbf5" matplotlib plotly
 
 
 If you have data: the workspace
