@@ -15,6 +15,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 MAPPINGS = ROOT / "assets" / "mappings" / "domain-battery"
 OUT = ROOT / "docs" / "pages" / "property-reference.md"
+CONTEXT = ROOT / "src" / "battinfo" / "data" / "context" / "domain-battery.context.json"
 
 
 def build() -> str:
@@ -60,6 +61,52 @@ def build() -> str:
     ]
     for u in sorted(units, key=lambda u: u["symbol"].lower()):
         lines.append(f"| `{u['symbol']}` | [{u['unit_pref_label']}]({u['unit_iri']}) |")
+
+    entity_map = json.loads(
+        (MAPPINGS / "entity_type_map.json").read_text(encoding="utf-8")
+    )["mappings"]
+    chemistry = entity_map["chemistry"]
+    context = json.loads(CONTEXT.read_text(encoding="utf-8"))
+    context = context.get("@context", context)
+
+    def class_link(name: str) -> str:
+        term = context.get(name)
+        iri = term.get("@id") if isinstance(term, dict) else term
+        return f"[{name}]({iri})" if isinstance(iri, str) else name
+
+    canonical = {k: v for k, v in chemistry.items() if "alias_of" not in v}
+    aliases = {k: v for k, v in chemistry.items() if "alias_of" in v}
+    lines += [
+        "",
+        f"## Chemistry labels ({len(canonical)})",
+        "",
+        "The recognised values of `chemistry` on a cell spec. A label names the",
+        "electrochemical couple and nothing else. Whether the cell is rechargeable",
+        "goes in `rechargeable`, and the electrode materials of a Li-ion cell go",
+        "in `positive_electrode_basis` and `negative_electrode_basis`.",
+        "",
+        "Some labels are narrower than others: a `li-mno2` cell is also a",
+        "`li-metal` cell. State the narrowest one you know. Matching ignores case,",
+        "so `Li-ion` and `li-ion` are the same label. A value that is not listed is",
+        "kept as plain text and the record gets no battery class from it.",
+        "",
+        "| Label | Narrower than | Battery class |",
+        "|---|---|---|",
+    ]
+    for key, entry in canonical.items():
+        broader = f"`{entry['broader']}`" if entry.get("broader") else ""
+        classes = ", ".join(class_link(name) for name in entry["battery_types"])
+        lines.append(f"| `{key}` | {broader} | {classes} |")
+    lines += [
+        "",
+        "Older spellings that still resolve. Validation flags them with the label",
+        "to use instead:",
+        "",
+        "| Older label | Use | Why |",
+        "|---|---|---|",
+    ]
+    for key, entry in aliases.items():
+        lines.append(f"| `{key}` | `{entry['alias_of']}` | {entry['note']} |")
 
     lines += [
         "",

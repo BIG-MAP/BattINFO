@@ -9,6 +9,29 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **`chemistry` has a proper vocabulary: 33 labels in two levels.** The
+  nine recognised labels mixed three things: the couple (`li-ion`),
+  rechargeability (`li-primary`) and the electrolyte (`alkaline`). That
+  left no correct label for a rechargeable lithium-metal cell, and made
+  `li-mno2` and `li-metal` look like alternatives when one is a kind of
+  the other. A label now names the electrochemical couple only.
+  Rechargeability stays in `rechargeable`, and Li-ion electrode materials
+  in the electrode basis fields. A label may be narrower than another
+  (`li-mno2`, `li-fes2`, `li-socl2`, `li-s` and others under `li-metal`;
+  `alkaline-zn-mno2` and `zinc-carbon` under `zn-mno2`; `leclanche` and
+  `zinc-chloride` under `zinc-carbon`), and each maps to its own
+  domain-battery class. New families: `k-ion`, `mg-ion`, `ca-ion`,
+  `zn-air`, `zn-hgo`, `ni-mh`, `ni-cd`, `ni-fe`, `ni-zn`, `lead-acid`,
+  five metal-air systems and three flow systems. The full table is
+  generated into the property reference page. `li-primary`, `alkaline`
+  and `znmno2` keep resolving as aliases; validation flags them with a
+  `semantic.controlled_value_superseded` warning that names the label
+  to use. Two mappings were wrong and are corrected: `zn-mno2` resolved
+  to the alkaline class, one of its three variants, and now resolves to
+  `ZincBattery`; `zinc-carbon` resolved to `AlkalineCell` and now
+  resolves to `ZincCarbonBattery`. The records context gains the 28 new
+  class terms (append-only, 617 to 645).
+
 - **Read side of the registry: `battinfo.registry.Registry`.** Until now
   the package could publish to a registry and search titles, but offered
   no way to get from a dataset record to its measurement data. `Registry`
