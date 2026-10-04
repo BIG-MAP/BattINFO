@@ -1087,7 +1087,7 @@ _BDF_CANONICAL_COLUMNS: list[tuple[str, str]] = [
     ("power_watt", "power (W)"),
     ("cycle_count", "cycle index"),
     ("step_count", "step counter"),
-    ("step_index", "step index within a cycle"),
+    ("step_id", "step number in the cycler program"),
     ("charging_capacity_ah", "charge capacity (Ah)"),
     ("discharging_capacity_ah", "discharge capacity (Ah)"),
     ("charging_energy_wh", "charge energy (Wh)"),
@@ -2011,10 +2011,9 @@ class AuthoringWorkspace:
             raise ValueError(f"fmt must be 'parquet' or 'csv' (got {fmt!r})")
 
         try:
-            import bdf.io as _bdf_io
             import bdf.repair as _bdf_repair
 
-            from battinfo.processing import _read_bdf_pandas
+            from battinfo.processing import _read_bdf_pandas, _reader_plugin_id, _save_bdf
         except ImportError:
             raise ImportError(
                 "convert() needs the BDF converter (module 'bdf' from the batterydf "
@@ -2068,12 +2067,12 @@ class AuthoringWorkspace:
                 # applies the ratified tz="UTC" timestamp policy.
                 df, meta = _read_bdf_pandas(src, validate=False)
                 df = _bdf_repair.fix_time(df)
-                _bdf_io.save(df, out)
+                _save_bdf(df, out)
             except Exception as exc:  # one bad file must not abort the batch
                 failed.append((src.name, str(exc)))
                 print(f"  FAILED: {src.name} -- {exc}")
                 continue
-            reader = meta.get("source") if isinstance(meta, dict) else None
+            reader = _reader_plugin_id(meta)
             via = f", via {reader}" if reader else ""
             print(f"  {src.name}  ->  {out.name}  ({out.stat().st_size / 1e6:.1f} MB{via})")
             written.append(out)
@@ -2196,8 +2195,8 @@ class AuthoringWorkspace:
 
         # Prefer bdf.io.save to keep the BDF round-trip honest; fall back to pandas.
         try:
-            import bdf.io as _bdf_io
-            _bdf_io.save(df, out)
+            from battinfo.processing import _save_bdf
+            _save_bdf(df, out)
         except Exception:
             if fmt == "parquet":
                 df.to_parquet(out, index=False)

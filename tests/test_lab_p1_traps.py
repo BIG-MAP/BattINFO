@@ -443,3 +443,63 @@ def test_template_empty_name_writes_sane_filenames(tmp_path: Path) -> None:
     assert cell_path.name == "cell-spec.cell-spec.json"
     test_path = ws.template("test-spec", type="cycling")
     assert test_path.name == "test-spec.test-spec.json"
+
+
+# ── batterydf 0.2 compatibility: metadata shape, column labels, required time ──
+
+def test_reader_plugin_id_reads_both_metadata_shapes() -> None:
+    """batterydf 0.1 returned a dict with a top-level "source"; 0.2 returns a
+    Metadata model with the plugin at ``.bdf.source``. The unmapped-column
+    report keys off this value, so losing it silences the data-loss warning."""
+    from types import SimpleNamespace
+
+    from battinfo.processing import _reader_plugin_id
+
+    assert _reader_plugin_id({"source": "neware_csv"}) == "neware_csv"
+    assert _reader_plugin_id({"bdf": {"source": "bdf_csv"}}) == "bdf_csv"
+    model = SimpleNamespace(bdf=SimpleNamespace(source="digatron_csv"))
+    assert _reader_plugin_id(model) == "digatron_csv"
+    assert _reader_plugin_id(SimpleNamespace(bdf=None)) is None
+    assert _reader_plugin_id({}) is None
+    assert _reader_plugin_id(None) is None
+
+
+def test_convert_writes_machine_readable_column_names(tmp_path: Path) -> None:
+    """Converted files carry the snake_case BDF names whichever batterydf
+    version wrote them; battinfo's readers and the published corpus rely on it."""
+    pytest.importorskip("bdf")
+    ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
+    (tmp_path / "export.csv").write_text(
+        "test_time_second,voltage_volt,current_ampere\n0,3.7,1.0\n1,3.71,1.0\n",
+        encoding="utf-8",
+    )
+
+    written = ws.convert("*.csv")
+
+    assert len(written) == 1
+    header = written[0].read_text(encoding="utf-8").splitlines()[0].split(",")
+    assert header == ["test_time_second", "voltage_volt", "current_ampere"]
+
+
+def test_convert_refuses_file_without_test_time(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """A source whose time column cannot be mapped must fail loudly and write
+    nothing, not produce a BDF file with no time axis. In a Neware export
+    "Time(s)" is the per-step clock, so it does not count as test time."""
+    pytest.importorskip("bdf")
+    ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
+    (tmp_path / "no-test-time.csv").write_text(
+        "Cycle,Step,Time(s),Voltage(V),Current(mA),Capacity(mAh)\n"
+        "1,CC_Chg,0,3.02,4500,0\n"
+        "1,CC_Chg,60,3.45,4500,75\n",
+        encoding="utf-8",
+    )
+
+    written = ws.convert("*.csv")
+
+    assert written == []
+    assert not list((tmp_path / "bdf").glob("*.csv"))
+    out = capsys.readouterr().out
+    assert "FAILED: no-test-time.csv" in out
+    assert "convert_csv" in out

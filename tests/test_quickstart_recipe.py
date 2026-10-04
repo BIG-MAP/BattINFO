@@ -27,7 +27,7 @@ def ws(tmp_path: Path) -> AuthoringWorkspace:
     import json
 
     (tmp_path / "cycler-export.csv").write_text(
-        "Cycle,Step,Time(s),Voltage(V),Current(mA),Capacity(mAh)\n"
+        "Cycle,Step,Total Time(s),Voltage(V),Current(mA),Capacity(mAh)\n"
         "1,CC_Chg,0,3.02,4500,0\n"
         "1,CC_Chg,60,3.45,4500,75\n"
         "1,CC_DChg,3600,4.19,-4500,4430\n",
