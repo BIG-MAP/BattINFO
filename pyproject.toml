@@ -66,7 +66,10 @@ storage = [
   "boto3>=1.43.57"
 ]
 processing = [
-  "batterydf>=0.2,<0.3",
+  # The nda/excel/mat extras carry the readers behind the formats that
+  # ws.convert() auto-detects (.ndax/.nda, .xlsx, .mat); batterydf 0.2 made
+  # them optional.
+  "batterydf[nda,excel,mat]>=0.2,<0.3",
   "matplotlib>=3.11.1",
   "plotly>=6.9.0",
 ]
@@ -113,7 +116,7 @@ battinfo = "battinfo.cli:app"
 
 # TEMPORARY until batterydf 0.2.0 is on PyPI — remove and re-lock on release
 [tool.uv.sources]
-batterydf = { git = "https://github.com/battery-data-alliance/battery-data-format", rev = "f64c338" }
+batterydf = { git = "https://github.com/battery-data-alliance/battery-data-format", rev = "07dd7a6" }
 
 [tool.setuptools]
 package-dir = { "" = "src" }

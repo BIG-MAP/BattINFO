@@ -144,6 +144,47 @@ def _read_bdf_pandas(source: Path, *, validate: bool = False):
     return frame.to_pandas(), metadata
 
 
+def _reader_plugin_id(metadata) -> str | None:
+    """Name of the batterydf reader plugin that parsed a file, or None.
+
+    batterydf 0.1 returned a plain dict with a top-level ``"source"`` key.
+    batterydf >= 0.2 returns a ``Metadata`` model that carries the same value
+    at ``metadata.bdf.source``. Both shapes are read here so callers never
+    depend on which one they were handed.
+    """
+    if metadata is None:
+        return None
+    if isinstance(metadata, dict):
+        source = metadata.get("source")
+        if source is None and isinstance(metadata.get("bdf"), dict):
+            source = metadata["bdf"].get("source")
+    else:
+        source = getattr(getattr(metadata, "bdf", None), "source", None)
+        if source is None:
+            source = getattr(metadata, "source", None)
+    return source if isinstance(source, str) and source else None
+
+
+def _save_bdf(df, out: Path) -> None:
+    """Write *df* with ``bdf.io.save`` using machine-readable column names.
+
+    Files battinfo writes carry the snake_case BDF names (``voltage_volt``),
+    which is what its own readers and the published corpus expect. batterydf
+    0.1 always wrote those. batterydf >= 0.2 writes the frame's labels
+    unchanged unless asked, and frames from ``bdf.read`` carry the
+    human-readable form (``Voltage / V``), so the machine form is requested
+    explicitly where the keyword exists.
+    """
+    import inspect  # noqa: PLC0415
+
+    import bdf.io as _bdf_io  # noqa: PLC0415
+
+    if "labels" in inspect.signature(_bdf_io.save).parameters:
+        _bdf_io.save(df, out, labels="machine")
+    else:
+        _bdf_io.save(df, out)
+
+
 def _read_bdf_csv(path: Path):
     """Read a BDF CSV or Parquet file into a DataFrame, returning None on failure."""
     try:

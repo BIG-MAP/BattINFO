@@ -38,6 +38,25 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- **`ws.convert()` works against batterydf 0.2, the version the
+  `processing` extra requires.** CI had been testing against a July
+  snapshot that predates 0.2, and three things had drifted. The reader
+  plugin name moved from `meta["source"]` to `meta.bdf.source`, so the
+  unmapped-column report (the DATA-LOSS WARNING) silently stopped
+  printing while columns were still being dropped. `bdf.io.save` no
+  longer converts labels by default, so converted files came out with
+  human-readable headers (`Voltage / V`) where every earlier file has
+  machine names (`voltage_volt`); convert now asks for machine names.
+  And the NEWARE binary, Excel and MATLAB readers became optional in
+  batterydf, so `pip install battinfo[processing]` could no longer
+  convert the `.ndax`, `.xlsx` and `.mat` files that `ws.convert()`
+  auto-detects; the extra is now `batterydf[nda,excel,mat]`. A source
+  with no mappable test-time column now fails with a named error and
+  writes nothing (previously a BDF file with no time axis). The CI pin
+  moves to the batterydf 0.2.0 release candidate, and
+  `ws.bdf_columns()` lists `step_id` in place of `step_index`, which is
+  no longer a BDF term.
+
 - **Release-review fixes (independent 0.8.0 pre-release review, F1-F6 +
   onboarding).** An external review of the release candidate reproduced
   real defects; all confirmed items are fixed with regression tests:
