@@ -13,6 +13,8 @@ on:
       - README.md
       - QUICKSTART.md
       - docs/pages/getting-started.rst
+      - docs/pages/troubleshooting.md
+      - src/battinfo/_util.py
       - .github/workflows/install-smoke.yml
   pull_request:
     paths:
@@ -20,6 +22,8 @@ on:
       - README.md
       - QUICKSTART.md
       - docs/pages/getting-started.rst
+      - docs/pages/troubleshooting.md
+      - src/battinfo/_util.py
       - .github/workflows/install-smoke.yml
   workflow_dispatch:
 
@@ -87,3 +91,71 @@ jobs:
           "$py" -m pip install --upgrade pip
           "$py" -m pip install "git+https://github.com/BIG-MAP/BattINFO.git"
           "$py" -c "import battinfo; print(battinfo.__version__)"
+
+      # The fallback the docs give while batterydf 0.2 is not on PyPI. The line
+      # is read out of QUICKSTART.md so this job tests what readers are told to
+      # run, then converts a small file to prove the converter and its Neware,
+      # Excel and MATLAB readers are importable. Not allowed to fail.
+      - name: documented converter install line
+        shell: bash
+        run: |
+          set -euxo pipefail
+          v="$RUNNER_TEMP/venv-converter"
+          python -m venv "$v"
+          if [ -f "$v/Scripts/python.exe" ]; then py="$v/Scripts/python.exe"; else py="$v/bin/python"; fi
+          "$py" -m pip install --upgrade pip
+          "$py" -m pip install -e ".[tabular]"
+          line=$(grep -o 'pip install "batterydf\[nda,excel,mat\] @ git+[^"]*" matplotlib plotly' QUICKSTART.md | head -n 1)
+          test -n "$line"
+          for doc in README.md docs/pages/getting-started.rst docs/pages/troubleshooting.md; do
+            grep -qF "$line" "$doc"
+          done
+          eval "\"$py\" -m $line"
+          work="$RUNNER_TEMP/convert-smoke"
+          mkdir -p "$work"
+          printf 'test_time_second,voltage_volt,current_ampere\n0,3.7,1.0\n1,3.71,1.0\n' > "$work/export.csv"
+          cd "$work"
+          "$py" -c "import bdf, fastnda, fastexcel, scipy; import battinfo; ws = battinfo.workspace('.'); out = ws.convert('*.csv'); assert len(out) == 1, out; print(open(out[0]).readline().strip())"
+
+      # What a PyPI user gets: the built wheel, stock pip, an empty environment,
+      # a working directory outside the checkout.
+      - name: wheel in an empty environment, outside the checkout
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python -m pip install --upgrade pip build
+          python -m build --wheel --outdir "$RUNNER_TEMP/dist" .
+          v="$RUNNER_TEMP/venv-wheel"
+          python -m venv "$v"
+          if [ -f "$v/Scripts/python.exe" ]; then py="$v/Scripts/python.exe"; else py="$v/bin/python"; fi
+          "$py" -m pip install --upgrade pip
+          "$py" -m pip install "$RUNNER_TEMP"/dist/battinfo-*.whl
+          work="$RUNNER_TEMP/wheel-smoke"
+          mkdir -p "$work"
+          cd "$work"
+          cat > quickstart.py <<'PY'
+          import json
+          import pathlib
+
+          import battinfo
+          from battinfo import CellSpec, publish, validate_record
+
+          assert "site-packages" in pathlib.Path(battinfo.__file__).as_posix(), battinfo.__file__
+          cell_spec = CellSpec(
+              manufacturer="Panasonic",
+              model="NCR18650B",
+              format="cylindrical",
+              chemistry="Li-ion",
+              size_code="R18650",
+              nominal_capacity={"value": 3.4, "unit": "Ah"},
+              nominal_voltage={"value": 3.6, "unit": "V"},
+              mass={"value": 48.0, "unit": "g"},
+          )
+          result = publish(cell_spec, destination="local", root=".battinfo/quickstart")
+          assert result.canonical_iri.startswith("https://w3id.org/battinfo/spec/"), result.canonical_iri
+          record = json.loads(pathlib.Path(result.debug_paths["canonical_record_path"]).read_text())
+          validate_record(record)
+          print("wheel ok", battinfo.__version__, result.canonical_iri)
+          PY
+          "$py" quickstart.py
+          "$py" -c "from battinfo.registry import Registry; print(Registry())"

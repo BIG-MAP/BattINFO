@@ -796,11 +796,11 @@ def ingest_publish(
             from battinfo.processing import process_timeseries_csv
             processor = process_timeseries_csv
         except ImportError:
+            from battinfo._util import CONVERTER_INSTALL_HINT
+
             typer.echo(
-                "Warning: --process-artifacts requires battinfo[processing]. "
-                "Install with: pip install 'battinfo[processing]' — or, until "
-                "batterydf is published to PyPI: pip install "
-                "'git+https://github.com/battery-data-alliance/battery-data-format.git'"
+                "Warning: --process-artifacts needs the BDF converter and plotting "
+                f"libraries. {CONVERTER_INSTALL_HINT}"
             )
 
     fmt = _check_workspace_output_format(output_format)

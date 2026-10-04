@@ -39,6 +39,21 @@ def require_extra(module_name: str, extra: str, feature: str):
         ) from exc
 
 
+# The BDF converter (PyPI name ``batterydf``, import name ``bdf``) and the
+# readers behind the file formats ``ws.convert()`` auto-detects. The source line
+# pins the commit BattINFO is tested against; it is the fallback for as long as
+# batterydf 0.2 is not on PyPI.
+CONVERTER_SOURCE_INSTALL = (
+    'pip install "batterydf[nda,excel,mat] @ '
+    "git+https://github.com/battery-data-alliance/battery-data-format.git"
+    '@07dd7a6923ae12fba0ea1079c5034883c14ebbf5" matplotlib plotly'
+)
+CONVERTER_INSTALL_HINT = (
+    'Run: pip install "battinfo[processing]". If pip reports that no batterydf '
+    "version matches, the converter release has not reached PyPI yet; install it "
+    f"from source instead: {CONVERTER_SOURCE_INSTALL}"
+)
+
 _DOI_URL_RE = re.compile(r"^https?://(?:dx\.)?doi\.org/(10\.\S+)$", re.IGNORECASE)
 _DOI_LITERAL_RE = re.compile(r"^(10\.\d{4,9}/[-._;()/:A-Za-z0-9]+)$")
 

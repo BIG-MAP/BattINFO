@@ -813,6 +813,8 @@
     "SodiumAirBattery": "battery:battery_7b8c74b3_0fa5_41d5_bb43_6230f5e293c8",
     "VanadiumRedoxFlowBattery": "battery:battery_e2aac68e_f880_4be5_87e6_73eba9f75955",
     "ZincBromineFlowBattery": "battery:battery_7b28d3a1_24d5_477b_afd8_af2bac480724",
-    "IronRedoxFlowBattery": "battery:battery_31a80cd5_d4eb_4f7d_a990_f32a5a75ea86"
+    "IronRedoxFlowBattery": "battery:battery_31a80cd5_d4eb_4f7d_a990_f32a5a75ea86",
+    "ChargingCurrent": "electrochemistry:electrochemistry_79551e01_4bc6_4292_916e_08fe28a84600",
+    "DischargingCurrent": "electrochemistry:electrochemistry_e4d666ee_d637_45cd_a904_dc33941ead4f"
   }
 }

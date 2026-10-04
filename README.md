@@ -104,7 +104,7 @@ Optional extras: `battinfo[processing]` (cycler-file conversion via `ws.convert(
 cannot resolve; install the processing dependencies directly instead:
 
 ```bash
-pip install "git+https://github.com/battery-data-alliance/battery-data-format.git" matplotlib plotly
+pip install "batterydf[nda,excel,mat] @ git+https://github.com/battery-data-alliance/battery-data-format.git@07dd7a6923ae12fba0ea1079c5034883c14ebbf5" matplotlib plotly
 ```
 
 **Developing on BattINFO?** This repo uses [uv](https://docs.astral.sh/uv/):
