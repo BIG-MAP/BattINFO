@@ -1980,7 +1980,7 @@ class AuthoringWorkspace:
         workspace root and converts them all.  Each file becomes
         ``bdf/<name>.bdf.<fmt>``; files already converted are skipped.
 
-        Requires the ``batterydf`` package (``pip install batterydf``).
+        Requires the BDF converter (``pip install "battinfo[processing]"``).
 
         Auto-detected (just run ``ws.convert()``): NEWARE ``.ndax``/``.nda``,
         Biologic ``.mpt``, Excel ``.xlsx``, MATLAB ``.mat``.
@@ -2015,11 +2015,11 @@ class AuthoringWorkspace:
 
             from battinfo.processing import _read_bdf_pandas, _reader_plugin_id, _save_bdf
         except ImportError:
+            from battinfo._util import CONVERTER_INSTALL_HINT
+
             raise ImportError(
                 "convert() needs the BDF converter (module 'bdf' from the batterydf "
-                "package). Run: pip install 'battinfo[processing]' — or, until "
-                "batterydf is published to PyPI: pip install "
-                "'git+https://github.com/battery-data-alliance/battery-data-format.git'"
+                f"package). {CONVERTER_INSTALL_HINT}"
             )
 
         # ── Resolve input files ────────────────────────────────────────────
@@ -4144,7 +4144,13 @@ class AuthoringWorkspace:
             # stays schema-valid (the inner role enum excludes plot_* roles).
             top_dists, inner_dists = _build_dataset_distributions(ds)
             self_iri = ds.get("id")
-            ds = {**ds, "distributions": inner_dists}
+            if inner_dists:
+                ds = {**ds, "distributions": inner_dists}
+            else:
+                # A collection (dcat:DatasetSeries) has no files of its own. The
+                # schema requires at least one entry when the key is present, so
+                # an empty list would be rejected at the registry gate.
+                ds = {k: v for k, v in ds.items() if k != "distributions"}
             if resolved_doi:
                 prov = dict(raw.get("provenance") or {})
                 prov.setdefault("citation_doi", resolved_doi)

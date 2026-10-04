@@ -65,6 +65,12 @@ Each missing optional dependency raises an error naming its extra. The map:
 | RO-Crate validation when publishing | `pip install "battinfo[publish]"` |
 | QR codes for cell labels | `pip install segno` (not a BattINFO extra) |
 
+If `pip install "battinfo[processing]"` reports that no `batterydf` version matches, the converter release has not reached PyPI yet. Install it from source:
+
+```bash
+pip install "batterydf[nda,excel,mat] @ git+https://github.com/battery-data-alliance/battery-data-format.git@07dd7a6923ae12fba0ea1079c5034883c14ebbf5" matplotlib plotly
+```
+
 ## My record's IRI opens a sign-in page
 
 Content negotiation is doing its job. A `https://w3id.org/battinfo/...` IRI

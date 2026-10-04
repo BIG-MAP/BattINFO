@@ -76,6 +76,33 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- **Pre-release fixes from the close-out review.** Four defects that would
+  have frozen into 0.8.0:
+  - *A collection could not be submitted.* `ws.submit()` sent
+    `"distributions": []` for a dataset with no file of its own, which is
+    what a `DatasetSeries` collection is, and the schema requires at least
+    one entry when the key is present. The key is now left out.
+  - *Two property keys emitted class names that do not exist.*
+    `nominal_continuous_charging_current` and
+    `nominal_continuous_discharging_current` carried candidate class IRIs
+    the ontology never minted, so their `@type` resolved against the
+    document base. They now emit the published `ChargingCurrent` and
+    `DischargingCurrent` (context 645 to 647 terms, append-only). Both
+    keys stay deferred in the curated map; their schema slots still point
+    at the maximum-current classes, which is a separate correction that
+    needs a context v2.
+  - *The graph-equivalence sweep skipped subfolders*, which is where that
+    record lives. It is now recursive, checks that every kind and every
+    file is reached, and a new test fails on any class or predicate that
+    falls back to the document base.
+  - *The converter install line in the docs and in two error messages
+    installed the bare converter*, without the NEWARE, Excel and MATLAB
+    readers, so `ws.convert()` failed on `.ndax` for anyone following it.
+    The line now names the extras and pins the tested commit, lives in one
+    place in the code, and CI installs it with stock pip and converts a
+    file. CI also installs the built wheel into an empty environment and
+    runs the first Quickstart step outside the checkout.
+
 - **`ws.convert()` works against batterydf 0.2, the version the
   `processing` extra requires.** CI had been testing against a July
   snapshot that predates 0.2, and three things had drifted. The reader

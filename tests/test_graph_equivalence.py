@@ -80,7 +80,10 @@ def _iter_records():
     for kind_dir in sorted(p for p in EXAMPLES.iterdir() if p.is_dir()):
         if kind_dir.name == "profiles":
             continue  # profile documents, not records — no emitter
-        for path in sorted(kind_dir.glob("*.json")):
+        # Recursive: some kinds keep worked examples in subfolders
+        # (cell-spec/research/), and a sweep that skips them certifies nothing
+        # about them.
+        for path in sorted(kind_dir.rglob("*.json")):
             yield kind_dir.name, path, json.loads(path.read_text(encoding="utf-8"))
 
 
@@ -133,6 +136,34 @@ def test_inline_and_url_modes_are_graph_isomorphic() -> None:
             mismatches.append(f"{kind}/{path.name}: inline-only={in_only} url-only={url_only}")
     assert checked > 140, f"corpus sweep looks broken (only {checked} records)"
     assert not mismatches, "emission modes diverge as graphs:\n" + "\n".join(mismatches)
+
+
+def test_sweep_reaches_every_record_kind_and_every_file() -> None:
+    """The sweep's reach is itself a contract: every kind directory contributes
+    at least one record, and no packaged example file is left out."""
+    swept = Counter(kind for kind, _path, _record in _iter_records())
+    kind_dirs = sorted(p.name for p in EXAMPLES.iterdir() if p.is_dir() and p.name != "profiles")
+    assert [k for k in kind_dirs if not swept[k]] == []
+    on_disk = sum(1 for p in EXAMPLES.rglob("*.json") if "profiles" not in p.relative_to(EXAMPLES).parts)
+    assert sum(swept.values()) == on_disk
+
+
+def test_no_emitted_term_falls_back_to_the_document_base() -> None:
+    """A class or property name that no context defines is not an error to a
+    JSON-LD processor: it resolves against the document base and becomes a
+    meaningless local address. Both emission modes do this identically, so the
+    isomorphism check above passes while the graph is wrong. Here every
+    rdf:type and every predicate must resolve to something other than the base."""
+    offenders: set[str] = set()
+    for kind, path, record in _iter_records():
+        for mode in ("inline", "url"):
+            g = _graph(record_to_jsonld(record, kind, context=mode))
+            for _s, p, o in g:
+                if str(p).startswith(BASE):
+                    offenders.add(f"{kind}/{path.name}: predicate {str(p)[len(BASE):]}")
+                if p == rdflib.RDF.type and str(o).startswith(BASE):
+                    offenders.add(f"{kind}/{path.name}: class {str(o)[len(BASE):]}")
+    assert not offenders, "terms with no context definition:\n" + "\n".join(sorted(offenders))
 
 
 # ── Independent-consumer SPARQL questions ────────────────────────────────────

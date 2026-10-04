@@ -562,3 +562,53 @@ def test_component_family_records_warn_instead_of_vanishing(
     out = capsys.readouterr().out
     assert "not submitted" in out and "separator-spec" in out
     assert all(p["resource"]["resource_type"] != "separator_spec" for p in fake.payloads)
+
+
+# ── A collection (dcat:DatasetSeries) has no files of its own ─────────────────
+
+def test_submit_sends_a_collection_without_an_empty_distributions_list(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The dataset schema requires at least one entry when ``distributions`` is
+    present. submit() used to send ``"distributions": []`` for every dataset with
+    no measurement file, which is exactly what a collection is, so the registry
+    gate rejected the one record the members point at."""
+    import json
+
+    from battinfo import Dataset, ProvenanceInfo
+    from battinfo.validate.record import validate_record_report
+
+    ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
+    _author_full_chain(ws, tmp_path)
+    ws.save(validation_policy="strict")
+
+    collection = Dataset(
+        id="https://w3id.org/battinfo/dataset/aaaa-bbbb-cccc-dddd",
+        name="Half-cell OCV collection",
+        access_url="https://doi.org/10.5281/zenodo.20086298",
+        additional_type=["DatasetSeries"],
+        source=ProvenanceInfo(type="catalog", url="https://doi.org/10.5281/zenodo.20086298",
+                              retrieved_at=1755648000),
+    ).to_record()
+    assert "distributions" not in collection["dataset"]
+    dataset_dir = next(p.parent for p in ws._session_paths if p.parent.name == "dataset")
+    path = dataset_dir / "aaaa-bbbb-cccc-dddd.json"
+    path.write_text(json.dumps(collection), encoding="utf-8")
+    ws._session_paths.add(path)
+
+    fake = _patch_registry(monkeypatch, lambda p: _result("validated"))
+    ws.submit(**_CREDS)
+
+    sent = [
+        record
+        for payload in fake.payloads
+        if payload["resource"]["resource_type"] == "dataset"
+        for record in payload["resource"]["semantic_payload"]["battinfo_records"].values()
+    ]
+    series = [r for r in sent if "DatasetSeries" in (r["dataset"].get("additional_type") or [])]
+    assert len(series) == 1
+    assert "distributions" not in series[0]["dataset"]
+    assert validate_record_report(series[0]).ok
+    # A dataset that does have a file still sends it.
+    others = [r for r in sent if r is not series[0]]
+    assert others and all(r["dataset"]["distributions"] for r in others)

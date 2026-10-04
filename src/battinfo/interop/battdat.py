@@ -10,7 +10,7 @@ that downstream tooling (the ingest engine or a curator) mints canonical
 
 Install the BDF library with::
 
-    pip install batterydf
+    pip install "battinfo[processing]"
 """
 
 from __future__ import annotations
@@ -133,7 +133,7 @@ def _read_df(source: Any, warnings: list[str]) -> tuple[Any, Path | None]:
     except ImportError:
         warnings.append(
             "batterydf is not installed; reading CSV with pandas.read_csv() without "
-            "BDF normalisation.  Install with: pip install batterydf"
+            'BDF normalisation.  Install with: pip install "battinfo[processing]"'
         )
     except Exception as exc:
         warnings.append(

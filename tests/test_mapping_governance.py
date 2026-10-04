@@ -284,3 +284,20 @@ def test_zinc_manganese_dioxide_variants_are_told_apart() -> None:
     assert chemistry["zinc-carbon"]["broader"] == chemistry["alkaline-zn-mno2"]["broader"] == "zn-mno2"
     # "alkaline" alone still resolves, to the alkaline zinc cell it has always meant.
     assert chemistry["alkaline"]["alias_of"] == "alkaline-zn-mno2"
+
+
+def test_every_property_mapping_names_a_class_the_ontology_publishes() -> None:
+    # Two candidate entries once carried class IRIs that were never minted
+    # (battery#nominalContinuousChargingCurrent). The emitter used their labels
+    # as bare @type values, no context defined them, and a JSON-LD processor
+    # silently turned them into addresses under the document base.
+    mapping_dir = ROOT / "src" / "battinfo" / "data" / "mappings" / "domain-battery"
+    context = _load_json(ROOT / "src" / "battinfo" / "data" / "context" / "domain-battery.context.json")["@context"]
+    published = {value.get("@id") if isinstance(value, dict) else value for value in context.values()}
+    unknown = []
+    for name in ("property_map.curated.json", "property_map.candidates.json"):
+        for entry in _load_json(mapping_dir / name)["mappings"]:
+            iri = entry.get("class_iri")
+            if iri and iri not in published:
+                unknown.append(f"{name}: {entry['key']} -> {iri}")
+    assert unknown == []

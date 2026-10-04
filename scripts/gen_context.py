@@ -50,6 +50,11 @@ EMITTER_CLASS_TERMS = {
     "PositiveElectrode": "electrochemistry:electrochemistry_aff732a9_238a_4734_977c_b2ba202af126",
     "MolarMass": "emmo:EMMO_e980389d_6dfe_4156_9b40_32050c9644a5",
     "SpecificSurfaceArea": "electrochemistry:electrochemistry_cf54e7c1_f359_4715_b61d_0350b890d597",
+    # The classes the candidate property map gives the two nominal continuous
+    # current keys. Those keys stay deferred in the curated map, so nothing else
+    # brings these terms into the context.
+    "ChargingCurrent": "electrochemistry:electrochemistry_79551e01_4bc6_4292_916e_08fe28a84600",
+    "DischargingCurrent": "electrochemistry:electrochemistry_e4d666ee_d637_45cd_a904_dc33941ead4f",
 }
 
 
