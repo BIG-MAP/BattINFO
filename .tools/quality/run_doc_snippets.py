@@ -41,6 +41,7 @@ SNIPPET_FILES = (
     "docs/howto/find-existing-records.md",
     "docs/howto/fix-validation-errors.md",
     "docs/howto/label-your-cells.md",
+    "docs/howto/publish-a-dataset-collection.md",
     "docs/howto/register-equipment.md",
     "docs/howto/register-materials.md",
     )

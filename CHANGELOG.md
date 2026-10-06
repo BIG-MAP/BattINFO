@@ -9,6 +9,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **How-to: publish a dataset collection.** A new page, `docs/howto/publish-a-dataset-collection.md`, walks through a collection of three datasets: when a collection is worth having, how to save the collection and its members with `Dataset` and `save_dataset`, how to check the deposit graph with `preview_jsonld()` and `validate_publication_report`, and what the JSON-LD looks like. It also states the rules that keep the links stable: the collection IRI is seeded from its access URL and name, so the name is frozen once published; the collection publishes before its members; and a collection has no distributions and no `about`. Its code runs in the doc-snippets CI job.
+
 - **`chemistry` has a proper vocabulary: 33 labels in two levels.** The
   nine recognised labels mixed three things: the couple (`li-ion`),
   rechargeability (`li-primary`) and the electrolyte (`alkaline`). That
