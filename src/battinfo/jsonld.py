@@ -1006,6 +1006,20 @@ def _schema_citations(values: Any) -> list:
     return out
 
 
+def dataset_series_edges(series_id: object) -> dict:
+    """The membership edges of a dataset that belongs to a series (collection).
+
+    Twinned like the rest of the emitters: dcat:inSeries is the DCAT 3
+    membership edge, schema:isPartOf is what dataset search engines read.
+    Empty when the dataset names no series. Shared by every dataset emitter
+    (record, resolver, publication package and deposit graph) so the edge
+    cannot drift between them.
+    """
+    if not isinstance(series_id, str) or not series_id:
+        return {}
+    return {"dcat:inSeries": {"@id": series_id}, "schema:isPartOf": {"@id": series_id}}
+
+
 def dataset_to_jsonld(record: dict) -> dict:
     """Transform a dataset record dict to JSON-LD.
 
@@ -1030,11 +1044,7 @@ def dataset_to_jsonld(record: dict) -> dict:
             "http://www.w3.org/ns/dcat#Dataset",
             "http://www.w3.org/ns/dcat#DatasetSeries",
         ]
-    if ds.get("series_id"):
-        # Twinned like the rest of the emitter: dcat:inSeries is the DCAT 3
-        # membership edge, schema:isPartOf is what dataset search engines read.
-        node["dcat:inSeries"] = {"@id": ds["series_id"]}
-        node["schema:isPartOf"] = {"@id": ds["series_id"]}
+    node.update(dataset_series_edges(ds.get("series_id")))
     catalog = ds.get("included_in_data_catalog")
     if isinstance(catalog, str) and catalog:
         node["schema:includedInDataCatalog"] = {"@id": catalog} if "://" in catalog else catalog

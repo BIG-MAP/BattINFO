@@ -226,6 +226,61 @@ def _graph_nodes(data: dict[str, Any]) -> list[tuple[str, dict[str, Any]]]:
     return [("", data)] if isinstance(data, dict) else []
 
 
+def _series_issues(
+    issues: list[ValidationIssue],
+    path: str,
+    node: dict[str, Any],
+    severity: str,
+    has_graph: bool,
+    node_ids: set[str],
+    types_by_id: dict[Any, list[str]],
+) -> None:
+    """Check a dataset's dcat:inSeries edge the way schema:about references are
+    checked: it must be an @id reference, and inside a @graph package a BattINFO
+    series IRI that resolves to a node of the graph must be typed
+    dcat:DatasetSeries. A series absent from the package is only a warning: the
+    collection may have been published earlier (in the registry or another
+    deposit), which is the documented order."""
+    in_series = node.get("dcat:inSeries")
+    if in_series is None:
+        return
+    ref_path = f"{path}.dcat:inSeries" if path else "dcat:inSeries"
+    ref_id = in_series.get("@id") if isinstance(in_series, dict) else None
+    if not isinstance(ref_id, str) or not ref_id:
+        _append_issue(
+            issues,
+            code="publication.reference_invalid",
+            severity=severity,
+            path=ref_path,
+            message="Publication dcat:inSeries must be an object with an @id string.",
+        )
+        return
+    if not has_graph or not ref_id.startswith("https://w3id.org/battinfo/"):
+        return
+    if ref_id not in node_ids:
+        _append_issue(
+            issues,
+            code="publication.series_not_in_package",
+            severity="warning",  # explicit: the collection may be published elsewhere
+            path=f"{ref_path}.@id",
+            message=(
+                f"The collection '{ref_id}' this dataset is in (dcat:inSeries) is not part "
+                "of this publication; check it is already published, or add its record."
+            ),
+        )
+    elif "dcat:DatasetSeries" not in types_by_id.get(ref_id, []):
+        _append_issue(
+            issues,
+            code="publication.series_target_not_series",
+            severity=severity,
+            path=f"{ref_path}.@id",
+            message=(
+                f"dcat:inSeries points at '{ref_id}', which is not typed dcat:DatasetSeries; "
+                "mark the collection record with additional_type DatasetSeries."
+            ),
+        )
+
+
 def _shape_issues(data: dict[str, Any], policy: ValidationPolicy) -> ValidationReport:
     severity = _issue_severity(policy)
     issues: list[ValidationIssue] = []
@@ -266,12 +321,21 @@ def _shape_issues(data: dict[str, Any], policy: ValidationPolicy) -> ValidationR
             seen_ids[node_id] = path or "@root"
 
     node_ids = set(seen_ids)
+    types_by_id = {
+        node.get("@id"): _type_values(node) for _path, node in nodes if isinstance(node.get("@id"), str)
+    }
     for path, node in nodes:
-        if "schema:Dataset" not in _type_values(node):
+        node_types = _type_values(node)
+        _series_issues(issues, path, node, severity, has_graph, node_ids, types_by_id)
+        if "schema:Dataset" not in node_types:
             continue
 
         node_id = node.get("@id")
         is_battinfo_dataset = isinstance(node_id, str) and node_id.startswith("https://w3id.org/battinfo/dataset/")
+        # A collection (dcat:DatasetSeries) groups member datasets: it is about
+        # nothing in particular and has no files of its own, so the about and
+        # distribution requirements apply to its members, not to it.
+        is_series = "dcat:DatasetSeries" in node_types
 
         about = node.get("schema:about")
         if about is not None and not isinstance(about, list):
@@ -282,7 +346,7 @@ def _shape_issues(data: dict[str, Any], policy: ValidationPolicy) -> ValidationR
                 path=f"{path}.schema:about" if path else "schema:about",
                 message="Publication schema:about must be a list of @id references.",
             )
-        elif is_battinfo_dataset and has_graph and (not isinstance(about, list) or not about):
+        elif is_battinfo_dataset and has_graph and not is_series and (not isinstance(about, list) or not about):
             _append_issue(
                 issues,
                 code="publication.dataset_about_missing",
@@ -325,7 +389,12 @@ def _shape_issues(data: dict[str, Any], policy: ValidationPolicy) -> ValidationR
                 message="Publication schema:distribution must be a list of distribution objects.",
             )
             continue
-        if is_battinfo_dataset and has_graph and (not isinstance(distributions, list) or not distributions):
+        if (
+            is_battinfo_dataset
+            and has_graph
+            and not is_series
+            and (not isinstance(distributions, list) or not distributions)
+        ):
             _append_issue(
                 issues,
                 code="publication.dataset_distribution_missing",

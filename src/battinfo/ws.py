@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 
 from battinfo._jsonio import atomic_write_text as _atomic_write_text
 from battinfo._jsonio import read_json as _read_json
-from battinfo._util import _now_iso
+from battinfo._util import _now_iso, is_dataset_series
 from battinfo.entities import record_set_dirs
 
 # Short-name pattern: 6 lowercase alphanumeric characters at the end of a
@@ -5090,8 +5090,11 @@ class AuthoringWorkspace:
         import shutil
         import zipfile
 
-        # Map dataset IRI → test kind via test records
+        # Map dataset IRI → test kind via test records (test.dataset_ids), with the
+        # dataset's own about naming its test as the fallback, the same links the
+        # deposit graph uses to pick each file's <kind>.zip.
         ds_to_kind: dict[str, str] = {}
+        test_kind: dict[str, str] = {}
         test_dir = records_dir / "test"
         if test_dir.exists():
             for f in sorted(test_dir.glob("*.json")):
@@ -5099,6 +5102,8 @@ class AuthoringWorkspace:
                     raw  = json.loads(f.read_text(encoding="utf-8"))
                     test = raw.get("test", {})
                     kind = test.get("kind", "other")
+                    if test.get("id"):
+                        test_kind[test["id"]] = kind
                     for ds_id in (test.get("dataset_ids") or []):
                         ds_to_kind[ds_id] = kind
                 except Exception:
@@ -5114,7 +5119,10 @@ class AuthoringWorkspace:
                     raw   = json.loads(ds_file.read_text(encoding="utf-8"))
                     ds    = raw.get("dataset", {})
                     ds_id = ds.get("id", "")
-                    kind  = ds_to_kind.get(ds_id, "other")
+                    kind  = ds_to_kind.get(ds_id) or next(
+                        (test_kind[a] for a in (ds.get("about") or []) if a in test_kind),
+                        "other",
+                    )
                     for dist in (ds.get("distributions") or []):
                         url = dist.get("content_url") or ""
                         if not url.startswith("file://"):
@@ -5220,6 +5228,7 @@ class AuthoringWorkspace:
         """
         from battinfo.jsonld import (
             checksum_node,
+            dataset_series_edges,
             electrode_role_links,
             funding_to_jsonld,
             schema_checksum_terms,
@@ -5429,8 +5438,46 @@ class AuthoringWorkspace:
                 cnode["schema:isPartOf"] = {"@id": eq_id}
             return cnode
 
+        # ── Dataset → subject links, read from the dataset's own ``about`` ────
+        # A dataset record names what it is about (its cell instance and the
+        # test that produced it) in ``about``. That list is the primary link;
+        # a test's ``dataset_ids`` is the reverse view, which many corpora never
+        # fill in. Each about entry is classified by the record set it belongs to
+        # (falling back to the IRI path segment for records outside the deposit),
+        # so a test can list its outputs even when only the dataset names it.
+        _test_iris: set[str] = set()
+        for raw in record_sets.get("test", []) or []:
+            _tbody = raw.get("test") if isinstance(raw, dict) else None
+            if isinstance(_tbody, dict) and _tbody.get("id"):
+                _test_iris.add(_tbody["id"])
+        _cell_iris: set[str] = set(instances)
+
+        def _about_kind(iri: str) -> str:
+            if iri in _test_iris:
+                return "test"
+            if iri in _cell_iris:
+                return "cell"
+            if "/test/" in iri:
+                return "test"
+            if "/cell/" in iri:
+                return "cell"
+            return ""
+
+        ds_about: dict[str, builtins.list[str]] = {}
+        test_to_ds_from_about: dict[str, builtins.list[str]] = {}
+        for raw in record_sets.get("dataset", []) or []:
+            _dbody = raw.get("dataset") if isinstance(raw, dict) else None
+            if not isinstance(_dbody, dict) or not _dbody.get("id"):
+                continue
+            _about = [a for a in (_dbody.get("about") or []) if isinstance(a, str) and a]
+            ds_about[_dbody["id"]] = list(dict.fromkeys(_about))
+            for _a in ds_about[_dbody["id"]]:
+                if _about_kind(_a) == "test":
+                    test_to_ds_from_about.setdefault(_a, []).append(_dbody["id"])
+
         # ── Build test instance nodes + dataset→test mapping ──────────────────
         ds_to_test: dict[str, dict] = {}
+        test_info: dict[str, dict] = {}   # test IRI → the same fields, for about-derived links
         test_nodes: list[dict] = []
         _test_recs = record_sets.get("test", [])
         if _test_recs:
@@ -5442,13 +5489,16 @@ class AuthoringWorkspace:
                     protocol = test.get("protocol_name", "")
                     instrument = test.get("instrument_name", "")
 
+                    _tinfo = {
+                        "kind":       test.get("kind", ""),
+                        "cell_id":    cell_id,
+                        "protocol":   protocol,
+                        "test_iri":   test_iri,
+                    }
+                    if test_iri:
+                        test_info[test_iri] = _tinfo
                     for ds_id in (test.get("dataset_ids") or []):
-                        ds_to_test[ds_id] = {
-                            "kind":       test.get("kind", ""),
-                            "cell_id":    cell_id,
-                            "protocol":   protocol,
-                            "test_iri":   test_iri,
-                        }
+                        ds_to_test[ds_id] = dict(_tinfo)
 
                     if test_iri and cell_id:
                         tnode: dict = {
@@ -5508,7 +5558,15 @@ class AuthoringWorkspace:
                             tnode["prov:used"].append({"@id": channel_id})
                         # hasOutput → the dataset IRIs produced by this test, mirrored
                         # as prov:generated so PROV alone reaches the output dataset.
-                        outputs = [{"@id": ds_id} for ds_id in (test.get("dataset_ids") or [])]
+                        # Union of the test's own dataset_ids and every dataset whose
+                        # about names this test.
+                        outputs = [
+                            {"@id": ds_id}
+                            for ds_id in dict.fromkeys([
+                                *(test.get("dataset_ids") or []),
+                                *test_to_ds_from_about.get(test_iri, []),
+                            ])
+                        ]
                         if outputs:
                             tnode["hasOutput"] = outputs
                             tnode["prov:generated"] = outputs
@@ -5567,7 +5625,20 @@ class AuthoringWorkspace:
                 try:
                     ds    = raw.get("dataset", {})
                     ds_id = ds.get("id", "")
-                    ti    = ds_to_test.get(ds_id, {})
+                    ti    = dict(ds_to_test.get(ds_id, {}))
+                    own_about = ds_about.get(ds_id, [])
+                    # No test lists this dataset: take the test and cell from the
+                    # dataset's own about (first entry of each kind is the primary,
+                    # matching Dataset.to_record's ordering).
+                    if not ti.get("test_iri"):
+                        _t = next((a for a in own_about if _about_kind(a) == "test"), "")
+                        if _t:
+                            ti = {**test_info.get(_t, {}), **{k: v for k, v in ti.items() if v}}
+                            ti["test_iri"] = _t
+                    if not ti.get("cell_id"):
+                        ti["cell_id"] = next(
+                            (a for a in own_about if _about_kind(a) == "cell"), ""
+                        ) or test_info.get(ti.get("test_iri", ""), {}).get("cell_id", "")
                     dists = []
                     for dist in (ds.get("distributions") or []):
                         url   = dist.get("content_url") or ""
@@ -5589,6 +5660,12 @@ class AuthoringWorkspace:
                         "cell_id":   ti.get("cell_id", ""),
                         "test_iri":  ti.get("test_iri", ""),
                         "kind":      ti.get("kind", ""),
+                        # schema:about: the record's own about first, then the cell
+                        # the reverse (test.dataset_ids) mapping found.
+                        "about":     list(dict.fromkeys(
+                            [*own_about, *([ti["cell_id"]] if ti.get("cell_id") else [])]
+                        )),
+                        "is_series": is_dataset_series(ds.get("additional_type")),
                         "dists":     dists,
                         "ds":        ds,   # full dataset record for discoverability fields
                     }
@@ -5718,10 +5795,21 @@ class AuthoringWorkspace:
                 "schema:distribution": schema_dists,
                 "dcterms:isPartOf":  {"@id": record_url},
             }
-            if meta.get("cell_id"):
+            if meta.get("is_series"):
+                # A collection (DCAT 3 dataset series) groups the member datasets
+                # that point at it; it has no files of its own, so it carries the
+                # series type and no (empty) distribution arrays.
+                member["@type"].append("dcat:DatasetSeries")
+                if not dists:
+                    del member["dcat:distribution"]
+                    del member["schema:distribution"]
+            if meta.get("about"):
                 # List form: schema:about may carry several subjects, and the
                 # publication validator expects a uniform array of @id references.
-                member["schema:about"] = [{"@id": meta["cell_id"]}]
+                member["schema:about"] = [{"@id": iri} for iri in meta["about"]]
+            # Series membership (dcat:inSeries + schema:isPartOf). dcterms:isPartOf
+            # above still ties the dataset to the deposit's catalog record.
+            member.update(dataset_series_edges((meta.get("ds") or {}).get("series_id")))
 
             # ── Discoverability metadata (FAIR / Google Dataset Search) ────────
             # Carried straight from the dataset record when present, so every member
