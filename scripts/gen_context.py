@@ -58,6 +58,29 @@ EMITTER_CLASS_TERMS = {
 }
 
 
+# One-time correction of v1 before the first release (owner ruling 2026-10-07).
+# v1 was frozen before domain-electrochemistry 0.37.1 and domain-battery 0.20.2
+# were adopted, so these terms kept a private battinfo: mint, a superseded class
+# or a deprecated IRI while the curated property map and the entity type map had
+# moved on. No released package has shipped v1, so it is corrected in place
+# rather than bumped to v2. After 0.8.0 this table must not grow: a change of
+# meaning then needs a v2 context. tests/test_context_v1_agreement.py fails if
+# v1 and the curated maps disagree again.
+PRE_RELEASE_CORRECTIONS = {
+    # private battinfo: mints -> the classes added in domain-electrochemistry 0.37.1
+    "power_capability": "electrochemistry:electrochemistry_4e6c4e9d_64cb_4c24_a0f3_5b4146ebbeb0",
+    "maximum_power": "electrochemistry:electrochemistry_4e6c4e9d_64cb_4c24_a0f3_5b4146ebbeb0",
+    "power_energy_ratio": "electrochemistry:electrochemistry_917660a7_2d98_4564_9ce7_6b5d1087de2c",
+    "round_trip_energy_efficiency": "electrochemistry:electrochemistry_c413d29a_b814_4d88_8db0_0fd0171cff11",
+    "capacity_threshold_exhaustion": "electrochemistry:electrochemistry_02dc55b3_18a1_438e_bee0_ab77670cb2d5",
+    "charging_time": "electrochemistry:electrochemistry_a3d54f83_4dc2_4833_acc2_c8652702d9b7",
+    # CapacityFade (a degradation phenomenon) -> CapacityFadeRate (the quantity)
+    "capacity_fade": "electrochemistry:electrochemistry_5b59a86e_99b4_493e_ae12_33ae8b5ec7c0",
+    # deprecated hyphen-named IRI -> its underscore twin (domain-battery issue #73)
+    "PrismaticBattery": "battery:battery_86c9ca80_de6f_417f_afdc_a7e52fa6322d",
+}
+
+
 def _published() -> dict:
     """The v1 terms already served at the hosted URL, or ``{}`` before first write."""
     if not OUT.exists():
@@ -77,6 +100,7 @@ def build() -> dict:
     fails until the bump is made deliberately.
     """
     context: dict = _published()
+    context.update(PRE_RELEASE_CORRECTIONS)
     for source in (
         _CONTEXT_INLINE,
         label_to_compact(),

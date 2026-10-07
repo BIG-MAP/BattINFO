@@ -498,8 +498,8 @@ slots:
   power_capability:
     # electrochemistry:MaximumPower (domain-electrochemistry 0.37.1), whose
     # altLabel is PowerCapability — one upstream class, so both keys point here
-    # rather than forking one concept across two IRIs. v1 keeps the old
-    # battinfo: mint (append-only); see the PR body.
+    # rather than forking one concept across two IRIs. records.context.v1.json
+    # carried the old battinfo: mint until its pre-release correction.
     slot_uri: electrochemistry:electrochemistry_4e6c4e9d_64cb_4c24_a0f3_5b4146ebbeb0
     range: SpecValue
     description: Continuous power output capability.
@@ -763,8 +763,8 @@ slots:
     # ElectrochemicalDegradationPhenomenon (a NaturalProcess), so a unit-bearing
     # value was typed as a process. CapacityFadeRate is the quantity that was
     # requested in docs/internal/ontology-additions-needed.md and is now
-    # published. records.context.v1.json is frozen on the old phenomenon IRI
-    # (append-only); see the PR body for the divergence.
+    # published. records.context.v1.json carried the old phenomenon IRI until
+    # its pre-release correction.
     slot_uri: electrochemistry:electrochemistry_5b59a86e_99b4_493e_ae12_33ae8b5ec7c0
     range: SpecValue
     description: Capacity fade rate per cycle or per year.

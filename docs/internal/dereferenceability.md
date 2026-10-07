@@ -40,11 +40,12 @@ namespace (ideally promoted into the BattINFO ontology), or migration to an EMMO
 if one exists:
 
 ```
-battinfo:capacityThresholdExhaustion  battinfo:powerCapability
-battinfo:chargingTime                 battinfo:powerEnergyRatio
-battinfo:cycleLifeCRate               battinfo:roundTripEnergyEfficiency
-battinfo:maximumPower                 battinfo:roundTripEnergyEfficiency50Pct
+battinfo:cycleLifeCRate               battinfo:roundTripEnergyEfficiency50Pct
 ```
+
+Six more (`capacityThresholdExhaustion`, `chargingTime`, `maximumPower`, `powerCapability`,
+`powerEnergyRatio`, `roundTripEnergyEfficiency`) left this list at domain-electrochemistry
+0.37.1, and the v1 records context was corrected to the EMMO classes before 0.8.0.
 
 `battinfo:operatingTemperatureMin` / `Max` left this list at
 domain-electrochemistry 0.36.0, which published `MinimumOperatingTemperature` /

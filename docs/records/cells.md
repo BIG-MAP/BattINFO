@@ -973,12 +973,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 
 ```json
 {
-  "@context": [
-    "https://w3id.org/battinfo/context/records/v1.json",
-    {
-      "PrismaticBattery": "battery:battery_86c9ca80_de6f_417f_afdc_a7e52fa6322d"
-    }
-  ],
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
   "@type": [
     "BatteryCellSpecification",
     "schema:ProductModel",
@@ -2116,12 +2111,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 
 ```json
 {
-  "@context": [
-    "https://w3id.org/battinfo/context/records/v1.json",
-    {
-      "PrismaticBattery": "battery:battery_86c9ca80_de6f_417f_afdc_a7e52fa6322d"
-    }
-  ],
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
   "@type": [
     "BatteryCellSpecification",
     "schema:ProductModel",
