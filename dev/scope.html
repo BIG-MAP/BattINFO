@@ -576,76 +576,126 @@
                   
   <section id="scope-and-capabilities">
 <h1>Scope and capabilities<a class="headerlink" href="#scope-and-capabilities" title="Link to this heading">#</a></h1>
-<p>This document maps the BattINFO surface by maturity, so you know what you can
-rely on today, what is available but still evolving, and what is in development.</p>
+<p>This page says what BattINFO covers and how mature each part is: what you can rely on today, what works but may still change, and what is in development.</p>
 <section id="modeling-scope">
 <h2>Modeling scope<a class="headerlink" href="#modeling-scope" title="Link to this heading">#</a></h2>
-<p>BattINFO models the cell level and below — materials, electrodes, electrolytes,
-cells, tests, and datasets. Module and pack modeling is on the roadmap; it is
-not yet part of the record model or the validated surface described here.</p>
-<p>Tested runtime support:</p>
-<ul class="simple">
-<li><p>Python 3.11</p></li>
-<li><p>Python 3.12</p></li>
-</ul>
+<p>BattINFO models the cell level and below. That means materials, electrodes, separators, current collectors, electrolytes and housings, the cells built from them, and the tests, test equipment and datasets around those cells. Modules and packs are on the roadmap; no schema or record type covers them yet.</p>
+<p>Tested runtime support is Python 3.11 and 3.12, on Linux and Windows.</p>
+</section>
+<section id="record-types">
+<h2>Record types<a class="headerlink" href="#record-types" title="Link to this heading">#</a></h2>
+<p>The library registers 22 record types (<code class="docutils literal notranslate"><span class="pre">ENTITY_KINDS</span></code> in <code class="docutils literal notranslate"><span class="pre">src/battinfo/entities.py</span></code>). Each one has a JSON Schema in <code class="docutils literal notranslate"><span class="pre">assets/schemas/</span></code>, is checked by <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">validate</span></code>, and emits JSON-LD. Most come in pairs: a spec is the reusable description, such as a datasheet, a formulation or a protocol, and an instance is one physical thing or event that points at its spec. The <a class="reference internal" href="records/index.html"><span class="std std-doc">record-type pages</span></a> give a reference example and the field reference for each family.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Family</p></th>
+<th class="head"><p>Spec</p></th>
+<th class="head"><p>Instance</p></th>
+<th class="head"><p>Authored with</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Cells</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cell-spec</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cell</span></code></p></td>
+<td><p>the workspace: <code class="docutils literal notranslate"><span class="pre">ws.load(...)</span></code>, <code class="docutils literal notranslate"><span class="pre">ws.add(&quot;cell&quot;,</span> <span class="pre">...)</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Tests</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">test-protocol</span></code> (the test spec)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">test</span></code></p></td>
+<td><p>the workspace: <code class="docutils literal notranslate"><span class="pre">ws.template(&quot;test-spec&quot;,</span> <span class="pre">...)</span></code> then <code class="docutils literal notranslate"><span class="pre">ws.load(...)</span></code>, <code class="docutils literal notranslate"><span class="pre">ws.add(&quot;test&quot;,</span> <span class="pre">...)</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Datasets</p></td>
+<td><p>none</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">dataset</span></code></p></td>
+<td><p>the workspace (<code class="docutils literal notranslate"><span class="pre">ws.add(&quot;test&quot;,</span> <span class="pre">data=...)</span></code>), or <code class="docutils literal notranslate"><span class="pre">Dataset</span></code> with <code class="docutils literal notranslate"><span class="pre">save_dataset</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Materials</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">material-spec</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">material</span></code></p></td>
+<td><p>the workspace: <code class="docutils literal notranslate"><span class="pre">ws.add(&quot;material_spec&quot;,</span> <span class="pre">...)</span></code>, <code class="docutils literal notranslate"><span class="pre">ws.add(&quot;material&quot;,</span> <span class="pre">...)</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Electrodes</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">electrode-spec</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">electrode</span></code></p></td>
+<td><p>the workspace: <code class="docutils literal notranslate"><span class="pre">ws.add(&quot;electrode_spec&quot;,</span> <span class="pre">...)</span></code>, <code class="docutils literal notranslate"><span class="pre">ws.add(&quot;electrode&quot;,</span> <span class="pre">...)</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Separators, current collectors, electrolytes, housings</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">separator-spec</span></code>, <code class="docutils literal notranslate"><span class="pre">current-collector-spec</span></code>, <code class="docutils literal notranslate"><span class="pre">electrolyte-spec</span></code>, <code class="docutils literal notranslate"><span class="pre">housing-spec</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">separator</span></code>, <code class="docutils literal notranslate"><span class="pre">current-collector</span></code>, <code class="docutils literal notranslate"><span class="pre">electrolyte</span></code>, <code class="docutils literal notranslate"><span class="pre">housing</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">battinfo.api</span></code> component functions</p></td>
+</tr>
+<tr class="row-even"><td><p>Equipment</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">equipment-spec</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">equipment</span></code>, <code class="docutils literal notranslate"><span class="pre">channel</span></code></p></td>
+<td><p>the workspace: <code class="docutils literal notranslate"><span class="pre">ws.add(&quot;equipment&quot;,</span> <span class="pre">...)</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Parameter sets</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">parameter-set</span></code></p></td>
+<td><p>none</p></td>
+<td><p>the workspace: <code class="docutils literal notranslate"><span class="pre">ws.add(&quot;parameter_set&quot;,</span> <span class="pre">...)</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Organizations</p></td>
+<td><p>none</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">organization</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">battinfo.api.create_organization</span></code> and <code class="docutils literal notranslate"><span class="pre">save_organization</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>A dataset collection is not a separate type. It is a <code class="docutils literal notranslate"><span class="pre">dataset</span></code> whose <code class="docutils literal notranslate"><span class="pre">additional_type</span></code> includes <code class="docutils literal notranslate"><span class="pre">DatasetSeries</span></code>, and its members point at it with <code class="docutils literal notranslate"><span class="pre">series_id</span></code>; <a class="reference internal" href="howto/publish-a-dataset-collection.html"><span class="std std-doc">Publish a dataset collection</span></a> walks through one.</p>
+<p>Not every type travels everywhere yet. <code class="docutils literal notranslate"><span class="pre">ws.submit()</span></code> sends the specs and instances of cells, tests, materials, electrodes and equipment to the registry, along with datasets, channels and parameter sets. The registry cannot register the four component families, so those records stay local, and organization records are not submitted. A Zenodo deposit graph describes components inline on the cell spec that uses them, and it carries manufacturer and publisher nodes on the records that name them instead of separate organization records.</p>
 </section>
 <section id="supported">
 <h2>Supported<a class="headerlink" href="#supported" title="Link to this heading">#</a></h2>
-<p>These capabilities are covered by tests in CI, documented as supported, and are
-the primary target for feedback:</p>
+<p>These capabilities are covered by tests in CI, documented as supported, and are the primary target for feedback:</p>
 <ul class="simple">
-<li><p>cell-descriptor validation for the stable integration subset</p></li>
-<li><p>cell-descriptor to JSON-LD mapping</p></li>
-<li><p>canonical record workflows for <code class="docutils literal notranslate"><span class="pre">cell-spec</span></code>, <code class="docutils literal notranslate"><span class="pre">cell-instance</span></code>, <code class="docutils literal notranslate"><span class="pre">test</span></code>, and <code class="docutils literal notranslate"><span class="pre">dataset</span></code></p></li>
-<li><p>CLI/API query, save, publish, and index flows for canonical records</p></li>
-<li><p>JSON-LD-first publication with <code class="docutils literal notranslate"><span class="pre">publish(...)</span></code> and <code class="docutils literal notranslate"><span class="pre">load_publication(...)</span></code></p></li>
-<li><p>validation policies <code class="docutils literal notranslate"><span class="pre">default</span></code>, <code class="docutils literal notranslate"><span class="pre">strict</span></code>, <code class="docutils literal notranslate"><span class="pre">publisher</span></code>, and <code class="docutils literal notranslate"><span class="pre">ingest</span></code></p></li>
-<li><p>resolver artifact generation for canonical records</p></li>
-</ul>
-<p>Representative cases exercised end-to-end:</p>
-<ul class="simple">
-<li><p>commercial battery cell records with simple specification-sheet metadata</p></li>
-<li><p>detailed battery cell descriptors for coin, cylindrical, single-layer pouch, multilayer pouch, and prismatic formats</p></li>
-<li><p>explicit canonical <code class="docutils literal notranslate"><span class="pre">test</span></code> records for common battery test workflows</p></li>
-<li><p>explicit canonical <code class="docutils literal notranslate"><span class="pre">dataset</span></code> records linked to a tested cell and optionally to a test</p></li>
-<li><p>repository notebooks that walk through the supported cases</p></li>
+<li><p>validation of every record type against its JSON Schema, with semantic and cross-reference checks, under the policies <code class="docutils literal notranslate"><span class="pre">default</span></code>, <code class="docutils literal notranslate"><span class="pre">strict</span></code>, <code class="docutils literal notranslate"><span class="pre">publisher</span></code> and <code class="docutils literal notranslate"><span class="pre">ingest</span></code> (<code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">validate</span></code>, <code class="docutils literal notranslate"><span class="pre">battinfo.validate_record_report</span></code>)</p></li>
+<li><p>JSON-LD for every record type through <code class="docutils literal notranslate"><span class="pre">battinfo.record_to_jsonld</span></code>, built from the curated property and unit maps and the versioned records context at <code class="docutils literal notranslate"><span class="pre">https://w3id.org/battinfo/context/records/v1.json</span></code></p></li>
+<li><p>authoring with <code class="docutils literal notranslate"><span class="pre">battinfo.workspace()</span></code> for cells, test specs, tests, datasets from local data files, materials, electrodes, equipment and channels, and parameter sets, all saved with deterministic IRIs</p></li>
+<li><p>publishing a workspace as a Zenodo deposit (<code class="docutils literal notranslate"><span class="pre">ws.zenodo()</span></code>, which leaves a draft unless <code class="docutils literal notranslate"><span class="pre">publish=True</span></code>) and submitting it to the registry review queue (<code class="docutils literal notranslate"><span class="pre">ws.submit()</span></code>), with <code class="docutils literal notranslate"><span class="pre">ws.preview_jsonld()</span></code> to run the publication checks on the deposit graph beforehand</p></li>
+<li><p>single records through the record models (<code class="docutils literal notranslate"><span class="pre">CellSpec</span></code>, <code class="docutils literal notranslate"><span class="pre">Cell</span></code>, <code class="docutils literal notranslate"><span class="pre">TestSpec</span></code>, <code class="docutils literal notranslate"><span class="pre">Test</span></code>, <code class="docutils literal notranslate"><span class="pre">Dataset</span></code>) and <code class="docutils literal notranslate"><span class="pre">battinfo.publish(...)</span></code></p></li>
+<li><p>CLI and <code class="docutils literal notranslate"><span class="pre">battinfo.api</span></code> save, query, index and resolver-publish flows for cell specs, cells, test specs, tests and datasets; <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">save</span> <span class="pre">record</span></code> saves a record of any type from a JSON file</p></li>
+<li><p>detailed cell descriptions for coin, cylindrical, single-layer pouch, multilayer pouch and prismatic formats, plus half cells and three-electrode cells through <code class="docutils literal notranslate"><span class="pre">cell_configuration</span></code></p></li>
+<li><p>test records with a controlled <code class="docutils literal notranslate"><span class="pre">kind</span></code> such as <code class="docutils literal notranslate"><span class="pre">cycling</span></code>, <code class="docutils literal notranslate"><span class="pre">capacity_check</span></code>, <code class="docutils literal notranslate"><span class="pre">rate_capability</span></code>, <code class="docutils literal notranslate"><span class="pre">gitt</span></code>, <code class="docutils literal notranslate"><span class="pre">hppc</span></code> or <code class="docutils literal notranslate"><span class="pre">eis</span></code> (the full list is in <code class="docutils literal notranslate"><span class="pre">assets/schemas/test.schema.json</span></code>)</p></li>
+<li><p>dataset collections, as described above</p></li>
+<li><p>the six guide notebooks in <code class="docutils literal notranslate"><span class="pre">docs/guides/</span></code>, which CI executes</p></li>
 </ul>
 </section>
 <section id="preview">
 <h2>Preview<a class="headerlink" href="#preview" title="Link to this heading">#</a></h2>
 <p>Available and expected to work, but interfaces may still be refined:</p>
 <ul class="simple">
-<li><p>reusable cell-spec library workflows beyond the descriptor fixtures</p></li>
-<li><p>curated datasheet validation examples included in the repository</p></li>
+<li><p>Standalone records for separators, current collectors, electrolytes and housings. They validate and emit JSON-LD, but the registry cannot take them yet.</p></li>
+<li><p>Organization records that other records point at.</p></li>
+<li><p>Reading records and data files from a registry with <code class="docutils literal notranslate"><span class="pre">battinfo.registry.Registry</span></code> (<a class="reference internal" href="howto/read-registry-data.html"><span class="std std-doc">how-to</span></a>). Its method names are expected to stay; the catalog columns may grow.</p></li>
+<li><p>The importers and exporters in <code class="docutils literal notranslate"><span class="pre">battinfo.interop</span></code>: BPX, Battery Data Commons, battdat, BattInfoConverter JSON-LD, Discovery, the solid-state database, and the aurora-unicycler, bmgen, PyBaMM and UCP protocol formats. The <a class="reference internal" href="pages/interop-recovery.html"><span class="std std-doc">interop scorecard</span></a> measures how completely the converter and Discovery documents are recovered.</p></li>
+<li><p>Reusable cell-spec library workflows (<code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">library</span> <span class="pre">...</span></code>) beyond the descriptor fixtures.</p></li>
 </ul>
-<p>Feedback is welcome; regressions here do not block a release unless they break a
-supported capability.</p>
+<p>Feedback is welcome; regressions here do not block a release unless they break a supported capability.</p>
 </section>
 <section id="in-development">
 <h2>In development<a class="headerlink" href="#in-development" title="Link to this heading">#</a></h2>
-<p>Present but with no stability promise — documented as draft, experimental, or
-internal:</p>
+<p>Present but with no stability promise:</p>
 <ul class="simple">
-<li><p>datasheet authoring as a public, frozen contract</p></li>
-<li><p>ingestion pipelines and other external-source normalization workflows</p></li>
-<li><p>semantic mapping candidate generation and review workflows</p></li>
-<li><p>reference validation strategies for larger external corpora beyond repository-scale source trees</p></li>
+<li><p>the folder-based CLI batch path (<code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">push</span></code>, <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">batch</span> <span class="pre">...</span></code>, <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">dataset</span> <span class="pre">...</span></code>) and registry administration (<code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">registry</span> <span class="pre">...</span></code>)</p></li>
+<li><p>folder ingest with <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">ingest</span> <span class="pre">...</span></code>, whose engine handles only the <code class="docutils literal notranslate"><span class="pre">cell-instance</span></code> resource type so far (see the <a class="reference internal" href="guarantees.html#ingest-manifest-contract"><span class="std std-ref">ingest manifest contract</span></a>)</p></li>
+<li><p>datasheet tooling under <code class="docutils literal notranslate"><span class="pre">.tools/datasheets/</span></code>, which is maintainer-only and has no public contract</p></li>
+<li><p>semantic mapping candidate generation and review (<code class="docutils literal notranslate"><span class="pre">.tools/semantic/</span></code>)</p></li>
+<li><p>reference validation for corpora larger than a repository-scale source tree</p></li>
 </ul>
 </section>
 <section id="verification">
 <h2>Verification<a class="headerlink" href="#verification" title="Link to this heading">#</a></h2>
 <p>A release is considered ready when:</p>
 <ul class="simple">
-<li><p>all supported workflows install and run from a clean environment</p></li>
+<li><p>the supported workflows install and run from a clean environment (CI builds the wheel and runs <code class="docutils literal notranslate"><span class="pre">tests/installed_smoke.py</span></code> against it)</p></li>
 <li><p>supported validation behavior is documented and machine-readable</p></li>
-<li><p>CI proves the supported Python versions for the supported surface</p></li>
-<li><p>top-level docs do not over-promise preview or in-development features</p></li>
+<li><p>CI passes on the supported Python versions</p></li>
+<li><p>the top-level docs do not promise more than the preview and in-development items deliver</p></li>
 </ul>
-<p>Bootstrap and run the verification gate:</p>
-<div class="highlight-powershell notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">-m</span> <span class="n">venv</span> <span class="p">.</span><span class="n">venv</span>
-<span class="p">.\.</span><span class="n">venv</span><span class="p">\</span><span class="n">Scripts</span><span class="p">\</span><span class="n">python</span> <span class="n">-m</span> <span class="n">pip</span> <span class="n">install</span> <span class="p">-</span><span class="n">-upgrade</span> <span class="n">pip</span> <span class="n">setuptools</span> <span class="n">wheel</span>
-<span class="p">.\.</span><span class="n">venv</span><span class="p">\</span><span class="n">Scripts</span><span class="p">\</span><span class="n">python</span> <span class="n">-m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">-e</span> <span class="p">.</span><span class="no">[dev]</span>
-<span class="p">.\.</span><span class="n">venv</span><span class="p">\</span><span class="n">Scripts</span><span class="p">\</span><span class="n">python</span> <span class="p">.</span><span class="n">tools</span><span class="p">/</span><span class="n">quality</span><span class="p">/</span><span class="n">run_verification</span><span class="p">.</span><span class="n">py</span>
+<p>To run the verification gate locally:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>sync<span class="w"> </span>--all-extras
+uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>.tools/quality/run_verification.py
 </pre></div>
 </div>
 </section>
@@ -699,6 +749,7 @@ internal:</p>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#modeling-scope">Modeling scope</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#record-types">Record types</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#supported">Supported</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#preview">Preview</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#in-development">In development</a></li>
