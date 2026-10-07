@@ -18,12 +18,17 @@ References
 
 from __future__ import annotations
 
+import copy
+import hashlib
 import json
 import math
+import warnings as _warnings
 from dataclasses import dataclass, field
+from datetime import date
 from pathlib import Path
 from typing import Any, Mapping
 
+from battinfo.entities import stable_uid
 from battinfo.interop._common import load_json_source
 
 PathLike = str | Path
@@ -1055,6 +1060,243 @@ _BPX_BLOCK_SCOPES = {
 }
 
 
+# ── Parameter files: identity, layout upgrade, checks ──────────────────────
+#
+# A published BPX file is served to solvers as its own bytes, never rebuilt
+# from claims: the claims are an index for search and collation, and a
+# reconstruction can drop what the importer does not model (Particle blends,
+# vendor User-defined encodings, Validation curves). These helpers give the
+# file an identity, a declared conversion when current parsers reject its
+# layout, and recorded checks.
+
+# Top-level sections the parameter importer reads (or folds, for State).
+_BPX_PARAMETER_SECTIONS = frozenset(
+    {"Header", "header", "Parameterisation", "parameterisation", "parameters", "State"}
+)
+
+
+def bpx_content_digest(source: Mapping[str, Any] | str | Path) -> str:
+    """SHA-256 of a BPX document's canonical JSON: the identity of a parameter file.
+
+    Canonical means sorted keys, no insignificant whitespace, UTF-8. A
+    re-indented copy or a CRLF checkout of the same file has the same digest;
+    any changed value changes it. Records imported from the file mint their
+    uids from this digest (IDENTIFIER_POLICY 6.3).
+    """
+    data, _ = _load_bpx(source)
+    canonical = json.dumps(data, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+@dataclass
+class BpxUpgradeResult:
+    """Result of :func:`upgrade_bpx`: the rewritten document and what moved."""
+
+    document: dict[str, Any]
+    source_version: str | None
+    target_version: str
+    changes: list[str] = field(default_factory=list)
+
+    @property
+    def changed(self) -> bool:
+        return bool(self.changes)
+
+    def conversion_note(self, tool: str) -> str:
+        """One line for a runnable distribution's ``conversion`` field."""
+        moved = "; ".join(self.changes) if self.changes else "no changes"
+        return (
+            f"BPX {self.source_version} layout rewritten as BPX {self.target_version} "
+            f"by {tool}: {moved}. No values changed."
+        )
+
+    def to_json(self, *, indent: int | None = 2) -> str:
+        return json.dumps(self.document, indent=indent, ensure_ascii=False) + "\n"
+
+    def save(self, path: PathLike) -> Path:
+        out = Path(path)
+        out.write_text(self.to_json(), encoding="utf-8", newline="\n")
+        return out
+
+
+def upgrade_bpx(
+    source: Mapping[str, Any] | str | Path, *, target_version: str = "1.1.0"
+) -> BpxUpgradeResult:
+    """Rewrite a BPX 1.0-layout document in the 1.1 layout, values untouched.
+
+    BPX 1.1 moved the initial and ambient temperatures out of ``Cell`` and the
+    initial electrolyte concentration out of ``Electrolyte`` into a top-level
+    ``State`` block, and the 1.1 parser rejects files that still carry them in
+    the old places. This moves exactly those fields and sets ``Header.BPX``;
+    every value is copied as-is. A document already at 1.1 or later comes back
+    unchanged. BPX 0.x files are converted by the bpx package itself
+    (``bpx.convert_v0_to_v1``), so they are refused here.
+    """
+    if _bpx_version_tuple(target_version)[:2] != (1, 1):
+        raise ValueError(f"upgrade_bpx only targets BPX 1.1.x; got {target_version!r}.")
+    data, _ = _load_bpx(source)
+    document = copy.deepcopy(data)
+    header = document.get("Header")
+    if not isinstance(header, dict):
+        raise ValueError("BPX document has no Header block.")
+    source_version = header.get("BPX")
+    version = _bpx_version_tuple(source_version)
+    if not version:
+        raise ValueError(f"BPX Header.BPX {source_version!r} is not a version number.")
+    source_label = str(source_version)
+    if version[0] < 1:
+        raise ValueError(
+            f"BPX {source_label} is a 0.x file; the bpx package converts those itself "
+            "(bpx.convert_v0_to_v1, or parse with convert_legacy=True)."
+        )
+    if version[:2] >= (1, 1):
+        return BpxUpgradeResult(document, source_label, source_label, [])
+
+    changes: list[str] = []
+    parameterisation = document.get("Parameterisation")
+    if isinstance(parameterisation, dict):
+        before_cell = set((parameterisation.get("Cell") or {}).keys())
+        before_electrolyte = set((parameterisation.get("Electrolyte") or {}).keys())
+        moved = _relocate_state_fields_1_1(parameterisation)
+        if moved:
+            state = document.setdefault("State", {})
+            for section, fields in moved.items():
+                target = state.setdefault(section, {})
+                for key, value in fields.items():
+                    if key in target:
+                        raise ValueError(
+                            f"BPX State.{section}.{key} is set both in State and in the "
+                            "1.0 location; refusing to choose between them."
+                        )
+                    target[key] = value
+            after_cell = set((parameterisation.get("Cell") or {}).keys())
+            after_electrolyte = set((parameterisation.get("Electrolyte") or {}).keys())
+            for key in sorted(before_cell - after_cell):
+                section = "Initial conditions" if key.startswith("Initial") else "Thermal environment"
+                changes.append(f"Cell.{key} -> State.{section}.{key}")
+            for key in sorted(before_electrolyte - after_electrolyte):
+                changes.append(
+                    f"Electrolyte.{key} -> State.Initial conditions."
+                    "Initial electrolyte concentration [mol.m-3]"
+                )
+    header["BPX"] = target_version
+    changes.append(f"Header.BPX {source_label} -> {target_version}")
+    return BpxUpgradeResult(document, source_label, target_version, changes)
+
+
+def check_bpx(source: Mapping[str, Any] | str | Path) -> dict[str, Any]:
+    """Parse a document with the official ``bpx`` package and report a file check.
+
+    Parses the way PyBaMM does (legacy 0.x conversion on), and says so in the
+    detail when a conversion or deprecation warning fired, since a file that
+    only parses after conversion is not current. Returns a ``checks`` entry
+    for a parameter-file distribution. Needs ``pip install bpx``.
+    """
+    try:
+        import bpx as bpx_lib  # noqa: PLC0415
+    except ImportError as exc:  # pragma: no cover - bpx is a dev dependency
+        raise ImportError("check_bpx needs the official parser: pip install bpx") from exc
+    from importlib.metadata import PackageNotFoundError, version  # noqa: PLC0415
+
+    try:
+        tool = f"bpx {version('bpx')}"
+    except PackageNotFoundError:  # pragma: no cover
+        tool = "bpx"
+    data, _ = _load_bpx(source)
+    with _warnings.catch_warnings(record=True) as caught:
+        _warnings.simplefilter("always")
+        try:
+            bpx_lib.parse_bpx_obj(copy.deepcopy(data))
+            passed, detail = True, "Parsed by the official bpx parser."
+        except Exception as exc:  # noqa: BLE001 - any parse failure is the finding
+            passed = False
+            lines = [line.strip() for line in str(exc).splitlines() if line.strip()]
+            lines = [line for line in lines if not line.startswith("For further information")]
+            detail = " ".join(lines)[:600]
+    # Only the parser's own notes (legacy conversion, version-format
+    # deprecations); library noise such as pyparsing deprecations is not a
+    # finding about the file.
+    notes = sorted(
+        {str(w.message).strip() for w in caught if "bpx" in str(w.message).lower()}
+    )
+    if notes:
+        detail = f"{detail} Warnings: {' | '.join(notes)}"[:900]
+    return {
+        "check": "bpx_parse",
+        "tool": tool,
+        "passed": passed,
+        "detail": detail,
+        "checked_at": date.today().isoformat(),
+    }
+
+
+def bpx_file_distribution(
+    file: str | Path | bytes,
+    *,
+    content_url: str,
+    role: str = "source",
+    name: str | None = None,
+    conforms_to: str | None = None,
+    derived_from: str | None = None,
+    conversion: str | None = None,
+    software_requirements: list[str] | None = None,
+    checks: list[Mapping[str, Any]] | None = None,
+    description: str | None = None,
+) -> dict[str, Any]:
+    """A parameter-set ``distributions`` entry for one BPX file.
+
+    Hashes the exact bytes (the checksum a downloader verifies) and reads
+    ``Header.BPX`` for ``conforms_to`` unless given. ``content_url`` is where
+    an immutable copy of those bytes is served. A ``runnable`` entry needs
+    ``derived_from`` (the source file's sha256, bare hex or ``sha256:<hex>``)
+    and ``conversion`` (what changed, by which tool).
+    """
+    if role not in ("source", "runnable"):
+        raise ValueError(f"role must be 'source' or 'runnable'; got {role!r}.")
+    if isinstance(file, (bytes, bytearray)):
+        raw = bytes(file)
+        file_name = name or "parameters.bpx.json"
+    else:
+        path = Path(file)
+        raw = path.read_bytes()
+        file_name = name or path.name
+    try:
+        document = json.loads(raw.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise ValueError(f"{file_name} is not a UTF-8 JSON document: {exc}") from exc
+    if conforms_to is None:
+        _title, header_version, _model, _desc = _extract_header(document)
+        if header_version is None:
+            raise ValueError(f"{file_name} has no Header.BPX version; pass conforms_to=.")
+        conforms_to = f"BPX {header_version}"
+    entry: dict[str, Any] = {
+        "type": "DataDownload",
+        "name": file_name,
+        "role": role,
+        "content_url": content_url,
+        "encoding_format": "application/json",
+        "conforms_to": conforms_to,
+        "byte_size": len(raw),
+        "checksum": {"algorithm": "sha256", "value": hashlib.sha256(raw).hexdigest()},
+    }
+    if description:
+        entry["description"] = description
+    if role == "runnable":
+        if not derived_from or not conversion:
+            raise ValueError("a runnable file needs derived_from= (source sha256) and conversion=.")
+        digest = derived_from.removeprefix("sha256:").lower()
+        if len(digest) != 64 or any(c not in "0123456789abcdef" for c in digest):
+            raise ValueError("derived_from must be a sha256 hex digest (optionally 'sha256:'-prefixed).")
+        entry["derived_from"] = f"sha256:{digest}"
+        entry["conversion"] = conversion
+    elif derived_from or conversion:
+        raise ValueError("derived_from/conversion only apply to role='runnable'.")
+    if software_requirements:
+        entry["software_requirements"] = [str(item) for item in software_requirements]
+    if checks:
+        entry["checks"] = [dict(check) for check in checks]
+    return entry
+
+
 @dataclass
 class BpxParameterImportResult:
     """Result of :func:`from_bpx_parameters`.
@@ -1078,6 +1320,10 @@ class BpxParameterImportResult:
         its ``annex`` so a re-export reproduces the file and nothing is lost.
     warnings:
         Unmapped fields and skipped values.
+    content_digest:
+        SHA-256 of the file's canonical JSON (:func:`bpx_content_digest`).
+        Records minted from the file are addressed by it: the same file always
+        mints the same IRIs, and any changed value mints new ones.
     """
 
     claims: dict[str, list[dict[str, Any]]]
@@ -1089,6 +1335,20 @@ class BpxParameterImportResult:
     references: str | None = None
     user_defined: dict[str, Any] = field(default_factory=dict)
     warnings: list[str] = field(default_factory=list)
+    content_digest: str | None = None
+
+    def file_uid(self, block: str | None = None) -> str | None:
+        """The content-addressed uid a record minted from this file gets.
+
+        ``block=None`` is the set record (the file as a whole); a block key
+        (``"negative_material"``, ...) is that block's member record. Known
+        before any record is minted, so the file can be uploaded under its
+        record's uid first. ``None`` when the import has no digest.
+        """
+        if self.content_digest is None:
+            return None
+        seed = f"parameter-set-file:{self.content_digest}"
+        return stable_uid(seed if block is None else f"{seed}:{block}")
 
     def to_records(
         self,
@@ -1098,6 +1358,7 @@ class BpxParameterImportResult:
         name: str | None = None,
         default_provenance_class: str = "fitted",
         by_block: bool = False,
+        distributions: list[Mapping[str, Any]] | None = None,
         **record_kwargs: Any,
     ) -> list[dict[str, Any]] | dict[str, dict[str, Any]]:
         """Build canonical parameter-set records from the imported claims.
@@ -1116,8 +1377,21 @@ class BpxParameterImportResult:
         ``by_block=True`` returns ``{block_key: record}`` instead of a flat
         list — the exact mapping :func:`to_bpx`'s ``parameter_sets`` argument
         takes, so import → records → export is symmetric by construction.
+
+        Every record is addressed by the file (IDENTIFIER_POLICY 6.3): uids
+        derive from :attr:`content_digest`, never from names or targets, so a
+        solver handed the set's IRI always gets the same parameters.
+        ``distributions`` attaches the file itself to the set record (build
+        entries with :func:`bpx_file_distribution`); it needs ``cell_spec_id``,
+        because only a targeted import mints the set.
         """
         from battinfo.api import create_parameter_set  # noqa: PLC0415
+
+        if distributions and cell_spec_id is None:
+            raise ValueError(
+                "distributions ride the set record, and the set only mints for a "
+                "targeted import: pass cell_spec_id=... as well."
+            )
 
         materials = dict(materials or {})
         base = name or self.title or self.source_file or "BPX import"
@@ -1175,6 +1449,7 @@ class BpxParameterImportResult:
                 return
             record = create_parameter_set(
                 name=f"{base} - {label}",
+                **({"uid": self.file_uid(block)} if self.content_digest else {}),
                 scope=scope,
                 claims=block_claims,
                 model_context=model_context,
@@ -1235,6 +1510,7 @@ class BpxParameterImportResult:
         if cell_spec_id is not None and records_by_block:
             set_record = create_parameter_set(
                 name=base,
+                **({"uid": self.file_uid()} if self.content_digest else {}),
                 cell_spec_id=cell_spec_id,
                 scope="cell",
                 members={
@@ -1243,6 +1519,7 @@ class BpxParameterImportResult:
                 },
                 model_context=model_context,
                 **({"annex": dict(self.user_defined)} if self.user_defined else {}),
+                **({"distributions": list(distributions)} if distributions else {}),
                 **record_kwargs,
             )
             set_iri = set_record["parameter_set"]["id"]
@@ -1250,6 +1527,11 @@ class BpxParameterImportResult:
                 record["parameter_set"]["set_id"] = set_iri
             records.append(set_record)
             records_by_block["set"] = set_record
+        elif distributions:
+            raise ValueError(
+                "distributions were given but no set record minted: the file "
+                "produced no records for the given materials/cell_spec_id."
+            )
         return records_by_block if by_block else records
 
 
@@ -1337,6 +1619,7 @@ def from_bpx_parameters(source: Mapping[str, Any] | str | Path) -> BpxParameterI
     """
     warnings: list[str] = []
     data, source_file = _load_bpx(source)
+    content_digest = bpx_content_digest(data)
     title, bpx_version, model_type, description = _extract_header(data)
 
     params_raw = (
@@ -1402,6 +1685,21 @@ def from_bpx_parameters(source: Mapping[str, Any] | str | Path) -> BpxParameterI
             warnings.append(
                 f"BPX Parameterisation block '{block_name}' is not recognised; ignored."
             )
+    # Top-level sections beyond Header/Parameterisation/State are named too.
+    # Validation holds measured curves, not parameters: they stay in the
+    # source file (published with the set), and belong in a dataset record.
+    for section, value in data.items():
+        if section in _BPX_PARAMETER_SECTIONS:
+            continue
+        if section == "Validation" and isinstance(value, Mapping):
+            series = [str(k) for k in value]
+            warnings.append(
+                f"BPX Validation block not read as claims ({len(series)} series: "
+                f"{', '.join(series)}). The measured curves stay in the source "
+                "file; describe them as a dataset record to make them findable."
+            )
+        else:
+            warnings.append(f"BPX top-level section '{section}' is not recognised; ignored.")
 
     if not claims:
         warnings.append("No parameter claims found in BPX electrode/separator/electrolyte blocks.")
@@ -1416,6 +1714,7 @@ def from_bpx_parameters(source: Mapping[str, Any] | str | Path) -> BpxParameterI
         references=_extract_references(data),
         user_defined=user_defined,
         warnings=warnings,
+        content_digest=content_digest,
     )
 
 
