@@ -26,7 +26,7 @@ from battinfo.api._shared import (
     _validate_canonical_record,
     _validate_publication_artifact,
 )
-from battinfo.jsonld import electrode_role_links, schema_checksum_terms
+from battinfo.jsonld import dataset_series_edges, electrode_role_links, schema_checksum_terms
 from battinfo.transform.cell_spec_node import build_cell_spec_node
 from battinfo.validate.core import DEFAULT_POLICY, ValidationPolicy
 
@@ -558,9 +558,7 @@ def _resolver_jsonld(doc: dict[str, Any]) -> dict[str, Any]:
             refs = [{"@id": item} for item in dataset["is_based_on"] if isinstance(item, str)]
             if refs:
                 out["schema:isBasedOn"] = refs
-        if isinstance(dataset.get("series_id"), str) and dataset["series_id"]:
-            out["dcat:inSeries"] = {"@id": dataset["series_id"]}
-            out["schema:isPartOf"] = {"@id": dataset["series_id"]}
+        out.update(dataset_series_edges(dataset.get("series_id")))
         included_in_data_catalog = dataset.get("included_in_data_catalog")
         included_in_data_catalog_value = _schema_data_catalog_value(included_in_data_catalog)
         if included_in_data_catalog_value is not None:

@@ -9,6 +9,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **How-to: publish a dataset collection.** A new page, `docs/howto/publish-a-dataset-collection.md`, walks through a collection of three datasets: when a collection is worth having, how to save the collection and its members with `Dataset` and `save_dataset`, how to check the deposit graph with `preview_jsonld()` and `validate_publication_report`, and what the JSON-LD looks like. It also states the rules that keep the links stable: the collection IRI is seeded from its access URL and name, so the name is frozen once published; the collection publishes before its members; and a collection has no distributions and no `about`. Its code runs in the doc-snippets CI job.
+
 - **`chemistry` has a proper vocabulary: 33 labels in two levels.** The
   nine recognised labels mixed three things: the couple (`li-ion`),
   rechargeability (`li-primary`) and the electrolyte (`alkaline`). That
@@ -75,6 +77,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
     `electrode_spec.active_material_spec_id` and `channel.equipment_id`.
 
 ### Fixed
+
+- **The Zenodo deposit graph reads a dataset's own `about` and understands collections.** The deposit builder took a member dataset's `schema:about` and its generated-by test only from the tests' `dataset_ids`. A corpus that links each dataset to its cell and test through the dataset's `about` list, and leaves `dataset_ids` empty, got no `schema:about` on any member, so `preview_jsonld()` reported `publication.dataset_about_missing` for every dataset and publishing was refused (95 errors on the Flores half-cell corpus). The dataset's `about` is now the primary source, unioned with what `dataset_ids` gives, and a test lists every dataset that names it as `hasOutput`/`prov:generated`. A collection (`additional_type = "DatasetSeries"`) is now typed `dcat:DatasetSeries` in the deposit and carries no empty distribution arrays, and its members carry `dcat:inSeries` and `schema:isPartOf` pointing at it, as the record and resolver emitters already did. The publication validator and its SHACL shapes exempt a series from the about and distribution rules. A `dcat:inSeries` target inside the package must be typed `dcat:DatasetSeries` (`publication.series_target_not_series`); a target outside it only warns (`publication.series_not_in_package`), since a collection may be published before its members. On the Flores corpus the gold-standard check goes from 98 errors and 96 warnings to a clean pass.
 
 - **Pre-release fixes from the close-out review.** Four defects that would
   have frozen into 0.8.0:

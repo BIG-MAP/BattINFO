@@ -27,7 +27,7 @@ from battinfo.bundle import (
     Test,
     ZenodoCellRecord,
 )
-from battinfo.jsonld import electrode_role_links, schema_checksum_terms
+from battinfo.jsonld import dataset_series_edges, electrode_role_links, schema_checksum_terms
 from battinfo.validate.core import PUBLISHER_POLICY, ValidationPolicy
 from battinfo.validate.publication import validate_publication_report
 from battinfo.validate.pydantic import validate_json
@@ -1064,9 +1064,7 @@ def _dataset_jsonld_node(
         node["schema:spatialCoverage"] = dataset.spatial_coverage
     if dataset.is_based_on:
         node["schema:isBasedOn"] = list(dataset.is_based_on)
-    if dataset.series_id is not None:
-        node["dcat:inSeries"] = {"@id": dataset.series_id}
-        node["schema:isPartOf"] = {"@id": dataset.series_id}
+    node.update(dataset_series_edges(dataset.series_id))
     if dataset.included_in_data_catalog is not None:
         included_in_data_catalog = _schema_data_catalog_node(dataset.included_in_data_catalog)
         if included_in_data_catalog is not None:

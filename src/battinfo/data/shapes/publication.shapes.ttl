@@ -37,14 +37,26 @@ bsh:CatalogShape a sh:NodeShape ;
         sh:message "Catalog should attribute a creator (FAIR Reusable)." ] .
 
 # ── Member dataset: one dcat:Dataset per test result ─────────────────────────
+# A collection (dcat:DatasetSeries, a subclass of dcat:Dataset in DCAT 3) groups
+# member datasets and has no files of its own, so each distribution rule is
+# "is a series, or carries the distribution".
 bsh:MemberDatasetShape a sh:NodeShape ;
     sh:targetClass dcat:Dataset ;
-    sh:property [
-        sh:path dcat:distribution ; sh:minCount 1 ; sh:severity sh:Violation ;
-        sh:message "Member dataset must carry at least one dcat:distribution." ] ;
-    sh:property [
-        sh:path schema:distribution ; sh:minCount 1 ; sh:severity sh:Warning ;
-        sh:message "Member dataset should mirror a schema:DataDownload for schema.org consumers." ] .
+    sh:or (
+        [ sh:class dcat:DatasetSeries ]
+        [ sh:path dcat:distribution ; sh:minCount 1 ]
+    ) ;
+    sh:severity sh:Violation ;
+    sh:message "Member dataset must carry at least one dcat:distribution." .
+
+bsh:MemberDatasetDownloadShape a sh:NodeShape ;
+    sh:targetClass dcat:Dataset ;
+    sh:or (
+        [ sh:class dcat:DatasetSeries ]
+        [ sh:path schema:distribution ; sh:minCount 1 ]
+    ) ;
+    sh:severity sh:Warning ;
+    sh:message "Member dataset should mirror a schema:DataDownload for schema.org consumers." .
 
 # ── Distribution: a downloadable file ────────────────────────────────────────
 bsh:DistributionShape a sh:NodeShape ;
