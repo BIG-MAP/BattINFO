@@ -9180,6 +9180,14 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "additionalProperties": true,
               "description": "Source-file extension entries carried verbatim (e.g. a BPX User-defined block): original key -> raw value. No standard semantics are claimed for these; they exist so a re-export reproduces the source file and nothing is silently lost."
             },
+            "distributions": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/ParameterFile"
+              },
+              "description": "The source file itself, when the record is the published home of a parameter file (a BPX file, for instance). A record carrying its file is addressed by that file: its uid derives from the file content, so the IRI always resolves to the same bytes and a changed file mints a new record. Role 'source' is the file exactly as its authors published it; role 'runnable' is a declared, checksummed conversion of it (for example a BPX 1.0 layout upgraded to 1.1) for solvers that cannot read the source as-is. Claims extracted from the file are an index for search and collation; a solver reads the file."
+            },
             "members": {
               "type": "object",
               "additionalProperties": false,
@@ -9720,6 +9728,165 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "$ref": "#/$defs/Organization"
             }
           }
+        },
+        "ParameterFile": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "content_url",
+            "encoding_format",
+            "checksum"
+          ],
+          "properties": {
+            "type": {
+              "const": "DataDownload",
+              "description": "JSON-LD type discriminator."
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "description": "File name."
+            },
+            "description": {
+              "type": "string"
+            },
+            "role": {
+              "type": "string",
+              "enum": [
+                "source",
+                "runnable"
+              ],
+              "description": "'source': the file exactly as published by its authors. 'runnable': a declared conversion of the source that current solvers load (derived_from names the source checksum, conversion says what changed)."
+            },
+            "content_url": {
+              "type": "string",
+              "format": "uri",
+              "description": "Direct download URL of an immutable copy of the file."
+            },
+            "encoding_format": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Media type of the file (e.g. 'application/json')."
+            },
+            "conforms_to": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The format and version the file follows, e.g. 'BPX 1.0' or 'BPX 1.1'."
+            },
+            "byte_size": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "File size in bytes."
+            },
+            "checksum": {
+              "$ref": "#/$defs/Checksum",
+              "description": "Integrity checksum of the exact bytes at content_url."
+            },
+            "derived_from": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "description": "For a runnable conversion: 'sha256:<hex>' of the source file it was converted from."
+            },
+            "conversion": {
+              "type": "string",
+              "minLength": 1,
+              "description": "For a runnable conversion: what changed relative to the source, and which tool and version made the change."
+            },
+            "software_requirements": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "description": "Software a solver needs beyond the format itself to run this file as intended (e.g. 'aepybamm>=0.2.3' for a file whose User-defined block encodes vendor functions)."
+            },
+            "checks": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/FileCheck"
+              },
+              "description": "Checks run on this exact file at ingest (format parse, solver smoke run)."
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "role": {
+                    "const": "runnable"
+                  }
+                },
+                "required": [
+                  "role"
+                ]
+              },
+              "then": {
+                "required": [
+                  "derived_from",
+                  "conversion"
+                ]
+              }
+            }
+          ],
+          "description": "One parameter file: where its immutable bytes live, what format it follows, and what was checked."
+        },
+        "Checksum": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "algorithm",
+            "value"
+          ],
+          "properties": {
+            "algorithm": {
+              "type": "string",
+              "enum": [
+                "sha256"
+              ],
+              "description": "Hash algorithm. Parameter files are addressed by sha256 only."
+            },
+            "value": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$",
+              "description": "Lowercase hex digest."
+            }
+          },
+          "description": "Integrity checksum of a parameter file."
+        },
+        "FileCheck": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "check",
+            "passed"
+          ],
+          "properties": {
+            "check": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "description": "What was checked, e.g. 'bpx_parse' (the official bpx package parses the file) or 'simulation_smoke' (a short simulation ran to completion)."
+            },
+            "tool": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Tool and version that ran the check, e.g. 'bpx 1.1.1' or 'pybamm 26.9.0'."
+            },
+            "passed": {
+              "type": "boolean"
+            },
+            "detail": {
+              "type": "string",
+              "description": "What was run and what happened (the first error on failure)."
+            },
+            "checked_at": {
+              "type": "string",
+              "format": "date",
+              "description": "Date the check ran."
+            }
+          },
+          "description": "One check run on a parameter file at ingest."
         }
       }
     }

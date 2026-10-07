@@ -2294,6 +2294,7 @@ def _base_context(
     include_has_measurement: bool = True,
     include_has_property: bool = False,
     include_bibo: bool = False,
+    include_files: bool = False,
 ) -> list[Any]:
     context_entry: dict[str, Any] = {
         "schema": "https://schema.org/",
@@ -2301,6 +2302,11 @@ def _base_context(
     }
     if include_bibo:
         context_entry["bibo"] = "http://purl.org/ontology/bibo/"
+    if include_files:
+        # Parameter files: byte size (dcat) and the source a conversion was
+        # derived from (prov). Both prefixes are in the hosted records context.
+        context_entry["dcat"] = "http://www.w3.org/ns/dcat#"
+        context_entry["prov"] = "http://www.w3.org/ns/prov#"
     if include_battinfo:
         # SLASH namespace (record layer): only the unmapped-property fallback
         # terms resolve here. The hash namespace belongs to the application
@@ -2752,6 +2758,16 @@ def _to_domain_battery_jsonld_parameter_set(data: dict[str, Any]) -> dict[str, A
     if isinstance(body.get("set_id"), str) and body["set_id"]:
         node["schema:isPartOf"] = {"@id": body["set_id"]}
 
+    # The parameter file itself: what a solver reads. Claims above are the
+    # index; these are the bytes, addressed by checksum.
+    file_nodes = [
+        file_node
+        for item in body.get("distributions") or []
+        if (file_node := _parameter_file_node(item)) is not None
+    ]
+    if file_nodes:
+        node["schema:distribution"] = file_nodes[0] if len(file_nodes) == 1 else file_nodes
+
     citation = _citation_to_jsonld(data.get("provenance"))
     if citation is not None:
         node["schema:citation"] = citation
@@ -2770,9 +2786,82 @@ def _to_domain_battery_jsonld_parameter_set(data: dict[str, Any]) -> dict[str, A
                 for c in (body.get("claims") or [])
                 if isinstance(c, dict)
             ),
+            include_files=bool(file_nodes),
         ),
         "@graph": [node],
     }
+
+
+def _parameter_file_node(item: Any) -> dict[str, Any] | None:
+    """One parameter-set ``distributions`` entry as a schema:DataDownload node.
+
+    Role rides dcterms:type and the format version dcterms:conformsTo, as for
+    test-protocol artifacts. A runnable conversion points at its source by
+    checksum (prov:wasDerivedFrom) and states what changed as the generating
+    activity's description. Ingest checks ride schema:additionalProperty.
+    """
+    from battinfo.jsonld import schema_checksum_terms  # noqa: PLC0415
+
+    if not isinstance(item, Mapping) or not isinstance(item.get("content_url"), str):
+        return None
+    out: dict[str, Any] = {
+        "@type": "schema:DataDownload",
+        "schema:contentUrl": item["content_url"],
+    }
+    for key, term in (
+        ("name", "schema:name"),
+        ("description", "schema:description"),
+        ("encoding_format", "schema:encodingFormat"),
+        ("role", "dcterms:type"),
+    ):
+        if isinstance(item.get(key), str) and item[key]:
+            out[term] = item[key]
+    conforms_to = item.get("conforms_to")
+    if isinstance(conforms_to, str) and conforms_to:
+        out["dcterms:conformsTo"] = (
+            {"@id": conforms_to}
+            if conforms_to.startswith(("http://", "https://"))
+            else conforms_to
+        )
+    if isinstance(item.get("byte_size"), int):
+        out["dcat:byteSize"] = item["byte_size"]
+    out.update(schema_checksum_terms(item.get("checksum")))
+    derived_from = item.get("derived_from")
+    if isinstance(derived_from, str) and derived_from.startswith("sha256:"):
+        out["prov:wasDerivedFrom"] = {
+            "@type": "schema:DataDownload",
+            "schema:sha256": derived_from.removeprefix("sha256:"),
+        }
+    if isinstance(item.get("conversion"), str) and item["conversion"]:
+        out["prov:wasGeneratedBy"] = {
+            "@type": "prov:Activity",
+            "dcterms:description": item["conversion"],
+        }
+    requirements = [r for r in item.get("software_requirements") or [] if isinstance(r, str) and r]
+    if requirements:
+        out["schema:softwareRequirements"] = (
+            requirements[0] if len(requirements) == 1 else requirements
+        )
+    checks: list[dict[str, Any]] = []
+    for check in item.get("checks") or []:
+        if not isinstance(check, Mapping) or not isinstance(check.get("check"), str):
+            continue
+        check_node: dict[str, Any] = {
+            "@type": "schema:PropertyValue",
+            "schema:name": check["check"],
+            "schema:value": bool(check.get("passed")),
+        }
+        detail = " ".join(
+            str(part) for part in (check.get("tool"), check.get("detail")) if part
+        )
+        if detail:
+            check_node["schema:description"] = detail
+        if isinstance(check.get("checked_at"), str):
+            check_node["dcterms:date"] = check["checked_at"]
+        checks.append(check_node)
+    if checks:
+        out["schema:additionalProperty"] = checks[0] if len(checks) == 1 else checks
+    return out
 
 
 def _to_domain_battery_jsonld_material(data: dict[str, Any]) -> dict[str, Any]:

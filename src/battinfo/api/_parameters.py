@@ -164,6 +164,7 @@ def _record_from_parameter_set(
     electrode_polarity: str | None = None,
     model_context: Mapping[str, Any] | None = None,
     annex: Mapping[str, Any] | None = None,
+    distributions: list[Mapping[str, Any]] | None = None,
     default_provenance_class: str | None = None,
     description: str | None = None,
     comment: str | None = None,
@@ -272,6 +273,14 @@ def _record_from_parameter_set(
         # Source-file extension entries (e.g. a BPX User-defined block),
         # verbatim: no semantics claimed, carried so re-export loses nothing.
         body["annex"] = dict(annex)
+    if distributions:
+        # The parameter file itself (source bytes, optionally a declared
+        # runnable conversion). The schema checks each entry's shape.
+        if not isinstance(distributions, list) or not all(
+            isinstance(item, Mapping) for item in distributions
+        ):
+            raise ValueError("distributions must be a list of parameter-file dicts.")
+        body["distributions"] = [dict(item) for item in distributions]
     if description is not None:
         body["description"] = description
     if comment is not None:

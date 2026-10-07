@@ -226,6 +226,8 @@ BPX file) lands on the existing record instead of duplicating it. Parameter
 (`data/vocab/parameters.json`), never namespace segments and never
 battinfo-minted classes (SS14).
 
+**Amendment, 2026-10-07: records imported from a parameter file are addressed by the file.** When parameter-set records come from a file (a BPX file today), every record the file produces, the set and each member, mints its uid from the SHA-256 of the file's canonical JSON (sorted keys, no insignificant whitespace, UTF-8): `stable_uid("parameter-set-file:<digest>")` for the set, `stable_uid("parameter-set-file:<digest>:<block>")` for a member. Names and targets do not enter the seed. The same file therefore always lands on the same IRIs (a re-indented or CRLF copy included), and any changed value mints new ones; a corrected file is a new record that supersedes the old. The reason is that a solver can be handed the set's IRI, and the parameters behind it must never change. The set record carries the file itself under `distributions` (the source bytes, optionally a declared runnable conversion, each with its sha256), so the IRI resolves to those bytes. Which cell spec or material a curator maps the file to is description: it can be corrected in a new version of the record without touching the identity. Records minted under the earlier `(target, scope, name)` rule keep their IRIs.
+
 ## 7. Resolver and Dereferencing Policy
 
 BattINFO IRIs identify resources and MUST resolve via HTTP.
