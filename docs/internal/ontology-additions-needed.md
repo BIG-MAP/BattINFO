@@ -326,6 +326,11 @@ upstream `@type` instead of the fallback term.
 point at `electrochemistry:CapacityFade`, an `ElectrochemicalDegradationPhenomenon` on
 the EMMO *Process* branch, so a unit-bearing datasheet value was typed as a process.
 
+The versioned records context (`records.context.v1.json`) was frozen before this pass and
+kept the old terms until it was corrected in place before 0.8.0 (`PRE_RELEASE_CORRECTIONS`
+in `scripts/gen_context.py`); `tests/test_context_v1_agreement.py` now fails if v1 and the
+curated map drift apart again.
+
 `CapacityLoss` and `ChargeRecovery` also landed but have no save-gate key, so they are
 allowlisted only. Wiring them is a future save-gate addition (`capacity_loss`,
 `capacity_retention`, `charge_recovery`), not part of this pass.

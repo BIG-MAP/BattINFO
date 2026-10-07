@@ -98,11 +98,6 @@ battinfo:batteryStatus a rdf:Property ;
     rdfs:comment "Placeholder for record key(s) 'ci_battery_status' pending an upstream EMMO domain-battery/electrochemistry term; will be retired when the upstream term is published."@en ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/> .
 
-battinfo:capacityThresholdExhaustion a rdf:Property ;
-    rdfs:label "Capacity Threshold Exhaustion"@en ;
-    rdfs:comment "Placeholder for record key(s) 'capacity_threshold_exhaustion' pending an upstream EMMO domain-battery/electrochemistry term; will be retired when the upstream term is published."@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
 battinfo:cellConfiguration a rdf:Property ;
     rdfs:label "Cell Configuration"@en ;
     rdfs:comment "Placeholder for record key(s) 'cell_configuration, ct_cell_configuration' pending an upstream EMMO domain-battery/electrochemistry term; will be retired when the upstream term is published."@en ;
@@ -121,11 +116,6 @@ battinfo:cellGrade a rdf:Property ;
 battinfo:cellSpecification a rdf:Property ;
     rdfs:label "Cell Specification"@en ;
     rdfs:comment "Placeholder for record key(s) 'ci_type_id' pending an upstream EMMO domain-battery/electrochemistry term; will be retired when the upstream term is published."@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
-battinfo:chargingTime a rdf:Property ;
-    rdfs:label "Charging Time"@en ;
-    rdfs:comment "Placeholder for record key(s) 'charging_time' pending an upstream EMMO domain-battery/electrochemistry term; will be retired when the upstream term is published."@en ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/> .
 
 battinfo:chemistry a rdf:Property ;
@@ -208,11 +198,6 @@ battinfo:materialClass a rdf:Property ;
     rdfs:comment "Placeholder for record key(s) 'material_class' pending an upstream EMMO domain-battery/electrochemistry term; will be retired when the upstream term is published."@en ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/> .
 
-battinfo:maximumPower a rdf:Property ;
-    rdfs:label "Maximum Power"@en ;
-    rdfs:comment "Placeholder for record key(s) 'maximum_power' pending an upstream EMMO domain-battery/electrochemistry term; will be retired when the upstream term is published."@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
 battinfo:measuredSpecs a rdf:Property ;
     rdfs:label "Measured Specs"@en ;
     rdfs:comment "Placeholder for record key(s) 'ci_measured' pending an upstream EMMO domain-battery/electrochemistry term; will be retired when the upstream term is published."@en ;
@@ -233,16 +218,6 @@ battinfo:positiveElectrodeBasis a rdf:Property ;
     rdfs:comment "Placeholder for record key(s) 'ct_positive_electrode_basis, positive_electrode_basis' pending an upstream EMMO domain-battery/electrochemistry term; will be retired when the upstream term is published."@en ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/> .
 
-battinfo:powerCapability a rdf:Property ;
-    rdfs:label "Power Capability"@en ;
-    rdfs:comment "Placeholder for record key(s) 'power_capability' pending an upstream EMMO domain-battery/electrochemistry term; will be retired when the upstream term is published."@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
-battinfo:powerEnergyRatio a rdf:Property ;
-    rdfs:label "Power Energy Ratio"@en ;
-    rdfs:comment "Placeholder for record key(s) 'power_energy_ratio' pending an upstream EMMO domain-battery/electrochemistry term; will be retired when the upstream term is published."@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
 battinfo:productType a rdf:Property ;
     rdfs:label "Product Type"@en ;
     rdfs:comment "Placeholder for record key(s) 'ct_product_type' pending an upstream EMMO domain-battery/electrochemistry term; will be retired when the upstream term is published."@en ;
@@ -261,11 +236,6 @@ battinfo:rechargeable a rdf:Property ;
 battinfo:record a rdf:Property ;
     rdfs:label "Record"@en ;
     rdfs:comment "Placeholder for record key(s) 'ts_record' pending an upstream EMMO domain-battery/electrochemistry term; will be retired when the upstream term is published."@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
-battinfo:roundTripEnergyEfficiency a rdf:Property ;
-    rdfs:label "Round Trip Energy Efficiency"@en ;
-    rdfs:comment "Placeholder for record key(s) 'round_trip_energy_efficiency' pending an upstream EMMO domain-battery/electrochemistry term; will be retired when the upstream term is published."@en ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/> .
 
 battinfo:roundTripEnergyEfficiency50Pct a rdf:Property ;

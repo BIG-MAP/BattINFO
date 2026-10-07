@@ -1646,9 +1646,9 @@ def _url_context_with_overrides(doc_context: dict, node: Mapping) -> str | list:
     uses whose per-document mapping disagrees with the published v1 context.
 
     v1 is append-only, so when upstream renames a class during a deprecation
-    window (PrismaticBattery's underscore twin replacing the deprecated
-    hyphen-named original, domain-battery 0.20.2 issue #73) the published
-    term cannot be repointed until a v2 context. The document then carries
+    window the published term cannot be repointed until a v2 context (before
+    0.8.0, PrismaticBattery's deprecated hyphen-named IRI was the case in
+    point; v1 was corrected in place for it). The document then carries
     the correction the way JSON-LD intends — a local ``@context`` entry that
     wins over the referenced one — so BOTH emission modes expand to the same
     graph and emit the current (non-deprecated) class. Only terms the

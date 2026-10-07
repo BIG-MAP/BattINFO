@@ -191,8 +191,8 @@ shapes:CycleLifeValueShape a sh:NodeShape ;
 
 # ── Efficiency / fade percentages ─────────────────────────────────────────────
 # domain-electrochemistry 0.37.1 published RoundTripEnergyEfficiency, so new
-# records type the quantity node with it. Records minted against the frozen v1
-# context still carry the battinfo: placeholder, so both are targeted.
+# records type the quantity node with it. Records emitted before the v1 context's
+# pre-release correction carry the battinfo: placeholder, so both are targeted.
 
 shapes:RoundTripEfficiencyValueShape a sh:NodeShape ;
     sh:targetClass electrochemistry:electrochemistry_c413d29a_b814_4d88_8db0_0fd0171cff11 ,
