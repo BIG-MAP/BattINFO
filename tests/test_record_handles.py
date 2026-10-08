@@ -3,7 +3,10 @@
 A handle is an optional display slug on the body of every record type. The
 schema enforces its grammar, a semantic warning nudges its layout toward the
 naming convention, the JSON-LD carries it as one more schema:identifier, and
-every authoring surface that takes ``name=`` takes ``handle=``.
+every authoring surface that takes ``name=`` takes ``handle=``. Renaming must
+not move an IRI, so the identity pins (test ``iri=``/``uid=``/``dataset_iris=``,
+a test-spec draft's ``id``, an explicit ``Dataset(id=...)``) are covered here
+too.
 """
 
 from __future__ import annotations
@@ -27,6 +30,7 @@ from battinfo.api import (  # noqa: E402
     create_material_spec,
     create_organization,
     create_parameter_set,
+    save_dataset,
 )
 from battinfo.bundle import Cell, Dataset, ProvenanceInfo  # noqa: E402
 from battinfo.entities import ENTITY_KINDS, kind_for_doc  # noqa: E402
@@ -39,7 +43,10 @@ EXAMPLES = ROOT / "src" / "battinfo" / "data" / "examples"
 CONTEXTS = ROOT / "src" / "battinfo" / "data" / "context"
 SPEC_UID = "aaaa-bbbb-cccc-0001"
 SPEC_PIN = f"https://w3id.org/battinfo/spec/{SPEC_UID}"
+TEST_PIN = "https://w3id.org/battinfo/test/aaaa-bbbb-cccc-0002"
+DATASET_PIN = "https://w3id.org/battinfo/dataset/aaaa-bbbb-cccc-0003"
 SERIES_PIN = "https://w3id.org/battinfo/dataset/aaaa-bbbb-cccc-0004"
+MEMBER_PIN = "https://w3id.org/battinfo/dataset/aaaa-bbbb-cccc-0005"
 CELL_IRI = "https://w3id.org/battinfo/cell/aaaa-bbbb-cccc-0006"
 
 
@@ -346,17 +353,68 @@ def test_cell_handles_must_parallel_the_cells(tmp_path: Path) -> None:
         ws.add("cell", spec=spec, names=["c1", "c2"], handles=["a-cell"])
 
 
+def test_a_new_test_title_moves_the_iri_unless_it_is_pinned(tmp_path: Path) -> None:
+    first = _gitt_session(tmp_path / "a", name="063b77 gitt")
+    renamed = _gitt_session(tmp_path / "b", name="Graphite AQ-1 cell 063b77 GITT test")
+    assert first._ws.tests[0].id != renamed._ws.tests[0].id  # the seed includes the name
+
+    original = _records(tmp_path / "a", "test")[0]["test"]["id"]
+    original_dataset = _records(tmp_path / "a", "dataset")[0]["dataset"]["id"]
+    _gitt_session(tmp_path / "c", name="Graphite AQ-1 cell 063b77 GITT test",
+                  iri=original, dataset_iris=[original_dataset])
+    (test,) = _records(tmp_path / "c", "test")
+    (dataset,) = _records(tmp_path / "c", "dataset")
+    assert test["test"]["id"] == original
+    assert test["test"]["name"] == "Graphite AQ-1 cell 063b77 GITT test"
+    assert test["test"]["dataset_ids"] == [original_dataset]
+    assert dataset["dataset"]["id"] == original_dataset
+    assert original in dataset["dataset"]["about"]
+
+
+def test_a_test_can_be_pinned_by_uid(tmp_path: Path) -> None:
+    _gitt_session(tmp_path, name="any title", uid="AAAA-BBBB-CCCC-0002", dataset_iris=[DATASET_PIN])
+    assert _records(tmp_path, "test")[0]["test"]["id"] == TEST_PIN
+    assert _records(tmp_path, "dataset")[0]["dataset"]["id"] == DATASET_PIN
+
+
+@pytest.mark.parametrize(("pins", "message"), [
+    ({"iri": "https://w3id.org/battinfo/cell/aaaa-bbbb-cccc-0002"}, "not a test IRI"),
+    ({"iri": TEST_PIN, "uid": "aaaa-bbbb-cccc-0009"}, "different tests"),
+    ({"uid": "not-a-uid"}, "UID must be"),
+    ({"dataset_iris": [DATASET_PIN, MEMBER_PIN]}, "number of data files"),
+    ({"dataset_iris": ["https://w3id.org/battinfo/test/aaaa-bbbb-cccc-0002"]}, "dataset IRIs"),
+])
+def test_bad_test_pins_fail_before_anything_is_created(tmp_path: Path, pins: dict, message: str) -> None:
+    ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
+    spec = _cell_spec(ws, tmp_path)
+    ws.add("cell", spec=spec, names=["c1"])
+    (tmp_path / "c1.csv").write_text("a,b\n0,1\n", encoding="utf-8")
+    with pytest.raises(ValueError, match=message):
+        ws.add("test", type="gitt", cell="c1", data="c1.csv", **pins)
+    assert not ws._ws.tests and not ws._ws.datasets
+
+
+def test_a_pin_cannot_name_two_tests(tmp_path: Path) -> None:
+    ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
+    spec = _cell_spec(ws, tmp_path)
+    ws.add("cell", spec=spec, names=["c1"])
+    ws.add("test", type="gitt", cell="c1", iri=TEST_PIN)
+    with pytest.raises(ValueError, match="already used"):
+        ws.add("test", type="eis", cell="c1", iri=TEST_PIN)
+
+
 def test_one_test_options_are_refused_in_batch_mode(tmp_path: Path) -> None:
     ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
     with pytest.raises(ValueError, match="explicit"):
         ws.add("test", type="gitt", datasets="*.csv", handle="lab/gitt-test")
 
 
-def test_a_test_spec_draft_carries_its_handle(tmp_path: Path) -> None:
+def test_a_test_spec_draft_keeps_its_explicit_id_and_handle(tmp_path: Path) -> None:
     ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
     draft = tmp_path / "gitt.test-spec.json"
     draft.write_text(json.dumps({
-        "name": "GITT test spec", "type": "gitt", "handle": "flores-ocv/gitt-test-spec",
+        "name": "GITT test spec", "type": "gitt", "id": SPEC_PIN,
+        "handle": "flores-ocv/gitt-test-spec",
     }), encoding="utf-8")
     test_spec = ws.load(draft)
     spec = _cell_spec(ws, tmp_path)
@@ -364,4 +422,37 @@ def test_a_test_spec_draft_carries_its_handle(tmp_path: Path) -> None:
     ws.add("test", spec=test_spec, cell="c1")
     ws.save()
     (saved,) = _records(tmp_path, "test-protocol")
+    assert saved["test_spec"]["id"] == SPEC_PIN
     assert saved["test_spec"]["handle"] == "flores-ocv/gitt-test-spec"
+    assert _records(tmp_path, "test")[0]["test"]["protocol_id"] == SPEC_PIN
+
+
+def test_a_test_spec_draft_may_pin_by_uid_and_rejects_a_foreign_id(tmp_path: Path) -> None:
+    ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
+    draft = tmp_path / "gitt.test-spec.json"
+    draft.write_text(json.dumps({"name": "GITT", "type": "gitt", "uid": SPEC_UID}), encoding="utf-8")
+    assert ws.load(draft).id == SPEC_PIN
+    draft.write_text(json.dumps({"name": "GITT", "type": "gitt", "id": TEST_PIN}), encoding="utf-8")
+    with pytest.raises(ValueError, match="not a spec IRI"):
+        ws.load(draft)
+
+
+@pytest.mark.parametrize(("iri", "extra"), [
+    (SERIES_PIN, {"additional_type": ["DatasetSeries"], "handle": "flores-ocv"}),
+    (MEMBER_PIN, {"series_id": SERIES_PIN, "cell_instance_id": CELL_IRI,
+                  "handle": "flores-ocv/graphite-aq-1-063b77-gitt-dataset"}),
+])
+def test_save_dataset_keeps_an_explicit_id_whatever_the_name(tmp_path: Path, iri: str, extra: dict) -> None:
+    """A collection's IRI otherwise seeds from access_url + name; an explicit id wins."""
+    for name in ("Old title", "Graphite AQ-1 cell 063b77 GITT dataset"):
+        dataset = Dataset(
+            id=iri, name=name, access_url="https://doi.org/10.5281/zenodo.20086298",
+            source=ProvenanceInfo(type="catalog", retrieved_at=1755648000), **extra,
+        )
+        result = save_dataset(dataset, source_root=tmp_path, mode="upsert",
+                              resolve_references=False, build_jsonld=False, build_html=False)
+        assert result["id"] == iri
+    (saved,) = [json.loads(p.read_text(encoding="utf-8")) for p in (tmp_path / "dataset").glob("*.json")]
+    assert saved["dataset"]["id"] == iri
+    assert saved["dataset"]["name"] == "Graphite AQ-1 cell 063b77 GITT dataset"
+    assert saved["dataset"]["handle"] == extra["handle"]

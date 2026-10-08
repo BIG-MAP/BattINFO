@@ -2613,13 +2613,18 @@ class AuthoringWorkspace:
         For large batches you may instead pass ``datasets="glob"`` to match files to
         already-loaded cells by the 6-char short ID in each filename.
 
-        **Names and handles.** Where a type takes ``name=`` it also takes
-        ``handle=`` (cells take ``handles=[...]`` parallel to ``names=``), a short
-        slug unique within a registry workspace. Handles are never generated
-        here; build them with ``battinfo.naming.handle_for()``::
+        **Names, handles and pinned identities.** Where a type takes ``name=`` it
+        also takes ``handle=`` (cells take ``handles=[...]`` parallel to
+        ``names=``), a short slug unique within a registry workspace. Handles are
+        never generated here; build them with ``battinfo.naming.handle_for()``.
+        Renaming a record must not move its IRI, so pin a published identity
+        when the display name changes: ``iris=[...]`` for cells, ``uid=`` for
+        material and electrode records, and ``iri=``/``uid=`` (plus
+        ``dataset_iris=[...]`` for its data files) for a test::
 
             ws.add("test", type="gitt", cell="063b77", name="Graphite AQ-1 cell 063b77 GITT test",
-                   handle="flores-ocv/graphite-aq-1-063b77-gitt-test")
+                   handle="flores-ocv/graphite-aq-1-063b77-gitt-test",
+                   iri="https://w3id.org/battinfo/test/....")
 
         **Equipment** (``"equipment"``) — register a physical unit + its channels::
 
@@ -6832,6 +6837,7 @@ class AuthoringWorkspace:
           when both are given. The serial is the cell's identity: it de-duplicates
           the batch and must be unique within it.
         * ``iris`` — pre-allocated IRIs to reuse instead of minting (parallel, equal length).
+          Use it to pin a published identity when the display name changes.
         * ``handles`` — one handle per cell (parallel, equal length; ``None`` skips
           one). A handle is a short slug, see :mod:`battinfo.naming`; it is never
           generated for you.
@@ -7058,6 +7064,11 @@ class AuthoringWorkspace:
             source_file=raw.get("source_file"),
             comment=notes or None,
         )
+        # An explicit identity in the draft pins a published test spec, so a
+        # corrected name does not mint a new IRI (the seed includes the name).
+        pinned = _draft_spec_iri(raw.get("id"), raw.get("uid"), path.name)
+        if pinned is not None:
+            tp.id = pinned
         if raw.get("handle"):
             tp.handle = raw["handle"]
         return tp
@@ -7603,6 +7614,9 @@ class AuthoringWorkspace:
         conformance: Any = None,
         name: str | None = None,
         handle: str | None = None,
+        iri: str | None = None,
+        uid: str | None = None,
+        dataset_iris: "builtins.list[str] | None" = None,
         instrument: str | None = None,
         channel: Any = None,
         license: str | None = None,
@@ -7615,8 +7629,14 @@ class AuthoringWorkspace:
         Batch: ``datasets="glob"`` matches files to loaded cells by short ID.
 
         ``name`` is the test's title and ``handle`` its short slug (see
-        :mod:`battinfo.naming`); neither is generated for you. A handle names one
-        test, so it needs the explicit ``cell=`` form.
+        :mod:`battinfo.naming`); neither is generated for you.
+
+        ``iri`` (a full ``https://w3id.org/battinfo/test/...`` IRI) or ``uid``
+        (its 16-character uid) pins a published identity when the display name
+        changes. The test IRI is otherwise seeded from the cell, type, protocol
+        and name, so a new title would mint a new test. ``dataset_iris`` does the
+        same for the datasets made from ``data=``: one IRI per data file, in the
+        same order. All three need the explicit ``cell=`` form.
 
         ``channel`` attaches the test to an equipment channel (a channel IRI, a
         channel label, or ``"unit/CHn"``); the test record then carries
@@ -7701,11 +7721,13 @@ class AuthoringWorkspace:
         if channel is not None:
             equipment_id, channel_id = self._resolve_channel(channel)
 
-        # A handle names ONE test, so it needs the explicit form.
-        if cell is None and handle is not None:
+        # Identity pins and the handle name ONE test, so they need the explicit
+        # form; check them before anything is created.
+        pinned_test_id = self._pinned_test_iri(iri, uid)
+        if cell is None and any(v is not None for v in (handle, iri, uid, dataset_iris)):
             raise ValueError(
-                "handle= describes one test; use the explicit form "
-                "ws.add('test', cell=..., ...) rather than datasets='glob'."
+                "handle=, iri=, uid= and dataset_iris= describe one test; use the explicit "
+                "form ws.add('test', cell=..., ...) rather than datasets='glob'."
             )
 
         # ── Explicit mode: a named cell (+ optional data files) ──────────────────
@@ -7719,6 +7741,7 @@ class AuthoringWorkspace:
                     "pass one original per processed file (same order), or omit raw= "
                     "to use the originals recorded by ws.convert()."
                 )
+            pinned_dataset_ids = self._pinned_dataset_iris(dataset_iris, len(files))
             # Measured period per data file (from the BDF unix_time_second column), so
             # the test activity and each dataset are placed in time from the data itself
             # rather than the record-assembly clock.
@@ -7738,6 +7761,8 @@ class AuthoringWorkspace:
                 started_at=min(s for s, _ in _spans) if _spans else None,
                 ended_at=max(e for _, e in _spans) if _spans else None,
             )
+            if pinned_test_id is not None:
+                test.id = pinned_test_id
             if handle is not None:
                 test.handle = handle
             if protocol_id_ref is not None:
@@ -7758,7 +7783,7 @@ class AuthoringWorkspace:
                     n_raw += 1
                 _per = periods[i]
                 _tc = (f"{_unix_to_iso(_per[0])}/{_unix_to_iso(_per[1])}" if _per else None)
-                self._ws.dataset(
+                dataset_obj = self._ws.dataset(
                     resolved,
                     title=f"{name or label} data",
                     test=test,
@@ -7768,6 +7793,8 @@ class AuthoringWorkspace:
                     format=_guess_format(f),
                     temporal_coverage=_tc,
                 )
+                if pinned_dataset_ids is not None:
+                    dataset_obj.id = pinned_dataset_ids[i]
             conf_status = conformance.status if conformance is not None else None
             print(f"  test [{test_type}] on {label}"
                   + (f"  +{len(files)} dataset(s)" if files else "")
@@ -7800,6 +7827,66 @@ class AuthoringWorkspace:
             "ws.add('test', ...) needs either cell=<serial|IRI|object> (with data=...) "
             "for an explicit test, or datasets='glob' to match files to loaded cells."
         )
+
+    def _pinned_test_iri(self, iri: str | None, uid: str | None) -> str | None:
+        """The test IRI pinned by ``iri=`` / ``uid=``, checked, or ``None``.
+
+        Same contract as the cell ``iris=`` path: the caller supplies an
+        identity that was published before, and it replaces the seeded IRI.
+        The shape is checked here so a typo fails before anything is created,
+        and a pin already taken by another test in this session is refused
+        (the save would otherwise re-mint both to keep them apart).
+        """
+        from battinfo.api._shared import TEST_IRI_RE, _normalized_dashed_uid  # noqa: PLC0415
+
+        if iri is None and uid is None:
+            return None
+        pinned: str | None = None
+        if iri is not None:
+            if not isinstance(iri, str) or not TEST_IRI_RE.fullmatch(iri.strip()):
+                raise ValueError(
+                    f"iri={iri!r} is not a test IRI; expected "
+                    "https://w3id.org/battinfo/test/xxxx-xxxx-xxxx-xxxx."
+                )
+            pinned = iri.strip()
+        if uid is not None:
+            from_uid = f"https://w3id.org/battinfo/test/{_normalized_dashed_uid(str(uid))}"
+            if pinned is not None and pinned != from_uid:
+                raise ValueError(f"iri={iri!r} and uid={uid!r} name different tests; pass one.")
+            pinned = from_uid
+        if any(getattr(existing, "id", None) == pinned for existing in self._ws.tests):
+            raise ValueError(f"{pinned} is already used by another test in this session.")
+        return pinned
+
+    def _pinned_dataset_iris(
+        self, dataset_iris: "builtins.list[str] | None", n_files: int
+    ) -> "builtins.list[str] | None":
+        """``dataset_iris=`` checked against the data files it pins, or ``None``."""
+        from battinfo.api._shared import DATASET_IRI_RE  # noqa: PLC0415
+
+        if dataset_iris is None:
+            return None
+        if isinstance(dataset_iris, str):
+            dataset_iris = [dataset_iris]
+        pinned = [str(item).strip() for item in dataset_iris]
+        if len(pinned) != n_files:
+            raise ValueError(
+                f"dataset_iris must match the number of data files "
+                f"({len(pinned)} IRIs vs {n_files} files)."
+            )
+        bad = [item for item in pinned if not DATASET_IRI_RE.fullmatch(item)]
+        if bad:
+            raise ValueError(
+                f"dataset_iris entries must be dataset IRIs "
+                f"(https://w3id.org/battinfo/dataset/xxxx-xxxx-xxxx-xxxx); got {bad[:3]}."
+            )
+        taken = {getattr(ds, "id", None) for ds in self._ws.datasets}
+        clashes = [item for item in pinned if item in taken]
+        if len(set(pinned)) != len(pinned) or clashes:
+            raise ValueError(
+                "dataset_iris must name distinct datasets not already used in this session."
+            )
+        return pinned
 
     def _as_data_paths(self, data: Any) -> builtins.list[Path]:
         """Normalise a data= value (path, str, or list) to a list of absolute Paths."""
@@ -8537,6 +8624,27 @@ _TEST_KIND_ALIASES: dict[str, str] = {
 
 def _test_kind_hint() -> str:
     return "Valid kinds: " + ", ".join(_test_kind_values()) + "."
+
+
+def _draft_spec_iri(draft_id: Any, draft_uid: Any, source: str) -> str | None:
+    """The spec IRI a draft file pins with ``"id"`` and/or ``"uid"``, or ``None``."""
+    from battinfo.api._shared import SPEC_IRI_RE, _normalized_dashed_uid  # noqa: PLC0415
+
+    pinned: str | None = None
+    if draft_id:
+        text = str(draft_id).strip()
+        if not SPEC_IRI_RE.fullmatch(text):
+            raise ValueError(
+                f"{source}: 'id' {draft_id!r} is not a spec IRI; expected "
+                "https://w3id.org/battinfo/spec/xxxx-xxxx-xxxx-xxxx."
+            )
+        pinned = text
+    if draft_uid:
+        from_uid = f"https://w3id.org/battinfo/spec/{_normalized_dashed_uid(str(draft_uid))}"
+        if pinned is not None and pinned != from_uid:
+            raise ValueError(f"{source}: 'id' and 'uid' name different specs; keep one.")
+        pinned = from_uid
+    return pinned
 
 
 def _closest_kind(key: str, valid: set[str]) -> str | None:

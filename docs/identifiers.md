@@ -96,4 +96,4 @@ The policy is linted, not aspirational:
 
 ## Handles and titles are not identifiers
 
-A record may also carry a `handle`, a short readable slug such as `flores-ocv/graphite-aq-1-063b77-cell` that is unique within one registry workspace, and a `name`, its title. Both are display text: they can be corrected without touching the IRI, and nothing should be derived from them. [Name your records](howto/name-your-records.md) shows how to build them.
+A record may also carry a `handle`, a short readable slug such as `flores-ocv/graphite-aq-1-063b77-cell` that is unique within one registry workspace, and a `name`, its title. Both are display text: they can be corrected without touching the IRI, and nothing should be derived from them. [Name your records](howto/name-your-records.md) shows how to build them and how to pin an IRI when a title changes.

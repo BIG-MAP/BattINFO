@@ -6,7 +6,7 @@ A record carries three names, and each has one job:
 - The **handle** (`flores-ocv/graphite-aq-1-063b77-cell`) is a short slug, unique within one registry workspace. The registry shows it as `<workspace>/<handle>` and can resolve it.
 - The **title** is the record's `name` (`Graphite AQ-1 cell 063b77`), written for people.
 
-Handles and titles are display text. Code that needs to know what a record is should read its structured fields, never parse its handle.
+Handles and titles are display text. You can correct either one later without moving the IRI, as long as you pin the identity (see below). Code that needs to know what a record is should read its structured fields, never parse its handle.
 
 ## Build them from structured parts
 
@@ -76,6 +76,37 @@ ws.save()
 ```
 
 Cells take `handles=[...]` in parallel with `names=` and `serial_numbers=`. The record models (`CellSpec`, `Cell`, `TestSpec`, `Test`, `Dataset`) take `handle=`, and so do the builders in `battinfo.api` (`create_material_spec`, `create_component_spec`, `create_equipment`, `create_organization`, `create_parameter_set` and the rest). Draft files loaded with `ws.load()` may carry a `"handle"` key.
+
+## Rename without moving an IRI
+
+Several record types seed their IRI from their name, so a new title would mint a new record. When you rename something that is already published, pin its identity:
+
+| Record | How to pin |
+|---|---|
+| Cell | `ws.add("cell", ..., iris=[...])`, one IRI per cell |
+| Test, and the datasets made from its data files | `ws.add("test", ..., iri=...)` or `uid=...`, plus `dataset_iris=[...]` in the order of `data=` |
+| Test spec drafts | an `"id"` (or `"uid"`) key in the `.test-spec.json` file |
+| Material and electrode records | `uid=...` or `id=...` |
+| Datasets and collections written with `battinfo.Dataset` | `Dataset(id=...)`; a collection's IRI otherwise comes from its access URL and name |
+
+For example, rebuilding a corpus with the new titles keeps the cell and test IRIs they were published under:
+
+```python
+rebuilt = battinfo.workspace("lab-rebuilt", registry_url=None)
+cell = rebuilt.add(
+    "cell", spec=spec, names=["Graphite AQ-1 cell 063b77"],
+    iris=["https://w3id.org/battinfo/cell/7k2m-4q8r-9tvx-3hd5"],
+)[0]
+test = rebuilt.add(
+    "test", type="gitt", cell=cell,
+    name="Graphite AQ-1 cell 063b77 GITT test",
+    iri="https://w3id.org/battinfo/test/7d9k-2m4p-8t3x-6nq5",
+)[0]
+rebuilt.save()
+print(test.id)  # https://w3id.org/battinfo/test/7d9k-2m4p-8t3x-6nq5
+```
+
+A pinned IRI must have the right namespace (`/test/` for a test, `/dataset/` for a dataset, `/spec/` for a spec), and one IRI can name only one record in a session.
 
 ## What validation checks
 
