@@ -37,9 +37,30 @@ The parts are:
 
 A handle reads `<group>/<subject>-<variant>-<sample>-<method>-<kind>`, leaving out the parts a record does not have. The kind word always comes last and depends only on the record type: `material-spec`, `material-lot`, `electrode-spec`, `electrode`, `cell-spec`, `cell`, `test-spec`, `test`, `dataset`, and so on for the component, equipment and parameter-set types. The full table is `battinfo.naming.KIND_WORDS`. A collection carries no kind word.
 
-Titles use the same parts in plain English. Subjects get a short label (Graphite, Silicon-graphite, LNMO, NMC532), the variant is upper case, the method is upper case, and the sample is kept as written. Tests and datasets name the item they are about first: `Graphite AQ-1 cell 063b77 GITT dataset`. A collection's title is its own label plus the word "collection", via `title_for("collection", label="Flores et al. 2026 half-cell OCV")`.
+Titles use the same parts in plain English. Subjects get a short label (Graphite, Silicon-graphite, LNMO, NMC532), the variant is upper case, and the sample is kept as written. A method written in lower case is upper-cased (`gitt` becomes `GITT`); one the source already capitalises keeps its spelling (`p-OCV hold`). Tests and datasets name the item they are about first: `Graphite AQ-1 cell 063b77 GITT dataset`. A collection's title is its own label plus the word "collection", via `title_for("collection", label="Flores et al. 2026 half-cell OCV")`.
 
 Both functions lowercase and transliterate their input to ASCII and collapse anything that is not a letter or digit into a single hyphen. A part that has nothing left after that raises `ValueError`, and so does a handle longer than 120 characters.
+
+## Products and manufacturers
+
+A commercial product is known by its maker and its model, so it is named by them instead of by a collection. Pass `manufacturer=` and `model=` for any spec type a manufacturer or supplier makes (cell, material, electrode, separator, current collector, electrolyte, housing and equipment specs; the set is `battinfo.naming.PRODUCT_KINDS`):
+
+```python
+from battinfo.naming import handle_for, organization_handle, title_for
+
+print(handle_for("cell-spec", manufacturer="Samsung SDI", model="INR18650-35E"))
+# samsung-sdi/inr18650-35e-cell-spec
+print(title_for("cell-spec", manufacturer="Samsung SDI", model="Samsung SDI INR18650-35E"))
+# Samsung SDI INR18650-35E
+
+eve = {"name": "EVE", "handle": "eve-energy"}  # the manufacturer reference a record carries
+print(handle_for("cell-spec", manufacturer=eve, model="LF280K"))  # eve-energy/lf280k-cell-spec
+print(organization_handle("Haldor Topsøe A/S"))                    # haldor-topsoe-a-s
+```
+
+The handle is `<manufacturer>/<model>-<kind>`. The title is the manufacturer's name and the model with no kind words: that is what people search for and cite, and the record type is shown beside the title. A model that repeats the manufacturer's name ("Samsung SDI INR18650-35E") is not doubled.
+
+The group is the manufacturer's organization handle when the reference or record carries one, and its slugged name otherwise. Give each organization a handle once (`organization_handle()` builds one, a single bare segment such as `eve-energy`) and every product of that company lands in one group, whichever spelling of its name a datasheet used. Like a collection's, an organization's handle carries no kind word.
 
 ## Put them on records
 
