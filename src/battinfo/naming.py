@@ -389,7 +389,9 @@ def title_for(
             dropped as in :func:`handle_for` and the rest is upper case
             (``Gr-AQ-1`` -> ``AQ-1``).
         sample: The source's sample id, kept as written.
-        method: The test method, upper case (``gitt`` -> ``GITT``).
+        method: The test method. Text the source already capitalises is kept
+            as written (``p-OCV hold``); an all-lowercase slug is upper-cased
+            (``gitt`` -> ``GITT``).
         tested: For tests and datasets, the kind of item tested (default
             ``"cell"``). Pass ``None`` to leave it out. Other kinds ignore it.
         label: A collection's descriptive name; ``" collection"`` is
@@ -403,6 +405,8 @@ def title_for(
     'Graphite AQ-1 electrode 063b77'
     >>> title_for("test-spec", method="gitt")
     'GITT test spec'
+    >>> title_for("test-spec", method="p-OCV hold")
+    'p-OCV hold test spec'
     """
     resolved = _resolve_kind(kind)
 
@@ -422,7 +426,11 @@ def title_for(
         if tokens:
             words.append("-".join(tokens).upper())
     sample_text = " ".join(_text(sample, "sample").split()) if sample is not None else ""
-    method_text = " ".join(_text(method, "method").split()).upper() if method is not None else ""
+    method_text = " ".join(_text(method, "method").split()) if method is not None else ""
+    # Keep the source's own spelling of a method name ("p-OCV hold"); only an
+    # all-lowercase slug ("gitt") is upper-cased.
+    if method_text and not any(ch.isupper() for ch in method_text):
+        method_text = method_text.upper()
 
     if resolved in _RESULT_KINDS or resolved == "test-protocol":
         if resolved in _RESULT_KINDS and tested and (words or sample_text):
@@ -440,6 +448,11 @@ def title_for(
             words.append(method_text)
 
     title = " ".join(word for word in words if word)
+    # Sentence case for titles that open with a plain word ("material spec"),
+    # but a word the source already capitalises ("p-OCV") keeps its spelling.
+    first = title.split(" ", 1)[0]
+    if any(ch.isupper() for ch in first):
+        return title
     return title[:1].upper() + title[1:]
 
 

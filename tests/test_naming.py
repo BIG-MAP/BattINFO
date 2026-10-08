@@ -216,7 +216,7 @@ def test_pattern_constant_matches_the_schema_definition() -> None:
     assert schema["$defs"]["Handle"]["maxLength"] == HANDLE_MAX_LENGTH
 
 
-def test_title_method_is_upper_case_and_sample_keeps_its_case() -> None:
+def test_title_lowercase_method_is_upper_cased_and_sample_keeps_its_case() -> None:
     assert title_for("test", subject="lnmo", variant="LNMO-NMP-2", sample="A7b", method="p-ocv hold") == (
         "LNMO NMP-2 cell A7b P-OCV HOLD test"
     )
@@ -246,3 +246,11 @@ def test_collection_title_needs_a_label_and_does_not_double_the_word() -> None:
         title_for("collection")
     with pytest.raises(ValueError, match="only used for collections"):
         title_for("cell", label="Graphite")
+
+
+def test_title_keeps_a_capitalised_method_as_written() -> None:
+    assert title_for("test-spec", method="p-OCV hold") == "p-OCV hold test spec"
+    assert (
+        title_for("dataset", subject="graphite", variant="Gr-AQ-1", sample="063b77", method="p-OCV")
+        == "Graphite AQ-1 cell 063b77 p-OCV dataset"
+    )
