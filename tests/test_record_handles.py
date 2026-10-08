@@ -75,6 +75,9 @@ def _jsonld_type(entity_type: str) -> str:
 def _conventional_handle(entity_type: str, body: dict) -> str:
     if entity_type == "dataset" and is_dataset_series(body.get("additional_type")):
         return handle_for("collection", group="examples")
+    if entity_type == "organization":
+        # An organization's handle is a bare root, like a collection's.
+        return handle_for("organization", group="examples")
     return handle_for(entity_type, group="examples", sample="probe")
 
 
@@ -166,6 +169,11 @@ def test_a_collection_carries_no_kind_word_but_a_plain_dataset_does() -> None:
     assert len(_handle_warnings(plain)) == 1
 
 
+def test_an_organization_handle_is_a_bare_root_without_a_kind_word() -> None:
+    # A manufacturer's handle groups its products (samsung-sdi/inr18650-35e-cell-spec).
+    assert not _handle_warnings(_with_handle("organization", "samsung-sdi"))
+
+
 # ── JSON-LD ───────────────────────────────────────────────────────────────────
 
 
@@ -177,7 +185,7 @@ def _handle_identifiers(node: dict) -> list[dict]:
 
 @pytest.mark.parametrize("entity_type", KIND_IDS)
 def test_every_record_type_emits_its_handle_as_an_identifier(entity_type: str) -> None:
-    handle = handle_for(entity_type, group="examples", sample="probe")
+    handle = _conventional_handle(entity_type, {})
     record = _with_handle(entity_type, handle)
     for mode in ("url", "inline"):
         node = record_to_jsonld(record, _jsonld_type(entity_type), context=mode)
@@ -229,7 +237,7 @@ def _graph(doc: dict) -> rdflib.Graph:
 
 @pytest.mark.parametrize("entity_type", ["cell-spec", "cell", "dataset", "material-spec", "organization"])
 def test_inline_and_url_emission_agree_on_the_handle_triples(entity_type: str) -> None:
-    handle = handle_for(entity_type, group="examples", sample="probe")
+    handle = _conventional_handle(entity_type, {})
     record = _with_handle(entity_type, handle)
     inline = _graph(record_to_jsonld(record, _jsonld_type(entity_type), context="inline"))
     url = _graph(record_to_jsonld(record, _jsonld_type(entity_type), context="url"))

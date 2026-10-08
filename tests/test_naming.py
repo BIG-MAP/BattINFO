@@ -19,9 +19,11 @@ from battinfo.naming import (  # noqa: E402
     HANDLE_MAX_LENGTH,
     HANDLE_PATTERN,
     KIND_WORDS,
+    PRODUCT_KINDS,
     handle_for,
     is_valid_handle,
     kind_word,
+    organization_handle,
     title_for,
 )
 
@@ -254,3 +256,61 @@ def test_title_keeps_a_capitalised_method_as_written() -> None:
         title_for("dataset", subject="graphite", variant="Gr-AQ-1", sample="063b77", method="p-OCV")
         == "Graphite AQ-1 cell 063b77 p-OCV dataset"
     )
+
+
+# ── Products and organizations ────────────────────────────────────────────────
+
+
+@pytest.mark.parametrize(("manufacturer", "model", "handle", "title"), [
+    ("Saft", "VL 5U", "saft/vl-5u-cell-spec", "Saft VL 5U"),
+    ("SAMSUNG", "INR18650-35E", "samsung/inr18650-35e-cell-spec", "SAMSUNG INR18650-35E"),
+    ("Samsung SDI", "Samsung SDI INR21700-50E", "samsung-sdi/inr21700-50e-cell-spec", "Samsung SDI INR21700-50E"),
+    ("Wuhan Lisun Power Corp. Ltd", "IMP225069S", "wuhan-lisun-power-corp-ltd/imp225069s-cell-spec",
+     "Wuhan Lisun Power Corp. Ltd IMP225069S"),
+])
+def test_a_product_is_named_by_its_manufacturer_and_model(manufacturer, model, handle, title) -> None:
+    assert handle_for("cell-spec", manufacturer=manufacturer, model=model) == handle
+    assert title_for("cell-spec", manufacturer=manufacturer, model=model) == title
+    assert is_valid_handle(handle)
+
+
+def test_an_organization_reference_with_a_handle_sets_the_group() -> None:
+    # Two spellings of one company resolve to one group once its record has a handle.
+    for spelling in ("EVE", "EVE Energy"):
+        ref = {"name": spelling, "id": "https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx",
+               "handle": "eve-energy"}
+        assert handle_for("cell-spec", manufacturer=ref, model="LF280K") == "eve-energy/lf280k-cell-spec"
+    record = {"organization": {"name": "EVE Energy", "handle": "eve-energy"}}
+    assert title_for("cell-spec", manufacturer=record, model="LF280K") == "EVE Energy LF280K"
+
+
+def test_every_product_kind_takes_the_product_rule() -> None:
+    for kind in PRODUCT_KINDS:
+        handle = handle_for(kind, manufacturer="Gelon LIB", model="LFP 1")
+        assert handle.startswith("gelon-lib/lfp-1-")
+        assert handle.endswith(KIND_WORDS[kind])
+
+
+@pytest.mark.parametrize("kind", ["cell", "test", "dataset", "material", "collection"])
+def test_the_product_rule_is_only_for_spec_kinds(kind) -> None:
+    with pytest.raises(ValueError):
+        handle_for(kind, manufacturer="Saft", model="VL 5U")
+
+
+def test_a_product_needs_both_parts_and_nothing_else() -> None:
+    with pytest.raises(ValueError):
+        handle_for("cell-spec", manufacturer="Saft")
+    with pytest.raises(ValueError):
+        title_for("cell-spec", model="VL 5U")
+    with pytest.raises(ValueError):
+        handle_for("cell-spec", manufacturer="Saft", model="VL 5U", group="flores-ocv")
+    with pytest.raises(ValueError):
+        title_for("cell-spec", manufacturer={"handle": "saft"}, model="VL 5U")
+
+
+def test_organization_handles_are_one_bare_segment() -> None:
+    assert organization_handle("Samsung SDI") == "samsung-sdi"
+    assert organization_handle({"organization": {"name": "Haldor Topsøe A/S"}}) == "haldor-topsoe-a-s"
+    assert handle_for("organization", group="Topsoe") == "topsoe"
+    with pytest.raises(ValueError):
+        organization_handle({"name": "Topsoe", "handle": "nordic/topsoe"})
