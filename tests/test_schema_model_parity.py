@@ -251,7 +251,7 @@ SAMPLE_OVERRIDES: dict[tuple[str, str], Any] = {
     ("electrode", "parent_id"): "https://w3id.org/battinfo/electrode/abcd-2345-6789-abcd",
 }
 
-_PATTERN_SAMPLES = {"short_id": "abcdef", "in_language": "en"}
+_PATTERN_SAMPLES = {"short_id": "abcdef", "in_language": "en", "handle": "probe-group/probe-sample"}
 _NAMESPACE_RE = re.compile(r"battinfo/\(\?:([a-z-]+)|battinfo/([a-z-]+)/")
 
 

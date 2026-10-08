@@ -150,6 +150,7 @@ Representative issue codes:
 - `semantic.electrode_holders_mixed` (with `semantic.electrode_role_expected` /
   `semantic.electrode_polarity_expected`: the electrode holders disagree with the
   cell configuration — see [Electrodes](records/half-cells.md))
+- `semantic.handle_kind_word_expected` (a warning under every policy: the record's `handle` does not end with its type's kind word; see [Name your records](howto/name-your-records.md))
 - `publication.distribution_url_invalid`
 - `publication.jsonld_parse_error`
 

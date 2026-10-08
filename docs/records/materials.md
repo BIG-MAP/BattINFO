@@ -1312,6 +1312,7 @@ Schema: [`material-spec.schema.json`](https://w3id.org/battinfo/schema/material-
 | `id` | → MaterialSpecIri | yes |  |
 | `short_id` | → ShortId |  |  |
 | `name` | string | yes | Human-readable material name / grade (e.g. 'LFP', 'Graphite', 'NMC811', 'PVDF'). |
+| `handle` | → Handle |  | Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity. |
 | `kind` | string |  | Required Level-1 MaterialKind key from the curated material_kinds vocabulary (e.g. 'graphite', 'lfp', 'nmc811'). The aggregation axis of the Battery Genome; resolves to the kind's chemical-substance class IRI. An unknown kind is rejected at save time. See battinfo.materials.material_kind_keys(). |
 | `grade` | string |  | Manufacturer grade / product version (e.g. 'grade X', 'v2'). Part of spec identity together with manufacturer and product. |
 | `material_class` | `active_material` \| `binder` \| `conductive_additive` \| `current_collector` … (13 values) |  | Deprecated in favor of the kind’s roles (the curated vocabulary lists the use-site slots a kind is known to fill): a single forced role is system-relative. Accepted for back-compat and still written by importers; slated for removal at the next record-shape version. |
@@ -1338,6 +1339,7 @@ Schema: [`material.schema.json`](https://w3id.org/battinfo/schema/material.schem
 | `material_spec_id` | → MaterialSpecIri | yes | IRI of the material-spec this physical lot realizes. |
 | `short_id` | → ShortId |  |  |
 | `name` | string |  | Human-readable label for this physical lot (e.g. a lab/inventory id). |
+| `handle` | → Handle |  | Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity. |
 | `lot_id` | string |  | Manufacturer / supplier lot or batch number. |
 | `batch_id` | string |  | Internal lab batch identifier, when different from the supplier lot. |
 | `supplier` | → OrgRef |  | Supplier or vendor the item was sourced from. |

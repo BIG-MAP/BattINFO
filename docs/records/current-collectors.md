@@ -347,6 +347,7 @@ Schema: [`current-collector-spec.schema.json`](https://w3id.org/battinfo/schema/
 | `id` | → ComponentSpecIri | yes |  |
 | `short_id` | → ShortId |  |  |
 | `name` | string | yes | Product label of this current-collector design (e.g. 'Al foil 15 um'). |
+| `handle` | → Handle |  | Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity. |
 | `material` | string |  | Substrate material of the current collector (e.g. 'Al', 'Cu', 'Ni', 'stainless steel', 'carbon-coated Al'). |
 | `form` | `foil` \| `mesh` \| `foam` \| `perforated` … (5 values) |  | Physical form of the current collector. |
 | `material_spec_id` | string |  |  |
@@ -366,6 +367,7 @@ Schema: [`current-collector.schema.json`](https://w3id.org/battinfo/schema/curre
 | `current_collector_spec_id` | → ComponentSpecIri | yes | IRI of the current collector-spec this physical current collector realizes. |
 | `short_id` | → ShortId |  |  |
 | `name` | string |  | Human-readable label for this physical item (e.g. a lab inventory id). |
+| `handle` | → Handle |  | Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity. |
 | `lot_id` | string |  | Manufacturer or supplier lot number. |
 | `batch_id` | string |  | Internal lab batch identifier, when different from the supplier lot. |
 | `supplier` | → OrgRef |  | Supplier or vendor the item was sourced from. |

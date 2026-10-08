@@ -71,6 +71,7 @@ def _finish_record(
 def _record_from_equipment_spec(
     *,
     name: str,
+    handle: str | None = None,
     equipment_class: str | None = None,
     model: str | None = None,
     channel_count: int | None = None,
@@ -102,6 +103,8 @@ def _record_from_equipment_spec(
         entity_id = f"https://w3id.org/battinfo/spec/{dashed_uid}"
 
     spec: dict[str, Any] = {"id": entity_id, "short_id": dashed_uid.replace("-", "")[:6], "name": name}
+    if handle is not None:
+        spec["handle"] = handle
     if equipment_class is not None:
         spec["equipment_class"] = equipment_class
     if model is not None:
@@ -139,6 +142,7 @@ def _record_from_equipment(
     equipment_spec_id: str,
     serial_number: str | None = None,
     name: str | None = None,
+    handle: str | None = None,
     location: str | None = None,
     commissioned_at: int | str | None = None,
     status: str | None = None,
@@ -174,6 +178,8 @@ def _record_from_equipment(
         equipment["serial_number"] = serial_number
     if name is not None:
         equipment["name"] = name
+    if handle is not None:
+        equipment["handle"] = handle
     if location is not None:
         equipment["location"] = location
     if commissioned_at is not None:
@@ -204,6 +210,7 @@ def _record_from_channel(
     equipment_id: str,
     index: int,
     label: str | None = None,
+    handle: str | None = None,
     status: str | None = None,
     property: dict[str, Any] | None = None,
     comment: str | None = None,
@@ -244,6 +251,8 @@ def _record_from_channel(
     }
     if label is not None:
         channel["label"] = label
+    if handle is not None:
+        channel["handle"] = handle
     checked_status = _checked_status(status)
     if checked_status is not None:
         channel["status"] = checked_status

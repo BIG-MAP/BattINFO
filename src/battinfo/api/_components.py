@@ -54,6 +54,7 @@ class MaterialSpecInput(BaseModel):
     id: str | None = None
     uid: str | None = None
     name: str
+    handle: str | None = None
     kind: str | None = None
     grade: str | None = None
     material_class: str | None = None
@@ -86,6 +87,7 @@ class MaterialInput(BaseModel):
         validation_alias=AliasChoices("material_spec_id", "spec_id")
     )
     name: str | None = None
+    handle: str | None = None
     lot_id: str | None = Field(default=None, validation_alias=AliasChoices("lot_id", "lot"))
     batch_id: str | None = None
     supplier: str | dict[str, Any] | None = None
@@ -122,6 +124,7 @@ class ElectrodeSpecInput(BaseModel):
     id: str | None = None
     uid: str | None = None
     name: str
+    handle: str | None = None
     active_material_kind: str | None = Field(
         default=None, validation_alias=AliasChoices("active_material_kind", "kind")
     )
@@ -176,6 +179,7 @@ class ElectrodeInput(BaseModel):
         validation_alias=AliasChoices("electrode_spec_id", "spec_id")
     )
     name: str | None = None
+    handle: str | None = None
     batch_id: str | None = Field(default=None, validation_alias=AliasChoices("batch_id", "batch"))
     lot_id: str | None = Field(default=None, validation_alias=AliasChoices("lot_id", "lot"))
     # Genealogy: the coated roll/web/strip this piece was cut from (itself an
@@ -294,6 +298,8 @@ def _record_from_material_spec(draft: MaterialSpecInput) -> dict[str, Any]:
         "short_id": dashed_uid.replace("-", "")[:6],
         "name": draft.name,
     }
+    if draft.handle is not None:
+        spec["handle"] = draft.handle
     if kind_key is not None:
         spec["kind"] = kind_key
     if draft.grade is not None:
@@ -366,7 +372,7 @@ def _record_from_material(draft: MaterialInput) -> dict[str, Any]:
         "material_spec_id": draft.material_spec_id,
         "short_id": dashed_uid.replace("-", "")[:6],
     }
-    for field_name in ("name", "lot_id", "batch_id", "storage"):
+    for field_name in ("name", "handle", "lot_id", "batch_id", "storage"):
         value = getattr(draft, field_name)
         if value is not None:
             material[field_name] = value
@@ -604,6 +610,8 @@ def _record_from_electrode_spec(draft: ElectrodeSpecInput) -> dict[str, Any]:
         "short_id": dashed_uid.replace("-", "")[:6],
         "name": draft.name,
     }
+    if draft.handle is not None:
+        spec["handle"] = draft.handle
     spec.update(draft.body or {})
     if kind_key is not None:
         # Canonical key; the deprecated `kind` spelling (from a body pass-through
@@ -707,7 +715,7 @@ def _record_from_electrode(draft: ElectrodeInput) -> dict[str, Any]:
         "short_id": dashed_uid.replace("-", "")[:6],
     }
     electrode.update(draft.body or {})
-    for field_name in ("name", "batch_id", "lot_id", "parent_id", "piece_id", "storage", "comment"):
+    for field_name in ("name", "handle", "batch_id", "lot_id", "parent_id", "piece_id", "storage", "comment"):
         value = getattr(draft, field_name)
         if value is not None:
             electrode[field_name] = value
@@ -1253,6 +1261,7 @@ def _record_from_component_spec(
     component_family: str,
     *,
     name: str,
+    handle: str | None = None,
     body: dict[str, Any] | None = None,
     manufacturer: str | dict[str, Any] | None = None,
     supplier: str | dict[str, Any] | None = None,
@@ -1281,6 +1290,8 @@ def _record_from_component_spec(
         entity_id = f"https://w3id.org/battinfo/spec/{dashed_uid}"
 
     spec: dict[str, Any] = {"id": entity_id, "short_id": dashed_uid.replace("-", "")[:6], "name": name}
+    if handle is not None:
+        spec["handle"] = handle
     spec.update(body or {})
     spec.update({k: v for k, v in extra.items() if v is not None})
     if component_family == "electrolyte":
@@ -1321,6 +1332,7 @@ def _record_from_component_instance(
     spec_id: str,
     body: dict[str, Any] | None = None,
     name: str | None = None,
+    handle: str | None = None,
     lot_id: str | None = None,
     supplier: str | dict[str, Any] | None = None,
     dataset_ids: list[str] | None = None,
@@ -1355,6 +1367,8 @@ def _record_from_component_instance(
     instance.update(body or {})
     if name is not None:
         instance["name"] = name
+    if handle is not None:
+        instance["handle"] = handle
     if lot_id is not None:
         instance["lot_id"] = lot_id
     org = _org_value(supplier)

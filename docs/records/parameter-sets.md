@@ -5861,6 +5861,7 @@ Schema: [`parameter-set.schema.json`](https://w3id.org/battinfo/schema/parameter
 | `id` | → SpecIri | yes |  |
 | `short_id` | → ShortId |  |  |
 | `name` | string | yes | Human-readable label for this batch of claims, conventionally '<source> - <target>' (e.g. 'Chen 2020 - graphite'). |
+| `handle` | → Handle |  | Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity. |
 | `material_kind` | string |  | Target: a generic material kind key from the curated material_kinds vocabulary (e.g. 'graphite', 'nmc811'). Claims about the generic chemistry collate here; resolution falls back from a product-specific material spec to its kind. |
 | `material_spec_id` | → MaterialSpecIri |  | Target: a specific material spec (a vendor product/grade). Use for claims measured on a particular product rather than the generic chemistry. |
 | `cell_spec_id` | → SpecIri |  | Target: a cell spec. Use for cell-level fitted sets (full-cell parameterizations, ECM fits) and for electrode/separator/electrolyte claims that describe this cell's build rather than a material. |

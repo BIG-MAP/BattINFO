@@ -762,6 +762,7 @@ Schema: [`housing-spec.schema.json`](https://w3id.org/battinfo/schema/housing-sp
 | `id` | → ComponentSpecIri | yes |  |
 | `short_id` | → ShortId |  |  |
 | `name` | string | yes | Human-readable name of this housing design (e.g. 'CR2032 SS316L case'). |
+| `handle` | → Handle |  | Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity. |
 | `cell_format` | `coin` \| `cylindrical` \| `pouch` \| `prismatic` … (6 values) |  | Cell format this housing is for. |
 | `case` | → Case |  | Main case or can of the housing. |
 | `cap` | → HardwarePart |  | Cap or lid part. |
@@ -784,6 +785,7 @@ Schema: [`housing.schema.json`](https://w3id.org/battinfo/schema/housing.schema.
 | `housing_spec_id` | → ComponentSpecIri | yes | IRI of the housing-spec this physical housing realizes. |
 | `short_id` | → ShortId |  |  |
 | `name` | string |  | Human-readable label for this physical item (e.g. a lab inventory id). |
+| `handle` | → Handle |  | Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity. |
 | `lot_id` | string |  | Manufacturer or supplier lot number. |
 | `batch_id` | string |  | Internal lab batch identifier, when different from the supplier lot. |
 | `supplier` | → OrgRef |  | Supplier or vendor the item was sourced from. |

@@ -1093,6 +1093,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "type": "string",
               "description": "Human-readable name / label for this cell (e.g. a lab batch ID). The primary identifier; usually present even without a manufacturer serial number."
             },
+            "handle": {
+              "$ref": "#/$defs/Handle",
+              "description": "Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity."
+            },
             "short_id": {
               "$ref": "#/$defs/ShortId"
             },
@@ -1381,6 +1385,12 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "type": "string",
           "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$",
           "description": "Short human-friendly identifier derived from the record IRI (Crockford base32, 6-16 characters)."
+        },
+        "Handle": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*(?:/[a-z0-9]+(?:-[a-z0-9]+)*)*$",
+          "maxLength": 120,
+          "description": "Short readable slug for this record, unique within one registry workspace and shown as <workspace>/<handle> (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Lowercase ASCII segments joined by '/', each made of letters and digits separated by single hyphens; at most 120 characters. Display text only: the record's identity is its IRI, and a handle may be corrected without moving it. Build one with battinfo.naming.handle_for()."
         },
         "CellIri": {
           "type": "string",
@@ -1688,6 +1698,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "type": "string",
               "minLength": 1,
               "description": "Human-readable display name, typically manufacturer plus model."
+            },
+            "handle": {
+              "$ref": "#/$defs/Handle",
+              "description": "Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity."
             },
             "model": {
               "type": "string",
@@ -2145,6 +2159,12 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$",
           "description": "Short human-friendly identifier derived from the record IRI (Crockford base32, 6-16 characters)."
         },
+        "Handle": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*(?:/[a-z0-9]+(?:-[a-z0-9]+)*)*$",
+          "maxLength": 120,
+          "description": "Short readable slug for this record, unique within one registry workspace and shown as <workspace>/<handle> (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Lowercase ASCII segments joined by '/', each made of letters and digits separated by single hyphens; at most 120 characters. Display text only: the record's identity is its IRI, and a handle may be corrected without moving it. Build one with battinfo.naming.handle_for()."
+        },
         "Identifier": {
           "anyOf": [
             {
@@ -2446,6 +2466,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             "label": {
               "type": "string"
             },
+            "handle": {
+              "$ref": "#/$defs/Handle",
+              "description": "Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity."
+            },
             "status": {
               "type": "string",
               "enum": [
@@ -2485,6 +2509,12 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         "ShortId": {
           "type": "string",
           "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$"
+        },
+        "Handle": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*(?:/[a-z0-9]+(?:-[a-z0-9]+)*)*$",
+          "maxLength": 120,
+          "description": "Short readable slug for this record, unique within one registry workspace and shown as <workspace>/<handle> (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Lowercase ASCII segments joined by '/', each made of letters and digits separated by single hyphens; at most 120 characters. Display text only: the record's identity is its IRI, and a handle may be corrected without moving it. Build one with battinfo.naming.handle_for()."
         },
         "UnixTime": {
           "type": "integer",
@@ -2586,6 +2616,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "minLength": 1,
               "description": "Product label of this current-collector design (e.g. 'Al foil 15 um')."
             },
+            "handle": {
+              "$ref": "#/$defs/Handle",
+              "description": "Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity."
+            },
             "material": {
               "type": "string",
               "minLength": 1,
@@ -2650,6 +2684,12 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "type": "string",
           "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$",
           "description": "Short human-friendly identifier derived from the record IRI (Crockford base32, 6-16 characters)."
+        },
+        "Handle": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*(?:/[a-z0-9]+(?:-[a-z0-9]+)*)*$",
+          "maxLength": 120,
+          "description": "Short readable slug for this record, unique within one registry workspace and shown as <workspace>/<handle> (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Lowercase ASCII segments joined by '/', each made of letters and digits separated by single hyphens; at most 120 characters. Display text only: the record's identity is its IRI, and a handle may be corrected without moving it. Build one with battinfo.naming.handle_for()."
         },
         "UnixTime": {
           "type": "integer",
@@ -2809,6 +2849,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "type": "string",
               "description": "Human-readable label for this physical item (e.g. a lab inventory id)."
             },
+            "handle": {
+              "$ref": "#/$defs/Handle",
+              "description": "Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity."
+            },
             "lot_id": {
               "type": "string",
               "description": "Manufacturer or supplier lot number."
@@ -2870,6 +2914,12 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "type": "string",
           "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$",
           "description": "Short human-friendly identifier derived from the record IRI (Crockford base32, 6-16 characters)."
+        },
+        "Handle": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*(?:/[a-z0-9]+(?:-[a-z0-9]+)*)*$",
+          "maxLength": 120,
+          "description": "Short readable slug for this record, unique within one registry workspace and shown as <workspace>/<handle> (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Lowercase ASCII segments joined by '/', each made of letters and digits separated by single hyphens; at most 120 characters. Display text only: the record's identity is its IRI, and a handle may be corrected without moving it. Build one with battinfo.naming.handle_for()."
         },
         "UnixTime": {
           "type": "integer",
@@ -3075,6 +3125,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "type": "string",
               "minLength": 1,
               "description": "Dataset title."
+            },
+            "handle": {
+              "$ref": "#/$defs/Handle",
+              "description": "Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity."
             },
             "description": {
               "type": "string",
@@ -3445,6 +3499,12 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "type": "string",
           "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$",
           "description": "Short human-friendly identifier derived from the record IRI (Crockford base32, 6-16 characters)."
+        },
+        "Handle": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*(?:/[a-z0-9]+(?:-[a-z0-9]+)*)*$",
+          "maxLength": 120,
+          "description": "Short readable slug for this record, unique within one registry workspace and shown as <workspace>/<handle> (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Lowercase ASCII segments joined by '/', each made of letters and digits separated by single hyphens; at most 120 characters. Display text only: the record's identity is its IRI, and a handle may be corrected without moving it. Build one with battinfo.naming.handle_for()."
         },
         "DatasetIri": {
           "type": "string",
@@ -4126,6 +4186,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "minLength": 1,
               "description": "Human-readable electrode name / designation (e.g. 'Si-Gr anode, aqueous', 'NMC811 cathode 96/2/2')."
             },
+            "handle": {
+              "$ref": "#/$defs/Handle",
+              "description": "Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity."
+            },
             "active_material_kind": {
               "type": "string",
               "minLength": 1,
@@ -4238,6 +4302,12 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "type": "string",
           "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$",
           "description": "Short human-friendly identifier derived from the record IRI (Crockford base32, 6-16 characters)."
+        },
+        "Handle": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*(?:/[a-z0-9]+(?:-[a-z0-9]+)*)*$",
+          "maxLength": 120,
+          "description": "Short readable slug for this record, unique within one registry workspace and shown as <workspace>/<handle> (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Lowercase ASCII segments joined by '/', each made of letters and digits separated by single hyphens; at most 120 characters. Display text only: the record's identity is its IRI, and a handle may be corrected without moving it. Build one with battinfo.naming.handle_for()."
         },
         "UnixTime": {
           "type": "integer",
@@ -4515,6 +4585,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "type": "string",
               "description": "Human-readable label for this batch."
             },
+            "handle": {
+              "$ref": "#/$defs/Handle",
+              "description": "Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity."
+            },
             "lot_id": {
               "type": "string",
               "description": "Producer / supplier lot number for a purchased electrode."
@@ -4620,6 +4694,12 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "type": "string",
           "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$",
           "description": "Short human-friendly identifier derived from the record IRI (Crockford base32, 6-16 characters)."
+        },
+        "Handle": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*(?:/[a-z0-9]+(?:-[a-z0-9]+)*)*$",
+          "maxLength": 120,
+          "description": "Short readable slug for this record, unique within one registry workspace and shown as <workspace>/<handle> (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Lowercase ASCII segments joined by '/', each made of letters and digits separated by single hyphens; at most 120 characters. Display text only: the record's identity is its IRI, and a handle may be corrected without moving it. Build one with battinfo.naming.handle_for()."
         },
         "UnixTime": {
           "type": "integer",
@@ -4913,6 +4993,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "minLength": 1,
               "description": "Human-readable name of this formulation (e.g. 'LP57 + 2% VC')."
             },
+            "handle": {
+              "$ref": "#/$defs/Handle",
+              "description": "Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity."
+            },
             "family": {
               "$ref": "modules/components/electrolyte.schema.json#/properties/family",
               "description": "Broad electrolyte class."
@@ -4977,6 +5061,12 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "type": "string",
           "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$",
           "description": "Short human-friendly identifier derived from the record IRI (Crockford base32, 6-16 characters)."
+        },
+        "Handle": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*(?:/[a-z0-9]+(?:-[a-z0-9]+)*)*$",
+          "maxLength": 120,
+          "description": "Short readable slug for this record, unique within one registry workspace and shown as <workspace>/<handle> (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Lowercase ASCII segments joined by '/', each made of letters and digits separated by single hyphens; at most 120 characters. Display text only: the record's identity is its IRI, and a handle may be corrected without moving it. Build one with battinfo.naming.handle_for()."
         },
         "UnixTime": {
           "type": "integer",
@@ -5136,6 +5226,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "type": "string",
               "description": "Human-readable label for this physical lot (e.g. a lab inventory id)."
             },
+            "handle": {
+              "$ref": "#/$defs/Handle",
+              "description": "Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity."
+            },
             "lot_id": {
               "type": "string",
               "description": "Manufacturer or supplier lot number."
@@ -5197,6 +5291,12 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "type": "string",
           "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$",
           "description": "Short human-friendly identifier derived from the record IRI (Crockford base32, 6-16 characters)."
+        },
+        "Handle": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*(?:/[a-z0-9]+(?:-[a-z0-9]+)*)*$",
+          "maxLength": 120,
+          "description": "Short readable slug for this record, unique within one registry workspace and shown as <workspace>/<handle> (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Lowercase ASCII segments joined by '/', each made of letters and digits separated by single hyphens; at most 120 characters. Display text only: the record's identity is its IRI, and a handle may be corrected without moving it. Build one with battinfo.naming.handle_for()."
         },
         "UnixTime": {
           "type": "integer",
@@ -5394,6 +5494,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "type": "string",
               "minLength": 1
             },
+            "handle": {
+              "$ref": "#/$defs/Handle",
+              "description": "Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity."
+            },
             "equipment_class": {
               "type": "string",
               "minLength": 1
@@ -5448,6 +5552,12 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         "ShortId": {
           "type": "string",
           "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$"
+        },
+        "Handle": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*(?:/[a-z0-9]+(?:-[a-z0-9]+)*)*$",
+          "maxLength": 120,
+          "description": "Short readable slug for this record, unique within one registry workspace and shown as <workspace>/<handle> (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Lowercase ASCII segments joined by '/', each made of letters and digits separated by single hyphens; at most 120 characters. Display text only: the record's identity is its IRI, and a handle may be corrected without moving it. Build one with battinfo.naming.handle_for()."
         },
         "UnixTime": {
           "type": "integer",
@@ -5590,6 +5700,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             "name": {
               "type": "string"
             },
+            "handle": {
+              "$ref": "#/$defs/Handle",
+              "description": "Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity."
+            },
             "location": {
               "type": "string"
             },
@@ -5635,6 +5749,12 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         "ShortId": {
           "type": "string",
           "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$"
+        },
+        "Handle": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*(?:/[a-z0-9]+(?:-[a-z0-9]+)*)*$",
+          "maxLength": 120,
+          "description": "Short readable slug for this record, unique within one registry workspace and shown as <workspace>/<handle> (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Lowercase ASCII segments joined by '/', each made of letters and digits separated by single hyphens; at most 120 characters. Display text only: the record's identity is its IRI, and a handle may be corrected without moving it. Build one with battinfo.naming.handle_for()."
         },
         "UnixTime": {
           "type": "integer",
@@ -5746,6 +5866,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "minLength": 1,
               "description": "Human-readable name of this housing design (e.g. 'CR2032 SS316L case')."
             },
+            "handle": {
+              "$ref": "#/$defs/Handle",
+              "description": "Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity."
+            },
             "cell_format": {
               "type": "string",
               "enum": [
@@ -5831,6 +5955,12 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "type": "string",
           "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$",
           "description": "Short human-friendly identifier derived from the record IRI (Crockford base32, 6-16 characters)."
+        },
+        "Handle": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*(?:/[a-z0-9]+(?:-[a-z0-9]+)*)*$",
+          "maxLength": 120,
+          "description": "Short readable slug for this record, unique within one registry workspace and shown as <workspace>/<handle> (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Lowercase ASCII segments joined by '/', each made of letters and digits separated by single hyphens; at most 120 characters. Display text only: the record's identity is its IRI, and a handle may be corrected without moving it. Build one with battinfo.naming.handle_for()."
         },
         "UnixTime": {
           "type": "integer",
@@ -6114,6 +6244,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "type": "string",
               "description": "Human-readable label for this physical item (e.g. a lab inventory id)."
             },
+            "handle": {
+              "$ref": "#/$defs/Handle",
+              "description": "Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity."
+            },
             "lot_id": {
               "type": "string",
               "description": "Manufacturer or supplier lot number."
@@ -6175,6 +6309,12 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "type": "string",
           "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$",
           "description": "Short human-friendly identifier derived from the record IRI (Crockford base32, 6-16 characters)."
+        },
+        "Handle": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*(?:/[a-z0-9]+(?:-[a-z0-9]+)*)*$",
+          "maxLength": 120,
+          "description": "Short readable slug for this record, unique within one registry workspace and shown as <workspace>/<handle> (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Lowercase ASCII segments joined by '/', each made of letters and digits separated by single hyphens; at most 120 characters. Display text only: the record's identity is its IRI, and a handle may be corrected without moving it. Build one with battinfo.naming.handle_for()."
         },
         "UnixTime": {
           "type": "integer",
@@ -6507,6 +6647,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "minLength": 1,
               "description": "Human-readable material name / grade (e.g. 'LFP', 'Graphite', 'NMC811', 'PVDF')."
             },
+            "handle": {
+              "$ref": "#/$defs/Handle",
+              "description": "Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity."
+            },
             "kind": {
               "type": "string",
               "minLength": 1,
@@ -6704,6 +6848,12 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "type": "string",
           "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$",
           "description": "Short human-friendly identifier derived from the record IRI (Crockford base32, 6-16 characters)."
+        },
+        "Handle": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*(?:/[a-z0-9]+(?:-[a-z0-9]+)*)*$",
+          "maxLength": 120,
+          "description": "Short readable slug for this record, unique within one registry workspace and shown as <workspace>/<handle> (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Lowercase ASCII segments joined by '/', each made of letters and digits separated by single hyphens; at most 120 characters. Display text only: the record's identity is its IRI, and a handle may be corrected without moving it. Build one with battinfo.naming.handle_for()."
         },
         "MaterialSpecIri": {
           "type": "string",
@@ -6972,6 +7122,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "type": "string",
               "description": "Human-readable label for this physical lot (e.g. a lab/inventory id)."
             },
+            "handle": {
+              "$ref": "#/$defs/Handle",
+              "description": "Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity."
+            },
             "lot_id": {
               "type": "string",
               "description": "Manufacturer / supplier lot or batch number."
@@ -7177,6 +7331,12 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "type": "string",
           "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$",
           "description": "Short human-friendly identifier derived from the record IRI (Crockford base32, 6-16 characters)."
+        },
+        "Handle": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*(?:/[a-z0-9]+(?:-[a-z0-9]+)*)*$",
+          "maxLength": 120,
+          "description": "Short readable slug for this record, unique within one registry workspace and shown as <workspace>/<handle> (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Lowercase ASCII segments joined by '/', each made of letters and digits separated by single hyphens; at most 120 characters. Display text only: the record's identity is its IRI, and a handle may be corrected without moving it. Build one with battinfo.naming.handle_for()."
         },
         "MaterialIri": {
           "type": "string",
@@ -8815,6 +8975,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "minLength": 1,
               "description": "Current preferred name of the organization."
             },
+            "handle": {
+              "$ref": "#/$defs/Handle",
+              "description": "Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity."
+            },
             "legalName": {
               "type": "string",
               "minLength": 1,
@@ -9059,6 +9223,12 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$",
           "description": "Short human-friendly identifier derived from the record IRI (Crockford base32, 6-16 characters)."
         },
+        "Handle": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*(?:/[a-z0-9]+(?:-[a-z0-9]+)*)*$",
+          "maxLength": 120,
+          "description": "Short readable slug for this record, unique within one registry workspace and shown as <workspace>/<handle> (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Lowercase ASCII segments joined by '/', each made of letters and digits separated by single hyphens; at most 120 characters. Display text only: the record's identity is its IRI, and a handle may be corrected without moving it. Build one with battinfo.naming.handle_for()."
+        },
         "UnixTime": {
           "type": "integer",
           "minimum": 0,
@@ -9105,6 +9275,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "type": "string",
               "minLength": 1,
               "description": "Human-readable label for this batch of claims, conventionally '<source> - <target>' (e.g. 'Chen 2020 - graphite')."
+            },
+            "handle": {
+              "$ref": "#/$defs/Handle",
+              "description": "Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity."
             },
             "material_kind": {
               "type": "string",
@@ -9327,6 +9501,12 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         "ShortId": {
           "type": "string",
           "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$"
+        },
+        "Handle": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*(?:/[a-z0-9]+(?:-[a-z0-9]+)*)*$",
+          "maxLength": 120,
+          "description": "Short readable slug for this record, unique within one registry workspace and shown as <workspace>/<handle> (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Lowercase ASCII segments joined by '/', each made of letters and digits separated by single hyphens; at most 120 characters. Display text only: the record's identity is its IRI, and a handle may be corrected without moving it. Build one with battinfo.naming.handle_for()."
         },
         "UnixTime": {
           "type": "integer",
@@ -9825,6 +10005,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "minLength": 1,
               "description": "Human-readable name of this separator design (e.g. 'Celgard 2325')."
             },
+            "handle": {
+              "$ref": "#/$defs/Handle",
+              "description": "Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity."
+            },
             "material": {
               "type": "string",
               "description": "Bulk separator material (e.g. 'PP', 'PE', 'cellulose')."
@@ -9893,6 +10077,12 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "type": "string",
           "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$",
           "description": "Short human-friendly identifier derived from the record IRI (Crockford base32, 6-16 characters)."
+        },
+        "Handle": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*(?:/[a-z0-9]+(?:-[a-z0-9]+)*)*$",
+          "maxLength": 120,
+          "description": "Short readable slug for this record, unique within one registry workspace and shown as <workspace>/<handle> (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Lowercase ASCII segments joined by '/', each made of letters and digits separated by single hyphens; at most 120 characters. Display text only: the record's identity is its IRI, and a handle may be corrected without moving it. Build one with battinfo.naming.handle_for()."
         },
         "UnixTime": {
           "type": "integer",
@@ -10052,6 +10242,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "type": "string",
               "description": "Human-readable label for this physical item (e.g. a lab inventory id)."
             },
+            "handle": {
+              "$ref": "#/$defs/Handle",
+              "description": "Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity."
+            },
             "lot_id": {
               "type": "string",
               "description": "Manufacturer or supplier lot number."
@@ -10113,6 +10307,12 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "type": "string",
           "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$",
           "description": "Short human-friendly identifier derived from the record IRI (Crockford base32, 6-16 characters)."
+        },
+        "Handle": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*(?:/[a-z0-9]+(?:-[a-z0-9]+)*)*$",
+          "maxLength": 120,
+          "description": "Short readable slug for this record, unique within one registry workspace and shown as <workspace>/<handle> (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Lowercase ASCII segments joined by '/', each made of letters and digits separated by single hyphens; at most 120 characters. Display text only: the record's identity is its IRI, and a handle may be corrected without moving it. Build one with battinfo.naming.handle_for()."
         },
         "UnixTime": {
           "type": "integer",
@@ -10317,6 +10517,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "type": "string",
               "minLength": 1,
               "description": "Human-readable protocol name."
+            },
+            "handle": {
+              "$ref": "#/$defs/Handle",
+              "description": "Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity."
             },
             "description": {
               "type": "string",
@@ -10588,6 +10792,12 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "type": "string",
           "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$",
           "description": "Short human-friendly identifier derived from the record IRI (Crockford base32, 6-16 characters)."
+        },
+        "Handle": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*(?:/[a-z0-9]+(?:-[a-z0-9]+)*)*$",
+          "maxLength": 120,
+          "description": "Short readable slug for this record, unique within one registry workspace and shown as <workspace>/<handle> (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Lowercase ASCII segments joined by '/', each made of letters and digits separated by single hyphens; at most 120 characters. Display text only: the record's identity is its IRI, and a handle may be corrected without moving it. Build one with battinfo.naming.handle_for()."
         },
         "SpecIri": {
           "type": "string",
@@ -11028,6 +11238,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "minLength": 1,
               "description": "Human-readable test name."
             },
+            "handle": {
+              "$ref": "#/$defs/Handle",
+              "description": "Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity."
+            },
             "protocol_id": {
               "$ref": "#/$defs/SpecIri",
               "description": "IRI of the test-protocol (test spec) this test executed."
@@ -11394,6 +11608,12 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "type": "string",
           "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$",
           "description": "Short human-friendly identifier derived from the record IRI (Crockford base32, 6-16 characters)."
+        },
+        "Handle": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*(?:/[a-z0-9]+(?:-[a-z0-9]+)*)*$",
+          "maxLength": 120,
+          "description": "Short readable slug for this record, unique within one registry workspace and shown as <workspace>/<handle> (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Lowercase ASCII segments joined by '/', each made of letters and digits separated by single hyphens; at most 120 characters. Display text only: the record's identity is its IRI, and a handle may be corrected without moving it. Build one with battinfo.naming.handle_for()."
         },
         "CellIri": {
           "type": "string",

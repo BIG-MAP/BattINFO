@@ -573,6 +573,7 @@ Schema: [`electrolyte-spec.schema.json`](https://w3id.org/battinfo/schema/electr
 | `id` | → ComponentSpecIri | yes |  |
 | `short_id` | → ShortId |  |  |
 | `name` | string | yes | Human-readable name of this formulation (e.g. 'LP57 + 2% VC'). |
+| `handle` | → Handle |  | Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity. |
 | `family` | → family | yes | Broad electrolyte class. |
 | `salt` | → salt |  | Conducting salt (e.g. LiPF6), with concentration under its property map. |
 | `solvent` | → solvent |  | Solvent component(s): a single component object for a pure solvent, or an array for a mixture. Each component's fraction lives under its property map (volume_fraction v/v or mass_fraction w/w - one basis per formulation). |
@@ -594,6 +595,7 @@ Schema: [`electrolyte.schema.json`](https://w3id.org/battinfo/schema/electrolyte
 | `electrolyte_spec_id` | → ComponentSpecIri | yes | IRI of the electrolyte-spec this physical electrolyte realizes. |
 | `short_id` | → ShortId |  |  |
 | `name` | string |  | Human-readable label for this physical lot (e.g. a lab inventory id). |
+| `handle` | → Handle |  | Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity. |
 | `lot_id` | string |  | Manufacturer or supplier lot number. |
 | `batch_id` | string |  | Internal lab batch identifier, when different from the supplier lot. |
 | `supplier` | → OrgRef |  | Supplier or vendor the item was sourced from. |
