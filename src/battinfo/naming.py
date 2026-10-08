@@ -52,6 +52,8 @@ __all__ = [
     "handle_for",
     "is_valid_handle",
     "kind_word",
+    "organization_handle",
+    "PRODUCT_KINDS",
     "title_for",
 ]
 
@@ -174,9 +176,20 @@ def _text(value: object, what: str) -> str:
     return str(value)
 
 
+# Letters that Unicode does not decompose into an ASCII base letter plus a mark,
+# spelled the way their languages transliterate them (Topsøe -> topsoe, not topse).
+_TRANSLITERATION = str.maketrans({
+    "ø": "o", "Ø": "O", "æ": "ae", "Æ": "AE", "œ": "oe", "Œ": "OE", "ß": "ss",
+    "ł": "l", "Ł": "L", "đ": "d", "Đ": "D", "ð": "d", "Ð": "D", "þ": "th", "Þ": "Th",
+    "ı": "i",
+})
+
+
 def _ascii(value: str) -> str:
-    """ASCII transliteration: accents fold away, letters with no ASCII form drop."""
-    return unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode("ascii")
+    """ASCII transliteration: accents fold away (é -> e), letters such as ø and
+    æ take their usual spelling (o, ae), and anything else with no ASCII form drops."""
+    folded = unicodedata.normalize("NFKD", value.translate(_TRANSLITERATION))
+    return folded.encode("ascii", "ignore").decode("ascii")
 
 
 def _slug(value: object, what: str) -> str:
@@ -269,6 +282,82 @@ def _kind_title_words(entity_type: str) -> str:
     return KIND_WORDS[entity_type].replace("-", " ")
 
 
+# ── Products and organizations ────────────────────────────────────────────────
+
+#: Spec kinds a manufacturer or supplier makes. A product's handle is grouped by
+#: its manufacturer and its title is the manufacturer's name and the model,
+#: because that is how people search for and cite a product.
+PRODUCT_KINDS: frozenset[str] = frozenset({
+    "cell-spec",
+    "material-spec",
+    "electrode-spec",
+    "separator-spec",
+    "current-collector-spec",
+    "electrolyte-spec",
+    "housing-spec",
+    "equipment-spec",
+})
+
+
+def _organization_fields(manufacturer: object) -> tuple[str | None, str | None]:
+    """(handle, name) from a manufacturer given as a name, a reference or a record.
+
+    Accepts a plain name (``"Samsung SDI"``), a reference as records carry it
+    (``{"name": ..., "id": ..., "handle": ...}``), or a whole organization
+    record (``{"organization": {...}}``).
+    """
+    if isinstance(manufacturer, Mapping):
+        body = manufacturer.get("organization", manufacturer)
+        if not isinstance(body, Mapping):
+            raise TypeError("manufacturer must be a name, a reference or an organization record.")
+        handle = body.get("handle")
+        name = body.get("name") or body.get("legal_name")
+        if handle is not None and not (isinstance(handle, str) and is_valid_handle(handle) and "/" not in handle):
+            raise ValueError(f"organization handle {handle!r} must be one handle segment, e.g. 'samsung-sdi'.")
+        if handle is None and not name:
+            raise ValueError("manufacturer reference has neither a handle nor a name.")
+        return handle, (str(name) if name else None)
+    name = " ".join(_text(manufacturer, "manufacturer").split())
+    if not name:
+        raise ValueError("manufacturer is empty.")
+    return None, name
+
+
+def _model_without_maker(model: object, maker_name: str | None) -> str:
+    """The model text, without a leading repeat of the manufacturer's name.
+
+    Datasheets often write the model as "Samsung INR18650-35E"; the title and
+    handle add the manufacturer themselves, so a repeated name is dropped once.
+    """
+    text = " ".join(_text(model, "model").split())
+    if not text:
+        raise ValueError("model is empty.")
+    if maker_name:
+        maker = " ".join(maker_name.split())
+        if text.lower().startswith(maker.lower() + " ") and len(text) > len(maker) + 1:
+            text = text[len(maker) + 1:].strip()
+    return text
+
+
+def organization_handle(organization: object) -> str:
+    """The handle for an organization: one bare slug, its products' group.
+
+    An organization's handle carries no kind word: like a collection's, it is
+    the root its records are grouped under (``samsung-sdi`` for
+    ``samsung-sdi/inr18650-35e-cell-spec``). An organization reference that
+    already states a handle keeps it.
+
+    >>> organization_handle("Samsung SDI")
+    'samsung-sdi'
+    >>> organization_handle({"name": "EVE Energy", "handle": "eve-energy"})
+    'eve-energy'
+    """
+    handle, name = _organization_fields(organization)
+    if handle is not None:
+        return handle
+    return _slug(name, "organization name")
+
+
 # ── Handles ───────────────────────────────────────────────────────────────────
 
 
@@ -280,6 +369,8 @@ def handle_for(
     variant: str | None = None,
     sample: str | int | None = None,
     method: str | None = None,
+    manufacturer: object = None,
+    model: str | None = None,
 ) -> str:
     """Build a record handle from structured parts.
 
@@ -299,6 +390,16 @@ def handle_for(
         sample: The source's sample id for a physical item or its results.
         method: The test method for tests and datasets (``"gitt"``,
             ``"p-OCV hold"``).
+        manufacturer: For a product (a spec kind in :data:`PRODUCT_KINDS`),
+            its manufacturer or supplier: a name, the organization reference
+            the record carries, or the organization record. The group is the
+            organization's handle when it has one, else its slugged name.
+        model: For a product, its model or product name. A leading repeat of
+            the manufacturer's name is dropped.
+
+    A product's handle reads ``<manufacturer>/<model>-<kind>``, e.g.
+    ``samsung-sdi/inr18650-35e-cell-spec``. An organization's handle, like a
+    collection's, is its bare group (see :func:`organization_handle`).
 
     Every part is normalised the same way: lowercased, transliterated to ASCII,
     and runs of anything other than letters and digits collapsed to one hyphen.
@@ -311,11 +412,25 @@ def handle_for(
 
     >>> handle_for("collection", group="flores-ocv")
     'flores-ocv'
+    >>> handle_for("cell-spec", manufacturer="Samsung SDI", model="INR18650-35E")
+    'samsung-sdi/inr18650-35e-cell-spec'
     >>> handle_for("test", group="flores-ocv", subject="graphite",
     ...            variant="Gr-AQ-1", sample="063b77", method="GITT")
     'flores-ocv/graphite-aq-1-063b77-gitt-test'
     """
     resolved = _resolve_kind(kind)
+
+    if manufacturer is not None or model is not None:
+        return _product_handle(resolved, manufacturer, model, group=group, subject=subject,
+                               variant=variant, sample=sample, method=method)
+    if resolved == "organization":
+        extras = [name for name, value in (
+            ("subject", subject), ("variant", variant), ("sample", sample), ("method", method),
+        ) if value is not None]
+        if extras or group is None:
+            raise ValueError("An organization's handle is one bare slug: use organization_handle(name).")
+        return organization_handle(group)
+
     group_slug = _group_slug(group) if group is not None else None
 
     if resolved == COLLECTION:
@@ -355,6 +470,35 @@ def handle_for(
     return handle
 
 
+def _product_handle(
+    resolved: str,
+    manufacturer: object,
+    model: object,
+    **others: object,
+) -> str:
+    if resolved not in PRODUCT_KINDS:
+        raise ValueError(
+            f"manufacturer=/model= build product handles, for {', '.join(sorted(PRODUCT_KINDS))}; "
+            f"a {resolved} record is named from its group and parts."
+        )
+    if manufacturer is None or model is None:
+        raise ValueError("A product handle needs both manufacturer= and model=.")
+    extras = [name for name, value in others.items() if value is not None]
+    if extras:
+        raise ValueError(
+            "A product handle is <manufacturer>/<model>-<kind>; drop "
+            + ", ".join(f"{name}=" for name in extras) + "."
+        )
+    _, maker_name = _organization_fields(manufacturer)
+    segment = f"{_slug(_model_without_maker(model, maker_name), 'model')}-{KIND_WORDS[resolved]}"
+    handle = f"{organization_handle(manufacturer)}/{segment}"
+    if len(handle) > HANDLE_MAX_LENGTH:
+        raise ValueError(
+            f"handle {handle!r} is {len(handle)} characters; the limit is {HANDLE_MAX_LENGTH}."
+        )
+    return handle
+
+
 # ── Titles ────────────────────────────────────────────────────────────────────
 
 _RESULT_KINDS = frozenset({"test", "dataset"})
@@ -369,6 +513,8 @@ def title_for(
     method: str | None = None,
     tested: str | None = "cell",
     label: str | None = None,
+    manufacturer: object = None,
+    model: str | None = None,
 ) -> str:
     """Build a readable record title (the ``name``) from structured parts.
 
@@ -396,6 +542,12 @@ def title_for(
             ``"cell"``). Pass ``None`` to leave it out. Other kinds ignore it.
         label: A collection's descriptive name; ``" collection"`` is
             appended unless it already ends that way. Only collections take it.
+        manufacturer: For a product (:data:`PRODUCT_KINDS`), its manufacturer:
+            a name, a reference or an organization record with a name.
+        model: For a product, its model. The title is the manufacturer's name
+            and the model (``Samsung SDI INR18650-35E``), with no kind words:
+            a product's name is what people search for and cite, and the
+            record type is shown beside the title.
 
     Raises:
         ValueError: when the kind is unknown, a collection has no label, or a
@@ -407,8 +559,29 @@ def title_for(
     'GITT test spec'
     >>> title_for("test-spec", method="p-OCV hold")
     'p-OCV hold test spec'
+    >>> title_for("cell-spec", manufacturer="Samsung SDI", model="Samsung SDI INR18650-35E")
+    'Samsung SDI INR18650-35E'
     """
     resolved = _resolve_kind(kind)
+
+    if manufacturer is not None or model is not None:
+        if resolved not in PRODUCT_KINDS:
+            raise ValueError(
+                f"manufacturer=/model= build product titles, for {', '.join(sorted(PRODUCT_KINDS))}."
+            )
+        if manufacturer is None or model is None:
+            raise ValueError("A product title needs both manufacturer= and model=.")
+        extras = [name for name, value in (
+            ("subject", subject), ("variant", variant), ("sample", sample),
+            ("method", method), ("label", label),
+        ) if value is not None]
+        if extras:
+            raise ValueError("A product title is the manufacturer and the model; drop "
+                             + ", ".join(f"{name}=" for name in extras) + ".")
+        _, maker_name = _organization_fields(manufacturer)
+        if not maker_name:
+            raise ValueError("A product title needs the manufacturer's name, not only its handle.")
+        return f"{maker_name} {_model_without_maker(model, maker_name)}"
 
     if resolved == COLLECTION:
         if label is None or not " ".join(_text(label, "label").split()):

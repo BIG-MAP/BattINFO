@@ -337,8 +337,10 @@ def _validate_handle_kind_word(doc: dict[str, Any], issues: list[ValidationIssue
 
     Always a warning, never an error, under every policy: the grammar itself is
     enforced by the schema pattern, and a handle that breaks only the layout
-    convention is still a usable handle. A collection (a dataset series) is the
-    root of its group and carries no kind word, so it is not checked.
+    convention is still a usable handle. A collection (a dataset series) and an
+    organization are the roots their records are grouped under (a collection's
+    members, a manufacturer's products) and carry no kind word, so they are not
+    checked.
     """
     kind = kind_for_doc(doc)
     if kind is None:
@@ -350,6 +352,8 @@ def _validate_handle_kind_word(doc: dict[str, Any], issues: list[ValidationIssue
     if not is_valid_handle(handle):
         return  # absent, or a schema error already
     if kind.entity_type == "dataset" and is_dataset_series(body.get("additional_type")):
+        return
+    if kind.entity_type == "organization":
         return
     expected = kind_word(kind.entity_type)
     last_segment = str(handle).rsplit("/", 1)[-1]
