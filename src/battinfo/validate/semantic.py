@@ -9,6 +9,8 @@ from typing import Any, Mapping
 
 from battinfo._util import is_dataset_series
 from battinfo.canonical_aliases import record_to_snake_aliases
+from battinfo.entities import kind_for_doc
+from battinfo.naming import is_valid_handle, kind_word
 from battinfo.validate.core import (
     DEFAULT_POLICY,
     ValidationIssue,
@@ -328,6 +330,43 @@ def _validate_identifier_consistency(
                 message=f"identifier '{identifier}' must use UID '{expected_uid}' to match id '{entity_id}'.",
                 resource_type=resource_type,
             )
+
+
+def _validate_handle_kind_word(doc: dict[str, Any], issues: list[ValidationIssue]) -> None:
+    """Nudge a handle toward the naming convention: it ends with its kind word.
+
+    Always a warning, never an error, under every policy: the grammar itself is
+    enforced by the schema pattern, and a handle that breaks only the layout
+    convention is still a usable handle. A collection (a dataset series) is the
+    root of its group and carries no kind word, so it is not checked.
+    """
+    kind = kind_for_doc(doc)
+    if kind is None:
+        return
+    body = doc.get(kind.record_key)
+    if not isinstance(body, Mapping):
+        return
+    handle = body.get("handle")
+    if not is_valid_handle(handle):
+        return  # absent, or a schema error already
+    if kind.entity_type == "dataset" and is_dataset_series(body.get("additional_type")):
+        return
+    expected = kind_word(kind.entity_type)
+    last_segment = str(handle).rsplit("/", 1)[-1]
+    if expected is None or last_segment == expected or last_segment.endswith(f"-{expected}"):
+        return
+    _append_issue(
+        issues,
+        code="semantic.handle_kind_word_expected",
+        severity="warning",
+        path=f"{kind.record_key}.handle",
+        message=(
+            f"handle '{handle}' should end with '{expected}', the kind word for a "
+            f"{kind.entity_type} record (e.g. '<group>/<subject>-{expected}'). "
+            "battinfo.naming.handle_for() builds handles that follow the convention."
+        ),
+        resource_type=kind.entity_type,
+    )
 
 
 def _validate_controlled_values(
@@ -1148,6 +1187,7 @@ def validate_semantic_report(
     hard_issue_severity = "error" if resolved_policy.semantic == "error" else "warning"
 
     _validate_identifier_consistency(doc, issues, resource_type, hard_issue_severity)
+    _validate_handle_kind_word(doc, issues)
     _validate_controlled_values(doc, issues, resource_type)
     _validate_electrode_role_coherence(doc, issues, resource_type)
     _validate_material_kind(doc, issues, resource_type, hard_issue_severity)

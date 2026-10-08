@@ -64,6 +64,21 @@ Query and validate
 
 .. autofunction:: battinfo.record_to_jsonld
 
+Record titles and handles
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``battinfo.naming`` builds a record's title (its ``name``) and its handle, the
+short slug a registry workspace shows as ``<workspace>/<handle>``, from
+structured parts. The how-to is :doc:`../howto/name-your-records`.
+
+.. autofunction:: battinfo.naming.handle_for
+
+.. autofunction:: battinfo.naming.title_for
+
+.. autofunction:: battinfo.naming.is_valid_handle
+
+.. autofunction:: battinfo.naming.kind_word
+
 The workspace object
 ~~~~~~~~~~~~~~~~~~~~
 

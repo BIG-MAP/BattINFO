@@ -154,6 +154,7 @@ _SET_MEMBER_BLOCKS = (
 def _record_from_parameter_set(
     *,
     name: str,
+    handle: str | None = None,
     claims: list[Any] | None = None,
     members: Mapping[str, str] | None = None,
     set_id: str | None = None,
@@ -255,6 +256,7 @@ def _record_from_parameter_set(
         "id": entity_id,
         "short_id": dashed_uid.replace("-", "")[:6],
         "name": name.strip(),
+        **({"handle": handle} if handle is not None else {}),
         target_field: target_value,
         "scope": scope,
     }
