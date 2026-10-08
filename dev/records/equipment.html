@@ -1065,47 +1065,52 @@ Canonical record</label><div class="sd-tab-content docutils">
 <td><p>yes</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">equipment_class</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">handle</span></code></p></td>
+<td><p>→ Handle</p></td>
+<td><p></p></td>
+<td><p>Short readable slug, unique within one registry workspace (e.g. ‘flores-ocv/graphite-aq-1-063b77-cell’). Display text, never part of the identity.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">equipment_class</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">model</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">model</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">channel_count</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">channel_count</span></code></p></td>
 <td><p>integer</p></td>
 <td><p></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">supported_chemistries</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">supported_chemistries</span></code></p></td>
 <td><p>array of string</p></td>
 <td><p></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">property</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">property</span></code></p></td>
 <td><p>→ quantitative-properties</p></td>
 <td><p></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">manufacturer</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">manufacturer</span></code></p></td>
 <td><p>→ OrgRef</p></td>
 <td><p></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">supplier</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">supplier</span></code></p></td>
 <td><p>→ OrgRef</p></td>
 <td><p></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">product_id</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">product_id</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">comment</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">comment</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p></p></td>
@@ -1151,27 +1156,32 @@ Canonical record</label><div class="sd-tab-content docutils">
 <td><p></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">location</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">handle</span></code></p></td>
+<td><p>→ Handle</p></td>
+<td><p></p></td>
+<td><p>Short readable slug, unique within one registry workspace (e.g. ‘flores-ocv/graphite-aq-1-063b77-cell’). Display text, never part of the identity.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">location</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">commissioned_at</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">commissioned_at</span></code></p></td>
 <td><p>→ FlexDate</p></td>
 <td><p></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">status</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">status</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">active</span></code> | <code class="docutils literal notranslate"><span class="pre">maintenance</span></code> | <code class="docutils literal notranslate"><span class="pre">retired</span></code> | <code class="docutils literal notranslate"><span class="pre">unknown</span></code></p></td>
 <td><p></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">property</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">property</span></code></p></td>
 <td><p>→ quantitative-properties</p></td>
 <td><p></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">comment</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">comment</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p></p></td>
@@ -1217,17 +1227,22 @@ Canonical record</label><div class="sd-tab-content docutils">
 <td><p></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">status</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">handle</span></code></p></td>
+<td><p>→ Handle</p></td>
+<td><p></p></td>
+<td><p>Short readable slug, unique within one registry workspace (e.g. ‘flores-ocv/graphite-aq-1-063b77-cell’). Display text, never part of the identity.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">status</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">active</span></code> | <code class="docutils literal notranslate"><span class="pre">maintenance</span></code> | <code class="docutils literal notranslate"><span class="pre">retired</span></code> | <code class="docutils literal notranslate"><span class="pre">unknown</span></code></p></td>
 <td><p></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">property</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">property</span></code></p></td>
 <td><p>→ quantitative-properties</p></td>
 <td><p></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">comment</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">comment</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p></p></td>

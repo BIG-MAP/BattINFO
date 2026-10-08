@@ -3956,107 +3956,112 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <td><p>yes</p></td>
 <td><p>Human-readable display name, typically manufacturer plus model.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">model</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">handle</span></code></p></td>
+<td><p>→ Handle</p></td>
+<td><p></p></td>
+<td><p>Short readable slug, unique within one registry workspace (e.g. ‘flores-ocv/graphite-aq-1-063b77-cell’). Display text, never part of the identity.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">model</span></code></p></td>
 <td><p>string</p></td>
 <td><p>yes</p></td>
 <td><p>Manufacturer model designation (e.g. ‘ANR26650M1-B’).</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">manufacturer</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">manufacturer</span></code></p></td>
 <td><p>→ Organization</p></td>
 <td><p>yes</p></td>
 <td><p>Organization that manufactures this cell model.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">brand</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">brand</span></code></p></td>
 <td><p>→ BrandOrOrganization</p></td>
 <td><p></p></td>
 <td><p>Brand the cell is marketed under, when different from the manufacturer.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">category</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">category</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Coarse product category label (e.g. ‘battery cell’).</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">url</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">url</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Product or datasheet page URL.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">additional_type</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">additional_type</span></code></p></td>
 <td><p>string or array of string</p></td>
 <td><p></p></td>
 <td><p>Extra JSON-LD type IRIs or labels stacked onto the record’s &#64;type.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">product_type</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">product_type</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">commercial</span></code> | <code class="docutils literal notranslate"><span class="pre">research</span></code> | <code class="docutils literal notranslate"><span class="pre">prototype</span></code></p></td>
 <td><p></p></td>
 <td><p>Whether this cell spec is a commercial product, a research cell, or a prototype.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cell_format</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cell_format</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">cylindrical</span></code> | <code class="docutils literal notranslate"><span class="pre">prismatic</span></code> | <code class="docutils literal notranslate"><span class="pre">pouch</span></code> | <code class="docutils literal notranslate"><span class="pre">coin</span></code> … (6 values)</p></td>
 <td><p>yes</p></td>
 <td><p>Mechanical format of the cell.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">size_code</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">size_code</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Standard size designation (e.g. ‘18650’, ‘21700’, ‘CR2032’).</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">iec_code</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">iec_code</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>IEC designation code (IEC 60086 / IEC 61960), when defined.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">country_of_origin</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">country_of_origin</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Country where the cell is manufactured.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rechargeable</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rechargeable</span></code></p></td>
 <td><p>boolean</p></td>
 <td><p></p></td>
 <td><p>Whether this cell is rechargeable (true) or primary/single-use (false).</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">year</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">year</span></code></p></td>
 <td><p>integer</p></td>
 <td><p></p></td>
 <td><p>Year the cell model was released or the datasheet was issued.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">chemistry</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">chemistry</span></code></p></td>
 <td><p>string</p></td>
 <td><p>yes</p></td>
 <td><p>Overall cell chemistry label (e.g. ‘Li-ion’, ‘NiMH’, ‘Zn-MnO2’). Use the recognised labels where they apply (see the property keys reference); other values are carried as literals.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">positive_electrode_basis</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">positive_electrode_basis</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Positive-electrode active material basis (e.g. ‘LFP’, ‘NMC811’). Use the recognised labels where they apply (see the property keys reference); other values are carried as literals.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">negative_electrode_basis</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">negative_electrode_basis</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Negative-electrode active material basis (e.g. ‘graphite’, ‘LTO’, ‘Si-C’). Use the recognised labels where they apply (see the property keys reference); other values are carried as literals.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">datasheet_revision</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">datasheet_revision</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Revision label of the datasheet the spec was taken from.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">manufacturing_place</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">manufacturing_place</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Geographic location of the battery manufacturing plant (EU Battery Regulation Annex VI Part A).</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">battery_category</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">battery_category</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">EV</span></code> | <code class="docutils literal notranslate"><span class="pre">LMT</span></code> | <code class="docutils literal notranslate"><span class="pre">industrial</span></code> | <code class="docutils literal notranslate"><span class="pre">stationary</span></code> … (7 values)</p></td>
 <td><p></p></td>
 <td><p>Battery category per EU Battery Regulation Article 3.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">reference_electrode</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">reference_electrode</span></code></p></td>
 <td><p>→ electrode or string</p></td>
 <td><p></p></td>
 <td><p>The physical reference electrode of a three-electrode build, as an inline electrode holder (a lithium ring or wire is a monolithic <code class="docutils literal notranslate"><span class="pre">material</span></code>). The legacy string shorthand (e.g. ‘lithium’, ‘NHE’) stays accepted. In a half_cell the counter electrode IS the reference - state nothing here. Emitted as hasReferenceElectrode with &#64;type ReferenceElectrode.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cell_configuration</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cell_configuration</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">full_cell</span></code> | <code class="docutils literal notranslate"><span class="pre">half_cell</span></code> | <code class="docutils literal notranslate"><span class="pre">three_electrode_cell</span></code></p></td>
 <td><p></p></td>
 <td><p>Electrode configuration as built. Optional; absent means unstated (read as a full cell unless a reference_electrode is present). Stated explicitly it overrides that heuristic: half_cell types the JSON-LD as BatteryHalfCell + HalfCellDevice, three_electrode_cell as ThreeElectrodeCellDevice, full_cell suppresses both.</p></td>
@@ -4143,57 +4148,62 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <td><p></p></td>
 <td><p>Human-readable name / label for this cell (e.g. a lab batch ID). The primary identifier; usually present even without a manufacturer serial number.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">short_id</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">handle</span></code></p></td>
+<td><p>→ Handle</p></td>
+<td><p></p></td>
+<td><p>Short readable slug, unique within one registry workspace (e.g. ‘flores-ocv/graphite-aq-1-063b77-cell’). Display text, never part of the identity.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">short_id</span></code></p></td>
 <td><p>→ ShortId</p></td>
 <td><p></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">serial_number</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">serial_number</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Manufacturer serial number (unique within the product model); optional.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">batch_id</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">batch_id</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Production or lab batch this cell belongs to.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">grade</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">grade</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Quality grade assigned to this cell (e.g. ‘A’, ‘B’, ‘C’, ‘reject’).</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">manufactured_at</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">manufactured_at</span></code></p></td>
 <td><p>→ FlexDate</p></td>
 <td><p></p></td>
 <td><p>Production date. ISO 8601 string (YYYY, YYYY-MM, YYYY-MM-DD) or Unix timestamp.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">expires_at</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">expires_at</span></code></p></td>
 <td><p>→ FlexDate</p></td>
 <td><p></p></td>
 <td><p>Expiration / best-before date. ISO 8601 string (YYYY, YYYY-MM, YYYY-MM-DD) or Unix timestamp.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">service_start_date</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">service_start_date</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>ISO 8601 date when the battery was first put into service.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">battery_status</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">battery_status</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">original</span></code> | <code class="docutils literal notranslate"><span class="pre">repurposed</span></code> | <code class="docutils literal notranslate"><span class="pre">re-used</span></code> | <code class="docutils literal notranslate"><span class="pre">remanufactured</span></code> … (5 values)</p></td>
 <td><p></p></td>
 <td><p>Current status of the battery per EU Battery Regulation Annex XIII.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dpp_status</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dpp_status</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">active</span></code> | <code class="docutils literal notranslate"><span class="pre">archived</span></code> | <code class="docutils literal notranslate"><span class="pre">inactive</span></code> | <code class="docutils literal notranslate"><span class="pre">marked-for-deletion</span></code></p></td>
 <td><p></p></td>
 <td><p>Status of this digital product passport record.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">supersedes</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">supersedes</span></code></p></td>
 <td><p>→ CellIri</p></td>
 <td><p></p></td>
 <td><p>IRI of the previous cell record this passport replaces, e.g. after repurposing.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">conformance</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">conformance</span></code></p></td>
 <td><p>object</p></td>
 <td><p></p></td>
 <td><p>Assessment of how well this record followed the spec that governs it.</p></td>

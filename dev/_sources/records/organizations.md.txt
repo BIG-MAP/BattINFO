@@ -209,6 +209,7 @@ The `organization` block:
 | `short_id` | → ShortId |  |  |
 | `type` | `Organization` \| `Corporation` \| `Manufacturer` \| `ResearchOrganization` … (8 values) |  | Organization kind (schema.org type). |
 | `name` | string | yes | Current preferred name of the organization. |
+| `handle` | → Handle |  | Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity. |
 | `legalName` | string |  | DEPRECATED alias of `legal_name` (pre-snake_case spelling): accepted forever, normalized on round-trip, never taught. |
 | `alternateName` | string or array of string |  | DEPRECATED alias of `alternate_name` (pre-snake_case spelling): accepted forever, normalized on round-trip, never taught. |
 | `url` | string |  | Official website URL. |

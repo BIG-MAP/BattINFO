@@ -2071,82 +2071,87 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <td><p>yes</p></td>
 <td><p>Human-readable electrode name / designation (e.g. ‘Si-Gr anode, aqueous’, ‘NMC811 cathode 96/2/2’).</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">active_material_kind</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">handle</span></code></p></td>
+<td><p>→ Handle</p></td>
+<td><p></p></td>
+<td><p>Short readable slug, unique within one registry workspace (e.g. ‘flores-ocv/graphite-aq-1-063b77-cell’). Display text, never part of the identity.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">active_material_kind</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Required Level-1 kind naming the ACTIVE material of this electrode, from the curated material-kind vocabulary (e.g. ‘graphite’, ‘silicon_graphite’, ‘nmc811’, ‘lfp’). Named for what it identifies: the electrode’s active material, not the electrode’s form. Required so a purchased electrode whose powder provenance is unknown is still queryable on the same aggregation axis as one built from an authored material-spec. Aliases resolve on input; an unknown kind is rejected at save time. See battinfo.electrodes.electrode_kind_keys().</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">kind</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">kind</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Deprecated alias of active_material_kind; accepted so existing records keep validating, normalized to active_material_kind on round-trip.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">polarity</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">polarity</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">positive</span></code> | <code class="docutils literal notranslate"><span class="pre">negative</span></code> | <code class="docutils literal notranslate"><span class="pre">unknown</span></code></p></td>
 <td><p></p></td>
 <td><p>Electrode polarity, authored when the design has a side to state. Never derived from the kind: which side an active material sits on is system-relative (graphite is the positive electrode of a lithium-counter half cell). Role-based cells (half / three-electrode) name electrodes by role instead.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">grade</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">grade</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Producer grade / design version (e.g. ‘v2’, ‘rev B’). Part of spec identity together with the producer and the electrode name.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">active_material_spec_id</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">active_material_spec_id</span></code></p></td>
 <td><p>→ MaterialSpecIri</p></td>
 <td><p></p></td>
 <td><p>Optional canonical IRI of the material-spec for this electrode’s active material, present when the powder is known and authored. Absent for a purchased electrode of known chemistry but unknown powder — ‘kind’ still carries the chemistry.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">material</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">material</span></code></p></td>
 <td><p>→ material-component</p></td>
 <td><p></p></td>
 <td><p>The electrode body as a single monolithic material - an uncoated metal foil or disc (lithium metal counter, zinc foil). States the material directly; there is no coating and no separate current collector, the foil is both. Alternative to <code class="docutils literal notranslate"><span class="pre">coating</span></code> for uncoated electrodes.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">coating</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">coating</span></code></p></td>
 <td><p>→ electrode-coating</p></td>
 <td><p></p></td>
 <td><p>Coating composition and coating-level design values. ‘component.active_material / binder / additive’ each carry a weight fraction under property.mass_fraction — the same shape a cell-spec’s inline electrode coating uses, so a composition authored here is the composition a cell reads.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">current_collector</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">current_collector</span></code></p></td>
 <td><p>→ current-collector</p></td>
 <td><p></p></td>
 <td><p>Current-collector foil: material (name and/or material_spec_id) and its thickness under property.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">tab</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">tab</span></code></p></td>
 <td><p>→ tab</p></td>
 <td><p></p></td>
 <td><p>Electrode current-collector tab: material plus its dimensions (width, thickness, length, weld_width, tape_width) under property.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">processing</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">processing</span></code></p></td>
 <td><p>→ Processing</p></td>
 <td><p></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">manufacturer</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">manufacturer</span></code></p></td>
 <td><p>→ OrgRef</p></td>
 <td><p></p></td>
 <td><p>Producer of this electrode design — a vendor for a purchased electrode, or the lab that designed it for an in-house coating. Part of spec identity.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">supplier</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">supplier</span></code></p></td>
 <td><p>→ OrgRef</p></td>
 <td><p></p></td>
 <td><p>Supplier or vendor the item was sourced from.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">product_id</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">product_id</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Producer product / design identifier. Preferred over ‘name’ as the product half of the spec identity when present.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">property</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">property</span></code></p></td>
 <td><p>→ quantitative-properties</p></td>
 <td><p></p></td>
 <td><p>Electrode-level design values: areal loading (‘loading’), dry and calendered coating thickness (‘dry_thickness’ / ‘calendered_thickness’), nominal areal capacity (‘areal_capacity’), porosity, diameter / width / length. An open snake_case map — new design values need no schema change.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">description</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">description</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">comment</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">comment</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Free-text comment.</p></td>
@@ -2187,72 +2192,77 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <td><p></p></td>
 <td><p>Human-readable label for this batch.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">lot_id</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">handle</span></code></p></td>
+<td><p>→ Handle</p></td>
+<td><p></p></td>
+<td><p>Short readable slug, unique within one registry workspace (e.g. ‘flores-ocv/graphite-aq-1-063b77-cell’). Display text, never part of the identity.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">lot_id</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Producer / supplier lot number for a purchased electrode.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">parent_id</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">parent_id</span></code></p></td>
 <td><p>→ ComponentIri</p></td>
 <td><p></p></td>
 <td><p>Canonical IRI of the electrode this piece was cut from - the coated roll, web, or strip its siblings share. The parent is itself an electrode record (usually realizing the same spec), so genealogy chains compose: cell -&gt; disc -&gt; parent roll -&gt; electrode-spec.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">piece_id</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">piece_id</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Label of this cut piece within its parent (e.g. ‘disc-07’, ‘strip-B’). Joins the identity seed, so pieces cut from the same parent mint distinct IRIs.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">batch_id</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">batch_id</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Coating batch label (e.g. ‘Si-AQ-1’). Together with the spec IRI this is the batch’s identity — the IRI is minted from the pair.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">supplier</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">supplier</span></code></p></td>
 <td><p>→ OrgRef</p></td>
 <td><p></p></td>
 <td><p>Supplier or vendor the item was sourced from.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">manufactured_at</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">manufactured_at</span></code></p></td>
 <td><p>→ FlexDate</p></td>
 <td><p></p></td>
 <td><p>Date this batch was coated / built.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">received_date</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">received_date</span></code></p></td>
 <td><p>→ FlexDate</p></td>
 <td><p></p></td>
 <td><p>Date a purchased batch was received.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">expires_at</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">expires_at</span></code></p></td>
 <td><p>→ FlexDate</p></td>
 <td><p></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">amount</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">amount</span></code></p></td>
 <td><p>→ quantity</p></td>
 <td><p></p></td>
 <td><p>Quantity of this batch on hand or consumed (e.g. coated area in cm2, web length in m, mass in g).</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">count</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">count</span></code></p></td>
 <td><p>integer</p></td>
 <td><p></p></td>
 <td><p>Number of discrete pieces in this batch (e.g. punched discs).</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">storage</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">storage</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Storage conditions for this batch (e.g. ‘argon glovebox’, ‘dry room, -40 degC dew point’).</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">datasets</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">datasets</span></code></p></td>
 <td><p>array of → DatasetLink</p></td>
 <td><p></p></td>
 <td><p>Characterization datasets for this batch (thickness maps, SEM, adhesion, half-cell checks, …).</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">property</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">property</span></code></p></td>
 <td><p>→ quantitative-properties</p></td>
 <td><p></p></td>
 <td><p>As-built batch actuals — measured loading, measured calendered thickness, measured porosity, disc diameter, disc mass. An open snake_case map: whatever this batch was actually measured for is recordable without a schema change.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">comment</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">comment</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Free-text comment.</p></td>

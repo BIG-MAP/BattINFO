@@ -62,7 +62,7 @@
     <link rel="icon" href="../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Fix the five classic validation errors" href="fix-validation-errors.html" />
+    <link rel="next" title="Name your records: titles and handles" href="name-your-records.html" />
     <link rel="prev" title="Bulk-ingest thousands of records" href="bulk-ingest.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -491,6 +491,7 @@
 <li class="toctree-l1"><a class="reference internal" href="read-registry-data.html">Read data from the registry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="bulk-ingest.html">Bulk-ingest thousands of records</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Publish a dataset collection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="name-your-records.html">Name your records: titles and handles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fix-validation-errors.html">Fix the five classic validation errors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="resume-a-submission.html">Resume an interrupted bulk submission</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tag-funding-and-orcid.html">Tag your work with a grant and your ORCID</a></li>
@@ -699,7 +700,7 @@
 </section>
 <section id="rules-that-keep-the-links-stable">
 <h2>Rules that keep the links stable<a class="headerlink" href="#rules-that-keep-the-links-stable" title="Link to this heading">#</a></h2>
-<p><strong>The name is frozen once published.</strong> A collection has no cell or test, so its IRI is seeded from its <code class="docutils literal notranslate"><span class="pre">access_url</span></code> and <code class="docutils literal notranslate"><span class="pre">name</span></code> alone. Rename it, or change its access URL, and it gets a new IRI; every member’s <code class="docutils literal notranslate"><span class="pre">series_id</span></code> then points at a record that no longer exists. Pick an access URL that will not change (the deposit DOI, or a project landing page) and settle the name before the first publication. The description, keywords and licence can change freely.</p>
+<p><strong>The name is part of the IRI seed.</strong> A collection has no cell or test, so its IRI is seeded from its <code class="docutils literal notranslate"><span class="pre">access_url</span></code> and <code class="docutils literal notranslate"><span class="pre">name</span></code> alone. Rename it, or change its access URL, and it gets a new IRI; every member’s <code class="docutils literal notranslate"><span class="pre">series_id</span></code> then points at a record that no longer exists. Pick an access URL that will not change (the deposit DOI, or a project landing page) and settle the name before the first publication. The description, keywords and licence can change freely. To retitle a collection that is already published, pass the IRI it was published under as <code class="docutils literal notranslate"><span class="pre">Dataset(id=...)</span></code>; <a class="reference internal" href="name-your-records.html"><span class="std std-doc">Name your records</span></a> covers titles, handles and pinned identities.</p>
 <p><strong>Publish the collection before its members.</strong> Members carry the link, so the collection has to exist with its final IRI before they cite it. In a single Zenodo deposit this happens on its own, since everything goes up together. If the members go out later or separately, publish the collection first.</p>
 <p><strong>A collection has no distributions and no <code class="docutils literal notranslate"><span class="pre">about</span></code>.</strong> The files and the cell and test links belong to the members. Leave both out of the collection; the publication checks exempt it from them.</p>
 </section>
@@ -741,11 +742,11 @@
       </div>
     </a>
     <a class="right-next"
-       href="fix-validation-errors.html"
+       href="name-your-records.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Fix the five classic validation errors</p>
+        <p class="prev-next-title">Name your records: titles and handles</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

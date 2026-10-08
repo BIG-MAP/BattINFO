@@ -1262,52 +1262,57 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <td><p>yes</p></td>
 <td><p>Human-readable name of this formulation (e.g. ‘LP57 + 2% VC’).</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">family</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">handle</span></code></p></td>
+<td><p>→ Handle</p></td>
+<td><p></p></td>
+<td><p>Short readable slug, unique within one registry workspace (e.g. ‘flores-ocv/graphite-aq-1-063b77-cell’). Display text, never part of the identity.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">family</span></code></p></td>
 <td><p>→ family</p></td>
 <td><p>yes</p></td>
 <td><p>Broad electrolyte class.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">salt</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">salt</span></code></p></td>
 <td><p>→ salt</p></td>
 <td><p></p></td>
 <td><p>Conducting salt (e.g. LiPF6), with concentration under its property map.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">solvent</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">solvent</span></code></p></td>
 <td><p>→ solvent</p></td>
 <td><p></p></td>
 <td><p>Solvent component(s): a single component object for a pure solvent, or an array for a mixture. Each component’s fraction lives under its property map (volume_fraction v/v or mass_fraction w/w - one basis per formulation).</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">solvent_mixture</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">solvent_mixture</span></code></p></td>
 <td><p>→ solvent_mixture</p></td>
 <td><p></p></td>
 <td><p>Deprecated alias of solvent (its {component: […]} wrapper form); accepted so existing records keep validating, normalized to solvent on round-trip.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">additive</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">additive</span></code></p></td>
 <td><p>→ additive</p></td>
 <td><p></p></td>
 <td><p>Functional additives (e.g. VC, FEC), each with its fraction under property.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">property</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">property</span></code></p></td>
 <td><p>→ quantitative-properties</p></td>
 <td><p></p></td>
 <td><p>Named quantity map of technical properties (snake_case key to value+unit quantity).</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">manufacturer</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">manufacturer</span></code></p></td>
 <td><p>→ OrgRef</p></td>
 <td><p></p></td>
 <td><p>Manufacturer of the item.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">supplier</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">supplier</span></code></p></td>
 <td><p>→ OrgRef</p></td>
 <td><p></p></td>
 <td><p>Supplier or vendor the item was sourced from.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">product_id</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">product_id</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Manufacturer or supplier product/grade identifier.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">comment</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">comment</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Free-text comment.</p></td>
@@ -1348,37 +1353,42 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <td><p></p></td>
 <td><p>Human-readable label for this physical lot (e.g. a lab inventory id).</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">lot_id</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">handle</span></code></p></td>
+<td><p>→ Handle</p></td>
+<td><p></p></td>
+<td><p>Short readable slug, unique within one registry workspace (e.g. ‘flores-ocv/graphite-aq-1-063b77-cell’). Display text, never part of the identity.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">lot_id</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Manufacturer or supplier lot number.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">batch_id</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">batch_id</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Internal lab batch identifier, when different from the supplier lot.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">supplier</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">supplier</span></code></p></td>
 <td><p>→ OrgRef</p></td>
 <td><p></p></td>
 <td><p>Supplier or vendor the item was sourced from.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">manufactured_at</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">manufactured_at</span></code></p></td>
 <td><p>→ FlexDate</p></td>
 <td><p></p></td>
 <td><p>Date this item was manufactured.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">datasets</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">datasets</span></code></p></td>
 <td><p>array of → DatasetLink</p></td>
 <td><p></p></td>
 <td><p>Characterization datasets recorded for this physical item.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">property</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">property</span></code></p></td>
 <td><p>→ quantitative-properties</p></td>
 <td><p></p></td>
 <td><p>Named quantity map of technical properties (snake_case key to value+unit quantity).</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">comment</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">comment</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Free-text comment.</p></td>

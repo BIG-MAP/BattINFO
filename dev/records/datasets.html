@@ -1441,142 +1441,147 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <td><p>yes</p></td>
 <td><p>Dataset title.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">description</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">handle</span></code></p></td>
+<td><p>→ Handle</p></td>
+<td><p></p></td>
+<td><p>Short readable slug, unique within one registry workspace (e.g. ‘flores-ocv/graphite-aq-1-063b77-cell’). Display text, never part of the identity.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">description</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Free-text description of the dataset.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">access_url</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">access_url</span></code></p></td>
 <td><p>string</p></td>
 <td><p>yes</p></td>
 <td><p>Landing page or direct access URL for the dataset.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">same_as</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">same_as</span></code></p></td>
 <td><p>array of string</p></td>
 <td><p></p></td>
 <td><p>Other IRIs identifying the same dataset (e.g. a Zenodo DOI URL).</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">about</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">about</span></code></p></td>
 <td><p>array of → AboutRef</p></td>
 <td><p></p></td>
 <td><p>What the dataset is about: canonical cell or test IRIs, or external URIs. Source of truth for what a dataset describes; the cell-instance datasets list and test.dataset_ids are back-references derived from it.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">additional_type</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">additional_type</span></code></p></td>
 <td><p>string or array of string</p></td>
 <td><p></p></td>
 <td><p>Extra JSON-LD type IRIs or labels stacked onto the record’s &#64;type.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">license</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">license</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>License IRI or SPDX identifier governing reuse.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">version</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">version</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Dataset version label.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">keywords</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">keywords</span></code></p></td>
 <td><p>array of string</p></td>
 <td><p></p></td>
 <td><p>Free-text keywords for discovery.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">creators</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">creators</span></code></p></td>
 <td><p>array of → PersonOrOrganization</p></td>
 <td><p></p></td>
 <td><p>People and/or organizations that created the data.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">publisher</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">publisher</span></code></p></td>
 <td><p>→ Organization</p></td>
 <td><p></p></td>
 <td><p>Organization that published the dataset.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">funders</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">funders</span></code></p></td>
 <td><p>array of → PersonOrOrganization</p></td>
 <td><p></p></td>
 <td><p>Parties that funded creation of the dataset.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">citations</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">citations</span></code></p></td>
 <td><p>array of → Citation</p></td>
 <td><p></p></td>
 <td><p>Related works to cite alongside the dataset (papers, source datasets, software).</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">measurement_techniques</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">measurement_techniques</span></code></p></td>
 <td><p>array of string</p></td>
 <td><p></p></td>
 <td><p>Measurement techniques used, as labels or ontology IRIs.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">measurement_methods</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">measurement_methods</span></code></p></td>
 <td><p>array of string</p></td>
 <td><p></p></td>
 <td><p>Measurement methods used, as labels or ontology IRIs.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">variable_measured</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">variable_measured</span></code></p></td>
 <td><p>array of → VariableMeasured</p></td>
 <td><p></p></td>
 <td><p>Variables (columns or signals) recorded in the dataset.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">is_accessible_for_free</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">is_accessible_for_free</span></code></p></td>
 <td><p>boolean</p></td>
 <td><p></p></td>
 <td><p>Whether access is free of charge.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">conditions_of_access</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">conditions_of_access</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Human-readable access conditions (e.g. ‘registration required’).</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">in_language</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">in_language</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Language of the dataset metadata (BCP 47 tag).</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">created_at</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">created_at</span></code></p></td>
 <td><p>→ UnixTime</p></td>
 <td><p></p></td>
 <td><p>Unix timestamp when the dataset was created.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">modified_at</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">modified_at</span></code></p></td>
 <td><p>→ UnixTime</p></td>
 <td><p></p></td>
 <td><p>Unix timestamp when the dataset was last modified.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">published_at</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">published_at</span></code></p></td>
 <td><p>→ UnixTime</p></td>
 <td><p></p></td>
 <td><p>Unix timestamp when the dataset was published.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">temporal_coverage</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">temporal_coverage</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Time period the data covers (ISO 8601 interval).</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">spatial_coverage</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">spatial_coverage</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Geographic area the data covers.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">distributions</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">distributions</span></code></p></td>
 <td><p>array of → DataDistribution</p></td>
 <td><p></p></td>
 <td><p>Downloadable files that make up the dataset.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">main_entity</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">main_entity</span></code></p></td>
 <td><p>→ CsvwMainEntity or array of → CsvwMainEntity</p></td>
 <td><p></p></td>
 <td><p>CSVW table description(s) documenting the tabular structure of the data files (the data dictionary).</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">is_based_on</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">is_based_on</span></code></p></td>
 <td><p>array of string</p></td>
 <td><p></p></td>
 <td><p>URIs of resources this dataset is derived from.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">series_id</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">series_id</span></code></p></td>
 <td><p>→ DatasetIri</p></td>
 <td><p></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">included_in_data_catalog</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">included_in_data_catalog</span></code></p></td>
 <td><p>string or → DataCatalog</p></td>
 <td><p></p></td>
 <td><p>Catalog(s) the dataset is listed in (e.g. the Battery Genome registry).</p></td>

@@ -6346,22 +6346,27 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <td><p>yes</p></td>
 <td><p>Human-readable protocol name.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">description</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">handle</span></code></p></td>
+<td><p>→ Handle</p></td>
+<td><p></p></td>
+<td><p>Short readable slug, unique within one registry workspace (e.g. ‘flores-ocv/graphite-aq-1-063b77-cell’). Display text, never part of the identity.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">description</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Free-text description of the procedure.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">kind</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">kind</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">cycling</span></code> | <code class="docutils literal notranslate"><span class="pre">capacity_check</span></code> | <code class="docutils literal notranslate"><span class="pre">rate_capability</span></code> | <code class="docutils literal notranslate"><span class="pre">hppc</span></code> … (22 values)</p></td>
 <td><p>yes</p></td>
 <td><p>Kind of test the protocol implements.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">version</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">version</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Protocol version label.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">protocol_url</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">protocol_url</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>URL of the protocol document.</p></td>
@@ -6493,72 +6498,77 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <td><p>yes</p></td>
 <td><p>Human-readable test name.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">protocol_id</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">handle</span></code></p></td>
+<td><p>→ Handle</p></td>
+<td><p></p></td>
+<td><p>Short readable slug, unique within one registry workspace (e.g. ‘flores-ocv/graphite-aq-1-063b77-cell’). Display text, never part of the identity.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">protocol_id</span></code></p></td>
 <td><p>→ SpecIri</p></td>
 <td><p></p></td>
 <td><p>IRI of the test-protocol (test spec) this test executed.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">description</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">description</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Free-text description of the test.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">kind</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">kind</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">cycling</span></code> | <code class="docutils literal notranslate"><span class="pre">capacity_check</span></code> | <code class="docutils literal notranslate"><span class="pre">rate_capability</span></code> | <code class="docutils literal notranslate"><span class="pre">quasi_ocv</span></code> … (22 values)</p></td>
 <td><p>yes</p></td>
 <td><p>Kind of test performed.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">status</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">status</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">planned</span></code> | <code class="docutils literal notranslate"><span class="pre">running</span></code> | <code class="docutils literal notranslate"><span class="pre">completed</span></code> | <code class="docutils literal notranslate"><span class="pre">aborted</span></code> … (5 values)</p></td>
 <td><p></p></td>
 <td><p>Execution status of the test.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">protocol_name</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">protocol_name</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Protocol name for display, when no protocol record is linked.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">protocol_url</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">protocol_url</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>URL of the protocol document.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">instrument_name</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">instrument_name</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Instrument or cycler the test was run on.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">equipment_id</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">equipment_id</span></code></p></td>
 <td><p>→ EquipmentIri</p></td>
 <td><p></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">channel_id</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">channel_id</span></code></p></td>
 <td><p>→ ChannelIri</p></td>
 <td><p></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">started_at</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">started_at</span></code></p></td>
 <td><p>→ UnixTime</p></td>
 <td><p></p></td>
 <td><p>Unix timestamp when the test started.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ended_at</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ended_at</span></code></p></td>
 <td><p>→ UnixTime</p></td>
 <td><p></p></td>
 <td><p>Unix timestamp when the test ended.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dataset_ids</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dataset_ids</span></code></p></td>
 <td><p>array of → DatasetIri</p></td>
 <td><p></p></td>
 <td><p>IRIs of dataset records produced by the test. Back-reference to dataset records. dataset.about is the source of truth for what a dataset describes; when records are saved together through a workspace the library fills this list from each dataset’s cell and test links, and hand-authored records may set it directly.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">conditions</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">conditions</span></code></p></td>
 <td><p>object (open keys)</p></td>
 <td><p></p></td>
 <td><p>As-run test conditions, as a map of condition name to a {value, unit} quantity. Planned conditions belong on the test protocol; record here the values actually applied or deviations from the protocol. Recommended keys: ambient_temperature, upper_voltage_limit, lower_voltage_limit, c_rate, state_of_charge.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">conformance</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">conformance</span></code></p></td>
 <td><p>object</p></td>
 <td><p></p></td>
 <td><p>Assessment of how well this record followed the spec that governs it.</p></td>

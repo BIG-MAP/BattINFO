@@ -51056,62 +51056,67 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <td><p>yes</p></td>
 <td><p>Human-readable label for this batch of claims, conventionally ‘<source> - <target>’ (e.g. ‘Chen 2020 - graphite’).</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">material_kind</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">handle</span></code></p></td>
+<td><p>→ Handle</p></td>
+<td><p></p></td>
+<td><p>Short readable slug, unique within one registry workspace (e.g. ‘flores-ocv/graphite-aq-1-063b77-cell’). Display text, never part of the identity.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">material_kind</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Target: a generic material kind key from the curated material_kinds vocabulary (e.g. ‘graphite’, ‘nmc811’). Claims about the generic chemistry collate here; resolution falls back from a product-specific material spec to its kind.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">material_spec_id</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">material_spec_id</span></code></p></td>
 <td><p>→ MaterialSpecIri</p></td>
 <td><p></p></td>
 <td><p>Target: a specific material spec (a vendor product/grade). Use for claims measured on a particular product rather than the generic chemistry.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cell_spec_id</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cell_spec_id</span></code></p></td>
 <td><p>→ SpecIri</p></td>
 <td><p></p></td>
 <td><p>Target: a cell spec. Use for cell-level fitted sets (full-cell parameterizations, ECM fits) and for electrode/separator/electrolyte claims that describe this cell’s build rather than a material.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">scope</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">scope</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">material</span></code> | <code class="docutils literal notranslate"><span class="pre">electrode</span></code> | <code class="docutils literal notranslate"><span class="pre">separator</span></code> | <code class="docutils literal notranslate"><span class="pre">electrolyte</span></code> … (5 values)</p></td>
 <td><p></p></td>
 <td><p>Physical scope the claims describe. Defaults (in the builder) to ‘material’ for material targets and ‘cell’ for cell-spec targets. Electrode/separator/electrolyte scopes carry manufactured-build parameters (thickness, porosity, transport) that belong to a cell design, not to a powder.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">electrode_polarity</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">electrode_polarity</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">positive</span></code> | <code class="docutils literal notranslate"><span class="pre">negative</span></code></p></td>
 <td><p></p></td>
 <td><p>For electrode-scope claims on a cell-spec target: which electrode the claims describe.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">model_context</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">model_context</span></code></p></td>
 <td><p>object</p></td>
 <td><p></p></td>
 <td><p>The digital artifact these claims came from, when they were imported from a modelling parameter set (BPX file, PyBaMM parameter set, …).</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">claims</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">claims</span></code></p></td>
 <td><p>array of → Claim</p></td>
 <td><p></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">description</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">description</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">comment</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">comment</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">annex</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">annex</span></code></p></td>
 <td><p>object</p></td>
 <td><p></p></td>
 <td><p>Source-file extension entries carried verbatim (e.g. a BPX User-defined block): original key -&gt; raw value. No standard semantics are claimed for these; they exist so a re-export reproduces the source file and nothing is silently lost.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">members</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">members</span></code></p></td>
 <td><p>object</p></td>
 <td><p></p></td>
 <td><p>Parameterisation-set flavor: the explicit block map of member parameter-set records that constitute one co-fitted, runnable parameterisation. A set record carries members INSTEAD of claims (the strict policy admits the empty claims for this flavor only); side assignment lives here because which material parameterises which electrode is a fact of the set, not of the material.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">set_id</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">set_id</span></code></p></td>
 <td><p>→ SpecIri</p></td>
 <td><p></p></td>
 <td><p>Membership in a parameterisation set (the record listing this one under members). Emitted as schema:isPartOf; the set emits dcterms:hasPart. Members carry the backlink; the set publishes with the members.</p></td>

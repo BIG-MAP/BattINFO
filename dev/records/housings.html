@@ -1572,57 +1572,62 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <td><p>yes</p></td>
 <td><p>Human-readable name of this housing design (e.g. ‘CR2032 SS316L case’).</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cell_format</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">handle</span></code></p></td>
+<td><p>→ Handle</p></td>
+<td><p></p></td>
+<td><p>Short readable slug, unique within one registry workspace (e.g. ‘flores-ocv/graphite-aq-1-063b77-cell’). Display text, never part of the identity.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cell_format</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">coin</span></code> | <code class="docutils literal notranslate"><span class="pre">cylindrical</span></code> | <code class="docutils literal notranslate"><span class="pre">pouch</span></code> | <code class="docutils literal notranslate"><span class="pre">prismatic</span></code> … (6 values)</p></td>
 <td><p></p></td>
 <td><p>Cell format this housing is for.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">case</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">case</span></code></p></td>
 <td><p>→ Case</p></td>
 <td><p></p></td>
 <td><p>Main case or can of the housing.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cap</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cap</span></code></p></td>
 <td><p>→ HardwarePart</p></td>
 <td><p></p></td>
 <td><p>Cap or lid part.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">terminals</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">terminals</span></code></p></td>
 <td><p>array of → Terminal</p></td>
 <td><p></p></td>
 <td><p>Electrical terminals, with polarity and material.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seals</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seals</span></code></p></td>
 <td><p>array of → Seal</p></td>
 <td><p></p></td>
 <td><p>Seals and gaskets.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">parts</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">parts</span></code></p></td>
 <td><p>array of → HardwarePart</p></td>
 <td><p></p></td>
 <td><p>Other hardware parts (springs, spacers, …).</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">property</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">property</span></code></p></td>
 <td><p>→ quantitative-properties</p></td>
 <td><p></p></td>
 <td><p>Named quantity map of housing-level properties (e.g. mass, wall_thickness). See the property keys reference for the full list of recognised keys.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">manufacturer</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">manufacturer</span></code></p></td>
 <td><p>→ OrgRef</p></td>
 <td><p></p></td>
 <td><p>Manufacturer of the item.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">supplier</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">supplier</span></code></p></td>
 <td><p>→ OrgRef</p></td>
 <td><p></p></td>
 <td><p>Supplier or vendor the item was sourced from.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">product_id</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">product_id</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Manufacturer or supplier product/grade identifier.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">comment</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">comment</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Free-text comment.</p></td>
@@ -1663,37 +1668,42 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <td><p></p></td>
 <td><p>Human-readable label for this physical item (e.g. a lab inventory id).</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">lot_id</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">handle</span></code></p></td>
+<td><p>→ Handle</p></td>
+<td><p></p></td>
+<td><p>Short readable slug, unique within one registry workspace (e.g. ‘flores-ocv/graphite-aq-1-063b77-cell’). Display text, never part of the identity.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">lot_id</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Manufacturer or supplier lot number.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">batch_id</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">batch_id</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Internal lab batch identifier, when different from the supplier lot.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">supplier</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">supplier</span></code></p></td>
 <td><p>→ OrgRef</p></td>
 <td><p></p></td>
 <td><p>Supplier or vendor the item was sourced from.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">manufactured_at</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">manufactured_at</span></code></p></td>
 <td><p>→ FlexDate</p></td>
 <td><p></p></td>
 <td><p>Date this item was manufactured.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">datasets</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">datasets</span></code></p></td>
 <td><p>array of → DatasetLink</p></td>
 <td><p></p></td>
 <td><p>Characterization datasets recorded for this physical item.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">property</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">property</span></code></p></td>
 <td><p>→ quantitative-properties</p></td>
 <td><p></p></td>
 <td><p>Named quantity map of technical properties (snake_case key to value+unit quantity).</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">comment</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">comment</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Free-text comment.</p></td>

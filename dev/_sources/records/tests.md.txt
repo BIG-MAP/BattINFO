@@ -3666,6 +3666,7 @@ The `test_spec` block:
 | `short_id` | → ShortId |  |  |
 | `identifier` | string |  | Local identifier for the protocol (e.g. a lab protocol code). |
 | `name` | string | yes | Human-readable protocol name. |
+| `handle` | → Handle |  | Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity. |
 | `description` | string |  | Free-text description of the procedure. |
 | `kind` | `cycling` \| `capacity_check` \| `rate_capability` \| `hppc` … (22 values) | yes | Kind of test the protocol implements. |
 | `version` | string |  | Protocol version label. |
@@ -3713,6 +3714,7 @@ The `test` block:
 | `identifier` | string |  | Local identifier for the test (e.g. a channel or run id). |
 | `cell_id` | → CellIri | yes | IRI of the cell instance the test was run on. |
 | `name` | string | yes | Human-readable test name. |
+| `handle` | → Handle |  | Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity. |
 | `protocol_id` | → SpecIri |  | IRI of the test-protocol (test spec) this test executed. |
 | `description` | string |  | Free-text description of the test. |
 | `kind` | `cycling` \| `capacity_check` \| `rate_capability` \| `quasi_ocv` … (22 values) | yes | Kind of test performed. |

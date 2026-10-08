@@ -878,72 +878,77 @@ Canonical record</label><div class="sd-tab-content docutils">
 <td><p>yes</p></td>
 <td><p>Current preferred name of the organization.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">legalName</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">handle</span></code></p></td>
+<td><p>→ Handle</p></td>
+<td><p></p></td>
+<td><p>Short readable slug, unique within one registry workspace (e.g. ‘flores-ocv/graphite-aq-1-063b77-cell’). Display text, never part of the identity.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">legalName</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>DEPRECATED alias of <code class="docutils literal notranslate"><span class="pre">legal_name</span></code> (pre-snake_case spelling): accepted forever, normalized on round-trip, never taught.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">alternateName</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">alternateName</span></code></p></td>
 <td><p>string or array of string</p></td>
 <td><p></p></td>
 <td><p>DEPRECATED alias of <code class="docutils literal notranslate"><span class="pre">alternate_name</span></code> (pre-snake_case spelling): accepted forever, normalized on round-trip, never taught.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">url</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">url</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Official website URL.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">same_as</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">same_as</span></code></p></td>
 <td><p>string or array of string</p></td>
 <td><p></p></td>
 <td><p>Canonical external IRIs (Wikidata, ROR, GRID, LEI) that identify this organization.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">location</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">location</span></code></p></td>
 <td><p>object</p></td>
 <td><p></p></td>
 <td><p>Headquarters or principal location.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">foundingDate</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">foundingDate</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>DEPRECATED alias of <code class="docutils literal notranslate"><span class="pre">founding_date</span></code> (pre-snake_case spelling): accepted forever, normalized on round-trip, never taught.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dissolutionDate</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dissolutionDate</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>DEPRECATED alias of <code class="docutils literal notranslate"><span class="pre">dissolution_date</span></code> (pre-snake_case spelling): accepted forever, normalized on round-trip, never taught.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">description</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">description</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Short description of the organization.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">parentOrganization</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">parentOrganization</span></code></p></td>
 <td><p>→ OrganizationIri or object</p></td>
 <td><p></p></td>
 <td><p>DEPRECATED alias of <code class="docutils literal notranslate"><span class="pre">parent_organization</span></code> (pre-snake_case spelling): accepted forever, normalized on round-trip, never taught.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">legal_name</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">legal_name</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Full legal name, if different from name.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">alternate_name</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">alternate_name</span></code></p></td>
 <td><p>string or array of string</p></td>
 <td><p></p></td>
 <td><p>Former names, abbreviations, or brand names (e.g. ‘LG Chem’ for LG Energy Solution).</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">founding_date</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">founding_date</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Year or ISO 8601 date the organization was founded.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dissolution_date</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dissolution_date</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Year or ISO 8601 date the organization was dissolved, if applicable.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">parent_organization</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">parent_organization</span></code></p></td>
 <td><p>→ OrganizationIri or object</p></td>
 <td><p></p></td>
 <td><p>Parent organization, if this is a subsidiary or division.</p></td>

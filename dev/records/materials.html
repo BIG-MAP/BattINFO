@@ -2280,77 +2280,82 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <td><p>yes</p></td>
 <td><p>Human-readable material name / grade (e.g. ‘LFP’, ‘Graphite’, ‘NMC811’, ‘PVDF’).</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">kind</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">handle</span></code></p></td>
+<td><p>→ Handle</p></td>
+<td><p></p></td>
+<td><p>Short readable slug, unique within one registry workspace (e.g. ‘flores-ocv/graphite-aq-1-063b77-cell’). Display text, never part of the identity.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">kind</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Required Level-1 MaterialKind key from the curated material_kinds vocabulary (e.g. ‘graphite’, ‘lfp’, ‘nmc811’). The aggregation axis of the Battery Genome; resolves to the kind’s chemical-substance class IRI. An unknown kind is rejected at save time. See battinfo.materials.material_kind_keys().</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">grade</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">grade</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Manufacturer grade / product version (e.g. ‘grade X’, ‘v2’). Part of spec identity together with manufacturer and product.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">material_class</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">material_class</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">active_material</span></code> | <code class="docutils literal notranslate"><span class="pre">binder</span></code> | <code class="docutils literal notranslate"><span class="pre">conductive_additive</span></code> | <code class="docutils literal notranslate"><span class="pre">current_collector</span></code> … (13 values)</p></td>
 <td><p></p></td>
 <td><p>Deprecated in favor of the kind’s roles (the curated vocabulary lists the use-site slots a kind is known to fill): a single forced role is system-relative. Accepted for back-compat and still written by importers; slated for removal at the next record-shape version.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">electrode_polarity</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">electrode_polarity</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">positive</span></code> | <code class="docutils literal notranslate"><span class="pre">negative</span></code> | <code class="docutils literal notranslate"><span class="pre">none</span></code></p></td>
 <td><p></p></td>
 <td><p>Deprecated, do not author: polarity is an electrode property, never a material’s — state it on the electrode or through the cell’s holders. Accepted only so existing records keep validating.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">formula</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">formula</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Chemical formula or idealized composition (e.g. ‘LiFePO4’, ‘C’, ‘Zn’, ‘(C2H2F2)n’).</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">chemistry_family</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">chemistry_family</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Coarse chemistry family label (e.g. ‘olivine’, ‘layered-oxide’, ‘spinel’, ‘graphitic-carbon’).</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">emmo_type</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">emmo_type</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Optional EMMO/domain-battery class label or IRI for this material; informs JSON-LD &#64;type.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cas_number</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cas_number</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>CAS Registry Number, when applicable.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">manufacturer</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">manufacturer</span></code></p></td>
 <td><p>→ OrgRef</p></td>
 <td><p></p></td>
 <td><p>Manufacturer of the item.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">supplier</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">supplier</span></code></p></td>
 <td><p>→ OrgRef</p></td>
 <td><p></p></td>
 <td><p>Supplier or vendor the item was sourced from.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">product_id</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">product_id</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Manufacturer / supplier product or grade identifier.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">composition</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">composition</span></code></p></td>
 <td><p>→ Composition</p></td>
 <td><p></p></td>
 <td><p>Structured derivation of this grade: base material, coatings, dopants, and constituents.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">property</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">property</span></code></p></td>
 <td><p>→ quantitative-properties</p></td>
 <td><p></p></td>
 <td><p>Named quantity map of technical properties (snake_case key to value+unit quantity).</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">description</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">description</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Longer free-text description of the material.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">comment</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">comment</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Free-text comment.</p></td>
@@ -2391,62 +2396,67 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <td><p></p></td>
 <td><p>Human-readable label for this physical lot (e.g. a lab/inventory id).</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">lot_id</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">handle</span></code></p></td>
+<td><p>→ Handle</p></td>
+<td><p></p></td>
+<td><p>Short readable slug, unique within one registry workspace (e.g. ‘flores-ocv/graphite-aq-1-063b77-cell’). Display text, never part of the identity.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">lot_id</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Manufacturer / supplier lot or batch number.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">batch_id</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">batch_id</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Internal lab batch identifier, when different from the supplier lot.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">supplier</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">supplier</span></code></p></td>
 <td><p>→ OrgRef</p></td>
 <td><p></p></td>
 <td><p>Supplier or vendor the item was sourced from.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">received_date</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">received_date</span></code></p></td>
 <td><p>→ FlexDate</p></td>
 <td><p></p></td>
 <td><p>Date the lot was received (YYYY, YYYY-MM, or YYYY-MM-DD, or Unix timestamp).</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">opened_date</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">opened_date</span></code></p></td>
 <td><p>→ FlexDate</p></td>
 <td><p></p></td>
 <td><p>Date this lot was first opened / put into use.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">expires_at</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">expires_at</span></code></p></td>
 <td><p>→ FlexDate</p></td>
 <td><p></p></td>
 <td><p>Expiry or retest date for the lot (YYYY, YYYY-MM, or YYYY-MM-DD, or Unix timestamp).</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">amount</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">amount</span></code></p></td>
 <td><p>→ quantity</p></td>
 <td><p></p></td>
 <td><p>Quantity of this lot on hand or consumed (e.g. mass in g, volume in mL).</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">storage</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">storage</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Storage conditions for this lot (e.g. ‘argon glovebox’, ‘dry room, -40 degC dew point’).</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">processing</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">processing</span></code></p></td>
 <td><p>→ Processing</p></td>
 <td><p></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">datasets</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">datasets</span></code></p></td>
 <td><p>array of → DatasetLink</p></td>
 <td><p></p></td>
 <td><p>Characterization datasets for this material lot (XRD, SEM, ICP, PSD, …).</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">property</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">property</span></code></p></td>
 <td><p>→ quantitative-properties</p></td>
 <td><p></p></td>
 <td><p>Named quantity map of technical properties (snake_case key to value+unit quantity).</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">comment</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">comment</span></code></p></td>
 <td><p>string</p></td>
 <td><p></p></td>
 <td><p>Free-text comment.</p></td>
