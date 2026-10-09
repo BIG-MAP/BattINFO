@@ -4022,7 +4022,11 @@ class AuthoringWorkspace:
             mfr_name = mfr.get("name", "") if isinstance(mfr, dict) else str(mfr)
             model = product.get("model", "")
             year  = product.get("year") or datetime.date.today().year
-            title = f"{mfr_name} {model}".strip()
+            # The record's own title wins; "<manufacturer> <model>" is the fallback for a
+            # cell spec without one. Titles are display text: the registry identity is the
+            # IRI and the source_local_id below, never the title.
+            name = product.get("name")
+            title = (name.strip() if isinstance(name, str) and name.strip() else f"{mfr_name} {model}".strip())
             source_local_id = _make_record_slug(mfr_name, model, year)
 
             if resolved_doi:

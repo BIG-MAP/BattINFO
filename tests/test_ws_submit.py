@@ -612,3 +612,15 @@ def test_submit_sends_a_collection_without_an_empty_distributions_list(
     # A dataset that does have a file still sends it.
     others = [r for r in sent if r is not series[0]]
     assert others and all(r["dataset"]["distributions"] for r in others)
+
+
+def test_submit_sends_a_cell_spec_s_own_title(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """A cell spec's name is its registry title; manufacturer + model is only the fallback."""
+    ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
+    _author_specs(ws, 2)
+    ws._ws.cell_specs[0].name = "Flores 2026 graphite AQ-1 cell spec"
+    ws.save(validation_policy="strict")
+    fake = _patch_registry(monkeypatch, lambda p: _result("validated"))
+    ws.submit(**_CREDS)
+    titles = sorted(payload["title"] for payload in fake.payloads)
+    assert titles == ["Acme X1", "Flores 2026 graphite AQ-1 cell spec"]

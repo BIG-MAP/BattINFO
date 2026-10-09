@@ -86,6 +86,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- **`ws.submit()` sends a cell spec's own title.** Every cell-spec submission was titled "<manufacturer> <model>", so a cell spec retitled with `battinfo.naming` ("Flores 2026 graphite AQ-1 cell spec") kept its old title in the registry. The record's `name` now wins; manufacturer and model are the fallback.
+
 - **A cell-spec draft keeps its title.** `ws.load()` of a cell-spec draft copied its `handle` but ignored its `name`, so the record was always titled "<manufacturer> <model>" and a build that set titles from `battinfo.naming` lost them silently. The draft's `name` now wins; without one the default is unchanged, and the IRI never depends on it.
 
 - **Handles keep letters such as ø and æ.** `battinfo.naming` dropped letters that Unicode does not decompose, so "Topsøe" became `topse`. They now take their usual ASCII spelling (ø to o, æ to ae, ß to ss, ł to l).
