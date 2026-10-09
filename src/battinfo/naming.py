@@ -515,12 +515,18 @@ def title_for(
     label: str | None = None,
     manufacturer: object = None,
     model: str | None = None,
+    source: str | None = None,
 ) -> str:
     """Build a readable record title (the ``name``) from structured parts.
 
     The title mirrors the handle in plain English::
 
-        <Subject> [<VARIANT>] <kind words> [<sample>] [<METHOD>]
+        [<Source>] <Subject> [<VARIANT>] <kind words> [<sample>] [<METHOD>]
+
+    A research record's title should lead with its source (``source="Flores
+    2026"``): a registry holds many graphite material specs, and only the
+    source tells them apart in a list or a search result. Products carry
+    their manufacturer instead (see ``manufacturer=``).
 
     Tests and datasets name the item they are about first, then the method,
     then their own kind (``Graphite AQ-1 cell 063b77 GITT test``), and a test
@@ -542,6 +548,12 @@ def title_for(
             ``"cell"``). Pass ``None`` to leave it out. Other kinds ignore it.
         label: A collection's descriptive name; ``" collection"`` is
             appended unless it already ends that way. Only collections take it.
+        source: The source the record comes from, as author and year
+            (``"Flores 2026"``). It leads the title, and a subject that is a
+            common word then loses its capital (``Flores 2026 graphite material
+            spec``) while an abbreviation keeps it (``Flores 2026 LNMO NMP-1
+            electrode spec``). Not used for products or collections; a
+            collection's ``label`` names its source itself.
         manufacturer: For a product (:data:`PRODUCT_KINDS`), its manufacturer:
             a name, a reference or an organization record with a name.
         model: For a product, its model. The title is the manufacturer's name
@@ -561,8 +573,17 @@ def title_for(
     'p-OCV hold test spec'
     >>> title_for("cell-spec", manufacturer="Samsung SDI", model="Samsung SDI INR18650-35E")
     'Samsung SDI INR18650-35E'
+    >>> title_for("electrode", source="Flores 2026", subject="graphite", variant="Gr-AQ-1", sample="063b77")
+    'Flores 2026 graphite AQ-1 electrode 063b77'
     """
     resolved = _resolve_kind(kind)
+    source_text = " ".join(_text(source, "source").split()) if source is not None else None
+    if source is not None and not source_text:
+        raise ValueError("source is empty.")
+    if source_text and (manufacturer is not None or model is not None):
+        raise ValueError("A product title is named by its manufacturer; drop source=.")
+    if source_text and resolved == COLLECTION:
+        raise ValueError("A collection's label names its source; drop source= and put it in label=.")
 
     if manufacturer is not None or model is not None:
         if resolved not in PRODUCT_KINDS:
@@ -593,7 +614,11 @@ def title_for(
 
     words: list[str] = []
     if subject is not None:
-        words.append(_subject_label(subject))
+        subject_label = _subject_label(subject)
+        if source_text and re.fullmatch(r"[A-Z][a-z]+(?:-[a-z]+)*", subject_label):
+            # After a source, a common-word subject reads as a word: "Flores 2026 graphite".
+            subject_label = subject_label[:1].lower() + subject_label[1:]
+        words.append(subject_label)
     if variant is not None:
         tokens = _variant_tokens(variant, subject)
         if tokens:
@@ -621,6 +646,8 @@ def title_for(
             words.append(method_text)
 
     title = " ".join(word for word in words if word)
+    if source_text:
+        return f"{source_text} {title}"
     # Sentence case for titles that open with a plain word ("material spec"),
     # but a word the source already capitalises ("p-OCV") keeps its spelling.
     first = title.split(" ", 1)[0]

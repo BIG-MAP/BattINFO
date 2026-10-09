@@ -314,3 +314,33 @@ def test_organization_handles_are_one_bare_segment() -> None:
     assert handle_for("organization", group="Topsoe") == "topsoe"
     with pytest.raises(ValueError):
         organization_handle({"name": "Topsoe", "handle": "nordic/topsoe"})
+
+
+# ── Source-first titles ───────────────────────────────────────────────────────
+
+
+@pytest.mark.parametrize(("kind", "parts", "title"), [
+    ("material-spec", {"subject": "graphite"}, "Flores 2026 graphite material spec"),
+    ("material", {"subject": "graphite"}, "Flores 2026 graphite material lot"),
+    ("electrode-spec", {"subject": "graphite", "variant": "Gr-AQ-1"}, "Flores 2026 graphite AQ-1 electrode spec"),
+    ("electrode", {"subject": "graphite", "variant": "Gr-AQ-1", "sample": "063b77"},
+     "Flores 2026 graphite AQ-1 electrode 063b77"),
+    ("cell-spec", {"subject": "lnmo", "variant": "LNMO-NMP-1"}, "Flores 2026 LNMO NMP-1 cell spec"),
+    ("cell", {"subject": "silicon_graphite", "variant": "SiGr-AQ-2", "sample": "61a57a"},
+     "Flores 2026 silicon-graphite AQ-2 cell 61a57a"),
+    ("test-protocol", {"method": "GITT"}, "Flores 2026 GITT test spec"),
+    ("test-protocol", {"method": "p-OCV hold"}, "Flores 2026 p-OCV hold test spec"),
+    ("dataset", {"subject": "graphite", "variant": "Gr-AQ-1", "sample": "063b77", "method": "GITT"},
+     "Flores 2026 graphite AQ-1 cell 063b77 GITT dataset"),
+])
+def test_a_source_leads_the_title(kind, parts, title) -> None:
+    assert title_for(kind, source="Flores 2026", **parts) == title
+
+
+def test_source_is_not_for_products_or_collections() -> None:
+    with pytest.raises(ValueError):
+        title_for("cell-spec", source="Flores 2026", manufacturer="Saft", model="VL 5U")
+    with pytest.raises(ValueError):
+        title_for("collection", source="Flores 2026", label="half-cell OCP")
+    with pytest.raises(ValueError):
+        title_for("material-spec", source="  ", subject="graphite")
