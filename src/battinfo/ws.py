@@ -6718,6 +6718,11 @@ class AuthoringWorkspace:
         )
         if raw.get("handle"):
             ct.handle = raw["handle"]
+        # A draft's own title wins over the "<manufacturer> <model>" default. The
+        # identity seed reads manufacturer and model, never the name, so a title
+        # change does not move the IRI.
+        if isinstance(raw.get("name"), str) and raw["name"].strip():
+            ct.name = raw["name"].strip()
         return ct
 
     def _load_from_result(self, result: dict) -> Any:
