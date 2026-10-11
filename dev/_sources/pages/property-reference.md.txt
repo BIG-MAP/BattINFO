@@ -9,10 +9,11 @@ unit IRI, by the curated mapping tables under
 `assets/mappings/domain-battery/` — the single source of truth for the
 semantics of emitted JSON-LD. This page is generated from those tables.
 
-## Properties (107)
+## Properties (106)
 
-The keys accepted in `properties={...}` on a cell spec, and the EMMO
-class each becomes in JSON-LD:
+The keys of quantities in `properties={...}` on a cell spec and in the
+`property` blocks of material and component records, and the EMMO class
+each becomes in JSON-LD:
 
 | Key | EMMO class |
 |---|---|
@@ -100,7 +101,6 @@ class each becomes in JSON-LD:
 | `reaction_rate_constant` | [ReactionRateConstant](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_0335e3f6_d1d8_4daa_8376_a9285f1bc9f1) |
 | `round_trip_energy_efficiency` | [RoundTripEnergyEfficiency](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c413d29a_b814_4d88_8db0_0fd0171cff11) |
 | `self_discharge_rate` | [SelfDischargeRate](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c3e97d58_1854_4c23_bb42_d2972172865e) |
-| `series_resistance` | [InternalResistance](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_9bf40017_3f58_4030_ada7_cb37a3dfda2d) |
 | `single_side_loading` | [MassLoading](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c955c089_6ee1_41a2_95fc_d534c5cfd3d5) |
 | `solid_diffusivity` | [Diffusivity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_37b24a94_cae0_4d7a_9519_9f7692dec607) |
 | `specific_capacity` | [SpecificCapacity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_1e3dc60d_dd6b_47d6_8161_70004fc5ee30) |
@@ -123,6 +123,26 @@ class each becomes in JSON-LD:
 | `wall_thickness` | [Thickness](https://w3id.org/emmo#EMMO_43003c86_9d15_433b_9789_ee2940920656) |
 | `weight` | [Mass](https://w3id.org/emmo#EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405) |
 | `width` | [Width](https://w3id.org/emmo#EMMO_e4de48b1_dabb_4490_ac2b_040f926c64f0) |
+
+## Parameter-set keys (9)
+
+Keys for parameter-set claims about a whole cell or its state, most of
+them the Cell and State values of a BPX file, which stay on the file's
+parameter-set record. A cell spec does not accept them as properties. A
+key with no EMMO class yet is typed by its value basis alone, and
+validation warns `semantic.property_unmapped`.
+
+| Key | Unit | EMMO class |
+|---|---|---|
+| `ambient_temperature` | `K` | none yet |
+| `electrode_pair_count` | `1` | [NumberOfEntities](https://w3id.org/emmo#EMMO_41efdf5d_0c9c_4ea0_bb65_f8236e663be5) |
+| `heat_transfer_coefficient` | `W/(m2.K)` | [SurfaceCoefficientOfHeatTransfer](https://w3id.org/emmo#EMMO_0b3295fa_f4bf_4f83_a603_9d98c03da5bb) |
+| `initial_soc` | `1` | [StateOfCharge](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_8b2aaa50_bbe1_45da_8778_8898326246a2) |
+| `initial_temperature` | `K` | [ThermodynamicTemperature](https://w3id.org/emmo#EMMO_affe07e4_e9bc_4852_86c6_69e26182a17f) |
+| `reference_temperature` | `K` | [ThermodynamicTemperature](https://w3id.org/emmo#EMMO_affe07e4_e9bc_4852_86c6_69e26182a17f) |
+| `series_resistance` | `Ohm` | [InternalResistance](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_9bf40017_3f58_4030_ada7_cb37a3dfda2d) |
+| `specific_heat_capacity` | `J/(kg.K)` | [SpecificHeatCapacity](https://w3id.org/emmo#EMMO_b4f4ed28_d24c_4a00_9583_62ab839abeca) |
+| `thermal_conductivity` | `W/(m.K)` | [ThermalConductivity](https://w3id.org/emmo#EMMO_8dd40ec6_2c5a_43f3_bf64_cadcd447a1c1) |
 
 ## Units (48)
 

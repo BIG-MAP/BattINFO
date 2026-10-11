@@ -582,10 +582,11 @@
 unit IRI, by the curated mapping tables under
 <code class="docutils literal notranslate"><span class="pre">assets/mappings/domain-battery/</span></code> — the single source of truth for the
 semantics of emitted JSON-LD. This page is generated from those tables.</p>
-<section id="properties-107">
-<h2>Properties (107)<a class="headerlink" href="#properties-107" title="Link to this heading">#</a></h2>
-<p>The keys accepted in <code class="docutils literal notranslate"><span class="pre">properties={...}</span></code> on a cell spec, and the EMMO
-class each becomes in JSON-LD:</p>
+<section id="properties-106">
+<h2>Properties (106)<a class="headerlink" href="#properties-106" title="Link to this heading">#</a></h2>
+<p>The keys of quantities in <code class="docutils literal notranslate"><span class="pre">properties={...}</span></code> on a cell spec and in the
+<code class="docutils literal notranslate"><span class="pre">property</span></code> blocks of material and component records, and the EMMO class
+each becomes in JSON-LD:</p>
 <div class="pst-scrollable-table-container"><table class="table">
 <thead>
 <tr class="row-odd"><th class="head"><p>Key</p></th>
@@ -845,74 +846,126 @@ class each becomes in JSON-LD:</p>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">self_discharge_rate</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c3e97d58_1854_4c23_bb42_d2972172865e">SelfDischargeRate</a></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">series_resistance</span></code></p></td>
-<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_9bf40017_3f58_4030_ada7_cb37a3dfda2d">InternalResistance</a></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">single_side_loading</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">single_side_loading</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c955c089_6ee1_41a2_95fc_d534c5cfd3d5">MassLoading</a></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">solid_diffusivity</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">solid_diffusivity</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_37b24a94_cae0_4d7a_9519_9f7692dec607">Diffusivity</a></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">specific_capacity</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">specific_capacity</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_1e3dc60d_dd6b_47d6_8161_70004fc5ee30">SpecificCapacity</a></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">specific_energy</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">specific_energy</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo#EMMO_e218c625_6a39_47a9_8d08_a2ef41c152a9">SpecificEnergy</a></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">specific_power</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">specific_power</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c762a928_5a74_46fd_9929_4ac2d7a3a8d7">SpecificPower</a></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">state_of_health</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">state_of_health</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_a7a4614f_2426_46f3_8475_cda4a9fabfce">StateOfHealth</a></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">stoichiometry_max</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">stoichiometry_max</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_95ef8c3c_62fe_467f_b5d4_dd0cd18a7ea8">MaximumStoichiometricCoefficient</a></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">stoichiometry_min</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">stoichiometry_min</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_86324806_4263_4d80_b5af_1a7be844ab5b">MinimumStoichiometricCoefficient</a></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">storage_temperature_max</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">storage_temperature_max</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_0ea4d188_9701_4699_a5ca_812a98a9afa7">MaximumStorageTemperature</a></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">storage_temperature_min</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">storage_temperature_min</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_0ddfd57a_d338_4690_be45_b26884ed6302">MinimumStorageTemperature</a></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">surface_area_per_volume</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">surface_area_per_volume</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_a5571263_f153_448f_84a3_cd18092cf8fa">VolumetricSurfaceArea</a></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">theoretical_capacity</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">theoretical_capacity</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_372c89d0_adab_4585_9662_33c912acef23">TheoreticalCapacity</a></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">thickness</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">thickness</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo#EMMO_43003c86_9d15_433b_9789_ee2940920656">Thickness</a></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">tortuosity</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">tortuosity</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo#EMMO_c413d96f_c57b_4c70_9ac1_312db6c009a8">Tortuosity</a></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">transference_number</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">transference_number</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_e3e78df2_d568_4ab7_8c0d_d3a2ee3ae282">ChargeCarrierTransportNumber</a></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">typical_capacity</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">typical_capacity</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_34d6cdd9_d3a7_4302_a54d_9dbd8a3b5e68">TypicalCapacity</a></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">typical_energy</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">typical_energy</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d">NominalEnergy</a></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">upper_voltage_limit</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">upper_voltage_limit</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_6dcd5baf_58cd_43f5_a692_51508e036c88">UpperVoltageLimit</a></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">volume</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">volume</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo#EMMO_f1a51559_aa3d_43a0_9327_918039f0dfed">Volume</a></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">wall_thickness</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">wall_thickness</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo#EMMO_43003c86_9d15_433b_9789_ee2940920656">Thickness</a></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">weight</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">weight</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo#EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405">Mass</a></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">width</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">width</span></code></p></td>
 <td><p><a class="reference external" href="https://w3id.org/emmo#EMMO_e4de48b1_dabb_4490_ac2b_040f926c64f0">Width</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="parameter-set-keys-9">
+<h2>Parameter-set keys (9)<a class="headerlink" href="#parameter-set-keys-9" title="Link to this heading">#</a></h2>
+<p>Keys for parameter-set claims about a whole cell or its state, most of
+them the Cell and State values of a BPX file, which stay on the file’s
+parameter-set record. A cell spec does not accept them as properties. A
+key with no EMMO class yet is typed by its value basis alone, and
+validation warns <code class="docutils literal notranslate"><span class="pre">semantic.property_unmapped</span></code>.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Unit</p></th>
+<th class="head"><p>EMMO class</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ambient_temperature</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">K</span></code></p></td>
+<td><p>none yet</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">electrode_pair_count</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#EMMO_41efdf5d_0c9c_4ea0_bb65_f8236e663be5">NumberOfEntities</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">heat_transfer_coefficient</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">W/(m2.K)</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#EMMO_0b3295fa_f4bf_4f83_a603_9d98c03da5bb">SurfaceCoefficientOfHeatTransfer</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">initial_soc</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_8b2aaa50_bbe1_45da_8778_8898326246a2">StateOfCharge</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">initial_temperature</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">K</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#EMMO_affe07e4_e9bc_4852_86c6_69e26182a17f">ThermodynamicTemperature</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">reference_temperature</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">K</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#EMMO_affe07e4_e9bc_4852_86c6_69e26182a17f">ThermodynamicTemperature</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">series_resistance</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Ohm</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo/domain/electrochemistry#electrochemistry_9bf40017_3f58_4030_ada7_cb37a3dfda2d">InternalResistance</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">specific_heat_capacity</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">J/(kg.K)</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#EMMO_b4f4ed28_d24c_4a00_9583_62ab839abeca">SpecificHeatCapacity</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">thermal_conductivity</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">W/(m.K)</span></code></p></td>
+<td><p><a class="reference external" href="https://w3id.org/emmo#EMMO_8dd40ec6_2c5a_43f3_bf64_cadcd447a1c1">ThermalConductivity</a></p></td>
 </tr>
 </tbody>
 </table>
@@ -1308,7 +1361,8 @@ surface as machine-readable issues.</p>
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#properties-107">Properties (107)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#properties-106">Properties (106)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parameter-set-keys-9">Parameter-set keys (9)</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#units-48">Units (48)</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chemistry-labels-33">Chemistry labels (33)</a></li>
 </ul>
