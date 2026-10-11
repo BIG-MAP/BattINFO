@@ -4,6 +4,7 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
 from typer.testing import CliRunner
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -299,6 +300,43 @@ def test_local_workspace_rehydrates_from_publication_bundle(tmp_path: Path) -> N
     assert objects["dataset"].test_id == objects["test"].id
     # The bundle states the licence as an IRI; reading it back keeps the IRI.
     assert objects["dataset"].license == "https://spdx.org/licenses/CC-BY-4.0.html"
+
+
+@pytest.mark.parametrize(("stored", "read_back"), [
+    ("https://spdx.org/licenses/cc-by-4.0.html", "https://spdx.org/licenses/CC-BY-4.0.html"),
+    ("https://spdx.org/licenses/gpl-3.0.html", "https://spdx.org/licenses/GPL-3.0-only.html"),
+    ("https://spdx.org/licenses/Lab-Terms-1.0.html", "https://spdx.org/licenses/Lab-Terms-1.0.html"),
+])
+def test_publication_bundle_reads_an_old_spdx_link_in_spdx_spelling(
+    tmp_path: Path, stored: str, read_back: str
+) -> None:
+    """Earlier versions wrote the SPDX page from the lower-case id, a 404 on
+    spdx.org. Reading such a bundle gives the page in SPDX's spelling, and the
+    re-exported record states that page; a page the table does not know stays
+    as given."""
+    from battinfo.jsonld import record_to_jsonld
+    from battinfo.publication import load_publication
+
+    cell_design, cell, test, dataset = _build_sample_objects(tmp_path)
+    publish_root = tmp_path / "publication"
+    publish_root.mkdir(parents=True, exist_ok=True)
+    dataset.dataset_path = str(publish_root)
+    dataset.access_url = publish_root.resolve().as_uri()
+    dataset.download_url = None
+    dataset.data_format = "application/vnd.battinfo.dataset-directory"
+    publish(cell_spec=cell_design, cell_instance=cell, test=test, dataset=dataset)
+    publication_path = publish_root / "battinfo.publish.jsonld"
+
+    doc = json.loads(publication_path.read_text(encoding="utf-8"))
+    stated = [node for node in doc["@graph"] if "schema:license" in node]
+    assert stated
+    for node in stated:
+        node["schema:license"] = {"@id": stored}
+    publication_path.write_text(json.dumps(doc), encoding="utf-8")
+
+    loaded = load_publication(publication_path).dataset
+    assert loaded.license == read_back
+    assert record_to_jsonld(loaded.to_record(), "dataset")["dcterms:license"] == {"@id": read_back}
 
 
 def test_local_workspace_rehydrates_from_registry_export_wrapper(tmp_path: Path) -> None:

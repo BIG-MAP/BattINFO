@@ -3462,13 +3462,20 @@ class BattinfoBundle(BundleJsonModel):
         dataset_distribution = dataset_node.get("schema:distribution")
         first_distribution = dataset_distribution[0] if isinstance(dataset_distribution, list) and dataset_distribution else {}
         dataset_main_entity = dataset_node.get("schema:mainEntity")
+        # An IRI reference in deposits, a bare string in older ones. An spdx.org
+        # page that earlier versions spelled in lower case (a 404) is read back
+        # in SPDX's own spelling.
+        from battinfo.jsonld import canonical_license_iri  # noqa: PLC0415
+
+        dataset_license = _ref_id(dataset_node.get("schema:license"))
+        if dataset_license:
+            dataset_license = canonical_license_iri(dataset_license)
         dataset = Dataset(
             id=str(dataset_node["@id"]),
             identifier=_copy_identifier(dataset_node.get("schema:identifier")),
             name=str(dataset_node.get("schema:name") or dataset_node["@id"]),
             description=dataset_node.get("schema:description"),
-            # An IRI reference in deposits, a bare string in older ones.
-            license=_ref_id(dataset_node.get("schema:license")),
+            license=dataset_license,
             same_as=_ref_ids(dataset_node.get("schema:sameAs")),
             additional_type=_text_list(dataset_node.get("schema:additionalType")),
             version=dataset_node.get("schema:version"),

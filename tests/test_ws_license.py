@@ -318,3 +318,23 @@ def test_every_accepted_license_id_has_its_spdx_page() -> None:
     for slug, iri in _LICENSE_SLUG_IRIS.items():
         assert iri.startswith("https://spdx.org/licenses/") and iri.endswith(".html")
         assert iri != f"https://spdx.org/licenses/{slug}.html", slug
+
+
+@pytest.mark.parametrize(("stored", "emitted"), [
+    # The lower-case pages earlier versions wrote, all 404s on spdx.org.
+    ("https://spdx.org/licenses/cc-by-4.0.html", "https://spdx.org/licenses/CC-BY-4.0.html"),
+    ("https://spdx.org/licenses/odbl-1.0.html", "https://spdx.org/licenses/ODbL-1.0.html"),
+    ("https://spdx.org/licenses/gpl-3.0.html", "https://spdx.org/licenses/GPL-3.0-only.html"),
+    # Already in SPDX's spelling, an spdx.org page the table does not know, and
+    # any other licence URL: kept as given.
+    ("https://spdx.org/licenses/CC-BY-4.0.html", "https://spdx.org/licenses/CC-BY-4.0.html"),
+    ("https://spdx.org/licenses/GPL-3.0.html", "https://spdx.org/licenses/GPL-3.0.html"),
+    ("https://spdx.org/licenses/Lab-Terms-1.0.html", "https://spdx.org/licenses/Lab-Terms-1.0.html"),
+    ("https://creativecommons.org/licenses/by/4.0/", "https://creativecommons.org/licenses/by/4.0/"),
+])
+def test_a_stored_spdx_link_is_emitted_in_spdx_spelling(stored: str, emitted: str) -> None:
+    from battinfo.jsonld import license_node
+
+    assert license_node(stored) == {"@id": emitted}
+    member = _member_node(stored)
+    assert member["schema:license"] == member["dcterms:license"] == {"@id": emitted}

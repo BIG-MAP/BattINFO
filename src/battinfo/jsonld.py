@@ -499,6 +499,28 @@ _LICENSE_SLUG_IRIS: dict[str, str] = {
     "agpl-3.0": "https://spdx.org/licenses/AGPL-3.0-only.html",
     "mpl-2.0": "https://spdx.org/licenses/MPL-2.0.html",
 }
+_LICENSE_IRIS_BY_LOWER: dict[str, str] = {iri.lower(): iri for iri in _LICENSE_SLUG_IRIS.values()}
+_SPDX_LICENSE_PAGE = re.compile(r"https://spdx\.org/licenses/([^/?#]+)\.html", re.IGNORECASE)
+
+
+def canonical_license_iri(url: str) -> str:
+    """An spdx.org licence page in SPDX's own spelling, when the table knows it.
+
+    Earlier versions built the page from the lower-case id, so records and
+    deposits can hold ``https://spdx.org/licenses/cc-by-4.0.html``, which is a
+    404. A page that matches a table entry case-insensitively becomes that
+    entry, and so does a page named by one of the table's lower-case ids
+    (``gpl-3.0.html`` becomes ``GPL-3.0-only.html``). Every other URL, an
+    spdx.org page the table does not know among them, is returned as given.
+    """
+    text = url.strip()
+    known = _LICENSE_IRIS_BY_LOWER.get(text.lower())
+    if known:
+        return known
+    page = _SPDX_LICENSE_PAGE.fullmatch(text)
+    if page and page.group(1).islower():
+        return _LICENSE_SLUG_IRIS.get(page.group(1), url)
+    return url
 
 
 def license_node(value: Any) -> dict | str | None:
@@ -506,14 +528,15 @@ def license_node(value: Any) -> dict | str | None:
 
     A bare slug emitted as ``{"@id": "cc-by-sa-4.0"}`` is a RELATIVE IRI that
     resolves against the document base into garbage. URLs pass through as IRI
-    references, known slugs map to their SPDX page, and anything else emits as
-    a plain literal — honest text beats a broken link.
+    references (an spdx.org page in SPDX's own spelling, see
+    :func:`canonical_license_iri`), known slugs map to their SPDX page, and
+    anything else emits as a plain literal — honest text beats a broken link.
     """
     if not isinstance(value, str) or not value.strip():
         return None
     text = value.strip()
     if text.startswith(("http://", "https://")):
-        return {"@id": text}
+        return {"@id": canonical_license_iri(text)}
     iri = _LICENSE_SLUG_IRIS.get(text.lower())
     if iri:
         return {"@id": iri}
