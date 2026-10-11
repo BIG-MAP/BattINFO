@@ -590,7 +590,7 @@
 <td><p>The dataset record</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">file_url</span></code>, <code class="docutils literal notranslate"><span class="pre">file_name</span></code>, <code class="docutils literal notranslate"><span class="pre">media_type</span></code>, <code class="docutils literal notranslate"><span class="pre">sha256</span></code>, <code class="docutils literal notranslate"><span class="pre">size_bytes</span></code></p></td>
-<td><p>Its measurement file</p></td>
+<td><p>Its measurement file. <code class="docutils literal notranslate"><span class="pre">sha256</span></code> is filled only when the record states a SHA-256 checksum</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">test_id</span></code>, <code class="docutils literal notranslate"><span class="pre">test_kind</span></code></p></td>
 <td><p>The test that produced it (<code class="docutils literal notranslate"><span class="pre">cycling</span></code>, <code class="docutils literal notranslate"><span class="pre">capacity_check</span></code>, <code class="docutils literal notranslate"><span class="pre">gitt</span></code>, …)</p></td>
@@ -603,6 +603,9 @@
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">nominal_capacity_ah</span></code>, <code class="docutils literal notranslate"><span class="pre">nominal_capacity_source</span></code></p></td>
 <td><p>Stated capacity in Ah, and whether it is the nominal, rated, typical or minimum figure</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">checksum_algorithm</span></code>, <code class="docutils literal notranslate"><span class="pre">checksum_value</span></code></p></td>
+<td><p>The checksum the record states for the file (<code class="docutils literal notranslate"><span class="pre">sha256</span></code>, <code class="docutils literal notranslate"><span class="pre">md5</span></code>, …), which <code class="docutils literal notranslate"><span class="pre">download()</span></code> and <code class="docutils literal notranslate"><span class="pre">read()</span></code> verify</p></td>
 </tr>
 </tbody>
 </table>
@@ -617,7 +620,8 @@
 <span class="c1"># [&#39;test_time_second&#39;, &#39;voltage_volt&#39;, &#39;current_ampere&#39;, &#39;cycle_count&#39;, &#39;step_index&#39;, ...]</span>
 </pre></div>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">read</span></code> downloads the file, checks it against the checksum in the record, keeps a local copy and returns a DataFrame. The second call for the same dataset reads the local copy.</p>
+<p><code class="docutils literal notranslate"><span class="pre">read</span></code> downloads the file, checks it against the checksum in the record, keeps a local copy and returns a DataFrame. The second call for the same dataset reads the local copy, after checking it again.</p>
+<p>The check uses whichever algorithm the record states, as long as Python’s <code class="docutils literal notranslate"><span class="pre">hashlib</span></code> provides it. That covers SHA-256 and MD5, which is what Zenodo records give. A download that does not match raises <code class="docutils literal notranslate"><span class="pre">OSError</span></code>, and a local copy that no longer matches is fetched again. Some records state no checksum, or one in an algorithm <code class="docutils literal notranslate"><span class="pre">hashlib</span></code> does not provide: such a file is used unchecked, and a <code class="docutils literal notranslate"><span class="pre">UserWarning</span></code> names it the first time.</p>
 <p>Files come from many publishers and do not all spell their columns the same way. By default <code class="docutils literal notranslate"><span class="pre">read</span></code> renames columns to machine-readable BDF names, so <code class="docutils literal notranslate"><span class="pre">Voltage</span> <span class="pre">/</span> <span class="pre">V</span></code> becomes <code class="docutils literal notranslate"><span class="pre">voltage_volt</span></code> and a file that logs time in milliseconds comes back with <code class="docutils literal notranslate"><span class="pre">test_time_second</span></code>. Columns it does not recognise are left as they are, and it never invents one: a file with no step column still has none. Pass <code class="docutils literal notranslate"><span class="pre">bdf_names=False</span></code> to get the file exactly as published.</p>
 <p>To fetch a file without loading it:</p>
 <!-- doc-snippet: skip -->

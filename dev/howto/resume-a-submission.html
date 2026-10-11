@@ -568,6 +568,7 @@ re-POST round-trips.</p></li>
 <li><p><strong>Failed records retry</strong> automatically on the next run.</p></li>
 <li><p><strong>Changed content re-submits</strong> — the journal keys on a content hash, so an
 edited record never hides behind an old success.</p></li>
+<li><p><strong>Each registry has its own record of successes.</strong> The journal notes the registry every record went to, and a success counts only there. A workspace rehearsed against a local registry therefore still sends everything when you submit to production. Journals written by earlier versions name no registry, so their records are sent once more; the registry deduplicates identical payloads.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ws.submit(resume=False)</span></code> bypasses the journal entirely; the registry
 dedups identical re-submissions server-side anyway.</p></li>
 </ul>

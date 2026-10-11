@@ -151,6 +151,7 @@ Representative issue codes:
   `semantic.electrode_polarity_expected`: the electrode holders disagree with the
   cell configuration — see [Electrodes](records/half-cells.md))
 - `semantic.handle_kind_word_expected` (a warning under every policy: the record's `handle` does not end with its type's kind word; see [Name your records](howto/name-your-records.md))
+- `semantic.schema_version_superseded` and `semantic.schema_version_unknown` (warnings under every policy: the record's `schema_version` is one an earlier release wrote, `0.1.0` or `1.0.0`, or one this release does not know at all; the current version is `0.2.0`)
 - `publication.distribution_url_invalid`
 - `publication.jsonld_parse_error`
 
