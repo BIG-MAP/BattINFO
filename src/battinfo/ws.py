@@ -676,6 +676,20 @@ def _normalize_license(value: str) -> tuple[str, bool]:
     return token, False
 
 
+def _license_value(license: str) -> dict | str:
+    """How a deposit graph or RO-Crate states a licence.
+
+    The same form ``record_to_jsonld`` uses (:func:`battinfo.jsonld.license_node`):
+    a URL or a known SPDX id becomes an IRI reference to the SPDX page, spelled
+    the way SPDX spells it; any other text stays a plain literal rather than a
+    link that resolves to nothing. The catalog node, every member dataset node
+    and the RO-Crate root use this one function.
+    """
+    from battinfo.jsonld import license_node
+
+    return license_node(license) or license.strip()
+
+
 @dataclass
 class ContributorRef:
     """The person contributing records from this workspace, identified by ORCID.
@@ -2613,6 +2627,16 @@ class AuthoringWorkspace:
 
         For large batches you may instead pass ``datasets="glob"`` to match files to
         already-loaded cells by the 6-char short ID in each filename.
+
+        ``series_id`` puts every dataset made from ``data=`` in a collection. Pass
+        the collection's IRI; the collection itself is saved first, with
+        ``battinfo.Dataset`` and ``battinfo.save_dataset``::
+
+            ws.add("test", type="cycling", cell="FAC-001", data="data/FAC-001.csv",
+                   series_id="https://w3id.org/battinfo/dataset/....")
+
+        Membership is not identity, so ``series_id`` never changes the IRIs of the
+        test or its datasets.
 
         **Names, handles and pinned identities.** Where a type takes ``name=`` it
         also takes ``handle=`` (cells take ``handles=[...]`` parallel to
@@ -5842,16 +5866,18 @@ class AuthoringWorkspace:
                 # Only publish a web access URL here; a local file:// directory URL
                 # (local-publication case) is set by that path's adapter instead.
                 member["schema:url"] = _ds["access_url"]
-            if _ds.get("license"):
-                lic = _ds["license"]
-                member["schema:license"] = {"@id": lic} if str(lic).startswith("http") else lic
-            # Propagate catalog-level rights/attribution down to each member — RDF has
-            # no inheritance, so a dataset lifted out of the catalog would otherwise lose
-            # its licence and creators. Record-level values (above) take precedence.
-            if "schema:license" not in member and license:
-                _lic_iri = license if license.startswith("http") else f"https://spdx.org/licenses/{license}.html"
-                member["schema:license"]  = {"@id": _lic_iri}
-                member["dcterms:license"] = {"@id": _lic_iri}
+            # Rights and attribution on each member: RDF has no inheritance, so a
+            # dataset lifted out of the catalog would otherwise lose its licence and
+            # creators. The dataset's own licence wins over the catalog's, and either
+            # is stated as an IRI, expanded the same way as the catalog's.
+            _own_license = _ds.get("license")
+            _member_license = (
+                _own_license if isinstance(_own_license, str) and _own_license.strip() else license
+            )
+            if _member_license:
+                _lic_value = _license_value(_member_license)
+                member["schema:license"]  = _lic_value
+                member["dcterms:license"] = _lic_value
             if creators:
                 # Full creator nodes (not @id refs) so a member is self-describing even
                 # lifted out of the catalog, and so creators without an ORCID @id are
@@ -5998,9 +6024,9 @@ class AuthoringWorkspace:
         if license:
             # Emit the licence as a dereferenceable IRI (SPDX) rather than a bare code,
             # so a consumer can resolve the exact terms. Matches the RO-Crate path.
-            lic_iri = license if license.startswith("http") else f"https://spdx.org/licenses/{license}.html"
-            catalog_node["dcterms:license"] = {"@id": lic_iri}
-            catalog_node["schema:license"]  = {"@id": lic_iri}
+            lic_value = _license_value(license)
+            catalog_node["dcterms:license"] = lic_value
+            catalog_node["schema:license"]  = lic_value
         if _funding_grant is not None:
             # Deposit-level funding: the grant under which the whole collection was produced.
             catalog_node["schema:funding"] = _funding_grant
@@ -6221,7 +6247,7 @@ class AuthoringWorkspace:
             "name":          title,
             "description":   description,
             "datePublished": _now_iso()[:10],
-            "license":       {"@id": f"https://spdx.org/licenses/{license}.html"},
+            "license":       _license_value(license),
             "url":           record_url,
             "identifier":    prereserved_doi,
             "hasPart":       parts,
@@ -7665,6 +7691,7 @@ class AuthoringWorkspace:
         iri: str | None = None,
         uid: str | None = None,
         dataset_iris: "builtins.list[str] | None" = None,
+        series_id: str | None = None,
         instrument: str | None = None,
         channel: Any = None,
         license: str | None = None,
@@ -7686,6 +7713,13 @@ class AuthoringWorkspace:
         same for the datasets made from ``data=``: one IRI per data file, in the
         same order. All three need the explicit ``cell=`` form.
 
+        ``series_id`` puts the datasets made from ``data=`` in a collection: it is
+        the collection's IRI (``https://w3id.org/battinfo/dataset/...``) and is set
+        on every one of them. It needs ``data=`` and the explicit ``cell=`` form,
+        and it is checked before anything is created. Membership is not identity,
+        so it never enters the test or dataset IRI seeds. The collection itself is
+        written with ``battinfo.Dataset`` and ``battinfo.save_dataset``.
+
         ``channel`` attaches the test to an equipment channel (a channel IRI, a
         channel label, or ``"unit/CHn"``); the test record then carries
         ``equipment_id`` + ``channel_id``.
@@ -7704,6 +7738,10 @@ class AuthoringWorkspace:
         workspace default (``ws.license``) for these records. Precedence at publish:
         an explicit ``ws.zenodo(license=...)`` > this ``license=`` > workspace default.
         """
+        # The collection for the datasets made from data=. Checked first, so a bad
+        # value fails before any test, dataset or test spec is created.
+        member_series_id = self._checked_series_id(series_id, cell=cell, data=data)
+
         # Resolve the test type (type=, legacy kind=, or from a linked spec).
         test_type = type or kind
         test_spec = spec if spec is not None else protocol
@@ -7843,12 +7881,15 @@ class AuthoringWorkspace:
                 )
                 if pinned_dataset_ids is not None:
                     dataset_obj.id = pinned_dataset_ids[i]
+                if member_series_id is not None:
+                    dataset_obj.series_id = member_series_id
             conf_status = conformance.status if conformance is not None else None
             print(f"  test [{test_type}] on {label}"
                   + (f"  +{len(files)} dataset(s)" if files else "")
                   + (f"  (+{n_raw} raw source{'s' if n_raw != 1 else ''})" if n_raw else "")
                   + (f"  channel: {channel}" if channel_id is not None else "")
-                  + (f"  conformance: {conf_status}" if conf_status else ""))
+                  + (f"  conformance: {conf_status}" if conf_status else "")
+                  + (f"  collection: {member_series_id}" if member_series_id else ""))
             return [test]
 
         # ── Batch mode: match a glob of files to loaded cells by short ID ────────
@@ -7935,6 +7976,31 @@ class AuthoringWorkspace:
                 "dataset_iris must name distinct datasets not already used in this session."
             )
         return pinned
+
+    def _checked_series_id(self, series_id: str | None, *, cell: Any, data: Any) -> str | None:
+        """``series_id=`` checked as a collection's dataset IRI, or ``None``.
+
+        The value goes on the datasets made from ``data=``, so it needs that and
+        the explicit ``cell=`` form. Only its shape is checked: the collection may
+        be saved in this workspace or published elsewhere earlier.
+        """
+        from battinfo.api._shared import DATASET_IRI_RE  # noqa: PLC0415
+
+        if series_id is None:
+            return None
+        if cell is None or not self._as_data_paths(data):
+            raise ValueError(
+                "series_id= puts the datasets made from data= in a collection; use "
+                "ws.add('test', cell=..., data=..., series_id=...). The collection itself "
+                "is written with battinfo.Dataset and battinfo.save_dataset."
+            )
+        text = series_id.strip() if isinstance(series_id, str) else ""
+        if not DATASET_IRI_RE.fullmatch(text):
+            raise ValueError(
+                f"series_id={series_id!r} is not a dataset IRI; expected the collection's "
+                "IRI, https://w3id.org/battinfo/dataset/xxxx-xxxx-xxxx-xxxx."
+            )
+        return text
 
     def _as_data_paths(self, data: Any) -> builtins.list[Path]:
         """Normalise a data= value (path, str, or list) to a list of absolute Paths."""

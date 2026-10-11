@@ -336,55 +336,11 @@ CANONICAL_RECORD_TERMS: dict[str, object] = {
 }
 
 # ── Curated unit symbol → EMMO IRI table ──────────────────────────────────────
-# IMPORTANT: term keys here MUST NOT contain "/" (or ":"). JSON-LD 1.1 treats any
-# term whose key has the form of an IRI (i.e. contains "/") as one that MUST expand
-# to its own definition; a compound-unit symbol like "Wh/kg" does not, so a strict
-# 1.1 processor rejects the ENTIRE context with:
-#   "Invalid JSON-LD syntax; term in form of IRI must expand to definition."
-# Compound units (Wh/kg, Wh/L, W/kg, W/L, 1/h, …) are therefore intentionally NOT
-# defined as symbol terms. They remain fully representable because:
-#   1. quantity nodes always emit the unit as an explicit IRI reference
-#      (hasMeasurementUnit / qudt:unit -> {"@id": "emmo:WattHourPerKilogram"}),
-#      never as a bare @vocab symbol string; and
-#   2. ws.py adds slash-free EMMO prefLabel aliases (WattHourPerKilogram, …) to the
-#      embedded context from unit_map.curated.json.
-UNIT_SYMBOLS: dict[str, str] = {
-    "V":      "emmo:Volt",
-    "mV":     "emmo:MilliVolt",
-    "kV":     "emmo:KiloVolt",
-    "Ah":     "emmo:AmpereHour",
-    "mAh":    "emmo:MilliAmpereHour",
-    "A":      "emmo:Ampere",
-    "mA":     "emmo:MilliAmpere",
-    "W":      "emmo:Watt",
-    "kW":     "emmo:KiloWatt",
-    "Wh":     "emmo:Watthour",
-    "kWh":    "emmo:KiloWatthour",
-    "MWh":    "emmo:MegaWattHour",
-    "Ohm":    "emmo:Ohm",
-    "mOhm":   "emmo:MilliOhm",
-    "mohm":   "emmo:MilliOhm",
-    "degC":   "emmo:EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc",
-    "K":      "emmo:Kelvin",
-    "g":      "emmo:Gram",
-    "kg":     "emmo:Kilogram",
-    "mg":     "emmo:MilliGram",
-    "mm":     "emmo:MilliMetre",
-    "cm":     "emmo:CentiMetre",
-    "m":      "emmo:Metre",
-    "L":      "emmo:Litre",
-    "mL":     "emmo:MilliLitre",
-    "cm3":    "emmo:CubicCentiMetre",
-    "h":      "emmo:Hour",
-    "min":    "emmo:Minute",
-    "s":      "emmo:Second",
-    # No "C" entry. In real records the bare symbol "C" is only ever a C-rate,
-    # and resolve_unit_iri() consults this context before the test-condition
-    # table, so a "C" -> Coulomb term here silently shadows the correct
-    # electrochemistry:AmperePerAmpereHour mapping (commit 41b7db3).
-    "1":      "emmo:EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
-    "%":      "emmo:Percent",
-}
+# Kept in the package (battinfo.jsonld.CONTEXT_UNIT_SYMBOLS), because the JSON-LD
+# validator reads it too: a unit term is never a node's @type. The rules for its
+# keys (no "/" or ":") are documented there.
+sys.path.insert(0, str(REPO_ROOT / "src"))
+from battinfo.jsonld import CONTEXT_UNIT_SYMBOLS as UNIT_SYMBOLS  # noqa: E402
 
 # ── Provenance/DCAT typed terms ────────────────────────────────────────────────
 # created_at/modified_at are xsd:dateTime, NOT xsd:integer: the record stores a
