@@ -101,14 +101,15 @@ def dataset_locator_seed(
 ) -> str:
     """The location part of a dataset's identity seed, the same wherever the workspace sits.
 
-    Shared by every surface that mints a dataset IRI (the workspace finalizer
-    and the ``save_dataset`` builder). An explicit remote ``access_url`` or
-    ``download_url`` (``https://...`` or any other non-file URL) is used as
-    it is. A local data file, given as ``dataset_path`` or as a ``file:`` URL,
-    is named by its path relative to *workspace_root* in POSIX form when it
-    lies inside that folder, and by its file name otherwise. The absolute
-    path never enters the seed, so the same workspace built in another folder,
-    by a colleague or a CI job, mints the same dataset IRIs.
+    Shared by every surface that mints a dataset IRI (the workspace finalizer,
+    the ``save_dataset`` builder and the publication package). An explicit
+    remote ``access_url`` or ``download_url`` (``https://...`` or any other
+    non-file URL) is used as it is. A local data file or folder, given as
+    ``dataset_path`` or as a ``file:`` URL, is named by its path relative to
+    *workspace_root* in POSIX form when it lies inside that folder, and by its
+    name otherwise. The absolute path never enters the seed, so the same
+    workspace built in another folder, by a colleague or a CI job, mints the
+    same dataset IRIs.
 
     Returns ``""`` when the dataset names no location at all.
     """

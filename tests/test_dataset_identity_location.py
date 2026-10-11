@@ -4,7 +4,10 @@ A dataset's identity seed used to include its access_url, which defaults to the
 absolute file:// URI of the data file, so the same workspace built in another
 folder minted new dataset IRIs. The seed now takes a location-independent
 locator: an explicit remote URL as before, otherwise the data file's path
-relative to the workspace root, otherwise its file name.
+relative to the workspace root, otherwise its file name. The older
+publication-package path (publish_publication_package and
+Workspace.build_publication_package) seeded on the dataset folder's absolute
+URI the same way and now follows the same rule.
 """
 from __future__ import annotations
 
@@ -120,3 +123,53 @@ def test_locator_takes_the_relative_path_or_the_file_name(tmp_path: Path) -> Non
         dataset_path=inside, workspace_root=root,
     ) == "https://example.org/C1.csv"
     assert dataset_locator_seed() == ""
+
+
+# ── The publication-package path ──────────────────────────────────────────────
+
+
+def _publish_package(parent: Path, **dataset_fields: str) -> dict:
+    """publish_publication_package for one cell, one test and one dataset folder under *parent*."""
+    folder = parent / "run-1"
+    folder.mkdir(parents=True, exist_ok=True)
+    (folder / "C1.bdf.csv").write_text(CSV, encoding="utf-8")
+    cell_spec = battinfo.CellSpec(**SPEC)
+    cell = battinfo.Cell(cell_spec=cell_spec, serial_number="C1")
+    test = battinfo.Test(cell=cell, kind="capacity_check", protocol="C/5 discharge", status="completed")
+    dataset = battinfo.Dataset(path=str(folder), cell=cell, test=test, **dataset_fields)
+    return battinfo.publish_publication_package(cell_spec=cell_spec, cell_instance=cell, test=test, dataset=dataset)
+
+
+def test_publication_package_dataset_iri_does_not_depend_on_the_folder(tmp_path: Path) -> None:
+    here = _publish_package(tmp_path / "X")
+    there = _publish_package(tmp_path / "somewhere" / "else" / "Y")
+    assert here["dataset_id"] == there["dataset_id"]
+    assert (here["cell_instance_id"], here["test_id"]) == (there["cell_instance_id"], there["test_id"])
+
+
+def test_publication_package_agrees_with_save_dataset_on_a_remote_url(tmp_path: Path) -> None:
+    """With a remote access URL the package mints the IRI save_dataset mints for the same fields."""
+    published = _publish_package(tmp_path / "package", name="C1 data", access_url=URL)
+    saved = battinfo.save_dataset(
+        battinfo.Dataset(name="C1 data", cell_instance_id=published["cell_instance_id"],
+                         test_id=published["test_id"], access_url=URL, license="cc-by-4.0",
+                         source={"type": "measurement"}),
+        source_root=tmp_path / "records", mode="upsert",
+        resolve_references=False, build_jsonld=False, build_html=False,
+    )
+    assert published["dataset_id"] == saved["id"]
+
+
+def test_workspace_publication_package_dataset_iri_does_not_depend_on_the_folder(tmp_path: Path) -> None:
+    def build(root: Path) -> str:
+        engine = Workspace(root=root)
+        data = root / "inputs" / "C1.bdf.csv"
+        data.parent.mkdir(parents=True, exist_ok=True)
+        data.write_text(CSV, encoding="utf-8")
+        spec = engine.cell_spec(**SPEC)
+        cell = engine.cell(spec, serial_number="C1")
+        test = engine.test(cell, kind="capacity_check", protocol="C/5 discharge", status="completed")
+        dataset = engine.dataset(cell, title="C1 data", test=test, path=data, license="CC-BY-4.0")
+        return engine.build_publication_package(dataset)["dataset_id"]
+
+    assert build(tmp_path / "X") == build(tmp_path / "somewhere" / "else" / "Y")
