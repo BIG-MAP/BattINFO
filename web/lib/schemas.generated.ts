@@ -9376,6 +9376,20 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "additionalProperties": true,
               "description": "Source-file extension entries carried verbatim (e.g. a BPX User-defined block): original key -> raw value. No standard semantics are claimed for these; they exist so a re-export reproduces the source file and nothing is silently lost."
             },
+            "not_imported": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "description": "Parameter files only: the values of the source file the record does not hold, as BPX paths ('Parameterisation/Negative electrode/Particle', 'State/Degradation', 'Validation'). They stay in the source file; a document rebuilt from the record lacks them."
+            },
+            "supersedes": {
+              "$ref": "#/$defs/SpecIri",
+              "description": "Parameter files only: the parameter-set record of an earlier file this one corrects. A corrected file has other parameters and so a new IRI; this links the two, and the registry marks the earlier record superseded when one publisher owns both."
+            },
             "distributions": {
               "type": "array",
               "minItems": 1,
@@ -9504,6 +9518,16 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
                   {
                     "required": [
                       "distributions"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "not_imported"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "supersedes"
                     ]
                   }
                 ]

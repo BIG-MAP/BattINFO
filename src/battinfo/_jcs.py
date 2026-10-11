@@ -19,19 +19,27 @@ values they hold (numpy is never imported here). Anything JCS cannot express
 (NaN, infinities, lone surrogates, non-string keys, other Python types) is
 refused with the path of the offending value.
 
+:func:`loads` parses JSON text the way RFC 8785 expects its input (I-JSON,
+RFC 7493): an object that repeats a key is refused, since JSON parsers
+disagree on which of the two values counts, and so are a number too large for
+a double and the non-JSON literals NaN and Infinity. A UTF-8 byte order mark
+is skipped.
+
 This is vendored rather than taken from a package so that the uids minted
-from it cannot move with someone else's release. Reference:
-https://www.rfc-editor.org/rfc/rfc8785
+from it cannot move with someone else's release. The battinfo-registry
+vendors this module verbatim, so it imports the standard library only.
+Reference: https://www.rfc-editor.org/rfc/rfc8785
 """
 
 from __future__ import annotations
 
+import json
 import math
 import re
 from decimal import Decimal
 from typing import Any, Mapping
 
-__all__ = ["canonical_json", "canonical_json_bytes", "es_number"]
+__all__ = ["canonical_json", "canonical_json_bytes", "es_number", "loads"]
 
 
 def canonical_json(value: Any) -> str:
@@ -174,3 +182,106 @@ def _write(value: Any, path: str, out: list[str]) -> None:
 
 def _where(path: str) -> str:
     return f"the value at {path}" if path else "the document"
+
+
+# ── Parsing ──────────────────────────────────────────────────────────────────
+
+
+class _Members(list):  # type: ignore[type-arg]
+    """One JSON object's members in file order, duplicates kept, until :func:`_checked` reads them."""
+
+
+class _Refused:
+    """A literal that has no RFC 8785 form, kept until its path is known."""
+
+    def __init__(self, text: str, reason: str) -> None:
+        self.text = text
+        self.reason = reason
+
+
+# A double holds at most about 1.8e308, so an integer literal of more digits
+# cannot be one (and int() refuses very long literals on its own).
+_MAX_DOUBLE_DIGITS = 309
+
+
+def _parse_float(text: str) -> Any:
+    value = float(text)
+    if math.isinf(value):
+        return _Refused(text, "too large")
+    return value
+
+
+def _parse_int(text: str) -> Any:
+    if len(text.lstrip("-")) > _MAX_DOUBLE_DIGITS:
+        return _Refused(text, "too large")
+    value = int(text)
+    try:
+        float(value)
+    except OverflowError:
+        return _Refused(text, "too large")
+    return value
+
+
+def _parse_constant(name: str) -> Any:
+    return _Refused(name, "not JSON")
+
+
+def loads(data: bytes | bytearray | str) -> Any:
+    """Parse JSON text into the values RFC 8785 canonicalizes (I-JSON, RFC 7493).
+
+    Bytes must be UTF-8; a leading byte order mark is skipped (the bytes'
+    own checksum is the caller's business). Refused with a ``ValueError``
+    that says where: an object repeating a key, a number too large for a
+    double, the non-JSON literals NaN, Infinity and -Infinity, and text that
+    is not JSON. Objects come back as dicts in file order.
+    """
+    if isinstance(data, (bytes, bytearray)):
+        raw = bytes(data)
+        if raw.startswith(b"\xef\xbb\xbf"):
+            raw = raw[3:]
+        try:
+            text = raw.decode("utf-8")
+        except UnicodeDecodeError as exc:
+            raise ValueError(f"the bytes are not UTF-8 text: {exc}") from None
+    elif isinstance(data, str):
+        text = data[1:] if data.startswith("﻿") else data
+    else:
+        raise TypeError(f"loads() reads bytes or str, not {type(data).__name__}.")
+    try:
+        parsed = json.loads(
+            text,
+            object_pairs_hook=_Members,
+            parse_float=_parse_float,
+            parse_int=_parse_int,
+            parse_constant=_parse_constant,
+        )
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"not valid JSON (line {exc.lineno}, column {exc.colno}): {exc.msg}") from None
+    return _checked(parsed, "")
+
+
+def _checked(value: Any, path: str) -> Any:
+    """``value`` with every object a dict, refusing repeated keys and unrepresentable literals."""
+    if isinstance(value, _Members):
+        out: dict[str, Any] = {}
+        for key, item in value:
+            if key in out:
+                raise ValueError(
+                    f"{_where(path)} repeats the key {key!r}. JSON parsers disagree on which of the "
+                    "two values counts, so RFC 8785 (I-JSON) refuses an object with a repeated key."
+                )
+            out[key] = _checked(item, f"{path}[{key!r}]")
+        return out
+    if isinstance(value, list):
+        for index, item in enumerate(value):
+            if isinstance(item, (list, _Refused)):  # _Members is a list too
+                value[index] = _checked(item, f"{path}[{index}]")
+        return value
+    if isinstance(value, _Refused):
+        if value.reason == "too large":
+            raise ValueError(f"{_where(path)} is {value.text[:40]}, too large for a JSON number (RFC 8785).")
+        raise ValueError(
+            f"{_where(path)} is {value.text}, which is not JSON (RFC 8259): RFC 8785 JSON has no NaN "
+            "or Infinity."
+        )
+    return value

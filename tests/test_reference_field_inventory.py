@@ -93,6 +93,11 @@ EXEMPT: dict[tuple[str, str], str] = {
         "the physical cell a parameter file was fitted on — a description "
         "link like cell_spec_id, same policy"
     ),
+    ("parameter-set.schema.json", "supersedes"): (
+        "lineage pointer, as on cell instances — the earlier parameter file's "
+        "record is checked by the registry at publication (same publisher, a "
+        "parameter set), not against the local source_root"
+    ),
 }
 
 

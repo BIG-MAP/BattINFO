@@ -10,8 +10,9 @@ The contract pinned here (IDENTIFIER_POLICY 6.3, parameter files):
 - the record carries the file itself (``distributions``): exactly one source
   (the bytes the parameters were read from), at most one runnable conversion
   naming the source's checksum, mirrors of the same bytes, https only;
-- ``upgrade_bpx`` moves exactly the fields BPX 1.0 relocated and nothing else,
-  and the official parser accepts the result where it rejected the source;
+- ``upgrade_bpx`` moves exactly the fields BPX 1.0 relocated, adds the State
+  values the bpx package's own migration adds (and names them), and the
+  official parser accepts the result where it rejected the source;
 - ``check_bpx`` reports every warning the parser raises;
 - the Validation section is named, never dropped in silence.
 
@@ -79,10 +80,14 @@ def _source() -> dict:
     return bpx_file_distribution(FIXTURE, content_url=SOURCE_URL)
 
 
+def _runnable_bytes() -> bytes:
+    return upgrade_bpx(FIXTURE).to_json().encode("utf-8")
+
+
 def _runnable(source: dict) -> dict:
     upgraded = upgrade_bpx(FIXTURE)
     return bpx_file_distribution(
-        upgraded.to_json().encode("utf-8"),
+        _runnable_bytes(),
         name="runnable.bpx.json",
         content_url=RUNNABLE_URL,
         role="runnable",
@@ -263,7 +268,7 @@ def test_the_file_rides_the_record_and_validates() -> None:
         checks=[check_bpx(FIXTURE)] if _has_bpx() else None,
     )
     mirror = bpx_file_distribution(FIXTURE, content_url=MIRROR_URL, role="mirror")
-    record = _record(distributions=[source, _runnable(source), mirror])
+    record = _record(distributions=[source, _runnable(source), mirror], runnable_file=_runnable_bytes())
     assert [d["role"] for d in record["parameter_set"]["distributions"]] == ["source", "runnable", "mirror"]
     report = validate_record_report(record)
     assert report.ok, report.errors
@@ -272,8 +277,15 @@ def test_the_file_rides_the_record_and_validates() -> None:
 def test_the_attached_source_must_be_the_file_read() -> None:
     res = from_bpx_parameters(FIXTURE)
     other = bpx_file_distribution(NODE_COPY, content_url=SOURCE_URL)
-    with pytest.raises(ValueError, match="not the file these parameters were read from"):
+    # The same parameters in other bytes: the message says so, and how to attach them.
+    with pytest.raises(ValueError, match="same parameters as the file read, in other bytes") as caught:
         res.to_parameter_set(virtual_cell=True, distributions=[other])
+    assert "source_file=" in str(caught.value)
+    changed_doc = _doc()
+    changed_doc["Parameterisation"]["Cell"]["Electrode area [m2]"] *= 10
+    unrelated = bpx_file_distribution(json.dumps(changed_doc).encode("utf-8"), content_url=SOURCE_URL)
+    with pytest.raises(ValueError, match="not the file these parameters were read from"):
+        res.to_parameter_set(virtual_cell=True, distributions=[unrelated])
     with pytest.raises(ValueError, match="exactly one role='source'"):
         res.to_parameter_set(virtual_cell=True, distributions=[_source(), _source()])
     # Other bytes with the same parameters are fine when the caller hands
@@ -353,7 +365,9 @@ def test_cross_entry_rules_hold() -> None:
 def test_a_runnable_next_to_a_source_that_parses_is_a_warning() -> None:
     source = {**_source(), "checks": [{"check": "bpx_parse", "passed": True}]}
     res = from_bpx_parameters(FIXTURE)
-    record = res.to_parameter_set(virtual_cell=True, distributions=[source, _runnable(source)])
+    record = res.to_parameter_set(
+        virtual_cell=True, distributions=[source, _runnable(source)], runnable_file=_runnable_bytes()
+    )
     assert any("a runnable copy is made only when the parser rejects" in w for w in res.warnings)
     report = validate_record_report(record)
     assert report.ok
@@ -405,8 +419,11 @@ def test_upgrade_moves_exactly_the_relocated_fields() -> None:
     assert result.source_version == "1.0"
     assert out["Header"]["BPX"] == "1.1.0"
     cell, electrolyte = doc["Parameterisation"]["Cell"], doc["Parameterisation"]["Electrolyte"]
+    # The moved values, plus the initial state of charge the bpx package's
+    # own v0-to-v1 migration adds when a file has none.
     assert out["State"] == {
         "Initial conditions": {
+            "Initial state-of-charge": 1,
             "Initial temperature [K]": cell["Initial temperature [K]"],
             "Initial electrolyte concentration [mol.m-3]": electrolyte["Initial concentration [mol.m-3]"],
         },
@@ -418,12 +435,13 @@ def test_upgrade_moves_exactly_the_relocated_fields() -> None:
         expected = {k: v for k, v in fields.items() if k not in moved}
         assert out["Parameterisation"][block] == expected, block
     assert out["Validation"] == doc["Validation"]
-    assert len(result.changes) == 4
+    assert len(result.changes) == 5
+    assert result.added == ["State.Initial conditions.Initial state-of-charge = 1 (the v0.x layout states none)"]
     # The input is never mutated.
     assert doc == _doc()
 
 
-def test_upgrade_leaves_current_files_alone_and_refuses_0x() -> None:
+def test_upgrade_leaves_current_files_alone_and_converts_0x() -> None:
     current = upgrade_bpx(_doc()).document
     again = upgrade_bpx(current)
     assert not again.changed
@@ -436,10 +454,13 @@ def test_upgrade_leaves_current_files_alone_and_refuses_0x() -> None:
     assert not untouched.changed
     assert untouched.document == declared_1_0
 
+    # A 0.x file is in the v0.x layout by its version: the same conversion,
+    # with the State values the bpx package's migration adds.
     legacy = _doc()
     legacy["Header"]["BPX"] = "0.5.0"
-    with pytest.raises(ValueError, match="0.x"):
-        upgrade_bpx(legacy)
+    converted = upgrade_bpx(legacy)
+    assert converted.changed and converted.document["Header"]["BPX"] == "1.1.0"
+    assert converted.document["State"]["Initial conditions"]["Initial state-of-charge"] == 1
 
 
 def test_upgrade_goes_by_the_fields_not_the_declared_version() -> None:
@@ -457,10 +478,17 @@ def test_upgrade_goes_by_the_fields_not_the_declared_version() -> None:
 def test_conversion_note_says_what_happened() -> None:
     note = upgrade_bpx(FIXTURE).conversion_note("battinfo test")
     assert note.startswith(
-        "BPX v0.x layout declared as BPX 1.0, rewritten in the BPX v1 layout as BPX 1.1.0 by battinfo test: "
+        "BPX 1.0 file in the v0.x layout, rewritten in the BPX v1 layout as BPX 1.1.0 by battinfo test: "
     )
-    assert note.endswith("No values changed.")
     assert "Cell.Initial temperature [K] -> State.Initial conditions.Initial temperature [K]" in note
+    # A value was added, so the note says which and does not claim nothing changed.
+    assert "No values changed" not in note
+    assert "Values added, which the file does not state: State.Initial conditions.Initial state-of-charge = 1" in note
+    assert "bpx.convert_v0_to_v1" in note
+    # With nothing to add, the note says no value changed.
+    doc = _doc()
+    doc["State"] = {"Initial conditions": {"Initial state-of-charge": 0.5}}
+    assert upgrade_bpx(doc).conversion_note("battinfo test").endswith("No values changed.")
 
 
 def test_upgrade_moves_cell_thermal_conductivity_to_user_defined() -> None:
@@ -561,11 +589,12 @@ def test_check_reports_the_parser_consistency_warnings() -> None:
     parameterisation["Negative electrode"]["OCP [V]"] = "0.1 - 0.05 * x"
     parameterisation["Positive electrode"]["OCP [V]"] = "4.4 - 0.5 * x"
     clean = check_bpx(doc)
-    assert clean["passed"] and "Warnings" not in clean["detail"], clean["detail"]
+    assert clean["passed"] and "Parser warnings" not in clean["detail"], clean["detail"]
 
     parameterisation["Cell"]["Upper voltage cut-off [V]"] = 3.9
     check = check_bpx(doc)
     assert check["passed"] is True
+    assert check["detail"].startswith("Parser warnings: ")
     assert "The maximum voltage computed from the STO limits" in check["detail"]
     assert "upper voltage cut-off (3.9 V)" in check["detail"]
 
@@ -591,7 +620,7 @@ def test_check_leaves_out_third_party_noise(monkeypatch: pytest.MonkeyPatch) -> 
     monkeypatch.setattr(bpx, "parse_bpx_obj", parse_with_noise)
     check = check_bpx(upgrade_bpx(FIXTURE).document)
     assert check["passed"] is True
-    assert "Warnings" not in check["detail"], check["detail"]
+    assert "Parser warnings" not in check["detail"], check["detail"]
 
 
 def test_check_reports_a_float_version_and_a_legacy_conversion() -> None:
@@ -635,7 +664,8 @@ def test_jsonld_describes_the_files() -> None:
         checks=[{"check": "bpx_parse", "tool": "bpx 1.1.1", "passed": True, "checked_at": "2026-10-07"}],
     )
     mirror = bpx_file_distribution(FIXTURE, content_url=MIRROR_URL, role="mirror")
-    files = _node(_record(distributions=[source, runnable, mirror]))["schema:distribution"]
+    record = _record(distributions=[source, runnable, mirror], runnable_file=_runnable_bytes())
+    files = _node(record)["schema:distribution"]
     assert [f["dcterms:type"] for f in files] == ["source", "runnable", "mirror"]
     assert files[0]["schema:contentUrl"] == SOURCE_URL
     assert files[0]["schema:sha256"] == source["checksum"]["value"]

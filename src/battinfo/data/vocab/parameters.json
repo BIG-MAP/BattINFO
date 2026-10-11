@@ -37,8 +37,16 @@
       "unit": "V",
       "kind": "curve",
       "x_quantity": "stoichiometry",
-      "description": "Half-cell open-circuit potential vs Li/Li+ as a function of stoichiometry. Use curve.branch for lithiation/delithiation where hysteresis matters.",
+      "description": "Half-cell open-circuit potential vs Li/Li+ as a function of stoichiometry. Use curve.branch for lithiation/delithiation where hysteresis matters: a BPX 1.x file's 'OCP (lithiation) [V]' and 'OCP (delithiation) [V]' tables read as ocp curves with that branch.",
       "bpx": {"electrode": "OCP [V]"}
+    },
+    "ocp_hysteresis_decay_constant": {
+      "label": "OCP hysteresis decay constant",
+      "scopes": ["material"],
+      "unit": "1",
+      "kind": "scalar",
+      "description": "Decay constant of a single-state OCP hysteresis model: how fast the hysteresis state moves between the delithiation and lithiation branches.",
+      "bpx": {"electrode": "OCP hysteresis decay constant"}
     },
     "entropic_coefficient": {
       "label": "Entropic change coefficient",

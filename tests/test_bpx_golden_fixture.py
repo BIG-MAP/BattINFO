@@ -217,7 +217,7 @@ def test_round_trip_export_is_exact() -> None:
     assert out.bpx["State"] == reference["State"]
     header = out.bpx["Header"]
     assert header["Model"] == "DFN"
-    assert header["BPX"] == 1.0
+    assert header["BPX"] == "1.0"  # Header.BPX is always written as a string
     assert header["Title"] == _doc()["Header"]["Title"]
     assert "Schmitt et al. 2026" in header["References"]
     assert not out.missing_required
@@ -273,8 +273,11 @@ def test_bpx_v1_state_round_trips() -> None:
     out = to_bpx(record)
     assert out.bpx["State"] == doc["State"]
     assert out.bpx["Header"]["BPX"] == "1.1.0"
-    # Either layout gives the same parts.
-    assert _parts(record) == _parts(_record())
+    # Either layout gives the same parts, except the initial state of charge
+    # the v1 copy states (the conversion added it, as the bpx package does).
+    v1_parts = _parts(record)
+    v1_parts["state"] = [c for c in v1_parts["state"] if c["parameter"] != "initial_soc"]
+    assert v1_parts == _parts(_record())
 
 
 def test_a_unit_other_than_bpx_states_is_converted_on_export() -> None:

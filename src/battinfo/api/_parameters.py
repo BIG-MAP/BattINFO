@@ -259,16 +259,27 @@ def _checksum_hex(entry: Mapping[str, Any]) -> str | None:
 def parameter_file_issues(body: Mapping[str, Any]) -> list[tuple[str, str, str, str]]:
     """The rules of a parameter-file record that JSON Schema cannot state.
 
-    Returns ``(code, severity, path, message)`` tuples: a (part, phase) pair
-    used twice, a runnable file that does not name the source's checksum, a
-    mirror whose checksum differs from the source's (all errors), and a
-    runnable file next to a source the official parser accepts (a warning: a
-    runnable copy is made only when the parser rejects the source). The
-    source and runnable counts are reported too (``*_count`` codes), for
-    callers that run without the schema. The builder raises on the errors;
-    the record validator reports them.
+    Returns ``(code, severity, path, message)`` tuples: an IRI the
+    fingerprint does not give, a (part, phase) pair used twice, a runnable
+    file that does not name the source's checksum, a mirror whose checksum
+    differs from the source's (all errors: integrity, under every
+    validation policy), and a runnable file next to a source the official
+    parser accepts (a warning: a runnable copy is made only when the parser
+    rejects the source). The source and runnable counts are reported too
+    (``*_count`` codes), for callers that run without the schema. The
+    builder raises on the errors; the record validator reports them.
     """
     issues: list[tuple[str, str, str, str]] = []
+    fingerprint = body.get("parameters_sha256")
+    if isinstance(fingerprint, str) and _SHA256_HEX_RE.fullmatch(fingerprint):
+        expected = f"https://w3id.org/battinfo/spec/{parameter_file_uid(fingerprint)}"
+        if body.get("id") != expected:
+            issues.append((
+                "id_mismatch", "error", "parameter_set.id",
+                f"a parameter file's IRI derives from its parameters_sha256 "
+                f"(stable_uid('parameter-set-file:' + parameters_sha256), IDENTIFIER_POLICY 6.3): "
+                f"it must be {expected}, not {body.get('id')}.",
+            ))
     seen: set[tuple[Any, Any]] = set()
     for index, part in enumerate(body.get("parts") or []):
         if not isinstance(part, Mapping):
@@ -350,7 +361,9 @@ def _record_from_parameter_set(
     electrode_polarity: str | None = None,
     model_context: Mapping[str, Any] | None = None,
     annex: Mapping[str, Any] | None = None,
+    not_imported: list[str] | None = None,
     distributions: list[Mapping[str, Any]] | None = None,
+    supersedes: str | None = None,
     default_provenance_class: str | None = None,
     description: str | None = None,
     comment: str | None = None,
@@ -395,6 +408,8 @@ def _record_from_parameter_set(
                 ("virtual_cell", virtual_cell or None),
                 ("parameters_sha256", parameters_sha256),
                 ("distributions", distributions or None),
+                ("not_imported", not_imported or None),
+                ("supersedes", supersedes),
             )
             if value is not None
         ]
@@ -425,14 +440,30 @@ def _record_from_parameter_set(
         # Source-file extension entries (e.g. a BPX User-defined block),
         # verbatim: no semantics claimed, carried so re-export loses nothing.
         body["annex"] = dict(annex)
+    if not_imported:
+        # The source file's values the record does not hold, by BPX path.
+        if not isinstance(not_imported, list) or not all(
+            isinstance(item, str) and item for item in not_imported
+        ):
+            raise ValueError("not_imported must be a list of BPX paths (non-empty strings).")
+        body["not_imported"] = list(dict.fromkeys(not_imported))
+    if supersedes is not None:
+        if not SPEC_IRI_RE.fullmatch(str(supersedes)):
+            raise ValueError("supersedes must be a parameter-set IRI: https://w3id.org/battinfo/spec/{uid}.")
+        if supersedes == body["id"]:
+            raise ValueError("a parameter file cannot supersede itself: supersedes names an earlier record.")
+        body["supersedes"] = str(supersedes)
+    if distributions is not None and not isinstance(distributions, list):
+        raise TypeError(
+            "distributions is a list of parameter-file dicts (entries from "
+            f"bpx_file_distribution()), not {type(distributions).__name__}."
+        )
     if distributions:
         # The parameter file itself: the source bytes, optionally a declared
         # runnable conversion and mirrors. The schema checks each entry's
         # shape; the cross-entry rules are checked here.
-        if not isinstance(distributions, list) or not all(
-            isinstance(item, Mapping) for item in distributions
-        ):
-            raise ValueError("distributions must be a list of parameter-file dicts.")
+        if not all(isinstance(item, Mapping) for item in distributions):
+            raise TypeError("each distributions entry is a parameter-file dict (from bpx_file_distribution()).")
         body["distributions"] = [dict(item) for item in distributions]
         errors = [
             message
@@ -628,7 +659,9 @@ def create_parameter_set(*, validate: bool = True, **fields: Any) -> dict[str, A
     ``cell_instance_id``, ``virtual_cell=True``, and states
     ``parameters_sha256``, from which its uid derives. Its ``distributions``
     hold exactly one source file, at most one runnable conversion that names
-    the source's checksum, and mirrors of the source's bytes.
+    the source's checksum, and mirrors of the source's bytes;
+    ``not_imported`` lists the BPX paths of the file's values the record does
+    not hold, and ``supersedes`` the record of an earlier file it corrects.
 
     Each claim carries exactly one of ``quantity`` / ``curve`` /
     ``expression`` plus its ``provenance_class`` (``default_provenance_class=``
@@ -762,6 +795,7 @@ def query_parameter_sets(
             "cell_spec_id": body.get("cell_spec_id"),
             "cell_instance_id": body.get("cell_instance_id"),
             "virtual_cell": bool(body.get("virtual_cell")),
+            "supersedes": body.get("supersedes"),
             "scope": body.get("scope"),
             "material_kinds": sorted({ctx["material_kind"] for ctx, _ in groups if ctx.get("material_kind")}),
             "material_spec_ids": sorted({
