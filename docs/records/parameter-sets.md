@@ -97,6 +97,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "hasNumberValue": 2.26
     },
     "hasMeasurementUnit": "https://w3id.org/emmo#GramPerCubicCentiMetre",
+    "schema:propertyID": "density",
     "schema:additionalProperty": {
       "@type": "schema:PropertyValue",
       "schema:name": "provenance_class",
@@ -192,6 +193,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         "hasNumberValue": 5.86e-06
       },
       "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+      "schema:propertyID": "particle_radius",
       "schema:additionalProperty": {
         "@type": "schema:PropertyValue",
         "schema:name": "provenance_class",
@@ -209,6 +211,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         "hasNumberValue": 33133.0
       },
       "schema:unitText": "mol/m3",
+      "schema:propertyID": "max_concentration",
       "schema:additionalProperty": {
         "@type": "schema:PropertyValue",
         "schema:name": "provenance_class",
@@ -226,6 +229,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         "hasNumberValue": 6.716e-06
       },
       "schema:unitText": "mol.m-2.s-1",
+      "schema:propertyID": "reaction_rate_constant",
       "schema:additionalProperty": {
         "@type": "schema:PropertyValue",
         "schema:name": "provenance_class",
@@ -243,6 +247,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         "hasNumberValue": 0.0279
       },
       "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:propertyID": "stoichiometry_min",
       "schema:additionalProperty": {
         "@type": "schema:PropertyValue",
         "schema:name": "provenance_class",
@@ -260,6 +265,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         "hasNumberValue": 0.9014
       },
       "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+      "schema:propertyID": "stoichiometry_max",
       "schema:additionalProperty": {
         "@type": "schema:PropertyValue",
         "schema:name": "provenance_class",
@@ -270,6 +276,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "schema:variableMeasured": {
     "@type": "schema:PropertyValue",
     "schema:name": "ocp",
+    "schema:propertyID": "ocp",
     "schema:description": "tabulated curve vs stoichiometry, 8 points, average branch",
     "schema:unitText": "V",
     "schema:measurementTechnique": "GITT",
@@ -379,6 +386,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 298.15
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Kelvin",
+          "schema:propertyID": "reference_temperature",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -396,6 +404,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 2.7
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
+          "schema:propertyID": "discharging_cutoff_voltage",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -413,6 +422,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 4.2
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
+          "schema:propertyID": "charging_cutoff_voltage",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -430,6 +440,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 12.5
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour",
+          "schema:propertyID": "nominal_capacity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -447,6 +458,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 913
           },
           "schema:unitText": "J/(kg.K)",
+          "schema:propertyID": "specific_heat_capacity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -464,6 +476,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 2.04
           },
           "schema:unitText": "W/(m.K)",
+          "schema:propertyID": "thermal_conductivity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -481,6 +494,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 1847
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#KilogramPerCubicMetre",
+          "schema:propertyID": "density",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -498,6 +512,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.016808
           },
           "schema:unitText": "m2",
+          "schema:propertyID": "electrode_area",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -515,6 +530,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 34
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "electrode_pair_count",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -532,6 +548,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.0379
           },
           "schema:unitText": "m2",
+          "schema:propertyID": "external_surface_area",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -549,6 +566,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.000128
           },
           "schema:unitText": "m3",
+          "schema:propertyID": "volume",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -582,6 +600,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 4.12e-06
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+          "schema:propertyID": "particle_radius",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -599,6 +618,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 2.728e-14
           },
           "schema:unitText": "m2/s",
+          "schema:propertyID": "solid_diffusivity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -616,6 +636,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 5.199e-06
           },
           "schema:unitText": "mol.m-2.s-1",
+          "schema:propertyID": "reaction_rate_constant",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -633,6 +654,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.005504
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "stoichiometry_min",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -650,6 +672,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.75668
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "stoichiometry_max",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -667,6 +690,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 29730
           },
           "schema:unitText": "mol/m3",
+          "schema:propertyID": "max_concentration",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -684,6 +708,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 30000
           },
           "schema:unitText": "J/mol",
+          "schema:propertyID": "diffusivity_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -701,6 +726,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 55000
           },
           "schema:unitText": "J/mol",
+          "schema:propertyID": "reaction_rate_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -712,6 +738,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         {
           "@type": "schema:PropertyValue",
           "schema:name": "ocp",
+          "schema:propertyID": "ocp",
           "schema:value": "9.47057878e-01 * exp(-1.59418743e+02  * x) - 3.50928033e+04 + 1.64230269e-01 * tanh(-4.55509094e+01 * (x - 3.24116012e-02 )) + 3.69968491e-02 * tanh(-1.96718868e+01 * (x - 1.68334476e-01)) + 1.91517003e+04 * tanh(3.19648312e+00 * (x - 1.85139824e+00)) + 5.42448511e+04 * tanh(-3.19009848e+00 * (x - 2.01660395e+00))",
           "schema:description": "expression (bpx)",
           "schema:additionalProperty": {
@@ -723,6 +750,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         {
           "@type": "schema:PropertyValue",
           "schema:name": "entropic_coefficient",
+          "schema:propertyID": "entropic_coefficient",
           "schema:value": "(-0.1112 * x + 0.02914 + 0.3561 * exp(-((x - 0.08309) ** 2) / 0.004616)) / 1000",
           "schema:description": "expression (bpx)",
           "schema:additionalProperty": {
@@ -753,6 +781,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 5.62e-05
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+          "schema:propertyID": "thickness",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -770,6 +799,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.222
           },
           "schema:unitText": "S/m",
+          "schema:propertyID": "electronic_conductivity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -787,6 +817,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 499522
           },
           "schema:unitText": "1/m",
+          "schema:propertyID": "surface_area_per_volume",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -803,6 +834,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.253991
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "porosity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -819,6 +851,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.128
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "transport_efficiency",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -852,6 +885,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 4.6e-06
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+          "schema:propertyID": "particle_radius",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -869,6 +903,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 3.2e-14
           },
           "schema:unitText": "m2/s",
+          "schema:propertyID": "solid_diffusivity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -886,6 +921,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": -0.0001
           },
           "schema:unitText": "V/K",
+          "schema:propertyID": "entropic_coefficient",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -903,6 +939,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 2.305e-05
           },
           "schema:unitText": "mol.m-2.s-1",
+          "schema:propertyID": "reaction_rate_constant",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -920,6 +957,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.42424
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "stoichiometry_min",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -937,6 +975,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.9621
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "stoichiometry_max",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -954,6 +993,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 46200
           },
           "schema:unitText": "mol/m3",
+          "schema:propertyID": "max_concentration",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -971,6 +1011,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 15000
           },
           "schema:unitText": "J/mol",
+          "schema:propertyID": "diffusivity_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -988,6 +1029,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 35000
           },
           "schema:unitText": "J/mol",
+          "schema:propertyID": "reaction_rate_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -998,6 +1040,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "schema:variableMeasured": {
         "@type": "schema:PropertyValue",
         "schema:name": "ocp",
+        "schema:propertyID": "ocp",
         "schema:value": "-3.04420906 * x + 10.04892207 - 0.65637536 * tanh(-4.02134095 * (x - 0.80063948)) + 4.24678547 * tanh(12.17805062 * (x - 7.57659337)) - 0.3757068 * tanh(59.33067782 * (x - 0.99784492))",
         "schema:description": "expression (bpx)",
         "schema:additionalProperty": {
@@ -1027,6 +1070,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 5.23e-05
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+          "schema:propertyID": "thickness",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1044,6 +1088,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.789
           },
           "schema:unitText": "S/m",
+          "schema:propertyID": "electronic_conductivity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1061,6 +1106,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 432072
           },
           "schema:unitText": "1/m",
+          "schema:propertyID": "surface_area_per_volume",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1077,6 +1123,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.277493
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "porosity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1093,6 +1140,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.1462
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "transport_efficiency",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1121,6 +1169,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 2e-05
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+          "schema:propertyID": "thickness",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1137,6 +1186,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.47
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "porosity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1153,6 +1203,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.3222
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "transport_efficiency",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1181,6 +1232,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.2594
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "transference_number",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1198,6 +1250,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 17100
           },
           "schema:unitText": "J/mol",
+          "schema:propertyID": "conductivity_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1215,6 +1268,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 17100
           },
           "schema:unitText": "J/mol",
+          "schema:propertyID": "diffusivity_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1226,6 +1280,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         {
           "@type": "schema:PropertyValue",
           "schema:name": "ionic_conductivity",
+          "schema:propertyID": "ionic_conductivity",
           "schema:value": "0.1297 * (x / 1000) ** 3 - 2.51 * (x / 1000) ** 1.5 + 3.329 * (x / 1000)",
           "schema:description": "expression (bpx)",
           "schema:additionalProperty": {
@@ -1237,6 +1292,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         {
           "@type": "schema:PropertyValue",
           "schema:name": "electrolyte_diffusivity",
+          "schema:propertyID": "electrolyte_diffusivity",
           "schema:value": "8.794e-11 * (x / 1000) ** 2 - 3.972e-10 * (x / 1000) + 4.862e-10",
           "schema:description": "expression (bpx)",
           "schema:additionalProperty": {
@@ -1267,6 +1323,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 298.15
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Kelvin",
+          "schema:propertyID": "initial_temperature",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1284,6 +1341,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 1000
           },
           "schema:unitText": "mol/m3",
+          "schema:propertyID": "initial_concentration",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1300,6 +1358,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 298.15
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Kelvin",
+          "schema:propertyID": "ambient_temperature",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1428,6 +1487,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 298.15
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Kelvin",
+          "schema:propertyID": "reference_temperature",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1445,6 +1505,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 2.0
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
+          "schema:propertyID": "discharging_cutoff_voltage",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1462,6 +1523,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 3.65
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
+          "schema:propertyID": "charging_cutoff_voltage",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1479,6 +1541,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 2
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour",
+          "schema:propertyID": "nominal_capacity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1496,6 +1559,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 999
           },
           "schema:unitText": "J/(kg.K)",
+          "schema:propertyID": "specific_heat_capacity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1513,6 +1577,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 1.89
           },
           "schema:unitText": "W/(m.K)",
+          "schema:propertyID": "thermal_conductivity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1530,6 +1595,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 1940
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#KilogramPerCubicMetre",
+          "schema:propertyID": "density",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1547,6 +1613,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.08959998
           },
           "schema:unitText": "m2",
+          "schema:propertyID": "electrode_area",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1564,6 +1631,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 1
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "electrode_pair_count",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1581,6 +1649,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.00431
           },
           "schema:unitText": "m2",
+          "schema:propertyID": "external_surface_area",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1598,6 +1667,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 1.7e-05
           },
           "schema:unitText": "m3",
+          "schema:propertyID": "volume",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1631,6 +1701,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 4.8e-06
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+          "schema:propertyID": "particle_radius",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1648,6 +1719,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 9.6e-15
           },
           "schema:unitText": "m2/s",
+          "schema:propertyID": "solid_diffusivity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1665,6 +1737,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 6.872e-06
           },
           "schema:unitText": "mol.m-2.s-1",
+          "schema:propertyID": "reaction_rate_constant",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1682,6 +1755,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.0016261
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "stoichiometry_min",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1699,6 +1773,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.82258
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "stoichiometry_max",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1716,6 +1791,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 31400
           },
           "schema:unitText": "mol/m3",
+          "schema:propertyID": "max_concentration",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1733,6 +1809,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 30000
           },
           "schema:unitText": "J/mol",
+          "schema:propertyID": "diffusivity_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1750,6 +1827,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 55000
           },
           "schema:unitText": "J/mol",
+          "schema:propertyID": "reaction_rate_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1761,6 +1839,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         {
           "@type": "schema:PropertyValue",
           "schema:name": "ocp",
+          "schema:propertyID": "ocp",
           "schema:value": "5.29210878e+01 * exp(-1.72699386e+02 * x) - 1.17963399e+03 + 1.20956356e+03 * tanh(6.72033948e+01 * (x + 2.44746396e-02)) + 4.52430314e-02 * tanh(-1.47542326e+01 * (x - 1.62746053e-01)) + 2.01855800e+01 * tanh(-2.46666302e+01 * (x - 1.12986136e+00)) + 2.01708039e-02 * tanh(-1.19900231e+01 * (x - 5.49773440e-01)) + 4.99616805e+01 * tanh(-6.11370883e+01 * (x + 4.69382558e-03))",
           "schema:description": "expression (bpx)",
           "schema:additionalProperty": {
@@ -1772,6 +1851,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         {
           "@type": "schema:PropertyValue",
           "schema:name": "entropic_coefficient",
+          "schema:propertyID": "entropic_coefficient",
           "schema:value": "(-0.1112 * x + 0.02914 + 0.3561 * exp(-((x - 0.08309) ** 2) / 0.004616)) / 1000",
           "schema:description": "expression (bpx)",
           "schema:additionalProperty": {
@@ -1802,6 +1882,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 4.44e-05
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+          "schema:propertyID": "thickness",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1819,6 +1900,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 7.46
           },
           "schema:unitText": "S/m",
+          "schema:propertyID": "electronic_conductivity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1836,6 +1918,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 473004
           },
           "schema:unitText": "1/m",
+          "schema:propertyID": "surface_area_per_volume",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1852,6 +1935,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.20666
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "porosity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1868,6 +1952,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.09395
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "transport_efficiency",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1901,6 +1986,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 5e-07
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+          "schema:propertyID": "particle_radius",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1918,6 +2004,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 6.873e-17
           },
           "schema:unitText": "m2/s",
+          "schema:propertyID": "solid_diffusivity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1935,6 +2022,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 9.736e-07
           },
           "schema:unitText": "mol.m-2.s-1",
+          "schema:propertyID": "reaction_rate_constant",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1952,6 +2040,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.0875
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "stoichiometry_min",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1969,6 +2058,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.95038
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "stoichiometry_max",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -1986,6 +2076,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 21200
           },
           "schema:unitText": "mol/m3",
+          "schema:propertyID": "max_concentration",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2003,6 +2094,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 80000
           },
           "schema:unitText": "J/mol",
+          "schema:propertyID": "diffusivity_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2020,6 +2112,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 35000
           },
           "schema:unitText": "J/mol",
+          "schema:propertyID": "reaction_rate_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2031,6 +2124,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         {
           "@type": "schema:PropertyValue",
           "schema:name": "ocp",
+          "schema:propertyID": "ocp",
           "schema:value": "3.41285712e+00 - 1.49721852e-02 * x + 3.54866018e+14 * exp(-3.95729493e+02 * x) - 1.45998465e+00 * exp(-1.10108622e+02 * (1 - x))",
           "schema:description": "expression (bpx)",
           "schema:additionalProperty": {
@@ -2042,6 +2136,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         {
           "@type": "schema:PropertyValue",
           "schema:name": "entropic_coefficient",
+          "schema:propertyID": "entropic_coefficient",
           "schema:description": "tabulated curve vs stoichiometry, 21 points",
           "schema:unitText": "V/K",
           "schema:additionalProperty": {
@@ -2072,6 +2167,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 6.43e-05
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+          "schema:propertyID": "thickness",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2089,6 +2185,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.8
           },
           "schema:unitText": "S/m",
+          "schema:propertyID": "electronic_conductivity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2106,6 +2203,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 4418460
           },
           "schema:unitText": "1/m",
+          "schema:propertyID": "surface_area_per_volume",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2122,6 +2220,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.20359
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "porosity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2138,6 +2237,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.09186
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "transport_efficiency",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2166,6 +2266,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 2e-05
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+          "schema:propertyID": "thickness",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2182,6 +2283,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.47
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "porosity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2198,6 +2300,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.3222
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "transport_efficiency",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2226,6 +2329,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.259
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "transference_number",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2243,6 +2347,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 17100
           },
           "schema:unitText": "J/mol",
+          "schema:propertyID": "conductivity_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2260,6 +2365,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 17100
           },
           "schema:unitText": "J/mol",
+          "schema:propertyID": "diffusivity_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2271,6 +2377,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         {
           "@type": "schema:PropertyValue",
           "schema:name": "ionic_conductivity",
+          "schema:propertyID": "ionic_conductivity",
           "schema:value": "0.1297 * (x / 1000) ** 3 - 2.51 * (x / 1000) ** 1.5 + 3.329 * (x / 1000)",
           "schema:description": "expression (bpx)",
           "schema:additionalProperty": {
@@ -2282,6 +2389,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         {
           "@type": "schema:PropertyValue",
           "schema:name": "electrolyte_diffusivity",
+          "schema:propertyID": "electrolyte_diffusivity",
           "schema:value": "8.794e-11 * (x / 1000) ** 2 - 3.972e-10 * (x / 1000) + 4.862e-10",
           "schema:description": "expression (bpx)",
           "schema:additionalProperty": {
@@ -2312,6 +2420,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 298.15
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Kelvin",
+          "schema:propertyID": "initial_temperature",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2329,6 +2438,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 1000
           },
           "schema:unitText": "mol/m3",
+          "schema:propertyID": "initial_concentration",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2345,6 +2455,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 298.15
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Kelvin",
+          "schema:propertyID": "ambient_temperature",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2473,6 +2584,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 298.15
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Kelvin",
+          "schema:propertyID": "reference_temperature",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2490,6 +2602,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 2.7
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
+          "schema:propertyID": "discharging_cutoff_voltage",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2507,6 +2620,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 4.2
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
+          "schema:propertyID": "charging_cutoff_voltage",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2524,6 +2638,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 12.5
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour",
+          "schema:propertyID": "nominal_capacity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2541,6 +2656,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 913
           },
           "schema:unitText": "J/(kg.K)",
+          "schema:propertyID": "specific_heat_capacity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2558,6 +2674,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 2.04
           },
           "schema:unitText": "W/(m.K)",
+          "schema:propertyID": "thermal_conductivity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2575,6 +2692,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 1847
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#KilogramPerCubicMetre",
+          "schema:propertyID": "density",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2592,6 +2710,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.016808
           },
           "schema:unitText": "m2",
+          "schema:propertyID": "electrode_area",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2609,6 +2728,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 34
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "electrode_pair_count",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2626,6 +2746,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.0379
           },
           "schema:unitText": "m2",
+          "schema:propertyID": "external_surface_area",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2643,6 +2764,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.000128
           },
           "schema:unitText": "m3",
+          "schema:propertyID": "volume",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2676,6 +2798,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 4.12e-06
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+          "schema:propertyID": "particle_radius",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2693,6 +2816,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 2.728e-14
           },
           "schema:unitText": "m2/s",
+          "schema:propertyID": "solid_diffusivity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2710,6 +2834,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 5.199e-06
           },
           "schema:unitText": "mol.m-2.s-1",
+          "schema:propertyID": "reaction_rate_constant",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2727,6 +2852,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.005504
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "stoichiometry_min",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2744,6 +2870,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.75668
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "stoichiometry_max",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2761,6 +2888,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 29730
           },
           "schema:unitText": "mol/m3",
+          "schema:propertyID": "max_concentration",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2778,6 +2906,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 30000
           },
           "schema:unitText": "J/mol",
+          "schema:propertyID": "diffusivity_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2795,6 +2924,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 55000
           },
           "schema:unitText": "J/mol",
+          "schema:propertyID": "reaction_rate_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2806,6 +2936,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         {
           "@type": "schema:PropertyValue",
           "schema:name": "ocp",
+          "schema:propertyID": "ocp",
           "schema:value": "9.47057878e-01 * exp(-1.59418743e+02  * x) - 3.50928033e+04 + 1.64230269e-01 * tanh(-4.55509094e+01 * (x - 3.24116012e-02 )) + 3.69968491e-02 * tanh(-1.96718868e+01 * (x - 1.68334476e-01)) + 1.91517003e+04 * tanh(3.19648312e+00 * (x - 1.85139824e+00)) + 5.42448511e+04 * tanh(-3.19009848e+00 * (x - 2.01660395e+00))",
           "schema:description": "expression (bpx)",
           "schema:additionalProperty": {
@@ -2817,6 +2948,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         {
           "@type": "schema:PropertyValue",
           "schema:name": "entropic_coefficient",
+          "schema:propertyID": "entropic_coefficient",
           "schema:value": "(-0.1112 * x + 0.02914 + 0.3561 * exp(-((x - 0.08309) ** 2) / 0.004616)) / 1000",
           "schema:description": "expression (bpx)",
           "schema:additionalProperty": {
@@ -2847,6 +2979,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 5.62e-05
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+          "schema:propertyID": "thickness",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2864,6 +2997,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 499522
           },
           "schema:unitText": "1/m",
+          "schema:propertyID": "surface_area_per_volume",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2897,6 +3031,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 4.6e-06
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+          "schema:propertyID": "particle_radius",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2914,6 +3049,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 3.2e-14
           },
           "schema:unitText": "m2/s",
+          "schema:propertyID": "solid_diffusivity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2931,6 +3067,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": -0.0001
           },
           "schema:unitText": "V/K",
+          "schema:propertyID": "entropic_coefficient",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2948,6 +3085,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 2.305e-05
           },
           "schema:unitText": "mol.m-2.s-1",
+          "schema:propertyID": "reaction_rate_constant",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2965,6 +3103,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.42424
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "stoichiometry_min",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2982,6 +3121,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.9621
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "stoichiometry_max",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2999,6 +3139,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 46200
           },
           "schema:unitText": "mol/m3",
+          "schema:propertyID": "max_concentration",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3016,6 +3157,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 15000
           },
           "schema:unitText": "J/mol",
+          "schema:propertyID": "diffusivity_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3033,6 +3175,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 35000
           },
           "schema:unitText": "J/mol",
+          "schema:propertyID": "reaction_rate_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3043,6 +3186,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "schema:variableMeasured": {
         "@type": "schema:PropertyValue",
         "schema:name": "ocp",
+        "schema:propertyID": "ocp",
         "schema:value": "-3.04420906 * x + 10.04892207 - 0.65637536 * tanh(-4.02134095 * (x - 0.80063948)) + 4.24678547 * tanh(12.17805062 * (x - 7.57659337)) - 0.3757068 * tanh(59.33067782 * (x - 0.99784492))",
         "schema:description": "expression (bpx)",
         "schema:additionalProperty": {
@@ -3072,6 +3216,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 5.23e-05
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+          "schema:propertyID": "thickness",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3089,6 +3234,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 432072
           },
           "schema:unitText": "1/m",
+          "schema:propertyID": "surface_area_per_volume",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3117,6 +3263,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 298.15
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Kelvin",
+          "schema:propertyID": "initial_temperature",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3133,6 +3280,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 298.15
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Kelvin",
+          "schema:propertyID": "ambient_temperature",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3260,6 +3408,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 298.15
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Kelvin",
+          "schema:propertyID": "reference_temperature",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3277,6 +3426,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 2.7
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
+          "schema:propertyID": "discharging_cutoff_voltage",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3294,6 +3444,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 4.2
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
+          "schema:propertyID": "charging_cutoff_voltage",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3311,6 +3462,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 12.5
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour",
+          "schema:propertyID": "nominal_capacity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3328,6 +3480,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 913
           },
           "schema:unitText": "J/(kg.K)",
+          "schema:propertyID": "specific_heat_capacity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3345,6 +3498,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 2.04
           },
           "schema:unitText": "W/(m.K)",
+          "schema:propertyID": "thermal_conductivity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3362,6 +3516,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 1847
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#KilogramPerCubicMetre",
+          "schema:propertyID": "density",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3379,6 +3534,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.016808
           },
           "schema:unitText": "m2",
+          "schema:propertyID": "electrode_area",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3396,6 +3552,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 34
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "electrode_pair_count",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3413,6 +3570,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.0379
           },
           "schema:unitText": "m2",
+          "schema:propertyID": "external_surface_area",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3430,6 +3588,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.000128
           },
           "schema:unitText": "m3",
+          "schema:propertyID": "volume",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3463,6 +3622,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 4.12e-06
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+          "schema:propertyID": "particle_radius",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3480,6 +3640,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 2.728e-14
           },
           "schema:unitText": "m2/s",
+          "schema:propertyID": "solid_diffusivity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3497,6 +3658,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 5.199e-06
           },
           "schema:unitText": "mol.m-2.s-1",
+          "schema:propertyID": "reaction_rate_constant",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3514,6 +3676,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.005504
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "stoichiometry_min",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3531,6 +3694,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.75668
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "stoichiometry_max",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3548,6 +3712,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 29730
           },
           "schema:unitText": "mol/m3",
+          "schema:propertyID": "max_concentration",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3565,6 +3730,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 30000
           },
           "schema:unitText": "J/mol",
+          "schema:propertyID": "diffusivity_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3582,6 +3748,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 55000
           },
           "schema:unitText": "J/mol",
+          "schema:propertyID": "reaction_rate_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3593,6 +3760,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         {
           "@type": "schema:PropertyValue",
           "schema:name": "ocp",
+          "schema:propertyID": "ocp",
           "schema:value": "9.47057878e-01 * exp(-1.59418743e+02  * x) - 3.50928033e+04 + 1.64230269e-01 * tanh(-4.55509094e+01 * (x - 3.24116012e-02 )) + 3.69968491e-02 * tanh(-1.96718868e+01 * (x - 1.68334476e-01)) + 1.91517003e+04 * tanh(3.19648312e+00 * (x - 1.85139824e+00)) + 5.42448511e+04 * tanh(-3.19009848e+00 * (x - 2.01660395e+00))",
           "schema:description": "expression (bpx)",
           "schema:additionalProperty": {
@@ -3604,6 +3772,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         {
           "@type": "schema:PropertyValue",
           "schema:name": "entropic_coefficient",
+          "schema:propertyID": "entropic_coefficient",
           "schema:value": "(-0.1112 * x + 0.02914 + 0.3561 * exp(-((x - 0.08309) ** 2) / 0.004616)) / 1000",
           "schema:description": "expression (bpx)",
           "schema:additionalProperty": {
@@ -3634,6 +3803,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 5.62e-05
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+          "schema:propertyID": "thickness",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3651,6 +3821,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.222
           },
           "schema:unitText": "S/m",
+          "schema:propertyID": "electronic_conductivity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3668,6 +3839,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 499522
           },
           "schema:unitText": "1/m",
+          "schema:propertyID": "surface_area_per_volume",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3684,6 +3856,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.253991
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "porosity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3700,6 +3873,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.128
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "transport_efficiency",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3728,6 +3902,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 5.23e-05
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+          "schema:propertyID": "thickness",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3745,6 +3920,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.789
           },
           "schema:unitText": "S/m",
+          "schema:propertyID": "electronic_conductivity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3761,6 +3937,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.277493
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "porosity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3777,6 +3954,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.1462
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "transport_efficiency",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3805,6 +3983,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 2e-05
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+          "schema:propertyID": "thickness",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3821,6 +4000,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.47
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "porosity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3837,6 +4017,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.3222
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "transport_efficiency",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3865,6 +4046,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.2594
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "transference_number",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3882,6 +4064,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 17100
           },
           "schema:unitText": "J/mol",
+          "schema:propertyID": "conductivity_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3899,6 +4082,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 17100
           },
           "schema:unitText": "J/mol",
+          "schema:propertyID": "diffusivity_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3910,6 +4094,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         {
           "@type": "schema:PropertyValue",
           "schema:name": "ionic_conductivity",
+          "schema:propertyID": "ionic_conductivity",
           "schema:value": "0.1297 * (x / 1000) ** 3 - 2.51 * (x / 1000) ** 1.5 + 3.329 * (x / 1000)",
           "schema:description": "expression (bpx)",
           "schema:additionalProperty": {
@@ -3921,6 +4106,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         {
           "@type": "schema:PropertyValue",
           "schema:name": "electrolyte_diffusivity",
+          "schema:propertyID": "electrolyte_diffusivity",
           "schema:value": "8.794e-11 * (x / 1000) ** 2 - 3.972e-10 * (x / 1000) + 4.862e-10",
           "schema:description": "expression (bpx)",
           "schema:additionalProperty": {
@@ -3951,6 +4137,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 298.15
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Kelvin",
+          "schema:propertyID": "initial_temperature",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3968,6 +4155,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 1000
           },
           "schema:unitText": "mol/m3",
+          "schema:propertyID": "initial_concentration",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -3984,6 +4172,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 298.15
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Kelvin",
+          "schema:propertyID": "ambient_temperature",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4111,6 +4300,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 298.15
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Kelvin",
+          "schema:propertyID": "reference_temperature",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4128,6 +4318,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 2.7
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
+          "schema:propertyID": "discharging_cutoff_voltage",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4145,6 +4336,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 4.2
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
+          "schema:propertyID": "charging_cutoff_voltage",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4162,6 +4354,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 12.5
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour",
+          "schema:propertyID": "nominal_capacity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4179,6 +4372,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 913
           },
           "schema:unitText": "J/(kg.K)",
+          "schema:propertyID": "specific_heat_capacity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4196,6 +4390,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 2.04
           },
           "schema:unitText": "W/(m.K)",
+          "schema:propertyID": "thermal_conductivity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4213,6 +4408,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 1847
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#KilogramPerCubicMetre",
+          "schema:propertyID": "density",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4230,6 +4426,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.016808
           },
           "schema:unitText": "m2",
+          "schema:propertyID": "electrode_area",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4247,6 +4444,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 34
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "electrode_pair_count",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4264,6 +4462,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.0379
           },
           "schema:unitText": "m2",
+          "schema:propertyID": "external_surface_area",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4281,6 +4480,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.000128
           },
           "schema:unitText": "m3",
+          "schema:propertyID": "volume",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4314,6 +4514,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 4.12e-06
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+          "schema:propertyID": "particle_radius",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4331,6 +4532,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 2.728e-14
           },
           "schema:unitText": "m2/s",
+          "schema:propertyID": "solid_diffusivity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4348,6 +4550,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
+          "schema:propertyID": "ocp",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4365,6 +4568,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 5.199e-06
           },
           "schema:unitText": "mol.m-2.s-1",
+          "schema:propertyID": "reaction_rate_constant",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4382,6 +4586,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.005504
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "stoichiometry_min",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4399,6 +4604,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.75668
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "stoichiometry_max",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4416,6 +4622,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 29730
           },
           "schema:unitText": "mol/m3",
+          "schema:propertyID": "max_concentration",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4433,6 +4640,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 30000
           },
           "schema:unitText": "J/mol",
+          "schema:propertyID": "diffusivity_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4450,6 +4658,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 55000
           },
           "schema:unitText": "J/mol",
+          "schema:propertyID": "reaction_rate_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4460,6 +4669,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "schema:variableMeasured": {
         "@type": "schema:PropertyValue",
         "schema:name": "entropic_coefficient",
+        "schema:propertyID": "entropic_coefficient",
         "schema:value": "(-0.1112 * x + 0.02914 + 0.3561 * exp(-((x - 0.08309) ** 2) / 0.004616)) / 1000",
         "schema:description": "expression (bpx)",
         "schema:additionalProperty": {
@@ -4489,6 +4699,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 5.62e-05
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+          "schema:propertyID": "thickness",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4506,6 +4717,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.222
           },
           "schema:unitText": "S/m",
+          "schema:propertyID": "electronic_conductivity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4523,6 +4735,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 499522
           },
           "schema:unitText": "1/m",
+          "schema:propertyID": "surface_area_per_volume",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4539,6 +4752,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.253991
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "porosity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4555,6 +4769,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.128
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "transport_efficiency",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4588,6 +4803,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 4.6e-06
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+          "schema:propertyID": "particle_radius",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4605,6 +4821,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 3.2e-14
           },
           "schema:unitText": "m2/s",
+          "schema:propertyID": "solid_diffusivity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4622,6 +4839,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": -0.0001
           },
           "schema:unitText": "V/K",
+          "schema:propertyID": "entropic_coefficient",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4639,6 +4857,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 2.305e-05
           },
           "schema:unitText": "mol.m-2.s-1",
+          "schema:propertyID": "reaction_rate_constant",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4656,6 +4875,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.42424
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "stoichiometry_min",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4673,6 +4893,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.9621
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "stoichiometry_max",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4690,6 +4911,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 46200
           },
           "schema:unitText": "mol/m3",
+          "schema:propertyID": "max_concentration",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4707,6 +4929,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 15000
           },
           "schema:unitText": "J/mol",
+          "schema:propertyID": "diffusivity_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4724,6 +4947,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 35000
           },
           "schema:unitText": "J/mol",
+          "schema:propertyID": "reaction_rate_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4734,6 +4958,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "schema:variableMeasured": {
         "@type": "schema:PropertyValue",
         "schema:name": "ocp",
+        "schema:propertyID": "ocp",
         "schema:value": "-3.04420906 * x + 10.04892207 - 0.65637536 * tanh(-4.02134095 * (x - 0.80063948)) + 4.24678547 * tanh(12.17805062 * (x - 7.57659337)) - 0.3757068 * tanh(59.33067782 * (x - 0.99784492))",
         "schema:description": "expression (bpx)",
         "schema:additionalProperty": {
@@ -4763,6 +4988,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 5.23e-05
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+          "schema:propertyID": "thickness",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4780,6 +5006,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.789
           },
           "schema:unitText": "S/m",
+          "schema:propertyID": "electronic_conductivity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4797,6 +5024,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 432072
           },
           "schema:unitText": "1/m",
+          "schema:propertyID": "surface_area_per_volume",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4813,6 +5041,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.277493
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "porosity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4829,6 +5058,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.1462
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "transport_efficiency",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4857,6 +5087,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 2e-05
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+          "schema:propertyID": "thickness",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4873,6 +5104,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.47
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "porosity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4889,6 +5121,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.3222
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "transport_efficiency",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4917,6 +5150,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.2594
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+          "schema:propertyID": "transference_number",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4934,6 +5168,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 17100
           },
           "schema:unitText": "J/mol",
+          "schema:propertyID": "conductivity_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4951,6 +5186,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 17100
           },
           "schema:unitText": "J/mol",
+          "schema:propertyID": "diffusivity_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -4962,6 +5198,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         {
           "@type": "schema:PropertyValue",
           "schema:name": "ionic_conductivity",
+          "schema:propertyID": "ionic_conductivity",
           "schema:value": "0.1297 * (x / 1000) ** 3 - 2.51 * (x / 1000) ** 1.5 + 3.329 * (x / 1000)",
           "schema:description": "expression (bpx)",
           "schema:additionalProperty": {
@@ -4973,6 +5210,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         {
           "@type": "schema:PropertyValue",
           "schema:name": "electrolyte_diffusivity",
+          "schema:propertyID": "electrolyte_diffusivity",
           "schema:value": "8.794e-11 * (x / 1000) ** 2 - 3.972e-10 * (x / 1000) + 4.862e-10",
           "schema:description": "expression (bpx)",
           "schema:additionalProperty": {
@@ -5003,6 +5241,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 298.15
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Kelvin",
+          "schema:propertyID": "initial_temperature",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -5020,6 +5259,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 1000
           },
           "schema:unitText": "mol/m3",
+          "schema:propertyID": "initial_concentration",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -5036,6 +5276,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 298.15
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Kelvin",
+          "schema:propertyID": "ambient_temperature",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",

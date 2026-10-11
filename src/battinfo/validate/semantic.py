@@ -1192,9 +1192,18 @@ def _validate_parameter_set_semantics(
     body: Mapping[str, Any],
     issues: list[ValidationIssue],
     resource_type: str | None,
-    hard_issue_severity: str,
+    policy_name: str,
 ) -> None:
-    """Claim mappability, plus the parameter-file rules JSON Schema cannot state."""
+    """Claim mappability, plus the parameter-file rules JSON Schema cannot state.
+
+    The parameter-file rules are integrity rules (the IRI must be the one
+    the fingerprint gives, a runnable copy must name its source, a mirror
+    must be the source's bytes, a part appears once), so they are errors
+    under every policy. A parameter file with no source file is fine for
+    local work and an error for publishing (ruling 2026-10-11): nothing
+    under the default policy, a warning under strict, an error under the
+    publisher policy.
+    """
     # Parameter-set claims emit through the same quantity nodes as properties,
     # so an unmapped parameter key gets the same warning. Fraction keys resolve
     # through the emitter's own table, as they do for properties.
@@ -1232,11 +1241,29 @@ def _validate_parameter_set_semantics(
         _append_issue(
             issues,
             code=f"semantic.parameter_file_{code}",
-            severity=hard_issue_severity if severity == "error" else "warning",
+            severity="error" if severity == "error" else "warning",
             path=path,
             message=message,
             resource_type=resource_type,
         )
+    if "parts" in body and policy_name in ("strict", "publisher"):
+        distributions = body.get("distributions")
+        has_source = isinstance(distributions, list) and any(
+            isinstance(entry, Mapping) and entry.get("role") == "source" for entry in distributions
+        )
+        if not has_source:
+            _append_issue(
+                issues,
+                code="semantic.parameter_file_no_source",
+                severity="error" if policy_name == "publisher" else "warning",
+                path="parameter_set.distributions",
+                message=(
+                    "a parameter file is published with its file: attach the source under "
+                    "distributions (bpx_file_distribution(path, content_url=...)), so its IRI "
+                    "resolves to a file with exactly these parameters."
+                ),
+                resource_type=resource_type,
+            )
 
 
 def validate_semantic_report(
@@ -1335,7 +1362,7 @@ def validate_semantic_report(
 
     parameter_set = doc.get("parameter_set")
     if isinstance(parameter_set, Mapping):
-        _validate_parameter_set_semantics(parameter_set, issues, resource_type, hard_issue_severity)
+        _validate_parameter_set_semantics(parameter_set, issues, resource_type, resolved_policy.name)
 
     dataset = doc.get("dataset")
     if isinstance(dataset, Mapping):

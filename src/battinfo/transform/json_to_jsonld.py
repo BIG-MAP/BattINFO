@@ -2665,7 +2665,11 @@ def _parameter_claim_variable_node(claim: dict[str, Any]) -> dict[str, Any] | No
     parameter = claim.get("parameter")
     if not isinstance(parameter, str) or not parameter:
         return None
-    node: dict[str, Any] = {"@type": "schema:PropertyValue", "schema:name": parameter}
+    node: dict[str, Any] = {
+        "@type": "schema:PropertyValue",
+        "schema:name": parameter,
+        "schema:propertyID": parameter,
+    }
     curve = claim.get("curve")
     expression = claim.get("expression")
     if isinstance(curve, dict):
@@ -2710,6 +2714,10 @@ def _parameter_claim_nodes(claims: Any) -> dict[str, Any]:
 
     Scalar claims become EMMO-typed quantities through the same emitter every
     component uses; curves and expressions become schema:PropertyValue nodes.
+    Every claim node names its parameter key in ``schema:propertyID``: two
+    keys can share an EMMO class (``electrode_area`` and
+    ``external_surface_area`` are both an Area), and the key is what tells
+    them apart in the graph.
     """
     property_nodes: list[dict[str, Any]] = []
     variable_nodes: list[dict[str, Any]] = []
@@ -2719,6 +2727,7 @@ def _parameter_claim_nodes(claims: Any) -> dict[str, Any]:
         quantity = claim.get("quantity")
         if isinstance(quantity, dict) and isinstance(claim.get("parameter"), str):
             for emitted in _descriptor_property_nodes({claim["parameter"]: quantity}):
+                emitted["schema:propertyID"] = claim["parameter"]
                 emitted.update(_parameter_claim_annotations(claim))
                 property_nodes.append(emitted)
             continue
@@ -2770,7 +2779,8 @@ def _to_domain_battery_jsonld_parameter_set(data: dict[str, Any]) -> dict[str, A
     blank schema:Dataset nodes under ``schema:hasPart``, each with its claims
     and, for a material part, the material on ``schema:about``; its
     fingerprint is a ``schema:identifier``; the file itself rides
-    ``schema:distribution``.
+    ``schema:distribution``; the record of an earlier file it corrects is
+    ``dcterms:replaces``.
     """
     body = data.get("parameter_set") if isinstance(data.get("parameter_set"), dict) else {}
     node: dict[str, Any] = {}
@@ -2793,6 +2803,9 @@ def _to_domain_battery_jsonld_parameter_set(data: dict[str, Any]) -> dict[str, A
             "schema:propertyID": PARAMETERS_SHA256_PROPERTY_ID,
             "schema:value": body["parameters_sha256"],
         }
+    if isinstance(body.get("supersedes"), str) and body["supersedes"]:
+        # A corrected parameter file is a new record that names the one it replaces.
+        node["dcterms:replaces"] = {"@id": body["supersedes"]}
 
     scope_values = [
         {"@type": "schema:PropertyValue", "schema:name": key, "schema:value": body[key]}

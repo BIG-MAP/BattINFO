@@ -9,6 +9,9 @@ Each test reproduces one finding and pins its fix:
   State values the bpx package's own migration adds (F2);
 - ``to_bpx`` writes numbers in the units BPX states them in, or refuses (F3);
 - nothing the import does not read is lost in silence (F4);
+- two claims of one EMMO class stay apart in RDF (F5);
+- the record validator holds the integrity rules under every policy (F6);
+- a corrected file names the record it supersedes (F7);
 - a file is parsed strictly (F8), errors say what to do (F9), and the
   parser's warnings are kept whole (F10).
 """
@@ -27,6 +30,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from battinfo._bpx_layout import to_v1_layout  # noqa: E402
+from battinfo.api import create_parameter_set  # noqa: E402
 from battinfo.interop import (  # noqa: E402
     bpx_content_digest,
     bpx_file_distribution,
@@ -401,6 +405,118 @@ def test_to_bpx_takes_records_it_can_export_only() -> None:
     resource = {"resource_type": "parameter_set", "semantic_payload": {"battinfo_records": {"parameter_set": record}}}
     assert to_bpx(resource).bpx == to_bpx(record).bpx
     assert to_bpx({"resource": resource}).bpx == to_bpx(record).bpx
+
+
+# ── F5: claims of one EMMO class stay apart in RDF ───────────────────────────
+
+
+def test_claims_name_their_parameter_in_rdf() -> None:
+    pyld = pytest.importorskip("pyld")
+    from battinfo.jsonld import record_to_jsonld
+
+    doc = record_to_jsonld(_record(), "parameter-set", context="inline")
+    quads = pyld.jsonld.to_rdf(doc, {"format": "application/n-quads"})
+    property_id = "<https://schema.org/propertyID>"
+    subjects: dict[str, str] = {}
+    types: dict[str, set[str]] = {}
+    for line in quads.splitlines():
+        subject, predicate, rest = line.split(" ", 2)
+        if predicate == property_id:
+            subjects[rest.rsplit(" ", 1)[0].strip('"')] = subject
+        elif predicate == "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>":
+            types.setdefault(subject, set()).add(rest.rsplit(" ", 1)[0])
+    area, surface = subjects["electrode_area"], subjects["external_surface_area"]
+    assert area != surface
+    assert types[area] & types[surface]  # same EMMO class (Area), told apart by propertyID
+    assert "ocp" in subjects  # curve claims carry it too
+
+
+# ── F6: integrity rules under every policy ───────────────────────────────────
+
+
+def _file_record(**kwargs) -> dict:
+    source = bpx_file_distribution(FIXTURE, content_url=SOURCE_URL)
+    return from_bpx_parameters(FIXTURE).to_parameter_set(virtual_cell=True, distributions=[source], **kwargs)
+
+
+@pytest.mark.parametrize("policy", ["default", "strict", "publisher", "ingest"])
+def test_an_iri_its_fingerprint_does_not_give_is_an_error(policy: str) -> None:
+    record = _file_record()
+    hand_built = copy.deepcopy(record)
+    hand_built["parameter_set"]["parameters_sha256"] = "a" * 64
+    report = validate_record_report(hand_built, policy=policy)
+    assert "semantic.parameter_file_id_mismatch" in {i.code for i in report.errors}
+    assert validate_record_report(record, policy=policy).ok
+
+
+@pytest.mark.parametrize("policy", ["default", "strict", "publisher"])
+def test_file_rules_are_errors_under_every_policy(policy: str) -> None:
+    record = _file_record()
+    source = record["parameter_set"]["distributions"][0]
+    mirror = {**source, "role": "mirror", "content_url": MIRROR_URL, "checksum": {"algorithm": "sha256", "value": "f" * 64}}
+    bad_mirror = copy.deepcopy(record)
+    bad_mirror["parameter_set"]["distributions"].append(mirror)
+    assert "semantic.parameter_file_mirror_checksum_differs" in {
+        i.code for i in validate_record_report(bad_mirror, policy=policy).errors
+    }
+    repeated = copy.deepcopy(record)
+    repeated["parameter_set"]["parts"].append(copy.deepcopy(repeated["parameter_set"]["parts"][0]))
+    assert "semantic.parameter_file_part_repeated" in {
+        i.code for i in validate_record_report(repeated, policy=policy).errors
+    }
+
+
+def test_a_missing_source_matters_only_for_publishing() -> None:
+    record = from_bpx_parameters(FIXTURE).to_parameter_set(virtual_cell=True)
+    code = "semantic.parameter_file_no_source"
+    default = validate_record_report(record)
+    assert default.ok and code not in {i.code for i in default.issues}
+    strict = validate_record_report(record, policy="strict")
+    assert strict.ok and code in {i.code for i in strict.warnings}
+    publisher = validate_record_report(record, policy="publisher")
+    assert code in {i.code for i in publisher.errors}
+
+
+def test_flavour_errors_say_what_is_wrong() -> None:
+    record = _file_record()
+
+    def messages(mutate) -> str:
+        bad = copy.deepcopy(record)
+        mutate(bad["parameter_set"])
+        return " | ".join(i.message for i in validate_record_report(bad).errors)
+
+    no_link = messages(lambda b: b.pop("virtual_cell"))
+    assert "names no cell" in no_link and "'id'" not in no_link and len(no_link) < 400
+    assert "more than one cell" in messages(lambda b: b.update(cell_spec_id=OLD_IRI))
+    assert "never both" in messages(lambda b: b.update(claims=copy.deepcopy(b["parts"][0]["claims"])))
+    assert "scope belongs to a claim batch" in messages(lambda b: b.update(scope="cell"))
+    source = record["parameter_set"]["distributions"][0]
+    assert "needs exactly 1 'source' entry; found 2" in messages(
+        lambda b: b["distributions"].append({**source, "content_url": MIRROR_URL})
+    )
+
+
+# ── F7: a corrected file supersedes the old record ───────────────────────────
+
+
+def test_a_corrected_file_names_the_record_it_supersedes() -> None:
+    from battinfo.jsonld import record_to_jsonld
+
+    record = from_bpx_parameters(FIXTURE).to_parameter_set(virtual_cell=True, supersedes=OLD_IRI)
+    assert record["parameter_set"]["supersedes"] == OLD_IRI
+    assert validate_record_report(record).ok
+    doc = record_to_jsonld(record, "parameter-set")
+    node = doc["@graph"][0] if "@graph" in doc else doc
+    assert node["dcterms:replaces"] == {"@id": OLD_IRI}
+    with pytest.raises(ValueError, match="cannot supersede itself"):
+        from_bpx_parameters(FIXTURE).to_parameter_set(virtual_cell=True, supersedes=record["parameter_set"]["id"])
+    with pytest.raises(ValueError, match="parameter-set IRI"):
+        from_bpx_parameters(FIXTURE).to_parameter_set(virtual_cell=True, supersedes="not-an-iri")
+    with pytest.raises(ValueError, match="belong to a parameter file"):
+        create_parameter_set(
+            name="Chen 2020 - graphite", material_kind="graphite", supersedes=OLD_IRI,
+            claims=[{"parameter": "particle_radius", "quantity": {"value": 5.86e-6, "unit": "m"}}],
+        )
 
 
 # ── F8: strict parsing ───────────────────────────────────────────────────────
