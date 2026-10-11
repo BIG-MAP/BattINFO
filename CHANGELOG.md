@@ -89,6 +89,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
     immediately surfaced two more unvalidated links, both now validated:
     `electrode_spec.active_material_spec_id` and `channel.equipment_id`.
 
+### Changed
+
+- **Parameter sets are datasets and mint under `dataset/`.** Both flavours, claim batches and parameter files, now get `https://w3id.org/battinfo/dataset/{uid}` IRIs instead of `spec/` ones. Nothing is ever an instance of a parameter set: it is one piece of data from one source, produced by one calibration or extraction (IDENTIFIER_POLICY 6.1 and 6.3, ruling of 2026-10-11). The seeds changed with the namespace, so every parameter set gets a new uid. A claim batch's is `stable_uid("parameter-claims:<target>:<scope>[:<electrode_polarity>]:<name>")`, where it was `parameter-set:...`, and a parameter file's is `stable_uid("parameter-file:<parameters_sha256>")`, where it was `parameter-set-file:...`. The schema's `parameter_set.id` takes a `dataset/` IRI, an explicit `id=` on a claim batch must be one, and a record with a `spec/` id no longer validates. `supersedes` now belongs to both flavours (`create_parameter_set(supersedes=...)`, `to_parameter_set(supersedes=...)`, `dcterms:replaces` in JSON-LD) and takes a `dataset/` IRI or a `spec/` one, so each of the 18 parameter sets published under `spec/` can be republished as a new `dataset/` record that supersedes it. Schmitt et al. 2026, published as `spec/szxp-xwnx-vhyf-rvm0`, becomes `dataset/7jnc-cjtw-5h3a-5t52`. The six packaged parameter-set examples carry their new IRIs. The deposit checks that a dataset node has an about link and at least one file now apply to dataset records (typed `dcat:Dataset` or `BatteryTestResult`) and no longer to every node under `dataset/`, since a claim batch has no files and a virtual-cell parameter file is about no record.
+
 ### Removed
 
 - `BpxParameterImportResult.to_records` and `load_parameter_set_members`. They built one record per BPX block plus a set record; a BPX file is now one record, and neither shipped in a release.

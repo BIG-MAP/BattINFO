@@ -48,7 +48,7 @@ for warning in result.warnings:
     print("-", warning)
 ```
 
-The uid comes from the SHA-256 of the file's canonical JSON (RFC 8785), so a re-indented copy, a CRLF checkout or a copy written by another JSON library has the same uid, and any changed value gives a new one. A file that repeats a key inside an object is refused, because JSON parsers disagree on which of the two values counts.
+The uid comes from the SHA-256 of the file's canonical JSON (RFC 8785), so a re-indented copy, a CRLF checkout or a copy written by another JSON library has the same uid, and any changed value gives a new one. The record's IRI is `https://w3id.org/battinfo/dataset/<uid>`: a parameter set is a dataset, one piece of data from one source, so it shares the `dataset/` namespace with dataset records (IDENTIFIER_POLICY 6.3). A file that repeats a key inside an object is refused, because JSON parsers disagree on which of the two values counts.
 
 Some values have no home in a record yet: the `Particle` blocks of a blended electrode, the initial hysteresis state, `Degradation` and `Validation`. They are named in the warnings and listed in `not_imported`, which the record keeps, so a reader knows what only the file holds. `to_bpx(record)` says so too, and sets `complete=False` on its result.
 
@@ -159,14 +159,14 @@ The checks that bind the record to its file are errors under every policy: the I
 
 ## Corrections
 
-A corrected file has other parameters, so it is a new record with a new IRI. The old IRI keeps resolving to the old file, because a solver may already have been handed it. Name the record the new one replaces:
+A corrected file has other parameters, so it is a new record with a new IRI. The old IRI keeps resolving to the old file, because a solver may already have been handed it. Name the record the new one replaces. Parameter sets published before 2026-10-11 have `spec/` IRIs, and `supersedes` takes those too:
 
 <!-- doc-snippet: skip -->
 ```python
 record = from_bpx_parameters("corrected.bpx.json").to_parameter_set(
     virtual_cell=True,
     distributions=[corrected_source],
-    supersedes="https://w3id.org/battinfo/spec/<old uid>",
+    supersedes="https://w3id.org/battinfo/dataset/<old uid>",
 )
 ```
 
@@ -185,12 +185,12 @@ The `battery-genome` client reads the record, downloads its BPX file (the runnab
 import battery_genome as bg
 import pybamm
 
-doc = bg.bpx("https://w3id.org/battinfo/spec/<uid>")
+doc = bg.bpx("https://w3id.org/battinfo/dataset/<uid>")
 parameter_values = pybamm.ParameterValues.create_from_bpx_obj(doc)
 ```
 
 Without Python, ask the IRI for the file. curl does not check the checksum; the client does.
 
 ```bash
-curl -L "https://w3id.org/battinfo/spec/<uid>?format=bpx" -o cell.bpx.json
+curl -L "https://w3id.org/battinfo/dataset/<uid>?format=bpx" -o cell.bpx.json
 ```

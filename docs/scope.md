@@ -21,7 +21,7 @@ The library registers 22 record types (`ENTITY_KINDS` in `src/battinfo/entities.
 | Electrodes | `electrode-spec` | `electrode` | the workspace: `ws.add("electrode_spec", ...)`, `ws.add("electrode", ...)` |
 | Separators, current collectors, electrolytes, housings | `separator-spec`, `current-collector-spec`, `electrolyte-spec`, `housing-spec` | `separator`, `current-collector`, `electrolyte`, `housing` | `battinfo.api` component functions |
 | Equipment | `equipment-spec` | `equipment`, `channel` | the workspace: `ws.add("equipment", ...)` |
-| Parameter sets | `parameter-set` | none | the workspace: `ws.add("parameter_set", ...)` |
+| Parameter sets | none | `parameter-set` (minted under `dataset/`) | the workspace: `ws.add("parameter_set", ...)` |
 | Organizations | none | `organization` | `battinfo.api.create_organization` and `save_organization` |
 
 A dataset collection is not a separate type. It is a `dataset` whose `additional_type` includes `DatasetSeries`, and its members point at it with `series_id`; [Publish a dataset collection](howto/publish-a-dataset-collection.md) walks through one.
