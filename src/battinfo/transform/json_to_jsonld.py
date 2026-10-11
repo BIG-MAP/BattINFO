@@ -132,11 +132,6 @@ CONVERTER_FORMAT_TYPES = {
 DOI_URL_RE = re.compile(r"^https?://(?:dx\.)?doi\.org/(10\.\S+)$", re.IGNORECASE)
 DOI_LITERAL_RE = re.compile(r"^(10\.\d{4,9}/[-._;()/:A-Za-z0-9]+)$")
 
-def _snake_to_camel(value: str) -> str:
-    head, *tail = value.split("_")
-    return head + "".join(part[:1].upper() + part[1:] for part in tail)
-
-
 def _citation_url_value(provenance: dict[str, Any] | None) -> str | None:
     if not isinstance(provenance, dict):
         return None
@@ -358,11 +353,17 @@ def _unit_type_map() -> dict[str, str]:
     return merged
 
 
-def _property_type_term(name: str) -> str:
+def _property_type_term(name: str) -> str | None:
+    """The EMMO class term mapped to a property key, or ``None`` when there is none.
+
+    BattINFO never invents a class for an unmapped key (IDENTIFIER_POLICY.md
+    section 14). The quantity node then carries only its value-basis class, see
+    :func:`_descriptor_quantity_node`.
+    """
     mapping = _property_type_map().get(name)
     if mapping and mapping.get("term"):
         return mapping["term"]
-    return f"battinfo:{_snake_to_camel(name)}"
+    return None
 
 
 # Property-nature co-types that are declared in the curated map but not yet
@@ -754,10 +755,17 @@ def _descriptor_quantity_node(
     resolved_term = term or _property_type_term(name)
     co_token = quantity.get("value_basis", quantity.get("co_type"))
     co_class = _CO_TYPE_CLASS.get(co_token) if isinstance(co_token, str) else None
-    node: dict[str, Any] = {"@type": [resolved_term, co_class or _property_co_type(name)]}
-    # Human layer: carry the class prefLabel on the instance node so readers
-    # need not dereference EMMO to see what the quantity is.
-    node["skos:prefLabel"] = resolved_term.split(":", 1)[-1]
+    basis_class = co_class or _property_co_type(name)
+    node: dict[str, Any]
+    if resolved_term:
+        node = {"@type": [resolved_term, basis_class]}
+        # Human layer: carry the class prefLabel on the instance node so readers
+        # need not dereference EMMO to see what the quantity is.
+        node["skos:prefLabel"] = resolved_term.split(":", 1)[-1]
+    else:
+        # No mapped class: the value-basis class is the only type and the record
+        # key names the quantity. Callers warn semantic.property_unmapped.
+        node = {"@type": [basis_class], "skos:prefLabel": name}
 
     # Emit the primary (nominal/typical) value only.  EMMO's canonical pattern for a
     # ConventionalProperty is a single RealData node; a range (min/max) is correctly

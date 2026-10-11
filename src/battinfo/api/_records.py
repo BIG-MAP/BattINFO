@@ -1539,9 +1539,11 @@ def save_cell_instance(
     """Save a cell-instance from either draft payload or canonical record.
 
     Drafts without ``id``/``uid`` mint deterministically from the natural key
-    (cell_spec_id :: serial_number :: batch_id :: name); instances with no
-    serial, batch, or name mint randomly so distinct anonymous cells never
-    dedup. See ``save_record`` for the full minting policy.
+    (cell_spec_id :: serial_number :: batch_id :: label), where the label is the
+    serial when there is one, otherwise the name, otherwise the batch, so
+    renaming a cell with a serial keeps its IRI. Instances with no serial,
+    batch, or name mint randomly so distinct anonymous cells never dedup. See
+    ``save_record`` for the full minting policy.
     """
     from battinfo.bundle import Cell as CellInstanceBundle
 

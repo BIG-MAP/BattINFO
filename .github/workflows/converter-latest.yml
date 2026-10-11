@@ -1,0 +1,51 @@
+# Catches a new batterydf release that breaks the converter before users meet
+# it. The processing extra accepts any batterydf 0.2 release, candidates
+# included, so a new one on PyPI reaches users with no change in this
+# repository, while CI keeps testing the version in uv.lock. Once a week this
+# job installs the newest batterydf below 0.3 from PyPI, release candidates
+# included, and runs the converter tests against it.
+name: converter-latest
+
+on:
+  schedule:
+    - cron: "0 5 * * 1"   # Mondays 05:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  converter:
+    name: newest batterydf (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: pip install the checkout and the newest batterydf
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev,tabular]"
+          # The bound names a pre-release, so pip considers batterydf release
+          # candidates while every other package stays on final releases.
+          python -m pip install --upgrade "batterydf[nda,excel,mat]>=0.2.0rc2,<0.3"
+          python -c "import bdf, importlib.metadata as m; print('batterydf', m.version('batterydf'))"
+
+      - name: converter tests
+        shell: bash
+        run: |
+          python -m pytest -q \
+            tests/test_quickstart_recipe.py \
+            tests/test_lab_p1_traps.py \
+            tests/test_authoring_ws.py \
+            tests/test_web_snippets.py

@@ -29,11 +29,9 @@ Suggested elucidation: *"A conventional property whose value is a declared ratin
 established under a specified rating procedure or standard (e.g. IEC 61960), as distinct
 from a NominalProperty (an approximate/representative reference value)."*
 
-## 2. Property classes — currently `battinfo:` fallbacks (optional)
+## 2. Property classes — currently typed by value basis only (optional)
 
-These engineering quantities have no clean EMMO term, so they emit under the `battinfo:`
-namespace (not lost, just not domain-battery-resolvable). Publish if you want them
-first-class:
+These engineering quantities have no clean EMMO term. Their quantity nodes carry only the value-basis class (for example `ConventionalProperty`) with the key as `skos:prefLabel`: kept in the graph, but not typed as a specific quantity. Before 2026-10-11 they were given generated `battinfo:` class names. Publish if you want them first-class:
 
 | Candidate term | Property key | Quantity |
 |---|---|---|
@@ -45,7 +43,7 @@ first-class:
 To wire after publishing: add a curated entry to
 `assets/mappings/domain-battery/property_map.curated.json` (and the `src/battinfo/data`
 mirror) with the new `class_iri` — the descriptor then emits the real `@type` instead of
-the `battinfo:` fallback.
+the value-basis class alone.
 
 ## 3. Optional — loading-side qualifier
 
@@ -182,14 +180,14 @@ had one job, 1-1 mapping, which is application-ontology work).
 ### 10a. One-facet generics (domain-battery / domain-electrochemistry)
 
 Parameter claims are polarity-agnostic by design: a claim targets the material kind
-(graphite as such) and the BPX block supplies polarity downstream. Two asks survive the
+(graphite as such) and the BPX block supplies polarity downstream. Two asks survived the
 depth rule; add each as the axiomatized parent of its existing polarity pair and repoint
-the curated map at it.
+the curated map at it. The second turned out to be published already (see its row).
 
 | Wanted term | Existing polarity pair | Parameter key |
 |---|---|---|
-| **`GuestDiffusivity`** | `GuestDiffusivityIn{Negative,Positive}ElectrodeActiveMaterial` | `solid_diffusivity` — diffusivity of the intercalated (guest) species in its host; the host context is implicit in "guest", so no `InActiveMaterial` suffix. |
-| **`EntropicChangeCoefficient`** | `{Negative,Positive}ElectrodeEntropicChangeCoefficient` | `entropic_coefficient` — dU/dT, measurable by potentiometry, used across every thermal-coupled model family. |
+| **`GuestDiffusivity`** | `GuestDiffusivityIn{Negative,Positive}ElectrodeActiveMaterial` | `solid_diffusivity` — diffusivity of the intercalated (guest) species in its host; the host context is implicit in "guest", so no `InActiveMaterial` suffix. Interim since 2026-10-11: wired to the published generic `Diffusivity`. |
+| ~~`EntropicChangeCoefficient`~~ | `{Negative,Positive}ElectrodeEntropicChangeCoefficient` | `entropic_coefficient` — dU/dT. No longer needed: the pair's published parent `TemperatureCoefficientOfTheOpenCircuitVoltage` (domain-electrochemistry 0.37.2) is this polarity-free quantity, and the key is wired to it since 2026-10-11. |
 
 ### 10b. Battery-general quantities missing entirely (domain-battery)
 
@@ -202,8 +200,8 @@ the curated map at it.
 
 | Wanted term | Parameter key | Notes |
 |---|---|---|
-| **`TransportEfficiency`** | `transport_efficiency` | BPX defines it operationally as ε^p (porosity to the Bruggeman exponent). `BruggemanCoefficient` exists upstream but is the *exponent* — a different quantity. Because the definition is BPX's convention, the BPX application ontology is the honest home; a domain-battery `EffectiveTransportRatio` would also serve if preferred. |
-| **`InitialConcentration`** | `initial_concentration` | An initial condition of the simulation (BPX ≥ 1.0 State family: initial temperature, initial SOC, initial concentrations), not a property of any material. Model-state quantities belong with the model standard. |
+| **`TransportEfficiency`** | `transport_efficiency` | Until it exists, the key is typed by its value basis only. BPX defines it operationally as ε^p (porosity to the Bruggeman exponent). `BruggemanCoefficient` exists upstream but is the *exponent* — a different quantity. Because the definition is BPX's convention, the BPX application ontology is the honest home; a domain-battery `EffectiveTransportRatio` would also serve if preferred. |
+| *(optional)* **`InitialConcentration`** | `initial_concentration` | An initial condition of the simulation (BPX ≥ 1.0 State family: initial temperature, initial SOC, initial concentrations), not a property of any material. Model-state quantities belong with the model standard. Interim since 2026-10-11: wired to the published `InitialChargeCarrierConcentrationInElectrolyte`, since the parameter vocabulary scopes the key to electrolytes. |
 | *(optional)* BPX-normalized `ReactionRateConstant` subclass | `reaction_rate_constant` | BPX's rate constant carries mol·m⁻²·s⁻¹ — a normalization convention of the standard. The generic `ReactionRateConstant` elucidation is dimensionally uncommitted, so the interim curated mapping to it (wired 2026-09-20) is defensible; a BPX-scoped subclass would make the convention explicit. |
 
 **Bridge-axiom pattern (ratified with the depth rule).** Every BPX-app-ontology
@@ -219,7 +217,7 @@ model, and the application ontology says which slot of the standard it fills.
 To wire after any of these publish: curated entry in
 `assets/mappings/domain-battery/property_map.curated.json` + the `src/battinfo/data`
 mirror, then `scripts/gen_context.py` and `scripts/gen_reference_records.py`; the
-`battinfo:` fallback retires automatically.
+value-basis-only typing retires automatically.
 
 ## Landed upstream — stubs flipped
 

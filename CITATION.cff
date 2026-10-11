@@ -2,6 +2,8 @@ cff-version: 1.2.0
 title: "BattINFO: The semantic data layer for battery science"
 message: "If you use this software, please cite it using the metadata from this file."
 type: software
+# Zenodo concept DOI: resolves to the latest archived release.
+doi: "10.5281/zenodo.6304782"
 authors:
   - given-names: "Simon"
     family-names: "Clark"

@@ -451,8 +451,8 @@ def _bdf_measurement_period(csv_path: "str | Path") -> tuple[int, int] | None:
             print(
                 f"  warning: {path.name} unix_time_second={start} is implausible "
                 "(outside 2000-2100) - not stamping test/dataset times from it. "
-                "Known cause: batterydf<0.2 wrote epoch/1000; upgrade batterydf "
-                "and re-run ws.convert()."
+                "Known cause: batterydf<0.2 wrote epoch/1000; upgrade the converter "
+                '(pip install "battinfo[processing]") and re-run ws.convert().'
             )
             return None
         return (start, end) if end >= start else (end, start)

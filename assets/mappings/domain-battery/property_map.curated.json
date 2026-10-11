@@ -152,6 +152,16 @@
       "confidence": 1.0
     },
     {
+      "key": "compaction_density",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_520995f8_ec9c_4b3c_bb64_2cd691947379",
+      "class_qname": "emmo:CalenderedDensity",
+      "class_pref_label": "CalenderedDensity",
+      "class_label": "CalenderedDensity",
+      "confidence": 1.0,
+      "notes": "Same quantity as press_density: the density of an electrode coating after pressing. 'Compaction density' is the common datasheet term."
+    },
+    {
       "key": "conductivity_activation_energy",
       "status": "curated",
       "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_8c16cb12_41c1_43bd_9e7c_2eea7b06a1f0",
@@ -325,6 +335,16 @@
       "confidence": 1.0
     },
     {
+      "key": "entropic_coefficient",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_3b938708_e7e4_4ac0_a959_9c04306302e7",
+      "class_qname": "emmo:TemperatureCoefficientOfTheOpenCircuitVoltage",
+      "class_pref_label": "TemperatureCoefficientOfTheOpenCircuitVoltage",
+      "class_label": "TemperatureCoefficientOfTheOpenCircuitVoltage",
+      "confidence": 1.0,
+      "notes": "dU/dT of a material's open-circuit potential. The published parent of the frozen Positive/NegativeElectrodeEntropicChangeCoefficient pair, so polarity rides the graph (depth rule, docs/internal/ontology-additions-needed.md section 10)."
+    },
+    {
       "key": "external_surface_area",
       "status": "curated",
       "class_iri": "https://w3id.org/emmo#EMMO_96f39f77_44dc_491b_8fa7_30d887fe0890",
@@ -359,6 +379,16 @@
       "class_pref_label": "ElectricImpedance",
       "class_label": "ElectricImpedance",
       "confidence": 0.9
+    },
+    {
+      "key": "initial_concentration",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_098f98dc_e015_4dbd_b358_a7ac3b3ecff3",
+      "class_qname": "emmo:InitialChargeCarrierConcentrationInElectrolyte",
+      "class_pref_label": "InitialChargeCarrierConcentrationInElectrolyte",
+      "class_label": "InitialChargeCarrierConcentrationInElectrolyte",
+      "confidence": 1.0,
+      "notes": "The parameter vocabulary scopes initial_concentration to electrolytes only (BPX 'Initial concentration [mol.m-3]')."
     },
     {
       "key": "initial_coulombic_efficiency",
@@ -607,6 +637,16 @@
       "notes": "New in domain-electrochemistry 0.36.0; previously emitted as a battinfo: fallback term."
     },
     {
+      "key": "particle_d50",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_3cfdfc10_a5cb_4e3e_b1a1_281010d1465c",
+      "class_qname": "emmo:D50ParticleSize",
+      "class_pref_label": "D50ParticleSize",
+      "class_label": "D50ParticleSize",
+      "confidence": 1.0,
+      "notes": "Same quantity as d50_particle_size."
+    },
+    {
       "key": "particle_radius",
       "status": "curated",
       "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_b92e382f_5109_4f60_ab5e_c89d340419a9",
@@ -777,6 +817,16 @@
       "class_pref_label": "MassLoading",
       "class_label": "MassLoading",
       "confidence": 1.0
+    },
+    {
+      "key": "solid_diffusivity",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_37b24a94_cae0_4d7a_9519_9f7692dec607",
+      "class_qname": "emmo:Diffusivity",
+      "class_pref_label": "Diffusivity",
+      "class_label": "Diffusivity",
+      "confidence": 1.0,
+      "notes": "Generic Diffusivity per the depth rule; the guest species and host material ride the claim target. Repoint to a polarity-free GuestDiffusivity once domain-electrochemistry publishes one (docs/internal/ontology-additions-needed.md section 10a)."
     },
     {
       "key": "specific_capacity",
