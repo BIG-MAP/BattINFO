@@ -10,7 +10,8 @@
       "tool": "BPX",
       "name": "Test case: Single Particle Model (SPM) parameterisation example based on nmc_pouch_cell_BPX.json from About:Energy open-source release.",
       "model": "SPM",
-      "version": "0.4.0"
+      "version": "0.4.0",
+      "layout": "v0"
     },
     "parts": [
       {

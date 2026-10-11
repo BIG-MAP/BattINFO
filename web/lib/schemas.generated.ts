@@ -9346,6 +9346,14 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
                 "version": {
                   "type": "string",
                   "description": "Source format/schema version (e.g. the BPX version)."
+                },
+                "layout": {
+                  "type": "string",
+                  "enum": [
+                    "v0",
+                    "v1"
+                  ],
+                  "description": "BPX files: the layout the source file actually uses, which a declared version does not always tell. 'v0': the temperatures in Cell and the initial electrolyte concentration in Electrolyte (every 0.x file, and some files declaring 1.0 or later); 'v1': the State block BPX 1.0 introduced. A v1 export of a 'v0' record makes the layout conversion upgrade_bpx makes."
                 }
               }
             },
@@ -9830,7 +9838,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             "phase": {
               "type": "string",
               "minLength": 1,
-              "description": "Reserved for blended electrodes: on a material part, the particle phase the claims describe (e.g. 'Primary')."
+              "description": "Reserved for blended electrodes, on material parts only: the particle phase the claims describe (e.g. 'Primary')."
             },
             "material_kind": {
               "type": "string",
@@ -9867,6 +9875,11 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
                   {
                     "required": [
                       "material_spec_id"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "phase"
                     ]
                   }
                 ]

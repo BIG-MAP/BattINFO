@@ -10,7 +10,8 @@
       "tool": "BPX",
       "name": "Test case: user-defined 0th-order hysteresis for graphite-Si blend in negative electrode. Compare to nmc_pouch_cell_BPX.json in About:Energy open-source release.",
       "model": "DFN",
-      "version": "0.4.0"
+      "version": "0.4.0",
+      "layout": "v0"
     },
     "parts": [
       {

@@ -200,6 +200,11 @@ def _checked_parts(parts: Any, default_provenance_class: str | None) -> list[dic
         phase = part.get("phase")
         if phase is not None and (not isinstance(phase, str) or not phase.strip()):
             raise ValueError(f"parts[{index}].phase must be a non-empty string.")
+        if phase is not None and name not in MATERIAL_PARTS:
+            raise ValueError(
+                f"parts[{index}] ({name}): only a material part ({', '.join(MATERIAL_PARTS)}) has a "
+                "phase, the particle phase of a blended electrode."
+            )
         if (name, phase) in seen:
             raise ValueError(
                 f"parts[{index}]: part {_part_label(part)} appears twice; each (part, phase) "

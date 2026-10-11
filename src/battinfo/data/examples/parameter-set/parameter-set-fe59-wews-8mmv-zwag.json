@@ -10,7 +10,8 @@
       "tool": "BPX",
       "name": "Parameterisation example of an NMC111|graphite 12.5 Ah pouch cell",
       "model": "DFN",
-      "version": "0.1.0"
+      "version": "0.1.0",
+      "layout": "v0"
     },
     "parts": [
       {

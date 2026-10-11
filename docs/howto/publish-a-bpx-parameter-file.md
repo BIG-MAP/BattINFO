@@ -2,7 +2,7 @@
 
 A [BPX](https://github.com/FaradayInstitution/BPX) file is a battery-model parameter set in the JSON format the PyBaMM project defined. In BattINFO one BPX file becomes one parameter-set record. The record holds every value of the file as claims grouped by part (cell, each electrode's material and build, separator, electrolyte, state), carries the file itself, and gets an IRI derived from the file's parameters. Anyone can then hand that IRI to a solver and run exactly those parameters, and search finds the file's graphite claims next to every other source's.
 
-This page imports a small file, links it to its cell, attaches the file and checks the record. The last sections cover corrections, who owns an IRI, and how a reader gets from the IRI to a PyBaMM simulation.
+This page imports a small file, links it to its cell, attaches the file and publishes the record through a workspace. The last sections cover corrections, who owns an IRI, and how a reader gets from the IRI to a PyBaMM simulation.
 
 ## 1. Read the file
 
@@ -111,25 +111,51 @@ A runnable copy is only ever that conversion. `to_parameter_set(..., runnable_fi
 
 The same bytes served from another place go in with role `mirror`. Build the entry from the same file, so the checksum matches the source's: `bpx_file_distribution(bpx_file, content_url=..., role="mirror")`.
 
-## 4. Build and check the record
+## 4. Build the record and publish it
+
+The record goes into a workspace like any other: `ws.add("parameter_set", record=...)` queues it, `ws.save()` validates and writes it, and `ws.submit()` sends what the last save wrote to the registry's review queue.
+
+`ws.submit()` validates every record under the `publisher` policy before it contacts the registry, and that policy requires the file. A record without its source saves for local work (the default policy says nothing, `strict` warns) but is refused at submission, and nothing is sent. The credentials below are placeholders that are never used, because the check comes first:
 
 ```python
-from battinfo.validate import validate_record_report
+import battinfo
+from battinfo.ws import SubmitError
 
+ws = battinfo.workspace("bpx-lab", registry_url=None)
+ws.license("cc-by-4.0")
+
+draft = result.to_parameter_set(virtual_cell=True, materials={"negative": "graphite"})
+ws.add("parameter_set", record=draft)
+ws.save()
+try:
+    ws.submit(
+        registry_url="https://registry.example.org", api_key="placeholder",
+        workspace_id="placeholder", publisher_id="placeholder",
+    )
+except SubmitError as exc:
+    print(exc.failed[0]["error"])  # "a parameter file is published with its file: attach the source"
+```
+
+Attach the file and add the record again. It has the same IRI, because it is the same file, so it replaces the draft:
+
+```python
 record = result.to_parameter_set(
     virtual_cell=True,
     materials={"negative": "graphite"},
     distributions=[source],
-    license="cc-by-4.0",
 )
-print(record["parameter_set"]["id"])
-report = validate_record_report(record, policy="publisher")
-print(report.ok, [issue.message for issue in report.errors])
+ws.add("parameter_set", record=record)
+ws.save()
 ```
 
-The file is required to publish the record and optional for local work: without a source entry the default policy says nothing, `strict` warns and `publisher` refuses. The checks that bind the record to its file are errors under every policy: the IRI must be the one `parameters_sha256` gives, a runnable copy must name the source's checksum, and a mirror must carry the source's checksum.
+With your registry credentials (from `ws.login(...)` or the `BATTINFO_*` environment variables), submit it:
 
-Save the record with `battinfo.api.save_parameter_set` into your records folder and submit it as you submit other records. The registry downloads the files and checks them itself: the source's checksum and fingerprint, the runnable copy against the conversion of the source, and each mirror's checksum.
+<!-- doc-snippet: skip -->
+```python
+ws.submit()
+```
+
+The checks that bind the record to its file are errors under every policy: the IRI must be the one `parameters_sha256` gives, a runnable copy must name the source's checksum, and a mirror must carry the source's checksum. The registry also downloads the files and checks them itself: the source's checksum and fingerprint, the runnable copy against the conversion of the source, and each mirror's checksum.
 
 ## Corrections
 

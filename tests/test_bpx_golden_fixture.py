@@ -185,6 +185,7 @@ def test_header_lineage_lands_on_the_record() -> None:
         "name": "Synthetic DFN parameter set (golden fixture)",
         "model": "DFN",
         "version": "1.0",
+        "layout": "v0",  # declares 1.0, keeps the v0.x layout
     }
     # Header.References is free text here (not a URL/DOI), so it rides a
     # note verbatim — provenance.citation is URI-typed by the schema.

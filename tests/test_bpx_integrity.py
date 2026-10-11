@@ -216,16 +216,40 @@ def test_a_v1_export_of_a_0x_record_is_the_upgraded_file() -> None:
 
 def test_a_record_of_a_v0_layout_v1_file_exports_like_its_runnable_copy() -> None:
     # The fixture declares BPX 1.0 but keeps the v0.x layout (as the Schmitt et
-    # al. 2026 file does). The record says so in a note, so its 1.x export
-    # makes the same conversion as the runnable copy.
+    # al. 2026 file does). model_context.layout says so, so the record's 1.x
+    # export makes the same conversion as the runnable copy.
     res = from_bpx_parameters(FIXTURE)
     assert any("keeps the v0.x layout" in w for w in res.warnings)
     record = res.to_parameter_set(virtual_cell=True)
-    assert any(note.startswith("BPX layout: ") for note in record["notes"])
+    context = record["parameter_set"]["model_context"]
+    assert (context["version"], context["layout"]) == ("1.0", "v0")
+    assert not any(note.startswith("BPX layout") for note in record.get("notes", []))
     exported = to_bpx(record, bpx_version="1.1.0").bpx
     runnable = upgrade_bpx(FIXTURE).document
     runnable.pop("Validation")
     assert exported == runnable
+
+
+def test_the_layout_is_the_one_the_file_uses() -> None:
+    assert _record()["parameter_set"]["model_context"]["layout"] == "v1"
+    legacy = to_bpx(_example("BPX NMC111 pouch")).bpx  # a 0.1.0 file
+    assert from_bpx_parameters(legacy).to_parameter_set(virtual_cell=True)["parameter_set"][
+        "model_context"
+    ]["layout"] == "v0"
+    # The field decides the export, not the version: the same record told
+    # "v1" writes its State as it holds it, with nothing added.
+    record = from_bpx_parameters(FIXTURE).to_parameter_set(virtual_cell=True)
+    record["parameter_set"]["model_context"]["layout"] = "v1"
+    state = to_bpx(record, bpx_version="1.1.0").bpx["State"]
+    assert "Initial state-of-charge" not in state["Initial conditions"]
+    # A hand-built record without the field goes by its version.
+    del record["parameter_set"]["model_context"]["layout"]
+    assert "Initial state-of-charge" not in to_bpx(record, bpx_version="1.1.0").bpx["State"]["Initial conditions"]
+    record["parameter_set"]["model_context"]["version"] = "0.4.0"
+    assert to_bpx(record, bpx_version="1.1.0").bpx["State"]["Initial conditions"]["Initial state-of-charge"] == 1
+    bad = from_bpx_parameters(FIXTURE).to_parameter_set(virtual_cell=True)
+    bad["parameter_set"]["model_context"]["layout"] = "v2"
+    assert not validate_record_report(bad).ok
 
 
 # ── F3: numbers in the units BPX states ──────────────────────────────────────
@@ -519,6 +543,56 @@ def test_a_corrected_file_names_the_record_it_supersedes() -> None:
         )
 
 
+# ── Publishing through the workspace ─────────────────────────────────────────
+
+
+def test_the_workspace_takes_a_ready_built_record(tmp_path: Path) -> None:
+    import battinfo
+    from battinfo.ws import SubmitError
+
+    ws = battinfo.workspace(tmp_path / "lab", registry_url=None)
+    result = from_bpx_parameters(FIXTURE)
+    draft = result.to_parameter_set(virtual_cell=True)
+    ws.add("parameter_set", record=draft)
+    batch = create_parameter_set(
+        name="Chen 2020 - graphite", material_kind="graphite",
+        claims=[{"parameter": "particle_radius", "quantity": {"value": 5.86e-6, "unit": "m"}}],
+    )
+    ws.add("parameter_set", record=batch)
+    saved = ws.save()
+    assert {item["id"] for item in saved["parameter_sets"]} == {
+        draft["parameter_set"]["id"], batch["parameter_set"]["id"],
+    }
+    # ws.submit validates under the publisher policy before it sends
+    # anything: a parameter file without its source file is refused.
+    credentials = {"registry_url": "https://registry.example.org", "api_key": "k",
+                   "workspace_id": "w", "publisher_id": "p"}
+    with pytest.raises(SubmitError) as caught:
+        ws.submit(**credentials)
+    assert [f["status"] for f in caught.value.failed] == ["invalid"]
+    assert "a parameter file is published with its file" in caught.value.failed[0]["error"]
+    # With the file attached, the same IRI is replaced and the check passes.
+    source = bpx_file_distribution(FIXTURE, content_url=SOURCE_URL)
+    ws.add("parameter_set", record=result.to_parameter_set(virtual_cell=True, distributions=[source]))
+    ws.save()
+    stored = json.loads(next((tmp_path / "lab").rglob(f"*{draft['parameter_set']['id'][-19:]}.json")).read_text(
+        encoding="utf-8"
+    ))
+    assert stored["parameter_set"]["distributions"][0]["role"] == "source"
+    assert validate_record_report(stored, policy="publisher").ok
+
+
+def test_a_ready_built_record_comes_alone(tmp_path: Path) -> None:
+    import battinfo
+
+    ws = battinfo.workspace(tmp_path / "lab", registry_url=None)
+    record = from_bpx_parameters(FIXTURE).to_parameter_set(virtual_cell=True)
+    with pytest.raises(ValueError, match="takes the record alone"):
+        ws.add("parameter_set", record=record, name="x")
+    with pytest.raises(TypeError, match="'parameter_set' body"):
+        ws.add("parameter_set", record={"cell_spec": {}})
+
+
 # ── F8: strict parsing ───────────────────────────────────────────────────────
 
 
@@ -572,6 +646,22 @@ def test_naming_the_material_of_a_blended_electrode_says_so() -> None:
 def test_a_bad_material_names_its_key_and_where_the_kinds_are() -> None:
     with pytest.raises(ValueError, match=r"materials\['positive'\].*material_kind_keys\(\)"):
         from_bpx_parameters(FIXTURE).to_parameter_set(virtual_cell=True, materials={"positive": "unobtainium"})
+
+
+def test_only_a_material_part_has_a_phase() -> None:
+    record = from_bpx_parameters(FIXTURE).to_parameter_set(virtual_cell=True)
+    body = record["parameter_set"]
+    with pytest.raises(ValueError, match="only a material part"):
+        create_parameter_set(
+            name="x", virtual_cell=True, parameters_sha256=body["parameters_sha256"],
+            parts=[{**body["parts"][0], "phase": "Primary"}],
+        )
+    phased = copy.deepcopy(record)
+    phased["parameter_set"]["parts"][0]["phase"] = "Primary"  # the cell part
+    assert not validate_record_report(phased).ok
+    phased["parameter_set"]["parts"][0].pop("phase")
+    phased["parameter_set"]["parts"][1]["phase"] = "Primary"  # the negative material part
+    assert validate_record_report(phased).ok
 
 
 def test_distributions_must_be_a_list() -> None:

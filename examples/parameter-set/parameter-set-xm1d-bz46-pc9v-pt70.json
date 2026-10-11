@@ -10,7 +10,8 @@
       "tool": "BPX",
       "name": "Parameterisation example of an LFP|graphite 2 Ah cylindrical 18650 cell.",
       "model": "DFN",
-      "version": "0.1.0"
+      "version": "0.1.0",
+      "layout": "v0"
     },
     "parts": [
       {

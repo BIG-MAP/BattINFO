@@ -630,8 +630,9 @@ def to_bpx(
     the annex becomes ``User-defined``, and the header comes from the
     record's model context. The document follows the layout of the version
     it declares: the source's own version by default, or ``bpx_version``. A
-    record read from a v0.x-layout file and exported at a 1.x version goes
-    through the same layout conversion as :func:`upgrade_bpx`, so the State
+    record read from a v0.x-layout file (``model_context.layout`` is
+    ``"v0"``) and exported at a 1.x version goes through the same layout
+    conversion as :func:`upgrade_bpx`, so the State
     values the bpx package's own v0-to-v1 migration adds (initial state of
     charge 1, and the temperatures it resolves) are added here too, and
     named in the warnings. A claim in another unit than BPX states is
@@ -939,11 +940,6 @@ _PART_BPX_BLOCKS: dict[str, tuple[str, str]] = {
 
 _REFERENCES_NOTE_PREFIX = "BPX Header.References: "
 
-# A note on a record read from a file that declares BPX 1.0 or later but
-# keeps the v0.x layout: the record cannot otherwise tell, and a v1 export
-# of it must make the same layout conversion upgrade_bpx makes.
-_V0_LAYOUT_NOTE_PREFIX = "BPX layout: "
-
 # The OCP branches BPX 1.0 added for single-phase electrodes: branch -> field.
 _OCP_BRANCH_FIELDS: dict[str, str] = {
     "lithiation": "OCP (lithiation) [V]",
@@ -1086,14 +1082,16 @@ def _ocp_branch(claim: Mapping[str, Any]) -> str | None:
     return branch if branch in _OCP_BRANCH_FIELDS else None
 
 
-def _record_uses_v0_layout(record: Mapping[str, Any], source_version: str | None) -> bool:
-    """Whether the record was read from a v0.x-layout file (a 0.x version, or the layout note)."""
-    if source_version is not None and version_tuple(source_version) and not uses_v1_layout(source_version):
-        return True
-    return any(
-        isinstance(note, str) and note.startswith(_V0_LAYOUT_NOTE_PREFIX)
-        for note in record.get("notes") or []
-    )
+def _record_uses_v0_layout(model_context: Mapping[str, Any], source_version: str | None) -> bool:
+    """Whether the record was read from a v0.x-layout file.
+
+    ``model_context.layout`` says so; a record without it (built by hand)
+    goes by its version, so a 0.x version means the v0.x layout.
+    """
+    layout = model_context.get("layout")
+    if layout in ("v0", "v1"):
+        return layout == "v0"
+    return source_version is not None and bool(version_tuple(source_version)) and not uses_v1_layout(source_version)
 
 
 def _parameter_file_to_bpx(
@@ -1125,7 +1123,7 @@ def _parameter_file_to_bpx(
     source_version = declared if isinstance(declared, str) and declared else None
     target_version = str(bpx_version or source_version or _BPX_VERSION)
     target_v1 = uses_v1_layout(target_version)
-    v0_source = _record_uses_v0_layout(record, source_version)
+    v0_source = _record_uses_v0_layout(model_context, source_version)
     warnings: list[str] = []
     lacking: list[str] = []
     blocks: dict[str, dict[str, Any]] = {"Cell": {}}
@@ -1876,16 +1874,14 @@ class BpxParameterImportResult:
                 notes = list(record_kwargs.get("notes") or [])
                 notes.append(f"{_REFERENCES_NOTE_PREFIX}{self.references}")
                 record_kwargs["notes"] = notes
-        layout_note = _v0_layout_note(self._document)
-        if layout_note is not None:
-            notes = list(record_kwargs.get("notes") or [])
-            notes.append(layout_note)
-            record_kwargs["notes"] = notes
         model_context = {
             "tool": "BPX",
             **({"name": self.title} if self.title else {}),
             **({"model": self.model_type} if self.model_type else {}),
             **({"version": self.bpx_version} if self.bpx_version else {}),
+            # The layout the file actually uses: a file declaring 1.0 may
+            # still keep the v0.x one, and a v1 export must then convert it.
+            "layout": "v0" if is_v0_layout(self._document) else "v1",
         }
         link_kwargs: dict[str, Any] = {
             "cell_spec_id": {"cell_spec_id": cell_spec_id},
@@ -2046,19 +2042,6 @@ def _v0_layout_in_v1_file(document: Mapping[str, Any]) -> tuple[Any, list[str]] 
     if not fields or not uses_v1_layout(declared):
         return None
     return declared, fields
-
-
-def _v0_layout_note(document: Mapping[str, Any]) -> str | None:
-    """The record note for a file that declares BPX 1.0 or later but keeps the v0.x layout."""
-    found = _v0_layout_in_v1_file(document)
-    if found is None:
-        return None
-    declared, fields = found
-    return (
-        f"{_V0_LAYOUT_NOTE_PREFIX}the file declares BPX {declared} but keeps the v0.x layout "
-        f"({', '.join(fields)}), which parsers since BPX 1.0 reject; a 1.x export of this record "
-        "makes the layout conversion upgrade_bpx makes."
-    )
 
 
 def _material_target(value: Any, side: str) -> dict[str, str]:
