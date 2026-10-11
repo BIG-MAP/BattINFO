@@ -4,7 +4,8 @@ A test spec's *descriptive* layer (what the test did, queryable but not executed
 is an ordered list of typed :class:`Step` objects — its ``method``.  Humans author
 this with PyBaMM-style experiment strings, which :func:`parse_experiment` compiles
 into the structured model; :func:`render_method` is the inverse, turning a method
-back into PyBaMM strings for display and round-tripping.  :func:`compute_facets`
+back into PyBaMM strings for display and round-tripping (:func:`render_experiment`
+gives one flat list with every loop unrolled).  :func:`compute_facets`
 derives a flat rollup index so agents can filter over a spec cheaply.
 
 The PyBaMM grammar is reimplemented here on purpose: PyBaMM pulls in scipy/casadi
@@ -29,6 +30,7 @@ Examples::
 from __future__ import annotations
 
 import re
+from decimal import Decimal
 from fractions import Fraction
 from typing import Any, Optional, Sequence
 
@@ -43,6 +45,7 @@ __all__ = [
     "parse_termination",
     "render_step",
     "render_method",
+    "render_experiment",
     "compute_facets",
     "ExperimentSyntaxError",
     "STEP_MODES",
@@ -490,12 +493,33 @@ def parse_experiment(steps: Sequence[str], cycles: int | None = None) -> list[St
 # ── Rendering (inverse of parsing) ──────────────────────────────────────────
 
 
+# Rendering writes every value in the unit it is stated in, so a current
+# density stays a current density and a duration in hours stays in hours. A step
+# that cannot be written faithfully renders as its description (or a neutral
+# label), never as a wrong value.
+
+# Units in which a C-rate value can be written in the C/n form.
+_CRATE_UNITS = frozenset({"A/Ah", "C", "1/h", "h-1"})
+
+# Unrolling a loop is bounded, so a corrupt repeat count cannot exhaust memory;
+# past this many strings a loop renders as one "Repeat N times: (...)" line.
+_MAX_RENDERED_STEPS = 100_000
+
+
 def _fmt_number(value: float) -> str:
-    return f"{value:g}"
+    """Up to 12 significant digits, never in exponent form (the grammar reads
+    no exponents). Twelve digits keep every real setpoint and drop the float
+    noise of unit scaling (9 mA parses to 0.009000000000000001 A)."""
+    text = format(value, ".12g")
+    if "e" in text:
+        text = format(Decimal(text), "f")
+    if "." in text:
+        text = text.rstrip("0").rstrip(".")
+    return "0" if text in ("", "-0") else text
 
 
 def _fmt_crate(value: float) -> str:
-    if value >= 1.0:
+    if value >= 1.0 or value <= 0.0:
         return f"{_fmt_number(value)}C"
     inv = 1.0 / value
     rounded = round(inv)
@@ -504,67 +528,110 @@ def _fmt_crate(value: float) -> str:
     return f"{_fmt_number(value)}C"
 
 
-def _fmt_setpoint(kind: str, qty: Quantity) -> str:
+def _fmt_quantity(qty: Quantity) -> str:
+    """A value with its unit as stated; a window renders as ``lo..hi unit``."""
     if qty.value is None:
-        # Window form ({min_value, max_value}) — render as a range label.
         lo = _fmt_number(qty.min_value) if qty.min_value is not None else "?"
         hi = _fmt_number(qty.max_value) if qty.max_value is not None else "?"
         return f"{lo}..{hi} {qty.unit}"
-    if kind == "c_rate":
-        return _fmt_crate(qty.value)
-    if kind == "current":
-        return f"{_fmt_number(qty.value)} A"
-    if kind == "power":
-        return f"{_fmt_number(qty.value)} W"
-    if kind == "resistance":
-        return f"{_fmt_number(qty.value)} Ohm"
-    if kind == "voltage":
-        return f"{_fmt_number(qty.value)} V"
     return f"{_fmt_number(qty.value)} {qty.unit}"
 
 
+def _fmt_setpoint(kind: str, qty: Quantity) -> str:
+    if kind == "c_rate" and qty.value is not None and qty.unit in _CRATE_UNITS:
+        return _fmt_crate(qty.value)
+    return _fmt_quantity(qty)
+
+
+def _plural(value: float, word: str) -> str:
+    return f"{_fmt_number(value)} {word}" + ("" if value == 1 else "s")
+
+
 def _fmt_duration(qty: Quantity) -> str:
-    seconds = _require_value(qty, "A step duration")
-    if seconds % 3600 == 0:
-        return f"for {_fmt_number(seconds / 3600)} hours"
-    if seconds % 60 == 0:
-        return f"for {_fmt_number(seconds / 60)} minutes"
-    return f"for {_fmt_number(seconds)} seconds"
+    if qty.value is None:
+        return f"for {_fmt_quantity(qty)}"
+    seconds_per_unit = _TIME_TABLE.get(qty.unit.strip().lower())
+    if seconds_per_unit is None:
+        return f"for {_fmt_quantity(qty)}"  # a unit the grammar has no word for
+    if seconds_per_unit == 3600.0:
+        return f"for {_plural(qty.value, 'hour')}"
+    if seconds_per_unit == 60.0:
+        return f"for {_plural(qty.value, 'minute')}"
+    # Stated in seconds (the parser's canonical unit): the largest whole unit,
+    # so "Rest for 30 minutes" reads back as written.
+    seconds = qty.value
+    if seconds and seconds % 3600 == 0:
+        return f"for {_plural(seconds / 3600, 'hour')}"
+    if seconds and seconds % 60 == 0:
+        return f"for {_plural(seconds / 60, 'minute')}"
+    return f"for {_plural(seconds, 'second')}"
 
 
 def _fmt_termination(term: Termination) -> str:
-    if term.quantity == "c_rate":
+    if term.quantity == "duration":
+        return _fmt_duration(Quantity(value=term.value, unit=term.unit))
+    if term.quantity == "c_rate" and term.unit in _CRATE_UNITS:
         return f"until {_fmt_crate(term.value)}"
-    suffix = {"voltage": "V", "current": "A", "capacity": "Ah"}.get(term.quantity, term.unit)
-    return f"until {_fmt_number(term.value)} {suffix}"
+    if term.quantity == "soc":
+        # The unit alone ("1") would not say the cutoff is a state of charge.
+        unit = "" if term.unit == "1" else f" {term.unit}"
+        return f"until {_fmt_number(term.value)}{unit} SOC"
+    return f"until {_fmt_number(term.value)} {term.unit}"
+
+
+def _step_label(step: Step) -> str:
+    """The fallback for a step the grammar cannot write: its description, or a
+    neutral label that asserts nothing it does not know."""
+    return step.description or (f"{step.direction} {step.mode}" if step.direction else step.mode)
+
+
+def _step_head(step: Step) -> str | None:
+    """The ``Charge at ...`` / ``Hold at ...`` / ``Rest`` part, or ``None`` when
+    the step cannot be written faithfully in the grammar."""
+    if step.mode == "rest":
+        return "Rest"
+    if step.mode == "cv":
+        volt = step.setpoints.get("voltage")
+        return f"Hold at {_fmt_quantity(volt)}" if volt is not None else "Hold"
+    if step.mode not in ("cc", "cp", "cr", "cccv"):
+        return None  # eis, scan: PyBaMM has no string form
+    if step.direction not in ("charge", "discharge"):
+        return None  # writing Charge or Discharge would be a guess
+    word = "Charge" if step.direction == "charge" else "Discharge"
+    if step.mode == "cccv":
+        rate = next((k for k in step.setpoints if k != "voltage"), None)
+        volt = step.setpoints.get("voltage")
+        rate_str = f" at {_fmt_setpoint(rate, step.setpoints[rate])}" if rate else ""
+        volt_str = f" to {_fmt_quantity(volt)} then hold" if volt is not None else ""
+        return f"{word}{rate_str}{volt_str}"
+    kind = next(iter(step.setpoints), None)
+    return f"{word} at {_fmt_setpoint(kind, step.setpoints[kind])}" if kind else word
+
+
+def _fmt_group(group: Step) -> str:
+    """A loop as one line: ``Repeat 3 times: (step; step)``."""
+    inner = "; ".join(render_step(s) for s in group.steps)
+    if group.count is None:
+        return group.description or f"Repeat (count not stated): ({inner})"
+    times = "time" if group.count == 1 else "times"
+    return f"Repeat {group.count} {times}: ({inner})"
 
 
 def render_step(step: Step) -> str:
     """Render a single :class:`Step` to a PyBaMM-style string.
 
-    Best-effort: modes PyBaMM cannot express (eis, scan, cccv, a non-top-level
-    group) render to a readable label rather than raising, so this never crashes
-    on a structured method. The cc/cv/cp/cr/rest forms round-trip exactly."""
-    if step.mode == "rest":
-        head = "Rest"
-    elif step.mode == "cv":
-        volt = step.setpoints.get("voltage")
-        head = f"Hold at {_fmt_number(volt.value)} V" if volt and volt.value is not None else "Hold"
-    elif step.mode in ("cc", "cp", "cr"):
-        word = "Charge" if step.direction == "charge" else "Discharge"
-        kind = next(iter(step.setpoints), None)
-        head = f"{word} at {_fmt_setpoint(kind, step.setpoints[kind])}" if kind else word
-    elif step.mode == "cccv":
-        word = "Charge" if step.direction == "charge" else "Discharge"
-        rate = next((k for k in step.setpoints if k != "voltage"), None)
-        volt = step.setpoints.get("voltage")
-        rate_str = f" at {_fmt_setpoint(rate, step.setpoints[rate])}" if rate else ""
-        volt_str = f" to {_fmt_number(volt.value)} V then hold" if volt and volt.value is not None else ""
-        head = f"{word}{rate_str}{volt_str}"
-    else:
-        # eis / scan / group / unknown — not PyBaMM-expressible; use a label.
-        return step.description or (f"{step.direction} {step.mode}".strip() if step.direction else step.mode)
-
+    Values keep the units they are stated in, so ``0.05 mA/cm2`` renders as
+    ``0.05 mA/cm2`` and a 6 h rest as ``Rest for 6 hours``. The cc/cv/cp/cr/rest
+    forms the parser produces read back to the same step. A step the grammar
+    cannot express (eis, scan, a cc step with no charge or discharge direction)
+    renders as its description or a neutral label rather than a wrong value, and
+    a group renders as one ``Repeat N times: (...)`` line, so this never raises
+    on a structured method."""
+    if step.mode == "group":
+        return _fmt_group(step)
+    head = _step_head(step)
+    if head is None:
+        return _step_label(step)
     clauses: list[str] = []
     if step.duration is not None:
         clauses.append(_fmt_duration(step.duration))
@@ -572,15 +639,46 @@ def render_step(step: Step) -> str:
     return head + (" " + " or ".join(clauses) if clauses else "")
 
 
+def _unrollable_count(group: Step) -> int | None:
+    """The repeat count of a loop when it can be unrolled (a whole number of at
+    least 1), otherwise ``None``."""
+    return group.count if group.count is not None and group.count >= 1 else None
+
+
+def _render_sequence(steps: Sequence[Step]) -> list[str]:
+    """Render steps in order, unrolling each loop: its steps repeated ``count``
+    times, the way ``pybamm.Experiment([...] * n)`` writes a repeat. A loop
+    with no count, or one too large to unroll, stays one ``Repeat`` line."""
+    out: list[str] = []
+    for step in steps:
+        if step.mode != "group":
+            out.append(render_step(step))
+            continue
+        count = _unrollable_count(step)
+        inner = _render_sequence(step.steps) if count else []
+        if count and len(inner) * count <= _MAX_RENDERED_STEPS:
+            out.extend(inner * count)
+        else:
+            out.append(render_step(step))
+    return out
+
+
 def render_method(steps: Sequence[Step]) -> tuple[list[str], int]:
     """Render a ``method`` back to ``(step_strings, cycles)``.
 
-    A single top-level ``group`` is unwrapped to ``(inner_strings, count)``;
-    otherwise the steps render flat with ``cycles == 1``."""
-    if len(steps) == 1 and steps[0].mode == "group":
-        group = steps[0]
-        return [render_step(s) for s in group.steps], int(group.count or 1)
-    return [render_step(s) for s in steps], 1
+    A single top-level ``group`` with a count unwraps to ``(inner_strings,
+    count)``, the grammar's own repeat form (``parse_experiment(strings,
+    cycles)``). Every other loop is unrolled in place."""
+    count = _unrollable_count(steps[0]) if len(steps) == 1 and steps[0].mode == "group" else None
+    if count:
+        return _render_sequence(steps[0].steps), count
+    return _render_sequence(steps), 1
+
+
+def render_experiment(steps: Sequence[Step]) -> list[str]:
+    """The whole method as one flat list of PyBaMM-style strings, every loop
+    unrolled, which is the list ``pybamm.Experiment`` takes."""
+    return _render_sequence(steps)
 
 
 # ── Facets (derived filter index) ──────────────────────────────────────────
