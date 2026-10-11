@@ -274,10 +274,10 @@ def _load_cell_spec_input(path: Path) -> CellSpec:
 
 def _init_example_document(profile: str) -> dict[str, Any]:
     if profile == "cell-spec":
+        # No placeholder id: saving the filled-in record mints the IRI.
         return {
             "schema_version": SCHEMA_VERSION,
             "cell_spec": {
-                "id": "https://w3id.org/battinfo/spec/0000-0000-0000-0000",
                 "name": "ExampleManufacturer MODEL-001",
                 "manufacturer": {"type": "Organization", "name": "ExampleManufacturer"},
                 "model": "MODEL-001",
@@ -903,6 +903,12 @@ def map(
     typer.echo(f"Wrote JSON-LD mapping to {out}")
 
 
+_TEMPLATE_UID_HELP = (
+    "Optional 16-char UID that pins the IRI. Without it the template has no id, "
+    "and saving the filled-in record mints one."
+)
+
+
 @template_app.command("cell-spec")
 def template_cell_spec(
     manufacturer: str = typer.Option("ExampleManufacturer", help="Manufacturer name."),
@@ -911,7 +917,7 @@ def template_cell_spec(
     cell_format: str = typer.Option("unknown", "--cell-format", help="Cell format."),
     country_of_origin: str | None = typer.Option(None, "--country-of-origin", help="Optional country of origin."),
     year: int | None = typer.Option(None, help="Optional model or release year."),
-    uid: str | None = typer.Option("0000000000000000", help="Optional 16-char UID."),
+    uid: str | None = typer.Option(None, help=_TEMPLATE_UID_HELP),
     out: Path | None = typer.Option(None, help="Optional output JSON path."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
@@ -936,7 +942,7 @@ def template_cell_spec(
         payload = {
             "status": "template",
             "resource": "cell-spec",
-            "id": record["cell_spec"]["id"],
+            "id": record["cell_spec"].get("id"),  # absent until the save mints it
             "path": str(out),
         }
         if fmt == "json":
@@ -951,7 +957,7 @@ def template_cell_spec(
     payload = {
         "status": "template",
         "resource": "cell-spec",
-        "id": record["cell_spec"]["id"],
+        "id": record["cell_spec"].get("id"),  # absent until the save mints it
         "path": "",
     }
     _emit_table([payload], ["status", "resource", "id", "path"])
@@ -1015,14 +1021,11 @@ def template_cell_spec_draft(
 
 @template_app.command("cell-instance")
 def template_cell_instance(
-    cell_spec_id: str = typer.Option(
-        "https://w3id.org/battinfo/spec/0000-0000-0000-0000",
-        help="Canonical cell-spec IRI.",
+    cell_spec_id: str | None = typer.Option(
+        None, help="Canonical cell-spec IRI. Left out of the template when not given.",
     ),
     source_type: str = typer.Option("measurement", help="Source type: measurement|lab|bms|other."),
-    uid: str | None = typer.Option(
-        None, help="Optional 16-char UID that pins the IRI. Without it the record has no id and saving mints one."
-    ),
+    uid: str | None = typer.Option(None, help=_TEMPLATE_UID_HELP),
     out: Path | None = typer.Option(None, help="Optional output JSON path."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
@@ -1068,9 +1071,9 @@ def template_cell_instance(
 def template_dataset(
     title: str = typer.Option("Example Dataset", help="Dataset title."),
     source_type: str = typer.Option("other", help="Source type: measurement|lab|simulation|external|other."),
-    uid: str | None = typer.Option("0000000000000000", help="Optional 16-char UID."),
+    uid: str | None = typer.Option(None, help=_TEMPLATE_UID_HELP),
     related_cell_id: list[str] = typer.Option(
-        ["https://w3id.org/battinfo/cell/0000-0000-0000-0000"],
+        [],
         "--related-cell-id",
         help="Related cell IRI. Repeat for multiple.",
     ),
@@ -1097,7 +1100,7 @@ def template_dataset(
         payload = {
             "status": "template",
             "resource": "dataset",
-            "id": record["dataset"]["id"],
+            "id": record["dataset"].get("id"),  # absent until the save mints it
             "path": str(out),
         }
         if fmt == "json":
@@ -1112,7 +1115,7 @@ def template_dataset(
     payload = {
         "status": "template",
         "resource": "dataset",
-        "id": record["dataset"]["id"],
+        "id": record["dataset"].get("id"),  # absent until the save mints it
         "path": "",
     }
     _emit_table([payload], ["status", "resource", "id", "path"])
@@ -1124,7 +1127,7 @@ def template_test_spec(
     name: str = typer.Option("Example Test Protocol", help="Human-readable protocol name."),
     kind: str = typer.Option("other", help="Test kind."),
     source_type: str = typer.Option("manual", help="Source type: manual|lab|simulation|other."),
-    uid: str | None = typer.Option("0000000000000000", help="Optional 16-char UID."),
+    uid: str | None = typer.Option(None, help=_TEMPLATE_UID_HELP),
     out: Path | None = typer.Option(None, help="Optional output JSON path."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
@@ -1146,7 +1149,7 @@ def template_test_spec(
         payload = {
             "status": "template",
             "resource": "test-protocol",
-            "id": record["test_spec"]["id"],
+            "id": record["test_spec"].get("id"),  # absent until the save mints it
             "path": str(out),
         }
         if fmt == "json":
@@ -1161,7 +1164,7 @@ def template_test_spec(
     payload = {
         "status": "template",
         "resource": "test-protocol",
-        "id": record["test_spec"]["id"],
+        "id": record["test_spec"].get("id"),  # absent until the save mints it
         "path": "",
     }
     _emit_table([payload], ["status", "resource", "id", "path"])
@@ -1169,14 +1172,13 @@ def template_test_spec(
 
 @template_app.command("test")
 def template_test(
-    cell_id: str = typer.Option(
-        "https://w3id.org/battinfo/cell/0000-0000-0000-0000",
-        help="Canonical cell-instance IRI under test.",
+    cell_id: str | None = typer.Option(
+        None, help="Canonical cell-instance IRI under test. Left out of the template when not given.",
     ),
     name: str = typer.Option("Example Test", help="Human-readable test name."),
     kind: str = typer.Option("other", help="Test kind."),
     source_type: str = typer.Option("measurement", help="Source type: measurement|lab|simulation|manual|other."),
-    uid: str | None = typer.Option("0000000000000000", help="Optional 16-char UID."),
+    uid: str | None = typer.Option(None, help=_TEMPLATE_UID_HELP),
     dataset_id: list[str] = typer.Option([], "--dataset-id", help="Linked dataset IRI. Repeat for multiple."),
     out: Path | None = typer.Option(None, help="Optional output JSON path."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
@@ -1201,7 +1203,7 @@ def template_test(
         payload = {
             "status": "template",
             "resource": "test",
-            "id": record["test"]["id"],
+            "id": record["test"].get("id"),  # absent until the save mints it
             "path": str(out),
         }
         if fmt == "json":
@@ -1216,7 +1218,7 @@ def template_test(
     payload = {
         "status": "template",
         "resource": "test",
-        "id": record["test"]["id"],
+        "id": record["test"].get("id"),  # absent until the save mints it
         "path": "",
     }
     _emit_table([payload], ["status", "resource", "id", "path"])
@@ -1230,7 +1232,7 @@ def library_template_cell_spec(
     cell_format: str = typer.Option("unknown", "--cell-format", help="Cell format."),
     positive_electrode_basis: str = typer.Option("unknown", help="Positive electrode basis."),
     negative_electrode_basis: str = typer.Option("unknown", help="Negative electrode basis."),
-    uid: str | None = typer.Option("0000000000000000", help="Optional 16-char UID."),
+    uid: str | None = typer.Option(None, help=_TEMPLATE_UID_HELP),
     out: Path | None = typer.Option(None, help="Optional output JSON path."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
@@ -1255,7 +1257,7 @@ def library_template_cell_spec(
         payload = {
             "status": "template",
             "resource": "library-cell-spec",
-            "id": record["specification"]["id"],
+            "id": record["specification"].get("id"),  # absent until the save mints it
             "path": str(out),
         }
         if fmt == "json":
@@ -1270,7 +1272,7 @@ def library_template_cell_spec(
     payload = {
         "status": "template",
         "resource": "library-cell-spec",
-        "id": record["specification"]["id"],
+        "id": record["specification"].get("id"),  # absent until the save mints it
         "path": "",
     }
     _emit_table([payload], ["status", "resource", "id", "path"])

@@ -869,7 +869,7 @@ $ battinfo template cell-spec [OPTIONS]
 * `--cell-format <str>`: Cell format.  [default: unknown]
 * `--country-of-origin <str>`: Optional country of origin.
 * `--year <int>`: Optional model or release year.
-* `--uid <str>`: Optional 16-char UID.  [default: 0000000000000000]
+* `--uid <str>`: Optional 16-char UID that pins the IRI. Without it the template has no id, and saving the filled-in record mints one.
 * `--out <path>`: Optional output JSON path.
 * `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
@@ -913,9 +913,9 @@ $ battinfo template cell-instance [OPTIONS]
 
 **Options**:
 
-* `--cell-spec-id <str>`: Canonical cell-spec IRI.  [default: https://w3id.org/battinfo/spec/0000-0000-0000-0000]
+* `--cell-spec-id <str>`: Canonical cell-spec IRI. Left out of the template when not given.
 * `--source-type <str>`: Source type: measurement|lab|bms|other.  [default: measurement]
-* `--uid <str>`: Optional 16-char UID that pins the IRI. Without it the record has no id and saving mints one.
+* `--uid <str>`: Optional 16-char UID that pins the IRI. Without it the template has no id, and saving the filled-in record mints one.
 * `--out <path>`: Optional output JSON path.
 * `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
@@ -934,8 +934,8 @@ $ battinfo template dataset [OPTIONS]
 
 * `--title <str>`: Dataset title.  [default: Example Dataset]
 * `--source-type <str>`: Source type: measurement|lab|simulation|external|other.  [default: other]
-* `--uid <str>`: Optional 16-char UID.  [default: 0000000000000000]
-* `--related-cell-id <str>`: Related cell IRI. Repeat for multiple.  [default: https://w3id.org/battinfo/cell/0000-0000-0000-0000]
+* `--uid <str>`: Optional 16-char UID that pins the IRI. Without it the template has no id, and saving the filled-in record mints one.
+* `--related-cell-id <str>`: Related cell IRI. Repeat for multiple.
 * `--related-test-id <str>`: Related test IRI. Repeat for multiple.
 * `--out <path>`: Optional output JSON path.
 * `--format <str>`: Output format: table|json.  [default: json]
@@ -956,7 +956,7 @@ $ battinfo template test-protocol [OPTIONS]
 * `--name <str>`: Human-readable protocol name.  [default: Example Test Protocol]
 * `--kind <str>`: Test kind.  [default: other]
 * `--source-type <str>`: Source type: manual|lab|simulation|other.  [default: manual]
-* `--uid <str>`: Optional 16-char UID.  [default: 0000000000000000]
+* `--uid <str>`: Optional 16-char UID that pins the IRI. Without it the template has no id, and saving the filled-in record mints one.
 * `--out <path>`: Optional output JSON path.
 * `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
@@ -976,7 +976,7 @@ $ battinfo template test-spec [OPTIONS]
 * `--name <str>`: Human-readable protocol name.  [default: Example Test Protocol]
 * `--kind <str>`: Test kind.  [default: other]
 * `--source-type <str>`: Source type: manual|lab|simulation|other.  [default: manual]
-* `--uid <str>`: Optional 16-char UID.  [default: 0000000000000000]
+* `--uid <str>`: Optional 16-char UID that pins the IRI. Without it the template has no id, and saving the filled-in record mints one.
 * `--out <path>`: Optional output JSON path.
 * `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
@@ -993,11 +993,11 @@ $ battinfo template test [OPTIONS]
 
 **Options**:
 
-* `--cell-id <str>`: Canonical cell-instance IRI under test.  [default: https://w3id.org/battinfo/cell/0000-0000-0000-0000]
+* `--cell-id <str>`: Canonical cell-instance IRI under test. Left out of the template when not given.
 * `--name <str>`: Human-readable test name.  [default: Example Test]
 * `--kind <str>`: Test kind.  [default: other]
 * `--source-type <str>`: Source type: measurement|lab|simulation|manual|other.  [default: measurement]
-* `--uid <str>`: Optional 16-char UID.  [default: 0000000000000000]
+* `--uid <str>`: Optional 16-char UID that pins the IRI. Without it the template has no id, and saving the filled-in record mints one.
 * `--dataset-id <str>`: Linked dataset IRI. Repeat for multiple.
 * `--out <path>`: Optional output JSON path.
 * `--format <str>`: Output format: table|json.  [default: json]
@@ -1188,7 +1188,7 @@ $ battinfo library template cell-spec [OPTIONS]
 * `--cell-format <str>`: Cell format.  [default: unknown]
 * `--positive-electrode-basis <str>`: Positive electrode basis.  [default: unknown]
 * `--negative-electrode-basis <str>`: Negative electrode basis.  [default: unknown]
-* `--uid <str>`: Optional 16-char UID.  [default: 0000000000000000]
+* `--uid <str>`: Optional 16-char UID that pins the IRI. Without it the template has no id, and saving the filled-in record mints one.
 * `--out <path>`: Optional output JSON path.
 * `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.

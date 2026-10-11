@@ -224,13 +224,14 @@ def test_created_record_passes_strict_schema_validation() -> None:
     assert report.ok, report.errors
 
 
-def test_template_record_passes_strict_schema_validation() -> None:
-    # The default template keeps the all-zero placeholder IRI, which validation
-    # refuses so an unedited template is never saved; everything else is valid.
-    report = validate_record_report(template_parameter_set())
-    assert [issue.code for issue in report.errors] == ["identity.placeholder_iri"]
+def test_template_record_passes_strict_schema_validation(tmp_path) -> None:
+    # The template carries no id; with one pinned it is valid as it stands, and
+    # saving the default template mints the id from its target and name.
+    assert "id" not in template_parameter_set()["parameter_set"]
     report = validate_record_report(template_parameter_set(uid="pge5wer62q82v9k0"))
     assert report.ok, report.errors
+    saved = save_parameter_set(template_parameter_set(), source_root=tmp_path)
+    assert saved["status"] == "created" and SPEC_IRI.fullmatch(saved["id"])
 
 
 def test_save_and_query_round_trip(tmp_path) -> None:

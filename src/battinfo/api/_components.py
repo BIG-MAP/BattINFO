@@ -21,7 +21,7 @@ from battinfo.api._shared import (
     MATERIAL_IRI_RE,
     MATERIAL_SPEC_IRI_RE,
     REGISTER_MODE_CREATE_ONLY,
-    TEMPLATE_UID,
+    TEMPLATE_CELL_SPEC_ID,
     PathLike,
     _component_iri_re,
     _iri_tail,
@@ -33,6 +33,7 @@ from battinfo.api._shared import (
     _str_eq,
     _to_unix_time,
     _validate_canonical_record,
+    _without_minted_identity,
 )
 from battinfo.bundle import (
     SCHEMA_VERSION,
@@ -43,6 +44,10 @@ from battinfo.entities import (
     COMPONENT_FAMILIES,
 )
 from battinfo.validate.core import DEFAULT_POLICY, ValidationPolicy
+
+# A spec/ IRI the instance templates build with when no spec is given; the field is
+# then removed again, so no template carries it.
+_TEMPLATE_SPEC_ID = TEMPLATE_CELL_SPEC_ID
 
 
 class MaterialSpecInput(BaseModel):
@@ -964,57 +969,79 @@ def query_electrodes(
 
 
 def template_electrode_spec(
-    *, name: str = "Example Electrode", uid: str | None = TEMPLATE_UID
+    *, name: str = "Example Electrode", uid: str | None = None
 ) -> dict[str, Any]:
-    """Build a starter canonical electrode-spec document for save workflows."""
-    return _record_from_electrode_spec(
+    """Build a starter canonical electrode-spec document for save workflows.
+
+    The document has no ``id`` unless *uid* is given; saving it mints the IRI.
+    """
+    record = _record_from_electrode_spec(
         ElectrodeSpecInput(
             uid=uid,
             name=name,
             notes=["Template-generated record. Set kind/composition/property before saving."],
         )
     )
+    return record if uid is not None else _without_minted_identity(record)
 
 
 def template_electrode(
     *,
-    electrode_spec_id: str = "https://w3id.org/battinfo/spec/0000-0000-0000-0000",
-    uid: str | None = TEMPLATE_UID,
+    electrode_spec_id: str | None = None,
+    uid: str | None = None,
 ) -> dict[str, Any]:
-    """Build a starter canonical electrode (instance) document for save workflows."""
-    return _record_from_electrode(
+    """Build a starter canonical electrode (instance) document for save workflows.
+
+    The document has no ``id`` unless *uid* is given and no ``electrode_spec_id``
+    unless one is passed; saving the filled-in record mints the IRI.
+    """
+    record = _record_from_electrode(
         ElectrodeInput(
             uid=uid,
-            electrode_spec_id=electrode_spec_id,
+            electrode_spec_id=electrode_spec_id or _TEMPLATE_SPEC_ID,  # build scaffold, removed below
             notes=["Template-generated record. Set electrode_spec_id/batch_id/property before saving."],
         )
     )
+    if electrode_spec_id is None:
+        record["electrode"].pop("electrode_spec_id", None)
+    return record if uid is not None else _without_minted_identity(record)
 
 
-def template_material_spec(*, name: str = "Example Material", uid: str | None = TEMPLATE_UID) -> dict[str, Any]:
-    """Build a starter canonical material-spec document for save workflows."""
-    return _record_from_material_spec(
+def template_material_spec(*, name: str = "Example Material", uid: str | None = None) -> dict[str, Any]:
+    """Build a starter canonical material-spec document for save workflows.
+
+    The document has no ``id`` unless *uid* is given; saving it mints the IRI.
+    """
+    record = _record_from_material_spec(
         MaterialSpecInput(
             uid=uid,
             name=name,
             notes=["Template-generated record. Set name/material_class/formula/property before saving."],
         )
     )
+    return record if uid is not None else _without_minted_identity(record)
 
 
 def template_material(
     *,
-    material_spec_id: str = "https://w3id.org/battinfo/spec/0000-0000-0000-0000",
-    uid: str | None = TEMPLATE_UID,
+    material_spec_id: str | None = None,
+    uid: str | None = None,
 ) -> dict[str, Any]:
-    """Build a starter canonical material (instance) document for save workflows."""
-    return _record_from_material(
+    """Build a starter canonical material (instance) document for save workflows.
+
+    The document has no ``id`` unless *uid* is given and no ``material_spec_id``
+    unless one is passed; saving the filled-in record mints the IRI.
+    """
+    record = _record_from_material(
         MaterialInput(
             uid=uid,
-            material_spec_id=material_spec_id,
+            material_spec_id=material_spec_id or _TEMPLATE_SPEC_ID,  # build scaffold, removed below
             notes=["Template-generated record. Set material_spec_id/lot_id/property before saving."],
         )
     )
+    if material_spec_id is None:
+        record["material"].pop("material_spec_id", None)
+    return record if uid is not None else _without_minted_identity(record)
 
 
 def create_material_spec(*, validate: bool = True, **fields: Any) -> dict[str, Any]:
@@ -1561,25 +1588,36 @@ def query_component_instances(
     )
 
 
-def template_component_spec(family: str, *, name: str | None = None, uid: str | None = TEMPLATE_UID) -> dict[str, Any]:
-    """Build a starter component-spec document for a family."""
-    return _record_from_component_spec(
+def template_component_spec(family: str, *, name: str | None = None, uid: str | None = None) -> dict[str, Any]:
+    """Build a starter component-spec document for a family.
+
+    The document has no ``id`` unless *uid* is given; saving it mints the IRI.
+    """
+    record = _record_from_component_spec(
         family, name=name or f"Example {family}", uid=uid,
         notes=[f"Template-generated {family}-spec. Fill in the holder body before saving."],
     )
+    return record if uid is not None else _without_minted_identity(record)
 
 
 def template_component_instance(
     family: str,
     *,
     spec_id: str | None = None,
-    uid: str | None = TEMPLATE_UID,
+    uid: str | None = None,
 ) -> dict[str, Any]:
-    """Build a starter component (instance) document for a family."""
-    return _record_from_component_instance(
-        family, spec_id=spec_id or "https://w3id.org/battinfo/spec/0000-0000-0000-0000", uid=uid,
+    """Build a starter component (instance) document for a family.
+
+    The document has no ``id`` unless *uid* is given and no ``<family>_spec_id``
+    unless *spec_id* is; saving the filled-in record mints the IRI.
+    """
+    record = _record_from_component_instance(
+        family, spec_id=spec_id or _TEMPLATE_SPEC_ID, uid=uid,  # build scaffold, removed below
         notes=[f"Template-generated {family} instance. Set {family}_spec_id before saving."],
     )
+    if spec_id is None:
+        record[family].pop(f"{family}_spec_id", None)
+    return record if uid is not None else _without_minted_identity(record)
 
 
 # Per-family convenience wrappers (create_electrode_spec, save_electrode_spec, …).

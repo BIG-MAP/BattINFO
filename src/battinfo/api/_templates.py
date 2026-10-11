@@ -15,7 +15,12 @@ from battinfo.api._records import (
     _record_from_test,
     _record_from_test_protocol,
 )
-from battinfo.api._shared import TEMPLATE_CELL_ID, TEMPLATE_CELL_SPEC_ID, TEMPLATE_UID, TestKind
+from battinfo.api._shared import (
+    TEMPLATE_CELL_ID,
+    TEMPLATE_CELL_SPEC_ID,
+    TestKind,
+    _without_minted_identity,
+)
 from battinfo.bundle import (
     BatteryTestType,
     Cell,
@@ -30,6 +35,11 @@ from battinfo.bundle import (
 # dict manufacturer, flat provenance kwargs, a transient uid), so one model is both the source of
 # truth and the thing callers construct. ``_record_from_cell_spec`` mints the IRI + applies save-time
 # provenance defaults. (The former ``CellDatasheetInput`` was likewise retired earlier.)
+#
+# The canonical-record templates write no placeholder IRI. Without uid= a template
+# carries no id, short_id or derived identifier, and a reference the caller did not
+# give is left out rather than filled with an all-zero IRI; saving the filled-in
+# record mints its IRI (see _records._with_minted_id).
 
 
 def template_cell_spec(
@@ -41,10 +51,14 @@ def template_cell_spec(
     iec_code: str | None = None,
     country_of_origin: str | None = None,
     year: int | None = None,
-    uid: str | None = TEMPLATE_UID,
+    uid: str | None = None,
     source_file: str = "template-cell-spec.json",
 ) -> dict[str, Any]:
-    """Build a starter canonical cell-spec document for save workflows."""
+    """Build a starter canonical cell-spec document for save workflows.
+
+    The document has no ``id`` unless *uid* is given; saving it mints the IRI
+    from the filled-in manufacturer, model, format and chemistry.
+    """
     draft = CellSpec(
         uid=uid,
         model_name=model_name,
@@ -58,7 +72,8 @@ def template_cell_spec(
         specs={},
         notes=["Template-generated record. Fill in specs/provenance before saving."],
     )
-    return _record_from_cell_spec(draft)
+    record = _record_from_cell_spec(draft)
+    return record if uid is not None else _without_minted_identity(record)
 
 
 def template_cell_spec_draft(
@@ -138,35 +153,35 @@ def _draft_specs_for_format(
 
 def template_cell_instance(
     *,
-    cell_spec_id: str = TEMPLATE_CELL_SPEC_ID,
+    cell_spec_id: str | None = None,
     source_type: Literal["measurement", "lab", "bms", "other"] = "measurement",
     uid: str | None = None,
 ) -> dict[str, Any]:
     """Build a starter canonical cell-instance document for save workflows.
 
-    The document carries no ``id`` unless *uid* is given: ``save_cell_instance``
-    mints the IRI from the cell's spec, serial number and name when it is saved,
-    so records made from the template never share a placeholder IRI.
+    The document carries no ``id`` unless *uid* is given, and no ``cell_spec_id``
+    unless *cell_spec_id* is: fill those in, and saving mints the IRI from the
+    cell's spec, serial number and name, so records made from the template
+    never share a placeholder IRI.
     """
     draft = Cell(
         uid=uid,
-        cell_spec_id=cell_spec_id,
+        cell_spec_id=cell_spec_id or TEMPLATE_CELL_SPEC_ID,  # build scaffold, removed below
         source_type=source_type,
         notes=["Template-generated record. Set cell_spec_id/serial_number/datasets before saving; "
                "saving mints the IRI."],
     )
     record = _record_from_cell_instance(draft)
-    if uid is None:
-        record["cell_instance"].pop("id", None)
-        record["cell_instance"].pop("short_id", None)
-    return record
+    if cell_spec_id is None:
+        record["cell_instance"].pop("cell_spec_id", None)
+    return record if uid is not None else _without_minted_identity(record)
 
 
 def template_dataset(
     *,
     title: str = "Example Dataset",
     source_type: Literal["catalog", "measurement", "lab", "simulation", "external", "manual", "other"] = "other",
-    uid: str | None = TEMPLATE_UID,
+    uid: str | None = None,
     related_cell_ids: list[str] | None = None,
     related_test_ids: list[str] | None = None,
     access_url: str = "https://example.org/replace-with-your-dataset-url",
@@ -174,39 +189,49 @@ def template_dataset(
     """Build a starter canonical dataset document for save workflows.
 
     ``access_url`` is a visible example placeholder (like the template's title) — replace
-    it with the landing page or download URL where the data actually lives."""
+    it with the landing page or download URL where the data actually lives. The document
+    has no ``id`` unless *uid* is given, and lists only the cells and tests passed in;
+    saving it mints the IRI."""
     draft = Dataset(
         uid=uid,
         title=title,
         source_type=source_type,
-        related_cell_ids=related_cell_ids or [TEMPLATE_CELL_ID],
+        related_cell_ids=related_cell_ids or [],
         related_test_ids=related_test_ids or [],
         access_url=access_url,
         notes=["Template-generated record. Fill in URL/license/distribution details before saving."],
     )
-    return _record_from_dataset(draft)
+    record = _record_from_dataset(draft)
+    return record if uid is not None else _without_minted_identity(record)
 
 
 def template_test(
     *,
-    cell_id: str = TEMPLATE_CELL_ID,
+    cell_id: str | None = None,
     name: str = "Example Test",
     kind: TestKind = BatteryTestType.OTHER,
     source_type: Literal["measurement", "lab", "simulation", "manual", "other"] = "measurement",
-    uid: str | None = TEMPLATE_UID,
+    uid: str | None = None,
     dataset_ids: list[str] | None = None,
 ) -> dict[str, Any]:
-    """Build a starter canonical test document for save workflows."""
+    """Build a starter canonical test document for save workflows.
+
+    The document has no ``id`` unless *uid* is given and no ``cell_id`` unless
+    *cell_id* is; saving the filled-in record mints the IRI.
+    """
     draft = Test(
         uid=uid,
-        cell_id=cell_id,
+        cell_id=cell_id or TEMPLATE_CELL_ID,  # build scaffold, removed below
         name=name,
         kind=kind,
         source_type=source_type,
         dataset_ids=dataset_ids or [],
         notes=["Template-generated record. Set the concrete cell, protocol, and datasets before saving."],
     )
-    return _record_from_test(draft)
+    record = _record_from_test(draft)
+    if cell_id is None:
+        record["test"].pop("cell_id", None)
+    return record if uid is not None else _without_minted_identity(record)
 
 
 def template_test_spec(
@@ -214,9 +239,12 @@ def template_test_spec(
     name: str = "Example Test Protocol",
     kind: TestKind = BatteryTestType.OTHER,
     source_type: Literal["manual", "lab", "simulation", "other"] = "manual",
-    uid: str | None = TEMPLATE_UID,
+    uid: str | None = None,
 ) -> dict[str, Any]:
-    """Build a starter canonical test-protocol document for save workflows."""
+    """Build a starter canonical test-protocol document for save workflows.
+
+    The document has no ``id`` unless *uid* is given; saving it mints the IRI.
+    """
     draft = TestSpec(
         uid=uid,
         name=name,
@@ -225,7 +253,8 @@ def template_test_spec(
         experiment=["Discharge at C/10 until 2.5 V"],
         notes=["Template-generated record. Replace the example experiment / conditions before saving."],
     )
-    return _record_from_test_protocol(draft)
+    record = _record_from_test_protocol(draft)
+    return record if uid is not None else _without_minted_identity(record)
 
 
 def template_test_spec_draft(
@@ -262,7 +291,7 @@ def template_library_cell_spec(
     format: Literal["cylindrical", "prismatic", "pouch", "coin", "other", "unknown"] = "unknown",
     positive_electrode_basis: str = "unknown",
     negative_electrode_basis: str = "unknown",
-    uid: str | None = TEMPLATE_UID,
+    uid: str | None = None,
     source_file: str = "template-library-cell-spec.json",
     source_type: str = "datasheet",
 ) -> dict[str, Any]:
@@ -270,8 +299,10 @@ def template_library_cell_spec(
 
     Detailed specs are normally authored via ``cell_description()``; this is the flat
     template for the library record (fill in the electrode/electrolyte/separator structure).
+    The record has no ``specification.id`` unless *uid* is given; ``save_library_cell_spec``
+    mints it from the filled-in manufacturer, model, format and chemistry.
     """
-    return _library_record_from_input(
+    record = _library_record_from_input(
         {
             "uid": uid,
             "manufacturer": manufacturer,
@@ -286,3 +317,4 @@ def template_library_cell_spec(
             "comment": ["Template-generated reusable library cell spec."],
         }
     )
+    return record if uid is not None else _without_minted_identity(record, "specification")

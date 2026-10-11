@@ -41,6 +41,17 @@ def stable_uid(seed: str) -> str:
     return "-".join((token[:4], token[4:8], token[8:12], token[12:16]))
 
 
+#: The uid record templates used as a placeholder ("0000000000000000", dashed).
+#: Templates no longer write it; validation rejects a record whose own IRI still
+#: carries it, since every record made from an unedited old template would claim it.
+PLACEHOLDER_UID = "0000-0000-0000-0000"
+
+
+def is_placeholder_iri(value: object) -> bool:
+    """True for a record IRI whose uid is the all-zero template placeholder."""
+    return isinstance(value, str) and value.rstrip("/").rsplit("/", 1)[-1] == PLACEHOLDER_UID
+
+
 def cell_instance_identity_seed(
     *,
     cell_spec_id: str | None,

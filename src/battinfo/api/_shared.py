@@ -410,6 +410,31 @@ def _entity_schema_rel_path(doc: dict[str, Any]) -> str:
     return kind.schema_file
 
 
+def _without_minted_identity(record: dict[str, Any], record_key: str | None = None) -> dict[str, Any]:
+    """Leave a template's id out, so saving the filled-in record mints the real one.
+
+    Drops ``id``, ``short_id`` and an ``identifier`` derived from the id from the
+    record body (*record_key*, or the registered kind's key). A template built
+    without a ``uid`` therefore carries no placeholder IRI for everyone who
+    copies it to claim.
+    """
+    if record_key is None:
+        kind = kind_for_doc(record)
+        if kind is None:
+            return record
+        record_key = kind.record_key
+    body = record.get(record_key)
+    if not isinstance(body, dict):
+        return record
+    entity_id = body.pop("id", None)
+    body.pop("short_id", None)
+    uid = entity_id.rstrip("/").rsplit("/", 1)[-1] if isinstance(entity_id, str) else None
+    identifier = body.get("identifier")
+    if uid and isinstance(identifier, str) and identifier.endswith(uid):
+        body.pop("identifier")
+    return record
+
+
 def _iri_tail(iri: str) -> tuple[str, str]:
     parts = iri.rstrip("/").split("/")
     if len(parts) < 2:
