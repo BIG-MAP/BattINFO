@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from battinfo._jsonio import write_json as _write_json
-from battinfo._util import _as_path, is_local_location
+from battinfo._util import _as_path, is_local_location, local_path, path_name
 from battinfo._workspace import Workspace
 from battinfo.api import submit_publication_package
 from battinfo.validate.schema import build_validator, schema_for_rel_path
@@ -391,14 +391,14 @@ def _prepare_live_submission_payload(
         distributions = resource.get("distributions")
         if not isinstance(distributions, list):
             continue
+        uploaded: dict[str, str] = {}
         for distribution in distributions:
             if not isinstance(distribution, dict):
                 continue
             public_url = _distribution_public_url(distribution.get("package_path"), artifact_base_url)
             if public_url is not None:
                 distribution["access_url"] = public_url
-                if resource.get("resource_type") == "dataset":
-                    _point_dataset_record_at(resource, public_url)
+                uploaded[_package_file_name(distribution.get("package_path"))] = public_url
             effective_url = public_url or distribution.get("access_url")
             if (
                 resource.get("resource_type") == "dataset"
@@ -407,6 +407,8 @@ def _prepare_live_submission_payload(
             ):
                 photo_dataset_resource = resource
                 photo_public_url = effective_url
+        if resource.get("resource_type") == "dataset":
+            _point_dataset_record_at(resource, uploaded)
 
     if cell_resource is not None and photo_dataset_resource is not None and photo_public_url is not None:
         semantic_payload = cell_resource.get("semantic_payload")
@@ -454,26 +456,48 @@ def _embedded_record(resource: dict[str, Any], key: str) -> dict[str, Any] | Non
     return record if isinstance(record, dict) else None
 
 
-def _point_dataset_record_at(resource: dict[str, Any], public_url: str) -> None:
-    """Point a dataset resource's embedded record at the uploaded copy of its file.
+def _package_file_name(package_path: object) -> str:
+    """The file name of a distribution's ``package_path`` (``/`` and ``\\`` alike)."""
+    return path_name(str(package_path or ""))
 
-    Its access URL, its file's content URL and its provenance source URL all
-    named the local file; each now names the public copy instead.
+
+def _point_dataset_record_at(resource: dict[str, Any], uploaded: dict[str, str]) -> None:
+    """Point a dataset resource's embedded record at the uploaded copies of its files.
+
+    *uploaded* maps a file name to the public URL of its uploaded copy. Each
+    location in the record that names a local file (the dataset's access URL,
+    each distribution's content URL, the provenance source URL) is pointed at
+    the uploaded copy of that same file, so a dataset of several files keeps
+    one URL per file. When a single file was uploaded for the dataset, it also
+    stands for a local location that does not name it (the dataset's folder,
+    say).
     """
     record = _embedded_record(resource, "dataset")
-    if record is None:
+    if record is None or not uploaded:
         return
+    only = next(iter(uploaded.values())) if len(uploaded) == 1 else None
+
+    def public(value: object) -> str | None:
+        if not isinstance(value, str) or not is_local_location(value):
+            return None
+        path = local_path(value)
+        return uploaded.get(path_name(path)) if path is not None and path_name(path) in uploaded else only
+
     dataset_payload = record.get("dataset")
     if isinstance(dataset_payload, dict):
-        dataset_payload["access_url"] = public_url
-        dataset_distributions = dataset_payload.get("distributions")
-        if isinstance(dataset_distributions, list) and dataset_distributions:
-            first_distribution = dataset_distributions[0]
-            if isinstance(first_distribution, dict):
-                first_distribution["content_url"] = public_url
+        url = public(dataset_payload.get("access_url"))
+        if url is not None:
+            dataset_payload["access_url"] = url
+        for distribution in dataset_payload.get("distributions") or []:
+            if isinstance(distribution, dict):
+                url = public(distribution.get("content_url"))
+                if url is not None:
+                    distribution["content_url"] = url
     provenance = record.get("provenance")
     if isinstance(provenance, dict):
-        provenance["source_url"] = public_url
+        url = public(provenance.get("source_url"))
+        if url is not None:
+            provenance["source_url"] = url
 
 
 def _point_test_sources_at_artifacts(submission_payload: dict[str, Any]) -> None:
@@ -733,6 +757,7 @@ def _upload_workspace_artifacts(
                 continue
 
             extra_distributions: list[dict[str, Any]] = []
+            uploaded: dict[str, str] = {}
 
             for distribution in distributions:
                 if not isinstance(distribution, dict):
@@ -749,9 +774,7 @@ def _upload_workspace_artifacts(
                     continue
                 raw_path = matches[0]
                 distribution["access_url"] = uploader(key, raw_path)
-                if resource.get("resource_type") == "dataset":
-                    # The embedded record names the uploaded copy too, not the local file.
-                    _point_dataset_record_at(resource, distribution["access_url"])
+                uploaded[filename] = distribution["access_url"]
 
                 # Process timeseries distributions when a processor is supplied.
                 # Keys follow the layout dataset/<short_id>/<filename> (or
@@ -831,6 +854,10 @@ def _upload_workspace_artifacts(
                     })
 
             distributions.extend(extra_distributions)
+            if resource.get("resource_type") == "dataset":
+                # The embedded record names the uploaded copies too, one per file,
+                # not the local files.
+                _point_dataset_record_at(resource, uploaded)
 
     _point_test_sources_at_artifacts(submission_package)
 

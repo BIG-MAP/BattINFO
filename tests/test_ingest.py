@@ -493,3 +493,65 @@ def test_ingest_publish_cli_with_an_artifact_base_url_passes(tmp_path: Path, mon
     )
     assert result.exit_code == 0, result.stdout
     assert len(sent) == 1
+
+
+# ── A dataset of two files: each distribution follows its own upload ─────────
+
+
+def _two_file_dataset_package(folder: Path) -> dict:
+    """A submission package with one dataset resource whose record has two files."""
+    folder.mkdir(parents=True, exist_ok=True)
+    first, second = folder / "run.csv", folder / "run-raw.csv"
+    for path in (first, second):
+        path.write_text("time_s,voltage_v\n0,4.20\n", encoding="utf-8")
+    record = {
+        "dataset": {
+            "id": "https://w3id.org/battinfo/dataset/aaaa-bbbb-cccc-dddd",
+            "access_url": first.as_uri(),
+            "distributions": [{"content_url": first.as_uri(), "encoding_format": "text/csv"},
+                              {"content_url": second.as_uri(), "encoding_format": "text/csv"}],
+        },
+        "provenance": {"source_type": "measurement", "source_url": first.as_uri()},
+    }
+    return {"resources": [{
+        "resource_type": "dataset", "source_local_id": "ds-1",
+        "semantic_payload": {"battinfo_records": {"dataset": record}},
+        "distributions": [
+            {"title": "run", "access_url": first.as_uri(), "package_path": "artifacts/dataset/x/run.csv"},
+            {"title": "run raw", "access_url": second.as_uri(), "package_path": "artifacts/dataset/x/run-raw.csv"},
+        ],
+    }]}
+
+
+def _dataset_record(package: dict) -> dict:
+    return package["resources"][0]["semantic_payload"]["battinfo_records"]["dataset"]
+
+
+def test_an_uploader_points_each_distribution_at_its_own_copy(tmp_path: Path) -> None:
+    from battinfo._util import local_file_references
+    from battinfo.ingest import _upload_workspace_artifacts
+
+    package = _two_file_dataset_package(tmp_path / "ingest")
+    _upload_workspace_artifacts(package, tmp_path / "ingest", lambda key, path: f"https://store.example.org/{key}")
+    record = _dataset_record(package)
+    first, second = "https://store.example.org/dataset/x/run.csv", "https://store.example.org/dataset/x/run-raw.csv"
+    assert [item["content_url"] for item in record["dataset"]["distributions"]] == [first, second]
+    assert record["dataset"]["access_url"] == first
+    assert record["provenance"]["source_url"] == first
+    assert local_file_references(package) == []
+
+
+def test_an_artifact_base_url_points_each_distribution_at_its_own_copy(tmp_path: Path) -> None:
+    from battinfo._util import local_file_references
+    from battinfo.ingest import _prepare_live_submission_payload
+
+    package = _two_file_dataset_package(tmp_path / "ingest")
+    _prepare_live_submission_payload(package, artifact_base_url="https://cdn.example.org/battinfo",
+                                     hero_alt="", hero_caption="")
+    record = _dataset_record(package)
+    first, second = ("https://cdn.example.org/battinfo/dataset/x/run.csv",
+                     "https://cdn.example.org/battinfo/dataset/x/run-raw.csv")
+    assert [item["content_url"] for item in record["dataset"]["distributions"]] == [first, second]
+    assert record["dataset"]["access_url"] == first
+    assert record["provenance"]["source_url"] == first
+    assert local_file_references(package) == []
