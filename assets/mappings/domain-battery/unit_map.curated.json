@@ -476,6 +476,115 @@
       "unit_pref_label": "AmperePerSquareMetre",
       "unit_label": "A/m²",
       "confidence": 1.0
+    },
+    {
+      "symbol": "m2",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#SquareMetre",
+      "unit_qname": "emmo:SquareMetre",
+      "unit_pref_label": "SquareMetre",
+      "unit_label": "m²",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "m3",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#CubicMetre",
+      "unit_qname": "emmo:CubicMetre",
+      "unit_pref_label": "CubicMetre",
+      "unit_label": "m³",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "mol/m3",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#MolePerCubicMetre",
+      "unit_qname": "emmo:MolePerCubicMetre",
+      "unit_pref_label": "MolePerCubicMetre",
+      "unit_label": "mol/m³",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "m2/s",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#SquareMetrePerSecond",
+      "unit_qname": "emmo:SquareMetrePerSecond",
+      "unit_pref_label": "SquareMetrePerSecond",
+      "unit_label": "m²/s",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "J/mol",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#JoulePerMole",
+      "unit_qname": "emmo:JoulePerMole",
+      "unit_pref_label": "JoulePerMole",
+      "unit_label": "J/mol",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "V/K",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#VoltPerKelvin",
+      "unit_qname": "emmo:VoltPerKelvin",
+      "unit_pref_label": "VoltPerKelvin",
+      "unit_label": "V/K",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "S/m",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#SiemensPerMetre",
+      "unit_qname": "emmo:SiemensPerMetre",
+      "unit_pref_label": "SiemensPerMetre",
+      "unit_label": "S/m",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "1/m",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#PerMetre",
+      "unit_qname": "emmo:PerMetre",
+      "unit_pref_label": "PerMetre",
+      "unit_label": "m⁻¹",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "mol.m-2.s-1",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#MolePerSquareMetrePerSecond",
+      "unit_qname": "emmo:MolePerSquareMetrePerSecond",
+      "unit_pref_label": "MolePerSquareMetrePerSecond",
+      "unit_label": "mol/(m²·s)",
+      "confidence": 1.0,
+      "notes": "BPX reaction rate constant unit. In EMMO 1.0.2 disciplines/units/coherentsiunits.ttl (UCUM code mol.m-2.s-1); not in the bundled domain-battery context."
+    },
+    {
+      "symbol": "J/(kg.K)",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#JoulePerKilogramKelvin",
+      "unit_qname": "emmo:JoulePerKilogramKelvin",
+      "unit_pref_label": "JoulePerKilogramKelvin",
+      "unit_label": "J/(kg·K)",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "W/(m.K)",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#WattPerMetreKelvin",
+      "unit_qname": "emmo:WattPerMetreKelvin",
+      "unit_pref_label": "WattPerMetreKelvin",
+      "unit_label": "W/(m·K)",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "W/(m2.K)",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#WattPerSquareMetreKelvin",
+      "unit_qname": "emmo:WattPerSquareMetreKelvin",
+      "unit_pref_label": "WattPerSquareMetreKelvin",
+      "unit_label": "W/(m²·K)",
+      "confidence": 1.0
     }
   ]
 }
