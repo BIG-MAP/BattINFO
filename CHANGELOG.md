@@ -86,11 +86,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
-- **BattINFO is cited by its existing Zenodo concept DOI.** The README carried a placeholder badge and said 0.8 would be the first archived release, but releases have been archived on Zenodo since v0.2.0 under the concept DOI 10.5281/zenodo.6304782. The README badge and citation, `CITATION.cff` and battinfo.org now use it, and RELEASING.md says how a published GitHub Release reaches Zenodo. battinfo.org also showed outdated ontology pins (domain-battery 0.18.7, domain-electrochemistry 0.33.0); it now shows the pinned 0.20.2 and 0.37.2, and a test keeps the two in step with `battinfo.ttl`.
-
 - **`ws.submit()` sends a cell spec's own title.** Every cell-spec submission was titled "<manufacturer> <model>", so a cell spec retitled with `battinfo.naming` ("Flores 2026 graphite AQ-1 cell spec") kept its old title in the registry. The record's `name` now wins; manufacturer and model are the fallback.
 
 - **A cell-spec draft keeps its title.** `ws.load()` of a cell-spec draft copied its `handle` but ignored its `name`, so the record was always titled "<manufacturer> <model>" and a build that set titles from `battinfo.naming` lost them silently. The draft's `name` now wins; without one the default is unchanged, and the IRI never depends on it.
+
+- **BattINFO is cited by its existing Zenodo concept DOI.** The README carried a placeholder badge and said 0.8 would be the first archived release, but releases have been archived on Zenodo since v0.2.0 under the concept DOI 10.5281/zenodo.6304782. The README badge and citation, `CITATION.cff` and battinfo.org now use it, and RELEASING.md says how a published GitHub Release reaches Zenodo. battinfo.org also showed outdated ontology pins (domain-battery 0.18.7, domain-electrochemistry 0.33.0); it now shows the pinned 0.20.2 and 0.37.2, and a test keeps the two in step with `battinfo.ttl`.
 
 - **Handles keep letters such as ø and æ.** `battinfo.naming` dropped letters that Unicode does not decompose, so "Topsøe" became `topse`. They now take their usual ASCII spelling (ø to o, æ to ae, ß to ss, ł to l).
 
