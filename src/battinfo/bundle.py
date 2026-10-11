@@ -2390,10 +2390,13 @@ class TestSpec(BundleJsonModel):
 
     @property
     def experiment(self) -> list[str]:
-        """The method rendered back to PyBaMM-style strings (display / round-trip)."""
-        from battinfo.testmethod import render_method
-        strings, _cycles = render_method(self.method)
-        return strings
+        """The method rendered back to PyBaMM-style strings (display / round-trip).
+
+        Values keep their stated units and every loop is unrolled, so the list
+        can go straight to ``pybamm.Experiment``. A step the grammar cannot
+        express renders as its description or a label, never as a wrong value."""
+        from battinfo.testmethod import render_experiment
+        return render_experiment(self.method)
 
     def facets(self) -> dict[str, Any]:
         """Derived rollup index of the method for cheap filtering."""

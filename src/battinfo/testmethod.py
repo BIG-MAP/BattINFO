@@ -4,7 +4,8 @@ A test spec's *descriptive* layer (what the test did, queryable but not executed
 is an ordered list of typed :class:`Step` objects — its ``method``.  Humans author
 this with PyBaMM-style experiment strings, which :func:`parse_experiment` compiles
 into the structured model; :func:`render_method` is the inverse, turning a method
-back into PyBaMM strings for display and round-tripping.  :func:`compute_facets`
+back into PyBaMM strings for display and round-tripping (:func:`render_experiment`
+gives one flat list with every loop unrolled).  :func:`compute_facets`
 derives a flat rollup index so agents can filter over a spec cheaply.
 
 The PyBaMM grammar is reimplemented here on purpose: PyBaMM pulls in scipy/casadi
@@ -13,9 +14,9 @@ dev-only dependency used solely by conformance tests.
 
 Grammar handled (case-insensitive)::
 
-    (Dis)charge at <C-rate|current|power> [for <time>] [or until <value>] ...
-    Hold at <voltage>                     [for <time>] [or until <value>] ...
-    Rest                                  [for <time>] [or until <value>] ...
+    (Dis)charge at <C-rate|current|current density|power> [for <time>] [or until <value>] ...
+    Hold at <voltage>                                     [for <time>] [or until <value>] ...
+    Rest                                                  [for <time>] [or until <value>] ...
 
 Examples::
 
@@ -23,15 +24,30 @@ Examples::
     "Charge at 1 C until 4.2 V"
     "Hold at 4.2 V until C/50"
     "Discharge at 200 mA for 90 seconds"
+    "Charge at 0.1 mA/cm2 until 4.2 V"
+    "Hold at 4.2 V until 0.05 mA/cm2"
     "Rest for 30 minutes"
+
+A current density (``mA/cm2``, ``A/m2``, ``mA cm-2``) is a BattINFO extension;
+PyBaMM's own grammar has no per-area current.
 """
 
 from __future__ import annotations
 
 import re
+import warnings
+from decimal import Decimal
+from fractions import Fraction
 from typing import Any, Optional, Sequence
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    ModelWrapValidatorHandler,
+    field_validator,
+    model_validator,
+)
 
 __all__ = [
     "Quantity",
@@ -42,6 +58,7 @@ __all__ = [
     "parse_termination",
     "render_step",
     "render_method",
+    "render_experiment",
     "compute_facets",
     "ExperimentSyntaxError",
     "STEP_MODES",
@@ -59,6 +76,86 @@ STEP_MODES: tuple[str, ...] = ("cc", "cv", "cccv", "cp", "cr", "rest", "eis", "s
 STEP_DIRECTIONS: tuple[str, ...] = ("charge", "discharge", "hold", "rest", "none")
 TERMINATION_QUANTITIES: tuple[str, ...] = ("voltage", "current", "c_rate", "capacity", "soc", "duration")
 TERMINATION_DIRECTIONS: tuple[str, ...] = ("below", "above", "elapsed")
+
+
+# SI prefixes are case-sensitive, as SI writes them: m is milli and M is mega;
+# u and µ are both micro. A prefix not listed for a unit raises rather than
+# being guessed (case-folding once read 1 MA/m2 as 1 mA/m2, nine orders of
+# magnitude off).
+_SI_PREFIX: dict[str, Fraction] = {
+    "M": Fraction(10**6),
+    "k": Fraction(10**3),
+    "": Fraction(1),
+    "m": Fraction(1, 10**3),
+    "µ": Fraction(1, 10**6),
+    "u": Fraction(1, 10**6),
+    "n": Fraction(1, 10**9),
+}
+_CURRENT_SYMBOL = {"M": "MA", "k": "kA", "": "A", "m": "mA", "µ": "µA", "u": "µA", "n": "nA"}
+
+# A current stated per area is a current density, whatever key or termination
+# quantity it is written under, so the emitters type it as one. Coin-cell
+# protocols state currents this way (0.1 mA/cm2). Area prefix -> (unit, in cm2).
+_AREA_CM2: dict[str, tuple[str, Fraction]] = {
+    "": ("m2", Fraction(10**4)),
+    "c": ("cm2", Fraction(1)),
+    "m": ("mm2", Fraction(1, 100)),
+}
+# "mA/cm2", "mA / cm^2", "mA/cm²", and the product forms "mA cm-2", "A.m-2".
+# Case-sensitive: a prefix is any one letter, checked below, and the metre must
+# be a lower-case m (M is mega).
+_AREAL_CURRENT_RE = re.compile(
+    r"^(?P<prefix>[^\W\d_]?)(?P<ampere>[Aa])\s*"
+    r"(?:/\s*(?P<per>[^\W\d_]?)m\s*\^?\s*2|(?:\s+|\s*[.·*]\s*)(?P<times>[^\W\d_]?)m\s*\^?\s*-\s*2)$"
+)
+
+
+def _check_prefix(prefix: str, letter: str, allowed: Any, unit: str) -> None:
+    """Refuse a prefix that is not listed for the unit, and an upper-case
+    prefix on a lower-case unit letter ("Ma": mega-ampere, or a mistyped mA?)."""
+    if letter.islower() and prefix != prefix.lower():
+        raise ExperimentSyntaxError(
+            f"Ambiguous unit '{unit}': write it in SI case, for example 'mA' for milliampere "
+            "or 'MA' for megaampere."
+        )
+    if prefix not in allowed:
+        known = ", ".join(repr(p) for p in sorted(allowed) if p) or "none"
+        raise ExperimentSyntaxError(
+            f"Unsupported prefix '{prefix}' in unit '{unit}' (prefixes read here: {known})."
+        )
+
+
+def _current_density_unit(unit: Any) -> tuple[str, Fraction] | None:
+    """``(canonical symbol, factor to mA/cm2)`` when ``unit`` is a current per
+    area (``mA/cm2``, ``A/m2``, ``mA cm-2``, ...), otherwise ``None``.
+
+    Raises :class:`ExperimentSyntaxError` for a current per area with a prefix
+    the grammar does not read, such as ``pA/cm2`` or ``mA/Mm2``."""
+    if not isinstance(unit, str):
+        return None
+    text = unit.strip().replace("²", "2").replace("⁻", "-").replace("−", "-").replace("μ", "µ")
+    match = _AREAL_CURRENT_RE.match(text)
+    if not match:
+        return None
+    prefix, area = match.group("prefix"), match.group("per") or match.group("times") or ""
+    _check_prefix(prefix, match.group("ampere"), _SI_PREFIX, unit)
+    if area not in _AREA_CM2:
+        raise ExperimentSyntaxError(
+            f"Unsupported area unit '{area}m2' in '{unit}' (read here: m2, cm2, mm2)."
+        )
+    area_symbol, area_factor = _AREA_CM2[area]
+    # Factor to mA/cm2: the prefix factor in A, times 1000 mA per A, per area in cm2.
+    return f"{_CURRENT_SYMBOL[prefix]}/{area_symbol}", _SI_PREFIX[prefix] * 1000 / area_factor
+
+
+def _is_current_density_unit(unit: Any) -> bool:
+    """True when ``unit`` is a current per area the grammar reads. Never raises:
+    the emitters call it on stored records, where an unreadable unit is left as
+    written."""
+    try:
+        return _current_density_unit(unit) is not None
+    except ExperimentSyntaxError:
+        return False
 
 
 def _require_member(value: Any, allowed: tuple[str, ...], field: str) -> Any:
@@ -116,7 +213,13 @@ class Quantity(BaseModel):
 
 class Termination(BaseModel):
     """A single stop condition.  A step's ``termination`` list is any-of (the
-    step ends when the first condition is met — PyBaMM's ``or``)."""
+    step ends when the first condition is met — PyBaMM's ``or``).
+
+    A current cutoff may be stated per area (``{"quantity": "current", "value":
+    0.05, "unit": "mA/cm2"}``); it is a current density and emits as one. A
+    current cutoff in a unit of another quantity (``V``, ``Ah``, ``C``) is
+    refused in a step string; a stored record or a dict keeps it, and the step
+    warns (see :class:`Step`)."""
 
     model_config = ConfigDict(extra="forbid")
     quantity: str  # voltage | current | c_rate | capacity | soc | duration
@@ -135,6 +238,48 @@ class Termination(BaseModel):
         return _require_member(value, TERMINATION_DIRECTIONS, "Termination.direction")
 
 
+# Units of other quantities, for the current-cutoff unit check:
+# lower-cased unit -> (what it measures, the termination quantity to use instead).
+# Units not listed here (a specific current such as mA/g, say) are let through.
+_OTHER_QUANTITY_UNITS: dict[str, tuple[str, str | None]] = {
+    **{u: ("voltage", "voltage") for u in ("v", "mv", "kv", "µv", "uv")},
+    **{u: ("C-rate", "c_rate") for u in ("c", "a/ah", "1/h", "h-1")},
+    **{u: ("charge", "capacity") for u in ("ah", "mah", "µah", "uah", "as", "mas")},
+    **{u: ("time", "duration") for u in ("s", "sec", "min", "h", "hr", "hour", "hours", "minutes", "seconds")},
+    **{u: ("dimensionless", "soc") for u in ("1", "%")},
+    **{u: ("power", None) for u in ("w", "mw", "kw")},
+    **{u: ("resistance", None) for u in ("ohm", "ohms", "mohm", "ω", "mω")},
+}
+
+
+def _other_quantity_of_unit(unit: str) -> tuple[str, str | None] | None:
+    """``(what the unit measures, quantity to use)`` when ``unit`` belongs to a
+    quantity other than current, otherwise ``None``."""
+    return _OTHER_QUANTITY_UNITS.get(unit.strip().lower())
+
+
+def _foreign_current_unit(term: Termination) -> str | None:
+    """What is wrong with a ``current`` cutoff whose unit belongs to another
+    quantity, or ``None`` when the cutoff is fine."""
+    if term.quantity != "current":
+        return None
+    other = _other_quantity_of_unit(term.unit)
+    if other is None:
+        return None
+    kind, hint = other
+    advice = f" Use quantity '{hint}' for that cutoff." if hint else ""
+    return f"a 'current' termination in {term.unit!r}, which is a {kind} unit.{advice}"
+
+
+def _refuse_foreign_current_units(terminations: Sequence[Termination], text: str) -> None:
+    """A step or cutoff written as a string is new authoring: refuse a current
+    cutoff in another quantity's unit outright."""
+    for term in terminations:
+        problem = _foreign_current_unit(term)
+        if problem:
+            raise ExperimentSyntaxError(f"'{text}' gives {problem}")
+
+
 # Comparison-string termination shorthand ("Voltage > 4.2", "C-rate < C/50",
 # "SOC < 0.05", "Time > 30 min") — the way engineers write cutoffs, and the
 # way UCP's `ends` writes them. Parsed at construction into the structured
@@ -144,6 +289,9 @@ _SHORTHAND_QUANTITY: dict[str, tuple[str, str]] = {
     "v": ("voltage", "V"),
     "current": ("current", "A"),
     "i": ("current", "A"),
+    # A current cutoff per area is stored as a current in mA/cm2.
+    "current density": ("current", "mA/cm2"),
+    "current_density": ("current", "mA/cm2"),
     "c-rate": ("c_rate", "A/Ah"),
     "c_rate": ("c_rate", "A/Ah"),
     "crate": ("c_rate", "A/Ah"),
@@ -155,6 +303,15 @@ _SHORTHAND_QUANTITY: dict[str, tuple[str, str]] = {
     "duration": ("duration", "s"),
 }
 
+# The value kinds each left side accepts, where that is more than its quantity:
+# a current cutoff may be stated per area, a current-density cutoff only so.
+_SHORTHAND_VALUE_KINDS: dict[str, frozenset[str]] = {
+    "current": frozenset({"current", "current_density"}),
+    "i": frozenset({"current", "current_density"}),
+    "current density": frozenset({"current_density"}),
+    "current_density": frozenset({"current_density"}),
+}
+
 _SHORTHAND_RE = re.compile(r"^\s*(.+?)\s*([<>])=?\s*(.+?)\s*$")
 
 
@@ -163,10 +320,11 @@ def parse_termination(text: str) -> Termination:
 
     ``"Voltage > 4.2"`` → voltage above 4.2 V; ``"C-rate < C/50"`` → c_rate
     below 0.02 A/Ah; ``"Current < 50 mA"`` → current below 0.05 A;
-    ``"SOC < 0.05"`` → soc below 0.05; ``"Time > 30 min"`` → duration 1800 s.
-    The left side names the quantity, the operator gives the approach
-    direction (irrelevant for time), and the right side is a number in the
-    quantity's canonical unit or any magnitude ``_parse_value`` understands.
+    ``"Current < 0.05 mA/cm2"`` (or ``"Current density < 0.05"``) → current
+    below 0.05 mA/cm2; ``"SOC < 0.05"`` → soc below 0.05; ``"Time > 30 min"``
+    → duration 1800 s. The left side names the quantity, the operator gives the
+    approach direction (irrelevant for time), and the right side is a number in
+    the quantity's canonical unit or any magnitude ``_parse_value`` understands.
     """
     match = _SHORTHAND_RE.match(text or "")
     if not match:
@@ -194,13 +352,16 @@ def parse_termination(text: str) -> Termination:
         unit = default_unit
     except ValueError:
         kind, qty = _parse_value(rhs)
-        if kind != quantity:
+        if kind not in _SHORTHAND_VALUE_KINDS.get(lhs, frozenset({quantity})):
+            named = "current density" if default_unit == "mA/cm2" else quantity
             raise ExperimentSyntaxError(
-                f"Termination '{text}' names {quantity} but its value parses as {kind}."
+                f"Termination '{text}' names {named} but its value parses as {kind}."
             ) from None
         value, unit = _require_value(qty, f"Termination '{text}'"), qty.unit
-    return Termination(quantity=quantity, value=value, unit=unit,
+    term = Termination(quantity=quantity, value=value, unit=unit,
                        direction="below" if op == "<" else "above")
+    _refuse_foreign_current_units([term], text)
+    return term
 
 
 class Step(BaseModel):
@@ -243,25 +404,69 @@ class Step(BaseModel):
     def _check_direction(cls, value: Any) -> Any:
         return _require_member(value, STEP_DIRECTIONS, "Step.direction")
 
+    @model_validator(mode="wrap")
+    @classmethod
+    def _warn_foreign_current_units(cls, data: Any, handler: ModelWrapValidatorHandler["Step"]) -> "Step":
+        # A step built from a stored record or a dict may hold a current cutoff
+        # in another quantity's unit (published before the check existed, or
+        # written by an importer). Refusing it would make the record unreadable,
+        # so warn and keep it as written; a step string refuses it instead.
+        # A Step instance passed on to another model was checked when it was
+        # built, so it does not warn again.
+        step = handler(data)
+        if not isinstance(data, Step):
+            for term in step.termination:
+                problem = _foreign_current_unit(term)
+                if problem:
+                    warnings.warn(f"Step {_step_name(step)} has {problem} It is kept as written.",
+                                  UserWarning, stacklevel=2)
+        return step
+
+
+def _step_name(step: Step) -> str:
+    """How a warning names a step: its description, its step_id, or its mode."""
+    if step.description:
+        return repr(step.description)
+    if step.step_id is not None:
+        return f"with step_id {step.step_id}"
+    return f"({step.mode} {step.direction})" if step.direction else f"({step.mode})"
+
 
 Step.model_rebuild()
 
 
 # ── Value parsing ───────────────────────────────────────────────────────────
 
-# unit token (lower-cased) -> (quantity-kind, canonical unit, scale-to-canonical)
-_UNIT_TABLE: dict[str, tuple[str, str, float]] = {
-    "a": ("current", "A", 1.0),
-    "ma": ("current", "A", 1e-3),
-    "c": ("c_rate", "A/Ah", 1.0),
-    "w": ("power", "W", 1.0),
-    "mw": ("power", "W", 1e-3),
-    "v": ("voltage", "V", 1.0),
-    "mv": ("voltage", "V", 1e-3),
-    "ohm": ("resistance", "Ohm", 1.0),
-    "ohms": ("resistance", "Ohm", 1.0),
-    "ω": ("resistance", "Ohm", 1.0),  # lowercased Ω (U+03A9 -> U+03C9) after .lower()
+# Units of the step grammar that take a prefix: unit letter (either case) ->
+# (quantity kind, canonical unit, prefixes read). The prefix itself is
+# case-sensitive (see _SI_PREFIX).
+_PREFIXED_UNITS: dict[str, tuple[str, str, frozenset[str]]] = {
+    "A": ("current", "A", frozenset(_SI_PREFIX)),
+    "W": ("power", "W", frozenset({"", "m"})),
+    "V": ("voltage", "V", frozenset({"", "m"})),
 }
+# Units read without a prefix: lower-cased token -> (quantity kind, canonical unit).
+_UNPREFIXED_UNITS: dict[str, tuple[str, str]] = {
+    "c": ("c_rate", "A/Ah"),
+    "ohm": ("resistance", "Ohm"),
+    "ohms": ("resistance", "Ohm"),
+    "ω": ("resistance", "Ohm"),  # lowercased Ω (U+03A9 -> U+03C9) after .lower()
+}
+
+
+def _unit_factor(unit: str, text: str) -> tuple[str, str, Fraction]:
+    """``(quantity kind, canonical unit, factor)`` for a unit token such as
+    ``mA``, ``MA``, ``V`` or ``Ohm``. Raises for an unknown unit or prefix."""
+    plain = _UNPREFIXED_UNITS.get(unit.lower())
+    if plain is not None:
+        return plain[0], plain[1], Fraction(1)
+    prefix, letter = unit[:-1].replace("μ", "µ"), unit[-1:]
+    base = _PREFIXED_UNITS.get(letter.upper())
+    if base is None:
+        raise ExperimentSyntaxError(f"Unknown unit '{unit}' in '{text}'.")
+    kind, canonical, allowed = base
+    _check_prefix(prefix, letter, allowed, unit)
+    return kind, canonical, _SI_PREFIX[prefix]
 
 _TIME_TABLE: dict[str, float] = {
     "s": 1.0,
@@ -279,8 +484,13 @@ _TIME_TABLE: dict[str, float] = {
 }
 
 _CRATE_DIV_RE = re.compile(r"^([cd])\s*/\s*([\d.]+)$", re.IGNORECASE)
-_NUM_UNIT_RE = re.compile(r"^([\d.]+)\s*([a-zΩω]+)$", re.IGNORECASE)
+_NUM_UNIT_RE = re.compile(r"^([\d.]+)\s*([a-zA-ZµμΩω]+)$")
+_NUM_ANY_UNIT_RE = re.compile(r"^([\d.]+)\s*(\S.*)$")
 _TIME_RE = re.compile(r"^([\d.]+)\s*([a-z]+)$", re.IGNORECASE)
+
+# Parsed current densities are normalised to mA/cm2, the unit battery
+# protocols state them in.
+_CURRENT_DENSITY_UNIT = "mA/cm2"
 
 
 def _to_float(token: str, text: str) -> float:
@@ -294,11 +504,33 @@ def _to_float(token: str, text: str) -> float:
         raise ExperimentSyntaxError(f"Could not parse number '{token}' in '{text}'.") from None
 
 
+def _to_fraction(token: str, text: str) -> Fraction:
+    """A numeric token as an exact fraction, so unit factors add no float noise
+    (3 A/m2 is 0.3 mA/cm2, not 0.30000000000000004)."""
+    try:
+        return Fraction(token)
+    except ValueError:
+        raise ExperimentSyntaxError(f"Could not parse number '{token}' in '{text}'.") from None
+
+
+def _parse_current_density(token: str, text: str) -> Quantity | None:
+    """``0.1 mA/cm2``, ``1 A/m2`` or ``0.1 mA cm-2`` -> a quantity in mA/cm2,
+    or ``None`` when the token is not a current per area."""
+    m = _NUM_ANY_UNIT_RE.match(token)
+    unit = _current_density_unit(m.group(2)) if m else None
+    if m is None or unit is None:
+        return None
+    return Quantity(value=float(_to_fraction(m.group(1), text) * unit[1]), unit=_CURRENT_DENSITY_UNIT)
+
+
 def _parse_value(text: str) -> tuple[str, Quantity]:
-    """Parse a magnitude token such as ``C/10``, ``1C``, ``200 mA`` or ``4.1 V``.
+    """Parse a magnitude token such as ``C/10``, ``1C``, ``200 mA``,
+    ``0.1 mA/cm2`` or ``4.1 V``.
 
     Returns ``(quantity_kind, Quantity)`` with the value normalised to the
-    canonical unit (A, V, W, Ohm; C-rate as A/Ah)."""
+    canonical unit (A, V, W, Ohm; C-rate as A/Ah; current density as mA/cm2).
+    Prefixes are case-sensitive: ``1 MA`` is a megaampere, ``1 mA`` a
+    milliampere, and a prefix the grammar does not read raises."""
     token = text.strip()
     div = _CRATE_DIV_RE.match(token)
     if div:
@@ -308,13 +540,14 @@ def _parse_value(text: str) -> tuple[str, Quantity]:
         return "c_rate", Quantity(value=1.0 / denom, unit="A/Ah")
     m = _NUM_UNIT_RE.match(token)
     if not m:
-        raise ExperimentSyntaxError(f"Could not parse value '{text}'. Expected e.g. 'C/10', '1C', '200 mA', '4.1 V'.")
-    number = _to_float(m.group(1), text)
-    unit_key = m.group(2).lower()
-    if unit_key not in _UNIT_TABLE:
-        raise ExperimentSyntaxError(f"Unknown unit '{m.group(2)}' in '{text}'.")
-    kind, canon_unit, scale = _UNIT_TABLE[unit_key]
-    return kind, Quantity(value=number * scale, unit=canon_unit)
+        density = _parse_current_density(token, text)
+        if density is not None:
+            return "current_density", density
+        raise ExperimentSyntaxError(
+            f"Could not parse value '{text}'. Expected e.g. 'C/10', '1C', '200 mA', '0.1 mA/cm2', '4.1 V'."
+        )
+    kind, canon_unit, factor = _unit_factor(m.group(2), text)
+    return kind, Quantity(value=float(_to_fraction(m.group(1), text) * factor), unit=canon_unit)
 
 
 def _parse_duration(text: str) -> Quantity:
@@ -345,10 +578,15 @@ def _termination_from_value(kind: str, qty: Quantity, direction: str | None) -> 
             unit=qty.unit,
             direction="above" if direction == "charge" else "below",
         )
-    if kind in ("current", "c_rate"):
+    if kind in ("current", "c_rate", "current_density"):
         # Cutoff currents are crossed from above as the cell relaxes/charges taper.
+        # A current density is stored as a current cutoff in mA/cm2; the
+        # emitters type it as a current-density limit.
         return Termination(
-            quantity=kind, value=_require_value(qty, "A current termination"), unit=qty.unit, direction="below"
+            quantity="current" if kind == "current_density" else kind,
+            value=_require_value(qty, "A current termination"),
+            unit=qty.unit,
+            direction="below",
         )
     raise ExperimentSyntaxError(f"Unsupported termination quantity '{kind}'.")
 
@@ -363,11 +601,13 @@ _OR_SPLIT_RE = re.compile(r"\s+or\s+", re.IGNORECASE)
 # op + value-kind -> (mode, direction)
 _MODE_FOR = {
     ("charge", "current"): ("cc", "charge"),
+    ("charge", "current_density"): ("cc", "charge"),
     ("charge", "c_rate"): ("cc", "charge"),
     ("charge", "power"): ("cp", "charge"),
     ("charge", "resistance"): ("cr", "charge"),
     ("charge", "voltage"): ("cv", "charge"),
     ("discharge", "current"): ("cc", "discharge"),
+    ("discharge", "current_density"): ("cc", "discharge"),
     ("discharge", "c_rate"): ("cc", "discharge"),
     ("discharge", "power"): ("cp", "discharge"),
     ("discharge", "resistance"): ("cr", "discharge"),
@@ -427,6 +667,7 @@ def parse_step(text: str) -> Step:
         else:
             raise ExperimentSyntaxError(f"Unexpected clause '{clause}' in '{text}'. Expected 'for ...' or 'until ...'.")
 
+    _refuse_foreign_current_units(terminations, text)
     return Step(
         mode=mode,
         direction=direction,
@@ -451,12 +692,33 @@ def parse_experiment(steps: Sequence[str], cycles: int | None = None) -> list[St
 # ── Rendering (inverse of parsing) ──────────────────────────────────────────
 
 
+# Rendering writes every value in the unit it is stated in, so a current
+# density stays a current density and a duration in hours stays in hours. A step
+# that cannot be written faithfully renders as its description (or a neutral
+# label), never as a wrong value.
+
+# Units in which a C-rate value can be written in the C/n form.
+_CRATE_UNITS = frozenset({"A/Ah", "C", "1/h", "h-1"})
+
+# Unrolling a loop is bounded, so a corrupt repeat count cannot exhaust memory;
+# past this many strings a loop renders as one "Repeat N times: (...)" line.
+_MAX_RENDERED_STEPS = 100_000
+
+
 def _fmt_number(value: float) -> str:
-    return f"{value:g}"
+    """Up to 12 significant digits, never in exponent form (the grammar reads
+    no exponents). Twelve digits keep every real setpoint and drop float noise
+    from unit scaling elsewhere (an importer's 9 * 0.001 is 0.009000000000000001)."""
+    text = format(value, ".12g")
+    if "e" in text:
+        text = format(Decimal(text), "f")
+    if "." in text:
+        text = text.rstrip("0").rstrip(".")
+    return "0" if text in ("", "-0") else text
 
 
 def _fmt_crate(value: float) -> str:
-    if value >= 1.0:
+    if value >= 1.0 or value <= 0.0:
         return f"{_fmt_number(value)}C"
     inv = 1.0 / value
     rounded = round(inv)
@@ -465,67 +727,110 @@ def _fmt_crate(value: float) -> str:
     return f"{_fmt_number(value)}C"
 
 
-def _fmt_setpoint(kind: str, qty: Quantity) -> str:
+def _fmt_quantity(qty: Quantity) -> str:
+    """A value with its unit as stated; a window renders as ``lo..hi unit``."""
     if qty.value is None:
-        # Window form ({min_value, max_value}) — render as a range label.
         lo = _fmt_number(qty.min_value) if qty.min_value is not None else "?"
         hi = _fmt_number(qty.max_value) if qty.max_value is not None else "?"
         return f"{lo}..{hi} {qty.unit}"
-    if kind == "c_rate":
-        return _fmt_crate(qty.value)
-    if kind == "current":
-        return f"{_fmt_number(qty.value)} A"
-    if kind == "power":
-        return f"{_fmt_number(qty.value)} W"
-    if kind == "resistance":
-        return f"{_fmt_number(qty.value)} Ohm"
-    if kind == "voltage":
-        return f"{_fmt_number(qty.value)} V"
     return f"{_fmt_number(qty.value)} {qty.unit}"
 
 
+def _fmt_setpoint(kind: str, qty: Quantity) -> str:
+    if kind == "c_rate" and qty.value is not None and qty.unit in _CRATE_UNITS:
+        return _fmt_crate(qty.value)
+    return _fmt_quantity(qty)
+
+
+def _plural(value: float, word: str) -> str:
+    return f"{_fmt_number(value)} {word}" + ("" if value == 1 else "s")
+
+
 def _fmt_duration(qty: Quantity) -> str:
-    seconds = _require_value(qty, "A step duration")
-    if seconds % 3600 == 0:
-        return f"for {_fmt_number(seconds / 3600)} hours"
-    if seconds % 60 == 0:
-        return f"for {_fmt_number(seconds / 60)} minutes"
-    return f"for {_fmt_number(seconds)} seconds"
+    if qty.value is None:
+        return f"for {_fmt_quantity(qty)}"
+    seconds_per_unit = _TIME_TABLE.get(qty.unit.strip().lower())
+    if seconds_per_unit is None:
+        return f"for {_fmt_quantity(qty)}"  # a unit the grammar has no word for
+    if seconds_per_unit == 3600.0:
+        return f"for {_plural(qty.value, 'hour')}"
+    if seconds_per_unit == 60.0:
+        return f"for {_plural(qty.value, 'minute')}"
+    # Stated in seconds (the parser's canonical unit): the largest whole unit,
+    # so "Rest for 30 minutes" reads back as written.
+    seconds = qty.value
+    if seconds and seconds % 3600 == 0:
+        return f"for {_plural(seconds / 3600, 'hour')}"
+    if seconds and seconds % 60 == 0:
+        return f"for {_plural(seconds / 60, 'minute')}"
+    return f"for {_plural(seconds, 'second')}"
 
 
 def _fmt_termination(term: Termination) -> str:
-    if term.quantity == "c_rate":
+    if term.quantity == "duration":
+        return _fmt_duration(Quantity(value=term.value, unit=term.unit))
+    if term.quantity == "c_rate" and term.unit in _CRATE_UNITS:
         return f"until {_fmt_crate(term.value)}"
-    suffix = {"voltage": "V", "current": "A", "capacity": "Ah"}.get(term.quantity, term.unit)
-    return f"until {_fmt_number(term.value)} {suffix}"
+    if term.quantity == "soc":
+        # The unit alone ("1") would not say the cutoff is a state of charge.
+        unit = "" if term.unit == "1" else f" {term.unit}"
+        return f"until {_fmt_number(term.value)}{unit} SOC"
+    return f"until {_fmt_number(term.value)} {term.unit}"
+
+
+def _step_label(step: Step) -> str:
+    """The fallback for a step the grammar cannot write: its description, or a
+    neutral label that asserts nothing it does not know."""
+    return step.description or (f"{step.direction} {step.mode}" if step.direction else step.mode)
+
+
+def _step_head(step: Step) -> str | None:
+    """The ``Charge at ...`` / ``Hold at ...`` / ``Rest`` part, or ``None`` when
+    the step cannot be written faithfully in the grammar."""
+    if step.mode == "rest":
+        return "Rest"
+    if step.mode == "cv":
+        volt = step.setpoints.get("voltage")
+        return f"Hold at {_fmt_quantity(volt)}" if volt is not None else "Hold"
+    if step.mode not in ("cc", "cp", "cr", "cccv"):
+        return None  # eis, scan: PyBaMM has no string form
+    if step.direction not in ("charge", "discharge"):
+        return None  # writing Charge or Discharge would be a guess
+    word = "Charge" if step.direction == "charge" else "Discharge"
+    if step.mode == "cccv":
+        rate = next((k for k in step.setpoints if k != "voltage"), None)
+        volt = step.setpoints.get("voltage")
+        rate_str = f" at {_fmt_setpoint(rate, step.setpoints[rate])}" if rate else ""
+        volt_str = f" to {_fmt_quantity(volt)} then hold" if volt is not None else ""
+        return f"{word}{rate_str}{volt_str}"
+    kind = next(iter(step.setpoints), None)
+    return f"{word} at {_fmt_setpoint(kind, step.setpoints[kind])}" if kind else word
+
+
+def _fmt_group(group: Step) -> str:
+    """A loop as one line: ``Repeat 3 times: (step; step)``."""
+    inner = "; ".join(render_step(s) for s in group.steps)
+    if group.count is None:
+        return group.description or f"Repeat (count not stated): ({inner})"
+    times = "time" if group.count == 1 else "times"
+    return f"Repeat {group.count} {times}: ({inner})"
 
 
 def render_step(step: Step) -> str:
     """Render a single :class:`Step` to a PyBaMM-style string.
 
-    Best-effort: modes PyBaMM cannot express (eis, scan, cccv, a non-top-level
-    group) render to a readable label rather than raising, so this never crashes
-    on a structured method. The cc/cv/cp/cr/rest forms round-trip exactly."""
-    if step.mode == "rest":
-        head = "Rest"
-    elif step.mode == "cv":
-        volt = step.setpoints.get("voltage")
-        head = f"Hold at {_fmt_number(volt.value)} V" if volt and volt.value is not None else "Hold"
-    elif step.mode in ("cc", "cp", "cr"):
-        word = "Charge" if step.direction == "charge" else "Discharge"
-        kind = next(iter(step.setpoints), None)
-        head = f"{word} at {_fmt_setpoint(kind, step.setpoints[kind])}" if kind else word
-    elif step.mode == "cccv":
-        word = "Charge" if step.direction == "charge" else "Discharge"
-        rate = next((k for k in step.setpoints if k != "voltage"), None)
-        volt = step.setpoints.get("voltage")
-        rate_str = f" at {_fmt_setpoint(rate, step.setpoints[rate])}" if rate else ""
-        volt_str = f" to {_fmt_number(volt.value)} V then hold" if volt and volt.value is not None else ""
-        head = f"{word}{rate_str}{volt_str}"
-    else:
-        # eis / scan / group / unknown — not PyBaMM-expressible; use a label.
-        return step.description or (f"{step.direction} {step.mode}".strip() if step.direction else step.mode)
-
+    Values keep the units they are stated in, so ``0.05 mA/cm2`` renders as
+    ``0.05 mA/cm2`` and a 6 h rest as ``Rest for 6 hours``. The cc/cv/cp/cr/rest
+    forms the parser produces read back to the same step. A step the grammar
+    cannot express (eis, scan, a cc step with no charge or discharge direction)
+    renders as its description or a neutral label rather than a wrong value, and
+    a group renders as one ``Repeat N times: (...)`` line, so this never raises
+    on a structured method."""
+    if step.mode == "group":
+        return _fmt_group(step)
+    head = _step_head(step)
+    if head is None:
+        return _step_label(step)
     clauses: list[str] = []
     if step.duration is not None:
         clauses.append(_fmt_duration(step.duration))
@@ -533,15 +838,46 @@ def render_step(step: Step) -> str:
     return head + (" " + " or ".join(clauses) if clauses else "")
 
 
+def _unrollable_count(group: Step) -> int | None:
+    """The repeat count of a loop when it can be unrolled (a whole number of at
+    least 1), otherwise ``None``."""
+    return group.count if group.count is not None and group.count >= 1 else None
+
+
+def _render_sequence(steps: Sequence[Step]) -> list[str]:
+    """Render steps in order, unrolling each loop: its steps repeated ``count``
+    times, the way ``pybamm.Experiment([...] * n)`` writes a repeat. A loop
+    with no count, or one too large to unroll, stays one ``Repeat`` line."""
+    out: list[str] = []
+    for step in steps:
+        if step.mode != "group":
+            out.append(render_step(step))
+            continue
+        count = _unrollable_count(step)
+        inner = _render_sequence(step.steps) if count else []
+        if count and len(inner) * count <= _MAX_RENDERED_STEPS:
+            out.extend(inner * count)
+        else:
+            out.append(render_step(step))
+    return out
+
+
 def render_method(steps: Sequence[Step]) -> tuple[list[str], int]:
     """Render a ``method`` back to ``(step_strings, cycles)``.
 
-    A single top-level ``group`` is unwrapped to ``(inner_strings, count)``;
-    otherwise the steps render flat with ``cycles == 1``."""
-    if len(steps) == 1 and steps[0].mode == "group":
-        group = steps[0]
-        return [render_step(s) for s in group.steps], int(group.count or 1)
-    return [render_step(s) for s in steps], 1
+    A single top-level ``group`` with a count unwraps to ``(inner_strings,
+    count)``, the grammar's own repeat form (``parse_experiment(strings,
+    cycles)``). Every other loop is unrolled in place."""
+    count = _unrollable_count(steps[0]) if len(steps) == 1 and steps[0].mode == "group" else None
+    if count:
+        return _render_sequence(steps[0].steps), count
+    return _render_sequence(steps), 1
+
+
+def render_experiment(steps: Sequence[Step]) -> list[str]:
+    """The whole method as one flat list of PyBaMM-style strings, every loop
+    unrolled, which is the list ``pybamm.Experiment`` takes."""
+    return _render_sequence(steps)
 
 
 # ── Facets (derived filter index) ──────────────────────────────────────────

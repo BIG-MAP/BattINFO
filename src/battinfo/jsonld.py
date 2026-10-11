@@ -26,6 +26,7 @@ from typing import Any, Callable
 
 from battinfo._util import is_dataset_series
 from battinfo.entities import kind_for_doc
+from battinfo.testmethod import _is_current_density_unit
 
 _DATA = Path(__file__).parent / "data"
 # Inline emission must expand identically to the hosted context the URL names,
@@ -87,6 +88,9 @@ def _load_test_method_context_terms() -> dict:
         "LowerVoltageLimit", "UpperVoltageLimit", "TerminationQuantity",
         "StateOfCharge",  # SOC-based termination (the UCP/HPPC seam)
         "CRate", "ElectricCurrent", "Voltage", "Power", "ElectricalResistance",
+        # Current densities: coin-cell protocols state their currents per area
+        # (0.1 mA/cm2), as setpoints and as cutoffs.
+        "ElectricCurrentDensity", "LowerCurrentDensityLimit", "UpperCurrentDensityLimit",
         "Duration", "ConventionalProperty",
         # Measurement-provenance subtree (as-run conditions emit typed
         # hasMeasurementParameter nodes on the test node itself) and the
@@ -324,11 +328,7 @@ def _unit_pref_labels() -> dict[str, tuple[str, str]]:
 _UNIT_PREF_LABELS = _unit_pref_labels()
 
 
-def resolve_unit_iri(unit_symbol: str) -> str | None:
-    """Unit symbol -> compact unit IRI, across the curated maps, the records
-    context (V, mA, degC, ...) and the test-condition extras (A/Ah for C-rate)."""
-    if not unit_symbol:
-        return None
+def _resolve_unit_symbol(unit_symbol: str) -> str | None:
     labelled = _UNIT_PREF_LABELS.get(unit_symbol)
     if labelled:
         return _compact_iri(labelled[0])
@@ -338,6 +338,38 @@ def resolve_unit_iri(unit_symbol: str) -> str | None:
     if isinstance(ctx_val, str) and (":" in ctx_val or ctx_val.startswith("http")):
         return ctx_val
     return TEST_CONDITION_UNIT_IRI.get(unit_symbol)
+
+
+def resolve_unit_iri(unit_symbol: str) -> str | None:
+    """Unit symbol -> compact unit IRI, across the curated maps, the records
+    context (V, mA, degC, ...) and the test-condition extras (A/Ah for C-rate).
+    The symbol as written is tried first, then its normalised spelling, so
+    ``mA/cm^2`` and ``mA cm-2`` resolve like ``mA/cm2``."""
+    if not unit_symbol:
+        return None
+    from battinfo.transform.json_to_jsonld import normalize_unit_symbol  # noqa: PLC0415
+
+    iri = _resolve_unit_symbol(unit_symbol)
+    if iri:
+        return iri
+    normalized = normalize_unit_symbol(unit_symbol)
+    if normalized and normalized != unit_symbol:
+        return _resolve_unit_symbol(normalized)
+    return None
+
+
+def _attach_unit(node: dict, unit_symbol: Any) -> None:
+    """Put the unit on a quantity node: its IRI when one is mapped, otherwise
+    the symbol as ``schema:unitText``. A value never loses its unit.
+    (``hasMeasurementUnit`` is @id-typed, so a bare symbol there would become a
+    relative IRI.)"""
+    if not unit_symbol:
+        return
+    unit_iri = resolve_unit_iri(str(unit_symbol))
+    if unit_iri:
+        node["hasMeasurementUnit"] = {"@id": unit_iri}
+    else:
+        node["schema:unitText"] = str(unit_symbol)
 
 
 def condition_quantity_node(key: str, value: Any, unit_symbol: str) -> dict | None:
@@ -352,22 +384,37 @@ def condition_quantity_node(key: str, value: Any, unit_symbol: str) -> dict | No
     # label to say *which* property it is.
     if cls in TEST_CONDITION_GENERIC_CLASSES:
         node["rdfs:label"] = str(key).replace("_", " ")
-    unit_iri = resolve_unit_iri(unit_symbol) if unit_symbol else (
+    if unit_symbol:
+        _attach_unit(node, unit_symbol)
+    elif cls == "CRate":
         # C-rate is dimensionless-by-symbol; default to AmperePerAmpereHour.
-        TEST_CONDITION_UNIT_IRI["A/Ah"] if cls == "CRate" else None
-    )
-    if unit_iri:
-        node["hasMeasurementUnit"] = {"@id": unit_iri}
+        node["hasMeasurementUnit"] = {"@id": TEST_CONDITION_UNIT_IRI["A/Ah"]}
     return node
 
 
 def typed_quantity_node(emmo_class: str, value: Any, unit_symbol: str) -> dict:
     """An EMMO quantity node with an explicit ``@type`` (used for method steps)."""
     node: dict = {"@type": emmo_class, "hasNumericalPart": {"hasNumberValue": value}}
-    unit_iri = resolve_unit_iri(unit_symbol) if unit_symbol else None
-    if unit_iri:
-        node["hasMeasurementUnit"] = {"@id": unit_iri}
+    _attach_unit(node, unit_symbol)
     return node
+
+
+def _setpoint_class(key: str, unit: Any) -> str | None:
+    """The quantity class of a step setpoint. A current given per area is a
+    current density, whichever key it was written under."""
+    qcls = setpoint_emmo_class(key) or TEST_CONDITION_CLASS.get(key.lower())
+    if qcls == "ElectricCurrent" and _is_current_density_unit(unit):
+        return setpoint_emmo_class("current_density")
+    return qcls
+
+
+def _termination_class(term: Mapping[str, Any]) -> str | None:
+    """The termination class of a step cutoff. A current cutoff stated per area
+    (0.05 mA/cm2) is a current-density limit, not a current limit."""
+    quantity = str(term.get("quantity") or "")
+    if quantity == "current" and _is_current_density_unit(term.get("unit")):
+        quantity = "current_density"
+    return termination_emmo_class(quantity, term.get("direction"))
 
 
 def method_step_node(step: Mapping[str, Any]) -> dict:
@@ -391,8 +438,10 @@ def method_step_node(step: Mapping[str, Any]) -> dict:
         node["rdfs:label"] = step["description"]
     controls: list = []
     for key, qty in (step.get("setpoints") or {}).items():
-        qcls = setpoint_emmo_class(key) or TEST_CONDITION_CLASS.get(str(key).lower())
-        if qcls and isinstance(qty, Mapping) and qty.get("value") is not None:
+        if not isinstance(qty, Mapping) or qty.get("value") is None:
+            continue
+        qcls = _setpoint_class(str(key), qty.get("unit"))
+        if qcls:
             controls.append(typed_quantity_node(qcls, qty["value"], qty.get("unit", "")))
     if controls:
         node["hasControlParameter"] = controls
@@ -400,7 +449,7 @@ def method_step_node(step: Mapping[str, Any]) -> dict:
     for term in (step.get("termination") or []):
         if not isinstance(term, Mapping):
             continue
-        tcls = termination_emmo_class(str(term.get("quantity") or ""), term.get("direction"))
+        tcls = _termination_class(term)
         if tcls and term.get("value") is not None:
             terminations.append(typed_quantity_node(tcls, term["value"], term.get("unit", "")))
     duration = step.get("duration")

@@ -2513,7 +2513,9 @@ class AuthoringWorkspace:
             # structured method. Leave empty if the method comes later.
             "steps": list(steps) if steps else [],
             "_steps_help": "PyBaMM-style strings, e.g. 'Discharge at C/5 for 10 hours "
-                           "or until 2.5 V', 'Hold at 4.2 V until C/50', 'Rest for 30 minutes'.",
+                           "or until 2.5 V', 'Hold at 4.2 V until C/50', 'Rest for 30 minutes'. "
+                           "Currents per area work too: 'Charge at 0.1 mA/cm2 until 4.2 V', "
+                           "'Hold at 4.2 V until 0.05 mA/cm2'.",
             # Every condition is a quantity: {value, unit} or {min_value, max_value, unit}.
             # Fill in what applies and delete the rest; null placeholders are
             # ignored by ws.load(). Keys starting with '_' are comments.

@@ -437,6 +437,14 @@ _UNIT_ALIASES: dict[str, str] = {
     "ohm": "Ω",
     "ohms": "Ω",
     "mAh/gram": "mAh/g",
+    # Current densities in product form ("mA cm-2", "A.m-2"); the separator
+    # rewrites below turn the space into a dot before this lookup.
+    "mA.cm-2": "mA/cm2",
+    "mA.cm^-2": "mA/cm2",
+    "A.cm-2": "A/cm2",
+    "A.cm^-2": "A/cm2",
+    "A.m-2": "A/m2",
+    "A.m^-2": "A/m2",
     "amp": "A",
     "amps": "A",
     "volt": "V",
