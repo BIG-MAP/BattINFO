@@ -82,6 +82,7 @@ CONVERTER_UNIT_TEXT_TO_TOKEN = {
     "C": "emmo:CelsiusTemperature",
     "°C": "emmo:CelsiusTemperature",
     "%": "unit:PERCENT",
+    "wt%": "unit:PERCENT",
     "g/cm3": "emmo:GramPerCubicCentiMetre",
     "mAh/cm2": "emmo:MilliAmpereHourPerSquareCentiMetre",
     "mAh/g": "unit:MilliA-HR-PER-GM",
@@ -413,8 +414,8 @@ _UNIT_ALIASES: dict[str, str] = {
     "Celsius": "°C",
     "percent": "%",
     "pct": "%",
-    "wt%": "%",
-    "wt.%": "%",
+    # Weight percent is a unit of its own (WeightPercent), not a plain percent.
+    "wt.%": "wt%",
     "vol.%": "vol%",
     "v/v%": "vol%",
     "l": "L",

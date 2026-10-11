@@ -144,14 +144,14 @@ validation warns `semantic.property_unmapped`.
 | `specific_heat_capacity` | `J/(kg.K)` | [SpecificHeatCapacity](https://w3id.org/emmo#EMMO_b4f4ed28_d24c_4a00_9583_62ab839abeca) |
 | `thermal_conductivity` | `W/(m.K)` | [ThermalConductivity](https://w3id.org/emmo#EMMO_8dd40ec6_2c5a_43f3_bf64_cadcd447a1c1) |
 
-## Units (51)
+## Units (52)
 
 The unit symbols accepted in quantity dicts, and the unit IRI each maps
 to (EMMO where a term exists, QUDT as the documented fallback):
 
 | Symbol | Unit |
 |---|---|
-| `%` | [WeightPercent](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_2c0e66c8_d58d_44b2_b0ce_ba55194bd505) |
+| `%` | [Percent](https://w3id.org/emmo#Percent) |
 | `1` | [UnitOne](https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978) |
 | `A` | [Ampere](https://w3id.org/emmo#Ampere) |
 | `A/Ah` | [AmperePerAmpereHour](https://w3id.org/emmo/domain/electrochemistry#AmperePerAmpereHour) |
@@ -199,6 +199,7 @@ to (EMMO where a term exists, QUDT as the documented fallback):
 | `Wh` | [WattHour](https://w3id.org/emmo#Watthour) |
 | `Wh/kg` | [WattHourPerKilogram](https://w3id.org/emmo#WattHourPerKilogram) |
 | `Wh/L` | [WattHourPerLitre](https://w3id.org/emmo#WattHourPerLitre) |
+| `wt%` | [WeightPercent](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_2c0e66c8_d58d_44b2_b0ce_ba55194bd505) |
 | `°C` | [DegreeCelsius](https://w3id.org/emmo#DegreeCelsius) |
 | `µm` | [MicroMetre](https://w3id.org/emmo#MicroMetre) |
 | `Ω` | [Ohm](https://w3id.org/emmo#Ohm) |
