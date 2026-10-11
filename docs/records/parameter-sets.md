@@ -474,10 +474,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:initialConcentration",
+        "InitialChargeCarrierConcentrationInElectrolyte",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "initialConcentration",
+      "skos:prefLabel": "InitialChargeCarrierConcentrationInElectrolyte",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 1000.0
@@ -705,10 +705,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:transportEfficiency",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "transportEfficiency",
+      "skos:prefLabel": "transport_efficiency",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.09395
@@ -825,10 +824,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:solidDiffusivity",
+        "Diffusivity",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "solidDiffusivity",
+      "skos:prefLabel": "Diffusivity",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 9.6e-15
@@ -1124,10 +1123,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:transportEfficiency",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "transportEfficiency",
+      "skos:prefLabel": "transport_efficiency",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.09186
@@ -1244,10 +1242,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:solidDiffusivity",
+        "Diffusivity",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "solidDiffusivity",
+      "skos:prefLabel": "Diffusivity",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 6.873e-17
@@ -1504,10 +1502,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:transportEfficiency",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "transportEfficiency",
+      "skos:prefLabel": "transport_efficiency",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.3222
@@ -1721,10 +1718,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:initialConcentration",
+        "InitialChargeCarrierConcentrationInElectrolyte",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "initialConcentration",
+      "skos:prefLabel": "InitialChargeCarrierConcentrationInElectrolyte",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 1000.0
@@ -1952,10 +1949,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:transportEfficiency",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "transportEfficiency",
+      "skos:prefLabel": "transport_efficiency",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.128
@@ -2072,10 +2068,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:solidDiffusivity",
+        "Diffusivity",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "solidDiffusivity",
+      "skos:prefLabel": "Diffusivity",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 2.728e-14
@@ -2371,10 +2367,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:transportEfficiency",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "transportEfficiency",
+      "skos:prefLabel": "transport_efficiency",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.1462
@@ -2491,10 +2486,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:solidDiffusivity",
+        "Diffusivity",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "solidDiffusivity",
+      "skos:prefLabel": "Diffusivity",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 3.2e-14
@@ -2508,10 +2503,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:entropicCoefficient",
+        "TemperatureCoefficientOfTheOpenCircuitVoltage",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "entropicCoefficient",
+      "skos:prefLabel": "TemperatureCoefficientOfTheOpenCircuitVoltage",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": -0.0001
@@ -2755,10 +2750,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:transportEfficiency",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "transportEfficiency",
+      "skos:prefLabel": "transport_efficiency",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.3222
@@ -3091,10 +3085,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:solidDiffusivity",
+        "Diffusivity",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "solidDiffusivity",
+      "skos:prefLabel": "Diffusivity",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 2.728e-14
@@ -3460,10 +3454,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:solidDiffusivity",
+        "Diffusivity",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "solidDiffusivity",
+      "skos:prefLabel": "Diffusivity",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 3.2e-14
@@ -3477,10 +3471,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:entropicCoefficient",
+        "TemperatureCoefficientOfTheOpenCircuitVoltage",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "entropicCoefficient",
+      "skos:prefLabel": "TemperatureCoefficientOfTheOpenCircuitVoltage",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": -0.0001
@@ -3802,10 +3796,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:initialConcentration",
+        "InitialChargeCarrierConcentrationInElectrolyte",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "initialConcentration",
+      "skos:prefLabel": "InitialChargeCarrierConcentrationInElectrolyte",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 1000.0
@@ -4032,10 +4026,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:transportEfficiency",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "transportEfficiency",
+      "skos:prefLabel": "transport_efficiency",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.128
@@ -4151,10 +4144,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:solidDiffusivity",
+        "Diffusivity",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "solidDiffusivity",
+      "skos:prefLabel": "Diffusivity",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 2.728e-14
@@ -4432,10 +4425,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:transportEfficiency",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "transportEfficiency",
+      "skos:prefLabel": "transport_efficiency",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.1462
@@ -4565,10 +4557,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:transportEfficiency",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "transportEfficiency",
+      "skos:prefLabel": "transport_efficiency",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.3222
@@ -4780,10 +4771,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:initialConcentration",
+        "InitialChargeCarrierConcentrationInElectrolyte",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "initialConcentration",
+      "skos:prefLabel": "InitialChargeCarrierConcentrationInElectrolyte",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 1000.0
@@ -5010,10 +5001,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:transportEfficiency",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "transportEfficiency",
+      "skos:prefLabel": "transport_efficiency",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.128
@@ -5129,10 +5119,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:solidDiffusivity",
+        "Diffusivity",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "solidDiffusivity",
+      "skos:prefLabel": "Diffusivity",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 2.728e-14
@@ -5431,10 +5421,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:transportEfficiency",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "transportEfficiency",
+      "skos:prefLabel": "transport_efficiency",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.1462
@@ -5550,10 +5539,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:solidDiffusivity",
+        "Diffusivity",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "solidDiffusivity",
+      "skos:prefLabel": "Diffusivity",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 3.2e-14
@@ -5567,10 +5556,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:entropicCoefficient",
+        "TemperatureCoefficientOfTheOpenCircuitVoltage",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "entropicCoefficient",
+      "skos:prefLabel": "TemperatureCoefficientOfTheOpenCircuitVoltage",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": -0.0001
@@ -5813,10 +5802,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": [
-        "battinfo:transportEfficiency",
         "ConventionalProperty"
       ],
-      "skos:prefLabel": "transportEfficiency",
+      "skos:prefLabel": "transport_efficiency",
       "hasNumericalPart": {
         "@type": "RealData",
         "hasNumberValue": 0.3222
