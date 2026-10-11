@@ -1351,6 +1351,9 @@ def _filled_quantities(quantities: Mapping[str, Any], path: Path) -> dict[str, A
 # registry envelope carries the canonical record under the same key in
 # semantic_payload.battinfo_records.
 _REGISTRY_RESOURCE_TYPES = {"cell": "cell", "cell-spec": "cell_spec", "test-protocol": "test_spec"}
+# Seconds to wait for the registry when looking up one referenced record. ws.add()
+# blocks on it, and the outcome is remembered for the session either way.
+_REFERENCE_LOOKUP_TIMEOUT = 10
 
 
 def _canonical_record_of(envelope: Any, entity_type: str) -> dict | None:
@@ -1446,6 +1449,11 @@ class AuthoringWorkspace:
         # loaded from .battinfo/records/cell-instance/ into the index above, so a
         # fresh process can still resolve a cell by serial (day-2 rehydration).
         self._cells_rehydrated = False
+        # (entity type, IRI) -> outcome of looking a referenced record up in the
+        # registry this session ("copied", "not_found", "unreachable", ...), so a
+        # record is asked for once, and a failed lookup is not retried on every
+        # ws.add() that references it.
+        self._reference_lookups: dict[tuple[str, str], str] = {}
         # channel reference -> (equipment_id, channel_id) for test attachment.
         # Keys: the channel IRI, the channel label, and "unit/CHn" for the
         # unit's name and serial number. Populated by ws.add("equipment", ...)
@@ -7118,7 +7126,7 @@ class AuthoringWorkspace:
             headers={"User-Agent": "battinfo-client/1.0"},
         )
         try:
-            with urllib.request.urlopen(request, timeout=30) as response:  # noqa: S310
+            with urllib.request.urlopen(request, timeout=_REFERENCE_LOOKUP_TIMEOUT) as response:  # noqa: S310
                 envelope = json.loads(response.read().decode("utf-8"))
         except urllib.error.HTTPError as exc:
             return None, "not_found" if exc.code == 404 else "unreachable"
@@ -7144,7 +7152,9 @@ class AuthoringWorkspace:
         registry configured, the published record is looked up and a read-only
         copy kept under ``.battinfo/references/``; offline, the reference cannot
         be checked and ws.save() reports it. Returns ``local``, ``copied``,
-        ``offline``, ``not_found``, ``unreachable`` or ``unreadable``.
+        ``offline``, ``not_found``, ``unreachable`` or ``unreadable``. Each record
+        is looked up at most once per session: a later reference to it reuses the
+        outcome, so a registry that is down costs one timeout, not one per test.
         """
         if self._knows_record(iri, entity_type):
             return "local"
@@ -7152,10 +7162,15 @@ class AuthoringWorkspace:
             print(f"  note: {iri} is not in this workspace and could not be checked offline "
                   "(registry_url=None).")
             return "offline"
+        remembered = self._reference_lookups.get((entity_type, iri))
+        if remembered is not None:
+            return remembered
         record, outcome = self._fetch_registry_record(iri, entity_type)
         if record is not None:
             self._keep_reference_copy(record, entity_type)
+            self._reference_lookups[(entity_type, iri)] = "copied"
             return "copied"
+        self._reference_lookups[(entity_type, iri)] = outcome
         reason = {
             "not_found": f"was not found in the registry at {self._registry_url}",
             "unreachable": f"could not be looked up in the registry at {self._registry_url}",
@@ -8418,6 +8433,12 @@ class AuthoringWorkspace:
         if isinstance(ref, str):
             s = ref.strip()
             if s.startswith("http"):  # an IRI
+                # A cell already found (by serial, a search hit or an earlier IRI) is
+                # reused, not referenced and looked up in the registry again.
+                known = next((cell for cell in self._cells_by_short_id.values()
+                              if getattr(cell, "id", None) == s), None)
+                if known is not None:
+                    return known
                 return self._reference_cell({"id": s, "type": "cell"})
             sid = _short_id(s)
 

@@ -200,3 +200,40 @@ def test_a_reference_the_registry_does_not_hold_stays_an_error(
     summary = ws.save()
     assert summary["tests"][0]["failed"] is True
     assert "Referenced cell not found" in summary["tests"][0]["error"]
+
+
+# ── A lookup is asked once per session, and gives up quickly ─────────────────
+
+
+class DownRegistry:
+    """A registry that does not answer: every request fails; each is counted with its timeout."""
+
+    def __init__(self) -> None:
+        self.calls: list[tuple[str, object]] = []
+
+    def __call__(self, request, timeout=None):  # noqa: ANN001
+        url = request.full_url if isinstance(request, urllib.request.Request) else str(request)
+        self.calls.append((url, timeout))
+        raise urllib.error.URLError("registry down")
+
+
+def test_a_failed_lookup_is_asked_once_and_with_a_short_timeout(tmp_path: Path, monkeypatch) -> None:
+    down = DownRegistry()
+    monkeypatch.setattr(urllib.request, "urlopen", down)
+    ws = AuthoringWorkspace(root=tmp_path, registry_url=REGISTRY)
+    for name in ("first", "second", "third"):
+        ws.add("test", type="cycling", cell=CELL_IRI, name=name)
+    lookups = [(url, timeout) for url, timeout in down.calls if url.endswith(f"/resources/cell/{_uid(CELL_IRI)}")]
+    assert lookups == [(f"{REGISTRY}/resources/cell/{_uid(CELL_IRI)}", 10)]
+
+
+def test_a_cell_found_by_serial_is_not_looked_up_again_by_iri(tmp_path: Path, registry: FakeRegistry) -> None:
+    """The listing finds the cell by serial; its record lookup fails; the IRI reuses the cell."""
+    del registry.envelopes[f"cell/{_uid(CELL_IRI)}"]  # the record lookup fails (404)
+    ws = AuthoringWorkspace(root=tmp_path, registry_url=REGISTRY)
+    ws.add("test", type="cycling", cell=SERIAL, name="by serial")
+    calls = len(registry.calls)
+    assert any(url.endswith(f"/resources/cell/{_uid(CELL_IRI)}") for url in registry.calls)
+    ws.add("test", type="cycling", cell=CELL_IRI, name="by IRI")
+    ws.add("test", type="cycling", cell=SERIAL, name="by serial again")
+    assert len(registry.calls) == calls
