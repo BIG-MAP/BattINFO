@@ -96,7 +96,8 @@ record class and the ``publish`` shortcut:
        manufacturer="Energizer",
        model="CR2032",
        format="coin",
-       chemistry="Li-primary",
+       chemistry="li-mno2",
+       rechargeable=False,
        properties={"nominal_capacity": {"value": 0.235, "unit": "Ah"}},
    )
 
@@ -128,23 +129,33 @@ directory. It is a dot-directory, so a plain ``ls`` hides it — use ``ls -a``:
 CLI quick reference
 -------------------
 
-BattINFO ships a command-line interface for validation and querying:
+BattINFO ships a command-line interface for validation and querying. The example records that come with the package can be searched from any folder:
 
 .. code-block:: bash
 
-   # Validate a cell-spec record (here one of the repository examples;
-   # point it at any record you created or downloaded)
-   battinfo validate examples/cell-spec/A123__ANR26650M1-B.json --profile cell-spec
-
-   # Query the example cell specs packaged with BattINFO — the flag searches
-   # the bundled corpus, so this works outside a repository checkout (for
-   # your own library, use the Python query_* functions with an explicit
-   # directory)
    battinfo query cell-spec --include-packaged-examples
 
-   # Save a cell record from a draft file (--source-root is where your
-   # linked records live)
-   battinfo save cell-instance --input draft.json --source-root records
+The commands below continue from the CR2032 cell spec published above. Replace ``<id>`` with the end of the IRI it printed (``https://w3id.org/battinfo/spec/<id>``):
+
+.. doc-snippet: skip
+
+.. code-block:: bash
+
+   # Validate the cell spec record
+   battinfo validate .battinfo/publish/energizer-cr2032/examples/cell-spec/cell-spec-<id>.json
+
+   # Write a draft for a physical cell of that spec
+   battinfo template cell-instance --cell-spec-id https://w3id.org/battinfo/spec/<id> --out draft.json
+
+   # Set "serial_number" under "cell_instance" in draft.json, then save the cell
+   # next to its spec, where the reference to the spec resolves
+   battinfo save cell-instance --input draft.json --source-root .battinfo/publish/energizer-cr2032/examples
+
+``battinfo validate`` takes any record file, one you created or downloaded. The example records shipped with the package are JSON files in the ``data/examples`` folder of the installed package; this prints where that is:
+
+.. code-block:: bash
+
+   python -c "import battinfo, pathlib; print(pathlib.Path(battinfo.__file__).parent / 'data' / 'examples')"
 
 See the :doc:`CLI reference <cli-reference>` for every command.
 
@@ -176,7 +187,7 @@ What to read next
         The orientation roadmap: layers, data flow, and where each module fits.
 
     .. grid-item-card::
-        :link: ../validation-contract.html
+        :link: ../guarantees.html#validation-contract
 
         :octicon:`shield-check;1em;sd-text-info`  Validation
         ^^^^^^^^^^

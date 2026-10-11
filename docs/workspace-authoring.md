@@ -70,7 +70,7 @@ roadmap item, not an omission in your usage:
 |---|---|---|---|
 | Cell spec | yes — `template` + `load`, `search` + reuse, `spec=` on `add("cell")` | yes — `CellSpec` + `save_cell_spec` / `publish` | yes — `template` / `save cell-spec` / `validate` |
 | Cell (physical instance) | yes — `add("cell", names=[...])` | yes — `save_cell_instance` | yes — `create` / `save cell-instance` |
-| Test spec (protocol) | partial — `template("test-spec")` exists but its output currently fails `ws.load()` ([troubleshooting](pages/troubleshooting.md)) | yes — `TestSpec` + `save_test_spec` (recommended) | yes — `template` / `save test-spec` |
+| Test spec (protocol) | yes — `template("test-spec")` + `load` once `type` is filled in, or a `TestSpec` passed as `spec=` on `add("test")` | yes — `TestSpec` + `save_test_spec` | yes — `template` / `save test-spec` |
 | Test | yes — `add("test", cell=..., data=..., channel=...)` | yes — `Test` + `save_test` | yes — `save test` |
 | Dataset | yes — created by `add("test", data=...)` | yes — `Dataset` + `save_dataset` | yes — `save dataset` |
 | Equipment + channels | **yes — best path**: `add("equipment", ...)` ([how-to](howto/register-equipment.md)) | yes — `battinfo.api` equipment/channel functions | no |
