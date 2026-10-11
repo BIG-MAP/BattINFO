@@ -1252,6 +1252,11 @@ _EQUIPMENT_SPEC_DRAFT_KEYS = frozenset({
 _QUANTITY_VALUE_KEYS = ("value", "min_value", "max_value", "typical_value", "value_text")
 
 
+def _path_key(path: str | Path) -> str:
+    """A file path normalised for comparison (absolute, case-folded where the OS is)."""
+    return os.path.normcase(os.path.abspath(str(path)))
+
+
 def _check_draft_keys(
     raw: Mapping[str, Any],
     allowed: frozenset[str],
@@ -2738,7 +2743,10 @@ class AuthoringWorkspace:
     def save(self, validation_policy: str = "strict", mode: str = "upsert") -> dict:
         """Save all records and rebuild the workspace index.
 
-        Returns a summary dict with counts of written records.
+        Returns a summary dict with counts of written records. A record that
+        the index rejects under ``validation_policy`` (a reference that does not
+        resolve, for example) is still written, but is listed as ``[failed]``
+        with its error, and its summary item carries ``failed`` and ``error``.
         Only the records saved in this call will be submitted by the next
         ``ws.submit()`` — records left over from previous sessions in the
         same directory are ignored.
@@ -2832,30 +2840,69 @@ class AuthoringWorkspace:
 
         total = sum(len(result.get(key, [])) for key, _ in _SAVE_DISPLAY)
         print(f"Saved {total} record(s) under {self._ws.source_root}:")
+        # Records the save-time index rejected (a reference that does not resolve,
+        # a schema error) are written but not valid: list them as failed, with the
+        # error, and mark them in the returned summary.
+        failures = self._index_failures(result)
+        failed_count = len(failures)
         for key, label in _SAVE_DISPLAY:
             items = [i for i in result.get(key, []) if isinstance(i, dict)]
-            for item in items[:10]:
+            hidden = 0
+            for position, item in enumerate(items):
+                failure = failures.pop(_path_key(item["path"]), None) if item.get("path") else None
+                if failure is not None:
+                    item["failed"] = True
+                    item["error"] = failure["error"]
+                elif position >= 10:
+                    hidden += 1
+                    continue
                 rid = item.get("id", "") or ""
                 name = name_by_id.get(rid) or (rid.rsplit("/", 1)[-1] if rid else "?")
-                status = item.get("status", "")
+                status = "failed" if failure is not None else item.get("status", "")
                 # A same-IRI upsert whose content is unchanged is a no-op, not an
                 # update: report it honestly so an identical re-save reads as such.
                 if status == "updated" and item.get("content_changed") is False:
                     status = "unchanged"
                 rel = self._rel_to_root(item.get("path", ""))
                 print(f"  {label:11} {name[:36]:36} [{status}]  {rel}")
-            if len(items) > 10:
-                print(f"  {label:11} ... +{len(items) - 10} more")
+                if failure is not None:
+                    for line in str(failure["error"]).splitlines():
+                        print(f"      {line.strip()}")
+            if hidden:
+                print(f"  {label:11} ... +{hidden} more")
+        if failures:
+            # Rejected records this save did not write (left by an earlier session).
+            print("  Other records in the records folder that failed validation:")
+            for failure in failures.values():
+                first_line = (str(failure.get("error", "")).splitlines() or [""])[0]
+                print(f"    {failure.get('file')}: {first_line}")
         if stamped:
             ref = self._get_project()
             label = ref.summary() if ref else "project"
             print(f"  funding:    {label} stamped onto {stamped} record(s)")
-        if not getattr(self, "_publishing", False):
+        if failed_count:
+            print(f"\n  {failed_count} record(s) failed validation under the {validation_policy} policy "
+                  "and are marked [failed] above.")
+            print("  They are written but not valid: fix the errors, then run ws.save() again "
+                  "before ws.publish() or ws.submit().")
+        elif not getattr(self, "_publishing", False):
             # Suppressed mid-publish: telling the user to run ws.publish()
             # from inside ws.publish() right before a credentials error reads
             # as mockery (red-team W1.3).
             print("\n  Next: ws.list(verbose=True) to inspect, or ws.publish() to publish.")
         return result
+
+    def _index_failures(self, result: dict) -> dict[str, dict]:
+        """The save-time index failures of *result*, keyed by the record file they name."""
+        failures: dict[str, dict] = {}
+        for failure in (result.get("index") or {}).get("failures") or []:
+            if not isinstance(failure, dict):
+                continue
+            path = Path(str(failure.get("file", "")))
+            if not path.is_absolute():
+                path = self._ws.source_root / path
+            failures[_path_key(path)] = failure
+        return failures
 
     def _save_side_records(
         self, *, mode: str, validation_policy: str, stamp: Any = None
