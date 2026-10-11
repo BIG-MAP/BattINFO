@@ -1152,6 +1152,47 @@ def _unmapped_source_columns(
         return []
 
 
+def _row_counter_columns(
+    src: Path, plugin_id: str | None, columns: list[str], n_rows: int
+) -> list[str]:
+    """The *columns* of *src* that only number its rows (best-effort).
+
+    A column holding 0, 1, 2, ... or 1, 2, 3, ..., one value per row of the
+    converted table, says nothing the row order of the converted file does not
+    already say (Neware's ``Record`` column is one), so leaving it out of the
+    BDF file loses no data. A column that cannot be read, or whose values are
+    anything else, is not a row counter and stays reported as lost.
+    """
+    if not columns or n_rows < 1:
+        return []
+    try:
+        import bdf.io as _bdf_io  # noqa: PLC0415
+        import polars as pl  # noqa: PLC0415
+
+        plugin = _bdf_io.PLUGINS[plugin_id] if plugin_id in _bdf_io.PLUGINS else None
+        parser = getattr(plugin, "table_parser", None)
+        if parser is None:
+            return []
+        frame = parser.read(src, normalize=False, lazy=True).select(columns).collect()
+    except Exception:  # noqa: BLE001 — best-effort, like the loss report itself
+        return []
+    counters: list[str] = []
+    for name in columns:
+        try:
+            values = frame.get_column(name)
+            if values.dtype.is_float() and not (values == values.floor()).all():
+                continue
+            values = values.cast(pl.Int64, strict=True)
+        except Exception:  # noqa: BLE001 — not whole numbers, so not a row counter
+            continue
+        if len(values) != n_rows or values.null_count() or values[0] not in (0, 1):
+            continue
+        if n_rows > 1 and not (values.diff().drop_nulls() == 1).all():
+            continue
+        counters.append(name)
+    return counters
+
+
 # Legacy/authored test-spec condition keys -> (canonical condition name, default unit).
 # ws.template() used to emit unit-suffixed keys with bare scalars or {min,max}
 # dicts; these keep loading (coerced to proper quantities) so old drafts survive.
@@ -2316,6 +2357,14 @@ class AuthoringWorkspace:
             # behind a success message — compare the source header against what
             # actually survived and report every column left behind.
             unmapped = _unmapped_source_columns(src, reader, list(df.columns))
+            # A column that only numbers the rows is not data: the row order of
+            # the converted file carries it. Say so instead of calling it a loss.
+            counters = _row_counter_columns(src, reader, unmapped, len(df))
+            if counters:
+                unmapped = [col for col in unmapped if col not in counters]
+                print(f"  Left out {'a column' if len(counters) == 1 else 'columns'} that only "
+                      f"number{'s' if len(counters) == 1 else ''} the rows: {', '.join(counters)}. "
+                      f"The row order of {out.name} holds the same information.")
             if unmapped:
                 lossy.append((src.name, unmapped))
                 print(f"  WARNING: {len(unmapped)} source column(s) were NOT mapped to BDF "
