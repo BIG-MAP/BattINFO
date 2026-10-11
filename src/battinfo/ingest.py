@@ -809,6 +809,7 @@ def publish_ingest_workspace(
     api_key_header: str = "X-Battinfo-API-Key",
     platform_base_url: str | None = None,
     timeout_sec: float = 30.0,
+    allow_local_files: bool = False,
 ) -> dict[str, Any]:
     """Build an ingest workspace and publish it to the registry.
 
@@ -824,6 +825,10 @@ def publish_ingest_workspace(
     ``battinfo[processing]``).  The processor generates a BDF-normalised CSV,
     a static PNG plot, and an interactive HTML plot; all three are uploaded to
     the object store alongside the raw file.
+
+    A package whose files are still local paths is refused before anything is
+    sent (see :func:`battinfo.api.submit_publication_package`); pass
+    ``allow_local_files=True`` only for a local test registry.
     """
     if registry_base_url is None or not registry_base_url.strip():
         raise ValueError("registry_base_url is required for ingest publication.")
@@ -864,6 +869,7 @@ def publish_ingest_workspace(
         api_key=api_key,
         api_key_header=api_key_header,
         timeout_sec=timeout_sec,
+        allow_local_files=allow_local_files,
     )
     response_payload = submit_result.get("response") or {}
     canonical_id_map = response_payload.get("canonical_id_map") if isinstance(response_payload, dict) else {}

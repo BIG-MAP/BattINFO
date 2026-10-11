@@ -1611,6 +1611,7 @@ $ battinfo demo verify [OPTIONS] [root]
 * `--timeout-sec <float>`: Timeout window for registry and platform checks.  [default: 30.0]
 * `--poll-interval-sec <float>`: Polling interval while waiting for responses.  [default: 1.0]
 * `--force`: Replace the existing demo root before regenerating it.
+* `--allow-local-files`: Send the demo dataset although its file is a local path. Only for a local test registry.
 * `--format <str>`: Output format: json|text.  [default: json]
 * `--help`: Show this message and exit.
 
@@ -1774,6 +1775,7 @@ $ battinfo ingest publish [OPTIONS] {ingest_root}
 * `--force`: Replace the existing workspace root before regenerating it.
 * `--validation-policy <str>`: Validation policy: strict|set|quick.  [default: strict]
 * `--process-artifacts`: Convert timeseries CSVs to BDF and generate static/interactive plots. Requires battinfo.
+* `--allow-local-files`: Send records whose files are local paths. Only for a local test registry.
 * `--format <str>`: Output format: json|text.  [default: json]
 * `--help`: Show this message and exit.
 

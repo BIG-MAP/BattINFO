@@ -556,6 +556,7 @@ def demo_verify(
     timeout_sec: float = typer.Option(30.0, "--timeout-sec", help="Timeout window for registry and platform checks."),
     poll_interval_sec: float = typer.Option(1.0, "--poll-interval-sec", help="Polling interval while waiting for responses."),
     force: bool = typer.Option(False, "--force", help="Replace the existing demo root before regenerating it."),
+    allow_local_files: bool = typer.Option(False, "--allow-local-files", help="Send the demo dataset although its file is a local path. Only for a local test registry."),
     output_format: str = typer.Option("json", "--format", help="Output format: json|text."),
 ) -> None:
     """Run the BattINFO demo pipeline through registry publication and optional platform verification."""
@@ -573,6 +574,7 @@ def demo_verify(
             timeout_sec=timeout_sec,
             poll_interval_sec=poll_interval_sec,
             force=force,
+            allow_local_files=allow_local_files,
         )
     except (OSError, RuntimeError, ValueError) as exc:
         typer.echo(str(exc))
@@ -755,6 +757,7 @@ def ingest_publish(
     clean: bool = typer.Option(False, "--force", help="Replace the existing workspace root before regenerating it."),
     validation_policy: str = typer.Option("strict", "--validation-policy", help="Validation policy: strict|set|quick."),
     process_artifacts: bool = typer.Option(False, "--process-artifacts", help="Convert timeseries CSVs to BDF and generate static/interactive plots. Requires battinfo[processing]."),
+    allow_local_files: bool = typer.Option(False, "--allow-local-files", help="Send records whose files are local paths. Only for a local test registry."),
     output_format: str = typer.Option("json", "--format", help="Output format: json|text."),
 ) -> None:
     """Build and publish one ingest workspace in a single command.
@@ -828,6 +831,7 @@ def ingest_publish(
             artifact_processor=processor,
             platform_base_url=platform_url,
             timeout_sec=timeout_sec,
+            allow_local_files=allow_local_files,
         )
     except (OSError, RuntimeError, ValueError) as exc:
         typer.echo(str(exc))

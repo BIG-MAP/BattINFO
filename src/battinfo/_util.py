@@ -94,6 +94,51 @@ def local_path(value: object) -> Path | None:
     return Path(text)
 
 
+#: Record fields that say where a file or its source can be downloaded. A
+#: registry must not receive a local path in any of them (see local_file_references).
+LOCATION_FIELDS = frozenset({"access_url", "content_url", "download_url", "source_url", "record_url"})
+
+
+def local_file_references(node: object, path: str = "") -> list[tuple[str, str]]:
+    """``(field path, value)`` for every location field in *node* that names a local file.
+
+    Walks a record (or a whole submission envelope) and reports each
+    ``access_url``, ``content_url``, ``download_url``, ``source_url`` and
+    ``record_url`` holding a ``file:`` URI or a plain path, wherever it sits
+    (``dataset.distributions[0].content_url``, ``provenance.source_url``, ...).
+    """
+    found: list[tuple[str, str]] = []
+    if isinstance(node, dict):
+        for key, value in node.items():
+            child = f"{path}.{key}" if path else str(key)
+            if key in LOCATION_FIELDS and isinstance(value, str):
+                if is_local_location(value):
+                    found.append((child, value))
+            else:
+                found.extend(local_file_references(value, child))
+    elif isinstance(node, (list, tuple)):
+        for index, item in enumerate(node):
+            found.extend(local_file_references(item, f"{path}[{index}]"))
+    return found
+
+
+def local_files_message(offenders: list[tuple[str, list[tuple[str, str]]]]) -> str:
+    """The refusal message for records that would publish local file paths to a registry."""
+    lines = [
+        f"Refusing to send {len(offenders)} record(s) to the registry: they point at files "
+        "on this computer, which nobody else can download."
+    ]
+    for label, fields in offenders:
+        lines.append(f"  {label}")
+        lines.extend(f"    {field}: {value}" for field, value in fields)
+    lines.append(
+        "Nothing was sent. Deposit the data files first, for example with ws.zenodo(), so the "
+        "records carry https URLs, then submit again. Only for a local test registry, pass "
+        "allow_local_files=True."
+    )
+    return "\n".join(lines)
+
+
 def path_name(path: PathLike) -> str:
     """The last component of *path*, split on ``/`` and ``\\`` alike so it is the same on every OS."""
     return PureWindowsPath(str(path)).name

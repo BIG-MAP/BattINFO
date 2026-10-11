@@ -32,8 +32,9 @@ if TYPE_CHECKING:
 
 from battinfo._jsonio import atomic_write_text as _atomic_write_text
 from battinfo._jsonio import read_json as _read_json
-from battinfo._util import _now_iso, is_dataset_series
-from battinfo.entities import record_set_dirs
+from battinfo._util import _now_iso, is_dataset_series, local_file_references
+from battinfo._util import local_files_message as _local_files_message
+from battinfo.entities import entity_id_from_doc, record_set_dirs
 
 # Short-name pattern: 6 lowercase alphanumeric characters at the end of a
 # dash-delimited name component (e.g. "666h1s" in "duracell-mn2400-2026-02-666h1s").
@@ -2854,6 +2855,7 @@ class AuthoringWorkspace:
         only: str | builtins.list[str] | None = None,
         publication_mode: str = STAGED_PUBLICATION_MODE,
         allow_partial: bool = False,
+        allow_local_files: bool = False,
     ) -> builtins.list[dict]:
         """Save and submit the workspace in one call (staged for review by default).
 
@@ -2889,6 +2891,11 @@ class AuthoringWorkspace:
             A pre-existing DOI to attach (e.g. from a Zenodo draft you reviewed).
         only:
             Restrict submission to one or more record types (see :meth:`submit`).
+        allow_local_files:
+            The registry step refuses records that point at local files (see
+            :meth:`submit`); ``zenodo=True`` deposits the files first and points
+            the records at the deposited copies. ``True`` lifts the check, for a
+            local test registry only.
         """
         self._publishing = True
         try:
@@ -2909,6 +2916,7 @@ class AuthoringWorkspace:
         return self.submit(
             note=note, doi=doi, only=only,
             publication_mode=publication_mode, allow_partial=allow_partial,
+            allow_local_files=allow_local_files,
         )
 
     def status(
@@ -3601,6 +3609,7 @@ class AuthoringWorkspace:
         allow_partial: bool = False,
         submit_all: bool = False,
         resume: bool = True,
+        allow_local_files: bool = False,
     ) -> builtins.list[dict]:
         """Submit workspace records to the battinfo registry (staged for review).
 
@@ -3658,6 +3667,14 @@ class AuthoringWorkspace:
             Version label for this submission batch.  Defaults to today's date.
         note:
             Provenance note attached to every submitted record.
+        allow_local_files:
+            Records whose download or source locations (``access_url``,
+            ``content_url``, ``download_url``, ``provenance.source_url``,
+            ``record_url``) are local paths or ``file:`` URIs are refused
+            before anything is sent, because the registry would publish paths
+            nobody else can open. Deposit the files first (``ws.zenodo()``
+            points the records at the deposited copies), then submit.
+            ``True`` lifts the check, for a local test registry only.
 
         Example::
 
@@ -3809,6 +3826,7 @@ class AuthoringWorkspace:
         parsed: dict[Path, dict] = {}
         validations: dict[Path, dict] = {}
         prefailed: list[dict] = []
+        local_offenders: list[tuple[Path, dict, list[tuple[str, str]]]] = []
         for s in wanted:
             for f in selected[s]:
                 try:
@@ -3838,8 +3856,32 @@ class AuthoringWorkspace:
                     prefailed.append({"title": f.name, "source_local_id": f.stem, "ok": False,
                                       "status": "invalid", "error": error, "iri": "", "result": None})
                     continue
+                if not allow_local_files:
+                    found = _submission_local_files(rec, s, records_dir)
+                    if found:
+                        local_offenders.append((f, rec, found))
+                        continue
                 parsed[f] = rec
                 validations[f] = {"ok": True, "errors": list(result.errors), "policy": "publisher"}
+        if local_offenders:
+            # Never publish a path on this computer as a download link: refuse the
+            # records that carry one, before any network call.
+            local_failures = [
+                {"title": f.name, "source_local_id": f.stem, "ok": False, "status": "local_files",
+                 "error": "; ".join(f"{field}: {value}" for field, value in found),
+                 "iri": entity_id_from_doc(rec) or "", "result": None}
+                for f, rec, found in local_offenders
+            ]
+            if not allow_partial:
+                message = _local_files_message([
+                    (f"{f.name} ({entity_id_from_doc(rec) or 'no id'})", found)
+                    for f, rec, found in local_offenders
+                ])
+                raise SubmitError(message, failed=local_failures + prefailed,
+                                  outcomes=local_failures + prefailed)
+            for failure in local_failures:
+                print(f"  ERROR: {failure['title']} -- points at local files: {failure['error']}")
+            prefailed.extend(local_failures)
         if prefailed and not allow_partial:
             raise SubmitError(
                 f"{len(prefailed)} record(s) are unreadable or failed validation; aborting before "
@@ -4012,7 +4054,8 @@ class AuthoringWorkspace:
                 outcomes.append(_journaled_submit(journal, payload, url, key, title,
                                                   source_local_id=source_local_id,
                                                   publication_mode=publication_mode,
-                                                  validation=validations[src]))
+                                                  validation=validations[src],
+                                                  allow_local_files=allow_local_files))
 
         # ── Cell specs ────────────────────────────────────────────────────────
         for src in _selected("cell-spec"):
@@ -4041,7 +4084,8 @@ class AuthoringWorkspace:
             )
             outcomes.append(_journaled_submit(journal, payload, url, key, title,
                                               source_local_id=source_local_id, publication_mode=publication_mode,
-                                              validation=validations[src]))
+                                              validation=validations[src],
+                                              allow_local_files=allow_local_files))
 
         # ── Cell instances ────────────────────────────────────────────────────
         cell_spec_dir = records_dir / "cell-spec"
@@ -4088,7 +4132,8 @@ class AuthoringWorkspace:
             )
             outcomes.append(_journaled_submit(journal, payload, url, key, label,
                                               source_local_id=source_local_id, publication_mode=publication_mode,
-                                              validation=validations[src]))
+                                              validation=validations[src],
+                                              allow_local_files=allow_local_files))
 
         # ── Test specs (protocols) ────────────────────────────────────────────
         # Submitted as resource_type "test_spec"; stored in the spec/ IRI namespace
@@ -4119,7 +4164,8 @@ class AuthoringWorkspace:
             )
             outcomes.append(_journaled_submit(journal, payload, url, key, title,
                                               source_local_id=source_local_id, publication_mode=publication_mode,
-                                              validation=validations[src]))
+                                              validation=validations[src],
+                                              allow_local_files=allow_local_files))
 
         # ── Tests ─────────────────────────────────────────────────────────────
         for src in _selected("test"):
@@ -4148,7 +4194,8 @@ class AuthoringWorkspace:
             )
             outcomes.append(_journaled_submit(journal, payload, url, key, title,
                                               source_local_id=source_local_id, publication_mode=publication_mode,
-                                              validation=validations[src]))
+                                              validation=validations[src],
+                                              allow_local_files=allow_local_files))
 
         # ── Datasets ──────────────────────────────────────────────────────────
         for src in _selected("dataset"):
@@ -4199,7 +4246,8 @@ class AuthoringWorkspace:
             )
             outcomes.append(_journaled_submit(journal, payload, url, key, title,
                                               source_local_id=source_local_id, publication_mode=publication_mode,
-                                              validation=validations[src]))
+                                              validation=validations[src],
+                                              allow_local_files=allow_local_files))
 
         if outcomes:
             self._search_cache = None
@@ -4407,14 +4455,16 @@ class AuthoringWorkspace:
         Mirrors what :meth:`upload` does for R2, without any extra storage:
         each distribution whose filename was deposited gets
         ``{record_url}/files/{name}`` as its ``content_url`` (plus a sha256
-        checksum if the local file is readable), and the primary distribution
-        sets the dataset ``access_url``. Returns the number of records updated.
+        checksum if the local file is readable), the primary distribution
+        sets the dataset ``access_url``, and a ``provenance.source_url`` naming
+        a deposited local file follows it. Returns the number of records updated.
         """
         import hashlib
 
         ds_dir = self._ws.source_root / "dataset"
         if not ds_dir.is_dir():
             return 0
+        public_by_name = {name: f"{record_url}/files/{name}" for name in uploaded_names}
         patched = 0
         for record_path in sorted(ds_dir.glob("*.json")):
             raw = json.loads(record_path.read_text(encoding="utf-8"))
@@ -4445,6 +4495,10 @@ class AuthoringWorkspace:
                 new_dists.append(dist)
                 if primary_url is None and dist.get("role") != "raw":
                     primary_url = public_url
+            # The provenance source of a workspace dataset is its own data file;
+            # point it at the deposited copy too, so no local path is left to publish.
+            if _point_source_url_at_public_copy(raw, public_by_name):
+                changed = True
             if not changed:
                 continue
             raw["dataset"]["distributions"] = new_dists
@@ -4552,6 +4606,7 @@ class AuthoringWorkspace:
             # file in the dataset gets a resolvable public URL, not just the first.
             new_dists: list[dict] = []
             primary_url: str | None = None
+            public_by_name: dict[str, str] = {}
             for dist in dists:
                 local_url = dist.get("content_url") or ds.get("access_url") or ""
                 local_file = _file_uri_to_path(local_url)
@@ -4613,6 +4668,7 @@ class AuthoringWorkspace:
                 dist = {**dist, "content_url": public_url,
                         "checksum": {"algorithm": "sha256", "value": sha256}}
                 new_dists.append(dist)
+                public_by_name[local_file.name] = public_url
                 # The primary (processed) distribution sets the dataset access_url.
                 if primary_url is None and dist.get("role") != "raw":
                     primary_url = public_url
@@ -4622,6 +4678,7 @@ class AuthoringWorkspace:
             urls.append(primary_url or new_dists[0]["content_url"])
             raw["dataset"]["access_url"] = primary_url or new_dists[0]["content_url"]
             raw["dataset"]["distributions"] = new_dists
+            _point_source_url_at_public_copy(raw, public_by_name)
             _atomic_write_text(record_path, json.dumps(raw, indent=2, ensure_ascii=False))
 
             # Keep session paths in sync so submit() picks up the updated record
@@ -8191,6 +8248,40 @@ def _cell_spec_submission_payload(
     )
 
 
+def _point_source_url_at_public_copy(record: dict, public_by_name: Mapping[str, str]) -> bool:
+    """Replace a local ``provenance.source_url`` with the public URL of the same file.
+
+    *public_by_name* maps a deposited file's name to its public URL. Returns
+    True when the record changed.
+    """
+    from battinfo._util import local_path, path_name  # noqa: PLC0415
+
+    provenance = record.get("provenance")
+    if not isinstance(provenance, dict):
+        return False
+    source = local_path(provenance.get("source_url"))
+    public = public_by_name.get(path_name(source)) if source is not None else None
+    if not public:
+        return False
+    provenance["source_url"] = public
+    return True
+
+
+def _submission_local_files(record: dict, subdir: str, records_dir: Path) -> list[tuple[str, str]]:
+    """Local file paths a submission of *record* would publish (see local_file_references).
+
+    A cell's submission embeds its saved cell spec, so that record is checked too.
+    """
+    found = local_file_references(record)
+    if subdir == "cell-instance":
+        spec_id = (record.get("cell_instance") or {}).get("cell_spec_id") or ""
+        spec_record = _find_spec_record(records_dir / "cell-spec", spec_id) if spec_id else None
+        if spec_record:
+            found += [(f"(its cell spec) {field}", value)
+                      for field, value in local_file_references(spec_record)]
+    return found
+
+
 def _find_spec_record(cell_spec_dir: Path, cell_spec_id: str) -> dict | None:
     """Return the cell-spec record dict whose product.id matches cell_spec_id."""
     if not cell_spec_dir.exists():
@@ -8414,11 +8505,13 @@ def _journaled_submit(
     source_local_id: str = "",
     publication_mode: str = STAGED_PUBLICATION_MODE,
     validation: dict[str, Any] | None = None,
+    allow_local_files: bool = False,
 ) -> dict:
     """Run one submission through the resume journal (no journal → plain submit)."""
     if journal is None:
         return _do_submit(payload, url, key, title, source_local_id=source_local_id,
-                          publication_mode=publication_mode, validation=validation)
+                          publication_mode=publication_mode, validation=validation,
+                          allow_local_files=allow_local_files)
     payload_hash = _journal_payload_hash(payload)
     previous = journal.previous_success(source_local_id, payload_hash) if source_local_id else None
     if previous is not None:
@@ -8427,7 +8520,8 @@ def _journaled_submit(
                 "status": "skipped_journal", "iri": previous.get("iri", ""), "error": None,
                 "result": None, "version_bumped": None}
     outcome = _do_submit(payload, url, key, title, source_local_id=source_local_id,
-                         publication_mode=publication_mode, validation=validation)
+                         publication_mode=publication_mode, validation=validation,
+                         allow_local_files=allow_local_files)
     journal.record(outcome, payload_hash)
     return outcome
 
@@ -8482,6 +8576,7 @@ def _do_submit(
     source_local_id: str = "",
     publication_mode: str = STAGED_PUBLICATION_MODE,
     validation: dict[str, Any] | None = None,
+    allow_local_files: bool = False,
 ) -> dict:
     """Submit one record; return a structured outcome (never silently drop it).
 
@@ -8501,7 +8596,8 @@ def _do_submit(
     bumped_version: str | None = None
     for attempt in range(2):
         try:
-            result = submit_publication_package(payload, registry_base_url=url, api_key=key)
+            result = submit_publication_package(payload, registry_base_url=url, api_key=key,
+                                                allow_local_files=allow_local_files)
             raw_response = result.get("response")
             response = raw_response if isinstance(raw_response, dict) else {}
             status = response.get("status", "unknown")
