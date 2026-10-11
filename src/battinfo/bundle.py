@@ -2283,6 +2283,17 @@ class Artifact(BaseModel):
 
 
 class TestSpec(BundleJsonModel):
+    """A test spec: a reusable test procedure, saved as a ``test-protocol`` record.
+
+    Give the steps as PyBaMM-style strings with ``experiment=``
+    (``["Charge at C/3 until 4.2 V", "Discharge at C/10 until 2.5 V"]``,
+    plus ``cycles=``) or as structured ``method`` steps, and the test type with
+    ``kind=``. Each run of the procedure is a :class:`Test` that points at it:
+    ``Test(protocol=spec, ...)`` or ``ws.add("test", spec=spec, ...)``.
+    Save it with ``battinfo.save_test_spec``. A misspelled argument raises
+    ``TypeError`` with a did-you-mean; the fields below say what each holds.
+    """
+
     default_filename: ClassVar[str] = TEST_SPEC_FILENAME
 
     kind: str = "TestSpec"
@@ -2486,6 +2497,17 @@ class TestSpec(BundleJsonModel):
 
 
 class Test(BundleJsonModel):
+    """A test: one run of a procedure on one physical cell, saved as a ``test`` record.
+
+    Name the cell (``cell=`` a :class:`Cell`, or ``cell_id=`` its IRI), the
+    test type (``kind=``) and, when there is one, the :class:`TestSpec` it
+    followed (``protocol=``). As-run details go in ``conditions``,
+    ``instrument``, ``started_at`` and ``ended_at``. The data the run produced
+    is a :class:`Dataset` that points back at the test. A misspelled argument
+    raises ``TypeError`` with a did-you-mean; the fields below say what each
+    holds.
+    """
+
     default_filename: ClassVar[str] = TEST_FILENAME
 
     kind: str = "Test"
@@ -2736,6 +2758,18 @@ class Test(BundleJsonModel):
 
 
 class Dataset(BundleJsonModel):
+    """A dataset: one data artifact and where its files are, saved as a ``dataset`` record.
+
+    Point it at the cell and test the data is about (``cell=``, ``test=`` or
+    their IRIs) and at the data: a local file (``path``) or files already
+    archived elsewhere (``access_url`` and ``distributions``, each with a
+    checksum). A collection of datasets is a ``Dataset`` with
+    ``additional_type=["DatasetSeries"]`` and no cell, test or files; its
+    members name it in ``series_id``. Save it with ``battinfo.save_dataset``.
+    A misspelled argument raises ``TypeError`` with a did-you-mean; the
+    fields below say what each holds.
+    """
+
     default_filename: ClassVar[str] = DATASET_FILENAME
 
     kind: str = "Dataset"

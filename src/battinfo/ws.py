@@ -1427,6 +1427,35 @@ def _check_draft_keys(
     )
 
 
+def _check_add_keywords(record_type: str, method: Callable[..., Any], kwargs: Mapping[str, Any]) -> None:
+    """Raise TypeError for keywords *method* does not take, with a did-you-mean.
+
+    ``ws.add()`` passes its keywords on to a private method, so without this
+    check a stray keyword fails with Python's own message, which names that
+    private method and lists nothing. A method that takes ``**kwargs`` checks
+    its own keywords and is left alone.
+    """
+    import inspect  # noqa: PLC0415
+
+    params = inspect.signature(method).parameters
+    if any(p.kind is inspect.Parameter.VAR_KEYWORD for p in params.values()):
+        return
+    named = (inspect.Parameter.POSITIONAL_OR_KEYWORD, inspect.Parameter.KEYWORD_ONLY)
+    accepted = [name for name, p in params.items() if p.kind in named]
+    unknown = [key for key in kwargs if key not in accepted]
+    if not unknown:
+        return
+    parts = []
+    for key in unknown:
+        close = difflib.get_close_matches(key, accepted, n=1)
+        parts.append(f"{key}=" + (f" (did you mean {close[0]}=?)" if close else ""))
+    raise TypeError(
+        f"Unknown keyword(s) for ws.add({record_type!r}): {', '.join(parts)}. "
+        f"ws.add({record_type!r}, ...) accepts: {', '.join(f'{name}=' for name in accepted)}. "
+        "Run help(ws.add) for what each one does."
+    )
+
+
 class AuthoringWorkspace:
     """The blessed authoring surface: a simplified workspace for BattINFO records.
 
@@ -2840,6 +2869,27 @@ class AuthoringWorkspace:
         For large batches you may instead pass ``datasets="glob"`` to match files to
         already-loaded cells by the 6-char short ID in each filename.
 
+        The keywords a test takes are ``type`` (or ``kind``), ``cell``, ``data``,
+        ``raw``, ``datasets``, ``spec`` (or ``protocol``), ``conformance``,
+        ``name``, ``handle``, ``iri``, ``uid``, ``dataset_iris``, ``series_id``,
+        ``instrument``, ``channel``, ``license``, ``description`` and ``status``.
+        Any other keyword raises ``TypeError`` with the closest match.
+
+        - ``spec`` (``protocol`` is the same keyword) is the test spec the run
+          followed: a ``battinfo.TestSpec``, saved with the test and linked to
+          it, or the IRI of a test spec that is already saved or published.
+        - ``description`` is free text about this run; ``status`` is
+          ``"completed"`` unless you pass ``"planned"``, ``"running"``,
+          ``"aborted"`` or ``"other"``.
+        - ``instrument`` names the cycler the test ran on.
+        - ``license`` sets the licence of the datasets made from ``data=``,
+          instead of the workspace default.
+        - ``raw`` attaches the original instrument file for each ``data`` file;
+          without it the originals recorded by ``ws.convert()`` are attached.
+        - ``conformance`` says whether the run followed its spec:
+          ``"conformant"``, ``"non-conformant"``, ``"unknown"``, or a dict with
+          ``status``, ``note`` and ``deviations``.
+
         ``series_id`` puts every dataset made from ``data=`` in a collection. Pass
         the collection's IRI; the collection itself is saved first, with
         ``battinfo.Dataset`` and ``battinfo.save_dataset``::
@@ -2875,6 +2925,7 @@ class AuthoringWorkspace:
         """
         rt_key = str(record_type).strip().lower().replace("_", "-")
         if rt_key == "equipment":
+            _check_add_keywords("equipment", self._add_equipment, kwargs)
             return self._add_equipment(**kwargs)
         if rt_key == "material-spec":
             return self._add_material_spec(**kwargs)
@@ -2891,8 +2942,10 @@ class AuthoringWorkspace:
         except ValueError:
             rt = None
         if rt == "cell":
+            _check_add_keywords("cell", self._add_cell_instances, kwargs)
             return self._add_cell_instances(**kwargs)
         if rt == "test":
+            _check_add_keywords("test", self._add_tests, kwargs)
             return self._add_tests(**kwargs)
         raise ValueError(
             f"add() supports type 'cell', 'test', 'equipment', 'material_spec', "
@@ -5028,7 +5081,8 @@ class AuthoringWorkspace:
         sandbox:
             Use ``sandbox.zenodo.org`` for testing.
         community:
-            Zenodo community identifier (default ``"battinfo-reference"``).
+            Zenodo community identifier (default ``"battery-knowledge-base"``).
+            ``None`` leaves the deposit out of any community.
         creators:
             List of ``{"name": "...", "affiliation": "...", "orcid": "..."}`` dicts.
         keywords:

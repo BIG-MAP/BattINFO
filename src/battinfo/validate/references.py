@@ -304,7 +304,7 @@ def validate_references_report(
                 source_root=root,
                 resource_type=resource_type,
                 missing_message=(
-                    "Referenced cell_spec not found in source_root. Register the type first "
+                    "Referenced cell_spec not found in source_root. Save the cell spec first "
                     f"or disable resolve_references. Missing: {cell_spec_id}"
                 ),
                 mismatch_message=(

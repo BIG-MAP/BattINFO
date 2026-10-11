@@ -126,7 +126,7 @@ $ battinfo push [OPTIONS] {folder}
 
 **Options**:
 
-* `-t, --cell-spec <str>`: Cell type, e.g. &#x27;Energizer CR2032&#x27;. Required for unstructured folders.
+* `-t, --cell-spec <str>`: Cell spec as manufacturer and model, e.g. &#x27;Energizer CR2032&#x27;. Required for unstructured folders.
 * `-n, --cells <int>`: Number of cells (auto-detected from filenames if omitted).
 * `--batch-id <str>`: Batch / lot identifier.
 * `--lab <str>`: Lab name.
@@ -1992,7 +1992,7 @@ $ battinfo batch init [OPTIONS] {output_dir}
 
 **Options**:
 
-* `-t, --cell-spec <str>`: Cell type IRI or name, e.g. &quot;Energizer CR2032&quot;.  [required]
+* `-t, --cell-spec <str>`: Cell spec IRI, or its manufacturer and model, e.g. &quot;Energizer CR2032&quot;.  [required]
 * `-n, --count <int>`: Number of cells received.  [required]
 * `--batch-id <str>`: Batch / lot identifier.
 * `--lab <str>`: Institution or lab name.
