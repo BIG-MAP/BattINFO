@@ -289,3 +289,65 @@ def test_protocol_import_stores_no_absolute_path(tmp_path: Path, monkeypatch: py
     spec = import_aurora_unicycler(AURORA, source_locator=str(source.resolve()))
     assert spec.artifacts[0].locator == "protocols/cc.json"
     assert spec.source.file == "protocols/cc.json"
+
+
+# ── A deposit zipped by test kind cannot back the registry route yet ─────────
+
+
+def _workspace_with_two_files(root: Path) -> AuthoringWorkspace:
+    ws = _workspace_with_local_data(root, registry_url="https://registry.example", save=False)
+    (root / "bdf" / "C1b.bdf.csv").write_text(CSV, encoding="utf-8")
+    ws.add("test", type="cycling", cell="C1", data="bdf/C1b.bdf.csv")
+    return ws
+
+
+@pytest.fixture()
+def no_r2(monkeypatch: pytest.MonkeyPatch) -> None:
+    for name, value in (("BATTINFO_API_KEY", "k"), ("BATTINFO_WORKSPACE_ID", "w"),
+                        ("BATTINFO_PUBLISHER_ID", "p")):
+        monkeypatch.setenv(name, value)
+    monkeypatch.delenv("R2_ENDPOINT", raising=False)
+    monkeypatch.setattr("battinfo.ws._ZENODO_ZIP_THRESHOLD", 1)  # two files would be zipped
+
+
+def _record_deposits(ws: AuthoringWorkspace, monkeypatch: pytest.MonkeyPatch) -> list[str]:
+    from types import SimpleNamespace
+
+    steps: list[str] = []
+    monkeypatch.setattr(ws, "upload", lambda *a, **kw: steps.append("upload"))
+    monkeypatch.setattr(ws, "zenodo", lambda *a, **kw: steps.append("zenodo") or SimpleNamespace(doi="10.5281/x"))
+    return steps
+
+
+def test_publish_to_zenodo_refuses_a_zipped_deposit_before_depositing(
+    tmp_path: Path, fake: _FakeRegistry, no_r2: None, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    ws = _workspace_with_two_files(tmp_path / "ws")
+    steps = _record_deposits(ws, monkeypatch)
+    with pytest.raises(ValueError) as excinfo:
+        ws.publish(zenodo=True)
+    message = str(excinfo.value)
+    assert "cannot yet point a record at a file inside an archive" in message
+    assert "ws.zenodo(publish=True)" in message and "split the workspace" in message
+    assert steps == [] and fake.payloads == []
+
+
+def test_a_zipped_deposit_is_fine_for_a_local_test_registry(
+    tmp_path: Path, fake: _FakeRegistry, no_r2: None, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    ws = _workspace_with_two_files(tmp_path / "ws")
+    steps = _record_deposits(ws, monkeypatch)
+    outcomes = ws.publish(zenodo=True, allow_local_files=True)
+    assert steps == ["zenodo"] and outcomes and all(o["ok"] for o in outcomes)
+
+
+def test_a_zipped_deposit_is_fine_with_r2_storage(
+    tmp_path: Path, fake: _FakeRegistry, no_r2: None, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """With R2 the records point at R2 copies of their files, not at the deposit."""
+    monkeypatch.setenv("R2_ENDPOINT", "https://r2.example")
+    ws = _workspace_with_two_files(tmp_path / "ws")
+    steps = _record_deposits(ws, monkeypatch)
+    with pytest.raises(SubmitError):  # the stub upload pointed nothing at R2
+        ws.publish(zenodo=True)
+    assert steps == ["upload", "zenodo"]

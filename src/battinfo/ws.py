@@ -1351,6 +1351,9 @@ def _filled_quantities(quantities: Mapping[str, Any], path: Path) -> dict[str, A
 # registry envelope carries the canonical record under the same key in
 # semantic_payload.battinfo_records.
 _REGISTRY_RESOURCE_TYPES = {"cell": "cell", "cell-spec": "cell_spec", "test-protocol": "test_spec"}
+# A Zenodo deposit of more than this many data files is zipped, one archive per
+# test kind (see AuthoringWorkspace._bundle_data_files).
+_ZENODO_ZIP_THRESHOLD = 90
 # Seconds to wait for the registry when looking up one referenced record. ws.add()
 # blocks on it, and the outcome is remembered for the session either way.
 _REFERENCE_LOOKUP_TIMEOUT = 10
@@ -3141,6 +3144,11 @@ class AuthoringWorkspace:
         zenodo:
             Upload data files and archive on Zenodo before submitting.  Publishes
             the Zenodo deposit immediately and records its DOI in each record.
+            A deposit of more than 90 data files is zipped by test kind, and the
+            registry cannot yet point at files inside an archive, so without R2
+            object storage such a workspace is refused before anything is
+            deposited: publish it with ``ws.zenodo(publish=True)`` alone, or
+            split it.
         sandbox:
             Use ``sandbox.zenodo.org`` (only relevant with ``zenodo=True``).
         doi:
@@ -3158,6 +3166,10 @@ class AuthoringWorkspace:
             self.save()
         finally:
             self._publishing = False
+        if zenodo and not allow_local_files and not self._r2_configured():
+            # Records point at Zenodo's copies of their files; a zipped deposit has
+            # none to point at. Refuse before anything is deposited.
+            self._refuse_a_zipped_deposit()
         if zenodo:
             if self._r2_configured():
                 self.upload()
@@ -5420,6 +5432,36 @@ class AuthoringWorkspace:
         import shutil
         import zipfile
 
+        unique = self._deposit_data_files(records_dir)
+        filenames: list[str] = []
+        if len(unique) <= _ZENODO_ZIP_THRESHOLD:
+            for lp, _ in unique:
+                shutil.copy2(lp, tmpdir / lp.name)
+                filenames.append(lp.name)
+        else:
+            # Group by test kind → one zip per kind
+            by_kind: dict[str, list[Path]] = {}
+            for lp, kind in unique:
+                by_kind.setdefault(kind, []).append(lp)
+            for kind, paths in sorted(by_kind.items()):
+                zip_name = f"{kind}.zip"
+                with zipfile.ZipFile(tmpdir / zip_name, "w", zipfile.ZIP_DEFLATED) as zf:
+                    for lp in sorted(paths):
+                        zf.write(lp, lp.name)
+                filenames.append(zip_name)
+                print(f"  Bundled {len(paths)} files -> {zip_name}")
+
+        return filenames
+
+    def _deposit_data_files(
+        self, records_dir: Path, *, report: bool = True
+    ) -> builtins.list[tuple[Path, str]]:
+        """The ``(local file, test kind)`` pairs a Zenodo deposit uploads, one per file name.
+
+        With *report* the missing data files and the artifact warnings are printed
+        and kept for zenodo() and publish to act on; without it the files are only
+        counted (the up-front check in publish()).
+        """
         # Map dataset IRI → test kind via test records (test.dataset_ids), with the
         # dataset's own about naming its test as the fallback, the same links the
         # deposit graph uses to pick each file's <kind>.zip.
@@ -5465,11 +5507,13 @@ class AuthoringWorkspace:
                             # deposit would be published incomplete (a distribution pointing at a
                             # file that was never uploaded). Warn now; block publish later (R-7).
                             missing.append(str(lp))
-                            print(f"  WARNING: data file for a distribution is missing (not uploaded): {lp}")
+                            if report:
+                                print(f"  WARNING: data file for a distribution is missing (not uploaded): {lp}")
                 except Exception:
                     continue
-        # Surfaced to zenodo()/publish so publishing can fail closed on an incomplete deposit.
-        self._missing_data_files = missing
+        if report:
+            # Surfaced to zenodo()/publish so publishing can fail closed on an incomplete deposit.
+            self._missing_data_files = missing
 
         # Deduplicate (a file may appear in multiple distributions)
         seen: set[str] = set()
@@ -5494,33 +5538,34 @@ class AuthoringWorkspace:
                     except Exception:
                         continue
         artifact_files, artifact_warnings = plan_artifact_inclusion(artifact_records, self._root)
-        self._artifact_warnings = artifact_warnings
-        for warning in artifact_warnings:
-            print(f"  WARNING: {warning}")
+        if report:
+            self._artifact_warnings = artifact_warnings
+            for warning in artifact_warnings:
+                print(f"  WARNING: {warning}")
         for lp in artifact_files:
             if lp.name not in seen:
                 seen.add(lp.name)
                 unique.append((lp, "protocol"))
+        return unique
 
-        filenames: list[str] = []
-        if len(unique) <= 90:
-            for lp, _ in unique:
-                shutil.copy2(lp, tmpdir / lp.name)
-                filenames.append(lp.name)
-        else:
-            # Group by test kind → one zip per kind
-            by_kind: dict[str, list[Path]] = {}
-            for lp, kind in unique:
-                by_kind.setdefault(kind, []).append(lp)
-            for kind, paths in sorted(by_kind.items()):
-                zip_name = f"{kind}.zip"
-                with zipfile.ZipFile(tmpdir / zip_name, "w", zipfile.ZIP_DEFLATED) as zf:
-                    for lp in sorted(paths):
-                        zf.write(lp, lp.name)
-                filenames.append(zip_name)
-                print(f"  Bundled {len(paths)} files -> {zip_name}")
+    def _refuse_a_zipped_deposit(self) -> None:
+        """Refuse publish(zenodo=True) before any deposit exists when its files would be zipped.
 
-        return filenames
+        A deposit of more than ``_ZENODO_ZIP_THRESHOLD`` data files is zipped by
+        test kind, and the registry cannot yet point a record at a file inside an
+        archive: the records would keep their local file paths, and the registry
+        half would refuse them only after the DOI was minted.
+        """
+        count = len(self._deposit_data_files(self._ws.source_root, report=False))
+        if count > _ZENODO_ZIP_THRESHOLD:
+            raise ValueError(
+                f"Refusing to publish: this workspace has {count} data files, and a Zenodo deposit "
+                f"of more than {_ZENODO_ZIP_THRESHOLD} is zipped by test kind. The registry cannot yet "
+                "point a record at a file inside an archive, so it would refuse the records after "
+                "the DOI was minted. Nothing was deposited or sent. Publish to Zenodo alone with "
+                "ws.zenodo(publish=True), or split the workspace into parts of at most "
+                f"{_ZENODO_ZIP_THRESHOLD} data files."
+            )
 
     @staticmethod
     def _assemble_zenodo_jsonld(
