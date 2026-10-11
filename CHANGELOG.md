@@ -86,6 +86,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- **`pip install "battinfo[processing]"` installs the converter from PyPI.** The extra required `batterydf>=0.2`, but the only 0.2 build on PyPI is the release candidate 0.2.0rc2, which sorts below 0.2, so pip found no matching version and the docs sent readers to a pinned batterydf commit on GitHub. The extra now requires `batterydf[nda,excel,mat]>=0.2.0rc2,<0.3` and installs the release candidate; the docs and the converter error messages give that one line. CI had been testing the GitHub commit, 30 commits newer than the release candidate. It now tests 0.2.0rc2 from PyPI, the install smoke job converts a file with the extra installed from the built wheel, and a weekly job runs the converter tests against the newest batterydf on PyPI.
+
 - **`ws.submit()` sends a cell spec's own title.** Every cell-spec submission was titled "<manufacturer> <model>", so a cell spec retitled with `battinfo.naming` ("Flores 2026 graphite AQ-1 cell spec") kept its old title in the registry. The record's `name` now wins; manufacturer and model are the fallback.
 
 - **A cell-spec draft keeps its title.** `ws.load()` of a cell-spec draft copied its `handle` but ignored its `name`, so the record was always titled "<manufacturer> <model>" and a build that set titles from `battinfo.naming` lost them silently. The draft's `name` now wins; without one the default is unchanged, and the IRI never depends on it.

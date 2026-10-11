@@ -64,14 +64,11 @@ jobs:
           "$py" -m pip install -e ".[dev]"
           "$py" -c "import battinfo; print(battinfo.__version__)"
 
-      # Allowed to fail until batterydf 0.2 is published on PyPI. The processing
-      # extra pins batterydf>=0.2,<0.3 (see pyproject.toml); PyPI currently ships
-      # only 0.1.0, so plain pip cannot resolve this extra. README.md and
-      # QUICKSTART.md document the git-source stopgap in the meantime. Remove
-      # continue-on-error once batterydf 0.2.x is on PyPI.
+      # The converter install the docs give, resolved by stock pip against live
+      # PyPI. A small CSV is then converted, to prove the converter and its
+      # Neware, Excel and MATLAB readers are importable.
       - name: pip install -e ".[processing]"
         shell: bash
-        continue-on-error: true
         run: |
           set -euxo pipefail
           v="$RUNNER_TEMP/venv-processing"
@@ -79,7 +76,12 @@ jobs:
           if [ -f "$v/Scripts/python.exe" ]; then py="$v/Scripts/python.exe"; else py="$v/bin/python"; fi
           "$py" -m pip install --upgrade pip
           "$py" -m pip install -e ".[processing]"
-          "$py" -c "import battinfo; print(battinfo.__version__)"
+          "$py" -c "import battinfo, importlib.metadata as m; print(battinfo.__version__, 'batterydf', m.version('batterydf'))"
+          work="$RUNNER_TEMP/convert-smoke"
+          mkdir -p "$work"
+          printf 'test_time_second,voltage_volt,current_ampere\n0,3.7,1.0\n1,3.71,1.0\n' > "$work/export.csv"
+          cd "$work"
+          "$py" -c "import bdf, fastnda, fastexcel, scipy; import battinfo; ws = battinfo.workspace('.'); out = ws.convert('*.csv'); assert len(out) == 1, out; print(open(out[0]).readline().strip())"
 
       - name: pip install git+https://github.com/BIG-MAP/BattINFO.git
         shell: bash
@@ -92,44 +94,37 @@ jobs:
           "$py" -m pip install "git+https://github.com/BIG-MAP/BattINFO.git"
           "$py" -c "import battinfo; print(battinfo.__version__)"
 
-      # The fallback the docs give while batterydf 0.2 is not on PyPI. The line
-      # is read out of QUICKSTART.md so this job tests what readers are told to
-      # run, then converts a small file to prove the converter and its Neware,
-      # Excel and MATLAB readers are importable. Not allowed to fail.
+      # The install docs give that one converter line, and nothing in the repo
+      # still tells readers to install batterydf from git. The steps above and
+      # below run the line; this one only reads the docs.
       - name: documented converter install line
         shell: bash
         run: |
           set -euxo pipefail
-          v="$RUNNER_TEMP/venv-converter"
-          python -m venv "$v"
-          if [ -f "$v/Scripts/python.exe" ]; then py="$v/Scripts/python.exe"; else py="$v/bin/python"; fi
-          "$py" -m pip install --upgrade pip
-          "$py" -m pip install -e ".[tabular]"
-          line=$(grep -o 'pip install "batterydf\[nda,excel,mat\] @ git+[^"]*" matplotlib plotly' QUICKSTART.md | head -n 1)
-          test -n "$line"
-          for doc in README.md docs/pages/getting-started.rst docs/pages/troubleshooting.md; do
-            grep -qF "$line" "$doc"
+          for doc in QUICKSTART.md README.md docs/pages/getting-started.rst docs/pages/troubleshooting.md; do
+            grep -qF 'pip install "battinfo[processing]"' "$doc"
           done
-          eval "\"$py\" -m $line"
-          work="$RUNNER_TEMP/convert-smoke"
-          mkdir -p "$work"
-          printf 'test_time_second,voltage_volt,current_ampere\n0,3.7,1.0\n1,3.71,1.0\n' > "$work/export.csv"
-          cd "$work"
-          "$py" -c "import bdf, fastnda, fastexcel, scipy; import battinfo; ws = battinfo.workspace('.'); out = ws.convert('*.csv'); assert len(out) == 1, out; print(open(out[0]).readline().strip())"
+          if git grep -nE 'batterydf(\[[^]]*\])? *@ *git\+' -- . ':!CHANGELOG.md'; then
+            echo "A batterydf git install line is still documented (listed above)."
+            exit 1
+          fi
 
       # What a PyPI user gets: the built wheel, stock pip, an empty environment,
-      # a working directory outside the checkout.
+      # a working directory outside the checkout. The core install runs the
+      # first Quickstart step; a second environment installs the wheel with the
+      # processing extra and converts a small CSV.
       - name: wheel in an empty environment, outside the checkout
         shell: bash
         run: |
           set -euxo pipefail
           python -m pip install --upgrade pip build
           python -m build --wheel --outdir "$RUNNER_TEMP/dist" .
+          wheel=$(ls "$RUNNER_TEMP"/dist/battinfo-*.whl)
           v="$RUNNER_TEMP/venv-wheel"
           python -m venv "$v"
           if [ -f "$v/Scripts/python.exe" ]; then py="$v/Scripts/python.exe"; else py="$v/bin/python"; fi
           "$py" -m pip install --upgrade pip
-          "$py" -m pip install "$RUNNER_TEMP"/dist/battinfo-*.whl
+          "$py" -m pip install "$wheel"
           work="$RUNNER_TEMP/wheel-smoke"
           mkdir -p "$work"
           cd "$work"
@@ -159,3 +154,25 @@ jobs:
           PY
           "$py" quickstart.py
           "$py" -c "from battinfo.registry import Registry; print(Registry())"
+          v="$RUNNER_TEMP/venv-wheel-processing"
+          python -m venv "$v"
+          if [ -f "$v/Scripts/python.exe" ]; then py="$v/Scripts/python.exe"; else py="$v/bin/python"; fi
+          "$py" -m pip install --upgrade pip
+          "$py" -m pip install "${wheel}[processing]"
+          work="$RUNNER_TEMP/wheel-convert-smoke"
+          mkdir -p "$work"
+          cd "$work"
+          printf 'test_time_second,voltage_volt,current_ampere\n0,3.7,1.0\n1,3.71,1.0\n' > export.csv
+          cat > convert_smoke.py <<'PY'
+          import importlib.metadata
+          import pathlib
+
+          import bdf, fastexcel, fastnda, scipy  # the converter and its Neware, Excel and MATLAB readers
+          import battinfo
+
+          assert "site-packages" in pathlib.Path(battinfo.__file__).as_posix(), battinfo.__file__
+          out = battinfo.workspace(".").convert("*.csv")
+          assert len(out) == 1, out
+          print("convert ok, batterydf", importlib.metadata.version("batterydf"), open(out[0]).readline().strip())
+          PY
+          "$py" convert_smoke.py

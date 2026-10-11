@@ -34,13 +34,13 @@ pip install "git+https://github.com/BIG-MAP/BattINFO.git"
 
 <!-- 0.8 release: replace the block above with  pip install battinfo -->
 
-> Converting raw cycler files (`ws.convert()`) needs the BDF converter,
-> distributed as `batterydf`. It is not yet on PyPI, so the `battinfo[processing]`
-> extra cannot resolve; install the converter and plotting libraries directly:
+> Converting raw cycler files (`ws.convert()`) needs the BDF converter, distributed as `batterydf`. The `processing` extra brings it, along with the plotting libraries:
 >
 > ```bash
-> pip install "batterydf[nda,excel,mat] @ git+https://github.com/battery-data-alliance/battery-data-format.git@07dd7a6923ae12fba0ea1079c5034883c14ebbf5" matplotlib plotly
+> pip install "battinfo[processing]"
 > ```
+>
+> The extra currently installs the batterydf 0.2 release candidate from PyPI.
 
 ---
 

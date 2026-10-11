@@ -265,7 +265,7 @@ wheels = [
 [[package]]
 name = "batterydf"
 version = "0.2.0rc2"
-source = { git = "https://github.com/battery-data-alliance/battery-data-format?rev=07dd7a6#07dd7a6923ae12fba0ea1079c5034883c14ebbf5" }
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "babel" },
     { name = "numpy" },
@@ -279,6 +279,10 @@ dependencies = [
     { name = "requests" },
     { name = "rich" },
     { name = "typer" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/d6/dc/a488a2d2407ea14fb05457861053ac837714e9c7ba2c937a12f29a87a20f/batterydf-0.2.0rc2.tar.gz", hash = "sha256:3a93141579c8615e1c5d9474981c3169704523ff18a5bb4a572b2e5ff576440a", size = 187008, upload-time = "2026-10-05T14:34:31.369Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/2f/85/d55bcbd9c6dceb54b50d967a81374aef645d9ccee96c5fa4200a6baa6821/batterydf-0.2.0rc2-py3-none-any.whl", hash = "sha256:46f6f73dcf753800b179fd519d58184e0831a25ec449ee4c8253b5400e66695a", size = 211346, upload-time = "2026-10-05T14:34:29.676Z" },
 ]
 
 [package.optional-dependencies]
@@ -365,7 +369,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "autodoc-pydantic", marker = "extra == 'docs'", specifier = ">=2.2" },
-    { name = "batterydf", extras = ["excel", "mat", "nda"], marker = "extra == 'processing'", git = "https://github.com/battery-data-alliance/battery-data-format?rev=07dd7a6" },
+    { name = "batterydf", extras = ["excel", "mat", "nda"], marker = "extra == 'processing'", specifier = ">=0.2.0rc2,<0.3" },
     { name = "battinfo", extras = ["publish"], marker = "extra == 'dev'" },
     { name = "battinfo", extras = ["tabular"], marker = "extra == 'dev'" },
     { name = "boto3", marker = "extra == 'storage'", specifier = ">=1.43.57" },
