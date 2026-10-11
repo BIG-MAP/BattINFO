@@ -14,6 +14,8 @@ from __future__ import annotations
 import json
 import os
 import sys
+import threading
+import time
 from pathlib import Path
 
 import pytest
@@ -112,6 +114,92 @@ def test_swap_dir_restores_target_when_swap_fails(
     # The rollback restores the original target content.
     assert {p.name for p in target.iterdir()} == {"old.json"}
     assert (target / "old.json").read_text(encoding="utf-8") == "OLD"
+
+
+def _swap_fixture(tmp_path: Path) -> tuple[Path, Path]:
+    target = tmp_path / "records"
+    target.mkdir()
+    (target / "old.json").write_text("OLD", encoding="utf-8")
+    staging = tmp_path / ".records.staging"
+    staging.mkdir()
+    (staging / "new.json").write_text("NEW", encoding="utf-8")
+    return staging, target
+
+
+def test_swap_dir_retries_a_rename_refused_for_a_moment(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    staging, target = _swap_fixture(tmp_path)
+    real_replace = os.replace
+    refusals = {"left": 2}
+
+    def busy_then_free(src, dst):
+        if Path(src) == staging and refusals["left"]:
+            refusals["left"] -= 1
+            raise PermissionError(13, "Access is denied", str(src))
+        return real_replace(src, dst)
+
+    monkeypatch.setattr(workspace_state.os, "replace", busy_then_free)
+    _swap_dir(staging, target)
+
+    assert refusals["left"] == 0
+    assert {p.name for p in target.iterdir()} == {"new.json"}
+    assert not staging.exists()
+
+
+def test_swap_dir_gives_up_after_the_retry_window_and_restores_target(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    staging, target = _swap_fixture(tmp_path)
+    real_replace = os.replace
+
+    def always_busy(src, dst):
+        if Path(src) == staging:
+            raise PermissionError(13, "Access is denied", str(src))
+        return real_replace(src, dst)
+
+    monkeypatch.setattr(workspace_state.os, "replace", always_busy)
+    monkeypatch.setattr(workspace_state, "_RENAME_RETRY_SECONDS", 0.2)
+    started = time.monotonic()
+    with pytest.raises(PermissionError):
+        _swap_dir(staging, target)
+
+    assert time.monotonic() - started >= 0.2  # it did wait before giving up
+    assert {p.name for p in target.iterdir()} == {"old.json"}
+
+
+@pytest.mark.skipif(sys.platform != "win32", reason="only Windows refuses to rename a folder with a file open in it")
+def test_swap_dir_waits_for_a_handle_held_briefly_in_staging(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The September review's F14 (A-15 in the 0.8.0 evaluation): a file held open in
+    the staging folder for half a second, as a virus scanner or indexer does with a
+    fresh file, failed the swap at once with WinError 5."""
+    staging, target = _swap_fixture(tmp_path)
+    real_replace = os.replace
+    refused: list[PermissionError] = []
+
+    def watching_replace(src, dst):
+        try:
+            return real_replace(src, dst)
+        except PermissionError as exc:
+            refused.append(exc)
+            raise
+
+    monkeypatch.setattr(workspace_state.os, "replace", watching_replace)
+    handle = open(staging / "new.json", "rb")  # closed by the timer, as a scanner would let go
+    timer = threading.Timer(0.5, handle.close)
+    timer.start()
+    try:
+        _swap_dir(staging, target)
+    finally:
+        timer.join()
+        handle.close()
+
+    assert refused, "the open handle should have refused the first rename"
+    assert (target / "new.json").read_text(encoding="utf-8") == "NEW"
+    assert not staging.exists()
+    assert not any(p.name.endswith(".bak") for p in tmp_path.iterdir())
 
 
 # ── WorkspaceStateStore._write_workspace stages-then-swaps (no rmtree-first) ───

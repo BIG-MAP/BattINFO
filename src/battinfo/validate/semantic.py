@@ -373,6 +373,43 @@ def _validate_handle_kind_word(doc: dict[str, Any], issues: list[ValidationIssue
     )
 
 
+def _validate_schema_version(doc: dict[str, Any], issues: list[ValidationIssue]) -> None:
+    """Warn when a record's ``schema_version`` is not the one this release writes.
+
+    The JSON Schema checks only the form (``1.2.3``). A version an earlier
+    release wrote still reads, and is flagged as superseded; any other version,
+    a newer one included, may use fields this release reads differently or not
+    at all. Always a warning, never an error, under every policy.
+    """
+    from battinfo.bundle import SCHEMA_VERSION, SUPERSEDED_SCHEMA_VERSIONS  # noqa: PLC0415
+
+    kind = kind_for_doc(doc)
+    version = doc.get("schema_version")
+    if kind is None or not isinstance(version, str) or not version.strip() or version == SCHEMA_VERSION:
+        return
+    if version in SUPERSEDED_SCHEMA_VERSIONS:
+        code = "semantic.schema_version_superseded"
+        message = (
+            f"schema_version '{version}' was written by an earlier BattINFO release. It still reads; "
+            f"records written now carry '{SCHEMA_VERSION}'."
+        )
+    else:
+        known = ", ".join(f"'{v}'" for v in (SCHEMA_VERSION, *SUPERSEDED_SCHEMA_VERSIONS))
+        code = "semantic.schema_version_unknown"
+        message = (
+            f"schema_version '{version}' is not a record version this BattINFO release knows ({known}); "
+            "its fields may be read differently or not at all."
+        )
+    _append_issue(
+        issues,
+        code=code,
+        severity="warning",
+        path="schema_version",
+        message=message,
+        resource_type=kind.entity_type,
+    )
+
+
 def _validate_controlled_values(
     doc: dict[str, Any],
     issues: list[ValidationIssue],
@@ -1282,6 +1319,7 @@ def validate_semantic_report(
     hard_issue_severity = "error" if resolved_policy.semantic == "error" else "warning"
 
     _validate_identifier_consistency(doc, issues, resource_type, hard_issue_severity)
+    _validate_schema_version(doc, issues)
     _validate_handle_kind_word(doc, issues)
     _validate_controlled_values(doc, issues, resource_type)
     _validate_electrode_role_coherence(doc, issues, resource_type)

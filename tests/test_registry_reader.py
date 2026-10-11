@@ -11,6 +11,7 @@ import io
 import json
 import urllib.error
 import urllib.parse
+import warnings
 from pathlib import Path
 
 import pytest
@@ -31,6 +32,14 @@ CSV_BYTES = (
     b"1,3.1,1.0,1,1\n"
 )
 CSV_SHA = hashlib.sha256(CSV_BYTES).hexdigest()
+CSV_MD5 = hashlib.md5(CSV_BYTES).hexdigest()
+# Another cell's file: valid data, so only a checksum can tell it apart.
+OTHER_CSV_BYTES = (
+    b"Test Time / s,Voltage / V,Current / A,Cycle Count / 1,Step Index / 1\n"
+    b"0,3.6,-0.5,1,1\n"
+    b"1,3.5,-0.5,1,1\n"
+    b"2,3.4,-0.5,1,1\n"
+)
 
 
 class _Response(io.BytesIO):
@@ -184,6 +193,7 @@ def test_files_merge_checksum_and_size_from_the_record_body(reg: Registry) -> No
     assert files[0] == RegistryFile(
         name="cell1.bdf.csv", url=f"{FILES}/cell1.bdf.csv", role="processed",
         media_type="text/csv", sha256=CSV_SHA, size=len(CSV_BYTES),
+        checksum_algorithm="sha256", checksum_value=CSV_SHA,
     )
     assert [f.role for f in files] == ["processed", "plot_static"]
     assert [f.name for f in reg.files(DATASET, role="processed")] == ["cell1.bdf.csv"]
@@ -215,6 +225,90 @@ def test_download_replaces_a_cached_copy_that_went_bad(reg: Registry) -> None:
 def test_download_reports_a_dataset_with_no_data_file(reg: Registry) -> None:
     with pytest.raises(FileNotFoundError, match="no file with role 'raw'"):
         reg.download(DATASET, role="raw")
+
+
+# ── Checksums in any algorithm ────────────────────────────────────────────────
+
+def _state_checksum(fake: FakeRegistry, algorithm: str | None, value: str | None = None) -> None:
+    """Make the record state *algorithm* and *value* for its file, or no checksum at all."""
+    body = fake.details["dataset/aaaa-bbbb-cccc-dddd"]["semantic_payload"]["battinfo_records"]["dataset"]["dataset"]
+    distribution = body["distributions"][0]
+    distribution.pop("checksum", None)
+    if algorithm is not None:
+        distribution["checksum"] = {"algorithm": algorithm, "value": value}
+
+
+def test_files_report_the_checksum_in_the_algorithm_the_record_states(reg: Registry, fake: FakeRegistry) -> None:
+    _state_checksum(fake, "md5", CSV_MD5)
+    processed = reg.files(DATASET, role="processed")[0]
+    assert (processed.checksum_algorithm, processed.checksum_value) == ("md5", CSV_MD5)
+    assert processed.sha256 is None  # kept for compatibility, filled for SHA-256 only
+
+
+def test_read_refetches_a_cached_md5_file_replaced_by_another(reg: Registry, fake: FakeRegistry) -> None:
+    """The consumer evaluation's A-01: a record stating only MD5, as Zenodo gives,
+    was never verified, so a cached file replaced by another dataset's file was
+    read back under this dataset's id."""
+    pytest.importorskip("pandas")
+    _state_checksum(fake, "md5", CSV_MD5)
+    path = reg.download(DATASET)
+    path.write_bytes(OTHER_CSV_BYTES)  # still a valid data file, from another cell
+    df = reg.read(DATASET)
+    assert df["voltage_volt"].tolist() == [3.0, 3.1]
+    assert path.read_bytes() == CSV_BYTES
+
+
+@pytest.mark.parametrize(("algorithm", "hashlib_name"), [
+    ("md5", "md5"), ("sha512", "sha512"), ("sha256", "sha256"), ("SHA-256", "sha256"),
+])
+def test_download_rejects_bytes_that_do_not_match_the_stated_algorithm(
+    reg: Registry, fake: FakeRegistry, algorithm: str, hashlib_name: str,
+) -> None:
+    _state_checksum(fake, algorithm, hashlib.new(hashlib_name, CSV_BYTES).hexdigest())
+    fake.file_bytes = CSV_BYTES + b"tampered\n"
+    with pytest.raises(OSError, match=f"checksum mismatch .* states {algorithm.lower()} "):
+        reg.download(DATASET)
+    assert not list((reg.cache_dir / "files").rglob("*.csv"))
+    fake.file_bytes = CSV_BYTES
+    assert reg.download(DATASET).read_bytes() == CSV_BYTES
+
+
+@pytest.mark.parametrize("stated", [CSV_MD5.upper(), f"md5:{CSV_MD5}"], ids=["upper-case", "zenodo-prefix"])
+def test_download_reads_the_stated_digest_in_either_spelling(
+    reg: Registry, fake: FakeRegistry, stated: str,
+) -> None:
+    _state_checksum(fake, "md5", stated)
+    assert reg.download(DATASET).read_bytes() == CSV_BYTES
+    fake.file_bytes = OTHER_CSV_BYTES
+    with pytest.raises(OSError, match="checksum mismatch"):
+        reg.download(DATASET, dest=reg.cache_dir / "elsewhere")
+
+
+def test_download_warns_once_for_a_file_with_no_checksum(reg: Registry, fake: FakeRegistry) -> None:
+    _state_checksum(fake, None)
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        path = reg.download(DATASET)
+        assert reg.download(DATASET) == path  # the cached copy, and no second warning
+    assert path.read_bytes() == CSV_BYTES
+    messages = [str(w.message) for w in caught if issubclass(w.category, UserWarning)]
+    assert len(messages) == 1
+    assert "cell1.bdf.csv (dataset aaaa-bbbb-cccc-dddd) is used without checksum verification" in messages[0]
+    assert "states no checksum" in messages[0]
+
+
+def test_download_warns_about_an_algorithm_hashlib_does_not_provide(reg: Registry, fake: FakeRegistry) -> None:
+    _state_checksum(fake, "other", "0123abcd")
+    with pytest.warns(UserWarning, match="checksum algorithm as 'other'"):
+        path = reg.download(DATASET)
+    assert path.read_bytes() == CSV_BYTES
+
+
+def test_download_without_verify_does_not_warn(reg: Registry, fake: FakeRegistry) -> None:
+    _state_checksum(fake, None)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        assert reg.download(DATASET, verify=False).read_bytes() == CSV_BYTES
 
 
 # ── Reading ───────────────────────────────────────────────────────────────────
@@ -290,6 +384,34 @@ def test_catalog_is_cached_until_the_registry_changes(reg: Registry, fake: FakeR
     fake.calls.clear()
     reg.catalog(refresh=True)
     assert any("/resources/dataset/" in u for u in fake.calls)
+
+
+def test_catalog_states_the_checksum_in_any_algorithm(reg: Registry, fake: FakeRegistry) -> None:
+    pd = pytest.importorskip("pandas")
+    row = reg.catalog().iloc[0]
+    assert (row.checksum_algorithm, row.checksum_value, row.sha256) == ("sha256", CSV_SHA, CSV_SHA)
+
+    _state_checksum(fake, "md5", CSV_MD5)
+    row = reg.catalog(refresh=True).iloc[0]
+    assert (row.checksum_algorithm, row.checksum_value) == ("md5", CSV_MD5)
+    assert pd.isna(row.sha256)
+
+
+def test_catalog_rebuilds_a_cache_written_with_other_columns(reg: Registry, fake: FakeRegistry) -> None:
+    pytest.importorskip("pandas")
+    reg.catalog()
+    cache = next((reg.cache_dir / "catalog").glob("*.json"))
+    saved = json.loads(cache.read_text(encoding="utf-8"))
+    # As an earlier version wrote it: no column list, no checksum columns.
+    del saved["columns"]
+    for row in saved["rows"]:
+        del row["checksum_algorithm"], row["checksum_value"]
+    cache.write_text(json.dumps(saved), encoding="utf-8")
+
+    fake.calls.clear()
+    row = reg.catalog().iloc[0]
+    assert any("/resources/dataset/" in u for u in fake.calls)  # rebuilt, not read back
+    assert row.checksum_algorithm == "sha256"
 
 
 def test_catalog_keeps_a_dataset_whose_record_cannot_be_read(reg: Registry, fake: FakeRegistry) -> None:

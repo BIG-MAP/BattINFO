@@ -3631,7 +3631,7 @@ class AuthoringWorkspace:
 
         Resumable: outcomes are journaled to ``.battinfo/submit-journal.jsonl``
         as they happen, and a record whose identical payload already succeeded
-        in a previous run is skipped (``status: skipped_journal``) instead of
+        at the same registry in a previous run is skipped (``status: skipped_journal``) instead of
         re-POSTed — resuming an interrupted bulk submission re-sends only what
         is missing. Pass ``resume=False`` to bypass the journal and re-send
         everything (the registry dedups identical re-submissions server-side).
@@ -8459,22 +8459,54 @@ def _journal_payload_hash(payload: dict) -> str:
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
+def _normalize_registry_url(url: str) -> str:
+    """A registry base URL in one spelling, as the submit journal records it.
+
+    Scheme and host are lower-cased; a default port, user name and password,
+    query, fragment and trailing slashes are dropped. Host names are not
+    resolved, so ``localhost`` and ``127.0.0.1`` count as two registries: a
+    record sent to one is sent again to the other, which is safe because the
+    registry de-duplicates identical submissions.
+    """
+    from urllib.parse import urlsplit  # noqa: PLC0415
+
+    text = (url or "").strip()
+    try:
+        parts = urlsplit(text)
+        port = parts.port
+    except ValueError:
+        return text.rstrip("/").lower()
+    host = parts.hostname or ""
+    if not parts.scheme or not host:
+        return text.rstrip("/").lower()
+    scheme = parts.scheme.lower()
+    if ":" in host:
+        host = f"[{host}]"  # an IPv6 literal
+    if port is not None and (scheme, port) not in {("http", 80), ("https", 443)}:
+        host = f"{host}:{port}"
+    return f"{scheme}://{host}{parts.path.rstrip('/')}"
+
+
 class _SubmitJournal:
     """Append-only outcome journal making ``ws.submit()`` resumable (3.5).
 
     Every submission outcome is appended to ``.battinfo/submit-journal.jsonl``
-    as it happens. On a later run, a record whose *identical* payload (envelope
-    timestamps excluded) already succeeded is skipped locally instead of being
-    re-POSTed — so resuming an interrupted bulk submission re-sends only what
-    is missing. The registry would dedup identical re-submissions anyway; the
-    journal saves the round-trips. Changed content (or a new
-    ``source_version``, e.g. a next-day run) hashes differently and is
-    submitted normally. ``ws.submit(resume=False)`` bypasses the journal.
+    as it happens, with the registry it went to. On a later run, a record whose
+    *identical* payload (envelope timestamps excluded) already succeeded at the
+    same registry is skipped locally instead of being re-POSTed — so resuming
+    an interrupted bulk submission re-sends only what is missing. The registry
+    would dedup identical re-submissions anyway; the journal saves the
+    round-trips. Changed content (or a new ``source_version``, e.g. a next-day
+    run) hashes differently and is submitted normally. A success at one
+    registry never counts for another, so a workspace rehearsed against a local
+    registry still sends everything to production; entries written before the
+    registry was recorded match none. ``ws.submit(resume=False)`` bypasses the
+    journal.
     """
 
     def __init__(self, path: Path) -> None:
         self.path = path
-        self._succeeded: dict[tuple[str, str], dict] = {}
+        self._succeeded: dict[tuple[str, str, str], dict] = {}
         if path.exists():
             for line in path.read_text(encoding="utf-8").splitlines():
                 line = line.strip()
@@ -8484,17 +8516,21 @@ class _SubmitJournal:
                     entry = json.loads(line)
                 except ValueError:
                     continue  # a torn final line from a crash must not poison the journal
-                if entry.get("ok") and entry.get("source_local_id") and entry.get("payload_hash"):
-                    self._succeeded[(entry["source_local_id"], entry["payload_hash"])] = entry
+                registry = entry.get("registry_url")
+                if (entry.get("ok") and isinstance(registry, str) and registry
+                        and entry.get("source_local_id") and entry.get("payload_hash")):
+                    key = (_normalize_registry_url(registry), entry["source_local_id"], entry["payload_hash"])
+                    self._succeeded[key] = entry
 
-    def previous_success(self, source_local_id: str, payload_hash: str) -> dict | None:
-        return self._succeeded.get((source_local_id, payload_hash))
+    def previous_success(self, source_local_id: str, payload_hash: str, *, registry_url: str) -> dict | None:
+        return self._succeeded.get((_normalize_registry_url(registry_url), source_local_id, payload_hash))
 
-    def record(self, outcome: dict, payload_hash: str) -> None:
+    def record(self, outcome: dict, payload_hash: str, *, registry_url: str) -> None:
         import datetime as _dt  # noqa: PLC0415
 
         entry = {
             "ts": _dt.datetime.now(_dt.timezone.utc).isoformat(timespec="seconds"),
+            "registry_url": _normalize_registry_url(registry_url),
             "source_local_id": outcome.get("source_local_id", ""),
             "title": outcome.get("title", ""),
             "ok": bool(outcome.get("ok")),
@@ -8506,7 +8542,7 @@ class _SubmitJournal:
         with self.path.open("a", encoding="utf-8") as handle:
             handle.write(json.dumps(entry, ensure_ascii=False) + "\n")
         if entry["ok"]:
-            self._succeeded[(entry["source_local_id"], entry["payload_hash"])] = entry
+            self._succeeded[(entry["registry_url"], entry["source_local_id"], entry["payload_hash"])] = entry
 
 
 def _journaled_submit(
@@ -8525,7 +8561,8 @@ def _journaled_submit(
         return _do_submit(payload, url, key, title, source_local_id=source_local_id,
                           publication_mode=publication_mode, validation=validation)
     payload_hash = _journal_payload_hash(payload)
-    previous = journal.previous_success(source_local_id, payload_hash) if source_local_id else None
+    previous = (journal.previous_success(source_local_id, payload_hash, registry_url=url)
+                if source_local_id else None)
     if previous is not None:
         print(f"  {title}  [already submitted -- skipped; pass resume=False to re-send]")
         return {"title": title, "source_local_id": source_local_id, "ok": True,
@@ -8533,7 +8570,7 @@ def _journaled_submit(
                 "result": None, "version_bumped": None}
     outcome = _do_submit(payload, url, key, title, source_local_id=source_local_id,
                          publication_mode=publication_mode, validation=validation)
-    journal.record(outcome, payload_hash)
+    journal.record(outcome, payload_hash, registry_url=url)
     return outcome
 
 
