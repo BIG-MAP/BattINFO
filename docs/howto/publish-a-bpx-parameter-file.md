@@ -52,6 +52,8 @@ The uid comes from the SHA-256 of the file's canonical JSON (RFC 8785), so a re-
 
 Some values have no home in a record yet: the `Particle` blocks of a blended electrode, the initial hysteresis state, `Degradation` and `Validation`. They are named in the warnings and listed in `not_imported`, which the record keeps, so a reader knows what only the file holds. `to_bpx(record)` says so too, and sets `complete=False` on its result.
 
+A transport value of zero or less (an ionic conductivity, a diffusivity, a transference number) cannot drive a physics model, and in published files it usually marks a placeholder for a model kept elsewhere, such as in `User-defined`. Such a value is read as the file states it, so the record still says exactly what the file says, and a warning names its BPX path and value.
+
 ## 2. Say which cell the file describes
 
 BattINFO never guesses the cell. Pass exactly one link:
@@ -60,14 +62,39 @@ BattINFO never guesses the cell. Pass exactly one link:
 - It is a real cell that is not in the genome yet: search for a duplicate by maker and model. If there is none, describe the cell spec with its identity only (name, maker, model, format, chemistry) and, if the maker has no organization record, create that too. Then link the new spec. The file's numbers (capacity, cut-offs, geometry, temperatures) stay on the parameter set as cell claims; they do not go on the spec.
 - There is no real cell, as for an example file or a made-up design: `virtual_cell=True`.
 
+The rest of this page takes the second path, as if the example file described a real cell, Example Lab's EX-5. A cell spec written as a draft file gets its IRI only when the workspace saves it, so save it before you build the parameter set. The search below runs offline and only looks in the workspace; with the default `registry_url` it searches the genome as well.
+
+```python
+import battinfo
+
+ws = battinfo.workspace("bpx-lab", registry_url=None)
+ws.license("cc-by-4.0")
+print(ws.search("Example Lab EX-5"))  # []: the cell is not described yet
+
+draft = Path("bpx-lab") / "example-lab-ex-5.cell-spec.json"
+draft.write_text(json.dumps({
+    "name": "Example Lab EX-5",
+    "manufacturer": "Example Lab",
+    "model": "EX-5",
+    "format": "pouch",
+    "chemistry": "li-ion",
+}, indent=2), encoding="utf-8")
+spec = ws.load(draft.name)  # a relative draft path resolves against the workspace root
+ws.save()                   # the draft gets its IRI here
+cell_spec_id = spec.id
+print(cell_spec_id)
+```
+
 BPX does not name its materials, so name each electrode's material with `materials=` to make its claims findable by material. A value is a material kind (`battinfo.materials.material_kind_keys()` lists them) or a material-spec IRI. Leave out an electrode that is blended: its per-particle values are not imported yet, so there is no material part to name.
+
+Each claim can say how its value was obtained. BPX does not say, so the claims of the `cell` and `state` parts get no provenance class: a file's capacity, cut-offs, geometry and temperatures may be datasheet values or conventions as easily as fits. The material, electrode, separator and electrolyte claims are marked `fitted` (`default_provenance_class=` changes that). If you know where a part's values came from, say so by part name, for example `provenance_classes={"cell": "measured"}`.
 
 ## 3. Put the file where a solver can fetch it
 
 The record points at the file's exact bytes, with their SHA-256, at an https URL whose content never changes. There are two ways to get such a URL today:
 
 - The registry's artifact store. Uploads are run by a registry operator for now (`scripts/publish_artifact_release.py` in battinfo-registry). The files land under `parameter-sets/<uid>/v1/<file name>`, which is why `result.file_uid()` is useful before the record exists.
-- Any https archive at a fixed version: a Zenodo record version, a GitHub raw URL pinned to a commit (not to a branch), an institutional repository. Not a URL whose content can change.
+- Any https archive at a fixed version: a Zenodo record version, a GitHub raw URL pinned to a commit (not to a branch), an institutional repository. Not a URL whose content can change. A GitHub or GitLab raw-file URL that names a branch or a tag instead of a commit earns a warning.
 
 `bpx_file_distribution` hashes the bytes and builds the entry. `check_bpx` records whether the official `bpx` parser accepts the file:
 
@@ -118,13 +145,9 @@ The record goes into a workspace like any other: `ws.add("parameter_set", record
 `ws.submit()` validates every record under the `publisher` policy before it contacts the registry, and that policy requires the file. A record without its source saves for local work (the default policy says nothing, `strict` warns) but is refused at submission, and nothing is sent. The credentials below are placeholders that are never used, because the check comes first:
 
 ```python
-import battinfo
 from battinfo.ws import SubmitError
 
-ws = battinfo.workspace("bpx-lab", registry_url=None)
-ws.license("cc-by-4.0")
-
-draft = result.to_parameter_set(virtual_cell=True, materials={"negative": "graphite"})
+draft = result.to_parameter_set(cell_spec_id=cell_spec_id, materials={"negative": "graphite"})
 ws.add("parameter_set", record=draft)
 ws.save()
 try:
@@ -140,7 +163,7 @@ Attach the file and add the record again. It has the same IRI, because it is the
 
 ```python
 record = result.to_parameter_set(
-    virtual_cell=True,
+    cell_spec_id=cell_spec_id,
     materials={"negative": "graphite"},
     distributions=[source],
 )
