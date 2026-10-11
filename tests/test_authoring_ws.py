@@ -718,7 +718,7 @@ def test_dcat_richness_dcterms_bytesize_derivation_mediatype() -> None:
     assert "dcterms:publisher" in cat and "dcat:keyword" in cat
 
     member = next(n for n in doc["@graph"] if n.get("@id") == ds_id)
-    assert member["schema:license"] == {"@id": "https://spdx.org/licenses/cc-by-4.0.html"}
+    assert member["schema:license"] == {"@id": "https://spdx.org/licenses/CC-BY-4.0.html"}
     assert member["schema:creator"]  # propagated from catalog-level creators
 
     dists = {d["schema:name"]: d for d in member["dcat:distribution"]}

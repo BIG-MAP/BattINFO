@@ -416,15 +416,36 @@ def _checksum_parts(checksum: Any) -> tuple[str, str] | None:
 # License slug -> the SPDX license page IRI. Records store licenses either as
 # full URLs (datasets: the creativecommons.org deed) or as SPDX-style slugs
 # (parameter sets: "cc-by-sa-4.0", set at ingest as a condition of the source).
+# spdx.org paths are case-sensitive (/licenses/cc-by-4.0.html is a 404), so each
+# IRI spells the id the way SPDX does. The keys cover every id ws.license()
+# accepts (ws._KNOWN_LICENSES); a test keeps the two in step.
 _LICENSE_SLUG_IRIS: dict[str, str] = {
     "cc-by-4.0": "https://spdx.org/licenses/CC-BY-4.0.html",
     "cc-by-sa-4.0": "https://spdx.org/licenses/CC-BY-SA-4.0.html",
     "cc-by-nc-4.0": "https://spdx.org/licenses/CC-BY-NC-4.0.html",
+    "cc-by-nc-sa-4.0": "https://spdx.org/licenses/CC-BY-NC-SA-4.0.html",
+    "cc-by-nd-4.0": "https://spdx.org/licenses/CC-BY-ND-4.0.html",
+    "cc-by-nc-nd-4.0": "https://spdx.org/licenses/CC-BY-NC-ND-4.0.html",
+    "cc-by-3.0": "https://spdx.org/licenses/CC-BY-3.0.html",
+    "cc-by-sa-3.0": "https://spdx.org/licenses/CC-BY-SA-3.0.html",
     "cc0-1.0": "https://spdx.org/licenses/CC0-1.0.html",
+    "cc-pddc": "https://spdx.org/licenses/CC-PDDC.html",
+    "pddl-1.0": "https://spdx.org/licenses/PDDL-1.0.html",
+    "odbl-1.0": "https://spdx.org/licenses/ODbL-1.0.html",
+    "odc-by-1.0": "https://spdx.org/licenses/ODC-By-1.0.html",
     "mit": "https://spdx.org/licenses/MIT.html",
     "apache-2.0": "https://spdx.org/licenses/Apache-2.0.html",
+    "bsd-2-clause": "https://spdx.org/licenses/BSD-2-Clause.html",
+    "bsd-3-clause": "https://spdx.org/licenses/BSD-3-Clause.html",
+    "gpl-2.0": "https://spdx.org/licenses/GPL-2.0-only.html",
+    "gpl-2.0-only": "https://spdx.org/licenses/GPL-2.0-only.html",
     "gpl-3.0": "https://spdx.org/licenses/GPL-3.0-only.html",
+    "gpl-3.0-only": "https://spdx.org/licenses/GPL-3.0-only.html",
     "gpl-3.0-or-later": "https://spdx.org/licenses/GPL-3.0-or-later.html",
+    "lgpl-2.1": "https://spdx.org/licenses/LGPL-2.1-only.html",
+    "lgpl-3.0": "https://spdx.org/licenses/LGPL-3.0-only.html",
+    "agpl-3.0": "https://spdx.org/licenses/AGPL-3.0-only.html",
+    "mpl-2.0": "https://spdx.org/licenses/MPL-2.0.html",
 }
 
 

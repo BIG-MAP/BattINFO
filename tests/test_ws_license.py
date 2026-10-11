@@ -164,13 +164,14 @@ def _member_node(record_license: str | None, catalog_license: str = "") -> dict:
 
 
 @pytest.mark.parametrize(("record_license", "iri"), [
-    ("cc-by-4.0", "https://spdx.org/licenses/cc-by-4.0.html"),
+    ("cc-by-4.0", "https://spdx.org/licenses/CC-BY-4.0.html"),
+    ("odbl-1.0", "https://spdx.org/licenses/ODbL-1.0.html"),
     ("https://creativecommons.org/licenses/by/4.0/", "https://creativecommons.org/licenses/by/4.0/"),
 ])
 def test_deposit_member_states_its_license_as_an_iri(record_license: str, iri: str) -> None:
     """A dataset's own licence was copied into its member node as given, so an
-    SPDX id came out as a bare string. It is now expanded the way the catalog's
-    licence is, and a URL is kept as it is."""
+    SPDX id came out as a bare string. It is now the SPDX page, spelled the way
+    SPDX spells it (the lower-case path is a 404), and a URL is kept as it is."""
     member = _member_node(record_license)
     assert member["schema:license"] == {"@id": iri}
     assert member["dcterms:license"] == {"@id": iri}
@@ -182,7 +183,7 @@ def test_deposit_member_without_a_license_states_none() -> None:
     assert "dcterms:license" not in member
     # A member with no licence of its own takes the catalog's.
     member = _member_node(None, catalog_license="cc-by-4.0")
-    expected = {"@id": "https://spdx.org/licenses/cc-by-4.0.html"}
+    expected = {"@id": "https://spdx.org/licenses/CC-BY-4.0.html"}
     assert member["schema:license"] == expected
     assert member["dcterms:license"] == expected
 
@@ -297,3 +298,23 @@ def test_present_license_produces_no_nudge(tmp_path: Path) -> None:
     )
     report = validate_publication_report(jsonld, policy="publisher")
     assert not [i for i in report.issues if i.code == "publication.license_missing"]
+
+
+def test_deposit_member_keeps_an_unknown_license_as_text() -> None:
+    """An id that is neither a URL nor a known SPDX id stays a literal: a guessed
+    spdx.org link would resolve to nothing."""
+    member = _member_node("lab-internal-terms")
+    assert member["schema:license"] == "lab-internal-terms"
+    assert member["dcterms:license"] == "lab-internal-terms"
+
+
+def test_every_accepted_license_id_has_its_spdx_page() -> None:
+    """ws.license() accepts these ids; each must map to the SPDX page in SPDX's
+    own spelling, so no emitter builds a lower-case link."""
+    from battinfo.jsonld import _LICENSE_SLUG_IRIS
+    from battinfo.ws import _KNOWN_LICENSES
+
+    assert set(_KNOWN_LICENSES) <= set(_LICENSE_SLUG_IRIS)
+    for slug, iri in _LICENSE_SLUG_IRIS.items():
+        assert iri.startswith("https://spdx.org/licenses/") and iri.endswith(".html")
+        assert iri != f"https://spdx.org/licenses/{slug}.html", slug

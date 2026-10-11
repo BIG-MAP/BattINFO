@@ -675,15 +675,18 @@ def _normalize_license(value: str) -> tuple[str, bool]:
     return token, False
 
 
-def _license_iri(license: str) -> str:
-    """The IRI a deposit graph states a licence with.
+def _license_value(license: str) -> dict | str:
+    """How a deposit graph or RO-Crate states a licence.
 
-    A URL is kept as it is; anything else is taken as an SPDX id and points at
-    its page under ``https://spdx.org/licenses/``. The catalog node and every
-    member dataset node use this one expansion.
+    The same form ``record_to_jsonld`` uses (:func:`battinfo.jsonld.license_node`):
+    a URL or a known SPDX id becomes an IRI reference to the SPDX page, spelled
+    the way SPDX spells it; any other text stays a plain literal rather than a
+    link that resolves to nothing. The catalog node, every member dataset node
+    and the RO-Crate root use this one function.
     """
-    text = license.strip()
-    return text if text.startswith("http") else f"https://spdx.org/licenses/{text}.html"
+    from battinfo.jsonld import license_node
+
+    return license_node(license) or license.strip()
 
 
 @dataclass
@@ -5869,9 +5872,9 @@ class AuthoringWorkspace:
                 _own_license if isinstance(_own_license, str) and _own_license.strip() else license
             )
             if _member_license:
-                _lic_iri = _license_iri(_member_license)
-                member["schema:license"]  = {"@id": _lic_iri}
-                member["dcterms:license"] = {"@id": _lic_iri}
+                _lic_value = _license_value(_member_license)
+                member["schema:license"]  = _lic_value
+                member["dcterms:license"] = _lic_value
             if creators:
                 # Full creator nodes (not @id refs) so a member is self-describing even
                 # lifted out of the catalog, and so creators without an ORCID @id are
@@ -6018,9 +6021,9 @@ class AuthoringWorkspace:
         if license:
             # Emit the licence as a dereferenceable IRI (SPDX) rather than a bare code,
             # so a consumer can resolve the exact terms. Matches the RO-Crate path.
-            lic_iri = _license_iri(license)
-            catalog_node["dcterms:license"] = {"@id": lic_iri}
-            catalog_node["schema:license"]  = {"@id": lic_iri}
+            lic_value = _license_value(license)
+            catalog_node["dcterms:license"] = lic_value
+            catalog_node["schema:license"]  = lic_value
         if _funding_grant is not None:
             # Deposit-level funding: the grant under which the whole collection was produced.
             catalog_node["schema:funding"] = _funding_grant
@@ -6241,7 +6244,7 @@ class AuthoringWorkspace:
             "name":          title,
             "description":   description,
             "datePublished": _now_iso()[:10],
-            "license":       {"@id": f"https://spdx.org/licenses/{license}.html"},
+            "license":       _license_value(license),
             "url":           record_url,
             "identifier":    prereserved_doi,
             "hasPart":       parts,
