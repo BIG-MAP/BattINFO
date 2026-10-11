@@ -34,7 +34,7 @@ from battinfo._jsonio import atomic_write_text as _atomic_write_text
 from battinfo._jsonio import read_json as _read_json
 from battinfo._util import _now_iso, is_dataset_series, local_file_references
 from battinfo._util import local_files_message as _local_files_message
-from battinfo.entities import entity_id_from_doc, record_set_dirs
+from battinfo.entities import entity_id_from_doc, kind_for_type, record_set_dirs, save_entity_path
 
 # Short-name pattern: 6 lowercase alphanumeric characters at the end of a
 # dash-delimited name component (e.g. "666h1s" in "duracell-mn2400-2026-02-666h1s").
@@ -1250,6 +1250,27 @@ _EQUIPMENT_SPEC_DRAFT_KEYS = frozenset({
 # A SpecItem with any of these set carries a value; one with none is an unfilled
 # template placeholder.
 _QUANTITY_VALUE_KEYS = ("value", "min_value", "max_value", "typical_value", "value_text")
+
+
+# Registry resource type of each entity type a workspace can reference by IRI. The
+# registry envelope carries the canonical record under the same key in
+# semantic_payload.battinfo_records.
+_REGISTRY_RESOURCE_TYPES = {"cell": "cell", "cell-spec": "cell_spec", "test-protocol": "test_spec"}
+
+
+def _canonical_record_of(envelope: Any, entity_type: str) -> dict | None:
+    """The canonical record inside a registry envelope, or None when it has none."""
+    kind = kind_for_type(entity_type)
+    if kind is None or not isinstance(envelope, dict):
+        return None
+    records = (envelope.get("semantic_payload") or {}).get("battinfo_records") or {}
+    if not isinstance(records, dict):
+        return None
+    for key in (_REGISTRY_RESOURCE_TYPES.get(entity_type), kind.record_key):
+        candidate = records.get(key) if key else None
+        if isinstance(candidate, dict) and isinstance(candidate.get(kind.record_key), dict):
+            return candidate
+    return None
 
 
 def _path_key(path: str | Path) -> str:
@@ -2671,7 +2692,11 @@ class AuthoringWorkspace:
 
         ``cell`` accepts a serial, IRI, ``Cell``, or search result, and is
         resolved in this session, locally, then in the registry (referenced if it
-        already exists).  ``data`` is a path or list of paths to files that
+        already exists).  A cell found in the registry is kept as a read-only copy
+        of its published record under ``.battinfo/references/``, so the strict
+        save resolves it; the copy is never submitted.  With ``registry_url=None``
+        a cell this workspace does not hold cannot be checked, and ``ws.save()``
+        reports the reference as unresolved.  ``data`` is a path or list of paths to files that
         exist; a relative path resolves against the workspace root, not the
         current directory, and a missing file raises ``FileNotFoundError``
         naming the path it resolved to.  ``type`` is the test
@@ -2901,6 +2926,14 @@ class AuthoringWorkspace:
             path = Path(str(failure.get("file", "")))
             if not path.is_absolute():
                 path = self._ws.source_root / path
+            error = str(failure.get("error", ""))
+            if not self._registry_url and "not found in source_root" in error:
+                # Offline, a reference to a record published elsewhere stays an error.
+                failure["error"] = (
+                    f"{error} It could not be checked offline: this workspace has no "
+                    "registry_url, so a published record cannot be looked up. Open the "
+                    "workspace with a registry_url, or save the referenced record here first."
+                )
             failures[_path_key(path)] = failure
         return failures
 
@@ -6916,6 +6949,8 @@ class AuthoringWorkspace:
 
         The cell is added to the matching index but NOT to the save set, so it is
         never re-saved or re-submitted — downstream tests just record its IRI.
+        A cell this workspace does not hold is looked up in the registry and kept
+        as a read-only reference copy, so the strict save resolves it.
         """
         from battinfo.bundle import Cell  # noqa: PLC0415
         cell = Cell(
@@ -6926,7 +6961,98 @@ class AuthoringWorkspace:
             batch_id=result.get("batch_id"),
         )
         self._index_cell(cell, result.get("serial_number"), result.get("name"))
+        if cell.id:
+            self._resolve_published_reference(cell.id, "cell")
         return cell
+
+    # ── Published records referenced from this workspace ──────────────────────
+
+    @property
+    def _references_root(self) -> Path:
+        """Read-only copies of the published records this workspace references.
+
+        Written when a reference is resolved in the registry, read by save-time
+        reference validation, and never saved over or submitted.
+        """
+        return self._root / ".battinfo" / "references"
+
+    def _knows_record(self, iri: str, entity_type: str) -> bool:
+        """True when *iri* is in this session, saved in this workspace, or kept as a copy."""
+        sessions: dict[str, builtins.list[Any]] = {
+            "cell": self._ws.cells, "cell-spec": self._ws.cell_specs, "test-protocol": self._ws.test_specs,
+        }
+        if any(getattr(obj, "id", None) == iri for obj in sessions.get(entity_type, [])):
+            return True
+        uid = iri.rstrip("/").rsplit("/", 1)[-1]
+        for root in (self._ws.source_root, self._references_root):
+            path = save_entity_path(entity_type, uid, root)
+            try:
+                if path.exists() and entity_id_from_doc(_read_json(path)) == iri:
+                    return True
+            except (OSError, ValueError):
+                continue
+        return False
+
+    def _fetch_registry_record(self, iri: str, entity_type: str) -> tuple[dict | None, str]:
+        """GET the published record behind *iri*: ``(canonical record or None, outcome)``.
+
+        The outcome is ``found``, ``not_found`` (the registry does not hold it),
+        ``unreachable``, or ``unreadable`` (its entry carries no canonical record).
+        """
+        import urllib.error  # noqa: PLC0415
+        import urllib.request  # noqa: PLC0415
+
+        uid = iri.rstrip("/").rsplit("/", 1)[-1]
+        request = urllib.request.Request(
+            f"{self._registry_url}/resources/{_REGISTRY_RESOURCE_TYPES[entity_type]}/{uid}",
+            headers={"User-Agent": "battinfo-client/1.0"},
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=30) as response:  # noqa: S310
+                envelope = json.loads(response.read().decode("utf-8"))
+        except urllib.error.HTTPError as exc:
+            return None, "not_found" if exc.code == 404 else "unreachable"
+        except Exception:  # noqa: BLE001 - registry down or network blocked: degrade, never fail ws.add
+            return None, "unreachable"
+        record = _canonical_record_of(envelope, entity_type)
+        if record is None or entity_id_from_doc(record) != iri:
+            return None, "unreadable"
+        return record, "found"
+
+    def _keep_reference_copy(self, record: dict, entity_type: str) -> Path:
+        """Write a read-only copy of a published record to ``.battinfo/references/<kind>/``."""
+        uid = (entity_id_from_doc(record) or "").rstrip("/").rsplit("/", 1)[-1]
+        path = save_entity_path(entity_type, uid, self._references_root)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        _atomic_write_text(path, json.dumps(record, indent=2, ensure_ascii=False))
+        return path
+
+    def _resolve_published_reference(self, iri: str, entity_type: str) -> str:
+        """Make a reference to a published record resolvable when ws.save() validates it.
+
+        A record this workspace already holds needs nothing. Otherwise, with a
+        registry configured, the published record is looked up and a read-only
+        copy kept under ``.battinfo/references/``; offline, the reference cannot
+        be checked and ws.save() reports it. Returns ``local``, ``copied``,
+        ``offline``, ``not_found``, ``unreachable`` or ``unreadable``.
+        """
+        if self._knows_record(iri, entity_type):
+            return "local"
+        if not self._registry_url:
+            print(f"  note: {iri} is not in this workspace and could not be checked offline "
+                  "(registry_url=None).")
+            return "offline"
+        record, outcome = self._fetch_registry_record(iri, entity_type)
+        if record is not None:
+            self._keep_reference_copy(record, entity_type)
+            return "copied"
+        reason = {
+            "not_found": f"was not found in the registry at {self._registry_url}",
+            "unreachable": f"could not be looked up in the registry at {self._registry_url}",
+            "unreadable": "has no canonical record in its registry entry",
+        }[outcome]
+        print(f"  WARNING: {iri} {reason}; ws.save() will report the reference as unresolved.")
+        return outcome
 
     def _reference_spec(self, result: dict) -> Any:
         """Build a referenced CellSpec reusing its existing IRI (NOT queued to publish)."""
@@ -6952,6 +7078,14 @@ class AuthoringWorkspace:
             source=ProvenanceInfo(type="registry"),
         )
         ct.id = result.get("id") or product.get("id")
+        if ct.id:
+            # Keep the fetched published record as a reference copy, so cells
+            # authored against this spec resolve it when ws.save() validates them.
+            if result.get("source") == "api" and entity_id_from_doc(record) == ct.id:
+                if not self._knows_record(ct.id, "cell-spec"):
+                    self._keep_reference_copy(record, "cell-spec")
+            else:
+                self._resolve_published_reference(ct.id, "cell-spec")
         return ct
 
     def _fetch_cell_spec_record(self, result: dict) -> dict:
@@ -7875,6 +8009,11 @@ class AuthoringWorkspace:
                 if test_spec.startswith(("http://", "https://")):
                     protocol_id_ref = test_spec
                     protocol_name, resolved_kind = self._resolve_test_protocol_ref(test_spec)
+                    if protocol_name is None and resolved_kind is None:
+                        # Not saved here: a protocol published elsewhere, so make the
+                        # reference resolvable at save time (its name and kind stay
+                        # unread, so the test's identity does not change).
+                        self._resolve_published_reference(test_spec, "test-protocol")
                     if resolved_kind and not test_type:
                         test_type = resolved_kind
                 else:

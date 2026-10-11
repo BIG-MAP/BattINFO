@@ -158,6 +158,18 @@ def workspace_layout_root(records_root: PathLike) -> Path | None:
     return None
 
 
+def workspace_references_root(records_root: PathLike) -> Path | None:
+    """Where the workspace owning *records_root* keeps copies of published records it references.
+
+    ``<root>/.battinfo/references/<kind>/`` holds read-only copies of records a
+    workspace resolved in the registry (a cell referenced by IRI, a cell spec
+    from a search hit). Reference validation against the workspace's records
+    folder reads them too; they are never saved over or submitted.
+    """
+    root = workspace_layout_root(records_root)
+    return root / ".battinfo" / "references" if root is not None else None
+
+
 def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
