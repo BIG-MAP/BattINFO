@@ -1188,6 +1188,57 @@ def _validate_substance_resolution(
             _check(comp, "additive", f"{prefix}.additive[{idx}]")
 
 
+def _validate_parameter_set_semantics(
+    body: Mapping[str, Any],
+    issues: list[ValidationIssue],
+    resource_type: str | None,
+    hard_issue_severity: str,
+) -> None:
+    """Claim mappability, plus the parameter-file rules JSON Schema cannot state."""
+    # Parameter-set claims emit through the same quantity nodes as properties,
+    # so an unmapped parameter key gets the same warning. Fraction keys resolve
+    # through the emitter's own table, as they do for properties.
+    from battinfo.transform.json_to_jsonld import _FRACTION_PROPERTY_TERMS
+
+    fraction_keys = frozenset(_FRACTION_PROPERTY_TERMS)
+    claim_lists: list[tuple[str, Any]] = [("parameter_set.claims", body.get("claims"))]
+    for part_idx, part in enumerate(body.get("parts") or []):
+        if isinstance(part, Mapping):
+            claim_lists.append((f"parameter_set.parts[{part_idx}].claims", part.get("claims")))
+    for prefix, claims in claim_lists:
+        if not isinstance(claims, list):
+            continue
+        for idx, claim in enumerate(claims):
+            if (
+                isinstance(claim, Mapping)
+                and isinstance(claim.get("parameter"), str)
+                and isinstance(claim.get("quantity"), Mapping)
+            ):
+                _validate_property_mappability(
+                    {claim["parameter"]: claim["quantity"]},
+                    issues,
+                    resource_type,
+                    path_prefix=f"{prefix}[{idx}]",
+                    extra_known=fraction_keys,
+                )
+
+    if "parts" not in body and "distributions" not in body:
+        return
+    from battinfo.api._parameters import parameter_file_issues  # noqa: PLC0415
+
+    for code, severity, path, message in parameter_file_issues(body):
+        if code.endswith("_count"):
+            continue  # the schema's contains/maxContains rules report these
+        _append_issue(
+            issues,
+            code=f"semantic.parameter_file_{code}",
+            severity=hard_issue_severity if severity == "error" else "warning",
+            path=path,
+            message=message,
+            resource_type=resource_type,
+        )
+
+
 def validate_semantic_report(
     doc: dict[str, Any],
     *,
@@ -1282,27 +1333,9 @@ def validate_semantic_report(
         for idx, part in enumerate(body.get("parts") or []):
             _check_props(part, f"{body_key}.parts[{idx}]")
 
-    # Parameter-set claims emit through the same quantity nodes as properties,
-    # so an unmapped parameter key gets the same warning. Fraction keys resolve
-    # through the emitter's own table, as they do for properties.
     parameter_set = doc.get("parameter_set")
-    if isinstance(parameter_set, Mapping) and isinstance(parameter_set.get("claims"), list):
-        from battinfo.transform.json_to_jsonld import _FRACTION_PROPERTY_TERMS
-
-        fraction_keys = frozenset(_FRACTION_PROPERTY_TERMS)
-        for idx, claim in enumerate(parameter_set["claims"]):
-            if (
-                isinstance(claim, Mapping)
-                and isinstance(claim.get("parameter"), str)
-                and isinstance(claim.get("quantity"), Mapping)
-            ):
-                _validate_property_mappability(
-                    {claim["parameter"]: claim["quantity"]},
-                    issues,
-                    resource_type,
-                    path_prefix=f"parameter_set.claims[{idx}]",
-                    extra_known=fraction_keys,
-                )
+    if isinstance(parameter_set, Mapping):
+        _validate_parameter_set_semantics(parameter_set, issues, resource_type, hard_issue_severity)
 
     dataset = doc.get("dataset")
     if isinstance(dataset, Mapping):

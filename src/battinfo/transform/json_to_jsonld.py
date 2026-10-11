@@ -2689,17 +2689,88 @@ def _parameter_claim_variable_node(claim: dict[str, Any]) -> dict[str, Any] | No
     return node
 
 
+# Parameter-file part -> the label its schema:hasPart node is named with.
+_PARAMETER_PART_LABELS: dict[str, str] = {
+    "cell": "cell",
+    "negative_material": "negative electrode material",
+    "negative_electrode": "negative electrode",
+    "positive_material": "positive electrode material",
+    "positive_electrode": "positive electrode",
+    "separator": "separator",
+    "electrolyte": "electrolyte",
+    "state": "initial and thermal state",
+}
+
+#: ``schema:propertyID`` naming a parameter file's fingerprint identifier.
+PARAMETERS_SHA256_PROPERTY_ID = "parameters-sha256-rfc8785"
+
+
+def _parameter_claim_nodes(claims: Any) -> dict[str, Any]:
+    """A claim list as ``hasProperty`` / ``schema:variableMeasured`` entries.
+
+    Scalar claims become EMMO-typed quantities through the same emitter every
+    component uses; curves and expressions become schema:PropertyValue nodes.
+    """
+    property_nodes: list[dict[str, Any]] = []
+    variable_nodes: list[dict[str, Any]] = []
+    for claim in claims or []:
+        if not isinstance(claim, dict):
+            continue
+        quantity = claim.get("quantity")
+        if isinstance(quantity, dict) and isinstance(claim.get("parameter"), str):
+            for emitted in _descriptor_property_nodes({claim["parameter"]: quantity}):
+                emitted.update(_parameter_claim_annotations(claim))
+                property_nodes.append(emitted)
+            continue
+        variable = _parameter_claim_variable_node(claim)
+        if variable is not None:
+            variable_nodes.append(variable)
+    out: dict[str, Any] = {}
+    if property_nodes:
+        out["hasProperty"] = property_nodes[0] if len(property_nodes) == 1 else property_nodes
+    if variable_nodes:
+        out["schema:variableMeasured"] = variable_nodes[0] if len(variable_nodes) == 1 else variable_nodes
+    return out
+
+
+def _parameter_part_node(part: dict[str, Any], record_name: Any) -> dict[str, Any] | None:
+    """One part of a parameter file as a blank schema:Dataset node under schema:hasPart."""
+    name = part.get("part")
+    if not isinstance(name, str) or not name:
+        return None
+    label = _PARAMETER_PART_LABELS.get(name, name.replace("_", " "))
+    node: dict[str, Any] = {"@type": "schema:Dataset"}
+    node["schema:name"] = f"{record_name} - {label}" if isinstance(record_name, str) and record_name else label
+    about = _parameter_target_node(
+        {key: part[key] for key in ("material_kind", "material_spec_id") if part.get(key)}
+    )
+    if about is not None:
+        node["schema:about"] = about
+    facets = [{"@type": "schema:PropertyValue", "schema:name": "part", "schema:value": name}]
+    if isinstance(part.get("phase"), str) and part["phase"]:
+        facets.append({"@type": "schema:PropertyValue", "schema:name": "phase", "schema:value": part["phase"]})
+    node["schema:additionalProperty"] = facets[0] if len(facets) == 1 else facets
+    node.update(_parameter_claim_nodes(part.get("claims")))
+    return node
+
+
 def _to_domain_battery_jsonld_parameter_set(data: dict[str, Any]) -> dict[str, Any]:
     """Emit a parameter-set record as one schema:Dataset node.
 
-    The node is the claim batch, not the target: claims are what one source
-    says, so they hang off the parameter-set node (scalar claims as EMMO-typed
-    ``hasProperty`` quantities through the same emitter every component uses;
-    curves/expressions as schema:PropertyValue under schema:variableMeasured),
-    and the target rides ``schema:about``. Asserting the values directly onto
-    the target node would collapse "Chen 2020 claims D=3.3e-14" into
-    "D=3.3e-14", which is exactly the epistemic distinction the claim model
-    exists to keep.
+    The node is the source's claims, not their target: claims are what one
+    source says, so they hang off the parameter-set node (scalar claims as
+    EMMO-typed ``hasProperty`` quantities; curves/expressions as
+    schema:PropertyValue under schema:variableMeasured), and the target rides
+    ``schema:about``. Asserting the values directly onto the target node
+    would collapse "Chen 2020 claims D=3.3e-14" into "D=3.3e-14", which is
+    exactly the epistemic distinction the claim model exists to keep.
+
+    A parameter file (one BPX file) is about the cell it describes, or about
+    none when it is a virtual cell (stated as ``virtual_cell``). Its parts are
+    blank schema:Dataset nodes under ``schema:hasPart``, each with its claims
+    and, for a material part, the material on ``schema:about``; its
+    fingerprint is a ``schema:identifier``; the file itself rides
+    ``schema:distribution``.
     """
     body = data.get("parameter_set") if isinstance(data.get("parameter_set"), dict) else {}
     node: dict[str, Any] = {}
@@ -2710,15 +2781,28 @@ def _to_domain_battery_jsonld_parameter_set(data: dict[str, Any]) -> dict[str, A
         node["schema:name"] = body["name"]
     if isinstance(body.get("description"), str) and body["description"]:
         node["schema:description"] = body["description"]
-    about = _parameter_target_node(body)
-    if about is not None:
-        node["schema:about"] = about
+    if isinstance(body.get("cell_instance_id"), str) and body["cell_instance_id"]:
+        node["schema:about"] = {"@id": body["cell_instance_id"]}
+    else:
+        about = _parameter_target_node(body)
+        if about is not None:
+            node["schema:about"] = about
+    if isinstance(body.get("parameters_sha256"), str) and body["parameters_sha256"]:
+        node["schema:identifier"] = {
+            "@type": "schema:PropertyValue",
+            "schema:propertyID": PARAMETERS_SHA256_PROPERTY_ID,
+            "schema:value": body["parameters_sha256"],
+        }
 
     scope_values = [
         {"@type": "schema:PropertyValue", "schema:name": key, "schema:value": body[key]}
         for key in ("scope", "electrode_polarity")
         if isinstance(body.get(key), str) and body[key]
     ]
+    if body.get("virtual_cell") is True:
+        scope_values.append(
+            {"@type": "schema:PropertyValue", "schema:name": "virtual_cell", "schema:value": True}
+        )
     model_context = body.get("model_context")
     if isinstance(model_context, dict):
         scope_values.extend(
@@ -2731,40 +2815,14 @@ def _to_domain_battery_jsonld_parameter_set(data: dict[str, Any]) -> dict[str, A
             scope_values[0] if len(scope_values) == 1 else scope_values
         )
 
-    property_nodes: list[dict[str, Any]] = []
-    variable_nodes: list[dict[str, Any]] = []
-    for claim in body.get("claims") or []:
-        if not isinstance(claim, dict):
-            continue
-        quantity = claim.get("quantity")
-        if isinstance(quantity, dict) and isinstance(claim.get("parameter"), str):
-            for emitted in _descriptor_property_nodes({claim["parameter"]: quantity}):
-                emitted.update(_parameter_claim_annotations(claim))
-                property_nodes.append(emitted)
-            continue
-        variable = _parameter_claim_variable_node(claim)
-        if variable is not None:
-            variable_nodes.append(variable)
-    if property_nodes:
-        node["hasProperty"] = property_nodes[0] if len(property_nodes) == 1 else property_nodes
-    if variable_nodes:
-        node["schema:variableMeasured"] = (
-            variable_nodes[0] if len(variable_nodes) == 1 else variable_nodes
-        )
-
-    # Parameterisation-set flavor: the set lists its members (dcterms:hasPart),
-    # members carry the backlink (schema:isPartOf) — the dataset-series edges.
-    members = body.get("members")
-    if isinstance(members, dict) and members:
-        part_refs = [
-            {"@id": member_iri}
-            for _block, member_iri in sorted(members.items())
-            if isinstance(member_iri, str) and member_iri
-        ]
-        if part_refs:
-            node["dcterms:hasPart"] = part_refs[0] if len(part_refs) == 1 else part_refs
-    if isinstance(body.get("set_id"), str) and body["set_id"]:
-        node["schema:isPartOf"] = {"@id": body["set_id"]}
+    node.update(_parameter_claim_nodes(body.get("claims")))
+    part_nodes = [
+        part_node
+        for part in body.get("parts") or []
+        if isinstance(part, dict) and (part_node := _parameter_part_node(part, body.get("name"))) is not None
+    ]
+    if part_nodes:
+        node["schema:hasPart"] = part_nodes[0] if len(part_nodes) == 1 else part_nodes
 
     # The parameter file itself: what a solver reads. Claims above are the
     # index; these are the bytes, addressed by checksum.
@@ -2791,7 +2849,15 @@ def _to_domain_battery_jsonld_parameter_set(data: dict[str, Any]) -> dict[str, A
             include_bibo=_citation_doi_value(data.get("provenance")) is not None
             or any(
                 _citation_doi_value(c) is not None
-                for c in (body.get("claims") or [])
+                for c in [
+                    *(body.get("claims") or []),
+                    *(
+                        claim
+                        for part in body.get("parts") or []
+                        if isinstance(part, dict)
+                        for claim in part.get("claims") or []
+                    ),
+                ]
                 if isinstance(c, dict)
             ),
             include_files=bool(file_nodes),

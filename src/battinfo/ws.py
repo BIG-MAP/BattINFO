@@ -3991,11 +3991,13 @@ class AuthoringWorkspace:
                         "canonical_iri": body["equipment_id"],
                     })
                 if record_key == "parameter_set":
-                    # The claim batch's target, when it is a registered record
-                    # (a material_kind target is vocabulary, not a record).
+                    # The claim batch's target, or the cell a parameter file
+                    # describes, when it is a registered record (a
+                    # material_kind target is vocabulary, not a record).
                     for tgt_field, tgt_type in (
                         ("material_spec_id", "material_spec"),
                         ("cell_spec_id", "cell_spec"),
+                        ("cell_instance_id", "cell"),
                     ):
                         if isinstance(body.get(tgt_field), str):
                             record_links.append({
@@ -7404,9 +7406,12 @@ class AuthoringWorkspace:
             body.get("material_kind")
             or body.get("material_spec_id")
             or body.get("cell_spec_id")
-            or "?"
+            or body.get("cell_instance_id")
+            or ("virtual cell" if body.get("virtual_cell") else "?")
         )
-        n_claims = len(body.get("claims", []))
+        n_claims = len(body.get("claims", [])) + sum(
+            len(part.get("claims", [])) for part in body.get("parts", [])
+        )
         print(f"  param set:      {body.get('name', name)}  [{target}, {n_claims} claim(s)]  {body['id']}")
         return [record]
 

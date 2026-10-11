@@ -9244,7 +9244,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/parameter-set.schema.json",
       "title": "BattINFO Parameter Set",
-      "description": "A batch of parameter claims from one source about one target (a material kind, a material spec, or a cell spec). Claims collate under the target: many parameter sets may state values for the same parameter of the same material, and the spread is the point. One source (paper, BPX file, lab fit) = one record; the record-level provenance block carries the source, each claim carries its own provenance class (measured/fitted/literature/assumed/derived).",
+      "description": "Parameter claims from one source. Two flavours. A claim batch states claims about one target (a material kind, a material spec, or a cell spec): many batches may state values for the same parameter of the same material, and the spread is the point. A parameter file is one published parameter file (a BPX file): every value in it, grouped by part (cell, materials, electrodes, separator, electrolyte, state), on one record whose IRI derives from the file's parameters, linked to the cell it describes or marked as a virtual cell, and carrying the file itself. The record-level provenance block carries the source; each claim carries its own provenance class (measured/fitted/literature/assumed/derived).",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -9274,7 +9274,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             "name": {
               "type": "string",
               "minLength": 1,
-              "description": "Human-readable label for this batch of claims, conventionally '<source> - <target>' (e.g. 'Chen 2020 - graphite')."
+              "description": "Human-readable label. A claim batch is conventionally named '<source> - <target>' (e.g. 'Chen 2020 - graphite'); a parameter file by its source (the BPX Header.Title)."
             },
             "handle": {
               "$ref": "#/$defs/Handle",
@@ -9283,15 +9283,23 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             "material_kind": {
               "type": "string",
               "minLength": 1,
-              "description": "Target: a generic material kind key from the curated material_kinds vocabulary (e.g. 'graphite', 'nmc811'). Claims about the generic chemistry collate here; resolution falls back from a product-specific material spec to its kind."
+              "description": "Claim-batch target: a generic material kind key from the curated material_kinds vocabulary (e.g. 'graphite', 'nmc811'). Claims about the generic chemistry collate here; resolution falls back from a product-specific material spec to its kind."
             },
             "material_spec_id": {
               "$ref": "#/$defs/MaterialSpecIri",
-              "description": "Target: a specific material spec (a vendor product/grade). Use for claims measured on a particular product rather than the generic chemistry."
+              "description": "Claim-batch target: a specific material spec (a vendor product/grade). Use for claims measured on a particular product rather than the generic chemistry."
             },
             "cell_spec_id": {
               "$ref": "#/$defs/SpecIri",
-              "description": "Target: a cell spec. Use for cell-level fitted sets (full-cell parameterizations, ECM fits) and for electrode/separator/electrolyte claims that describe this cell's build rather than a material."
+              "description": "The cell spec the claims describe. On a claim batch, the target: cell-level fitted sets (full-cell parameterizations, ECM fits) and electrode/separator/electrolyte claims that describe this cell's build. On a parameter file, the cell design the file parameterises."
+            },
+            "cell_instance_id": {
+              "$ref": "#/$defs/CellIri",
+              "description": "Parameter files only: the physical cell the file was fitted on, when the fit describes one cell rather than a cell design."
+            },
+            "virtual_cell": {
+              "const": true,
+              "description": "Parameter files only: the file describes no real cell (a virtual or example cell), so the record links to none."
             },
             "scope": {
               "type": "string",
@@ -9302,7 +9310,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
                 "electrolyte",
                 "cell"
               ],
-              "description": "Physical scope the claims describe. Defaults (in the builder) to 'material' for material targets and 'cell' for cell-spec targets. Electrode/separator/electrolyte scopes carry manufactured-build parameters (thickness, porosity, transport) that belong to a cell design, not to a powder."
+              "description": "Claim batches only. Physical scope the claims describe. Defaults (in the builder) to 'material' for material targets and 'cell' for cell-spec targets. Electrode/separator/electrolyte scopes carry manufactured-build parameters (thickness, porosity, transport) that belong to a cell design, not to a powder."
             },
             "electrode_polarity": {
               "type": "string",
@@ -9310,7 +9318,12 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
                 "positive",
                 "negative"
               ],
-              "description": "For electrode-scope claims on a cell-spec target: which electrode the claims describe."
+              "description": "Claim batches only. For electrode-scope claims on a cell-spec target: which electrode the claims describe."
+            },
+            "parameters_sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$",
+              "description": "Parameter files only: the SHA-256 (lowercase hex) of the RFC 8785 canonical form of the source file, the fingerprint the record's IRI derives from (stable_uid('parameter-set-file:' + parameters_sha256), IDENTIFIER_POLICY 6.3). Anyone can check a file against the IRI with it."
             },
             "model_context": {
               "type": "object",
@@ -9341,7 +9354,16 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "minItems": 1,
               "items": {
                 "$ref": "#/$defs/Claim"
-              }
+              },
+              "description": "Claim batches only: the claims about the target."
+            },
+            "parts": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/Part"
+              },
+              "description": "Parameter files only: every claim the file makes, grouped by part. Each (part, phase) pair appears at most once (builder- and validator-enforced)."
             },
             "description": {
               "type": "string"
@@ -9360,114 +9382,228 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "items": {
                 "$ref": "#/$defs/ParameterFile"
               },
-              "description": "The source file itself, when the record is the published home of a parameter file (a BPX file, for instance). A record carrying its file is addressed by that file: its uid derives from the file content, so the IRI always resolves to the same bytes and a changed file mints a new record. Role 'source' is the file exactly as its authors published it; role 'runnable' is a declared, checksummed conversion of it (for example a BPX 1.0 layout upgraded to 1.1) for solvers that cannot read the source as-is. Claims extracted from the file are an index for search and collation; a solver reads the file."
-            },
-            "members": {
-              "type": "object",
-              "additionalProperties": false,
-              "minProperties": 1,
-              "properties": {
-                "negative_material": {
-                  "$ref": "#/$defs/SpecIri",
-                  "description": "The member parameter-set record carrying the negative material claims."
-                },
-                "negative_electrode": {
-                  "$ref": "#/$defs/SpecIri",
-                  "description": "The member parameter-set record carrying the negative electrode claims."
-                },
-                "positive_material": {
-                  "$ref": "#/$defs/SpecIri",
-                  "description": "The member parameter-set record carrying the positive material claims."
-                },
-                "positive_electrode": {
-                  "$ref": "#/$defs/SpecIri",
-                  "description": "The member parameter-set record carrying the positive electrode claims."
-                },
-                "separator": {
-                  "$ref": "#/$defs/SpecIri",
-                  "description": "The member parameter-set record carrying the separator claims."
-                },
-                "electrolyte": {
-                  "$ref": "#/$defs/SpecIri",
-                  "description": "The member parameter-set record carrying the electrolyte claims."
+              "contains": {
+                "required": [
+                  "role"
+                ],
+                "properties": {
+                  "role": {
+                    "const": "source"
+                  }
                 }
               },
-              "description": "Parameterisation-set flavor: the explicit block map of member parameter-set records that constitute one co-fitted, runnable parameterisation. A set record carries members INSTEAD of claims (the strict policy admits the empty claims for this flavor only); side assignment lives here because which material parameterises which electrode is a fact of the set, not of the material."
-            },
-            "set_id": {
-              "$ref": "#/$defs/SpecIri",
-              "description": "Membership in a parameterisation set (the record listing this one under members). Emitted as schema:isPartOf; the set emits dcterms:hasPart. Members carry the backlink; the set publishes with the members."
+              "minContains": 1,
+              "maxContains": 1,
+              "allOf": [
+                {
+                  "contains": {
+                    "required": [
+                      "role"
+                    ],
+                    "properties": {
+                      "role": {
+                        "const": "runnable"
+                      }
+                    }
+                  },
+                  "minContains": 0,
+                  "maxContains": 1
+                }
+              ],
+              "description": "Parameter files only: the file itself. Exactly one 'source' entry (the file exactly as its authors published it), at most one 'runnable' entry (a declared, checksummed conversion for solvers that cannot read the source, made only when the official parser rejects it) and any number of 'mirror' entries (the same bytes served elsewhere). Claims extracted from the file are an index for search and collation; a solver reads the file."
             }
           },
           "oneOf": [
             {
-              "required": [
-                "material_kind"
-              ],
-              "not": {
-                "anyOf": [
-                  {
-                    "required": [
-                      "material_spec_id"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "cell_spec_id"
-                    ]
-                  }
-                ]
-              }
-            },
-            {
-              "required": [
-                "material_spec_id"
-              ],
-              "not": {
-                "anyOf": [
-                  {
-                    "required": [
-                      "material_kind"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "cell_spec_id"
-                    ]
-                  }
-                ]
-              }
-            },
-            {
-              "required": [
-                "cell_spec_id"
-              ],
-              "not": {
-                "anyOf": [
-                  {
-                    "required": [
-                      "material_kind"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "material_spec_id"
-                    ]
-                  }
-                ]
-              }
-            }
-          ],
-          "anyOf": [
-            {
+              "title": "Claim batch",
+              "description": "One source's claims about exactly one target.",
               "required": [
                 "claims"
-              ]
+              ],
+              "oneOf": [
+                {
+                  "required": [
+                    "material_kind"
+                  ],
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "material_spec_id"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "cell_spec_id"
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
+                  "required": [
+                    "material_spec_id"
+                  ],
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "material_kind"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "cell_spec_id"
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
+                  "required": [
+                    "cell_spec_id"
+                  ],
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "material_kind"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "material_spec_id"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ],
+              "not": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "parts"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "parameters_sha256"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "virtual_cell"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "cell_instance_id"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "distributions"
+                    ]
+                  }
+                ]
+              }
             },
             {
+              "title": "Parameter file",
+              "description": "One parameter file: its claims grouped by part, its fingerprint, exactly one cell link (a cell spec, one physical cell, or virtual_cell).",
               "required": [
-                "members"
-              ]
+                "parts",
+                "parameters_sha256"
+              ],
+              "oneOf": [
+                {
+                  "required": [
+                    "cell_spec_id"
+                  ],
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "cell_instance_id"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "virtual_cell"
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
+                  "required": [
+                    "cell_instance_id"
+                  ],
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "cell_spec_id"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "virtual_cell"
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
+                  "required": [
+                    "virtual_cell"
+                  ],
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "cell_spec_id"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "cell_instance_id"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ],
+              "not": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "claims"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "material_kind"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "material_spec_id"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "scope"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "electrode_polarity"
+                    ]
+                  }
+                ]
+              }
             }
           ]
         },
@@ -9505,6 +9641,11 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         "MaterialSpecIri": {
           "type": "string",
           "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+        },
+        "CellIri": {
+          "type": "string",
+          "pattern": "^https://w3id\\.org/battinfo/cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "description": "A physical cell (cell instance) IRI."
         },
         "ShortId": {
           "type": "string",
@@ -9639,6 +9780,86 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               }
             }
           ]
+        },
+        "Part": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "part",
+            "claims"
+          ],
+          "properties": {
+            "part": {
+              "type": "string",
+              "enum": [
+                "cell",
+                "negative_material",
+                "negative_electrode",
+                "positive_material",
+                "positive_electrode",
+                "separator",
+                "electrolyte",
+                "state"
+              ],
+              "description": "Which part of the cell the claims describe. An electrode's intrinsic material values (OCP, diffusivity, stoichiometry window) form its material part, its build (thickness, porosity) its electrode part; 'state' holds the initial and environmental conditions."
+            },
+            "phase": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Reserved for blended electrodes: on a material part, the particle phase the claims describe (e.g. 'Primary')."
+            },
+            "material_kind": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Material parts only: the curated material kind the claims are about."
+            },
+            "material_spec_id": {
+              "$ref": "#/$defs/MaterialSpecIri",
+              "description": "Material parts only: the material spec the claims are about."
+            },
+            "claims": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/Claim"
+              }
+            }
+          },
+          "not": {
+            "required": [
+              "material_kind",
+              "material_spec_id"
+            ]
+          },
+          "allOf": [
+            {
+              "if": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "material_kind"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "material_spec_id"
+                    ]
+                  }
+                ]
+              },
+              "then": {
+                "properties": {
+                  "part": {
+                    "enum": [
+                      "negative_material",
+                      "positive_material"
+                    ]
+                  }
+                }
+              }
+            }
+          ],
+          "description": "One part of a parameter file and the claims the file makes about it."
         },
         "Curve": {
           "type": "object",
@@ -9935,14 +10156,16 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "type": "string",
               "enum": [
                 "source",
-                "runnable"
+                "runnable",
+                "mirror"
               ],
-              "description": "'source': the file exactly as published by its authors. 'runnable': a declared conversion of the source that current solvers load (derived_from names the source checksum, conversion says what changed)."
+              "description": "'source': the file exactly as published by its authors. 'runnable': a declared conversion of the source that current solvers load (derived_from names the source checksum, conversion says what changed). 'mirror': the source's exact bytes served from another place (same checksum)."
             },
             "content_url": {
               "type": "string",
               "format": "uri",
-              "description": "Direct download URL of an immutable copy of the file."
+              "pattern": "^https://",
+              "description": "Direct https download URL of an immutable copy of the file."
             },
             "encoding_format": {
               "type": "string",
@@ -9966,12 +10189,12 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             "derived_from": {
               "type": "string",
               "pattern": "^sha256:[0-9a-f]{64}$",
-              "description": "For a runnable conversion: 'sha256:<hex>' of the source file it was converted from."
+              "description": "Runnable files only: 'sha256:<hex>' of the source file it was converted from."
             },
             "conversion": {
               "type": "string",
               "minLength": 1,
-              "description": "For a runnable conversion: what changed relative to the source, and which tool and version made the change."
+              "description": "Runnable files only: what changed relative to the source, and which tool and version made the change."
             },
             "software_requirements": {
               "type": "array",
@@ -10007,6 +10230,37 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
                   "derived_from",
                   "conversion"
                 ]
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "role": {
+                    "enum": [
+                      "source",
+                      "mirror"
+                    ]
+                  }
+                },
+                "required": [
+                  "role"
+                ]
+              },
+              "then": {
+                "not": {
+                  "anyOf": [
+                    {
+                      "required": [
+                        "derived_from"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "conversion"
+                      ]
+                    }
+                  ]
+                }
               }
             }
           ],
@@ -10045,8 +10299,11 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "properties": {
             "check": {
               "type": "string",
-              "pattern": "^[a-z][a-z0-9_]*$",
-              "description": "What was checked, e.g. 'bpx_parse' (the official bpx package parses the file) or 'simulation_smoke' (a short simulation ran to completion)."
+              "enum": [
+                "bpx_parse",
+                "simulation_smoke"
+              ],
+              "description": "What was checked: 'bpx_parse' (the official bpx package parses the file) or 'simulation_smoke' (a short simulation ran to completion)."
             },
             "tool": {
               "type": "string",

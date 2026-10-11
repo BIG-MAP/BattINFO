@@ -1,15 +1,15 @@
-"""A BPX file published to the genome is addressed by its parameters.
+"""A BPX file published to the genome is one record, addressed by its parameters.
 
-The contract pinned here (IDENTIFIER_POLICY 6.3, file-backed parameter sets):
+The contract pinned here (IDENTIFIER_POLICY 6.3, parameter files):
 
-- records imported from a BPX file mint their uids from the digest of the
-  file's RFC 8785 canonical JSON, so the IRI names the parameters: the same
-  parameters land on the same IRIs however the file is formatted or its
-  numbers spelled, and a changed value mints new ones; names and targets
-  never enter the identity;
-- the set record carries the file itself (``distributions``): the source bytes
-  as published and, optionally, a declared runnable conversion, each with a
-  sha256 a downloader verifies;
+- the record a BPX file becomes mints its uid from the digest of the file's
+  RFC 8785 canonical JSON, and stores that digest as ``parameters_sha256``,
+  so the IRI names the parameters: the same parameters land on the same IRI
+  however the file is formatted or its numbers spelled, a changed value mints
+  a new one, and names, cell links and material targets never enter it;
+- the record carries the file itself (``distributions``): exactly one source
+  (the bytes the parameters were read from), at most one runnable conversion
+  naming the source's checksum, mirrors of the same bytes, https only;
 - ``upgrade_bpx`` moves exactly the fields BPX 1.0 relocated and nothing else,
   and the official parser accepts the result where it rejected the source;
 - ``check_bpx`` reports every warning the parser raises;
@@ -32,12 +32,13 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+from battinfo.entities import stable_uid  # noqa: E402
 from battinfo.interop import (  # noqa: E402
     bpx_content_digest,
     bpx_file_distribution,
     check_bpx,
-    from_bpx,
     from_bpx_parameters,
+    import_bpx_parameters,
     upgrade_bpx,
 )
 from battinfo.interop.bpx import to_bpx  # noqa: E402
@@ -57,15 +58,36 @@ CELL_SPEC_IRI = "https://w3id.org/battinfo/spec/0000-0000-0000-0000"
 MATERIALS = {"negative": "graphite", "positive": "nmc811"}
 SOURCE_URL = "https://files.example.org/parameter_sets/x/source.bpx.json"
 RUNNABLE_URL = "https://files.example.org/parameter_sets/x/runnable.bpx.json"
+MIRROR_URL = "https://mirror.example.org/x/source.bpx.json"
 
 
 def _doc() -> dict:
     return json.loads(FIXTURE.read_text(encoding="utf-8"))
 
 
-def _records(source=FIXTURE, **kwargs) -> dict[str, dict]:
-    return from_bpx_parameters(source).to_records(
-        materials=MATERIALS, cell_spec_id=CELL_SPEC_IRI, by_block=True, **kwargs
+def _record(source=FIXTURE, **kwargs) -> dict:
+    kwargs.setdefault("cell_spec_id", CELL_SPEC_IRI)
+    kwargs.setdefault("materials", MATERIALS)
+    return from_bpx_parameters(source).to_parameter_set(**kwargs)
+
+
+def _iri(source=FIXTURE, **kwargs) -> str:
+    return _record(source, **kwargs)["parameter_set"]["id"]
+
+
+def _source() -> dict:
+    return bpx_file_distribution(FIXTURE, content_url=SOURCE_URL)
+
+
+def _runnable(source: dict) -> dict:
+    upgraded = upgrade_bpx(FIXTURE)
+    return bpx_file_distribution(
+        upgraded.to_json().encode("utf-8"),
+        name="runnable.bpx.json",
+        content_url=RUNNABLE_URL,
+        role="runnable",
+        derived_from=source["checksum"]["value"],
+        conversion=upgraded.conversion_note("battinfo test"),
     )
 
 
@@ -77,6 +99,7 @@ def test_digest_ignores_layout_but_not_values() -> None:
     reordered = dict(reversed(list(doc.items())))
     assert bpx_content_digest(reordered) == bpx_content_digest(doc)
     assert bpx_content_digest(FIXTURE) == bpx_content_digest(doc)
+    assert bpx_content_digest(FIXTURE.read_bytes()) == bpx_content_digest(doc)
 
     changed = copy.deepcopy(doc)
     changed["Parameterisation"]["Separator"]["Porosity"] = 0.4321
@@ -87,16 +110,24 @@ def test_digest_is_the_rfc8785_digest() -> None:
     assert bpx_content_digest(FIXTURE) == FIXTURE_DIGEST
 
 
-def test_reindented_copy_mints_the_same_iris(tmp_path: Path) -> None:
+def test_the_record_states_the_fingerprint_its_iri_derives_from() -> None:
+    record = _record()
+    body = record["parameter_set"]
+    assert body["parameters_sha256"] == FIXTURE_DIGEST
+    # Anyone holding the file can check it against the IRI.
+    uid = stable_uid(f"parameter-set-file:{bpx_content_digest(FIXTURE)}")
+    assert body["id"] == f"https://w3id.org/battinfo/spec/{uid}"
+    assert from_bpx_parameters(FIXTURE).file_uid() == uid
+
+
+def test_reindented_copy_mints_the_same_iri(tmp_path: Path) -> None:
     # A CRLF checkout or a re-indented copy is the same file to the genome.
     copy_path = tmp_path / "reindented.bpx.json"
     copy_path.write_text(json.dumps(_doc(), indent=4).replace("\n", "\r\n"), encoding="utf-8")
-    first = {block: r["parameter_set"]["id"] for block, r in _records().items()}
-    second = {block: r["parameter_set"]["id"] for block, r in _records(copy_path).items()}
-    assert first == second
+    assert _iri(copy_path) == _iri()
 
 
-def test_a_copy_rewritten_by_another_json_library_keeps_its_iris() -> None:
+def test_a_copy_rewritten_by_another_json_library_keeps_its_iri() -> None:
     # The IRI names the parameters, not the bytes: Node writes 1.0 as 1 and
     # 9e-06 as 0.000009, and the file still means the same simulation.
     node_text = NODE_COPY.read_text(encoding="utf-8")
@@ -104,9 +135,7 @@ def test_a_copy_rewritten_by_another_json_library_keeps_its_iris() -> None:
     assert '"Nominal cell capacity [A.h]": 1,' in node_text
     assert '"Volume [m3]": 0.000009,' in node_text
     assert bpx_content_digest(NODE_COPY) == FIXTURE_DIGEST
-    original = {block: r["parameter_set"]["id"] for block, r in _records().items()}
-    rewritten = {block: r["parameter_set"]["id"] for block, r in _records(NODE_COPY).items()}
-    assert rewritten == original
+    assert _iri(NODE_COPY) == _iri()
 
 
 def test_number_spelling_does_not_enter_the_identity(tmp_path: Path) -> None:
@@ -131,7 +160,13 @@ def test_numpy_values_in_a_dict_import_like_their_json() -> None:
     doc["Parameterisation"]["Cell"]["Number of electrode pairs connected in parallel to make a cell"] = np.int64(20)
     ocp = doc["Parameterisation"]["Negative electrode"]["OCP [V]"]
     ocp["x"], ocp["y"] = np.array(ocp["x"]), np.array(ocp["y"])
-    assert from_bpx_parameters(doc).file_uid() == from_bpx_parameters(FIXTURE).file_uid()
+    res = from_bpx_parameters(doc)
+    assert res.file_uid() == from_bpx_parameters(FIXTURE).file_uid()
+    # The record holds plain numbers, so it serialises.
+    record = res.to_parameter_set(virtual_cell=True)
+    assert record["parameter_set"]["parts"] == _record(virtual_cell=True, cell_spec_id=None,
+                                                         materials=None)["parameter_set"]["parts"]
+    json.dumps(record)
 
     # A float32 holds a different double from the decimal it was made from;
     # it imports as the value it holds.
@@ -150,43 +185,45 @@ def test_nan_has_no_identity() -> None:
         from_bpx_parameters(doc)
 
 
-def test_every_record_is_addressed_by_the_file() -> None:
-    res = from_bpx_parameters(FIXTURE)
-    by_block = res.to_records(materials=MATERIALS, cell_spec_id=CELL_SPEC_IRI, by_block=True)
-    assert by_block["set"]["parameter_set"]["id"].endswith("/" + res.file_uid())
-    for block, record in by_block.items():
-        if block == "set":
-            continue
-        assert record["parameter_set"]["id"].endswith("/" + res.file_uid(block)), block
-
-
-def test_names_and_targets_do_not_enter_the_identity() -> None:
-    # The IRI is the file; which cell spec or material a curator maps it to is
+def test_names_links_and_targets_do_not_enter_the_identity() -> None:
+    # The IRI is the file; which cell or material a curator maps it to is
     # description that can be corrected without changing the bytes it serves.
-    base = {block: r["parameter_set"]["id"] for block, r in _records().items()}
-    renamed = from_bpx_parameters(FIXTURE).to_records(
-        materials={"negative": "graphite", "positive": "nmc622"},
-        cell_spec_id="https://w3id.org/battinfo/spec/1111-1111-1111-1111",
-        name="A curator's better name",
-        by_block=True,
-    )
-    assert {block: r["parameter_set"]["id"] for block, r in renamed.items()} == base
+    base = _iri()
+    assert _iri(materials={"negative": "graphite", "positive": "nmc622"}) == base
+    assert _iri(cell_spec_id="https://w3id.org/battinfo/spec/1111-1111-1111-1111") == base
+    assert _iri(cell_spec_id=None, virtual_cell=True) == base
+    assert _iri(name="A curator's better name") == base
 
 
-def test_a_changed_value_mints_new_iris() -> None:
+def test_a_changed_value_mints_a_new_iri() -> None:
     changed = _doc()
     changed["Parameterisation"]["Separator"]["Porosity"] = 0.4321
-    old = {block: r["parameter_set"]["id"] for block, r in _records().items()}
-    new = {block: r["parameter_set"]["id"] for block, r in _records(changed).items()}
-    assert set(old) == set(new)
-    assert not set(old.values()) & set(new.values())
+    assert _iri(changed) != _iri()
 
 
-# ── The file rides the set ───────────────────────────────────────────────────
+def test_the_builder_refuses_an_iri_the_fingerprint_does_not_give() -> None:
+    from battinfo.api import create_parameter_set
+
+    body = _record()["parameter_set"]
+    with pytest.raises(ValueError, match="derives from its parameters_sha256"):
+        create_parameter_set(
+            name="x", parts=body["parts"], parameters_sha256=body["parameters_sha256"],
+            virtual_cell=True, uid="0000-0000-0000-0000",
+        )
+
+
+def test_the_one_call_form_returns_the_record() -> None:
+    record = import_bpx_parameters(
+        FIXTURE, cell_spec_id=CELL_SPEC_IRI, materials=MATERIALS, retrieved_at=1789900000
+    )
+    assert record == _record(retrieved_at=1789900000)
+
+
+# ── The file rides the record ────────────────────────────────────────────────
 
 
 def test_source_distribution_hashes_the_exact_bytes() -> None:
-    entry = bpx_file_distribution(FIXTURE, content_url=SOURCE_URL)
+    entry = _source()
     raw = FIXTURE.read_bytes()
     assert entry["checksum"] == {"algorithm": "sha256", "value": hashlib.sha256(raw).hexdigest()}
     assert entry["byte_size"] == len(raw)
@@ -197,16 +234,8 @@ def test_source_distribution_hashes_the_exact_bytes() -> None:
 
 
 def test_runnable_distribution_names_its_source_and_conversion() -> None:
-    source = bpx_file_distribution(FIXTURE, content_url=SOURCE_URL)
-    upgraded = upgrade_bpx(FIXTURE)
-    runnable = bpx_file_distribution(
-        upgraded.to_json().encode("utf-8"),
-        name="runnable.bpx.json",
-        content_url=RUNNABLE_URL,
-        role="runnable",
-        derived_from=source["checksum"]["value"],
-        conversion=upgraded.conversion_note("battinfo test"),
-    )
+    source = _source()
+    runnable = _runnable(source)
     assert runnable["conforms_to"] == "BPX 1.1.0"
     assert runnable["derived_from"] == "sha256:" + source["checksum"]["value"]
     assert "Initial temperature" in runnable["conversion"]
@@ -215,40 +244,147 @@ def test_runnable_distribution_names_its_source_and_conversion() -> None:
         bpx_file_distribution(FIXTURE, content_url=RUNNABLE_URL, role="runnable")
     with pytest.raises(ValueError, match="only apply"):
         bpx_file_distribution(FIXTURE, content_url=SOURCE_URL, conversion="x")
+    with pytest.raises(ValueError, match="only apply"):
+        bpx_file_distribution(FIXTURE, content_url=MIRROR_URL, role="mirror", conversion="x")
 
 
-def test_distributions_ride_the_set_and_validate() -> None:
+def test_links_are_https_only() -> None:
+    with pytest.raises(ValueError, match="https"):
+        bpx_file_distribution(FIXTURE, content_url="http://files.example.org/x.json")
+    record = _record(distributions=[_source()])
+    record["parameter_set"]["distributions"][0]["content_url"] = "ftp://files.example.org/x.json"
+    assert not validate_record_report(record).ok
+
+
+def test_the_file_rides_the_record_and_validates() -> None:
     source = bpx_file_distribution(
         FIXTURE,
         content_url=SOURCE_URL,
         checks=[check_bpx(FIXTURE)] if _has_bpx() else None,
     )
-    by_block = _records(distributions=[source])
-    assert by_block["set"]["parameter_set"]["distributions"] == [source]
-    for block, record in by_block.items():
-        if block != "set":
-            assert "distributions" not in record["parameter_set"], block
-        report = validate_record_report(record)
-        assert report.ok, (block, report.errors)
-
-
-def test_schema_rejects_a_runnable_file_without_its_source() -> None:
-    by_block = _records(distributions=[bpx_file_distribution(FIXTURE, content_url=SOURCE_URL)])
-    record = copy.deepcopy(by_block["set"])
-    record["parameter_set"]["distributions"].append(
-        {**record["parameter_set"]["distributions"][0], "role": "runnable"}
-    )
+    mirror = bpx_file_distribution(FIXTURE, content_url=MIRROR_URL, role="mirror")
+    record = _record(distributions=[source, _runnable(source), mirror])
+    assert [d["role"] for d in record["parameter_set"]["distributions"]] == ["source", "runnable", "mirror"]
     report = validate_record_report(record)
-    assert not report.ok
+    assert report.ok, report.errors
 
 
-def test_distributions_need_the_set() -> None:
+def test_the_attached_source_must_be_the_file_read() -> None:
     res = from_bpx_parameters(FIXTURE)
-    with pytest.raises(ValueError, match="cell_spec_id"):
-        res.to_records(
-            materials=MATERIALS,
-            distributions=[bpx_file_distribution(FIXTURE, content_url=SOURCE_URL)],
+    other = bpx_file_distribution(NODE_COPY, content_url=SOURCE_URL)
+    with pytest.raises(ValueError, match="not the file these parameters were read from"):
+        res.to_parameter_set(virtual_cell=True, distributions=[other])
+    with pytest.raises(ValueError, match="exactly one role='source'"):
+        res.to_parameter_set(virtual_cell=True, distributions=[_source(), _source()])
+    # Other bytes with the same parameters are fine when the caller hands
+    # them over: the source entry must carry their checksum.
+    record = res.to_parameter_set(virtual_cell=True, distributions=[other], source_file=NODE_COPY)
+    assert record["parameter_set"]["distributions"] == [other]
+    changed = _doc()
+    changed["Parameterisation"]["Separator"]["Porosity"] = 0.4321
+    changed_bytes = json.dumps(changed).encode("utf-8")
+    with pytest.raises(ValueError, match="other parameters"):
+        res.to_parameter_set(
+            virtual_cell=True,
+            distributions=[bpx_file_distribution(changed_bytes, content_url=SOURCE_URL)],
+            source_file=changed_bytes,
         )
+
+
+def test_a_dict_import_needs_the_source_bytes_to_attach_them() -> None:
+    res = from_bpx_parameters(_doc())
+    assert res.source_sha256 is None
+    with pytest.raises(ValueError, match="pass source_file="):
+        res.to_parameter_set(virtual_cell=True, distributions=[_source()])
+    record = res.to_parameter_set(virtual_cell=True, distributions=[_source()], source_file=FIXTURE)
+    assert record["parameter_set"]["distributions"][0]["checksum"]["value"] == (
+        hashlib.sha256(FIXTURE.read_bytes()).hexdigest()
+    )
+
+
+def test_a_bytes_import_knows_its_checksum() -> None:
+    raw = FIXTURE.read_bytes()
+    res = from_bpx_parameters(raw)
+    assert res.source_sha256 == hashlib.sha256(raw).hexdigest()
+    assert res.content_digest == FIXTURE_DIGEST
+    res.to_parameter_set(virtual_cell=True, distributions=[_source()])
+
+
+def test_cross_entry_rules_hold() -> None:
+    from battinfo.api import create_parameter_set
+
+    source = _source()
+    record = _record(distributions=[source])
+    body = record["parameter_set"]
+    base = {
+        "name": body["name"], "parts": body["parts"],
+        "parameters_sha256": body["parameters_sha256"], "virtual_cell": True,
+    }
+    wrong_runnable = {**_runnable(source), "derived_from": "sha256:" + "0" * 64}
+    with pytest.raises(ValueError, match="must name the source"):
+        create_parameter_set(**base, distributions=[source, wrong_runnable])
+    wrong_mirror = {**bpx_file_distribution(NODE_COPY, content_url=MIRROR_URL, role="mirror")}
+    with pytest.raises(ValueError, match="mirror serves the source's exact bytes"):
+        create_parameter_set(**base, distributions=[source, wrong_mirror])
+    with pytest.raises(ValueError, match="exactly one source"):
+        create_parameter_set(**base, distributions=[_runnable(source)], validate=False)
+
+    # The record validator says the same about a record built elsewhere
+    # (an error under the strict policy, like every semantic rule).
+    bad = copy.deepcopy(record)
+    bad["parameter_set"]["distributions"].append(wrong_runnable)
+    codes = {issue.code for issue in validate_record_report(bad).issues}
+    assert "semantic.parameter_file_runnable_not_from_source" in codes
+    assert not validate_record_report(bad, policy="strict").ok
+    bad_mirror = copy.deepcopy(record)
+    bad_mirror["parameter_set"]["distributions"].append(wrong_mirror)
+    assert "semantic.parameter_file_mirror_checksum_differs" in {
+        issue.code for issue in validate_record_report(bad_mirror, policy="strict").errors
+    }
+
+    two_sources = copy.deepcopy(record)
+    two_sources["parameter_set"]["distributions"].append(dict(source))
+    assert not validate_record_report(two_sources).ok
+    two_runnables = copy.deepcopy(record)
+    two_runnables["parameter_set"]["distributions"] += [_runnable(source), _runnable(source)]
+    assert not validate_record_report(two_runnables).ok
+
+
+def test_a_runnable_next_to_a_source_that_parses_is_a_warning() -> None:
+    source = {**_source(), "checks": [{"check": "bpx_parse", "passed": True}]}
+    res = from_bpx_parameters(FIXTURE)
+    record = res.to_parameter_set(virtual_cell=True, distributions=[source, _runnable(source)])
+    assert any("a runnable copy is made only when the parser rejects" in w for w in res.warnings)
+    report = validate_record_report(record)
+    assert report.ok
+    assert "semantic.parameter_file_runnable_not_needed" in {i.code for i in report.warnings}
+
+
+def test_check_names_come_from_a_fixed_list() -> None:
+    record = _record(distributions=[_source()])
+    record["parameter_set"]["distributions"][0]["checks"] = [{"check": "vibes", "passed": True}]
+    assert not validate_record_report(record).ok
+    record["parameter_set"]["distributions"][0]["checks"] = [{"check": "simulation_smoke", "passed": True}]
+    assert validate_record_report(record).ok
+
+
+def test_a_part_appears_once() -> None:
+    from battinfo.api import create_parameter_set
+
+    body = _record()["parameter_set"]
+    parts = body["parts"] + [copy.deepcopy(body["parts"][0])]
+    with pytest.raises(ValueError, match="appears twice"):
+        create_parameter_set(
+            name="x", parts=parts, parameters_sha256=body["parameters_sha256"], virtual_cell=True,
+        )
+    record = _record()
+    record["parameter_set"]["parts"].append(copy.deepcopy(record["parameter_set"]["parts"][0]))
+    report = validate_record_report(record, policy="strict")
+    assert "semantic.parameter_file_part_repeated" in {i.code for i in report.errors}
+    # A phase names another part of the same kind (reserved for blends).
+    phased = [*body["parts"], {**copy.deepcopy(body["parts"][1]), "phase": "Secondary"}]
+    create_parameter_set(name="x", parts=phased, parameters_sha256=body["parameters_sha256"],
+                         virtual_cell=True)
 
 
 # ── Layout upgrade and checks ────────────────────────────────────────────────
@@ -364,10 +500,10 @@ def test_upgrade_says_what_is_wrong_with_a_null_state() -> None:
 def test_export_at_any_v1_version_uses_the_v1_layout(bpx_version: str) -> None:
     # BPX 1.0, not 1.1, introduced the State block: an export declaring 1.0
     # in the old layout is a file every current parser rejects.
-    by_block = _records()
-    extras = {**from_bpx(FIXTURE).extras, THERMAL_CONDUCTIVITY: 1.48}
-    out = to_bpx({"properties": from_bpx(FIXTURE).specs}, parameter_sets=by_block,
-                 cell_extras=extras, bpx_version=bpx_version)
+    doc = _doc()
+    doc["Parameterisation"]["Cell"][THERMAL_CONDUCTIVITY] = 1.48
+    record = _record(doc)
+    out = to_bpx(record, bpx_version=bpx_version)
     cell = out.bpx["Parameterisation"]["Cell"]
     assert not {"Initial temperature [K]", "Ambient temperature [K]", THERMAL_CONDUCTIVITY} & set(cell)
     assert out.bpx["State"]["Initial conditions"]["Initial temperature [K]"] == 298.15
@@ -378,19 +514,28 @@ def test_export_at_any_v1_version_uses_the_v1_layout(bpx_version: str) -> None:
         assert check["passed"], check["detail"]
 
     # 0.x keeps the old layout.
-    legacy = to_bpx({"properties": from_bpx(FIXTURE).specs}, parameter_sets=by_block,
-                    cell_extras=extras, bpx_version="0.4.0")
+    legacy = to_bpx(record, bpx_version="0.4.0")
     assert "State" not in legacy.bpx
     assert legacy.bpx["Parameterisation"]["Cell"][THERMAL_CONDUCTIVITY] == 1.48
 
 
 def test_export_refuses_two_thermal_conductivities() -> None:
-    by_block = _records()
-    by_block["set"]["parameter_set"]["annex"][THERMAL_CONDUCTIVITY] = 2.0
-    extras = {**from_bpx(FIXTURE).extras, THERMAL_CONDUCTIVITY: 1.48}
+    doc = _doc()
+    doc["Parameterisation"]["Cell"][THERMAL_CONDUCTIVITY] = 1.48
+    doc["Parameterisation"]["User-defined"][THERMAL_CONDUCTIVITY] = 2.0
     with pytest.raises(ValueError, match="refusing to choose"):
-        to_bpx({"properties": from_bpx(FIXTURE).specs}, parameter_sets=by_block,
-               cell_extras=extras, bpx_version="1.1.0")
+        to_bpx(_record(doc), bpx_version="1.1.0")
+
+
+def test_a_claim_batch_is_not_a_file() -> None:
+    from battinfo.api import create_parameter_set
+
+    batch = create_parameter_set(
+        name="Chen 2020 - graphite", material_kind="graphite",
+        claims=[{"parameter": "particle_radius", "quantity": {"value": 5.86e-6, "unit": "m"}}],
+    )
+    with pytest.raises(ValueError, match="claim batch"):
+        to_bpx(batch)
 
 
 def test_official_parser_rejects_the_source_and_accepts_the_upgrade() -> None:
@@ -470,26 +615,28 @@ def test_validation_section_is_named_not_dropped() -> None:
 # ── JSON-LD ──────────────────────────────────────────────────────────────────
 
 
-def test_jsonld_describes_the_files() -> None:
+def _node(record: dict, context: str = "url") -> dict:
     from battinfo.jsonld import record_to_jsonld
 
-    source = bpx_file_distribution(FIXTURE, content_url=SOURCE_URL)
-    upgraded = upgrade_bpx(FIXTURE)
+    doc = record_to_jsonld(record, "parameter-set", context=context)
+    return doc.get("@graph", [doc])[0] if "@graph" in doc else doc
+
+
+def test_jsonld_describes_the_files() -> None:
+    source = _source()
     runnable = bpx_file_distribution(
-        upgraded.to_json().encode("utf-8"),
+        upgrade_bpx(FIXTURE).to_json().encode("utf-8"),
         name="runnable.bpx.json",
         content_url=RUNNABLE_URL,
         role="runnable",
         derived_from=source["checksum"]["value"],
-        conversion=upgraded.conversion_note("battinfo test"),
+        conversion=upgrade_bpx(FIXTURE).conversion_note("battinfo test"),
         software_requirements=["pybamm>=26.7"],
         checks=[{"check": "bpx_parse", "tool": "bpx 1.1.1", "passed": True, "checked_at": "2026-10-07"}],
     )
-    record = _records(distributions=[source, runnable])["set"]
-    node = record_to_jsonld(record, "parameter-set")
-    node = node.get("@graph", [node])[0] if "@graph" in node else node
-    files = node["schema:distribution"]
-    assert [f["dcterms:type"] for f in files] == ["source", "runnable"]
+    mirror = bpx_file_distribution(FIXTURE, content_url=MIRROR_URL, role="mirror")
+    files = _node(_record(distributions=[source, runnable, mirror]))["schema:distribution"]
+    assert [f["dcterms:type"] for f in files] == ["source", "runnable", "mirror"]
     assert files[0]["schema:contentUrl"] == SOURCE_URL
     assert files[0]["schema:sha256"] == source["checksum"]["value"]
     assert files[0]["dcterms:conformsTo"] == "BPX 1.0"
@@ -497,3 +644,56 @@ def test_jsonld_describes_the_files() -> None:
     assert "Initial temperature" in files[1]["prov:wasGeneratedBy"]["dcterms:description"]
     assert files[1]["schema:softwareRequirements"] == "pybamm>=26.7"
     assert files[1]["schema:additionalProperty"]["schema:value"] is True
+    assert files[2]["schema:sha256"] == source["checksum"]["value"]
+
+
+def test_jsonld_parts_are_datasets_with_their_claims() -> None:
+    record = _record()
+    node = _node(record)
+    assert node["schema:about"] == {"@id": CELL_SPEC_IRI}
+    assert node["schema:identifier"] == {
+        "@type": "schema:PropertyValue",
+        "schema:propertyID": "parameters-sha256-rfc8785",
+        "schema:value": FIXTURE_DIGEST,
+    }
+    parts = node["schema:hasPart"]
+    assert len(parts) == 8
+    assert all(part["@type"] == "schema:Dataset" and "@id" not in part for part in parts)
+    by_part = {part["schema:additionalProperty"]["schema:value"]: part for part in parts}
+    negative = by_part["negative_material"]
+    assert negative["schema:name"] == f"{record['parameter_set']['name']} - negative electrode material"
+    assert negative["schema:about"]["@type"] == "Graphite"
+    variables = negative["schema:variableMeasured"]
+    variables = variables if isinstance(variables, list) else [variables]
+    assert any(v["schema:name"] == "ocp" for v in variables)
+    cell_types = {
+        t for prop in by_part["cell"]["hasProperty"] for t in prop["@type"]
+        if isinstance(prop["@type"], list)
+    }
+    assert {"NominalCapacity", "Area", "NumberOfEntities"} <= cell_types
+    assert "schema:about" not in by_part["separator"]
+
+
+@pytest.mark.parametrize("link", ["cell_spec_id", "cell_instance_id", "virtual_cell"])
+@pytest.mark.parametrize("context", ["url", "inline"])
+def test_jsonld_validates_for_every_cell_link(link: str, context: str) -> None:
+    from battinfo.jsonld import record_to_jsonld
+    from battinfo.validate.jsonld import validate_jsonld_report
+
+    kwargs = {
+        "cell_spec_id": {"cell_spec_id": CELL_SPEC_IRI},
+        "cell_instance_id": {"cell_spec_id": None,
+                             "cell_instance_id": "https://w3id.org/battinfo/cell/0000-0000-0000-0001"},
+        "virtual_cell": {"cell_spec_id": None, "virtual_cell": True},
+    }[link]
+    record = _record(distributions=[_source()], **kwargs)
+    doc = record_to_jsonld(record, "parameter-set", context=context)
+    report = validate_jsonld_report(doc)
+    assert report.ok, report.errors
+    node = _node(record, context)
+    if link == "virtual_cell":
+        assert "schema:about" not in node
+        flags = node["schema:additionalProperty"]
+        assert {"@type": "schema:PropertyValue", "schema:name": "virtual_cell", "schema:value": True} in flags
+    else:
+        assert node["schema:about"] == {"@id": record["parameter_set"][link]}

@@ -94,8 +94,9 @@ KNOWN_GAPS: dict[tuple[str, str], str] = {
                             "material-spec", "material", "electrode-spec", "electrode",
                             "parameter-set")
         for prop in ("license", "funding", "contributor")
-        # dataset carries its license on the dataset body, which IS modeled
-        if not (entity_type == "dataset" and prop == "license")
+        # dataset carries its license on the dataset body, which IS modeled;
+        # create_parameter_set takes license= (an imported file keeps its own)
+        if (entity_type, prop) not in {("dataset", "license"), ("parameter-set", "license")}
     },
 
     # Open defect, tracked as readiness finding M4.

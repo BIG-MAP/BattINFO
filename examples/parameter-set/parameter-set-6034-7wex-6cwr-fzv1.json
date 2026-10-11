@@ -1,0 +1,421 @@
+{
+  "schema_version": "0.2.0",
+  "parameter_set": {
+    "id": "https://w3id.org/battinfo/spec/6034-7wex-6cwr-fzv1",
+    "short_id": "60347w",
+    "name": "BPX NMC111 pouch blended",
+    "virtual_cell": true,
+    "parameters_sha256": "fcc7c98a2a9b665a256984d21b0b5fa1dbfa84430d0b5c1d957946373155a084",
+    "model_context": {
+      "tool": "BPX",
+      "name": "Test case: blended electrode definition with two particle sizes but equivalent chemistry. Compare to nmc_pouch_cell_BPX.json in About:Energy open-source release.",
+      "model": "DFN",
+      "version": "0.4.0"
+    },
+    "parts": [
+      {
+        "part": "cell",
+        "claims": [
+          {
+            "parameter": "reference_temperature",
+            "quantity": {
+              "value": 298.15,
+              "unit": "K"
+            },
+            "provenance_class": "fitted"
+          },
+          {
+            "parameter": "discharging_cutoff_voltage",
+            "quantity": {
+              "value": 2.7,
+              "unit": "V"
+            },
+            "provenance_class": "fitted"
+          },
+          {
+            "parameter": "charging_cutoff_voltage",
+            "quantity": {
+              "value": 4.2,
+              "unit": "V"
+            },
+            "provenance_class": "fitted"
+          },
+          {
+            "parameter": "nominal_capacity",
+            "quantity": {
+              "value": 12.5,
+              "unit": "Ah"
+            },
+            "provenance_class": "fitted"
+          },
+          {
+            "parameter": "specific_heat_capacity",
+            "quantity": {
+              "value": 913,
+              "unit": "J/(kg.K)"
+            },
+            "provenance_class": "fitted"
+          },
+          {
+            "parameter": "thermal_conductivity",
+            "quantity": {
+              "value": 2.04,
+              "unit": "W/(m.K)"
+            },
+            "provenance_class": "fitted"
+          },
+          {
+            "parameter": "density",
+            "quantity": {
+              "value": 1847,
+              "unit": "kg/m3"
+            },
+            "provenance_class": "fitted"
+          },
+          {
+            "parameter": "electrode_area",
+            "quantity": {
+              "value": 0.016808,
+              "unit": "m2"
+            },
+            "provenance_class": "fitted"
+          },
+          {
+            "parameter": "electrode_pair_count",
+            "quantity": {
+              "value": 34,
+              "unit": "1"
+            },
+            "provenance_class": "fitted"
+          },
+          {
+            "parameter": "external_surface_area",
+            "quantity": {
+              "value": 0.0379,
+              "unit": "m2"
+            },
+            "provenance_class": "fitted"
+          },
+          {
+            "parameter": "volume",
+            "quantity": {
+              "value": 0.000128,
+              "unit": "m3"
+            },
+            "provenance_class": "fitted"
+          }
+        ]
+      },
+      {
+        "part": "negative_material",
+        "material_kind": "graphite",
+        "claims": [
+          {
+            "parameter": "particle_radius",
+            "quantity": {
+              "value": 4.12e-06,
+              "unit": "m"
+            },
+            "provenance_class": "fitted"
+          },
+          {
+            "parameter": "solid_diffusivity",
+            "quantity": {
+              "value": 2.728e-14,
+              "unit": "m2/s"
+            },
+            "provenance_class": "fitted"
+          },
+          {
+            "parameter": "ocp",
+            "expression": {
+              "text": "9.47057878e-01 * exp(-1.59418743e+02  * x) - 3.50928033e+04 + 1.64230269e-01 * tanh(-4.55509094e+01 * (x - 3.24116012e-02 )) + 3.69968491e-02 * tanh(-1.96718868e+01 * (x - 1.68334476e-01)) + 1.91517003e+04 * tanh(3.19648312e+00 * (x - 1.85139824e+00)) + 5.42448511e+04 * tanh(-3.19009848e+00 * (x - 2.01660395e+00))",
+              "language": "bpx",
+              "argument": "x"
+            },
+            "provenance_class": "fitted"
+          },
+          {
+            "parameter": "entropic_coefficient",
+            "expression": {
+              "text": "(-0.1112 * x + 0.02914 + 0.3561 * exp(-((x - 0.08309) ** 2) / 0.004616)) / 1000",
+              "language": "bpx",
+              "argument": "x"
+            },
+            "provenance_class": "fitted"
+          },
+          {
+            "parameter": "reaction_rate_constant",
+            "quantity": {
+              "value": 5.199e-06,
+              "unit": "mol.m-2.s-1"
+            },
+            "provenance_class": "fitted"
+          },
+          {
+            "parameter": "stoichiometry_min",
+            "quantity": {
+              "value": 0.005504,
+              "unit": "1"
+            },
+            "provenance_class": "fitted"
+          },
+          {
+            "parameter": "stoichiometry_max",
+            "quantity": {
+              "value": 0.75668,
+              "unit": "1"
+            },
+            "provenance_class": "fitted"
+          },
+          {
+            "parameter": "max_concentration",
+            "quantity": {
+              "value": 29730,
+              "unit": "mol/m3"
+            },
+            "provenance_class": "fitted"
+          },
+          {
+            "parameter": "diffusivity_activation_energy",
+            "quantity": {
+              "value": 30000,
+              "unit": "J/mol"
+            },
+            "provenance_class": "fitted"
+          },
+          {
+            "parameter": "reaction_rate_activation_energy",
+            "quantity": {
+              "value": 55000,
+              "unit": "J/mol"
+            },
+            "provenance_class": "fitted"
+          }
+        ]
+      },
+      {
+        "part": "negative_electrode",
+        "claims": [
+          {
+            "parameter": "thickness",
+            "quantity": {
+              "value": 5.62e-05,
+              "unit": "m"
+            },
+            "provenance_class": "fitted"
+          },
+          {
+            "parameter": "electronic_conductivity",
+            "quantity": {
+              "value": 0.222,
+              "unit": "S/m"
+            },
+            "provenance_class": "fitted"
+          },
+          {
+            "parameter": "surface_area_per_volume",
+            "quantity": {
+              "value": 499522,
+              "unit": "1/m"
+            },
+            "provenance_class": "fitted"
+          },
+          {
+            "parameter": "porosity",
+            "quantity": {
+              "value": 0.253991,
+              "unit": "1"
+            },
+            "provenance_class": "fitted"
+          },
+          {
+            "parameter": "transport_efficiency",
+            "quantity": {
+              "value": 0.128,
+              "unit": "1"
+            },
+            "provenance_class": "fitted"
+          }
+        ]
+      },
+      {
+        "part": "positive_electrode",
+        "claims": [
+          {
+            "parameter": "thickness",
+            "quantity": {
+              "value": 5.23e-05,
+              "unit": "m"
+            },
+            "provenance_class": "fitted"
+          },
+          {
+            "parameter": "electronic_conductivity",
+            "quantity": {
+              "value": 0.789,
+              "unit": "S/m"
+            },
+            "provenance_class": "fitted"
+          },
+          {
+            "parameter": "porosity",
+            "quantity": {
+              "value": 0.277493,
+              "unit": "1"
+            },
+            "provenance_class": "fitted"
+          },
+          {
+            "parameter": "transport_efficiency",
+            "quantity": {
+              "value": 0.1462,
+              "unit": "1"
+            },
+            "provenance_class": "fitted"
+          }
+        ]
+      },
+      {
+        "part": "separator",
+        "claims": [
+          {
+            "parameter": "thickness",
+            "quantity": {
+              "value": 2e-05,
+              "unit": "m"
+            },
+            "provenance_class": "fitted"
+          },
+          {
+            "parameter": "porosity",
+            "quantity": {
+              "value": 0.47,
+              "unit": "1"
+            },
+            "provenance_class": "fitted"
+          },
+          {
+            "parameter": "transport_efficiency",
+            "quantity": {
+              "value": 0.3222,
+              "unit": "1"
+            },
+            "provenance_class": "fitted"
+          }
+        ]
+      },
+      {
+        "part": "electrolyte",
+        "claims": [
+          {
+            "parameter": "transference_number",
+            "quantity": {
+              "value": 0.2594,
+              "unit": "1"
+            },
+            "provenance_class": "fitted"
+          },
+          {
+            "parameter": "ionic_conductivity",
+            "expression": {
+              "text": "0.1297 * (x / 1000) ** 3 - 2.51 * (x / 1000) ** 1.5 + 3.329 * (x / 1000)",
+              "language": "bpx",
+              "argument": "x"
+            },
+            "provenance_class": "fitted"
+          },
+          {
+            "parameter": "electrolyte_diffusivity",
+            "expression": {
+              "text": "8.794e-11 * (x / 1000) ** 2 - 3.972e-10 * (x / 1000) + 4.862e-10",
+              "language": "bpx",
+              "argument": "x"
+            },
+            "provenance_class": "fitted"
+          },
+          {
+            "parameter": "conductivity_activation_energy",
+            "quantity": {
+              "value": 17100,
+              "unit": "J/mol"
+            },
+            "provenance_class": "fitted"
+          },
+          {
+            "parameter": "diffusivity_activation_energy",
+            "quantity": {
+              "value": 17100,
+              "unit": "J/mol"
+            },
+            "provenance_class": "fitted"
+          }
+        ]
+      },
+      {
+        "part": "state",
+        "claims": [
+          {
+            "parameter": "initial_temperature",
+            "quantity": {
+              "value": 298.15,
+              "unit": "K"
+            },
+            "provenance_class": "fitted"
+          },
+          {
+            "parameter": "initial_concentration",
+            "quantity": {
+              "value": 1000,
+              "unit": "mol/m3"
+            },
+            "provenance_class": "fitted"
+          },
+          {
+            "parameter": "ambient_temperature",
+            "quantity": {
+              "value": 298.15,
+              "unit": "K"
+            },
+            "provenance_class": "fitted"
+          }
+        ]
+      }
+    ],
+    "distributions": [
+      {
+        "type": "DataDownload",
+        "name": "nmc_pouch_cell_BPX_blended_electrode.json",
+        "role": "source",
+        "content_url": "https://raw.githubusercontent.com/FaradayInstitution/BPX/eb5da74588631ffee0e81f00746352a3f5ba5414/examples/nmc_pouch_cell_BPX_blended_electrode.json",
+        "encoding_format": "application/json",
+        "conforms_to": "BPX 0.4.0",
+        "byte_size": 5385,
+        "checksum": {
+          "algorithm": "sha256",
+          "value": "10e0ab624b7394e106c1218065155d90dedae960506b4d6e7fa87da3ff288118"
+        },
+        "checks": [
+          {
+            "check": "bpx_parse",
+            "tool": "bpx 1.1.1",
+            "passed": true,
+            "detail": "Parsed by the official bpx parser. Warnings: Detected a legacy BPX v0.x file/object; converting to the v1.x schema for backward compatibility. The conversion is approximate: the 'State' block is synthesised from the v0.x parameterisation (initial SOC set to 1, ambient and initial temperatures resolved from those provided, lumped thermal conductivity dropped). Optional v1.x fields that have no v0.x equivalent (e.g. initial hysteresis state and heat transfer coefficient) are omitted from the converted object rather than given a value here, so any tool that consumes it will apply its own defaults for them. Cross-version semantic changes are not corrected. Re-export from bpx>=1 to silence this warning, or pass convert_legacy=False to disable conversion.",
+            "checked_at": "2026-10-11"
+          }
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "source_type": "literature",
+    "retrieved_at": 1791676800,
+    "battinfo_version": "0.7.0",
+    "source_url": "https://github.com/FaradayInstitution/BPX/blob/eb5da74588631ffee0e81f00746352a3f5ba5414/examples/nmc_pouch_cell_BPX_blended_electrode.json",
+    "citation": "https://github.com/FaradayInstitution/BPX"
+  },
+  "notes": [
+    "Imported from the FaradayInstitution/BPX examples (MIT licence, (c) 2022 University of Oxford)."
+  ],
+  "license": "mit"
+}

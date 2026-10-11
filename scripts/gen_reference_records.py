@@ -972,10 +972,11 @@ FAMILIES = [
                     "The claim batch emits as one `schema:Dataset` node: scalar "
                     "claims as EMMO-typed quantities, the target on "
                     "`schema:about`.",
-                    "A BPX file imports the same way: "
-                    "`from_bpx_parameters(...).to_records(materials=...)` turns "
-                    "its physics blocks into claim records, header lineage "
-                    "included (see the design notes).",
+                    "A BPX file is one parameter-file record: "
+                    "`from_bpx_parameters(...).to_parameter_set(cell_spec_id=..., "
+                    "materials=...)` groups every value of the file by part, "
+                    "header lineage included, and `to_bpx(record)` rebuilds "
+                    "the file (see the design notes).",
                 ],
             },
         ],
@@ -1231,6 +1232,7 @@ PAGE_RULES: dict[str, list[str]] = {
     "parameter-sets": [
         "A batch of **claims** about a target: each names a curated parameter, a quantity or curve, and a provenance class (literature, measured, fitted, assumed).",
         "Claims are records so sources can disagree; consumers select among them.",
+        "A BPX file is one record: its claims grouped by part, linked to the cell it describes (or marked a virtual cell), with the file attached and an IRI derived from its parameters.",
     ],
     "organizations": [
         "Identity is the `same_as` registry link (ROR, Wikidata); the body carries the display name and its variants.",
@@ -1330,38 +1332,11 @@ SHELVES: dict[str, list[str]] = {
     ],
     "parameter-sets": [
         "parameter-set/parameter-set-8qqs-rh43-wt8d-172n.json",
-        "parameter-set/parameter-set-1e31-69dh-s500-h9j4.json",
-        "parameter-set/parameter-set-ayt4-483v-13dj-hqgc.json",
-        "parameter-set/parameter-set-a979-b0s3-rzzt-4m57.json",
-        "parameter-set/parameter-set-2563-gee9-ppq0-8p2r.json",
-        "parameter-set/parameter-set-sa76-qhyc-pesq-jvge.json",
-        "parameter-set/parameter-set-956b-frrf-hfg6-m4d9.json",
-        "parameter-set/parameter-set-4gvn-f7sq-cchp-36rm.json",
-        "parameter-set/parameter-set-ma31-1g1r-m2x1-h7d2.json",
-        "parameter-set/parameter-set-2p6b-xrjf-jtcr-57hx.json",
-        "parameter-set/parameter-set-ftg3-krew-9dq5-mntm.json",
-        "parameter-set/parameter-set-nzk2-dv72-c12e-497h.json",
-        "parameter-set/parameter-set-wdd4-4r9a-zcc8-wnj1.json",
-        "parameter-set/parameter-set-vdek-3ryx-83cq-0fcc.json",
-        "parameter-set/parameter-set-2wm3-4t64-h09k-ackh.json",
-        "parameter-set/parameter-set-zwap-fsws-m4yx-p5pp.json",
-        "parameter-set/parameter-set-3n1b-f8n3-zrtc-psjs.json",
-        "parameter-set/parameter-set-z3ac-1me1-hsfd-pa56.json",
-        "parameter-set/parameter-set-dgjc-w8j1-evf7-e2kb.json",
-        "parameter-set/parameter-set-f4tg-ahwq-1mgt-xn7x.json",
-        "parameter-set/parameter-set-pyss-2m8j-y8c1-rmcb.json",
-        "parameter-set/parameter-set-0kaz-t3ef-8ehm-yhhb.json",
-        "parameter-set/parameter-set-q3dk-9sq9-7s86-43vw.json",
-        "parameter-set/parameter-set-baez-0ppf-14qx-6rt0.json",
-        "parameter-set/parameter-set-9cwx-f2pf-6sv6-3n9e.json",
-        "parameter-set/parameter-set-e04y-e56s-wz45-yvk4.json",
-        "parameter-set/parameter-set-5rjm-2a2w-4x8c-5dqy.json",
-        "parameter-set/parameter-set-5znm-m359-cbp5-77hn.json",
-        "parameter-set/parameter-set-340n-s2eb-qy4g-h2rh.json",
-        "parameter-set/parameter-set-4afn-7wan-67hf-nwys.json",
-        "parameter-set/parameter-set-geyv-hp0x-jhrh-c44z.json",
-        "parameter-set/parameter-set-sdw7-cp7b-nsst-tvvy.json",
-        "parameter-set/parameter-set-smjg-7gh6-93vg-geh5.json",
+        "parameter-set/parameter-set-fe59-wews-8mmv-zwag.json",
+        "parameter-set/parameter-set-xm1d-bz46-pc9v-pt70.json",
+        "parameter-set/parameter-set-q73c-bk3q-ceks-r4p6.json",
+        "parameter-set/parameter-set-6034-7wex-6cwr-fzv1.json",
+        "parameter-set/parameter-set-c8cb-d472-yt6s-kyjw.json",
     ],
     "organizations": [
         "organization/A123.json",
