@@ -3467,7 +3467,8 @@ class BattinfoBundle(BundleJsonModel):
             identifier=_copy_identifier(dataset_node.get("schema:identifier")),
             name=str(dataset_node.get("schema:name") or dataset_node["@id"]),
             description=dataset_node.get("schema:description"),
-            license=dataset_node.get("schema:license"),
+            # An IRI reference in deposits, a bare string in older ones.
+            license=_ref_id(dataset_node.get("schema:license")),
             same_as=_ref_ids(dataset_node.get("schema:sameAs")),
             additional_type=_text_list(dataset_node.get("schema:additionalType")),
             version=dataset_node.get("schema:version"),

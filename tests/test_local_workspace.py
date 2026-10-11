@@ -297,6 +297,8 @@ def test_local_workspace_rehydrates_from_publication_bundle(tmp_path: Path) -> N
     assert objects["cell_design"].model == "ANR26650M1-B"
     assert objects["test"].cell_instance_id == objects["cell"].id
     assert objects["dataset"].test_id == objects["test"].id
+    # The bundle states the licence as an IRI; reading it back keeps the IRI.
+    assert objects["dataset"].license == "https://spdx.org/licenses/CC-BY-4.0.html"
 
 
 def test_local_workspace_rehydrates_from_registry_export_wrapper(tmp_path: Path) -> None:

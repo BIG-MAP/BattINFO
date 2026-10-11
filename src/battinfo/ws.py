@@ -675,6 +675,17 @@ def _normalize_license(value: str) -> tuple[str, bool]:
     return token, False
 
 
+def _license_iri(license: str) -> str:
+    """The IRI a deposit graph states a licence with.
+
+    A URL is kept as it is; anything else is taken as an SPDX id and points at
+    its page under ``https://spdx.org/licenses/``. The catalog node and every
+    member dataset node use this one expansion.
+    """
+    text = license.strip()
+    return text if text.startswith("http") else f"https://spdx.org/licenses/{text}.html"
+
+
 @dataclass
 class ContributorRef:
     """The person contributing records from this workspace, identified by ORCID.
@@ -5839,14 +5850,16 @@ class AuthoringWorkspace:
                 # Only publish a web access URL here; a local file:// directory URL
                 # (local-publication case) is set by that path's adapter instead.
                 member["schema:url"] = _ds["access_url"]
-            if _ds.get("license"):
-                lic = _ds["license"]
-                member["schema:license"] = {"@id": lic} if str(lic).startswith("http") else lic
-            # Propagate catalog-level rights/attribution down to each member — RDF has
-            # no inheritance, so a dataset lifted out of the catalog would otherwise lose
-            # its licence and creators. Record-level values (above) take precedence.
-            if "schema:license" not in member and license:
-                _lic_iri = license if license.startswith("http") else f"https://spdx.org/licenses/{license}.html"
+            # Rights and attribution on each member: RDF has no inheritance, so a
+            # dataset lifted out of the catalog would otherwise lose its licence and
+            # creators. The dataset's own licence wins over the catalog's, and either
+            # is stated as an IRI, expanded the same way as the catalog's.
+            _own_license = _ds.get("license")
+            _member_license = (
+                _own_license if isinstance(_own_license, str) and _own_license.strip() else license
+            )
+            if _member_license:
+                _lic_iri = _license_iri(_member_license)
                 member["schema:license"]  = {"@id": _lic_iri}
                 member["dcterms:license"] = {"@id": _lic_iri}
             if creators:
@@ -5995,7 +6008,7 @@ class AuthoringWorkspace:
         if license:
             # Emit the licence as a dereferenceable IRI (SPDX) rather than a bare code,
             # so a consumer can resolve the exact terms. Matches the RO-Crate path.
-            lic_iri = license if license.startswith("http") else f"https://spdx.org/licenses/{license}.html"
+            lic_iri = _license_iri(license)
             catalog_node["dcterms:license"] = {"@id": lic_iri}
             catalog_node["schema:license"]  = {"@id": lic_iri}
         if _funding_grant is not None:
