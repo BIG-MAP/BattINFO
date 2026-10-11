@@ -35,11 +35,19 @@ PyBaMM's own grammar has no per-area current.
 from __future__ import annotations
 
 import re
+import warnings
 from decimal import Decimal
 from fractions import Fraction
 from typing import Any, Optional, Sequence
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    ModelWrapValidatorHandler,
+    field_validator,
+    model_validator,
+)
 
 __all__ = [
     "Quantity",
@@ -210,7 +218,8 @@ class Termination(BaseModel):
     A current cutoff may be stated per area (``{"quantity": "current", "value":
     0.05, "unit": "mA/cm2"}``); it is a current density and emits as one. A
     current cutoff in a unit of another quantity (``V``, ``Ah``, ``C``) is
-    rejected."""
+    refused in a step string; a stored record or a dict keeps it, and the step
+    warns (see :class:`Step`)."""
 
     model_config = ConfigDict(extra="forbid")
     quantity: str  # voltage | current | c_rate | capacity | soc | duration
@@ -227,19 +236,6 @@ class Termination(BaseModel):
     @classmethod
     def _check_direction(cls, value: Any) -> Any:
         return _require_member(value, TERMINATION_DIRECTIONS, "Termination.direction")
-
-    @model_validator(mode="after")
-    def _check_current_unit(self) -> "Termination":
-        if self.quantity == "current":
-            other = _other_quantity_of_unit(self.unit)
-            if other is not None:
-                kind, hint = other
-                advice = f" Use quantity '{hint}' for that cutoff." if hint else ""
-                raise ValueError(
-                    "A 'current' termination takes a current unit (A, mA) or a current per "
-                    f"area (mA/cm2, A/m2); got {self.unit!r}, which is a {kind} unit.{advice}"
-                )
-        return self
 
 
 # Units of other quantities, for the current-cutoff unit check:
@@ -260,6 +256,28 @@ def _other_quantity_of_unit(unit: str) -> tuple[str, str | None] | None:
     """``(what the unit measures, quantity to use)`` when ``unit`` belongs to a
     quantity other than current, otherwise ``None``."""
     return _OTHER_QUANTITY_UNITS.get(unit.strip().lower())
+
+
+def _foreign_current_unit(term: Termination) -> str | None:
+    """What is wrong with a ``current`` cutoff whose unit belongs to another
+    quantity, or ``None`` when the cutoff is fine."""
+    if term.quantity != "current":
+        return None
+    other = _other_quantity_of_unit(term.unit)
+    if other is None:
+        return None
+    kind, hint = other
+    advice = f" Use quantity '{hint}' for that cutoff." if hint else ""
+    return f"a 'current' termination in {term.unit!r}, which is a {kind} unit.{advice}"
+
+
+def _refuse_foreign_current_units(terminations: Sequence[Termination], text: str) -> None:
+    """A step or cutoff written as a string is new authoring: refuse a current
+    cutoff in another quantity's unit outright."""
+    for term in terminations:
+        problem = _foreign_current_unit(term)
+        if problem:
+            raise ExperimentSyntaxError(f"'{text}' gives {problem}")
 
 
 # Comparison-string termination shorthand ("Voltage > 4.2", "C-rate < C/50",
@@ -340,8 +358,10 @@ def parse_termination(text: str) -> Termination:
                 f"Termination '{text}' names {named} but its value parses as {kind}."
             ) from None
         value, unit = _require_value(qty, f"Termination '{text}'"), qty.unit
-    return Termination(quantity=quantity, value=value, unit=unit,
+    term = Termination(quantity=quantity, value=value, unit=unit,
                        direction="below" if op == "<" else "above")
+    _refuse_foreign_current_units([term], text)
+    return term
 
 
 class Step(BaseModel):
@@ -383,6 +403,33 @@ class Step(BaseModel):
     @classmethod
     def _check_direction(cls, value: Any) -> Any:
         return _require_member(value, STEP_DIRECTIONS, "Step.direction")
+
+    @model_validator(mode="wrap")
+    @classmethod
+    def _warn_foreign_current_units(cls, data: Any, handler: ModelWrapValidatorHandler["Step"]) -> "Step":
+        # A step built from a stored record or a dict may hold a current cutoff
+        # in another quantity's unit (published before the check existed, or
+        # written by an importer). Refusing it would make the record unreadable,
+        # so warn and keep it as written; a step string refuses it instead.
+        # A Step instance passed on to another model was checked when it was
+        # built, so it does not warn again.
+        step = handler(data)
+        if not isinstance(data, Step):
+            for term in step.termination:
+                problem = _foreign_current_unit(term)
+                if problem:
+                    warnings.warn(f"Step {_step_name(step)} has {problem} It is kept as written.",
+                                  UserWarning, stacklevel=2)
+        return step
+
+
+def _step_name(step: Step) -> str:
+    """How a warning names a step: its description, its step_id, or its mode."""
+    if step.description:
+        return repr(step.description)
+    if step.step_id is not None:
+        return f"with step_id {step.step_id}"
+    return f"({step.mode} {step.direction})" if step.direction else f"({step.mode})"
 
 
 Step.model_rebuild()
@@ -620,6 +667,7 @@ def parse_step(text: str) -> Step:
         else:
             raise ExperimentSyntaxError(f"Unexpected clause '{clause}' in '{text}'. Expected 'for ...' or 'until ...'.")
 
+    _refuse_foreign_current_units(terminations, text)
     return Step(
         mode=mode,
         direction=direction,

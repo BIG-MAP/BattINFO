@@ -344,20 +344,84 @@ def test_a_current_cutoff_accepts_current_and_areal_units(unit: str) -> None:
         ("W", "power unit."),
     ],
 )
-def test_a_current_cutoff_in_another_quantitys_unit_is_rejected(unit: str, message: str) -> None:
-    from pydantic import ValidationError
-
+def test_a_step_built_from_a_dict_warns_about_a_current_cutoff_in_another_unit(unit: str, message: str) -> None:
+    """A dict is how stored records come back, so it warns and keeps the cutoff."""
     from battinfo.testmethod import Step
 
-    with pytest.raises(ValidationError, match=message):
-        Step(mode="cv", direction="hold",
-             termination=[{"quantity": "current", "value": 1, "unit": unit, "direction": "below"}])
+    with pytest.warns(UserWarning, match=message):
+        step = Step(mode="cv", direction="hold",
+                    termination=[{"quantity": "current", "value": 1, "unit": unit, "direction": "below"}])
+    assert step.termination[0].unit == unit
+
+
+def test_a_stored_spec_with_a_current_cutoff_in_another_unit_still_loads() -> None:
+    """Main loads such a record; refusing it would make published specs unreadable."""
+    import warnings
+
+    record = _empa_spec().to_record()
+    record["method"][1]["description"] = "Hold at 4.2 V until 0.05 C"
+    record["method"][1]["termination"][0]["unit"] = "C"
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        spec = battinfo.TestSpec.from_record(record)
+    messages = [str(w.message) for w in caught if issubclass(w.category, UserWarning)]
+    assert messages == [
+        "Step 'Hold at 4.2 V until 0.05 C' has a 'current' termination in 'C', which is a C-rate unit. "
+        "Use quantity 'c_rate' for that cutoff. It is kept as written."
+    ]
+    assert spec.method[1].termination[0].model_dump() == {
+        "quantity": "current", "value": 0.05, "unit": "C", "direction": "below",
+    }
+    # It still emits: the cutoff stays a generic termination quantity with its unit.
+    term = record_to_jsonld(spec.to_record(), "test-protocol")["hasTask"][1]["hasTerminationParameter"][0]
+    assert term["@type"] == "TerminationQuantity"
+
+
+def test_a_warning_names_an_undescribed_step_by_its_id_or_mode() -> None:
+    from battinfo.testmethod import Step
+
+    bad = [{"quantity": "current", "value": 1, "unit": "V", "direction": "below"}]
+    with pytest.warns(UserWarning, match=r"^Step with step_id 4 has "):
+        Step(mode="cv", direction="hold", step_id=4, termination=bad)
+    with pytest.warns(UserWarning, match=r"^Step \(cv hold\) has "):
+        Step(mode="cv", direction="hold", termination=bad)
+
+
+def test_a_step_string_still_refuses_a_current_cutoff_in_another_unit() -> None:
+    """New authoring from strings stays strict. A step string reads the quantity
+    from the unit, so "until 0.05 C" is a C-rate cutoff and never a current one;
+    the comparison shorthand that names current refuses a C-rate value."""
+    from pydantic import ValidationError
+
+    from battinfo.testmethod import (
+        ExperimentSyntaxError,
+        Step,
+        Termination,
+        _refuse_foreign_current_units,
+        parse_step,
+        parse_termination,
+    )
+
+    assert parse_step("Hold at 4.2 V until 0.05 C").termination[0].quantity == "c_rate"
+    with pytest.raises(ExperimentSyntaxError, match="Unknown unit 'Ah'"):
+        parse_step("Hold at 4.2 V until 0.05 Ah")
+    with pytest.raises(ExperimentSyntaxError, match="names current but its value parses as c_rate"):
+        parse_termination("Current < 0.05 C")
+    with pytest.raises(ValidationError, match="names current but its value parses as voltage"):
+        Step(mode="cv", direction="hold", termination=["Current < 4.2 V"])
+    # The guard both string parsers run before building a step.
+    with pytest.raises(ExperimentSyntaxError, match="gives a 'current' termination in 'C'"):
+        _refuse_foreign_current_units([Termination(quantity="current", value=1, unit="C")], "until 1 C")
 
 
 def test_published_empa_specs_still_load() -> None:
     """The check must not break reading records production already holds."""
+    import warnings
+
     record = _empa_spec().to_record()
-    again = battinfo.TestSpec.from_record(record)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")  # the Empa form (current in mA/cm2) is not a mistake
+        again = battinfo.TestSpec.from_record(record)
     assert again.method[1].termination[0].unit == "mA/cm2"
 
 
