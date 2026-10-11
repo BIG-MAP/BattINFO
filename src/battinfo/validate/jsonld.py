@@ -307,6 +307,39 @@ def _context_class_terms(context: dict[str, Any]) -> set[str]:
     return terms
 
 
+def _expand_compact_iri(value: str, context: dict[str, Any]) -> str:
+    """``value`` with its prefix expanded by ``context`` (``emmo:Volt`` -> full IRI)."""
+    prefix, sep, local = value.partition(":")
+    base = context.get(prefix) if sep and not local.startswith("//") else None
+    if isinstance(base, str) and base.endswith(("#", "/")):
+        return base + local
+    return value
+
+
+def _context_unit_terms(context: dict[str, Any]) -> set[str]:
+    """The terms of a JSON-LD context bound to a measurement unit.
+
+    A unit is any IRI in the curated or candidate unit map, or bound to one of
+    the unit symbols the records context defines
+    (:data:`battinfo.jsonld.CONTEXT_UNIT_SYMBOLS`): ``V``, ``Volt``, ``MWh``,
+    ``UnitOne`` and the like.
+    """
+    from battinfo.jsonld import CONTEXT_UNIT_SYMBOLS  # noqa: PLC0415
+
+    unit_iris = {_expand_compact_iri(iri, context) for iri in CONTEXT_UNIT_SYMBOLS.values()}
+    for filename in ("unit_map.curated.json", "unit_map.candidates.json"):
+        for item in _load_mapping_json(filename).get("mappings", []):
+            iri = item.get("unit_iri")
+            if isinstance(iri, str) and iri:
+                unit_iris.add(_expand_compact_iri(iri, context))
+    terms: set[str] = set()
+    for term, value in context.items():
+        iri = value.get("@id") if isinstance(value, dict) else value
+        if isinstance(iri, str) and _expand_compact_iri(iri, context) in unit_iris:
+            terms.add(term)
+    return terms
+
+
 @lru_cache(maxsize=1)
 def _allowed_type_terms() -> set[str]:
     allowed = set(_EXPLICIT_ALLOWED_TYPE_TERMS)
@@ -316,7 +349,8 @@ def _allowed_type_terms() -> set[str]:
     # class of its own gets the generic Case, for one), so whatever it defines
     # is accepted here; a bare token defined nowhere is still rejected.
     records_context = _local_context_document(_LOCAL_CONTEXT_FILES[_BATTINFO_RECORDS_CONTEXT_URL])
-    allowed.update(_context_class_terms(records_context.get("@context", {})))
+    records_terms = records_context.get("@context", {})
+    allowed.update(_context_class_terms(records_terms))
 
     # The test-spec method graph emits its vocabulary (workflow/process classes,
     # control/termination quantities) straight from the bundled context via
@@ -359,6 +393,12 @@ def _allowed_type_terms() -> set[str]:
     from battinfo.electrodes import ELECTRODE_POLARITY_TYPES  # noqa: PLC0415
 
     allowed.update(ELECTRODE_POLARITY_TYPES.values())
+
+    # A measurement unit (V, Ah, MWh, ...) is the value of hasMeasurementUnit,
+    # never the type of a node, and the naming convention above cannot tell a
+    # unit term from a class term. Unit terms are taken out last, whichever
+    # source brought them in, so an emitter that types a node "V" is caught.
+    allowed -= _context_unit_terms(records_terms)
 
     return allowed
 
