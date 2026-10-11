@@ -9,7 +9,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
-- **A BPX file published to the genome is addressed by its parameters and carries itself.** Records imported with `from_bpx_parameters` now mint their uids from the SHA-256 of the file's canonical JSON (`bpx_content_digest`) instead of from names and targets. Canonical means RFC 8785, the JSON Canonicalization Scheme, so the IRI names the parameters rather than the bytes: a re-indented or CRLF copy lands on the same IRIs, and so does a copy written by another JSON library that spells `1.0` as `1` or `1e-05` as `0.00001`. Any changed value mints new ones (IDENTIFIER_POLICY 6.3, amended). The canonicaliser is vendored in `battinfo._jcs` rather than added as a dependency; numpy values in a dict count as the numbers they hold, and a NaN or an infinity raises `ValueError` with its key path. `to_records(distributions=[...])` attaches the file to the set record: role `source` is the file as its authors published it, role `runnable` an optional declared conversion, each with its sha256, the BPX version it follows and the checks run on it. Three helpers come with it. `bpx_file_distribution` builds an entry from a file. `upgrade_bpx` rewrites a file that declares BPX 1.0 or later but still uses the v0.x layout, as the BattMo export of Schmitt et al. 2026 does: the temperatures and the initial electrolyte concentration move to `State`, a Cell thermal conductivity moves to `User-defined`, and no value changes. It recognises the old layout by its fields, whatever version the file declares. `check_bpx` records whether the official `bpx` parser accepts a file, along with every warning the parser raises. In JSON-LD each file is a `schema:DataDownload` with `dcterms:conformsTo` and `schema:sha256`, and a conversion points at its source with `prov:wasDerivedFrom`. The claims stay an index for search and collation; a solver handed the set's IRI reads the file.
+- **A BPX file is one parameter-set record, addressed by its parameters and carrying the file.** `from_bpx_parameters(path).to_parameter_set(...)` turns one BPX file into one record that holds every value of the file, grouped by part: `cell`, each electrode's material part (OCP, diffusivity, stoichiometry window) and electrode part (thickness, porosity), `separator`, `electrolyte` and `state`. The Cell and State blocks are claims now as well, read the same from the v0.x layout and from the v1 `State` block, through new vocabulary keys (nominal capacity, both cut-offs, the electrode area of one electrode pair and the pair count, volume, lumped density, specific heat capacity and thermal conductivity, reference, initial and ambient temperature, initial state of charge, heat transfer coefficient) and a new `state` scope; a vocabulary BPX mapping may name the BPX unit when it differs from the canonical one. The `User-defined` block rides the record verbatim as its `annex`, and what the record does not model yet (blended-electrode `Particle` blocks, initial hysteresis state, `Degradation`, `Validation` curves) is named in a warning. The caller says which cell the file describes, with exactly one of `cell_spec_id`, `cell_instance_id` or `virtual_cell=True`: the importer never guesses and creates no cell record, and a cell spec made for a new cell gets its identity only, since the file's cell numbers stay on the parameter set. The record's uid derives from the SHA-256 of the file's RFC 8785 canonical JSON, stored on the record as `parameters_sha256`, so a re-indented or CRLF copy, or one written by another JSON library that spells `1.0` as `1`, lands on the same IRI and any changed value mints a new one (IDENTIFIER_POLICY 6.3, amended). The canonicaliser is vendored in `battinfo._jcs`; numpy values in a dict count as the numbers they hold, and a NaN or an infinity raises `ValueError` with its key path. The file rides the record under `distributions`: exactly one `source`, checked against the bytes the parameters were read from, at most one `runnable` conversion that names the source's checksum, and any number of `mirror` copies of the same bytes, all on https, with checks named `bpx_parse` or `simulation_smoke`. `bpx_file_distribution` builds an entry from a file. `upgrade_bpx` rewrites a file that declares BPX 1.0 or later but keeps the v0.x layout, as the BattMo export of Schmitt et al. 2026 does, recognising the old layout by its fields and changing no value. `check_bpx` records whether the official `bpx` parser accepts a file, with every warning the parser raises. `to_bpx(record)` rebuilds the BPX document from the parts, at the file's own version or at `bpx_version=`, in that version's layout: on the eleven single-phase BPX files in our test corpus, the official parser accepts the result and Parameterisation and State come back value for value (`bpx` is a dev dependency, so CI checks this). In JSON-LD the parts are blank `schema:Dataset` nodes under `schema:hasPart`, the fingerprint is a `schema:identifier`, and each file is a `schema:DataDownload` with `dcterms:conformsTo` and `schema:sha256`; a conversion points at its source with `prov:wasDerivedFrom`. Seven of the new keys type as published EMMO classes (SpecificHeatCapacity, ThermalConductivity, ThermodynamicTemperature for the reference and initial temperatures, StateOfCharge, SurfaceCoefficientOfHeatTransfer, NumberOfEntities); `ambient_temperature` keeps the placeholder the published context pins. `query_parameter_sets` and `collate_claims` read the parts, so a search by material finds a file's material parts next to the literature claim batches. The five FaradayInstitution/BPX examples (MIT, (c) 2022 University of Oxford) are now five such records, marked `virtual_cell` and with their source pinned to a commit of that repository; the five invented example cell specs and the 32 per-block records are gone.
 
 - **Research titles lead with their source.** `battinfo.naming.title_for()` takes `source=` (author and year), so a title reads `Flores 2026 graphite AQ-1 electrode spec` and stays distinguishable among many graphite records. A common-word subject loses its capital after the source; abbreviations keep theirs. Products keep their manufacturer-and-model titles, and a collection's label names its source.
 
@@ -168,11 +168,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
     The new default `"auto"` keeps the value carried by cell extras and
     applies the convention only when nothing provides the field; an
     explicit float still forces, `None` still omits.
-  - *BPX v1 State import (F3):* `from_bpx` / `from_bpx_parameters` now
-    fold a top-level `State` block back into its v0.x homes (initial and
-    ambient temperature to Cell extras, initial electrolyte concentration
-    to an `initial_concentration` claim) — the exact inverse of the
-    export-side relocation, so v1 → records → v1 round-trips with state
+  - *BPX v1 State import (F3):* a top-level `State` block is read, not
+    discarded: `from_bpx` folds the initial and ambient temperatures into
+    its Cell extras, and `from_bpx_parameters` reads the block as the
+    record's `state` part, so v1 → record → v1 round-trips with state
     values intact. Unrecognized State entries are skipped by NAME, never
     silently.
   - *Inline JSON-LD context (F4):* inline emission now embeds the
@@ -203,35 +202,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
     DateTime column agrees with its elapsed-time axis (F15).
 
 ### Added
-
-- **Parameterisation sets: one record that names a complete, runnable
-  parameterisation.** A parameter-set record can now carry `members`
-  instead of `claims`: a block map (negative_material,
-  negative_electrode, positive_material, positive_electrode, separator,
-  electrolyte) pointing at the member parameter-set records that
-  together form one source's complete cell parameterisation - the same
-  set/member split the dataset-series pattern uses. Members carry a
-  `set_id` backlink; the JSON-LD emits `dcterms:hasPart` on the set and
-  `schema:isPartOf` on each member. `from_bpx_parameters` mints the set
-  automatically whenever it imports a whole file against a cell spec,
-  `load_parameter_set_members()` resolves a set back to its member
-  records, and `to_bpx` accepts the loaded map directly - so "import a
-  BPX file, export it back" round-trips through one set record. A
-  record is a set XOR a per-source claims record, never both
-  (schema-enforced).
-
-- **The BPX repository's five official examples join the corpus.** All
-  five FaradayInstitution/BPX examples (MIT, (c) 2022 University of
-  Oxford) import through the public `from_bpx` / `from_bpx_parameters`
-  path into 32 parameter-set records (27 per-component members + 5
-  parameterisation sets) and 5 BPX-derived cell specs - real DFN, SPM,
-  blended-electrode, and hysteresis (`User-defined`) files, licensed
-  `mit`, cited to the repository, shelved on the parameter-sets
-  reference page. The import exposed a gap it also fixes:
-  `electrode_area` and `external_surface_area` (a Phase-1 ruling) had
-  never reached the cell-spec SpecSet, so `from_bpx` output failed
-  schema validation; both now live in the yaml/schema/pydantic/
-  authoring-fields chain like every other spec property.
 
 - **Chemical substances get pinned, machine-verifiable identity (0.8.0
   core-features ruling; PR #371 un-parked).** A shipped vocabulary
@@ -283,23 +253,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   aliases - as kwargs and in stored records - and normalize on
   round-trip. Packaged examples rewritten to the canonical keys.
 
-- **BPX round trip: parameter-set records export back to a runnable BPX
-  file (parameter-plan Phase 1).** `to_bpx(spec, parameter_sets=...)`
-  takes ONE source's records (the block-keyed mapping
-  `to_records(by_block=True)` returns) and rebuilds the
-  electrode/separator/electrolyte blocks: claim values at full precision
-  - scalars verbatim, curves as {x, y} tables, expressions as BPX
-  function strings - with the User-defined annex reassembled and
-  `Header.Model` taken from the source's own model context (battinfo's
-  tier contracts require more than a BPX DFN file carries, so deriving
-  from tiers alone would demote an honest DFN source; the tier heuristic
-  is the fallback). Exports declaring BPX 1.0 or later follow the v1 layout
-  (temperatures and initial electrolyte concentration move to the State
-  section, a Cell thermal conductivity to User-defined), and the official
-  `bpx` parser accepts the result - pinned in
-  CI with `bpx` as a dev dependency. Per-source only, deliberately: a
-  calibration is a joint estimate, and mixing sources across blocks
-  would produce a file no validation supports.
+- **`electrode_area` and `external_surface_area` reach the cell-spec schema.** Importing the BPX
+  repository's examples exposed that the two keys (a Phase-1 ruling) had never reached the
+  cell-spec SpecSet, so `from_bpx` output failed schema validation; both now live in the
+  yaml/schema/pydantic/authoring-fields chain like every other spec property.
 
 - **Cell geometry gets a home (BPX Cell-block ruling).** `electrode_area`
   and `external_surface_area` join the curated property vocabulary
@@ -349,13 +306,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **BPX import drops nothing silently (parameter-plan Phase 0).** The
   `User-defined` block — BPX's extension point, previously ignored without
   a word - is now reported key-by-key, and unrecognised Parameterisation
-  blocks are named. Header lineage rides every minted parameter-set
-  record: `Description` as the record description and `References` as the
+  blocks are named. Header lineage rides the parameter-set record:
+  `Description` as the record description and `References` as the
   provenance citation (verbatim as a note when it is not a URL/DOI),
   beside the model context the importer already stamped. A synthetic
   full-DFN golden fixture (structural twin of a published BattMo export,
   fabricated values - the original is GPL-3.0) pins the contract: every
-  parameter in the file becomes a claim, a spec property, or a named
+  value in the file becomes a claim, the record's annex, or a named
   warning.
 
 - **Parameter-set records emit against the records context.** The
