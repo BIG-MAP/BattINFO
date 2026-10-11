@@ -1226,6 +1226,59 @@ def _clean_template_steps(raw: Any) -> builtins.list[str] | None:
     return steps or None
 
 
+# The keys each ws.load() draft loader reads. Anything else (keys starting with
+# "_" are comments) is refused rather than silently dropped, the way the record
+# models refuse an unknown field.
+_CELL_SPEC_DRAFT_KEYS = frozenset({
+    "manufacturer", "model", "format", "chemistry", "positive_electrode_basis",
+    "negative_electrode_basis", "size_code", "iec_code", "country_of_origin",
+    "cell_configuration", "reference_electrode", "rechargeable", "year",
+    "source_file", "citation", "properties", "name", "handle",
+})
+# Older draft spellings that are still read: alias -> current key.
+_CELL_SPEC_DRAFT_ALIASES = {"specs": "properties"}
+_TEST_SPEC_DRAFT_KEYS = frozenset({
+    "name", "type", "kind", "description", "instrument", "atmosphere", "steps",
+    "experiment", "cycles", "method", "conditions", "record", "safety", "artifacts",
+    "citation", "source_file", "id", "uid", "handle",
+})
+_EQUIPMENT_SPEC_DRAFT_KEYS = frozenset({
+    "name", "manufacturer", "model", "equipment_class", "channel_count",
+    "supported_chemistries", "product_id", "supplier", "comment", "source_url",
+    "citation", "property", "handle",
+})
+# A SpecItem with any of these set carries a value; one with none is an unfilled
+# template placeholder.
+_QUANTITY_VALUE_KEYS = ("value", "min_value", "max_value", "typical_value", "value_text")
+
+
+def _check_draft_keys(
+    raw: Mapping[str, Any],
+    allowed: frozenset[str],
+    *,
+    draft: str,
+    path: Path,
+    aliases: Mapping[str, str] | None = None,
+) -> None:
+    """Raise ValueError for draft keys the loader does not read, with a did-you-mean."""
+    aliases = aliases or {}
+    unknown = [key for key in raw
+               if not str(key).startswith("_") and key not in allowed and key not in aliases]
+    if not unknown:
+        return
+    candidates = sorted({*allowed, *aliases})
+    parts = []
+    for key in unknown:
+        close = difflib.get_close_matches(str(key), candidates, n=1)
+        suggestion = aliases.get(close[0], close[0]) if close else None
+        parts.append(repr(key) + (f" (did you mean {suggestion!r}?)" if suggestion else ""))
+    raise ValueError(
+        f"{path.name}: unknown key(s) in a {draft} draft: {', '.join(parts)}. "
+        f"A {draft} draft accepts: {', '.join(sorted(allowed))}; keys starting with '_' "
+        "are comments. Nothing was loaded."
+    )
+
+
 class AuthoringWorkspace:
     """The blessed authoring surface: a simplified workspace for BattINFO records.
 
@@ -2556,8 +2609,12 @@ class AuthoringWorkspace:
     def load(self, source: str | Path | dict | builtins.list) -> Any:
         """Bring a record into the workspace — author a new one, or reference an existing one.
 
-        - A **draft file** (``.cell-spec.json`` / ``.test-spec.json``) is authored as a
-          NEW record and published when you save/submit.
+        - A **draft file** (``.cell-spec.json`` / ``.test-spec.json`` /
+          ``.equipment-spec.json``) is authored as a NEW record and published
+          when you save/submit. A key the draft type does not read raises
+          ``ValueError`` with a did-you-mean and the accepted keys, rather than
+          being dropped; keys starting with ``_`` are comments, and a cell-spec
+          draft reads ``specs`` as the older spelling of ``properties``.
         - A **search result** (from :meth:`search`), or a **list** of results, is
           REFERENCED: brought into the session reusing the existing IRI and never
           re-published. A referenced cell is registered for test attachment.
@@ -6762,8 +6819,17 @@ class AuthoringWorkspace:
 
     def _load_from_file(self, path: Path) -> Any:
         raw = json.loads(path.read_text(encoding="utf-8"))
-        # Filter out null spec values so the schema stays valid
-        specs = {k: v for k, v in (raw.get("properties") or {}).items() if v and v.get("value") is not None}
+        _check_draft_keys(raw, _CELL_SPEC_DRAFT_KEYS, draft="cell-spec", path=path,
+                          aliases=_CELL_SPEC_DRAFT_ALIASES)
+        # `specs` (the draft key until June 2026) is read as an alias of
+        # `properties`, merged the way CellSpec(specs=...) merges it: properties wins.
+        quantities = {**(raw.get("specs") or {}), **(raw.get("properties") or {})}
+        # Drop unfilled template placeholders (no value of any kind) so the schema
+        # stays valid; a range or a text value is a value.
+        specs = {
+            k: v for k, v in quantities.items()
+            if isinstance(v, dict) and any(v.get(field) is not None for field in _QUANTITY_VALUE_KEYS)
+        }
         ct = self._ws.cell_spec(
             manufacturer=raw["manufacturer"],
             model=raw["model"],
@@ -7090,6 +7156,17 @@ class AuthoringWorkspace:
         # Keys starting with "_" are in-file comments written by ws.template()
         # (e.g. _allowed_types, _steps_help) — never record content.
         raw = {k: v for k, v in raw.items() if not str(k).startswith("_")}
+        if "termination_criteria" in raw:
+            # Older drafts stated a protocol-level cutoff here. It has no faithful
+            # home without knowing which step ends at it, so say where it goes.
+            raise ValueError(
+                f"{path.name}: 'termination_criteria' is an older draft key that is no longer "
+                "read, and it was not loaded. State a cutoff in the step that ends at it, for "
+                'example "steps": ["Discharge at C/5 until 0.9 V"], or as a structured '
+                '"termination" on a "method" step: {"quantity": "voltage", "value": 0.9, '
+                '"unit": "V", "direction": "below"}. Nothing was loaded.'
+            )
+        _check_draft_keys(raw, _TEST_SPEC_DRAFT_KEYS, draft="test-spec", path=path)
 
         allowed_types = [t.value for t in BatteryTestType]
         test_type = raw.get("type") or raw.get("kind") or ""
@@ -7156,6 +7233,7 @@ class AuthoringWorkspace:
         from battinfo.entities import stable_uid  # noqa: PLC0415
 
         raw = json.loads(path.read_text(encoding="utf-8"))
+        _check_draft_keys(raw, _EQUIPMENT_SPEC_DRAFT_KEYS, draft="equipment-spec", path=path)
         name = raw.get("name") or ""
         manufacturer = raw.get("manufacturer") or None
         model = raw.get("model") or None
