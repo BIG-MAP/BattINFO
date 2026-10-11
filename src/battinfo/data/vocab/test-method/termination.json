@@ -1,5 +1,5 @@
 {
- "$comment": "Controlled vocabulary mapping a termination condition (the measured quantity + the direction the limit is approached from) to the EMMO termination quantity class, attached under hasTerminationParameter. This replaces the old name-encoded scheme (e.g. 'discharging_cutoff_voltage' -> LowerVoltageLimit) with an explicit (quantity, direction) pair, mirroring bmgen's LOWER_LIMITS/UPPER_LIMITS remap. 'below'/'above' = the value is a lower/upper bound the channel crosses to end the step. 'duration' is time-based and direction-free.",
+ "$comment": "Controlled vocabulary mapping a termination condition (the measured quantity + the direction the limit is approached from) to the EMMO termination quantity class, attached under hasTerminationParameter. This replaces the old name-encoded scheme (e.g. 'discharging_cutoff_voltage' -> LowerVoltageLimit) with an explicit (quantity, direction) pair, mirroring bmgen's LOWER_LIMITS/UPPER_LIMITS remap. 'below'/'above' = the value is a lower/upper bound the channel crosses to end the step. 'duration' is time-based and direction-free. 'current_density' is not a quantity an author writes: a 'current' cutoff stated per area (mA/cm2, A/m2) is a current density, and the emitters type it with these classes.",
  "version": "1.0.0",
  "terminations": {
   "voltage": {
@@ -16,6 +16,16 @@
    },
    "above": {
     "emmo_class": "TerminationQuantity"
+   }
+  },
+  "current_density": {
+   "below": {
+    "emmo_class": "LowerCurrentDensityLimit",
+    "iri": "electrochemistry:electrochemistry_abdd3bbb_403a_4cb3_b522_50d027492a68"
+   },
+   "above": {
+    "emmo_class": "UpperCurrentDensityLimit",
+    "iri": "electrochemistry:electrochemistry_2a16f139_ab9c_4034_bd21_eabd2e1202e8"
    }
   },
   "c_rate": {

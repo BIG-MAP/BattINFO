@@ -29,6 +29,7 @@ Examples::
 from __future__ import annotations
 
 import re
+from fractions import Fraction
 from typing import Any, Optional, Sequence
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
@@ -59,6 +60,44 @@ STEP_MODES: tuple[str, ...] = ("cc", "cv", "cccv", "cp", "cr", "rest", "eis", "s
 STEP_DIRECTIONS: tuple[str, ...] = ("charge", "discharge", "hold", "rest", "none")
 TERMINATION_QUANTITIES: tuple[str, ...] = ("voltage", "current", "c_rate", "capacity", "soc", "duration")
 TERMINATION_DIRECTIONS: tuple[str, ...] = ("below", "above", "elapsed")
+
+
+# A current stated per area is a current density, whatever key or termination
+# quantity it is written under, so the emitters type it as one. Coin-cell
+# protocols state currents this way (0.1 mA/cm2). The factors convert to mA/cm2.
+_CURRENT_PREFIX_MA: dict[str, tuple[str, Fraction]] = {
+    "ka": ("kA", Fraction(10**6)),
+    "a": ("A", Fraction(1000)),
+    "ma": ("mA", Fraction(1)),
+    "µa": ("µA", Fraction(1, 1000)),
+    "ua": ("µA", Fraction(1, 1000)),
+    "na": ("nA", Fraction(1, 10**6)),
+}
+_AREA_CM2: dict[str, tuple[str, Fraction]] = {
+    "m": ("m2", Fraction(10**4)),
+    "cm": ("cm2", Fraction(1)),
+    "mm": ("mm2", Fraction(1, 100)),
+}
+# "mA/cm2", "mA / cm^2", "mA/cm²", and the product forms "mA cm-2", "A.m-2".
+_AREAL_CURRENT_RE = re.compile(
+    r"^(?P<current>[kmunµ]?a)\s*"
+    r"(?:/\s*(?P<per>[cm]?m)\s*\^?\s*2|(?:\s+|\s*[.·*]\s*)(?P<times>[cm]?m)\s*\^?\s*-\s*2)$",
+    re.IGNORECASE,
+)
+
+
+def _current_density_unit(unit: Any) -> tuple[str, Fraction] | None:
+    """``(canonical symbol, factor to mA/cm2)`` when ``unit`` is a current per
+    area (``mA/cm2``, ``A/m2``, ``mA cm-2``, ...), otherwise ``None``."""
+    if not isinstance(unit, str):
+        return None
+    text = unit.strip().replace("²", "2").replace("⁻", "-").replace("−", "-").replace("μ", "µ")
+    match = _AREAL_CURRENT_RE.match(text)
+    if not match:
+        return None
+    current_symbol, current_factor = _CURRENT_PREFIX_MA[match.group("current").lower()]
+    area_symbol, area_factor = _AREA_CM2[(match.group("per") or match.group("times")).lower()]
+    return f"{current_symbol}/{area_symbol}", current_factor / area_factor
 
 
 def _require_member(value: Any, allowed: tuple[str, ...], field: str) -> Any:

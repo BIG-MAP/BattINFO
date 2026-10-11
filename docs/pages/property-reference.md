@@ -124,7 +124,7 @@ class each becomes in JSON-LD:
 | `weight` | [Mass](https://w3id.org/emmo#EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405) |
 | `width` | [Width](https://w3id.org/emmo#EMMO_e4de48b1_dabb_4490_ac2b_040f926c64f0) |
 
-## Units (48)
+## Units (51)
 
 The unit symbols accepted in quantity dicts, and the unit IRI each maps
 to (EMMO where a term exists, QUDT as the documented fallback):
@@ -135,6 +135,8 @@ to (EMMO where a term exists, QUDT as the documented fallback):
 | `1` | [UnitOne](https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978) |
 | `A` | [Ampere](https://w3id.org/emmo#Ampere) |
 | `A/Ah` | [AmperePerAmpereHour](https://w3id.org/emmo/domain/electrochemistry#AmperePerAmpereHour) |
+| `A/cm2` | [AmperePerSquareCentiMetre](https://w3id.org/emmo#AmperePerSquareCentiMetre) |
+| `A/m2` | [AmperePerSquareMetre](https://w3id.org/emmo#AmperePerSquareMetre) |
 | `Ah` | [AmpereHour](https://w3id.org/emmo#AmpereHour) |
 | `cm` | [CentiMetre](https://w3id.org/emmo#CentiMetre) |
 | `cm2` | [SquareCentiMetre](https://w3id.org/emmo#SquareCentiMetre) |
@@ -154,6 +156,7 @@ to (EMMO where a term exists, QUDT as the documented fallback):
 | `m` | [Metre](https://w3id.org/emmo#Metre) |
 | `m2/g` | [SquareMetrePerGram](https://w3id.org/emmo#SquareMetrePerGram) |
 | `mA` | [MilliAmpere](https://w3id.org/emmo#MilliAmpere) |
+| `mA/cm2` | [MilliAmperePerSquareCentiMetre](https://w3id.org/emmo#MilliAmperePerSquareCentiMetre) |
 | `mAh` | [MilliAmpereHour](https://w3id.org/emmo#MilliAmpereHour) |
 | `mg` | [MilliGram](https://w3id.org/emmo#MilliGram) |
 | `mg/cm2` | [MilliGramPerSquareCentiMetre](https://w3id.org/emmo#MilliGramPerSquareCentiMetre) |
