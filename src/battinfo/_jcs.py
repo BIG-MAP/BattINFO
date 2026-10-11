@@ -76,6 +76,9 @@ def es_number(value: float | int, path: str = "") -> str:
     digits = "".join(str(d) for d in decimal.digits).rstrip("0")
     k = len(digits)
     # The value is 0.<digits> x 10^n, i.e. int(digits) x 10^(n - k).
+    # Only NaN and infinities have a string exponent, and they were refused above.
+    if not isinstance(decimal.exponent, int):
+        raise ValueError(f"{_where(path)} is {number!r}; RFC 8785 JSON has no NaN or Infinity.")
     n = decimal.exponent + len(decimal.digits)
     # The four layouts Number::toString chooses between. Python already
     # wrote everything in 1e-4 <= |x| < 1e16 above, so the second branch is
