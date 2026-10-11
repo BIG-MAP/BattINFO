@@ -1271,10 +1271,20 @@ def _record_from_dataset(dataset: Dataset, *, workspace_root: PathLike | None = 
     # Save-time canonicalization: dates default to now and convert to Unix; provenance
     # gets the schema-required source_type category default and a retrieval timestamp. The
     # model's to_record() handles the schema.org field mapping and distribution assembly.
-    created = _resolved_time("created_at", finalized.created_at, _now_unix())
+    # A dataset that states when it was published but not when it was created (a new
+    # version of a published record, read back with from_record) existed by then, so its
+    # created_at defaults to published_at, not to now, which would fall after it.
+    published = (
+        _resolved_time("published_at", finalized.published_at, 0)
+        if finalized.published_at is not None
+        else None
+    )
+    created = _resolved_time(
+        "created_at", finalized.created_at, published if published is not None else _now_unix()
+    )
     finalized.created_at = created
     finalized.modified_at = _resolved_time("modified_at", finalized.modified_at, created)
-    finalized.published_at = _resolved_time("published_at", finalized.published_at, created)
+    finalized.published_at = published if published is not None else created
     if finalized.source.type is None:
         finalized.source.type = "other"
     finalized.source.retrieved_at = _resolved_retrieved_at(finalized.source.retrieved_at)
