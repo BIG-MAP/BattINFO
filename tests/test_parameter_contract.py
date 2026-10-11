@@ -295,7 +295,7 @@ def test_template_record_passes_strict_schema_validation(tmp_path) -> None:
     report = validate_record_report(template_parameter_set(uid="pge5wer62q82v9k0"))
     assert report.ok, report.errors
     saved = save_parameter_set(template_parameter_set(), source_root=tmp_path)
-    assert saved["status"] == "created" and SPEC_IRI.fullmatch(saved["id"])
+    assert saved["status"] == "created" and DATASET_IRI.fullmatch(saved["id"])
 
 
 def test_save_and_query_round_trip(tmp_path) -> None:
