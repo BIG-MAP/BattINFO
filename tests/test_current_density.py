@@ -359,3 +359,69 @@ def test_published_empa_specs_still_load() -> None:
     record = _empa_spec().to_record()
     again = battinfo.TestSpec.from_record(record)
     assert again.method[1].termination[0].unit == "mA/cm2"
+
+
+# -- SI prefixes are case-sensitive: M is mega, m is milli --------------------
+
+
+@pytest.mark.parametrize(
+    ("text", "value"),
+    [
+        ("1 MA/m2", 100000.0),
+        ("1 mA/m2", 0.0001),
+        ("1 kA/m2", 100.0),
+        ("1 uA/cm2", 0.001),
+        ("1 µA/cm2", 0.001),
+        ("1 μA/cm2", 0.001),  # Greek mu
+        ("1 ma/cm2", 1.0),  # all lower case: the prefix is still milli
+    ],
+)
+def test_current_density_prefixes_are_read_case_sensitively(text: str, value: float) -> None:
+    from battinfo.testmethod import parse_step
+
+    qty = parse_step(f"Charge at {text} until 4.2 V").setpoints["current_density"]
+    assert (qty.value, qty.unit) == (value, "mA/cm2")
+
+
+@pytest.mark.parametrize(
+    ("text", "message"),
+    [
+        ("1 mA/Mm2", "Unsupported area unit 'Mm2'"),
+        ("1 KA/m2", "Unsupported prefix 'K'"),
+        ("1 pA/cm2", "Unsupported prefix 'p'"),
+        ("1 Ma/cm2", "Ambiguous unit 'Ma/cm2'"),
+        ("1 mA/CM2", "Could not parse value"),
+    ],
+)
+def test_a_prefix_the_grammar_does_not_read_raises(text: str, message: str) -> None:
+    from battinfo.testmethod import ExperimentSyntaxError, parse_step
+
+    with pytest.raises(ExperimentSyntaxError, match=message):
+        parse_step(f"Charge at {text} until 4.2 V")
+
+
+def test_plain_unit_prefixes_are_case_sensitive_too() -> None:
+    """The plain units had the same fold: 1 MA was read as 1 mA, 1 MW as 1 mW."""
+    from battinfo.testmethod import ExperimentSyntaxError, parse_step
+
+    assert parse_step("Discharge at 1 MA until 3 V").setpoints["current"].value == 1e6
+    assert parse_step("Discharge at 5 µA until 3 V").setpoints["current"].value == 5e-6
+    assert parse_step("Discharge at 200 ma until 3 V").setpoints["current"].value == 0.2
+    assert parse_step("Discharge at 9 mA until 3 V").setpoints["current"].value == 0.009
+    for text in ("Discharge at 1 MW until 3 V", "Hold at 1 MV until 0.1 A", "Discharge at 1 Ma until 3 V",
+                 "Discharge at 1 KA until 3 V"):
+        with pytest.raises(ExperimentSyntaxError):
+            parse_step(text)
+
+
+@pytest.mark.parametrize("unit", ["pA/cm2", "Ma/cm2", "mA/Mm2"])
+def test_the_emitters_leave_an_unreadable_stored_unit_as_written(unit: str) -> None:
+    """A stored record with a unit the grammar refuses still emits; the value
+    keeps its unit as text and is not typed as a current density."""
+    record = _step(setpoints={"current": {"value": 1, "unit": unit}},
+                   termination=[{"quantity": "current", "value": 1, "unit": unit, "direction": "below"}])
+    task = record_to_jsonld(record, "test-protocol")["hasTask"][0]
+    assert task["hasControlParameter"][0]["@type"] == "ElectricCurrent"
+    assert task["hasControlParameter"][0]["schema:unitText"] == unit
+    assert task["hasTerminationParameter"][0]["@type"] == "TerminationQuantity"
+    assert task["hasTerminationParameter"][0]["schema:unitText"] == unit

@@ -26,7 +26,7 @@ from typing import Any, Callable
 
 from battinfo._util import is_dataset_series
 from battinfo.entities import kind_for_doc
-from battinfo.testmethod import _current_density_unit
+from battinfo.testmethod import _is_current_density_unit
 
 _DATA = Path(__file__).parent / "data"
 # Inline emission must expand identically to the hosted context the URL names,
@@ -351,7 +351,7 @@ def _setpoint_class(key: str, unit: Any) -> str | None:
     """The quantity class of a step setpoint. A current given per area is a
     current density, whichever key it was written under."""
     qcls = setpoint_emmo_class(key) or TEST_CONDITION_CLASS.get(key.lower())
-    if qcls == "ElectricCurrent" and _current_density_unit(unit):
+    if qcls == "ElectricCurrent" and _is_current_density_unit(unit):
         return setpoint_emmo_class("current_density")
     return qcls
 
@@ -360,7 +360,7 @@ def _termination_class(term: Mapping[str, Any]) -> str | None:
     """The termination class of a step cutoff. A current cutoff stated per area
     (0.05 mA/cm2) is a current-density limit, not a current limit."""
     quantity = str(term.get("quantity") or "")
-    if quantity == "current" and _current_density_unit(term.get("unit")):
+    if quantity == "current" and _is_current_density_unit(term.get("unit")):
         quantity = "current_density"
     return termination_emmo_class(quantity, term.get("direction"))
 

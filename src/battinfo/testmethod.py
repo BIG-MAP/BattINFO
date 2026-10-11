@@ -70,42 +70,84 @@ TERMINATION_QUANTITIES: tuple[str, ...] = ("voltage", "current", "c_rate", "capa
 TERMINATION_DIRECTIONS: tuple[str, ...] = ("below", "above", "elapsed")
 
 
+# SI prefixes are case-sensitive, as SI writes them: m is milli and M is mega;
+# u and µ are both micro. A prefix not listed for a unit raises rather than
+# being guessed (case-folding once read 1 MA/m2 as 1 mA/m2, nine orders of
+# magnitude off).
+_SI_PREFIX: dict[str, Fraction] = {
+    "M": Fraction(10**6),
+    "k": Fraction(10**3),
+    "": Fraction(1),
+    "m": Fraction(1, 10**3),
+    "µ": Fraction(1, 10**6),
+    "u": Fraction(1, 10**6),
+    "n": Fraction(1, 10**9),
+}
+_CURRENT_SYMBOL = {"M": "MA", "k": "kA", "": "A", "m": "mA", "µ": "µA", "u": "µA", "n": "nA"}
+
 # A current stated per area is a current density, whatever key or termination
 # quantity it is written under, so the emitters type it as one. Coin-cell
-# protocols state currents this way (0.1 mA/cm2). The factors convert to mA/cm2.
-_CURRENT_PREFIX_MA: dict[str, tuple[str, Fraction]] = {
-    "ka": ("kA", Fraction(10**6)),
-    "a": ("A", Fraction(1000)),
-    "ma": ("mA", Fraction(1)),
-    "µa": ("µA", Fraction(1, 1000)),
-    "ua": ("µA", Fraction(1, 1000)),
-    "na": ("nA", Fraction(1, 10**6)),
-}
+# protocols state currents this way (0.1 mA/cm2). Area prefix -> (unit, in cm2).
 _AREA_CM2: dict[str, tuple[str, Fraction]] = {
-    "m": ("m2", Fraction(10**4)),
-    "cm": ("cm2", Fraction(1)),
-    "mm": ("mm2", Fraction(1, 100)),
+    "": ("m2", Fraction(10**4)),
+    "c": ("cm2", Fraction(1)),
+    "m": ("mm2", Fraction(1, 100)),
 }
 # "mA/cm2", "mA / cm^2", "mA/cm²", and the product forms "mA cm-2", "A.m-2".
+# Case-sensitive: a prefix is any one letter, checked below, and the metre must
+# be a lower-case m (M is mega).
 _AREAL_CURRENT_RE = re.compile(
-    r"^(?P<current>[kmunµ]?a)\s*"
-    r"(?:/\s*(?P<per>[cm]?m)\s*\^?\s*2|(?:\s+|\s*[.·*]\s*)(?P<times>[cm]?m)\s*\^?\s*-\s*2)$",
-    re.IGNORECASE,
+    r"^(?P<prefix>[^\W\d_]?)(?P<ampere>[Aa])\s*"
+    r"(?:/\s*(?P<per>[^\W\d_]?)m\s*\^?\s*2|(?:\s+|\s*[.·*]\s*)(?P<times>[^\W\d_]?)m\s*\^?\s*-\s*2)$"
 )
+
+
+def _check_prefix(prefix: str, letter: str, allowed: Any, unit: str) -> None:
+    """Refuse a prefix that is not listed for the unit, and an upper-case
+    prefix on a lower-case unit letter ("Ma": mega-ampere, or a mistyped mA?)."""
+    if letter.islower() and prefix != prefix.lower():
+        raise ExperimentSyntaxError(
+            f"Ambiguous unit '{unit}': write it in SI case, for example 'mA' for milliampere "
+            "or 'MA' for megaampere."
+        )
+    if prefix not in allowed:
+        known = ", ".join(repr(p) for p in sorted(allowed) if p) or "none"
+        raise ExperimentSyntaxError(
+            f"Unsupported prefix '{prefix}' in unit '{unit}' (prefixes read here: {known})."
+        )
 
 
 def _current_density_unit(unit: Any) -> tuple[str, Fraction] | None:
     """``(canonical symbol, factor to mA/cm2)`` when ``unit`` is a current per
-    area (``mA/cm2``, ``A/m2``, ``mA cm-2``, ...), otherwise ``None``."""
+    area (``mA/cm2``, ``A/m2``, ``mA cm-2``, ...), otherwise ``None``.
+
+    Raises :class:`ExperimentSyntaxError` for a current per area with a prefix
+    the grammar does not read, such as ``pA/cm2`` or ``mA/Mm2``."""
     if not isinstance(unit, str):
         return None
     text = unit.strip().replace("²", "2").replace("⁻", "-").replace("−", "-").replace("μ", "µ")
     match = _AREAL_CURRENT_RE.match(text)
     if not match:
         return None
-    current_symbol, current_factor = _CURRENT_PREFIX_MA[match.group("current").lower()]
-    area_symbol, area_factor = _AREA_CM2[(match.group("per") or match.group("times")).lower()]
-    return f"{current_symbol}/{area_symbol}", current_factor / area_factor
+    prefix, area = match.group("prefix"), match.group("per") or match.group("times") or ""
+    _check_prefix(prefix, match.group("ampere"), _SI_PREFIX, unit)
+    if area not in _AREA_CM2:
+        raise ExperimentSyntaxError(
+            f"Unsupported area unit '{area}m2' in '{unit}' (read here: m2, cm2, mm2)."
+        )
+    area_symbol, area_factor = _AREA_CM2[area]
+    # Factor to mA/cm2: the prefix factor in A, times 1000 mA per A, per area in cm2.
+    return f"{_CURRENT_SYMBOL[prefix]}/{area_symbol}", _SI_PREFIX[prefix] * 1000 / area_factor
+
+
+def _is_current_density_unit(unit: Any) -> bool:
+    """True when ``unit`` is a current per area the grammar reads. Never raises:
+    the emitters call it on stored records, where an unreadable unit is left as
+    written."""
+    try:
+        return _current_density_unit(unit) is not None
+    except ExperimentSyntaxError:
+        return False
 
 
 def _require_member(value: Any, allowed: tuple[str, ...], field: str) -> Any:
@@ -348,19 +390,36 @@ Step.model_rebuild()
 
 # ── Value parsing ───────────────────────────────────────────────────────────
 
-# unit token (lower-cased) -> (quantity-kind, canonical unit, scale-to-canonical)
-_UNIT_TABLE: dict[str, tuple[str, str, float]] = {
-    "a": ("current", "A", 1.0),
-    "ma": ("current", "A", 1e-3),
-    "c": ("c_rate", "A/Ah", 1.0),
-    "w": ("power", "W", 1.0),
-    "mw": ("power", "W", 1e-3),
-    "v": ("voltage", "V", 1.0),
-    "mv": ("voltage", "V", 1e-3),
-    "ohm": ("resistance", "Ohm", 1.0),
-    "ohms": ("resistance", "Ohm", 1.0),
-    "ω": ("resistance", "Ohm", 1.0),  # lowercased Ω (U+03A9 -> U+03C9) after .lower()
+# Units of the step grammar that take a prefix: unit letter (either case) ->
+# (quantity kind, canonical unit, prefixes read). The prefix itself is
+# case-sensitive (see _SI_PREFIX).
+_PREFIXED_UNITS: dict[str, tuple[str, str, frozenset[str]]] = {
+    "A": ("current", "A", frozenset(_SI_PREFIX)),
+    "W": ("power", "W", frozenset({"", "m"})),
+    "V": ("voltage", "V", frozenset({"", "m"})),
 }
+# Units read without a prefix: lower-cased token -> (quantity kind, canonical unit).
+_UNPREFIXED_UNITS: dict[str, tuple[str, str]] = {
+    "c": ("c_rate", "A/Ah"),
+    "ohm": ("resistance", "Ohm"),
+    "ohms": ("resistance", "Ohm"),
+    "ω": ("resistance", "Ohm"),  # lowercased Ω (U+03A9 -> U+03C9) after .lower()
+}
+
+
+def _unit_factor(unit: str, text: str) -> tuple[str, str, Fraction]:
+    """``(quantity kind, canonical unit, factor)`` for a unit token such as
+    ``mA``, ``MA``, ``V`` or ``Ohm``. Raises for an unknown unit or prefix."""
+    plain = _UNPREFIXED_UNITS.get(unit.lower())
+    if plain is not None:
+        return plain[0], plain[1], Fraction(1)
+    prefix, letter = unit[:-1].replace("μ", "µ"), unit[-1:]
+    base = _PREFIXED_UNITS.get(letter.upper())
+    if base is None:
+        raise ExperimentSyntaxError(f"Unknown unit '{unit}' in '{text}'.")
+    kind, canonical, allowed = base
+    _check_prefix(prefix, letter, allowed, unit)
+    return kind, canonical, _SI_PREFIX[prefix]
 
 _TIME_TABLE: dict[str, float] = {
     "s": 1.0,
@@ -378,7 +437,7 @@ _TIME_TABLE: dict[str, float] = {
 }
 
 _CRATE_DIV_RE = re.compile(r"^([cd])\s*/\s*([\d.]+)$", re.IGNORECASE)
-_NUM_UNIT_RE = re.compile(r"^([\d.]+)\s*([a-zΩω]+)$", re.IGNORECASE)
+_NUM_UNIT_RE = re.compile(r"^([\d.]+)\s*([a-zA-ZµμΩω]+)$")
 _NUM_ANY_UNIT_RE = re.compile(r"^([\d.]+)\s*(\S.*)$")
 _TIME_RE = re.compile(r"^([\d.]+)\s*([a-z]+)$", re.IGNORECASE)
 
@@ -398,6 +457,15 @@ def _to_float(token: str, text: str) -> float:
         raise ExperimentSyntaxError(f"Could not parse number '{token}' in '{text}'.") from None
 
 
+def _to_fraction(token: str, text: str) -> Fraction:
+    """A numeric token as an exact fraction, so unit factors add no float noise
+    (3 A/m2 is 0.3 mA/cm2, not 0.30000000000000004)."""
+    try:
+        return Fraction(token)
+    except ValueError:
+        raise ExperimentSyntaxError(f"Could not parse number '{token}' in '{text}'.") from None
+
+
 def _parse_current_density(token: str, text: str) -> Quantity | None:
     """``0.1 mA/cm2``, ``1 A/m2`` or ``0.1 mA cm-2`` -> a quantity in mA/cm2,
     or ``None`` when the token is not a current per area."""
@@ -405,12 +473,7 @@ def _parse_current_density(token: str, text: str) -> Quantity | None:
     unit = _current_density_unit(m.group(2)) if m else None
     if m is None or unit is None:
         return None
-    try:
-        number = Fraction(m.group(1))
-    except ValueError:
-        raise ExperimentSyntaxError(f"Could not parse number '{m.group(1)}' in '{text}'.") from None
-    # Exact arithmetic, so 3 A/m2 is 0.3 mA/cm2 and not 0.30000000000000004.
-    return Quantity(value=float(number * unit[1]), unit=_CURRENT_DENSITY_UNIT)
+    return Quantity(value=float(_to_fraction(m.group(1), text) * unit[1]), unit=_CURRENT_DENSITY_UNIT)
 
 
 def _parse_value(text: str) -> tuple[str, Quantity]:
@@ -418,7 +481,9 @@ def _parse_value(text: str) -> tuple[str, Quantity]:
     ``0.1 mA/cm2`` or ``4.1 V``.
 
     Returns ``(quantity_kind, Quantity)`` with the value normalised to the
-    canonical unit (A, V, W, Ohm; C-rate as A/Ah; current density as mA/cm2)."""
+    canonical unit (A, V, W, Ohm; C-rate as A/Ah; current density as mA/cm2).
+    Prefixes are case-sensitive: ``1 MA`` is a megaampere, ``1 mA`` a
+    milliampere, and a prefix the grammar does not read raises."""
     token = text.strip()
     div = _CRATE_DIV_RE.match(token)
     if div:
@@ -434,12 +499,8 @@ def _parse_value(text: str) -> tuple[str, Quantity]:
         raise ExperimentSyntaxError(
             f"Could not parse value '{text}'. Expected e.g. 'C/10', '1C', '200 mA', '0.1 mA/cm2', '4.1 V'."
         )
-    number = _to_float(m.group(1), text)
-    unit_key = m.group(2).lower()
-    if unit_key not in _UNIT_TABLE:
-        raise ExperimentSyntaxError(f"Unknown unit '{m.group(2)}' in '{text}'.")
-    kind, canon_unit, scale = _UNIT_TABLE[unit_key]
-    return kind, Quantity(value=number * scale, unit=canon_unit)
+    kind, canon_unit, factor = _unit_factor(m.group(2), text)
+    return kind, Quantity(value=float(_to_fraction(m.group(1), text) * factor), unit=canon_unit)
 
 
 def _parse_duration(text: str) -> Quantity:
@@ -598,8 +659,8 @@ _MAX_RENDERED_STEPS = 100_000
 
 def _fmt_number(value: float) -> str:
     """Up to 12 significant digits, never in exponent form (the grammar reads
-    no exponents). Twelve digits keep every real setpoint and drop the float
-    noise of unit scaling (9 mA parses to 0.009000000000000001 A)."""
+    no exponents). Twelve digits keep every real setpoint and drop float noise
+    from unit scaling elsewhere (an importer's 9 * 0.001 is 0.009000000000000001)."""
     text = format(value, ".12g")
     if "e" in text:
         text = format(Decimal(text), "f")
