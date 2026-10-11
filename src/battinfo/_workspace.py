@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from battinfo.local_workspace import LocalWorkspace
 
 from battinfo._jsonio import read_record_json as _load_json
-from battinfo._util import _as_path, _now_unix, _sha256
+from battinfo._util import _as_path, _now_unix, _sha256, workspace_layout_root
 from battinfo.api import (
     build_cell_spec_library_rdf,
     query_cell_instances,
@@ -46,7 +46,12 @@ from battinfo.bundle import (
     TestConformance,
     TestSpec,
 )
-from battinfo.entities import cell_instance_identity_seed, iri_namespace_map, stable_uid
+from battinfo.entities import (
+    cell_instance_identity_seed,
+    dataset_locator_seed,
+    iri_namespace_map,
+    stable_uid,
+)
 from battinfo.publication import DEFAULT_PUBLISH_FILENAME
 from battinfo.publication import publish as publish_bundle
 from battinfo.validate.record import validate_record_report
@@ -280,6 +285,9 @@ class Workspace:
         if clean and self.root.exists():
             shutil.rmtree(self.root)
         self.source_root = self.root / source_dir_name
+        # The folder a data file's path is taken relative to when it seeds a
+        # dataset IRI: the project folder of a battinfo.workspace(), else this root.
+        self.data_root = workspace_layout_root(self.source_root) or self.root
         self.index_path = self.root / index_name
         self.library_root = self.root / "library" / "cell-spec"
         self.package_root = self.root / "package" / "cell-spec"
@@ -2103,13 +2111,20 @@ class Workspace:
         if finalized.access_url is None and finalized.dataset_path is not None:
             finalized.access_url = _as_path(finalized.dataset_path).resolve().as_uri()
         if finalized.id is None:
+            # The local access_url stays on the record (the deposit preview reads it),
+            # but the seed takes a location-independent locator (dataset_locator_seed).
             finalized.id = _entity_iri(
                 "dataset",
                 "::".join(
                     [
                         _with_default(finalized.cell_instance_id, "unknown-cell"),
                         finalized.test_id or "",
-                        finalized.access_url or finalized.download_url or finalized.dataset_path or "",
+                        dataset_locator_seed(
+                            access_url=finalized.access_url,
+                            download_url=finalized.download_url,
+                            dataset_path=finalized.dataset_path,
+                            workspace_root=self.data_root,
+                        ),
                         _with_default(finalized.name, "dataset"),
                     ]
                 ),

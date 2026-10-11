@@ -81,6 +81,46 @@ def cell_instance_identity_seed(
     )
 
 
+def dataset_locator_seed(
+    *,
+    access_url: str | None = None,
+    download_url: str | None = None,
+    dataset_path: str | Path | None = None,
+    workspace_root: str | Path | None = None,
+) -> str:
+    """The location part of a dataset's identity seed, the same wherever the workspace sits.
+
+    Shared by every surface that mints a dataset IRI (the workspace finalizer
+    and the ``save_dataset`` builder). An explicit remote ``access_url`` or
+    ``download_url`` (``https://...`` or any other non-file URL) is used as
+    it is. A local data file, given as ``dataset_path`` or as a ``file:`` URL,
+    is named by its path relative to *workspace_root* in POSIX form when it
+    lies inside that folder, and by its file name otherwise. The absolute
+    path never enters the seed, so the same workspace built in another folder,
+    by a colleague or a CI job, mints the same dataset IRIs.
+
+    Returns ``""`` when the dataset names no location at all.
+    """
+    from battinfo._util import is_local_location, local_path, path_name  # noqa: PLC0415
+
+    for url in (access_url, download_url):
+        if isinstance(url, str) and url.strip() and not is_local_location(url):
+            return url.strip()
+    for candidate in (dataset_path, access_url, download_url):
+        path = local_path(candidate)
+        if path is None or not str(path).strip():
+            continue
+        if workspace_root is not None:
+            try:
+                relative = path.resolve().relative_to(Path(workspace_root).resolve())
+            except (OSError, ValueError):
+                relative = None
+            if relative is not None and relative.parts:
+                return relative.as_posix()
+        return path_name(path)
+    return ""
+
+
 def electrode_spec_identity_seed(
     *,
     producer: str | None,

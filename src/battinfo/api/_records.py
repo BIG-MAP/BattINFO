@@ -13,7 +13,7 @@ from typing import Any, Mapping, Sequence
 from battinfo._jsonio import read_record_json as _load_json
 from battinfo._jsonio import write_json as _write_json
 from battinfo._record_index import active_record_cache, bulk_save_session
-from battinfo._util import _as_path, _citation_url_value, _now_unix
+from battinfo._util import _as_path, _citation_url_value, _now_unix, workspace_layout_root
 from battinfo.api._index import build_index
 from battinfo.api._resolver import publish_record
 from battinfo.api._shared import (
@@ -66,6 +66,7 @@ from battinfo.bundle import (
     stamp_provenance,
 )
 from battinfo.entities import (
+    dataset_locator_seed,
     entity_types_for_namespace,
     iter_entity_files,
     save_entity_path,
@@ -1063,7 +1064,7 @@ def _seed_part(value: str | None, fallback: str = "") -> str:
     return text or fallback
 
 
-def _identity_minted_uid(entity_kind: str, entity: Any) -> str:
+def _identity_minted_uid(entity_kind: str, entity: Any, *, workspace_root: PathLike | None = None) -> str:
     """Mint a deterministic uid from the record's natural identity (3.3).
 
     Seeds mirror the ``Workspace._finalize_*`` minting exactly, so a record
@@ -1077,7 +1078,10 @@ def _identity_minted_uid(entity_kind: str, entity: Any) -> str:
     - cell:           cell_spec_id :: serial_number :: batch_id :: name
     - test-protocol:  test_kind :: name :: version
     - test:           cell_instance_id :: test_kind :: protocol name :: name
-    - dataset:        cell_instance_id :: test_id :: access/download/path :: name
+    - dataset:        cell_instance_id :: test_id :: locator :: name, where the
+      locator is the remote access/download URL, or a local data file's path
+      relative to *workspace_root* (its file name outside it); see
+      ``entities.dataset_locator_seed``
 
     A record with NO distinguishing identity at all (e.g. a cell instance with
     no serial, batch, or name) falls back to a random uid — two anonymous but
@@ -1136,7 +1140,12 @@ def _identity_minted_uid(entity_kind: str, entity: Any) -> str:
             ]
         )
     elif entity_kind == "dataset":
-        locator = entity.access_url or entity.download_url or entity.dataset_path or ""
+        locator = dataset_locator_seed(
+            access_url=entity.access_url,
+            download_url=entity.download_url,
+            dataset_path=entity.dataset_path,
+            workspace_root=workspace_root,
+        )
         if not (_seed_part(entity.name) or _seed_part(locator) or _seed_part(entity.test_id)):
             return _normalized_dashed_uid(None)
         seed = "::".join(
@@ -1206,7 +1215,11 @@ def _record_from_cell_instance(instance: Cell) -> dict[str, Any]:
     return finalized.to_record()
 
 
-def _record_from_dataset(dataset: Dataset) -> dict[str, Any]:
+def _record_from_dataset(dataset: Dataset, *, workspace_root: PathLike | None = None) -> dict[str, Any]:
+    """Finalize a Dataset into its canonical record, minting the id when absent.
+
+    *workspace_root* is the folder a local data file's path is taken relative
+    to in the identity seed (see ``entities.dataset_locator_seed``)."""
     if dataset.id is not None:
         if not DATASET_IRI_RE.fullmatch(dataset.id):
             raise ValueError("dataset id must match https://w3id.org/battinfo/dataset/{uid}.")
@@ -1215,7 +1228,7 @@ def _record_from_dataset(dataset: Dataset) -> dict[str, Any]:
         dashed = (
             _normalized_dashed_uid(dataset.uid)
             if dataset.uid is not None
-            else _identity_minted_uid("dataset", dataset)
+            else _identity_minted_uid("dataset", dataset, workspace_root=workspace_root)
         )
         entity_id = f"https://w3id.org/battinfo/dataset/{dashed}"
 
@@ -1652,7 +1665,9 @@ def save_dataset(
             stamp=stamp,
         )
     dataset = draft if isinstance(draft, DatasetBundle) else DatasetBundle(**dict(draft))
-    record = _record_from_dataset(dataset)
+    # Saved into a workspace's records folder, a local data file seeds the IRI by its
+    # path relative to that workspace, as ws.add("test", data=...) does.
+    record = _record_from_dataset(dataset, workspace_root=workspace_layout_root(source_root))
     return save_record(
         record,
         source_root=source_root,

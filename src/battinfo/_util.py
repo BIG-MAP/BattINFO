@@ -11,7 +11,8 @@ from __future__ import annotations
 import hashlib
 import re
 from datetime import datetime, timezone
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
+from urllib.parse import unquote, urlparse
 
 PathLike = str | Path
 
@@ -50,6 +51,66 @@ _DOI_LITERAL_RE = re.compile(r"^(10\.\d{4,9}/[-._;()/:A-Za-z0-9]+)$")
 
 def _as_path(path: PathLike) -> Path:
     return path if isinstance(path, Path) else Path(path)
+
+
+_WINDOWS_PATH_RE = re.compile(r"^[A-Za-z]:[\\/]")
+
+
+def is_local_location(value: object) -> bool:
+    """True when *value* names a place on the local file system, not on the network.
+
+    A ``file:`` URI, a Windows drive or UNC path, and a string with no URL
+    scheme at all (an absolute or relative path) are local. ``https://...``
+    and every other URL scheme are not.
+    """
+    if not isinstance(value, str):
+        return False
+    text = value.strip()
+    if not text:
+        return False
+    if _WINDOWS_PATH_RE.match(text) or text.startswith("\\\\"):
+        return True
+    return urlparse(text).scheme.lower() in ("", "file")
+
+
+def local_path(value: object) -> Path | None:
+    """The file-system path a local location names, or ``None`` for a remote URL.
+
+    Accepts a :class:`~pathlib.Path`, a ``file:`` URI or a plain path string.
+    """
+    if isinstance(value, Path):
+        return value
+    if not is_local_location(value):
+        return None
+    text = str(value).strip()
+    parsed = urlparse(text)
+    if parsed.scheme.lower() == "file":
+        path_text = unquote(parsed.path)
+        if parsed.netloc:
+            path_text = f"//{parsed.netloc}{path_text}"
+        if path_text.startswith("/") and len(path_text) > 2 and path_text[2] == ":":
+            path_text = path_text[1:]  # /C:/... -> C:/...
+        return Path(path_text)
+    return Path(text)
+
+
+def path_name(path: PathLike) -> str:
+    """The last component of *path*, split on ``/`` and ``\\`` alike so it is the same on every OS."""
+    return PureWindowsPath(str(path)).name
+
+
+def workspace_layout_root(records_root: PathLike) -> Path | None:
+    """The workspace folder that owns *records_root*, when it is a workspace records folder.
+
+    ``battinfo.workspace(root)`` keeps its records in ``<root>/.battinfo/records``
+    (``<root>/.battinfo/records/examples`` in a pre-0.8 workspace); for either
+    this returns ``<root>``. Any other folder returns ``None``.
+    """
+    path = _as_path(records_root)
+    for parent in (path.parent, path.parent.parent):
+        if parent.name == ".battinfo":
+            return parent.parent
+    return None
 
 
 def _now_iso() -> str:
