@@ -84,6 +84,8 @@ def _record_from_equipment_spec(
     uid: str | None = None,
     id: str | None = None,
     source_type: str = "datasheet",
+    source_name: str | None = None,
+    source_file: str | None = None,
     source_url: str | None = None,
     citation: str | None = None,
     retrieved_at: int | str | None = None,
@@ -127,12 +129,15 @@ def _record_from_equipment_spec(
     if comment is not None:
         spec["comment"] = comment
 
+    provenance: dict[str, Any] = {"source_type": source_type, "retrieved_at": _resolved_retrieved_at(retrieved_at)}
+    if source_name is not None:
+        provenance["source_name"] = source_name
+    if source_file is not None:
+        provenance["source_file"] = source_file
     record: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
         "equipment_spec": spec,
-        "provenance": stamp_provenance(
-            {"source_type": source_type, "retrieved_at": _resolved_retrieved_at(retrieved_at)}
-        ),
+        "provenance": stamp_provenance(provenance),
     }
     return _finish_record(record, source_url=source_url, citation=citation, notes=notes)
 

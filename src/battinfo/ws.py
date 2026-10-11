@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import builtins  # AuthoringWorkspace.list shadows the builtin in class-scope annotations
 import difflib
+import functools
 import json
 import os
 import re
@@ -1226,30 +1227,124 @@ def _clean_template_steps(raw: Any) -> builtins.list[str] | None:
     return steps or None
 
 
-# The keys each ws.load() draft loader reads. Anything else (keys starting with
-# "_" are comments) is refused rather than silently dropped, the way the record
-# models refuse an unknown field.
-_CELL_SPEC_DRAFT_KEYS = frozenset({
-    "manufacturer", "model", "format", "chemistry", "positive_electrode_basis",
-    "negative_electrode_basis", "size_code", "iec_code", "country_of_origin",
-    "cell_configuration", "reference_electrode", "rechargeable", "year",
-    "source_file", "citation", "properties", "name", "handle",
-})
-# Older draft spellings that are still read: alias -> current key.
-_CELL_SPEC_DRAFT_ALIASES = {"specs": "properties"}
-_TEST_SPEC_DRAFT_KEYS = frozenset({
-    "name", "type", "kind", "description", "instrument", "atmosphere", "steps",
-    "experiment", "cycles", "method", "conditions", "record", "safety", "artifacts",
-    "citation", "source_file", "id", "uid", "handle",
-})
+# The keys each ws.load() draft loader reads: the fields of the record model the
+# draft becomes, the spellings that model's constructor also takes, and a few
+# draft-only keys. A key with no home in the record (keys starting with "_" are
+# comments) is refused rather than silently dropped, the way the record models
+# refuse an unknown field.
+#
+# Model fields that are not draft keys: the class markers, and the cell spec's
+# link to a library specification, which the canonical cell-spec record does
+# not carry.
+_NOT_DRAFT_KEYS = frozenset({"kind", "schema_version", "cell_specification_id"})
+# Flat provenance keys -> the field of the record's nested `source` they fill (the
+# spellings every record model's constructor takes).
+_DRAFT_PROVENANCE_KEYS = {
+    "source_type": "type", "source_name": "name", "source_file": "file", "source_url": "url",
+    "citation": "citation", "file_hash": "file_hash", "retrieved_at": "retrieved_at",
+    "workflow_version": "workflow_version", "curated_by": "curated_by",
+}
+# Other spellings that are read: alias -> the key it stands for. `specs` is also
+# the cell-spec draft key used until June 2026.
+_CELL_SPEC_DRAFT_ALIASES = {"specs": "properties", "model_name": "model", "notes": "comment"}
+_TEST_SPEC_DRAFT_ALIASES = {"notes": "comment"}
+# The equipment-spec record has no model class; its fields are the keyword
+# arguments of create_equipment_spec().
 _EQUIPMENT_SPEC_DRAFT_KEYS = frozenset({
-    "name", "manufacturer", "model", "equipment_class", "channel_count",
-    "supported_chemistries", "product_id", "supplier", "comment", "source_url",
-    "citation", "property", "handle",
+    "name", "handle", "equipment_class", "model", "channel_count", "supported_chemistries",
+    "property", "manufacturer", "supplier", "product_id", "comment", "uid", "id",
+    "source_type", "source_name", "source_file", "source_url", "citation", "retrieved_at",
+    "notes",
 })
 # A SpecItem with any of these set carries a value; one with none is an unfilled
 # template placeholder.
 _QUANTITY_VALUE_KEYS = ("value", "min_value", "max_value", "typical_value", "value_text")
+
+
+@functools.cache
+def _cell_spec_draft_keys() -> frozenset[str]:
+    """Every CellSpec field a cell-spec draft can set, and the flat provenance keys."""
+    from battinfo.bundle import CellSpec  # noqa: PLC0415
+
+    return frozenset({*CellSpec.model_fields, *_DRAFT_PROVENANCE_KEYS} - _NOT_DRAFT_KEYS)
+
+
+@functools.cache
+def _test_spec_draft_keys() -> frozenset[str]:
+    """Every TestSpec field a test-spec draft can set, and the draft's own keys."""
+    from battinfo.bundle import TestSpec  # noqa: PLC0415
+
+    # The test type is `type` in the template and is also read as `kind`,
+    # `test_type` or `test_kind`; `steps` or `experiment` (with `cycles`) are
+    # PyBaMM-style strings parsed into the method; `instrument` and `atmosphere`
+    # are kept as notes; `protocol_url` is the URL of the protocol followed.
+    own_keys = {"type", "kind", "test_kind", "steps", "experiment", "cycles",
+                "instrument", "atmosphere", "protocol_url"}
+    return frozenset(({*TestSpec.model_fields, *_DRAFT_PROVENANCE_KEYS} - _NOT_DRAFT_KEYS) | own_keys)
+
+
+def _draft_text_list(value: Any) -> builtins.list[str]:
+    """A draft's comment or notes as a list of strings; one string is one note."""
+    if value is None:
+        return []
+    items = value if isinstance(value, (builtins.list, tuple)) else [value]
+    return [str(item) for item in items if item is not None and str(item).strip()]
+
+
+def _merge_draft_alias(fields: dict[str, Any], alias: str, key: str, path: Path) -> None:
+    """Read *alias* as *key*; the two given with different values raise."""
+    if alias not in fields:
+        return
+    value = fields.pop(alias)
+    if fields.get(key) not in (None, value):
+        raise ValueError(f"{path.name}: {alias!r} and {key!r} disagree; keep one. Nothing was loaded.")
+    fields[key] = value
+
+
+def _draft_source(fields: dict[str, Any], *, default_type: str, path: Path) -> dict[str, Any]:
+    """Pop a draft's provenance into the one ``source`` object the record model takes.
+
+    Reads a nested ``source`` object and the flat keys the templates write
+    (``source_file``, ``citation``, ``source_url``, ...); a value given both
+    ways must agree.
+    """
+    nested = fields.pop("source", None)
+    if nested is not None and not isinstance(nested, Mapping):
+        raise ValueError(
+            f"{path.name}: 'source' must be an object such as "
+            '{"type": "datasheet", "url": "https://..."}. Nothing was loaded.'
+        )
+    source = {key: value for key, value in (nested or {}).items() if value is not None}
+    for flat, key in _DRAFT_PROVENANCE_KEYS.items():
+        value = fields.pop(flat, None)
+        if value is None:
+            continue
+        if source.get(key) not in (None, value):
+            raise ValueError(f"{path.name}: {flat!r} and 'source.{key}' disagree; keep one. Nothing was loaded.")
+        source[key] = value
+    source.setdefault("type", default_type)
+    return source
+
+
+def _filled_quantities(quantities: Mapping[str, Any], path: Path) -> dict[str, Any]:
+    """The quantities a draft fills in, without the unfilled template placeholders.
+
+    A placeholder is null or an object with no value of any kind; a range or a
+    text value is a value. A value that is not a quantity object raises rather
+    than being dropped.
+    """
+    filled: dict[str, Any] = {}
+    for key, value in quantities.items():
+        if value is None:
+            continue
+        if not isinstance(value, Mapping):
+            raise ValueError(
+                f"{path.name}: property {key!r} must be a quantity object such as "
+                f'{{"value": 1.5, "unit": "V"}}, not {value!r}. Nothing was loaded.'
+            )
+        if any(value.get(field) is not None for field in _QUANTITY_VALUE_KEYS):
+            filled[key] = value
+    return filled
 
 
 # Registry resource type of each entity type a workspace can reference by IRI. The
@@ -1285,14 +1380,20 @@ def _check_draft_keys(
     draft: str,
     path: Path,
     aliases: Mapping[str, str] | None = None,
+    quiet: frozenset[str] = frozenset(),
 ) -> None:
-    """Raise ValueError for draft keys the loader does not read, with a did-you-mean."""
+    """Raise ValueError for draft keys the loader does not read, with a did-you-mean.
+
+    The *allowed* keys are listed in the message; *aliases* (alias -> the key it
+    stands for) and *quiet* keys are read too, but not listed.
+    """
     aliases = aliases or {}
     unknown = [key for key in raw
-               if not str(key).startswith("_") and key not in allowed and key not in aliases]
+               if not str(key).startswith("_") and key not in allowed and key not in aliases
+               and key not in quiet]
     if not unknown:
         return
-    candidates = sorted({*allowed, *aliases})
+    candidates = sorted({*allowed, *aliases, *quiet})
     parts = []
     for key in unknown:
         close = difflib.get_close_matches(str(key), candidates, n=1)
@@ -2637,9 +2738,13 @@ class AuthoringWorkspace:
 
         - A **draft file** (``.cell-spec.json`` / ``.test-spec.json`` /
           ``.equipment-spec.json``) is authored as a NEW record and published
-          when you save/submit. A key the draft type does not read raises
-          ``ValueError`` with a did-you-mean and the accepted keys, rather than
-          being dropped; keys starting with ``_`` are comments, and a cell-spec
+          when you save/submit. A draft reads every field of the record it
+          becomes (``CellSpec``, ``TestSpec``, or the arguments of
+          ``create_equipment_spec()``), the flat provenance keys
+          (``source_url``, ``citation``, ...) and the spellings those models
+          also take; a key with no home in the record raises ``ValueError``
+          with a did-you-mean and the accepted keys, rather than being
+          dropped. Keys starting with ``_`` are comments, and a cell-spec
           draft reads ``specs`` as the older spelling of ``properties``.
         - A **search result** (from :meth:`search`), or a **list** of results, is
           REFERENCED: brought into the session reusing the existing IRI and never
@@ -6898,44 +7003,49 @@ class AuthoringWorkspace:
         return entries
 
     def _load_from_file(self, path: Path) -> Any:
+        from battinfo.bundle import CELL_TYPE_AUTHORING_PROPERTY_FIELDS, CellSpec  # noqa: PLC0415
+
         raw = json.loads(path.read_text(encoding="utf-8"))
-        _check_draft_keys(raw, _CELL_SPEC_DRAFT_KEYS, draft="cell-spec", path=path,
-                          aliases=_CELL_SPEC_DRAFT_ALIASES)
+        flat_names = frozenset(CELL_TYPE_AUTHORING_PROPERTY_FIELDS)
+        _check_draft_keys(raw, _cell_spec_draft_keys(), draft="cell-spec", path=path,
+                          aliases=_CELL_SPEC_DRAFT_ALIASES, quiet=flat_names)
+        # A null is an unfilled template entry: the model default applies.
+        fields = {key: value for key, value in raw.items()
+                  if not str(key).startswith("_") and value is not None}
         # `specs` (the draft key until June 2026) is read as an alias of
-        # `properties`, merged the way CellSpec(specs=...) merges it: properties wins.
-        quantities = {**(raw.get("specs") or {}), **(raw.get("properties") or {})}
-        # Drop unfilled template placeholders (no value of any kind) so the schema
-        # stays valid; a range or a text value is a value.
-        specs = {
-            k: v for k, v in quantities.items()
-            if isinstance(v, dict) and any(v.get(field) is not None for field in _QUANTITY_VALUE_KEYS)
-        }
-        ct = self._ws.cell_spec(
-            manufacturer=raw["manufacturer"],
-            model=raw["model"],
-            format=raw["format"],
-            chemistry=raw["chemistry"],
-            positive_electrode_basis=raw.get("positive_electrode_basis"),
-            negative_electrode_basis=raw.get("negative_electrode_basis"),
-            size_code=raw.get("size_code"),
-            iec_code=raw.get("iec_code"),
-            country_of_origin=raw.get("country_of_origin"),
-            cell_configuration=raw.get("cell_configuration"),
-            reference_electrode=raw.get("reference_electrode"),
-            rechargeable=raw.get("rechargeable"),
-            year=raw.get("year"),
-            specs=specs or None,
-            source_type="datasheet",
-            source_file=raw.get("source_file"),
-            citation=raw.get("citation"),
-        )
-        if raw.get("handle"):
-            ct.handle = raw["handle"]
+        # `properties`, merged the way CellSpec(specs=...) merges it (properties
+        # wins), and a flat property name ("nominal_voltage": {...}) the way
+        # CellSpec(nominal_voltage=...) reads it (it wins over both).
+        flat = {key: fields.pop(key) for key in [key for key in fields if key in flat_names]}
+        quantities = {**(fields.pop("specs", None) or {}), **(fields.pop("properties", None) or {}), **flat}
+        fields["properties"] = _filled_quantities(quantities, path)
+        _merge_draft_alias(fields, "model_name", "model", path)
+        comment = [*_draft_text_list(fields.pop("comment", None)), *_draft_text_list(fields.pop("notes", None))]
+        if comment:
+            fields["comment"] = comment
+        fields["source"] = _draft_source(fields, default_type="datasheet", path=path)
+        # An explicit identity in the draft pins a published cell spec, so a
+        # corrected manufacturer, model, format or chemistry does not mint a new IRI.
+        pinned = _draft_spec_iri(fields.pop("id", None), fields.pop("uid", None), path.name)
+        if pinned is not None:
+            fields["id"] = pinned
+        missing = [key for key in ("manufacturer", "model", "format", "chemistry") if key not in fields]
+        if missing:
+            raise ValueError(
+                f"{path.name}: fill in {', '.join(missing)} before loading a cell-spec draft. "
+                "Nothing was loaded."
+            )
+        handle = fields.pop("handle", None)
+        name = fields.pop("name", None)
+        ct = CellSpec(**fields)
+        if handle:
+            ct.handle = handle
         # A draft's own title wins over the "<manufacturer> <model>" default. The
         # identity seed reads manufacturer and model, never the name, so a title
         # change does not move the IRI.
-        if isinstance(raw.get("name"), str) and raw["name"].strip():
-            ct.name = raw["name"].strip()
+        if isinstance(name, str) and name.strip():
+            ct.name = name.strip()
+        self._ws.cell_specs.append(ct)
         return ct
 
     def _load_from_result(self, result: dict) -> Any:
@@ -7331,7 +7441,7 @@ class AuthoringWorkspace:
         return cells
 
     def _load_test_spec(self, path: Path) -> Any:
-        from battinfo.bundle import BatteryTestType  # noqa: PLC0415
+        from battinfo.bundle import BatteryTestType, ProvenanceInfo  # noqa: PLC0415
 
         raw = json.loads(path.read_text(encoding="utf-8"))
         # Keys starting with "_" are in-file comments written by ws.template()
@@ -7347,10 +7457,17 @@ class AuthoringWorkspace:
                 '"termination" on a "method" step: {"quantity": "voltage", "value": 0.9, '
                 '"unit": "V", "direction": "below"}. Nothing was loaded.'
             )
-        _check_draft_keys(raw, _TEST_SPEC_DRAFT_KEYS, draft="test-spec", path=path)
+        _check_draft_keys(raw, _test_spec_draft_keys(), draft="test-spec", path=path,
+                          aliases=_TEST_SPEC_DRAFT_ALIASES)
 
         allowed_types = [t.value for t in BatteryTestType]
-        test_type = raw.get("type") or raw.get("kind") or ""
+        spellings = {key: raw[key] for key in ("type", "kind", "test_type", "test_kind") if raw.get(key)}
+        if len(set(spellings.values())) > 1:
+            raise ValueError(
+                f"{path.name}: {' and '.join(repr(key) for key in spellings)} name different "
+                "test types; keep one. Nothing was loaded."
+            )
+        test_type = next(iter(spellings.values()), "")
         if not test_type:
             raise ValueError(
                 f"{path.name}: fill in 'type' before loading. "
@@ -7365,15 +7482,43 @@ class AuthoringWorkspace:
         conditions, condition_notes = _clean_template_conditions(raw.get("conditions"))
         steps = _clean_template_steps(raw.get("experiment") or raw.get("steps"))
 
-        # Fields with no structured home on a test spec are preserved as notes
-        # rather than silently dropped (instrument belongs on the test run;
-        # atmosphere has no numeric quantity form).
-        notes: list[str] = []
+        # The protocol followed: the record keeps its URL (protocol_url) but has no
+        # field for its name, so a named protocol is kept as a note.
+        protocol = raw.get("protocol")
+        if protocol is not None and not isinstance(protocol, (str, Mapping)):
+            raise ValueError(
+                f"{path.name}: 'protocol' must be the protocol's name or an object with "
+                "'name' and 'url'. Nothing was loaded."
+            )
+        protocol_info = {"name": protocol} if isinstance(protocol, str) else dict(protocol or {})
+        unknown = sorted(set(protocol_info) - {"name", "url"})
+        if unknown:
+            raise ValueError(
+                f"{path.name}: 'protocol' takes 'name' and 'url', not "
+                f"{', '.join(map(repr, unknown))}. Nothing was loaded."
+            )
+        if raw.get("protocol_url") is not None:
+            if protocol_info.get("url") not in (None, raw["protocol_url"]):
+                raise ValueError(
+                    f"{path.name}: 'protocol_url' and 'protocol.url' disagree; keep one. "
+                    "Nothing was loaded."
+                )
+            protocol_info["url"] = raw["protocol_url"]
+
+        # The record's own comment (or notes) first. Fields with no structured home
+        # on a test spec are kept as notes rather than silently dropped (instrument
+        # belongs on the test run; atmosphere has no numeric quantity form).
+        notes = [*_draft_text_list(raw.get("comment")), *_draft_text_list(raw.get("notes"))]
         for label, value in (("instrument", raw.get("instrument")),
-                             ("atmosphere", raw.get("atmosphere"))):
+                             ("atmosphere", raw.get("atmosphere")),
+                             ("protocol", protocol_info.get("name"))):
             if isinstance(value, str) and value.strip():
                 notes.append(f"{label}: {value.strip()}")
         notes.extend(condition_notes)
+        source = ProvenanceInfo(**_draft_source(dict(raw), default_type="manual", path=path))
+        # An explicit identity in the draft pins a published test spec, so a
+        # corrected name does not mint a new IRI (the seed includes the name).
+        pinned = _draft_spec_iri(raw.get("id"), raw.get("uid"), path.name)
 
         # Forward the authored method so it survives into the saved record (and
         # thence the published JSON-LD as an EMMO process graph). Humans author the
@@ -7386,17 +7531,15 @@ class AuthoringWorkspace:
             experiment=steps,
             cycles=raw.get("cycles"),
             method=raw.get("method"),
+            version=raw.get("version"),
+            protocol_url=protocol_info.get("url"),
             conditions=conditions,
             record=raw.get("record"),
             safety=raw.get("safety"),
             artifacts=raw.get("artifacts"),
-            citation=raw.get("citation"),
-            source_file=raw.get("source_file"),
             comment=notes or None,
         )
-        # An explicit identity in the draft pins a published test spec, so a
-        # corrected name does not mint a new IRI (the seed includes the name).
-        pinned = _draft_spec_iri(raw.get("id"), raw.get("uid"), path.name)
+        tp.source = source
         if pinned is not None:
             tp.id = pinned
         if raw.get("handle"):
@@ -7408,7 +7551,8 @@ class AuthoringWorkspace:
 
         The uid is minted deterministically from the draft's natural key
         (manufacturer :: model :: name), so re-loading the same draft converges
-        on the same spec IRI instead of minting a duplicate.
+        on the same spec IRI instead of minting a duplicate. An ``id`` or
+        ``uid`` in the draft pins the IRI instead.
         """
         from battinfo.api import create_equipment_spec  # noqa: PLC0415
         from battinfo.entities import stable_uid  # noqa: PLC0415
@@ -7423,7 +7567,8 @@ class AuthoringWorkspace:
                 f"{path.name} needs at least a name (or manufacturer/model) - "
                 "fill in the template before loading it."
             )
-        uid = stable_uid("::".join(["equipment-spec", manufacturer or "", model or "", name]))
+        pinned = _draft_spec_iri(raw.get("id"), raw.get("uid"), path.name)
+        uid = None if pinned else stable_uid("::".join(["equipment-spec", manufacturer or "", model or "", name]))
         # Drop template placeholders (null quantity fields) so the record stays valid.
         props: dict[str, dict] = {}
         for key, value in (raw.get("property") or {}).items():
@@ -7435,6 +7580,7 @@ class AuthoringWorkspace:
         chemistries = [c for c in (raw.get("supported_chemistries") or []) if c]
         record = create_equipment_spec(
             uid=uid,
+            id=pinned,
             name=name or " ".join(p for p in (manufacturer, model) if p),
             handle=raw.get("handle") or None,
             equipment_class=raw.get("equipment_class"),
@@ -7446,9 +7592,13 @@ class AuthoringWorkspace:
             supplier=raw.get("supplier"),
             product_id=raw.get("product_id"),
             comment=raw.get("comment"),
-            source_type="datasheet",
+            source_type=raw.get("source_type") or "datasheet",
+            source_name=raw.get("source_name"),
+            source_file=raw.get("source_file"),
             source_url=raw.get("source_url"),
             citation=raw.get("citation"),
+            retrieved_at=raw.get("retrieved_at"),
+            notes=_draft_text_list(raw.get("notes")) or None,
         )
         body = record["equipment_spec"]
         print(f"  equipment-spec: {body['name']}  {body['id']}")
