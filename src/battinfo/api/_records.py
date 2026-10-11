@@ -1081,7 +1081,7 @@ def _identity_minted_uid(entity_kind: str, entity: Any, *, workspace_root: PathL
     - test:           cell_instance_id :: test_kind :: protocol name :: name
     - dataset:        cell_instance_id :: test_id :: locator :: name, where the
       locator is the remote access/download URL, or a local data file's path
-      relative to *workspace_root* (its file name outside it); see
+      relative to *workspace_root* (its folder and file name outside it); see
       ``entities.dataset_locator_seed``
 
     A record with NO distinguishing identity at all (e.g. a cell instance with

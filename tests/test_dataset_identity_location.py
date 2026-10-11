@@ -4,7 +4,7 @@ A dataset's identity seed used to include its access_url, which defaults to the
 absolute file:// URI of the data file, so the same workspace built in another
 folder minted new dataset IRIs. The seed now takes a location-independent
 locator: an explicit remote URL as before, otherwise the data file's path
-relative to the workspace root, otherwise its file name. The older
+relative to the workspace root, otherwise its folder and file name. The older
 publication-package path (publish_publication_package and
 Workspace.build_publication_package) seeded on the dataset folder's absolute
 URI the same way and now follows the same rule.
@@ -107,15 +107,18 @@ def test_save_dataset_into_a_workspace_agrees_with_the_workspace(tmp_path: Path)
     assert saved["id"] == ids["dataset"][0]
 
 
-def test_locator_takes_the_relative_path_or_the_file_name(tmp_path: Path) -> None:
+def test_locator_takes_the_relative_path_or_the_folder_and_name(tmp_path: Path) -> None:
     root = tmp_path / "ws"
     inside = root / "bdf" / "run 1" / "C1.bdf.csv"
     outside = tmp_path / "elsewhere" / "C1.bdf.csv"
 
     assert dataset_locator_seed(dataset_path=inside, workspace_root=root) == "bdf/run 1/C1.bdf.csv"
     assert dataset_locator_seed(access_url=inside.resolve().as_uri(), workspace_root=root) == "bdf/run 1/C1.bdf.csv"
-    assert dataset_locator_seed(dataset_path=outside, workspace_root=root) == "C1.bdf.csv"
-    assert dataset_locator_seed(access_url=outside.resolve().as_uri()) == "C1.bdf.csv"
+    assert dataset_locator_seed(dataset_path=outside, workspace_root=root) == "elsewhere/C1.bdf.csv"
+    assert dataset_locator_seed(access_url=outside.resolve().as_uri()) == "elsewhere/C1.bdf.csv"
+    assert dataset_locator_seed(dataset_path="C1.bdf.csv") == "C1.bdf.csv"
+    assert dataset_locator_seed(dataset_path=r"C:\ext\run1\data.csv") == "run1/data.csv"
+    assert dataset_locator_seed(dataset_path="/ext/run1/data.csv") == "run1/data.csv"
     # An explicit remote URL wins over a local path, access_url before download_url.
     assert dataset_locator_seed(access_url=URL, dataset_path=inside, workspace_root=root) == URL
     assert dataset_locator_seed(
@@ -141,8 +144,10 @@ def _publish_package(parent: Path, **dataset_fields: str) -> dict:
 
 
 def test_publication_package_dataset_iri_does_not_depend_on_the_folder(tmp_path: Path) -> None:
-    here = _publish_package(tmp_path / "X")
-    there = _publish_package(tmp_path / "somewhere" / "else" / "Y")
+    """The same project folder, here and somewhere else: the dataset folder is named by
+    its own name and its parent's (project/run-1), never by the absolute path."""
+    here = _publish_package(tmp_path / "X" / "project")
+    there = _publish_package(tmp_path / "somewhere" / "else" / "project")
     assert here["dataset_id"] == there["dataset_id"]
     assert (here["cell_instance_id"], here["test_id"]) == (there["cell_instance_id"], there["test_id"])
 
@@ -173,3 +178,75 @@ def test_workspace_publication_package_dataset_iri_does_not_depend_on_the_folder
         return engine.build_publication_package(dataset)["dataset_id"]
 
     assert build(tmp_path / "X") == build(tmp_path / "somewhere" / "else" / "Y")
+
+
+# ── Files outside the workspace, relative paths, and colliding records ────────
+
+
+def _save_outside(tmp_path: Path, folder: str) -> dict:
+    data = tmp_path / "ext" / folder / "data.csv"
+    data.parent.mkdir(parents=True, exist_ok=True)
+    data.write_text(CSV, encoding="utf-8")
+    return battinfo.save_dataset(
+        battinfo.Dataset(name="data", path=str(data), access_url=data.resolve().as_uri(), cell_instance_id="https://w3id.org/battinfo/cell/2435-kc9w-g9q0-1xsm",
+                         test_id="https://w3id.org/battinfo/test/y4gj-dvk5-e8x4-3y3t", license="cc-by-4.0",
+                         source={"type": "measurement"}),
+        source_root=tmp_path / "records", resolve_references=False, build_jsonld=False, build_html=False,
+    )
+
+
+def test_one_file_name_in_two_outside_folders_mints_two_iris(tmp_path: Path) -> None:
+    """/ext/run1/data.csv and /ext/run2/data.csv with one title: two datasets, not one."""
+    first = _save_outside(tmp_path, "run1")
+    second = _save_outside(tmp_path, "run2")
+    assert first["status"] == second["status"] == "created"
+    assert first["id"] != second["id"]
+
+
+def test_relative_paths_are_read_against_the_workspace_root(tmp_path: Path, monkeypatch) -> None:
+    root = tmp_path / "ws"
+    (root / "notebooks").mkdir(parents=True)
+    for cwd in (root, root / "notebooks", tmp_path):
+        monkeypatch.chdir(cwd)
+        assert dataset_locator_seed(dataset_path="data/C01.csv", workspace_root=root) == "data/C01.csv"
+        assert dataset_locator_seed(dataset_path=Path("data") / "C01.csv", workspace_root=root) == "data/C01.csv"
+
+
+def test_save_dataset_with_a_relative_path_mints_one_iri_from_any_directory(tmp_path: Path, monkeypatch) -> None:
+    root = tmp_path / "ws"
+    (root / "notebooks").mkdir(parents=True)
+    ids = []
+    for cwd in (root, root / "notebooks"):
+        monkeypatch.chdir(cwd)
+        saved = battinfo.save_dataset(
+            # access_url as a naive caller derives it, from the current directory; the
+            # IRI must not follow it.
+            battinfo.Dataset(name="C01 data", path="data/C01.csv", license="cc-by-4.0",
+                             access_url=Path("data/C01.csv").resolve().as_uri(),
+                             cell_instance_id="https://w3id.org/battinfo/cell/2435-kc9w-g9q0-1xsm",
+                             source={"type": "measurement"}),
+            source_root=root / ".battinfo" / "records", mode="upsert", validate=False,
+            resolve_references=False, build_jsonld=False, build_html=False,
+        )
+        ids.append(saved["id"])
+    assert ids[0] == ids[1]
+
+
+def test_colliding_datasets_are_re_minted_the_same_in_any_folder(tmp_path: Path) -> None:
+    """Two datasets on one file and title collide; the content-seeded re-mint that keeps
+    them apart names the file by its locator, so it does not move with the folder."""
+    def build(root: Path) -> list[str]:
+        engine = Workspace(root=root)
+        data = root / "bdf" / "C1.bdf.csv"
+        data.parent.mkdir(parents=True, exist_ok=True)
+        data.write_text(CSV, encoding="utf-8")
+        spec = engine.cell_spec(**SPEC)
+        cell = engine.cell(spec, serial_number="C1")
+        test = engine.test(cell, kind="capacity_check", protocol="C/5 discharge", status="completed")
+        for description in ("first pass", "second pass"):
+            engine.dataset(cell, title="C1 data", test=test, path=data, description=description)
+        return [dataset.id for dataset in engine._finalize()["datasets"]]
+
+    here = build(tmp_path / "X")
+    assert len(set(here)) == 2
+    assert here == build(tmp_path / "somewhere" / "else" / "Y")

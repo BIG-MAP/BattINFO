@@ -106,30 +106,35 @@ def dataset_locator_seed(
     remote ``access_url`` or ``download_url`` (``https://...`` or any other
     non-file URL) is used as it is. A local data file or folder, given as
     ``dataset_path`` or as a ``file:`` URL, is named by its path relative to
-    *workspace_root* in POSIX form when it lies inside that folder, and by its
-    name otherwise. The absolute path never enters the seed, so the same
-    workspace built in another folder, by a colleague or a CI job, mints the
-    same dataset IRIs.
+    *workspace_root* in POSIX form when it lies inside that folder; a relative
+    path is read against *workspace_root*, never against the current
+    directory. Outside the workspace, or with no workspace root, it is named
+    by its folder and its name (``run1/data.csv``), so two files with one name
+    in different folders do not share an IRI. The absolute path never enters
+    the seed, so the same workspace built in another folder, by a colleague or
+    a CI job, mints the same dataset IRIs.
 
     Returns ``""`` when the dataset names no location at all.
     """
-    from battinfo._util import is_local_location, local_path, path_name  # noqa: PLC0415
+    from battinfo._util import is_local_location, local_path, path_tail  # noqa: PLC0415
 
     for url in (access_url, download_url):
         if isinstance(url, str) and url.strip() and not is_local_location(url):
             return url.strip()
+    root = Path(workspace_root).resolve() if workspace_root is not None else None
     for candidate in (dataset_path, access_url, download_url):
         path = local_path(candidate)
         if path is None or not str(path).strip():
             continue
-        if workspace_root is not None:
+        if root is not None:
+            absolute = path if path.is_absolute() else root / path
             try:
-                relative = path.resolve().relative_to(Path(workspace_root).resolve())
+                relative = absolute.resolve().relative_to(root)
             except (OSError, ValueError):
                 relative = None
             if relative is not None and relative.parts:
                 return relative.as_posix()
-        return path_name(path)
+        return path_tail(path)
     return ""
 
 

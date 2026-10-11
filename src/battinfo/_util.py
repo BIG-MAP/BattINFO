@@ -144,6 +144,16 @@ def path_name(path: PathLike) -> str:
     return PureWindowsPath(str(path)).name
 
 
+def path_tail(path: PathLike) -> str:
+    """The folder and name of *path* (``run1/data.csv``), in POSIX form on every OS.
+
+    Just the name when the path has no named parent (``data.csv``, ``C:\\data.csv``).
+    """
+    pure = PureWindowsPath(str(path))
+    parent = pure.parent.name
+    return f"{parent}/{pure.name}" if parent not in ("", ".", "..") else pure.name
+
+
 def workspace_layout_root(records_root: PathLike) -> Path | None:
     """The workspace folder that owns *records_root*, when it is a workspace records folder.
 

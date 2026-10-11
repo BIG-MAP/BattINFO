@@ -12,7 +12,14 @@ if TYPE_CHECKING:
     from battinfo.local_workspace import LocalWorkspace
 
 from battinfo._jsonio import read_record_json as _load_json
-from battinfo._util import _as_path, _now_unix, _sha256, workspace_layout_root
+from battinfo._util import (
+    LOCATION_FIELDS,
+    _as_path,
+    _now_unix,
+    _sha256,
+    is_local_location,
+    workspace_layout_root,
+)
 from battinfo.api import (
     build_cell_spec_library_rdf,
     query_cell_instances,
@@ -154,14 +161,39 @@ def _strip_volatile(value: Any) -> Any:
     return value
 
 
-def _content_seed(entity: Any) -> str:
+# Fields that can name a local file. In a content seed a local value enters as its
+# location-independent locator (dataset_locator_seed), never as the absolute path,
+# so a re-minted IRI does not change when the workspace folder moves.
+_LOCATION_SEED_KEYS = frozenset({*LOCATION_FIELDS, "dataset_path", "path", "url", "file"})
+
+
+def _seed_view(value: Any, workspace_root: Path | None) -> Any:
+    """*value* without volatile fields, with each local file location as its locator."""
+    if isinstance(value, dict):
+        view: dict[str, Any] = {}
+        for key, item in value.items():
+            if key in _VOLATILE_SEED_KEYS:
+                continue
+            if key in _LOCATION_SEED_KEYS and isinstance(item, str) and is_local_location(item):
+                item = dataset_locator_seed(dataset_path=item, workspace_root=workspace_root)
+            view[key] = _seed_view(item, workspace_root)
+        return view
+    if isinstance(value, list):
+        return [_seed_view(item, workspace_root) for item in value]
+    return value
+
+
+def _content_seed(entity: Any, *, workspace_root: Path | None = None) -> str:
     """A stable, order-independent seed from an entity's distinguishing content
-    (its canonical record minus the IRI and volatile timestamps)."""
+    (its canonical record minus the IRI and volatile timestamps, with local file
+    locations as their workspace-relative locators)."""
     data = entity.model_dump(mode="json", exclude_none=True)
-    return json.dumps(_strip_volatile(data), sort_keys=True, ensure_ascii=False)
+    return json.dumps(_seed_view(data, workspace_root), sort_keys=True, ensure_ascii=False)
 
 
-def _disambiguate_entity_ids(entities: Sequence[Any], entity_type: str) -> None:
+def _disambiguate_entity_ids(
+    entities: Sequence[Any], entity_type: str, *, workspace_root: Path | None = None
+) -> None:
     """Ensure auto-minted IRIs are unique across distinct authored entities.
 
     Deterministic IRIs are seeded from a record's identity fields, so two
@@ -182,6 +214,8 @@ def _disambiguate_entity_ids(entities: Sequence[Any], entity_type: str) -> None:
     Note: adding an identity-colliding sibling later re-mints a previously-unique record
     to a content-seeded IRI — the deliberate cost of order-independence. This loses no
     data within a workspace, since save() stages-then-swaps the full finalized set.
+    The content seed names a local data file by its locator relative to
+    *workspace_root* (see ``entities.dataset_locator_seed``), not its absolute path.
     """
     by_id: dict[str, list[Any]] = {}
     for entity in entities:
@@ -197,7 +231,9 @@ def _disambiguate_entity_ids(entities: Sequence[Any], entity_type: str) -> None:
         group = by_id.get(current)
         if group is not None and len(group) > 1:
             # Distinct entities sharing an IRI: re-seed from content (order-independent).
-            current = _entity_iri(entity_type, f"{current}::{_content_seed(entity)}")
+            current = _entity_iri(
+                entity_type, f"{current}::{_content_seed(entity, workspace_root=workspace_root)}"
+            )
         if current in seen:
             # Genuine full-content duplicate — keep both with a stable ordinal suffix.
             ordinal = 1
@@ -1800,27 +1836,27 @@ class Workspace:
         # share identity fields must not overwrite each other on save, and each cell must
         # link to its own spec (cell_spec_map holds the same objects, so in-place
         # re-minting propagates into _finalize_cell's cell_spec_id lookup below).
-        _disambiguate_entity_ids(finalized_cell_specs, "cell-spec")
+        _disambiguate_entity_ids(finalized_cell_specs, "cell-spec", workspace_root=self.data_root)
 
         finalized_cells = [self._finalize_cell(item, cell_spec_map) for item in self.cells]
         cell_map = {id(original): finalized for original, finalized in zip(self.cells, finalized_cells, strict=True)}
         # Break IRI collisions before datasets link to these ids (cell_map holds
         # the same objects, so in-place re-minting propagates to dataset linking).
-        _disambiguate_entity_ids(finalized_cells, "cell")
+        _disambiguate_entity_ids(finalized_cells, "cell", workspace_root=self.data_root)
 
         finalized_test_specs = [self._finalize_test_spec(item) for item in self.test_specs]
         test_spec_map = {
             id(original): finalized for original, finalized in zip(self.test_specs, finalized_test_specs, strict=True)
         }
         # Break test-spec IRI collisions before tests link to them via conformsTo.
-        _disambiguate_entity_ids(finalized_test_specs, "test-protocol")
+        _disambiguate_entity_ids(finalized_test_specs, "test-protocol", workspace_root=self.data_root)
 
         finalized_tests = [self._finalize_test(item, cell_map, test_spec_map) for item in self.tests]
         test_map = {id(original): finalized for original, finalized in zip(self.tests, finalized_tests, strict=True)}
-        _disambiguate_entity_ids(finalized_tests, "test")
+        _disambiguate_entity_ids(finalized_tests, "test", workspace_root=self.data_root)
 
         finalized_datasets = [self._finalize_dataset(item, cell_map, test_map) for item in self.datasets]
-        _disambiguate_entity_ids(finalized_datasets, "dataset")
+        _disambiguate_entity_ids(finalized_datasets, "dataset", workspace_root=self.data_root)
 
         dataset_ids_by_cell: dict[str, list[str]] = {}
         for dataset in finalized_datasets:
