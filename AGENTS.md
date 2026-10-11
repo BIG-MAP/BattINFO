@@ -111,7 +111,7 @@ The CLI also has a folder-based batch path (`battinfo push`, `battinfo batch ...
 
 ## Dataset collections
 
-A collection is not a separate kind. It is a `dataset` record with `additional_type=["DatasetSeries"]` (a DCAT 3 dataset series), and each member sets `series_id` to the collection's IRI. Code tests for one with `is_dataset_series()` in `src/battinfo/_util.py`. The collection IRI is seeded from its `access_url` and `name`, so both are frozen once published, and the collection has to be saved before its members. `ws.add("test", data=...)` cannot set `series_id`, so members are written with `battinfo.Dataset` and `battinfo.save_dataset`. The worked example is `docs/howto/publish-a-dataset-collection.md`.
+A collection is not a separate kind. It is a `dataset` record with `additional_type=["DatasetSeries"]` (a DCAT 3 dataset series), and each member sets `series_id` to the collection's IRI. Code tests for one with `is_dataset_series()` in `src/battinfo/_util.py`. The collection IRI is seeded from its `access_url` and `name`, so both are frozen once published, and the collection has to be saved before its members. The collection itself, and members that describe files archived elsewhere, are written with `battinfo.Dataset` and `battinfo.save_dataset`. Members made from local data files can come from `ws.add("test", data=..., series_id=...)`, which sets `series_id` on every dataset it creates. Membership is not identity, so `series_id` stays out of every IRI seed. The worked example is `docs/howto/publish-a-dataset-collection.md`.
 
 ## Where IRIs come from
 
