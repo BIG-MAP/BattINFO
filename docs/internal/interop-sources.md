@@ -14,7 +14,7 @@ specifically, see [converter-compatibility.md](converter-compatibility.md).)
 | **Discovery-Benchmark** (`.eln` RO-Crate) | `import_discovery_eln` | material-spec → electrode-spec → cell-spec → instance → test → dataset (+ electrolyte-spec) | `tests/fixtures/interop/discovery/ro-crate-metadata.sample.json` |
 | **Discovery-Benchmark** (`.xlsx`) | `import_discovery_xlsx` | material-spec + electrolyte-spec + cell-spec → instance → test | `tests/fixtures/interop/discovery/discovery-benchmark.sample.xlsx` |
 | **Battery Data Commons** (registry JSON) | `batch_import_bdc` / `import_bdc_record`; `to_bdc_record` (export) | dataset + cell-spec → instance + material-spec ×N + test per measurement | `tests/fixtures/interop/bdc/canonical/datasets/*` |
-| **BPX** (Battery Parameter eXchange) | `from_bpx` / `to_bpx` / `save_bpx` | cell-spec ⇄ BPX | `examples/cell-spec/A123__ANR26650M1-B.json` |
+| **BPX** (Battery Parameter eXchange) | `from_bpx_parameters(...).to_parameter_set(...)`, `to_bpx(record)`; `from_bpx` / `to_bpx(cell_spec)` / `save_bpx` | one BPX file ⇄ one parameter-set record (claims by part, file attached); cell-spec → Partial BPX | `tests/fixtures/interop/bpx-dfn-full.bpx.json`, `examples/parameter-set/` (five BPX examples), `examples/cell-spec/A123__ANR26650M1-B.json` |
 | **battdat / BDF** (timeseries CSV) | `from_battdat` | test + dataset | synthetic in `test_ingest.py` |
 | **Cycler protocols** | `import_aurora_unicycler`, `import_pybamm_experiment`, `import_bmgen_jsonld` | test-spec (structured method) | inline in `test_protocol_importers.py` |
 

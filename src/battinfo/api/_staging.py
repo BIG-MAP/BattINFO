@@ -121,7 +121,7 @@ def _staging_cell_spec_input(
         manufacturer = manufacturer_obj.get("name") if isinstance(manufacturer_obj, Mapping) else manufacturer_obj
         return (
             CellSpec(
-                schema_version=str(record_payload.get("schema_version") or "0.1.0"),
+                schema_version=str(record_payload.get("schema_version") or SCHEMA_VERSION),
                 id=product.get("id") if isinstance(product.get("id"), str) else None,
                 uid=uid,
                 model_name=str(product.get("model") or product.get("model_name") or ""),

@@ -25,7 +25,7 @@ Each page also carries a shelf of common, real examples — the docs' reasonable
 | [Tests](tests.md) | The protocol · The execution |
 | [Datasets](datasets.md) | A member dataset · The collection (dataset series) |
 | [Equipment](equipment.md) | An equipment spec (the product) · An equipment unit · A channel on that unit |
-| [Parameter sets](parameter-sets.md) | A claim batch from the literature |
+| [Parameter sets](parameter-sets.md) | A claim batch from the literature · One BPX file as one record |
 | [Organizations](organizations.md) | A manufacturer |
 
 Coverage accounting (every schema property exercised by a reference example, or waived with a reason) arrives with the next expansion of this chapter.

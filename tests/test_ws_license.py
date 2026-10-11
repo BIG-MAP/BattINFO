@@ -143,6 +143,66 @@ def test_preview_bundle_carries_workspace_license(tmp_path: Path) -> None:
     assert catalog.get("dcterms:license") or catalog.get("schema:license")
 
 
+# ── Deposit graph: a member dataset states its licence as an IRI ───────────────
+
+_MEMBER_IRI = "https://w3id.org/battinfo/dataset/aaaa-bbbb-cccc-0001"
+
+
+def _member_node(record_license: str | None, catalog_license: str = "") -> dict:
+    body: dict = {"id": _MEMBER_IRI, "name": "d1"}
+    if record_license is not None:
+        body["license"] = record_license
+    doc = AuthoringWorkspace._assemble_zenodo_jsonld(
+        {"dataset": [{"dataset": body}]},
+        zenodo_record_id=0,
+        prereserved_doi="",
+        record_url="https://zenodo.org/records/1",
+        data_filenames=[],
+        license=catalog_license,
+    )
+    return next(node for node in doc["@graph"] if node.get("@id") == _MEMBER_IRI)
+
+
+@pytest.mark.parametrize(("record_license", "iri"), [
+    ("cc-by-4.0", "https://spdx.org/licenses/CC-BY-4.0.html"),
+    ("odbl-1.0", "https://spdx.org/licenses/ODbL-1.0.html"),
+    ("https://creativecommons.org/licenses/by/4.0/", "https://creativecommons.org/licenses/by/4.0/"),
+])
+def test_deposit_member_states_its_license_as_an_iri(record_license: str, iri: str) -> None:
+    """A dataset's own licence was copied into its member node as given, so an
+    SPDX id came out as a bare string. It is now the SPDX page, spelled the way
+    SPDX spells it (the lower-case path is a 404), and a URL is kept as it is."""
+    member = _member_node(record_license)
+    assert member["schema:license"] == {"@id": iri}
+    assert member["dcterms:license"] == {"@id": iri}
+
+
+def test_deposit_member_without_a_license_states_none() -> None:
+    member = _member_node(None)
+    assert "schema:license" not in member
+    assert "dcterms:license" not in member
+    # A member with no licence of its own takes the catalog's.
+    member = _member_node(None, catalog_license="cc-by-4.0")
+    expected = {"@id": "https://spdx.org/licenses/CC-BY-4.0.html"}
+    assert member["schema:license"] == expected
+    assert member["dcterms:license"] == expected
+
+
+def test_preview_members_state_the_workspace_license_as_an_iri(tmp_path: Path) -> None:
+    ws = _ws_with_cell(tmp_path)
+    ws.add("test", type="capacity_check", cell="SN-1", data="f.csv")
+    ws.license("cc-by-4.0")
+    ws.save()
+    out = ws.preview_jsonld(output=tmp_path / "preview.jsonld")
+    graph = json.loads(Path(out).read_text(encoding="utf-8"))["@graph"]
+    catalog = next(n for n in graph if "dcat:Catalog" in (n.get("@type") or []))
+    members = [n for n in graph if "dcat:Dataset" in (n.get("@type") or [])]
+    assert members
+    for member in members:
+        assert member["schema:license"] == catalog["schema:license"]
+        assert member["dcterms:license"] == catalog["dcterms:license"]
+
+
 class _StubZenodoClient:
     """Offline stand-in: returns a minimal deposit so the flow reaches the
     JSON-LD builder without touching the network."""
@@ -238,3 +298,43 @@ def test_present_license_produces_no_nudge(tmp_path: Path) -> None:
     )
     report = validate_publication_report(jsonld, policy="publisher")
     assert not [i for i in report.issues if i.code == "publication.license_missing"]
+
+
+def test_deposit_member_keeps_an_unknown_license_as_text() -> None:
+    """An id that is neither a URL nor a known SPDX id stays a literal: a guessed
+    spdx.org link would resolve to nothing."""
+    member = _member_node("lab-internal-terms")
+    assert member["schema:license"] == "lab-internal-terms"
+    assert member["dcterms:license"] == "lab-internal-terms"
+
+
+def test_every_accepted_license_id_has_its_spdx_page() -> None:
+    """ws.license() accepts these ids; each must map to the SPDX page in SPDX's
+    own spelling, so no emitter builds a lower-case link."""
+    from battinfo.jsonld import _LICENSE_SLUG_IRIS
+    from battinfo.ws import _KNOWN_LICENSES
+
+    assert set(_KNOWN_LICENSES) <= set(_LICENSE_SLUG_IRIS)
+    for slug, iri in _LICENSE_SLUG_IRIS.items():
+        assert iri.startswith("https://spdx.org/licenses/") and iri.endswith(".html")
+        assert iri != f"https://spdx.org/licenses/{slug}.html", slug
+
+
+@pytest.mark.parametrize(("stored", "emitted"), [
+    # The lower-case pages earlier versions wrote, all 404s on spdx.org.
+    ("https://spdx.org/licenses/cc-by-4.0.html", "https://spdx.org/licenses/CC-BY-4.0.html"),
+    ("https://spdx.org/licenses/odbl-1.0.html", "https://spdx.org/licenses/ODbL-1.0.html"),
+    ("https://spdx.org/licenses/gpl-3.0.html", "https://spdx.org/licenses/GPL-3.0-only.html"),
+    # Already in SPDX's spelling, an spdx.org page the table does not know, and
+    # any other licence URL: kept as given.
+    ("https://spdx.org/licenses/CC-BY-4.0.html", "https://spdx.org/licenses/CC-BY-4.0.html"),
+    ("https://spdx.org/licenses/GPL-3.0.html", "https://spdx.org/licenses/GPL-3.0.html"),
+    ("https://spdx.org/licenses/Lab-Terms-1.0.html", "https://spdx.org/licenses/Lab-Terms-1.0.html"),
+    ("https://creativecommons.org/licenses/by/4.0/", "https://creativecommons.org/licenses/by/4.0/"),
+])
+def test_a_stored_spdx_link_is_emitted_in_spdx_spelling(stored: str, emitted: str) -> None:
+    from battinfo.jsonld import license_node
+
+    assert license_node(stored) == {"@id": emitted}
+    member = _member_node(stored)
+    assert member["schema:license"] == member["dcterms:license"] == {"@id": emitted}

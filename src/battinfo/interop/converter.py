@@ -423,7 +423,7 @@ def import_converter_jsonld_record(
         warnings=warnings,
     )
 
-    result_specification = CellSpec.from_library_record(record)
+    result_specification = CellSpec.from_library_record(record, schema_version=schema_version)
     if validate:
         # Match the other interop importers: schema-validate the emitted cell-spec so a malformed
         # import fails loudly here, not silently downstream. `to_record()` is the canonical

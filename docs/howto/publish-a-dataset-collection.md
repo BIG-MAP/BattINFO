@@ -179,6 +179,18 @@ result = ws.zenodo(
 
 The registry route refuses any record that still points at a file on your computer: a `file:///` or plain path in an access URL, a distribution's content URL, a download URL or `provenance.source_url`, or an absolute path in a `source_file` or an artifact `locator`. The registry would publish that path as the download link, and nobody else can follow it. `ws.submit()` lists each such record and field and sends nothing. The members in this example already point at Zenodo, so they pass. For datasets made from local files, run `ws.zenodo()` first: it uploads the files and points each record at its deposited copy, and `ws.submit()` then sends https URLs. Only for a local test registry, `ws.submit(allow_local_files=True)` lifts the check.
 
-## Limits today
+## Members from local data files
 
-`ws.add("test", data=...)` creates a dataset for each local data file, but it has no way to set `series_id`. Collections of local files therefore need the member datasets written with `Dataset` and `save_dataset` as above, with `file://` URLs in their distributions. `ws.zenodo()` uploads those files with the deposit and points each distribution at its copy there, which `ws.preview_jsonld()` already shows.
+The members above describe files that are already archived. When a member's data file is on your disk, the workspace can write the dataset for you: `ws.add("test", data=...)` makes one dataset per data file, and `series_id=` puts each of them in the collection. Here a fourth cell, C04, was measured later in your own lab:
+
+```python
+ws.add("cell", spec=spec, serial_numbers=["C04"])
+# Stands in for the converted file you already have.
+Path("ocv-study", "C04.bdf.csv").write_text(
+    "test_time_second,voltage_volt\n0,0.81\n3600,0.12\n", encoding="utf-8"
+)
+ws.add("test", type="cycling", cell="C04", data="C04.bdf.csv", series_id=collection_iri)
+ws.save()
+```
+
+`series_id` takes the collection's IRI and nothing else. A value that is not a `https://w3id.org/battinfo/dataset/...` IRI is refused before any record is created, and so is `series_id` without `data=`. Membership is not part of a record's identity, so adding or dropping `series_id` never moves the IRI of the test or its datasets. The collection itself is still saved with `Dataset` and `save_dataset`, before its members, as in step 2. `ws.zenodo()` uploads the data file with the deposit and points the dataset's distribution at its copy there.

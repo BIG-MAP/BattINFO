@@ -1,14 +1,24 @@
-"""Import battery parameters from a BPX file into BattINFO cell-spec specs.
+"""BPX files in and out of BattINFO.
 
 BPX (Battery Parameter eXchange) is a JSON format developed by the PyBaMM
-project for sharing battery physics parameters.  This module extracts the
-subset of BPX parameters that correspond to cell-spec specification properties
-in BattINFO (capacity, voltage limits, mass, dimensions) and converts them to
-BattINFO's ``{value, unit}`` quantity format.
+project for sharing battery physics parameters. One BPX file becomes one
+parameter-set record (:func:`from_bpx_parameters`, then
+:meth:`BpxParameterImportResult.to_parameter_set`): every value in the file is
+a claim in a part (cell, each electrode's material and build, separator,
+electrolyte, state), the ``User-defined`` block rides the record verbatim, and
+anything else is named in a warning and listed in the record's
+``not_imported``. The record's IRI derives from the file's parameters, it
+links the cell the file describes (or says it is a virtual cell), and it
+carries the file itself. :func:`to_bpx` rebuilds the BPX document from such a
+record. Files are parsed strictly (:func:`battinfo._jcs.loads`), and the
+v0.x-to-v1 layout conversion is :mod:`battinfo._bpx_layout`, which the
+registry vendors to check a runnable copy against its source.
 
-The remaining BPX parameters (electrode microstructure, transport coefficients,
-OCP functions, etc.) have no direct BattINFO spec equivalent and are silently
-skipped with a note in ``warnings``.
+:func:`from_bpx` reads the cell-level fields a cell spec can hold (capacity,
+voltage limits, dimensions) for other uses; a BPX import does not create a
+cell spec, and a new cell spec gets its identity only, since the file's cell
+values live on the parameter set. :func:`to_bpx` also exports a cell spec as
+a ``"Partial"`` BPX document.
 
 References
 ----------
@@ -18,13 +28,29 @@ References
 
 from __future__ import annotations
 
+import copy
+import hashlib
 import json
 import math
+import sys
+import warnings as _warnings
 from dataclasses import dataclass, field
+from datetime import date
 from pathlib import Path
 from typing import Any, Mapping
 
-from battinfo.interop._common import load_json_source
+from battinfo._bpx_layout import (
+    DEFAULT_TARGET_VERSION,
+    THERMAL_CONDUCTIVITY,
+    V1_STATE_MOVES,
+    is_v0_layout,
+    to_v1_layout,
+    uses_v1_layout,
+    v0_layout_fields,
+    version_tuple,
+)
+from battinfo._jcs import _from_numpy, canonical_json_bytes
+from battinfo._jcs import loads as _loads_json
 
 PathLike = str | Path
 
@@ -117,13 +143,37 @@ class BpxImportResult:
 # ── Internal helpers ──────────────────────────────────────────────────────────
 
 
-def _load_bpx(source: Mapping[str, Any] | str | Path) -> tuple[dict[str, Any], str]:
-    """Load a BPX source (dict, JSON string, or path) and return (data, filename)."""
+def _parse_bpx_bytes(raw: bytes, label: str) -> dict[str, Any]:
+    """A BPX file's bytes as a document, parsed strictly (see :func:`battinfo._jcs.loads`).
+
+    A byte order mark is skipped; a repeated key, a number too large for a
+    double, NaN or Infinity, and text that is not a JSON object are refused
+    with ``ValueError`` naming ``label`` and where.
+    """
+    try:
+        data = _loads_json(raw)
+    except ValueError as exc:
+        raise ValueError(f"{label}: {exc}") from None
+    if not isinstance(data, dict):
+        raise ValueError(f"{label} is not a JSON object.")
+    return data
+
+
+def _read_bytes(path: Path) -> bytes:
+    try:
+        return path.read_bytes()
+    except OSError as exc:
+        raise ValueError(f"Cannot read {path}: {exc}") from exc
+
+
+def _load_bpx(source: Mapping[str, Any] | str | Path | bytes) -> tuple[dict[str, Any], str]:
+    """Load a BPX source (dict, file bytes, or path) and return (data, filename)."""
     if isinstance(source, Mapping):
         return dict(source), "bpx-parameter.json"
+    if isinstance(source, (bytes, bytearray)):
+        return _parse_bpx_bytes(bytes(source), "the BPX bytes"), "bpx-parameter.json"
     path = Path(source)
-    data = load_json_source(path)
-    return data, path.name
+    return _parse_bpx_bytes(_read_bytes(path), str(path)), path.name
 
 
 def _extract_header(data: dict[str, Any]) -> tuple[str | None, str | None, str | None, str | None]:
@@ -221,12 +271,13 @@ def _extract_specs(
 def _fold_state_block(
     data: Mapping[str, Any], warnings: list[str]
 ) -> tuple[dict[str, Any], dict[str, Any]]:
-    """Fold a BPX >= 1.1 top-level ``State`` block back into its 1.0 homes.
+    """Fold a BPX >= 1.0 top-level ``State`` block back into its v0.x homes.
 
-    The exact inverse of :func:`_relocate_state_fields_1_1`: initial/ambient
-    temperatures return to the Cell block (where the importer carries them as
-    verbatim extras) and the initial electrolyte concentration returns to the
-    Electrolyte block (where it becomes an ``initial_concentration`` claim).
+    The inverse of the State moves of :func:`upgrade_bpx`:
+    initial/ambient temperatures return to the Cell block (where the importer
+    carries them as verbatim extras) and the initial electrolyte concentration
+    returns to the Electrolyte block (where it becomes an
+    ``initial_concentration`` claim).
     Returns ``(cell_fields, electrolyte_fields)``; anything unrecognized is
     named in a warning — never dropped silently.
     """
@@ -272,12 +323,18 @@ def from_bpx(
     *,
     extra_warnings: bool = True,
 ) -> BpxImportResult:
-    """Import cell-spec specs from a BPX battery parameter file.
+    """Read the cell-spec properties a BPX file's Cell block can fill.
 
     Extracts the subset of BPX ``Parameterisation.Cell`` parameters that map
     directly to BattINFO cell-spec spec properties (capacity, voltage limits,
     mass, dimensions).  Physics parameters (microstructure, transport,
     electrochemical kinetics) are logged as warnings and skipped.
+
+    A BPX import does not go through here: :func:`from_bpx_parameters` keeps
+    every value of the file, the Cell block included, on the file's
+    parameter-set record, and a cell spec created for the file's cell gets
+    its identity only (name, maker, model, format, chemistry). Use this for
+    other purposes, such as comparing a file's Cell block with a datasheet.
 
     Parameters
     ----------
@@ -342,9 +399,9 @@ def from_bpx(
     else:
         cell_params = dict(cell_params_raw)
 
-    # BPX >= 1.1 moves the temperatures into a top-level State block; fold
-    # them back so they ride the extras path like their 1.0 counterparts
-    # (and re-emit into State on a >= 1.1 export). Explicit Cell values win.
+    # BPX >= 1.0 moves the temperatures into a top-level State block; fold
+    # them back so they ride the extras path like their v0.x counterparts
+    # (and re-emit into State on a >= 1.0 export). Explicit Cell values win.
     state_cell_fields, _state_electrolyte = _fold_state_block(data, warnings)
     for state_key, state_value in state_cell_fields.items():
         cell_params.setdefault(state_key, state_value)
@@ -386,16 +443,17 @@ def from_bpx(
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# Export:  BattINFO cell spec / instance  ──►  BPX file
+# Export:  parameter-file record, or cell spec / instance  ──►  BPX file
 # ══════════════════════════════════════════════════════════════════════════════
 #
-# A BPX file parameterises a *physics* model (DFN/SPMe): it needs electrode
-# microstructure, transport coefficients, and OCP functions that a cell
-# specification or datasheet simply does not contain.  ``to_bpx`` therefore
-# emits a BPX ``"Partial"`` document — a valid Header plus the cell-level
-# ``Parameterisation.Cell`` block populated with everything derivable from the
-# spec — and reports the required physics parameters it could not fill, instead
-# of inventing them.  This is the "as much information as is available" contract.
+# A parameter-file record holds every value of its file, so ``to_bpx`` rebuilds
+# the document from it. A cell specification does not: a BPX file
+# parameterises a *physics* model (DFN/SPMe), which needs electrode
+# microstructure, transport coefficients and OCP functions a datasheet does not
+# contain. For a spec ``to_bpx`` emits a BPX ``"Partial"`` document (a valid
+# Header plus the cell-level ``Parameterisation.Cell`` block populated with
+# everything derivable from the spec) and reports the required physics
+# parameters it could not fill, instead of inventing them.
 
 # Default BPX schema version to stamp into Header.BPX (override via to_bpx).
 _BPX_VERSION = "0.4.0"
@@ -506,23 +564,33 @@ class BpxExportResult:
     Attributes
     ----------
     bpx:
-        A BPX document (``{"Header": ..., "Parameterisation": {"Cell": ...}}``)
-        with the ``"Partial"`` model type and every cell-level parameter that
-        could be derived from the spec.
+        The BPX document: for a parameter-file record the file it
+        describes, for a cell spec a ``"Partial"`` document with every
+        cell-level parameter the spec gives.
     filled:
-        BPX Cell keys that were populated from the spec.
+        The BPX fields written from the record (``"Cell.Electrode area
+        [m2]"``, ``"State.Initial conditions.Initial temperature [K]"``).
     missing_required:
-        Required BPX Cell keys that could not be filled — the user must supply
-        these (or run a physics-parameterisation workflow) before the file can
-        drive a full model.
+        Required BPX Cell keys the document lacks: the user must supply
+        these (or run a physics-parameterisation workflow) before the file
+        can drive a full model.
     warnings:
-        Non-fatal notes (unconvertible units, absent dimensions, etc.).
+        What the caller should know: values the document lacks, unit
+        conversions, values added by the v0-to-v1 layout conversion, and
+        the official parser's verdict when it rejects the document.
+    complete:
+        ``False`` when the document lacks a value its source held: for a
+        parameter-file record, a value the import did not read
+        (``not_imported``) or a claim this export could not write; for a
+        cell spec, a property in a unit with no BPX conversion. The source
+        file under the record's ``distributions`` is then the complete copy.
     """
 
     bpx: dict[str, Any]
     filled: list[str]
     missing_required: list[str]
     warnings: list[str] = field(default_factory=list)
+    complete: bool = True
 
     def to_json(self, *, indent: int = 2) -> str:
         """Serialise the BPX document to a JSON string.
@@ -544,76 +612,192 @@ def to_bpx(
     source: Any,
     *,
     cell_instance: Mapping[str, Any] | Any | None = None,
-    parameter_sets: Mapping[str, Any] | None = None,
     cell_extras: Mapping[str, Any] | None = None,
     model: str | None = None,
     bpx_version: str | None = None,
     reference_temperature_k: float | None | str = "auto",
     title: str | None = None,
+    strict: bool = False,
 ) -> BpxExportResult:
-    """Export a BattINFO cell spec (and optional instance) to a BPX document.
+    """Export a BattINFO record to a BPX document.
 
-    Populates the BPX ``Parameterisation.Cell`` block with everything derivable
-    from the specification — nominal capacity, voltage cut-offs, electrode
-    area, and (when cell dimensions are present) volume, external surface
-    area, and density — and reports the required physics parameters that a
-    spec cannot provide.
+    Two sources are accepted.
 
-    ``parameter_sets`` adds the physics: a mapping of block keys —
-    ``negative_material`` / ``negative_electrode`` / ``positive_material`` /
-    ``positive_electrode`` / ``separator`` / ``electrolyte``, the same keys
-    :func:`from_bpx_parameters` produces — to ONE parameter-set record each.
-    This is the per-source export: the records of one co-fitted source become
-    the electrode/separator/electrolyte blocks, claim values at full precision
-    (scalars verbatim, curves as ``{"x", "y"}`` tables, expressions as BPX
-    function strings), annex entries reassembled into ``User-defined``.
-    ``Header.Model`` resolves as: explicit ``model`` argument, else the
-    records' own consistent ``model_context.model`` (a fitted set knows which
-    model it was fitted under), else the tier heuristic (p2d → DFN,
-    spme → SPMe, spm → SPM), else ``"Partial"``. Do NOT mix sources across
-    blocks here — a calibration is a joint estimate; composed exports are a
-    separate, labeled mode (planned).
+    A **parameter-file record** (a parameter set built by
+    :meth:`BpxParameterImportResult.to_parameter_set`) is rebuilt into the
+    full BPX document it describes: every part's claims go back to their BPX
+    block (cell, electrodes, separator, electrolyte, State) at full precision,
+    the annex becomes ``User-defined``, and the header comes from the
+    record's model context. The document follows the layout of the version
+    it declares: the source's own version by default, or ``bpx_version``. A
+    record read from a v0.x-layout file (``model_context.layout`` is
+    ``"v0"``) and exported at a 1.x version goes through the same layout
+    conversion as :func:`upgrade_bpx`, so the State
+    values the bpx package's own v0-to-v1 migration adds (initial state of
+    charge 1, and the temperatures it resolves) are added here too, and
+    named in the warnings. A claim in another unit than BPX states is
+    converted (a curve's x axis included), or the export raises
+    ``ValueError`` naming it, as it does for a curve tabulated against
+    another quantity than the BPX field. What the record never held (the
+    paths in its ``not_imported``: blended-electrode ``Particle`` blocks, a
+    ``Validation`` section, ...) is named in the warnings and makes
+    :attr:`BpxExportResult.complete` false: the stored source file is the
+    complete copy.
+
+    A **cell spec** (a cell-spec record dict ``{"cell_spec": ...,
+    "properties": ...}``, a :class:`~battinfo.bundle.CellSpec`, or a bare
+    properties mapping) gives a ``"Partial"`` document: the
+    ``Parameterisation.Cell`` block with everything derivable from the
+    specification (nominal capacity, voltage cut-offs, electrode area, and,
+    from the dimensions, volume, external surface area and density), plus
+    the required physics parameters a spec cannot provide, reported rather
+    than invented.
+
+    A registry resource JSON holding one such record (under
+    ``semantic_payload.battinfo_records``) is unwrapped. Anything else
+    raises ``TypeError``. When the official ``bpx`` package is installed,
+    the document is parsed with it and a rejection is added to the warnings.
 
     Parameters
     ----------
     source:
-        A BattINFO cell-spec record dict (``{"cell_spec": ..., "properties":
-        ...}``), a :class:`~battinfo.bundle.CellSpec` (anything exposing
-        ``to_record()``), or a bare properties mapping.
+        A parameter-file record, or a cell spec as above.
     cell_instance:
-        Optional cell-instance record or object; its serial number / id is
-        recorded in the BPX ``Header`` so an exported file traces back to a
-        physical cell.
+        Cell-spec export only: a cell-instance record or object whose serial
+        number / id is recorded in ``Header.References``.
+    cell_extras:
+        Cell-spec export only: BPX Cell fields carried verbatim (for example
+        :attr:`BpxImportResult.extras`); spec-derived values win.
     model:
-        BPX ``Header.Model`` value. Defaults to ``"Partial"`` — the correct type
-        for a spec-only export. Use ``"SPMe"`` / ``"DFN"`` only once the physics
-        sections have been completed downstream.
+        ``Header.Model``. A parameter file defaults to the model it was
+        fitted under (its ``model_context``); a cell spec to ``"Partial"``.
     bpx_version:
-        Value stamped into ``Header.BPX``.
+        Value stamped into ``Header.BPX`` (always a string). The document
+        follows that version's layout: from 1.0 on, the temperatures and the
+        initial electrolyte concentration go in the ``State`` block and a
+        Cell thermal conductivity goes in ``User-defined``; a 0.x version
+        keeps them in Cell and Electrolyte.
     reference_temperature_k:
-        ``"Reference temperature [K]"`` handling. The default ``"auto"``
-        keeps a value carried by ``cell_extras`` (so a round-tripped file
-        comes back with its own temperature) and falls back to the
-        298.15 K convention only when nothing provides the field. Pass a
-        float to force that value, or ``None`` to emit none of our own
-        (extras still pass through verbatim).
+        Cell-spec export only. The default ``"auto"`` keeps a value carried
+        by ``cell_extras`` and falls back to the 298.15 K convention only
+        when nothing provides the field. Pass a float to force that value,
+        or ``None`` to emit none of our own.
     title:
-        Override ``Header.Title``; defaults to the spec name/model.
+        Override ``Header.Title``.
+    strict:
+        Raise ``ValueError`` instead of returning a document that is not
+        :attr:`~BpxExportResult.complete`.
 
     Returns
     -------
     BpxExportResult
-        The BPX document plus ``filled`` / ``missing_required`` / ``warnings``.
+        The BPX document plus ``filled`` / ``missing_required`` /
+        ``warnings`` / ``complete``.
 
     Examples
     --------
-    >>> import json
-    >>> record = json.load(open("examples/cell-spec/A123__ANR26650M1-B.json"))
-    >>> result = to_bpx(record)
-    >>> result.save("a123.bpx.json")          # doctest: +SKIP
-    >>> result.missing_required
-    ['Electrode area [m2]', 'Number of electrode pairs connected in parallel to make a cell', ...]
+    >>> record = from_bpx_parameters("nmc_pouch_cell_BPX.json").to_parameter_set(
+    ...     virtual_cell=True)                          # doctest: +SKIP
+    >>> to_bpx(record, bpx_version="1.1.0").save("nmc.bpx.json")  # doctest: +SKIP
     """
+    record = _export_source(source)
+    if isinstance(record.get("parameter_set"), Mapping):
+        if cell_instance is not None or cell_extras is not None:
+            raise ValueError(
+                "cell_instance and cell_extras apply to a cell-spec export; a parameter-file "
+                "record already holds every value of its file."
+            )
+        result, lacking = _parameter_file_to_bpx(record, model=model, bpx_version=bpx_version, title=title)
+    else:
+        result, lacking = _cell_spec_to_bpx(
+            record,
+            cell_instance=cell_instance,
+            cell_extras=cell_extras,
+            model=model,
+            bpx_version=bpx_version,
+            reference_temperature_k=reference_temperature_k,
+            title=title,
+        )
+    result.complete = not lacking
+    if strict and lacking:
+        raise ValueError(
+            "to_bpx(strict=True): the document would lack values its source holds: "
+            + "; ".join(lacking)
+        )
+    rejection = _official_parser_rejection(result.bpx)
+    if rejection is not None:
+        result.warnings.append(f"The official bpx parser rejects this document: {rejection}")
+    return result
+
+
+def _export_source(source: Any) -> dict[str, Any]:
+    """``source`` as the record to_bpx exports, or ``TypeError`` saying what it accepts."""
+    from battinfo.entities import kind_for_doc  # noqa: PLC0415
+
+    if hasattr(source, "to_record") and callable(source.to_record):
+        source = source.to_record()
+    if not isinstance(source, Mapping):
+        raise TypeError(
+            "to_bpx exports a parameter-file record or a cell spec (a cell-spec record dict, a "
+            f"CellSpec-like object with to_record(), or a properties mapping); got {type(source).__name__}."
+        )
+    resource = source.get("resource") if isinstance(source.get("resource"), Mapping) else source
+    payload = resource.get("semantic_payload")
+    if isinstance(payload, Mapping):
+        held = payload.get("battinfo_records")
+        candidates = [
+            item
+            for item in (held.values() if isinstance(held, Mapping) else [])
+            if isinstance(item, Mapping)
+            and (isinstance(item.get("parameter_set"), Mapping) or isinstance(item.get("cell_spec"), Mapping))
+        ]
+        if len(candidates) != 1:
+            raise TypeError(
+                "this registry resource does not hold exactly one parameter-set or cell-spec record "
+                "under semantic_payload.battinfo_records, so to_bpx has nothing to export."
+            )
+        return dict(candidates[0])
+    kind = kind_for_doc(source)
+    if kind is not None and kind.entity_type not in ("cell-spec", "parameter-set"):
+        raise TypeError(
+            f"to_bpx exports a parameter-file record or a cell spec; this is a {kind.entity_type} record."
+        )
+    if kind is None and "properties" not in source and "cell_spec" not in source:
+        quantities = [value for value in source.values() if isinstance(value, Mapping)]
+        if not source or len(quantities) != len(source) or not all(
+            "value" in value or "unit" in value for value in quantities
+        ):
+            raise TypeError(
+                "to_bpx exports a parameter-file record, a cell-spec record or a cell spec's "
+                "properties mapping (key -> {value, unit}); this mapping is none of them."
+            )
+    return dict(source)
+
+
+def _official_parser_rejection(document: Mapping[str, Any]) -> str | None:
+    """The official parser's error for ``document``, or ``None`` when it parses or bpx is absent."""
+    try:
+        import bpx  # noqa: F401, PLC0415
+    except ImportError:
+        return None
+    check = check_bpx(document)
+    return None if check["passed"] else str(check["detail"])
+
+
+_NO_CONVERSION = "with no BPX conversion; skipped."
+
+
+def _cell_spec_to_bpx(
+    source: Any,
+    *,
+    cell_instance: Mapping[str, Any] | Any | None,
+    cell_extras: Mapping[str, Any] | None,
+    model: str | None,
+    bpx_version: str | None,
+    reference_temperature_k: float | None | str,
+    title: str | None,
+) -> tuple[BpxExportResult, list[str]]:
+    """A cell spec's ``Partial`` BPX document (see :func:`to_bpx`), and what it lacks."""
     warnings: list[str] = []
     meta, props = _coerce_cell_spec(source)
 
@@ -673,26 +857,7 @@ def to_bpx(
         cell["Reference temperature [K]"] = _DEFAULT_REFERENCE_TEMPERATURE_K
         filled.append("Reference temperature [K]")
 
-    # 4. Physics blocks from one source's parameter-set records.
-    physics_blocks: dict[str, dict[str, Any]] = {}
-    annex: dict[str, Any] = {}
-    model_hints: set[str] = set()
-    version_hints: set[str] = set()
-    reference_hints: list[str] = []
-    claims_by_scope: dict[str, list[Any]] = {}
-    if parameter_sets:
-        physics_blocks, annex, model_hints, version_hints, reference_hints, claims_by_scope = (
-            _physics_blocks_from_parameter_sets(parameter_sets, warnings)
-        )
-
-    # 5. Required BPX Cell keys a spec can never supply.
-    missing_required = [
-        bpx_key
-        for _bi_key, (bpx_key, _table, required) in _BPX_EXPORT_DIRECT.items()
-        if required and bpx_key not in cell
-    ]
-    missing_required.extend(k for k in _BPX_REQUIRED_UNFILLABLE if k not in cell)
-
+    missing_required = _missing_required_cell_fields(cell)
     if missing_required:
         warnings.append(
             "Required BPX Cell parameters not derivable from a cell spec "
@@ -700,309 +865,444 @@ def to_bpx(
             + ", ".join(missing_required)
         )
 
-    # 6. Model resolution: explicit argument, else the source's own model
-    # context (a fitted set knows which model it was fitted under), else the
-    # tier heuristic, else Partial.
-    resolved_model = model
-    if resolved_model is None and len(model_hints) == 1:
-        resolved_model = next(iter(model_hints))
-    if resolved_model is None and claims_by_scope:
-        from battinfo.parameters import cell_completeness  # noqa: PLC0415
+    resolved_model = model or "Partial"
+    warnings.append(
+        "Electrode, electrolyte, and separator physics parameters "
+        "(thickness, porosity, transport, OCP, particle data) are not part of a "
+        f"cell specification and were not emitted. Header.Model is {resolved_model!r}."
+    )
 
-        tiers = cell_completeness(claims_by_scope)
-        for tier, bpx_model in (("p2d", "DFN"), ("spme", "SPMe"), ("spm", "SPM")):
-            if tiers.get(tier, {}).get("satisfied"):
-                resolved_model = bpx_model
-                break
-    if resolved_model is None:
-        resolved_model = "Partial"
-    if model is None and len(model_hints) > 1:
-        warnings.append(
-            f"parameter_sets disagree on model_context.model ({', '.join(sorted(model_hints))}); "
-            f"Header.Model resolved to {resolved_model!r} — pass model=... to override."
-        )
-
-    if not physics_blocks:
-        warnings.append(
-            "Electrode, electrolyte, and separator physics parameters "
-            "(thickness, porosity, transport, OCP, particle data) are not part of a "
-            f"cell specification and were not emitted. Header.Model is {resolved_model!r}."
-        )
-
-    resolved_version = bpx_version
-    if resolved_version is None and len(version_hints) == 1:
-        resolved_version = next(iter(version_hints))
-    if resolved_version is None:
-        resolved_version = _BPX_VERSION
-    # The bpx schema types Header.BPX as a number; emit one when the version
-    # is float-shaped ("1.0" -> 1.0) and keep multi-part strings as strings.
-    header_version: Any = resolved_version
-    try:
-        as_float = float(resolved_version)
-    except (TypeError, ValueError):
-        pass
-    else:
-        if str(as_float) == str(resolved_version) or resolved_version.count(".") <= 1:
-            header_version = as_float
-
-    header: dict[str, Any] = {"BPX": header_version, "Model": resolved_model}
+    resolved_version = str(bpx_version or _BPX_VERSION)
+    header: dict[str, Any] = {"BPX": resolved_version, "Model": resolved_model}
     if name:
         header["Title"] = str(name)
-    if physics_blocks:
-        header["Description"] = (
-            "BPX exported from BattINFO parameter-set records"
-            + (f" for '{name}'" if name else "")
-            + ". Physics blocks carry one source's co-fitted claims at full "
-            "precision; the Cell block is derived from the specification."
-        )
-    else:
-        header["Description"] = (
-            "Partial BPX exported from a BattINFO cell specification"
-            + (f" ('{name}')" if name else "")
-            + ". Cell-level parameters only; physics parameters are not derivable "
-            "from a specification and must be added separately."
-        )
-    references_parts = list(dict.fromkeys(reference_hints))
+    header["Description"] = (
+        "Partial BPX exported from a BattINFO cell specification"
+        + (f" ('{name}')" if name else "")
+        + ". Cell-level parameters only; physics parameters are not derivable "
+        "from a specification and must be added separately."
+    )
     instance_reference = _instance_reference(meta, cell_instance)
     if instance_reference:
-        references_parts.append(instance_reference)
-    if references_parts:
-        header["References"] = "; ".join(references_parts)
-
-    parameterisation: dict[str, Any] = {"Cell": cell}
-    for block_name in ("Electrolyte", "Negative electrode", "Positive electrode", "Separator"):
-        if block_name in physics_blocks:
-            parameterisation[block_name] = physics_blocks[block_name]
-    if annex:
-        parameterisation["User-defined"] = annex
-
-    # BPX >= 1.1 moved the state-like fields out of Cell/Electrolyte into a
-    # top-level State section (Initial conditions / Thermal environment); the
-    # 1.1 parser rejects the old placement, so the export follows the layout
-    # of the version it declares.
-    state_block: dict[str, Any] = {}
-    if _bpx_version_tuple(resolved_version) >= (1, 1):
-        state_block = _relocate_state_fields_1_1(parameterisation)
+        header["References"] = instance_reference
 
     bpx_doc: dict[str, Any] = {
         "Header": header,
-        "Parameterisation": parameterisation,
+        "Parameterisation": {"Cell": cell},
     }
-    if state_block:
-        bpx_doc["State"] = state_block
-
-    return BpxExportResult(
-        bpx=bpx_doc,
-        filled=filled,
-        missing_required=missing_required,
-        warnings=warnings,
+    if uses_v1_layout(resolved_version) and is_v0_layout(bpx_doc):
+        # Temperatures from cell_extras sit in Cell, where a 0.x file keeps
+        # them: the same conversion upgrade_bpx makes.
+        bpx_doc, changes = to_v1_layout(bpx_doc, resolved_version)
+        _report_layout_changes(changes, resolved_version, warnings)
+    lacking = [w.split(" has unit ")[0] for w in warnings if w.endswith(_NO_CONVERSION)]
+    return (
+        BpxExportResult(bpx=bpx_doc, filled=filled, missing_required=missing_required, warnings=warnings),
+        lacking,
     )
 
 
-# Export block key -> (BPX block name, vocabulary block for field lookup).
-# The same keys :func:`from_bpx_parameters` produces, so import and export are
-# symmetric by construction.
-_EXPORT_BLOCK_TARGETS: dict[str, tuple[str, str]] = {
+def _report_layout_changes(changes: list[str], version: str, warnings: list[str]) -> None:
+    """Name what the v0-to-v1 layout conversion did beyond moving State fields."""
+    for change in changes:
+        if change.startswith(f"Cell.{THERMAL_CONDUCTIVITY}"):
+            warnings.append(f"BPX {version} has no Cell thermal conductivity: {change}.")
+    added = [change.removeprefix("added ") for change in changes if change.startswith("added ")]
+    if added:
+        warnings.append(
+            "Added for the v1 layout, as the bpx package's own v0-to-v1 migration adds them "
+            "for a file without them: " + "; ".join(added) + "."
+        )
+
+
+def _missing_required_cell_fields(cell: Mapping[str, Any]) -> list[str]:
+    """The Cell fields every non-Partial BPX file needs and ``cell`` lacks."""
+    missing = [
+        bpx_key
+        for _bi_key, (bpx_key, _table, required) in _BPX_EXPORT_DIRECT.items()
+        if required and bpx_key not in cell
+    ]
+    missing.extend(k for k in _BPX_REQUIRED_UNFILLABLE if k not in cell)
+    return missing
+
+
+# Parameter-file part -> (BPX block, vocabulary block for the field lookup).
+_PART_BPX_BLOCKS: dict[str, tuple[str, str]] = {
+    "cell": ("Cell", "cell"),
     "negative_material": ("Negative electrode", "electrode"),
     "negative_electrode": ("Negative electrode", "electrode"),
     "positive_material": ("Positive electrode", "electrode"),
     "positive_electrode": ("Positive electrode", "electrode"),
     "separator": ("Separator", "separator"),
     "electrolyte": ("Electrolyte", "electrolyte"),
+    "state": ("State", "state"),
 }
 
-# Export block key -> the cell_completeness scope key its claims count toward.
-_EXPORT_BLOCK_SCOPES: dict[str, str] = {
-    "negative_material": "material_negative",
-    "negative_electrode": "electrode_negative",
-    "positive_material": "material_positive",
-    "positive_electrode": "electrode_positive",
-    "separator": "separator",
-    "electrolyte": "electrolyte",
+_REFERENCES_NOTE_PREFIX = "BPX Header.References: "
+
+# The OCP branches BPX 1.0 added for single-phase electrodes: branch -> field.
+_OCP_BRANCH_FIELDS: dict[str, str] = {
+    "lithiation": "OCP (lithiation) [V]",
+    "delithiation": "OCP (delithiation) [V]",
 }
 
-_ANNEX_NOTE_PREFIX = "BPX Header.References: "
+# State field -> its v0.x home: the inverse of the moves BPX 1.0 made.
+_V0_STATE_HOMES: dict[tuple[str, str], tuple[str, str]] = {
+    (section, new_key): (block, key) for block, key, section, new_key in V1_STATE_MOVES
+}
+
+# The unit a BPX table's x axis is in, by what it tabulates against.
+_CURVE_X_UNITS: dict[str, str] = {"stoichiometry": "1", "concentration": "mol/m3", "temperature": "K"}
+
+# BPX unit -> {unit: factor into it}. Keys are the spellings
+# normalize_unit_symbol gives; the BPX unit itself always converts with 1.
+_UNIT_FACTORS: dict[str, dict[str, float]] = {
+    "1": {"%": 1e-2},
+    "Ah": {"A.h": 1.0, "mAh": 1e-3},
+    "V": {"mV": 1e-3, "kV": 1e3},
+    "V/K": {"mV/K": 1e-3},
+    "m": {"cm": 1e-2, "mm": 1e-3, "µm": 1e-6, "nm": 1e-9},
+    "kg": {"g": 1e-3, "mg": 1e-6},
+    "m2": {"cm2": 1e-4, "mm2": 1e-6},
+    "m3": {"cm3": 1e-6, "mm3": 1e-9, "dm3": 1e-3, "L": 1e-3, "mL": 1e-6},
+    "kg/m3": {"g/cm3": 1e3, "g/mL": 1e3, "g/L": 1.0},
+    "mol/m3": {"mol/L": 1e3, "mol/dm3": 1e3, "M": 1e3, "kmol/m3": 1e3, "mmol/L": 1.0, "mM": 1.0, "mol/cm3": 1e6},
+    "m2/s": {"cm2/s": 1e-4, "mm2/s": 1e-6},
+    "S/m": {"S/cm": 1e2, "mS/cm": 1e-1, "mS/m": 1e-3},
+    "1/m": {"m-1": 1.0, "1/cm": 1e2, "cm-1": 1e2},
+    "J/mol": {"kJ/mol": 1e3},
+    "mol.m-2.s-1": {"mol/(m2.s)": 1.0},
+    "J/(kg.K)": {"J/kg/K": 1.0, "J.kg-1.K-1": 1.0, "J.K-1.kg-1": 1.0, "J/(g.K)": 1e3, "kJ/(kg.K)": 1e3},
+    "W/(m.K)": {"W/m/K": 1.0, "W.m-1.K-1": 1.0},
+    "W/(m2.K)": {"W/m2/K": 1.0, "W.m-2.K-1": 1.0},
+}
+# Units that convert with an offset: unit -> (BPX unit, offset added).
+_UNIT_OFFSETS: dict[str, tuple[str, float]] = {"°C": ("K", 273.15)}
 
 
-def _physics_blocks_from_parameter_sets(
-    parameter_sets: Mapping[str, Any], warnings: list[str]
-) -> tuple[
-    dict[str, dict[str, Any]],
-    dict[str, Any],
-    set[str],
-    set[str],
-    list[str],
-    dict[str, list[Any]],
-]:
-    """One source's parameter-set records -> BPX physics blocks + header hints.
+def _unit_factor(unit: str | None, bpx_unit: str) -> tuple[float, float] | None:
+    """``(factor, offset)`` taking ``unit`` to ``bpx_unit``, or ``None`` when no conversion is known."""
+    from battinfo.transform.json_to_jsonld import normalize_unit_symbol  # noqa: PLC0415
 
-    Returns ``(blocks, annex, model_hints, version_hints, references, claims_by_scope)``.
-    Claim values export at full precision — sig-fig rounding is a presentation
-    choice for spec-derived Cell values, never for claims.
-    """
-    from battinfo.parameters import parameter_entry  # noqa: PLC0415
-
-    blocks: dict[str, dict[str, Any]] = {}
-    annex: dict[str, Any] = {}
-    model_hints: set[str] = set()
-    version_hints: set[str] = set()
-    references: list[str] = []
-    claims_by_scope: dict[str, list[Any]] = {}
-
-    for block_key, record in parameter_sets.items():
-        if block_key == "set":
-            # The parameterisation-set record itself: no claims, but it
-            # carries the set-level lineage (model context, annex,
-            # references) — harvest those and move on.
-            set_body = record.get("parameter_set", record) if isinstance(record, Mapping) else {}
-            set_context = set_body.get("model_context") or {}
-            if isinstance(set_context.get("model"), str):
-                model_hints.add(set_context["model"])
-            if isinstance(set_context.get("version"), str):
-                version_hints.add(set_context["version"])
-            set_annex = set_body.get("annex")
-            if isinstance(set_annex, Mapping):
-                for annex_key, annex_value in set_annex.items():
-                    annex.setdefault(annex_key, annex_value)
-            if isinstance(record, Mapping):
-                for note in record.get("notes", []):
-                    if isinstance(note, str) and note.startswith(_ANNEX_NOTE_PREFIX):
-                        references.append(note[len(_ANNEX_NOTE_PREFIX):])
-            continue
-        target = _EXPORT_BLOCK_TARGETS.get(block_key)
-        if target is None:
-            warnings.append(
-                f"parameter_sets key {block_key!r} is not a BPX export block "
-                f"(valid: set, {', '.join(_EXPORT_BLOCK_TARGETS)}); skipped."
-            )
-            continue
-        bpx_block_name, vocab_block = target
-        body = record.get("parameter_set", record) if isinstance(record, Mapping) else None
-        if not isinstance(body, Mapping):
-            warnings.append(f"parameter_sets[{block_key!r}] is not a parameter-set record; skipped.")
-            continue
-
-        claims = body.get("claims") or []
-        claims_by_scope.setdefault(_EXPORT_BLOCK_SCOPES[block_key], []).extend(claims)
-        block = blocks.setdefault(bpx_block_name, {})
-        for claim in claims:
-            if not isinstance(claim, Mapping):
-                continue
-            key = claim.get("parameter")
-            entry = parameter_entry(key)
-            field_name = ((entry or {}).get("bpx") or {}).get(vocab_block)
-            if field_name is None:
-                warnings.append(
-                    f"claim parameter {key!r} ({block_key}) has no BPX field name; skipped."
-                )
-                continue
-            value = _claim_to_bpx_value(claim, entry or {}, warnings, block_key)
-            if value is None:
-                continue
-            if field_name in block and block[field_name] != value:
-                warnings.append(
-                    f"BPX field {field_name!r} set by more than one claim in "
-                    f"{bpx_block_name!r}; keeping the first value."
-                )
-                continue
-            block[field_name] = value
-
-        model_context = body.get("model_context") or {}
-        if isinstance(model_context.get("model"), str):
-            model_hints.add(model_context["model"])
-        if isinstance(model_context.get("version"), str):
-            version_hints.add(model_context["version"])
-        for note in record.get("notes", []) if isinstance(record, Mapping) else []:
-            if isinstance(note, str) and note.startswith(_ANNEX_NOTE_PREFIX):
-                references.append(note[len(_ANNEX_NOTE_PREFIX):])
-        provenance = record.get("provenance", {}) if isinstance(record, Mapping) else {}
-        for prov_key in ("citation", "citation_doi"):
-            prov_value = provenance.get(prov_key)
-            if isinstance(prov_value, str) and prov_value:
-                references.append(prov_value)
-
-        record_annex = body.get("annex")
-        if isinstance(record_annex, Mapping):
-            for annex_key, annex_value in record_annex.items():
-                if annex_key in annex and annex[annex_key] != annex_value:
-                    warnings.append(
-                        f"annex entry {annex_key!r} differs between records; keeping the first."
-                    )
-                    continue
-                annex[annex_key] = annex_value
-
-    blocks = {name: block for name, block in blocks.items() if block}
-    return blocks, annex, model_hints, version_hints, references, claims_by_scope
+    if unit is None or unit == bpx_unit:
+        return 1.0, 0.0
+    source = normalize_unit_symbol(unit) or unit
+    target = normalize_unit_symbol(bpx_unit) or bpx_unit
+    if source == target:
+        return 1.0, 0.0
+    offset = _UNIT_OFFSETS.get(source)
+    if offset is not None and offset[0] == target:
+        return 1.0, offset[1]
+    factor = _UNIT_FACTORS.get(target, {}).get(source)
+    return (factor, 0.0) if factor is not None else None
 
 
 def _claim_to_bpx_value(
-    claim: Mapping[str, Any], entry: Mapping[str, Any], warnings: list[str], block_key: str
-) -> Any | None:
-    """One claim's value form -> its BPX value (full precision), or None."""
+    claim: Mapping[str, Any], bpx_unit: str, entry: Mapping[str, Any], part: Any, field_name: str
+) -> Any:
+    """One claim's value as BPX writes it, or ``ValueError`` saying why it cannot be.
+
+    Values are written back exactly as the claim holds them when they are in
+    the unit BPX states; otherwise they are converted. A quantity without a
+    unit is in the parameter's canonical unit. A curve's x axis must
+    tabulate what the BPX field tabulates, in (or convertible to) the unit
+    BPX uses for it.
+    """
+    key = claim.get("parameter")
+    label = f"claim {key!r} ({part})"
     quantity = claim.get("quantity")
     if isinstance(quantity, Mapping):
         value = quantity.get("value")
-        if not isinstance(value, (int, float)) or isinstance(value, bool):
-            return None
+        if not _finite_number(value):
+            raise ValueError(f"{label} has no finite numeric value for BPX {field_name!r}.")
         unit = quantity.get("unit")
-        expected = entry.get("unit")
-        if unit is not None and expected is not None and str(unit) != str(expected):
-            warnings.append(
-                f"claim {claim.get('parameter')!r} ({block_key}) carries unit "
-                f"{unit!r} but BPX expects the vocabulary unit {expected!r}; skipped."
-            )
-            return None
-        return float(value)
+        unit = str(unit) if unit is not None else str(entry.get("unit") or bpx_unit)
+        return _converted([value], unit, bpx_unit, label, field_name)[0]
     curve = claim.get("curve")
     if isinstance(curve, Mapping):
         xs, ys = curve.get("x"), curve.get("y")
-        if isinstance(xs, list) and isinstance(ys, list) and len(xs) == len(ys):
-            return {"x": [float(v) for v in xs], "y": [float(v) for v in ys]}
-        return None
+        if not (
+            isinstance(xs, list) and isinstance(ys, list) and len(xs) == len(ys) >= 2
+            and all(_finite_number(v) for v in [*xs, *ys])
+        ):
+            raise ValueError(f"{label} has a malformed curve: x and y need equal lengths of finite numbers.")
+        tabulated = str(entry.get("x_quantity") or "stoichiometry")
+        x_quantity = curve.get("x_quantity")
+        if x_quantity != tabulated:
+            raise ValueError(
+                f"{label} is a curve against {x_quantity!r}, and BPX {field_name!r} tabulates against "
+                f"{tabulated!r}; it cannot be written as that field."
+            )
+        x_unit = _CURVE_X_UNITS.get(tabulated, "1")
+        given_x_unit = curve.get("x_unit")
+        if given_x_unit is None and x_unit != "1":
+            raise ValueError(
+                f"{label} is a curve against {tabulated} with no x_unit; BPX {field_name!r} "
+                f"tabulates it in {x_unit}, so say which unit the x values are in."
+            )
+        y_unit = curve.get("y_unit")
+        return {
+            "x": _converted(xs, None if given_x_unit is None else str(given_x_unit), x_unit, f"{label} x axis", field_name),
+            "y": _converted(ys, None if y_unit is None else str(y_unit), bpx_unit, label, field_name),
+        }
     expression = claim.get("expression")
     if isinstance(expression, Mapping):
         text = expression.get("text")
         if isinstance(text, str) and text.strip():
-            if expression.get("language") not in (None, "bpx"):
-                warnings.append(
-                    f"claim {claim.get('parameter')!r} ({block_key}) carries a "
-                    f"{expression.get('language')!r} expression; BPX expects its own "
-                    "function syntax — emitted verbatim."
-                )
-            return text.strip()
-    return None
+            return text
+    raise ValueError(f"{label} holds no quantity, curve or expression BPX can write as {field_name!r}.")
 
 
-def _bpx_version_tuple(version: Any) -> tuple[int, ...]:
-    """A comparable prefix tuple from a BPX version string; ``()`` when unparseable."""
-    parts: list[int] = []
-    for piece in str(version).split("."):
-        if not piece.isdigit():
-            break
-        parts.append(int(piece))
-    return tuple(parts)
+def _finite_number(value: Any) -> bool:
+    return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
 
 
-def _relocate_state_fields_1_1(parameterisation: dict[str, Any]) -> dict[str, Any]:
-    """Move BPX 1.1 State fields out of Cell/Electrolyte, returning the State block."""
-    initial_conditions: dict[str, Any] = {}
-    thermal: dict[str, Any] = {}
-    cell = parameterisation.get("Cell") or {}
-    if "Initial temperature [K]" in cell:
-        initial_conditions["Initial temperature [K]"] = cell.pop("Initial temperature [K]")
-    if "Ambient temperature [K]" in cell:
-        thermal["Ambient temperature [K]"] = cell.pop("Ambient temperature [K]")
-    electrolyte = parameterisation.get("Electrolyte") or {}
-    if "Initial concentration [mol.m-3]" in electrolyte:
-        initial_conditions["Initial electrolyte concentration [mol.m-3]"] = electrolyte.pop(
-            "Initial concentration [mol.m-3]"
+def _converted(values: list[Any], unit: str | None, bpx_unit: str, label: str, field_name: str) -> list[Any]:
+    conversion = _unit_factor(unit, bpx_unit)
+    if conversion is None:
+        raise ValueError(
+            f"{label} is in {unit!r}, and BPX states {field_name!r} in {bpx_unit!r}: no conversion "
+            "between the two is known, so the value is not written. Give the claim in "
+            f"{bpx_unit!r}."
         )
-    state: dict[str, Any] = {}
-    if initial_conditions:
-        state["Initial conditions"] = initial_conditions
-    if thermal:
-        state["Thermal environment"] = thermal
-    return state
+    factor, offset = conversion
+    if factor == 1.0 and offset == 0.0:
+        return list(values)
+    return [value * factor + offset for value in values]
+
+
+def _ocp_branch(claim: Mapping[str, Any]) -> str | None:
+    """'lithiation' or 'delithiation' for an OCP curve of one hysteresis branch, else None."""
+    from battinfo.parameters import resolve_parameter  # noqa: PLC0415
+
+    curve = claim.get("curve")
+    if resolve_parameter(claim.get("parameter")) != "ocp" or not isinstance(curve, Mapping):
+        return None
+    branch = curve.get("branch")
+    return branch if branch in _OCP_BRANCH_FIELDS else None
+
+
+def _record_uses_v0_layout(model_context: Mapping[str, Any], source_version: str | None) -> bool:
+    """Whether the record was read from a v0.x-layout file.
+
+    ``model_context.layout`` says so; a record without it (built by hand)
+    goes by its version, so a 0.x version means the v0.x layout.
+    """
+    layout = model_context.get("layout")
+    if layout in ("v0", "v1"):
+        return layout == "v0"
+    return source_version is not None and bool(version_tuple(source_version)) and not uses_v1_layout(source_version)
+
+
+def _parameter_file_to_bpx(
+    record: Mapping[str, Any],
+    *,
+    model: str | None,
+    bpx_version: str | None,
+    title: str | None,
+) -> tuple[BpxExportResult, list[str]]:
+    """Rebuild the BPX document a parameter-file record describes (see :func:`to_bpx`).
+
+    The document is first laid out the way the source file was (the v0.x
+    layout for a record read from a v0.x-layout file) and then, when the
+    requested version needs the other layout, converted: v0.x to v1 with
+    the one conversion :func:`upgrade_bpx` makes, v1 to v0.x by folding
+    State back into Cell and Electrolyte.
+    """
+    from battinfo.parameters import bpx_field, parameter_entry  # noqa: PLC0415
+
+    body = record["parameter_set"]
+    if not isinstance(body.get("parts"), list):
+        raise ValueError(
+            "to_bpx rebuilds a BPX file from a parameter-file record (one with parts, built by "
+            "BpxParameterImportResult.to_parameter_set); a claim batch states one target's "
+            "claims, not a file."
+        )
+    model_context = body.get("model_context") if isinstance(body.get("model_context"), Mapping) else {}
+    declared = model_context.get("version")
+    source_version = declared if isinstance(declared, str) and declared else None
+    target_version = str(bpx_version or source_version or _BPX_VERSION)
+    target_v1 = uses_v1_layout(target_version)
+    v0_source = _record_uses_v0_layout(model_context, source_version)
+    warnings: list[str] = []
+    lacking: list[str] = []
+    blocks: dict[str, dict[str, Any]] = {"Cell": {}}
+    state: dict[str, dict[str, Any]] = {}
+    user_defined: dict[str, Any] = {}
+
+    for part in body["parts"]:
+        if not isinstance(part, Mapping):
+            continue
+        part_name = part.get("part")
+        if part.get("phase") is not None:
+            lacking.append(
+                f"part {part_name!r} phase {part.get('phase')!r} (blended electrodes, BPX Particle "
+                "blocks, are not exported yet)"
+            )
+            continue
+        target = _PART_BPX_BLOCKS.get(part_name)
+        if target is None:
+            lacking.append(f"part {part_name!r} (no BPX block)")
+            continue
+        block_name, vocab_block = target
+        for claim in part.get("claims") or []:
+            if not isinstance(claim, Mapping):
+                continue
+            key = claim.get("parameter")
+            mapping = bpx_field(key, vocab_block)
+            if mapping is None:
+                lacking.append(f"claim {key!r} ({part_name}), which has no BPX field")
+                continue
+            field_name = mapping["field"]
+            branch = _ocp_branch(claim)
+            if branch is not None:
+                if not target_v1:
+                    raise ValueError(
+                        f"claim {key!r} ({part_name}) is the OCP's {branch} branch, and BPX "
+                        f"{target_version} has no field for one branch ('{_OCP_BRANCH_FIELDS[branch]}' "
+                        "arrived with BPX 1.0): export at a 1.x version."
+                    )
+                field_name = _OCP_BRANCH_FIELDS[branch]
+            value = _claim_to_bpx_value(claim, mapping["unit"], parameter_entry(key) or {}, part_name, field_name)
+            expression = claim.get("expression")
+            if isinstance(expression, Mapping) and expression.get("language") not in (None, "bpx"):
+                warnings.append(
+                    f"claim {key!r} ({part_name}) carries a {expression.get('language')!r} expression; "
+                    "BPX expects its own function syntax, so it is written verbatim."
+                )
+            # Where the source file kept the value.
+            if vocab_block == "state":
+                section = mapping["section"]
+                home = _V0_STATE_HOMES.get((section, field_name)) if v0_source else None
+                if home is not None:
+                    destination, where, name = blocks.setdefault(home[0], {}), home[0], home[1]
+                else:
+                    destination, where, name = state.setdefault(section, {}), f"State.{section}", field_name
+            elif block_name == "Cell" and field_name == THERMAL_CONDUCTIVITY and target_v1 and not v0_source:
+                destination, where, name = user_defined, "User-defined", field_name
+            else:
+                destination, where, name = blocks.setdefault(block_name, {}), block_name, field_name
+            if name in destination and destination[name] != value:
+                lacking.append(f"claim {key!r} ({part_name}), since {where}.{name} is set by another claim")
+                continue
+            destination[name] = value
+
+    header: dict[str, Any] = {
+        "BPX": (source_version or target_version) if (target_v1 and v0_source) else target_version,
+        "Model": model or model_context.get("model") or "Partial",
+    }
+    header_title = title or model_context.get("name") or body.get("name")
+    if header_title:
+        header["Title"] = str(header_title)
+    if isinstance(body.get("description"), str) and body["description"]:
+        header["Description"] = body["description"]
+    references = [
+        note[len(_REFERENCES_NOTE_PREFIX):]
+        for note in record.get("notes") or []
+        if isinstance(note, str) and note.startswith(_REFERENCES_NOTE_PREFIX)
+    ]
+    provenance = record.get("provenance") if isinstance(record.get("provenance"), Mapping) else {}
+    for prov_key in ("citation", "citation_doi"):
+        prov_value = provenance.get(prov_key)
+        if isinstance(prov_value, str) and prov_value and not references:
+            references.append(prov_value)
+    if references:
+        header["References"] = "; ".join(dict.fromkeys(references))
+
+    parameterisation: dict[str, Any] = {}
+    for block_name in ("Cell", "Electrolyte", "Negative electrode", "Positive electrode", "Separator"):
+        if block_name in blocks:
+            parameterisation[block_name] = blocks[block_name]
+    annex = body.get("annex")
+    annex_copy: dict[str, Any] = copy.deepcopy(dict(annex)) if isinstance(annex, Mapping) else {}
+    for name, value in user_defined.items():
+        if name in annex_copy and annex_copy[name] != value:
+            raise ValueError(
+                f"BPX Cell.{name} is {value!r} but the annex (User-defined) holds {annex_copy[name]!r} "
+                "under the same key; refusing to choose between them."
+            )
+        annex_copy[name] = value
+    if annex_copy:
+        parameterisation["User-defined"] = annex_copy
+    document: dict[str, Any] = {"Header": header, "Parameterisation": parameterisation}
+    if state:
+        document["State"] = state
+
+    added: set[str] = set()
+    if target_v1 and v0_source:
+        document, changes = to_v1_layout(document, target_version)
+        _report_layout_changes(changes, target_version, warnings)
+        added = {change.removeprefix("added ").split(" = ")[0] for change in changes if change.startswith("added ")}
+    elif not target_v1:
+        unhomed = _fold_state_into_v0(document)
+        if unhomed:
+            lacking.append(
+                f"State values BPX {target_version} has no field for ({', '.join(unhomed)}; export at "
+                "a 1.x version to keep them)"
+            )
+
+    filled = [
+        f"{block_name}.{name}"
+        for block_name, fields in document["Parameterisation"].items()
+        if block_name != "User-defined" and isinstance(fields, Mapping)
+        for name in fields
+    ] + [
+        path
+        for section, fields in (document.get("State") or {}).items()
+        if isinstance(fields, Mapping)
+        for name in fields
+        if (path := f"State.{section}.{name}") not in added
+    ]
+    missing_required = _missing_required_cell_fields(document["Parameterisation"].get("Cell", {}))
+    if missing_required and header["Model"] != "Partial":
+        warnings.append(
+            "Required BPX Cell parameters the record does not hold: " + ", ".join(missing_required)
+        )
+    not_imported = [str(path) for path in body.get("not_imported") or [] if isinstance(path, str)]
+    if not_imported:
+        warnings.append(
+            "The record does not hold these values of its source file, so this document lacks them "
+            "(the source file under distributions is the complete copy): " + ", ".join(not_imported)
+        )
+    if lacking:
+        warnings.append("Values the record holds that this document does not: " + "; ".join(lacking))
+    return (
+        BpxExportResult(bpx=document, filled=filled, missing_required=missing_required, warnings=warnings),
+        [*(f"not imported: {path}" for path in not_imported), *lacking],
+    )
+
+
+def _fold_state_into_v0(document: dict[str, Any]) -> list[str]:
+    """Move State into its v0.x homes (Cell, Electrolyte), in place; return what has none.
+
+    The values with no v0.x field are left out of the document and named.
+    A value set both in State and in its v0.x home is refused unless equal.
+    """
+    state = document.pop("State", None)
+    if state is None:
+        return []
+    if not isinstance(state, dict):
+        return ["State"]
+    parameterisation = document.setdefault("Parameterisation", {})
+    unhomed: list[str] = []
+    for section, fields in state.items():
+        if not isinstance(fields, dict):
+            unhomed.append(f"State.{section}")
+            continue
+        for key, value in fields.items():
+            home = _V0_STATE_HOMES.get((section, key))
+            if home is None:
+                unhomed.append(f"State.{section}.{key}")
+                continue
+            block_name, v0_key = home
+            block = parameterisation.setdefault(block_name, {})
+            if v0_key in block and block[v0_key] != value:
+                raise ValueError(
+                    f"BPX {block_name}.{v0_key} is set both there and as State.{section}.{key}; "
+                    "refusing to choose between them."
+                )
+            block[v0_key] = value
+    return unhomed
 
 
 def save_bpx(source: Any, path: PathLike, **kwargs: Any) -> Path:
@@ -1030,104 +1330,532 @@ def _coerce_cell_spec(source: Any) -> tuple[dict[str, Any], dict[str, Any]]:
     )
 
 
+def _json_kind(value: Any) -> str:
+    """How a JSON value reads in an error message: null, an array, a string, ..."""
+    if value is None:
+        return "null"
+    if isinstance(value, bool):
+        return "a boolean"
+    if isinstance(value, (int, float)):
+        return "a number"
+    if isinstance(value, str):
+        return "a string"
+    if isinstance(value, (list, tuple)):
+        return "an array"
+    return f"a {type(value).__name__}"
+
+
 # ══════════════════════════════════════════════════════════════════════════════
-# Import:  BPX physics parameters  ──►  parameter-set claim records
+# Import:  one BPX file  ──►  one parameter-set record
 # ══════════════════════════════════════════════════════════════════════════════
 #
-# :func:`from_bpx` deliberately imports only the cell-level spec subset; the
-# physics parameters (microstructure, transport, kinetics, OCPs) now have a
-# home — ``parameter-set`` records. One BPX file = one source making claims
-# about several targets: each electrode's *material* parameters (targeting a
-# material kind or material spec the caller names), and the *build* parameters
-# (electrode thickness/porosity, separator, electrolyte) targeting the cell
-# spec the file parameterises. BPX value forms map 1:1 onto claim forms:
-# number → quantity, {"x": [...], "y": [...]} → curve, "expression string" →
+# One BPX file is one source and one record. Every value lands in a part: each
+# electrode block splits into its material part (intrinsic values: OCP,
+# diffusivity, stoichiometry window) and its electrode part (the build:
+# thickness, porosity), and the Cell and State blocks become the cell and state
+# parts. BPX value forms map 1:1 onto claim forms: number -> quantity,
+# {"x": [...], "y": [...]} -> curve, "expression string" ->
 # expression(language="bpx").
 
 _BPX_ELECTRODE_BLOCKS = {"negative": "Negative electrode", "positive": "Positive electrode"}
 
-# claim-key groups per BPX block, split by the vocabulary's scope: an electrode
-# block mixes intrinsic material parameters with manufactured-build parameters,
-# and they must land in different parameter sets (different targets).
-_BPX_BLOCK_SCOPES = {
-    "separator": "separator",
-    "electrolyte": "electrolyte",
-}
+
+# ── Parameter files: identity, layout upgrade, checks ──────────────────────
+#
+# A published BPX file is served to solvers as its own bytes. The claims are
+# the searchable index and rebuild the file (to_bpx), but a rebuild cannot
+# restore what the importer does not model (Particle blends, initial
+# hysteresis state, Validation curves). These helpers give the file an
+# identity, a declared conversion when current parsers reject its layout, and
+# recorded checks.
+
+# Top-level sections the parameter importer reads (or folds, for State).
+_BPX_PARAMETER_SECTIONS = frozenset(
+    {"Header", "header", "Parameterisation", "parameterisation", "parameters", "State"}
+)
+
+
+def bpx_content_digest(source: Mapping[str, Any] | str | Path | bytes) -> str:
+    """SHA-256 of a BPX document's canonical JSON: the identity of its parameters.
+
+    Canonical is RFC 8785 (JSON Canonicalization Scheme): numbers written the
+    way ECMAScript writes doubles, keys sorted by UTF-16 code units, minimal
+    string escaping, no whitespace, UTF-8. The digest names the parameters,
+    not the bytes: a re-indented, reordered or CRLF copy has the same digest,
+    and so does one that spells a number differently (``1`` or ``1.0``,
+    ``1e-05`` or ``0.00001``, ``-0.0`` or ``0``), as a file passed through
+    another JSON library will. Any changed value changes it. The record imported
+    from the file stores it as ``parameters_sha256`` and mints its uid from it
+    (IDENTIFIER_POLICY 6.3).
+
+    numpy scalars and arrays in a dict input count as the values they hold.
+    NaN and infinities have no JSON form, so they raise ``ValueError`` naming
+    where they are.
+    """
+    data, _ = _load_bpx(source)
+    return hashlib.sha256(canonical_json_bytes(data)).hexdigest()
+
+
+@dataclass
+class BpxUpgradeResult:
+    """Result of :func:`upgrade_bpx`: the rewritten document and what changed.
+
+    ``source_version`` is ``Header.BPX`` as the file declared it;
+    ``target_version`` is what the rewritten file declares (the same when
+    nothing needed rewriting). ``changes`` names every move, every State
+    value added (entries starting ``"added "``) and the header change.
+    """
+
+    document: dict[str, Any]
+    source_version: str | None
+    target_version: str
+    changes: list[str] = field(default_factory=list)
+
+    @property
+    def changed(self) -> bool:
+        return bool(self.changes)
+
+    @property
+    def added(self) -> list[str]:
+        """The State values the conversion added, as ``"State.<section>.<field> = <value> (why)"``."""
+        return [change.removeprefix("added ") for change in self.changes if change.startswith("added ")]
+
+    def conversion_note(self, tool: str) -> str:
+        """One line for a runnable distribution's ``conversion`` field."""
+        if not self.changes:
+            return (
+                f"BPX {self.source_version} file already in the BPX v1 layout; "
+                f"nothing rewritten by {tool}."
+            )
+        rewritten = [change for change in self.changes if not change.startswith("added ")]
+        note = (
+            f"BPX {self.source_version} file in the v0.x layout, rewritten in the BPX v1 layout as "
+            f"BPX {self.target_version} by {tool}: {'; '.join(rewritten)}."
+        )
+        if self.added:
+            return (
+                f"{note} Values added, which the file does not state: {'; '.join(self.added)}. "
+                "The bpx package's own v0-to-v1 migration (bpx.convert_v0_to_v1) adds the same."
+            )
+        return f"{note} No values changed."
+
+    def to_json(self, *, indent: int | None = 2) -> str:
+        return json.dumps(self.document, indent=indent, ensure_ascii=False) + "\n"
+
+    def save(self, path: PathLike) -> Path:
+        out = Path(path)
+        out.write_text(self.to_json(), encoding="utf-8", newline="\n")
+        return out
+
+
+def upgrade_bpx(
+    source: Mapping[str, Any] | str | Path | bytes, *, target_version: str = DEFAULT_TARGET_VERSION
+) -> BpxUpgradeResult:
+    """Rewrite a BPX file in the v0.x layout in the v1 layout, every value of the file kept.
+
+    BPX 1.0 moved the initial and ambient temperatures out of ``Cell`` and the
+    initial electrolyte concentration out of ``Electrolyte`` into a top-level
+    ``State`` block, and took Cell's lumped thermal conductivity out of the
+    schema (the parser asks for it in ``User-defined``). Every parser since
+    1.0 rejects a file that declares 1.0 or later but keeps those fields in
+    the old places, and some exporters write exactly that (the BattMo export
+    of Schmitt et al. 2026 declares ``"BPX": 1.0``). This moves those fields,
+    sets ``Header.BPX`` to ``target_version``, and adds the State values the
+    v0.x layout has no field for, as the bpx package's own migration
+    (``bpx.convert_v0_to_v1``) adds them: initial state of charge 1, the
+    ambient temperature from the reference temperature (else 298.15 K) and
+    the initial temperature from the ambient one, each only when the file
+    has none. Every move and every added value is named in
+    :attr:`BpxUpgradeResult.changes`. One difference from the bpx package:
+    the thermal conductivity moves to ``User-defined`` instead of being
+    dropped.
+
+    The old layout is recognised by its fields or by a 0.x version, so a file
+    declaring 1.1 with its temperatures still in Cell is rewritten too, and a
+    document already in the v1 layout comes back unchanged. The conversion
+    itself is :func:`battinfo._bpx_layout.to_v1_layout`, the module the
+    registry vendors to check a runnable copy against its source.
+    """
+    data, _ = _load_bpx(source)
+    if not isinstance(data.get("Header"), Mapping):
+        raise ValueError("BPX document has no Header block.")
+    declared = data["Header"].get("BPX")
+    document, changes = to_v1_layout(data, target_version)
+    source_label = None if declared is None else str(declared)
+    target = target_version if changes else (source_label or target_version)
+    return BpxUpgradeResult(document, source_label, target, changes)
+
+
+def check_bpx(source: Mapping[str, Any] | str | Path | bytes) -> dict[str, Any]:
+    """Parse a document with the official ``bpx`` package and report a file check.
+
+    Parses the way PyBaMM does (legacy 0.x conversion on). Every warning the
+    parser itself raises goes into the detail: a legacy conversion or a
+    version-format deprecation (a file that only parses after conversion is
+    not current), and the consistency checks, such as OCPs at the
+    stoichiometry limits that overshoot a voltage cut-off. A file that parses
+    with warnings still passes, and the detail names every one of them,
+    first and in full, before the verdict (or the parser's error). Returns a
+    ``checks`` entry for a parameter-file distribution. Needs
+    ``pip install bpx``. A passing check means the parser accepts the file,
+    not that a solver runs it: that is what a ``simulation_smoke`` check
+    records.
+    """
+    try:
+        import bpx as bpx_lib  # noqa: PLC0415
+    except ImportError as exc:  # pragma: no cover - bpx is a dev dependency
+        raise ImportError("check_bpx needs the official parser: pip install bpx") from exc
+    from importlib.metadata import PackageNotFoundError, version  # noqa: PLC0415
+
+    try:
+        tool = f"bpx {version('bpx')}"
+    except PackageNotFoundError:  # pragma: no cover
+        tool = "bpx"
+    data, _ = _load_bpx(source)
+    bpx_dir = Path(bpx_lib.__file__).resolve().parent
+    notes: set[str] = set()
+
+    def _keep_parser_warnings(message: Any, category: Any, filename: str, *_: Any, **__: Any) -> None:
+        # Kept by where the warning was raised, not by what it says: the
+        # consistency warnings never mention "bpx". The filename a warning
+        # reports is wherever its stacklevel points: pydantic or this module
+        # for some of bpx's own warnings, and bpx's own code for pyparsing's
+        # deprecation noise. So look up the frame that called warn() instead.
+        if _is_within(_warning_origin() or filename, bpx_dir):
+            notes.add(str(message).strip())
+
+    with _warnings.catch_warnings():
+        _warnings.simplefilter("always")
+        _warnings.showwarning = _keep_parser_warnings
+        try:
+            bpx_lib.parse_bpx_obj(copy.deepcopy(data))
+            passed, detail = True, "Parsed by the official bpx parser."
+        except Exception as exc:  # noqa: BLE001 - any parse failure is the finding
+            passed = False
+            lines = [line.strip() for line in str(exc).splitlines() if line.strip()]
+            lines = [line for line in lines if not line.startswith("For further information")]
+            detail = " ".join(lines)
+    if notes:
+        # Every warning, in full: a truncated list hides the rest.
+        detail = f"Parser warnings: {' | '.join(sorted(notes))}. {detail}"
+    return {
+        "check": "bpx_parse",
+        "tool": tool,
+        "passed": passed,
+        "detail": detail,
+        "checked_at": date.today().isoformat(),
+    }
+
+
+# Modules that make up the warnings machinery itself (Python 3.14 moved the
+# pure-Python half into _py_warnings).
+_WARNINGS_MODULES = frozenset({"warnings", "_py_warnings"})
+
+
+def _warning_origin() -> str | None:
+    """From inside a ``showwarning`` hook: the file of the code that called ``warn()``."""
+    getframe = getattr(sys, "_getframe", None)
+    if getframe is None:  # pragma: no cover - not CPython
+        return None
+    frame = getframe(2)  # skip this function and the hook calling it
+    while frame is not None and frame.f_globals.get("__name__") in _WARNINGS_MODULES:
+        frame = frame.f_back
+    return frame.f_code.co_filename if frame is not None else None
+
+
+def _is_within(path: str, directory: Path) -> bool:
+    try:
+        Path(path).resolve().relative_to(directory)
+    except (OSError, ValueError):
+        return False
+    return True
+
+
+class _BpxFileEntry(dict):  # type: ignore[type-arg]
+    """A ``distributions`` entry: a plain dict to JSON and the schema.
+
+    It also remembers the parameters digest of the bytes it was made from,
+    outside the dict, so :meth:`BpxParameterImportResult.to_parameter_set`
+    can tell a copy with other bytes but the same parameters from another
+    file.
+    """
+
+    parameters_sha256: str | None = None
+
+
+def bpx_file_distribution(
+    file: str | Path | bytes,
+    *,
+    content_url: str,
+    role: str = "source",
+    name: str | None = None,
+    conforms_to: str | None = None,
+    derived_from: str | None = None,
+    conversion: str | None = None,
+    software_requirements: list[str] | None = None,
+    checks: list[Mapping[str, Any]] | None = None,
+    description: str | None = None,
+) -> dict[str, Any]:
+    """A parameter-file ``distributions`` entry for one BPX file.
+
+    Hashes the exact bytes (the checksum a downloader verifies) and reads
+    ``Header.BPX`` for ``conforms_to`` unless given. ``content_url`` is the
+    https URL where an immutable copy of those bytes is served. Roles:
+    ``source`` is the file as its authors published it; ``mirror`` is the
+    same bytes served elsewhere (pass the same file, so the checksums
+    agree); ``runnable`` is a declared conversion, made with
+    :func:`upgrade_bpx` only when the official parser rejects the source,
+    and needs ``derived_from`` (the source file's sha256, bare hex or
+    ``sha256:<hex>``) and ``conversion`` (what changed, by which tool:
+    :meth:`BpxUpgradeResult.conversion_note`). ``software_requirements``
+    names what a solver needs beyond BPX itself, such as
+    ``["aepybamm>=0.2.3"]`` for a file whose User-defined block holds
+    About:Energy's functions. The file is parsed as strictly as the import
+    parses it (no repeated keys).
+    """
+    if role not in ("source", "runnable", "mirror"):
+        raise ValueError(f"role must be 'source', 'runnable' or 'mirror'; got {role!r}.")
+    if not isinstance(content_url, str) or not content_url.startswith("https://"):
+        raise ValueError(f"content_url must be an https URL; got {content_url!r}.")
+    if isinstance(file, (bytes, bytearray)):
+        raw = bytes(file)
+        file_name = name or "parameters.bpx.json"
+    else:
+        path = Path(file)
+        raw = _read_bytes(path)
+        file_name = name or path.name
+    document = _parse_bpx_bytes(raw, file_name)
+    if conforms_to is None:
+        _title, header_version, _model, _desc = _extract_header(document)
+        if header_version is None:
+            raise ValueError(f"{file_name} has no Header.BPX version; pass conforms_to=.")
+        conforms_to = f"BPX {header_version}"
+    entry = _BpxFileEntry(
+        {
+            "type": "DataDownload",
+            "name": file_name,
+            "role": role,
+            "content_url": content_url,
+            "encoding_format": "application/json",
+            "conforms_to": conforms_to,
+            "byte_size": len(raw),
+            "checksum": {"algorithm": "sha256", "value": hashlib.sha256(raw).hexdigest()},
+        }
+    )
+    entry.parameters_sha256 = hashlib.sha256(canonical_json_bytes(document)).hexdigest()
+    if description:
+        entry["description"] = description
+    if role == "runnable":
+        if not derived_from or not conversion:
+            raise ValueError("a runnable file needs derived_from= (source sha256) and conversion=.")
+        digest = derived_from.removeprefix("sha256:").lower()
+        if len(digest) != 64 or any(c not in "0123456789abcdef" for c in digest):
+            raise ValueError("derived_from must be a sha256 hex digest (optionally 'sha256:'-prefixed).")
+        entry["derived_from"] = f"sha256:{digest}"
+        entry["conversion"] = conversion
+    elif derived_from or conversion:
+        raise ValueError("derived_from/conversion only apply to role='runnable'.")
+    if software_requirements:
+        entry["software_requirements"] = [str(item) for item in software_requirements]
+    if checks:
+        entry["checks"] = [dict(check) for check in checks]
+    return entry
 
 
 @dataclass
 class BpxParameterImportResult:
-    """Result of :func:`from_bpx_parameters`.
+    """Result of :func:`from_bpx_parameters`: one BPX file, read as parts.
 
     Attributes
     ----------
-    claims:
-        Claim lists keyed by block: ``negative_material`` / ``positive_material``
-        (intrinsic material claims), ``negative_electrode`` /
-        ``positive_electrode`` (manufactured-build claims), ``separator``,
-        ``electrolyte``. Every claim is schema-shaped (``parameter`` + one of
-        ``quantity``/``curve``/``expression``).
+    parts:
+        The file's claims grouped by part, in canonical order (cell,
+        negative_material, negative_electrode, positive_material,
+        positive_electrode, separator, electrolyte, state), each
+        ``{"part": ..., "claims": [...]}``. For inspection: the record
+        :meth:`to_parameter_set` builds re-reads the file, so editing these
+        lists cannot change what the record's IRI names.
     title / bpx_version / model_type / description / source_file:
         BPX header fields, as in :class:`BpxImportResult`.
     references:
-        The ``Header.References`` provenance string, carried onto every minted
-        record as its provenance citation (unless the caller passes one).
-    user_defined:
-        The ``Parameterisation.User-defined`` block verbatim — BPX's extension
-        point, with no standard semantics. Carried onto every minted record as
-        its ``annex`` so a re-export reproduces the file and nothing is lost.
+        The ``Header.References`` provenance string.
+    annex:
+        The ``Parameterisation.User-defined`` block verbatim: BPX's extension
+        point, with no standard semantics, carried on the record so a
+        re-export reproduces it.
     warnings:
-        Unmapped fields and skipped values.
+        Every value the file holds that is not a claim or the annex, named
+        (blended-electrode Particle blocks, initial hysteresis state,
+        Degradation, Validation series, unknown fields), plus skipped values.
+    not_imported:
+        The BPX paths of those values (``"Parameterisation/Negative
+        electrode/Particle"``, ``"State/Degradation"``, ``"Validation"``):
+        the record's ``not_imported``, so a reader of the record knows what
+        only the source file holds.
+    content_digest:
+        SHA-256 of the file's RFC 8785 canonical JSON (:func:`bpx_content_digest`):
+        the record's ``parameters_sha256``, from which its IRI derives.
+    source_sha256:
+        SHA-256 of the exact bytes read, for a path or bytes input (``None``
+        for a dict): the checksum the source distribution must carry.
     """
 
-    claims: dict[str, list[dict[str, Any]]]
+    parts: list[dict[str, Any]]
     title: str | None
     bpx_version: str | None
     model_type: str | None
     description: str | None
     source_file: str | None
     references: str | None = None
-    user_defined: dict[str, Any] = field(default_factory=dict)
+    annex: dict[str, Any] = field(default_factory=dict)
     warnings: list[str] = field(default_factory=list)
+    not_imported: list[str] = field(default_factory=list)
+    content_digest: str | None = None
+    source_sha256: str | None = None
+    _document: dict[str, Any] = field(default_factory=dict, repr=False, compare=False)
 
-    def to_records(
+    def file_uid(self) -> str | None:
+        """The uid of the record this file becomes (IDENTIFIER_POLICY 6.3).
+
+        Known before the record is built, so the file can be uploaded under
+        its record's uid first. ``None`` when the import has no digest.
+        """
+        if self.content_digest is None:
+            return None
+        from battinfo.api._parameters import parameter_file_uid  # noqa: PLC0415
+
+        return parameter_file_uid(self.content_digest)
+
+    def to_parameter_set(
         self,
         *,
-        materials: Mapping[str, str] | None = None,
         cell_spec_id: str | None = None,
+        cell_instance_id: str | None = None,
+        virtual_cell: bool = False,
+        materials: Mapping[str, str] | None = None,
+        distributions: list[Mapping[str, Any]] | None = None,
+        source_file: str | Path | bytes | None = None,
+        runnable_file: str | Path | bytes | None = None,
+        supersedes: str | None = None,
         name: str | None = None,
         default_provenance_class: str = "fitted",
-        by_block: bool = False,
         **record_kwargs: Any,
-    ) -> list[dict[str, Any]] | dict[str, dict[str, Any]]:
-        """Build canonical parameter-set records from the imported claims.
+    ) -> dict[str, Any]:
+        """Build the file's one parameter-set record.
 
-        ``materials`` maps ``"negative"`` / ``"positive"`` (and optionally
-        ``"electrolyte"``, ``"separator"``) to a target: a curated material-kind
-        key/alias or a material-spec IRI. Electrode-material claims without a
-        mapping are skipped with a warning — BPX does not name its materials, so
-        the caller must. Build claims (electrode/separator/electrolyte scope)
-        target ``cell_spec_id`` and are skipped with a warning when it is absent
-        (unless a material target was given for that block).
+        Say which cell the file describes, with exactly one of
+        ``cell_spec_id`` (a cell spec already in the genome),
+        ``cell_instance_id`` (the one physical cell a fit was made on) or
+        ``virtual_cell=True`` (no real cell). BattINFO never guesses, and it
+        creates no cell record: a cell that is not in the genome yet is
+        described first (identity only: name, maker, model, format,
+        chemistry), and its BPX numbers stay on this record as cell claims.
 
-        ``record_kwargs`` (citation_doi, source_url, notes, ...) pass through to
-        every record. Records validate against the parameter-set schema.
+        ``materials`` names what each electrode's material part is about,
+        ``{"negative": ..., "positive": ...}``, as a curated material-kind
+        key/alias (:func:`battinfo.materials.material_kind_keys` lists them)
+        or a material-spec IRI: BPX does not name its materials, and a named
+        part is what lets its claims be found by material. Naming the
+        material of a blended electrode raises: its per-particle values are
+        not imported yet, so there is no material part to name.
 
-        ``by_block=True`` returns ``{block_key: record}`` instead of a flat
-        list — the exact mapping :func:`to_bpx`'s ``parameter_sets`` argument
-        takes, so import → records → export is symmetric by construction.
+        ``distributions`` attaches the file (entries from
+        :func:`bpx_file_distribution`): exactly one ``source``, at most one
+        ``runnable`` conversion naming the source's checksum, and mirrors of
+        the source's bytes. A file is required to publish the record and
+        optional for local work. The source must be the file these
+        parameters were read from. For a path or bytes import its checksum
+        must equal :attr:`source_sha256`. For a dict import, or to attach a
+        copy with other bytes but the same parameters (a CRLF checkout, a
+        re-indented file), pass ``source_file=`` (its bytes or path): its
+        parameters must match, and the source entry must carry its checksum.
+        A ``runnable`` entry needs ``runnable_file=`` (its bytes or path):
+        its sha256 must be the entry's checksum, and its parameters must be
+        those of :func:`upgrade_bpx` applied to this file, so a runnable
+        copy can only be this file's layout conversion.
+
+        ``supersedes`` names the record (a spec IRI) of an earlier file this
+        one corrects: a corrected file has other parameters, so it is a new
+        record with a new IRI that points back at the old one.
+
+        ``record_kwargs`` (description, citation, citation_doi, source_url,
+        notes, license, retrieved_at, ...) pass to
+        :func:`battinfo.api.create_parameter_set`. The header's
+        ``Description`` and ``References`` fill description and citation
+        (or a note) unless given. The record validates against the
+        parameter-set schema.
         """
+        from battinfo._util import _citation_url_value  # noqa: PLC0415
         from battinfo.api import create_parameter_set  # noqa: PLC0415
 
+        links = [
+            link
+            for link, value in (
+                ("cell_spec_id", cell_spec_id),
+                ("cell_instance_id", cell_instance_id),
+                ("virtual_cell", True if virtual_cell else None),
+            )
+            if value is not None
+        ]
+        if len(links) != 1:
+            raise ValueError(
+                "say which cell this file describes: pass exactly one of cell_spec_id= (a cell "
+                "spec in the genome), cell_instance_id= (the physical cell it was fitted on) or "
+                f"virtual_cell=True (no real cell); got {links or 'none'}."
+            )
+        if self.content_digest is None or bpx_content_digest(self._document) != self.content_digest:
+            raise ValueError(
+                "this import no longer holds the document it was read from; import the file again."
+            )
+        # Re-read the file rather than trusting self.parts: the IRI names the
+        # file's parameters, so the record must say exactly what the file says.
+        parts, annex, _warnings, not_imported = _parse_bpx_parameters(self._document)
+
+        if materials is not None and not isinstance(materials, Mapping):
+            raise TypeError(
+                f"materials is a mapping {{'negative': ..., 'positive': ...}}, not {type(materials).__name__}."
+            )
         materials = dict(materials or {})
-        base = name or self.title or self.source_file or "BPX import"
-        # Header lineage rides every record: Description as the record
-        # description; References as the provenance citation when it is a
-        # URL/DOI, otherwise verbatim as a note (provenance.citation is
-        # URI-typed). Caller-supplied values win; the model context
-        # (tool/model/version) is stamped unconditionally below — a DFN-fitted
-        # value is not model-free.
-        from battinfo._util import _citation_url_value  # noqa: PLC0415
+        unknown_sides = sorted(set(materials) - set(_BPX_ELECTRODE_BLOCKS))
+        if unknown_sides:
+            raise ValueError(
+                f"materials keys are 'negative' and 'positive'; got {', '.join(unknown_sides)}."
+            )
+        for side, block_name in _BPX_ELECTRODE_BLOCKS.items():
+            part = next((p for p in parts if p["part"] == f"{side}_material"), None)
+            target = materials.get(side)
+            if part is None:
+                if target is not None:
+                    raise ValueError(self._no_material_part(side, block_name))
+                continue
+            if target is None:
+                self._warn(
+                    f"The {side} electrode material part names no material: BPX does not name "
+                    f"its materials, so pass materials={{'{side}': '<kind or material-spec IRI>'}} "
+                    "to make its claims findable by material."
+                )
+                continue
+            part.update(_material_target(target, side))
+
+        if distributions is not None:
+            if not isinstance(distributions, list):
+                raise TypeError(
+                    "distributions is a list of entries from bpx_file_distribution(), not "
+                    f"{type(distributions).__name__}; wrap a single entry in a list."
+                )
+            for index, entry in enumerate(distributions):
+                if not isinstance(entry, Mapping):
+                    raise TypeError(
+                        f"distributions[{index}] is a {type(entry).__name__}; each entry is a dict "
+                        "from bpx_file_distribution()."
+                    )
+        if distributions:
+            self._check_source_file(distributions, source_file)
+            self._check_runnable_file(distributions, runnable_file)
+        else:
+            for given, what in ((source_file, "source_file"), (runnable_file, "runnable_file")):
+                if given is not None:
+                    raise ValueError(f"{what}= checks an attached file: pass distributions= too.")
 
         record_kwargs = dict(record_kwargs)
         if self.description is not None:
@@ -1137,143 +1865,234 @@ class BpxParameterImportResult:
             and "citation" not in record_kwargs
             and "citation_doi" not in record_kwargs
         ):
+            # provenance.citation is URI-typed: a URL/DOI goes there, free text
+            # rides a note verbatim (to_bpx reads it back into the header).
             citation_value = _citation_url_value(self.references)
-            if isinstance(citation_value, str) and citation_value.startswith(
-                ("http://", "https://")
-            ):
+            if isinstance(citation_value, str) and citation_value.startswith(("http://", "https://")):
                 record_kwargs["citation"] = self.references
             else:
                 notes = list(record_kwargs.get("notes") or [])
-                notes.append(f"BPX Header.References: {self.references}")
+                notes.append(f"{_REFERENCES_NOTE_PREFIX}{self.references}")
                 record_kwargs["notes"] = notes
         model_context = {
             "tool": "BPX",
             **({"name": self.title} if self.title else {}),
             **({"model": self.model_type} if self.model_type else {}),
             **({"version": self.bpx_version} if self.bpx_version else {}),
+            # The layout the file actually uses: a file declaring 1.0 may
+            # still keep the v0.x one, and a v1 export must then convert it.
+            "layout": "v0" if is_v0_layout(self._document) else "v1",
         }
+        link_kwargs: dict[str, Any] = {
+            "cell_spec_id": {"cell_spec_id": cell_spec_id},
+            "cell_instance_id": {"cell_instance_id": cell_instance_id},
+            "virtual_cell": {"virtual_cell": True},
+        }[links[0]]
+        record = create_parameter_set(
+            name=name or self.title or self.source_file or "BPX import",
+            parts=parts,
+            parameters_sha256=self.content_digest,
+            model_context=model_context,
+            **({"annex": annex} if annex else {}),
+            **({"not_imported": not_imported} if not_imported else {}),
+            **({"distributions": [dict(d) for d in distributions]} if distributions else {}),
+            **({"supersedes": supersedes} if supersedes is not None else {}),
+            default_provenance_class=default_provenance_class,
+            **link_kwargs,
+            **record_kwargs,
+        )
+        if distributions:
+            from battinfo.api._parameters import parameter_file_issues  # noqa: PLC0415
 
-        def _target_fields(value: str) -> dict[str, str]:
-            from battinfo.materials import resolve_material_kind  # noqa: PLC0415
+            for _code, severity, _path, message in parameter_file_issues(record["parameter_set"]):
+                if severity == "warning":
+                    self._warn(message)
+        return record
 
-            kind = resolve_material_kind(value)
-            if kind is not None:
-                return {"material_kind": kind}
-            if isinstance(value, str) and value.startswith("https://w3id.org/battinfo/"):
-                return {"material_spec_id": value}
+    def _warn(self, message: str) -> None:
+        if message not in self.warnings:
+            self.warnings.append(message)
+
+    def _no_material_part(self, side: str, block_name: str) -> str:
+        block = (self._document.get("Parameterisation") or {}).get(block_name)
+        if isinstance(block, Mapping) and block.get("Particle") is not None:
+            phases = block["Particle"]
+            named = ", ".join(map(str, phases)) if isinstance(phases, Mapping) else "its phases"
+            return (
+                f"materials[{side!r}] names a material, but the {side} electrode is blended ({named}): "
+                "its particle values sit in a Particle block, which is not imported yet, so there is "
+                f"no {side} material part to name. Leave {side!r} out of materials."
+            )
+        return (
+            f"materials[{side!r}] names a material, but the file has no {side} electrode material "
+            f"values, so there is no {side} material part to name. Leave {side!r} out of materials."
+        )
+
+    def _check_source_file(
+        self, distributions: list[Mapping[str, Any]], source_file: str | Path | bytes | None
+    ) -> None:
+        """The attached source must be the file these parameters were read from."""
+        sources = [d for d in distributions if isinstance(d, Mapping) and d.get("role") == "source"]
+        if len(sources) != 1:
             raise ValueError(
-                f"materials[...] value {value!r} is neither a curated material kind "
-                "nor a material-spec IRI."
+                "distributions need exactly one role='source' entry: the file these parameters "
+                f"were read from (got {len(sources)})."
+            )
+        checksum = sources[0].get("checksum")
+        attached = checksum.get("value") if isinstance(checksum, Mapping) else None
+        if source_file is not None:
+            raw = _file_bytes(source_file)
+            document = _parse_bpx_bytes(raw, "source_file")
+            if bpx_content_digest(document) != self.content_digest:
+                raise ValueError(
+                    "source_file holds other parameters than the ones imported (its RFC 8785 "
+                    "digest differs), so it cannot be this record's source."
+                )
+            expected = hashlib.sha256(raw).hexdigest()
+        elif self.source_sha256 is not None:
+            expected = self.source_sha256
+        else:
+            raise ValueError(
+                "these parameters were imported from a dict, so the attached source cannot be "
+                "checked against them: pass source_file= (the source file's bytes or path)."
+            )
+        if attached == expected:
+            return
+        same_parameters = getattr(sources[0], "parameters_sha256", None) == self.content_digest
+        if same_parameters and source_file is None:
+            raise ValueError(
+                "the attached source file holds the same parameters as the file read, in other "
+                f"bytes (a CRLF checkout or a re-indented copy, for example): its checksum is "
+                f"{attached}, the bytes read have sha256 {expected}. To attach that copy, pass "
+                "source_file= (its bytes or path) as well."
+            )
+        raise ValueError(
+            "the attached source file is not the file these parameters were read from: its "
+            f"checksum is {attached}, the file read has sha256 {expected}. If it is the same file "
+            "in other bytes (a CRLF checkout, a re-indented copy), pass source_file= (its bytes or "
+            "path) and build the source entry from those bytes."
+        )
+
+    def _check_runnable_file(
+        self, distributions: list[Mapping[str, Any]], runnable_file: str | Path | bytes | None
+    ) -> None:
+        """An attached runnable copy must be the layout conversion of this file, byte-checked."""
+        runnables = [d for d in distributions if d.get("role") == "runnable"]
+        if not runnables:
+            if runnable_file is not None:
+                raise ValueError("runnable_file= checks an attached runnable copy, and distributions has none.")
+            return
+        if runnable_file is None:
+            raise ValueError(
+                "distributions holds a runnable copy, so pass runnable_file= (its bytes or path): "
+                "its sha256 must be the entry's checksum, and it must be upgrade_bpx() of this file."
+            )
+        if len(runnables) > 1:
+            return  # the record builder refuses a second runnable copy
+        entry = runnables[0]
+        raw = _file_bytes(runnable_file)
+        checksum = entry.get("checksum")
+        declared = checksum.get("value") if isinstance(checksum, Mapping) else None
+        actual = hashlib.sha256(raw).hexdigest()
+        if declared != actual:
+            raise ValueError(
+                f"runnable_file is not the attached runnable copy: the entry's checksum is {declared}, "
+                f"runnable_file has sha256 {actual}."
+            )
+        runnable = _parse_bpx_bytes(raw, "runnable_file")
+        expected = upgrade_bpx(self._document).document
+        if bpx_content_digest(runnable) != bpx_content_digest(expected):
+            differing = _differing_paths(expected, runnable)
+            raise ValueError(
+                "the runnable copy is not the layout conversion of this file: its parameters differ "
+                "from upgrade_bpx() of the file read"
+                + (f" at {', '.join(differing)}" if differing else "")
+                + ". A runnable copy may only move fields to the BPX v1 layout; make it with "
+                "upgrade_bpx(source).save(path)."
             )
 
-        records: list[dict[str, Any]] = []
-        records_by_block: dict[str, dict[str, Any]] = {}
 
-        def _emit(block: str, scope: str, label: str, **target: str) -> None:
-            block_claims = self.claims.get(block) or []
-            if not block_claims:
-                return
-            record = create_parameter_set(
-                name=f"{base} - {label}",
-                scope=scope,
-                claims=block_claims,
-                model_context=model_context,
-                # The User-defined block rides every record from this file (the
-                # same file-level duplication model_context already uses), so a
-                # single record is enough to re-export the source faithfully.
-                **({"annex": dict(self.user_defined)} if self.user_defined else {}),
-                default_provenance_class=default_provenance_class,
-                **target,
-                **record_kwargs,
-            )
-            records.append(record)
-            records_by_block[block] = record
+def _file_bytes(file: str | Path | bytes) -> bytes:
+    return bytes(file) if isinstance(file, (bytes, bytearray)) else _read_bytes(Path(file))
 
-        for side in ("negative", "positive"):
-            material_target = materials.get(side)
-            if material_target is not None:
-                _emit(
-                    f"{side}_material", "material", f"{side} electrode material",
-                    **_target_fields(material_target),
-                )
-            elif self.claims.get(f"{side}_material"):
-                self.warnings.append(
-                    f"{side} electrode material claims skipped: BPX does not name the "
-                    f"material — pass materials={{'{side}': '<kind or material-spec IRI>'}}."
-                )
-            if self.claims.get(f"{side}_electrode"):
-                if cell_spec_id is not None:
-                    _emit(
-                        f"{side}_electrode", "electrode", f"{side} electrode build",
-                        electrode_polarity=side, cell_spec_id=cell_spec_id,
-                    )
-                else:
-                    self.warnings.append(
-                        f"{side} electrode build claims (thickness/porosity/...) skipped: "
-                        "pass cell_spec_id=... to target the cell design they describe."
-                    )
 
-        for block, scope in _BPX_BLOCK_SCOPES.items():
-            if not self.claims.get(block):
-                continue
-            block_material = materials.get(block)
-            if block_material is not None:
-                _emit(block, scope, block, **_target_fields(block_material))
-            elif cell_spec_id is not None:
-                _emit(block, scope, block, cell_spec_id=cell_spec_id)
+def _differing_paths(expected: Any, actual: Any, path: str = "", limit: int = 5) -> list[str]:
+    """Up to ``limit`` paths where two parsed documents differ (``"Parameterisation.Cell.Volume [m3]"``)."""
+    if isinstance(expected, Mapping) and isinstance(actual, Mapping):
+        found: list[str] = []
+        for key in [*expected, *(k for k in actual if k not in expected)]:
+            where = f"{path}.{key}" if path else str(key)
+            if key not in expected or key not in actual:
+                found.append(where)
             else:
-                self.warnings.append(
-                    f"{block} claims skipped: pass cell_spec_id=... (or a "
-                    f"materials={{'{block}': ...}} target)."
-                )
-
-        # One BPX file = one co-fitted parameterisation: mint the SET record
-        # (the dataset-series flavor) so the whole is addressable, its block
-        # map states side assignment, and to_bpx can reassemble the runnable
-        # file from the set alone. Members are stamped with the backlink after
-        # minting (the set's deterministic id needs the member ids first).
-        if cell_spec_id is not None and records_by_block:
-            set_record = create_parameter_set(
-                name=base,
-                cell_spec_id=cell_spec_id,
-                scope="cell",
-                members={
-                    block: record["parameter_set"]["id"]
-                    for block, record in records_by_block.items()
-                },
-                model_context=model_context,
-                **({"annex": dict(self.user_defined)} if self.user_defined else {}),
-                **record_kwargs,
-            )
-            set_iri = set_record["parameter_set"]["id"]
-            for record in records:
-                record["parameter_set"]["set_id"] = set_iri
-            records.append(set_record)
-            records_by_block["set"] = set_record
-        return records_by_block if by_block else records
+                found.extend(_differing_paths(expected[key], actual[key], where, limit))
+            if len(found) >= limit:
+                return found[:limit]
+        return found
+    if canonical_json_bytes(expected) != canonical_json_bytes(actual):
+        return [path or "(the document)"]
+    return []
 
 
-def _bpx_value_to_claim(key: str, raw_value: Any, entry: Mapping[str, Any]) -> dict[str, Any] | None:
-    """Map one BPX field value to a claim body (quantity/curve/expression), or None."""
-    unit = str(entry.get("unit", "1"))
+def _v0_layout_in_v1_file(document: Mapping[str, Any]) -> tuple[Any, list[str]] | None:
+    """``(declared version, old fields)`` for a file that declares BPX 1.0 or later but keeps the v0.x layout."""
+    header = document.get("Header")
+    declared = header.get("BPX") if isinstance(header, Mapping) else None
+    fields = v0_layout_fields(document)
+    if not fields or not uses_v1_layout(declared):
+        return None
+    return declared, fields
+
+
+def _material_target(value: Any, side: str) -> dict[str, str]:
+    """A materials[...] value as a part's material target."""
+    from battinfo.materials import resolve_material_kind  # noqa: PLC0415
+
+    kind = resolve_material_kind(value) if isinstance(value, str) else None
+    if kind is not None:
+        return {"material_kind": kind}
+    if isinstance(value, str) and value.startswith("https://w3id.org/battinfo/"):
+        return {"material_spec_id": value}
+    raise ValueError(
+        f"materials[{side!r}] is {value!r}, which is neither a curated material kind nor a "
+        "material-spec IRI (https://w3id.org/battinfo/spec/<uid>). "
+        "battinfo.materials.material_kind_keys() lists the material kinds."
+    )
+
+
+def _short_repr(value: Any, limit: int = 80) -> str:
+    text = repr(value)
+    return text if len(text) <= limit else text[: limit - 3] + "..."
+
+
+def _bpx_value_to_claim(key: str, raw_value: Any, entry: Mapping[str, Any], unit: str) -> dict[str, Any] | None:
+    """One BPX field value as a claim body (quantity/curve/expression), or None.
+
+    The value is kept exactly as the file states it, in the unit BPX states
+    it in, so the record says what the file says.
+    """
     if isinstance(raw_value, bool):
         return None
     if isinstance(raw_value, (int, float)):
         if not math.isfinite(raw_value):
             return None
-        return {"parameter": key, "quantity": {"value": float(raw_value), "unit": unit}}
+        return {"parameter": key, "quantity": {"value": raw_value, "unit": unit}}
     if isinstance(raw_value, str) and raw_value.strip():
         return {
             "parameter": key,
-            "expression": {"text": raw_value.strip(), "language": "bpx", "argument": "x"},
+            "expression": {"text": raw_value, "language": "bpx", "argument": "x"},
         }
-    if isinstance(raw_value, Mapping):
-        xs, ys = raw_value.get("x"), raw_value.get("y")
-        if isinstance(xs, list) and isinstance(ys, list) and len(xs) == len(ys) and len(xs) >= 2:
+    if isinstance(raw_value, Mapping) and set(raw_value) == {"x", "y"}:
+        xs, ys = raw_value["x"], raw_value["y"]
+        numeric = all(
+            isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v)
+            for v in [*(xs if isinstance(xs, list) else []), *(ys if isinstance(ys, list) else [])]
+        )
+        if isinstance(xs, list) and isinstance(ys, list) and len(xs) == len(ys) >= 2 and numeric:
             curve: dict[str, Any] = {
                 "x_quantity": str(entry.get("x_quantity", "stoichiometry")),
-                "x": [float(v) for v in xs],
-                "y": [float(v) for v in ys],
+                "x": list(xs),
+                "y": list(ys),
                 "y_unit": unit,
             }
             x_unit = {"concentration": "mol/m3", "temperature": "K"}.get(curve["x_quantity"])
@@ -1283,157 +2102,394 @@ def _bpx_value_to_claim(key: str, raw_value: Any, entry: Mapping[str, Any]) -> d
     return None
 
 
-def _extract_block_claims(
-    block_params: Mapping[str, Any],
-    bpx_block: str,
-    warnings: list[str],
-    block_label: str,
-) -> dict[str, list[dict[str, Any]]]:
-    """Split one BPX block's fields into material- and build-scope claim lists."""
-    from battinfo.parameters import parameter_entry, resolve_bpx_field  # noqa: PLC0415
+# BPX field -> the OCP branch it tabulates (single-phase electrodes, BPX 1.0+).
+_OCP_BRANCH_BY_FIELD: dict[str, str] = {field: branch for branch, field in _OCP_BRANCH_FIELDS.items()}
 
-    material_claims: list[dict[str, Any]] = []
-    build_claims: list[dict[str, Any]] = []
+
+def _bpx_block_claims(
+    block: Mapping[str, Any],
+    vocab_block: str,
+    label: str,
+    warnings: list[str],
+    not_imported: list[str],
+    path: str,
+) -> list[tuple[dict[str, Any], list[str]]]:
+    """One BPX block's fields as ``(claim, scopes)`` pairs; every field read or named.
+
+    ``path`` is the block's BPX path (``"Parameterisation/Cell"``); a field
+    that is not read lands in ``not_imported`` under it.
+    """
+    from battinfo.parameters import bpx_field, parameter_entry, resolve_bpx_field  # noqa: PLC0415
+
+    out: list[tuple[dict[str, Any], list[str]]] = []
     unknown: list[str] = []
-    for field_name, raw_value in block_params.items():
-        key = resolve_bpx_field(bpx_block, field_name)
-        if key is None:
-            unknown.append(field_name)
+    for field_name, raw_value in block.items():
+        branch = _OCP_BRANCH_BY_FIELD.get(str(field_name)) if vocab_block == "electrode" else None
+        if branch is not None:
+            # An OCP branch of a single-phase electrode: the ocp parameter,
+            # as a curve that says which branch it is.
+            entry = parameter_entry("ocp") or {}
+            claim = _bpx_value_to_claim("ocp", raw_value, entry, "V")
+            if claim is None or "curve" not in claim:
+                warnings.append(
+                    f"BPX {label} field '{field_name}' is {_short_repr(raw_value)}: an OCP branch is "
+                    "read as a curve claim only, so this one is not read."
+                )
+                not_imported.append(f"{path}/{field_name}")
+                continue
+            claim["curve"]["branch"] = branch
+            out.append((claim, list(entry.get("scopes", []))))
+            continue
+        key = resolve_bpx_field(vocab_block, field_name)
+        mapping = bpx_field(key, vocab_block) if key is not None else None
+        if key is None or mapping is None:
+            unknown.append(str(field_name))
+            not_imported.append(f"{path}/{field_name}")
             continue
         entry = parameter_entry(key) or {}
-        claim = _bpx_value_to_claim(key, raw_value, entry)
+        claim = _bpx_value_to_claim(key, raw_value, entry, mapping["unit"])
         if claim is None:
             warnings.append(
-                f"BPX {block_label} field '{field_name}' has unusable value "
-                f"{raw_value!r}; skipped."
+                f"BPX {label} field '{field_name}' has unusable value {_short_repr(raw_value)}; "
+                "not read as a claim."
             )
+            not_imported.append(f"{path}/{field_name}")
             continue
-        scopes = entry.get("scopes", [])
-        (material_claims if "material" in scopes else build_claims).append(claim)
+        out.append((claim, list(entry.get("scopes", []))))
     if unknown:
+        # EVERY field is named: a truncated list is a silent drop for the rest.
         warnings.append(
-            f"BPX {block_label} fields with no parameter mapping: "
-            f"{', '.join(unknown[:8])}" + (" …" if len(unknown) > 8 else "")
+            f"BPX {label} fields with no parameter mapping, not read as claims: {', '.join(unknown)}"
         )
-    return {"material": material_claims, "build": build_claims}
+    return out
 
 
-def from_bpx_parameters(source: Mapping[str, Any] | str | Path) -> BpxParameterImportResult:
-    """Import BPX physics parameters as parameter-set claims.
+def _bpx_state_sections(
+    data: Mapping[str, Any],
+    blocks: dict[str, dict[str, Any]],
+    warnings: list[str],
+    not_imported: list[str],
+    params_key: str,
+) -> dict[str, Any]:
+    """The file's State values by section, in the v1 layout.
 
-    Extracts the electrode, separator, and electrolyte blocks that
-    :func:`from_bpx` deliberately skips, as schema-shaped claims grouped by
-    block. Cell-level fields stay with :func:`from_bpx` (they are spec
-    properties, not claims). Call :meth:`BpxParameterImportResult.to_records`
-    (or :func:`import_bpx_parameters`) to mint the canonical records.
+    A v0.x-layout file keeps the fields BPX 1.0 moved into State in Cell and
+    Electrolyte; they are taken out of ``blocks`` (copies) and read as the
+    State values they are, so either layout gives the same state part.
+    """
+    raw_state = data.get("State")
+    state: dict[str, Any] = {}
+    if isinstance(raw_state, Mapping):
+        state = {
+            section: dict(fields) if isinstance(fields, Mapping) else fields
+            for section, fields in raw_state.items()
+        }
+    elif raw_state is not None:
+        warnings.append(f"BPX State is {_json_kind(raw_state)}, not an object; not read.")
+        not_imported.append("State")
+    for block_name, key, section, new_key in V1_STATE_MOVES:
+        block = blocks.get(block_name)
+        if not block or key not in block:
+            continue
+        value = block.pop(key)
+        target = state.setdefault(section, {})
+        if not isinstance(target, dict):
+            warnings.append(
+                f"BPX {block_name}.{key} not read: State.{section} is {_json_kind(target)}, "
+                "not an object."
+            )
+            not_imported.append(f"{params_key}/{block_name}/{key}")
+            continue
+        if new_key in target and target[new_key] != value:
+            warnings.append(
+                f"BPX {block_name}.{key} ({_short_repr(value)}) and State.{section}.{new_key} "
+                f"({_short_repr(target[new_key])}) disagree: the State value is read, the "
+                f"{block_name} value is not."
+            )
+            not_imported.append(f"{params_key}/{block_name}/{key}")
+            continue
+        target[new_key] = value
+    return state
+
+
+# Header fields the import reads (model_context, description, references).
+_BPX_HEADER_FIELDS = frozenset(
+    {"BPX", "bpx", "Title", "title", "Model", "model", "Description", "description", "References", "references"}
+)
+
+
+def _parse_bpx_parameters(
+    data: Mapping[str, Any],
+) -> tuple[list[dict[str, Any]], dict[str, Any], list[str], list[str]]:
+    """One BPX document as ``(parts, annex, warnings, not_imported)``.
+
+    Every value in the document becomes a claim in a part, rides the annex
+    (User-defined, verbatim), or is named in a warning, and its BPX path is
+    listed in ``not_imported``.
+    """
+    from battinfo.parameters import PARAMETER_FILE_PARTS  # noqa: PLC0415
+
+    warnings: list[str] = []
+    not_imported: list[str] = []
+    params_key = next(
+        (k for k in ("Parameterisation", "parameterisation", "parameters") if data.get(k)), "Parameterisation"
+    )
+    params_raw = data.get(params_key) or {}
+    if not isinstance(params_raw, Mapping) or not params_raw:
+        warnings.append("BPX file has no 'Parameterisation' block; no claims extracted.")
+        if params_raw:
+            not_imported.append(params_key)
+        params_raw = {}
+    old_layout = _v0_layout_in_v1_file(data)
+    if old_layout is not None:
+        warnings.append(
+            f"The file declares BPX {old_layout[0]} but keeps the v0.x layout "
+            f"({', '.join(old_layout[1])}), so the official parser rejects it: attach a runnable "
+            "copy made with upgrade_bpx() for solvers."
+        )
+    blocks: dict[str, dict[str, Any]] = {
+        name: dict(block) for name, block in params_raw.items() if isinstance(block, Mapping)
+    }
+    state = _bpx_state_sections(data, blocks, warnings, not_imported, params_key)
+    claims: dict[str, list[dict[str, Any]]] = {}
+
+    cell = blocks.get("Cell")
+    if cell:
+        claims["cell"] = [
+            claim
+            for claim, _ in _bpx_block_claims(cell, "cell", "Cell", warnings, not_imported, f"{params_key}/Cell")
+        ]
+
+    for side, block_name in _BPX_ELECTRODE_BLOCKS.items():
+        block = blocks.get(block_name)
+        if not block:
+            continue
+        particle = block.pop("Particle", None)
+        if particle is not None:
+            if isinstance(particle, Mapping):
+                phases = "; ".join(
+                    f"{phase}: {', '.join(map(str, fields)) if isinstance(fields, Mapping) else _short_repr(fields)}"
+                    for phase, fields in particle.items()
+                )
+            else:
+                phases = _short_repr(particle)
+            warnings.append(
+                f"BPX {block_name} Particle block (a blended electrode) not read as claims: "
+                f"blended electrodes are not modelled yet, so the per-phase values stay in the "
+                f"source file ({phases})."
+            )
+            not_imported.append(f"{params_key}/{block_name}/Particle")
+        path = f"{params_key}/{block_name}"
+        for claim, scopes in _bpx_block_claims(block, "electrode", block_name, warnings, not_imported, path):
+            part = f"{side}_material" if "material" in scopes else f"{side}_electrode"
+            claims.setdefault(part, []).append(claim)
+
+    for block_name, vocab_block in (("Separator", "separator"), ("Electrolyte", "electrolyte")):
+        block = blocks.get(block_name)
+        if block:
+            path = f"{params_key}/{block_name}"
+            found = [
+                claim
+                for claim, _ in _bpx_block_claims(block, vocab_block, block_name, warnings, not_imported, path)
+            ]
+            if found:
+                claims[vocab_block] = found
+
+    state_claims, unread = _bpx_state_claims(state, warnings, not_imported)
+    if state_claims:
+        claims["state"] = state_claims
+    if unread:
+        # EVERY entry is named: a truncated list is a silent drop for the rest.
+        warnings.append(
+            "BPX State entries not read as claims (initial hysteresis state and Degradation have "
+            "no BattINFO home yet; they stay in the source file): " + ", ".join(unread)
+        )
+
+    # The User-defined block is BPX's blessed extension point (tool- and
+    # study-specific keys with no standard semantics): carried VERBATIM as the
+    # record's annex so a re-export reproduces it, and named so the carry is
+    # visible.
+    user_defined_raw = params_raw.get("User-defined")
+    annex: dict[str, Any] = (
+        copy.deepcopy(dict(user_defined_raw)) if isinstance(user_defined_raw, Mapping) else {}
+    )
+    if annex:
+        keys = [str(k) for k in annex]
+        warnings.append(
+            f"BPX User-defined block carried verbatim as the record's annex, not as claims "
+            f"({len(keys)} keys: {', '.join(keys)}). These have no standard semantics; author "
+            "them as explicit claims if they matter."
+        )
+    handled = {"Cell", *_BPX_ELECTRODE_BLOCKS.values(), "Separator", "Electrolyte", "User-defined"}
+    for block_name, block in params_raw.items():
+        if block_name not in handled:
+            warnings.append(f"BPX Parameterisation block '{block_name}' is not recognised; not read.")
+            not_imported.append(f"{params_key}/{block_name}")
+        elif not isinstance(block, Mapping):
+            warnings.append(
+                f"BPX Parameterisation block '{block_name}' is {_json_kind(block)}, not an object; "
+                "not read."
+            )
+            not_imported.append(f"{params_key}/{block_name}")
+    # Header fields beyond the ones the record holds are named too: they are
+    # part of the file's parameters (its digest covers them).
+    header = data.get("Header") if isinstance(data.get("Header"), Mapping) else data.get("header")
+    if isinstance(header, Mapping):
+        extra = [str(key) for key in header if key not in _BPX_HEADER_FIELDS]
+        if extra:
+            warnings.append(f"BPX Header fields not read: {', '.join(extra)}")
+            not_imported.extend(f"Header/{key}" for key in extra)
+    # Top-level sections beyond Header/Parameterisation/State are named too.
+    # Validation holds measured curves, not parameters: they stay in the
+    # source file, and belong in a dataset record.
+    for section, value in data.items():
+        if section in _BPX_PARAMETER_SECTIONS:
+            continue
+        if section == "Validation" and isinstance(value, Mapping):
+            series = [str(k) for k in value]
+            warnings.append(
+                f"BPX Validation block not read as claims ({len(series)} series: "
+                f"{', '.join(series)}). The measured curves stay in the source "
+                "file; describe them as a dataset record to make them findable."
+            )
+        else:
+            warnings.append(f"BPX top-level section '{section}' is not recognised; not read.")
+        not_imported.append(str(section))
+
+    if not claims:
+        warnings.append("No parameter claims found in the BPX file.")
+    parts = [{"part": part, "claims": claims[part]} for part in PARAMETER_FILE_PARTS if claims.get(part)]
+    return parts, annex, warnings, list(dict.fromkeys(not_imported))
+
+
+def _bpx_state_claims(
+    state: Mapping[str, Any], warnings: list[str], not_imported: list[str]
+) -> tuple[list[dict[str, Any]], list[str]]:
+    """The State values as state-part claims, plus the entries with no home (named by the caller).
+
+    A section none of whose entries is read (Degradation) is one
+    ``not_imported`` path; otherwise each unread entry is.
+    """
+    from battinfo.parameters import bpx_field, parameter_entry, resolve_bpx_field  # noqa: PLC0415
+
+    claims: list[dict[str, Any]] = []
+    unread: list[str] = []
+    for section, fields in state.items():
+        if not isinstance(fields, Mapping):
+            unread.append(f"{section} ({_json_kind(fields)})")
+            not_imported.append(f"State/{section}")
+            continue
+        section_unread: list[str] = []
+        for field_name, raw_value in fields.items():
+            key = resolve_bpx_field("state", field_name)
+            mapping = bpx_field(key, "state") if key is not None else None
+            if mapping is None or mapping.get("section") != section:
+                unread.append(f"{section}.{field_name}")
+                section_unread.append(str(field_name))
+                continue
+            claim = _bpx_value_to_claim(key, raw_value, parameter_entry(key) or {}, mapping["unit"])
+            if claim is None:
+                warnings.append(
+                    f"BPX State.{section} field '{field_name}' has unusable value "
+                    f"{_short_repr(raw_value)}; not read as a claim."
+                )
+                section_unread.append(str(field_name))
+                continue
+            claims.append(claim)
+        if section_unread and len(section_unread) == len(fields):
+            not_imported.append(f"State/{section}")
+        else:
+            not_imported.extend(f"State/{section}/{name}" for name in section_unread)
+    return claims, unread
+
+
+def _plain_json(value: Any) -> Any:
+    """A parsed-JSON value with numpy scalars and arrays as the plain values they hold (a copy)."""
+    value = _from_numpy(value)
+    if isinstance(value, Mapping):
+        return {key: _plain_json(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_plain_json(item) for item in value]
+    return value
+
+
+def _read_bpx_source(
+    source: Mapping[str, Any] | str | Path | bytes,
+) -> tuple[dict[str, Any], str | None, str | None]:
+    """``(document, file name, sha256 of the exact bytes)``; no bytes for a dict input.
+
+    Bytes and files are parsed strictly: a byte order mark is skipped (the
+    checksum still covers it), and a repeated key, a number too large for a
+    double, NaN or Infinity are refused.
+    """
+    if isinstance(source, Mapping):
+        return _plain_json(source), None, None
+    if isinstance(source, (bytes, bytearray)):
+        raw, file_name = bytes(source), None
+    else:
+        path = Path(source)
+        raw = _read_bytes(path)
+        file_name = path.name
+    data = _parse_bpx_bytes(raw, file_name or "the BPX bytes")
+    return data, file_name, hashlib.sha256(raw).hexdigest()
+
+
+def from_bpx_parameters(source: Mapping[str, Any] | str | Path | bytes) -> BpxParameterImportResult:
+    """Read a BPX file as the parts of one parameter-set record.
+
+    Every value in the file becomes a claim in its part (cell, each
+    electrode's material and build, separator, electrolyte, state), rides
+    the annex (the ``User-defined`` block, verbatim), or is named in
+    :attr:`BpxParameterImportResult.warnings` with its BPX path in
+    :attr:`BpxParameterImportResult.not_imported`. The fields BPX 1.0 moved
+    into ``State`` read the same from either layout. A single-phase
+    electrode's OCP branches (``OCP (lithiation) [V]``, ``OCP
+    (delithiation) [V]``) are ``ocp`` curves with their ``branch``. Call
+    :meth:`BpxParameterImportResult.to_parameter_set` (or
+    :func:`import_bpx_parameters`) to build the record.
+
+    ``source`` is a path, the file's bytes, or a parsed dict. A path or bytes
+    input also records the sha256 of the exact bytes, which the attached
+    source file must match. A file that repeats a key in an object is
+    refused, since JSON parsers disagree on which value counts.
 
     Examples
     --------
-    >>> result = from_bpx_parameters("chen2020.json")
-    >>> records = result.to_records(
-    ...     materials={"negative": "graphite", "positive": "nmc811"},
-    ...     citation_doi="10.1149/1945-7111/ab9050",
-    ... )
+    >>> result = from_bpx_parameters("nmc_pouch_cell_BPX.json")       # doctest: +SKIP
+    >>> record = result.to_parameter_set(
+    ...     virtual_cell=True,
+    ...     materials={"negative": "graphite", "positive": "nmc111"},
+    ... )                                                              # doctest: +SKIP
     """
-    warnings: list[str] = []
-    data, source_file = _load_bpx(source)
+    data, source_file, source_sha256 = _read_bpx_source(source)
+    content_digest = bpx_content_digest(data)
     title, bpx_version, model_type, description = _extract_header(data)
-
-    params_raw = (
-        data.get("Parameterisation")
-        or data.get("parameterisation")
-        or data.get("parameters")
-        or {}
-    )
-    claims: dict[str, list[dict[str, Any]]] = {}
-    if not isinstance(params_raw, Mapping) or not params_raw:
-        warnings.append("BPX file has no 'Parameterisation' block; no claims extracted.")
-        params_raw = {}
-
-    # BPX >= 1.1 moves the initial electrolyte concentration into the
-    # top-level State block; fold it back into the Electrolyte block so it
-    # mints the same initial_concentration claim as a 1.0 file (the export
-    # side relocates it into State again for >= 1.1). Explicit block values
-    # win. Temperatures fold on the from_bpx side.
-    _state_cell, state_electrolyte_fields = _fold_state_block(data, warnings)
-
-    for side, block_name in _BPX_ELECTRODE_BLOCKS.items():
-        block = params_raw.get(block_name)
-        if isinstance(block, Mapping) and block:
-            split = _extract_block_claims(block, "electrode", warnings, block_name)
-            if split["material"]:
-                claims[f"{side}_material"] = split["material"]
-            if split["build"]:
-                claims[f"{side}_electrode"] = split["build"]
-
-    for block_name, bpx_block in (("Separator", "separator"), ("Electrolyte", "electrolyte")):
-        block = params_raw.get(block_name)
-        block = dict(block) if isinstance(block, Mapping) else {}
-        if bpx_block == "electrolyte":
-            for state_key, state_value in state_electrolyte_fields.items():
-                block.setdefault(state_key, state_value)
-        if block:
-            split = _extract_block_claims(block, bpx_block, warnings, block_name)
-            merged = split["material"] + split["build"]
-            if merged:
-                claims[bpx_block] = merged
-
-    # No silent drops: name what this importer does not read as claims. The
-    # User-defined block is BPX's blessed extension point (tool- and
-    # study-specific keys with no standard semantics): its entries are carried
-    # VERBATIM as each minted record's annex, so a re-export reproduces the
-    # file — named here so the carry is visible. The Cell block belongs to
-    # from_bpx (spec properties, not claims).
-    user_defined_raw = params_raw.get("User-defined")
-    user_defined: dict[str, Any] = (
-        dict(user_defined_raw) if isinstance(user_defined_raw, Mapping) else {}
-    )
-    if user_defined:
-        keys = [str(k) for k in user_defined]
-        # EVERY key is named — a truncated list is a silent drop for the rest.
-        warnings.append(
-            f"BPX User-defined block carried verbatim as the records' annex, "
-            f"not as claims ({len(keys)} keys: {', '.join(keys)}). These have "
-            "no standard semantics; author them as explicit claims if they matter."
-        )
-    _handled_blocks = {*_BPX_ELECTRODE_BLOCKS.values(), "Separator", "Electrolyte", "Cell", "User-defined"}
-    for block_name in params_raw:
-        if block_name not in _handled_blocks:
-            warnings.append(
-                f"BPX Parameterisation block '{block_name}' is not recognised; ignored."
-            )
-
-    if not claims:
-        warnings.append("No parameter claims found in BPX electrode/separator/electrolyte blocks.")
-
+    parts, annex, warnings, not_imported = _parse_bpx_parameters(data)
     return BpxParameterImportResult(
-        claims=claims,
+        parts=parts,
         title=title,
         bpx_version=bpx_version,
         model_type=model_type,
         description=description,
         source_file=source_file,
         references=_extract_references(data),
-        user_defined=user_defined,
+        annex=annex,
         warnings=warnings,
+        not_imported=not_imported,
+        content_digest=content_digest,
+        source_sha256=source_sha256,
+        _document=data,
     )
 
 
 def import_bpx_parameters(
-    source: Mapping[str, Any] | str | Path,
-    *,
-    materials: Mapping[str, str] | None = None,
-    cell_spec_id: str | None = None,
-    **record_kwargs: Any,
-) -> list[dict[str, Any]]:
-    """One-call BPX physics import: claims extracted and minted as records.
+    source: Mapping[str, Any] | str | Path | bytes, **kwargs: Any
+) -> dict[str, Any]:
+    """One-call form of ``from_bpx_parameters(source).to_parameter_set(**kwargs)``.
 
-    Convenience for ``from_bpx_parameters(source).to_records(...)``; use the
-    two-step form when you need to inspect claims or warnings first.
+    Returns the record. Use the two-step form to read the warnings.
     """
-    return from_bpx_parameters(source).to_records(
-        materials=materials, cell_spec_id=cell_spec_id, **record_kwargs
-    )
+    return from_bpx_parameters(source).to_parameter_set(**kwargs)
 
 
 def _instance_reference(

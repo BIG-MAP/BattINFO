@@ -33,8 +33,10 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+import warnings
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -56,7 +58,13 @@ _CAPACITY_TO_AH = {"ah": 1.0, "mah": 1e-3, "a.h": 1.0, "ma.h": 1e-3}
 
 @dataclass(frozen=True)
 class RegistryFile:
-    """One downloadable file attached to a dataset record."""
+    """One downloadable file attached to a dataset record.
+
+    ``checksum_algorithm`` and ``checksum_value`` are the checksum the record
+    states for the file, in whichever algorithm it uses (``"sha256"``,
+    ``"md5"``, ...). ``sha256`` holds the same value when the algorithm is
+    SHA-256 and is ``None`` otherwise.
+    """
 
     name: str
     url: str
@@ -64,6 +72,8 @@ class RegistryFile:
     media_type: str | None = None
     sha256: str | None = None
     size: int | None = None
+    checksum_algorithm: str | None = None
+    checksum_value: str | None = None
 
 
 # ── Column names ──────────────────────────────────────────────────────────────
@@ -253,8 +263,11 @@ def _files_of(record: dict) -> list[RegistryFile]:
             return
         seen.add(url)
         extra = details.get(url, {})
-        checksum = extra.get("checksum") or {}
-        sha256 = checksum.get("value") if str(checksum.get("algorithm", "")).lower() == "sha256" else None
+        checksum = extra.get("checksum")
+        if not isinstance(checksum, dict):
+            checksum = {}
+        algorithm = str(checksum.get("algorithm") or "").strip().lower() or None
+        value = checksum.get("value") if isinstance(checksum.get("value"), str) else None
         raw_size = extra.get("content_size") or extra.get("byte_size")
         try:
             size = int(raw_size) if raw_size is not None else None
@@ -265,8 +278,10 @@ def _files_of(record: dict) -> list[RegistryFile]:
             url=url,
             role=role or extra.get("role"),
             media_type=media_type or extra.get("encoding_format"),
-            sha256=sha256,
+            sha256=value if _hash_name(algorithm) == "sha256" else None,
             size=size,
+            checksum_algorithm=algorithm,
+            checksum_value=value,
         ))
 
     for dist in record.get("distributions") or []:
@@ -328,6 +343,7 @@ class Registry:
         self.cache_dir = Path(cache_dir) if cache_dir else _default_cache_dir()
         self.timeout = timeout
         self._user_agent = f"battinfo/{__version__} (registry reader)"
+        self._warned_unverified: set[str] = set()
 
     def __repr__(self) -> str:
         return f"Registry({self.url!r})"
@@ -439,8 +455,11 @@ class Registry:
         """Fetch a dataset's data file and return the local path.
 
         The file is kept under the cache directory (or *dest*) and reused on
-        the next call. When the record states a SHA-256 the download is checked
-        against it, and a cached copy that no longer matches is fetched again.
+        the next call. The download is checked against the checksum the record
+        states, in any algorithm :mod:`hashlib` supports (SHA-256 and MD5 among
+        them), and a cached copy that no longer matches is fetched again. A file
+        whose record states no checksum that can be checked is used as it is,
+        with a warning the first time. ``verify=False`` skips the check.
         """
         candidates = self.files(dataset, role=role)
         tabular = [f for f in candidates if f.url.lower().split("?")[0].endswith(_TABULAR_SUFFIXES)]
@@ -450,28 +469,50 @@ class Registry:
         uid = _record_ref(dataset)[1]
         folder = Path(dest) if dest else self.cache_dir / "files" / uid
         target = _cache_file(folder, chosen.name)
-        if target.exists() and (not verify or not chosen.sha256 or _sha256(target) == chosen.sha256):
+        expected = _stated_digest(chosen)
+        algorithm = _hash_name(chosen.checksum_algorithm) if verify and expected else None
+        if verify and algorithm is None:
+            self._warn_unverified(uid, chosen)
+        if target.exists() and (algorithm is None or _file_digest(target, algorithm) == expected):
             return target
         folder.mkdir(parents=True, exist_ok=True)
         partial = target.with_name(target.name + ".part")
-        digest = hashlib.sha256()
+        digest = hashlib.new(algorithm, usedforsecurity=False) if algorithm else None
         with self._open(chosen.url) as response, open(partial, "wb") as handle:
             while chunk := response.read(1 << 20):
-                digest.update(chunk)
+                if digest is not None:
+                    digest.update(chunk)
                 handle.write(chunk)
-        if verify and chosen.sha256 and digest.hexdigest() != chosen.sha256:
+        if digest is not None and digest.hexdigest() != expected:
             partial.unlink(missing_ok=True)
             raise OSError(
-                f"checksum mismatch for {chosen.url}: the record states {chosen.sha256}, "
-                f"the download has {digest.hexdigest()}"
+                f"checksum mismatch for {chosen.url}: the record states {chosen.checksum_algorithm} "
+                f"{chosen.checksum_value}, the download has {digest.hexdigest()}"
             )
         partial.replace(target)
         return target
 
+    def _warn_unverified(self, uid: str, file: RegistryFile) -> None:
+        """Say once per file that it is used without a checksum check."""
+        if file.url in self._warned_unverified:
+            return
+        self._warned_unverified.add(file.url)
+        if file.checksum_algorithm and file.checksum_value:
+            reason = (f"its record gives the checksum algorithm as {file.checksum_algorithm!r}, "
+                      "which this Python's hashlib does not provide")
+        else:
+            reason = "its record states no checksum"
+        warnings.warn(
+            f"{file.name} (dataset {uid}) is used without checksum verification: {reason}.",
+            UserWarning,
+            stacklevel=3,
+        )
+
     def read(self, dataset: Any, *, bdf_names: bool = True, role: str = "processed"):
         """Load a dataset's measurement data as a pandas DataFrame.
 
-        With *bdf_names* (the default) the columns are renamed to
+        The file is fetched, checksum-checked and cached as :meth:`download`
+        does. With *bdf_names* (the default) the columns are renamed to
         machine-readable BDF names, see :func:`bdf_column_names`, so files from
         different publishers can be handled by the same code. Pass
         ``bdf_names=False`` for the file exactly as published.
@@ -498,6 +539,7 @@ class Registry:
 
         - ``dataset_id``, ``title``, ``license``, ``doi``
         - ``file_url``, ``file_name``, ``media_type``, ``sha256``, ``size_bytes``
+          (``sha256`` is filled only when the record states a SHA-256 checksum)
         - ``test_id``, ``test_kind``
         - ``cell_id``, ``cell_name``, ``cell_spec_id``
         - ``manufacturer``, ``model``, ``format``, ``chemistry``,
@@ -505,10 +547,13 @@ class Registry:
         - ``nominal_capacity_ah`` and ``nominal_capacity_source`` (which stated
           capacity it is: nominal, rated, typical or minimum; empty when the
           cell and its spec state none)
+        - ``checksum_algorithm``, ``checksum_value``: the checksum the record
+          states for the file, in any algorithm
 
         Building it reads every dataset record once, which takes a few minutes
         on a large registry. The result is cached and reused until the registry
-        reports a change; pass ``refresh=True`` to rebuild regardless.
+        reports a change or the columns change; pass ``refresh=True`` to
+        rebuild regardless.
         """
         from battinfo._util import require_extra  # noqa: PLC0415
 
@@ -518,14 +563,16 @@ class Registry:
         if not refresh and cache.exists():
             try:
                 saved = json.loads(cache.read_text(encoding="utf-8"))
-                if saved.get("stamp") == stamp:
+                # A cache written with other columns would leave the new ones empty.
+                if saved.get("stamp") == stamp and saved.get("columns") == _CATALOG_COLUMNS:
                     return pd.DataFrame(saved["rows"], columns=_CATALOG_COLUMNS)
             except (OSError, ValueError, KeyError):
                 pass
         rows = self._build_catalog(workers)
         try:
             cache.parent.mkdir(parents=True, exist_ok=True)
-            cache.write_text(json.dumps({"stamp": stamp, "rows": rows}), encoding="utf-8")
+            cache.write_text(json.dumps({"stamp": stamp, "columns": _CATALOG_COLUMNS, "rows": rows}),
+                             encoding="utf-8")
         except OSError:
             pass  # a read-only cache directory must not fail the call
         return pd.DataFrame(rows, columns=_CATALOG_COLUMNS)
@@ -579,6 +626,7 @@ class Registry:
                 if processed:
                     first = processed[0]
                     row.update(file_url=first.url, file_name=first.name, sha256=first.sha256,
+                               checksum_algorithm=first.checksum_algorithm, checksum_value=first.checksum_value,
                                size_bytes=first.size, media_type=first.media_type or row["media_type"])
                 test_id = next(iter(links.get("test", [])), None)
                 cell_id = next(iter(links.get("cell", [])), None)
@@ -617,11 +665,50 @@ _CATALOG_COLUMNS = [
     "manufacturer", "model", "format", "chemistry",
     "positive_electrode_basis", "negative_electrode_basis",
     "nominal_capacity_ah", "nominal_capacity_source",
+    # Added after 0.8 began: appended so the documented column order stays put.
+    "checksum_algorithm", "checksum_value",
 ]
 
 
-def _sha256(path: Path) -> str:
-    digest = hashlib.sha256()
+@lru_cache(maxsize=32)
+def _hash_name(algorithm: str | None) -> str | None:
+    """The :mod:`hashlib` name for a checksum algorithm a record states, or None.
+
+    Spellings differ between publishers (``sha256``, ``SHA-256``, ``sha3_256``),
+    so case, hyphens and underscores are ignored. The SHAKE digests need a
+    length that a record does not give, so they count as unsupported, as does
+    any algorithm this Python's hashlib cannot build.
+    """
+    if not algorithm:
+        return None
+    wanted = algorithm.strip().lower().replace("-", "").replace("_", "")
+    for name in [*sorted(hashlib.algorithms_guaranteed), *sorted(hashlib.algorithms_available)]:
+        key = name.lower().replace("-", "").replace("_", "")
+        if key != wanted or key.startswith("shake"):
+            continue
+        try:
+            hashlib.new(name, usedforsecurity=False)
+        except (TypeError, ValueError):
+            continue
+        return name
+    return None
+
+
+def _stated_digest(file: RegistryFile) -> str:
+    """The hex digest the record states for *file*, lower-cased.
+
+    Zenodo reports checksums as ``md5:<hex>``, and a record may carry that
+    form; a prefix naming the record's own algorithm is dropped.
+    """
+    value = (file.checksum_value or "").strip().lower()
+    prefix, sep, rest = value.partition(":")
+    if sep and _hash_name(prefix) is not None and _hash_name(prefix) == _hash_name(file.checksum_algorithm):
+        return rest.strip()
+    return value
+
+
+def _file_digest(path: Path, algorithm: str) -> str:
+    digest = hashlib.new(algorithm, usedforsecurity=False)
     with open(path, "rb") as handle:
         while chunk := handle.read(1 << 20):
             digest.update(chunk)

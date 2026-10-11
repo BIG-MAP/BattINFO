@@ -18,6 +18,7 @@ recipes assume, and the [glossary](glossary.md) decodes the vocabulary.
 | **Validate my records and fix what's wrong** | [Fix validation errors](../howto/fix-validation-errors.md) |
 | **Publish, and get a DOI** | [Tutorial 6, Publish your first dataset](../guides/06-publish-your-data.ipynb) |
 | **Group several datasets into one collection** (a study, a deposit) | [Publish a dataset collection](../howto/publish-a-dataset-collection.md) |
+| **Publish a BPX parameter file** so a solver can run it from its IRI | [Publish a BPX parameter file](../howto/publish-a-bpx-parameter-file.md) |
 | **Give records consistent titles and handles**, or rename them without moving their IRIs | [Name your records](../howto/name-your-records.md) |
 | **Put labels / QR codes on my cells** | [Label your cells](../howto/label-your-cells.md) |
 | **Find out what already exists** (my session, my library, the registry) | [Find existing records](../howto/find-existing-records.md) |
@@ -54,6 +55,7 @@ or cite in a paper. The {doc}`tutorials <guides>` build this up properly.
 ../howto/read-registry-data
 ../howto/bulk-ingest
 ../howto/publish-a-dataset-collection
+../howto/publish-a-bpx-parameter-file
 ../howto/name-your-records
 ../howto/fix-validation-errors
 ../howto/resume-a-submission

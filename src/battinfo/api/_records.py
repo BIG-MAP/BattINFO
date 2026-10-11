@@ -134,7 +134,7 @@ def _cell_spec_record_to_library_format(doc: dict[str, Any]) -> dict[str, Any]:
     if "notes" in doc:
         specification["comment"] = doc["notes"]
     return {
-        "schema_version": doc.get("schema_version", "1.0.0"),
+        "schema_version": doc.get("schema_version") or SCHEMA_VERSION,
         "specification": specification,
         "provenance": doc.get("provenance"),
         "comment": doc.get("notes"),
@@ -222,7 +222,7 @@ def _library_record_from_input(draft: Mapping[str, Any]) -> dict[str, Any]:
         provenance["comment"] = draft["provenance_comment"]
 
     record: dict[str, Any] = {
-        "schema_version": draft.get("schema_version", "1.0.0"),
+        "schema_version": draft.get("schema_version") or SCHEMA_VERSION,
         "specification": specification,
         "provenance": provenance,
     }

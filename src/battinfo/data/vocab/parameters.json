@@ -1,6 +1,6 @@
 {
-  "version": "0.1.0",
-  "description": "Curated vocabulary of simulation-parameter keys and model-tier completeness contracts. A parameter claim (parameter-set record) uses these canonical snake_case keys; unknown keys are tolerated on import but only canonical keys count toward tier completeness. Each entry states the physical scope(s) the parameter belongs to (material = intrinsic to an active material; electrode/separator = the manufactured build; electrolyte = the formulated liquid; cell = whole-cell fits), the canonical unit, and where applicable the BPX source field it maps from (block + name, since BPX reuses names like 'Conductivity [S.m-1]' across blocks with different meanings). The tiers block is the machine-readable completeness contract consumed by battinfo.parameters.completeness() and vendored downstream (registry, web) so every surface applies identical rules.",
+  "version": "0.2.0",
+  "description": "Curated vocabulary of simulation-parameter keys and model-tier completeness contracts. A parameter claim (parameter-set record) uses these canonical snake_case keys; unknown keys are tolerated on import but only canonical keys count toward tier completeness. Each entry states the physical scope(s) the parameter belongs to (material = intrinsic to an active material; electrode/separator = the manufactured build; electrolyte = the formulated liquid; cell = whole-cell values and fits; state = the initial and environmental conditions a simulation starts from), the canonical unit, and where applicable the BPX field it maps from, per BPX block (BPX reuses names like 'Conductivity [S.m-1]' across blocks with different meanings). A bpx entry is either the field name, read in the key's canonical unit, or an object holding the field, the BPX unit when it differs from the canonical one ('unit') and, for the State block, the section that holds the field ('section'). The tiers block is the machine-readable completeness contract consumed by battinfo.parameters.completeness() and vendored downstream (registry, web) so every surface applies identical rules.",
   "parameters": {
     "specific_capacity": {
       "label": "Practical specific capacity",
@@ -18,10 +18,11 @@
     },
     "density": {
       "label": "True density",
-      "scopes": ["material"],
+      "scopes": ["material", "cell"],
       "unit": "g/cm3",
       "kind": "scalar",
-      "description": "Crystallographic/true density of the active material (not electrode/tap density)."
+      "description": "Crystallographic/true density of the active material (not electrode/tap density). At cell scope, the lumped density of the whole cell, which BPX states in kg/m3.",
+      "bpx": {"cell": {"field": "Density [kg.m-3]", "unit": "kg/m3"}}
     },
     "first_cycle_efficiency": {
       "label": "First-cycle coulombic efficiency",
@@ -36,8 +37,16 @@
       "unit": "V",
       "kind": "curve",
       "x_quantity": "stoichiometry",
-      "description": "Half-cell open-circuit potential vs Li/Li+ as a function of stoichiometry. Use curve.branch for lithiation/delithiation where hysteresis matters.",
+      "description": "Half-cell open-circuit potential vs Li/Li+ as a function of stoichiometry. Use curve.branch for lithiation/delithiation where hysteresis matters: a BPX 1.x file's 'OCP (lithiation) [V]' and 'OCP (delithiation) [V]' tables read as ocp curves with that branch.",
       "bpx": {"electrode": "OCP [V]"}
+    },
+    "ocp_hysteresis_decay_constant": {
+      "label": "OCP hysteresis decay constant",
+      "scopes": ["material"],
+      "unit": "1",
+      "kind": "scalar",
+      "description": "Decay constant of a single-state OCP hysteresis model: how fast the hysteresis state moves between the delithiation and lithiation branches.",
+      "bpx": {"electrode": "OCP hysteresis decay constant"}
     },
     "entropic_coefficient": {
       "label": "Entropic change coefficient",
@@ -144,10 +153,11 @@
     },
     "initial_concentration": {
       "label": "Initial salt concentration",
-      "scopes": ["electrolyte"],
+      "scopes": ["electrolyte", "state"],
       "unit": "mol/m3",
       "kind": "scalar",
-      "bpx": {"electrolyte": "Initial concentration [mol.m-3]"}
+      "description": "Initial (rest) salt concentration of the electrolyte. In a BPX file it is a state value: State.Initial conditions from BPX 1.0, the Electrolyte block's 'Initial concentration [mol.m-3]' before that.",
+      "bpx": {"state": {"section": "Initial conditions", "field": "Initial electrolyte concentration [mol.m-3]"}}
     },
     "transference_number": {
       "label": "Cation transference number",
@@ -180,12 +190,120 @@
       "kind": "scalar",
       "bpx": {"electrolyte": "Conductivity activation energy [J.mol-1]"}
     },
+    "nominal_capacity": {
+      "label": "Nominal cell capacity",
+      "scopes": ["cell"],
+      "unit": "Ah",
+      "kind": "scalar",
+      "description": "Nominal capacity of the cell; BPX uses it to convert between current and C-rate.",
+      "bpx": {"cell": "Nominal cell capacity [A.h]"}
+    },
+    "discharging_cutoff_voltage": {
+      "label": "Lower voltage cut-off",
+      "scopes": ["cell"],
+      "unit": "V",
+      "kind": "scalar",
+      "bpx": {"cell": "Lower voltage cut-off [V]"}
+    },
+    "charging_cutoff_voltage": {
+      "label": "Upper voltage cut-off",
+      "scopes": ["cell"],
+      "unit": "V",
+      "kind": "scalar",
+      "bpx": {"cell": "Upper voltage cut-off [V]"}
+    },
+    "electrode_area": {
+      "label": "Electrode area",
+      "scopes": ["cell"],
+      "unit": "m2",
+      "kind": "scalar",
+      "description": "Area of ONE electrode pair, as BPX and PyBaMM use it. The cell's total electrode area is this times electrode_pair_count.",
+      "bpx": {"cell": "Electrode area [m2]"}
+    },
+    "electrode_pair_count": {
+      "label": "Number of electrode pairs",
+      "scopes": ["cell"],
+      "unit": "1",
+      "kind": "scalar",
+      "description": "Number of electrode pairs connected in parallel to make the cell.",
+      "bpx": {"cell": "Number of electrode pairs connected in parallel to make a cell"}
+    },
+    "external_surface_area": {
+      "label": "External surface area",
+      "scopes": ["cell"],
+      "unit": "m2",
+      "kind": "scalar",
+      "bpx": {"cell": "External surface area [m2]"}
+    },
+    "volume": {
+      "label": "Cell volume",
+      "scopes": ["cell"],
+      "unit": "m3",
+      "kind": "scalar",
+      "bpx": {"cell": "Volume [m3]"}
+    },
+    "specific_heat_capacity": {
+      "label": "Specific heat capacity",
+      "scopes": ["cell"],
+      "unit": "J/(kg.K)",
+      "kind": "scalar",
+      "description": "Lumped specific heat capacity of the cell.",
+      "bpx": {"cell": "Specific heat capacity [J.K-1.kg-1]"}
+    },
+    "reference_temperature": {
+      "label": "Reference temperature",
+      "scopes": ["cell"],
+      "unit": "K",
+      "kind": "scalar",
+      "description": "Reference temperature of the Arrhenius temperature dependences.",
+      "bpx": {"cell": "Reference temperature [K]"}
+    },
+    "thermal_conductivity": {
+      "label": "Thermal conductivity",
+      "scopes": ["cell"],
+      "unit": "W/(m.K)",
+      "kind": "scalar",
+      "description": "Lumped thermal conductivity of the cell. A Cell field in BPX 0.x only: from BPX 1.0 the parser asks for it in User-defined, which is where to_bpx writes it for a v1 export.",
+      "bpx": {"cell": "Thermal conductivity [W.m-1.K-1]"}
+    },
     "series_resistance": {
       "label": "Series resistance",
       "scopes": ["cell"],
       "unit": "Ohm",
       "kind": "scalar",
       "description": "Lumped ohmic series resistance of the cell (ECM R0 / DCIR-style fits)."
+    },
+    "initial_temperature": {
+      "label": "Initial temperature",
+      "scopes": ["state"],
+      "unit": "K",
+      "kind": "scalar",
+      "description": "Cell temperature at the start of a simulation (a Cell field in BPX 0.x).",
+      "bpx": {"state": {"section": "Initial conditions", "field": "Initial temperature [K]"}}
+    },
+    "ambient_temperature": {
+      "label": "Ambient temperature",
+      "scopes": ["state"],
+      "unit": "K",
+      "kind": "scalar",
+      "description": "Temperature of the cell's surroundings (a Cell field in BPX 0.x).",
+      "bpx": {"state": {"section": "Thermal environment", "field": "Ambient temperature [K]"}}
+    },
+    "initial_soc": {
+      "label": "Initial state of charge",
+      "scopes": ["state"],
+      "unit": "1",
+      "kind": "scalar",
+      "description": "State of charge at the start of a simulation, between 0 and 1.",
+      "bpx": {"state": {"section": "Initial conditions", "field": "Initial state-of-charge"}}
+    },
+    "heat_transfer_coefficient": {
+      "label": "Heat transfer coefficient",
+      "scopes": ["state"],
+      "unit": "W/(m2.K)",
+      "kind": "scalar",
+      "description": "Coefficient of heat transfer between the cell surface and its surroundings.",
+      "bpx": {"state": {"section": "Thermal environment", "field": "Heat transfer coefficient [W.m-2.K-1]"}}
     }
   },
   "tiers": {

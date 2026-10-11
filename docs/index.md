@@ -56,7 +56,7 @@ Each notebook runs from its own folder and writes only to a throwaway `_scratch/
 | | |
 |---|---|
 | **[Workspace authoring](workspace-authoring.md)** | The everyday authoring surface: `battinfo.workspace(".")` end-to-end, and which surface to use when |
-| **[How-to guides](pages/howto.md)** | Task recipes: register materials, build a cell from components, label cells, register equipment and channels, find existing records, bulk ingest, fix validation errors, resume submissions, funding/ORCID |
+| **[How-to guides](pages/howto.md)** | Task recipes: register materials, build a cell from components, label cells, register equipment and channels, find existing records, bulk ingest, publish a BPX parameter file, fix validation errors, resume submissions, funding/ORCID |
 | **[Editorial cell-spec workflow](internal/editorial-cell-type-workflow.md)** | Submission and curation workflow for the cell-spec library |
 | **[Ingest manifest contract](guarantees.md#ingest-manifest-contract)** | Batch intake from a folder of raw data files |
 | **[Dataset registry intake spec](internal/dataset-registry-intake-spec.md)** | Submission package format for registry intake |

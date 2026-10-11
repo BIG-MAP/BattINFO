@@ -308,6 +308,16 @@
       "confidence": 1.0
     },
     {
+      "key": "electrode_pair_count",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo#EMMO_41efdf5d_0c9c_4ea0_bb65_f8236e663be5",
+      "class_qname": "emmo:NumberOfEntities",
+      "class_pref_label": "NumberOfEntities",
+      "class_label": "NumberOfEntities",
+      "confidence": 1.0,
+      "notes": "BPX 'Number of electrode pairs connected in parallel to make a cell'. NumberOfEntities is the count of entities of a given kind in a system; which entities rides the key (the geometry->Area precedent)."
+    },
+    {
       "key": "electrolyte_diffusivity",
       "status": "curated",
       "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_4c274506_af5b_4ef1_8217_829ffd459f28",
@@ -363,6 +373,16 @@
       "confidence": 1.0
     },
     {
+      "key": "heat_transfer_coefficient",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo#EMMO_0b3295fa_f4bf_4f83_a603_9d98c03da5bb",
+      "class_qname": "emmo:SurfaceCoefficientOfHeatTransfer",
+      "class_pref_label": "SurfaceCoefficientOfHeatTransfer",
+      "class_label": "SurfaceCoefficientOfHeatTransfer",
+      "confidence": 1.0,
+      "notes": "BPX State 'Heat transfer coefficient [W.m-2.K-1]': heat flow from the cell surface per area and temperature difference."
+    },
+    {
       "key": "height",
       "status": "curated",
       "class_iri": "https://w3id.org/emmo#EMMO_08bcf1d6_e719_46c8_bb21_24bc9bf34dba",
@@ -388,7 +408,7 @@
       "class_pref_label": "InitialChargeCarrierConcentrationInElectrolyte",
       "class_label": "InitialChargeCarrierConcentrationInElectrolyte",
       "confidence": 1.0,
-      "notes": "The parameter vocabulary scopes initial_concentration to electrolytes only (BPX 'Initial concentration [mol.m-3]')."
+      "notes": "The electrolyte's initial salt concentration: BPX 'Initial electrolyte concentration [mol.m-3]' (State, from BPX 1.0) or 'Initial concentration [mol.m-3]' (Electrolyte, BPX 0.x). The parameter vocabulary scopes it to electrolyte and state."
     },
     {
       "key": "initial_coulombic_efficiency",
@@ -398,6 +418,26 @@
       "class_pref_label": "InitialCoulombicEfficiency",
       "class_label": "InitialCoulombicEfficiency",
       "confidence": 1.0
+    },
+    {
+      "key": "initial_soc",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_8b2aaa50_bbe1_45da_8778_8898326246a2",
+      "class_qname": "emmo:StateOfCharge",
+      "class_pref_label": "StateOfCharge",
+      "class_label": "StateOfCharge",
+      "confidence": 1.0,
+      "notes": "BPX State 'Initial state-of-charge'; the 'initial' rides the key and the state part."
+    },
+    {
+      "key": "initial_temperature",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo#EMMO_affe07e4_e9bc_4852_86c6_69e26182a17f",
+      "class_qname": "emmo:ThermodynamicTemperature",
+      "class_pref_label": "ThermodynamicTemperature",
+      "class_label": "ThermodynamicTemperature",
+      "confidence": 1.0,
+      "notes": "BPX State 'Initial temperature [K]'. Generic per the depth rule; the published InititalThermodynamicTemperature carries a misspelled label."
     },
     {
       "key": "internal_resistance",
@@ -782,6 +822,16 @@
       "confidence": 1.0
     },
     {
+      "key": "reference_temperature",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo#EMMO_affe07e4_e9bc_4852_86c6_69e26182a17f",
+      "class_qname": "emmo:ThermodynamicTemperature",
+      "class_pref_label": "ThermodynamicTemperature",
+      "class_label": "ThermodynamicTemperature",
+      "confidence": 1.0,
+      "notes": "BPX Cell 'Reference temperature [K]' (of the Arrhenius dependences). Generic per the depth rule, like initial_temperature."
+    },
+    {
       "key": "round_trip_energy_efficiency",
       "status": "curated",
       "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c413d29a_b814_4d88_8db0_0fd0171cff11",
@@ -845,6 +895,16 @@
       "class_pref_label": "SpecificEnergy",
       "class_label": "SpecificEnergy",
       "confidence": 1.0
+    },
+    {
+      "key": "specific_heat_capacity",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo#EMMO_b4f4ed28_d24c_4a00_9583_62ab839abeca",
+      "class_qname": "emmo:SpecificHeatCapacity",
+      "class_pref_label": "SpecificHeatCapacity",
+      "class_label": "SpecificHeatCapacity",
+      "confidence": 1.0,
+      "notes": "BPX Cell 'Specific heat capacity [J.K-1.kg-1]' (lumped over the cell)."
     },
     {
       "key": "specific_power",
@@ -917,6 +977,16 @@
       "class_pref_label": "TheoreticalCapacity",
       "class_label": "TheoreticalCapacity",
       "confidence": 1.0
+    },
+    {
+      "key": "thermal_conductivity",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo#EMMO_8dd40ec6_2c5a_43f3_bf64_cadcd447a1c1",
+      "class_qname": "emmo:ThermalConductivity",
+      "class_pref_label": "ThermalConductivity",
+      "class_label": "ThermalConductivity",
+      "confidence": 1.0,
+      "notes": "BPX 0.x Cell 'Thermal conductivity [W.m-1.K-1]' (lumped; User-defined from BPX 1.0)."
     },
     {
       "key": "thickness",
