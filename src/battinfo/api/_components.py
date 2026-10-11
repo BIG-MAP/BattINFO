@@ -1591,7 +1591,10 @@ def query_component_instances(
 def template_component_spec(family: str, *, name: str | None = None, uid: str | None = None) -> dict[str, Any]:
     """Build a starter component-spec document for a family.
 
-    The document has no ``id`` unless *uid* is given; saving it mints the IRI.
+    The document has no ``id`` unless *uid* is given. A component spec has no
+    natural key to mint its IRI from, so pass *uid* for a record you will save:
+    a save without an id is refused rather than given a random IRI, which would
+    turn every re-run into a duplicate.
     """
     record = _record_from_component_spec(
         family, name=name or f"Example {family}", uid=uid,
@@ -1609,7 +1612,8 @@ def template_component_instance(
     """Build a starter component (instance) document for a family.
 
     The document has no ``id`` unless *uid* is given and no ``<family>_spec_id``
-    unless *spec_id* is; saving the filled-in record mints the IRI.
+    unless *spec_id* is. A component has no natural key to mint its IRI from, so
+    pass *uid* for a record you will save: a save without an id is refused.
     """
     record = _record_from_component_instance(
         family, spec_id=spec_id or _TEMPLATE_SPEC_ID, uid=uid,  # build scaffold, removed below

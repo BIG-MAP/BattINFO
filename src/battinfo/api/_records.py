@@ -1065,8 +1065,8 @@ def _seed_part(value: str | None, fallback: str = "") -> str:
     return text or fallback
 
 
-def _identity_minted_uid(entity_kind: str, entity: Any, *, workspace_root: PathLike | None = None) -> str:
-    """Mint a deterministic uid from the record's natural identity (3.3).
+def _identity_seed(entity_kind: str, entity: Any, *, workspace_root: PathLike | None = None) -> str | None:
+    """The identity seed of a record's natural key, or ``None`` when it has none (3.3).
 
     Seeds mirror the ``Workspace._finalize_*`` minting exactly, so a record
     authored through the workspace and the same record saved through ``save_*``
@@ -1085,14 +1085,13 @@ def _identity_minted_uid(entity_kind: str, entity: Any, *, workspace_root: PathL
       ``entities.dataset_locator_seed``
 
     A record with NO distinguishing identity at all (e.g. a cell instance with
-    no serial, batch, or name) falls back to a random uid — two anonymous but
-    physically distinct records must never silently dedup into one.
+    no serial, batch, or name) has no seed (``None``): the builders then mint a
+    random uid, since two anonymous but physically distinct records must never
+    silently dedup into one, and a save of an id-less record refuses it.
     """
-    from battinfo.entities import stable_uid  # noqa: PLC0415 — keep entities import-light at module load
-
     if entity_kind == "cell-spec":
         if not (_seed_part(entity.manufacturer) or _seed_part(entity.model)):
-            return _normalized_dashed_uid(None)
+            return None
         seed = "::".join(
             [
                 _seed_part(entity.manufacturer, "unknown-manufacturer"),
@@ -1114,11 +1113,11 @@ def _identity_minted_uid(entity_kind: str, entity: Any, *, workspace_root: PathL
             name=entity.name,
         )
         if shared_seed is None:
-            return _normalized_dashed_uid(None)
+            return None
         seed = shared_seed
     elif entity_kind == "test-protocol":
         if not (_seed_part(entity.name) or _seed_part(entity.version)):
-            return _normalized_dashed_uid(None)
+            return None
         seed = "::".join(
             [
                 _seed_part(getattr(entity, "test_kind", None), "other"),
@@ -1131,7 +1130,7 @@ def _identity_minted_uid(entity_kind: str, entity: Any, *, workspace_root: PathL
         protocol_name = (getattr(protocol, "name", None) if protocol is not None else None) or "test"
         name = entity.name or protocol_name
         if not (_seed_part(entity.name) or _seed_part(getattr(protocol, "name", None) if protocol else None)):
-            return _normalized_dashed_uid(None)
+            return None
         seed = "::".join(
             [
                 _seed_part(entity.cell_instance_id, "unknown-cell"),
@@ -1148,7 +1147,7 @@ def _identity_minted_uid(entity_kind: str, entity: Any, *, workspace_root: PathL
             workspace_root=workspace_root,
         )
         if not (_seed_part(entity.name) or _seed_part(locator) or _seed_part(entity.test_id)):
-            return _normalized_dashed_uid(None)
+            return None
         seed = "::".join(
             [
                 _seed_part(entity.cell_instance_id, "unknown-cell"),
@@ -1159,7 +1158,16 @@ def _identity_minted_uid(entity_kind: str, entity: Any, *, workspace_root: PathL
         )
     else:  # pragma: no cover — programming error, not user input
         raise ValueError(f"No identity-minting policy for entity kind {entity_kind!r}.")
-    return stable_uid(seed)
+    return seed
+
+
+def _identity_minted_uid(entity_kind: str, entity: Any, *, workspace_root: PathLike | None = None) -> str:
+    """Mint a deterministic uid from the record's natural identity (see ``_identity_seed``);
+    a random one for a record with no distinguishing identity at all."""
+    from battinfo.entities import stable_uid  # noqa: PLC0415
+
+    seed = _identity_seed(entity_kind, entity, workspace_root=workspace_root)
+    return stable_uid(seed) if seed is not None else _normalized_dashed_uid(None)
 
 
 def _mint_cell_spec_record(spec: CellSpec) -> dict[str, Any]:
@@ -1226,74 +1234,93 @@ def _org_name(value: Any) -> Any:
     return value.get("name") if isinstance(value, Mapping) else value
 
 
+# What a record of each kind needs for a save to mint its IRI from its natural
+# key. A kind not listed here has none: its builders mint a random uid.
+_NATURAL_KEY_FIELDS = {
+    "cell-spec": "manufacturer or model",
+    "cell": "serial_number, batch_id or name",
+    "test-protocol": "name or version",
+    "test": "name or protocol_name",
+    "dataset": "name or access_url",
+    "parameter-set": "name and material_kind, material_spec_id or cell_spec_id",
+    "organization": "name",
+    "channel": "equipment_id and index",
+}
+
+
 def _canonical_identity_uid(entity_type: str, body: Mapping[str, Any], *,
-                            workspace_root: PathLike | None) -> str:
+                            workspace_root: PathLike | None) -> str | None:
     """The uid a builder would mint for this canonical record body, from the same natural key.
 
     Each kind is seeded exactly as its ``create_*`` / ``_record_from_*`` builder
     seeds it (see those builders), read back from the canonical field names, so a
     filled-in template saved without an id lands on the IRI the same record gets
-    when built from its fields. Kinds whose builders mint randomly (the component
-    families) mint randomly here too.
+    when built from its fields. ``None`` when there is no natural key to seed
+    from: the kinds whose builders mint a random uid (the component families and
+    equipment), and a record whose key fields are empty. A random IRI there
+    would turn every re-run of the save into a duplicate, so the save refuses it.
     """
     from types import SimpleNamespace  # noqa: PLC0415
 
     from battinfo.entities import electrode_identity_seed, stable_uid  # noqa: PLC0415
 
+    seed: str | None = None
     if entity_type == "cell-spec":
-        return _identity_minted_uid("cell-spec", SimpleNamespace(
+        seed = _identity_seed("cell-spec", SimpleNamespace(
             manufacturer=_org_name(body.get("manufacturer")), model=body.get("model"),
             format=body.get("cell_format") or body.get("format"), chemistry=body.get("chemistry"),
             size_code=body.get("size_code"),
         ))
-    if entity_type == "cell":
-        return _identity_minted_uid("cell", SimpleNamespace(
+    elif entity_type == "cell":
+        seed = _identity_seed("cell", SimpleNamespace(
             cell_spec_id=body.get("cell_spec_id"), serial_number=body.get("serial_number"),
             batch_id=body.get("batch_id"), name=body.get("name"),
         ))
-    if entity_type == "test-protocol":
-        return _identity_minted_uid("test-protocol", SimpleNamespace(
+    elif entity_type == "test-protocol":
+        seed = _identity_seed("test-protocol", SimpleNamespace(
             name=body.get("name"), version=body.get("version"), test_kind=body.get("kind"),
         ))
-    if entity_type == "test":
-        return _identity_minted_uid("test", SimpleNamespace(
+    elif entity_type == "test":
+        seed = _identity_seed("test", SimpleNamespace(
             name=body.get("name"), cell_instance_id=body.get("cell_id"), test_kind=body.get("kind"),
             protocol=SimpleNamespace(name=body.get("protocol_name")),
         ))
-    if entity_type == "dataset":
-        about = [item for item in body.get("about") or [] if isinstance(item, str)]
+    elif entity_type == "dataset":
+        # The about list does not say which cell and test are the dataset's primary
+        # ones, and a template lists its cells and tests as related ones, which the
+        # builder leaves out of the seed. They stay out here too, so a saved
+        # template gets the IRI the builder gives the same template inputs.
         distributions = body.get("distributions") or []
         first = distributions[0] if distributions and isinstance(distributions[0], Mapping) else {}
-        return _identity_minted_uid("dataset", SimpleNamespace(
+        seed = _identity_seed("dataset", SimpleNamespace(
             name=body.get("name"), access_url=body.get("access_url"),
             download_url=first.get("content_url"), dataset_path=None,
-            cell_instance_id=next((item for item in about if CELL_IRI_RE.fullmatch(item)), None),
-            test_id=next((item for item in about if TEST_IRI_RE.fullmatch(item)), None),
+            cell_instance_id=None, test_id=None,
         ), workspace_root=workspace_root)
-    if entity_type == "material-spec":
+    elif entity_type == "material-spec":
         from battinfo.api._components import _material_spec_identity_uid  # noqa: PLC0415
 
         return _material_spec_identity_uid(SimpleNamespace(  # type: ignore[arg-type]
             manufacturer=body.get("manufacturer"), product_id=body.get("product_id"),
             name=body.get("name"), grade=body.get("grade"),
         ), body.get("kind"))
-    if entity_type == "material":
+    elif entity_type == "material":
         lot = body.get("lot_id") or body.get("batch_id") or body.get("name") or ""
-        return stable_uid("::".join(["material", str(body.get("material_spec_id") or "").strip(), str(lot).strip()]))
-    if entity_type == "electrode-spec":
+        seed = "::".join(["material", str(body.get("material_spec_id") or "").strip(), str(lot).strip()])
+    elif entity_type == "electrode-spec":
         from battinfo.api._components import _electrode_spec_identity_uid  # noqa: PLC0415
 
         return _electrode_spec_identity_uid(SimpleNamespace(  # type: ignore[arg-type]
             manufacturer=body.get("manufacturer"), processing=body.get("processing"),
             product_id=body.get("product_id"), name=body.get("name"), grade=body.get("grade"),
         ), body.get("active_material_kind") or body.get("kind"))
-    if entity_type == "electrode":
-        return stable_uid(electrode_identity_seed(
+    elif entity_type == "electrode":
+        seed = electrode_identity_seed(
             electrode_spec_id=body.get("electrode_spec_id"),
             batch=body.get("batch_id") or body.get("lot_id") or body.get("name") or "",
             parent_id=body.get("parent_id"), piece_id=body.get("piece_id"),
-        ))
-    if entity_type == "parameter-set":
+        )
+    elif entity_type == "parameter-set":
         target = next((body.get(field) for field in ("material_kind", "material_spec_id", "cell_spec_id")
                        if isinstance(body.get(field), str)), None)
         name = body.get("name")
@@ -1302,8 +1329,37 @@ def _canonical_identity_uid(entity_type: str, body: Mapping[str, Any], *,
             if body.get("electrode_polarity"):
                 parts.append(str(body["electrode_polarity"]))
             parts.append(name.strip().lower())
-            return stable_uid(":".join(parts))
-    return _normalized_dashed_uid(None)
+            seed = ":".join(parts)
+    elif entity_type == "organization":
+        name = body.get("name")
+        if isinstance(name, str) and name.strip():
+            seed = f"organization:{name.strip().lower()}"
+    elif entity_type == "channel":
+        equipment_id, index = body.get("equipment_id"), body.get("index")
+        if isinstance(equipment_id, str) and "/" in equipment_id and isinstance(index, int) and not isinstance(index, bool):
+            seed = f"channel:{_iri_tail(equipment_id)[1]}:{index}"
+    return stable_uid(seed) if seed is not None else None
+
+
+def _unmintable_record_message(entity_type: str, record_key: str) -> str:
+    """Why a record saved without an id gets none, and what to do instead."""
+    fields = _NATURAL_KEY_FIELDS.get(entity_type)
+    article = "an" if entity_type[:1] in "aeiou" else "a"
+    give_uid = (
+        "give it a uid (uid= when you build the template or the record, --uid on battinfo "
+        f"template), or set {record_key}.id to the IRI it was published under"
+    )
+    if fields is None:
+        return (
+            f"Cannot save {article} {entity_type} record without an id: {entity_type} records "
+            "have no natural key to mint an IRI from, and a random one would turn every re-run "
+            f"of the save into a duplicate record. To save it, {give_uid}."
+        )
+    return (
+        f"Cannot save {article} {entity_type} record without an id: fill in its {fields} so "
+        f"the save can mint the IRI from them, or {give_uid}. A random IRI would turn every "
+        "re-run of the save into a duplicate record."
+    )
 
 
 def _with_minted_id(doc: dict[str, Any], *, source_root: PathLike | None = None) -> dict[str, Any]:
@@ -1311,8 +1367,10 @@ def _with_minted_id(doc: dict[str, Any], *, source_root: PathLike | None = None)
 
     Templates leave the id out (an all-zero placeholder used to be written and
     everyone who saved an unedited template claimed it), so saving the filled-in
-    record mints the IRI here: ``id``, ``short_id`` and, for kinds that carry one,
-    the derived ``identifier``. A record that has an id is returned unchanged.
+    record mints the IRI here from its natural key: ``id``, ``short_id`` and, for
+    kinds that carry one, the derived ``identifier``. A record with no natural
+    key (see ``_canonical_identity_uid``) is refused rather than given a random
+    IRI. A record that has an id is returned unchanged.
     """
     from battinfo.entities import kind_for_doc  # noqa: PLC0415
 
@@ -1322,6 +1380,8 @@ def _with_minted_id(doc: dict[str, Any], *, source_root: PathLike | None = None)
         return doc
     workspace_root = workspace_layout_root(source_root) if source_root is not None else None
     uid = _canonical_identity_uid(kind.entity_type, body, workspace_root=workspace_root)
+    if uid is None:
+        raise ValueError(_unmintable_record_message(kind.entity_type, kind.record_key))
     entity_id = f"https://w3id.org/battinfo/{kind.iri_namespace}/{uid}"
     minted: dict[str, Any] = {"id": entity_id, "short_id": _short_id_from_iri(entity_id)}
     prefix = _DERIVED_IDENTIFIER_PREFIX.get(kind.entity_type)
@@ -2121,6 +2181,8 @@ def save_library_cell_spec(
         # A filled-in library template carries no id: mint it from the same natural
         # key as a cell spec (manufacturer, model, format, chemistry, size code).
         minted_uid = _canonical_identity_uid("cell-spec", specification, workspace_root=None)
+        if minted_uid is None:
+            raise ValueError(_unmintable_record_message("cell-spec", "specification"))
         specification = {"id": f"https://w3id.org/battinfo/spec/{minted_uid}", **specification}
         doc = {**doc, "specification": specification}
     elif is_placeholder_iri(specification.get("id")):

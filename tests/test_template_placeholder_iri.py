@@ -44,9 +44,13 @@ def test_template_save_validate_mints_a_real_iri(tmp_path: Path) -> None:
     )
     draft = tmp_path / "draft.json"
     _cli("template", "cell-instance", "--cell-spec-id", spec["id"], "--out", str(draft))
-    body = json.loads(draft.read_text(encoding="utf-8"))["cell_instance"]
+    record = json.loads(draft.read_text(encoding="utf-8"))
+    body = record["cell_instance"]
     assert "id" not in body and "short_id" not in body
     assert body["cell_spec_id"] == spec["id"]
+    # Filled in as the template's note asks: the serial number is what the IRI is minted from.
+    body["serial_number"] = "CR2032-001"
+    draft.write_text(json.dumps(record), encoding="utf-8")
 
     saved = _cli("save", "cell-instance", "--input", str(draft), "--source-root", str(root))
     assert saved["status"] == "created"
@@ -198,19 +202,30 @@ def test_filled_component_and_parameter_templates_mint_on_save(tmp_path: Path) -
     electrode_template = api.template_electrode(electrode_spec_id=electrode_spec["id"])
     electrode_template["electrode"]["batch_id"] = "B-1"
     electrode = api.save_electrode(electrode_template, source_root=root)
-    separator_spec = api.save_component_spec("separator", api.template_component_spec("separator"),
-                                             source_root=root)
-    separator = api.save_component_instance(
-        "separator", api.template_component_instance("separator", spec_id=separator_spec["id"]),
-        source_root=root,
-    )
     parameter_set = api.save_parameter_set(api.template_parameter_set(), source_root=root)
-    for saved in (material_spec, material, electrode_spec, electrode, separator_spec, separator, parameter_set):
+    for saved in (material_spec, material, electrode_spec, electrode, parameter_set):
         assert saved["status"] == "created" and "0000-0000" not in saved["id"]
     # Deterministic kinds land on the IRI their builders mint for the same fields.
     assert material_spec["id"] == api.create_material_spec(name="Graphite SLP30")["material_spec"]["id"]
     assert material["id"] == api.create_material(material_spec_id=material_spec["id"],
                                                  lot_id="LOT-1")["material"]["id"]
+    # Saving the same filled-in template again hits the same record, not a second one.
+    with pytest.raises(ValueError, match="already exists"):
+        api.save_material(material_template, source_root=root)
+
+
+def test_component_templates_need_a_uid(tmp_path: Path) -> None:
+    """A component family has no natural key; a random IRI would duplicate on every re-run."""
+    root = tmp_path / "records"
+    with pytest.raises(ValueError, match=r"separator-spec records have no natural key.*give it a uid"):
+        api.save_component_spec("separator", api.template_component_spec("separator"), source_root=root)
+    spec = api.save_component_spec("separator", api.template_component_spec("separator", uid="1f8r6v2k9p4m3t7x"),
+                                   source_root=root)
+    assert spec["status"] == "created" and spec["id"].endswith("/1f8r-6v2k-9p4m-3t7x")
+    with pytest.raises(ValueError, match="give it a uid"):
+        api.save_component_instance(
+            "separator", api.template_component_instance("separator", spec_id=spec["id"]), source_root=root,
+        )
 
 
 def test_library_template_mints_on_save(tmp_path: Path) -> None:
@@ -251,3 +266,66 @@ def test_cli_cell_spec_template_saves_with_a_minted_iri(tmp_path: Path) -> None:
          "--chemistry", "li-metal", "--cell-format", "coin", "--out", str(draft))
     saved = _cli("save", "cell-spec", "--input", str(draft), "--source-root", str(tmp_path / "examples"))
     assert saved["status"] == "created" and "0000-0000" not in saved["id"]
+
+
+# ── Save-time minting: deterministic or refused ──────────────────────────────
+
+def test_a_saved_template_dataset_gets_the_builder_iri(tmp_path: Path) -> None:
+    """template_dataset() lists its cells and tests as related ones, which the builder
+    leaves out of the identity seed; saving the template mints the builder's IRI."""
+    from battinfo import Dataset
+
+    cell = "https://w3id.org/battinfo/cell/2435-kc9w-g9q0-1xsm"
+    test = "https://w3id.org/battinfo/test/y4gj-dvk5-e8x4-3y3t"
+    url = "https://zenodo.org/records/1/files/S1.csv"
+    saved = api.save_dataset(
+        api.template_dataset(title="S1 data", related_cell_ids=[cell], related_test_ids=[test], access_url=url),
+        source_root=tmp_path / "template", resolve_references=False, build_jsonld=False, build_html=False,
+    )
+    built = api.save_dataset(
+        Dataset(name="S1 data", related_cell_ids=[cell], related_test_ids=[test], access_url=url,
+                source_type="other"),
+        source_root=tmp_path / "builder", resolve_references=False, build_jsonld=False, build_html=False,
+    )
+    assert saved["id"] == built["id"]
+
+
+def test_an_organization_without_an_id_gets_its_name_derived_iri(tmp_path: Path) -> None:
+    from battinfo.api import create_organization
+
+    record = create_organization(name="Example Lab", type="ResearchOrganization")
+    expected = record["organization"].pop("id")
+    record["organization"].pop("short_id")
+    saved = save_record(record, source_root=tmp_path, build_jsonld=False, build_html=False)
+    assert saved["id"] == expected
+
+
+def test_a_channel_without_an_id_gets_its_equipment_and_index_iri(tmp_path: Path) -> None:
+    from battinfo.api import create_channel
+
+    record = create_channel(equipment_id="https://w3id.org/battinfo/equipment/1f8r-6v2k-9p4m-3t7x", index=3)
+    expected = record["channel"].pop("id")
+    record["channel"].pop("short_id")
+    saved = save_record(record, source_root=tmp_path, resolve_references=False, build_jsonld=False,
+                        build_html=False)
+    assert saved["id"] == expected
+
+
+@pytest.mark.parametrize("kind", ["equipment-spec", "equipment"])
+def test_equipment_without_an_id_is_refused(tmp_path: Path, kind: str) -> None:
+    from battinfo.api import create_equipment, create_equipment_spec
+
+    record = (create_equipment_spec(name="SkyRC MC3000", model="MC3000") if kind == "equipment-spec"
+              else create_equipment(spec_id="https://w3id.org/battinfo/spec/1f8r-6v2k-9p4m-3t7x", serial_number="E1"))
+    body = record[kind.replace("-", "_")]
+    body.pop("id")
+    body.pop("short_id")
+    with pytest.raises(ValueError, match="give it a uid"):
+        save_record(record, source_root=tmp_path, resolve_references=False, build_jsonld=False, build_html=False)
+
+
+def test_a_cell_template_without_a_serial_is_refused(tmp_path: Path) -> None:
+    template = template_cell_instance(cell_spec_id="https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0")
+    with pytest.raises(ValueError, match="fill in its serial_number, batch_id or name"):
+        save_record(template, source_root=tmp_path, resolve_references=False, build_jsonld=False,
+                    build_html=False)

@@ -161,8 +161,9 @@ def template_cell_instance(
 
     The document carries no ``id`` unless *uid* is given, and no ``cell_spec_id``
     unless *cell_spec_id* is: fill those in, and saving mints the IRI from the
-    cell's spec, serial number and name, so records made from the template
-    never share a placeholder IRI.
+    cell's spec, serial number, batch and name, so records made from the template
+    never share a placeholder IRI. A cell with none of serial number, batch and
+    name has nothing to mint from, and its save is refused.
     """
     draft = Cell(
         uid=uid,
