@@ -4,6 +4,7 @@ import mimetypes
 import os
 import shutil
 import tempfile
+import time
 from pathlib import Path
 from typing import Any
 from urllib.parse import unquote, urlparse
@@ -64,6 +65,33 @@ def _relative_to(root: Path, path: Path) -> str:
         return path.as_posix()
 
 
+# A virus scanner or search indexer that opens a freshly written file holds it for a
+# moment, and Windows will not rename a folder while a file inside it is open
+# (WinError 5, raised as PermissionError). How long _replace_dir keeps trying.
+_RENAME_RETRY_SECONDS = 2.0
+
+
+def _replace_dir(source: Path, destination: Path) -> None:
+    """``os.replace`` that waits out a file another process holds open for a moment.
+
+    A rename refused with PermissionError is tried again after a pause that
+    grows from 20 ms to 250 ms, for about ``_RENAME_RETRY_SECONDS`` in all, and
+    then the last error is raised.
+    """
+    deadline = time.monotonic() + _RENAME_RETRY_SECONDS
+    pause = 0.02
+    while True:
+        try:
+            os.replace(source, destination)
+            return
+        except PermissionError:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise
+            time.sleep(min(pause, remaining))
+            pause = min(pause * 2, 0.25)
+
+
 def _swap_dir(staging: Path, target: Path) -> None:
     """Atomically replace directory ``target`` with ``staging``.
 
@@ -71,19 +99,20 @@ def _swap_dir(staging: Path, target: Path) -> None:
     removes the old copy. Both moves are atomic renames; on failure the original
     ``target`` is restored. This never destroys a live directory before its
     replacement is durably in place (cf. ``shutil.rmtree`` then re-write, which
-    loses the whole group if interrupted in between).
+    loses the whole group if interrupted in between). Each rename waits out a
+    file that another process holds open for a moment (``_replace_dir``).
     """
     backup: Path | None = None
     if target.exists():
         backup = target.with_name(staging.name + ".bak")
         if backup.exists():
             shutil.rmtree(backup, ignore_errors=True)
-        os.replace(target, backup)
+        _replace_dir(target, backup)
     try:
-        os.replace(staging, target)
+        _replace_dir(staging, target)
     except BaseException:
         if backup is not None and not target.exists():
-            os.replace(backup, target)  # roll back to the original
+            _replace_dir(backup, target)  # roll back to the original
         raise
     if backup is not None:
         shutil.rmtree(backup, ignore_errors=True)
