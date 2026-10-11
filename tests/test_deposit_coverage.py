@@ -282,3 +282,31 @@ def test_standalone_kinds_are_registered_types() -> None:
     assert not unknown, f"DEPOSIT_STANDALONE_KINDS names unregistered types: {unknown}"
     overlap = sorted(set(DEPOSIT_STANDALONE_KINDS) & set(DEPOSIT_COVERAGE_EXEMPT))
     assert not overlap, f"types both promoted and exempt: {overlap}"
+
+
+def test_parameter_sets_are_not_checked_as_dataset_records() -> None:
+    """Parameter sets share dataset/ with dataset records (IDENTIFIER_POLICY 6.3).
+
+    A claim batch has no files and a virtual-cell parameter file is about no
+    record, so the checks a dataset record must pass (an about link, at least
+    one file) must not fire on them because of their namespace.
+    """
+    from battinfo.interop import from_bpx_parameters
+    from battinfo.validate import validate_publication_report
+
+    record_sets = _record_sets()
+    fixture = ROOT / "tests" / "fixtures" / "interop" / "bpx-dfn-full.bpx.json"
+    record_sets["parameter-set"].append(from_bpx_parameters(fixture).to_parameter_set(virtual_cell=True))
+    parameter_set_iris = {_record_iri(rec) for rec in record_sets["parameter-set"]}
+    assert all(iri.startswith("https://w3id.org/battinfo/dataset/") for iri in parameter_set_iris)
+
+    doc = _deposit_graph(record_sets)
+    paths = {f"@graph[{i}]" for i, node in enumerate(doc["@graph"]) if node.get("@id") in parameter_set_iris}
+    assert len(paths) == len(parameter_set_iris)
+    report = validate_publication_report(doc, policy="publisher")
+    flagged = [
+        issue for issue in report.issues
+        if issue.code in {"publication.dataset_about_missing", "publication.dataset_distribution_missing"}
+        and issue.path.split(".")[0] in paths
+    ]
+    assert not flagged, flagged

@@ -210,6 +210,11 @@ def _is_absolute_uri(value: Any) -> bool:
     return bool(parsed.scheme and (parsed.netloc or parsed.path))
 
 
+# The types a dataset record's node carries: dcat:Dataset in a workspace
+# deposit, BatteryTestResult in a dataset publication package.
+_DATASET_RECORD_TYPES = frozenset({"dcat:Dataset", "BatteryTestResult"})
+
+
 def _type_values(node: dict[str, Any]) -> list[str]:
     value = node.get("@type")
     if isinstance(value, str):
@@ -331,7 +336,16 @@ def _shape_issues(data: dict[str, Any], policy: ValidationPolicy) -> ValidationR
             continue
 
         node_id = node.get("@id")
-        is_battinfo_dataset = isinstance(node_id, str) and node_id.startswith("https://w3id.org/battinfo/dataset/")
+        # Parameter sets share the dataset/ namespace (IDENTIFIER_POLICY 6.3) but
+        # are plain schema:Dataset nodes, so the namespace alone does not make a
+        # node a dataset record: a claim batch has no files and a virtual-cell
+        # parameter file is about no record. A dataset record's node carries
+        # one of the dataset-record types.
+        is_battinfo_dataset = (
+            isinstance(node_id, str)
+            and node_id.startswith("https://w3id.org/battinfo/dataset/")
+            and any(t in _DATASET_RECORD_TYPES for t in node_types)
+        )
         # A collection (dcat:DatasetSeries) groups member datasets: it is about
         # nothing in particular and has no files of its own, so the about and
         # distribution requirements apply to its members, not to it.
