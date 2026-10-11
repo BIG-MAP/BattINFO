@@ -2143,10 +2143,15 @@ class Workspace:
         if finalized.name is None:
             finalized.name = finalized.dataset_path or finalized.access_url or "dataset"
         if finalized.created_at is None:
-            # A dataset already published was created by then, not at this save.
-            finalized.created_at = (
-                finalized.published_at if finalized.published_at is not None else _now_unix()
-            )
+            if finalized.published_at is not None:
+                # A dataset already published was created by then, not at this save,
+                # and this save modifies it: without its own modified_at it takes the
+                # save time, not the old publication time.
+                finalized.created_at = finalized.published_at
+                if finalized.modified_at is None:
+                    finalized.modified_at = _now_unix()
+            else:
+                finalized.created_at = _now_unix()
         if finalized.access_url is None and finalized.dataset_path is not None:
             finalized.access_url = _as_path(finalized.dataset_path).resolve().as_uri()
         if finalized.id is None:

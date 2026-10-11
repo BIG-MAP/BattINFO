@@ -1424,17 +1424,22 @@ def _record_from_dataset(dataset: Dataset, *, workspace_root: PathLike | None = 
     # model's to_record() handles the schema.org field mapping and distribution assembly.
     # A dataset that states when it was published but not when it was created (a new
     # version of a published record, read back with from_record) existed by then, so its
-    # created_at defaults to published_at, not to now, which would fall after it.
+    # created_at defaults to published_at, not to now, which would fall after it. This
+    # save is then a modification: without its own modified_at it takes the save time,
+    # not the old publication time.
     published = (
         _resolved_time("published_at", finalized.published_at, 0)
         if finalized.published_at is not None
         else None
     )
+    created_from_published = finalized.created_at is None and published is not None
     created = _resolved_time(
         "created_at", finalized.created_at, published if published is not None else _now_unix()
     )
     finalized.created_at = created
-    finalized.modified_at = _resolved_time("modified_at", finalized.modified_at, created)
+    finalized.modified_at = _resolved_time(
+        "modified_at", finalized.modified_at, _now_unix() if created_from_published else created
+    )
     finalized.published_at = published if published is not None else created
     if finalized.source.type is None:
         finalized.source.type = "other"

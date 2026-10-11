@@ -4,7 +4,8 @@ A published record read back with Dataset.from_record() has published_at but no
 created_at. Saving defaulted created_at to the save time, which is after the
 publication date, so strict validation refused the record with an error about
 published_at, a field the user never touched. created_at now defaults to
-published_at when only that is known.
+published_at when only that is known, and modified_at then to the save time:
+the save is the modification, and the old publication time is not.
 """
 from __future__ import annotations
 
@@ -58,10 +59,12 @@ def test_published_dataset_resaves_under_the_strict_policy(tmp_path: Path) -> No
     """The reproduction from the evaluation (e03_created_at.py)."""
     dataset = battinfo.Dataset.from_record(copy.deepcopy(PUBLISHED_RECORD))
     assert dataset.created_at is None
+    before = int(time.time())
     record = _save(dataset, tmp_path)
     assert record["dataset"]["created_at"] == PUBLISHED
     assert record["dataset"]["published_at"] == PUBLISHED
-    assert record["dataset"]["modified_at"] == PUBLISHED
+    # The new version was modified now, not when the first one was published.
+    assert before <= record["dataset"]["modified_at"] <= int(time.time()) + 1
 
 
 def test_a_relinked_new_version_saves(tmp_path: Path) -> None:
@@ -76,8 +79,10 @@ def test_the_workspace_engine_defaults_created_at_the_same_way(tmp_path: Path) -
     engine = Workspace(root=tmp_path / "engine")
     dataset = battinfo.Dataset(name="Cell 1 data", access_url=FILE_URL, published_at=PUBLISHED,
                                cell_instance_id=CELL, test_id=TEST)
+    before = int(time.time())
     finalized = engine._finalize_dataset(dataset, {}, {})
     assert finalized.created_at == PUBLISHED
+    assert before <= finalized.modified_at <= int(time.time()) + 1
 
 
 def test_without_either_date_created_at_is_the_save_time(tmp_path: Path) -> None:
@@ -94,3 +99,14 @@ def test_the_ordering_rule_still_holds(tmp_path: Path) -> None:
     )
     with pytest.raises(ValueError, match=r"published_at .* must be >= created_at"):
         _save(dataset, tmp_path)
+
+
+def test_a_stated_modified_at_is_kept(tmp_path: Path) -> None:
+    stated = PUBLISHED + 86400
+    dataset = battinfo.Dataset.from_record(copy.deepcopy(PUBLISHED_RECORD)).model_copy(update={"modified_at": stated})
+    assert _save(dataset, tmp_path)["dataset"]["modified_at"] == stated
+    engine = Workspace(root=tmp_path / "engine")
+    finalized = engine._finalize_dataset(
+        battinfo.Dataset(name="Cell 1 data", access_url=FILE_URL, published_at=PUBLISHED, modified_at=stated,
+                         cell_instance_id=CELL, test_id=TEST), {}, {})
+    assert finalized.modified_at == stated
