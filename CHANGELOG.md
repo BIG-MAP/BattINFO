@@ -88,13 +88,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
-- **A BPX Validation section is named on import.** Top-level sections other than Header, Parameterisation and State were skipped without a warning, so the five measured discharge curves in the Schmitt et al. 2026 file disappeared silently, against the importer's own rule. The warning now lists every Validation series and says the curves stay in the source file; any other unknown top-level section is named too.
-
 - **`ws.submit()` sends a cell spec's own title.** Every cell-spec submission was titled "<manufacturer> <model>", so a cell spec retitled with `battinfo.naming` ("Flores 2026 graphite AQ-1 cell spec") kept its old title in the registry. The record's `name` now wins; manufacturer and model are the fallback.
 
 - **A cell-spec draft keeps its title.** `ws.load()` of a cell-spec draft copied its `handle` but ignored its `name`, so the record was always titled "<manufacturer> <model>" and a build that set titles from `battinfo.naming` lost them silently. The draft's `name` now wins; without one the default is unchanged, and the IRI never depends on it.
 
 - **Handles keep letters such as ø and æ.** `battinfo.naming` dropped letters that Unicode does not decompose, so "Topsøe" became `topse`. They now take their usual ASCII spelling (ø to o, æ to ae, ß to ss, ł to l).
+
+- **A BPX Validation section is named on import.** Top-level sections other than Header, Parameterisation and State were skipped without a warning, so the five measured discharge curves in the Schmitt et al. 2026 file disappeared silently, against the importer's own rule. The warning now lists every Validation series and says the curves stay in the source file; any other unknown top-level section is named too.
 
 - **A test-spec draft keeps its explicit `id`.** `ws.load()` ignored the `"id"` of a `.test-spec.json` draft and minted a new IRI from the name, so a corrected name moved a published test spec. The draft's `"id"` (or `"uid"`) is now used and checked as a `spec/` IRI.
 
