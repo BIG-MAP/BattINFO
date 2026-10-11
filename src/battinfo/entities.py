@@ -41,6 +41,17 @@ def stable_uid(seed: str) -> str:
     return "-".join((token[:4], token[4:8], token[8:12], token[12:16]))
 
 
+#: The uid record templates used as a placeholder ("0000000000000000", dashed).
+#: Templates no longer write it; validation rejects a record whose own IRI still
+#: carries it, since every record made from an unedited old template would claim it.
+PLACEHOLDER_UID = "0000-0000-0000-0000"
+
+
+def is_placeholder_iri(value: object) -> bool:
+    """True for a record IRI whose uid is the all-zero template placeholder."""
+    return isinstance(value, str) and value.rstrip("/").rsplit("/", 1)[-1] == PLACEHOLDER_UID
+
+
 def cell_instance_identity_seed(
     *,
     cell_spec_id: str | None,
@@ -79,6 +90,52 @@ def cell_instance_identity_seed(
             label,
         ]
     )
+
+
+def dataset_locator_seed(
+    *,
+    access_url: str | None = None,
+    download_url: str | None = None,
+    dataset_path: str | Path | None = None,
+    workspace_root: str | Path | None = None,
+) -> str:
+    """The location part of a dataset's identity seed, the same wherever the workspace sits.
+
+    Shared by every surface that mints a dataset IRI (the workspace finalizer,
+    the ``save_dataset`` builder and the publication package). An explicit
+    remote ``access_url`` or ``download_url`` (``https://...`` or any other
+    non-file URL) is used as it is. A local data file or folder, given as
+    ``dataset_path`` or as a ``file:`` URL, is named by its path relative to
+    *workspace_root* in POSIX form when it lies inside that folder; a relative
+    path is read against *workspace_root*, never against the current
+    directory. Outside the workspace, or with no workspace root, it is named
+    by its folder and its name (``run1/data.csv``), so two files with one name
+    in different folders do not share an IRI. The absolute path never enters
+    the seed, so the same workspace built in another folder, by a colleague or
+    a CI job, mints the same dataset IRIs.
+
+    Returns ``""`` when the dataset names no location at all.
+    """
+    from battinfo._util import is_local_location, local_path, path_tail  # noqa: PLC0415
+
+    for url in (access_url, download_url):
+        if isinstance(url, str) and url.strip() and not is_local_location(url):
+            return url.strip()
+    root = Path(workspace_root).resolve() if workspace_root is not None else None
+    for candidate in (dataset_path, access_url, download_url):
+        path = local_path(candidate)
+        if path is None or not str(path).strip():
+            continue
+        if root is not None:
+            absolute = path if path.is_absolute() else root / path
+            try:
+                relative = absolute.resolve().relative_to(root)
+            except (OSError, ValueError):
+                relative = None
+            if relative is not None and relative.parts:
+                return relative.as_posix()
+        return path_tail(path)
+    return ""
 
 
 def electrode_spec_identity_seed(

@@ -72,8 +72,7 @@ tests = ws.search(type="test-spec", query="capacity")
 
 Reading the registry needs no account or API key. What the results mean:
 
-- **A hit** is a published record; `ws.load(hit)` references it in your session
-  (reusing its IRI) instead of authoring a duplicate.
+- **A hit** is a published record; `ws.load(hit)` references it in your session (reusing its IRI) instead of authoring a duplicate. The workspace keeps a read-only copy of the published record under `.battinfo/references/`, so the records that point at it pass the strict check in `ws.save()`. The copy is never submitted.
 - **No hits** means nothing published matches — your own unpublished records
   will *not* appear here; they are only visible to `ws.list` and `query_*`.
 - **Offline** (or registry unreachable): search falls back to a local clone of

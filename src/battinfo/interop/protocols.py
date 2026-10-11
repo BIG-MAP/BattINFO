@@ -7,6 +7,11 @@ descriptive (queryable) and actionable (runnable) layers stay connected.
 
 The descriptive layer is allowed to be lossy: the imported method is a faithful
 summary; the linked artifact remains the executable source of truth.
+
+A ``source_locator`` that is a local path is stored relative to the current
+directory, or as the bare file name when the file lies outside it, never as an
+absolute path: a registry refuses records that name files on the importer's
+computer.
 """
 from __future__ import annotations
 
@@ -76,8 +81,30 @@ def _q(value: float, unit: str) -> Quantity:
     return Quantity(value=value, unit=unit)
 
 
+def _portable_locator(locator: str | None) -> str | None:
+    """The source file as a published record may name it.
+
+    A URL stays as it is. A local file is named by its path relative to the
+    current directory when it lies inside it, otherwise by its file name, so
+    the record never carries an absolute path (the importer's folder layout
+    and user name) that a registry would refuse.
+    """
+    from battinfo._util import is_local_location, local_path, path_name  # noqa: PLC0415
+
+    if not locator or not is_local_location(locator):
+        return locator
+    path = local_path(locator)
+    if path is None:
+        return locator
+    try:
+        return path.resolve().relative_to(Path.cwd().resolve()).as_posix()
+    except (OSError, ValueError):
+        return path_name(path)
+
+
 def _source_artifact(fmt: str, locator: str | None, sha256: str | None,
                      conforms_to: str | None) -> list[Artifact]:
+    locator = _portable_locator(locator)
     if not locator:
         return []
     return [Artifact(role="source_protocol", format=fmt, locator=locator,
@@ -87,7 +114,7 @@ def _source_artifact(fmt: str, locator: str | None, sha256: str | None,
 def _provenance(source_file: str | None) -> ProvenanceInfo:
     # Stamp retrieval time so the imported record is schema-valid standalone
     # (mirrors the save/publish path, which mints retrieved_at when absent).
-    return ProvenanceInfo(type="import", file=source_file, retrieved_at=int(time.time()))
+    return ProvenanceInfo(type="import", file=_portable_locator(source_file), retrieved_at=int(time.time()))
 
 
 # ── aurora-unicycler ──────────────────────────────────────────────────────────

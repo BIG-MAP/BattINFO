@@ -153,6 +153,7 @@ def test_run_demo_pipeline_publishes_and_checks_platform_page(tmp_path: Path, mo
         api_key="secret",
         platform_base_url="https://www.battery-genome.org",
         force=True,
+        allow_local_files=True,  # the demo dataset is a local file; the registry here is a mock
     )
 
     assert payload["verification_target"]["resource_type"] == "dataset"

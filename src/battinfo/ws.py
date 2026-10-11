@@ -19,6 +19,7 @@ from __future__ import annotations
 import builtins  # AuthoringWorkspace.list shadows the builtin in class-scope annotations
 import copy
 import difflib
+import functools
 import json
 import os
 import re
@@ -33,8 +34,9 @@ if TYPE_CHECKING:
 
 from battinfo._jsonio import atomic_write_text as _atomic_write_text
 from battinfo._jsonio import read_json as _read_json
-from battinfo._util import _now_iso, is_dataset_series
-from battinfo.entities import record_set_dirs
+from battinfo._util import _now_iso, is_dataset_series, local_file_references
+from battinfo._util import local_files_message as _local_files_message
+from battinfo.entities import entity_id_from_doc, kind_for_type, record_set_dirs, save_entity_path
 
 # Short-name pattern: 6 lowercase alphanumeric characters at the end of a
 # dash-delimited name component (e.g. "666h1s" in "duracell-mn2400-2026-02-666h1s").
@@ -1240,6 +1242,191 @@ def _clean_template_steps(raw: Any) -> builtins.list[str] | None:
     return steps or None
 
 
+# The keys each ws.load() draft loader reads: the fields of the record model the
+# draft becomes, the spellings that model's constructor also takes, and a few
+# draft-only keys. A key with no home in the record (keys starting with "_" are
+# comments) is refused rather than silently dropped, the way the record models
+# refuse an unknown field.
+#
+# Model fields that are not draft keys: the class markers, and the cell spec's
+# link to a library specification, which the canonical cell-spec record does
+# not carry.
+_NOT_DRAFT_KEYS = frozenset({"kind", "schema_version", "cell_specification_id"})
+# Flat provenance keys -> the field of the record's nested `source` they fill (the
+# spellings every record model's constructor takes).
+_DRAFT_PROVENANCE_KEYS = {
+    "source_type": "type", "source_name": "name", "source_file": "file", "source_url": "url",
+    "citation": "citation", "file_hash": "file_hash", "retrieved_at": "retrieved_at",
+    "workflow_version": "workflow_version", "curated_by": "curated_by",
+}
+# Other spellings that are read: alias -> the key it stands for. `specs` is also
+# the cell-spec draft key used until June 2026.
+_CELL_SPEC_DRAFT_ALIASES = {"specs": "properties", "model_name": "model", "notes": "comment"}
+_TEST_SPEC_DRAFT_ALIASES = {"notes": "comment"}
+# The equipment-spec record has no model class; its fields are the keyword
+# arguments of create_equipment_spec().
+_EQUIPMENT_SPEC_DRAFT_KEYS = frozenset({
+    "name", "handle", "equipment_class", "model", "channel_count", "supported_chemistries",
+    "property", "manufacturer", "supplier", "product_id", "comment", "uid", "id",
+    "source_type", "source_name", "source_file", "source_url", "citation", "retrieved_at",
+    "notes",
+})
+# A SpecItem with any of these set carries a value; one with none is an unfilled
+# template placeholder.
+_QUANTITY_VALUE_KEYS = ("value", "min_value", "max_value", "typical_value", "value_text")
+
+
+@functools.cache
+def _cell_spec_draft_keys() -> frozenset[str]:
+    """Every CellSpec field a cell-spec draft can set, and the flat provenance keys."""
+    from battinfo.bundle import CellSpec  # noqa: PLC0415
+
+    return frozenset({*CellSpec.model_fields, *_DRAFT_PROVENANCE_KEYS} - _NOT_DRAFT_KEYS)
+
+
+@functools.cache
+def _test_spec_draft_keys() -> frozenset[str]:
+    """Every TestSpec field a test-spec draft can set, and the draft's own keys."""
+    from battinfo.bundle import TestSpec  # noqa: PLC0415
+
+    # The test type is `type` in the template and is also read as `kind`,
+    # `test_type` or `test_kind`; `steps` or `experiment` (with `cycles`) are
+    # PyBaMM-style strings parsed into the method; `instrument` and `atmosphere`
+    # are kept as notes; `protocol_url` is the URL of the protocol followed.
+    own_keys = {"type", "kind", "test_kind", "steps", "experiment", "cycles",
+                "instrument", "atmosphere", "protocol_url"}
+    return frozenset(({*TestSpec.model_fields, *_DRAFT_PROVENANCE_KEYS} - _NOT_DRAFT_KEYS) | own_keys)
+
+
+def _draft_text_list(value: Any) -> builtins.list[str]:
+    """A draft's comment or notes as a list of strings; one string is one note."""
+    if value is None:
+        return []
+    items = value if isinstance(value, (builtins.list, tuple)) else [value]
+    return [str(item) for item in items if item is not None and str(item).strip()]
+
+
+def _merge_draft_alias(fields: dict[str, Any], alias: str, key: str, path: Path) -> None:
+    """Read *alias* as *key*; the two given with different values raise."""
+    if alias not in fields:
+        return
+    value = fields.pop(alias)
+    if fields.get(key) not in (None, value):
+        raise ValueError(f"{path.name}: {alias!r} and {key!r} disagree; keep one. Nothing was loaded.")
+    fields[key] = value
+
+
+def _draft_source(fields: dict[str, Any], *, default_type: str, path: Path) -> dict[str, Any]:
+    """Pop a draft's provenance into the one ``source`` object the record model takes.
+
+    Reads a nested ``source`` object and the flat keys the templates write
+    (``source_file``, ``citation``, ``source_url``, ...); a value given both
+    ways must agree.
+    """
+    nested = fields.pop("source", None)
+    if nested is not None and not isinstance(nested, Mapping):
+        raise ValueError(
+            f"{path.name}: 'source' must be an object such as "
+            '{"type": "datasheet", "url": "https://..."}. Nothing was loaded.'
+        )
+    source = {key: value for key, value in (nested or {}).items() if value is not None}
+    for flat, key in _DRAFT_PROVENANCE_KEYS.items():
+        value = fields.pop(flat, None)
+        if value is None:
+            continue
+        if source.get(key) not in (None, value):
+            raise ValueError(f"{path.name}: {flat!r} and 'source.{key}' disagree; keep one. Nothing was loaded.")
+        source[key] = value
+    source.setdefault("type", default_type)
+    return source
+
+
+def _filled_quantities(quantities: Mapping[str, Any], path: Path) -> dict[str, Any]:
+    """The quantities a draft fills in, without the unfilled template placeholders.
+
+    A placeholder is null or an object with no value of any kind; a range or a
+    text value is a value. A value that is not a quantity object raises rather
+    than being dropped.
+    """
+    filled: dict[str, Any] = {}
+    for key, value in quantities.items():
+        if value is None:
+            continue
+        if not isinstance(value, Mapping):
+            raise ValueError(
+                f"{path.name}: property {key!r} must be a quantity object such as "
+                f'{{"value": 1.5, "unit": "V"}}, not {value!r}. Nothing was loaded.'
+            )
+        if any(value.get(field) is not None for field in _QUANTITY_VALUE_KEYS):
+            filled[key] = value
+    return filled
+
+
+# Registry resource type of each entity type a workspace can reference by IRI. The
+# registry envelope carries the canonical record under the same key in
+# semantic_payload.battinfo_records.
+_REGISTRY_RESOURCE_TYPES = {"cell": "cell", "cell-spec": "cell_spec", "test-protocol": "test_spec"}
+# A Zenodo deposit of more than this many data files is zipped, one archive per
+# test kind (see AuthoringWorkspace._bundle_data_files).
+_ZENODO_ZIP_THRESHOLD = 90
+# Seconds to wait for the registry when looking up one referenced record. ws.add()
+# blocks on it, and the outcome is remembered for the session either way.
+_REFERENCE_LOOKUP_TIMEOUT = 10
+
+
+def _canonical_record_of(envelope: Any, entity_type: str) -> dict | None:
+    """The canonical record inside a registry envelope, or None when it has none."""
+    kind = kind_for_type(entity_type)
+    if kind is None or not isinstance(envelope, dict):
+        return None
+    records = (envelope.get("semantic_payload") or {}).get("battinfo_records") or {}
+    if not isinstance(records, dict):
+        return None
+    for key in (_REGISTRY_RESOURCE_TYPES.get(entity_type), kind.record_key):
+        candidate = records.get(key) if key else None
+        if isinstance(candidate, dict) and isinstance(candidate.get(kind.record_key), dict):
+            return candidate
+    return None
+
+
+def _path_key(path: str | Path) -> str:
+    """A file path normalised for comparison (absolute, case-folded where the OS is)."""
+    return os.path.normcase(os.path.abspath(str(path)))
+
+
+def _check_draft_keys(
+    raw: Mapping[str, Any],
+    allowed: frozenset[str],
+    *,
+    draft: str,
+    path: Path,
+    aliases: Mapping[str, str] | None = None,
+    quiet: frozenset[str] = frozenset(),
+) -> None:
+    """Raise ValueError for draft keys the loader does not read, with a did-you-mean.
+
+    The *allowed* keys are listed in the message; *aliases* (alias -> the key it
+    stands for) and *quiet* keys are read too, but not listed.
+    """
+    aliases = aliases or {}
+    unknown = [key for key in raw
+               if not str(key).startswith("_") and key not in allowed and key not in aliases
+               and key not in quiet]
+    if not unknown:
+        return
+    candidates = sorted({*allowed, *aliases, *quiet})
+    parts = []
+    for key in unknown:
+        close = difflib.get_close_matches(str(key), candidates, n=1)
+        suggestion = aliases.get(close[0], close[0]) if close else None
+        parts.append(repr(key) + (f" (did you mean {suggestion!r}?)" if suggestion else ""))
+    raise ValueError(
+        f"{path.name}: unknown key(s) in a {draft} draft: {', '.join(parts)}. "
+        f"A {draft} draft accepts: {', '.join(sorted(allowed))}; keys starting with '_' "
+        "are comments. Nothing was loaded."
+    )
+
+
 class AuthoringWorkspace:
     """The blessed authoring surface: a simplified workspace for BattINFO records.
 
@@ -1280,6 +1467,11 @@ class AuthoringWorkspace:
         # loaded from .battinfo/records/cell-instance/ into the index above, so a
         # fresh process can still resolve a cell by serial (day-2 rehydration).
         self._cells_rehydrated = False
+        # (entity type, IRI) -> outcome of looking a referenced record up in the
+        # registry this session ("copied", "not_found", "unreachable", ...), so a
+        # record is asked for once, and a failed lookup is not retried on every
+        # ws.add() that references it.
+        self._reference_lookups: dict[tuple[str, str], str] = {}
         # channel reference -> (equipment_id, channel_id) for test attachment.
         # Keys: the channel IRI, the channel label, and "unit/CHn" for the
         # unit's name and serial number. Populated by ws.add("equipment", ...)
@@ -2572,11 +2764,22 @@ class AuthoringWorkspace:
     def load(self, source: str | Path | dict | builtins.list) -> Any:
         """Bring a record into the workspace — author a new one, or reference an existing one.
 
-        - A **draft file** (``.cell-spec.json`` / ``.test-spec.json``) is authored as a
-          NEW record and published when you save/submit.
+        - A **draft file** (``.cell-spec.json`` / ``.test-spec.json`` /
+          ``.equipment-spec.json``) is authored as a NEW record and published
+          when you save/submit. A draft reads every field of the record it
+          becomes (``CellSpec``, ``TestSpec``, or the arguments of
+          ``create_equipment_spec()``), the flat provenance keys
+          (``source_url``, ``citation``, ...) and the spellings those models
+          also take; a key with no home in the record raises ``ValueError``
+          with a did-you-mean and the accepted keys, rather than being
+          dropped. Keys starting with ``_`` are comments, and a cell-spec
+          draft reads ``specs`` as the older spelling of ``properties``.
         - A **search result** (from :meth:`search`), or a **list** of results, is
           REFERENCED: brought into the session reusing the existing IRI and never
           re-published. A referenced cell is registered for test attachment.
+
+        A relative draft path resolves against the workspace root, not the
+        current directory.
 
         Example::
 
@@ -2622,7 +2825,14 @@ class AuthoringWorkspace:
 
         ``cell`` accepts a serial, IRI, ``Cell``, or search result, and is
         resolved in this session, locally, then in the registry (referenced if it
-        already exists).  ``data`` is a path or list of paths.  ``type`` is the test
+        already exists).  A cell found in the registry is kept as a read-only copy
+        of its published record under ``.battinfo/references/``, so the strict
+        save resolves it; the copy is never submitted.  With ``registry_url=None``
+        a cell this workspace does not hold cannot be checked, and ``ws.save()``
+        reports the reference as unresolved.  ``data`` is a path or list of paths to files that
+        exist; a relative path resolves against the workspace root, not the
+        current directory, and a missing file raises ``FileNotFoundError``
+        naming the path it resolved to.  ``type`` is the test
         type (``"cycling"``, ``"capacity_check"``, …); ``kind`` is accepted as an alias.
         ``channel`` attaches the test to an equipment channel — a channel IRI, a
         channel label, or ``"<unit>/CHn"`` (see ``ws.add("equipment", ...)``).
@@ -2701,7 +2911,10 @@ class AuthoringWorkspace:
     def save(self, validation_policy: str = "strict", mode: str = "upsert") -> dict:
         """Save all records and rebuild the workspace index.
 
-        Returns a summary dict with counts of written records.
+        Returns a summary dict with counts of written records. A record that
+        the index rejects under ``validation_policy`` (a reference that does not
+        resolve, for example) is still written, but is listed as ``[failed]``
+        with its error, and its summary item carries ``failed`` and ``error``.
         Only the records saved in this call will be submitted by the next
         ``ws.submit()`` — records left over from previous sessions in the
         same directory are ignored.
@@ -2795,30 +3008,77 @@ class AuthoringWorkspace:
 
         total = sum(len(result.get(key, [])) for key, _ in _SAVE_DISPLAY)
         print(f"Saved {total} record(s) under {self._ws.source_root}:")
+        # Records the save-time index rejected (a reference that does not resolve,
+        # a schema error) are written but not valid: list them as failed, with the
+        # error, and mark them in the returned summary.
+        failures = self._index_failures(result)
+        failed_count = len(failures)
         for key, label in _SAVE_DISPLAY:
             items = [i for i in result.get(key, []) if isinstance(i, dict)]
-            for item in items[:10]:
+            hidden = 0
+            for position, item in enumerate(items):
+                failure = failures.pop(_path_key(item["path"]), None) if item.get("path") else None
+                if failure is not None:
+                    item["failed"] = True
+                    item["error"] = failure["error"]
+                elif position >= 10:
+                    hidden += 1
+                    continue
                 rid = item.get("id", "") or ""
                 name = name_by_id.get(rid) or (rid.rsplit("/", 1)[-1] if rid else "?")
-                status = item.get("status", "")
+                status = "failed" if failure is not None else item.get("status", "")
                 # A same-IRI upsert whose content is unchanged is a no-op, not an
                 # update: report it honestly so an identical re-save reads as such.
                 if status == "updated" and item.get("content_changed") is False:
                     status = "unchanged"
                 rel = self._rel_to_root(item.get("path", ""))
                 print(f"  {label:11} {name[:36]:36} [{status}]  {rel}")
-            if len(items) > 10:
-                print(f"  {label:11} ... +{len(items) - 10} more")
+                if failure is not None:
+                    for line in str(failure["error"]).splitlines():
+                        print(f"      {line.strip()}")
+            if hidden:
+                print(f"  {label:11} ... +{hidden} more")
+        if failures:
+            # Rejected records this save did not write (left by an earlier session).
+            print("  Other records in the records folder that failed validation:")
+            for failure in failures.values():
+                first_line = (str(failure.get("error", "")).splitlines() or [""])[0]
+                print(f"    {failure.get('file')}: {first_line}")
         if stamped:
             ref = self._get_project()
             label = ref.summary() if ref else "project"
             print(f"  funding:    {label} stamped onto {stamped} record(s)")
-        if not getattr(self, "_publishing", False):
+        if failed_count:
+            print(f"\n  {failed_count} record(s) failed validation under the {validation_policy} policy "
+                  "and are marked [failed] above.")
+            print("  They are written but not valid: fix the errors, then run ws.save() again "
+                  "before ws.publish() or ws.submit().")
+        elif not getattr(self, "_publishing", False):
             # Suppressed mid-publish: telling the user to run ws.publish()
             # from inside ws.publish() right before a credentials error reads
             # as mockery (red-team W1.3).
             print("\n  Next: ws.list(verbose=True) to inspect, or ws.publish() to publish.")
         return result
+
+    def _index_failures(self, result: dict) -> dict[str, dict]:
+        """The save-time index failures of *result*, keyed by the record file they name."""
+        failures: dict[str, dict] = {}
+        for failure in (result.get("index") or {}).get("failures") or []:
+            if not isinstance(failure, dict):
+                continue
+            path = Path(str(failure.get("file", "")))
+            if not path.is_absolute():
+                path = self._ws.source_root / path
+            error = str(failure.get("error", ""))
+            if not self._registry_url and "not found in source_root" in error:
+                # Offline, a reference to a record published elsewhere stays an error.
+                failure["error"] = (
+                    f"{error} It could not be checked offline: this workspace has no "
+                    "registry_url, so a published record cannot be looked up. Open the "
+                    "workspace with a registry_url, or save the referenced record here first."
+                )
+            failures[_path_key(path)] = failure
+        return failures
 
     def _save_side_records(
         self, *, mode: str, validation_policy: str, stamp: Any = None
@@ -2881,6 +3141,7 @@ class AuthoringWorkspace:
         only: str | builtins.list[str] | None = None,
         publication_mode: str = STAGED_PUBLICATION_MODE,
         allow_partial: bool = False,
+        allow_local_files: bool = False,
     ) -> builtins.list[dict]:
         """Save and submit the workspace in one call (staged for review by default).
 
@@ -2910,18 +3171,32 @@ class AuthoringWorkspace:
         zenodo:
             Upload data files and archive on Zenodo before submitting.  Publishes
             the Zenodo deposit immediately and records its DOI in each record.
+            A deposit of more than 90 data files is zipped by test kind, and the
+            registry cannot yet point at files inside an archive, so without R2
+            object storage such a workspace is refused before anything is
+            deposited: publish it with ``ws.zenodo(publish=True)`` alone, or
+            split it.
         sandbox:
             Use ``sandbox.zenodo.org`` (only relevant with ``zenodo=True``).
         doi:
             A pre-existing DOI to attach (e.g. from a Zenodo draft you reviewed).
         only:
             Restrict submission to one or more record types (see :meth:`submit`).
+        allow_local_files:
+            The registry step refuses records that point at local files (see
+            :meth:`submit`); ``zenodo=True`` deposits the files first and points
+            the records at the deposited copies. ``True`` lifts the check, for a
+            local test registry only.
         """
         self._publishing = True
         try:
             self.save()
         finally:
             self._publishing = False
+        if zenodo and not allow_local_files and not self._r2_configured():
+            # Records point at Zenodo's copies of their files; a zipped deposit has
+            # none to point at. Refuse before anything is deposited.
+            self._refuse_a_zipped_deposit()
         if zenodo:
             if self._r2_configured():
                 self.upload()
@@ -2936,6 +3211,7 @@ class AuthoringWorkspace:
         return self.submit(
             note=note, doi=doi, only=only,
             publication_mode=publication_mode, allow_partial=allow_partial,
+            allow_local_files=allow_local_files,
         )
 
     def status(
@@ -3628,6 +3904,7 @@ class AuthoringWorkspace:
         allow_partial: bool = False,
         submit_all: bool = False,
         resume: bool = True,
+        allow_local_files: bool = False,
     ) -> builtins.list[dict]:
         """Submit workspace records to the battinfo registry (staged for review).
 
@@ -3685,6 +3962,14 @@ class AuthoringWorkspace:
             Version label for this submission batch.  Defaults to today's date.
         note:
             Provenance note attached to every submitted record.
+        allow_local_files:
+            Records whose download or source locations (``access_url``,
+            ``content_url``, ``download_url``, ``provenance.source_url``,
+            ``record_url``) are local paths or ``file:`` URIs are refused
+            before anything is sent, because the registry would publish paths
+            nobody else can open. Deposit the files first (``ws.zenodo()``
+            points the records at the deposited copies), then submit.
+            ``True`` lifts the check, for a local test registry only.
 
         Example::
 
@@ -3836,6 +4121,7 @@ class AuthoringWorkspace:
         parsed: dict[Path, dict] = {}
         validations: dict[Path, dict] = {}
         prefailed: list[dict] = []
+        local_offenders: list[tuple[Path, dict, list[tuple[str, str]]]] = []
         for s in wanted:
             for f in selected[s]:
                 try:
@@ -3865,8 +4151,32 @@ class AuthoringWorkspace:
                     prefailed.append({"title": f.name, "source_local_id": f.stem, "ok": False,
                                       "status": "invalid", "error": error, "iri": "", "result": None})
                     continue
+                if not allow_local_files:
+                    found = _submission_local_files(rec, s, records_dir)
+                    if found:
+                        local_offenders.append((f, rec, found))
+                        continue
                 parsed[f] = rec
                 validations[f] = {"ok": True, "errors": list(result.errors), "policy": "publisher"}
+        if local_offenders:
+            # Never publish a path on this computer as a download link: refuse the
+            # records that carry one, before any network call.
+            local_failures = [
+                {"title": f.name, "source_local_id": f.stem, "ok": False, "status": "local_files",
+                 "error": "; ".join(f"{field}: {value}" for field, value in found),
+                 "iri": entity_id_from_doc(rec) or "", "result": None}
+                for f, rec, found in local_offenders
+            ]
+            if not allow_partial:
+                message = _local_files_message([
+                    (f"{f.name} ({entity_id_from_doc(rec) or 'no id'})", found)
+                    for f, rec, found in local_offenders
+                ])
+                raise SubmitError(message, failed=local_failures + prefailed,
+                                  outcomes=local_failures + prefailed)
+            for failure in local_failures:
+                print(f"  ERROR: {failure['title']} -- points at local files: {failure['error']}")
+            prefailed.extend(local_failures)
         if prefailed and not allow_partial:
             raise SubmitError(
                 f"{len(prefailed)} record(s) are unreadable or failed validation; aborting before "
@@ -4041,7 +4351,8 @@ class AuthoringWorkspace:
                 outcomes.append(_journaled_submit(journal, payload, url, key, title,
                                                   source_local_id=source_local_id,
                                                   publication_mode=publication_mode,
-                                                  validation=validations[src]))
+                                                  validation=validations[src],
+                                                  allow_local_files=allow_local_files))
 
         # ── Cell specs ────────────────────────────────────────────────────────
         for src in _selected("cell-spec"):
@@ -4070,7 +4381,8 @@ class AuthoringWorkspace:
             )
             outcomes.append(_journaled_submit(journal, payload, url, key, title,
                                               source_local_id=source_local_id, publication_mode=publication_mode,
-                                              validation=validations[src]))
+                                              validation=validations[src],
+                                              allow_local_files=allow_local_files))
 
         # ── Cell instances ────────────────────────────────────────────────────
         cell_spec_dir = records_dir / "cell-spec"
@@ -4117,7 +4429,8 @@ class AuthoringWorkspace:
             )
             outcomes.append(_journaled_submit(journal, payload, url, key, label,
                                               source_local_id=source_local_id, publication_mode=publication_mode,
-                                              validation=validations[src]))
+                                              validation=validations[src],
+                                              allow_local_files=allow_local_files))
 
         # ── Test specs (protocols) ────────────────────────────────────────────
         # Submitted as resource_type "test_spec"; stored in the spec/ IRI namespace
@@ -4148,7 +4461,8 @@ class AuthoringWorkspace:
             )
             outcomes.append(_journaled_submit(journal, payload, url, key, title,
                                               source_local_id=source_local_id, publication_mode=publication_mode,
-                                              validation=validations[src]))
+                                              validation=validations[src],
+                                              allow_local_files=allow_local_files))
 
         # ── Tests ─────────────────────────────────────────────────────────────
         for src in _selected("test"):
@@ -4177,7 +4491,8 @@ class AuthoringWorkspace:
             )
             outcomes.append(_journaled_submit(journal, payload, url, key, title,
                                               source_local_id=source_local_id, publication_mode=publication_mode,
-                                              validation=validations[src]))
+                                              validation=validations[src],
+                                              allow_local_files=allow_local_files))
 
         # ── Datasets ──────────────────────────────────────────────────────────
         for src in _selected("dataset"):
@@ -4228,7 +4543,8 @@ class AuthoringWorkspace:
             )
             outcomes.append(_journaled_submit(journal, payload, url, key, title,
                                               source_local_id=source_local_id, publication_mode=publication_mode,
-                                              validation=validations[src]))
+                                              validation=validations[src],
+                                              allow_local_files=allow_local_files))
 
         if outcomes:
             self._search_cache = None
@@ -4436,14 +4752,16 @@ class AuthoringWorkspace:
         Mirrors what :meth:`upload` does for R2, without any extra storage:
         each distribution whose filename was deposited gets
         ``{record_url}/files/{name}`` as its ``content_url`` (plus a sha256
-        checksum if the local file is readable), and the primary distribution
-        sets the dataset ``access_url``. Returns the number of records updated.
+        checksum if the local file is readable), the primary distribution
+        sets the dataset ``access_url``, and a ``provenance.source_url`` naming
+        a deposited local file follows it. Returns the number of records updated.
         """
         import hashlib
 
         ds_dir = self._ws.source_root / "dataset"
         if not ds_dir.is_dir():
             return 0
+        public_by_name = {name: f"{record_url}/files/{name}" for name in uploaded_names}
         patched = 0
         for record_path in sorted(ds_dir.glob("*.json")):
             raw = json.loads(record_path.read_text(encoding="utf-8"))
@@ -4474,6 +4792,10 @@ class AuthoringWorkspace:
                 new_dists.append(dist)
                 if primary_url is None and dist.get("role") != "raw":
                     primary_url = public_url
+            # The provenance source of a workspace dataset is its own data file;
+            # point it at the deposited copy too, so no local path is left to publish.
+            if _point_source_url_at_public_copy(raw, public_by_name):
+                changed = True
             if not changed:
                 continue
             raw["dataset"]["distributions"] = new_dists
@@ -4581,6 +4903,7 @@ class AuthoringWorkspace:
             # file in the dataset gets a resolvable public URL, not just the first.
             new_dists: list[dict] = []
             primary_url: str | None = None
+            public_by_name: dict[str, str] = {}
             for dist in dists:
                 local_url = dist.get("content_url") or ds.get("access_url") or ""
                 local_file = _file_uri_to_path(local_url)
@@ -4642,6 +4965,7 @@ class AuthoringWorkspace:
                 dist = {**dist, "content_url": public_url,
                         "checksum": {"algorithm": "sha256", "value": sha256}}
                 new_dists.append(dist)
+                public_by_name[local_file.name] = public_url
                 # The primary (processed) distribution sets the dataset access_url.
                 if primary_url is None and dist.get("role") != "raw":
                     primary_url = public_url
@@ -4651,6 +4975,7 @@ class AuthoringWorkspace:
             urls.append(primary_url or new_dists[0]["content_url"])
             raw["dataset"]["access_url"] = primary_url or new_dists[0]["content_url"]
             raw["dataset"]["distributions"] = new_dists
+            _point_source_url_at_public_copy(raw, public_by_name)
             _atomic_write_text(record_path, json.dumps(raw, indent=2, ensure_ascii=False))
 
             # Keep session paths in sync so submit() picks up the updated record
@@ -5136,6 +5461,36 @@ class AuthoringWorkspace:
         import shutil
         import zipfile
 
+        unique = self._deposit_data_files(records_dir)
+        filenames: list[str] = []
+        if len(unique) <= _ZENODO_ZIP_THRESHOLD:
+            for lp, _ in unique:
+                shutil.copy2(lp, tmpdir / lp.name)
+                filenames.append(lp.name)
+        else:
+            # Group by test kind → one zip per kind
+            by_kind: dict[str, list[Path]] = {}
+            for lp, kind in unique:
+                by_kind.setdefault(kind, []).append(lp)
+            for kind, paths in sorted(by_kind.items()):
+                zip_name = f"{kind}.zip"
+                with zipfile.ZipFile(tmpdir / zip_name, "w", zipfile.ZIP_DEFLATED) as zf:
+                    for lp in sorted(paths):
+                        zf.write(lp, lp.name)
+                filenames.append(zip_name)
+                print(f"  Bundled {len(paths)} files -> {zip_name}")
+
+        return filenames
+
+    def _deposit_data_files(
+        self, records_dir: Path, *, report: bool = True
+    ) -> builtins.list[tuple[Path, str]]:
+        """The ``(local file, test kind)`` pairs a Zenodo deposit uploads, one per file name.
+
+        With *report* the missing data files and the artifact warnings are printed
+        and kept for zenodo() and publish to act on; without it the files are only
+        counted (the up-front check in publish()).
+        """
         # Map dataset IRI → test kind via test records (test.dataset_ids), with the
         # dataset's own about naming its test as the fallback, the same links the
         # deposit graph uses to pick each file's <kind>.zip.
@@ -5181,11 +5536,13 @@ class AuthoringWorkspace:
                             # deposit would be published incomplete (a distribution pointing at a
                             # file that was never uploaded). Warn now; block publish later (R-7).
                             missing.append(str(lp))
-                            print(f"  WARNING: data file for a distribution is missing (not uploaded): {lp}")
+                            if report:
+                                print(f"  WARNING: data file for a distribution is missing (not uploaded): {lp}")
                 except Exception:
                     continue
-        # Surfaced to zenodo()/publish so publishing can fail closed on an incomplete deposit.
-        self._missing_data_files = missing
+        if report:
+            # Surfaced to zenodo()/publish so publishing can fail closed on an incomplete deposit.
+            self._missing_data_files = missing
 
         # Deduplicate (a file may appear in multiple distributions)
         seen: set[str] = set()
@@ -5210,33 +5567,34 @@ class AuthoringWorkspace:
                     except Exception:
                         continue
         artifact_files, artifact_warnings = plan_artifact_inclusion(artifact_records, self._root)
-        self._artifact_warnings = artifact_warnings
-        for warning in artifact_warnings:
-            print(f"  WARNING: {warning}")
+        if report:
+            self._artifact_warnings = artifact_warnings
+            for warning in artifact_warnings:
+                print(f"  WARNING: {warning}")
         for lp in artifact_files:
             if lp.name not in seen:
                 seen.add(lp.name)
                 unique.append((lp, "protocol"))
+        return unique
 
-        filenames: list[str] = []
-        if len(unique) <= 90:
-            for lp, _ in unique:
-                shutil.copy2(lp, tmpdir / lp.name)
-                filenames.append(lp.name)
-        else:
-            # Group by test kind → one zip per kind
-            by_kind: dict[str, list[Path]] = {}
-            for lp, kind in unique:
-                by_kind.setdefault(kind, []).append(lp)
-            for kind, paths in sorted(by_kind.items()):
-                zip_name = f"{kind}.zip"
-                with zipfile.ZipFile(tmpdir / zip_name, "w", zipfile.ZIP_DEFLATED) as zf:
-                    for lp in sorted(paths):
-                        zf.write(lp, lp.name)
-                filenames.append(zip_name)
-                print(f"  Bundled {len(paths)} files -> {zip_name}")
+    def _refuse_a_zipped_deposit(self) -> None:
+        """Refuse publish(zenodo=True) before any deposit exists when its files would be zipped.
 
-        return filenames
+        A deposit of more than ``_ZENODO_ZIP_THRESHOLD`` data files is zipped by
+        test kind, and the registry cannot yet point a record at a file inside an
+        archive: the records would keep their local file paths, and the registry
+        half would refuse them only after the DOI was minted.
+        """
+        count = len(self._deposit_data_files(self._ws.source_root, report=False))
+        if count > _ZENODO_ZIP_THRESHOLD:
+            raise ValueError(
+                f"Refusing to publish: this workspace has {count} data files, and a Zenodo deposit "
+                f"of more than {_ZENODO_ZIP_THRESHOLD} is zipped by test kind. The registry cannot yet "
+                "point a record at a file inside an archive, so it would refuse the records after "
+                "the DOI was minted. Nothing was deposited or sent. Publish to Zenodo alone with "
+                "ws.zenodo(publish=True), or split the workspace into parts of at most "
+                f"{_ZENODO_ZIP_THRESHOLD} data files."
+            )
 
     @staticmethod
     def _assemble_zenodo_jsonld(
@@ -6729,35 +7087,49 @@ class AuthoringWorkspace:
         return entries
 
     def _load_from_file(self, path: Path) -> Any:
+        from battinfo.bundle import CELL_TYPE_AUTHORING_PROPERTY_FIELDS, CellSpec  # noqa: PLC0415
+
         raw = json.loads(path.read_text(encoding="utf-8"))
-        # Filter out null spec values so the schema stays valid
-        specs = {k: v for k, v in (raw.get("properties") or {}).items() if v and v.get("value") is not None}
-        ct = self._ws.cell_spec(
-            manufacturer=raw["manufacturer"],
-            model=raw["model"],
-            format=raw["format"],
-            chemistry=raw["chemistry"],
-            positive_electrode_basis=raw.get("positive_electrode_basis"),
-            negative_electrode_basis=raw.get("negative_electrode_basis"),
-            size_code=raw.get("size_code"),
-            iec_code=raw.get("iec_code"),
-            country_of_origin=raw.get("country_of_origin"),
-            cell_configuration=raw.get("cell_configuration"),
-            reference_electrode=raw.get("reference_electrode"),
-            rechargeable=raw.get("rechargeable"),
-            year=raw.get("year"),
-            specs=specs or None,
-            source_type="datasheet",
-            source_file=raw.get("source_file"),
-            citation=raw.get("citation"),
-        )
-        if raw.get("handle"):
-            ct.handle = raw["handle"]
+        flat_names = frozenset(CELL_TYPE_AUTHORING_PROPERTY_FIELDS)
+        _check_draft_keys(raw, _cell_spec_draft_keys(), draft="cell-spec", path=path,
+                          aliases=_CELL_SPEC_DRAFT_ALIASES, quiet=flat_names)
+        # A null is an unfilled template entry: the model default applies.
+        fields = {key: value for key, value in raw.items()
+                  if not str(key).startswith("_") and value is not None}
+        # `specs` (the draft key until June 2026) is read as an alias of
+        # `properties`, merged the way CellSpec(specs=...) merges it (properties
+        # wins), and a flat property name ("nominal_voltage": {...}) the way
+        # CellSpec(nominal_voltage=...) reads it (it wins over both).
+        flat = {key: fields.pop(key) for key in [key for key in fields if key in flat_names]}
+        quantities = {**(fields.pop("specs", None) or {}), **(fields.pop("properties", None) or {}), **flat}
+        fields["properties"] = _filled_quantities(quantities, path)
+        _merge_draft_alias(fields, "model_name", "model", path)
+        comment = [*_draft_text_list(fields.pop("comment", None)), *_draft_text_list(fields.pop("notes", None))]
+        if comment:
+            fields["comment"] = comment
+        fields["source"] = _draft_source(fields, default_type="datasheet", path=path)
+        # An explicit identity in the draft pins a published cell spec, so a
+        # corrected manufacturer, model, format or chemistry does not mint a new IRI.
+        pinned = _draft_spec_iri(fields.pop("id", None), fields.pop("uid", None), path.name)
+        if pinned is not None:
+            fields["id"] = pinned
+        missing = [key for key in ("manufacturer", "model", "format", "chemistry") if key not in fields]
+        if missing:
+            raise ValueError(
+                f"{path.name}: fill in {', '.join(missing)} before loading a cell-spec draft. "
+                "Nothing was loaded."
+            )
+        handle = fields.pop("handle", None)
+        name = fields.pop("name", None)
+        ct = CellSpec(**fields)
+        if handle:
+            ct.handle = handle
         # A draft's own title wins over the "<manufacturer> <model>" default. The
         # identity seed reads manufacturer and model, never the name, so a title
         # change does not move the IRI.
-        if isinstance(raw.get("name"), str) and raw["name"].strip():
-            ct.name = raw["name"].strip()
+        if isinstance(name, str) and name.strip():
+            ct.name = name.strip()
+        self._ws.cell_specs.append(ct)
         return ct
 
     def _load_from_result(self, result: dict) -> Any:
@@ -6771,6 +7143,8 @@ class AuthoringWorkspace:
 
         The cell is added to the matching index but NOT to the save set, so it is
         never re-saved or re-submitted — downstream tests just record its IRI.
+        A cell this workspace does not hold is looked up in the registry and kept
+        as a read-only reference copy, so the strict save resolves it.
         """
         from battinfo.bundle import Cell  # noqa: PLC0415
         cell = Cell(
@@ -6781,7 +7155,105 @@ class AuthoringWorkspace:
             batch_id=result.get("batch_id"),
         )
         self._index_cell(cell, result.get("serial_number"), result.get("name"))
+        if cell.id:
+            self._resolve_published_reference(cell.id, "cell")
         return cell
+
+    # ── Published records referenced from this workspace ──────────────────────
+
+    @property
+    def _references_root(self) -> Path:
+        """Read-only copies of the published records this workspace references.
+
+        Written when a reference is resolved in the registry, read by save-time
+        reference validation, and never saved over or submitted.
+        """
+        return self._root / ".battinfo" / "references"
+
+    def _knows_record(self, iri: str, entity_type: str) -> bool:
+        """True when *iri* is in this session, saved in this workspace, or kept as a copy."""
+        sessions: dict[str, builtins.list[Any]] = {
+            "cell": self._ws.cells, "cell-spec": self._ws.cell_specs, "test-protocol": self._ws.test_specs,
+        }
+        if any(getattr(obj, "id", None) == iri for obj in sessions.get(entity_type, [])):
+            return True
+        uid = iri.rstrip("/").rsplit("/", 1)[-1]
+        for root in (self._ws.source_root, self._references_root):
+            path = save_entity_path(entity_type, uid, root)
+            try:
+                if path.exists() and entity_id_from_doc(_read_json(path)) == iri:
+                    return True
+            except (OSError, ValueError):
+                continue
+        return False
+
+    def _fetch_registry_record(self, iri: str, entity_type: str) -> tuple[dict | None, str]:
+        """GET the published record behind *iri*: ``(canonical record or None, outcome)``.
+
+        The outcome is ``found``, ``not_found`` (the registry does not hold it),
+        ``unreachable``, or ``unreadable`` (its entry carries no canonical record).
+        """
+        import urllib.error  # noqa: PLC0415
+        import urllib.request  # noqa: PLC0415
+
+        uid = iri.rstrip("/").rsplit("/", 1)[-1]
+        request = urllib.request.Request(
+            f"{self._registry_url}/resources/{_REGISTRY_RESOURCE_TYPES[entity_type]}/{uid}",
+            headers={"User-Agent": "battinfo-client/1.0"},
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=_REFERENCE_LOOKUP_TIMEOUT) as response:  # noqa: S310
+                envelope = json.loads(response.read().decode("utf-8"))
+        except urllib.error.HTTPError as exc:
+            return None, "not_found" if exc.code == 404 else "unreachable"
+        except Exception:  # noqa: BLE001 - registry down or network blocked: degrade, never fail ws.add
+            return None, "unreachable"
+        record = _canonical_record_of(envelope, entity_type)
+        if record is None or entity_id_from_doc(record) != iri:
+            return None, "unreadable"
+        return record, "found"
+
+    def _keep_reference_copy(self, record: dict, entity_type: str) -> Path:
+        """Write a read-only copy of a published record to ``.battinfo/references/<kind>/``."""
+        uid = (entity_id_from_doc(record) or "").rstrip("/").rsplit("/", 1)[-1]
+        path = save_entity_path(entity_type, uid, self._references_root)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        _atomic_write_text(path, json.dumps(record, indent=2, ensure_ascii=False))
+        return path
+
+    def _resolve_published_reference(self, iri: str, entity_type: str) -> str:
+        """Make a reference to a published record resolvable when ws.save() validates it.
+
+        A record this workspace already holds needs nothing. Otherwise, with a
+        registry configured, the published record is looked up and a read-only
+        copy kept under ``.battinfo/references/``; offline, the reference cannot
+        be checked and ws.save() reports it. Returns ``local``, ``copied``,
+        ``offline``, ``not_found``, ``unreachable`` or ``unreadable``. Each record
+        is looked up at most once per session: a later reference to it reuses the
+        outcome, so a registry that is down costs one timeout, not one per test.
+        """
+        if self._knows_record(iri, entity_type):
+            return "local"
+        if not self._registry_url:
+            print(f"  note: {iri} is not in this workspace and could not be checked offline "
+                  "(registry_url=None).")
+            return "offline"
+        remembered = self._reference_lookups.get((entity_type, iri))
+        if remembered is not None:
+            return remembered
+        record, outcome = self._fetch_registry_record(iri, entity_type)
+        if record is not None:
+            self._keep_reference_copy(record, entity_type)
+            self._reference_lookups[(entity_type, iri)] = "copied"
+            return "copied"
+        self._reference_lookups[(entity_type, iri)] = outcome
+        reason = {
+            "not_found": f"was not found in the registry at {self._registry_url}",
+            "unreachable": f"could not be looked up in the registry at {self._registry_url}",
+            "unreadable": "has no canonical record in its registry entry",
+        }[outcome]
+        print(f"  WARNING: {iri} {reason}; ws.save() will report the reference as unresolved.")
+        return outcome
 
     def _reference_spec(self, result: dict) -> Any:
         """Build a referenced CellSpec reusing its existing IRI (NOT queued to publish)."""
@@ -6807,6 +7279,14 @@ class AuthoringWorkspace:
             source=ProvenanceInfo(type="registry"),
         )
         ct.id = result.get("id") or product.get("id")
+        if ct.id:
+            # Keep the fetched published record as a reference copy, so cells
+            # authored against this spec resolve it when ws.save() validates them.
+            if result.get("source") == "api" and entity_id_from_doc(record) == ct.id:
+                if not self._knows_record(ct.id, "cell-spec"):
+                    self._keep_reference_copy(record, "cell-spec")
+            else:
+                self._resolve_published_reference(ct.id, "cell-spec")
         return ct
 
     def _fetch_cell_spec_record(self, result: dict) -> dict:
@@ -7052,15 +7532,33 @@ class AuthoringWorkspace:
         return cells
 
     def _load_test_spec(self, path: Path) -> Any:
-        from battinfo.bundle import BatteryTestType  # noqa: PLC0415
+        from battinfo.bundle import BatteryTestType, ProvenanceInfo  # noqa: PLC0415
 
         raw = json.loads(path.read_text(encoding="utf-8"))
         # Keys starting with "_" are in-file comments written by ws.template()
         # (e.g. _allowed_types, _steps_help) — never record content.
         raw = {k: v for k, v in raw.items() if not str(k).startswith("_")}
+        if "termination_criteria" in raw:
+            # Older drafts stated a protocol-level cutoff here. It has no faithful
+            # home without knowing which step ends at it, so say where it goes.
+            raise ValueError(
+                f"{path.name}: 'termination_criteria' is an older draft key that is no longer "
+                "read, and it was not loaded. State a cutoff in the step that ends at it, for "
+                'example "steps": ["Discharge at C/5 until 0.9 V"], or as a structured '
+                '"termination" on a "method" step: {"quantity": "voltage", "value": 0.9, '
+                '"unit": "V", "direction": "below"}. Nothing was loaded.'
+            )
+        _check_draft_keys(raw, _test_spec_draft_keys(), draft="test-spec", path=path,
+                          aliases=_TEST_SPEC_DRAFT_ALIASES)
 
         allowed_types = [t.value for t in BatteryTestType]
-        test_type = raw.get("type") or raw.get("kind") or ""
+        spellings = {key: raw[key] for key in ("type", "kind", "test_type", "test_kind") if raw.get(key)}
+        if len(set(spellings.values())) > 1:
+            raise ValueError(
+                f"{path.name}: {' and '.join(repr(key) for key in spellings)} name different "
+                "test types; keep one. Nothing was loaded."
+            )
+        test_type = next(iter(spellings.values()), "")
         if not test_type:
             raise ValueError(
                 f"{path.name}: fill in 'type' before loading. "
@@ -7075,15 +7573,43 @@ class AuthoringWorkspace:
         conditions, condition_notes = _clean_template_conditions(raw.get("conditions"))
         steps = _clean_template_steps(raw.get("experiment") or raw.get("steps"))
 
-        # Fields with no structured home on a test spec are preserved as notes
-        # rather than silently dropped (instrument belongs on the test run;
-        # atmosphere has no numeric quantity form).
-        notes: list[str] = []
+        # The protocol followed: the record keeps its URL (protocol_url) but has no
+        # field for its name, so a named protocol is kept as a note.
+        protocol = raw.get("protocol")
+        if protocol is not None and not isinstance(protocol, (str, Mapping)):
+            raise ValueError(
+                f"{path.name}: 'protocol' must be the protocol's name or an object with "
+                "'name' and 'url'. Nothing was loaded."
+            )
+        protocol_info = {"name": protocol} if isinstance(protocol, str) else dict(protocol or {})
+        unknown = sorted(set(protocol_info) - {"name", "url"})
+        if unknown:
+            raise ValueError(
+                f"{path.name}: 'protocol' takes 'name' and 'url', not "
+                f"{', '.join(map(repr, unknown))}. Nothing was loaded."
+            )
+        if raw.get("protocol_url") is not None:
+            if protocol_info.get("url") not in (None, raw["protocol_url"]):
+                raise ValueError(
+                    f"{path.name}: 'protocol_url' and 'protocol.url' disagree; keep one. "
+                    "Nothing was loaded."
+                )
+            protocol_info["url"] = raw["protocol_url"]
+
+        # The record's own comment (or notes) first. Fields with no structured home
+        # on a test spec are kept as notes rather than silently dropped (instrument
+        # belongs on the test run; atmosphere has no numeric quantity form).
+        notes = [*_draft_text_list(raw.get("comment")), *_draft_text_list(raw.get("notes"))]
         for label, value in (("instrument", raw.get("instrument")),
-                             ("atmosphere", raw.get("atmosphere"))):
+                             ("atmosphere", raw.get("atmosphere")),
+                             ("protocol", protocol_info.get("name"))):
             if isinstance(value, str) and value.strip():
                 notes.append(f"{label}: {value.strip()}")
         notes.extend(condition_notes)
+        source = ProvenanceInfo(**_draft_source(dict(raw), default_type="manual", path=path))
+        # An explicit identity in the draft pins a published test spec, so a
+        # corrected name does not mint a new IRI (the seed includes the name).
+        pinned = _draft_spec_iri(raw.get("id"), raw.get("uid"), path.name)
 
         # Forward the authored method so it survives into the saved record (and
         # thence the published JSON-LD as an EMMO process graph). Humans author the
@@ -7096,17 +7622,15 @@ class AuthoringWorkspace:
             experiment=steps,
             cycles=raw.get("cycles"),
             method=raw.get("method"),
+            version=raw.get("version"),
+            protocol_url=protocol_info.get("url"),
             conditions=conditions,
             record=raw.get("record"),
             safety=raw.get("safety"),
             artifacts=raw.get("artifacts"),
-            citation=raw.get("citation"),
-            source_file=raw.get("source_file"),
             comment=notes or None,
         )
-        # An explicit identity in the draft pins a published test spec, so a
-        # corrected name does not mint a new IRI (the seed includes the name).
-        pinned = _draft_spec_iri(raw.get("id"), raw.get("uid"), path.name)
+        tp.source = source
         if pinned is not None:
             tp.id = pinned
         if raw.get("handle"):
@@ -7118,12 +7642,14 @@ class AuthoringWorkspace:
 
         The uid is minted deterministically from the draft's natural key
         (manufacturer :: model :: name), so re-loading the same draft converges
-        on the same spec IRI instead of minting a duplicate.
+        on the same spec IRI instead of minting a duplicate. An ``id`` or
+        ``uid`` in the draft pins the IRI instead.
         """
         from battinfo.api import create_equipment_spec  # noqa: PLC0415
         from battinfo.entities import stable_uid  # noqa: PLC0415
 
         raw = json.loads(path.read_text(encoding="utf-8"))
+        _check_draft_keys(raw, _EQUIPMENT_SPEC_DRAFT_KEYS, draft="equipment-spec", path=path)
         name = raw.get("name") or ""
         manufacturer = raw.get("manufacturer") or None
         model = raw.get("model") or None
@@ -7132,7 +7658,8 @@ class AuthoringWorkspace:
                 f"{path.name} needs at least a name (or manufacturer/model) - "
                 "fill in the template before loading it."
             )
-        uid = stable_uid("::".join(["equipment-spec", manufacturer or "", model or "", name]))
+        pinned = _draft_spec_iri(raw.get("id"), raw.get("uid"), path.name)
+        uid = None if pinned else stable_uid("::".join(["equipment-spec", manufacturer or "", model or "", name]))
         # Drop template placeholders (null quantity fields) so the record stays valid.
         props: dict[str, dict] = {}
         for key, value in (raw.get("property") or {}).items():
@@ -7144,6 +7671,7 @@ class AuthoringWorkspace:
         chemistries = [c for c in (raw.get("supported_chemistries") or []) if c]
         record = create_equipment_spec(
             uid=uid,
+            id=pinned,
             name=name or " ".join(p for p in (manufacturer, model) if p),
             handle=raw.get("handle") or None,
             equipment_class=raw.get("equipment_class"),
@@ -7155,9 +7683,13 @@ class AuthoringWorkspace:
             supplier=raw.get("supplier"),
             product_id=raw.get("product_id"),
             comment=raw.get("comment"),
-            source_type="datasheet",
+            source_type=raw.get("source_type") or "datasheet",
+            source_name=raw.get("source_name"),
+            source_file=raw.get("source_file"),
             source_url=raw.get("source_url"),
             citation=raw.get("citation"),
+            retrieved_at=raw.get("retrieved_at"),
+            notes=_draft_text_list(raw.get("notes")) or None,
         )
         body = record["equipment_spec"]
         print(f"  equipment-spec: {body['name']}  {body['id']}")
@@ -7704,6 +8236,8 @@ class AuthoringWorkspace:
 
         Explicit (preferred): ``cell=<serial|IRI|object>`` and ``data=<path|list>``.
         Batch: ``datasets="glob"`` matches files to loaded cells by short ID.
+        Relative paths resolve against the workspace root, and a data file that
+        does not exist raises ``FileNotFoundError`` before anything is created.
 
         ``name`` is the test's title and ``handle`` its short slug (see
         :mod:`battinfo.naming`); neither is generated for you.
@@ -7764,6 +8298,11 @@ class AuthoringWorkspace:
                 if test_spec.startswith(("http://", "https://")):
                     protocol_id_ref = test_spec
                     protocol_name, resolved_kind = self._resolve_test_protocol_ref(test_spec)
+                    if protocol_name is None and resolved_kind is None:
+                        # Not saved here: a protocol published elsewhere, so make the
+                        # reference resolvable at save time (its name and kind stay
+                        # unread, so the test's identity does not change).
+                        self._resolve_published_reference(test_spec, "test-protocol")
                     if resolved_kind and not test_type:
                         test_type = resolved_kind
                 else:
@@ -7820,9 +8359,13 @@ class AuthoringWorkspace:
 
         # ── Explicit mode: a named cell (+ optional data files) ──────────────────
         if cell is not None:
-            resolved = self._resolve_cell(cell)
             files = self._as_data_paths(data)
             raw_files = self._as_data_paths(raw)
+            # A dataset for a file that does not exist would be saved without a word
+            # and only fail at deposit time; refuse it before anything is created.
+            self._require_files(files, "data")
+            self._require_files(raw_files, "raw")
+            resolved = self._resolve_cell(cell)
             if raw_files and len(raw_files) != len(files):
                 raise ValueError(
                     f"raw= has {len(raw_files)} file(s) but data= has {len(files)}; "
@@ -7979,6 +8522,16 @@ class AuthoringWorkspace:
             )
         return pinned
 
+    def _require_files(self, paths: builtins.list[Path], argument: str) -> None:
+        """Raise FileNotFoundError naming each resolved path in *paths* that does not exist."""
+        missing = [path for path in paths if not path.exists()]
+        if missing:
+            listing = ", ".join(str(path) for path in missing)
+            raise FileNotFoundError(
+                f"{argument}= file not found: {listing}. A relative path resolves against the "
+                f"workspace root ({self._root}), not the current directory."
+            )
+
     def _checked_series_id(self, series_id: str | None, *, cell: Any, data: Any) -> str | None:
         """``series_id=`` checked as a collection's dataset IRI, or ``None``.
 
@@ -8032,6 +8585,12 @@ class AuthoringWorkspace:
         if isinstance(ref, str):
             s = ref.strip()
             if s.startswith("http"):  # an IRI
+                # A cell already found (by serial, a search hit or an earlier IRI) is
+                # reused, not referenced and looked up in the registry again.
+                known = next((cell for cell in self._cells_by_short_id.values()
+                              if getattr(cell, "id", None) == s), None)
+                if known is not None:
+                    return known
                 return self._reference_cell({"id": s, "type": "cell"})
             sid = _short_id(s)
 
@@ -8089,6 +8648,7 @@ class AuthoringWorkspace:
         else:
             matched_files = [Path(p) if not isinstance(p, Path) else p for p in datasets]
             matched_files = [p if p.is_absolute() else self._root / p for p in matched_files]
+            self._require_files(matched_files, "datasets")
         if not matched_files:
             print(f"  No dataset files matched: {datasets!r}")
             return []
@@ -8296,6 +8856,40 @@ def _cell_spec_submission_payload(
         title=title,
         related_resources=related_resources,
     )
+
+
+def _point_source_url_at_public_copy(record: dict, public_by_name: Mapping[str, str]) -> bool:
+    """Replace a local ``provenance.source_url`` with the public URL of the same file.
+
+    *public_by_name* maps a deposited file's name to its public URL. Returns
+    True when the record changed.
+    """
+    from battinfo._util import local_path, path_name  # noqa: PLC0415
+
+    provenance = record.get("provenance")
+    if not isinstance(provenance, dict):
+        return False
+    source = local_path(provenance.get("source_url"))
+    public = public_by_name.get(path_name(source)) if source is not None else None
+    if not public:
+        return False
+    provenance["source_url"] = public
+    return True
+
+
+def _submission_local_files(record: dict, subdir: str, records_dir: Path) -> list[tuple[str, str]]:
+    """Local file paths a submission of *record* would publish (see local_file_references).
+
+    A cell's submission embeds its saved cell spec, so that record is checked too.
+    """
+    found = local_file_references(record)
+    if subdir == "cell-instance":
+        spec_id = (record.get("cell_instance") or {}).get("cell_spec_id") or ""
+        spec_record = _find_spec_record(records_dir / "cell-spec", spec_id) if spec_id else None
+        if spec_record:
+            found += [(f"(its cell spec) {field}", value)
+                      for field, value in local_file_references(spec_record)]
+    return found
 
 
 def _find_spec_record(cell_spec_dir: Path, cell_spec_id: str) -> dict | None:
@@ -8557,11 +9151,13 @@ def _journaled_submit(
     source_local_id: str = "",
     publication_mode: str = STAGED_PUBLICATION_MODE,
     validation: dict[str, Any] | None = None,
+    allow_local_files: bool = False,
 ) -> dict:
     """Run one submission through the resume journal (no journal → plain submit)."""
     if journal is None:
         return _do_submit(payload, url, key, title, source_local_id=source_local_id,
-                          publication_mode=publication_mode, validation=validation)
+                          publication_mode=publication_mode, validation=validation,
+                          allow_local_files=allow_local_files)
     payload_hash = _journal_payload_hash(payload)
     previous = (journal.previous_success(source_local_id, payload_hash, registry_url=url)
                 if source_local_id else None)
@@ -8571,7 +9167,8 @@ def _journaled_submit(
                 "status": "skipped_journal", "iri": previous.get("iri", ""), "error": None,
                 "result": None, "version_bumped": None}
     outcome = _do_submit(payload, url, key, title, source_local_id=source_local_id,
-                         publication_mode=publication_mode, validation=validation)
+                         publication_mode=publication_mode, validation=validation,
+                         allow_local_files=allow_local_files)
     journal.record(outcome, payload_hash, registry_url=url)
     return outcome
 
@@ -8626,6 +9223,7 @@ def _do_submit(
     source_local_id: str = "",
     publication_mode: str = STAGED_PUBLICATION_MODE,
     validation: dict[str, Any] | None = None,
+    allow_local_files: bool = False,
 ) -> dict:
     """Submit one record; return a structured outcome (never silently drop it).
 
@@ -8645,7 +9243,8 @@ def _do_submit(
     bumped_version: str | None = None
     for attempt in range(2):
         try:
-            result = submit_publication_package(payload, registry_base_url=url, api_key=key)
+            result = submit_publication_package(payload, registry_base_url=url, api_key=key,
+                                                allow_local_files=allow_local_files)
             raw_response = result.get("response")
             response = raw_response if isinstance(raw_response, dict) else {}
             status = response.get("status", "unknown")

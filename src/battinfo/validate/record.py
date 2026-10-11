@@ -4,9 +4,10 @@ from pathlib import Path
 from typing import Any
 
 from battinfo.canonical_aliases import record_to_snake_aliases
-from battinfo.entities import kind_for_doc
+from battinfo.entities import is_placeholder_iri, kind_for_doc
 from battinfo.validate.core import (
     DEFAULT_POLICY,
+    ValidationIssue,
     ValidationPolicy,
     ValidationReport,
     ValidationResult,
@@ -34,6 +35,32 @@ def _resource_type(doc: dict[str, Any]) -> str | None:
     return kind.entity_type if kind is not None else None
 
 
+def _placeholder_iri_report(doc: dict[str, Any], policy: ValidationPolicy) -> ValidationReport:
+    """Reject a record whose own IRI is the all-zero template placeholder.
+
+    Templates no longer write it, but a draft made from an older template still
+    carries it, and every such record would claim the same IRI. So this is an
+    error under every policy, whatever its schema/semantic settings.
+    """
+    kind = kind_for_doc(doc)
+    body = doc.get(kind.record_key) if kind is not None else None
+    entity_id = body.get("id") if isinstance(body, dict) else None
+    if kind is None or not is_placeholder_iri(entity_id):
+        return ValidationReport(policy=policy)
+    fix = ("Remove id, short_id and identifier so the save mints the IRI, or set the IRI "
+           "this record was published under.")
+    issue = ValidationIssue(
+        code="identity.placeholder_iri",
+        severity="error",
+        path=f"{kind.record_key}.id",
+        message=(f"{entity_id} is a template placeholder, not a real IRI: every record made "
+                 f"from an unedited template would claim it. {fix}"),
+        validator="identity",
+        resource_type=kind.entity_type,
+    )
+    return ValidationReport(issues=(issue,), policy=policy)
+
+
 def validate_record_report(
     doc: dict[str, Any],
     *,
@@ -42,7 +69,7 @@ def validate_record_report(
 ) -> ValidationReport:
     normalized_doc = record_to_snake_aliases(doc)
     resolved_policy = get_validation_policy(policy) if isinstance(policy, str) else policy
-    reports: list[ValidationReport] = []
+    reports: list[ValidationReport] = [_placeholder_iri_report(normalized_doc, resolved_policy)]
     resource_type = _resource_type(normalized_doc)
 
     if resolved_policy.schema != "off":

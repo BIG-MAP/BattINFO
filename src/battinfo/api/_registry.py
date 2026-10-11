@@ -12,6 +12,7 @@ from typing import Any, Mapping
 from urllib.error import HTTPError, URLError
 from urllib.request import Request as UrlRequest
 
+from battinfo._util import local_file_references, local_files_message
 from battinfo.api._shared import PathLike
 from battinfo.api._staging import build_curated_cell_spec_submission
 from battinfo.validate.core import DEFAULT_POLICY, ValidationPolicy
@@ -72,6 +73,28 @@ def _scrub_secret(text: str) -> str:
     return _SECRET_TOKEN_RE.sub("***", text)
 
 
+def _local_file_offenders(payload: Mapping[str, Any]) -> list[tuple[str, list[tuple[str, str]]]]:
+    """Group the local file paths in a submission envelope by the resource that carries them."""
+    resources: list[Mapping[str, Any]] = []
+    if isinstance(payload.get("resource"), Mapping):
+        resources.append(payload["resource"])
+    if isinstance(payload.get("resources"), list):
+        resources.extend(item for item in payload["resources"] if isinstance(item, Mapping))
+    offenders: list[tuple[str, list[tuple[str, str]]]] = []
+    for resource in resources:
+        found = local_file_references(dict(resource))
+        if found:
+            label = " ".join(
+                str(part) for part in (resource.get("resource_type"), resource.get("title")) if part
+            ) or str(resource.get("source_local_id") or "resource")
+            offenders.append((label, found))
+    rest = {key: value for key, value in payload.items() if key not in ("resource", "resources")}
+    found = local_file_references(rest)
+    if found:
+        offenders.append(("submission envelope", found))
+    return offenders
+
+
 def submit_publication_package(
     payload: Mapping[str, Any],
     *,
@@ -81,6 +104,7 @@ def submit_publication_package(
     timeout_sec: float = 30.0,
     max_attempts: int = 3,
     backoff_sec: float = 0.5,
+    allow_local_files: bool = False,
 ) -> dict[str, Any]:
     """POST a publication package to the registry, defending against a hostile/cold registry.
 
@@ -90,9 +114,21 @@ def submit_publication_package(
     ``failed``/``rejected``/``error`` status, is surfaced rather than reported as a
     blanket success. Every failure raises a :class:`RegistryError` subclass — which
     is a :class:`RuntimeError`, so existing callers keep working.
+
+    A package whose records give a local file as a download or source location
+    (``access_url``, ``content_url``, ``download_url``, ``source_url`` or
+    ``record_url`` holding a ``file:`` URI or a path) is refused with a
+    ``ValueError`` before anything is sent: a registry would publish the path,
+    which nobody else can follow. Deposit the files first so the records carry
+    https URLs. ``allow_local_files=True`` lifts the check, for a local test
+    registry only.
     """
     if max_attempts < 1:
         raise ValueError("max_attempts must be >= 1")
+    if not allow_local_files:
+        offenders = _local_file_offenders(payload)
+        if offenders:
+            raise ValueError(local_files_message(offenders))
     request_url = registry_base_url.rstrip("/") + "/publication-packages"
     request_payload = dict(payload)
     request_body = json.dumps(request_payload, ensure_ascii=False).encode("utf-8")
