@@ -102,11 +102,11 @@ Cells take `handles=[...]` in parallel with `names=` and `serial_numbers=`. The 
 
 ## Rename without moving an IRI
 
-Several record types seed their IRI from their name, so a new title would mint a new record. When you rename something that is already published, pin its identity:
+Several record types seed their IRI from their name, so a new title would mint a new record. A cell with a serial number is the exception: its IRI comes from the serial, so it keeps its IRI when you rename it. When you rename anything else that is already published, pin its identity:
 
 | Record | How to pin |
 |---|---|
-| Cell | `ws.add("cell", ..., iris=[...])`, one IRI per cell |
+| Cell without a serial number | `ws.add("cell", ..., iris=[...])`, one IRI per cell |
 | Test, and the datasets made from its data files | `ws.add("test", ..., iri=...)` or `uid=...`, plus `dataset_iris=[...]` in the order of `data=` |
 | Test spec drafts | an `"id"` (or `"uid"`) key in the `.test-spec.json` file |
 | Material and electrode records | `uid=...` or `id=...` |
