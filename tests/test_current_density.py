@@ -231,3 +231,131 @@ def test_gold_standard_check_accepts_the_current_density_classes() -> None:
     allowed = _allowed_type_terms()
     for term in ("ElectricCurrentDensity", "LowerCurrentDensityLimit", "UpperCurrentDensityLimit"):
         assert term in allowed, term
+
+
+# -- E-06: current density in the step grammar, and a unit check on current cutoffs
+
+
+def test_a_current_density_step_string_parses() -> None:
+    from battinfo.testmethod import parse_step
+
+    step = parse_step("Charge at 0.1 mA/cm2 until 2.5 V")
+    assert (step.mode, step.direction) == ("cc", "charge")
+    assert step.setpoints["current_density"].model_dump(exclude_none=True) == {"value": 0.1, "unit": "mA/cm2"}
+    term = step.termination[0]
+    assert (term.quantity, term.value, term.unit, term.direction) == ("voltage", 2.5, "V", "above")
+
+
+def test_a_current_density_cutoff_parses_to_the_stored_form() -> None:
+    """The form production's own Empa specs use: a current cutoff in mA/cm2."""
+    from battinfo.testmethod import parse_step
+
+    step = parse_step("Hold at 4.2 V until 0.05 mA/cm2")
+    term = step.termination[0]
+    assert (term.quantity, term.value, term.unit, term.direction) == ("current", 0.05, "mA/cm2", "below")
+
+
+@pytest.mark.parametrize(
+    ("text", "value"),
+    [
+        ("0.1 mA/cm2", 0.1),
+        ("0.1 mA/cm^2", 0.1),
+        ("0.1 mA/cm²", 0.1),
+        ("0.1 mA cm-2", 0.1),
+        ("1 A/m2", 0.1),
+        ("3 A/m2", 0.3),
+        ("2 µA/cm2", 0.002),
+        ("2 uA/cm2", 0.002),
+        ("0.5 A/cm2", 500.0),
+    ],
+)
+def test_current_density_spellings_normalise_to_ma_per_cm2(text: str, value: float) -> None:
+    from battinfo.testmethod import parse_step
+
+    qty = parse_step(f"Discharge at {text} until 3 V").setpoints["current_density"]
+    assert qty.unit == "mA/cm2"
+    assert qty.value == value  # exact: no float noise from the unit factor
+
+
+def test_a_current_density_protocol_round_trips_through_its_strings() -> None:
+    spec = _empa_spec()
+    again = battinfo.TestSpec(name="again", kind="cycling", experiment=spec.experiment)
+    first, hold = again.method[0], again.method[1]
+    assert first.setpoints["current_density"].model_dump(exclude_none=True) == {"value": 0.1, "unit": "mA/cm2"}
+    assert hold.termination[0].model_dump() == {
+        "quantity": "current", "value": 0.05, "unit": "mA/cm2", "direction": "below",
+    }
+    assert again.method[2].duration is not None and again.method[2].duration.value == 6 * 3600
+    assert again.experiment == spec.experiment
+
+
+def test_a_protocol_authored_as_strings_emits_current_densities() -> None:
+    spec = battinfo.TestSpec(
+        id=SPEC_ID, name="strings", kind="cycling",
+        experiment=["Charge at 0.1 mA/cm2 until 4.2 V", "Hold at 4.2 V until 0.05 mA/cm2"],
+    )
+    tasks = record_to_jsonld(spec.to_record(), "test-protocol")["hasTask"]
+    assert tasks[0]["hasControlParameter"][0]["@type"] == "ElectricCurrentDensity"
+    assert tasks[1]["hasTerminationParameter"][0]["@type"] == "LowerCurrentDensityLimit"
+
+
+def test_parsed_current_density_steps_pass_the_save_time_schema() -> None:
+    from importlib import resources
+
+    from jsonschema import Draft202012Validator
+
+    from battinfo.testmethod import parse_step
+
+    with resources.files("battinfo").joinpath("data", "schemas", "test-protocol.schema.json").open(
+        "r", encoding="utf-8"
+    ) as handle:
+        schema = json.load(handle)
+    validator = Draft202012Validator({**schema["$defs"]["Step"], "$defs": schema["$defs"]})
+    for text in ("Charge at 0.1 mA/cm2 until 4.2 V", "Hold at 4.2 V until 0.05 mA/cm2"):
+        validator.validate(parse_step(text).model_dump(exclude_none=True))
+
+
+def test_comparison_shorthand_takes_a_current_density() -> None:
+    from battinfo.testmethod import ExperimentSyntaxError, parse_termination
+
+    for text in ("Current < 0.05 mA/cm2", "Current density < 0.05", "current_density < 0.5 A/m2"):
+        term = parse_termination(text)
+        assert (term.quantity, term.value, term.unit, term.direction) == ("current", 0.05, "mA/cm2", "below"), text
+    with pytest.raises(ExperimentSyntaxError, match="names current density but its value parses as current"):
+        parse_termination("Current density < 0.05 A")
+
+
+@pytest.mark.parametrize("unit", ["A", "mA", "µA", "mA/cm2", "A/m2", "mA cm-2", "mA/g"])
+def test_a_current_cutoff_accepts_current_and_areal_units(unit: str) -> None:
+    from battinfo.testmethod import Termination
+
+    assert Termination(quantity="current", value=1, unit=unit, direction="below").unit == unit
+
+
+@pytest.mark.parametrize(
+    ("unit", "message"),
+    [
+        ("V", "voltage unit. Use quantity 'voltage'"),
+        ("mAh", "charge unit. Use quantity 'capacity'"),
+        ("C", "C-rate unit. Use quantity 'c_rate'"),
+        ("A/Ah", "C-rate unit. Use quantity 'c_rate'"),
+        ("min", "time unit. Use quantity 'duration'"),
+        ("%", "dimensionless unit. Use quantity 'soc'"),
+        ("W", "power unit."),
+    ],
+)
+def test_a_current_cutoff_in_another_quantitys_unit_is_rejected(unit: str, message: str) -> None:
+    from pydantic import ValidationError
+
+    from battinfo.testmethod import Step
+
+    with pytest.raises(ValidationError, match=message):
+        Step(mode="cv", direction="hold",
+             termination=[{"quantity": "current", "value": 1, "unit": unit, "direction": "below"}])
+
+
+def test_published_empa_specs_still_load() -> None:
+    """The check must not break reading records production already holds."""
+    record = _empa_spec().to_record()
+    again = battinfo.TestSpec.from_record(record)
+    assert again.method[1].termination[0].unit == "mA/cm2"

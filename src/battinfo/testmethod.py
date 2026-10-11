@@ -14,9 +14,9 @@ dev-only dependency used solely by conformance tests.
 
 Grammar handled (case-insensitive)::
 
-    (Dis)charge at <C-rate|current|power> [for <time>] [or until <value>] ...
-    Hold at <voltage>                     [for <time>] [or until <value>] ...
-    Rest                                  [for <time>] [or until <value>] ...
+    (Dis)charge at <C-rate|current|current density|power> [for <time>] [or until <value>] ...
+    Hold at <voltage>                                     [for <time>] [or until <value>] ...
+    Rest                                                  [for <time>] [or until <value>] ...
 
 Examples::
 
@@ -24,7 +24,12 @@ Examples::
     "Charge at 1 C until 4.2 V"
     "Hold at 4.2 V until C/50"
     "Discharge at 200 mA for 90 seconds"
+    "Charge at 0.1 mA/cm2 until 4.2 V"
+    "Hold at 4.2 V until 0.05 mA/cm2"
     "Rest for 30 minutes"
+
+A current density (``mA/cm2``, ``A/m2``, ``mA cm-2``) is a BattINFO extension;
+PyBaMM's own grammar has no per-area current.
 """
 
 from __future__ import annotations
@@ -158,7 +163,12 @@ class Quantity(BaseModel):
 
 class Termination(BaseModel):
     """A single stop condition.  A step's ``termination`` list is any-of (the
-    step ends when the first condition is met — PyBaMM's ``or``)."""
+    step ends when the first condition is met — PyBaMM's ``or``).
+
+    A current cutoff may be stated per area (``{"quantity": "current", "value":
+    0.05, "unit": "mA/cm2"}``); it is a current density and emits as one. A
+    current cutoff in a unit of another quantity (``V``, ``Ah``, ``C``) is
+    rejected."""
 
     model_config = ConfigDict(extra="forbid")
     quantity: str  # voltage | current | c_rate | capacity | soc | duration
@@ -176,6 +186,39 @@ class Termination(BaseModel):
     def _check_direction(cls, value: Any) -> Any:
         return _require_member(value, TERMINATION_DIRECTIONS, "Termination.direction")
 
+    @model_validator(mode="after")
+    def _check_current_unit(self) -> "Termination":
+        if self.quantity == "current":
+            other = _other_quantity_of_unit(self.unit)
+            if other is not None:
+                kind, hint = other
+                advice = f" Use quantity '{hint}' for that cutoff." if hint else ""
+                raise ValueError(
+                    "A 'current' termination takes a current unit (A, mA) or a current per "
+                    f"area (mA/cm2, A/m2); got {self.unit!r}, which is a {kind} unit.{advice}"
+                )
+        return self
+
+
+# Units of other quantities, for the current-cutoff unit check:
+# lower-cased unit -> (what it measures, the termination quantity to use instead).
+# Units not listed here (a specific current such as mA/g, say) are let through.
+_OTHER_QUANTITY_UNITS: dict[str, tuple[str, str | None]] = {
+    **{u: ("voltage", "voltage") for u in ("v", "mv", "kv", "µv", "uv")},
+    **{u: ("C-rate", "c_rate") for u in ("c", "a/ah", "1/h", "h-1")},
+    **{u: ("charge", "capacity") for u in ("ah", "mah", "µah", "uah", "as", "mas")},
+    **{u: ("time", "duration") for u in ("s", "sec", "min", "h", "hr", "hour", "hours", "minutes", "seconds")},
+    **{u: ("dimensionless", "soc") for u in ("1", "%")},
+    **{u: ("power", None) for u in ("w", "mw", "kw")},
+    **{u: ("resistance", None) for u in ("ohm", "ohms", "mohm", "ω", "mω")},
+}
+
+
+def _other_quantity_of_unit(unit: str) -> tuple[str, str | None] | None:
+    """``(what the unit measures, quantity to use)`` when ``unit`` belongs to a
+    quantity other than current, otherwise ``None``."""
+    return _OTHER_QUANTITY_UNITS.get(unit.strip().lower())
+
 
 # Comparison-string termination shorthand ("Voltage > 4.2", "C-rate < C/50",
 # "SOC < 0.05", "Time > 30 min") — the way engineers write cutoffs, and the
@@ -186,6 +229,9 @@ _SHORTHAND_QUANTITY: dict[str, tuple[str, str]] = {
     "v": ("voltage", "V"),
     "current": ("current", "A"),
     "i": ("current", "A"),
+    # A current cutoff per area is stored as a current in mA/cm2.
+    "current density": ("current", "mA/cm2"),
+    "current_density": ("current", "mA/cm2"),
     "c-rate": ("c_rate", "A/Ah"),
     "c_rate": ("c_rate", "A/Ah"),
     "crate": ("c_rate", "A/Ah"),
@@ -197,6 +243,15 @@ _SHORTHAND_QUANTITY: dict[str, tuple[str, str]] = {
     "duration": ("duration", "s"),
 }
 
+# The value kinds each left side accepts, where that is more than its quantity:
+# a current cutoff may be stated per area, a current-density cutoff only so.
+_SHORTHAND_VALUE_KINDS: dict[str, frozenset[str]] = {
+    "current": frozenset({"current", "current_density"}),
+    "i": frozenset({"current", "current_density"}),
+    "current density": frozenset({"current_density"}),
+    "current_density": frozenset({"current_density"}),
+}
+
 _SHORTHAND_RE = re.compile(r"^\s*(.+?)\s*([<>])=?\s*(.+?)\s*$")
 
 
@@ -205,10 +260,11 @@ def parse_termination(text: str) -> Termination:
 
     ``"Voltage > 4.2"`` → voltage above 4.2 V; ``"C-rate < C/50"`` → c_rate
     below 0.02 A/Ah; ``"Current < 50 mA"`` → current below 0.05 A;
-    ``"SOC < 0.05"`` → soc below 0.05; ``"Time > 30 min"`` → duration 1800 s.
-    The left side names the quantity, the operator gives the approach
-    direction (irrelevant for time), and the right side is a number in the
-    quantity's canonical unit or any magnitude ``_parse_value`` understands.
+    ``"Current < 0.05 mA/cm2"`` (or ``"Current density < 0.05"``) → current
+    below 0.05 mA/cm2; ``"SOC < 0.05"`` → soc below 0.05; ``"Time > 30 min"``
+    → duration 1800 s. The left side names the quantity, the operator gives the
+    approach direction (irrelevant for time), and the right side is a number in
+    the quantity's canonical unit or any magnitude ``_parse_value`` understands.
     """
     match = _SHORTHAND_RE.match(text or "")
     if not match:
@@ -236,9 +292,10 @@ def parse_termination(text: str) -> Termination:
         unit = default_unit
     except ValueError:
         kind, qty = _parse_value(rhs)
-        if kind != quantity:
+        if kind not in _SHORTHAND_VALUE_KINDS.get(lhs, frozenset({quantity})):
+            named = "current density" if default_unit == "mA/cm2" else quantity
             raise ExperimentSyntaxError(
-                f"Termination '{text}' names {quantity} but its value parses as {kind}."
+                f"Termination '{text}' names {named} but its value parses as {kind}."
             ) from None
         value, unit = _require_value(qty, f"Termination '{text}'"), qty.unit
     return Termination(quantity=quantity, value=value, unit=unit,
@@ -322,7 +379,12 @@ _TIME_TABLE: dict[str, float] = {
 
 _CRATE_DIV_RE = re.compile(r"^([cd])\s*/\s*([\d.]+)$", re.IGNORECASE)
 _NUM_UNIT_RE = re.compile(r"^([\d.]+)\s*([a-zΩω]+)$", re.IGNORECASE)
+_NUM_ANY_UNIT_RE = re.compile(r"^([\d.]+)\s*(\S.*)$")
 _TIME_RE = re.compile(r"^([\d.]+)\s*([a-z]+)$", re.IGNORECASE)
+
+# Parsed current densities are normalised to mA/cm2, the unit battery
+# protocols state them in.
+_CURRENT_DENSITY_UNIT = "mA/cm2"
 
 
 def _to_float(token: str, text: str) -> float:
@@ -336,11 +398,27 @@ def _to_float(token: str, text: str) -> float:
         raise ExperimentSyntaxError(f"Could not parse number '{token}' in '{text}'.") from None
 
 
+def _parse_current_density(token: str, text: str) -> Quantity | None:
+    """``0.1 mA/cm2``, ``1 A/m2`` or ``0.1 mA cm-2`` -> a quantity in mA/cm2,
+    or ``None`` when the token is not a current per area."""
+    m = _NUM_ANY_UNIT_RE.match(token)
+    unit = _current_density_unit(m.group(2)) if m else None
+    if m is None or unit is None:
+        return None
+    try:
+        number = Fraction(m.group(1))
+    except ValueError:
+        raise ExperimentSyntaxError(f"Could not parse number '{m.group(1)}' in '{text}'.") from None
+    # Exact arithmetic, so 3 A/m2 is 0.3 mA/cm2 and not 0.30000000000000004.
+    return Quantity(value=float(number * unit[1]), unit=_CURRENT_DENSITY_UNIT)
+
+
 def _parse_value(text: str) -> tuple[str, Quantity]:
-    """Parse a magnitude token such as ``C/10``, ``1C``, ``200 mA`` or ``4.1 V``.
+    """Parse a magnitude token such as ``C/10``, ``1C``, ``200 mA``,
+    ``0.1 mA/cm2`` or ``4.1 V``.
 
     Returns ``(quantity_kind, Quantity)`` with the value normalised to the
-    canonical unit (A, V, W, Ohm; C-rate as A/Ah)."""
+    canonical unit (A, V, W, Ohm; C-rate as A/Ah; current density as mA/cm2)."""
     token = text.strip()
     div = _CRATE_DIV_RE.match(token)
     if div:
@@ -350,7 +428,12 @@ def _parse_value(text: str) -> tuple[str, Quantity]:
         return "c_rate", Quantity(value=1.0 / denom, unit="A/Ah")
     m = _NUM_UNIT_RE.match(token)
     if not m:
-        raise ExperimentSyntaxError(f"Could not parse value '{text}'. Expected e.g. 'C/10', '1C', '200 mA', '4.1 V'.")
+        density = _parse_current_density(token, text)
+        if density is not None:
+            return "current_density", density
+        raise ExperimentSyntaxError(
+            f"Could not parse value '{text}'. Expected e.g. 'C/10', '1C', '200 mA', '0.1 mA/cm2', '4.1 V'."
+        )
     number = _to_float(m.group(1), text)
     unit_key = m.group(2).lower()
     if unit_key not in _UNIT_TABLE:
@@ -387,10 +470,15 @@ def _termination_from_value(kind: str, qty: Quantity, direction: str | None) -> 
             unit=qty.unit,
             direction="above" if direction == "charge" else "below",
         )
-    if kind in ("current", "c_rate"):
+    if kind in ("current", "c_rate", "current_density"):
         # Cutoff currents are crossed from above as the cell relaxes/charges taper.
+        # A current density is stored as a current cutoff in mA/cm2; the
+        # emitters type it as a current-density limit.
         return Termination(
-            quantity=kind, value=_require_value(qty, "A current termination"), unit=qty.unit, direction="below"
+            quantity="current" if kind == "current_density" else kind,
+            value=_require_value(qty, "A current termination"),
+            unit=qty.unit,
+            direction="below",
         )
     raise ExperimentSyntaxError(f"Unsupported termination quantity '{kind}'.")
 
@@ -405,11 +493,13 @@ _OR_SPLIT_RE = re.compile(r"\s+or\s+", re.IGNORECASE)
 # op + value-kind -> (mode, direction)
 _MODE_FOR = {
     ("charge", "current"): ("cc", "charge"),
+    ("charge", "current_density"): ("cc", "charge"),
     ("charge", "c_rate"): ("cc", "charge"),
     ("charge", "power"): ("cp", "charge"),
     ("charge", "resistance"): ("cr", "charge"),
     ("charge", "voltage"): ("cv", "charge"),
     ("discharge", "current"): ("cc", "discharge"),
+    ("discharge", "current_density"): ("cc", "discharge"),
     ("discharge", "c_rate"): ("cc", "discharge"),
     ("discharge", "power"): ("cp", "discharge"),
     ("discharge", "resistance"): ("cr", "discharge"),
