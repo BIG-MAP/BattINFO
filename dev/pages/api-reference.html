@@ -1035,7 +1035,9 @@ deterministically from their natural identity key (see
 existing records — use <code class="docutils literal notranslate"><span class="pre">mode=&quot;upsert&quot;</span></code> (no-op re-save reports
 <code class="docutils literal notranslate"><span class="pre">content_changed:</span> <span class="pre">False</span></code>) or <code class="docutils literal notranslate"><span class="pre">duplicate_policy=&quot;return_existing&quot;</span></code>
 for idempotent pipelines. Records with no distinguishing identity fall
-back to a random uid and never silently dedup.</p>
+back to a random uid and never silently dedup. A canonical record saved
+without an <code class="docutils literal notranslate"><span class="pre">id</span></code> (a filled-in template) is minted the same way
+(<code class="docutils literal notranslate"><span class="pre">_with_minted_id</span></code>).</p>
 </dd></dl>
 
 <dl class="py function">

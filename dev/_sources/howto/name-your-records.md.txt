@@ -112,6 +112,8 @@ Several record types seed their IRI from their name, so a new title would mint a
 | Material and electrode records | `uid=...` or `id=...` |
 | Datasets and collections written with `battinfo.Dataset` | `Dataset(id=...)`; a collection's IRI otherwise comes from its access URL and name |
 
+A dataset made from a data file is seeded from its cell, its test, its name and the file's location. When the dataset has an https access or download URL, that URL is the location. For a local file it is the path relative to the workspace folder, such as `bdf/C01.bdf.csv`; a relative path is read against the workspace folder, not the directory you run from. A file outside the workspace is located by its folder and name, such as `run1/data.csv`, so two files called `data.csv` in different folders stay two datasets. Where the workspace folder itself sits never enters the seed, so a colleague or a CI job that builds the same workspace in another folder gets the same dataset IRIs. Moving or renaming a data file inside the workspace does give its dataset a new IRI; pin a published one with `dataset_iris=[...]`. A publication package built with `publish_publication_package()` or `Workspace.build_publication_package()` follows the same rule; there the local location is the dataset folder and its parent, such as `project/run-1`.
+
 For example, rebuilding a corpus with the new titles keeps the cell and test IRIs they were published under:
 
 ```python
