@@ -2,8 +2,8 @@
 # it. The processing extra accepts any batterydf 0.2 release, candidates
 # included, so a new one on PyPI reaches users with no change in this
 # repository, while CI keeps testing the version in uv.lock. Once a week this
-# job installs the newest batterydf below 0.3 from PyPI and runs the converter
-# tests against it.
+# job installs the newest batterydf below 0.3 from PyPI, release candidates
+# included, and runs the converter tests against it.
 name: converter-latest
 
 on:
@@ -36,7 +36,9 @@ jobs:
           set -euxo pipefail
           python -m pip install --upgrade pip
           python -m pip install -e ".[dev,tabular]"
-          python -m pip install --pre --upgrade "batterydf[nda,excel,mat]<0.3"
+          # The bound names a pre-release, so pip considers batterydf release
+          # candidates while every other package stays on final releases.
+          python -m pip install --upgrade "batterydf[nda,excel,mat]>=0.2.0rc2,<0.3"
           python -c "import bdf, importlib.metadata as m; print('batterydf', m.version('batterydf'))"
 
       - name: converter tests
