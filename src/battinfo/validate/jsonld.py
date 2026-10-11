@@ -284,9 +284,39 @@ def _collect_bare_terms(value: Any, out: set[str]) -> None:
             _collect_bare_terms(item, out)
 
 
+def _context_class_terms(context: dict[str, Any]) -> set[str]:
+    """The terms of a JSON-LD context that name a class.
+
+    A context entry does not say whether its IRI is a class or a property, so
+    this goes by the naming convention the vocabularies share, the same one
+    scripts/gen_battinfo_vocab.py applies: class terms are UpperCamelCase
+    (``Case``, ``CoinCell``, ``Dataset``), while properties, record keys and
+    prefixes start lower-case. A class term binds a plain IRI, or a definition
+    holding nothing but an ``@id``.
+    """
+    terms: set[str] = set()
+    for term, value in context.items():
+        if not term[:1].isupper():
+            continue
+        if isinstance(value, dict):
+            if set(value) != {"@id"}:
+                continue
+            value = value["@id"]
+        if isinstance(value, str) and value:
+            terms.add(term)
+    return terms
+
+
 @lru_cache(maxsize=1)
 def _allowed_type_terms() -> set[str]:
     allowed = set(_EXPLICIT_ALLOWED_TYPE_TERMS)
+
+    # Every class term of the bundled v1 records context. The emitters type
+    # their nodes with that context's terms (a housing whose format has no case
+    # class of its own gets the generic Case, for one), so whatever it defines
+    # is accepted here; a bare token defined nowhere is still rejected.
+    records_context = _local_context_document(_LOCAL_CONTEXT_FILES[_BATTINFO_RECORDS_CONTEXT_URL])
+    allowed.update(_context_class_terms(records_context.get("@context", {})))
 
     # The test-spec method graph emits its vocabulary (workflow/process classes,
     # control/termination quantities) straight from the bundled context via

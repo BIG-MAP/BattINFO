@@ -86,6 +86,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- **A housing spec in a format with no case class of its own converts to JSON-LD.** A housing whose `cell_format` is `other` or `unknown` types its case as the generic `Case`. The records context defines that class, but the JSON-LD validator built its allowed `@type` set from the mapping tables alone and rejected it, so `record_to_jsonld()` raised instead of returning a document. The validator now also accepts every class term of the bundled v1 records context, which puts what the emitters write and what the validator accepts on one source. A bare `@type` that is defined nowhere is still rejected. The packaged-example sweep in the tests no longer skips an example whose JSON-LD fails validation, and it checks every emitted `@type` against the validator.
+
 - **`ws.submit()` sends a cell spec's own title.** Every cell-spec submission was titled "<manufacturer> <model>", so a cell spec retitled with `battinfo.naming` ("Flores 2026 graphite AQ-1 cell spec") kept its old title in the registry. The record's `name` now wins; manufacturer and model are the fallback.
 
 - **A cell-spec draft keeps its title.** `ws.load()` of a cell-spec draft copied its `handle` but ignored its `name`, so the record was always titled "<manufacturer> <model>" and a build that set titles from `battinfo.naming` lost them silently. The draft's `name` now wins; without one the default is unchanged, and the IRI never depends on it.
