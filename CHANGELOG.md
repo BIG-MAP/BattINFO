@@ -86,6 +86,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- **Renaming a cell with a serial number keeps its IRI.** A cell's IRI was seeded from its name when it had one, so a new display name minted a new cell, and every test and dataset seeded from that cell moved with it. The seed now takes the serial first, then the name, then the batch, as the `ws.add("cell")` documentation already stated. `create_cell_instance()` ignored the name while `ws.add("cell")` and `save_cell_instance()` used it, so one physical cell could get two IRIs depending on which function created it; all three now agree. Cells without a serial keep their IRIs. A cell that has both a name and a different serial gets a new IRI compared with earlier development versions; to keep a published one, pin it with `ws.add("cell", ..., iris=[...])`.
+
 - **`ws.submit()` sends a cell spec's own title.** Every cell-spec submission was titled "<manufacturer> <model>", so a cell spec retitled with `battinfo.naming` ("Flores 2026 graphite AQ-1 cell spec") kept its old title in the registry. The record's `name` now wins; manufacturer and model are the fallback.
 
 - **A cell-spec draft keeps its title.** `ws.load()` of a cell-spec draft copied its `handle` but ignored its `name`, so the record was always titled "<manufacturer> <model>" and a build that set titles from `battinfo.naming` lost them silently. The draft's `name` now wins; without one the default is unchanged, and the IRI never depends on it.
