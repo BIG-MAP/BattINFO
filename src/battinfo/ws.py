@@ -2562,6 +2562,9 @@ class AuthoringWorkspace:
           REFERENCED: brought into the session reusing the existing IRI and never
           re-published. A referenced cell is registered for test attachment.
 
+        A relative draft path resolves against the workspace root, not the
+        current directory.
+
         Example::
 
             spec = ws.load("duracell.cell-spec.json")               # author new
@@ -2606,7 +2609,10 @@ class AuthoringWorkspace:
 
         ``cell`` accepts a serial, IRI, ``Cell``, or search result, and is
         resolved in this session, locally, then in the registry (referenced if it
-        already exists).  ``data`` is a path or list of paths.  ``type`` is the test
+        already exists).  ``data`` is a path or list of paths to files that
+        exist; a relative path resolves against the workspace root, not the
+        current directory, and a missing file raises ``FileNotFoundError``
+        naming the path it resolved to.  ``type`` is the test
         type (``"cycling"``, ``"capacity_check"``, …); ``kind`` is accepted as an alias.
         ``channel`` attaches the test to an equipment channel — a channel IRI, a
         channel label, or ``"<unit>/CHn"`` (see ``ws.add("equipment", ...)``).
@@ -7693,6 +7699,8 @@ class AuthoringWorkspace:
 
         Explicit (preferred): ``cell=<serial|IRI|object>`` and ``data=<path|list>``.
         Batch: ``datasets="glob"`` matches files to loaded cells by short ID.
+        Relative paths resolve against the workspace root, and a data file that
+        does not exist raises ``FileNotFoundError`` before anything is created.
 
         ``name`` is the test's title and ``handle`` its short slug (see
         :mod:`battinfo.naming`); neither is generated for you.
@@ -7798,9 +7806,13 @@ class AuthoringWorkspace:
 
         # ── Explicit mode: a named cell (+ optional data files) ──────────────────
         if cell is not None:
-            resolved = self._resolve_cell(cell)
             files = self._as_data_paths(data)
             raw_files = self._as_data_paths(raw)
+            # A dataset for a file that does not exist would be saved without a word
+            # and only fail at deposit time; refuse it before anything is created.
+            self._require_files(files, "data")
+            self._require_files(raw_files, "raw")
+            resolved = self._resolve_cell(cell)
             if raw_files and len(raw_files) != len(files):
                 raise ValueError(
                     f"raw= has {len(raw_files)} file(s) but data= has {len(files)}; "
@@ -7954,6 +7966,16 @@ class AuthoringWorkspace:
             )
         return pinned
 
+    def _require_files(self, paths: builtins.list[Path], argument: str) -> None:
+        """Raise FileNotFoundError naming each resolved path in *paths* that does not exist."""
+        missing = [path for path in paths if not path.exists()]
+        if missing:
+            listing = ", ".join(str(path) for path in missing)
+            raise FileNotFoundError(
+                f"{argument}= file not found: {listing}. A relative path resolves against the "
+                f"workspace root ({self._root}), not the current directory."
+            )
+
     def _as_data_paths(self, data: Any) -> builtins.list[Path]:
         """Normalise a data= value (path, str, or list) to a list of absolute Paths."""
         if data is None:
@@ -8039,6 +8061,7 @@ class AuthoringWorkspace:
         else:
             matched_files = [Path(p) if not isinstance(p, Path) else p for p in datasets]
             matched_files = [p if p.is_absolute() else self._root / p for p in matched_files]
+            self._require_files(matched_files, "datasets")
         if not matched_files:
             print(f"  No dataset files matched: {datasets!r}")
             return []
