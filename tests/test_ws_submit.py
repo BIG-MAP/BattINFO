@@ -452,6 +452,66 @@ def test_failed_outcomes_are_journaled_but_retried_on_resume(
     assert statuses == ["skipped_journal", "validated"]
 
 
+def test_journal_counts_a_success_only_at_the_same_registry(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The Empa evaluation's E-10: a workspace rehearsed against one registry skipped
+    every record as "already submitted" when pointed at another, because the journal
+    did not record where a record went."""
+    import json
+
+    ws = _saved_ws(tmp_path, n=2)
+    fake = _patch_registry(monkeypatch, lambda p: _result("validated"))
+    ws.submit(**dict(_CREDS, registry_url="http://127.0.0.1:8012"))
+    assert fake.calls == 2
+
+    other = ws.submit(**dict(_CREDS, registry_url="http://localhost:8012"))
+    assert fake.calls == 4, "a success at one registry must not count for another"
+    assert [o["status"] for o in other] == ["validated", "validated"]
+
+    # The first registry again, spelled differently: still the same registry.
+    again = ws.submit(**dict(_CREDS, registry_url="HTTP://127.0.0.1:8012/"))
+    assert fake.calls == 4
+    assert [o["status"] for o in again] == ["skipped_journal", "skipped_journal"]
+
+    journal = tmp_path / ".battinfo" / "submit-journal.jsonl"
+    entries = [json.loads(ln) for ln in journal.read_text(encoding="utf-8").splitlines() if ln.strip()]
+    assert [e["registry_url"] for e in entries] == ["http://127.0.0.1:8012"] * 2 + ["http://localhost:8012"] * 2
+
+
+def test_journal_entries_without_a_registry_match_none(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import json
+
+    ws = _saved_ws(tmp_path)
+    fake = _patch_registry(monkeypatch, lambda p: _result("validated"))
+    ws.submit(**_CREDS)
+    journal = tmp_path / ".battinfo" / "submit-journal.jsonl"
+    entries = [json.loads(ln) for ln in journal.read_text(encoding="utf-8").splitlines() if ln.strip()]
+    for entry in entries:
+        del entry["registry_url"]  # as journals were written before the registry was recorded
+    journal.write_text("".join(json.dumps(e) + "\n" for e in entries), encoding="utf-8")
+
+    outcomes = ws.submit(**_CREDS)
+    assert fake.calls == 2  # sent once more; the registry deduplicates identical payloads
+    assert [o["status"] for o in outcomes] == ["validated"]
+
+
+@pytest.mark.parametrize(("url", "expected"), [
+    ("https://registry.example", "https://registry.example"),
+    ("HTTPS://Registry.Example:443/", "https://registry.example"),
+    ("http://localhost:80/api/v1/", "http://localhost/api/v1"),
+    ("http://127.0.0.1:8012", "http://127.0.0.1:8012"),
+    ("https://user:secret@registry.example/", "https://registry.example"),
+    ("http://[::1]:8012/", "http://[::1]:8012"),
+])
+def test_journal_records_a_registry_url_in_one_spelling(url: str, expected: str) -> None:
+    from battinfo.ws import _normalize_registry_url
+
+    assert _normalize_registry_url(url) == expected
+
+
 def test_changed_content_is_resubmitted(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     ws = _saved_ws(tmp_path)
     fake = _patch_registry(monkeypatch, lambda p: _result("validated"))

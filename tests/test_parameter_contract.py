@@ -1,8 +1,11 @@
 """Contract tests for the parameter-set claim family (IDENTIFIER_POLICY 6.3).
 
 Design rules under test:
-- a parameter set targets exactly ONE of material_kind / material_spec_id /
+- a claim batch targets exactly ONE of material_kind / material_spec_id /
   cell_spec_id; material_kind resolves through the curated vocabulary;
+- a parameter file (one BPX file) groups its claims by part, links exactly
+  one cell (or says virtual_cell), and never mixes with the claim-batch
+  fields;
 - each claim carries exactly one of quantity / curve / expression, and curves
   must be well-formed (equal-length finite x/y);
 - IRIs mint under the shared spec/ namespace, DETERMINISTIC from
@@ -382,25 +385,34 @@ def _bpx() -> dict:
     }
 
 
-def test_bpx_claims_split_material_from_build_scope() -> None:
-    result = from_bpx_parameters(_bpx())
-    negative_material = {c["parameter"] for c in result.claims["negative_material"]}
-    negative_build = {c["parameter"] for c in result.claims["negative_electrode"]}
+def _parts(result) -> dict[str, list[dict]]:
+    return {part["part"]: part["claims"] for part in result.parts}
+
+
+def test_bpx_claims_split_material_from_build_part() -> None:
+    parts = _parts(from_bpx_parameters(_bpx()))
+    negative_material = {c["parameter"] for c in parts["negative_material"]}
+    negative_build = {c["parameter"] for c in parts["negative_electrode"]}
     assert "particle_radius" in negative_material
     assert "solid_diffusivity" in negative_material
     assert "thickness" in negative_build
     assert "electronic_conductivity" in negative_build
     assert negative_material.isdisjoint(negative_build)
+    # The Cell block is the cell part; the 0.x Electrolyte initial
+    # concentration is a state value.
+    assert [c["parameter"] for c in parts["cell"]] == ["nominal_capacity"]
+    assert [c["parameter"] for c in parts["state"]] == ["initial_concentration"]
+    assert "initial_concentration" not in {c["parameter"] for c in parts["electrolyte"]}
 
 
 def test_bpx_value_forms_map_to_claim_forms() -> None:
-    result = from_bpx_parameters(_bpx())
-    by_key = {c["parameter"]: c for c in result.claims["negative_material"]}
+    parts = _parts(from_bpx_parameters(_bpx()))
+    by_key = {c["parameter"]: c for c in parts["negative_material"]}
     assert by_key["particle_radius"]["quantity"] == {"value": 5.86e-06, "unit": "m"}
     assert by_key["solid_diffusivity"]["expression"]["language"] == "bpx"
     assert by_key["ocp"]["curve"]["x_quantity"] == "stoichiometry"
     assert by_key["ocp"]["curve"]["y_unit"] == "V"
-    electrolyte = {c["parameter"]: c for c in result.claims["electrolyte"]}
+    electrolyte = {c["parameter"]: c for c in parts["electrolyte"]}
     assert electrolyte["ionic_conductivity"]["expression"]["text"] == "0.95 * c"
 
 
@@ -409,45 +421,107 @@ def test_bpx_unknown_fields_are_warned_never_silent() -> None:
     assert any("Mystery field" in w for w in result.warnings)
 
 
-def test_bpx_to_records_targets_and_scopes() -> None:
-    records = import_bpx_parameters(
+def test_bpx_import_builds_one_record() -> None:
+    record = import_bpx_parameters(
         _bpx(),
         materials={"negative": "graphite", "positive": "NMC 811"},
         cell_spec_id=CELL_SPEC_IRI,
         citation_doi="10.1149/1945-7111/ab9050",
     )
-    by_name = {r["parameter_set"]["name"]: r["parameter_set"] for r in records}
-    negative = by_name["Chen2020 LG M50 - negative electrode material"]
-    assert negative["material_kind"] == "graphite"
-    assert negative["scope"] == "material"
-    build = by_name["Chen2020 LG M50 - negative electrode build"]
-    assert build["cell_spec_id"] == CELL_SPEC_IRI
-    assert build["scope"] == "electrode"
-    assert build["electrode_polarity"] == "negative"
-    assert by_name["Chen2020 LG M50 - separator"]["scope"] == "separator"
-    assert by_name["Chen2020 LG M50 - electrolyte"]["scope"] == "electrolyte"
-    positive = by_name["Chen2020 LG M50 - positive electrode material"]
-    assert positive["material_kind"] == "nmc811"
-    for record in records:
-        report = validate_record_report(record)
-        assert report.ok, report.errors
-
-
-def test_bpx_records_without_targets_skip_with_warnings() -> None:
-    result = from_bpx_parameters(_bpx())
-    records = result.to_records()
-    assert records == []
-    assert any("pass materials=" in w for w in result.warnings)
-    assert any("cell_spec_id" in w for w in result.warnings)
+    body = record["parameter_set"]
+    assert body["name"] == "Chen2020 LG M50"
+    assert body["cell_spec_id"] == CELL_SPEC_IRI
+    assert "scope" not in body and "claims" not in body
+    by_part = {part["part"]: part for part in body["parts"]}
+    assert by_part["negative_material"]["material_kind"] == "graphite"
+    assert by_part["positive_material"]["material_kind"] == "nmc811"
+    assert "material_kind" not in by_part["negative_electrode"]
+    report = validate_record_report(record)
+    assert report.ok, report.errors
 
 
 def test_bpx_reimport_is_idempotent() -> None:
     kwargs = {"materials": {"negative": "graphite"}, "cell_spec_id": CELL_SPEC_IRI}
-    first = {r["parameter_set"]["name"]: r["parameter_set"]["id"]
-             for r in import_bpx_parameters(_bpx(), **kwargs)}
-    second = {r["parameter_set"]["name"]: r["parameter_set"]["id"]
-              for r in import_bpx_parameters(_bpx(), **kwargs)}
+    first = import_bpx_parameters(_bpx(), **kwargs)["parameter_set"]["id"]
+    second = import_bpx_parameters(_bpx(), **kwargs)["parameter_set"]["id"]
     assert first == second
+
+
+# ── the two flavours ─────────────────────────────────────────────────────────
+
+
+def _parameter_file(**overrides) -> dict:
+    fields = {
+        "name": "A BPX file",
+        "virtual_cell": True,
+        "parameters_sha256": "a" * 64,
+        "parts": [
+            {"part": "negative_material", "material_kind": "graphite", "claims": _claims()},
+            {"part": "separator", "claims": [
+                {"parameter": "porosity", "quantity": {"value": 0.47, "unit": "1"}},
+            ]},
+        ],
+        "default_provenance_class": "fitted",
+    }
+    fields.update(overrides)
+    return create_parameter_set(**fields)
+
+
+def test_a_parameter_file_validates_and_keeps_its_part_order() -> None:
+    record = _parameter_file(parts=list(reversed(_parameter_file()["parameter_set"]["parts"])))
+    assert [p["part"] for p in record["parameter_set"]["parts"]] == ["negative_material", "separator"]
+    report = validate_record_report(record)
+    assert report.ok, report.errors
+
+
+def test_the_flavours_do_not_mix() -> None:
+    with pytest.raises(ValueError, match="belong to a claim batch"):
+        _parameter_file(claims=_claims())
+    with pytest.raises(ValueError, match="belong to a claim batch"):
+        _parameter_file(scope="cell")
+    with pytest.raises(ValueError, match="belong to a parameter file"):
+        _record(virtual_cell=True)
+    with pytest.raises(ValueError, match="belong to a parameter file"):
+        _record(parameters_sha256="a" * 64)
+    with pytest.raises(ValueError, match="exactly one of cell_spec_id"):
+        _parameter_file(virtual_cell=False)
+    with pytest.raises(ValueError, match="only a material part"):
+        _parameter_file(parts=[{"part": "separator", "material_kind": "graphite", "claims": _claims()}])
+
+    # The schema says the same about records built by hand.
+    batch = _record()
+    batch["parameter_set"]["parts"] = _parameter_file()["parameter_set"]["parts"]
+    assert not validate_record_report(batch).ok
+    file_record = _parameter_file()
+    file_record["parameter_set"]["claims"] = _claims()
+    assert not validate_record_report(file_record).ok
+    file_record = _parameter_file()
+    file_record["parameter_set"]["cell_spec_id"] = CELL_SPEC_IRI
+    assert not validate_record_report(file_record).ok
+    del file_record["parameter_set"]["cell_spec_id"]
+    del file_record["parameter_set"]["virtual_cell"]
+    assert not validate_record_report(file_record).ok
+    file_record = _parameter_file()
+    file_record["parameter_set"]["parts"][1]["material_kind"] = "graphite"
+    assert not validate_record_report(file_record).ok
+
+
+def test_a_parameter_file_collates_and_queries_by_material(tmp_path) -> None:
+    file_record = _parameter_file()
+    collated = collate_claims([_record(), file_record])
+    radii = collated["particle_radius"]
+    assert {c["source"].get("part") for c in radii} == {None, "negative_material"}
+    from_file = next(c for c in radii if c["source"].get("part"))
+    assert from_file["source"]["material_kind"] == "graphite"
+    assert from_file["source"]["virtual_cell"] is True
+
+    save_parameter_set(file_record, source_root=tmp_path)
+    save_parameter_set(_record(), source_root=tmp_path)
+    rows = query_parameter_sets(source_root=tmp_path, material_kind="graphite")
+    assert {row["id"] for row in rows} == {
+        file_record["parameter_set"]["id"], _record()["parameter_set"]["id"]
+    }
+    assert len(query_parameter_sets(source_root=tmp_path, parameter="porosity")) == 1
 
 
 # ── JSON-LD emission ─────────────────────────────────────────────────────────

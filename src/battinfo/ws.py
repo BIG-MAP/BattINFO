@@ -17,6 +17,7 @@ Usage::
 from __future__ import annotations
 
 import builtins  # AuthoringWorkspace.list shadows the builtin in class-scope annotations
+import copy
 import difflib
 import json
 import os
@@ -673,6 +674,20 @@ def _normalize_license(value: str) -> tuple[str, bool]:
     if lowered in _KNOWN_LICENSES:
         return lowered, True
     return token, False
+
+
+def _license_value(license: str) -> dict | str:
+    """How a deposit graph or RO-Crate states a licence.
+
+    The same form ``record_to_jsonld`` uses (:func:`battinfo.jsonld.license_node`):
+    a URL or a known SPDX id becomes an IRI reference to the SPDX page, spelled
+    the way SPDX spells it; any other text stays a plain literal rather than a
+    link that resolves to nothing. The catalog node, every member dataset node
+    and the RO-Crate root use this one function.
+    """
+    from battinfo.jsonld import license_node
+
+    return license_node(license) or license.strip()
 
 
 @dataclass
@@ -2615,6 +2630,16 @@ class AuthoringWorkspace:
         For large batches you may instead pass ``datasets="glob"`` to match files to
         already-loaded cells by the 6-char short ID in each filename.
 
+        ``series_id`` puts every dataset made from ``data=`` in a collection. Pass
+        the collection's IRI; the collection itself is saved first, with
+        ``battinfo.Dataset`` and ``battinfo.save_dataset``::
+
+            ws.add("test", type="cycling", cell="FAC-001", data="data/FAC-001.csv",
+                   series_id="https://w3id.org/battinfo/dataset/....")
+
+        Membership is not identity, so ``series_id`` never changes the IRIs of the
+        test or its datasets.
+
         **Names, handles and pinned identities.** Where a type takes ``name=`` it
         also takes ``handle=`` (cells take ``handles=[...]`` parallel to
         ``names=``), a short slug unique within a registry workspace. Handles are
@@ -3608,7 +3633,7 @@ class AuthoringWorkspace:
 
         Resumable: outcomes are journaled to ``.battinfo/submit-journal.jsonl``
         as they happen, and a record whose identical payload already succeeded
-        in a previous run is skipped (``status: skipped_journal``) instead of
+        at the same registry in a previous run is skipped (``status: skipped_journal``) instead of
         re-POSTed — resuming an interrupted bulk submission re-sends only what
         is missing. Pass ``resume=False`` to bypass the journal and re-send
         everything (the registry dedups identical re-submissions server-side).
@@ -3993,11 +4018,13 @@ class AuthoringWorkspace:
                         "canonical_iri": body["equipment_id"],
                     })
                 if record_key == "parameter_set":
-                    # The claim batch's target, when it is a registered record
-                    # (a material_kind target is vocabulary, not a record).
+                    # The claim batch's target, or the cell a parameter file
+                    # describes, when it is a registered record (a
+                    # material_kind target is vocabulary, not a record).
                     for tgt_field, tgt_type in (
                         ("material_spec_id", "material_spec"),
                         ("cell_spec_id", "cell_spec"),
+                        ("cell_instance_id", "cell"),
                     ):
                         if isinstance(body.get(tgt_field), str):
                             record_links.append({
@@ -5841,16 +5868,18 @@ class AuthoringWorkspace:
                 # Only publish a web access URL here; a local file:// directory URL
                 # (local-publication case) is set by that path's adapter instead.
                 member["schema:url"] = _ds["access_url"]
-            if _ds.get("license"):
-                lic = _ds["license"]
-                member["schema:license"] = {"@id": lic} if str(lic).startswith("http") else lic
-            # Propagate catalog-level rights/attribution down to each member — RDF has
-            # no inheritance, so a dataset lifted out of the catalog would otherwise lose
-            # its licence and creators. Record-level values (above) take precedence.
-            if "schema:license" not in member and license:
-                _lic_iri = license if license.startswith("http") else f"https://spdx.org/licenses/{license}.html"
-                member["schema:license"]  = {"@id": _lic_iri}
-                member["dcterms:license"] = {"@id": _lic_iri}
+            # Rights and attribution on each member: RDF has no inheritance, so a
+            # dataset lifted out of the catalog would otherwise lose its licence and
+            # creators. The dataset's own licence wins over the catalog's, and either
+            # is stated as an IRI, expanded the same way as the catalog's.
+            _own_license = _ds.get("license")
+            _member_license = (
+                _own_license if isinstance(_own_license, str) and _own_license.strip() else license
+            )
+            if _member_license:
+                _lic_value = _license_value(_member_license)
+                member["schema:license"]  = _lic_value
+                member["dcterms:license"] = _lic_value
             if creators:
                 # Full creator nodes (not @id refs) so a member is self-describing even
                 # lifted out of the catalog, and so creators without an ORCID @id are
@@ -5997,9 +6026,9 @@ class AuthoringWorkspace:
         if license:
             # Emit the licence as a dereferenceable IRI (SPDX) rather than a bare code,
             # so a consumer can resolve the exact terms. Matches the RO-Crate path.
-            lic_iri = license if license.startswith("http") else f"https://spdx.org/licenses/{license}.html"
-            catalog_node["dcterms:license"] = {"@id": lic_iri}
-            catalog_node["schema:license"]  = {"@id": lic_iri}
+            lic_value = _license_value(license)
+            catalog_node["dcterms:license"] = lic_value
+            catalog_node["schema:license"]  = lic_value
         if _funding_grant is not None:
             # Deposit-level funding: the grant under which the whole collection was produced.
             catalog_node["schema:funding"] = _funding_grant
@@ -6220,7 +6249,7 @@ class AuthoringWorkspace:
             "name":          title,
             "description":   description,
             "datePublished": _now_iso()[:10],
-            "license":       {"@id": f"https://spdx.org/licenses/{license}.html"},
+            "license":       _license_value(license),
             "url":           record_url,
             "identifier":    prereserved_doi,
             "hasPart":       parts,
@@ -7363,7 +7392,12 @@ class AuthoringWorkspace:
         return [record]
 
     def _add_parameter_set(
-        self, name: str | None = None, *, material: Any = None, **kwargs
+        self,
+        name: str | None = None,
+        *,
+        material: Any = None,
+        record: Mapping[str, Any] | None = None,
+        **kwargs,
     ) -> builtins.list:
         """Collate parameter claims from one source about one target, queued for ws.save().
 
@@ -7378,9 +7412,33 @@ class AuthoringWorkspace:
         ``cell_spec_id=`` instead for cell-level fitted sets. One source = one
         record; the IRI derives from (target, scope, name), so re-adding the same
         source is a no-op, never a duplicate.
+
+        ``record=`` queues a parameter-set record built elsewhere instead, of
+        either flavour: a claim batch, or the record of a BPX file from
+        ``from_bpx_parameters(...).to_parameter_set(...)``. ``ws.save()``
+        validates it like any other record and ``ws.submit()`` sends it under
+        the publisher policy, which refuses a parameter file without its
+        source file. Re-adding a record with the same IRI replaces it.
         """
         from battinfo.api import create_parameter_set  # noqa: PLC0415
         from battinfo.materials import resolve_material_kind  # noqa: PLC0415
+
+        if record is not None:
+            if name is not None or material is not None or kwargs:
+                given = [k for k, v in (("name", name), ("material", material)) if v is not None]
+                raise ValueError(
+                    "ws.add('parameter_set', record=...) takes the record alone; it already holds "
+                    f"its name, target and claims (got {', '.join([*given, *kwargs])} too)."
+                )
+            if not isinstance(record, Mapping) or not isinstance(record.get("parameter_set"), Mapping):
+                raise TypeError(
+                    "record= is a parameter-set record, a dict with a 'parameter_set' body (for "
+                    "a BPX file: from_bpx_parameters(path).to_parameter_set(...))."
+                )
+            queued = copy.deepcopy(dict(record))
+            if not isinstance(queued["parameter_set"].get("id"), str):
+                raise ValueError("record= has no parameter_set.id; build it with create_parameter_set.")
+            return self._queue_parameter_set(queued, name)
 
         if not name:
             raise ValueError(
@@ -7399,16 +7457,23 @@ class AuthoringWorkspace:
                 kwargs["material_kind"] = kind
             else:
                 kwargs["material_spec_id"] = self._resolve_material_spec_arg(material)
-        record = create_parameter_set(validate=False, name=name, **kwargs)
+        built = create_parameter_set(validate=False, name=name, **kwargs)
+        return self._queue_parameter_set(built, name)
+
+    def _queue_parameter_set(self, record: dict, name: str | None) -> builtins.list:
+        """Queue a parameter-set record for ws.save(), replacing one with the same IRI."""
         self._parameter_sets = _dedupe_records_by_id(self._parameter_sets, record, "parameter_set")
         body = record["parameter_set"]
         target = (
             body.get("material_kind")
             or body.get("material_spec_id")
             or body.get("cell_spec_id")
-            or "?"
+            or body.get("cell_instance_id")
+            or ("virtual cell" if body.get("virtual_cell") else "?")
         )
-        n_claims = len(body.get("claims", []))
+        n_claims = len(body.get("claims", [])) + sum(
+            len(part.get("claims", [])) for part in body.get("parts", [])
+        )
         print(f"  param set:      {body.get('name', name)}  [{target}, {n_claims} claim(s)]  {body['id']}")
         return [record]
 
@@ -7628,6 +7693,7 @@ class AuthoringWorkspace:
         iri: str | None = None,
         uid: str | None = None,
         dataset_iris: "builtins.list[str] | None" = None,
+        series_id: str | None = None,
         instrument: str | None = None,
         channel: Any = None,
         license: str | None = None,
@@ -7649,6 +7715,13 @@ class AuthoringWorkspace:
         same for the datasets made from ``data=``: one IRI per data file, in the
         same order. All three need the explicit ``cell=`` form.
 
+        ``series_id`` puts the datasets made from ``data=`` in a collection: it is
+        the collection's IRI (``https://w3id.org/battinfo/dataset/...``) and is set
+        on every one of them. It needs ``data=`` and the explicit ``cell=`` form,
+        and it is checked before anything is created. Membership is not identity,
+        so it never enters the test or dataset IRI seeds. The collection itself is
+        written with ``battinfo.Dataset`` and ``battinfo.save_dataset``.
+
         ``channel`` attaches the test to an equipment channel (a channel IRI, a
         channel label, or ``"unit/CHn"``); the test record then carries
         ``equipment_id`` + ``channel_id``.
@@ -7667,6 +7740,10 @@ class AuthoringWorkspace:
         workspace default (``ws.license``) for these records. Precedence at publish:
         an explicit ``ws.zenodo(license=...)`` > this ``license=`` > workspace default.
         """
+        # The collection for the datasets made from data=. Checked first, so a bad
+        # value fails before any test, dataset or test spec is created.
+        member_series_id = self._checked_series_id(series_id, cell=cell, data=data)
+
         # Resolve the test type (type=, legacy kind=, or from a linked spec).
         test_type = type or kind
         test_spec = spec if spec is not None else protocol
@@ -7806,12 +7883,15 @@ class AuthoringWorkspace:
                 )
                 if pinned_dataset_ids is not None:
                     dataset_obj.id = pinned_dataset_ids[i]
+                if member_series_id is not None:
+                    dataset_obj.series_id = member_series_id
             conf_status = conformance.status if conformance is not None else None
             print(f"  test [{test_type}] on {label}"
                   + (f"  +{len(files)} dataset(s)" if files else "")
                   + (f"  (+{n_raw} raw source{'s' if n_raw != 1 else ''})" if n_raw else "")
                   + (f"  channel: {channel}" if channel_id is not None else "")
-                  + (f"  conformance: {conf_status}" if conf_status else ""))
+                  + (f"  conformance: {conf_status}" if conf_status else "")
+                  + (f"  collection: {member_series_id}" if member_series_id else ""))
             return [test]
 
         # ── Batch mode: match a glob of files to loaded cells by short ID ────────
@@ -7898,6 +7978,31 @@ class AuthoringWorkspace:
                 "dataset_iris must name distinct datasets not already used in this session."
             )
         return pinned
+
+    def _checked_series_id(self, series_id: str | None, *, cell: Any, data: Any) -> str | None:
+        """``series_id=`` checked as a collection's dataset IRI, or ``None``.
+
+        The value goes on the datasets made from ``data=``, so it needs that and
+        the explicit ``cell=`` form. Only its shape is checked: the collection may
+        be saved in this workspace or published elsewhere earlier.
+        """
+        from battinfo.api._shared import DATASET_IRI_RE  # noqa: PLC0415
+
+        if series_id is None:
+            return None
+        if cell is None or not self._as_data_paths(data):
+            raise ValueError(
+                "series_id= puts the datasets made from data= in a collection; use "
+                "ws.add('test', cell=..., data=..., series_id=...). The collection itself "
+                "is written with battinfo.Dataset and battinfo.save_dataset."
+            )
+        text = series_id.strip() if isinstance(series_id, str) else ""
+        if not DATASET_IRI_RE.fullmatch(text):
+            raise ValueError(
+                f"series_id={series_id!r} is not a dataset IRI; expected the collection's "
+                "IRI, https://w3id.org/battinfo/dataset/xxxx-xxxx-xxxx-xxxx."
+            )
+        return text
 
     def _as_data_paths(self, data: Any) -> builtins.list[Path]:
         """Normalise a data= value (path, str, or list) to a list of absolute Paths."""
@@ -8356,22 +8461,54 @@ def _journal_payload_hash(payload: dict) -> str:
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
+def _normalize_registry_url(url: str) -> str:
+    """A registry base URL in one spelling, as the submit journal records it.
+
+    Scheme and host are lower-cased; a default port, user name and password,
+    query, fragment and trailing slashes are dropped. Host names are not
+    resolved, so ``localhost`` and ``127.0.0.1`` count as two registries: a
+    record sent to one is sent again to the other, which is safe because the
+    registry de-duplicates identical submissions.
+    """
+    from urllib.parse import urlsplit  # noqa: PLC0415
+
+    text = (url or "").strip()
+    try:
+        parts = urlsplit(text)
+        port = parts.port
+    except ValueError:
+        return text.rstrip("/").lower()
+    host = parts.hostname or ""
+    if not parts.scheme or not host:
+        return text.rstrip("/").lower()
+    scheme = parts.scheme.lower()
+    if ":" in host:
+        host = f"[{host}]"  # an IPv6 literal
+    if port is not None and (scheme, port) not in {("http", 80), ("https", 443)}:
+        host = f"{host}:{port}"
+    return f"{scheme}://{host}{parts.path.rstrip('/')}"
+
+
 class _SubmitJournal:
     """Append-only outcome journal making ``ws.submit()`` resumable (3.5).
 
     Every submission outcome is appended to ``.battinfo/submit-journal.jsonl``
-    as it happens. On a later run, a record whose *identical* payload (envelope
-    timestamps excluded) already succeeded is skipped locally instead of being
-    re-POSTed — so resuming an interrupted bulk submission re-sends only what
-    is missing. The registry would dedup identical re-submissions anyway; the
-    journal saves the round-trips. Changed content (or a new
-    ``source_version``, e.g. a next-day run) hashes differently and is
-    submitted normally. ``ws.submit(resume=False)`` bypasses the journal.
+    as it happens, with the registry it went to. On a later run, a record whose
+    *identical* payload (envelope timestamps excluded) already succeeded at the
+    same registry is skipped locally instead of being re-POSTed — so resuming
+    an interrupted bulk submission re-sends only what is missing. The registry
+    would dedup identical re-submissions anyway; the journal saves the
+    round-trips. Changed content (or a new ``source_version``, e.g. a next-day
+    run) hashes differently and is submitted normally. A success at one
+    registry never counts for another, so a workspace rehearsed against a local
+    registry still sends everything to production; entries written before the
+    registry was recorded match none. ``ws.submit(resume=False)`` bypasses the
+    journal.
     """
 
     def __init__(self, path: Path) -> None:
         self.path = path
-        self._succeeded: dict[tuple[str, str], dict] = {}
+        self._succeeded: dict[tuple[str, str, str], dict] = {}
         if path.exists():
             for line in path.read_text(encoding="utf-8").splitlines():
                 line = line.strip()
@@ -8381,17 +8518,21 @@ class _SubmitJournal:
                     entry = json.loads(line)
                 except ValueError:
                     continue  # a torn final line from a crash must not poison the journal
-                if entry.get("ok") and entry.get("source_local_id") and entry.get("payload_hash"):
-                    self._succeeded[(entry["source_local_id"], entry["payload_hash"])] = entry
+                registry = entry.get("registry_url")
+                if (entry.get("ok") and isinstance(registry, str) and registry
+                        and entry.get("source_local_id") and entry.get("payload_hash")):
+                    key = (_normalize_registry_url(registry), entry["source_local_id"], entry["payload_hash"])
+                    self._succeeded[key] = entry
 
-    def previous_success(self, source_local_id: str, payload_hash: str) -> dict | None:
-        return self._succeeded.get((source_local_id, payload_hash))
+    def previous_success(self, source_local_id: str, payload_hash: str, *, registry_url: str) -> dict | None:
+        return self._succeeded.get((_normalize_registry_url(registry_url), source_local_id, payload_hash))
 
-    def record(self, outcome: dict, payload_hash: str) -> None:
+    def record(self, outcome: dict, payload_hash: str, *, registry_url: str) -> None:
         import datetime as _dt  # noqa: PLC0415
 
         entry = {
             "ts": _dt.datetime.now(_dt.timezone.utc).isoformat(timespec="seconds"),
+            "registry_url": _normalize_registry_url(registry_url),
             "source_local_id": outcome.get("source_local_id", ""),
             "title": outcome.get("title", ""),
             "ok": bool(outcome.get("ok")),
@@ -8403,7 +8544,7 @@ class _SubmitJournal:
         with self.path.open("a", encoding="utf-8") as handle:
             handle.write(json.dumps(entry, ensure_ascii=False) + "\n")
         if entry["ok"]:
-            self._succeeded[(entry["source_local_id"], entry["payload_hash"])] = entry
+            self._succeeded[(entry["registry_url"], entry["source_local_id"], entry["payload_hash"])] = entry
 
 
 def _journaled_submit(
@@ -8422,7 +8563,8 @@ def _journaled_submit(
         return _do_submit(payload, url, key, title, source_local_id=source_local_id,
                           publication_mode=publication_mode, validation=validation)
     payload_hash = _journal_payload_hash(payload)
-    previous = journal.previous_success(source_local_id, payload_hash) if source_local_id else None
+    previous = (journal.previous_success(source_local_id, payload_hash, registry_url=url)
+                if source_local_id else None)
     if previous is not None:
         print(f"  {title}  [already submitted -- skipped; pass resume=False to re-send]")
         return {"title": title, "source_local_id": source_local_id, "ok": True,
@@ -8430,7 +8572,7 @@ def _journaled_submit(
                 "result": None, "version_bumped": None}
     outcome = _do_submit(payload, url, key, title, source_local_id=source_local_id,
                          publication_mode=publication_mode, validation=validation)
-    journal.record(outcome, payload_hash)
+    journal.record(outcome, payload_hash, registry_url=url)
     return outcome
 
 

@@ -23,6 +23,24 @@ PathLike = str | Path
 # bump it here (and CHANGELOG the record-shape change) whenever the emitted record shape
 # changes.
 SCHEMA_VERSION = "0.2.0"
+# The versions earlier releases stamped, which this release still reads. Validation warns
+# on these (semantic.schema_version_superseded) and on any other version but
+# SCHEMA_VERSION (semantic.schema_version_unknown). Add the old value here on a bump.
+SUPERSEDED_SCHEMA_VERSIONS: tuple[str, ...] = ("0.1.0", "1.0.0")
+
+
+def _stored_schema_version(record: Mapping[str, Any]) -> str:
+    """The ``schema_version`` a record read back states, or :data:`SCHEMA_VERSION`.
+
+    A stored version is provenance, so a record read and saved again keeps it. A
+    record that states none is being written by this release, so it gets the
+    current version rather than a guess at an older one.
+    """
+    stated = record.get("schema_version")
+    if stated is None or (isinstance(stated, str) and not stated.strip()):
+        return SCHEMA_VERSION
+    return str(stated)
+
 
 BUNDLE_MANIFEST_FILENAME = "bundle.json"
 CELL_SPECIFICATION_FILENAME = "cell-specification.json"
@@ -1572,7 +1590,7 @@ class CellSpec(BundleJsonModel):
             else None
         )
         return cls(
-            schema_version=str(record.get("schema_version", "1.0.0")),
+            schema_version=_stored_schema_version(record),
             id=str(product["id"]),
             name=str(product.get("name") or f"{manufacturer_name} {product.get('model')}"),
             handle=product.get("handle"),
@@ -1795,7 +1813,15 @@ class CellSpec(BundleJsonModel):
         return cls.from_json(payload)
 
     @classmethod
-    def from_library_record(cls, record: Mapping[str, Any]) -> Self:
+    def from_library_record(cls, record: Mapping[str, Any], *, schema_version: str = SCHEMA_VERSION) -> Self:
+        """Build a cell spec from a datasheet library record (the ``specification`` format).
+
+        The library format is not the canonical record format, so the version the
+        library file states is not carried over: the cell spec gets
+        *schema_version*, the version this release writes unless a caller asks
+        for another. ``from_record`` is the read-back path that keeps a stored
+        version.
+        """
         specification = record.get("specification", {})
         provenance = record.get("provenance", {})
         if not isinstance(specification, Mapping):
@@ -1811,7 +1837,7 @@ class CellSpec(BundleJsonModel):
         raw_pt = specification.get("product_type")
         product_type = CellProductType(raw_pt) if isinstance(raw_pt, str) and raw_pt in CellProductType._value2member_map_ else None
         return cls(
-            schema_version=str(record.get("schema_version", "1.0.0")),
+            schema_version=schema_version,
             id=str(specification["id"]),
             manufacturer=str(specification["manufacturer"]),
             model=str(specification["model"]),
@@ -1983,7 +2009,7 @@ class Cell(BundleJsonModel):
         if not isinstance(notes, list):
             notes = []
         return cls(
-            schema_version=str(record.get("schema_version", "1.0.0")),
+            schema_version=_stored_schema_version(record),
             id=str(cell_instance["id"]),
             name=str(
                 cell_instance.get("name")
@@ -2399,7 +2425,7 @@ class TestSpec(BundleJsonModel):
         if not isinstance(artifacts, list):
             artifacts = []
         return cls(
-            schema_version=str(record.get("schema_version", "1.0.0")),
+            schema_version=_stored_schema_version(record),
             id=str(protocol["id"]),
             name=str(protocol["name"]),
             handle=protocol.get("handle"),
@@ -2629,7 +2655,7 @@ class Test(BundleJsonModel):
         if not isinstance(conditions, Mapping):
             conditions = {}
         return cls(
-            schema_version=str(record.get("schema_version", "1.0.0")),
+            schema_version=_stored_schema_version(record),
             id=str(test["id"]),
             name=str(test["name"]),
             handle=test.get("handle"),
@@ -2988,7 +3014,7 @@ class Dataset(BundleJsonModel):
         if not isinstance(notes, list):
             notes = []
         return cls(
-            schema_version=str(record.get("schema_version", "1.0.0")),
+            schema_version=_stored_schema_version(record),
             id=str(dataset["id"]),
             identifier=_copy_identifier(dataset.get("identifier")),
             name=str(dataset.get("name") or dataset.get("title") or dataset["id"]),
@@ -3199,7 +3225,7 @@ class BattinfoBundle(BundleJsonModel):
             if spec_path.exists():
                 cell_specification = CellSpec.from_path(spec_path)
         return cls(
-            schema_version=str(manifest.get("schema_version", "1.0.0")),
+            schema_version=_stored_schema_version(manifest),
             bundle_name=manifest.get("bundle_name"),
             cell_specification=cell_specification,
             cell_spec=CellSpec.from_path(root / str(manifest.get("cell_spec_file", CELL_SPEC_FILENAME))),
@@ -3465,12 +3491,20 @@ class BattinfoBundle(BundleJsonModel):
         dataset_distribution = dataset_node.get("schema:distribution")
         first_distribution = dataset_distribution[0] if isinstance(dataset_distribution, list) and dataset_distribution else {}
         dataset_main_entity = dataset_node.get("schema:mainEntity")
+        # An IRI reference in deposits, a bare string in older ones. An spdx.org
+        # page that earlier versions spelled in lower case (a 404) is read back
+        # in SPDX's own spelling.
+        from battinfo.jsonld import canonical_license_iri  # noqa: PLC0415
+
+        dataset_license = _ref_id(dataset_node.get("schema:license"))
+        if dataset_license:
+            dataset_license = canonical_license_iri(dataset_license)
         dataset = Dataset(
             id=str(dataset_node["@id"]),
             identifier=_copy_identifier(dataset_node.get("schema:identifier")),
             name=str(dataset_node.get("schema:name") or dataset_node["@id"]),
             description=dataset_node.get("schema:description"),
-            license=dataset_node.get("schema:license"),
+            license=dataset_license,
             same_as=_ref_ids(dataset_node.get("schema:sameAs")),
             additional_type=_text_list(dataset_node.get("schema:additionalType")),
             version=dataset_node.get("schema:version"),
@@ -3638,7 +3672,7 @@ class ZenodoCellRecord(BaseModel):
             ))
 
         return cls(
-            schema_version=str(data.get("schema_version", "1.0.0")),
+            schema_version=_stored_schema_version(data),
             kind=str(data.get("kind", "BattinfoCellRecord")),
             cell_spec=cell_spec,
             cell_specification=cell_specification,

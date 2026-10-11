@@ -116,8 +116,108 @@ def _validator_code(error: ValidationError) -> str:
     return f"schema.{validator}"
 
 
+# Parameter-set fields that belong to one flavour only.
+_PARAMETER_FILE_ONLY = (
+    "parts", "parameters_sha256", "virtual_cell", "cell_instance_id", "distributions", "not_imported",
+    "supersedes",
+)
+_CLAIM_BATCH_ONLY = ("material_kind", "material_spec_id", "scope", "electrode_polarity")
+_CELL_LINKS = ("cell_spec_id", "cell_instance_id", "virtual_cell")
+_CLAIM_BATCH_TARGETS = ("material_kind", "material_spec_id", "cell_spec_id")
+
+
+def _parameter_set_flavour_message(body: Any) -> str | None:
+    """What makes a parameter-set body neither a claim batch nor a parameter file, in words.
+
+    The schema states the two flavours as a ``oneOf``, whose own message is
+    a dump of the whole record. The flavour is read off the body first
+    (``parts`` or ``claims``), and the message says what that flavour lacks
+    or must not carry.
+    """
+    if not isinstance(body, dict):
+        return None
+    if "parts" in body and "claims" in body:
+        return (
+            "a parameter set is either a claim batch (claims about one target) or a parameter "
+            "file (parts), never both: this one carries claims and parts."
+        )
+    problems: list[str] = []
+    if "parts" in body or ("claims" not in body and any(f in body for f in _PARAMETER_FILE_ONLY)):
+        for needed in ("parts", "parameters_sha256"):
+            if needed not in body:
+                problems.append(f"it has no {needed}")
+        links = [f for f in _CELL_LINKS if f in body]
+        if not links:
+            problems.append(
+                "it names no cell: give exactly one of cell_spec_id (a cell spec), cell_instance_id "
+                "(one physical cell) or virtual_cell: true (no real cell)"
+            )
+        elif len(links) > 1:
+            problems.append(f"it links more than one cell ({', '.join(links)}): keep exactly one")
+        stray = [f for f in _CLAIM_BATCH_ONLY if f in body]
+        if stray:
+            problems.append(
+                f"{', '.join(stray)} {'belongs' if len(stray) == 1 else 'belong'} to a claim batch: "
+                "a parameter file has no scope or "
+                "target, and names each material on its material part"
+            )
+        what = "parameter file"
+    elif "claims" in body:
+        targets = [f for f in _CLAIM_BATCH_TARGETS if f in body]
+        if not targets:
+            problems.append(
+                "it names no target: give exactly one of material_kind, material_spec_id, cell_spec_id"
+            )
+        elif len(targets) > 1:
+            problems.append(f"it names more than one target ({', '.join(targets)}): keep exactly one")
+        stray = [f for f in _PARAMETER_FILE_ONLY if f in body]
+        if stray:
+            problems.append(
+                f"{', '.join(stray)} {'belongs' if len(stray) == 1 else 'belong'} to a parameter file "
+                "(one BPX file, with parts), not to a "
+                "claim batch"
+            )
+        what = "claim batch"
+    else:
+        return (
+            "a parameter set carries claims (a claim batch about one target) or parts (a parameter "
+            "file); this one carries neither."
+        )
+    if not problems:
+        return f"this {what} matches neither parameter-set flavour."
+    return f"this {what} is not valid: " + "; ".join(problems) + "."
+
+
+def _contains_message(error: ValidationError) -> str | None:
+    """A ``contains`` count error on a role-tagged array, naming the role and the count found."""
+    schema = error.schema if isinstance(error.schema, dict) else {}
+    contains = schema.get("contains")
+    role = (
+        contains.get("properties", {}).get("role", {}).get("const")
+        if isinstance(contains, dict)
+        else None
+    )
+    if not isinstance(role, str) or not isinstance(error.instance, list):
+        return None
+    found = sum(1 for item in error.instance if isinstance(item, dict) and item.get("role") == role)
+    low, high = schema.get("minContains", 1), schema.get("maxContains")
+    if low == high:
+        return f"needs exactly {low} '{role}' entr{'y' if low == 1 else 'ies'}; found {found}."
+    if high is not None and found > high:
+        return f"holds at most {high} '{role}' entr{'y' if high == 1 else 'ies'}; found {found}."
+    return f"needs at least {low} '{role}' entr{'y' if low == 1 else 'ies'}; found {found}."
+
+
 def _enhance_message(error: ValidationError) -> str:
     msg = error.message
+    if error.validator in ("contains", "minContains", "maxContains"):
+        msg = _contains_message(error) or msg
+    if error.validator == "oneOf" and isinstance(error.schema, dict):
+        titles = {
+            branch.get("title") for branch in error.schema.get("oneOf") or [] if isinstance(branch, dict)
+        }
+        if titles == {"Claim batch", "Parameter file"}:
+            msg = _parameter_set_flavour_message(error.instance) or msg
     if error.validator == "additionalProperties" and list(error.path) == ["properties"]:
         msg += " Run 'battinfo properties list' to see all valid property names."
     if error.validator in ("pattern", "maxLength") and list(error.path)[-1:] == ["handle"]:

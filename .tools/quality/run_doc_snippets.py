@@ -43,6 +43,7 @@ SNIPPET_FILES = (
     "docs/howto/label-your-cells.md",
     "docs/howto/name-your-records.md",
     "docs/howto/publish-a-dataset-collection.md",
+    "docs/howto/publish-a-bpx-parameter-file.md",
     "docs/howto/register-equipment.md",
     "docs/howto/register-materials.md",
     )

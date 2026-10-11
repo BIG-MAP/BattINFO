@@ -373,6 +373,43 @@ def _validate_handle_kind_word(doc: dict[str, Any], issues: list[ValidationIssue
     )
 
 
+def _validate_schema_version(doc: dict[str, Any], issues: list[ValidationIssue]) -> None:
+    """Warn when a record's ``schema_version`` is not the one this release writes.
+
+    The JSON Schema checks only the form (``1.2.3``). A version an earlier
+    release wrote still reads, and is flagged as superseded; any other version,
+    a newer one included, may use fields this release reads differently or not
+    at all. Always a warning, never an error, under every policy.
+    """
+    from battinfo.bundle import SCHEMA_VERSION, SUPERSEDED_SCHEMA_VERSIONS  # noqa: PLC0415
+
+    kind = kind_for_doc(doc)
+    version = doc.get("schema_version")
+    if kind is None or not isinstance(version, str) or not version.strip() or version == SCHEMA_VERSION:
+        return
+    if version in SUPERSEDED_SCHEMA_VERSIONS:
+        code = "semantic.schema_version_superseded"
+        message = (
+            f"schema_version '{version}' was written by an earlier BattINFO release. It still reads; "
+            f"records written now carry '{SCHEMA_VERSION}'."
+        )
+    else:
+        known = ", ".join(f"'{v}'" for v in (SCHEMA_VERSION, *SUPERSEDED_SCHEMA_VERSIONS))
+        code = "semantic.schema_version_unknown"
+        message = (
+            f"schema_version '{version}' is not a record version this BattINFO release knows ({known}); "
+            "its fields may be read differently or not at all."
+        )
+    _append_issue(
+        issues,
+        code=code,
+        severity="warning",
+        path="schema_version",
+        message=message,
+        resource_type=kind.entity_type,
+    )
+
+
 def _validate_controlled_values(
     doc: dict[str, Any],
     issues: list[ValidationIssue],
@@ -1188,6 +1225,84 @@ def _validate_substance_resolution(
             _check(comp, "additive", f"{prefix}.additive[{idx}]")
 
 
+def _validate_parameter_set_semantics(
+    body: Mapping[str, Any],
+    issues: list[ValidationIssue],
+    resource_type: str | None,
+    policy_name: str,
+) -> None:
+    """Claim mappability, plus the parameter-file rules JSON Schema cannot state.
+
+    The parameter-file rules are integrity rules (the IRI must be the one
+    the fingerprint gives, a runnable copy must name its source, a mirror
+    must be the source's bytes, a part appears once), so they are errors
+    under every policy. A parameter file with no source file is fine for
+    local work and an error for publishing (ruling 2026-10-11): nothing
+    under the default policy, a warning under strict, an error under the
+    publisher policy.
+    """
+    # Parameter-set claims emit through the same quantity nodes as properties,
+    # so an unmapped parameter key gets the same warning. Fraction keys resolve
+    # through the emitter's own table, as they do for properties.
+    from battinfo.transform.json_to_jsonld import _FRACTION_PROPERTY_TERMS
+
+    fraction_keys = frozenset(_FRACTION_PROPERTY_TERMS)
+    claim_lists: list[tuple[str, Any]] = [("parameter_set.claims", body.get("claims"))]
+    for part_idx, part in enumerate(body.get("parts") or []):
+        if isinstance(part, Mapping):
+            claim_lists.append((f"parameter_set.parts[{part_idx}].claims", part.get("claims")))
+    for prefix, claims in claim_lists:
+        if not isinstance(claims, list):
+            continue
+        for idx, claim in enumerate(claims):
+            if (
+                isinstance(claim, Mapping)
+                and isinstance(claim.get("parameter"), str)
+                and isinstance(claim.get("quantity"), Mapping)
+            ):
+                _validate_property_mappability(
+                    {claim["parameter"]: claim["quantity"]},
+                    issues,
+                    resource_type,
+                    path_prefix=f"{prefix}[{idx}]",
+                    extra_known=fraction_keys,
+                )
+
+    if "parts" not in body and "distributions" not in body:
+        return
+    from battinfo.api._parameters import parameter_file_issues  # noqa: PLC0415
+
+    for code, severity, path, message in parameter_file_issues(body):
+        if code.endswith("_count"):
+            continue  # the schema's contains/maxContains rules report these
+        _append_issue(
+            issues,
+            code=f"semantic.parameter_file_{code}",
+            severity="error" if severity == "error" else "warning",
+            path=path,
+            message=message,
+            resource_type=resource_type,
+        )
+    if "parts" in body and policy_name in ("strict", "publisher"):
+        distributions = body.get("distributions")
+        has_source = isinstance(distributions, list) and any(
+            isinstance(entry, Mapping) and entry.get("role") == "source" for entry in distributions
+        )
+        if not has_source:
+            _append_issue(
+                issues,
+                code="semantic.parameter_file_no_source",
+                severity="error" if policy_name == "publisher" else "warning",
+                path="parameter_set.distributions",
+                message=(
+                    "a parameter file is published with its file: attach the source under "
+                    "distributions (bpx_file_distribution(path, content_url=...)), so its IRI "
+                    "resolves to a file with exactly these parameters."
+                ),
+                resource_type=resource_type,
+            )
+
+
 def validate_semantic_report(
     doc: dict[str, Any],
     *,
@@ -1204,6 +1319,7 @@ def validate_semantic_report(
     hard_issue_severity = "error" if resolved_policy.semantic == "error" else "warning"
 
     _validate_identifier_consistency(doc, issues, resource_type, hard_issue_severity)
+    _validate_schema_version(doc, issues)
     _validate_handle_kind_word(doc, issues)
     _validate_controlled_values(doc, issues, resource_type)
     _validate_electrode_role_coherence(doc, issues, resource_type)
@@ -1282,27 +1398,9 @@ def validate_semantic_report(
         for idx, part in enumerate(body.get("parts") or []):
             _check_props(part, f"{body_key}.parts[{idx}]")
 
-    # Parameter-set claims emit through the same quantity nodes as properties,
-    # so an unmapped parameter key gets the same warning. Fraction keys resolve
-    # through the emitter's own table, as they do for properties.
     parameter_set = doc.get("parameter_set")
-    if isinstance(parameter_set, Mapping) and isinstance(parameter_set.get("claims"), list):
-        from battinfo.transform.json_to_jsonld import _FRACTION_PROPERTY_TERMS
-
-        fraction_keys = frozenset(_FRACTION_PROPERTY_TERMS)
-        for idx, claim in enumerate(parameter_set["claims"]):
-            if (
-                isinstance(claim, Mapping)
-                and isinstance(claim.get("parameter"), str)
-                and isinstance(claim.get("quantity"), Mapping)
-            ):
-                _validate_property_mappability(
-                    {claim["parameter"]: claim["quantity"]},
-                    issues,
-                    resource_type,
-                    path_prefix=f"parameter_set.claims[{idx}]",
-                    extra_known=fraction_keys,
-                )
+    if isinstance(parameter_set, Mapping):
+        _validate_parameter_set_semantics(parameter_set, issues, resource_type, resolved_policy.name)
 
     dataset = doc.get("dataset")
     if isinstance(dataset, Mapping):

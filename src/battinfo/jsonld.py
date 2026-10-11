@@ -225,6 +225,58 @@ TEST_CONDITION_CLASS: dict[str, str] = {
 }
 # Quantity classes whose @type is generic and so should carry a human rdfs:label.
 TEST_CONDITION_GENERIC_CLASSES = frozenset({"ConventionalProperty"})
+# Unit symbol -> EMMO unit IRI: the unit terms the records context defines (V, Ah,
+# MWh, ...). scripts/assemble_context.py writes them into the context, and the
+# JSON-LD validator reads them so a unit is never accepted as a node's @type.
+# IMPORTANT: term keys here MUST NOT contain "/" (or ":"). JSON-LD 1.1 treats any
+# term whose key has the form of an IRI (i.e. contains "/") as one that MUST expand
+# to its own definition; a compound-unit symbol like "Wh/kg" does not, so a strict
+# 1.1 processor rejects the ENTIRE context with:
+#   "Invalid JSON-LD syntax; term in form of IRI must expand to definition."
+# Compound units (Wh/kg, Wh/L, W/kg, W/L, 1/h, …) are therefore intentionally NOT
+# defined as symbol terms. They remain fully representable because:
+#   1. quantity nodes always emit the unit as an explicit IRI reference
+#      (hasMeasurementUnit / qudt:unit -> {"@id": "emmo:WattHourPerKilogram"}),
+#      never as a bare @vocab symbol string; and
+#   2. ws.py adds slash-free EMMO prefLabel aliases (WattHourPerKilogram, …) to the
+#      embedded context from unit_map.curated.json.
+CONTEXT_UNIT_SYMBOLS: dict[str, str] = {
+    "V":      "emmo:Volt",
+    "mV":     "emmo:MilliVolt",
+    "kV":     "emmo:KiloVolt",
+    "Ah":     "emmo:AmpereHour",
+    "mAh":    "emmo:MilliAmpereHour",
+    "A":      "emmo:Ampere",
+    "mA":     "emmo:MilliAmpere",
+    "W":      "emmo:Watt",
+    "kW":     "emmo:KiloWatt",
+    "Wh":     "emmo:Watthour",
+    "kWh":    "emmo:KiloWatthour",
+    "MWh":    "emmo:MegaWattHour",
+    "Ohm":    "emmo:Ohm",
+    "mOhm":   "emmo:MilliOhm",
+    "mohm":   "emmo:MilliOhm",
+    "degC":   "emmo:EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc",
+    "K":      "emmo:Kelvin",
+    "g":      "emmo:Gram",
+    "kg":     "emmo:Kilogram",
+    "mg":     "emmo:MilliGram",
+    "mm":     "emmo:MilliMetre",
+    "cm":     "emmo:CentiMetre",
+    "m":      "emmo:Metre",
+    "L":      "emmo:Litre",
+    "mL":     "emmo:MilliLitre",
+    "cm3":    "emmo:CubicCentiMetre",
+    "h":      "emmo:Hour",
+    "min":    "emmo:Minute",
+    "s":      "emmo:Second",
+    # No "C" entry. In real records the bare symbol "C" is only ever a C-rate,
+    # and resolve_unit_iri() consults this context before the test-condition
+    # table, so a "C" -> Coulomb term here silently shadows the correct
+    # electrochemistry:AmperePerAmpereHour mapping (commit 41b7db3).
+    "1":      "emmo:EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+    "%":      "emmo:Percent",
+}
 # Extra unit symbols not in the records context (CRate is current-per-capacity).
 TEST_CONDITION_UNIT_IRI: dict[str, str] = {
     "A/Ah":  "electrochemistry:AmperePerAmpereHour",
@@ -465,16 +517,59 @@ def _checksum_parts(checksum: Any) -> tuple[str, str] | None:
 # License slug -> the SPDX license page IRI. Records store licenses either as
 # full URLs (datasets: the creativecommons.org deed) or as SPDX-style slugs
 # (parameter sets: "cc-by-sa-4.0", set at ingest as a condition of the source).
+# spdx.org paths are case-sensitive (/licenses/cc-by-4.0.html is a 404), so each
+# IRI spells the id the way SPDX does. The keys cover every id ws.license()
+# accepts (ws._KNOWN_LICENSES); a test keeps the two in step.
 _LICENSE_SLUG_IRIS: dict[str, str] = {
     "cc-by-4.0": "https://spdx.org/licenses/CC-BY-4.0.html",
     "cc-by-sa-4.0": "https://spdx.org/licenses/CC-BY-SA-4.0.html",
     "cc-by-nc-4.0": "https://spdx.org/licenses/CC-BY-NC-4.0.html",
+    "cc-by-nc-sa-4.0": "https://spdx.org/licenses/CC-BY-NC-SA-4.0.html",
+    "cc-by-nd-4.0": "https://spdx.org/licenses/CC-BY-ND-4.0.html",
+    "cc-by-nc-nd-4.0": "https://spdx.org/licenses/CC-BY-NC-ND-4.0.html",
+    "cc-by-3.0": "https://spdx.org/licenses/CC-BY-3.0.html",
+    "cc-by-sa-3.0": "https://spdx.org/licenses/CC-BY-SA-3.0.html",
     "cc0-1.0": "https://spdx.org/licenses/CC0-1.0.html",
+    "cc-pddc": "https://spdx.org/licenses/CC-PDDC.html",
+    "pddl-1.0": "https://spdx.org/licenses/PDDL-1.0.html",
+    "odbl-1.0": "https://spdx.org/licenses/ODbL-1.0.html",
+    "odc-by-1.0": "https://spdx.org/licenses/ODC-By-1.0.html",
     "mit": "https://spdx.org/licenses/MIT.html",
     "apache-2.0": "https://spdx.org/licenses/Apache-2.0.html",
+    "bsd-2-clause": "https://spdx.org/licenses/BSD-2-Clause.html",
+    "bsd-3-clause": "https://spdx.org/licenses/BSD-3-Clause.html",
+    "gpl-2.0": "https://spdx.org/licenses/GPL-2.0-only.html",
+    "gpl-2.0-only": "https://spdx.org/licenses/GPL-2.0-only.html",
     "gpl-3.0": "https://spdx.org/licenses/GPL-3.0-only.html",
+    "gpl-3.0-only": "https://spdx.org/licenses/GPL-3.0-only.html",
     "gpl-3.0-or-later": "https://spdx.org/licenses/GPL-3.0-or-later.html",
+    "lgpl-2.1": "https://spdx.org/licenses/LGPL-2.1-only.html",
+    "lgpl-3.0": "https://spdx.org/licenses/LGPL-3.0-only.html",
+    "agpl-3.0": "https://spdx.org/licenses/AGPL-3.0-only.html",
+    "mpl-2.0": "https://spdx.org/licenses/MPL-2.0.html",
 }
+_LICENSE_IRIS_BY_LOWER: dict[str, str] = {iri.lower(): iri for iri in _LICENSE_SLUG_IRIS.values()}
+_SPDX_LICENSE_PAGE = re.compile(r"https://spdx\.org/licenses/([^/?#]+)\.html", re.IGNORECASE)
+
+
+def canonical_license_iri(url: str) -> str:
+    """An spdx.org licence page in SPDX's own spelling, when the table knows it.
+
+    Earlier versions built the page from the lower-case id, so records and
+    deposits can hold ``https://spdx.org/licenses/cc-by-4.0.html``, which is a
+    404. A page that matches a table entry case-insensitively becomes that
+    entry, and so does a page named by one of the table's lower-case ids
+    (``gpl-3.0.html`` becomes ``GPL-3.0-only.html``). Every other URL, an
+    spdx.org page the table does not know among them, is returned as given.
+    """
+    text = url.strip()
+    known = _LICENSE_IRIS_BY_LOWER.get(text.lower())
+    if known:
+        return known
+    page = _SPDX_LICENSE_PAGE.fullmatch(text)
+    if page and page.group(1).islower():
+        return _LICENSE_SLUG_IRIS.get(page.group(1), url)
+    return url
 
 
 def license_node(value: Any) -> dict | str | None:
@@ -482,14 +577,15 @@ def license_node(value: Any) -> dict | str | None:
 
     A bare slug emitted as ``{"@id": "cc-by-sa-4.0"}`` is a RELATIVE IRI that
     resolves against the document base into garbage. URLs pass through as IRI
-    references, known slugs map to their SPDX page, and anything else emits as
-    a plain literal — honest text beats a broken link.
+    references (an spdx.org page in SPDX's own spelling, see
+    :func:`canonical_license_iri`), known slugs map to their SPDX page, and
+    anything else emits as a plain literal — honest text beats a broken link.
     """
     if not isinstance(value, str) or not value.strip():
         return None
     text = value.strip()
     if text.startswith(("http://", "https://")):
-        return {"@id": text}
+        return {"@id": canonical_license_iri(text)}
     iri = _LICENSE_SLUG_IRIS.get(text.lower())
     if iri:
         return {"@id": iri}
