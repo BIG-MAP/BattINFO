@@ -828,6 +828,12 @@ export const recordsContext: Record<string, unknown> = {
     "NumberOfEntities": "emmo:EMMO_41efdf5d_0c9c_4ea0_bb65_f8236e663be5",
     "SurfaceCoefficientOfHeatTransfer": "emmo:EMMO_0b3295fa_f4bf_4f83_a603_9d98c03da5bb",
     "SpecificHeatCapacity": "emmo:EMMO_b4f4ed28_d24c_4a00_9583_62ab839abeca",
-    "ThermalConductivity": "emmo:EMMO_8dd40ec6_2c5a_43f3_bf64_cadcd447a1c1"
+    "ThermalConductivity": "emmo:EMMO_8dd40ec6_2c5a_43f3_bf64_cadcd447a1c1",
+    "MilliAmperePerSquareCentiMetre": "emmo:MilliAmperePerSquareCentiMetre",
+    "AmperePerSquareCentiMetre": "emmo:AmperePerSquareCentiMetre",
+    "AmperePerSquareMetre": "emmo:AmperePerSquareMetre",
+    "ElectricCurrentDensity": "https://w3id.org/emmo#EMMO_7c8007b0_58a7_4486_bf1c_4772852caca0",
+    "LowerCurrentDensityLimit": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_abdd3bbb_403a_4cb3_b522_50d027492a68",
+    "UpperCurrentDensityLimit": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_2a16f139_ab9c_4034_bd21_eabd2e1202e8"
   }
 };

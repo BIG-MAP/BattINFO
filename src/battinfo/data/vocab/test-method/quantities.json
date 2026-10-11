@@ -5,6 +5,7 @@
     "current":    {"emmo_class": "ElectricCurrent", "iri": "emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88"},
     "voltage":    {"emmo_class": "Voltage",          "iri": "emmo:EMMO_17b031fb_4695_49b6_bb69_189ec63df3ee"},
     "c_rate":     {"emmo_class": "CRate",            "iri": "electrochemistry:electrochemistry_e1fd84eb_acdb_4b2c_b90c_e899d552a3ee"},
+    "current_density": {"emmo_class": "ElectricCurrentDensity", "iri": "emmo:EMMO_7c8007b0_58a7_4486_bf1c_4772852caca0"},
     "power":      {"emmo_class": "Power",            "best_effort": true},
     "resistance": {"emmo_class": "ElectricalResistance", "best_effort": true}
   },
