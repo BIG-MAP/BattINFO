@@ -97,15 +97,37 @@ def local_path(value: object) -> Path | None:
 #: Record fields that say where a file or its source can be downloaded. A
 #: registry must not receive a local path in any of them (see local_file_references).
 LOCATION_FIELDS = frozenset({"access_url", "content_url", "download_url", "source_url", "record_url"})
+#: Record fields that may name a file by its name or a relative path (a source
+#: file, an artifact's locator inside a deposit), but never by an absolute path
+#: on the submitter's computer.
+PATH_FIELDS = frozenset({"source_file", "locator"})
+
+
+def is_absolute_local_path(value: object) -> bool:
+    """True for a ``file:`` URI or an absolute file-system path (drive, UNC or ``/`` root).
+
+    A bare file name or a relative path is not absolute, and neither is a URL
+    with any other scheme.
+    """
+    if not isinstance(value, str):
+        return False
+    text = value.strip()
+    if not text:
+        return False
+    if _WINDOWS_PATH_RE.match(text) or text.startswith(("\\", "/")):
+        return True
+    return urlparse(text).scheme.lower() == "file"
 
 
 def local_file_references(node: object, path: str = "") -> list[tuple[str, str]]:
-    """``(field path, value)`` for every location field in *node* that names a local file.
+    """``(field path, value)`` for every field in *node* that names a file on this computer.
 
     Walks a record (or a whole submission envelope) and reports each
     ``access_url``, ``content_url``, ``download_url``, ``source_url`` and
     ``record_url`` holding a ``file:`` URI or a plain path, wherever it sits
-    (``dataset.distributions[0].content_url``, ``provenance.source_url``, ...).
+    (``dataset.distributions[0].content_url``, ``provenance.source_url``, ...),
+    and each ``source_file`` or artifact ``locator`` holding an absolute path or
+    a ``file:`` URI (a file name or a relative path there is fine).
     """
     found: list[tuple[str, str]] = []
     if isinstance(node, dict):
@@ -113,6 +135,9 @@ def local_file_references(node: object, path: str = "") -> list[tuple[str, str]]
             child = f"{path}.{key}" if path else str(key)
             if key in LOCATION_FIELDS and isinstance(value, str):
                 if is_local_location(value):
+                    found.append((child, value))
+            elif key in PATH_FIELDS and isinstance(value, str):
+                if is_absolute_local_path(value):
                     found.append((child, value))
             else:
                 found.extend(local_file_references(value, child))
@@ -136,6 +161,11 @@ def local_files_message(offenders: list[tuple[str, list[tuple[str, str]]]]) -> s
         "records carry https URLs, then submit again. Only for a local test registry, pass "
         "allow_local_files=True."
     )
+    if any(field.rsplit(".", 1)[-1] in PATH_FIELDS for _, fields in offenders for field, _ in fields):
+        lines.append(
+            "A source_file or an artifact locator names the file by its name or by its path "
+            "inside the workspace, not by its absolute path on this computer."
+        )
     return "\n".join(lines)
 
 

@@ -207,3 +207,85 @@ def test_demo_pipeline_refuses_its_local_file_by_default(tmp_path: Path, monkeyp
         run_demo_pipeline(tmp_path / "demo", registry_base_url="https://registry.example.org",
                           api_key="secret", force=True)
     assert calls == []
+
+
+# ── Absolute paths in source_file and artifact locators ──────────────────────
+
+AURORA = {
+    "unicycler": {"version": "0.3.2"},
+    "sample": {"name": "cell-1", "capacity_mAh": "123"},
+    "method": [{"step": "constant_current", "rate_C": "-0.1", "until_voltage_V": "2.5"}],
+}
+
+
+def _protocol_record(value: str) -> dict:
+    return {
+        "test_spec": {"id": "https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd", "name": "CC discharge"},
+        "artifacts": [{"role": "source_protocol", "format": "aurora-unicycler-json", "locator": value}],
+        "provenance": {"source_type": "import", "source_file": value},
+    }
+
+
+@pytest.mark.parametrize("value", [
+    r"C:\Users\someone\protocols\cc.json",
+    "/home/someone/protocols/cc.json",
+    "file:///C:/Users/someone/protocols/cc.json",
+])
+def test_an_absolute_source_file_or_locator_is_a_local_reference(value: str) -> None:
+    from battinfo._util import local_file_references
+
+    assert dict(local_file_references(_protocol_record(value))) == {
+        "artifacts[0].locator": value, "provenance.source_file": value,
+    }
+
+
+@pytest.mark.parametrize("value", ["cc.json", "protocols/cc.json", "https://example.org/protocols/cc.json"])
+def test_a_file_name_or_relative_path_is_not(value: str) -> None:
+    from battinfo._util import local_file_references
+
+    assert local_file_references(_protocol_record(value)) == []
+
+
+def test_submit_publication_package_refuses_an_absolute_artifact_locator(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls: list[object] = []
+    monkeypatch.setattr("battinfo.api.urlopen", lambda request, timeout=None: calls.append(request))
+    envelope = {"kind": "BattinfoSubmission", "resource": {
+        "resource_type": "test_spec", "title": "CC discharge", "source_local_id": "ts-1",
+        "semantic_payload": {"battinfo_records": {"test_spec": _protocol_record("/home/someone/cc.json")}},
+    }}
+    with pytest.raises(ValueError) as excinfo:
+        submit_publication_package(envelope, registry_base_url="https://r.example", api_key="k")
+    assert calls == []
+    message = str(excinfo.value)
+    assert "artifacts[0].locator" in message and "provenance.source_file" in message
+    assert "not by its absolute path" in message
+
+
+def test_protocol_import_stores_no_absolute_path(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """`battinfo import-protocol` passes the path as typed; the record keeps no absolute path."""
+    from typer.testing import CliRunner
+
+    from battinfo._util import local_file_references
+    from battinfo.cli import app
+    from battinfo.interop.protocols import import_aurora_unicycler
+
+    source = tmp_path / "project" / "protocols" / "cc.json"
+    source.parent.mkdir(parents=True)
+    source.write_text(json.dumps(AURORA), encoding="utf-8")
+    elsewhere = tmp_path / "elsewhere"
+    elsewhere.mkdir()
+    monkeypatch.chdir(elsewhere)
+    out = tmp_path / "record.json"
+    result = CliRunner().invoke(app, ["import-protocol", str(source.resolve()), "--format", "aurora",
+                                      "--out", str(out)])
+    assert result.exit_code == 0, result.output
+    record = json.loads(out.read_text(encoding="utf-8"))
+    assert record["artifacts"][0]["locator"] == "cc.json"
+    assert record["provenance"]["source_file"] == "cc.json"
+    assert local_file_references(record) == []
+
+    # Inside the current directory the path stays, relative to it.
+    monkeypatch.chdir(tmp_path / "project")
+    spec = import_aurora_unicycler(AURORA, source_locator=str(source.resolve()))
+    assert spec.artifacts[0].locator == "protocols/cc.json"
+    assert spec.source.file == "protocols/cc.json"
