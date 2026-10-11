@@ -225,7 +225,11 @@ def test_created_record_passes_strict_schema_validation() -> None:
 
 
 def test_template_record_passes_strict_schema_validation() -> None:
+    # The default template keeps the all-zero placeholder IRI, which validation
+    # refuses so an unedited template is never saved; everything else is valid.
     report = validate_record_report(template_parameter_set())
+    assert [issue.code for issue in report.errors] == ["identity.placeholder_iri"]
+    report = validate_record_report(template_parameter_set(uid="pge5wer62q82v9k0"))
     assert report.ok, report.errors
 
 

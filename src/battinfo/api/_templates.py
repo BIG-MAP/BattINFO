@@ -140,16 +140,26 @@ def template_cell_instance(
     *,
     cell_spec_id: str = TEMPLATE_CELL_SPEC_ID,
     source_type: Literal["measurement", "lab", "bms", "other"] = "measurement",
-    uid: str | None = TEMPLATE_UID,
+    uid: str | None = None,
 ) -> dict[str, Any]:
-    """Build a starter canonical cell-instance document for save workflows."""
+    """Build a starter canonical cell-instance document for save workflows.
+
+    The document carries no ``id`` unless *uid* is given: ``save_cell_instance``
+    mints the IRI from the cell's spec, serial number and name when it is saved,
+    so records made from the template never share a placeholder IRI.
+    """
     draft = Cell(
         uid=uid,
         cell_spec_id=cell_spec_id,
         source_type=source_type,
-        notes=["Template-generated record. Set cell_spec_id/serial_number/datasets before saving."],
+        notes=["Template-generated record. Set cell_spec_id/serial_number/datasets before saving; "
+               "saving mints the IRI."],
     )
-    return _record_from_cell_instance(draft)
+    record = _record_from_cell_instance(draft)
+    if uid is None:
+        record["cell_instance"].pop("id", None)
+        record["cell_instance"].pop("short_id", None)
+    return record
 
 
 def template_dataset(

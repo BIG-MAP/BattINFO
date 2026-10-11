@@ -7,6 +7,7 @@ from battinfo.canonical_aliases import record_to_snake_aliases
 from battinfo.entities import kind_for_doc
 from battinfo.validate.core import (
     DEFAULT_POLICY,
+    ValidationIssue,
     ValidationPolicy,
     ValidationReport,
     ValidationResult,
@@ -34,6 +35,41 @@ def _resource_type(doc: dict[str, Any]) -> str | None:
     return kind.entity_type if kind is not None else None
 
 
+# The uid the record templates write as a placeholder (TEMPLATE_UID, dashed).
+_PLACEHOLDER_UID = "0000-0000-0000-0000"
+
+
+def _placeholder_iri_report(doc: dict[str, Any], policy: ValidationPolicy) -> ValidationReport:
+    """Reject a record whose own IRI is the all-zero template placeholder.
+
+    Every record made from an unedited template would claim that IRI, so this
+    is an error under every policy, whatever its schema/semantic settings.
+    """
+    kind = kind_for_doc(doc)
+    body = doc.get(kind.record_key) if kind is not None else None
+    entity_id = body.get("id") if isinstance(body, dict) else None
+    if kind is None or not isinstance(entity_id, str):
+        return ValidationReport(policy=policy)
+    if entity_id.rstrip("/").rsplit("/", 1)[-1] != _PLACEHOLDER_UID:
+        return ValidationReport(policy=policy)
+    if kind.entity_type == "cell":
+        fix = ("Remove id and short_id; saving the cell mints its IRI from its spec and "
+               "serial number.")
+    else:
+        fix = ("Give the record its own IRI, for example with --uid on battinfo template, "
+               "or the IRI it was published under.")
+    issue = ValidationIssue(
+        code="identity.placeholder_iri",
+        severity="error",
+        path=f"{kind.record_key}.id",
+        message=(f"{entity_id} is a template placeholder, not a real IRI: every record made "
+                 f"from an unedited template would claim it. {fix}"),
+        validator="identity",
+        resource_type=kind.entity_type,
+    )
+    return ValidationReport(issues=(issue,), policy=policy)
+
+
 def validate_record_report(
     doc: dict[str, Any],
     *,
@@ -42,7 +78,7 @@ def validate_record_report(
 ) -> ValidationReport:
     normalized_doc = record_to_snake_aliases(doc)
     resolved_policy = get_validation_policy(policy) if isinstance(policy, str) else policy
-    reports: list[ValidationReport] = []
+    reports: list[ValidationReport] = [_placeholder_iri_report(normalized_doc, resolved_policy)]
     resource_type = _resource_type(normalized_doc)
 
     if resolved_policy.schema != "off":

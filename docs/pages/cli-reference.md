@@ -915,7 +915,7 @@ $ battinfo template cell-instance [OPTIONS]
 
 * `--cell-spec-id <str>`: Canonical cell-spec IRI.  [default: https://w3id.org/battinfo/spec/0000-0000-0000-0000]
 * `--source-type <str>`: Source type: measurement|lab|bms|other.  [default: measurement]
-* `--uid <str>`: Optional 16-char UID.  [default: 0000000000000000]
+* `--uid <str>`: Optional 16-char UID that pins the IRI. Without it the record has no id and saving mints one.
 * `--out <path>`: Optional output JSON path.
 * `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.

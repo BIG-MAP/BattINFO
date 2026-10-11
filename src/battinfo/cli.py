@@ -1020,7 +1020,9 @@ def template_cell_instance(
         help="Canonical cell-spec IRI.",
     ),
     source_type: str = typer.Option("measurement", help="Source type: measurement|lab|bms|other."),
-    uid: str | None = typer.Option("0000000000000000", help="Optional 16-char UID."),
+    uid: str | None = typer.Option(
+        None, help="Optional 16-char UID that pins the IRI. Without it the record has no id and saving mints one."
+    ),
     out: Path | None = typer.Option(None, help="Optional output JSON path."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
@@ -1041,7 +1043,7 @@ def template_cell_instance(
         payload = {
             "status": "template",
             "resource": "cell-instance",
-            "id": record["cell_instance"]["id"],
+            "id": record["cell_instance"].get("id"),  # absent until the save mints it
             "path": str(out),
         }
         if fmt == "json":
@@ -1056,7 +1058,7 @@ def template_cell_instance(
     payload = {
         "status": "template",
         "resource": "cell-instance",
-        "id": record["cell_instance"]["id"],
+        "id": record["cell_instance"].get("id"),  # absent until the save mints it
         "path": "",
     }
     _emit_table([payload], ["status", "resource", "id", "path"])

@@ -1215,6 +1215,31 @@ def _record_from_cell_instance(instance: Cell) -> dict[str, Any]:
     return finalized.to_record()
 
 
+def _with_minted_cell_instance_id(doc: dict[str, Any]) -> dict[str, Any]:
+    """Give a canonical cell-instance record without an ``id`` its minted IRI.
+
+    ``battinfo template cell-instance`` writes no id, so the save mints one from
+    the same identity seed as a draft (spec, serial number, batch, name), or a
+    random uid for a cell with none of them.
+    """
+    body = doc["cell_instance"]
+    if body.get("id"):
+        return doc
+    from battinfo.entities import cell_instance_identity_seed, stable_uid  # noqa: PLC0415
+
+    seed = cell_instance_identity_seed(
+        cell_spec_id=body.get("cell_spec_id"),
+        serial_number=body.get("serial_number"),
+        batch_id=body.get("batch_id"),
+        name=body.get("name"),
+    )
+    dashed = stable_uid(seed) if seed is not None else _normalized_dashed_uid(None)
+    entity_id = f"https://w3id.org/battinfo/cell/{dashed}"
+    minted = {key: value for key, value in body.items() if key != "short_id"}
+    doc["cell_instance"] = {"id": entity_id, "short_id": _short_id_from_iri(entity_id), **minted}
+    return doc
+
+
 def _record_from_dataset(dataset: Dataset, *, workspace_root: PathLike | None = None) -> dict[str, Any]:
     """Finalize a Dataset into its canonical record, minting the id when absent.
 
@@ -1579,7 +1604,7 @@ def save_cell_instance(
         )
     if isinstance(draft, Mapping) and isinstance(draft.get("cell_instance"), Mapping):
         return save_record(
-            dict(draft),
+            _with_minted_cell_instance_id(dict(draft)),
             source_root=source_root,
             mode=mode,
             duplicate_policy=duplicate_policy,
