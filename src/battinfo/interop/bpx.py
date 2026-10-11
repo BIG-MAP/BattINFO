@@ -103,7 +103,7 @@ class BpxImportResult:
     Attributes
     ----------
     specs:
-        Dict of BattINFO spec-property key → ``{"value": ..., "unit": ...}``
+        Dict of BattINFO spec-property key -> ``{"value": ..., "unit": ...}``
         objects for all BPX parameters that have a direct BattINFO equivalent.
     title:
         ``Header.Title`` from the BPX file, or ``None``.
@@ -115,6 +115,10 @@ class BpxImportResult:
         ``Header.Description``, or ``None``.
     source_file:
         Filename of the BPX source (when loaded from a path).
+    extras:
+        The Cell fields with no cell-spec property (electrode-pair count,
+        temperatures, unknown keys), verbatim; ``to_bpx(spec,
+        cell_extras=...)`` writes them back.
     warnings:
         Non-fatal notes about unmapped BPX fields or missing data.
     """
@@ -129,10 +133,10 @@ class BpxImportResult:
     warnings: list[str] = field(default_factory=list)
 
     def to_cell_spec_kwargs(self) -> dict[str, Any]:
-        """Return kwargs suitable for ``Workspace.cell_spec(specs=..., name=...)``.
+        """Return ``properties`` (and ``name``, the BPX title) for :class:`battinfo.CellSpec`.
 
-        The caller is responsible for providing ``manufacturer``, ``model``,
-        ``format``, and ``chemistry`` — BPX does not carry those fields.
+        The caller provides ``manufacturer``, ``model``, ``format`` and
+        ``chemistry``: BPX does not carry those fields.
         """
         kwargs: dict[str, Any] = {"properties": dict(self.specs)}
         if self.title is not None:
@@ -325,10 +329,13 @@ def from_bpx(
 ) -> BpxImportResult:
     """Read the cell-spec properties a BPX file's Cell block can fill.
 
-    Extracts the subset of BPX ``Parameterisation.Cell`` parameters that map
-    directly to BattINFO cell-spec spec properties (capacity, voltage limits,
-    mass, dimensions).  Physics parameters (microstructure, transport,
-    electrochemical kinetics) are logged as warnings and skipped.
+    Reads the ``Parameterisation.Cell`` block (and the temperatures a BPX
+    1.x file keeps in ``State``) and maps the fields that have a cell-spec
+    property: capacity, voltage limits, mass, dimensions, areas, volume.
+    The Cell fields with no such property (electrode-pair count,
+    temperatures, unknown keys) are kept verbatim in
+    :attr:`BpxImportResult.extras`. The electrode, separator and
+    electrolyte blocks are not read.
 
     A BPX import does not go through here: :func:`from_bpx_parameters` keeps
     every value of the file, the Cell block included, on the file's
@@ -339,27 +346,31 @@ def from_bpx(
     Parameters
     ----------
     source:
-        Path to a BPX JSON file, a JSON-string, or an already-parsed dict.
+        Path to a BPX JSON file, or an already-parsed dict.
     extra_warnings:
-        When ``True`` (default), append a warning listing BPX physics
-        parameters that were skipped.  Set ``False`` to suppress.
+        When ``True`` (default), the warnings include the Cell fields kept
+        in ``extras`` and the Cell values skipped as non-numeric or
+        non-finite. ``False`` leaves those out; warnings about the file
+        itself (no Parameterisation block, State entries with no home, a
+        mass recovered from density and volume) are always given.
 
     Returns
     -------
     BpxImportResult
-        Contains ``specs`` ready for ``Workspace.cell_spec(specs=...)``,
-        along with title, version, and any warnings.
+        ``specs`` (cell-spec properties), ``extras``, the header fields and
+        the warnings.
 
     Examples
     --------
-    >>> result = from_bpx("mohtat2021.json")
-    >>> ws.cell_spec(
+    >>> import battinfo
+    >>> result = from_bpx("mohtat2021.json")                    # doctest: +SKIP
+    >>> spec = battinfo.CellSpec(
     ...     manufacturer="Custom",
-    ...     model=result.title or "BPX cell",
+    ...     model="BPX cell",
     ...     format="cylindrical",
-    ...     chemistry="Li-ion",
-    ...     specs=result.specs,
-    ... )
+    ...     chemistry="li-ion",
+    ...     **result.to_cell_spec_kwargs(),                     # properties and name
+    ... )                                                       # doctest: +SKIP
     """
     warnings: list[str] = []
     data, source_file = _load_bpx(source)
@@ -571,9 +582,13 @@ class BpxExportResult:
         The BPX fields written from the record (``"Cell.Electrode area
         [m2]"``, ``"State.Initial conditions.Initial temperature [K]"``).
     missing_required:
-        Required BPX Cell keys the document lacks: the user must supply
+        Required BPX fields the document lacks: the user must supply
         these (or run a physics-parameterisation workflow) before the file
-        can drive a full model.
+        can drive a full model. Cell keys are named by themselves
+        (``"Electrode area [m2]"``). For a parameter-file record, when the
+        official ``bpx`` package is installed and rejects the document,
+        every other field it reports missing follows as
+        ``"<block>.<field>"`` (``"Negative electrode.OCP [V]"``).
     warnings:
         What the caller should know: values the document lacks, unit
         conversions, values added by the v0-to-v1 layout conversion, and
@@ -724,9 +739,16 @@ def to_bpx(
             "to_bpx(strict=True): the document would lack values its source holds: "
             + "; ".join(lacking)
         )
-    rejection = _official_parser_rejection(result.bpx)
+    rejection, parser_missing = _official_parser_rejection(result.bpx)
     if rejection is not None:
         result.warnings.append(f"The official bpx parser rejects this document: {rejection}")
+    if isinstance(record.get("parameter_set"), Mapping):
+        # The parser knows every block's required fields; the Cell check above
+        # knows only the Cell's.
+        for path in parser_missing:
+            block, _, name = path.partition(".")
+            if not (block == "Cell" and name in result.missing_required) and path not in result.missing_required:
+                result.missing_required.append(path)
     return result
 
 
@@ -774,14 +796,18 @@ def _export_source(source: Any) -> dict[str, Any]:
     return dict(source)
 
 
-def _official_parser_rejection(document: Mapping[str, Any]) -> str | None:
-    """The official parser's error for ``document``, or ``None`` when it parses or bpx is absent."""
+def _official_parser_rejection(document: Mapping[str, Any]) -> tuple[str | None, list[str]]:
+    """The official parser's error for ``document`` and the fields it reports missing.
+
+    ``(None, [])`` when the document parses or bpx is not installed. A
+    missing field is ``"<block>.<field>"`` (``"Negative electrode.OCP [V]"``).
+    """
     try:
-        import bpx  # noqa: F401, PLC0415
+        import bpx as bpx_lib  # noqa: PLC0415
     except ImportError:
-        return None
-    check = check_bpx(document)
-    return None if check["passed"] else str(check["detail"])
+        return None, []
+    passed, detail, missing = _parse_with_official_parser(dict(document), bpx_lib)
+    return (None, []) if passed else (detail, missing)
 
 
 _NO_CONVERSION = "with no BPX conversion; skipped."
@@ -1512,8 +1538,21 @@ def check_bpx(source: Mapping[str, Any] | str | Path | bytes) -> dict[str, Any]:
     except PackageNotFoundError:  # pragma: no cover
         tool = "bpx"
     data, _ = _load_bpx(source)
+    passed, detail, _missing = _parse_with_official_parser(data, bpx_lib)
+    return {
+        "check": "bpx_parse",
+        "tool": tool,
+        "passed": passed,
+        "detail": detail,
+        "checked_at": date.today().isoformat(),
+    }
+
+
+def _parse_with_official_parser(data: dict[str, Any], bpx_lib: Any) -> tuple[bool, str, list[str]]:
+    """``(passed, detail, missing fields)`` from the official parser (see :func:`check_bpx`)."""
     bpx_dir = Path(bpx_lib.__file__).resolve().parent
     notes: set[str] = set()
+    missing: list[str] = []
 
     def _keep_parser_warnings(message: Any, category: Any, filename: str, *_: Any, **__: Any) -> None:
         # Kept by where the warning was raised, not by what it says: the
@@ -1535,16 +1574,17 @@ def check_bpx(source: Mapping[str, Any] | str | Path | bytes) -> dict[str, Any]:
             lines = [line.strip() for line in str(exc).splitlines() if line.strip()]
             lines = [line for line in lines if not line.startswith("For further information")]
             detail = " ".join(lines)
+            errors = getattr(exc, "errors", None)
+            if callable(errors):  # pydantic: which required fields are absent
+                missing = [
+                    ".".join(str(part) for part in error.get("loc", ()))
+                    for error in errors()
+                    if isinstance(error, Mapping) and error.get("type") == "missing"
+                ]
     if notes:
         # Every warning, in full: a truncated list hides the rest.
-        detail = f"Parser warnings: {' | '.join(sorted(notes))}. {detail}"
-    return {
-        "check": "bpx_parse",
-        "tool": tool,
-        "passed": passed,
-        "detail": detail,
-        "checked_at": date.today().isoformat(),
-    }
+        detail = f"Parser warnings: {' | '.join(sorted(notes)).rstrip('.')}. {detail}"
+    return passed, detail, missing
 
 
 # Modules that make up the warnings machinery itself (Python 3.14 moved the
@@ -1738,7 +1778,8 @@ class BpxParameterImportResult:
         runnable_file: str | Path | bytes | None = None,
         supersedes: str | None = None,
         name: str | None = None,
-        default_provenance_class: str = "fitted",
+        default_provenance_class: str | None = "fitted",
+        provenance_classes: Mapping[str, str | None] | None = None,
         **record_kwargs: Any,
     ) -> dict[str, Any]:
         """Build the file's one parameter-set record.
@@ -1784,6 +1825,16 @@ class BpxParameterImportResult:
         ``Description`` and ``References`` fill description and citation
         (or a note) unless given. The record validates against the
         parameter-set schema.
+
+        Each claim may say how its value was obtained (``provenance_class``:
+        measured, fitted, literature, assumed or derived). BPX does not say,
+        so the claims of the cell and state parts get no class: the file's
+        capacity, cut-offs, geometry, temperatures and initial state of
+        charge may as well be datasheet values or conventions as fits. The
+        electrode, material, separator and electrolyte parts get
+        ``default_provenance_class`` (``"fitted"``; ``None`` for no class).
+        ``provenance_classes`` sets the class of a whole part by its name,
+        for example ``{"cell": "measured"}`` or ``{"separator": None}``.
         """
         from battinfo._util import _citation_url_value  # noqa: PLC0415
         from battinfo.api import create_parameter_set  # noqa: PLC0415
@@ -1803,6 +1854,8 @@ class BpxParameterImportResult:
                 "spec in the genome), cell_instance_id= (the physical cell it was fitted on) or "
                 f"virtual_cell=True (no real cell); got {links or 'none'}."
             )
+        part_classes = _part_provenance_classes(default_provenance_class, provenance_classes)
+        _check_record_kwargs(record_kwargs)
         if self.content_digest is None or bpx_content_digest(self._document) != self.content_digest:
             raise ValueError(
                 "this import no longer holds the document it was read from; import the file again."
@@ -1836,6 +1889,11 @@ class BpxParameterImportResult:
                 )
                 continue
             part.update(_material_target(target, side))
+        for part in parts:
+            part_class = part_classes.get(part["part"])
+            if part_class is not None:
+                for claim in part["claims"]:
+                    claim.setdefault("provenance_class", part_class)
 
         if distributions is not None:
             if not isinstance(distributions, list):
@@ -1897,7 +1955,7 @@ class BpxParameterImportResult:
             **({"not_imported": not_imported} if not_imported else {}),
             **({"distributions": [dict(d) for d in distributions]} if distributions else {}),
             **({"supersedes": supersedes} if supersedes is not None else {}),
-            default_provenance_class=default_provenance_class,
+            default_provenance_class=None,  # set per part above
             **link_kwargs,
             **record_kwargs,
         )
@@ -2010,6 +2068,14 @@ class BpxParameterImportResult:
                 + ". A runnable copy may only move fields to the BPX v1 layout; make it with "
                 "upgrade_bpx(source).save(path)."
             )
+        if bpx_content_digest(runnable) == self.content_digest:
+            # The conversion changed nothing: the source is already in the v1
+            # layout, whether or not its entry carries a bpx_parse check.
+            self._warn(
+                "the runnable copy holds the same parameters as the source (upgrade_bpx() changes "
+                "nothing in a file already in the v1 layout), so it is not needed: a runnable copy "
+                "is made only when the official parser rejects the source."
+            )
 
 
 def _file_bytes(file: str | Path | bytes) -> bytes:
@@ -2060,6 +2126,88 @@ def _material_target(value: Any, side: str) -> dict[str, str]:
     )
 
 
+# Parts whose BPX values carry no provenance class by default: BPX does not say
+# how a cell's capacity, cut-offs, geometry or temperatures, or the initial
+# state, were obtained, so calling them fitted would state something the file
+# does not.
+_PARTS_WITHOUT_DEFAULT_CLASS = ("cell", "state")
+
+
+def _part_provenance_classes(
+    default: Any, overrides: Mapping[str, Any] | None
+) -> dict[str, str | None]:
+    """The provenance class each part's claims get, by part name (``None``: no class)."""
+    from battinfo.api._parameters import _PROVENANCE_CLASSES  # noqa: PLC0415
+    from battinfo.parameters import PARAMETER_FILE_PARTS  # noqa: PLC0415
+
+    def checked(value: Any, what: str) -> str | None:
+        if value is None or value in _PROVENANCE_CLASSES:
+            return value
+        raise ValueError(
+            f"{what} is {value!r}; a provenance class is one of {', '.join(_PROVENANCE_CLASSES)}, "
+            "or None for no class."
+        )
+
+    default = checked(default, "default_provenance_class")
+    classes: dict[str, str | None] = {
+        part: None if part in _PARTS_WITHOUT_DEFAULT_CLASS else default for part in PARAMETER_FILE_PARTS
+    }
+    if overrides is None:
+        return classes
+    if not isinstance(overrides, Mapping):
+        raise TypeError(
+            "provenance_classes maps part names to provenance classes, for example "
+            f"{{'cell': 'measured'}}; got {type(overrides).__name__}."
+        )
+    unknown = [str(part) for part in overrides if part not in PARAMETER_FILE_PARTS]
+    if unknown:
+        raise ValueError(
+            f"provenance_classes keys are part names ({', '.join(PARAMETER_FILE_PARTS)}); "
+            f"got {', '.join(repr(part) for part in unknown)}."
+        )
+    for part, value in overrides.items():
+        classes[part] = checked(value, f"provenance_classes[{part!r}]")
+    return classes
+
+
+# Keywords of create_parameter_set that to_parameter_set sets from the file,
+# or that belong to a claim batch; the others pass through as record fields.
+_SET_FROM_THE_FILE = frozenset({
+    "name", "claims", "parts", "material_kind", "material_spec_id", "cell_spec_id",
+    "cell_instance_id", "virtual_cell", "parameters_sha256", "scope", "electrode_polarity",
+    "model_context", "annex", "not_imported", "distributions", "supersedes",
+    "default_provenance_class",
+})
+
+
+def _check_record_kwargs(record_kwargs: Mapping[str, Any]) -> None:
+    """``TypeError`` naming a keyword ``to_parameter_set`` does not take, with a did-you-mean."""
+    import difflib  # noqa: PLC0415
+    import inspect  # noqa: PLC0415
+
+    from battinfo.api._parameters import _record_from_parameter_set  # noqa: PLC0415
+
+    passed_through = sorted(
+        {*inspect.signature(_record_from_parameter_set).parameters, "validate"} - _SET_FROM_THE_FILE
+    )
+    unknown = [key for key in record_kwargs if key not in passed_through]
+    if not unknown:
+        return
+    own = [
+        name for name in inspect.signature(BpxParameterImportResult.to_parameter_set).parameters
+        if name not in ("self", "record_kwargs")
+    ]
+    accepted = [*own, *passed_through]
+    named = []
+    for key in unknown:
+        close = difflib.get_close_matches(key, accepted, n=1)
+        named.append(f"{key}=" + (f" (did you mean {close[0]}=?)" if close else ""))
+    raise TypeError(
+        "to_parameter_set() got unknown keyword(s): " + ", ".join(named)
+        + f". It takes {', '.join(own)}, and the record fields {', '.join(passed_through)}."
+    )
+
+
 def _short_repr(value: Any, limit: int = 80) -> str:
     text = repr(value)
     return text if len(text) <= limit else text[: limit - 3] + "..."
@@ -2105,6 +2253,18 @@ def _bpx_value_to_claim(key: str, raw_value: Any, entry: Mapping[str, Any], unit
 # BPX field -> the OCP branch it tabulates (single-phase electrodes, BPX 1.0+).
 _OCP_BRANCH_BY_FIELD: dict[str, str] = {field: branch for branch, field in _OCP_BRANCH_FIELDS.items()}
 
+# Transport parameters that are strictly positive in a physics model: a scalar
+# of zero or less in a BPX file is a placeholder, named in a warning. (A table
+# may reach zero, for example a conductivity at zero concentration.)
+_POSITIVE_TRANSPORT_KEYS = frozenset({
+    "ionic_conductivity",
+    "electrolyte_diffusivity",
+    "transference_number",
+    "solid_diffusivity",
+    "electronic_conductivity",
+    "transport_efficiency",
+})
+
 
 def _bpx_block_claims(
     block: Mapping[str, Any],
@@ -2123,6 +2283,7 @@ def _bpx_block_claims(
 
     out: list[tuple[dict[str, Any], list[str]]] = []
     unknown: list[str] = []
+    not_positive: list[str] = []
     for field_name, raw_value in block.items():
         branch = _OCP_BRANCH_BY_FIELD.get(str(field_name)) if vocab_block == "electrode" else None
         if branch is not None:
@@ -2155,11 +2316,20 @@ def _bpx_block_claims(
             )
             not_imported.append(f"{path}/{field_name}")
             continue
+        if key in _POSITIVE_TRANSPORT_KEYS and "quantity" in claim and claim["quantity"]["value"] <= 0:
+            not_positive.append(f"{path}/{field_name} = {raw_value!r}")
         out.append((claim, list(entry.get("scopes", []))))
     if unknown:
         # EVERY field is named: a truncated list is a silent drop for the rest.
         warnings.append(
             f"BPX {label} fields with no parameter mapping, not read as claims: {', '.join(unknown)}"
+        )
+    if not_positive:
+        warnings.append(
+            "BPX transport values a physics model needs positive are zero or negative, which "
+            "usually marks a placeholder (the file may model them elsewhere, for example in "
+            "User-defined): " + "; ".join(not_positive) + ". They are read as claims as the file "
+            "states them; check the source before using them."
         )
     return out
 

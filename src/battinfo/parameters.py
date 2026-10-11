@@ -312,7 +312,12 @@ def parameter_set_claim_groups(body: Mapping[str, Any]) -> list[tuple[dict[str, 
     return [(context, claims)] if isinstance(claims, list) else []
 
 
-def collate_claims(records: Iterable[Mapping[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+def collate_claims(
+    records: Iterable[Mapping[str, Any]],
+    *,
+    material_kind: str | None = None,
+    material_spec_id: str | None = None,
+) -> dict[str, list[dict[str, Any]]]:
     """Fold parameter-set records into ``{parameter: [claim, ...]}``.
 
     Each returned claim is a copy of the stored claim dict with the source
@@ -325,10 +330,25 @@ def collate_claims(records: Iterable[Mapping[str, Any]]) -> dict[str, list[dict[
     verbatim — collation is for reading what sources say, and tolerant import
     means unknown keys may carry real values.
 
+    ``material_kind`` (a kind key or alias) and ``material_spec_id`` keep
+    only the claims about that material: a claim batch with that target, and
+    the matching material part of a parameter file. Without them every claim
+    of every record comes back, including a BPX file's cell, electrode and
+    other-electrode claims. A search by material therefore passes the same
+    filter on::
+
+        rows = query_parameter_sets(material_kind="graphite", parameter="particle_radius")
+        claims = collate_claims([row["record"] for row in rows], material_kind="graphite")
+
     The spread across sources per parameter is the point: callers decide how
     to select (curated slate, newest, conditions filter) — this function never
     picks a winner.
     """
+    kind_filter: str | None = None
+    if material_kind is not None:
+        from battinfo.materials import resolve_material_kind  # noqa: PLC0415
+
+        kind_filter = resolve_material_kind(material_kind) or material_kind
     collated: dict[str, list[dict[str, Any]]] = {}
     for record in records:
         body = record.get("parameter_set")
@@ -344,6 +364,10 @@ def collate_claims(records: Iterable[Mapping[str, Any]]) -> dict[str, list[dict[
             if provenance.get(citation_field):
                 record_source[citation_field] = provenance[citation_field]
         for context, claims in parameter_set_claim_groups(body):
+            if kind_filter is not None and context.get("material_kind") != kind_filter:
+                continue
+            if material_spec_id is not None and context.get("material_spec_id") != material_spec_id:
+                continue
             source = {**record_source, **context}
             for claim in claims:
                 if not isinstance(claim, Mapping) or not claim.get("parameter"):

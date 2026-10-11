@@ -175,16 +175,14 @@ record = result.to_parameter_set(
             "quantity": {
               "value": 5.0,
               "unit": "Ah"
-            },
-            "provenance_class": "fitted"
+            }
           },
           {
             "parameter": "electrode_area",
             "quantity": {
               "value": 0.1,
               "unit": "m2"
-            },
-            "provenance_class": "fitted"
+            }
           }
         ]
       },
@@ -223,8 +221,7 @@ record = result.to_parameter_set(
             "quantity": {
               "value": 1.0,
               "unit": "1"
-            },
-            "provenance_class": "fitted"
+            }
           }
         ]
       }
@@ -321,12 +318,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 5.0
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour",
-          "schema:propertyID": "nominal_capacity",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "nominal_capacity"
         },
         {
           "@type": [
@@ -339,12 +331,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 0.1
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#SquareMetre",
-          "schema:propertyID": "electrode_area",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "electrode_area"
         }
       ]
     },
@@ -426,12 +413,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
           "hasNumberValue": 1.0
         },
         "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
-        "schema:propertyID": "initial_soc",
-        "schema:additionalProperty": {
-          "@type": "schema:PropertyValue",
-          "schema:name": "provenance_class",
-          "schema:value": "fitted"
-        }
+        "schema:propertyID": "initial_soc"
       }
     }
   ],
@@ -443,7 +425,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     "dcterms:type": "source",
     "dcterms:conformsTo": "BPX 1.1.0",
     "dcat:byteSize": 418,
-    "schema:sha256": "c0dc1d775e8e0322f39bc9add2bd975cc70d60c7733dbbca9a45088e77745c11"
+    "schema:sha256": "c0dc1d775e8e0322f39bc9add2bd975cc70d60c7733dbbca9a45088e77745c11",
+    "schema:isPartOf": {
+      "@id": "https://w3id.org/battinfo/spec/bwcv-1gn2-bgb7-gcz6"
+    }
   }
 }
 ```
@@ -620,6 +605,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     "schema:propertyID": "ocp",
     "schema:description": "tabulated curve vs stoichiometry, 8 points, average branch",
     "schema:unitText": "V",
+    "schema:unitCode": {
+      "@id": "https://w3id.org/emmo#Volt"
+    },
     "schema:measurementTechnique": "GITT",
     "schema:additionalProperty": {
       "@type": "schema:PropertyValue",
@@ -709,6 +697,12 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "@type": "schema:PropertyValue",
       "schema:name": "source_version",
       "schema:value": "0.1.0"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "not_imported",
+      "schema:value": "Validation",
+      "schema:description": "Values of the source file that this record does not hold, by their path in the file; the source file under schema:distribution is the complete copy."
     }
   ],
   "schema:hasPart": [
@@ -1729,6 +1723,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "schema:value": true,
       "schema:description": "bpx 1.1.1 Parser warnings: Detected a legacy BPX v0.x file/object; converting to the v1.x schema for backward compatibility. The conversion is approximate: the 'State' block is synthesised from the v0.x parameterisation (initial SOC set to 1, ambient and initial temperatures resolved from those provided, lumped thermal conductivity dropped). Optional v1.x fields that have no v0.x equivalent (e.g. initial hysteresis state and heat transfer coefficient) are omitted from the converted object rather than given a value here, so any tool that consumes it will apply its own defaults for them. Cross-version semantic changes are not corrected. Re-export from bpx>=1 to silence this warning, or pass convert_legacy=False to disable conversion. | The maximum voltage computed from the STO limits (4.201761488607647 V) is higher than the upper voltage cut-off (4.2 V) with the absolute tolerance v_tol = 0.001 V. Parsed by the official bpx parser.",
       "dcterms:date": "2026-10-11"
+    },
+    "schema:isPartOf": {
+      "@id": "https://w3id.org/battinfo/spec/fe59-wews-8mmv-zwag"
     }
   },
   "schema:citation": {
@@ -2490,6 +2487,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
           "schema:propertyID": "entropic_coefficient",
           "schema:description": "tabulated curve vs stoichiometry, 21 points",
           "schema:unitText": "V/K",
+          "schema:unitCode": {
+            "@id": "https://w3id.org/emmo#VoltPerKelvin"
+          },
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2831,6 +2831,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "schema:value": true,
       "schema:description": "bpx 1.1.1 Parser warnings: Detected a legacy BPX v0.x file/object; converting to the v1.x schema for backward compatibility. The conversion is approximate: the 'State' block is synthesised from the v0.x parameterisation (initial SOC set to 1, ambient and initial temperatures resolved from those provided, lumped thermal conductivity dropped). Optional v1.x fields that have no v0.x equivalent (e.g. initial hysteresis state and heat transfer coefficient) are omitted from the converted object rather than given a value here, so any tool that consumes it will apply its own defaults for them. Cross-version semantic changes are not corrected. Re-export from bpx>=1 to silence this warning, or pass convert_legacy=False to disable conversion.. Parsed by the official bpx parser.",
       "dcterms:date": "2026-10-11"
+    },
+    "schema:isPartOf": {
+      "@id": "https://w3id.org/battinfo/spec/xm1d-bz46-pc9v-pt70"
     }
   },
   "schema:citation": {
@@ -2917,6 +2920,12 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "@type": "schema:PropertyValue",
       "schema:name": "source_version",
       "schema:value": "0.4.0"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "not_imported",
+      "schema:value": "Validation",
+      "schema:description": "Values of the source file that this record does not hold, by their path in the file; the source file under schema:distribution is the complete copy."
     }
   ],
   "schema:hasPart": [
@@ -3661,6 +3670,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "schema:value": true,
       "schema:description": "bpx 1.1.1 Parser warnings: Detected a legacy BPX v0.x file/object; converting to the v1.x schema for backward compatibility. The conversion is approximate: the 'State' block is synthesised from the v0.x parameterisation (initial SOC set to 1, ambient and initial temperatures resolved from those provided, lumped thermal conductivity dropped). Optional v1.x fields that have no v0.x equivalent (e.g. initial hysteresis state and heat transfer coefficient) are omitted from the converted object rather than given a value here, so any tool that consumes it will apply its own defaults for them. Cross-version semantic changes are not corrected. Re-export from bpx>=1 to silence this warning, or pass convert_legacy=False to disable conversion. | The maximum voltage computed from the STO limits (4.201761488607647 V) is higher than the upper voltage cut-off (4.2 V) with the absolute tolerance v_tol = 0.001 V. Parsed by the official bpx parser.",
       "dcterms:date": "2026-10-11"
+    },
+    "schema:isPartOf": {
+      "@id": "https://w3id.org/battinfo/spec/q73c-bk3q-ceks-r4p6"
     }
   },
   "schema:citation": {
@@ -3746,6 +3758,12 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "@type": "schema:PropertyValue",
       "schema:name": "source_version",
       "schema:value": "0.4.0"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "not_imported",
+      "schema:value": "Parameterisation/Positive electrode/Particle",
+      "schema:description": "Values of the source file that this record does not hold, by their path in the file; the source file under schema:distribution is the complete copy."
     }
   ],
   "schema:hasPart": [
@@ -4558,6 +4576,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "schema:value": true,
       "schema:description": "bpx 1.1.1 Parser warnings: Detected a legacy BPX v0.x file/object; converting to the v1.x schema for backward compatibility. The conversion is approximate: the 'State' block is synthesised from the v0.x parameterisation (initial SOC set to 1, ambient and initial temperatures resolved from those provided, lumped thermal conductivity dropped). Optional v1.x fields that have no v0.x equivalent (e.g. initial hysteresis state and heat transfer coefficient) are omitted from the converted object rather than given a value here, so any tool that consumes it will apply its own defaults for them. Cross-version semantic changes are not corrected. Re-export from bpx>=1 to silence this warning, or pass convert_legacy=False to disable conversion.. Parsed by the official bpx parser.",
       "dcterms:date": "2026-10-11"
+    },
+    "schema:isPartOf": {
+      "@id": "https://w3id.org/battinfo/spec/6034-7wex-6cwr-fzv1"
     }
   },
   "schema:citation": {
@@ -4643,6 +4664,15 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "@type": "schema:PropertyValue",
       "schema:name": "source_version",
       "schema:value": "0.4.0"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "annex",
+      "schema:value": [
+        "Negative electrode delithiation OCP [V]",
+        "Negative electrode lithiation OCP [V]"
+      ],
+      "schema:description": "Entries of the source file's extension block (BPX User-defined), held verbatim in the record file and not as claims."
     }
   ],
   "schema:hasPart": [
@@ -5667,6 +5697,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "schema:value": true,
       "schema:description": "bpx 1.1.1 Parser warnings: Detected a legacy BPX v0.x file/object; converting to the v1.x schema for backward compatibility. The conversion is approximate: the 'State' block is synthesised from the v0.x parameterisation (initial SOC set to 1, ambient and initial temperatures resolved from those provided, lumped thermal conductivity dropped). Optional v1.x fields that have no v0.x equivalent (e.g. initial hysteresis state and heat transfer coefficient) are omitted from the converted object rather than given a value here, so any tool that consumes it will apply its own defaults for them. Cross-version semantic changes are not corrected. Re-export from bpx>=1 to silence this warning, or pass convert_legacy=False to disable conversion.. Parsed by the official bpx parser.",
       "dcterms:date": "2026-10-11"
+    },
+    "schema:isPartOf": {
+      "@id": "https://w3id.org/battinfo/spec/c8cb-d472-yt6s-kyjw"
     }
   },
   "schema:citation": {
