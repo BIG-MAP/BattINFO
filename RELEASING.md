@@ -58,9 +58,12 @@ Then create matching [GitHub environments](../../settings/environments) named
    ```
    The workflow guards that the tag matches the built version, publishes to
    PyPI, and drafts a GitHub Release.
-7. **Finalize:** review and publish the drafted GitHub Release. If archiving to
-   Zenodo, deposit and then backfill the DOI + `date-released` in
-   `CITATION.cff` and the DOI badge/citation in `README.md`.
+7. **Finalize:** review and publish the drafted GitHub Release. Publishing it
+   archives the release on Zenodo through the repository's Zenodo webhook, as
+   a new version under the concept DOI 10.5281/zenodo.6304782. Zenodo reads the
+   metadata, author list included, from `CITATION.cff`, so check the authors
+   and `date-released` before tagging. The README badge and citation use the
+   concept DOI and need no change.
 
 ## Notes
 

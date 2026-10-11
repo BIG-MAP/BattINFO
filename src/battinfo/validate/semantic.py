@@ -797,6 +797,21 @@ def _validate_property_mappability(
         if class_iri is None and key in extra_known:
             continue
         if class_iri is None:
+            from battinfo.transform.json_to_jsonld import _property_type_term
+
+            candidate = _property_type_term(str(key))
+            if candidate:
+                outcome = (
+                    f"the JSON-LD export types it with the unreviewed candidate "
+                    f"class '{candidate}'."
+                )
+            else:
+                outcome = (
+                    "the JSON-LD export gives it no quantity class, only its "
+                    "value-basis class (for example ConventionalProperty) with the "
+                    "key as its label, so tools looking for a specific quantity "
+                    "will not find it."
+                )
             _append_issue(
                 issues,
                 code="semantic.property_unmapped",
@@ -804,9 +819,7 @@ def _validate_property_mappability(
                 path=f"{path_prefix}.{key}",
                 message=(
                     f"'{key}' is schema-valid but has no curated EMMO mapping - "
-                    "the JSON-LD export emits it under a non-canonical fallback "
-                    "term, which other tools will not recognize and which will "
-                    "not survive a round-trip import. File a mapping in "
+                    f"{outcome} File a mapping in "
                     "assets/mappings/domain-battery/property_map.curated.json."
                 ),
                 resource_type=resource_type,
@@ -1268,6 +1281,28 @@ def validate_semantic_report(
             _check_props(seal, f"{body_key}.seals[{idx}]")
         for idx, part in enumerate(body.get("parts") or []):
             _check_props(part, f"{body_key}.parts[{idx}]")
+
+    # Parameter-set claims emit through the same quantity nodes as properties,
+    # so an unmapped parameter key gets the same warning. Fraction keys resolve
+    # through the emitter's own table, as they do for properties.
+    parameter_set = doc.get("parameter_set")
+    if isinstance(parameter_set, Mapping) and isinstance(parameter_set.get("claims"), list):
+        from battinfo.transform.json_to_jsonld import _FRACTION_PROPERTY_TERMS
+
+        fraction_keys = frozenset(_FRACTION_PROPERTY_TERMS)
+        for idx, claim in enumerate(parameter_set["claims"]):
+            if (
+                isinstance(claim, Mapping)
+                and isinstance(claim.get("parameter"), str)
+                and isinstance(claim.get("quantity"), Mapping)
+            ):
+                _validate_property_mappability(
+                    {claim["parameter"]: claim["quantity"]},
+                    issues,
+                    resource_type,
+                    path_prefix=f"parameter_set.claims[{idx}]",
+                    extra_known=fraction_keys,
+                )
 
     dataset = doc.get("dataset")
     if isinstance(dataset, Mapping):

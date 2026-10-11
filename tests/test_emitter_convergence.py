@@ -149,8 +149,11 @@ def test_unmapped_property_key_warns_at_emit_time() -> None:
     )
     with pytest.warns(UserWarning, match="semantic.property_unmapped.*frobnication_index"):
         doc = build_cell_spec_node(record)
-    # Emitted with the non-canonical fallback term rather than silently dropped.
-    assert doc["isDescriptionFor"]["hasProperty"][0]["@type"][0] == "battinfo:frobnicationIndex"
+    # Kept in the graph, typed by its value basis only and labelled with its
+    # key: no class name is generated for it.
+    node = doc["isDescriptionFor"]["hasProperty"][0]
+    assert node["@type"] == ["ConventionalProperty"]
+    assert node["skos:prefLabel"] == "frobnication_index"
 
 
 def test_value_text_only_property_warns_at_emit_time() -> None:

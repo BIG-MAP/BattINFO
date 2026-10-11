@@ -30,8 +30,8 @@ and resolvable through persistent `https://w3id.org/battinfo/` identifiers.
 <!-- Badges · learn & cite -->
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/BIG-MAP/BattINFO/blob/main/docs/guides/01-concepts.ipynb)
 [![nbviewer](https://img.shields.io/badge/render-nbviewer-F37726?logo=jupyter&logoColor=white)](https://nbviewer.org/github/BIG-MAP/BattINFO/tree/main/docs/guides/)
-<!-- DOI: replace the placeholder with the concept DOI minted on the first Zenodo release -->
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX)
+<!-- DOI: the Zenodo concept DOI; it resolves to the latest archived release -->
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6304782.svg)](https://doi.org/10.5281/zenodo.6304782)
 
 [**Quickstart**](QUICKSTART.md) ·
 [**Documentation**](docs/index.md) ·
@@ -96,16 +96,13 @@ pip install "git+https://github.com/BIG-MAP/BattINFO.git"
 
 <!-- 0.8 release: replace the block above with  pip install battinfo -->
 
-Optional extras: `battinfo[processing]` (cycler-file conversion via `ws.convert()`
-+ plotting), `battinfo[tabular]` (CSV/Parquet/XLSX readers), `battinfo[publish]`
-(RO-Crate validation), `battinfo[storage]` (S3), `battinfo[docs]` (Sphinx), and
-`battinfo[dev]` (full test/lint/build toolchain). The `processing` extra also needs
-`batterydf`, which is not yet on PyPI. Until it ships, `pip install "battinfo[processing]"`
-cannot resolve; install the processing dependencies directly instead:
+Optional extras: `battinfo[processing]` (cycler-file conversion via `ws.convert()` + plotting), `battinfo[tabular]` (CSV/Parquet/XLSX readers), `battinfo[publish]` (RO-Crate validation), `battinfo[storage]` (S3), `battinfo[docs]` (Sphinx), and `battinfo[dev]` (full test/lint/build toolchain). To convert raw cycler files, install the converter and the plotting libraries with:
 
 ```bash
-pip install "batterydf[nda,excel,mat] @ git+https://github.com/battery-data-alliance/battery-data-format.git@07dd7a6923ae12fba0ea1079c5034883c14ebbf5" matplotlib plotly
+pip install "battinfo[processing]"
 ```
+
+The `processing` extra currently installs the batterydf 0.2 release candidate from PyPI.
 
 **Developing on BattINFO?** This repo uses [uv](https://docs.astral.sh/uv/):
 
@@ -273,9 +270,9 @@ CI runs the same checks across Python 3.11/3.12 on Linux and Windows via the
 
 ## Citation
 
-If you use BattINFO in your research, please cite it. The concept DOI arrives
-with the 0.8 release (the first Zenodo-archived release); the badge above will
-then resolve to a citable record:
+If you use BattINFO in your research, please cite it. The concept DOI
+[10.5281/zenodo.6304782](https://doi.org/10.5281/zenodo.6304782) always resolves to the latest archived release;
+each release also gets its own version DOI on Zenodo.
 
 ```bibtex
 @software{battinfo,
@@ -283,14 +280,14 @@ then resolve to a citable record:
   author       = {Clark, Simon and Friis, Jesper and L{\o}nstad Bleken, Francesca and Flores, Eibar and Stier, Simon and Battaglia, Corsin},
   year         = {2026},
   publisher    = {Zenodo},
-  doi          = {10.5281/zenodo.XXXXXXX},
+  doi          = {10.5281/zenodo.6304782},
   url          = {https://github.com/BIG-MAP/BattINFO}
 }
 ```
 
-> **Maintainers:** mint a Zenodo concept DOI on the first tagged release and
-> replace `zenodo.XXXXXXX` (in the badge and the citation above) with the real
-> identifier.
+> **Maintainers:** publishing a GitHub Release archives it on Zenodo as a new
+> version under this concept DOI. Zenodo takes the metadata, including the
+> author list, from `CITATION.cff`.
 
 ## License
 

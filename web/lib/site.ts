@@ -25,16 +25,16 @@ export const site = {
   ciBadge: "https://github.com/BIG-MAP/BattINFO/actions/workflows/ci.yml/badge.svg?branch=main",
   ciRuns: "https://github.com/BIG-MAP/BattINFO/actions/workflows/ci.yml",
   pypiBadge: "https://img.shields.io/pypi/v/battinfo?label=PyPI&color=0e7c86",
-  // Zenodo concept DOI — set when the 0.8 release is archived (D.1); the proof
+  // Zenodo concept DOI; resolves to the latest archived release. The proof
   // strip renders the badge only when non-empty.
-  doi: "",
+  doi: "10.5281/zenodo.6304782",
   emmo: "https://github.com/emmo-repo/domain-battery",
   emmoElectrochem: "https://github.com/emmo-repo/domain-electrochemistry",
   license: "Apache-2.0",
   // Pinned upstream ontology versions — keep in sync with battinfo.ttl.
   versions: {
-    domainBattery: "0.18.7",
-    domainElectrochemistry: "0.33.0",
+    domainBattery: "0.20.2",
+    domainElectrochemistry: "0.37.2",
     schema: "JSON Schema 2020-12",
   },
 } as const;

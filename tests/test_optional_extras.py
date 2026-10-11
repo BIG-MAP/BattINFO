@@ -2,7 +2,8 @@
 
 pandas/pyarrow/openpyxl ship in the [tabular] extra and rocrate in the [publish]
 extra; feature code imports them lazily through battinfo._util.require_extra so
-the error message cannot drift between call sites.
+the error message cannot drift between call sites. The BDF converter ships in
+the [processing] extra, and its hint is battinfo._util.CONVERTER_INSTALL_HINT.
 
 Absence is simulated by poisoning sys.modules with None: both the import
 statement and importlib.import_module raise ImportError when a module's
@@ -12,6 +13,7 @@ from __future__ import annotations
 
 import sys
 import types
+from pathlib import Path
 
 import pytest
 
@@ -66,3 +68,17 @@ def test_import_discovery_xlsx_names_tabular_extra(monkeypatch: pytest.MonkeyPat
     _poison(monkeypatch, "openpyxl")
     with pytest.raises(ImportError, match=r"pip install battinfo\[tabular\]"):
         import_discovery_xlsx("does-not-matter.xlsx")
+
+
+def test_convert_without_converter_names_processing_extra(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    import battinfo
+
+    _poison(monkeypatch, "bdf")
+    ws = battinfo.workspace(tmp_path, registry_url=None)
+    with pytest.raises(ImportError) as excinfo:
+        ws.convert()
+    message = str(excinfo.value)
+    assert message.endswith('Run: pip install "battinfo[processing]"')
+    assert "git+" not in message

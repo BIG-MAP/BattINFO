@@ -54,7 +54,6 @@ from battinfo.transform.json_to_jsonld import (
     _load_mapping_file,
     _material_name_map,
     _property_type_map,
-    _property_type_term,
     described_iri,
     schema_dimension_nodes,
 )
@@ -403,10 +402,10 @@ def cell_spec_property_nodes(
     """EMMO ``hasProperty`` nodes for a cell-spec ``properties`` mapping.
 
     Emits the shared quantity-node shape and warns (never silently) at the two
-    lossy edges: a key without a curated EMMO mapping is emitted with a
-    non-canonical ``battinfo:`` fallback term (``semantic.property_unmapped``),
-    and a quantity carrying only ``value_text`` emits no numeric part
-    (``semantic.value_text_only``).
+    lossy edges: a key without a curated EMMO mapping gets no quantity class,
+    only its value-basis class with the key as label
+    (``semantic.property_unmapped``), and a quantity carrying only
+    ``value_text`` emits no numeric part (``semantic.value_text_only``).
     """
     nodes: list[dict[str, Any]] = []
     if not isinstance(properties, Mapping):
@@ -418,9 +417,9 @@ def cell_spec_property_nodes(
         if key not in _property_type_map():
             warnings.warn(
                 f"semantic.property_unmapped: '{key}'{where} has no curated EMMO "
-                f"mapping - it is emitted with the non-canonical fallback term "
-                f"'{_property_type_term(str(key))}' in the exported JSON-LD and will "
-                "not survive a round-trip import. File a mapping in "
+                "mapping - the exported JSON-LD gives it no quantity class, only its "
+                "value-basis class (for example ConventionalProperty) with the key as "
+                "its label. File a mapping in "
                 "assets/mappings/domain-battery/property_map.curated.json.",
                 stacklevel=2,
             )

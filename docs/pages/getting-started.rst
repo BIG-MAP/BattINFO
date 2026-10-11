@@ -43,13 +43,8 @@ naming the extra to install):
 
 .. note::
 
-   The ``processing`` extra depends on the BDF converter (``batterydf``),
-   which is not yet published to PyPI, so the extra cannot resolve there
-   today. Until it lands, install the converter from source instead:
-
-   .. code-block:: bash
-
-      pip install "batterydf[nda,excel,mat] @ git+https://github.com/battery-data-alliance/battery-data-format.git@07dd7a6923ae12fba0ea1079c5034883c14ebbf5" matplotlib plotly
+   The ``processing`` extra currently installs the batterydf 0.2 release
+   candidate from PyPI.
 
 
 If you have data: the workspace

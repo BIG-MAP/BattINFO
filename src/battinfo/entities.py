@@ -55,12 +55,20 @@ def cell_instance_identity_seed(
     ``save_cell_instance`` or ``create_cell_instance`` lands on the same IRI
     instead of minting parallel identities per surface.
 
+    The serial number is the cell's identity and the name is display text, so
+    the label part of the seed takes the serial first. Renaming a cell that has
+    a serial keeps its IRI. A cell without a serial is still seeded from its
+    name, then its batch.
+
     Returns ``None`` when the instance carries no distinguishing identity at all
     (no name, serial, or batch) — callers must then fall back to their own
     anonymous policy (e.g. a random uid), because two anonymous but physically
     distinct cells must never silently dedup into one.
     """
-    label = (name or serial_number or batch_id or "").strip()
+    label = next(
+        (value.strip() for value in (serial_number, name, batch_id) if value and value.strip()),
+        "",
+    )
     if not label:
         return None
     return "::".join(
