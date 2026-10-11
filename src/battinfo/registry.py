@@ -659,12 +659,14 @@ class Registry:
 
 _CATALOG_COLUMNS = [
     "dataset_id", "title", "license", "doi",
-    "file_url", "file_name", "media_type", "sha256", "checksum_algorithm", "checksum_value", "size_bytes",
+    "file_url", "file_name", "media_type", "sha256", "size_bytes",
     "test_id", "test_kind",
     "cell_id", "cell_name", "cell_spec_id",
     "manufacturer", "model", "format", "chemistry",
     "positive_electrode_basis", "negative_electrode_basis",
     "nominal_capacity_ah", "nominal_capacity_source",
+    # Added after 0.8 began: appended so the documented column order stays put.
+    "checksum_algorithm", "checksum_value",
 ]
 
 

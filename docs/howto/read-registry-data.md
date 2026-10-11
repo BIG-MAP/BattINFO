@@ -32,11 +32,12 @@ The columns are:
 | Columns | What they hold |
 |---|---|
 | `dataset_id`, `title`, `license`, `doi` | The dataset record |
-| `file_url`, `file_name`, `media_type`, `sha256`, `checksum_algorithm`, `checksum_value`, `size_bytes` | Its measurement file. `checksum_algorithm` and `checksum_value` are the checksum the record states (`sha256`, `md5`, ...); `sha256` is filled only when the algorithm is SHA-256 |
+| `file_url`, `file_name`, `media_type`, `sha256`, `size_bytes` | Its measurement file. `sha256` is filled only when the record states a SHA-256 checksum |
 | `test_id`, `test_kind` | The test that produced it (`cycling`, `capacity_check`, `gitt`, ...) |
 | `cell_id`, `cell_name`, `cell_spec_id` | The physical cell and its spec |
 | `manufacturer`, `model`, `format`, `chemistry`, `positive_electrode_basis`, `negative_electrode_basis` | Cell description |
 | `nominal_capacity_ah`, `nominal_capacity_source` | Stated capacity in Ah, and whether it is the nominal, rated, typical or minimum figure |
+| `checksum_algorithm`, `checksum_value` | The checksum the record states for the file (`sha256`, `md5`, ...), which `download()` and `read()` verify |
 
 A cell with no stated capacity has an empty `nominal_capacity_ah`. Nothing is estimated from the data.
 
