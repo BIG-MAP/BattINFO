@@ -4,6 +4,7 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
 from typer.testing import CliRunner
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -363,3 +364,194 @@ def test_ingest_init_cli_writes_manifest_for_fast_followup(tmp_path: Path) -> No
     inspect_payload = json.loads(inspect_result.stdout)
     assert inspect_payload["type_record"] == str(EXAMPLE_CELL_TYPE)
     assert inspect_payload["license"] == "CC-BY-4.0"
+
+
+# ── Local paths never reach the registry (the C-14 refusal) ───────────────────
+
+
+class _RegistryResponse:
+    """Stand-in for the urlopen() response of a registry that accepts the bundle."""
+
+    def __init__(self, body: dict) -> None:
+        self._body = json.dumps(body).encode("utf-8")
+
+    def getcode(self) -> int:
+        return 200
+
+    def read(self) -> bytes:
+        return self._body
+
+    def __enter__(self) -> "_RegistryResponse":
+        return self
+
+    def __exit__(self, *exc: object) -> None:
+        return None
+
+
+def _accepting_registry(monkeypatch) -> list[dict]:
+    """Patch the registry client's urlopen; the guard in submit_publication_package still runs."""
+    sent: list[dict] = []
+
+    def fake_urlopen(request, timeout=None):  # noqa: ANN001
+        payload = json.loads(request.data.decode("utf-8"))
+        sent.append(payload)
+        mapping = {resource["source_local_id"]: f"{resource['resource_type']}-demo-{index:03d}"
+                   for index, resource in enumerate(payload["resources"], start=1)}
+        return _RegistryResponse({"status": "validated", "canonical_id_map": mapping})
+
+    monkeypatch.setattr("battinfo.api.urlopen", fake_urlopen)
+    return sent
+
+
+def _publish_kwargs(tmp_path: Path) -> dict:
+    return dict(
+        resource_type="cell-instance",
+        type_record=EXAMPLE_CELL_TYPE,
+        resource_iri="https://w3id.org/battinfo/cell/15qn-rpd4-xhy7-kx2q",
+        workspace_root=tmp_path / "workspace",
+        workspace_id="google-g20m7-instance-demo",
+        publisher_id="demo-lab",
+        source_version="demo-2026-04-09",
+        license="CC-BY-4.0",
+        clean=True,
+        registry_base_url="https://registry.example.org",
+        api_key="secret",
+    )
+
+
+def _test_records(payload: dict) -> list[dict]:
+    return [resource["semantic_payload"]["battinfo_records"]["test"]
+            for resource in payload["resources"] if resource["resource_type"] == "test"]
+
+
+def test_publish_with_an_artifact_base_url_sends_no_local_path(tmp_path: Path, monkeypatch) -> None:
+    """The builder writes no local path into a URL field, so no allow_local_files is needed."""
+    from battinfo._util import local_file_references
+
+    ingest_root = _make_ingest_root(tmp_path)
+    sent = _accepting_registry(monkeypatch)
+    result = publish_ingest_workspace(
+        ingest_root, artifact_base_url="https://cdn.example.org/battinfo", **_publish_kwargs(tmp_path),
+    )
+    assert result["status"] == "ok" and len(sent) == 1
+    assert local_file_references(sent[0]) == []
+    cell = next(resource for resource in sent[0]["resources"] if resource["resource_type"] == "cell")
+    assert "source_url" not in cell["semantic_payload"]["battinfo_records"]["cell"]["provenance"]
+    for record in _test_records(sent[0]):
+        provenance = record["provenance"]
+        assert provenance["source_url"].startswith("https://cdn.example.org/battinfo/")
+        assert provenance["source_url"].endswith("/" + provenance["source_file"])
+
+
+def test_publish_with_an_uploader_sends_no_local_path(tmp_path: Path, monkeypatch) -> None:
+    from battinfo._util import local_file_references
+
+    ingest_root = _make_ingest_root(tmp_path)
+    sent = _accepting_registry(monkeypatch)
+    result = publish_ingest_workspace(
+        ingest_root, artifact_uploader=lambda key, path: f"https://store.example.org/{key}",
+        **_publish_kwargs(tmp_path),
+    )
+    assert result["status"] == "ok"
+    assert local_file_references(sent[0]) == []
+    datasets = [resource["semantic_payload"]["battinfo_records"]["dataset"]
+                for resource in sent[0]["resources"] if resource["resource_type"] == "dataset"]
+    assert datasets and all(record["dataset"]["access_url"].startswith("https://store.example.org/")
+                            for record in datasets)
+
+
+def test_publish_without_artifact_urls_is_refused(tmp_path: Path, monkeypatch) -> None:
+    """Without an artifact base URL or uploader the files are local, and the registry refuses them."""
+    ingest_root = _make_ingest_root(tmp_path)
+    sent = _accepting_registry(monkeypatch)
+    with pytest.raises(ValueError, match="allow_local_files=True"):
+        publish_ingest_workspace(ingest_root, **_publish_kwargs(tmp_path))
+    assert sent == []
+
+
+def test_ingest_publish_cli_with_an_artifact_base_url_passes(tmp_path: Path, monkeypatch) -> None:
+    ingest_root = _make_ingest_root(tmp_path)
+    sent = _accepting_registry(monkeypatch)
+    monkeypatch.delenv("BATTINFO_STORAGE_BUCKET", raising=False)
+    result = CliRunner().invoke(
+        app,
+        [
+            "ingest", "publish", str(ingest_root),
+            "--type-record", str(EXAMPLE_CELL_TYPE),
+            "--resource-iri", "https://w3id.org/battinfo/cell/15qn-rpd4-xhy7-kx2q",
+            "--workspace-root", str(tmp_path / "workspace"),
+            "--workspace-id", "google-g20m7-instance-demo",
+            "--publisher-id", "demo-lab",
+            "--source-version", "demo-2026-04-09",
+            "--license", "CC-BY-4.0",
+            "--artifact-base-url", "https://cdn.example.org/battinfo",
+            "--registry-url", "https://registry.example.org",
+            "--api-key", "secret",
+            "--force",
+            "--format", "json",
+        ],
+    )
+    assert result.exit_code == 0, result.stdout
+    assert len(sent) == 1
+
+
+# ── A dataset of two files: each distribution follows its own upload ─────────
+
+
+def _two_file_dataset_package(folder: Path) -> dict:
+    """A submission package with one dataset resource whose record has two files."""
+    folder.mkdir(parents=True, exist_ok=True)
+    first, second = folder / "run.csv", folder / "run-raw.csv"
+    for path in (first, second):
+        path.write_text("time_s,voltage_v\n0,4.20\n", encoding="utf-8")
+    record = {
+        "dataset": {
+            "id": "https://w3id.org/battinfo/dataset/aaaa-bbbb-cccc-dddd",
+            "access_url": first.as_uri(),
+            "distributions": [{"content_url": first.as_uri(), "encoding_format": "text/csv"},
+                              {"content_url": second.as_uri(), "encoding_format": "text/csv"}],
+        },
+        "provenance": {"source_type": "measurement", "source_url": first.as_uri()},
+    }
+    return {"resources": [{
+        "resource_type": "dataset", "source_local_id": "ds-1",
+        "semantic_payload": {"battinfo_records": {"dataset": record}},
+        "distributions": [
+            {"title": "run", "access_url": first.as_uri(), "package_path": "artifacts/dataset/x/run.csv"},
+            {"title": "run raw", "access_url": second.as_uri(), "package_path": "artifacts/dataset/x/run-raw.csv"},
+        ],
+    }]}
+
+
+def _dataset_record(package: dict) -> dict:
+    return package["resources"][0]["semantic_payload"]["battinfo_records"]["dataset"]
+
+
+def test_an_uploader_points_each_distribution_at_its_own_copy(tmp_path: Path) -> None:
+    from battinfo._util import local_file_references
+    from battinfo.ingest import _upload_workspace_artifacts
+
+    package = _two_file_dataset_package(tmp_path / "ingest")
+    _upload_workspace_artifacts(package, tmp_path / "ingest", lambda key, path: f"https://store.example.org/{key}")
+    record = _dataset_record(package)
+    first, second = "https://store.example.org/dataset/x/run.csv", "https://store.example.org/dataset/x/run-raw.csv"
+    assert [item["content_url"] for item in record["dataset"]["distributions"]] == [first, second]
+    assert record["dataset"]["access_url"] == first
+    assert record["provenance"]["source_url"] == first
+    assert local_file_references(package) == []
+
+
+def test_an_artifact_base_url_points_each_distribution_at_its_own_copy(tmp_path: Path) -> None:
+    from battinfo._util import local_file_references
+    from battinfo.ingest import _prepare_live_submission_payload
+
+    package = _two_file_dataset_package(tmp_path / "ingest")
+    _prepare_live_submission_payload(package, artifact_base_url="https://cdn.example.org/battinfo",
+                                     hero_alt="", hero_caption="")
+    record = _dataset_record(package)
+    first, second = ("https://cdn.example.org/battinfo/dataset/x/run.csv",
+                     "https://cdn.example.org/battinfo/dataset/x/run-raw.csv")
+    assert [item["content_url"] for item in record["dataset"]["distributions"]] == [first, second]
+    assert record["dataset"]["access_url"] == first
+    assert record["provenance"]["source_url"] == first
+    assert local_file_references(package) == []

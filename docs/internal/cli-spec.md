@@ -281,7 +281,7 @@ Behavior:
 
 - Generates minimal canonical JSON records suitable for edit + save.
 - Writes to `--out` when provided; otherwise prints JSON to stdout.
-- Defaults use placeholder IRIs/UIDs (`0000-0000-0000-0000`) for easy replacement.
+- No template writes a placeholder IRI. Without `--uid` the record has no `id`, `short_id` or derived identifier, and a reference IRI that was not given (`--cell-spec-id`, `--cell-id`, `--related-cell-id`) is left out; saving the filled-in record mints the IRI. Validation still rejects any record whose own IRI has the all-zero uid (`0000-0000-0000-0000`) that older templates wrote.
 
 ## 6. Publish Commands
 

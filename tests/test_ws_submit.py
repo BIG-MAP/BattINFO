@@ -259,7 +259,8 @@ def test_submit_stamps_staged_mode_on_all_record_kinds(
     _author_full_chain(ws, tmp_path)
     ws.save(validation_policy="strict")
     fake = _patch_registry(monkeypatch, lambda p: _result("validated"))
-    ws.submit(**_CREDS)
+    # The chain's dataset is a local file; the mocked registry stands in for a test registry.
+    ws.submit(allow_local_files=True, **_CREDS)
     assert fake.calls >= 4  # cell_spec, cell, test, dataset (+ test-spec)
     assert all(p["publication_intent"]["mode"] == STAGED_PUBLICATION_MODE for p in fake.payloads)
     assert {p["resource"]["resource_type"] for p in fake.payloads} >= {"cell_spec", "cell", "test", "dataset"}
@@ -657,7 +658,7 @@ def test_submit_sends_a_collection_without_an_empty_distributions_list(
     ws._session_paths.add(path)
 
     fake = _patch_registry(monkeypatch, lambda p: _result("validated"))
-    ws.submit(**_CREDS)
+    ws.submit(allow_local_files=True, **_CREDS)  # the member's file is local; a test registry
 
     sent = [
         record

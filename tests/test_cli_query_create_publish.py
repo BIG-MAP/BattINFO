@@ -657,7 +657,7 @@ def test_init_defaults_to_battery_descriptor_scaffold(tmp_path: Path) -> None:
     assert scaffold_path.exists()
     scaffold = json.loads(scaffold_path.read_text(encoding="utf-8"))
     assert scaffold["schema_version"] == SCHEMA_VERSION
-    assert scaffold["cell_spec"]["id"] == "https://w3id.org/battinfo/spec/0000-0000-0000-0000"
+    assert "id" not in scaffold["cell_spec"]  # no placeholder IRI; saving the filled-in record mints it
     assert scaffold["cell_spec"]["manufacturer"]["name"] == "ExampleManufacturer"
 
 

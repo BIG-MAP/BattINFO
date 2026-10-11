@@ -82,6 +82,23 @@ def _candidate_types(namespace: str) -> list[str]:
 
 
 def _find_record(entity_id: str, source_root: Path) -> tuple[Path, str] | None:
+    """Locate *entity_id* under *source_root*.
+
+    When *source_root* is a workspace's records folder, a record the workspace
+    keeps as a read-only copy of a published one (``.battinfo/references``,
+    written when it resolved the reference in the registry) also resolves.
+    """
+    from battinfo._util import workspace_references_root  # noqa: PLC0415
+
+    found = _find_record_under(entity_id, source_root)
+    if found is None:
+        references = workspace_references_root(source_root)
+        if references is not None and references.is_dir():
+            found = _find_record_under(entity_id, references)
+    return found
+
+
+def _find_record_under(entity_id: str, source_root: Path) -> tuple[Path, str] | None:
     from battinfo._record_index import active_record_cache  # noqa: PLC0415 — avoid import cycle
 
     namespace, uid = _iri_tail(entity_id)
@@ -258,6 +275,12 @@ def validate_references_report(
     policy: ValidationPolicy | str = DEFAULT_POLICY,
     allow_missing: bool = False,
 ) -> ValidationReport:
+    """Check that the records *doc* references exist under *source_root*.
+
+    For a workspace's records folder (``<root>/.battinfo/records``) a reference
+    also resolves to the read-only copy of a published record the workspace
+    keeps in ``<root>/.battinfo/references``.
+    """
     resolved_policy = get_validation_policy(policy) if isinstance(policy, str) else policy
     if resolved_policy.references == "off":
         return ValidationReport(policy=resolved_policy)

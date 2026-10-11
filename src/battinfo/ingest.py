@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from battinfo._jsonio import write_json as _write_json
-from battinfo._util import _as_path
+from battinfo._util import _as_path, is_local_location, local_path, path_name
 from battinfo._workspace import Workspace
 from battinfo.api import submit_publication_package
 from battinfo.validate.schema import build_validator, schema_for_rel_path
@@ -391,30 +391,14 @@ def _prepare_live_submission_payload(
         distributions = resource.get("distributions")
         if not isinstance(distributions, list):
             continue
+        uploaded: dict[str, str] = {}
         for distribution in distributions:
             if not isinstance(distribution, dict):
                 continue
             public_url = _distribution_public_url(distribution.get("package_path"), artifact_base_url)
             if public_url is not None:
                 distribution["access_url"] = public_url
-                if resource.get("resource_type") == "dataset":
-                    semantic_payload = resource.get("semantic_payload")
-                    if isinstance(semantic_payload, dict):
-                        battinfo_records = semantic_payload.get("battinfo_records")
-                        if isinstance(battinfo_records, dict):
-                            dataset_record = battinfo_records.get("dataset")
-                            if isinstance(dataset_record, dict):
-                                dataset_payload = dataset_record.get("dataset")
-                                if isinstance(dataset_payload, dict):
-                                    dataset_payload["access_url"] = public_url
-                                    dataset_distributions = dataset_payload.get("distributions")
-                                    if isinstance(dataset_distributions, list) and dataset_distributions:
-                                        first_distribution = dataset_distributions[0]
-                                        if isinstance(first_distribution, dict):
-                                            first_distribution["content_url"] = public_url
-                                provenance = dataset_record.get("provenance")
-                                if isinstance(provenance, dict):
-                                    provenance["source_url"] = public_url
+                uploaded[_package_file_name(distribution.get("package_path"))] = public_url
             effective_url = public_url or distribution.get("access_url")
             if (
                 resource.get("resource_type") == "dataset"
@@ -423,6 +407,8 @@ def _prepare_live_submission_payload(
             ):
                 photo_dataset_resource = resource
                 photo_public_url = effective_url
+        if resource.get("resource_type") == "dataset":
+            _point_dataset_record_at(resource, uploaded)
 
     if cell_resource is not None and photo_dataset_resource is not None and photo_public_url is not None:
         semantic_payload = cell_resource.get("semantic_payload")
@@ -458,7 +444,90 @@ def _prepare_live_submission_payload(
                     )
                     existing_ids.add(source_local_id)
 
+    _point_test_sources_at_artifacts(submission_payload)
     return submission_payload
+
+
+def _embedded_record(resource: dict[str, Any], key: str) -> dict[str, Any] | None:
+    """The canonical record a submission resource carries under ``battinfo_records[key]``."""
+    semantic_payload = resource.get("semantic_payload")
+    records = semantic_payload.get("battinfo_records") if isinstance(semantic_payload, dict) else None
+    record = records.get(key) if isinstance(records, dict) else None
+    return record if isinstance(record, dict) else None
+
+
+def _package_file_name(package_path: object) -> str:
+    """The file name of a distribution's ``package_path`` (``/`` and ``\\`` alike)."""
+    return path_name(str(package_path or ""))
+
+
+def _point_dataset_record_at(resource: dict[str, Any], uploaded: dict[str, str]) -> None:
+    """Point a dataset resource's embedded record at the uploaded copies of its files.
+
+    *uploaded* maps a file name to the public URL of its uploaded copy. Each
+    location in the record that names a local file (the dataset's access URL,
+    each distribution's content URL, the provenance source URL) is pointed at
+    the uploaded copy of that same file, so a dataset of several files keeps
+    one URL per file. When a single file was uploaded for the dataset, it also
+    stands for a local location that does not name it (the dataset's folder,
+    say).
+    """
+    record = _embedded_record(resource, "dataset")
+    if record is None or not uploaded:
+        return
+    only = next(iter(uploaded.values())) if len(uploaded) == 1 else None
+
+    def public(value: object) -> str | None:
+        if not isinstance(value, str) or not is_local_location(value):
+            return None
+        path = local_path(value)
+        return uploaded.get(path_name(path)) if path is not None and path_name(path) in uploaded else only
+
+    dataset_payload = record.get("dataset")
+    if isinstance(dataset_payload, dict):
+        url = public(dataset_payload.get("access_url"))
+        if url is not None:
+            dataset_payload["access_url"] = url
+        for distribution in dataset_payload.get("distributions") or []:
+            if isinstance(distribution, dict):
+                url = public(distribution.get("content_url"))
+                if url is not None:
+                    distribution["content_url"] = url
+    provenance = record.get("provenance")
+    if isinstance(provenance, dict):
+        url = public(provenance.get("source_url"))
+        if url is not None:
+            provenance["source_url"] = url
+
+
+def _point_test_sources_at_artifacts(submission_payload: dict[str, Any]) -> None:
+    """Give each test record the public URL of the file it was read from.
+
+    The builder names a test's source file only by ``source_file``; once that
+    file has an uploaded (non-local) artifact URL, the URL becomes the test's
+    ``provenance.source_url``. Without one the field stays absent.
+    """
+    public_by_name: dict[str, str] = {}
+    resources = [item for item in submission_payload.get("resources") or [] if isinstance(item, dict)]
+    for resource in resources:
+        if resource.get("resource_type") != "dataset":
+            continue
+        for distribution in resource.get("distributions") or []:
+            if not isinstance(distribution, dict):
+                continue
+            url = distribution.get("access_url")
+            package_path = distribution.get("package_path")
+            if isinstance(url, str) and isinstance(package_path, str) and not is_local_location(url):
+                public_by_name[Path(package_path.replace("\\", "/")).name] = url
+    for resource in resources:
+        if resource.get("resource_type") != "test":
+            continue
+        record = _embedded_record(resource, "test")
+        provenance = record.get("provenance") if record is not None else None
+        if isinstance(provenance, dict):
+            public = public_by_name.get(str(provenance.get("source_file") or ""))
+            if public:
+                provenance["source_url"] = public
 
 
 def build_ingest_workspace(
@@ -522,13 +591,17 @@ def build_ingest_workspace(
             f"resource_type '{resolved_resource_type}' is not implemented yet. Supported today: cell-instance."
         )
 
+    # No URL field gets a local path: the registry would publish it. The cell's
+    # source is the ingest folder, which has no public URL, so it is named by
+    # its folder name only; each test names its file in source_file, and its
+    # source_url is filled in once that file has an uploaded artifact URL
+    # (_point_test_sources_at_artifacts).
     cell_spec_obj = workspace.load_cell_spec(str(inspection["type_record"]))
     cell = workspace.cell(
         cell_spec_obj,
         serial_number=str(inspection["resource_name"]),
         source_type="lab",
-        source_url=ingest_path.resolve().as_uri(),
-        comment=[f"Ingested files sourced from {ingest_path}."],
+        comment=[f"Ingested files sourced from the folder {ingest_path.resolve().name}."],
     )
     cell.name = str(inspection["resource_name"])
     if inspection["resource_iri"] is not None:
@@ -550,7 +623,6 @@ def build_ingest_workspace(
             status="completed",
             started_at=_mtime_to_unix(photo_path),
             source_type="measurement",
-            source_url=photo_path.resolve().as_uri(),
             source_file=photo_path.name,
         )
         workspace.dataset(
@@ -563,7 +635,6 @@ def build_ingest_workspace(
             license=str(inspection["license"]) if inspection["license"] is not None else None,
             created_at=_mtime_to_unix(photo_path),
             source_type="measurement",
-            source_url=photo_path.resolve().as_uri(),
             comment=["Standalone instance photo dataset."],
         )
 
@@ -589,7 +660,6 @@ def build_ingest_workspace(
             status="completed",
             started_at=started_at,
             source_type="measurement",
-            source_url=csv_path.resolve().as_uri(),
             source_file=csv_path.name,
         )
         workspace.dataset(
@@ -602,7 +672,6 @@ def build_ingest_workspace(
             license=str(inspection["license"]) if inspection["license"] is not None else None,
             created_at=_mtime_to_unix(csv_path),
             source_type="measurement",
-            source_url=csv_path.resolve().as_uri(),
             comment=[f"Derived from ingest folder {ingest_path.name}."],
         )
 
@@ -688,6 +757,7 @@ def _upload_workspace_artifacts(
                 continue
 
             extra_distributions: list[dict[str, Any]] = []
+            uploaded: dict[str, str] = {}
 
             for distribution in distributions:
                 if not isinstance(distribution, dict):
@@ -704,6 +774,7 @@ def _upload_workspace_artifacts(
                     continue
                 raw_path = matches[0]
                 distribution["access_url"] = uploader(key, raw_path)
+                uploaded[filename] = distribution["access_url"]
 
                 # Process timeseries distributions when a processor is supplied.
                 # Keys follow the layout dataset/<short_id>/<filename> (or
@@ -783,6 +854,12 @@ def _upload_workspace_artifacts(
                     })
 
             distributions.extend(extra_distributions)
+            if resource.get("resource_type") == "dataset":
+                # The embedded record names the uploaded copies too, one per file,
+                # not the local files.
+                _point_dataset_record_at(resource, uploaded)
+
+    _point_test_sources_at_artifacts(submission_package)
 
 
 def publish_ingest_workspace(
@@ -809,6 +886,7 @@ def publish_ingest_workspace(
     api_key_header: str = "X-Battinfo-API-Key",
     platform_base_url: str | None = None,
     timeout_sec: float = 30.0,
+    allow_local_files: bool = False,
 ) -> dict[str, Any]:
     """Build an ingest workspace and publish it to the registry.
 
@@ -824,6 +902,10 @@ def publish_ingest_workspace(
     ``battinfo[processing]``).  The processor generates a BDF-normalised CSV,
     a static PNG plot, and an interactive HTML plot; all three are uploaded to
     the object store alongside the raw file.
+
+    A package whose files are still local paths is refused before anything is
+    sent (see :func:`battinfo.api.submit_publication_package`); pass
+    ``allow_local_files=True`` only for a local test registry.
     """
     if registry_base_url is None or not registry_base_url.strip():
         raise ValueError("registry_base_url is required for ingest publication.")
@@ -864,6 +946,7 @@ def publish_ingest_workspace(
         api_key=api_key,
         api_key_header=api_key_header,
         timeout_sec=timeout_sec,
+        allow_local_files=allow_local_files,
     )
     response_payload = submit_result.get("response") or {}
     canonical_id_map = response_payload.get("canonical_id_map") if isinstance(response_payload, dict) else {}

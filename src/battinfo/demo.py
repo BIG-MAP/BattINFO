@@ -114,7 +114,13 @@ def run_demo_pipeline(
     timeout_sec: float = 30.0,
     poll_interval_sec: float = 1.0,
     force: bool = False,
+    allow_local_files: bool = False,
 ) -> dict[str, Any]:
+    """Publish the demo package to a registry and check that it resolves.
+
+    The demo dataset is a local file, so the registry refuses it unless
+    ``allow_local_files=True``, which is meant for a local test registry only.
+    """
     demo = setup_demo_environment(
         root,
         registry=registry,
@@ -130,6 +136,7 @@ def run_demo_pipeline(
         api_key=api_key,
         api_key_header=api_key_header,
         timeout_sec=timeout_sec,
+        allow_local_files=allow_local_files,
     )
     response_payload = submission_result.get("response") or {}
     target = _verification_target(submission_payload, response_payload)

@@ -46,7 +46,6 @@ from battinfo.api._shared import (
     MATERIAL_SPEC_IRI_RE,
     REGISTER_MODE_CREATE_ONLY,
     SPEC_IRI_RE,
-    TEMPLATE_UID,
     PathLike,
     _iri_tail,
     _normalized_dashed_uid,
@@ -55,6 +54,7 @@ from battinfo.api._shared import (
     _resolved_retrieved_at,
     _str_eq,
     _validate_canonical_record,
+    _without_minted_identity,
 )
 from battinfo.bundle import SCHEMA_VERSION, stamp_provenance
 from battinfo.canonical_aliases import record_to_snake_aliases
@@ -701,10 +701,14 @@ def create_parameter_set(*, validate: bool = True, **fields: Any) -> dict[str, A
 
 
 def template_parameter_set(
-    *, name: str = "Example source - graphite", uid: str | None = TEMPLATE_UID
+    *, name: str = "Example source - graphite", uid: str | None = None
 ) -> dict[str, Any]:
-    """Build a starter canonical parameter-set document for save workflows."""
-    return _record_from_parameter_set(
+    """Build a starter canonical parameter-set document for save workflows.
+
+    The document has no ``id`` unless *uid* is given; saving it mints the IRI
+    from the filled-in target, scope and name.
+    """
+    record = _record_from_parameter_set(
         name=name,
         uid=uid,
         material_kind="graphite",
@@ -717,6 +721,7 @@ def template_parameter_set(
         ],
         notes=["Template-generated record. Set target/claims/citation before saving."],
     )
+    return record if uid is not None else _without_minted_identity(record)
 
 
 def save_parameter_set(

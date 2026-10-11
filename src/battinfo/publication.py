@@ -27,6 +27,7 @@ from battinfo.bundle import (
     Test,
     ZenodoCellRecord,
 )
+from battinfo.entities import dataset_locator_seed
 from battinfo.jsonld import dataset_series_edges, electrode_role_links, schema_checksum_terms
 from battinfo.validate.core import PUBLISHER_POLICY, ValidationPolicy
 from battinfo.validate.publication import validate_publication_report
@@ -1556,12 +1557,20 @@ def _finalize_dataset(
     if finalized.created_at is None:
         finalized.created_at = _now_unix()
     if finalized.id is None:
+        # Seeded like every other dataset IRI (the workspace and save_dataset): cell,
+        # test, a locator that does not depend on where the folder sits (an explicit
+        # remote URL, otherwise the folder's name; see dataset_locator_seed), and name.
         finalized.id = _entity_iri(
             "dataset",
             "::".join(
                 [
                     _with_default(finalized.cell_instance_id, "unknown-cell"),
-                    dataset_dir.resolve().as_uri(),
+                    finalized.test_id or "",
+                    dataset_locator_seed(
+                        access_url=finalized.access_url,
+                        download_url=finalized.download_url,
+                        dataset_path=dataset_dir,
+                    ),
                     _with_default(finalized.name, dataset_dir.name),
                 ]
             ),
