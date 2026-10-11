@@ -538,10 +538,8 @@ class Registry:
         This is the table to filter before downloading anything. Columns:
 
         - ``dataset_id``, ``title``, ``license``, ``doi``
-        - ``file_url``, ``file_name``, ``media_type``, ``sha256``,
-          ``checksum_algorithm``, ``checksum_value``, ``size_bytes``
-          (the checksum the record states, in any algorithm; ``sha256`` is
-          filled only when that algorithm is SHA-256)
+        - ``file_url``, ``file_name``, ``media_type``, ``sha256``, ``size_bytes``
+          (``sha256`` is filled only when the record states a SHA-256 checksum)
         - ``test_id``, ``test_kind``
         - ``cell_id``, ``cell_name``, ``cell_spec_id``
         - ``manufacturer``, ``model``, ``format``, ``chemistry``,
@@ -549,6 +547,8 @@ class Registry:
         - ``nominal_capacity_ah`` and ``nominal_capacity_source`` (which stated
           capacity it is: nominal, rated, typical or minimum; empty when the
           cell and its spec state none)
+        - ``checksum_algorithm``, ``checksum_value``: the checksum the record
+          states for the file, in any algorithm
 
         Building it reads every dataset record once, which takes a few minutes
         on a large registry. The result is cached and reused until the registry
