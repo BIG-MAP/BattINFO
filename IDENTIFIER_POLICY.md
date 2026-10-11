@@ -350,9 +350,12 @@ semantics — quantities, battery classes, measurement concepts — are
 identified exclusively by their EMMO IRIs (domain-battery /
 domain-electrochemistry). Terms missing from EMMO are added upstream (the
 working queue is `docs/internal/ontology-additions-needed.md`); while a term
-is missing, the value is preserved in the JSON record and omitted from RDF
-with a `semantic.property_unmapped` warning — never bridged with a
-BattINFO-minted IRI.
+is missing, the value is preserved in the JSON record and in RDF, where its
+quantity node carries only its value-basis class (for example
+`ConventionalProperty`) and the record key as `skos:prefLabel`, with a
+`semantic.property_unmapped` warning — never bridged with a BattINFO-minted
+IRI. (Amended 2026-10-11: such values were previously omitted from RDF in
+this text, while the emitter gave them generated `battinfo:` class names.)
 
 In particular, a "thin human-friendly IRI layer" over EMMO (e.g. a readable
 `battinfo:PowerDensity` aliasing an opaque EMMO IRI) is **rejected as

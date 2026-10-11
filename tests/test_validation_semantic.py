@@ -215,13 +215,13 @@ def test_coating_property_unmapped_key_warns_with_coating_path() -> None:
 
 
 def test_property_unmapped_message_matches_transform_reality() -> None:
-    # The transform emits unmapped keys under a battinfo: fallback term — it
-    # does not omit them. The warning must say what actually happens.
+    # The transform keeps unmapped keys, typed by their value basis only and
+    # labelled with the key. The warning must say what actually happens.
     doc = _load_json("src/battinfo/data/examples/cell-spec/A123__ANR26650M1-B.json")
     doc["properties"]["frobnication_index"] = {"value": 1.0, "unit": "%"}
     report = validate_semantic_report(doc, policy=STRICT_SEMANTIC)
     issue = next(i for i in report.issues if i.code == "semantic.property_unmapped")
-    assert "fallback" in issue.message
+    assert "no quantity class" in issue.message
     assert "OMITTED" not in issue.message
 
 

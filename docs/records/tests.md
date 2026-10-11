@@ -404,7 +404,6 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   ],
   "hasMeasurementParameter": {
     "@type": [
-      "battinfo:ambientTemperature",
       "ConventionalProperty"
     ],
     "skos:prefLabel": "ambient_temperature",

@@ -33,9 +33,9 @@ inventory. Known non-emitting sites are allowlisted:
 
   * READER_FALLBACK_TERMS — terms only *read* for back-compat with previously
     published packages / dataframes, never emitted.
-  * DYNAMIC_MINT_FILES — the one deliberate dynamic mint: the unmapped-property
-    fallback (_property_type_term), which warns `semantic.property_unmapped`
-    at emit time and is by definition not enumerable here.
+  * DYNAMIC_MINT_FILES — files allowed to mint battinfo: terms dynamically.
+    Empty: an unmapped property key is typed by its value-basis class only and
+    warns `semantic.property_unmapped`; no class name is ever generated.
 
 Serving: w3id.org/battinfo/<term> should resolve to this document (W2 routing
 work); the namespace is the SLASH form by decision — the hash form belongs to
@@ -88,7 +88,7 @@ READER_FALLBACK_TERMS = {
 # Files allowed to contain a dynamic (f-string) battinfo: mint. Exactly one is
 # sanctioned: the unmapped-property fallback term, which is warned at emit time
 # (semantic.property_unmapped) and documented as non-canonical.
-DYNAMIC_MINT_FILES = {"transform/json_to_jsonld.py"}
+DYNAMIC_MINT_FILES: set[str] = set()
 
 # ── Static section: genuinely-local residue terms ─────────────────────────────
 # term -> hand-written rdfs:comment. Add a term here ONLY if it is truly local
@@ -189,8 +189,8 @@ def check_honesty(placeholders: dict[str, list[str]]) -> None:
     if rogue_dynamic:
         raise SystemExit(
             "gen_battinfo_vocab: unsanctioned dynamic battinfo: mint (f-string) "
-            f"in: {sorted(rogue_dynamic)}. Only the warned unmapped-property "
-            "fallback in transform/json_to_jsonld.py is allowed."
+            f"in: {sorted(rogue_dynamic)}. BattINFO never generates class or "
+            "property names; map the key to an EMMO class instead."
         )
 
 
