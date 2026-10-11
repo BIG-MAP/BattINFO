@@ -9,7 +9,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
-- **A BPX file published to the genome is addressed by its content and carries itself.** Records imported with `from_bpx_parameters` now mint their uids from the SHA-256 of the file's canonical JSON (`bpx_content_digest`) instead of from names and targets, so the same file lands on the same IRIs (a re-indented or CRLF copy included) and any changed value mints new ones (IDENTIFIER_POLICY 6.3, amended). `to_records(distributions=[...])` attaches the file to the set record: role `source` is the file as its authors published it, role `runnable` an optional declared conversion, each with its sha256, the BPX version it follows and the checks run on it. Three helpers come with it: `bpx_file_distribution` builds an entry from a file, `upgrade_bpx` rewrites a BPX 1.0-layout document in the 1.1 layout (temperatures and the initial electrolyte concentration move to `State`; no value changes), and `check_bpx` records whether the official `bpx` parser accepts a file. In JSON-LD each file is a `schema:DataDownload` with `dcterms:conformsTo` and `schema:sha256`, and a conversion points at its source with `prov:wasDerivedFrom`. The claims stay an index for search and collation; a solver handed the set's IRI reads the file.
+- **A BPX file published to the genome is addressed by its parameters and carries itself.** Records imported with `from_bpx_parameters` now mint their uids from the SHA-256 of the file's canonical JSON (`bpx_content_digest`) instead of from names and targets. Canonical means RFC 8785, the JSON Canonicalization Scheme, so the IRI names the parameters rather than the bytes: a re-indented or CRLF copy lands on the same IRIs, and so does a copy written by another JSON library that spells `1.0` as `1` or `1e-05` as `0.00001`. Any changed value mints new ones (IDENTIFIER_POLICY 6.3, amended). The canonicaliser is vendored in `battinfo._jcs` rather than added as a dependency; numpy values in a dict count as the numbers they hold, and a NaN or an infinity raises `ValueError` with its key path. `to_records(distributions=[...])` attaches the file to the set record: role `source` is the file as its authors published it, role `runnable` an optional declared conversion, each with its sha256, the BPX version it follows and the checks run on it. Three helpers come with it. `bpx_file_distribution` builds an entry from a file. `upgrade_bpx` rewrites a file that declares BPX 1.0 or later but still uses the v0.x layout, as the BattMo export of Schmitt et al. 2026 does: the temperatures and the initial electrolyte concentration move to `State`, a Cell thermal conductivity moves to `User-defined`, and no value changes. It recognises the old layout by its fields, whatever version the file declares. `check_bpx` records whether the official `bpx` parser accepts a file, along with every warning the parser raises. In JSON-LD each file is a `schema:DataDownload` with `dcterms:conformsTo` and `schema:sha256`, and a conversion points at its source with `prov:wasDerivedFrom`. The claims stay an index for search and collation; a solver handed the set's IRI reads the file.
 
 - **Research titles lead with their source.** `battinfo.naming.title_for()` takes `source=` (author and year), so a title reads `Flores 2026 graphite AQ-1 electrode spec` and stays distinguishable among many graphite records. A common-word subject loses its capital after the source; abbreviations keep theirs. Products keep their manufacturer-and-model titles, and a collection's label names its source.
 
@@ -160,11 +160,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
     The new default `"auto"` keeps the value carried by cell extras and
     applies the convention only when nothing provides the field; an
     explicit float still forces, `None` still omits.
-  - *BPX 1.1 State import (F3):* `from_bpx` / `from_bpx_parameters` now
-    fold a top-level `State` block back into its 1.0 homes (initial and
+  - *BPX v1 State import (F3):* `from_bpx` / `from_bpx_parameters` now
+    fold a top-level `State` block back into its v0.x homes (initial and
     ambient temperature to Cell extras, initial electrolyte concentration
     to an `initial_concentration` claim) — the exact inverse of the
-    export-side relocation, so 1.1 → records → 1.1 round-trips with state
+    export-side relocation, so v1 → records → v1 round-trips with state
     values intact. Unrecognized State entries are skipped by NAME, never
     silently.
   - *Inline JSON-LD context (F4):* inline emission now embeds the
@@ -285,9 +285,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   `Header.Model` taken from the source's own model context (battinfo's
   tier contracts require more than a BPX DFN file carries, so deriving
   from tiers alone would demote an honest DFN source; the tier heuristic
-  is the fallback). Exports declaring BPX >= 1.1 follow the 1.1 layout
+  is the fallback). Exports declaring BPX 1.0 or later follow the v1 layout
   (temperatures and initial electrolyte concentration move to the State
-  section), and the official `bpx` parser accepts the result - pinned in
+  section, a Cell thermal conductivity to User-defined), and the official
+  `bpx` parser accepts the result - pinned in
   CI with `bpx` as a dev dependency. Per-source only, deliberately: a
   calibration is a joint estimate, and mixing sources across blocks
   would produce a file no validation supports.

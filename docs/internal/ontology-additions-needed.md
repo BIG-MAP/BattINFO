@@ -203,7 +203,7 @@ the curated map at it.
 | Wanted term | Parameter key | Notes |
 |---|---|---|
 | **`TransportEfficiency`** | `transport_efficiency` | BPX defines it operationally as ε^p (porosity to the Bruggeman exponent). `BruggemanCoefficient` exists upstream but is the *exponent* — a different quantity. Because the definition is BPX's convention, the BPX application ontology is the honest home; a domain-battery `EffectiveTransportRatio` would also serve if preferred. |
-| **`InitialConcentration`** | `initial_concentration` | An initial condition of the simulation (BPX ≥ 1.1 State family: initial temperature, initial SOC, initial concentrations), not a property of any material. Model-state quantities belong with the model standard. |
+| **`InitialConcentration`** | `initial_concentration` | An initial condition of the simulation (BPX ≥ 1.0 State family: initial temperature, initial SOC, initial concentrations), not a property of any material. Model-state quantities belong with the model standard. |
 | *(optional)* BPX-normalized `ReactionRateConstant` subclass | `reaction_rate_constant` | BPX's rate constant carries mol·m⁻²·s⁻¹ — a normalization convention of the standard. The generic `ReactionRateConstant` elucidation is dimensionally uncommitted, so the interim curated mapping to it (wired 2026-09-20) is defensible; a BPX-scoped subclass would make the convention explicit. |
 
 **Bridge-axiom pattern (ratified with the depth rule).** Every BPX-app-ontology

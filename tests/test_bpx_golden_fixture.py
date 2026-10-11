@@ -13,10 +13,12 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from battinfo.interop import from_bpx, from_bpx_parameters  # noqa: E402
+from battinfo.interop import from_bpx, from_bpx_parameters, upgrade_bpx  # noqa: E402
 
 FIXTURE = ROOT / "tests" / "fixtures" / "interop" / "bpx-dfn-full.bpx.json"
 
@@ -118,7 +120,8 @@ def test_round_trip_export_reproduces_the_physics_exactly() -> None:
     """The Phase 1 conformance contract: import(export(x)) is exact on the
     physics blocks and User-defined (claims export at full precision), with
     only the declared Cell-block deltas (temperatures and pair count are
-    model conventions / unhomed; spec-derived values pass through sig-6)."""
+    model conventions / unhomed; spec-derived values pass through sig-6) and
+    the layout the declared BPX version requires."""
     import pytest
 
     from battinfo.interop.bpx import to_bpx
@@ -145,7 +148,11 @@ def test_round_trip_export_reproduces_the_physics_exactly() -> None:
 
     out = to_bpx(spec_record, parameter_sets=by_block, cell_extras=cell.extras)
     exported = out.bpx["Parameterisation"]
-    original = doc["Parameterisation"]
+    # The fixture, like the BattMo export it mirrors, declares BPX 1.0 but
+    # keeps the v0.x layout. The export declares the same version and follows
+    # that version's real layout, so the reference is the fixture moved into it.
+    reference = upgrade_bpx(doc).document
+    original = reference["Parameterisation"]
 
     # Physics: exact, full precision — no rounding of claim values, ever.
     for block in ("Negative electrode", "Positive electrode", "Separator", "Electrolyte"):
@@ -158,6 +165,7 @@ def test_round_trip_export_reproduces_the_physics_exactly() -> None:
     assert set(exported["Cell"]) == set(original["Cell"])
     for key, value in original["Cell"].items():
         assert exported["Cell"][key] == pytest.approx(value, rel=1e-6), key
+    assert out.bpx["State"] == reference["State"]
 
     # Header lineage: the source's own model context wins (battinfo's tier
     # contracts require MORE than a BPX DFN file carries, so deriving from
@@ -169,9 +177,10 @@ def test_round_trip_export_reproduces_the_physics_exactly() -> None:
     assert not out.missing_required
 
 
-def test_exported_document_validates_with_the_bpx_package() -> None:
+@pytest.mark.parametrize("bpx_version", ["1.0", "1.1"])
+def test_exported_document_validates_with_the_bpx_package(bpx_version: str) -> None:
     """The export drives real tools: the official bpx parser accepts it."""
-    bpx_lib = __import__("pytest").importorskip("bpx")
+    bpx_lib = pytest.importorskip("bpx")
 
     cell = from_bpx(FIXTURE)
     spec_record = {
@@ -186,10 +195,10 @@ def test_exported_document_validates_with_the_bpx_package() -> None:
     )
     from battinfo.interop.bpx import to_bpx
 
-    # Target the current standard's layout: 1.1 moved the state-like fields
-    # (temperatures, initial concentration) into the State section.
+    # Every v1 version uses the layout BPX 1.0 introduced: the state-like
+    # fields (temperatures, initial concentration) live in the State section.
     out = to_bpx(
-        spec_record, parameter_sets=by_block, cell_extras=cell.extras, bpx_version="1.1"
+        spec_record, parameter_sets=by_block, cell_extras=cell.extras, bpx_version=bpx_version
     )
     assert "State" in out.bpx
     parsed = bpx_lib.parse_bpx_obj(out.bpx)
@@ -254,7 +263,8 @@ def test_set_round_trip_from_saved_records(tmp_path) -> None:
         "properties": cell.specs,
     }
     out = to_bpx(spec_record, parameter_sets=loaded, cell_extras=cell.extras)
-    original = _doc()["Parameterisation"]
+    # Exported at the fixture's declared BPX 1.0, so in the v1 layout.
+    original = upgrade_bpx(_doc()).document["Parameterisation"]
     for block in ("Negative electrode", "Positive electrode", "Separator", "Electrolyte"):
         assert out.bpx["Parameterisation"][block] == original[block], block
     assert out.bpx["Parameterisation"]["User-defined"] == original["User-defined"]
@@ -324,9 +334,10 @@ def test_emitted_jsonld_uses_the_records_context_and_absolute_license() -> None:
     assert not unresolved, f"terms missing from the inline records context: {unresolved}"
 
 
-def _as_1_1(doc: dict) -> dict:
-    """Derive the same document in BPX >= 1.1 layout: the temperatures and the
-    initial electrolyte concentration move into the top-level State block."""
+def _as_v1(doc: dict) -> dict:
+    """Derive the same document in the BPX v1 layout (1.0 and later): the
+    temperatures and the initial electrolyte concentration move into the
+    top-level State block."""
     import copy
 
     d = copy.deepcopy(doc)
@@ -377,12 +388,12 @@ def test_reference_temperature_survives_the_round_trip() -> None:
     assert "Reference temperature [K]" not in out_none.bpx["Parameterisation"]["Cell"]
 
 
-def test_bpx_1_1_state_round_trips() -> None:
-    """A BPX >= 1.1 State block is imported, not discarded, and re-emitted
-    with its values intact: 1.1 -> records -> 1.1 (0.8.0 review F3)."""
+def test_bpx_v1_state_round_trips() -> None:
+    """A BPX >= 1.0 State block is imported, not discarded, and re-emitted
+    with its values intact: v1 -> records -> v1 (0.8.0 review F3)."""
     from battinfo.interop.bpx import to_bpx
 
-    doc = _as_1_1(_doc())
+    doc = _as_v1(_doc())
     original_state = json.loads(json.dumps(doc["State"]))
 
     cell = from_bpx(doc)
@@ -424,7 +435,7 @@ def test_bpx_1_1_state_round_trips() -> None:
 def test_unknown_state_entries_are_named_never_dropped() -> None:
     """Drop-nothing-silently extends to State: entries with no BattINFO home
     are skipped by NAME."""
-    doc = _as_1_1(_doc())
+    doc = _as_v1(_doc())
     doc["State"]["Initial conditions"]["Initial state of charge"] = 0.5
     doc["State"]["Magic"] = {"x": 1}
 

@@ -22,12 +22,14 @@ import copy
 import hashlib
 import json
 import math
+import sys
 import warnings as _warnings
 from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
 from typing import Any, Mapping
 
+from battinfo._jcs import canonical_json_bytes
 from battinfo.entities import stable_uid
 from battinfo.interop._common import load_json_source
 
@@ -226,12 +228,13 @@ def _extract_specs(
 def _fold_state_block(
     data: Mapping[str, Any], warnings: list[str]
 ) -> tuple[dict[str, Any], dict[str, Any]]:
-    """Fold a BPX >= 1.1 top-level ``State`` block back into its 1.0 homes.
+    """Fold a BPX >= 1.0 top-level ``State`` block back into its v0.x homes.
 
-    The exact inverse of :func:`_relocate_state_fields_1_1`: initial/ambient
-    temperatures return to the Cell block (where the importer carries them as
-    verbatim extras) and the initial electrolyte concentration returns to the
-    Electrolyte block (where it becomes an ``initial_concentration`` claim).
+    The inverse of the State moves in :func:`_relocate_to_v1_layout`:
+    initial/ambient temperatures return to the Cell block (where the importer
+    carries them as verbatim extras) and the initial electrolyte concentration
+    returns to the Electrolyte block (where it becomes an
+    ``initial_concentration`` claim).
     Returns ``(cell_fields, electrolyte_fields)``; anything unrecognized is
     named in a warning — never dropped silently.
     """
@@ -347,9 +350,9 @@ def from_bpx(
     else:
         cell_params = dict(cell_params_raw)
 
-    # BPX >= 1.1 moves the temperatures into a top-level State block; fold
-    # them back so they ride the extras path like their 1.0 counterparts
-    # (and re-emit into State on a >= 1.1 export). Explicit Cell values win.
+    # BPX >= 1.0 moves the temperatures into a top-level State block; fold
+    # them back so they ride the extras path like their v0.x counterparts
+    # (and re-emit into State on a >= 1.0 export). Explicit Cell values win.
     state_cell_fields, _state_electrolyte = _fold_state_block(data, warnings)
     for state_key, state_value in state_cell_fields.items():
         cell_params.setdefault(state_key, state_value)
@@ -594,7 +597,11 @@ def to_bpx(
         for a spec-only export. Use ``"SPMe"`` / ``"DFN"`` only once the physics
         sections have been completed downstream.
     bpx_version:
-        Value stamped into ``Header.BPX``.
+        Value stamped into ``Header.BPX``. The document follows that
+        version's layout: from 1.0 on, the temperatures and the initial
+        electrolyte concentration go in the ``State`` block and a Cell
+        thermal conductivity goes in ``User-defined``; a 0.x version keeps
+        them in Cell and Electrolyte.
     reference_temperature_k:
         ``"Reference temperature [K]"`` handling. The default ``"auto"``
         keeps a value carried by ``cell_extras`` (so a round-tripped file
@@ -781,20 +788,21 @@ def to_bpx(
     if annex:
         parameterisation["User-defined"] = annex
 
-    # BPX >= 1.1 moved the state-like fields out of Cell/Electrolyte into a
-    # top-level State section (Initial conditions / Thermal environment); the
-    # 1.1 parser rejects the old placement, so the export follows the layout
-    # of the version it declares.
-    state_block: dict[str, Any] = {}
-    if _bpx_version_tuple(resolved_version) >= (1, 1):
-        state_block = _relocate_state_fields_1_1(parameterisation)
-
     bpx_doc: dict[str, Any] = {
         "Header": header,
         "Parameterisation": parameterisation,
     }
-    if state_block:
-        bpx_doc["State"] = state_block
+    # BPX 1.0 moved the state-like fields out of Cell/Electrolyte into a
+    # top-level State section (Initial conditions / Thermal environment) and
+    # took the lumped thermal conductivity out of Cell; every bpx parser since
+    # rejects the old placement, so the export follows the layout of the
+    # version it declares.
+    if _uses_v1_layout(resolved_version):
+        for change in _relocate_to_v1_layout(bpx_doc):
+            if change.startswith(f"Cell.{_THERMAL_CONDUCTIVITY}"):
+                warnings.append(
+                    f"BPX {resolved_version} has no Cell thermal conductivity: {change}."
+                )
 
     return BpxExportResult(
         bpx=bpx_doc,
@@ -988,26 +996,127 @@ def _bpx_version_tuple(version: Any) -> tuple[int, ...]:
     return tuple(parts)
 
 
-def _relocate_state_fields_1_1(parameterisation: dict[str, Any]) -> dict[str, Any]:
-    """Move BPX 1.1 State fields out of Cell/Electrolyte, returning the State block."""
-    initial_conditions: dict[str, Any] = {}
-    thermal: dict[str, Any] = {}
-    cell = parameterisation.get("Cell") or {}
-    if "Initial temperature [K]" in cell:
-        initial_conditions["Initial temperature [K]"] = cell.pop("Initial temperature [K]")
-    if "Ambient temperature [K]" in cell:
-        thermal["Ambient temperature [K]"] = cell.pop("Ambient temperature [K]")
-    electrolyte = parameterisation.get("Electrolyte") or {}
-    if "Initial concentration [mol.m-3]" in electrolyte:
-        initial_conditions["Initial electrolyte concentration [mol.m-3]"] = electrolyte.pop(
-            "Initial concentration [mol.m-3]"
-        )
-    state: dict[str, Any] = {}
-    if initial_conditions:
-        state["Initial conditions"] = initial_conditions
-    if thermal:
-        state["Thermal environment"] = thermal
-    return state
+def _uses_v1_layout(version: Any) -> bool:
+    """Whether a declared BPX version means the v1 layout (major version 1 or later).
+
+    The same cut the official parser makes (``bpx._migrations.is_legacy_bpx``):
+    the State block arrived with BPX 1.0, not 1.1.
+    """
+    parts = _bpx_version_tuple(version)
+    return bool(parts) and parts[0] >= 1
+
+
+# The fields BPX 1.0 moved out of Parameterisation into the top-level State
+# block: (block, v0.x key, State section, v1 key).
+_V1_STATE_MOVES: tuple[tuple[str, str, str, str], ...] = (
+    ("Cell", "Initial temperature [K]", "Initial conditions", "Initial temperature [K]"),
+    ("Cell", "Ambient temperature [K]", "Thermal environment", "Ambient temperature [K]"),
+    (
+        "Electrolyte",
+        "Initial concentration [mol.m-3]",
+        "Initial conditions",
+        "Initial electrolyte concentration [mol.m-3]",
+    ),
+)
+
+# Cell's lumped thermal conductivity is not part of the BPX 1.0+ schema; the
+# parser asks for it in User-defined instead, under the same key.
+_THERMAL_CONDUCTIVITY = "Thermal conductivity [W.m-1.K-1]"
+
+
+def _v0_layout_fields(document: Mapping[str, Any]) -> list[str]:
+    """The fields of ``document`` that sit where only the v0.x layout puts them."""
+    parameterisation = document.get("Parameterisation")
+    if not isinstance(parameterisation, Mapping):
+        return []
+    found: list[str] = []
+    for block_name, key, _section, _new_key in _V1_STATE_MOVES:
+        block = parameterisation.get(block_name)
+        if isinstance(block, Mapping) and key in block:
+            found.append(f"{block_name}.{key}")
+    cell = parameterisation.get("Cell")
+    if isinstance(cell, Mapping) and _THERMAL_CONDUCTIVITY in cell:
+        found.append(f"Cell.{_THERMAL_CONDUCTIVITY}")
+    return found
+
+
+def _json_kind(value: Any) -> str:
+    """How a JSON value reads in an error message: null, an array, a string, ..."""
+    if value is None:
+        return "null"
+    if isinstance(value, bool):
+        return "a boolean"
+    if isinstance(value, (int, float)):
+        return "a number"
+    if isinstance(value, str):
+        return "a string"
+    if isinstance(value, (list, tuple)):
+        return "an array"
+    return f"a {type(value).__name__}"
+
+
+def _relocate_to_v1_layout(document: dict[str, Any]) -> list[str]:
+    """Move the fields BPX 1.0 relocated, in place, and say what moved.
+
+    Initial and ambient temperatures leave Cell and the initial electrolyte
+    concentration leaves Electrolyte (renamed), all for the top-level State
+    block; Cell's thermal conductivity goes to User-defined under the same
+    key. Values are moved as they are. A State field that is already set is
+    refused, and so is a User-defined thermal conductivity that differs from
+    Cell's: there is no right one to pick.
+    """
+    parameterisation = document.get("Parameterisation")
+    if not isinstance(parameterisation, dict):
+        return []
+    changes: list[str] = []
+    for block_name, key, section, new_key in _V1_STATE_MOVES:
+        block = parameterisation.get(block_name)
+        if not isinstance(block, dict) or key not in block:
+            continue
+        state = document.setdefault("State", {})
+        if not isinstance(state, dict):
+            raise ValueError(
+                f"BPX State is {_json_kind(state)}, not an object, so {block_name}.{key} "
+                "cannot move into it. Make State an object (or remove it) and try again."
+            )
+        target = state.setdefault(section, {})
+        if not isinstance(target, dict):
+            raise ValueError(
+                f"BPX State.{section} is {_json_kind(target)}, not an object, so "
+                f"{block_name}.{key} cannot move into it. Make State.{section} an "
+                "object (or remove it) and try again."
+            )
+        if new_key in target:
+            raise ValueError(
+                f"BPX State.{section}.{new_key} is set both in State and as "
+                f"{block_name}.{key}; refusing to choose between them."
+            )
+        target[new_key] = block.pop(key)
+        changes.append(f"{block_name}.{key} -> State.{section}.{new_key}")
+
+    cell = parameterisation.get("Cell")
+    if isinstance(cell, dict) and _THERMAL_CONDUCTIVITY in cell:
+        user_defined = parameterisation.setdefault("User-defined", {})
+        if not isinstance(user_defined, dict):
+            raise ValueError(
+                f"BPX User-defined is {_json_kind(user_defined)}, not an object, so "
+                f"Cell.{_THERMAL_CONDUCTIVITY} cannot move into it."
+            )
+        value = cell.pop(_THERMAL_CONDUCTIVITY)
+        if _THERMAL_CONDUCTIVITY not in user_defined:
+            user_defined[_THERMAL_CONDUCTIVITY] = value
+            changes.append(f"Cell.{_THERMAL_CONDUCTIVITY} -> User-defined.{_THERMAL_CONDUCTIVITY}")
+        elif user_defined[_THERMAL_CONDUCTIVITY] == value:
+            changes.append(
+                f"Cell.{_THERMAL_CONDUCTIVITY} dropped: User-defined already holds the same value"
+            )
+        else:
+            raise ValueError(
+                f"BPX Cell.{_THERMAL_CONDUCTIVITY} is {value!r} but User-defined holds "
+                f"{user_defined[_THERMAL_CONDUCTIVITY]!r} under the same key; refusing to "
+                "choose between them."
+            )
+    return changes
 
 
 def save_bpx(source: Any, path: PathLike, **kwargs: Any) -> Path:
@@ -1076,21 +1185,33 @@ _BPX_PARAMETER_SECTIONS = frozenset(
 
 
 def bpx_content_digest(source: Mapping[str, Any] | str | Path) -> str:
-    """SHA-256 of a BPX document's canonical JSON: the identity of a parameter file.
+    """SHA-256 of a BPX document's canonical JSON: the identity of its parameters.
 
-    Canonical means sorted keys, no insignificant whitespace, UTF-8. A
-    re-indented copy or a CRLF checkout of the same file has the same digest;
-    any changed value changes it. Records imported from the file mint their
-    uids from this digest (IDENTIFIER_POLICY 6.3).
+    Canonical is RFC 8785 (JSON Canonicalization Scheme): numbers written the
+    way ECMAScript writes doubles, keys sorted by UTF-16 code units, minimal
+    string escaping, no whitespace, UTF-8. The digest names the parameters,
+    not the bytes: a re-indented, reordered or CRLF copy has the same digest,
+    and so does one that spells a number differently (``1`` or ``1.0``,
+    ``1e-05`` or ``0.00001``, ``-0.0`` or ``0``), as a file passed through
+    another JSON library will. Any changed value changes it. Records imported
+    from the file mint their uids from this digest (IDENTIFIER_POLICY 6.3).
+
+    numpy scalars and arrays in a dict input count as the values they hold.
+    NaN and infinities have no JSON form, so they raise ``ValueError`` naming
+    where they are.
     """
     data, _ = _load_bpx(source)
-    canonical = json.dumps(data, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
-    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+    return hashlib.sha256(canonical_json_bytes(data)).hexdigest()
 
 
 @dataclass
 class BpxUpgradeResult:
-    """Result of :func:`upgrade_bpx`: the rewritten document and what moved."""
+    """Result of :func:`upgrade_bpx`: the rewritten document and what moved.
+
+    ``source_version`` is ``Header.BPX`` as the file declared it;
+    ``target_version`` is what the rewritten file declares (the same when
+    nothing needed rewriting).
+    """
 
     document: dict[str, Any]
     source_version: str | None
@@ -1103,10 +1224,15 @@ class BpxUpgradeResult:
 
     def conversion_note(self, tool: str) -> str:
         """One line for a runnable distribution's ``conversion`` field."""
-        moved = "; ".join(self.changes) if self.changes else "no changes"
+        if not self.changes:
+            return (
+                f"BPX {self.source_version} file already in the BPX v1 layout; "
+                f"nothing rewritten by {tool}."
+            )
         return (
-            f"BPX {self.source_version} layout rewritten as BPX {self.target_version} "
-            f"by {tool}: {moved}. No values changed."
+            f"BPX v0.x layout declared as BPX {self.source_version}, rewritten in the "
+            f"BPX v1 layout as BPX {self.target_version} by {tool}: "
+            f"{'; '.join(self.changes)}. No values changed."
         )
 
     def to_json(self, *, indent: int | None = 2) -> str:
@@ -1121,18 +1247,35 @@ class BpxUpgradeResult:
 def upgrade_bpx(
     source: Mapping[str, Any] | str | Path, *, target_version: str = "1.1.0"
 ) -> BpxUpgradeResult:
-    """Rewrite a BPX 1.0-layout document in the 1.1 layout, values untouched.
+    """Rewrite a v1 file that still uses the v0.x layout in the v1 layout, values untouched.
 
-    BPX 1.1 moved the initial and ambient temperatures out of ``Cell`` and the
+    BPX 1.0 moved the initial and ambient temperatures out of ``Cell`` and the
     initial electrolyte concentration out of ``Electrolyte`` into a top-level
-    ``State`` block, and the 1.1 parser rejects files that still carry them in
-    the old places. This moves exactly those fields and sets ``Header.BPX``;
-    every value is copied as-is. A document already at 1.1 or later comes back
-    unchanged. BPX 0.x files are converted by the bpx package itself
-    (``bpx.convert_v0_to_v1``), so they are refused here.
+    ``State`` block, and took Cell's lumped thermal conductivity out of the
+    schema (the parser asks for it in ``User-defined``). Every parser since
+    1.0 rejects a file that declares 1.0 or later but keeps those fields in
+    the old places, and some exporters write exactly that (the BattMo export
+    of Schmitt et al. 2026 declares ``"BPX": 1.0``). This moves those fields
+    and nothing else, sets ``Header.BPX`` to ``target_version``, and copies
+    every value as-is.
+
+    The old layout is recognised by its fields, not by the declared version,
+    so a file declaring 1.1 with its temperatures still in Cell is rewritten
+    too, and a document already in the v1 layout comes back unchanged. Files
+    that declare 0.x are refused: the bpx package converts those itself
+    (``bpx.convert_v0_to_v1``, or parsing with ``convert_legacy=True``) and
+    fills in State values a 0.x file never had.
     """
-    if _bpx_version_tuple(target_version)[:2] != (1, 1):
-        raise ValueError(f"upgrade_bpx only targets BPX 1.1.x; got {target_version!r}.")
+    target_parts = _bpx_version_tuple(target_version)
+    if (
+        len(target_parts) < 2
+        or target_parts[0] != 1
+        or ".".join(map(str, target_parts)) != str(target_version)
+    ):
+        raise ValueError(
+            f"upgrade_bpx writes the BPX 1.x layout; target_version must be a 1.x "
+            f"version such as '1.1.0', got {target_version!r}."
+        )
     data, _ = _load_bpx(source)
     document = copy.deepcopy(data)
     header = document.get("Header")
@@ -1148,48 +1291,33 @@ def upgrade_bpx(
             f"BPX {source_label} is a 0.x file; the bpx package converts those itself "
             "(bpx.convert_v0_to_v1, or parse with convert_legacy=True)."
         )
-    if version[:2] >= (1, 1):
+    old_fields = _v0_layout_fields(document)
+    if not old_fields:
         return BpxUpgradeResult(document, source_label, source_label, [])
+    if version[0] > 1:
+        raise ValueError(
+            f"BPX {source_label} declares a version newer than the 1.x layout upgrade_bpx "
+            f"knows, yet holds v0.x fields ({', '.join(old_fields)}); refusing to guess."
+        )
 
-    changes: list[str] = []
-    parameterisation = document.get("Parameterisation")
-    if isinstance(parameterisation, dict):
-        before_cell = set((parameterisation.get("Cell") or {}).keys())
-        before_electrolyte = set((parameterisation.get("Electrolyte") or {}).keys())
-        moved = _relocate_state_fields_1_1(parameterisation)
-        if moved:
-            state = document.setdefault("State", {})
-            for section, fields in moved.items():
-                target = state.setdefault(section, {})
-                for key, value in fields.items():
-                    if key in target:
-                        raise ValueError(
-                            f"BPX State.{section}.{key} is set both in State and in the "
-                            "1.0 location; refusing to choose between them."
-                        )
-                    target[key] = value
-            after_cell = set((parameterisation.get("Cell") or {}).keys())
-            after_electrolyte = set((parameterisation.get("Electrolyte") or {}).keys())
-            for key in sorted(before_cell - after_cell):
-                section = "Initial conditions" if key.startswith("Initial") else "Thermal environment"
-                changes.append(f"Cell.{key} -> State.{section}.{key}")
-            for key in sorted(before_electrolyte - after_electrolyte):
-                changes.append(
-                    f"Electrolyte.{key} -> State.Initial conditions."
-                    "Initial electrolyte concentration [mol.m-3]"
-                )
-    header["BPX"] = target_version
-    changes.append(f"Header.BPX {source_label} -> {target_version}")
+    changes = _relocate_to_v1_layout(document)
+    if source_label != target_version:
+        header["BPX"] = target_version
+        changes.append(f"Header.BPX {source_label} -> {target_version}")
     return BpxUpgradeResult(document, source_label, target_version, changes)
 
 
 def check_bpx(source: Mapping[str, Any] | str | Path) -> dict[str, Any]:
     """Parse a document with the official ``bpx`` package and report a file check.
 
-    Parses the way PyBaMM does (legacy 0.x conversion on), and says so in the
-    detail when a conversion or deprecation warning fired, since a file that
-    only parses after conversion is not current. Returns a ``checks`` entry
-    for a parameter-file distribution. Needs ``pip install bpx``.
+    Parses the way PyBaMM does (legacy 0.x conversion on). Every warning the
+    parser itself raises goes into the detail: a legacy conversion or a
+    version-format deprecation (a file that only parses after conversion is
+    not current), and the consistency checks, such as OCPs at the
+    stoichiometry limits that overshoot a voltage cut-off. A file that parses
+    with warnings still passes, and the detail names them. Returns a
+    ``checks`` entry for a parameter-file distribution. Needs
+    ``pip install bpx``.
     """
     try:
         import bpx as bpx_lib  # noqa: PLC0415
@@ -1202,8 +1330,21 @@ def check_bpx(source: Mapping[str, Any] | str | Path) -> dict[str, Any]:
     except PackageNotFoundError:  # pragma: no cover
         tool = "bpx"
     data, _ = _load_bpx(source)
-    with _warnings.catch_warnings(record=True) as caught:
+    bpx_dir = Path(bpx_lib.__file__).resolve().parent
+    notes: set[str] = set()
+
+    def _keep_parser_warnings(message: Any, category: Any, filename: str, *_: Any, **__: Any) -> None:
+        # Kept by where the warning was raised, not by what it says: the
+        # consistency warnings never mention "bpx". The filename a warning
+        # reports is wherever its stacklevel points: pydantic or this module
+        # for some of bpx's own warnings, and bpx's own code for pyparsing's
+        # deprecation noise. So look up the frame that called warn() instead.
+        if _is_within(_warning_origin() or filename, bpx_dir):
+            notes.add(str(message).strip())
+
+    with _warnings.catch_warnings():
         _warnings.simplefilter("always")
+        _warnings.showwarning = _keep_parser_warnings
         try:
             bpx_lib.parse_bpx_obj(copy.deepcopy(data))
             passed, detail = True, "Parsed by the official bpx parser."
@@ -1212,14 +1353,8 @@ def check_bpx(source: Mapping[str, Any] | str | Path) -> dict[str, Any]:
             lines = [line.strip() for line in str(exc).splitlines() if line.strip()]
             lines = [line for line in lines if not line.startswith("For further information")]
             detail = " ".join(lines)[:600]
-    # Only the parser's own notes (legacy conversion, version-format
-    # deprecations); library noise such as pyparsing deprecations is not a
-    # finding about the file.
-    notes = sorted(
-        {str(w.message).strip() for w in caught if "bpx" in str(w.message).lower()}
-    )
     if notes:
-        detail = f"{detail} Warnings: {' | '.join(notes)}"[:900]
+        detail = f"{detail} Warnings: {' | '.join(sorted(notes))}"[:900]
     return {
         "check": "bpx_parse",
         "tool": tool,
@@ -1227,6 +1362,30 @@ def check_bpx(source: Mapping[str, Any] | str | Path) -> dict[str, Any]:
         "detail": detail,
         "checked_at": date.today().isoformat(),
     }
+
+
+# Modules that make up the warnings machinery itself (Python 3.14 moved the
+# pure-Python half into _py_warnings).
+_WARNINGS_MODULES = frozenset({"warnings", "_py_warnings"})
+
+
+def _warning_origin() -> str | None:
+    """From inside a ``showwarning`` hook: the file of the code that called ``warn()``."""
+    getframe = getattr(sys, "_getframe", None)
+    if getframe is None:  # pragma: no cover - not CPython
+        return None
+    frame = getframe(2)  # skip this function and the hook calling it
+    while frame is not None and frame.f_globals.get("__name__") in _WARNINGS_MODULES:
+        frame = frame.f_back
+    return frame.f_code.co_filename if frame is not None else None
+
+
+def _is_within(path: str, directory: Path) -> bool:
+    try:
+        Path(path).resolve().relative_to(directory)
+    except (OSError, ValueError):
+        return False
+    return True
 
 
 def bpx_file_distribution(
@@ -1321,9 +1480,10 @@ class BpxParameterImportResult:
     warnings:
         Unmapped fields and skipped values.
     content_digest:
-        SHA-256 of the file's canonical JSON (:func:`bpx_content_digest`).
-        Records minted from the file are addressed by it: the same file always
-        mints the same IRIs, and any changed value mints new ones.
+        SHA-256 of the file's RFC 8785 canonical JSON (:func:`bpx_content_digest`).
+        Records minted from the file are addressed by it: the same parameters
+        always mint the same IRIs, however the file is formatted, and any
+        changed value mints new ones.
     """
 
     claims: dict[str, list[dict[str, Any]]]
@@ -1378,9 +1538,10 @@ class BpxParameterImportResult:
         list — the exact mapping :func:`to_bpx`'s ``parameter_sets`` argument
         takes, so import → records → export is symmetric by construction.
 
-        Every record is addressed by the file (IDENTIFIER_POLICY 6.3): uids
-        derive from :attr:`content_digest`, never from names or targets, so a
-        solver handed the set's IRI always gets the same parameters.
+        Every record is addressed by the file's parameters (IDENTIFIER_POLICY
+        6.3): uids derive from :attr:`content_digest`, never from names or
+        targets, so a solver handed the set's IRI always gets the same
+        parameters.
         ``distributions`` attaches the file itself to the set record (build
         entries with :func:`bpx_file_distribution`); it needs ``cell_spec_id``,
         because only a targeted import mints the set.
@@ -1505,8 +1666,10 @@ class BpxParameterImportResult:
         # One BPX file = one co-fitted parameterisation: mint the SET record
         # (the dataset-series flavor) so the whole is addressable, its block
         # map states side assignment, and to_bpx can reassemble the runnable
-        # file from the set alone. Members are stamped with the backlink after
-        # minting (the set's deterministic id needs the member ids first).
+        # file from the set alone. The members map is read off the minted
+        # member records, so they come first and get their set_id backlink
+        # afterwards. No uid depends on another: each comes from the file
+        # digest (or, without one, from its own target, scope and name).
         if cell_spec_id is not None and records_by_block:
             set_record = create_parameter_set(
                 name=base,
@@ -1633,11 +1796,11 @@ def from_bpx_parameters(source: Mapping[str, Any] | str | Path) -> BpxParameterI
         warnings.append("BPX file has no 'Parameterisation' block; no claims extracted.")
         params_raw = {}
 
-    # BPX >= 1.1 moves the initial electrolyte concentration into the
+    # BPX >= 1.0 moves the initial electrolyte concentration into the
     # top-level State block; fold it back into the Electrolyte block so it
-    # mints the same initial_concentration claim as a 1.0 file (the export
-    # side relocates it into State again for >= 1.1). Explicit block values
-    # win. Temperatures fold on the from_bpx side.
+    # mints the same initial_concentration claim as a v0.x-layout file (the
+    # export side relocates it into State again for >= 1.0). Explicit block
+    # values win. Temperatures fold on the from_bpx side.
     _state_cell, state_electrolyte_fields = _fold_state_block(data, warnings)
 
     for side, block_name in _BPX_ELECTRODE_BLOCKS.items():
