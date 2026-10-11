@@ -23,6 +23,10 @@ PathLike = str | Path
 # bump it here (and CHANGELOG the record-shape change) whenever the emitted record shape
 # changes.
 SCHEMA_VERSION = "0.2.0"
+# The versions earlier releases stamped, which this release still reads. Validation warns
+# on these (semantic.schema_version_superseded) and on any other version but
+# SCHEMA_VERSION (semantic.schema_version_unknown). Add the old value here on a bump.
+SUPERSEDED_SCHEMA_VERSIONS: tuple[str, ...] = ("0.1.0", "1.0.0")
 
 BUNDLE_MANIFEST_FILENAME = "bundle.json"
 CELL_SPECIFICATION_FILENAME = "cell-specification.json"
