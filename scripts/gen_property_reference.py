@@ -16,6 +16,25 @@ ROOT = Path(__file__).resolve().parents[1]
 MAPPINGS = ROOT / "assets" / "mappings" / "domain-battery"
 OUT = ROOT / "docs" / "pages" / "property-reference.md"
 CONTEXT = ROOT / "src" / "battinfo" / "data" / "context" / "domain-battery.context.json"
+PARAMETERS = ROOT / "src" / "battinfo" / "data" / "vocab" / "parameters.json"
+CELL_SCHEMA = ROOT / "assets" / "schemas" / "cell-canonical.schema.json"
+
+
+def parameter_only_keys() -> dict[str, dict]:
+    """Parameter-vocabulary keys that are claims only, never a cell spec's properties.
+
+    A key counts when a cell spec does not accept it and the vocabulary
+    scopes it to the cell or state parts of a parameter file only (a BPX
+    file's Cell and State values, such as the electrode pair count or the
+    initial state of charge).
+    """
+    vocab = json.loads(PARAMETERS.read_text(encoding="utf-8"))["parameters"]
+    spec_set = json.loads(CELL_SCHEMA.read_text(encoding="utf-8"))["$defs"]["SpecSet"]["properties"]
+    return {
+        key: entry
+        for key, entry in vocab.items()
+        if key not in spec_set and set(entry.get("scopes", [])) <= {"cell", "state"}
+    }
 
 
 def build() -> str:
@@ -25,6 +44,9 @@ def build() -> str:
     units = json.loads(
         (MAPPINGS / "unit_map.curated.json").read_text(encoding="utf-8")
     )["mappings"]
+    parameter_only = parameter_only_keys()
+    by_key = {p["key"]: p for p in props}
+    props = [p for p in props if p["key"] not in parameter_only]
 
     lines = [
         "# Properties and units",
@@ -40,14 +62,33 @@ def build() -> str:
         "",
         f"## Properties ({len(props)})",
         "",
-        "The keys accepted in `properties={...}` on a cell spec, and the EMMO",
-        "class each becomes in JSON-LD:",
+        "The keys of quantities in `properties={...}` on a cell spec and in the",
+        "`property` blocks of material and component records, and the EMMO class",
+        "each becomes in JSON-LD:",
         "",
         "| Key | EMMO class |",
         "|---|---|",
     ]
     for p in sorted(props, key=lambda p: p["key"]):
         lines.append(f"| `{p['key']}` | [{p['class_pref_label']}]({p['class_iri']}) |")
+
+    lines += [
+        "",
+        f"## Parameter-set keys ({len(parameter_only)})",
+        "",
+        "Keys for parameter-set claims about a whole cell or its state, most of",
+        "them the Cell and State values of a BPX file, which stay on the file's",
+        "parameter-set record. A cell spec does not accept them as properties. A",
+        "key with no EMMO class yet is typed by its value basis alone, and",
+        "validation warns `semantic.property_unmapped`.",
+        "",
+        "| Key | Unit | EMMO class |",
+        "|---|---|---|",
+    ]
+    for key in sorted(parameter_only):
+        mapped = by_key.get(key)
+        cls = f"[{mapped['class_pref_label']}]({mapped['class_iri']})" if mapped else "none yet"
+        lines.append(f"| `{key}` | `{parameter_only[key].get('unit', '1')}` | {cls} |")
 
     lines += [
         "",

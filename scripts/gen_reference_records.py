@@ -556,6 +556,35 @@ def snippet_parameter_set():
     return record
 
 
+def snippet_parameter_file():
+    import json
+
+    from battinfo.interop import bpx_file_distribution, from_bpx_parameters
+
+    # A BPX file's bytes (a small partial file here; read yours from disk).
+    raw = json.dumps({
+        "Header": {"BPX": "1.1.0", "Title": "Example pouch cell", "Model": "Partial"},
+        "Parameterisation": {
+            "Cell": {"Nominal cell capacity [A.h]": 5.0, "Electrode area [m2]": 0.1},
+            "Negative electrode": {"Particle radius [m]": 5.86e-6, "Thickness [m]": 8.52e-5},
+        },
+        "State": {"Initial conditions": {"Initial state-of-charge": 1.0}},
+    }, indent=2).encode("utf-8")
+
+    # One file, one record: its IRI derives from the file's parameters.
+    result = from_bpx_parameters(raw)
+    record = result.to_parameter_set(
+        virtual_cell=True,                    # or cell_spec_id= / cell_instance_id=
+        materials={"negative": "graphite"},   # BPX does not name its materials
+        distributions=[bpx_file_distribution(
+            raw, name="example-cell.bpx.json",
+            content_url="https://files.example.org/parameter-sets/example-cell.bpx.json",
+        )],
+        retrieved_at=1750000000,
+    )
+    return record
+
+
 def snippet_organization():
     from battinfo.api import create_organization
 
@@ -972,11 +1001,23 @@ FAMILIES = [
                     "The claim batch emits as one `schema:Dataset` node: scalar "
                     "claims as EMMO-typed quantities, the target on "
                     "`schema:about`.",
-                    "A BPX file is one parameter-file record: "
-                    "`from_bpx_parameters(...).to_parameter_set(cell_spec_id=..., "
-                    "materials=...)` groups every value of the file by part, "
-                    "header lineage included, and `to_bpx(record)` rebuilds "
-                    "the file (see the design notes).",
+                ],
+            },
+            {
+                "heading": "One BPX file as one record",
+                "fn": snippet_parameter_file,
+                "record_type": "parameter-set",
+                "notice": [
+                    "The parts are blank `schema:Dataset` nodes under "
+                    "`schema:hasPart`; each claim names its parameter key in "
+                    "`schema:propertyID`, so two keys of one EMMO class "
+                    "(an `Area`, say) stay apart.",
+                    "The fingerprint the IRI derives from is a "
+                    "`schema:identifier`, and the file itself a "
+                    "`schema:DataDownload` with its `schema:sha256`. "
+                    "`to_bpx(record)` rebuilds the file; the how-to "
+                    "[Publish a BPX parameter file](../howto/publish-a-bpx-parameter-file.md) "
+                    "has the steps.",
                 ],
             },
         ],
@@ -1135,7 +1176,13 @@ def build_sections(family: dict) -> list[dict]:
 
     sections = []
     for section in family["sections"]:
-        record = normalize(section["fn"]())
+        raw = section["fn"]()
+        # A parameter file's uid derives from its parameters: keep it.
+        body = raw.get("parameter_set") if isinstance(raw.get("parameter_set"), dict) else {}
+        keep = frozenset(
+            [str(body["id"]).rsplit("/", 1)[-1]] if body.get("parameters_sha256") else []
+        )
+        record = normalize(raw, keep=keep)
         verdict = _validate_or_die(
             record,
             f"{family['slug']}: {section['heading']}",

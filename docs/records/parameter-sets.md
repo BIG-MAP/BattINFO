@@ -113,7 +113,342 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 What to notice:
 
 - The claim batch emits as one `schema:Dataset` node: scalar claims as EMMO-typed quantities, the target on `schema:about`.
-- A BPX file is one parameter-file record: `from_bpx_parameters(...).to_parameter_set(cell_spec_id=..., materials=...)` groups every value of the file by part, header lineage included, and `to_bpx(record)` rebuilds the file (see the design notes).
+
+
+### One BPX file as one record
+
+::::{tab-set}
+
+:::{tab-item} Python
+```python
+import json
+
+from battinfo.interop import bpx_file_distribution, from_bpx_parameters
+
+# A BPX file's bytes (a small partial file here; read yours from disk).
+raw = json.dumps({
+    "Header": {"BPX": "1.1.0", "Title": "Example pouch cell", "Model": "Partial"},
+    "Parameterisation": {
+        "Cell": {"Nominal cell capacity [A.h]": 5.0, "Electrode area [m2]": 0.1},
+        "Negative electrode": {"Particle radius [m]": 5.86e-6, "Thickness [m]": 8.52e-5},
+    },
+    "State": {"Initial conditions": {"Initial state-of-charge": 1.0}},
+}, indent=2).encode("utf-8")
+
+# One file, one record: its IRI derives from the file's parameters.
+result = from_bpx_parameters(raw)
+record = result.to_parameter_set(
+    virtual_cell=True,                    # or cell_spec_id= / cell_instance_id=
+    materials={"negative": "graphite"},   # BPX does not name its materials
+    distributions=[bpx_file_distribution(
+        raw, name="example-cell.bpx.json",
+        content_url="https://files.example.org/parameter-sets/example-cell.bpx.json",
+    )],
+    retrieved_at=1750000000,
+)
+```
+:::
+
+:::{tab-item} Canonical record
+```json
+{
+  "schema_version": "0.2.0",
+  "parameter_set": {
+    "id": "https://w3id.org/battinfo/spec/bwcv-1gn2-bgb7-gcz6",
+    "short_id": "bwcv1g",
+    "name": "Example pouch cell",
+    "virtual_cell": true,
+    "parameters_sha256": "cae9047a38afefc4e8ac96b7024bca32566608a964f9cf55bc2f133670f1d4ae",
+    "model_context": {
+      "tool": "BPX",
+      "name": "Example pouch cell",
+      "model": "Partial",
+      "version": "1.1.0"
+    },
+    "parts": [
+      {
+        "part": "cell",
+        "claims": [
+          {
+            "parameter": "nominal_capacity",
+            "quantity": {
+              "value": 5.0,
+              "unit": "Ah"
+            },
+            "provenance_class": "fitted"
+          },
+          {
+            "parameter": "electrode_area",
+            "quantity": {
+              "value": 0.1,
+              "unit": "m2"
+            },
+            "provenance_class": "fitted"
+          }
+        ]
+      },
+      {
+        "part": "negative_material",
+        "material_kind": "graphite",
+        "claims": [
+          {
+            "parameter": "particle_radius",
+            "quantity": {
+              "value": 5.86e-06,
+              "unit": "m"
+            },
+            "provenance_class": "fitted"
+          }
+        ]
+      },
+      {
+        "part": "negative_electrode",
+        "claims": [
+          {
+            "parameter": "thickness",
+            "quantity": {
+              "value": 8.52e-05,
+              "unit": "m"
+            },
+            "provenance_class": "fitted"
+          }
+        ]
+      },
+      {
+        "part": "state",
+        "claims": [
+          {
+            "parameter": "initial_soc",
+            "quantity": {
+              "value": 1.0,
+              "unit": "1"
+            },
+            "provenance_class": "fitted"
+          }
+        ]
+      }
+    ],
+    "distributions": [
+      {
+        "type": "DataDownload",
+        "name": "example-cell.bpx.json",
+        "role": "source",
+        "content_url": "https://files.example.org/parameter-sets/example-cell.bpx.json",
+        "encoding_format": "application/json",
+        "conforms_to": "BPX 1.1.0",
+        "byte_size": 418,
+        "checksum": {
+          "algorithm": "sha256",
+          "value": "c0dc1d775e8e0322f39bc9add2bd975cc70d60c7733dbbca9a45088e77745c11"
+        }
+      }
+    ]
+  },
+  "provenance": {
+    "source_type": "literature",
+    "retrieved_at": 1750000000,
+    "battinfo_version": "0.7.0"
+  }
+}
+```
+:::
+
+:::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@id": "https://w3id.org/battinfo/spec/bwcv-1gn2-bgb7-gcz6",
+  "@type": "schema:Dataset",
+  "schema:name": "Example pouch cell",
+  "schema:identifier": {
+    "@type": "schema:PropertyValue",
+    "schema:propertyID": "parameters-sha256-rfc8785",
+    "schema:value": "cae9047a38afefc4e8ac96b7024bca32566608a964f9cf55bc2f133670f1d4ae"
+  },
+  "schema:additionalProperty": [
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "virtual_cell",
+      "schema:value": true
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_model",
+      "schema:value": "Partial"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_name",
+      "schema:value": "Example pouch cell"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_tool",
+      "schema:value": "BPX"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "source_version",
+      "schema:value": "1.1.0"
+    }
+  ],
+  "schema:hasPart": [
+    {
+      "@type": "schema:Dataset",
+      "schema:name": "Example pouch cell - cell",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "part",
+        "schema:value": "cell"
+      },
+      "hasProperty": [
+        {
+          "@type": [
+            "NominalCapacity",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "NominalCapacity",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 5.0
+          },
+          "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour",
+          "schema:propertyID": "nominal_capacity",
+          "schema:additionalProperty": {
+            "@type": "schema:PropertyValue",
+            "schema:name": "provenance_class",
+            "schema:value": "fitted"
+          }
+        },
+        {
+          "@type": [
+            "Area",
+            "ConventionalProperty"
+          ],
+          "skos:prefLabel": "Area",
+          "hasNumericalPart": {
+            "@type": "RealData",
+            "hasNumberValue": 0.1
+          },
+          "schema:unitText": "m2",
+          "schema:propertyID": "electrode_area",
+          "schema:additionalProperty": {
+            "@type": "schema:PropertyValue",
+            "schema:name": "provenance_class",
+            "schema:value": "fitted"
+          }
+        }
+      ]
+    },
+    {
+      "@type": "schema:Dataset",
+      "schema:name": "Example pouch cell - negative electrode material",
+      "schema:about": {
+        "@type": "Graphite",
+        "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_d53259a7_0d9c_48b9_a6c1_4418169df303",
+        "schema:name": "Graphite"
+      },
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "part",
+        "schema:value": "negative_material"
+      },
+      "hasProperty": {
+        "@type": [
+          "ParticleRadius",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "ParticleRadius",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 5.86e-06
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+        "schema:propertyID": "particle_radius",
+        "schema:additionalProperty": {
+          "@type": "schema:PropertyValue",
+          "schema:name": "provenance_class",
+          "schema:value": "fitted"
+        }
+      }
+    },
+    {
+      "@type": "schema:Dataset",
+      "schema:name": "Example pouch cell - negative electrode",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "part",
+        "schema:value": "negative_electrode"
+      },
+      "hasProperty": {
+        "@type": [
+          "Thickness",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "Thickness",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 8.52e-05
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
+        "schema:propertyID": "thickness",
+        "schema:additionalProperty": {
+          "@type": "schema:PropertyValue",
+          "schema:name": "provenance_class",
+          "schema:value": "fitted"
+        }
+      }
+    },
+    {
+      "@type": "schema:Dataset",
+      "schema:name": "Example pouch cell - initial and thermal state",
+      "schema:additionalProperty": {
+        "@type": "schema:PropertyValue",
+        "schema:name": "part",
+        "schema:value": "state"
+      },
+      "hasProperty": {
+        "@type": [
+          "StateOfCharge",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "StateOfCharge",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 1.0
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+        "schema:propertyID": "initial_soc",
+        "schema:additionalProperty": {
+          "@type": "schema:PropertyValue",
+          "schema:name": "provenance_class",
+          "schema:value": "fitted"
+        }
+      }
+    }
+  ],
+  "schema:distribution": {
+    "@type": "schema:DataDownload",
+    "schema:contentUrl": "https://files.example.org/parameter-sets/example-cell.bpx.json",
+    "schema:name": "example-cell.bpx.json",
+    "schema:encodingFormat": "application/json",
+    "dcterms:type": "source",
+    "dcterms:conformsTo": "BPX 1.1.0",
+    "dcat:byteSize": 418,
+    "schema:sha256": "c0dc1d775e8e0322f39bc9add2bd975cc70d60c7733dbbca9a45088e77745c11"
+  }
+}
+```
+:::
+
+::::
+
+What to notice:
+
+- The parts are blank `schema:Dataset` nodes under `schema:hasPart`; each claim names its parameter key in `schema:propertyID`, so two keys of one EMMO class (an `Area`, say) stay apart.
+- The fingerprint the IRI derives from is a `schema:identifier`, and the file itself a `schema:DataDownload` with its `schema:sha256`. `to_bpx(record)` rebuilds the file; the how-to [Publish a BPX parameter file](../howto/publish-a-bpx-parameter-file.md) has the steps.
 
 
 ## Common examples
@@ -5359,7 +5694,7 @@ Schema: [`parameter-set.schema.json`](https://w3id.org/battinfo/schema/parameter
 
 **One file, one record.** A BPX file is one co-fitted parameterisation whose values are only valid together, so they stay together: one parameter-set record per file, its claims grouped by part. The importer never guesses which cell a file describes, and the caller states it with exactly one link. If the cell is already in the genome, the record names its cell spec (`cell_spec_id`), or the one physical cell a fit was made on (`cell_instance_id`), and nothing else is created. If it is a real cell that is not in the genome yet, the caller searches for a duplicate by maker and model, then creates the cell spec with its identity only (name, maker, model, format, chemistry) and, if missing, the maker's organization record, and links that spec. The file's cell numbers (capacity, cut-offs, geometry, temperatures) stay on the parameter set as claims, not on the new spec. If there is no real cell, as for the BPX repository's own examples, the record says `virtual_cell: true` and links nothing. BPX does not name its materials, so the caller names each electrode's material part (`materials={"negative": "graphite", "positive": "nmc811"}`) to make its claims findable by material. `electrode_area` is the area of one electrode pair, as BPX and PyBaMM use it, and `electrode_pair_count` sits next to it so the total can be computed.
 
-**BPX interop, both directions.** `from_bpx_parameters` reads the file and `to_parameter_set` builds the record. Every value in the file lands in a part. The Cell block is the `cell` part. Each electrode block splits into its material part (stoichiometry window, diffusivity, OCP) and its electrode part (thickness, porosity). Separator and electrolyte are parts of their own, and the initial and thermal conditions form the `state` part, read the same from the v0.x layout (Cell and Electrolyte) and from the v1 `State` block. Values keep the form and unit the file gives them: scalars as quantities, tables as curves, function strings as expressions. Header lineage rides along: `Model` and the BPX version in `model_context` (a DFN-fitted value is not model-free), `Description` on the record, `References` as citation or note. The `User-defined` block travels verbatim as the record's `annex`. What the record does not model yet (blended-electrode `Particle` blocks, initial hysteresis state, `Degradation`, `Validation` curves) is named in a warning, never dropped silently. The reverse is `to_bpx(record)`, which rebuilds the BPX document from the parts at the file's own version or at the one asked for, in that version's layout, and the official `bpx` parser accepts the result. `query_parameter_sets` and `collate_claims` read the parts, so a search for graphite claims finds the graphite part of every file next to the literature claim batches.
+**BPX interop, both directions.** `from_bpx_parameters` reads the file and `to_parameter_set` builds the record. Every value in the file lands in a part. The Cell block is the `cell` part. Each electrode block splits into its material part (stoichiometry window, diffusivity, OCP) and its electrode part (thickness, porosity). Separator and electrolyte are parts of their own, and the initial and thermal conditions form the `state` part, read the same from the v0.x layout (Cell and Electrolyte) and from the v1 `State` block. Values keep the form and unit the file gives them: scalars as quantities, tables as curves, function strings as expressions. Header lineage rides along: `Model` and the BPX version in `model_context` (a DFN-fitted value is not model-free), `Description` on the record, `References` as citation or note. The `User-defined` block travels verbatim as the record's `annex`. A single-phase electrode's OCP branches are `ocp` curves with their `branch`. What the record does not model yet (blended-electrode `Particle` blocks, initial hysteresis state, `Degradation`, `Validation` curves) is named in a warning and listed by its BPX path in the record's `not_imported`, never dropped silently. The reverse is `to_bpx(record)`, which rebuilds the BPX document from the parts at the file's own version or at the one asked for, in that version's layout. A record read from a v0.x-layout file and exported at a 1.x version goes through the same conversion as `upgrade_bpx`, so it gains the State values the bpx package's own migration adds. Values in another unit than BPX states are converted, curves included, or the export refuses; the result says `complete=False` when the file held values the record does not, and the official `bpx` parser's verdict is in its warnings. `query_parameter_sets` and `collate_claims` read the parts, so a search for graphite claims finds the graphite part of every file next to the literature claim batches.
 
-**A BPX file's IRI.** A solver should be able to take a parameter set's IRI and run it, so the record carries the file itself under `distributions`. Role `source` is the file exactly as its authors published it, and there is exactly one. Role `runnable` is an optional declared conversion, made only when the official parser rejects the source: a file that declares BPX 1.0 but keeps the v0.x layout, for example, rewritten in the v1 layout by `upgrade_bpx` because current PyBaMM requires it. It names the source's sha256 in `derived_from` and says what changed in `conversion`. Role `mirror` is the source's bytes served from somewhere else, with the same checksum. Links are https only, and each file records the checks run on it at ingest (`bpx_parse`, `simulation_smoke`). The record is addressed by the file's parameters (IDENTIFIER_POLICY 6.3): its uid derives from the digest of the file's RFC 8785 canonical JSON, which the record stores as `parameters_sha256`, so anyone holding the file can check it against the IRI. A copy that differs only in formatting or number spelling keeps the IRI, and a corrected file is a new record. The registry keeps the first copy it is given and serves it at `https://w3id.org/battinfo/spec/<uid>?format=bpx`.
+**A BPX file's IRI.** A solver should be able to take a parameter set's IRI and run it, so the record carries the file itself under `distributions`. Role `source` is the file exactly as its authors published it, and there is exactly one. Role `runnable` is an optional declared conversion, made only when the official parser rejects the source: a file that declares BPX 1.0 but keeps the v0.x layout, for example, rewritten in the v1 layout by `upgrade_bpx` because current PyBaMM requires it. It names the source's sha256 in `derived_from`, says what changed in `conversion`, and must be exactly that conversion of the source: the builder (given `runnable_file=`) and the registry both check it. The conversion lives in `battinfo._bpx_layout`, a standard-library module the registry vendors as it is. Role `mirror` is the source's bytes served from somewhere else, with the same checksum. Links are https only, and each file records the checks run on it at ingest (`bpx_parse`, `simulation_smoke`). The record is addressed by the file's parameters (IDENTIFIER_POLICY 6.3): its uid derives from the digest of the file's RFC 8785 canonical JSON, which the record stores as `parameters_sha256`, so anyone holding the file can check it against the IRI. A copy that differs only in formatting or number spelling keeps the IRI, and a corrected file is a new record that names the old one in `supersedes`. The first publisher owns the IRI, the registry keeps the first copy it is given and serves it at `https://w3id.org/battinfo/spec/<uid>?format=bpx`, and the record validator holds the binding (an IRI the fingerprint does not give, a runnable not naming its source, a mirror of other bytes) as errors under every policy. A file is required to publish and optional for local work. The steps are in [Publish a BPX parameter file](../howto/publish-a-bpx-parameter-file.md).
 :::

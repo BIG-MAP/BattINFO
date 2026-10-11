@@ -348,7 +348,13 @@ KEEP_UIDS = {
 }
 
 
-def normalize(record: dict) -> dict:
+def normalize(record: dict, keep: frozenset[str] = frozenset()) -> dict:
+    """The record with its uids swapped for placeholders and its timestamps frozen.
+
+    ``keep`` names uids to leave as they are, such as a parameter file's,
+    which derives from the file's parameters and must stay the one its
+    fingerprint gives.
+    """
     text = json.dumps(record, ensure_ascii=False)
     seen: dict[str, str] = {}
     # A uid that is already a pool value was chosen deliberately by a snippet —
@@ -360,7 +366,7 @@ def normalize(record: dict) -> dict:
     present = set(UID_RE.findall(text))
     available = [p for p in PLACEHOLDER_UIDS if p not in present]
     for uid in UID_RE.findall(text):
-        if uid in KEEP_UIDS or uid in PLACEHOLDER_UIDS:
+        if uid in KEEP_UIDS or uid in PLACEHOLDER_UIDS or uid in keep:
             continue
         if uid not in seen:
             if not available:

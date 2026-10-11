@@ -9,10 +9,11 @@ unit IRI, by the curated mapping tables under
 `assets/mappings/domain-battery/` — the single source of truth for the
 semantics of emitted JSON-LD. This page is generated from those tables.
 
-## Properties (114)
+## Properties (106)
 
-The keys accepted in `properties={...}` on a cell spec, and the EMMO
-class each becomes in JSON-LD:
+The keys of quantities in `properties={...}` on a cell spec and in the
+`property` blocks of material and component records, and the EMMO class
+each becomes in JSON-LD:
 
 | Key | EMMO class |
 |---|---|
@@ -48,20 +49,16 @@ class each becomes in JSON-LD:
 | `discharging_temperature_min` | [MinimumDischargingTemperature](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_2a1de79f_e927_45a2_9619_3799a0d61e9b) |
 | `double_side_loading` | [MassLoading](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c955c089_6ee1_41a2_95fc_d534c5cfd3d5) |
 | `electrode_area` | [Area](https://w3id.org/emmo#EMMO_96f39f77_44dc_491b_8fa7_30d887fe0890) |
-| `electrode_pair_count` | [NumberOfEntities](https://w3id.org/emmo#EMMO_41efdf5d_0c9c_4ea0_bb65_f8236e663be5) |
 | `electrolyte_diffusivity` | [ChargeCarrierDiffusivityInElectrolyte](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_4c274506_af5b_4ef1_8217_829ffd459f28) |
 | `electronic_conductivity` | [ElectronicConductivity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_ce74d2dc_d496_4116_b2fb_3e83d88bc744) |
 | `energy_density` | [EnergyDensity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_4aa1b96e_44a0_4b1a_a0ac_723d0223d80b) |
 | `entropic_coefficient` | [TemperatureCoefficientOfTheOpenCircuitVoltage](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_3b938708_e7e4_4ac0_a959_9c04306302e7) |
 | `external_surface_area` | [Area](https://w3id.org/emmo#EMMO_96f39f77_44dc_491b_8fa7_30d887fe0890) |
 | `foil_thickness` | [Thickness](https://w3id.org/emmo#EMMO_43003c86_9d15_433b_9789_ee2940920656) |
-| `heat_transfer_coefficient` | [SurfaceCoefficientOfHeatTransfer](https://w3id.org/emmo#EMMO_0b3295fa_f4bf_4f83_a603_9d98c03da5bb) |
 | `height` | [Height](https://w3id.org/emmo#EMMO_08bcf1d6_e719_46c8_bb21_24bc9bf34dba) |
 | `impedance` | [ElectricImpedance](https://w3id.org/emmo#EMMO_79a02de5_b884_4eab_bc18_f67997d597a2) |
 | `initial_concentration` | [InitialChargeCarrierConcentrationInElectrolyte](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_098f98dc_e015_4dbd_b358_a7ac3b3ecff3) |
 | `initial_coulombic_efficiency` | [InitialCoulombicEfficiency](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_469b9516_a96d_4aa2_b8e5_05ae982e2084) |
-| `initial_soc` | [StateOfCharge](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_8b2aaa50_bbe1_45da_8778_8898326246a2) |
-| `initial_temperature` | [ThermodynamicTemperature](https://w3id.org/emmo#EMMO_affe07e4_e9bc_4852_86c6_69e26182a17f) |
 | `internal_resistance` | [InternalResistance](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_9bf40017_3f58_4030_ada7_cb37a3dfda2d) |
 | `ionic_conductivity` | [IonicConductivity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_25dabdc2_68bf_4a38_8cbe_11be017358bc) |
 | `length` | [Length](https://w3id.org/emmo#EMMO_cd2cd0de_e0cc_4ef1_b27e_2e88db027bac) |
@@ -102,15 +99,12 @@ class each becomes in JSON-LD:
 | `rated_specific_discharge_capacity` | [DischargingSpecificCapacity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_884650fd_6cc6_4ec6_8264_c18fbe6b90ee) |
 | `reaction_rate_activation_energy` | [ActivationEnergy](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_d7f8cab9_b035_4ecd_be63_292672572526) |
 | `reaction_rate_constant` | [ReactionRateConstant](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_0335e3f6_d1d8_4daa_8376_a9285f1bc9f1) |
-| `reference_temperature` | [ThermodynamicTemperature](https://w3id.org/emmo#EMMO_affe07e4_e9bc_4852_86c6_69e26182a17f) |
 | `round_trip_energy_efficiency` | [RoundTripEnergyEfficiency](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c413d29a_b814_4d88_8db0_0fd0171cff11) |
 | `self_discharge_rate` | [SelfDischargeRate](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c3e97d58_1854_4c23_bb42_d2972172865e) |
-| `series_resistance` | [InternalResistance](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_9bf40017_3f58_4030_ada7_cb37a3dfda2d) |
 | `single_side_loading` | [MassLoading](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c955c089_6ee1_41a2_95fc_d534c5cfd3d5) |
 | `solid_diffusivity` | [Diffusivity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_37b24a94_cae0_4d7a_9519_9f7692dec607) |
 | `specific_capacity` | [SpecificCapacity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_1e3dc60d_dd6b_47d6_8161_70004fc5ee30) |
 | `specific_energy` | [SpecificEnergy](https://w3id.org/emmo#EMMO_e218c625_6a39_47a9_8d08_a2ef41c152a9) |
-| `specific_heat_capacity` | [SpecificHeatCapacity](https://w3id.org/emmo#EMMO_b4f4ed28_d24c_4a00_9583_62ab839abeca) |
 | `specific_power` | [SpecificPower](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c762a928_5a74_46fd_9929_4ac2d7a3a8d7) |
 | `state_of_health` | [StateOfHealth](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_a7a4614f_2426_46f3_8475_cda4a9fabfce) |
 | `stoichiometry_max` | [MaximumStoichiometricCoefficient](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_95ef8c3c_62fe_467f_b5d4_dd0cd18a7ea8) |
@@ -119,7 +113,6 @@ class each becomes in JSON-LD:
 | `storage_temperature_min` | [MinimumStorageTemperature](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_0ddfd57a_d338_4690_be45_b26884ed6302) |
 | `surface_area_per_volume` | [VolumetricSurfaceArea](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_a5571263_f153_448f_84a3_cd18092cf8fa) |
 | `theoretical_capacity` | [TheoreticalCapacity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_372c89d0_adab_4585_9662_33c912acef23) |
-| `thermal_conductivity` | [ThermalConductivity](https://w3id.org/emmo#EMMO_8dd40ec6_2c5a_43f3_bf64_cadcd447a1c1) |
 | `thickness` | [Thickness](https://w3id.org/emmo#EMMO_43003c86_9d15_433b_9789_ee2940920656) |
 | `tortuosity` | [Tortuosity](https://w3id.org/emmo#EMMO_c413d96f_c57b_4c70_9ac1_312db6c009a8) |
 | `transference_number` | [ChargeCarrierTransportNumber](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_e3e78df2_d568_4ab7_8c0d_d3a2ee3ae282) |
@@ -130,6 +123,26 @@ class each becomes in JSON-LD:
 | `wall_thickness` | [Thickness](https://w3id.org/emmo#EMMO_43003c86_9d15_433b_9789_ee2940920656) |
 | `weight` | [Mass](https://w3id.org/emmo#EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405) |
 | `width` | [Width](https://w3id.org/emmo#EMMO_e4de48b1_dabb_4490_ac2b_040f926c64f0) |
+
+## Parameter-set keys (9)
+
+Keys for parameter-set claims about a whole cell or its state, most of
+them the Cell and State values of a BPX file, which stay on the file's
+parameter-set record. A cell spec does not accept them as properties. A
+key with no EMMO class yet is typed by its value basis alone, and
+validation warns `semantic.property_unmapped`.
+
+| Key | Unit | EMMO class |
+|---|---|---|
+| `ambient_temperature` | `K` | none yet |
+| `electrode_pair_count` | `1` | [NumberOfEntities](https://w3id.org/emmo#EMMO_41efdf5d_0c9c_4ea0_bb65_f8236e663be5) |
+| `heat_transfer_coefficient` | `W/(m2.K)` | [SurfaceCoefficientOfHeatTransfer](https://w3id.org/emmo#EMMO_0b3295fa_f4bf_4f83_a603_9d98c03da5bb) |
+| `initial_soc` | `1` | [StateOfCharge](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_8b2aaa50_bbe1_45da_8778_8898326246a2) |
+| `initial_temperature` | `K` | [ThermodynamicTemperature](https://w3id.org/emmo#EMMO_affe07e4_e9bc_4852_86c6_69e26182a17f) |
+| `reference_temperature` | `K` | [ThermodynamicTemperature](https://w3id.org/emmo#EMMO_affe07e4_e9bc_4852_86c6_69e26182a17f) |
+| `series_resistance` | `Ohm` | [InternalResistance](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_9bf40017_3f58_4030_ada7_cb37a3dfda2d) |
+| `specific_heat_capacity` | `J/(kg.K)` | [SpecificHeatCapacity](https://w3id.org/emmo#EMMO_b4f4ed28_d24c_4a00_9583_62ab839abeca) |
+| `thermal_conductivity` | `W/(m.K)` | [ThermalConductivity](https://w3id.org/emmo#EMMO_8dd40ec6_2c5a_43f3_bf64_cadcd447a1c1) |
 
 ## Units (48)
 
