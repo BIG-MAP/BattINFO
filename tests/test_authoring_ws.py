@@ -1049,3 +1049,30 @@ def test_legacy_examples_layout_is_detected_and_reused(
     ws.save(validation_policy="strict")
     assert list(legacy.glob("*.json")), "records must keep landing in the legacy examples/ dir"
     assert not (tmp_path / ".battinfo" / "records" / "cell-spec").exists()
+
+
+def test_cell_spec_draft_name_is_kept_and_does_not_move_the_iri(tmp_path: Path) -> None:
+    """A cell-spec draft's "name" is its title; without one the title is manufacturer + model."""
+    import json
+
+    draft = {"manufacturer": "SINTEF", "model": "Graphite R2032 half-cell (intelligent)",
+             "format": "coin", "chemistry": "li-metal", "size_code": "R2032"}
+    plain_ws = AuthoringWorkspace(root=tmp_path / "plain", registry_url=None)
+    (tmp_path / "plain.cell-spec.json").write_text(json.dumps(draft), encoding="utf-8")
+    plain = plain_ws.load(tmp_path / "plain.cell-spec.json")
+    plain_ws.save()
+
+    named_ws = AuthoringWorkspace(root=tmp_path / "named", registry_url=None)
+    (tmp_path / "named.cell-spec.json").write_text(
+        json.dumps({**draft, "name": "Graphite AQ-1 cell spec"}), encoding="utf-8"
+    )
+    named = named_ws.load(tmp_path / "named.cell-spec.json")
+    named_ws.save()
+
+    def saved(ws: AuthoringWorkspace) -> dict:
+        (path,) = (ws._ws.source_root / "cell-spec").glob("*.json")
+        return json.loads(path.read_text(encoding="utf-8"))["cell_spec"]
+
+    assert saved(plain_ws)["name"] == "SINTEF Graphite R2032 half-cell (intelligent)"
+    assert saved(named_ws)["name"] == "Graphite AQ-1 cell spec"
+    assert named.id == plain.id, "a title change must not move the cell-spec IRI"

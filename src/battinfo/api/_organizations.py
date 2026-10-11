@@ -60,6 +60,7 @@ _ORGANIZATION_TYPES = (
 def _record_from_organization(
     *,
     name: str,
+    handle: str | None = None,
     type: str | None = None,  # noqa: A002 - matches the record field, like `id`
     legal_name: str | None = None,
     alternate_name: list[str] | str | None = None,
@@ -87,7 +88,7 @@ def _record_from_organization(
         if unknown:
             raise TypeError(f"unexpected keyword argument(s): {', '.join(sorted(unknown))}")
         explicit: dict[str, Any] = {
-            "name": name, "type": type, "legal_name": legal_name,
+            "name": name, "handle": handle, "type": type, "legal_name": legal_name,
             "alternate_name": alternate_name, "url": url, "same_as": same_as,
             "location": location, "founding_date": founding_date,
             "dissolution_date": dissolution_date,
@@ -130,6 +131,8 @@ def _record_from_organization(
         "short_id": dashed_uid.replace("-", "")[:6],
         "name": name.strip(),
     }
+    if handle is not None:
+        body["handle"] = handle
     if type is not None:
         body["type"] = type
     if legal_name is not None:

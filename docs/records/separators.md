@@ -381,6 +381,7 @@ Schema: [`separator-spec.schema.json`](https://w3id.org/battinfo/schema/separato
 | `id` | → ComponentSpecIri | yes |  |
 | `short_id` | → ShortId |  |  |
 | `name` | string | yes | Human-readable name of this separator design (e.g. 'Celgard 2325'). |
+| `handle` | → Handle |  | Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity. |
 | `material` | string |  | Bulk separator material (e.g. 'PP', 'PE', 'cellulose'). |
 | `structure` | `monolayer` \| `bilayer` \| `trilayer` \| `composite` … (6 values) |  | Physical layer structure of the separator membrane. |
 | `coating` | string |  | Surface coating applied to the base membrane, e.g. 'Al2O3', 'SiO2', 'PVDF', 'ceramic'. |
@@ -401,6 +402,7 @@ Schema: [`separator.schema.json`](https://w3id.org/battinfo/schema/separator.sch
 | `separator_spec_id` | → ComponentSpecIri | yes | IRI of the separator-spec this physical separator realizes. |
 | `short_id` | → ShortId |  |  |
 | `name` | string |  | Human-readable label for this physical item (e.g. a lab inventory id). |
+| `handle` | → Handle |  | Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity. |
 | `lot_id` | string |  | Manufacturer or supplier lot number. |
 | `batch_id` | string |  | Internal lab batch identifier, when different from the supplier lot. |
 | `supplier` | → OrgRef |  | Supplier or vendor the item was sourced from. |

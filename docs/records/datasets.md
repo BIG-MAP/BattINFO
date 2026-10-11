@@ -688,6 +688,7 @@ Schema: [`dataset.schema.json`](https://w3id.org/battinfo/schema/dataset.schema.
 | `short_id` | → ShortId |  |  |
 | `identifier` | → Identifier | yes | Identifier(s) for the dataset (e.g. DOI, accession number), as strings or PropertyValue pairs. |
 | `name` | string | yes | Dataset title. |
+| `handle` | → Handle |  | Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity. |
 | `description` | string |  | Free-text description of the dataset. |
 | `access_url` | string | yes | Landing page or direct access URL for the dataset. |
 | `same_as` | array of string |  | Other IRIs identifying the same dataset (e.g. a Zenodo DOI URL). |

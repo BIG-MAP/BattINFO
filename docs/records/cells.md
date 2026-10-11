@@ -2319,6 +2319,7 @@ The `cell_spec` block:
 | `short_id` | → ShortId |  |  |
 | `identifier` | → Identifier |  | Additional identifier(s) for the cell model, as strings or PropertyValue pairs. |
 | `name` | string | yes | Human-readable display name, typically manufacturer plus model. |
+| `handle` | → Handle |  | Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity. |
 | `model` | string | yes | Manufacturer model designation (e.g. 'ANR26650M1-B'). |
 | `manufacturer` | → Organization | yes | Organization that manufactures this cell model. |
 | `brand` | → BrandOrOrganization |  | Brand the cell is marketed under, when different from the manufacturer. |
@@ -2404,6 +2405,7 @@ The `cell_instance` block:
 | `working_electrode_id` | → ElectrodeIri |  | Canonical IRI of the electrode record (the physical batch or disc) built into this cell as its working electrode. The cell spec says which electrode design the cell uses; this says which built electrode went into this individual cell. |
 | `counter_electrode_id` | → ElectrodeIri |  | Canonical IRI of the electrode record built into this cell as its counter electrode. In a half cell that electrode is also the reference electrode, so it is emitted with both role classes. |
 | `name` | string |  | Human-readable name / label for this cell (e.g. a lab batch ID). The primary identifier; usually present even without a manufacturer serial number. |
+| `handle` | → Handle |  | Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity. |
 | `short_id` | → ShortId |  |  |
 | `serial_number` | string |  | Manufacturer serial number (unique within the product model); optional. |
 | `batch_id` | string |  | Production or lab batch this cell belongs to. |

@@ -1108,6 +1108,7 @@ Schema: [`electrode-spec.schema.json`](https://w3id.org/battinfo/schema/electrod
 | `id` | → ComponentSpecIri | yes |  |
 | `short_id` | → ShortId |  |  |
 | `name` | string | yes | Human-readable electrode name / designation (e.g. 'Si-Gr anode, aqueous', 'NMC811 cathode 96/2/2'). |
+| `handle` | → Handle |  | Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity. |
 | `active_material_kind` | string |  | Required Level-1 kind naming the ACTIVE material of this electrode, from the curated material-kind vocabulary (e.g. 'graphite', 'silicon_graphite', 'nmc811', 'lfp'). Named for what it identifies: the electrode's active material, not the electrode's form. Required so a purchased electrode whose powder provenance is unknown is still queryable on the same aggregation axis as one built from an authored material-spec. Aliases resolve on input; an unknown kind is rejected at save time. See battinfo.electrodes.electrode_kind_keys(). |
 | `kind` | string |  | Deprecated alias of active_material_kind; accepted so existing records keep validating, normalized to active_material_kind on round-trip. |
 | `polarity` | `positive` \| `negative` \| `unknown` |  | Electrode polarity, authored when the design has a side to state. Never derived from the kind: which side an active material sits on is system-relative (graphite is the positive electrode of a lithium-counter half cell). Role-based cells (half / three-electrode) name electrodes by role instead. |
@@ -1135,6 +1136,7 @@ Schema: [`electrode.schema.json`](https://w3id.org/battinfo/schema/electrode.sch
 | `electrode_spec_id` | → ComponentSpecIri | yes | Canonical IRI of the electrode-spec this batch realizes. Required: a built electrode without a design is not describable. |
 | `short_id` | → ShortId |  |  |
 | `name` | string |  | Human-readable label for this batch. |
+| `handle` | → Handle |  | Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity. |
 | `lot_id` | string |  | Producer / supplier lot number for a purchased electrode. |
 | `parent_id` | → ComponentIri |  | Canonical IRI of the electrode this piece was cut from - the coated roll, web, or strip its siblings share. The parent is itself an electrode record (usually realizing the same spec), so genealogy chains compose: cell -> disc -> parent roll -> electrode-spec. |
 | `piece_id` | string |  | Label of this cut piece within its parent (e.g. 'disc-07', 'strip-B'). Joins the identity seed, so pieces cut from the same parent mint distinct IRIs. |

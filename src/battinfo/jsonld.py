@@ -25,6 +25,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from battinfo._util import is_dataset_series
+from battinfo.entities import kind_for_doc
 
 _DATA = Path(__file__).parent / "data"
 # Inline emission must expand identically to the hosted context the URL names,
@@ -1156,6 +1157,54 @@ def _provenance(prov: dict) -> dict:
     return provenance_node(prov) or {}
 
 
+#: ``schema:propertyID`` naming the identifier that carries a record's handle.
+HANDLE_PROPERTY_ID = "battinfo-handle"
+
+
+def handle_identifier_node(handle: Any) -> dict | None:
+    """A record ``handle`` as a ``schema:identifier`` PropertyValue, or ``None``.
+
+    The handle rides the same term as the record's other identifiers, named by
+    ``schema:propertyID`` the way a cell's batch id is, so no new vocabulary
+    term is needed and a consumer that reads identifiers finds it with them.
+    It is the bare handle: the registry workspace it is unique in is not part
+    of the record.
+    """
+    if not isinstance(handle, str) or not handle.strip():
+        return None
+    return {
+        "@type": "schema:PropertyValue",
+        "schema:propertyID": HANDLE_PROPERTY_ID,
+        "schema:value": handle,
+    }
+
+
+def add_handle_identifier(node: dict, handle: Any) -> dict:
+    """Append the handle PropertyValue to ``node["schema:identifier"]`` in place.
+
+    Keeps whatever identifiers the emitter already wrote (a uid string, a batch
+    id PropertyValue, or a list of them) and adds the handle once.
+    """
+    entry = handle_identifier_node(handle)
+    if entry is None:
+        return node
+    existing = node.get("schema:identifier")
+    if existing is None:
+        values: list = []
+    elif isinstance(existing, list):
+        values = list(existing)
+    else:
+        values = [existing]
+    if any(
+        isinstance(value, Mapping) and value.get("schema:propertyID") == HANDLE_PROPERTY_ID
+        for value in values
+    ):
+        return node
+    values.append(entry)
+    node["schema:identifier"] = values[0] if len(values) == 1 else values
+    return node
+
+
 def funding_to_jsonld(funding: Any) -> dict | None:
     """Convert a record ``funding`` block to a schema.org ``Grant`` node.
 
@@ -1611,6 +1660,14 @@ def record_to_jsonld(record: dict, record_type: str, *, context: str = "url") ->
             f"Supported: {sorted({k.replace('_','-') for k in _TRANSFORMERS})}."
         )
     node = fn(record)
+    # Handle (display slug, unique within a registry workspace) → one more
+    # schema:identifier PropertyValue, for EVERY record kind. Like funding and
+    # license below it is record-level metadata, so it is added here rather
+    # than in each per-type builder.
+    entity_kind = kind_for_doc(record)
+    body = record.get(entity_kind.record_key) if entity_kind is not None else None
+    if isinstance(body, Mapping):
+        add_handle_identifier(node, body.get("handle"))
     # Funding (workspace grant) → schema:funding/Grant, for EVERY record kind.
     # Material and component nodes carry a domain-battery context rather than the
     # records context, but that context declares the same `schema:` and

@@ -357,6 +357,7 @@ Schema: [`equipment-spec.schema.json`](https://w3id.org/battinfo/schema/equipmen
 | `id` | → SpecIri | yes |  |
 | `short_id` | → ShortId |  |  |
 | `name` | string | yes |  |
+| `handle` | → Handle |  | Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity. |
 | `equipment_class` | string |  |  |
 | `model` | string |  |  |
 | `channel_count` | integer |  |  |
@@ -378,6 +379,7 @@ Schema: [`equipment.schema.json`](https://w3id.org/battinfo/schema/equipment.sch
 | `short_id` | → ShortId |  |  |
 | `serial_number` | string |  |  |
 | `name` | string |  |  |
+| `handle` | → Handle |  | Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity. |
 | `location` | string |  |  |
 | `commissioned_at` | → FlexDate |  |  |
 | `status` | `active` \| `maintenance` \| `retired` \| `unknown` |  |  |
@@ -395,6 +397,7 @@ Schema: [`channel.schema.json`](https://w3id.org/battinfo/schema/channel.schema.
 | `index` | integer | yes |  |
 | `short_id` | → ShortId |  |  |
 | `label` | string |  |  |
+| `handle` | → Handle |  | Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity. |
 | `status` | `active` \| `maintenance` \| `retired` \| `unknown` |  |  |
 | `property` | → quantitative-properties |  |  |
 | `comment` | string |  |  |

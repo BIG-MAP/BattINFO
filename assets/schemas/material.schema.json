@@ -39,6 +39,10 @@
           "type": "string",
           "description": "Human-readable label for this physical lot (e.g. a lab/inventory id)."
         },
+        "handle": {
+          "$ref": "#/$defs/Handle",
+          "description": "Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity."
+        },
         "lot_id": {
           "type": "string",
           "description": "Manufacturer / supplier lot or batch number."
@@ -244,6 +248,12 @@
       "type": "string",
       "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$",
       "description": "Short human-friendly identifier derived from the record IRI (Crockford base32, 6-16 characters)."
+    },
+    "Handle": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*(?:/[a-z0-9]+(?:-[a-z0-9]+)*)*$",
+      "maxLength": 120,
+      "description": "Short readable slug for this record, unique within one registry workspace and shown as <workspace>/<handle> (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Lowercase ASCII segments joined by '/', each made of letters and digits separated by single hyphens; at most 120 characters. Display text only: the record's identity is its IRI, and a handle may be corrected without moving it. Build one with battinfo.naming.handle_for()."
     },
     "MaterialIri": {
       "type": "string",

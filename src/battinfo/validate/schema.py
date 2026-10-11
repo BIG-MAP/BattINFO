@@ -120,6 +120,13 @@ def _enhance_message(error: ValidationError) -> str:
     msg = error.message
     if error.validator == "additionalProperties" and list(error.path) == ["properties"]:
         msg += " Run 'battinfo properties list' to see all valid property names."
+    if error.validator in ("pattern", "maxLength") and list(error.path)[-1:] == ["handle"]:
+        msg += (
+            " A handle is lowercase ASCII segments joined by '/', each made of letters and"
+            " digits separated by single hyphens, at most 120 characters"
+            " (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'); battinfo.naming.handle_for()"
+            " builds one from structured parts."
+        )
     return msg
 
 

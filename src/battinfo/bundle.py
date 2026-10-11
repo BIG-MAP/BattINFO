@@ -1364,6 +1364,7 @@ class CellSpec(BundleJsonModel):
     # Transient short id used only to mint the canonical IRI when no id is given; never serialized.
     uid: str | None = Field(default=None, exclude=True, repr=False, description="Transient 16-char Crockford Base32 uid used to mint the canonical IRI when no id is given; never serialized.")
     name: str | None = Field(default=None, description="Full display name of the product; defaults to 'manufacturer model'.")
+    handle: str | None = Field(default=None, description="Short readable slug, unique within one registry workspace and shown as <workspace>/<handle> (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text only, never part of the identity; build one with battinfo.naming.handle_for().")
     manufacturer: str = Field(default="", description="The company that manufactured this cell (plain name; use manufacturer_id for the org record link).")
     # The schema types manufacturer as an Organization object; keeping the name a plain string
     # preserves the fluent authoring API while this optional id carries the org link.
@@ -1574,6 +1575,7 @@ class CellSpec(BundleJsonModel):
             schema_version=str(record.get("schema_version", "1.0.0")),
             id=str(product["id"]),
             name=str(product.get("name") or f"{manufacturer_name} {product.get('model')}"),
+            handle=product.get("handle"),
             manufacturer=str(manufacturer_name),
             manufacturer_id=manufacturer_id,
             model=str(product["model"]),
@@ -1709,6 +1711,7 @@ class CellSpec(BundleJsonModel):
                 "short_id": _short_id(self.id),
                 "identifier": _identifier("cell-spec", self.id),
                 "name": self.name,
+                **({"handle": self.handle} if self.handle is not None else {}),
                 "model": self.model,
                 "manufacturer": {"type": "Organization", "name": self.manufacturer},
                 "cell_format": self.format,
@@ -1894,6 +1897,7 @@ class Cell(BundleJsonModel):
     # Transient short id used only to mint the canonical IRI when no id is given; never serialized.
     uid: str | None = Field(default=None, exclude=True, repr=False, description="Transient 16-char Crockford Base32 uid used to mint the canonical IRI when no id is given; never serialized.")
     name: str | None = Field(default=None, description="Display name; defaults to the serial number or batch id.")
+    handle: str | None = Field(default=None, description="Short readable slug, unique within one registry workspace and shown as <workspace>/<handle> (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text only, never part of the identity; build one with battinfo.naming.handle_for().")
     cell_spec_id: str | None = Field(default=None, description="IRI of the cell spec this physical cell instantiates (required at save).")
     cell_spec: CellSpec | None = Field(default=None, exclude=True, repr=False, description="Linked cell-spec object (alternative to cell_spec_id; may also be passed positionally).")
     working_electrode_id: str | None = Field(default=None, description="IRI of the electrode record built into this cell as its working electrode (the physical disc/batch, not the design).")
@@ -1986,6 +1990,7 @@ class Cell(BundleJsonModel):
                 or cell_instance.get("serial_number")
                 or cell_instance["id"].rstrip("/").split("/")[-1]
             ),
+            handle=cell_instance.get("handle"),
             cell_spec_id=str(cell_instance["cell_spec_id"]),
             working_electrode_id=cell_instance.get("working_electrode_id"),
             counter_electrode_id=cell_instance.get("counter_electrode_id"),
@@ -2019,6 +2024,7 @@ class Cell(BundleJsonModel):
                 "working_electrode_id": self.working_electrode_id,
                 "counter_electrode_id": self.counter_electrode_id,
                 "name": self.name,
+                "handle": self.handle,
                 "serial_number": self.serial_number,
                 "batch_id": self.batch_id,
                 "grade": self.grade,
@@ -2259,6 +2265,7 @@ class TestSpec(BundleJsonModel):
     # Transient short id used only to mint the canonical IRI when no id is given; never serialized.
     uid: str | None = Field(default=None, exclude=True, repr=False, description="Transient 16-char Crockford Base32 uid used to mint the canonical IRI when no id is given; never serialized.")
     name: str | None = Field(default=None, description="Human-readable name of the test procedure (e.g. 'CC cycling 25degC').")
+    handle: str | None = Field(default=None, description="Short readable slug, unique within one registry workspace and shown as <workspace>/<handle> (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text only, never part of the identity; build one with battinfo.naming.handle_for().")
     test_type: BatteryTestType = Field(
         default=BatteryTestType.OTHER,
         validation_alias=AliasChoices("test_type", "test_kind", "kind"),
@@ -2392,6 +2399,7 @@ class TestSpec(BundleJsonModel):
             schema_version=str(record.get("schema_version", "1.0.0")),
             id=str(protocol["id"]),
             name=str(protocol["name"]),
+            handle=protocol.get("handle"),
             test_type=protocol["kind"],
             description=protocol.get("description"),
             version=protocol.get("version"),
@@ -2417,6 +2425,7 @@ class TestSpec(BundleJsonModel):
                 "short_id": _short_id(self.id),
                 "identifier": _identifier("test-protocol", self.id),
                 "name": self.name,
+                **({"handle": self.handle} if self.handle is not None else {}),
                 "kind": self.test_type,
             },
             "provenance": {},
@@ -2456,6 +2465,7 @@ class Test(BundleJsonModel):
     # Transient short id used only to mint the canonical IRI when no id is given; never serialized.
     uid: str | None = Field(default=None, exclude=True, repr=False, description="Transient 16-char Crockford Base32 uid used to mint the canonical IRI when no id is given; never serialized.")
     name: str | None = Field(default=None, description="Display name; defaults to '<cell name> <protocol or kind>'.")
+    handle: str | None = Field(default=None, description="Short readable slug, unique within one registry workspace and shown as <workspace>/<handle> (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text only, never part of the identity; build one with battinfo.naming.handle_for().")
     test_type: BatteryTestType = Field(
         default=BatteryTestType.OTHER,
         validation_alias=AliasChoices("test_type", "test_kind", "kind"),
@@ -2619,6 +2629,7 @@ class Test(BundleJsonModel):
             schema_version=str(record.get("schema_version", "1.0.0")),
             id=str(test["id"]),
             name=str(test["name"]),
+            handle=test.get("handle"),
             test_type=test["kind"],
             protocol_id=test.get("protocol_id"),
             cell_instance_id=str(test["cell_id"]),
@@ -2655,6 +2666,7 @@ class Test(BundleJsonModel):
                 "short_id": _short_id(self.id),
                 "identifier": _identifier("test", self.id),
                 "name": self.name,
+                **({"handle": self.handle} if self.handle is not None else {}),
                 "kind": self.test_type,
                 "cell_id": self.cell_instance_id,
             },
@@ -2703,6 +2715,7 @@ class Dataset(BundleJsonModel):
     uid: str | None = Field(default=None, exclude=True, repr=False, description="Transient 16-char Crockford Base32 uid used to mint the canonical IRI when no id is given; never serialized.")
     identifier: Any = Field(default=None, description="External identifier (e.g. {'property_id': 'doi', 'value': '10.5281/...'}); defaults to one derived from the IRI.")
     name: str | None = Field(default=None, description="Dataset title (authoring alias: title=).")
+    handle: str | None = Field(default=None, description="Short readable slug, unique within one registry workspace and shown as <workspace>/<handle> (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text only, never part of the identity; build one with battinfo.naming.handle_for().")
     description: str | None = Field(default=None, description="Free-text description of the dataset contents.")
     license: str | None = Field(default=None, description="License URL (e.g. a creativecommons.org license).")
     same_as: _StrList = Field(default_factory=list, validation_alias=AliasChoices("same_as", "sameAs"), description="URLs of other representations of this same dataset.")
@@ -2976,6 +2989,7 @@ class Dataset(BundleJsonModel):
             id=str(dataset["id"]),
             identifier=_copy_identifier(dataset.get("identifier")),
             name=str(dataset.get("name") or dataset.get("title") or dataset["id"]),
+            handle=dataset.get("handle"),
             description=dataset.get("description"),
             license=dataset.get("license"),
             same_as=_string_list(dataset.get("same_as")),
@@ -3026,6 +3040,8 @@ class Dataset(BundleJsonModel):
             "identifier": _copy_identifier(self.identifier) or _identifier("dataset", self.id),
             "name": self.name,
         }
+        if self.handle is not None:
+            dataset_obj["handle"] = self.handle
         if self.description is not None:
             dataset_obj["description"] = self.description
         if self.license is not None:

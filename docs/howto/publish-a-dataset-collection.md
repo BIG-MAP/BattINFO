@@ -157,7 +157,7 @@ The single-record emitter (`battinfo.record_to_jsonld(record, "dataset")`) and t
 
 ## Rules that keep the links stable
 
-**The name is frozen once published.** A collection has no cell or test, so its IRI is seeded from its `access_url` and `name` alone. Rename it, or change its access URL, and it gets a new IRI; every member's `series_id` then points at a record that no longer exists. Pick an access URL that will not change (the deposit DOI, or a project landing page) and settle the name before the first publication. The description, keywords and licence can change freely.
+**The name is part of the IRI seed.** A collection has no cell or test, so its IRI is seeded from its `access_url` and `name` alone. Rename it, or change its access URL, and it gets a new IRI; every member's `series_id` then points at a record that no longer exists. Pick an access URL that will not change (the deposit DOI, or a project landing page) and settle the name before the first publication. The description, keywords and licence can change freely. To retitle a collection that is already published, pass the IRI it was published under as `Dataset(id=...)`; [Name your records](name-your-records.md) covers titles, handles and pinned identities.
 
 **Publish the collection before its members.** Members carry the link, so the collection has to exist with its final IRI before they cite it. In a single Zenodo deposit this happens on its own, since everything goes up together. If the members go out later or separately, publish the collection first.
 
