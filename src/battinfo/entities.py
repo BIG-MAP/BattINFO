@@ -236,12 +236,14 @@ ENTITY_KINDS: tuple[EntityKind, ...] = (
     # ``equipment_id`` lives in the record body, uid minted deterministically
     # from (equipment uid, index) — IDENTIFIER_POLICY 6.1.
     EntityKind("channel", "channel", "channel.schema.json", "channel", "channel"),
-    # Parameter sets are claim batches (one source, one target) rather than a
-    # spec+instance pair: a reusable description, minted under spec/ like every
-    # other one. The target link (material_kind / material_spec_id /
-    # cell_spec_id) lives in the record body, uid minted deterministically from
-    # (target, name) so re-importing the same source is idempotent.
-    EntityKind("parameter-set", "parameter_set", "parameter-set.schema.json", "parameter-set", "spec"),
+    # Parameter sets (claim batches and parameter files) are datasets, not
+    # descriptions: nothing is ever an instance of one. They mint under
+    # dataset/, which they share with dataset records (IDENTIFIER_POLICY 6.3),
+    # so the namespace does not say which of the two an IRI names. The target
+    # link (material_kind / material_spec_id / cell_spec_id) lives in the
+    # record body; a claim batch's uid derives from (target, scope, name), a
+    # parameter file's from its parameters_sha256.
+    EntityKind("parameter-set", "parameter_set", "parameter-set.schema.json", "parameter-set", "dataset"),
     # Organizations are identity records (manufacturers, labs, publishers)
     # other records point at. Instance-only, minted under organization/; NEW
     # uids derive deterministically from the normalized name so re-creating
@@ -308,7 +310,8 @@ def entity_types_for_namespace(namespace: str) -> list[str]:
     """Logical entity types that mint IRIs under *namespace*.
 
     Multiple kinds can share a namespace (``cell-spec`` and ``test-protocol``
-    both use ``spec/``). Falls back to ``[namespace]`` when nothing matches, to
+    both use ``spec/``, ``dataset`` and ``parameter-set`` both use
+    ``dataset/``). Falls back to ``[namespace]`` when nothing matches, to
     preserve the previous best-effort lookup behavior.
     """
     matches = [kind.entity_type for kind in ENTITY_KINDS if kind.iri_namespace == namespace]

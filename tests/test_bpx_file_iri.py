@@ -119,10 +119,22 @@ def test_the_record_states_the_fingerprint_its_iri_derives_from() -> None:
     record = _record()
     body = record["parameter_set"]
     assert body["parameters_sha256"] == FIXTURE_DIGEST
-    # Anyone holding the file can check it against the IRI.
-    uid = stable_uid(f"parameter-set-file:{bpx_content_digest(FIXTURE)}")
-    assert body["id"] == f"https://w3id.org/battinfo/spec/{uid}"
+    # Anyone holding the file can check it against the IRI. The seed and the
+    # dataset/ namespace are the registry contract (IDENTIFIER_POLICY 6.3).
+    uid = stable_uid(f"parameter-file:{bpx_content_digest(FIXTURE)}")
+    assert uid == "94pv-g7vd-2e2r-0t34"
+    assert body["id"] == f"https://w3id.org/battinfo/dataset/{uid}"
     assert from_bpx_parameters(FIXTURE).file_uid() == uid
+
+
+def test_the_schmitt_file_uid_is_pinned() -> None:
+    # Schmitt et al. 2026 (BattMo export), republished under dataset/ to
+    # supersede spec/szxp-xwnx-vhyf-rvm0, which the old seed gave.
+    from battinfo.api._parameters import parameter_file_uid
+
+    digest = "b29ec1fd8b0d5c160ffc12fcd39010484c654d3ed149d8a75081d4b49f2d1873"
+    assert parameter_file_uid(digest) == "7jnc-cjtw-5h3a-5t52"
+    assert stable_uid(f"parameter-set-file:{digest}") == "szxp-xwnx-vhyf-rvm0"
 
 
 def test_reindented_copy_mints_the_same_iri(tmp_path: Path) -> None:

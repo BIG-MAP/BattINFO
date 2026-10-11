@@ -42,7 +42,7 @@ record = create_parameter_set(
 {
   "schema_version": "0.2.0",
   "parameter_set": {
-    "id": "https://w3id.org/battinfo/spec/fm9p-sqkk-tbx3-rr66",
+    "id": "https://w3id.org/battinfo/dataset/fm9p-sqkk-tbx3-rr66",
     "short_id": "fm9psq",
     "name": "Graphite density claims, Smith 2026",
     "material_kind": "graphite",
@@ -73,7 +73,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 ```json
 {
   "@context": "https://w3id.org/battinfo/context/records/v1.json",
-  "@id": "https://w3id.org/battinfo/spec/fm9p-sqkk-tbx3-rr66",
+  "@id": "https://w3id.org/battinfo/dataset/fm9p-sqkk-tbx3-rr66",
   "@type": "schema:Dataset",
   "schema:name": "Graphite density claims, Smith 2026",
   "schema:about": {
@@ -154,8 +154,8 @@ record = result.to_parameter_set(
 {
   "schema_version": "0.2.0",
   "parameter_set": {
-    "id": "https://w3id.org/battinfo/spec/bwcv-1gn2-bgb7-gcz6",
-    "short_id": "bwcv1g",
+    "id": "https://w3id.org/battinfo/dataset/j6a4-h1cs-bmyh-07qc",
+    "short_id": "j6a4h1",
     "name": "Example pouch cell",
     "virtual_cell": true,
     "parameters_sha256": "cae9047a38afefc4e8ac96b7024bca32566608a964f9cf55bc2f133670f1d4ae",
@@ -260,7 +260,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 ```json
 {
   "@context": "https://w3id.org/battinfo/context/records/v1.json",
-  "@id": "https://w3id.org/battinfo/spec/bwcv-1gn2-bgb7-gcz6",
+  "@id": "https://w3id.org/battinfo/dataset/j6a4-h1cs-bmyh-07qc",
   "@type": "schema:Dataset",
   "schema:name": "Example pouch cell",
   "schema:identifier": {
@@ -473,14 +473,14 @@ from importlib import resources
 
 record = json.loads(
     resources.files("battinfo")
-    .joinpath("data/examples/parameter-set/parameter-set-8qqs-rh43-wt8d-172n.json")
+    .joinpath("data/examples/parameter-set/parameter-set-xm4e-fr60-10y6-ajqh.json")
     .read_text(encoding="utf-8")
 )
 ```
 ::::
 
 ::::{tab-item} Canonical record
-```{literalinclude} ../../examples/parameter-set/parameter-set-8qqs-rh43-wt8d-172n.json
+```{literalinclude} ../../examples/parameter-set/parameter-set-xm4e-fr60-10y6-ajqh.json
 :language: json
 ```
 ::::
@@ -491,7 +491,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 ```json
 {
   "@context": "https://w3id.org/battinfo/context/records/v1.json",
-  "@id": "https://w3id.org/battinfo/spec/8qqs-rh43-wt8d-172n",
+  "@id": "https://w3id.org/battinfo/dataset/xm4e-fr60-10y6-ajqh",
   "@type": "schema:Dataset",
   "schema:name": "Chen 2020 - graphite",
   "schema:description": "Subset of the Chen et al. 2020 LG M50 parameterization for the graphite negative electrode material, as a worked example of parameter claims.",
@@ -652,14 +652,14 @@ from importlib import resources
 
 record = json.loads(
     resources.files("battinfo")
-    .joinpath("data/examples/parameter-set/parameter-set-fe59-wews-8mmv-zwag.json")
+    .joinpath("data/examples/parameter-set/parameter-set-rnc6-edv8-m43x-ebnq.json")
     .read_text(encoding="utf-8")
 )
 ```
 ::::
 
 ::::{tab-item} Canonical record
-```{literalinclude} ../../examples/parameter-set/parameter-set-fe59-wews-8mmv-zwag.json
+```{literalinclude} ../../examples/parameter-set/parameter-set-rnc6-edv8-m43x-ebnq.json
 :language: json
 ```
 ::::
@@ -670,7 +670,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 ```json
 {
   "@context": "https://w3id.org/battinfo/context/records/v1.json",
-  "@id": "https://w3id.org/battinfo/spec/fe59-wews-8mmv-zwag",
+  "@id": "https://w3id.org/battinfo/dataset/rnc6-edv8-m43x-ebnq",
   "@type": "schema:Dataset",
   "schema:name": "BPX NMC111 pouch",
   "schema:description": "NMC111|graphite 12.5 Ah pouch cell. Parameterisation by About:Energy Limited (aboutenergy.io), December 2022, based on cell cycling data, and electrode data gathered after cell teardown. Electrolyte properties from Nyman et al. 2008 (doi:10.1016/j.electacta.2008.04.023). Negative electrode entropic coefficient data are from O'Regan et al. 2022 (doi:10.1016/j.electacta.2022.140700). Positive electrode entropic coefficient data are from Viswanathan et al. 2010 (doi:10.1016/j.jpowsour.2009.11.103). Other thermal properties are estimated.",
@@ -1758,14 +1758,14 @@ from importlib import resources
 
 record = json.loads(
     resources.files("battinfo")
-    .joinpath("data/examples/parameter-set/parameter-set-xm1d-bz46-pc9v-pt70.json")
+    .joinpath("data/examples/parameter-set/parameter-set-h7g7-5082-63jk-9wm3.json")
     .read_text(encoding="utf-8")
 )
 ```
 ::::
 
 ::::{tab-item} Canonical record
-```{literalinclude} ../../examples/parameter-set/parameter-set-xm1d-bz46-pc9v-pt70.json
+```{literalinclude} ../../examples/parameter-set/parameter-set-h7g7-5082-63jk-9wm3.json
 :language: json
 ```
 ::::
@@ -1776,7 +1776,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 ```json
 {
   "@context": "https://w3id.org/battinfo/context/records/v1.json",
-  "@id": "https://w3id.org/battinfo/spec/xm1d-bz46-pc9v-pt70",
+  "@id": "https://w3id.org/battinfo/dataset/h7g7-5082-63jk-9wm3",
   "@type": "schema:Dataset",
   "schema:name": "BPX LFP 18650",
   "schema:description": "LFP|graphite 2 Ah cylindrical 18650 cell. Parameterisation by About:Energy Limited (aboutenergy.io), December 2022, based on cell cycling data, and electrode data gathered after cell teardown. Electrolyte properties from Nyman et al. 2008 (doi:10.1016/j.electacta.2008.04.023). Negative electrode entropic coefficient data are from O'Regan et al. 2022 (doi:10.1016/j.electacta.2022.140700). Positive electrode entropic coefficient data are from Gerver and Meyers 2011 (doi:10.1149/1.3591799). Other thermal properties are estimated.",
@@ -2860,14 +2860,14 @@ from importlib import resources
 
 record = json.loads(
     resources.files("battinfo")
-    .joinpath("data/examples/parameter-set/parameter-set-q73c-bk3q-ceks-r4p6.json")
+    .joinpath("data/examples/parameter-set/parameter-set-6bpa-4qet-046r-1zzk.json")
     .read_text(encoding="utf-8")
 )
 ```
 ::::
 
 ::::{tab-item} Canonical record
-```{literalinclude} ../../examples/parameter-set/parameter-set-q73c-bk3q-ceks-r4p6.json
+```{literalinclude} ../../examples/parameter-set/parameter-set-6bpa-4qet-046r-1zzk.json
 :language: json
 ```
 ::::
@@ -2878,7 +2878,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 ```json
 {
   "@context": "https://w3id.org/battinfo/context/records/v1.json",
-  "@id": "https://w3id.org/battinfo/spec/q73c-bk3q-ceks-r4p6",
+  "@id": "https://w3id.org/battinfo/dataset/6bpa-4qet-046r-1zzk",
   "@type": "schema:Dataset",
   "schema:name": "BPX NMC111 pouch SPM",
   "schema:description": "NMC111|graphite 12.5 Ah pouch cell. Parameterisation by About:Energy Limited (aboutenergy.io), December 2022, based on cell cycling data, and electrode data gathered after cell teardown. Negative electrode entropic coefficient data are from O'Regan et al. 2022 (doi:10.1016/j.electacta.2022.140700). Positive electrode entropic coefficient data are from Viswanathan et al. 2010 (doi:10.1016/j.jpowsour.2009.11.103). Other thermal properties are estimated.",
@@ -3690,14 +3690,14 @@ from importlib import resources
 
 record = json.loads(
     resources.files("battinfo")
-    .joinpath("data/examples/parameter-set/parameter-set-6034-7wex-6cwr-fzv1.json")
+    .joinpath("data/examples/parameter-set/parameter-set-dpj6-1j9x-eetd-gs81.json")
     .read_text(encoding="utf-8")
 )
 ```
 ::::
 
 ::::{tab-item} Canonical record
-```{literalinclude} ../../examples/parameter-set/parameter-set-6034-7wex-6cwr-fzv1.json
+```{literalinclude} ../../examples/parameter-set/parameter-set-dpj6-1j9x-eetd-gs81.json
 :language: json
 ```
 ::::
@@ -3708,7 +3708,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 ```json
 {
   "@context": "https://w3id.org/battinfo/context/records/v1.json",
-  "@id": "https://w3id.org/battinfo/spec/6034-7wex-6cwr-fzv1",
+  "@id": "https://w3id.org/battinfo/dataset/dpj6-1j9x-eetd-gs81",
   "@type": "schema:Dataset",
   "schema:name": "BPX NMC111 pouch blended",
   "schema:identifier": {
@@ -4587,14 +4587,14 @@ from importlib import resources
 
 record = json.loads(
     resources.files("battinfo")
-    .joinpath("data/examples/parameter-set/parameter-set-c8cb-d472-yt6s-kyjw.json")
+    .joinpath("data/examples/parameter-set/parameter-set-xms6-5z2m-gpsz-nzy9.json")
     .read_text(encoding="utf-8")
 )
 ```
 ::::
 
 ::::{tab-item} Canonical record
-```{literalinclude} ../../examples/parameter-set/parameter-set-c8cb-d472-yt6s-kyjw.json
+```{literalinclude} ../../examples/parameter-set/parameter-set-xms6-5z2m-gpsz-nzy9.json
 :language: json
 ```
 ::::
@@ -4605,7 +4605,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 ```json
 {
   "@context": "https://w3id.org/battinfo/context/records/v1.json",
-  "@id": "https://w3id.org/battinfo/spec/c8cb-d472-yt6s-kyjw",
+  "@id": "https://w3id.org/battinfo/dataset/xms6-5z2m-gpsz-nzy9",
   "@type": "schema:Dataset",
   "schema:name": "BPX NMC111-Si pouch hysteresis",
   "schema:identifier": {
@@ -5695,7 +5695,7 @@ Schema: [`parameter-set.schema.json`](https://w3id.org/battinfo/schema/parameter
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `id` | → SpecIri | yes |  |
+| `id` | → DatasetIri | yes | The record's IRI. Parameter sets of both flavours are datasets and mint under dataset/ (IDENTIFIER_POLICY 6.3): a claim batch's uid is stable_uid('parameter-claims:<target>:<scope>[:<electrode_polarity>]:<name>'), the name stripped and lowercased, and a parameter file's is stable_uid('parameter-file:' + parameters_sha256). |
 | `short_id` | → ShortId |  |  |
 | `name` | string | yes | Human-readable label. A claim batch is conventionally named '<source> - <target>' (e.g. 'Chen 2020 - graphite'); a parameter file by its source (the BPX Header.Title). |
 | `handle` | → Handle |  | Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity. |
@@ -5706,7 +5706,7 @@ Schema: [`parameter-set.schema.json`](https://w3id.org/battinfo/schema/parameter
 | `virtual_cell` | const `True` |  | Parameter files only: the file describes no real cell (a virtual or example cell), so the record links to none. |
 | `scope` | `material` \| `electrode` \| `separator` \| `electrolyte` … (5 values) |  | Claim batches only. Physical scope the claims describe. Defaults (in the builder) to 'material' for material targets and 'cell' for cell-spec targets. Electrode/separator/electrolyte scopes carry manufactured-build parameters (thickness, porosity, transport) that belong to a cell design, not to a powder. |
 | `electrode_polarity` | `positive` \| `negative` |  | Claim batches only. For electrode-scope claims on a cell-spec target: which electrode the claims describe. |
-| `parameters_sha256` | string |  | Parameter files only: the SHA-256 (lowercase hex) of the RFC 8785 canonical form of the source file, the fingerprint the record's IRI derives from (stable_uid('parameter-set-file:' + parameters_sha256), IDENTIFIER_POLICY 6.3). Anyone can check a file against the IRI with it. |
+| `parameters_sha256` | string |  | Parameter files only: the SHA-256 (lowercase hex) of the RFC 8785 canonical form of the source file, the fingerprint the record's IRI derives from (stable_uid('parameter-file:' + parameters_sha256), IDENTIFIER_POLICY 6.3). Anyone can check a file against the IRI with it. |
 | `model_context` | object |  | The digital artifact these claims came from, when they were imported from a modelling parameter set (BPX file, PyBaMM parameter set, ...). |
 | `claims` | array of → Claim |  | Claim batches only: the claims about the target. |
 | `parts` | array of → Part |  | Parameter files only: every claim the file makes, grouped by part. Each (part, phase) pair appears at most once (builder- and validator-enforced). |
@@ -5714,7 +5714,7 @@ Schema: [`parameter-set.schema.json`](https://w3id.org/battinfo/schema/parameter
 | `comment` | string |  |  |
 | `annex` | object |  | Source-file extension entries carried verbatim (e.g. a BPX User-defined block): original key -> raw value. No standard semantics are claimed for these; they exist so a re-export reproduces the source file and nothing is silently lost. |
 | `not_imported` | array of string |  | Parameter files only: the values of the source file the record does not hold, as BPX paths ('Parameterisation/Negative electrode/Particle', 'State/Degradation', 'Validation'). They stay in the source file; a document rebuilt from the record lacks them. |
-| `supersedes` | → SpecIri |  | Parameter files only: the parameter-set record of an earlier file this one corrects. A corrected file has other parameters and so a new IRI; this links the two, and the registry marks the earlier record superseded when one publisher owns both. |
+| `supersedes` | → SupersededParameterSetIri |  | The parameter-set record this one replaces, of either flavour: the record of an earlier file a corrected file replaces (a corrected file has other parameters and so a new IRI), or a parameter set minted under spec/ before 2026-10-11 that this dataset/ record republishes. The registry marks the earlier record superseded when one publisher owns both. |
 | `distributions` | array of → ParameterFile |  | Parameter files only: the file itself. Exactly one 'source' entry (the file exactly as its authors published it), at most one 'runnable' entry (a declared, checksummed conversion for solvers that cannot read the source, made only when the official parser rejects it) and any number of 'mirror' entries (the same bytes served elsewhere). Claims extracted from the file are an index for search and collation; a solver reads the file. |
 
 
@@ -5723,9 +5723,11 @@ Schema: [`parameter-set.schema.json`](https://w3id.org/battinfo/schema/parameter
 :::{dropdown} The reasoning behind the model
 **Why claims, not properties.** It is tempting to say a diffusivity of graphite is a property of graphite and file it on a material record. Four facts break that model. Most claims target a *kind* (graphite as such), and kinds are vocabulary, not records — there is no bearer to carry the property. Sources disagree — five published graphite OCPs, fitted diffusivities an order of magnitude apart — and a record's properties presuppose one adjudicated value, while the spread *is* the data. Many parameters are not properties of the material at all but of a model fit — a reaction rate constant fitted under DFN belongs to (material × model × calibration), and asserting it on the material would poison the record with model artifacts. And a calibration is a joint estimate: values fitted together are only valid together, so the set is the unit of self-consistency. Hence one record per source, `provenance_class` per claim, resolution downstream. The describer's own declarations (a datasheet density) stay properties of the description; third-party and model-bound assertions are claims about the target — the same epistemics rule as spec vs instance.
 
+**A parameter set is a dataset.** Both flavours are one particular piece of data from one source, produced by one calibration or extraction, and nothing is ever an instance of one, so they are datasets in the sense of IDENTIFIER_POLICY 6.1 rather than specs. They mint under `https://w3id.org/battinfo/dataset/`, next to dataset records, and emit as `schema:Dataset`; read the record, not the namespace, to tell the two apart. A claim batch's uid derives from its target, scope, electrode polarity and name under the seed `parameter-claims`, a parameter file's from its `parameters_sha256` under the seed `parameter-file`. Parameter sets published under `spec/` before 2026-10-11 are republished as new `dataset/` records that name the old IRI in `supersedes`, which either flavour may carry, and the old IRI keeps resolving as a superseded record that points at its replacement.
+
 **One file, one record.** A BPX file is one co-fitted parameterisation whose values are only valid together, so they stay together: one parameter-set record per file, its claims grouped by part. The importer never guesses which cell a file describes, and the caller states it with exactly one link. If the cell is already in the genome, the record names its cell spec (`cell_spec_id`), or the one physical cell a fit was made on (`cell_instance_id`), and nothing else is created. If it is a real cell that is not in the genome yet, the caller searches for a duplicate by maker and model, then creates the cell spec with its identity only (name, maker, model, format, chemistry) and, if missing, the maker's organization record, and links that spec. The file's cell numbers (capacity, cut-offs, geometry, temperatures) stay on the parameter set as claims, not on the new spec. If there is no real cell, as for the BPX repository's own examples, the record says `virtual_cell: true` and links nothing. BPX does not name its materials, so the caller names each electrode's material part (`materials={"negative": "graphite", "positive": "nmc811"}`) to make its claims findable by material. `electrode_area` is the area of one electrode pair, as BPX and PyBaMM use it, and `electrode_pair_count` sits next to it so the total can be computed.
 
 **BPX interop, both directions.** `from_bpx_parameters` reads the file and `to_parameter_set` builds the record. Every value in the file lands in a part. The Cell block is the `cell` part. Each electrode block splits into its material part (stoichiometry window, diffusivity, OCP) and its electrode part (thickness, porosity). Separator and electrolyte are parts of their own, and the initial and thermal conditions form the `state` part, read the same from the v0.x layout (Cell and Electrolyte) and from the v1 `State` block. Values keep the form and unit the file gives them: scalars as quantities, tables as curves, function strings as expressions. Header lineage rides along: `Model`, the BPX version and the layout the file actually uses (`v0` or `v1`; a file declaring 1.0 may keep the v0.x one) in `model_context` (a DFN-fitted value is not model-free), `Description` on the record, `References` as citation or note. The `User-defined` block travels verbatim as the record's `annex`. A single-phase electrode's OCP branches are `ocp` curves with their `branch`. What the record does not model yet (blended-electrode `Particle` blocks, initial hysteresis state, `Degradation`, `Validation` curves) is named in a warning and listed by its BPX path in the record's `not_imported`, never dropped silently. The reverse is `to_bpx(record)`, which rebuilds the BPX document from the parts at the file's own version or at the one asked for, in that version's layout. A record whose `model_context.layout` is `v0` and that is exported at a 1.x version goes through the same conversion as `upgrade_bpx`, so it gains the State values the bpx package's own migration adds. Values in another unit than BPX states are converted, curves included, or the export refuses; the result says `complete=False` when the file held values the record does not, and the official `bpx` parser's verdict is in its warnings. `query_parameter_sets` and `collate_claims` read the parts, so a search for graphite claims finds the graphite part of every file next to the literature claim batches.
 
-**A BPX file's IRI.** A solver should be able to take a parameter set's IRI and run it, so the record carries the file itself under `distributions`. Role `source` is the file exactly as its authors published it, and there is exactly one. Role `runnable` is an optional declared conversion, made only when the official parser rejects the source: a file that declares BPX 1.0 but keeps the v0.x layout, for example, rewritten in the v1 layout by `upgrade_bpx` because current PyBaMM requires it. It names the source's sha256 in `derived_from`, says what changed in `conversion`, and must be exactly that conversion of the source: the builder (given `runnable_file=`) and the registry both check it. The conversion lives in `battinfo._bpx_layout`, a standard-library module the registry vendors as it is. Role `mirror` is the source's bytes served from somewhere else, with the same checksum. Links are https only, and each file records the checks run on it at ingest (`bpx_parse`, `simulation_smoke`). The record is addressed by the file's parameters (IDENTIFIER_POLICY 6.3): its uid derives from the digest of the file's RFC 8785 canonical JSON, which the record stores as `parameters_sha256`, so anyone holding the file can check it against the IRI. A copy that differs only in formatting or number spelling keeps the IRI, and a corrected file is a new record that names the old one in `supersedes`. The first publisher owns the IRI, the registry keeps the first copy it is given and serves it at `https://w3id.org/battinfo/spec/<uid>?format=bpx`, and the record validator holds the binding (an IRI the fingerprint does not give, a runnable not naming its source, a mirror of other bytes) as errors under every policy. A file is required to publish and optional for local work. The steps are in [Publish a BPX parameter file](../howto/publish-a-bpx-parameter-file.md).
+**A BPX file's IRI.** A solver should be able to take a parameter set's IRI and run it, so the record carries the file itself under `distributions`. Role `source` is the file exactly as its authors published it, and there is exactly one. Role `runnable` is an optional declared conversion, made only when the official parser rejects the source: a file that declares BPX 1.0 but keeps the v0.x layout, for example, rewritten in the v1 layout by `upgrade_bpx` because current PyBaMM requires it. It names the source's sha256 in `derived_from`, says what changed in `conversion`, and must be exactly that conversion of the source: the builder (given `runnable_file=`) and the registry both check it. The conversion lives in `battinfo._bpx_layout`, a standard-library module the registry vendors as it is. Role `mirror` is the source's bytes served from somewhere else, with the same checksum. Links are https only, and each file records the checks run on it at ingest (`bpx_parse`, `simulation_smoke`). The record is addressed by the file's parameters (IDENTIFIER_POLICY 6.3): its uid derives from the digest of the file's RFC 8785 canonical JSON, which the record stores as `parameters_sha256`, so anyone holding the file can check it against the IRI. A copy that differs only in formatting or number spelling keeps the IRI, and a corrected file is a new record that names the old one in `supersedes`. The first publisher owns the IRI, the registry keeps the first copy it is given and serves it at `https://w3id.org/battinfo/dataset/<uid>?format=bpx`, and the record validator holds the binding (an IRI the fingerprint does not give, a runnable not naming its source, a mirror of other bytes) as errors under every policy. A file is required to publish and optional for local work. The steps are in [Publish a BPX parameter file](../howto/publish-a-bpx-parameter-file.md).
 :::

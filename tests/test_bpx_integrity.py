@@ -47,6 +47,7 @@ SOURCE_URL = "https://files.example.org/parameter_sets/x/source.bpx.json"
 RUNNABLE_URL = "https://files.example.org/parameter_sets/x/runnable.bpx.json"
 MIRROR_URL = "https://mirror.example.org/x/source.bpx.json"
 OLD_IRI = "https://w3id.org/battinfo/spec/0000-0000-0000-0001"
+NEWER_OLD_IRI = "https://w3id.org/battinfo/dataset/0000-0000-0000-0002"
 
 
 def _doc() -> dict:
@@ -536,11 +537,17 @@ def test_a_corrected_file_names_the_record_it_supersedes() -> None:
         from_bpx_parameters(FIXTURE).to_parameter_set(virtual_cell=True, supersedes=record["parameter_set"]["id"])
     with pytest.raises(ValueError, match="parameter-set IRI"):
         from_bpx_parameters(FIXTURE).to_parameter_set(virtual_cell=True, supersedes="not-an-iri")
-    with pytest.raises(ValueError, match="belong to a parameter file"):
-        create_parameter_set(
-            name="Chen 2020 - graphite", material_kind="graphite", supersedes=OLD_IRI,
-            claims=[{"parameter": "particle_radius", "quantity": {"value": 5.86e-6, "unit": "m"}}],
-        )
+    # A record of the dataset/ era supersedes as well as a spec/ one.
+    newer = from_bpx_parameters(FIXTURE).to_parameter_set(virtual_cell=True, supersedes=NEWER_OLD_IRI)
+    assert newer["parameter_set"]["supersedes"] == NEWER_OLD_IRI
+    assert validate_record_report(newer).ok
+    # Claim batches carry supersedes too (IDENTIFIER_POLICY 6.3).
+    batch = create_parameter_set(
+        name="Chen 2020 - graphite", material_kind="graphite", supersedes=OLD_IRI,
+        claims=[{"parameter": "particle_radius", "quantity": {"value": 5.86e-6, "unit": "m"}}],
+    )
+    assert batch["parameter_set"]["supersedes"] == OLD_IRI
+    assert batch["parameter_set"]["id"].startswith("https://w3id.org/battinfo/dataset/")
 
 
 # ── Publishing through the workspace ─────────────────────────────────────────

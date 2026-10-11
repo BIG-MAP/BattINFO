@@ -1,8 +1,8 @@
 {
   "schema_version": "0.2.0",
   "parameter_set": {
-    "id": "https://w3id.org/battinfo/spec/c8cb-d472-yt6s-kyjw",
-    "short_id": "c8cbd4",
+    "id": "https://w3id.org/battinfo/dataset/xms6-5z2m-gpsz-nzy9",
+    "short_id": "xms65z",
     "name": "BPX NMC111-Si pouch hysteresis",
     "virtual_cell": true,
     "parameters_sha256": "c19a385e1a02df4b3dbea88203f5f463108ed7ccb647b850d92f7c224bbc3989",

@@ -116,10 +116,9 @@ def _validator_code(error: ValidationError) -> str:
     return f"schema.{validator}"
 
 
-# Parameter-set fields that belong to one flavour only.
+# Parameter-set fields that belong to one flavour only (supersedes belongs to both).
 _PARAMETER_FILE_ONLY = (
     "parts", "parameters_sha256", "virtual_cell", "cell_instance_id", "distributions", "not_imported",
-    "supersedes",
 )
 _CLAIM_BATCH_ONLY = ("material_kind", "material_spec_id", "scope", "electrode_polarity")
 _CELL_LINKS = ("cell_spec_id", "cell_instance_id", "virtual_cell")

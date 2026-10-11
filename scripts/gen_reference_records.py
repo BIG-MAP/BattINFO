@@ -1378,12 +1378,12 @@ SHELVES: dict[str, list[str]] = {
         "equipment/bw1k-j56y-r2ax-2adv.json",
     ],
     "parameter-sets": [
-        "parameter-set/parameter-set-8qqs-rh43-wt8d-172n.json",
-        "parameter-set/parameter-set-fe59-wews-8mmv-zwag.json",
-        "parameter-set/parameter-set-xm1d-bz46-pc9v-pt70.json",
-        "parameter-set/parameter-set-q73c-bk3q-ceks-r4p6.json",
-        "parameter-set/parameter-set-6034-7wex-6cwr-fzv1.json",
-        "parameter-set/parameter-set-c8cb-d472-yt6s-kyjw.json",
+        "parameter-set/parameter-set-xm4e-fr60-10y6-ajqh.json",
+        "parameter-set/parameter-set-rnc6-edv8-m43x-ebnq.json",
+        "parameter-set/parameter-set-h7g7-5082-63jk-9wm3.json",
+        "parameter-set/parameter-set-6bpa-4qet-046r-1zzk.json",
+        "parameter-set/parameter-set-dpj6-1j9x-eetd-gs81.json",
+        "parameter-set/parameter-set-xms6-5z2m-gpsz-nzy9.json",
     ],
     "organizations": [
         "organization/A123.json",

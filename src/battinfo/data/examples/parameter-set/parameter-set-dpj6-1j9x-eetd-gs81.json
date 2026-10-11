@@ -1,16 +1,16 @@
 {
   "schema_version": "0.2.0",
   "parameter_set": {
-    "id": "https://w3id.org/battinfo/spec/xm1d-bz46-pc9v-pt70",
-    "short_id": "xm1dbz",
-    "name": "BPX LFP 18650",
+    "id": "https://w3id.org/battinfo/dataset/dpj6-1j9x-eetd-gs81",
+    "short_id": "dpj61j",
+    "name": "BPX NMC111 pouch blended",
     "virtual_cell": true,
-    "parameters_sha256": "7e7da04a7bee449ae4f36c970a0a5a6f7c3305b6da517122324ba62369b424ff",
+    "parameters_sha256": "fcc7c98a2a9b665a256984d21b0b5fa1dbfa84430d0b5c1d957946373155a084",
     "model_context": {
       "tool": "BPX",
-      "name": "Parameterisation example of an LFP|graphite 2 Ah cylindrical 18650 cell.",
+      "name": "Test case: blended electrode definition with two particle sizes but equivalent chemistry. Compare to nmc_pouch_cell_BPX.json in About:Energy open-source release.",
       "model": "DFN",
-      "version": "0.1.0",
+      "version": "0.4.0",
       "layout": "v0"
     },
     "parts": [
@@ -28,7 +28,7 @@
           {
             "parameter": "discharging_cutoff_voltage",
             "quantity": {
-              "value": 2.0,
+              "value": 2.7,
               "unit": "V"
             },
             "provenance_class": "fitted"
@@ -36,7 +36,7 @@
           {
             "parameter": "charging_cutoff_voltage",
             "quantity": {
-              "value": 3.65,
+              "value": 4.2,
               "unit": "V"
             },
             "provenance_class": "fitted"
@@ -44,7 +44,7 @@
           {
             "parameter": "nominal_capacity",
             "quantity": {
-              "value": 2,
+              "value": 12.5,
               "unit": "Ah"
             },
             "provenance_class": "fitted"
@@ -52,7 +52,7 @@
           {
             "parameter": "specific_heat_capacity",
             "quantity": {
-              "value": 999,
+              "value": 913,
               "unit": "J/(kg.K)"
             },
             "provenance_class": "fitted"
@@ -60,7 +60,7 @@
           {
             "parameter": "thermal_conductivity",
             "quantity": {
-              "value": 1.89,
+              "value": 2.04,
               "unit": "W/(m.K)"
             },
             "provenance_class": "fitted"
@@ -68,7 +68,7 @@
           {
             "parameter": "density",
             "quantity": {
-              "value": 1940,
+              "value": 1847,
               "unit": "kg/m3"
             },
             "provenance_class": "fitted"
@@ -76,7 +76,7 @@
           {
             "parameter": "electrode_area",
             "quantity": {
-              "value": 0.08959998,
+              "value": 0.016808,
               "unit": "m2"
             },
             "provenance_class": "fitted"
@@ -84,7 +84,7 @@
           {
             "parameter": "electrode_pair_count",
             "quantity": {
-              "value": 1,
+              "value": 34,
               "unit": "1"
             },
             "provenance_class": "fitted"
@@ -92,7 +92,7 @@
           {
             "parameter": "external_surface_area",
             "quantity": {
-              "value": 0.00431,
+              "value": 0.0379,
               "unit": "m2"
             },
             "provenance_class": "fitted"
@@ -100,7 +100,7 @@
           {
             "parameter": "volume",
             "quantity": {
-              "value": 1.7e-05,
+              "value": 0.000128,
               "unit": "m3"
             },
             "provenance_class": "fitted"
@@ -114,7 +114,7 @@
           {
             "parameter": "particle_radius",
             "quantity": {
-              "value": 4.8e-06,
+              "value": 4.12e-06,
               "unit": "m"
             },
             "provenance_class": "fitted"
@@ -122,7 +122,7 @@
           {
             "parameter": "solid_diffusivity",
             "quantity": {
-              "value": 9.6e-15,
+              "value": 2.728e-14,
               "unit": "m2/s"
             },
             "provenance_class": "fitted"
@@ -130,7 +130,7 @@
           {
             "parameter": "ocp",
             "expression": {
-              "text": "5.29210878e+01 * exp(-1.72699386e+02 * x) - 1.17963399e+03 + 1.20956356e+03 * tanh(6.72033948e+01 * (x + 2.44746396e-02)) + 4.52430314e-02 * tanh(-1.47542326e+01 * (x - 1.62746053e-01)) + 2.01855800e+01 * tanh(-2.46666302e+01 * (x - 1.12986136e+00)) + 2.01708039e-02 * tanh(-1.19900231e+01 * (x - 5.49773440e-01)) + 4.99616805e+01 * tanh(-6.11370883e+01 * (x + 4.69382558e-03))",
+              "text": "9.47057878e-01 * exp(-1.59418743e+02  * x) - 3.50928033e+04 + 1.64230269e-01 * tanh(-4.55509094e+01 * (x - 3.24116012e-02 )) + 3.69968491e-02 * tanh(-1.96718868e+01 * (x - 1.68334476e-01)) + 1.91517003e+04 * tanh(3.19648312e+00 * (x - 1.85139824e+00)) + 5.42448511e+04 * tanh(-3.19009848e+00 * (x - 2.01660395e+00))",
               "language": "bpx",
               "argument": "x"
             },
@@ -148,7 +148,7 @@
           {
             "parameter": "reaction_rate_constant",
             "quantity": {
-              "value": 6.872e-06,
+              "value": 5.199e-06,
               "unit": "mol.m-2.s-1"
             },
             "provenance_class": "fitted"
@@ -156,7 +156,7 @@
           {
             "parameter": "stoichiometry_min",
             "quantity": {
-              "value": 0.0016261,
+              "value": 0.005504,
               "unit": "1"
             },
             "provenance_class": "fitted"
@@ -164,7 +164,7 @@
           {
             "parameter": "stoichiometry_max",
             "quantity": {
-              "value": 0.82258,
+              "value": 0.75668,
               "unit": "1"
             },
             "provenance_class": "fitted"
@@ -172,7 +172,7 @@
           {
             "parameter": "max_concentration",
             "quantity": {
-              "value": 31400,
+              "value": 29730,
               "unit": "mol/m3"
             },
             "provenance_class": "fitted"
@@ -201,7 +201,7 @@
           {
             "parameter": "thickness",
             "quantity": {
-              "value": 4.44e-05,
+              "value": 5.62e-05,
               "unit": "m"
             },
             "provenance_class": "fitted"
@@ -209,7 +209,7 @@
           {
             "parameter": "electronic_conductivity",
             "quantity": {
-              "value": 7.46,
+              "value": 0.222,
               "unit": "S/m"
             },
             "provenance_class": "fitted"
@@ -217,7 +217,7 @@
           {
             "parameter": "surface_area_per_volume",
             "quantity": {
-              "value": 473004,
+              "value": 499522,
               "unit": "1/m"
             },
             "provenance_class": "fitted"
@@ -225,7 +225,7 @@
           {
             "parameter": "porosity",
             "quantity": {
-              "value": 0.20666,
+              "value": 0.253991,
               "unit": "1"
             },
             "provenance_class": "fitted"
@@ -233,141 +233,8 @@
           {
             "parameter": "transport_efficiency",
             "quantity": {
-              "value": 0.09395,
+              "value": 0.128,
               "unit": "1"
-            },
-            "provenance_class": "fitted"
-          }
-        ]
-      },
-      {
-        "part": "positive_material",
-        "material_kind": "lfp",
-        "claims": [
-          {
-            "parameter": "particle_radius",
-            "quantity": {
-              "value": 5e-07,
-              "unit": "m"
-            },
-            "provenance_class": "fitted"
-          },
-          {
-            "parameter": "solid_diffusivity",
-            "quantity": {
-              "value": 6.873e-17,
-              "unit": "m2/s"
-            },
-            "provenance_class": "fitted"
-          },
-          {
-            "parameter": "ocp",
-            "expression": {
-              "text": "3.41285712e+00 - 1.49721852e-02 * x + 3.54866018e+14 * exp(-3.95729493e+02 * x) - 1.45998465e+00 * exp(-1.10108622e+02 * (1 - x))",
-              "language": "bpx",
-              "argument": "x"
-            },
-            "provenance_class": "fitted"
-          },
-          {
-            "parameter": "entropic_coefficient",
-            "curve": {
-              "x_quantity": "stoichiometry",
-              "x": [
-                0,
-                0.05,
-                0.1,
-                0.15,
-                0.2,
-                0.25,
-                0.3,
-                0.35,
-                0.4,
-                0.45,
-                0.5,
-                0.55,
-                0.6,
-                0.65,
-                0.7,
-                0.75,
-                0.8,
-                0.85,
-                0.9,
-                0.95,
-                1
-              ],
-              "y": [
-                0.0001,
-                4.7145e-05,
-                3.7666e-05,
-                2.0299e-05,
-                5.9833e-06,
-                -4.6859e-06,
-                -1.3966e-05,
-                -2.3528e-05,
-                -3.3593e-05,
-                -4.3433e-05,
-                -5.2311e-05,
-                -6.0211e-05,
-                -6.8006e-05,
-                -7.6939e-05,
-                -8.7641e-05,
-                -9.913e-05,
-                -0.00010855,
-                -0.00011266,
-                -0.00011238,
-                -0.00010921,
-                -0.00022539
-              ],
-              "y_unit": "V/K"
-            },
-            "provenance_class": "fitted"
-          },
-          {
-            "parameter": "reaction_rate_constant",
-            "quantity": {
-              "value": 9.736e-07,
-              "unit": "mol.m-2.s-1"
-            },
-            "provenance_class": "fitted"
-          },
-          {
-            "parameter": "stoichiometry_min",
-            "quantity": {
-              "value": 0.0875,
-              "unit": "1"
-            },
-            "provenance_class": "fitted"
-          },
-          {
-            "parameter": "stoichiometry_max",
-            "quantity": {
-              "value": 0.95038,
-              "unit": "1"
-            },
-            "provenance_class": "fitted"
-          },
-          {
-            "parameter": "max_concentration",
-            "quantity": {
-              "value": 21200,
-              "unit": "mol/m3"
-            },
-            "provenance_class": "fitted"
-          },
-          {
-            "parameter": "diffusivity_activation_energy",
-            "quantity": {
-              "value": 80000,
-              "unit": "J/mol"
-            },
-            "provenance_class": "fitted"
-          },
-          {
-            "parameter": "reaction_rate_activation_energy",
-            "quantity": {
-              "value": 35000,
-              "unit": "J/mol"
             },
             "provenance_class": "fitted"
           }
@@ -379,7 +246,7 @@
           {
             "parameter": "thickness",
             "quantity": {
-              "value": 6.43e-05,
+              "value": 5.23e-05,
               "unit": "m"
             },
             "provenance_class": "fitted"
@@ -387,23 +254,15 @@
           {
             "parameter": "electronic_conductivity",
             "quantity": {
-              "value": 0.8,
+              "value": 0.789,
               "unit": "S/m"
-            },
-            "provenance_class": "fitted"
-          },
-          {
-            "parameter": "surface_area_per_volume",
-            "quantity": {
-              "value": 4418460,
-              "unit": "1/m"
             },
             "provenance_class": "fitted"
           },
           {
             "parameter": "porosity",
             "quantity": {
-              "value": 0.20359,
+              "value": 0.277493,
               "unit": "1"
             },
             "provenance_class": "fitted"
@@ -411,7 +270,7 @@
           {
             "parameter": "transport_efficiency",
             "quantity": {
-              "value": 0.09186,
+              "value": 0.1462,
               "unit": "1"
             },
             "provenance_class": "fitted"
@@ -453,7 +312,7 @@
           {
             "parameter": "transference_number",
             "quantity": {
-              "value": 0.259,
+              "value": 0.2594,
               "unit": "1"
             },
             "provenance_class": "fitted"
@@ -524,18 +383,21 @@
         ]
       }
     ],
+    "not_imported": [
+      "Parameterisation/Positive electrode/Particle"
+    ],
     "distributions": [
       {
         "type": "DataDownload",
-        "name": "lfp_18650_cell_BPX.json",
+        "name": "nmc_pouch_cell_BPX_blended_electrode.json",
         "role": "source",
-        "content_url": "https://raw.githubusercontent.com/FaradayInstitution/BPX/eb5da74588631ffee0e81f00746352a3f5ba5414/examples/lfp_18650_cell_BPX.json",
+        "content_url": "https://raw.githubusercontent.com/FaradayInstitution/BPX/eb5da74588631ffee0e81f00746352a3f5ba5414/examples/nmc_pouch_cell_BPX_blended_electrode.json",
         "encoding_format": "application/json",
-        "conforms_to": "BPX 0.1.0",
-        "byte_size": 5017,
+        "conforms_to": "BPX 0.4.0",
+        "byte_size": 5385,
         "checksum": {
           "algorithm": "sha256",
-          "value": "fd6d0c992a641c30edad7a76dd988fac1162434c7f8302961fc8f587da1f62a5"
+          "value": "10e0ab624b7394e106c1218065155d90dedae960506b4d6e7fa87da3ff288118"
         },
         "checks": [
           {
@@ -547,14 +409,13 @@
           }
         ]
       }
-    ],
-    "description": "LFP|graphite 2 Ah cylindrical 18650 cell. Parameterisation by About:Energy Limited (aboutenergy.io), December 2022, based on cell cycling data, and electrode data gathered after cell teardown. Electrolyte properties from Nyman et al. 2008 (doi:10.1016/j.electacta.2008.04.023). Negative electrode entropic coefficient data are from O'Regan et al. 2022 (doi:10.1016/j.electacta.2022.140700). Positive electrode entropic coefficient data are from Gerver and Meyers 2011 (doi:10.1149/1.3591799). Other thermal properties are estimated."
+    ]
   },
   "provenance": {
     "source_type": "literature",
     "retrieved_at": 1791676800,
     "battinfo_version": "0.7.0",
-    "source_url": "https://github.com/FaradayInstitution/BPX/blob/eb5da74588631ffee0e81f00746352a3f5ba5414/examples/lfp_18650_cell_BPX.json",
+    "source_url": "https://github.com/FaradayInstitution/BPX/blob/eb5da74588631ffee0e81f00746352a3f5ba5414/examples/nmc_pouch_cell_BPX_blended_electrode.json",
     "citation": "https://github.com/FaradayInstitution/BPX"
   },
   "notes": [
