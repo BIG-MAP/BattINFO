@@ -68,8 +68,11 @@ storage = [
 processing = [
   # The nda/excel/mat extras carry the readers behind the formats that
   # ws.convert() auto-detects (.ndax/.nda, .xlsx, .mat); batterydf 0.2 made
-  # them optional.
-  "batterydf[nda,excel,mat]>=0.2,<0.3",
+  # them optional. The lower bound names the release candidate on purpose:
+  # 0.2.0rc2 sorts below 0.2, so ">=0.2" matches nothing on PyPI until 0.2.0
+  # final is out. A bound that names a pre-release also lets pip pick later
+  # batterydf pre-releases, so raise it to 0.2.0 once that is published.
+  "batterydf[nda,excel,mat]>=0.2.0rc2,<0.3",
   "matplotlib>=3.11.1",
   "plotly>=6.9.0",
 ]
@@ -113,10 +116,6 @@ Changelog = "https://github.com/BIG-MAP/BattINFO/blob/main/CHANGELOG.md"
 
 [project.scripts]
 battinfo = "battinfo.cli:app"
-
-# TEMPORARY until batterydf 0.2.0 is on PyPI — remove and re-lock on release
-[tool.uv.sources]
-batterydf = { git = "https://github.com/battery-data-alliance/battery-data-format", rev = "07dd7a6" }
 
 [tool.setuptools]
 package-dir = { "" = "src" }

@@ -96,16 +96,13 @@ pip install "git+https://github.com/BIG-MAP/BattINFO.git"
 
 <!-- 0.8 release: replace the block above with  pip install battinfo -->
 
-Optional extras: `battinfo[processing]` (cycler-file conversion via `ws.convert()`
-+ plotting), `battinfo[tabular]` (CSV/Parquet/XLSX readers), `battinfo[publish]`
-(RO-Crate validation), `battinfo[storage]` (S3), `battinfo[docs]` (Sphinx), and
-`battinfo[dev]` (full test/lint/build toolchain). The `processing` extra also needs
-`batterydf`, which is not yet on PyPI. Until it ships, `pip install "battinfo[processing]"`
-cannot resolve; install the processing dependencies directly instead:
+Optional extras: `battinfo[processing]` (cycler-file conversion via `ws.convert()` + plotting), `battinfo[tabular]` (CSV/Parquet/XLSX readers), `battinfo[publish]` (RO-Crate validation), `battinfo[storage]` (S3), `battinfo[docs]` (Sphinx), and `battinfo[dev]` (full test/lint/build toolchain). To convert raw cycler files, install the converter and the plotting libraries with:
 
 ```bash
-pip install "batterydf[nda,excel,mat] @ git+https://github.com/battery-data-alliance/battery-data-format.git@07dd7a6923ae12fba0ea1079c5034883c14ebbf5" matplotlib plotly
+pip install "battinfo[processing]"
 ```
+
+The `processing` extra currently installs the batterydf 0.2 release candidate from PyPI.
 
 **Developing on BattINFO?** This repo uses [uv](https://docs.astral.sh/uv/):
 
