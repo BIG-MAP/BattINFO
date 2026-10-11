@@ -28,6 +28,20 @@ SCHEMA_VERSION = "0.2.0"
 # SCHEMA_VERSION (semantic.schema_version_unknown). Add the old value here on a bump.
 SUPERSEDED_SCHEMA_VERSIONS: tuple[str, ...] = ("0.1.0", "1.0.0")
 
+
+def _stored_schema_version(record: Mapping[str, Any]) -> str:
+    """The ``schema_version`` a record read back states, or :data:`SCHEMA_VERSION`.
+
+    A stored version is provenance, so a record read and saved again keeps it. A
+    record that states none is being written by this release, so it gets the
+    current version rather than a guess at an older one.
+    """
+    stated = record.get("schema_version")
+    if stated is None or (isinstance(stated, str) and not stated.strip()):
+        return SCHEMA_VERSION
+    return str(stated)
+
+
 BUNDLE_MANIFEST_FILENAME = "bundle.json"
 CELL_SPECIFICATION_FILENAME = "cell-specification.json"
 CELL_SPEC_FILENAME = "cell-spec.json"
@@ -1576,7 +1590,7 @@ class CellSpec(BundleJsonModel):
             else None
         )
         return cls(
-            schema_version=str(record.get("schema_version", "1.0.0")),
+            schema_version=_stored_schema_version(record),
             id=str(product["id"]),
             name=str(product.get("name") or f"{manufacturer_name} {product.get('model')}"),
             handle=product.get("handle"),
@@ -1799,7 +1813,15 @@ class CellSpec(BundleJsonModel):
         return cls.from_json(payload)
 
     @classmethod
-    def from_library_record(cls, record: Mapping[str, Any]) -> Self:
+    def from_library_record(cls, record: Mapping[str, Any], *, schema_version: str = SCHEMA_VERSION) -> Self:
+        """Build a cell spec from a datasheet library record (the ``specification`` format).
+
+        The library format is not the canonical record format, so the version the
+        library file states is not carried over: the cell spec gets
+        *schema_version*, the version this release writes unless a caller asks
+        for another. ``from_record`` is the read-back path that keeps a stored
+        version.
+        """
         specification = record.get("specification", {})
         provenance = record.get("provenance", {})
         if not isinstance(specification, Mapping):
@@ -1815,7 +1837,7 @@ class CellSpec(BundleJsonModel):
         raw_pt = specification.get("product_type")
         product_type = CellProductType(raw_pt) if isinstance(raw_pt, str) and raw_pt in CellProductType._value2member_map_ else None
         return cls(
-            schema_version=str(record.get("schema_version", "1.0.0")),
+            schema_version=schema_version,
             id=str(specification["id"]),
             manufacturer=str(specification["manufacturer"]),
             model=str(specification["model"]),
@@ -1987,7 +2009,7 @@ class Cell(BundleJsonModel):
         if not isinstance(notes, list):
             notes = []
         return cls(
-            schema_version=str(record.get("schema_version", "1.0.0")),
+            schema_version=_stored_schema_version(record),
             id=str(cell_instance["id"]),
             name=str(
                 cell_instance.get("name")
@@ -2400,7 +2422,7 @@ class TestSpec(BundleJsonModel):
         if not isinstance(artifacts, list):
             artifacts = []
         return cls(
-            schema_version=str(record.get("schema_version", "1.0.0")),
+            schema_version=_stored_schema_version(record),
             id=str(protocol["id"]),
             name=str(protocol["name"]),
             handle=protocol.get("handle"),
@@ -2630,7 +2652,7 @@ class Test(BundleJsonModel):
         if not isinstance(conditions, Mapping):
             conditions = {}
         return cls(
-            schema_version=str(record.get("schema_version", "1.0.0")),
+            schema_version=_stored_schema_version(record),
             id=str(test["id"]),
             name=str(test["name"]),
             handle=test.get("handle"),
@@ -2989,7 +3011,7 @@ class Dataset(BundleJsonModel):
         if not isinstance(notes, list):
             notes = []
         return cls(
-            schema_version=str(record.get("schema_version", "1.0.0")),
+            schema_version=_stored_schema_version(record),
             id=str(dataset["id"]),
             identifier=_copy_identifier(dataset.get("identifier")),
             name=str(dataset.get("name") or dataset.get("title") or dataset["id"]),
@@ -3200,7 +3222,7 @@ class BattinfoBundle(BundleJsonModel):
             if spec_path.exists():
                 cell_specification = CellSpec.from_path(spec_path)
         return cls(
-            schema_version=str(manifest.get("schema_version", "1.0.0")),
+            schema_version=_stored_schema_version(manifest),
             bundle_name=manifest.get("bundle_name"),
             cell_specification=cell_specification,
             cell_spec=CellSpec.from_path(root / str(manifest.get("cell_spec_file", CELL_SPEC_FILENAME))),
@@ -3639,7 +3661,7 @@ class ZenodoCellRecord(BaseModel):
             ))
 
         return cls(
-            schema_version=str(data.get("schema_version", "1.0.0")),
+            schema_version=_stored_schema_version(data),
             kind=str(data.get("kind", "BattinfoCellRecord")),
             cell_spec=cell_spec,
             cell_specification=cell_specification,
