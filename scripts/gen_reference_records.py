@@ -556,6 +556,35 @@ def snippet_parameter_set():
     return record
 
 
+def snippet_parameter_file():
+    import json
+
+    from battinfo.interop import bpx_file_distribution, from_bpx_parameters
+
+    # A BPX file's bytes (a small partial file here; read yours from disk).
+    raw = json.dumps({
+        "Header": {"BPX": "1.1.0", "Title": "Example pouch cell", "Model": "Partial"},
+        "Parameterisation": {
+            "Cell": {"Nominal cell capacity [A.h]": 5.0, "Electrode area [m2]": 0.1},
+            "Negative electrode": {"Particle radius [m]": 5.86e-6, "Thickness [m]": 8.52e-5},
+        },
+        "State": {"Initial conditions": {"Initial state-of-charge": 1.0}},
+    }, indent=2).encode("utf-8")
+
+    # One file, one record: its IRI derives from the file's parameters.
+    result = from_bpx_parameters(raw)
+    record = result.to_parameter_set(
+        virtual_cell=True,                    # or cell_spec_id= / cell_instance_id=
+        materials={"negative": "graphite"},   # BPX does not name its materials
+        distributions=[bpx_file_distribution(
+            raw, name="example-cell.bpx.json",
+            content_url="https://files.example.org/parameter-sets/example-cell.bpx.json",
+        )],
+        retrieved_at=1750000000,
+    )
+    return record
+
+
 def snippet_organization():
     from battinfo.api import create_organization
 
@@ -972,10 +1001,23 @@ FAMILIES = [
                     "The claim batch emits as one `schema:Dataset` node: scalar "
                     "claims as EMMO-typed quantities, the target on "
                     "`schema:about`.",
-                    "A BPX file imports the same way: "
-                    "`from_bpx_parameters(...).to_records(materials=...)` turns "
-                    "its physics blocks into claim records, header lineage "
-                    "included (see the design notes).",
+                ],
+            },
+            {
+                "heading": "One BPX file as one record",
+                "fn": snippet_parameter_file,
+                "record_type": "parameter-set",
+                "notice": [
+                    "The parts are blank `schema:Dataset` nodes under "
+                    "`schema:hasPart`; each claim names its parameter key in "
+                    "`schema:propertyID`, so two keys of one EMMO class "
+                    "(an `Area`, say) stay apart.",
+                    "The fingerprint the IRI derives from is a "
+                    "`schema:identifier`, and the file itself a "
+                    "`schema:DataDownload` with its `schema:sha256`. "
+                    "`to_bpx(record)` rebuilds the file; the how-to "
+                    "[Publish a BPX parameter file](../howto/publish-a-bpx-parameter-file.md) "
+                    "has the steps.",
                 ],
             },
         ],
@@ -1134,7 +1176,13 @@ def build_sections(family: dict) -> list[dict]:
 
     sections = []
     for section in family["sections"]:
-        record = normalize(section["fn"]())
+        raw = section["fn"]()
+        # A parameter file's uid derives from its parameters: keep it.
+        body = raw.get("parameter_set") if isinstance(raw.get("parameter_set"), dict) else {}
+        keep = frozenset(
+            [str(body["id"]).rsplit("/", 1)[-1]] if body.get("parameters_sha256") else []
+        )
+        record = normalize(raw, keep=keep)
         verdict = _validate_or_die(
             record,
             f"{family['slug']}: {section['heading']}",
@@ -1231,6 +1279,7 @@ PAGE_RULES: dict[str, list[str]] = {
     "parameter-sets": [
         "A batch of **claims** about a target: each names a curated parameter, a quantity or curve, and a provenance class (literature, measured, fitted, assumed).",
         "Claims are records so sources can disagree; consumers select among them.",
+        "A BPX file is one record: its claims grouped by part, linked to the cell it describes (or marked a virtual cell), with the file attached and an IRI derived from its parameters.",
     ],
     "organizations": [
         "Identity is the `same_as` registry link (ROR, Wikidata); the body carries the display name and its variants.",
@@ -1330,38 +1379,11 @@ SHELVES: dict[str, list[str]] = {
     ],
     "parameter-sets": [
         "parameter-set/parameter-set-8qqs-rh43-wt8d-172n.json",
-        "parameter-set/parameter-set-1e31-69dh-s500-h9j4.json",
-        "parameter-set/parameter-set-ayt4-483v-13dj-hqgc.json",
-        "parameter-set/parameter-set-a979-b0s3-rzzt-4m57.json",
-        "parameter-set/parameter-set-2563-gee9-ppq0-8p2r.json",
-        "parameter-set/parameter-set-sa76-qhyc-pesq-jvge.json",
-        "parameter-set/parameter-set-956b-frrf-hfg6-m4d9.json",
-        "parameter-set/parameter-set-4gvn-f7sq-cchp-36rm.json",
-        "parameter-set/parameter-set-ma31-1g1r-m2x1-h7d2.json",
-        "parameter-set/parameter-set-2p6b-xrjf-jtcr-57hx.json",
-        "parameter-set/parameter-set-ftg3-krew-9dq5-mntm.json",
-        "parameter-set/parameter-set-nzk2-dv72-c12e-497h.json",
-        "parameter-set/parameter-set-wdd4-4r9a-zcc8-wnj1.json",
-        "parameter-set/parameter-set-vdek-3ryx-83cq-0fcc.json",
-        "parameter-set/parameter-set-2wm3-4t64-h09k-ackh.json",
-        "parameter-set/parameter-set-zwap-fsws-m4yx-p5pp.json",
-        "parameter-set/parameter-set-3n1b-f8n3-zrtc-psjs.json",
-        "parameter-set/parameter-set-z3ac-1me1-hsfd-pa56.json",
-        "parameter-set/parameter-set-dgjc-w8j1-evf7-e2kb.json",
-        "parameter-set/parameter-set-f4tg-ahwq-1mgt-xn7x.json",
-        "parameter-set/parameter-set-pyss-2m8j-y8c1-rmcb.json",
-        "parameter-set/parameter-set-0kaz-t3ef-8ehm-yhhb.json",
-        "parameter-set/parameter-set-q3dk-9sq9-7s86-43vw.json",
-        "parameter-set/parameter-set-baez-0ppf-14qx-6rt0.json",
-        "parameter-set/parameter-set-9cwx-f2pf-6sv6-3n9e.json",
-        "parameter-set/parameter-set-e04y-e56s-wz45-yvk4.json",
-        "parameter-set/parameter-set-5rjm-2a2w-4x8c-5dqy.json",
-        "parameter-set/parameter-set-5znm-m359-cbp5-77hn.json",
-        "parameter-set/parameter-set-340n-s2eb-qy4g-h2rh.json",
-        "parameter-set/parameter-set-4afn-7wan-67hf-nwys.json",
-        "parameter-set/parameter-set-geyv-hp0x-jhrh-c44z.json",
-        "parameter-set/parameter-set-sdw7-cp7b-nsst-tvvy.json",
-        "parameter-set/parameter-set-smjg-7gh6-93vg-geh5.json",
+        "parameter-set/parameter-set-fe59-wews-8mmv-zwag.json",
+        "parameter-set/parameter-set-xm1d-bz46-pc9v-pt70.json",
+        "parameter-set/parameter-set-q73c-bk3q-ceks-r4p6.json",
+        "parameter-set/parameter-set-6034-7wex-6cwr-fzv1.json",
+        "parameter-set/parameter-set-c8cb-d472-yt6s-kyjw.json",
     ],
     "organizations": [
         "organization/A123.json",

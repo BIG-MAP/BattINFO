@@ -17,6 +17,7 @@ Usage::
 from __future__ import annotations
 
 import builtins  # AuthoringWorkspace.list shadows the builtin in class-scope annotations
+import copy
 import difflib
 import json
 import os
@@ -3991,11 +3992,13 @@ class AuthoringWorkspace:
                         "canonical_iri": body["equipment_id"],
                     })
                 if record_key == "parameter_set":
-                    # The claim batch's target, when it is a registered record
-                    # (a material_kind target is vocabulary, not a record).
+                    # The claim batch's target, or the cell a parameter file
+                    # describes, when it is a registered record (a
+                    # material_kind target is vocabulary, not a record).
                     for tgt_field, tgt_type in (
                         ("material_spec_id", "material_spec"),
                         ("cell_spec_id", "cell_spec"),
+                        ("cell_instance_id", "cell"),
                     ):
                         if isinstance(body.get(tgt_field), str):
                             record_links.append({
@@ -7361,7 +7364,12 @@ class AuthoringWorkspace:
         return [record]
 
     def _add_parameter_set(
-        self, name: str | None = None, *, material: Any = None, **kwargs
+        self,
+        name: str | None = None,
+        *,
+        material: Any = None,
+        record: Mapping[str, Any] | None = None,
+        **kwargs,
     ) -> builtins.list:
         """Collate parameter claims from one source about one target, queued for ws.save().
 
@@ -7376,9 +7384,33 @@ class AuthoringWorkspace:
         ``cell_spec_id=`` instead for cell-level fitted sets. One source = one
         record; the IRI derives from (target, scope, name), so re-adding the same
         source is a no-op, never a duplicate.
+
+        ``record=`` queues a parameter-set record built elsewhere instead, of
+        either flavour: a claim batch, or the record of a BPX file from
+        ``from_bpx_parameters(...).to_parameter_set(...)``. ``ws.save()``
+        validates it like any other record and ``ws.submit()`` sends it under
+        the publisher policy, which refuses a parameter file without its
+        source file. Re-adding a record with the same IRI replaces it.
         """
         from battinfo.api import create_parameter_set  # noqa: PLC0415
         from battinfo.materials import resolve_material_kind  # noqa: PLC0415
+
+        if record is not None:
+            if name is not None or material is not None or kwargs:
+                given = [k for k, v in (("name", name), ("material", material)) if v is not None]
+                raise ValueError(
+                    "ws.add('parameter_set', record=...) takes the record alone; it already holds "
+                    f"its name, target and claims (got {', '.join([*given, *kwargs])} too)."
+                )
+            if not isinstance(record, Mapping) or not isinstance(record.get("parameter_set"), Mapping):
+                raise TypeError(
+                    "record= is a parameter-set record, a dict with a 'parameter_set' body (for "
+                    "a BPX file: from_bpx_parameters(path).to_parameter_set(...))."
+                )
+            queued = copy.deepcopy(dict(record))
+            if not isinstance(queued["parameter_set"].get("id"), str):
+                raise ValueError("record= has no parameter_set.id; build it with create_parameter_set.")
+            return self._queue_parameter_set(queued, name)
 
         if not name:
             raise ValueError(
@@ -7397,16 +7429,23 @@ class AuthoringWorkspace:
                 kwargs["material_kind"] = kind
             else:
                 kwargs["material_spec_id"] = self._resolve_material_spec_arg(material)
-        record = create_parameter_set(validate=False, name=name, **kwargs)
+        built = create_parameter_set(validate=False, name=name, **kwargs)
+        return self._queue_parameter_set(built, name)
+
+    def _queue_parameter_set(self, record: dict, name: str | None) -> builtins.list:
+        """Queue a parameter-set record for ws.save(), replacing one with the same IRI."""
         self._parameter_sets = _dedupe_records_by_id(self._parameter_sets, record, "parameter_set")
         body = record["parameter_set"]
         target = (
             body.get("material_kind")
             or body.get("material_spec_id")
             or body.get("cell_spec_id")
-            or "?"
+            or body.get("cell_instance_id")
+            or ("virtual cell" if body.get("virtual_cell") else "?")
         )
-        n_claims = len(body.get("claims", []))
+        n_claims = len(body.get("claims", [])) + sum(
+            len(part.get("claims", [])) for part in body.get("parts", [])
+        )
         print(f"  param set:      {body.get('name', name)}  [{target}, {n_claims} claim(s)]  {body['id']}")
         return [record]
 

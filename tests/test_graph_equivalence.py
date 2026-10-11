@@ -134,7 +134,7 @@ def test_inline_and_url_modes_are_graph_isomorphic() -> None:
             in_only = sum((inline - url).values())
             url_only = sum((url - inline).values())
             mismatches.append(f"{kind}/{path.name}: inline-only={in_only} url-only={url_only}")
-    assert checked > 140, f"corpus sweep looks broken (only {checked} records)"
+    assert checked > 120, f"corpus sweep looks broken (only {checked} records)"
     assert not mismatches, "emission modes diverge as graphs:\n" + "\n".join(mismatches)
 
 
@@ -199,6 +199,7 @@ def test_cell_instances_state_their_spec_conformance(corpus_graph) -> None:
         """
         SELECT ?cell ?spec WHERE {
             ?cell <http://purl.org/dc/terms/conformsTo> ?spec .
+            FILTER(isIRI(?spec))  # a parameter file's "BPX 1.0" conformsTo is a literal
         }
         """
     ))

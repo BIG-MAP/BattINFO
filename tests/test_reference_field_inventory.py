@@ -89,19 +89,14 @@ EXEMPT: dict[tuple[str, str], str] = {
     ("parameter-set.schema.json", "cell_spec_id"): (
         "claim target — same policy as material_spec_id"
     ),
-    **{
-        ("parameter-set.schema.json", block): (
-            "parameterisation-set membership — resolved and error-checked by "
-            "load_parameter_set_members(), which raises on a missing member"
-        )
-        for block in (
-            "negative_material", "negative_electrode", "positive_material",
-            "positive_electrode", "separator", "electrolyte",
-        )
-    },
-    ("parameter-set.schema.json", "set_id"): (
-        "member backlink of the parameterisation set — the set record is "
-        "minted in the same import and carried alongside its members"
+    ("parameter-set.schema.json", "cell_instance_id"): (
+        "the physical cell a parameter file was fitted on — a description "
+        "link like cell_spec_id, same policy"
+    ),
+    ("parameter-set.schema.json", "supersedes"): (
+        "lineage pointer, as on cell instances — the earlier parameter file's "
+        "record is checked by the registry at publication (same publisher, a "
+        "parameter set), not against the local source_root"
     ),
 }
 

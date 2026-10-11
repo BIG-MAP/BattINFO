@@ -1,13 +1,16 @@
 """Parameter vocabulary, model-tier completeness, and claim collation.
 
 Parameters live as *claims* inside ``parameter-set`` records: one record = one
-source (paper, BPX file, lab fit) making claims about one target (a material
-kind, a material spec, or a cell spec). Many records may claim values for the
-same parameter of the same material — the spread across sources is data, not a
-conflict. This module is the shared contract on top of those records:
+source (paper, BPX file, lab fit). A claim batch makes claims about one target
+(a material kind, a material spec, or a cell spec); a parameter file (one BPX
+file) groups its claims by part (cell, materials, electrodes, separator,
+electrolyte, state). Many records may claim values for the same parameter of
+the same material — the spread across sources is data, not a conflict. This
+module is the shared contract on top of those records:
 
 - the curated parameter vocabulary (``data/vocab/parameters.json``): canonical
-  snake_case keys, physical scopes, canonical units, BPX source fields;
+  snake_case keys, physical scopes, canonical units, BPX fields
+  (:func:`bpx_field`);
 - the model-tier completeness contract (``bote``/``spm``/``spme``/``p2d``):
   which parameters a scope needs before that model tier can honestly run,
   computed by :func:`completeness` and shipped as JSON so downstream surfaces
@@ -28,7 +31,24 @@ from importlib import resources
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 
-PARAMETER_SCOPES: tuple[str, ...] = ("material", "electrode", "separator", "electrolyte", "cell")
+PARAMETER_SCOPES: tuple[str, ...] = (
+    "material", "electrode", "separator", "electrolyte", "cell", "state",
+)
+
+# The parts of a parameter file (one BPX file), in canonical order. A part
+# holds the claims one BPX block makes; an electrode block splits into its
+# material (intrinsic) part and its electrode (build) part.
+PARAMETER_FILE_PARTS: tuple[str, ...] = (
+    "cell",
+    "negative_material",
+    "negative_electrode",
+    "positive_material",
+    "positive_electrode",
+    "separator",
+    "electrolyte",
+    "state",
+)
+MATERIAL_PARTS: tuple[str, ...] = ("negative_material", "positive_material")
 
 
 def _load_parameters_file() -> dict[str, Any]:
@@ -67,6 +87,27 @@ def _parameter_alias_index() -> dict[str, str]:
     return index
 
 
+def _bpx_mapping(entry: Mapping[str, Any], block: str) -> dict[str, str] | None:
+    """One vocabulary entry's BPX mapping for ``block``: ``{"field", "unit", "section"?}``.
+
+    The vocabulary states a mapping as the field name (read in the key's
+    canonical unit) or as an object naming the field, the BPX unit when it
+    differs, and for the State block the section that holds the field.
+    """
+    bpx = entry.get("bpx")
+    if not isinstance(bpx, Mapping):
+        return None
+    raw = bpx.get(block)
+    if isinstance(raw, str) and raw.strip():
+        return {"field": raw.strip(), "unit": str(entry.get("unit", "1"))}
+    if isinstance(raw, Mapping) and isinstance(raw.get("field"), str) and raw["field"].strip():
+        mapping = {"field": raw["field"].strip(), "unit": str(raw.get("unit") or entry.get("unit", "1"))}
+        if isinstance(raw.get("section"), str) and raw["section"].strip():
+            mapping["section"] = raw["section"].strip()
+        return mapping
+    return None
+
+
 @lru_cache(maxsize=1)
 def _bpx_field_index() -> dict[tuple[str, str], str]:
     """Map (block, lowercased BPX field name) -> canonical parameter key."""
@@ -75,9 +116,10 @@ def _bpx_field_index() -> dict[tuple[str, str], str]:
         bpx = entry.get("bpx")
         if not isinstance(bpx, Mapping):
             continue
-        for block, field_name in bpx.items():
-            if isinstance(field_name, str) and field_name.strip():
-                index[(block, field_name.strip().lower())] = key
+        for block in bpx:
+            mapping = _bpx_mapping(entry, block)
+            if mapping is not None:
+                index[(block, mapping["field"].lower())] = key
     return index
 
 
@@ -121,14 +163,28 @@ def resolve_parameter(value: Any) -> str | None:
 def resolve_bpx_field(block: str, field_name: Any) -> str | None:
     """Resolve a BPX field name to its canonical parameter key, scoped by block.
 
-    ``block`` is one of ``"electrode"``, ``"separator"``, ``"electrolyte"``
-    (BPX 'Negative electrode'/'Positive electrode' both resolve through
-    ``"electrode"``). Block-scoped because BPX reuses field names across blocks
-    with different physical meanings.
+    ``block`` is one of ``"cell"``, ``"electrode"``, ``"separator"``,
+    ``"electrolyte"``, ``"state"`` (BPX 'Negative electrode'/'Positive
+    electrode' both resolve through ``"electrode"``; a State field is named
+    without its section). Block-scoped because BPX reuses field names across
+    blocks with different physical meanings.
     """
     if not isinstance(field_name, str) or not field_name.strip():
         return None
     return _bpx_field_index().get((block, field_name.strip().lower()))
+
+
+def bpx_field(key: Any, block: str) -> dict[str, str] | None:
+    """Where a parameter lives in a BPX block: ``{"field", "unit", "section"?}``, or ``None``.
+
+    ``unit`` is the unit BPX states the field in (the key's canonical unit
+    unless the vocabulary names another); ``section`` is set for the State
+    fields ("Initial conditions", "Thermal environment").
+    """
+    canonical = resolve_parameter(key)
+    if canonical is None:
+        return None
+    return _bpx_mapping(_parameters_data()["parameters"][canonical], block)
 
 
 def tier_keys() -> list[str]:
@@ -223,6 +279,39 @@ def cell_completeness(claims_by_scope: Mapping[str, Iterable[Any]]) -> dict[str,
     return result
 
 
+def parameter_set_claim_groups(body: Mapping[str, Any]) -> list[tuple[dict[str, Any], list[Any]]]:
+    """A parameter-set body's claims as ``[(context, claims), ...]``.
+
+    A claim batch is one group whose context is its target, scope and
+    polarity. A parameter file gives one group per part, whose context is the
+    part (and phase), the part's material target and the file's cell link, so
+    its graphite claims collate with every other source's graphite claims.
+    """
+    parts = body.get("parts")
+    if isinstance(parts, list):
+        cell_link = {
+            field: body[field]
+            for field in ("cell_spec_id", "cell_instance_id", "virtual_cell")
+            if body.get(field)
+        }
+        groups: list[tuple[dict[str, Any], list[Any]]] = []
+        for part in parts:
+            if not isinstance(part, Mapping) or not isinstance(part.get("claims"), list):
+                continue
+            context: dict[str, Any] = {"part": part.get("part"), **cell_link}
+            for field in ("phase", "material_kind", "material_spec_id"):
+                if part.get(field):
+                    context[field] = part[field]
+            groups.append((context, part["claims"]))
+        return groups
+    context = {"scope": body.get("scope")}
+    for field in ("material_kind", "material_spec_id", "cell_spec_id", "electrode_polarity"):
+        if body.get(field):
+            context[field] = body[field]
+    claims = body.get("claims")
+    return [(context, claims)] if isinstance(claims, list) else []
+
+
 def collate_claims(records: Iterable[Mapping[str, Any]]) -> dict[str, list[dict[str, Any]]]:
     """Fold parameter-set records into ``{parameter: [claim, ...]}``.
 
@@ -230,9 +319,11 @@ def collate_claims(records: Iterable[Mapping[str, Any]]) -> dict[str, list[dict[
     context attached under ``"source"``: the parameter-set id/name, its target
     (material_kind / material_spec_id / cell_spec_id), scope, and the
     record-level citation (claim-level ``citation``/``citation_doi`` override
-    it when present). Unknown parameter keys are kept verbatim — collation is
-    for reading what sources say, and tolerant import means unknown keys may
-    carry real values.
+    it when present). A parameter file's claims carry their part instead of a
+    scope, with the part's material target and the file's cell link
+    (:func:`parameter_set_claim_groups`). Unknown parameter keys are kept
+    verbatim — collation is for reading what sources say, and tolerant import
+    means unknown keys may carry real values.
 
     The spread across sources per parameter is the point: callers decide how
     to select (curated slate, newest, conditions filter) — this function never
@@ -245,31 +336,24 @@ def collate_claims(records: Iterable[Mapping[str, Any]]) -> dict[str, list[dict[
             continue
         provenance_raw = record.get("provenance")
         provenance: Mapping[str, Any] = provenance_raw if isinstance(provenance_raw, Mapping) else {}
-        source: dict[str, Any] = {
+        record_source: dict[str, Any] = {
             "parameter_set_id": body.get("id"),
             "name": body.get("name"),
-            "scope": body.get("scope"),
         }
-        for target_field in ("material_kind", "material_spec_id", "cell_spec_id"):
-            if body.get(target_field):
-                source[target_field] = body[target_field]
         for citation_field in ("citation", "citation_doi"):
             if provenance.get(citation_field):
-                source[citation_field] = provenance[citation_field]
-        if body.get("electrode_polarity"):
-            source["electrode_polarity"] = body["electrode_polarity"]
-        claims = body.get("claims")
-        if not isinstance(claims, list):
-            continue
-        for claim in claims:
-            if not isinstance(claim, Mapping) or not claim.get("parameter"):
-                continue
-            key = resolve_parameter(claim["parameter"]) or str(claim["parameter"])
-            entry = dict(claim)
-            claim_source = dict(source)
-            for citation_field in ("citation", "citation_doi"):
-                if claim.get(citation_field):
-                    claim_source[citation_field] = claim[citation_field]
-            entry["source"] = claim_source
-            collated.setdefault(key, []).append(entry)
+                record_source[citation_field] = provenance[citation_field]
+        for context, claims in parameter_set_claim_groups(body):
+            source = {**record_source, **context}
+            for claim in claims:
+                if not isinstance(claim, Mapping) or not claim.get("parameter"):
+                    continue
+                key = resolve_parameter(claim["parameter"]) or str(claim["parameter"])
+                entry = dict(claim)
+                claim_source = dict(source)
+                for citation_field in ("citation", "citation_doi"):
+                    if claim.get(citation_field):
+                        claim_source[citation_field] = claim[citation_field]
+                entry["source"] = claim_source
+                collated.setdefault(key, []).append(entry)
     return collated
