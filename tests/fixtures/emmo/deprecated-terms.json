@@ -1,0 +1,647 @@
+{
+  "description": "Every owl:deprecated term in the EMMO import closure battinfo.ttl pins, read from the release tags by .tools/quality/emmo_deprecated_terms.py. tests/test_mapping_governance.py checks that no IRI the emitters use is in this list. Regenerate it when the pins move.",
+  "closure": {
+    "EMMO": [
+      "1.0.2"
+    ],
+    "domain-battery": [
+      "0.21.0"
+    ],
+    "domain-characterisation-methodology": [
+      "1.0.2"
+    ],
+    "domain-chemical-substance": [
+      "0.15.0"
+    ],
+    "domain-electrochemistry": [
+      "0.39.0"
+    ]
+  },
+  "deprecated": [
+    {
+      "iri": "https://w3id.org/emmo#EMMO_0b1cbe60_d380_4787_b92e_be26bdacf2c2",
+      "pref_label": "uneceCommonCode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo#EMMO_d85162ec_6d62_4cdb_a5b9_f092285e5b7f",
+      "pref_label": "hasPrefixSymbol",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/battery#battery_09cdc3de_2aea_4925_9a65_2f078e72eec4",
+      "pref_label": "INR1865035E",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/battery#battery_17591da0_34ec_41b9_b3c1_3a4446dc6f0a",
+      "pref_label": "StateOfCharge",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/battery#battery_22353114_9b0a_42d1_b96c_3a702c273e2d",
+      "pref_label": "DepthOfDischarge",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/battery#battery_4d308636_8dac_4cc9_a0a1_197eefeb203f",
+      "pref_label": "LithiumIonSiliconGraphiteBattery",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/battery#battery_50de8c6a_294c_4576_8592_cf05c9d32000",
+      "pref_label": "INR1865025R",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/battery#battery_58cc84db_b997_4f2c_81cc_cf11bfc6ac2f",
+      "pref_label": "INR18650P28B",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/battery#battery_6d935cbd_5354_4ff5_9ae2_5b90d035ad7b",
+      "pref_label": "INR18650MJ1",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/battery#battery_86c9ca80-de6f-417f-afdc-a7e52fa6322d",
+      "pref_label": "PrismaticBattery",
+      "replaced_by": [
+        "https://w3id.org/emmo/domain/battery#battery_86c9ca80_de6f_417f_afdc_a7e52fa6322d"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/battery#battery_87bb15ff_4fc2_4929_9938_0b31d9166001",
+      "pref_label": "BatteryEnergy",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/battery#battery_b3405eb1_801e_416b_8cd2_1473f1868e27",
+      "pref_label": "LithiumIonSiliconOxideGraphiteBattery",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/battery#battery_c4fe9409_3cd3_4af0_aa96_5681ef0261b4",
+      "pref_label": "LithiumIonSiliconBattery",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/battery#battery_d51a2b95_a327_4ef5_8692_ab6c412f4945",
+      "pref_label": "LithiumIonSiliconOxideBattery",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/battery#battery_e769f629_438a_4637_8483_205c866487b3",
+      "pref_label": "NaCR32140MP10",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/battery#battery_e855801e_bdda_461b_913b_1c680027409e",
+      "pref_label": "G20M7",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/battery#battery_f13ac384_e21a_40b3_9ee8_023c2586049a",
+      "pref_label": "MagnesiumMetalBattery",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/battery#battery_f1489778_c355_4cd5_b5ca_35d082ac896a",
+      "pref_label": "INR18650P28A",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/chemical-substance#substance_81b90332_8b8e_407b_a8fd_517306d56a59",
+      "pref_label": "SolventCompound",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#C",
+      "pref_label": "C",
+      "replaced_by": [
+        "https://w3id.org/emmo/domain/electrochemistry#AmperePerAmpereHour"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_098690e3_9010_437e_8042_cee1656efa9b",
+      "pref_label": "LithiumNickelManganeseCobaltOxideLithiumCobaltOxideElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_0a1e73c5_e91b_4365_88d4_1e1f476bf776",
+      "pref_label": "PositiveElectrodeActiveMaterialVolumetricSurfaceArea",
+      "replaced_by": [
+        "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_a5571263_f153_448f_84a3_cd18092cf8fa"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_0e2f4fe6_570a_4d13_81e9_de1d4f9987af",
+      "pref_label": "NegativeElectrodeActiveMaterialOpenCircuitVoltage",
+      "replaced_by": [
+        "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_e272f229_7b45_4436_9b0b_30391ee4e5be"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_103c9e6c_9c26_430a_9fb9_f4f041e970b0",
+      "pref_label": "SodiumMetatitanateElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_10a91aba_da41_4309_a926_ddc0f285c2c1",
+      "pref_label": "RutheniumOxideElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_11a774f3_d20a_4741_bd81_cae53230bd0c",
+      "pref_label": "ProtonInsertionElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_1c6cef85_811f_45d0_a0fd_2bc2d9369ea4",
+      "pref_label": "AluminiumInsertionElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_21da0fe9_9fb6_4840_a12f_fbcc1ba84fb3",
+      "pref_label": "NegativeElectrodeActiveMaterialGuestStoichiometricCoefficientAtSOC0",
+      "replaced_by": [
+        "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_f22bd1ec_faca_4335_92a5_a1687154c622"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_245c9442_ca1d_4070_a624_182b92d30b10",
+      "pref_label": "ZincInsertionElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_26a0dc36_8171_4a84_88dd_0f5dd7cb2d20",
+      "pref_label": "PotassiumHydroxideSolution",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_2dea31c2_5061_4464_ab76_5336bef23629",
+      "pref_label": "CelsiusTemperatureMeasurementResult",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_2fd5964b_0c65_4413_8b8c_849639e6d1e7",
+      "pref_label": "SiliconOxideGraphiteElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_334b3acd_e35d_4d5a_b8b5_6d13cbebbc57",
+      "pref_label": "SulfuricAcidSolution",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_339e1ba1_2006_4f22_aac4_3ce75edf1088",
+      "pref_label": "FluorineDopedTinOxideElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_3fdc81d5_eef3_4408_a6e4_3c51c5b1c8dc",
+      "pref_label": "TungstenOxideElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_404126e0_cb1b_44e4_98dc_2474185767a1",
+      "pref_label": "PositiveElectrodeReactionRateConstant",
+      "replaced_by": [
+        "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_0335e3f6_d1d8_4daa_8376_a9285f1bc9f1"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_4143b1c2_2d21_419e_af45_247d4c78ce7e",
+      "pref_label": "SiliconOxideElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_41ddf723_245f_4ce8_b9b1_7d9b3b9eea7d",
+      "pref_label": "LithiumNickelManganeseOxideElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_43f77743_1af6_4a0f_9cc6_285c2a450549",
+      "pref_label": "PositiveElectrodeElectronicConductivity",
+      "replaced_by": [
+        "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_ce74d2dc_d496_4116_b2fb_3e83d88bc744"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_48e380c3_0441_4761_a80f_3e448cb2f0ba",
+      "pref_label": "LithiumNickelManganeseCobaltOxideLithiumManganeseOxideElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_496c8f31_9732_42c1_8eae_dd73979c06eb",
+      "pref_label": "TimeMeasurementResult",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_4a13e538_4c08_4ba9_8ebc_98a866208e01",
+      "pref_label": "SodiumNickelPhosphateElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_4c3ee364_829b_41a4_b895_ca4a041efb2a",
+      "pref_label": "LithiumInsertionElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_4d69edda_d2fa_40b0_9c1e_52e08debf578",
+      "pref_label": "ActivationEnergyOfGuestDiffusivityInPositiveElectrodeActiveMaterial",
+      "replaced_by": [
+        "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_d7f8cab9_b035_4ecd_be63_292672572526"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_4edb47d6_107c_40a2_be7c_6b26e9d296da",
+      "pref_label": "SodiumManganeseHexacyanoferrateElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_50247e71_75fe_4986_959e_fd06c6be98db",
+      "pref_label": "GuestDiffusivityInNegativeElectrodeActiveMaterial",
+      "replaced_by": [
+        "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_fed4582e_0de4_43e1_b51a_e3496697c25d"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_502a98a3_ce47_421f_8e0a_016ed171c900",
+      "pref_label": "SodiumIronPhosphateElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_52ab4fdd_f945_4541_9ce6_cd6fd3a05861",
+      "pref_label": "PositiveElectrodeActiveMaterialOpenCircuitVoltage",
+      "replaced_by": [
+        "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_e272f229_7b45_4436_9b0b_30391ee4e5be"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_56b9cd1f_5397_4385_9292_30d93d9e7a05",
+      "pref_label": "PositiveElectrodeActivationEnergyOfReaction",
+      "replaced_by": [
+        "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_d7f8cab9_b035_4ecd_be63_292672572526"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_58400817_3282_46e5_942e_3a1538631403",
+      "pref_label": "PositiveElectrodeActiveMaterialParticleRadius",
+      "replaced_by": [
+        "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_b92e382f_5109_4f60_ab5e_c89d340419a9"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_58413d4e_2885_459e_ac06_8d45e661cf91",
+      "pref_label": "PorousSeparator",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_5cb403c4_4f28_46cb_81c4_21c5c47ef14a",
+      "pref_label": "NegativeElectrodeCoatingPorosity",
+      "replaced_by": [
+        "https://w3id.org/emmo#EMMO_3a6578ac_aee0_43b9_9bc6_1eb208c8c9a9"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_62f5beeb_6d1e_442a_8048_3ebe08882964",
+      "pref_label": "PositiveElectrodeCoatingThickness",
+      "replaced_by": [
+        "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_3b938708_e7e4_4ac0_a959_9c04306302e7"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_68c1c36e_1548_4247_bae2_fe7102a2c4ff",
+      "pref_label": "R626",
+      "replaced_by": [
+        "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_6b275583_433f_46f7_aafd_ebc9409257cc"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_713200a1_952b_49e2_90b7_deba229f6bbe",
+      "pref_label": "LithiumManganesePhosphateElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_7481c4c9_c247_4248_a045_a1077230acba",
+      "pref_label": "PositiveElectrodeCoatingPorosity",
+      "replaced_by": [
+        "https://w3id.org/emmo#EMMO_3a6578ac_aee0_43b9_9bc6_1eb208c8c9a9"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_76e461aa_5948_4a68_8337_284d11e0fd7d",
+      "pref_label": "NickelOxideElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_76fe8fb2_868e_48eb_95ca_fc6acd6f5fc9",
+      "pref_label": "TitaniumDioxideElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_78f75a64_55b6_4243_a35e_3d279c83209b",
+      "pref_label": "PhosphoricAcidSolution",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_7b811780_7251_481b_a4d3_97d437955099",
+      "pref_label": "CobaltBasedElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_7beef5fb_a406_4284_b85a_87d55cf46a0e",
+      "pref_label": "ElectricCurrentMeasurementResult",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_80920875_62ac_4e29_b970_ec4316e76aa5",
+      "pref_label": "PositiveElectrodeActiveMaterialGuestStoichiometricCoefficientAtSOC0",
+      "replaced_by": [
+        "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_f22bd1ec_faca_4335_92a5_a1687154c622"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_82c70935_0aea_454b_92bf_17fb0b488012",
+      "pref_label": "ZincOxideElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_830d02dd_f897_4c3c_95a7_c5e5eafa346a",
+      "pref_label": "ElectrochemicalTestingProcedure",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_838a927f_775e_4c6d_8e39_7865548608c2",
+      "pref_label": "Record",
+      "replaced_by": [
+        "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_59c041fc_eaa1_40fc_9b3e_1a6aca6119fd"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_86af4487_33c1_4562_a00b_3a8252ffe378",
+      "pref_label": "ActivationEnergyOfGuestDiffusivityInNegativeElectrodeActiveMaterial",
+      "replaced_by": [
+        "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_d7f8cab9_b035_4ecd_be63_292672572526"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_8968eb7a_9a65_4286_a596_c31b998df329",
+      "pref_label": "SodiumIronHexacyanoferrateElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_8c336ae9_1818_4b08_a660_4bb83b28351f",
+      "pref_label": "NegativeElectrodeActiveMaterialGuestStoichiometricCoefficientAtSOC100",
+      "replaced_by": [
+        "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_38ab058e_3912_48c2_a7eb_76d25d000820"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_90103be0_9096_4f98_89c7_b5db01197858",
+      "pref_label": "CalciumInsertionElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_99041897_5c08_40ed_9118_3e77e9b0e191",
+      "pref_label": "PositiveElectrodeActiveMaterialGuestStoichiometricCoefficientAtSOC100",
+      "replaced_by": [
+        "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_38ab058e_3912_48c2_a7eb_76d25d000820"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_9d558b56_d3b8_429a_a4e2_d2ffab895e42",
+      "pref_label": "PositiveElectrodeEntropicChangeCoefficient",
+      "replaced_by": [
+        "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_9b44a651_afa9_4889_ae07_9ac49ede8ac1"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_9e24d403_8531_416e_a9ec_d1ec5508bcb1",
+      "pref_label": "SodiumCobaltPhosphateElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_a2b92d2e_4431_411e_8da5_a4c08bac2c0e",
+      "pref_label": "Electroplating",
+      "replaced_by": [
+        "https://w3id.org/emmo#EMMO_30e3edb5_0977_4b9b_9aed_5a4d16c1c07c"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_a76072fe_ca6e_48ad_8b4a_ab98a2bc9abb",
+      "pref_label": "VoltageMeasurementResult",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_b5e91259_cd97_4ed6_9ab2_4b18ef68a35a",
+      "pref_label": "LithiumVanadiumOxideElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_bb710d71_98fa_48a1_85bc_d8f1ef2200da",
+      "pref_label": "LithiumNickelManganeseOxideLithiumIronPhosphateElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_be3da3e2_58a9_4e58_adc2_7336d312717c",
+      "pref_label": "NegativeElectrodeElectronicConductivity",
+      "replaced_by": [
+        "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_ce74d2dc_d496_4116_b2fb_3e83d88bc744"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_bfe553c2_a63e_49b6_a209_0855dfc39724",
+      "pref_label": "NegativeElectrodeActiveMaterialParticleRadius",
+      "replaced_by": [
+        "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_b92e382f_5109_4f60_ab5e_c89d340419a9"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c183f697_8995_477c_9ccd_5c12d98e3633",
+      "pref_label": "PotassiumInsertionElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c5dcb1a2_f2cf_421a_b8ae_47a88a61fce3",
+      "pref_label": "NegativeElectrodeReactionRateConstant",
+      "replaced_by": [
+        "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_0335e3f6_d1d8_4daa_8376_a9285f1bc9f1"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c5f51531_1452_4654_82e5_0505491c2c7d",
+      "pref_label": "SodiumTitaniumOxideElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c5f9b91e_a770_4e9b_837e_fa2a76019111",
+      "pref_label": "NegativeElectrodeActiveMaterialVolumetricSurfaceArea",
+      "replaced_by": [
+        "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_a5571263_f153_448f_84a3_cd18092cf8fa"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c63baed9_48dd_4b5c_9e8c_03011010ffb6",
+      "pref_label": "IndiumTinOxideElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c69a9d55_823f_4113_a305_ebc89dde7de3",
+      "pref_label": "PositiveElectrodeActiveMaterialMaximumGuestConcentration",
+      "replaced_by": [
+        "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_47287d09_6108_45ca_ac65_8b9451b1065e"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_cab66388_3feb_4101_82bc_f4441f0b60e3",
+      "pref_label": "LithiumNickelOxideElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_cba03815_eaa8_493d_b9e4_52856b57fde6",
+      "pref_label": "IridiumOxideElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_cc0468a2_1851_4d3d_92a6_b4059db0c056",
+      "pref_label": "SodiumManganesePhosphateElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_cc4e178c_bc1f_4502_b6c2_33f304ef6bab",
+      "pref_label": "IronBasedElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_cdc91ec0_9fc5_4551_bbd9_6824c2920124",
+      "pref_label": "NegativeElectrodeCoatingThickness",
+      "replaced_by": [
+        "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_3b938708_e7e4_4ac0_a959_9c04306302e7"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_cff80dd5_19a9_4357_8fb9_410a978153e2",
+      "pref_label": "SodiumTitaniumPhosphateElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_d90221a0_0da7_4876_9cac_0e943e445f6f",
+      "pref_label": "TitaniumBasedElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_d936c767_1530_419c_93f4_59e08f0d702c",
+      "pref_label": "SodiumInsertionElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_d9888f1f_2226_4ce3_9cb3_91fd9bd1bf22",
+      "pref_label": "MagnesiumInsertionElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_e59188bb_ce66_49f6_84aa_ecb98e76941e",
+      "pref_label": "GuestDiffusivityInPositiveElectrodeActiveMaterial",
+      "replaced_by": [
+        "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_fed4582e_0de4_43e1_b51a_e3496697c25d"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_e808a26a_5812_49e9_894c_b793c7fe0c38",
+      "pref_label": "NegativeElectrodeActiveMaterialMaximumGuestConcentration",
+      "replaced_by": [
+        "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_47287d09_6108_45ca_ac65_8b9451b1065e"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_e84e691a_df58_465c_9771_7a7fe2212ed5",
+      "pref_label": "LithiumHydroxideSolution",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_e8d9e091_a56d_4a24_a305_d1bac55cfce3",
+      "pref_label": "SodiumManganeseOxideElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_eac57b09_5cc9_41d7_b2c8_40218d7fd47c",
+      "pref_label": "NegativeElectrodeEntropicChangeCoefficient",
+      "replaced_by": [
+        "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_9b44a651_afa9_4889_ae07_9ac49ede8ac1"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_ebd01982_6b0c_48e7_90ef_7b7342009449",
+      "pref_label": "SodiumHydroxideSolution",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_ecf136cb_2584_4cb1_98b7_2d2b3d22e40d",
+      "pref_label": "SolidElectrolyteInterphase",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_ee0278fb_932d_48cd_a20a_c1b89b29d68b",
+      "pref_label": "SodiumCobaltOxideElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_ee479886_6805_4018_95e1_500185e44215",
+      "pref_label": "Powder",
+      "replaced_by": [
+        "https://w3id.org/emmo#EMMO_29a15bcd_e219_4afc_9f82_9d3fceb666cd"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_f19d3b4f_d59b_4a92_a547_54a6f59cc9b4",
+      "pref_label": "LithiumNickelCobaltAluminumOxideElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_f49b84d4_e1f9_424c_bb22_8cea23c0a7d4",
+      "pref_label": "ElectrochemicalMethod",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_f6223121_7df5_42f8_902c_d26fa2fc4f04",
+      "pref_label": "LeadOxideElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_f8e0d532_cf44_403c_9188_e00ee161a3c1",
+      "pref_label": "CathodeElectrolyteInterphase",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_f8f81b27_1d6c_42d8_a7e9_5a2534102562",
+      "pref_label": "SodiumChromiumOxideElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_f9e2e676_5cd1_4e22_a776_af45838d4027",
+      "pref_label": "AmmoniaSolution",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_fda9539d_5232_471c_8945_b9a8ec7247fe",
+      "pref_label": "NegativeElectrodeActivationEnergyOfReaction",
+      "replaced_by": [
+        "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_d7f8cab9_b035_4ecd_be63_292672572526"
+      ]
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_fffc3dad_6946_4c32_a9d3_f5f311339881",
+      "pref_label": "LithiumManganeseOxideLithiumIronPhosphateElectrode",
+      "replaced_by": []
+    },
+    {
+      "iri": "https://w3id.org/emmo/domain/manufacturing#manufacturing_4f2342ed_84f2_46ba_90c2_5732da7cc993",
+      "pref_label": "Welding",
+      "replaced_by": [
+        "https://w3id.org/emmo#EMMO_06c415dc_ba26_407d_b596_283bd4d9a66f"
+      ]
+    }
+  ]
+}
