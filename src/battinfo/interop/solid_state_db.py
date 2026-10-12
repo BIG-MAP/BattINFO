@@ -96,7 +96,7 @@ class SolidStateImportResult:
     row_id:
         The sheet's ``ID`` column for the source row (provenance, not an IRI).
     cell_spec, cell_instance, test:
-        The canonical spec → instance → test chain for the cell. ``test`` is
+        The canonical spec -> instance -> test chain for the cell. ``test`` is
         ``None`` when the row reported no cycle-life measurement.
     material_specs:
         Material-spec records for the distinct cathode / anode / solid-electrolyte
@@ -192,7 +192,7 @@ def from_solid_state_db_row(
     Parameters
     ----------
     row:
-        A mapping of column name → cell value (e.g. one ``csv.DictReader`` row).
+        A mapping of column name -> cell value (e.g. one ``csv.DictReader`` row).
     source_file:
         Provenance file name recorded on every produced record.
     validate:

@@ -50,6 +50,34 @@ PARAMETER_FILE_PARTS: tuple[str, ...] = (
 )
 MATERIAL_PARTS: tuple[str, ...] = ("negative_material", "positive_material")
 
+# Transport parameters a physics model needs strictly positive. A scalar claim
+# of zero or less for one of them is a placeholder (a BPX file that keeps the
+# real model in User-defined, for example), not a value anyone obtained: the
+# BPX importer gives it no provenance class, and record validation warns. A
+# table may reach zero (a conductivity at zero concentration), so only
+# scalars count.
+_POSITIVE_TRANSPORT_PARAMETERS = frozenset({
+    "ionic_conductivity",
+    "electrolyte_diffusivity",
+    "transference_number",
+    "solid_diffusivity",
+    "electronic_conductivity",
+    "transport_efficiency",
+})
+
+
+def _nonpositive_transport_value(claim: Any) -> float | None:
+    """The value of a scalar transport claim that is zero or negative, else ``None``."""
+    if not isinstance(claim, Mapping):
+        return None
+    if (resolve_parameter(claim.get("parameter")) or claim.get("parameter")) not in _POSITIVE_TRANSPORT_PARAMETERS:
+        return None
+    quantity = claim.get("quantity")
+    value = quantity.get("value") if isinstance(quantity, Mapping) else None
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or value > 0:
+        return None
+    return value
+
 
 def _load_parameters_file() -> dict[str, Any]:
     packaged_path = resources.files("battinfo").joinpath("data", "vocab", "parameters.json")
@@ -333,7 +361,11 @@ def superseded_parameter_set_ids(records: Iterable[Mapping[str, Any]]) -> set[st
 
 
 def collate_claims(
-    records: Iterable[Mapping[str, Any]], *, include_superseded: bool = False
+    records: Iterable[Mapping[str, Any]],
+    *,
+    include_superseded: bool = False,
+    material_kind: str | None = None,
+    material_spec_id: str | None = None,
 ) -> dict[str, list[dict[str, Any]]]:
     """Fold parameter-set records into ``{parameter: [claim, ...]}``.
 
@@ -352,12 +384,27 @@ def collate_claims(
     (:func:`superseded_parameter_set_ids`); ``include_superseded=True`` keeps
     it.
 
+    ``material_kind`` (a kind key or alias) and ``material_spec_id`` keep
+    only the claims about that material: a claim batch with that target, and
+    the matching material part of a parameter file. Without them every claim
+    of every record comes back, including a BPX file's cell, electrode and
+    other-electrode claims. A search by material therefore passes the same
+    filter on::
+
+        rows = query_parameter_sets(material_kind="graphite", parameter="particle_radius")
+        claims = collate_claims([row["record"] for row in rows], material_kind="graphite")
+
     The spread across sources per parameter is the point: callers decide how
     to select (curated slate, newest, conditions filter) — this function never
     picks a winner.
     """
     records = list(records)
     superseded = set() if include_superseded else superseded_parameter_set_ids(records)
+    kind_filter: str | None = None
+    if material_kind is not None:
+        from battinfo.materials import resolve_material_kind  # noqa: PLC0415
+
+        kind_filter = resolve_material_kind(material_kind) or material_kind
     collated: dict[str, list[dict[str, Any]]] = {}
     for record in records:
         body = record.get("parameter_set")
@@ -376,6 +423,10 @@ def collate_claims(
             if provenance.get(citation_field):
                 record_source[citation_field] = provenance[citation_field]
         for context, claims in parameter_set_claim_groups(body):
+            if kind_filter is not None and context.get("material_kind") != kind_filter:
+                continue
+            if material_spec_id is not None and context.get("material_spec_id") != material_spec_id:
+                continue
             source = {**record_source, **context}
             for claim in claims:
                 if not isinstance(claim, Mapping) or not claim.get("parameter"):

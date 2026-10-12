@@ -600,7 +600,7 @@ def import_discovery_xlsx(
 ) -> DiscoveryImportPackage:
     """Import the flat Discovery-Benchmark workbook (one cell per row).
 
-    Produces material-spec + electrolyte-spec + cell-spec → instance → test per
+    Produces material-spec + electrolyte-spec + cell-spec -> instance -> test per
     row. Unlike the RO-Crate path this emits no electrode-specs (the flat sheet
     has no separable electrode entities); electrodes are carried as cell-spec
     basis names.

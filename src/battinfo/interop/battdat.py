@@ -93,7 +93,7 @@ class BattdatImportResult:
     Attributes
     ----------
     test_record:
-        BattINFO test record dict.  No ``id`` field — IRI minted downstream.
+        BattINFO test record dict.  No ``id`` field: IRI minted downstream.
     dataset_record:
         BattINFO dataset record dict, or ``None`` if *source* was a DataFrame
         with no associated file path.
@@ -252,7 +252,7 @@ def from_battdat(
         BDF-normalised CSV file.  When a path is given, ``batterydf`` is used
         to read and normalise the file; ``pandas.read_csv`` is the fallback.
     cell_id:
-        The BattINFO cell-instance identifier (``https://w3id.org/battinfo/cell/…``
+        The BattINFO cell-instance identifier (``https://w3id.org/battinfo/cell/...``
         or a staging placeholder such as ``urn:staging:a123--cell-07``).
     kind:
         Test kind (e.g. ``"cycling"``, ``"eis"``).  Inferred from BDF column

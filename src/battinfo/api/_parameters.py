@@ -379,9 +379,11 @@ def parameter_file_issues(body: Mapping[str, Any]) -> list[tuple[str, str, str, 
     fingerprint does not give, a (part, phase) pair used twice, a runnable
     file that does not name the source's checksum, a mirror whose checksum
     differs from the source's (all errors: integrity, under every
-    validation policy), and a runnable file next to a source the official
-    parser accepts (a warning: a runnable copy is made only when the parser
-    rejects the source). The source and runnable counts are reported too
+    validation policy), and two warnings: a runnable file next to a source
+    the official parser accepts (a runnable copy is made only when the
+    parser rejects the source), and a GitHub or GitLab raw-file URL that
+    names a branch or tag instead of a commit (its content can change
+    under the checksum). The source and runnable counts are reported too
     (``*_count`` codes), for callers that run without the schema. The
     builder raises on the errors; the record validator reports them.
     """
@@ -468,7 +470,42 @@ def parameter_file_issues(body: Mapping[str, Any]) -> list[tuple[str, str, str, 
             "the source carries a passing bpx_parse check, so the official parser reads it as "
             "published: a runnable copy is made only when the parser rejects the source.",
         ))
+    for index, entry in entries:
+        ref = _unpinned_git_ref(entry.get("content_url"))
+        if ref is not None:
+            issues.append((
+                "content_url_unpinned", "warning",
+                f"parameter_set.distributions[{index}].content_url",
+                f"{entry['content_url']} serves the file at the git ref {ref!r}, a branch or tag "
+                "whose content can change, so the record could come to point at other bytes than "
+                "its checksum: pin the URL to a commit (its SHA).",
+            ))
     return issues
+
+
+# Git hosts' raw-file URLs: the ref is a path segment, and only a commit SHA pins
+# it. An explicit refs/heads/<x> or refs/tags/<x> is a branch or a tag whatever
+# <x> looks like; a bare segment counts as a commit only when it is all hex.
+_GIT_RAW_URL_RES = (
+    re.compile(r"^https://raw\.githubusercontent\.com/[^/]+/[^/]+/((?:refs/(?:heads|tags)/)?)([^/]+)/"),
+    re.compile(r"^https://github\.com/[^/]+/[^/]+/(?:raw|blob)/((?:refs/(?:heads|tags)/)?)([^/]+)/"),
+    re.compile(r"^https://gitlab\.com/.+?/-/(?:raw|blob)/((?:refs/(?:heads|tags)/)?)([^/]+)/"),
+)
+_COMMIT_SHA_RE = re.compile(r"^[0-9a-f]{7,40}$")
+
+
+def _unpinned_git_ref(url: Any) -> str | None:
+    """The branch or tag a raw-file URL on GitHub or GitLab names, or ``None`` (pinned to a commit, or another host)."""
+    if not isinstance(url, str):
+        return None
+    for pattern in _GIT_RAW_URL_RES:
+        match = pattern.match(url)
+        if match is not None:
+            prefix, ref = match.group(1), match.group(2)
+            if not prefix and _COMMIT_SHA_RE.fullmatch(ref):
+                return None
+            return prefix + ref
+    return None
 
 
 def _record_from_parameter_set(
@@ -978,6 +1015,13 @@ def query_parameter_sets(
     offset: int = 0,
 ) -> list[dict[str, Any]]:
     """Query saved parameter sets; the collation entry point.
+
+    A row is a whole record, so a BPX file found by its graphite part also
+    holds its cell, electrode and other-electrode claims: pass the same
+    material filter to ``collate_claims`` to keep only that material's::
+
+        rows = query_parameter_sets(material_kind="graphite", parameter="particle_radius")
+        claims = collate_claims([row["record"] for row in rows], material_kind="graphite")
 
     ``material_kind`` accepts a kind key or alias. ``material_kind`` and
     ``material_spec_id`` match a claim batch's target or any material part of

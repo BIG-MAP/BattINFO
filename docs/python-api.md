@@ -18,6 +18,7 @@ reference follows below; for the layered architecture, see
 | Author research-grade composition (materials, electrodes, electrolyte) | `battinfo.authoring` — see {doc}`Tutorial 5 <../guides/05-descriptors>` |
 | Load, query, save, or resolver-publish canonical records | `battinfo.api` helpers |
 | Turn a folder of photos and CSVs into a linked submission | `battinfo.ingest` — one-command folder intake |
+| Read or write another format (BPX, Battery Data Commons, battdat, protocol files) | `battinfo.interop` importers and exporters |
 | Script validation, saving, and publishing from the shell | The `battinfo` CLI — see the {doc}`CLI reference </pages/cli-reference>` |
 
 If you are new here, start with the {doc}`tutorials </pages/guides>` — six
@@ -169,6 +170,30 @@ metadata; its shape is defined by
 {doc}`the ingest manifest contract <../guarantees>` and validated
 against `assets/schemas/ingest-manifest.schema.json`.
 `resource_type="cell-instance"` is the currently implemented subject.
+
+## Other formats (`battinfo.interop`)
+
+Importers and exporters for formats other tools write: BPX parameter files (`from_bpx_parameters`, `to_bpx`, `upgrade_bpx`, `check_bpx`), Battery Data Commons records (`import_bdc_record`, `to_bdc_record`), battdat datasets (`from_battdat`), BattInfoConverter JSON-LD (`import_converter_jsonld`), Discovery spreadsheets (`import_discovery_xlsx`), the solid-state battery database (`from_solid_state_db_row`), and the aurora-unicycler, bmgen, PyBaMM and UCP protocol formats (`import_aurora_unicycler`, `import_bmgen_jsonld`, `import_pybamm_experiment`, `import_ucp`). An importer returns BattINFO records, or a result object that holds them with warnings naming what it could not read; nothing is saved or published until you do it.
+
+A BPX file becomes one parameter-set record, and `to_bpx` rebuilds the file from it:
+
+```python
+from battinfo.interop import from_bpx_parameters, to_bpx
+
+bpx = {
+    "Header": {"BPX": "1.1.0", "Title": "Example cell", "Model": "Partial"},
+    "Parameterisation": {
+        "Cell": {"Nominal cell capacity [A.h]": 5.0, "Electrode area [m2]": 0.1},
+        "Negative electrode": {"Particle radius [m]": 5.86e-6, "Thickness [m]": 8.52e-5},
+    },
+}
+result = from_bpx_parameters(bpx)
+record = result.to_parameter_set(virtual_cell=True, materials={"negative": "graphite"})
+print([part["part"] for part in record["parameter_set"]["parts"]])
+print(to_bpx(record).bpx == bpx)  # True
+```
+
+{doc}`Publish a BPX parameter file </howto/publish-a-bpx-parameter-file>` takes a file from disk to a published record, and the {doc}`interop scorecard </pages/interop-recovery>` measures how completely BattInfoConverter and Discovery JSON-LD exports reach canonical records.
 
 ## Advanced: the internal engine
 

@@ -412,7 +412,7 @@ def import_pybamm_experiment(source: Any, *, name: str | None = None, kind: str 
 
     Accepts either the list passed to ``pybamm.Experiment`` (strings for single
     steps, lists/tuples for cycles, ``[(...)] * N`` style) OR a ``to_config()``
-    dict ``{"cycles": [[step_dict, …], …]}`` (or a JSON string / path to one).
+    dict ``{"cycles": [[step_dict, ...], ...]}`` (or a JSON string / path to one).
     Consecutive identical cycles fold into one repeated group."""
     data = source
     if isinstance(source, (str, Path)) and (_looks_like_path(source)
@@ -690,9 +690,9 @@ def import_ucp(source: Any, *, name: str | None = None, kind: str | None = None,
     """Import an ionworks Universal Cycler Protocol (dict | YAML/JSON string | path).
 
     The ``global`` block maps onto the blessed protocol conventions:
-    ``initial_temperature`` → ``conditions.ambient_temperature``,
-    ``initial_state_type: soc_percentage`` → ``conditions.initial_state_of_charge``
-    (unit "1"), ``resolution`` → ``record``. Computational steps (Control,
+    ``initial_temperature`` -> ``conditions.ambient_temperature``,
+    ``initial_state_type: soc_percentage`` -> ``conditions.initial_state_of_charge``
+    (unit "1"), ``resolution`` -> ``record``. Computational steps (Control,
     set_variable, goto actions) and expression-valued fields are Layer-B
     behaviour: they stay with the linked artifact and are recorded as notes.
     """

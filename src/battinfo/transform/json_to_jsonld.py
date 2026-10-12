@@ -2688,6 +2688,11 @@ def _parameter_claim_variable_node(claim: dict[str, Any]) -> dict[str, Any] | No
         node["schema:description"] = ", ".join(parts)
         if isinstance(curve.get("y_unit"), str):
             node["schema:unitText"] = curve["y_unit"]
+            unit_iri = _unit_iri(curve["y_unit"])
+            if unit_iri:
+                # schema:unitCode takes a URL: the EMMO unit, as a quantity's
+                # hasMeasurementUnit gives it.
+                node["schema:unitCode"] = {"@id": unit_iri}
     elif isinstance(expression, dict):
         if isinstance(expression.get("text"), str):
             node["schema:value"] = expression["text"]
@@ -2833,6 +2838,36 @@ def _to_domain_battery_jsonld_parameter_set(data: dict[str, Any]) -> dict[str, A
             for key, value in sorted(model_context.items())
             if isinstance(value, str) and value
         )
+    # What the graph does not carry, so a linked-data reader can tell the
+    # record is not the whole file: the source file's values the record does
+    # not hold (by BPX path), and the extension entries (BPX User-defined)
+    # that ride the record file verbatim rather than as claims.
+    not_imported = [path for path in body.get("not_imported") or [] if isinstance(path, str) and path]
+    if not_imported:
+        description = "Values of the source file that this record does not hold, by their path in the file"
+        if any(
+            isinstance(entry, Mapping) and entry.get("role") == "source"
+            for entry in body.get("distributions") or []
+        ):
+            description += "; the source file under schema:distribution is the complete copy"
+        scope_values.append({
+            "@type": "schema:PropertyValue",
+            "schema:name": "not_imported",
+            "schema:value": not_imported[0] if len(not_imported) == 1 else not_imported,
+            "schema:description": description + ".",
+        })
+    annex = body.get("annex")
+    if isinstance(annex, dict) and annex:
+        annex_keys = [str(key) for key in annex]
+        scope_values.append({
+            "@type": "schema:PropertyValue",
+            "schema:name": "annex",
+            "schema:value": annex_keys[0] if len(annex_keys) == 1 else annex_keys,
+            "schema:description": (
+                "Entries of the source file's extension block (BPX User-defined), held verbatim "
+                "in the record file and not as claims."
+            ),
+        })
     if scope_values:
         node["schema:additionalProperty"] = (
             scope_values[0] if len(scope_values) == 1 else scope_values

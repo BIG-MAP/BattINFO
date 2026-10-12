@@ -175,16 +175,14 @@ record = result.to_parameter_set(
             "quantity": {
               "value": 5.0,
               "unit": "Ah"
-            },
-            "provenance_class": "fitted"
+            }
           },
           {
             "parameter": "electrode_area",
             "quantity": {
               "value": 0.1,
               "unit": "m2"
-            },
-            "provenance_class": "fitted"
+            }
           }
         ]
       },
@@ -223,8 +221,7 @@ record = result.to_parameter_set(
             "quantity": {
               "value": 1.0,
               "unit": "1"
-            },
-            "provenance_class": "fitted"
+            }
           }
         ]
       }
@@ -321,12 +318,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 5.0
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour",
-          "schema:propertyID": "nominal_capacity",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "nominal_capacity"
         },
         {
           "@type": [
@@ -338,13 +330,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 0.1
           },
-          "schema:unitText": "m2",
-          "schema:propertyID": "electrode_area",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "hasMeasurementUnit": "https://w3id.org/emmo#SquareMetre",
+          "schema:propertyID": "electrode_area"
         }
       ]
     },
@@ -426,12 +413,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
           "hasNumberValue": 1.0
         },
         "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
-        "schema:propertyID": "initial_soc",
-        "schema:additionalProperty": {
-          "@type": "schema:PropertyValue",
-          "schema:name": "provenance_class",
-          "schema:value": "fitted"
-        }
+        "schema:propertyID": "initial_soc"
       }
     }
   ],
@@ -554,7 +536,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         "@type": "RealData",
         "hasNumberValue": 33133.0
       },
-      "schema:unitText": "mol/m3",
+      "hasMeasurementUnit": "https://w3id.org/emmo#MolePerCubicMetre",
       "schema:propertyID": "max_concentration",
       "schema:additionalProperty": {
         "@type": "schema:PropertyValue",
@@ -572,7 +554,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         "@type": "RealData",
         "hasNumberValue": 6.716e-06
       },
-      "schema:unitText": "mol.m-2.s-1",
+      "hasMeasurementUnit": "https://w3id.org/emmo#MolePerSquareMetrePerSecond",
       "schema:propertyID": "reaction_rate_constant",
       "schema:additionalProperty": {
         "@type": "schema:PropertyValue",
@@ -623,6 +605,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     "schema:propertyID": "ocp",
     "schema:description": "tabulated curve vs stoichiometry, 8 points, average branch",
     "schema:unitText": "V",
+    "schema:unitCode": {
+      "@id": "https://w3id.org/emmo#Volt"
+    },
     "schema:measurementTechnique": "GITT",
     "schema:additionalProperty": {
       "@type": "schema:PropertyValue",
@@ -712,6 +697,12 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "@type": "schema:PropertyValue",
       "schema:name": "source_version",
       "schema:value": "0.1.0"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "not_imported",
+      "schema:value": "Validation",
+      "schema:description": "Values of the source file that this record does not hold, by their path in the file; the source file under schema:distribution is the complete copy."
     }
   ],
   "schema:hasPart": [
@@ -735,12 +726,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 298.15
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Kelvin",
-          "schema:propertyID": "reference_temperature",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "reference_temperature"
         },
         {
           "@type": [
@@ -753,12 +739,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 2.7
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
-          "schema:propertyID": "discharging_cutoff_voltage",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "discharging_cutoff_voltage"
         },
         {
           "@type": [
@@ -771,12 +752,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 4.2
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
-          "schema:propertyID": "charging_cutoff_voltage",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "charging_cutoff_voltage"
         },
         {
           "@type": [
@@ -789,12 +765,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 12.5
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour",
-          "schema:propertyID": "nominal_capacity",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "nominal_capacity"
         },
         {
           "@type": [
@@ -806,13 +777,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 913
           },
-          "schema:unitText": "J/(kg.K)",
-          "schema:propertyID": "specific_heat_capacity",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "hasMeasurementUnit": "https://w3id.org/emmo#JoulePerKilogramKelvin",
+          "schema:propertyID": "specific_heat_capacity"
         },
         {
           "@type": [
@@ -824,13 +790,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 2.04
           },
-          "schema:unitText": "W/(m.K)",
-          "schema:propertyID": "thermal_conductivity",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "hasMeasurementUnit": "https://w3id.org/emmo#WattPerMetreKelvin",
+          "schema:propertyID": "thermal_conductivity"
         },
         {
           "@type": [
@@ -843,12 +804,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 1847
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#KilogramPerCubicMetre",
-          "schema:propertyID": "density",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "density"
         },
         {
           "@type": [
@@ -860,13 +816,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 0.016808
           },
-          "schema:unitText": "m2",
-          "schema:propertyID": "electrode_area",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "hasMeasurementUnit": "https://w3id.org/emmo#SquareMetre",
+          "schema:propertyID": "electrode_area"
         },
         {
           "@type": [
@@ -879,12 +830,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 34
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
-          "schema:propertyID": "electrode_pair_count",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "electrode_pair_count"
         },
         {
           "@type": [
@@ -896,13 +842,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 0.0379
           },
-          "schema:unitText": "m2",
-          "schema:propertyID": "external_surface_area",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "hasMeasurementUnit": "https://w3id.org/emmo#SquareMetre",
+          "schema:propertyID": "external_surface_area"
         },
         {
           "@type": [
@@ -914,13 +855,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 0.000128
           },
-          "schema:unitText": "m3",
-          "schema:propertyID": "volume",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "hasMeasurementUnit": "https://w3id.org/emmo#CubicMetre",
+          "schema:propertyID": "volume"
         }
       ]
     },
@@ -966,7 +902,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 2.728e-14
           },
-          "schema:unitText": "m2/s",
+          "hasMeasurementUnit": "https://w3id.org/emmo#SquareMetrePerSecond",
           "schema:propertyID": "solid_diffusivity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -984,7 +920,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 5.199e-06
           },
-          "schema:unitText": "mol.m-2.s-1",
+          "hasMeasurementUnit": "https://w3id.org/emmo#MolePerSquareMetrePerSecond",
           "schema:propertyID": "reaction_rate_constant",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -1038,7 +974,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 29730
           },
-          "schema:unitText": "mol/m3",
+          "hasMeasurementUnit": "https://w3id.org/emmo#MolePerCubicMetre",
           "schema:propertyID": "max_concentration",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -1056,7 +992,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 30000
           },
-          "schema:unitText": "J/mol",
+          "hasMeasurementUnit": "https://w3id.org/emmo#JoulePerMole",
           "schema:propertyID": "diffusivity_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -1074,7 +1010,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 55000
           },
-          "schema:unitText": "J/mol",
+          "hasMeasurementUnit": "https://w3id.org/emmo#JoulePerMole",
           "schema:propertyID": "reaction_rate_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -1147,7 +1083,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 0.222
           },
-          "schema:unitText": "S/m",
+          "hasMeasurementUnit": "https://w3id.org/emmo#SiemensPerMetre",
           "schema:propertyID": "electronic_conductivity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -1165,7 +1101,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 499522
           },
-          "schema:unitText": "1/m",
+          "hasMeasurementUnit": "https://w3id.org/emmo#PerMetre",
           "schema:propertyID": "surface_area_per_volume",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -1251,7 +1187,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 3.2e-14
           },
-          "schema:unitText": "m2/s",
+          "hasMeasurementUnit": "https://w3id.org/emmo#SquareMetrePerSecond",
           "schema:propertyID": "solid_diffusivity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -1269,7 +1205,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": -0.0001
           },
-          "schema:unitText": "V/K",
+          "hasMeasurementUnit": "https://w3id.org/emmo#VoltPerKelvin",
           "schema:propertyID": "entropic_coefficient",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -1287,7 +1223,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 2.305e-05
           },
-          "schema:unitText": "mol.m-2.s-1",
+          "hasMeasurementUnit": "https://w3id.org/emmo#MolePerSquareMetrePerSecond",
           "schema:propertyID": "reaction_rate_constant",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -1341,7 +1277,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 46200
           },
-          "schema:unitText": "mol/m3",
+          "hasMeasurementUnit": "https://w3id.org/emmo#MolePerCubicMetre",
           "schema:propertyID": "max_concentration",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -1359,7 +1295,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 15000
           },
-          "schema:unitText": "J/mol",
+          "hasMeasurementUnit": "https://w3id.org/emmo#JoulePerMole",
           "schema:propertyID": "diffusivity_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -1377,7 +1313,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 35000
           },
-          "schema:unitText": "J/mol",
+          "hasMeasurementUnit": "https://w3id.org/emmo#JoulePerMole",
           "schema:propertyID": "reaction_rate_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -1436,7 +1372,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 0.789
           },
-          "schema:unitText": "S/m",
+          "hasMeasurementUnit": "https://w3id.org/emmo#SiemensPerMetre",
           "schema:propertyID": "electronic_conductivity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -1454,7 +1390,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 432072
           },
-          "schema:unitText": "1/m",
+          "hasMeasurementUnit": "https://w3id.org/emmo#PerMetre",
           "schema:propertyID": "surface_area_per_volume",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -1598,7 +1534,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 17100
           },
-          "schema:unitText": "J/mol",
+          "hasMeasurementUnit": "https://w3id.org/emmo#JoulePerMole",
           "schema:propertyID": "conductivity_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -1616,7 +1552,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 17100
           },
-          "schema:unitText": "J/mol",
+          "hasMeasurementUnit": "https://w3id.org/emmo#JoulePerMole",
           "schema:propertyID": "diffusivity_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -1672,12 +1608,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 298.15
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Kelvin",
-          "schema:propertyID": "initial_temperature",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "initial_temperature"
         },
         {
           "@type": [
@@ -1689,13 +1620,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 1000
           },
-          "schema:unitText": "mol/m3",
-          "schema:propertyID": "initial_concentration",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "hasMeasurementUnit": "https://w3id.org/emmo#MolePerCubicMetre",
+          "schema:propertyID": "initial_concentration"
         },
         {
           "@type": [
@@ -1707,12 +1633,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 298.15
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Kelvin",
-          "schema:propertyID": "ambient_temperature",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "ambient_temperature"
         }
       ]
     }
@@ -1844,12 +1765,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 298.15
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Kelvin",
-          "schema:propertyID": "reference_temperature",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "reference_temperature"
         },
         {
           "@type": [
@@ -1862,12 +1778,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 2.0
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
-          "schema:propertyID": "discharging_cutoff_voltage",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "discharging_cutoff_voltage"
         },
         {
           "@type": [
@@ -1880,12 +1791,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 3.65
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
-          "schema:propertyID": "charging_cutoff_voltage",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "charging_cutoff_voltage"
         },
         {
           "@type": [
@@ -1898,12 +1804,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 2
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour",
-          "schema:propertyID": "nominal_capacity",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "nominal_capacity"
         },
         {
           "@type": [
@@ -1915,13 +1816,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 999
           },
-          "schema:unitText": "J/(kg.K)",
-          "schema:propertyID": "specific_heat_capacity",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "hasMeasurementUnit": "https://w3id.org/emmo#JoulePerKilogramKelvin",
+          "schema:propertyID": "specific_heat_capacity"
         },
         {
           "@type": [
@@ -1933,13 +1829,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 1.89
           },
-          "schema:unitText": "W/(m.K)",
-          "schema:propertyID": "thermal_conductivity",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "hasMeasurementUnit": "https://w3id.org/emmo#WattPerMetreKelvin",
+          "schema:propertyID": "thermal_conductivity"
         },
         {
           "@type": [
@@ -1952,12 +1843,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 1940
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#KilogramPerCubicMetre",
-          "schema:propertyID": "density",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "density"
         },
         {
           "@type": [
@@ -1969,13 +1855,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 0.08959998
           },
-          "schema:unitText": "m2",
-          "schema:propertyID": "electrode_area",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "hasMeasurementUnit": "https://w3id.org/emmo#SquareMetre",
+          "schema:propertyID": "electrode_area"
         },
         {
           "@type": [
@@ -1988,12 +1869,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 1
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
-          "schema:propertyID": "electrode_pair_count",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "electrode_pair_count"
         },
         {
           "@type": [
@@ -2005,13 +1881,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 0.00431
           },
-          "schema:unitText": "m2",
-          "schema:propertyID": "external_surface_area",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "hasMeasurementUnit": "https://w3id.org/emmo#SquareMetre",
+          "schema:propertyID": "external_surface_area"
         },
         {
           "@type": [
@@ -2023,13 +1894,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 1.7e-05
           },
-          "schema:unitText": "m3",
-          "schema:propertyID": "volume",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "hasMeasurementUnit": "https://w3id.org/emmo#CubicMetre",
+          "schema:propertyID": "volume"
         }
       ]
     },
@@ -2075,7 +1941,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 9.6e-15
           },
-          "schema:unitText": "m2/s",
+          "hasMeasurementUnit": "https://w3id.org/emmo#SquareMetrePerSecond",
           "schema:propertyID": "solid_diffusivity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -2093,7 +1959,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 6.872e-06
           },
-          "schema:unitText": "mol.m-2.s-1",
+          "hasMeasurementUnit": "https://w3id.org/emmo#MolePerSquareMetrePerSecond",
           "schema:propertyID": "reaction_rate_constant",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -2147,7 +2013,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 31400
           },
-          "schema:unitText": "mol/m3",
+          "hasMeasurementUnit": "https://w3id.org/emmo#MolePerCubicMetre",
           "schema:propertyID": "max_concentration",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -2165,7 +2031,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 30000
           },
-          "schema:unitText": "J/mol",
+          "hasMeasurementUnit": "https://w3id.org/emmo#JoulePerMole",
           "schema:propertyID": "diffusivity_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -2183,7 +2049,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 55000
           },
-          "schema:unitText": "J/mol",
+          "hasMeasurementUnit": "https://w3id.org/emmo#JoulePerMole",
           "schema:propertyID": "reaction_rate_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -2256,7 +2122,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 7.46
           },
-          "schema:unitText": "S/m",
+          "hasMeasurementUnit": "https://w3id.org/emmo#SiemensPerMetre",
           "schema:propertyID": "electronic_conductivity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -2274,7 +2140,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 473004
           },
-          "schema:unitText": "1/m",
+          "hasMeasurementUnit": "https://w3id.org/emmo#PerMetre",
           "schema:propertyID": "surface_area_per_volume",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -2360,7 +2226,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 6.873e-17
           },
-          "schema:unitText": "m2/s",
+          "hasMeasurementUnit": "https://w3id.org/emmo#SquareMetrePerSecond",
           "schema:propertyID": "solid_diffusivity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -2378,7 +2244,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 9.736e-07
           },
-          "schema:unitText": "mol.m-2.s-1",
+          "hasMeasurementUnit": "https://w3id.org/emmo#MolePerSquareMetrePerSecond",
           "schema:propertyID": "reaction_rate_constant",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -2432,7 +2298,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 21200
           },
-          "schema:unitText": "mol/m3",
+          "hasMeasurementUnit": "https://w3id.org/emmo#MolePerCubicMetre",
           "schema:propertyID": "max_concentration",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -2450,7 +2316,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 80000
           },
-          "schema:unitText": "J/mol",
+          "hasMeasurementUnit": "https://w3id.org/emmo#JoulePerMole",
           "schema:propertyID": "diffusivity_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -2468,7 +2334,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 35000
           },
-          "schema:unitText": "J/mol",
+          "hasMeasurementUnit": "https://w3id.org/emmo#JoulePerMole",
           "schema:propertyID": "reaction_rate_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -2496,6 +2362,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
           "schema:propertyID": "entropic_coefficient",
           "schema:description": "tabulated curve vs stoichiometry, 21 points",
           "schema:unitText": "V/K",
+          "schema:unitCode": {
+            "@id": "https://w3id.org/emmo#VoltPerKelvin"
+          },
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
             "schema:name": "provenance_class",
@@ -2541,7 +2410,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 0.8
           },
-          "schema:unitText": "S/m",
+          "hasMeasurementUnit": "https://w3id.org/emmo#SiemensPerMetre",
           "schema:propertyID": "electronic_conductivity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -2559,7 +2428,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 4418460
           },
-          "schema:unitText": "1/m",
+          "hasMeasurementUnit": "https://w3id.org/emmo#PerMetre",
           "schema:propertyID": "surface_area_per_volume",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -2703,7 +2572,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 17100
           },
-          "schema:unitText": "J/mol",
+          "hasMeasurementUnit": "https://w3id.org/emmo#JoulePerMole",
           "schema:propertyID": "conductivity_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -2721,7 +2590,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 17100
           },
-          "schema:unitText": "J/mol",
+          "hasMeasurementUnit": "https://w3id.org/emmo#JoulePerMole",
           "schema:propertyID": "diffusivity_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -2777,12 +2646,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 298.15
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Kelvin",
-          "schema:propertyID": "initial_temperature",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "initial_temperature"
         },
         {
           "@type": [
@@ -2794,13 +2658,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 1000
           },
-          "schema:unitText": "mol/m3",
-          "schema:propertyID": "initial_concentration",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "hasMeasurementUnit": "https://w3id.org/emmo#MolePerCubicMetre",
+          "schema:propertyID": "initial_concentration"
         },
         {
           "@type": [
@@ -2812,12 +2671,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 298.15
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Kelvin",
-          "schema:propertyID": "ambient_temperature",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "ambient_temperature"
         }
       ]
     }
@@ -2926,6 +2780,12 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "@type": "schema:PropertyValue",
       "schema:name": "source_version",
       "schema:value": "0.4.0"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "not_imported",
+      "schema:value": "Validation",
+      "schema:description": "Values of the source file that this record does not hold, by their path in the file; the source file under schema:distribution is the complete copy."
     }
   ],
   "schema:hasPart": [
@@ -2949,12 +2809,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 298.15
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Kelvin",
-          "schema:propertyID": "reference_temperature",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "reference_temperature"
         },
         {
           "@type": [
@@ -2967,12 +2822,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 2.7
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
-          "schema:propertyID": "discharging_cutoff_voltage",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "discharging_cutoff_voltage"
         },
         {
           "@type": [
@@ -2985,12 +2835,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 4.2
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
-          "schema:propertyID": "charging_cutoff_voltage",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "charging_cutoff_voltage"
         },
         {
           "@type": [
@@ -3003,12 +2848,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 12.5
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour",
-          "schema:propertyID": "nominal_capacity",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "nominal_capacity"
         },
         {
           "@type": [
@@ -3020,13 +2860,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 913
           },
-          "schema:unitText": "J/(kg.K)",
-          "schema:propertyID": "specific_heat_capacity",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "hasMeasurementUnit": "https://w3id.org/emmo#JoulePerKilogramKelvin",
+          "schema:propertyID": "specific_heat_capacity"
         },
         {
           "@type": [
@@ -3038,13 +2873,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 2.04
           },
-          "schema:unitText": "W/(m.K)",
-          "schema:propertyID": "thermal_conductivity",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "hasMeasurementUnit": "https://w3id.org/emmo#WattPerMetreKelvin",
+          "schema:propertyID": "thermal_conductivity"
         },
         {
           "@type": [
@@ -3057,12 +2887,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 1847
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#KilogramPerCubicMetre",
-          "schema:propertyID": "density",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "density"
         },
         {
           "@type": [
@@ -3074,13 +2899,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 0.016808
           },
-          "schema:unitText": "m2",
-          "schema:propertyID": "electrode_area",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "hasMeasurementUnit": "https://w3id.org/emmo#SquareMetre",
+          "schema:propertyID": "electrode_area"
         },
         {
           "@type": [
@@ -3093,12 +2913,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 34
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
-          "schema:propertyID": "electrode_pair_count",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "electrode_pair_count"
         },
         {
           "@type": [
@@ -3110,13 +2925,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 0.0379
           },
-          "schema:unitText": "m2",
-          "schema:propertyID": "external_surface_area",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "hasMeasurementUnit": "https://w3id.org/emmo#SquareMetre",
+          "schema:propertyID": "external_surface_area"
         },
         {
           "@type": [
@@ -3128,13 +2938,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 0.000128
           },
-          "schema:unitText": "m3",
-          "schema:propertyID": "volume",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "hasMeasurementUnit": "https://w3id.org/emmo#CubicMetre",
+          "schema:propertyID": "volume"
         }
       ]
     },
@@ -3180,7 +2985,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 2.728e-14
           },
-          "schema:unitText": "m2/s",
+          "hasMeasurementUnit": "https://w3id.org/emmo#SquareMetrePerSecond",
           "schema:propertyID": "solid_diffusivity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -3198,7 +3003,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 5.199e-06
           },
-          "schema:unitText": "mol.m-2.s-1",
+          "hasMeasurementUnit": "https://w3id.org/emmo#MolePerSquareMetrePerSecond",
           "schema:propertyID": "reaction_rate_constant",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -3252,7 +3057,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 29730
           },
-          "schema:unitText": "mol/m3",
+          "hasMeasurementUnit": "https://w3id.org/emmo#MolePerCubicMetre",
           "schema:propertyID": "max_concentration",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -3270,7 +3075,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 30000
           },
-          "schema:unitText": "J/mol",
+          "hasMeasurementUnit": "https://w3id.org/emmo#JoulePerMole",
           "schema:propertyID": "diffusivity_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -3288,7 +3093,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 55000
           },
-          "schema:unitText": "J/mol",
+          "hasMeasurementUnit": "https://w3id.org/emmo#JoulePerMole",
           "schema:propertyID": "reaction_rate_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -3361,7 +3166,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 499522
           },
-          "schema:unitText": "1/m",
+          "hasMeasurementUnit": "https://w3id.org/emmo#PerMetre",
           "schema:propertyID": "surface_area_per_volume",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -3413,7 +3218,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 3.2e-14
           },
-          "schema:unitText": "m2/s",
+          "hasMeasurementUnit": "https://w3id.org/emmo#SquareMetrePerSecond",
           "schema:propertyID": "solid_diffusivity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -3431,7 +3236,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": -0.0001
           },
-          "schema:unitText": "V/K",
+          "hasMeasurementUnit": "https://w3id.org/emmo#VoltPerKelvin",
           "schema:propertyID": "entropic_coefficient",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -3449,7 +3254,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 2.305e-05
           },
-          "schema:unitText": "mol.m-2.s-1",
+          "hasMeasurementUnit": "https://w3id.org/emmo#MolePerSquareMetrePerSecond",
           "schema:propertyID": "reaction_rate_constant",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -3503,7 +3308,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 46200
           },
-          "schema:unitText": "mol/m3",
+          "hasMeasurementUnit": "https://w3id.org/emmo#MolePerCubicMetre",
           "schema:propertyID": "max_concentration",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -3521,7 +3326,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 15000
           },
-          "schema:unitText": "J/mol",
+          "hasMeasurementUnit": "https://w3id.org/emmo#JoulePerMole",
           "schema:propertyID": "diffusivity_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -3539,7 +3344,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 35000
           },
-          "schema:unitText": "J/mol",
+          "hasMeasurementUnit": "https://w3id.org/emmo#JoulePerMole",
           "schema:propertyID": "reaction_rate_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -3598,7 +3403,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 432072
           },
-          "schema:unitText": "1/m",
+          "hasMeasurementUnit": "https://w3id.org/emmo#PerMetre",
           "schema:propertyID": "surface_area_per_volume",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -3628,12 +3433,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 298.15
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Kelvin",
-          "schema:propertyID": "initial_temperature",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "initial_temperature"
         },
         {
           "@type": [
@@ -3645,12 +3445,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 298.15
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Kelvin",
-          "schema:propertyID": "ambient_temperature",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "ambient_temperature"
         }
       ]
     }
@@ -3758,6 +3553,12 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "@type": "schema:PropertyValue",
       "schema:name": "source_version",
       "schema:value": "0.4.0"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "not_imported",
+      "schema:value": "Parameterisation/Positive electrode/Particle",
+      "schema:description": "Values of the source file that this record does not hold, by their path in the file; the source file under schema:distribution is the complete copy."
     }
   ],
   "schema:hasPart": [
@@ -3781,12 +3582,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 298.15
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Kelvin",
-          "schema:propertyID": "reference_temperature",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "reference_temperature"
         },
         {
           "@type": [
@@ -3799,12 +3595,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 2.7
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
-          "schema:propertyID": "discharging_cutoff_voltage",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "discharging_cutoff_voltage"
         },
         {
           "@type": [
@@ -3817,12 +3608,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 4.2
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
-          "schema:propertyID": "charging_cutoff_voltage",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "charging_cutoff_voltage"
         },
         {
           "@type": [
@@ -3835,12 +3621,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 12.5
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour",
-          "schema:propertyID": "nominal_capacity",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "nominal_capacity"
         },
         {
           "@type": [
@@ -3852,13 +3633,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 913
           },
-          "schema:unitText": "J/(kg.K)",
-          "schema:propertyID": "specific_heat_capacity",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "hasMeasurementUnit": "https://w3id.org/emmo#JoulePerKilogramKelvin",
+          "schema:propertyID": "specific_heat_capacity"
         },
         {
           "@type": [
@@ -3870,13 +3646,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 2.04
           },
-          "schema:unitText": "W/(m.K)",
-          "schema:propertyID": "thermal_conductivity",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "hasMeasurementUnit": "https://w3id.org/emmo#WattPerMetreKelvin",
+          "schema:propertyID": "thermal_conductivity"
         },
         {
           "@type": [
@@ -3889,12 +3660,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 1847
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#KilogramPerCubicMetre",
-          "schema:propertyID": "density",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "density"
         },
         {
           "@type": [
@@ -3906,13 +3672,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 0.016808
           },
-          "schema:unitText": "m2",
-          "schema:propertyID": "electrode_area",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "hasMeasurementUnit": "https://w3id.org/emmo#SquareMetre",
+          "schema:propertyID": "electrode_area"
         },
         {
           "@type": [
@@ -3925,12 +3686,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 34
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
-          "schema:propertyID": "electrode_pair_count",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "electrode_pair_count"
         },
         {
           "@type": [
@@ -3942,13 +3698,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 0.0379
           },
-          "schema:unitText": "m2",
-          "schema:propertyID": "external_surface_area",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "hasMeasurementUnit": "https://w3id.org/emmo#SquareMetre",
+          "schema:propertyID": "external_surface_area"
         },
         {
           "@type": [
@@ -3960,13 +3711,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 0.000128
           },
-          "schema:unitText": "m3",
-          "schema:propertyID": "volume",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "hasMeasurementUnit": "https://w3id.org/emmo#CubicMetre",
+          "schema:propertyID": "volume"
         }
       ]
     },
@@ -4012,7 +3758,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 2.728e-14
           },
-          "schema:unitText": "m2/s",
+          "hasMeasurementUnit": "https://w3id.org/emmo#SquareMetrePerSecond",
           "schema:propertyID": "solid_diffusivity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -4030,7 +3776,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 5.199e-06
           },
-          "schema:unitText": "mol.m-2.s-1",
+          "hasMeasurementUnit": "https://w3id.org/emmo#MolePerSquareMetrePerSecond",
           "schema:propertyID": "reaction_rate_constant",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -4084,7 +3830,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 29730
           },
-          "schema:unitText": "mol/m3",
+          "hasMeasurementUnit": "https://w3id.org/emmo#MolePerCubicMetre",
           "schema:propertyID": "max_concentration",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -4102,7 +3848,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 30000
           },
-          "schema:unitText": "J/mol",
+          "hasMeasurementUnit": "https://w3id.org/emmo#JoulePerMole",
           "schema:propertyID": "diffusivity_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -4120,7 +3866,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 55000
           },
-          "schema:unitText": "J/mol",
+          "hasMeasurementUnit": "https://w3id.org/emmo#JoulePerMole",
           "schema:propertyID": "reaction_rate_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -4193,7 +3939,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 0.222
           },
-          "schema:unitText": "S/m",
+          "hasMeasurementUnit": "https://w3id.org/emmo#SiemensPerMetre",
           "schema:propertyID": "electronic_conductivity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -4211,7 +3957,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 499522
           },
-          "schema:unitText": "1/m",
+          "hasMeasurementUnit": "https://w3id.org/emmo#PerMetre",
           "schema:propertyID": "surface_area_per_volume",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -4292,7 +4038,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 0.789
           },
-          "schema:unitText": "S/m",
+          "hasMeasurementUnit": "https://w3id.org/emmo#SiemensPerMetre",
           "schema:propertyID": "electronic_conductivity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -4436,7 +4182,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 17100
           },
-          "schema:unitText": "J/mol",
+          "hasMeasurementUnit": "https://w3id.org/emmo#JoulePerMole",
           "schema:propertyID": "conductivity_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -4454,7 +4200,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 17100
           },
-          "schema:unitText": "J/mol",
+          "hasMeasurementUnit": "https://w3id.org/emmo#JoulePerMole",
           "schema:propertyID": "diffusivity_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -4510,12 +4256,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 298.15
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Kelvin",
-          "schema:propertyID": "initial_temperature",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "initial_temperature"
         },
         {
           "@type": [
@@ -4527,13 +4268,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 1000
           },
-          "schema:unitText": "mol/m3",
-          "schema:propertyID": "initial_concentration",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "hasMeasurementUnit": "https://w3id.org/emmo#MolePerCubicMetre",
+          "schema:propertyID": "initial_concentration"
         },
         {
           "@type": [
@@ -4545,12 +4281,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 298.15
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Kelvin",
-          "schema:propertyID": "ambient_temperature",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "ambient_temperature"
         }
       ]
     }
@@ -4658,6 +4389,15 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "@type": "schema:PropertyValue",
       "schema:name": "source_version",
       "schema:value": "0.4.0"
+    },
+    {
+      "@type": "schema:PropertyValue",
+      "schema:name": "annex",
+      "schema:value": [
+        "Negative electrode delithiation OCP [V]",
+        "Negative electrode lithiation OCP [V]"
+      ],
+      "schema:description": "Entries of the source file's extension block (BPX User-defined), held verbatim in the record file and not as claims."
     }
   ],
   "schema:hasPart": [
@@ -4681,12 +4421,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 298.15
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Kelvin",
-          "schema:propertyID": "reference_temperature",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "reference_temperature"
         },
         {
           "@type": [
@@ -4699,12 +4434,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 2.7
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
-          "schema:propertyID": "discharging_cutoff_voltage",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "discharging_cutoff_voltage"
         },
         {
           "@type": [
@@ -4717,12 +4447,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 4.2
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
-          "schema:propertyID": "charging_cutoff_voltage",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "charging_cutoff_voltage"
         },
         {
           "@type": [
@@ -4735,12 +4460,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 12.5
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour",
-          "schema:propertyID": "nominal_capacity",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "nominal_capacity"
         },
         {
           "@type": [
@@ -4752,13 +4472,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 913
           },
-          "schema:unitText": "J/(kg.K)",
-          "schema:propertyID": "specific_heat_capacity",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "hasMeasurementUnit": "https://w3id.org/emmo#JoulePerKilogramKelvin",
+          "schema:propertyID": "specific_heat_capacity"
         },
         {
           "@type": [
@@ -4770,13 +4485,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 2.04
           },
-          "schema:unitText": "W/(m.K)",
-          "schema:propertyID": "thermal_conductivity",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "hasMeasurementUnit": "https://w3id.org/emmo#WattPerMetreKelvin",
+          "schema:propertyID": "thermal_conductivity"
         },
         {
           "@type": [
@@ -4789,12 +4499,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 1847
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#KilogramPerCubicMetre",
-          "schema:propertyID": "density",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "density"
         },
         {
           "@type": [
@@ -4806,13 +4511,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 0.016808
           },
-          "schema:unitText": "m2",
-          "schema:propertyID": "electrode_area",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "hasMeasurementUnit": "https://w3id.org/emmo#SquareMetre",
+          "schema:propertyID": "electrode_area"
         },
         {
           "@type": [
@@ -4825,12 +4525,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 34
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
-          "schema:propertyID": "electrode_pair_count",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "electrode_pair_count"
         },
         {
           "@type": [
@@ -4842,13 +4537,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 0.0379
           },
-          "schema:unitText": "m2",
-          "schema:propertyID": "external_surface_area",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "hasMeasurementUnit": "https://w3id.org/emmo#SquareMetre",
+          "schema:propertyID": "external_surface_area"
         },
         {
           "@type": [
@@ -4860,13 +4550,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 0.000128
           },
-          "schema:unitText": "m3",
-          "schema:propertyID": "volume",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "hasMeasurementUnit": "https://w3id.org/emmo#CubicMetre",
+          "schema:propertyID": "volume"
         }
       ]
     },
@@ -4912,7 +4597,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 2.728e-14
           },
-          "schema:unitText": "m2/s",
+          "hasMeasurementUnit": "https://w3id.org/emmo#SquareMetrePerSecond",
           "schema:propertyID": "solid_diffusivity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -4948,7 +4633,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 5.199e-06
           },
-          "schema:unitText": "mol.m-2.s-1",
+          "hasMeasurementUnit": "https://w3id.org/emmo#MolePerSquareMetrePerSecond",
           "schema:propertyID": "reaction_rate_constant",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -5002,7 +4687,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 29730
           },
-          "schema:unitText": "mol/m3",
+          "hasMeasurementUnit": "https://w3id.org/emmo#MolePerCubicMetre",
           "schema:propertyID": "max_concentration",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -5020,7 +4705,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 30000
           },
-          "schema:unitText": "J/mol",
+          "hasMeasurementUnit": "https://w3id.org/emmo#JoulePerMole",
           "schema:propertyID": "diffusivity_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -5038,7 +4723,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 55000
           },
-          "schema:unitText": "J/mol",
+          "hasMeasurementUnit": "https://w3id.org/emmo#JoulePerMole",
           "schema:propertyID": "reaction_rate_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -5097,7 +4782,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 0.222
           },
-          "schema:unitText": "S/m",
+          "hasMeasurementUnit": "https://w3id.org/emmo#SiemensPerMetre",
           "schema:propertyID": "electronic_conductivity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -5115,7 +4800,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 499522
           },
-          "schema:unitText": "1/m",
+          "hasMeasurementUnit": "https://w3id.org/emmo#PerMetre",
           "schema:propertyID": "surface_area_per_volume",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -5201,7 +4886,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 3.2e-14
           },
-          "schema:unitText": "m2/s",
+          "hasMeasurementUnit": "https://w3id.org/emmo#SquareMetrePerSecond",
           "schema:propertyID": "solid_diffusivity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -5219,7 +4904,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": -0.0001
           },
-          "schema:unitText": "V/K",
+          "hasMeasurementUnit": "https://w3id.org/emmo#VoltPerKelvin",
           "schema:propertyID": "entropic_coefficient",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -5237,7 +4922,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 2.305e-05
           },
-          "schema:unitText": "mol.m-2.s-1",
+          "hasMeasurementUnit": "https://w3id.org/emmo#MolePerSquareMetrePerSecond",
           "schema:propertyID": "reaction_rate_constant",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -5291,7 +4976,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 46200
           },
-          "schema:unitText": "mol/m3",
+          "hasMeasurementUnit": "https://w3id.org/emmo#MolePerCubicMetre",
           "schema:propertyID": "max_concentration",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -5309,7 +4994,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 15000
           },
-          "schema:unitText": "J/mol",
+          "hasMeasurementUnit": "https://w3id.org/emmo#JoulePerMole",
           "schema:propertyID": "diffusivity_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -5327,7 +5012,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 35000
           },
-          "schema:unitText": "J/mol",
+          "hasMeasurementUnit": "https://w3id.org/emmo#JoulePerMole",
           "schema:propertyID": "reaction_rate_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -5386,7 +5071,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 0.789
           },
-          "schema:unitText": "S/m",
+          "hasMeasurementUnit": "https://w3id.org/emmo#SiemensPerMetre",
           "schema:propertyID": "electronic_conductivity",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -5404,7 +5089,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 432072
           },
-          "schema:unitText": "1/m",
+          "hasMeasurementUnit": "https://w3id.org/emmo#PerMetre",
           "schema:propertyID": "surface_area_per_volume",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -5548,7 +5233,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 17100
           },
-          "schema:unitText": "J/mol",
+          "hasMeasurementUnit": "https://w3id.org/emmo#JoulePerMole",
           "schema:propertyID": "conductivity_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -5566,7 +5251,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 17100
           },
-          "schema:unitText": "J/mol",
+          "hasMeasurementUnit": "https://w3id.org/emmo#JoulePerMole",
           "schema:propertyID": "diffusivity_activation_energy",
           "schema:additionalProperty": {
             "@type": "schema:PropertyValue",
@@ -5622,12 +5307,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 298.15
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Kelvin",
-          "schema:propertyID": "initial_temperature",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "initial_temperature"
         },
         {
           "@type": [
@@ -5639,13 +5319,8 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "@type": "RealData",
             "hasNumberValue": 1000
           },
-          "schema:unitText": "mol/m3",
-          "schema:propertyID": "initial_concentration",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "hasMeasurementUnit": "https://w3id.org/emmo#MolePerCubicMetre",
+          "schema:propertyID": "initial_concentration"
         },
         {
           "@type": [
@@ -5657,12 +5332,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "hasNumberValue": 298.15
           },
           "hasMeasurementUnit": "https://w3id.org/emmo#Kelvin",
-          "schema:propertyID": "ambient_temperature",
-          "schema:additionalProperty": {
-            "@type": "schema:PropertyValue",
-            "schema:name": "provenance_class",
-            "schema:value": "fitted"
-          }
+          "schema:propertyID": "ambient_temperature"
         }
       ]
     }
@@ -5747,7 +5417,7 @@ Schema: [`parameter-set.schema.json`](https://w3id.org/battinfo/schema/parameter
 
 **One file, one record.** A BPX file is one co-fitted parameterisation whose values are only valid together, so they stay together: one parameter-set record per file, its claims grouped by part. The importer never guesses which cell a file describes, and the caller states it with exactly one link. If the cell is already in the genome, the record names its cell spec (`cell_spec_id`), or the one physical cell a fit was made on (`cell_instance_id`), and nothing else is created. If it is a real cell that is not in the genome yet, the caller searches for a duplicate by maker and model, then creates the cell spec with its identity only (name, maker, model, format, chemistry) and, if missing, the maker's organization record, and links that spec. The file's cell numbers (capacity, cut-offs, geometry, temperatures) stay on the parameter set as claims, not on the new spec. If there is no real cell, as for the BPX repository's own examples, the record says `virtual_cell: true` and links nothing. BPX does not name its materials, so the caller names each electrode's material part (`materials={"negative": "graphite", "positive": "nmc811"}`) to make its claims findable by material. `electrode_area` is the area of one electrode pair, as BPX and PyBaMM use it, and `electrode_pair_count` sits next to it so the total can be computed.
 
-**BPX interop, both directions.** `from_bpx_parameters` reads the file and `to_parameter_set` builds the record. Every value in the file lands in a part. The Cell block is the `cell` part. Each electrode block splits into its material part (stoichiometry window, diffusivity, OCP) and its electrode part (thickness, porosity). Separator and electrolyte are parts of their own, and the initial and thermal conditions form the `state` part, read the same from the v0.x layout (Cell and Electrolyte) and from the v1 `State` block. Values keep the form and unit the file gives them: scalars as quantities, tables as curves, function strings as expressions. Header lineage rides along: `Model`, the BPX version and the layout the file actually uses (`v0` or `v1`; a file declaring 1.0 may keep the v0.x one) in `model_context` (a DFN-fitted value is not model-free), `Description` on the record, `References` as citation or note. The `User-defined` block travels verbatim as the record's `annex`. A single-phase electrode's OCP branches are `ocp` curves with their `branch`. What the record does not model yet (blended-electrode `Particle` blocks, initial hysteresis state, `Degradation`, `Validation` curves) is named in a warning and listed by its BPX path in the record's `not_imported`, never dropped silently. The reverse is `to_bpx(record)`, which rebuilds the BPX document from the parts at the file's own version or at the one asked for, in that version's layout. A record whose `model_context.layout` is `v0` and that is exported at a 1.x version goes through the same conversion as `upgrade_bpx`, so it gains the State values the bpx package's own migration adds. Values in another unit than BPX states are converted, curves included, or the export refuses; the result says `complete=False` when the file held values the record does not, and the official `bpx` parser's verdict is in its warnings. `query_parameter_sets` and `collate_claims` read the parts, so a search for graphite claims finds the graphite part of every file next to the literature claim batches.
+**BPX interop, both directions.** `from_bpx_parameters` reads the file and `to_parameter_set` builds the record. Every value in the file lands in a part. The Cell block is the `cell` part. Each electrode block splits into its material part (stoichiometry window, diffusivity, OCP) and its electrode part (thickness, porosity). Separator and electrolyte are parts of their own, and the initial and thermal conditions form the `state` part, read the same from the v0.x layout (Cell and Electrolyte) and from the v1 `State` block. Values keep the form and unit the file gives them: scalars as quantities, tables as curves, function strings as expressions. BPX does not say how a value was obtained, so the `cell` and `state` claims carry no `provenance_class`; the material, electrode, separator and electrolyte claims are `fitted` unless the caller says otherwise (`default_provenance_class=`, or `provenance_classes=` by part name). A zero or negative transport value (a conductivity, diffusivity, transference number or transport efficiency) is a placeholder, not a fit: it is kept as the file states it, gets no class unless its part is named, and record validation warns about it. Header lineage rides along: `Model`, the BPX version and the layout the file actually uses (`v0` or `v1`; a file declaring 1.0 may keep the v0.x one) in `model_context` (a DFN-fitted value is not model-free), `Description` on the record, `References` as citation or note. The `User-defined` block travels verbatim as the record's `annex`. A single-phase electrode's OCP branches are `ocp` curves with their `branch`. What the record does not model yet (blended-electrode `Particle` blocks, initial hysteresis state, `Degradation`, `Validation` curves) is named in a warning and listed by its BPX path in the record's `not_imported`, never dropped silently. The JSON-LD says so as well: the record node carries `not_imported`, and the names of the annex entries, as `schema:additionalProperty` values, so a linked-data reader can tell the graph is not the whole file. The reverse is `to_bpx(record)`, which rebuilds the BPX document from the parts at the file's own version or at the one asked for, in that version's layout. A record whose `model_context.layout` is `v0` and that is exported at a 1.x version goes through the same conversion as `upgrade_bpx`, so it gains the State values the bpx package's own migration adds. Values in another unit than BPX states are converted, curves included, or the export refuses; the result says `complete=False` when the file held values the record does not, and the official `bpx` parser's verdict is in its warnings. `query_parameter_sets` and `collate_claims` read the parts, so a search for graphite claims finds the graphite part of every file next to the literature claim batches. A search returns whole records, so pass the same material on, `collate_claims(records, material_kind="graphite")`, to keep only the graphite claims; without it a file's cell, electrode and other-electrode claims come back too.
 
 **A BPX file's IRI.** A solver should be able to take a parameter set's IRI and run it, so the record carries the file itself under `distributions`. Role `source` is the file exactly as its authors published it, and there is exactly one. Role `runnable` is an optional declared conversion, made only when the official parser rejects the source: a file that declares BPX 1.0 but keeps the v0.x layout, for example, rewritten in the v1 layout by `upgrade_bpx` because current PyBaMM requires it. It names the source's sha256 in `derived_from`, says what changed in `conversion`, and must be exactly that conversion of the source: the builder (given `runnable_file=`) and the registry both check it. The conversion lives in `battinfo._bpx_layout`, a standard-library module the registry vendors as it is. Role `mirror` is the source's bytes served from somewhere else, with the same checksum. Links are https only, and each file records the checks run on it at ingest (`bpx_parse`, `simulation_smoke`). The record is addressed by the file's parameters (IDENTIFIER_POLICY 6.3): its uid derives from the digest of the file's RFC 8785 canonical JSON, which the record stores as `parameters_sha256`, so anyone holding the file can check it against the IRI. A copy that differs only in formatting or number spelling keeps the IRI, and a corrected file is a new record that names the old one in `supersedes`. The first publisher owns the IRI, the registry keeps the first copy it is given and serves it at `https://w3id.org/battinfo/dataset/<uid>?format=bpx`, and the record validator holds the binding (an IRI the fingerprint does not give, a runnable not naming its source, a mirror of other bytes) as errors under every policy. A file is required to publish and optional for local work. The steps are in [Publish a BPX parameter file](../howto/publish-a-bpx-parameter-file.md).
 :::
