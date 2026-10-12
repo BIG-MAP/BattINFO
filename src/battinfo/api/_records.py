@@ -70,6 +70,7 @@ from battinfo.entities import (
     entity_types_for_namespace,
     is_placeholder_iri,
     iter_entity_files,
+    kind_for_doc,
     save_entity_path,
 )
 from battinfo.validate.core import DEFAULT_POLICY, ValidationPolicy
@@ -992,29 +993,36 @@ def _candidate_types_for_namespace(namespace: str) -> list[str]:
     return entity_types_for_namespace(namespace)
 
 
-def _find_record_path_by_id(entity_id: str, source_root: Path) -> Path | None:
+def _find_record_by_id(entity_id: str, source_root: Path) -> tuple[Path, str] | None:
+    """The file under *source_root* holding *entity_id*, and the kind of record in it."""
     namespace, uid = _iri_tail(entity_id)
     cache = active_record_cache(source_root)
     if cache is not None:
-        found = cache.lookup(entity_id, _candidate_types_for_namespace(namespace))
-        return found[0] if found is not None else None
+        return cache.lookup(entity_id, _candidate_types_for_namespace(namespace))
+
+    def _holds(path: Path) -> tuple[Path, str] | None:
+        try:
+            doc = _load_json(path)
+            if _entity_id(doc) != entity_id:
+                return None
+        except Exception:  # noqa: BLE001
+            return None
+        kind = kind_for_doc(doc)
+        return (path, kind.entity_type) if kind is not None else None
+
     for entity_type in _candidate_types_for_namespace(namespace):
         expected = _save_entity_path(entity_type, uid, source_root)
-        if expected.exists():
-            try:
-                if _entity_id(_load_json(expected)) == entity_id:
-                    return expected
-            except Exception:  # noqa: BLE001
-                pass
+        if expected.exists() and (found := _holds(expected)) is not None:
+            return found
         for path in _iter_entity_files(entity_type, source_root):
-            if path == expected:
-                continue
-            try:
-                if _entity_id(_load_json(path)) == entity_id:
-                    return path
-            except Exception:  # noqa: BLE001
-                continue
+            if path != expected and (found := _holds(path)) is not None:
+                return found
     return None
+
+
+def _find_record_path_by_id(entity_id: str, source_root: Path) -> Path | None:
+    found = _find_record_by_id(entity_id, source_root)
+    return found[0] if found is not None else None
 
 
 def _validate_save_mode(mode: str) -> str:
@@ -1370,8 +1378,6 @@ def _with_minted_id(doc: dict[str, Any], *, source_root: PathLike | None = None)
     key (see ``_canonical_identity_uid``) is refused rather than given a random
     IRI. A record that has an id is returned unchanged.
     """
-    from battinfo.entities import kind_for_doc  # noqa: PLC0415
-
     kind = kind_for_doc(doc)
     body = doc.get(kind.record_key) if kind is not None else None
     if kind is None or not isinstance(body, Mapping) or body.get("id"):
@@ -1569,7 +1575,17 @@ def save_record(
     entity_id = _entity_id(doc)
     _, uid = _iri_tail(entity_id)
     entity_type = _logical_entity_type_from_doc(doc)
-    existing_path = _find_record_path_by_id(entity_id, source_root_path)
+    existing = _find_record_by_id(entity_id, source_root_path)
+    if existing is not None and existing[1] != entity_type:
+        # Two kinds share some namespaces (dataset/ holds datasets and parameter
+        # sets), so an IRI found on disk may name another kind of record. An IRI
+        # names one record: never overwrite it with a record of another kind.
+        raise ValueError(
+            f"Cannot save this {entity_type} record: {entity_id} is already the IRI of the "
+            f"{existing[1]} record at {existing[0]}. An IRI names one record, so a {entity_type} "
+            f"cannot replace a {existing[1]}; give the {entity_type} its own IRI."
+        )
+    existing_path = existing[0] if existing is not None else None
     target_path = existing_path if existing_path is not None else _save_entity_path(entity_type, uid, source_root_path)
 
     if resolve_references:
