@@ -24,7 +24,7 @@ import json
 import os
 import re
 import warnings
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -1475,30 +1475,31 @@ def _check_draft_keys(
     )
 
 
-def _check_add_keywords(record_type: str, method: Callable[..., Any], kwargs: Mapping[str, Any]) -> None:
-    """Raise TypeError for keywords *method* does not take, with a did-you-mean.
-
-    ``ws.add()`` passes its keywords on to a private method, so without this
-    check a stray keyword fails with Python's own message, which names that
-    private method and lists nothing. A method that takes ``**kwargs`` checks
-    its own keywords and is left alone.
-    """
+def _signature_keywords(fn: Callable[..., Any]) -> builtins.list[str]:
+    """The parameters *fn* takes by name, in signature order; ``**kwargs`` is not one."""
     import inspect  # noqa: PLC0415
 
-    params = inspect.signature(method).parameters
-    if any(p.kind is inspect.Parameter.VAR_KEYWORD for p in params.values()):
-        return
     named = (inspect.Parameter.POSITIONAL_OR_KEYWORD, inspect.Parameter.KEYWORD_ONLY)
-    accepted = [name for name, p in params.items() if p.kind in named]
+    return [name for name, p in inspect.signature(fn).parameters.items() if p.kind in named]
+
+
+def _check_add_keywords(record_type: str, accepted: Iterable[str], kwargs: Mapping[str, Any]) -> None:
+    """Raise TypeError for keywords ``ws.add(record_type, ...)`` does not take, with a did-you-mean.
+
+    ``ws.add()`` hands its keywords to a private method, and from there to a
+    builder or an input model, so a stray keyword used to fail deep inside: as
+    Python's message naming the private method, as a pydantic error, or as a
+    complaint about another argument. *accepted* is read from those signatures
+    and models, so it follows them when they change.
+    """
+    from battinfo.bundle import _unknown_keyword_parts  # noqa: PLC0415
+
+    accepted = list(dict.fromkeys(accepted))
     unknown = [key for key in kwargs if key not in accepted]
     if not unknown:
         return
-    parts = []
-    for key in unknown:
-        close = difflib.get_close_matches(key, accepted, n=1)
-        parts.append(f"{key}=" + (f" (did you mean {close[0]}=?)" if close else ""))
     raise TypeError(
-        f"Unknown keyword(s) for ws.add({record_type!r}): {', '.join(parts)}. "
+        f"Unknown keyword(s) for ws.add({record_type!r}): {_unknown_keyword_parts(unknown, accepted)}. "
         f"ws.add({record_type!r}, ...) accepts: {', '.join(f'{name}=' for name in accepted)}. "
         "Run help(ws.add) for what each one does."
     )
@@ -2929,7 +2930,9 @@ class AuthoringWorkspace:
         ``raw``, ``datasets``, ``spec`` (or ``protocol``), ``conformance``,
         ``name``, ``handle``, ``iri``, ``uid``, ``dataset_iris``, ``series_id``,
         ``instrument``, ``channel``, ``license``, ``description`` and ``status``.
-        Any other keyword raises ``TypeError`` with the closest match.
+        Any other keyword raises ``TypeError`` naming the closest match and
+        listing the accepted ones, before anything is created; every record type
+        checks its keywords this way.
 
         - ``spec`` (``protocol`` is the same keyword) is the test spec the run
           followed: a ``battinfo.TestSpec``, saved with the test and linked to
@@ -2981,27 +2984,53 @@ class AuthoringWorkspace:
         """
         rt_key = str(record_type).strip().lower().replace("_", "-")
         if rt_key == "equipment":
-            _check_add_keywords("equipment", self._add_equipment, kwargs)
+            _check_add_keywords("equipment", _signature_keywords(self._add_equipment), kwargs)
             return self._add_equipment(**kwargs)
-        if rt_key == "material-spec":
-            return self._add_material_spec(**kwargs)
-        if rt_key == "material":
-            return self._add_material(**kwargs)
-        if rt_key == "electrode-spec":
-            return self._add_electrode_spec(**kwargs)
-        if rt_key == "electrode":
+        if rt_key in ("material-spec", "material", "electrode-spec", "electrode"):
+            from battinfo.api._components import (  # noqa: PLC0415
+                ElectrodeInput,
+                ElectrodeSpecInput,
+                MaterialInput,
+                MaterialSpecInput,
+            )
+            from battinfo.bundle import _model_keywords  # noqa: PLC0415
+
+            # The component paths hand their keywords to an input model. The
+            # instance paths set the spec link themselves from spec=, so the
+            # model's own spec-id keywords are not theirs to take.
+            if rt_key == "material-spec":
+                _check_add_keywords("material_spec", _model_keywords(MaterialSpecInput), kwargs)
+                return self._add_material_spec(**kwargs)
+            if rt_key == "electrode-spec":
+                _check_add_keywords("electrode_spec", _model_keywords(ElectrodeSpecInput), kwargs)
+                return self._add_electrode_spec(**kwargs)
+            if rt_key == "material":
+                linked = {"material_spec_id", "spec_id"}
+                accepted = [*_signature_keywords(self._add_material),
+                            *(k for k in _model_keywords(MaterialInput) if k not in linked)]
+                _check_add_keywords("material", accepted, kwargs)
+                return self._add_material(**kwargs)
+            linked = {"electrode_spec_id", "spec_id"}
+            accepted = [*_signature_keywords(self._add_electrode),
+                        *(k for k in _model_keywords(ElectrodeInput) if k not in linked)]
+            _check_add_keywords("electrode", accepted, kwargs)
             return self._add_electrode(**kwargs)
         if rt_key in ("parameter-set", "parameters"):
+            from battinfo.api._parameters import _record_from_parameter_set  # noqa: PLC0415
+
+            accepted = [*_signature_keywords(self._add_parameter_set),
+                        *_signature_keywords(_record_from_parameter_set)]
+            _check_add_keywords("parameter_set", accepted, kwargs)
             return self._add_parameter_set(**kwargs)
         try:
             rt = _canon_type(record_type)
         except ValueError:
             rt = None
         if rt == "cell":
-            _check_add_keywords("cell", self._add_cell_instances, kwargs)
+            _check_add_keywords("cell", _signature_keywords(self._add_cell_instances), kwargs)
             return self._add_cell_instances(**kwargs)
         if rt == "test":
-            _check_add_keywords("test", self._add_tests, kwargs)
+            _check_add_keywords("test", _signature_keywords(self._add_tests), kwargs)
             return self._add_tests(**kwargs)
         raise ValueError(
             f"add() supports type 'cell', 'test', 'equipment', 'material_spec', "
