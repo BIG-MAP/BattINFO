@@ -217,6 +217,13 @@ def _enhance_message(error: ValidationError) -> str:
         }
         if titles == {"Claim batch", "Parameter file"}:
             msg = _parameter_set_flavour_message(error.instance) or msg
+    if error.validator == "anyOf" and list(error.path) == ["parameter_set", "id"]:
+        msg = (
+            f"{error.instance!r} is not a parameter-set IRI: parameter sets mint under "
+            "https://w3id.org/battinfo/dataset/{uid} (IDENTIFIER_POLICY 6.3), and a "
+            "https://w3id.org/battinfo/spec/{uid} IRI is accepted only for a record minted "
+            "before 2026-10-11."
+        )
     if error.validator == "additionalProperties" and list(error.path) == ["properties"]:
         msg += " Run 'battinfo properties list' to see all valid property names."
     if error.validator in ("pattern", "maxLength") and list(error.path)[-1:] == ["handle"]:

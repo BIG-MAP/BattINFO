@@ -128,12 +128,17 @@ def test_explicit_id_must_be_a_dataset_iri() -> None:
         _record(id="https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd")
 
 
-def test_a_spec_namespace_id_no_longer_validates() -> None:
+def test_a_spec_namespace_id_is_legacy_readable_but_not_publishable() -> None:
+    # Records minted under spec/ before 2026-10-11 keep validating (with a
+    # warning) so they stay readable; the publisher policy refuses them.
     record = _record()
     record["parameter_set"]["id"] = LEGACY_IRI
+    record["parameter_set"]["short_id"] = "8qqsrh"
     report = validate_record_report(record)
-    assert not report.ok
-    assert any(issue.path.endswith("id") for issue in report.issues if issue.severity == "error")
+    assert report.ok, report.errors
+    assert [i.code for i in report.warnings] == ["semantic.parameter_set_legacy_namespace"]
+    publisher = validate_record_report(record, policy="publisher")
+    assert [i.code for i in publisher.errors] == ["semantic.parameter_set_legacy_namespace"]
 
 
 @pytest.mark.parametrize("old", [LEGACY_IRI, "https://w3id.org/battinfo/dataset/aaaa-bbbb-cccc-dddd"])

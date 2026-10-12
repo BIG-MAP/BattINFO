@@ -9266,8 +9266,17 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           ],
           "properties": {
             "id": {
-              "$ref": "#/$defs/DatasetIri",
-              "description": "The record's IRI. Parameter sets of both flavours are datasets and mint under dataset/ (IDENTIFIER_POLICY 6.3): a claim batch's uid is stable_uid('parameter-claims:<target>:<scope>[:<electrode_polarity>]:<name>'), the name stripped and lowercased, and a parameter file's is stable_uid('parameter-file:' + parameters_sha256)."
+              "description": "The record's IRI. Parameter sets of both flavours are datasets and mint under dataset/ (IDENTIFIER_POLICY 6.3): a claim batch's uid is stable_uid('parameter-claims:<target>:<scope>[:<electrode_polarity>]:<name>'), the name stripped and lowercased, and a parameter file's is stable_uid('parameter-file:' + parameters_sha256). A spec/ IRI is accepted only for a record minted before 2026-10-11.",
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/DatasetIri",
+                  "description": "Every parameter set minted since 2026-10-11, and every new one."
+                },
+                {
+                  "$ref": "#/$defs/SpecIri",
+                  "description": "Only a parameter set minted under spec/ before 2026-10-11. It stays readable and validates with a warning (an error under the publisher policy); a new version is a dataset/ record that supersedes it (battinfo.api.supersede_parameter_set). Nothing mints under spec/ any more."
+                }
+              ]
             },
             "short_id": {
               "$ref": "#/$defs/ShortId"

@@ -340,13 +340,23 @@ def parameter_file_issues(body: Mapping[str, Any]) -> list[tuple[str, str, str, 
     issues: list[tuple[str, str, str, str]] = []
     fingerprint = body.get("parameters_sha256")
     if isinstance(fingerprint, str) and _SHA256_HEX_RE.fullmatch(fingerprint):
-        expected = f"{_PARAMETER_SET_IRI_BASE}{parameter_file_uid(fingerprint)}"
+        if SPEC_IRI_RE.fullmatch(str(body.get("id"))):
+            # Minted under spec/ before 2026-10-11, from the seed of the time: it
+            # stays bound to its fingerprint (the legacy-namespace warning is
+            # the validator's, not this rule's).
+            expected = f"https://w3id.org/battinfo/spec/{stable_uid(f'parameter-set-file:{fingerprint}')}"
+            recipe = (
+                "stable_uid('parameter-set-file:' + parameters_sha256) for a parameter file "
+                "minted under spec/ before 2026-10-11"
+            )
+        else:
+            expected = f"{_PARAMETER_SET_IRI_BASE}{parameter_file_uid(fingerprint)}"
+            recipe = "stable_uid('parameter-file:' + parameters_sha256)"
         if body.get("id") != expected:
             issues.append((
                 "id_mismatch", "error", "parameter_set.id",
                 f"a parameter file's IRI derives from its parameters_sha256 "
-                f"(stable_uid('parameter-file:' + parameters_sha256), IDENTIFIER_POLICY 6.3): "
-                f"it must be {expected}, not {body.get('id')}.",
+                f"({recipe}, IDENTIFIER_POLICY 6.3): it must be {expected}, not {body.get('id')}.",
             ))
     seen: set[tuple[Any, Any]] = set()
     for index, part in enumerate(body.get("parts") or []):
@@ -447,6 +457,15 @@ def _record_from_parameter_set(
 ) -> dict[str, Any]:
     if not isinstance(name, str) or not name.strip():
         raise ValueError("parameter set needs a non-empty name (convention: '<source> - <target>').")
+    if id is not None and SPEC_IRI_RE.fullmatch(str(id)):
+        # Records minted under spec/ before 2026-10-11 still load and validate,
+        # but nothing mints there any more (IDENTIFIER_POLICY 6.3).
+        raise ValueError(
+            f"{id} is a spec/ IRI: parameter sets have minted under https://w3id.org/battinfo/dataset/ "
+            "since 2026-10-11 (IDENTIFIER_POLICY 6.3), and a spec/ one names a record minted before "
+            "then. Publish a new version of such a record as a dataset/ record that supersedes it: "
+            f"supersede_parameter_set(record), or leave id out and pass supersedes={id!r}."
+        )
 
     if parts is not None:
         body = _parameter_file_body(
@@ -524,6 +543,12 @@ def _record_from_parameter_set(
             )
         if supersedes == body["id"]:
             raise ValueError("a parameter set cannot supersede itself: supersedes names an earlier record.")
+        if _iri_tail(str(supersedes))[1] == _iri_tail(body["id"])[1]:
+            raise ValueError(
+                f"{body['id']} reuses the uid of the record it supersedes ({supersedes}). A uid is "
+                "never reused, not even under another namespace (IDENTIFIER_POLICY 6.3 and 10): "
+                "leave id and uid out so the record mints its own."
+            )
         body["supersedes"] = str(supersedes)
     if distributions is not None and not isinstance(distributions, list):
         raise TypeError(
@@ -901,6 +926,9 @@ def query_parameter_sets(
     filters to sets carrying at least one claim for that (canonical)
     parameter key, in any part. The returned rows carry the full ``record`` so
     results feed straight into :func:`battinfo.parameters.collate_claims`.
+    A row whose record was minted under ``spec/`` before 2026-10-11 says so
+    in ``legacy_spec_iri``; :func:`supersede_parameter_set` builds its
+    ``dataset/`` replacement.
     """
     from battinfo.materials import resolve_material_kind  # noqa: PLC0415
     from battinfo.parameters import parameter_set_claim_groups, resolve_parameter  # noqa: PLC0415
@@ -932,6 +960,7 @@ def query_parameter_sets(
             "cell_instance_id": body.get("cell_instance_id"),
             "virtual_cell": bool(body.get("virtual_cell")),
             "supersedes": body.get("supersedes"),
+            "legacy_spec_iri": bool(SPEC_IRI_RE.fullmatch(str(body.get("id")))),
             "scope": body.get("scope"),
             "material_kinds": sorted({ctx["material_kind"] for ctx, _ in groups if ctx.get("material_kind")}),
             "material_spec_ids": sorted({

@@ -1225,6 +1225,77 @@ def _validate_substance_resolution(
             _check(comp, "additive", f"{prefix}.additive[{idx}]")
 
 
+_BATTINFO_RECORD_IRI_RE = re.compile(
+    r"^https://w3id\.org/battinfo/([a-z][a-z0-9-]*)/([0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3})$"
+)
+
+
+def _validate_parameter_set_identity(
+    body: Mapping[str, Any],
+    issues: list[ValidationIssue],
+    resource_type: str | None,
+    policy_name: str,
+) -> None:
+    """A parameter set's IRI against the namespace move of 2026-10-11 (IDENTIFIER_POLICY 6.3).
+
+    A record minted under spec/ before then is legacy: it stays readable, so
+    it is a warning, except under the publisher policy, where it is an error
+    because nothing is published under spec/ any more. A record that names
+    its own IRI in ``supersedes``, or reuses the uid of the record it
+    supersedes under another namespace, is an error under every policy: a
+    uid is never reused (section 10).
+    """
+    record_id = body.get("id")
+    own = _BATTINFO_RECORD_IRI_RE.fullmatch(record_id) if isinstance(record_id, str) else None
+    if own is None:
+        return  # the schema reports a malformed id
+    if own.group(1) == "spec":
+        _append_issue(
+            issues,
+            code="semantic.parameter_set_legacy_namespace",
+            severity="error" if policy_name == "publisher" else "warning",
+            path="parameter_set.id",
+            message=(
+                f"{record_id} was minted under spec/, before parameter sets moved to dataset/ on "
+                "2026-10-11 (IDENTIFIER_POLICY 6.3). The record stays readable, but nothing is "
+                "published under spec/ any more: a new version is a new dataset/ record that "
+                "supersedes this one, which battinfo.api.supersede_parameter_set(record) builds."
+            ),
+            resource_type=resource_type,
+        )
+    supersedes = body.get("supersedes")
+    if not isinstance(supersedes, str):
+        return
+    if supersedes == record_id:
+        _append_issue(
+            issues,
+            code="semantic.parameter_set_supersedes_itself",
+            severity="error",
+            path="parameter_set.supersedes",
+            message=(
+                f"supersedes names this record's own IRI ({record_id}); it names the earlier "
+                "record this one replaces."
+            ),
+            resource_type=resource_type,
+        )
+        return
+    old = _BATTINFO_RECORD_IRI_RE.fullmatch(supersedes)
+    if old is not None and old.group(2) == own.group(2):
+        _append_issue(
+            issues,
+            code="semantic.parameter_set_uid_reused",
+            severity="error",
+            path="parameter_set.id",
+            message=(
+                f"this record reuses the uid {own.group(2)} of the record it supersedes "
+                f"({supersedes}). A uid is never reused, not even under another namespace "
+                "(IDENTIFIER_POLICY 6.3 and 10): leave id out so the record mints its own uid "
+                "from the current seeds, or build it with battinfo.api.supersede_parameter_set()."
+            ),
+            resource_type=resource_type,
+        )
+
+
 def _validate_parameter_set_semantics(
     body: Mapping[str, Any],
     issues: list[ValidationIssue],
@@ -1241,6 +1312,7 @@ def _validate_parameter_set_semantics(
     under the default policy, a warning under strict, an error under the
     publisher policy.
     """
+    _validate_parameter_set_identity(body, issues, resource_type, policy_name)
     # Parameter-set claims emit through the same quantity nodes as properties,
     # so an unmapped parameter key gets the same warning. Fraction keys resolve
     # through the emitter's own table, as they do for properties.

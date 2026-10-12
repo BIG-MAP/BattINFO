@@ -213,6 +213,9 @@ class EntityKind:
         spec_ref_field: For an instance kind, the body field that links to its
             spec (e.g. ``"cell_spec_id"``); ``None`` for spec kinds.
         spec_entity_type: The ``entity_type`` that ``spec_ref_field`` points to.
+        legacy_iri_namespaces: Namespaces this kind minted under before it
+            moved to ``iri_namespace``. Nothing new mints there, but records
+            minted there keep their IRIs, so lookups search them too.
     """
 
     entity_type: str
@@ -222,6 +225,7 @@ class EntityKind:
     iri_namespace: str
     spec_ref_field: Optional[str] = None
     spec_entity_type: Optional[str] = None
+    legacy_iri_namespaces: tuple[str, ...] = ()
 
 
 # Registered in a deterministic order. Dispatch keys on ``record_key`` (unique),
@@ -299,8 +303,12 @@ ENTITY_KINDS: tuple[EntityKind, ...] = (
     # so the namespace does not say which of the two an IRI names. The target
     # link (material_kind / material_spec_id / cell_spec_id) lives in the
     # record body; a claim batch's uid derives from (target, scope, name), a
-    # parameter file's from its parameters_sha256.
-    EntityKind("parameter-set", "parameter_set", "parameter-set.schema.json", "parameter-set", "dataset"),
+    # parameter file's from its parameters_sha256. Parameter sets minted
+    # before 2026-10-11 keep their spec/ IRIs (they are superseded, not moved).
+    EntityKind(
+        "parameter-set", "parameter_set", "parameter-set.schema.json", "parameter-set", "dataset",
+        legacy_iri_namespaces=("spec",),
+    ),
     # Organizations are identity records (manufacturers, labs, publishers)
     # other records point at. Instance-only, minted under organization/; NEW
     # uids derive deterministically from the normalized name so re-creating
@@ -364,14 +372,17 @@ def iri_namespace_map() -> dict[str, str]:
 
 
 def entity_types_for_namespace(namespace: str) -> list[str]:
-    """Logical entity types that mint IRIs under *namespace*.
+    """Logical entity types whose records can have an IRI under *namespace*.
 
     Multiple kinds can share a namespace (``cell-spec`` and ``test-protocol``
     both use ``spec/``, ``dataset`` and ``parameter-set`` both use
-    ``dataset/``). Falls back to ``[namespace]`` when nothing matches, to
-    preserve the previous best-effort lookup behavior.
+    ``dataset/``). A kind that moved keeps its old records' IRIs, so it is
+    listed under its legacy namespace too, after the kinds that mint there
+    (``parameter-set`` under ``spec/``). Falls back to ``[namespace]`` when
+    nothing matches, to preserve the previous best-effort lookup behavior.
     """
     matches = [kind.entity_type for kind in ENTITY_KINDS if kind.iri_namespace == namespace]
+    matches += [kind.entity_type for kind in ENTITY_KINDS if namespace in kind.legacy_iri_namespaces]
     return matches or [namespace]
 
 
