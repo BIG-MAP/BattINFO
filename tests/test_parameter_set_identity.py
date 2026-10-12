@@ -9,7 +9,9 @@ Rules under test:
   error under the publisher policy), local lookups find them by their spec/
   IRI, and the builders never mint a new spec/ IRI;
 - a uid is never reused: not by a record that supersedes itself, not by a
-  dataset/ record that keeps the uid of the spec/ record it supersedes;
+  dataset/ record that keeps the uid of the spec/ record it supersedes, nor
+  by one that keeps the uid the seeds of before 2026-10-11 give its fields;
+- the legacy warning names the dataset/ IRI the replacement mints;
 - a save never overwrites a record of another kind that holds the same IRI;
 - supersede_parameter_set() builds the dataset/ replacement of a legacy
   record from the current seeds.
@@ -120,6 +122,7 @@ def test_a_legacy_record_validates_with_the_legacy_warning(path: Path, policy: s
     assert sorted(_codes(report, "warning")) == sorted([*_codes(current, "warning"), LEGACY_CODE])
     message = next(issue.message for issue in report.issues if issue.code == LEGACY_CODE)
     assert "spec/" in message and "dataset/" in message and "supersede_parameter_set" in message
+    assert _load(path)["parameter_set"]["id"] in message  # the IRI its replacement mints
 
 
 @pytest.mark.parametrize("path", [CLAIM_BATCH_EXAMPLE, PARAMETER_FILE_EXAMPLE], ids=["claims", "file"])
@@ -242,6 +245,72 @@ def test_the_builder_refuses_to_reuse_the_superseded_uid() -> None:
             uid=legacy["id"].rsplit("/", 1)[-1], supersedes=legacy["id"],
             name=legacy["name"], material_kind="graphite", claims=legacy["claims"],
         )
+
+
+def _moved(path: Path) -> dict:
+    """The naive migration without supersedes: the spec/ record's uid under dataset/."""
+    record = _legacy(path)
+    body = record["parameter_set"]
+    body["id"] = body["id"].replace("/spec/", "/dataset/")
+    assert "supersedes" not in body
+    return record
+
+
+@pytest.mark.parametrize("path", [CLAIM_BATCH_EXAMPLE, PARAMETER_FILE_EXAMPLE], ids=["claims", "file"])
+@pytest.mark.parametrize("policy", ["default", "strict", "ingest", "publisher"])
+def test_a_dataset_record_that_keeps_its_spec_uid_is_an_error_under_every_policy(path: Path, policy: str) -> None:
+    # Naming no supersedes does not make the uid free: the seeds of the time give it back.
+    record = _moved(path)
+    report = validate_record_report(record, policy=policy)
+    assert "semantic.parameter_set_uid_reused" in _codes(report, "error")
+    message = next(issue.message for issue in report.errors if issue.code == "semantic.parameter_set_uid_reused")
+    assert _legacy(path)["parameter_set"]["id"] in message
+    assert _load(path)["parameter_set"]["id"] in message  # where the record belongs
+
+
+def test_the_chen_claim_batch_saved_under_its_spec_uid_is_refused(tmp_path: Path) -> None:
+    # The reproduction: the Chen 2020 graphite claim batch, saved as dataset/8qqs-rh43-wt8d-172n
+    # without supersedes, passed the publisher policy.
+    record = _moved(CLAIM_BATCH_EXAMPLE)
+    assert record["parameter_set"]["id"] == "https://w3id.org/battinfo/dataset/8qqs-rh43-wt8d-172n"
+    assert record["parameter_set"]["name"] == "Chen 2020 - graphite"
+    assert not validate_record_report(record, policy="publisher").ok
+    with pytest.raises(ValueError, match="parameter_set_uid_reused|never reused"):
+        save_parameter_set(record, source_root=tmp_path)
+    assert not list(tmp_path.rglob("parameter-set-*.json"))
+
+
+def test_the_builders_refuse_a_uid_minted_under_spec() -> None:
+    legacy = _legacy(CLAIM_BATCH_EXAMPLE)["parameter_set"]
+    legacy_uid = legacy["id"].rsplit("/", 1)[-1]
+    for pin in ({"uid": legacy_uid}, {"id": f"https://w3id.org/battinfo/dataset/{legacy_uid}"}):
+        with pytest.raises(ValueError, match="never reused") as excinfo:
+            create_parameter_set(name=legacy["name"], material_kind="graphite", claims=legacy["claims"], **pin)
+        assert legacy["id"] in str(excinfo.value)
+    from battinfo.interop import from_bpx_parameters
+
+    fixture = Path(__file__).resolve().parent / "fixtures" / "interop" / "bpx-dfn-full.bpx.json"
+    result = from_bpx_parameters(fixture)
+    file_uid = stable_uid("parameter-set-file:" + result.content_digest)
+    with pytest.raises(ValueError, match="never reused"):
+        result.to_parameter_set(virtual_cell=True, id=f"https://w3id.org/battinfo/dataset/{file_uid}")
+
+
+def test_the_legacy_warning_names_the_replacement_iri() -> None:
+    # A production record: the Ai2020 graphite claim batch, published as
+    # spec/27fw-rh2c-t82v-t96q and republished as dataset/3zge-ge5d-cdn7-vzfy.
+    record = create_parameter_set(
+        validate=False, name="Ai2020 (PyBaMM) - graphite", material_kind="graphite",
+        claims=_load(CLAIM_BATCH_EXAMPLE)["parameter_set"]["claims"],
+    )
+    record["parameter_set"]["id"] = "https://w3id.org/battinfo/spec/27fw-rh2c-t82v-t96q"
+    record["parameter_set"]["short_id"] = "27fwrh"
+    for policy in ("default", "publisher"):
+        report = validate_record_report(record, policy=policy)
+        message = next(issue.message for issue in report.issues if issue.code == LEGACY_CODE)
+        assert "https://w3id.org/battinfo/dataset/3zge-ge5d-cdn7-vzfy" in message
+    replacement = supersede_parameter_set(record)
+    assert replacement["parameter_set"]["id"] == "https://w3id.org/battinfo/dataset/3zge-ge5d-cdn7-vzfy"
 
 
 # ── a save never replaces a record of another kind ───────────────────────────

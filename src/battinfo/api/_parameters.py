@@ -169,6 +169,16 @@ _FILE_LINK_FIELDS = ("cell_spec_id", "cell_instance_id", "virtual_cell")
 _PART_FIELDS = frozenset({"part", "phase", "material_kind", "material_spec_id", "claims"})
 
 
+# The first part of each flavour's uid seed (IDENTIFIER_POLICY 6.3). Parameter
+# sets minted under spec/ before 2026-10-11 used the legacy seeds. Nothing mints
+# from those any more, but they give back the uid such a record had, which a
+# dataset/ record must never take (section 10).
+_CLAIM_BATCH_SEED = "parameter-claims"
+_PARAMETER_FILE_SEED = "parameter-file"
+_LEGACY_CLAIM_BATCH_SEED = "parameter-set"
+_LEGACY_PARAMETER_FILE_SEED = "parameter-set-file"
+
+
 def parameter_file_uid(parameters_sha256: str) -> str:
     """The uid of a parameter file's record (IDENTIFIER_POLICY 6.3).
 
@@ -176,7 +186,12 @@ def parameter_file_uid(parameters_sha256: str) -> str:
     ``dataset/``: the IRI names the file's parameters, so anyone holding the
     file can check it against the IRI.
     """
-    return stable_uid(f"parameter-file:{parameters_sha256}")
+    return stable_uid(f"{_PARAMETER_FILE_SEED}:{parameters_sha256}")
+
+
+def _legacy_parameter_file_uid(parameters_sha256: str) -> str:
+    """The uid a parameter file minted under spec/ before 2026-10-11 has."""
+    return stable_uid(f"{_LEGACY_PARAMETER_FILE_SEED}:{parameters_sha256}")
 
 
 def claim_batch_uid(target: str, scope: str, name: str, electrode_polarity: str | None = None) -> str:
@@ -187,7 +202,13 @@ def claim_batch_uid(target: str, scope: str, name: str, electrode_polarity: str 
     source's claims about the same target re-import onto the same IRI. The
     builder and a save of a record that has no id both mint through here.
     """
-    parts = ["parameter-claims", target, scope]
+    return _seeded_claim_batch_uid(_CLAIM_BATCH_SEED, target, scope, name, electrode_polarity)
+
+
+def _seeded_claim_batch_uid(
+    seed: str, target: str, scope: str, name: str, electrode_polarity: str | None
+) -> str:
+    parts = [seed, target, scope]
     if electrode_polarity:
         parts.append(electrode_polarity)
     parts.append(name.strip().lower())
@@ -208,10 +229,26 @@ def parameter_set_uid(body: Mapping[str, Any]) -> str | None:
     record saved without an id lands on the IRI the builder gives it.
     ``None`` when the body lacks what its flavour's seed needs.
     """
+    return _seeded_parameter_set_uid(body, legacy=False)
+
+
+def legacy_parameter_set_uid(body: Mapping[str, Any]) -> str | None:
+    """The uid the seeds of before 2026-10-11 give a parameter-set body.
+
+    The same fields as :func:`parameter_set_uid` under the seeds of the
+    time (``parameter-set`` for a claim batch, ``parameter-set-file`` for a
+    parameter file): the uid the record had, or would have had, under
+    ``spec/``. Nothing mints from them; a ``dataset/`` record must never
+    carry this uid (IDENTIFIER_POLICY 6.3 and 10).
+    """
+    return _seeded_parameter_set_uid(body, legacy=True)
+
+
+def _seeded_parameter_set_uid(body: Mapping[str, Any], *, legacy: bool) -> str | None:
     if "parts" in body or "parameters_sha256" in body:
         fingerprint = body.get("parameters_sha256")
         if isinstance(fingerprint, str) and _SHA256_HEX_RE.fullmatch(fingerprint):
-            return parameter_file_uid(fingerprint)
+            return _legacy_parameter_file_uid(fingerprint) if legacy else parameter_file_uid(fingerprint)
         return None
     target = next(
         ((field, body[field]) for field in _TARGET_FIELDS if isinstance(body.get(field), str) and body[field]),
@@ -227,11 +264,22 @@ def parameter_set_uid(body: Mapping[str, Any]) -> str | None:
         target_value = resolve_material_kind(target_value) or target_value
     scope = body.get("scope")
     polarity = body.get("electrode_polarity")
-    return claim_batch_uid(
+    return _seeded_claim_batch_uid(
+        _LEGACY_CLAIM_BATCH_SEED if legacy else _CLAIM_BATCH_SEED,
         target_value,
         scope if isinstance(scope, str) and scope else _default_scope(target_field),
         name,
         polarity if isinstance(polarity, str) and polarity else None,
+    )
+
+
+def _legacy_uid_reused_message(entity_id: str, legacy_uid: str) -> str:
+    legacy_iri = f"https://w3id.org/battinfo/spec/{legacy_uid}"
+    return (
+        f"{entity_id} reuses the uid of {legacy_iri}, the IRI this parameter set had under spec/ "
+        "before parameter sets moved to dataset/ on 2026-10-11. A uid is never reused, not even "
+        "under another namespace (IDENTIFIER_POLICY 6.3 and 10): leave id and uid out so the record "
+        f"mints its own, and name {legacy_iri} in supersedes."
     )
 
 
@@ -344,7 +392,7 @@ def parameter_file_issues(body: Mapping[str, Any]) -> list[tuple[str, str, str, 
             # Minted under spec/ before 2026-10-11, from the seed of the time: it
             # stays bound to its fingerprint (the legacy-namespace warning is
             # the validator's, not this rule's).
-            expected = f"https://w3id.org/battinfo/spec/{stable_uid(f'parameter-set-file:{fingerprint}')}"
+            expected = f"https://w3id.org/battinfo/spec/{_legacy_parameter_file_uid(fingerprint)}"
             recipe = (
                 "stable_uid('parameter-set-file:' + parameters_sha256) for a parameter file "
                 "minted under spec/ before 2026-10-11"
@@ -651,6 +699,13 @@ def _claim_batch_body(
         # mints the same IRI, so re-importing a source is idempotent.
         dashed_uid = claim_batch_uid(target_value, scope, name, electrode_polarity)
         entity_id = f"{_PARAMETER_SET_IRI_BASE}{dashed_uid}"
+    if id is not None or uid is not None:
+        # A pinned uid may not be the one this batch had under spec/.
+        legacy_uid = _seeded_claim_batch_uid(
+            _LEGACY_CLAIM_BATCH_SEED, target_value, scope, name, electrode_polarity
+        )
+        if dashed_uid == legacy_uid:
+            raise ValueError(_legacy_uid_reused_message(entity_id, legacy_uid))
 
     body: dict[str, Any] = {
         "id": entity_id,
@@ -724,6 +779,9 @@ def _parameter_file_body(
     given = id if id is not None else (
         f"{_PARAMETER_SET_IRI_BASE}{_normalized_dashed_uid(uid)}" if uid is not None else None
     )
+    legacy_uid = _legacy_parameter_file_uid(parameters_sha256)
+    if given is not None and given.rsplit("/", 1)[-1] == legacy_uid:
+        raise ValueError(_legacy_uid_reused_message(given, legacy_uid))
     if given is not None and given != entity_id:
         raise ValueError(
             f"a parameter file's IRI derives from its parameters_sha256 ({entity_id}); "

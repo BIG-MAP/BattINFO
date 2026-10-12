@@ -1240,16 +1240,27 @@ def _validate_parameter_set_identity(
 
     A record minted under spec/ before then is legacy: it stays readable, so
     it is a warning, except under the publisher policy, where it is an error
-    because nothing is published under spec/ any more. A record that names
-    its own IRI in ``supersedes``, or reuses the uid of the record it
-    supersedes under another namespace, is an error under every policy: a
+    because nothing is published under spec/ any more. The message names the
+    dataset/ IRI its replacement mints. A record that names its own IRI in
+    ``supersedes``, or carries a uid it had under spec/ (the uid of the
+    record it supersedes, or the one the seeds of the time give its fields,
+    whether or not it names that record), is an error under every policy: a
     uid is never reused (section 10).
     """
+    from battinfo.api._parameters import legacy_parameter_set_uid, parameter_set_uid  # noqa: PLC0415
+
     record_id = body.get("id")
     own = _BATTINFO_RECORD_IRI_RE.fullmatch(record_id) if isinstance(record_id, str) else None
     if own is None:
         return  # the schema reports a malformed id
     if own.group(1) == "spec":
+        replacement_uid = parameter_set_uid(body)
+        replacement = (
+            f"its replacement is https://w3id.org/battinfo/dataset/{replacement_uid}, a new record "
+            "minted from the current seeds that supersedes this one"
+            if replacement_uid is not None
+            else "a new version is a new dataset/ record that supersedes this one"
+        )
         _append_issue(
             issues,
             code="semantic.parameter_set_legacy_namespace",
@@ -1258,15 +1269,13 @@ def _validate_parameter_set_identity(
             message=(
                 f"{record_id} was minted under spec/, before parameter sets moved to dataset/ on "
                 "2026-10-11 (IDENTIFIER_POLICY 6.3). The record stays readable, but nothing is "
-                "published under spec/ any more: a new version is a new dataset/ record that "
-                "supersedes this one, which battinfo.api.supersede_parameter_set(record) builds."
+                f"published under spec/ any more: {replacement}, which "
+                "battinfo.api.supersede_parameter_set(record) builds."
             ),
             resource_type=resource_type,
         )
     supersedes = body.get("supersedes")
-    if not isinstance(supersedes, str):
-        return
-    if supersedes == record_id:
+    if isinstance(supersedes, str) and supersedes == record_id:
         _append_issue(
             issues,
             code="semantic.parameter_set_supersedes_itself",
@@ -1279,7 +1288,7 @@ def _validate_parameter_set_identity(
             resource_type=resource_type,
         )
         return
-    old = _BATTINFO_RECORD_IRI_RE.fullmatch(supersedes)
+    old = _BATTINFO_RECORD_IRI_RE.fullmatch(supersedes) if isinstance(supersedes, str) else None
     if old is not None and old.group(2) == own.group(2):
         _append_issue(
             issues,
@@ -1291,6 +1300,25 @@ def _validate_parameter_set_identity(
                 f"({supersedes}). A uid is never reused, not even under another namespace "
                 "(IDENTIFIER_POLICY 6.3 and 10): leave id out so the record mints its own uid "
                 "from the current seeds, or build it with battinfo.api.supersede_parameter_set()."
+            ),
+            resource_type=resource_type,
+        )
+        return
+    if own.group(1) == "dataset" and own.group(2) == legacy_parameter_set_uid(body):
+        legacy_iri = f"https://w3id.org/battinfo/spec/{own.group(2)}"
+        replacement_uid = parameter_set_uid(body)
+        _append_issue(
+            issues,
+            code="semantic.parameter_set_uid_reused",
+            severity="error",
+            path="parameter_set.id",
+            message=(
+                f"this record reuses the uid {own.group(2)} of {legacy_iri}, the IRI the seeds of "
+                "before 2026-10-11 give these fields under spec/. A uid is never reused, not even "
+                "under another namespace (IDENTIFIER_POLICY 6.3 and 10): the dataset/ record for "
+                f"these fields is https://w3id.org/battinfo/dataset/{replacement_uid}, minted from "
+                f"the current seeds, with supersedes naming {legacy_iri}; "
+                "battinfo.api.supersede_parameter_set() builds it from the spec/ record."
             ),
             resource_type=resource_type,
         )
