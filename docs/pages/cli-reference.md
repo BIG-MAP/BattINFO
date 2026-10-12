@@ -126,7 +126,7 @@ $ battinfo push [OPTIONS] {folder}
 
 **Options**:
 
-* `-t, --cell-spec <str>`: Cell spec as manufacturer and model, e.g. &#x27;Energizer CR2032&#x27;. Required for unstructured folders.
+* `-t, --cell-spec <str>`: Cell spec: its IRI (https://w3id.org/battinfo/spec/...) or its manufacturer and model, e.g. &#x27;Energizer CR2032&#x27;. Required for unstructured folders.
 * `-n, --cells <int>`: Number of cells (auto-detected from filenames if omitted).
 * `--batch-id <str>`: Batch / lot identifier.
 * `--lab <str>`: Lab name.
@@ -186,7 +186,7 @@ $ battinfo query [OPTIONS] COMMAND [ARGS]...
 
 **Commands**:
 
-* `cell-spec`: Query canonical cell types.
+* `cell-spec`: Query canonical cell specs.
 * `cell-instance`: Query canonical cell instances.
 * `dataset`: Query canonical dataset records.
 * `test-protocol`: Query canonical test protocols.
@@ -195,7 +195,7 @@ $ battinfo query [OPTIONS] COMMAND [ARGS]...
 
 ### `battinfo query cell-spec`
 
-Query canonical cell types.
+Query canonical cell specs.
 
 **Usage**:
 
@@ -406,13 +406,13 @@ $ battinfo publish [OPTIONS] COMMAND [ARGS]...
 
 **Commands**:
 
-* `cell-spec`: Publish one cell type through the...
+* `cell-spec`: Publish one cell spec through the...
 * `record`: Publish one record into resolver artifacts.
 * `batch`: Publish a deterministic batch of records...
 
 ### `battinfo publish cell-spec`
 
-Publish one cell type through the simplified BattINFO publish surface.
+Publish one cell spec through the simplified BattINFO publish surface.
 
 **Usage**:
 
@@ -1109,11 +1109,11 @@ $ battinfo library save [OPTIONS] COMMAND [ARGS]...
 
 **Commands**:
 
-* `cell-spec`: Save a reusable library cell type from...
+* `cell-spec`: Save a reusable library cell spec from...
 
 #### `battinfo library save cell-spec`
 
-Save a reusable library cell type from cell-specification JSON or inline fields.
+Save a reusable library cell spec from cell-specification JSON or inline fields.
 
 **Usage**:
 
@@ -1992,7 +1992,7 @@ $ battinfo batch init [OPTIONS] {output_dir}
 
 **Options**:
 
-* `-t, --cell-spec <str>`: Cell spec IRI, or its manufacturer and model, e.g. &quot;Energizer CR2032&quot;.  [required]
+* `-t, --cell-spec <str>`: Cell spec: its IRI (https://w3id.org/battinfo/spec/...) or its manufacturer and model, e.g. &quot;Energizer CR2032&quot;.  [required]
 * `-n, --count <int>`: Number of cells received.  [required]
 * `--batch-id <str>`: Batch / lot identifier.
 * `--lab <str>`: Institution or lab name.
@@ -2009,7 +2009,7 @@ $ battinfo batch init [OPTIONS] {output_dir}
 Add more cells to an existing batch directory.
 
 
-Reads batch.yaml to inherit cell type, lab, operator, and project.
+Reads batch.yaml to inherit cell spec, lab, operator, and project.
 New cells are numbered after the existing ones.
 Provide --batch-id / --operator / --project to override for the new cells.
 Updates the count in batch.yaml automatically.
