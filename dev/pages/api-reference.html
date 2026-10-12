@@ -609,7 +609,10 @@ reference follows below; for the layered architecture, see
 <tr class="row-even"><td><p>Turn a folder of photos and CSVs into a linked submission</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">battinfo.ingest</span></code> — one-command folder intake</p></td>
 </tr>
-<tr class="row-odd"><td><p>Script validation, saving, and publishing from the shell</p></td>
+<tr class="row-odd"><td><p>Read or write another format (BPX, Battery Data Commons, battdat, protocol files)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">battinfo.interop</span></code> importers and exporters</p></td>
+</tr>
+<tr class="row-even"><td><p>Script validation, saving, and publishing from the shell</p></td>
 <td><p>The <code class="docutils literal notranslate"><span class="pre">battinfo</span></code> CLI — see the <a class="reference internal" href="cli-reference.html"><span class="doc">CLI reference</span></a></p></td>
 </tr>
 </tbody>
@@ -755,6 +758,27 @@ metadata; its shape is defined by
 <a class="reference internal" href="../guarantees.html"><span class="doc">the ingest manifest contract</span></a> and validated
 against <code class="docutils literal notranslate"><span class="pre">assets/schemas/ingest-manifest.schema.json</span></code>.
 <code class="docutils literal notranslate"><span class="pre">resource_type=&quot;cell-instance&quot;</span></code> is the currently implemented subject.</p>
+</section>
+<section id="other-formats-battinfo-interop">
+<h2>Other formats (<code class="docutils literal notranslate"><span class="pre">battinfo.interop</span></code>)<a class="headerlink" href="#other-formats-battinfo-interop" title="Link to this heading">#</a></h2>
+<p>Importers and exporters for formats other tools write: BPX parameter files (<code class="docutils literal notranslate"><span class="pre">from_bpx_parameters</span></code>, <code class="docutils literal notranslate"><span class="pre">to_bpx</span></code>, <code class="docutils literal notranslate"><span class="pre">upgrade_bpx</span></code>, <code class="docutils literal notranslate"><span class="pre">check_bpx</span></code>), Battery Data Commons records (<code class="docutils literal notranslate"><span class="pre">import_bdc_record</span></code>, <code class="docutils literal notranslate"><span class="pre">to_bdc_record</span></code>), battdat datasets (<code class="docutils literal notranslate"><span class="pre">from_battdat</span></code>), BattInfoConverter JSON-LD (<code class="docutils literal notranslate"><span class="pre">import_converter_jsonld</span></code>), Discovery spreadsheets (<code class="docutils literal notranslate"><span class="pre">import_discovery_xlsx</span></code>), the solid-state battery database (<code class="docutils literal notranslate"><span class="pre">from_solid_state_db_row</span></code>), and the aurora-unicycler, bmgen, PyBaMM and UCP protocol formats (<code class="docutils literal notranslate"><span class="pre">import_aurora_unicycler</span></code>, <code class="docutils literal notranslate"><span class="pre">import_bmgen_jsonld</span></code>, <code class="docutils literal notranslate"><span class="pre">import_pybamm_experiment</span></code>, <code class="docutils literal notranslate"><span class="pre">import_ucp</span></code>). An importer returns BattINFO records, or a result object that holds them with warnings naming what it could not read; nothing is saved or published until you do it.</p>
+<p>A BPX file becomes one parameter-set record, and <code class="docutils literal notranslate"><span class="pre">to_bpx</span></code> rebuilds the file from it:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.interop</span><span class="w"> </span><span class="kn">import</span> <span class="n">from_bpx_parameters</span><span class="p">,</span> <span class="n">to_bpx</span>
+
+<span class="n">bpx</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;Header&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;BPX&quot;</span><span class="p">:</span> <span class="s2">&quot;1.1.0&quot;</span><span class="p">,</span> <span class="s2">&quot;Title&quot;</span><span class="p">:</span> <span class="s2">&quot;Example cell&quot;</span><span class="p">,</span> <span class="s2">&quot;Model&quot;</span><span class="p">:</span> <span class="s2">&quot;Partial&quot;</span><span class="p">},</span>
+    <span class="s2">&quot;Parameterisation&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;Cell&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;Nominal cell capacity [A.h]&quot;</span><span class="p">:</span> <span class="mf">5.0</span><span class="p">,</span> <span class="s2">&quot;Electrode area [m2]&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">},</span>
+        <span class="s2">&quot;Negative electrode&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;Particle radius [m]&quot;</span><span class="p">:</span> <span class="mf">5.86e-6</span><span class="p">,</span> <span class="s2">&quot;Thickness [m]&quot;</span><span class="p">:</span> <span class="mf">8.52e-5</span><span class="p">},</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">from_bpx_parameters</span><span class="p">(</span><span class="n">bpx</span><span class="p">)</span>
+<span class="n">record</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">to_parameter_set</span><span class="p">(</span><span class="n">virtual_cell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">materials</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;negative&quot;</span><span class="p">:</span> <span class="s2">&quot;graphite&quot;</span><span class="p">})</span>
+<span class="nb">print</span><span class="p">([</span><span class="n">part</span><span class="p">[</span><span class="s2">&quot;part&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;parameter_set&quot;</span><span class="p">][</span><span class="s2">&quot;parts&quot;</span><span class="p">]])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">to_bpx</span><span class="p">(</span><span class="n">record</span><span class="p">)</span><span class="o">.</span><span class="n">bpx</span> <span class="o">==</span> <span class="n">bpx</span><span class="p">)</span>  <span class="c1"># True</span>
+</pre></div>
+</div>
+<p><a class="reference internal" href="../howto/publish-a-bpx-parameter-file.html"><span class="doc">Publish a BPX parameter file</span></a> takes a file from disk to a published record, and the <a class="reference internal" href="interop-recovery.html"><span class="doc">interop scorecard</span></a> measures how completely BattInfoConverter and Discovery JSON-LD exports reach canonical records.</p>
 </section>
 <section id="advanced-the-internal-engine">
 <h2>Advanced: the internal engine<a class="headerlink" href="#advanced-the-internal-engine" title="Link to this heading">#</a></h2>
@@ -1378,6 +1402,7 @@ top-level <code class="docutils literal notranslate"><span class="pre">Workspace
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#query-and-save-battinfo-api">Query and save (<code class="docutils literal notranslate"><span class="pre">battinfo.api</span></code>)</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#index-and-resolver-publishing-battinfo-api">Index and resolver publishing (<code class="docutils literal notranslate"><span class="pre">battinfo.api</span></code>)</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ingest-first-intake-battinfo-ingest">Ingest-first intake (<code class="docutils literal notranslate"><span class="pre">battinfo.ingest</span></code>)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#other-formats-battinfo-interop">Other formats (<code class="docutils literal notranslate"><span class="pre">battinfo.interop</span></code>)</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-the-internal-engine">Advanced: the internal engine</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#guidance">Guidance</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#generated-reference">Generated reference</a><ul class="nav section-nav flex-column">

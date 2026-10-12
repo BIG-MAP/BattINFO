@@ -144,7 +144,7 @@ validation warns `semantic.property_unmapped`.
 | `specific_heat_capacity` | `J/(kg.K)` | [SpecificHeatCapacity](https://w3id.org/emmo#EMMO_b4f4ed28_d24c_4a00_9583_62ab839abeca) |
 | `thermal_conductivity` | `W/(m.K)` | [ThermalConductivity](https://w3id.org/emmo#EMMO_8dd40ec6_2c5a_43f3_bf64_cadcd447a1c1) |
 
-## Units (51)
+## Units (63)
 
 The unit symbols accepted in quantity dicts, and the unit IRI each maps
 to (EMMO where a term exists, QUDT as the documented fallback):
@@ -153,6 +153,7 @@ to (EMMO where a term exists, QUDT as the documented fallback):
 |---|---|
 | `%` | [WeightPercent](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_2c0e66c8_d58d_44b2_b0ce_ba55194bd505) |
 | `1` | [UnitOne](https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978) |
+| `1/m` | [PerMetre](https://w3id.org/emmo#PerMetre) |
 | `A` | [Ampere](https://w3id.org/emmo#Ampere) |
 | `A/Ah` | [AmperePerAmpereHour](https://w3id.org/emmo/domain/electrochemistry#AmperePerAmpereHour) |
 | `A/cm2` | [AmperePerSquareCentiMetre](https://w3id.org/emmo#AmperePerSquareCentiMetre) |
@@ -168,13 +169,18 @@ to (EMMO where a term exists, QUDT as the documented fallback):
 | `g/mol` | [GramPerMole](https://w3id.org/emmo#GramPerMole) |
 | `h` | [Hour](https://w3id.org/emmo#Hour) |
 | `Hz` | [Hertz](https://w3id.org/emmo#Hertz) |
+| `J/(kg.K)` | [JoulePerKilogramKelvin](https://w3id.org/emmo#JoulePerKilogramKelvin) |
+| `J/mol` | [JoulePerMole](https://w3id.org/emmo#JoulePerMole) |
 | `K` | [Kelvin](https://w3id.org/emmo#Kelvin) |
 | `kg` | [Kilogram](https://w3id.org/emmo#Kilogram) |
 | `kg/m3` | [KilogramPerCubicMetre](https://w3id.org/emmo#KilogramPerCubicMetre) |
 | `kWh` | [KiloWattHour](https://w3id.org/emmo#KiloWatthour) |
 | `L` | [Litre](https://w3id.org/emmo#Litre) |
 | `m` | [Metre](https://w3id.org/emmo#Metre) |
+| `m2` | [SquareMetre](https://w3id.org/emmo#SquareMetre) |
 | `m2/g` | [SquareMetrePerGram](https://w3id.org/emmo#SquareMetrePerGram) |
+| `m2/s` | [SquareMetrePerSecond](https://w3id.org/emmo#SquareMetrePerSecond) |
+| `m3` | [CubicMetre](https://w3id.org/emmo#CubicMetre) |
 | `mA` | [MilliAmpere](https://w3id.org/emmo#MilliAmpere) |
 | `mA/cm2` | [MilliAmperePerSquareCentiMetre](https://w3id.org/emmo#MilliAmperePerSquareCentiMetre) |
 | `mAh` | [MilliAmpereHour](https://w3id.org/emmo#MilliAmpereHour) |
@@ -183,17 +189,23 @@ to (EMMO where a term exists, QUDT as the documented fallback):
 | `min` | [Minute](https://w3id.org/emmo#Minute) |
 | `mL` | [MilliLitre](https://w3id.org/emmo#MilliLitre) |
 | `mm` | [MilliMetre](https://w3id.org/emmo#MilliMetre) |
+| `mol.m-2.s-1` | [MolePerSquareMetrePerSecond](https://w3id.org/emmo#MolePerSquareMetrePerSecond) |
 | `mol/kg` | [MolPerKilogram](https://w3id.org/emmo#MolPerKilogram) |
 | `mol/L` | [MolePerLitre](https://w3id.org/emmo#MolePerLitre) |
+| `mol/m3` | [MolePerCubicMetre](https://w3id.org/emmo#MolePerCubicMetre) |
 | `mPa.s` | [MilliPascalSecond](https://w3id.org/emmo#MilliPascalSecond) |
 | `mS/cm` | [MilliSiemensPerCentiMetre](https://w3id.org/emmo#MilliSiemensPerCentiMetre) |
 | `mV` | [MilliVolt](https://w3id.org/emmo#MilliVolt) |
 | `mΩ` | [MilliOhm](https://w3id.org/emmo#MilliOhm) |
 | `nm` | [NanoMetre](https://w3id.org/emmo#NanoMetre) |
 | `s` | [Second](https://w3id.org/emmo#Second) |
+| `S/m` | [SiemensPerMetre](https://w3id.org/emmo#SiemensPerMetre) |
 | `V` | [Volt](https://w3id.org/emmo#Volt) |
+| `V/K` | [VoltPerKelvin](https://w3id.org/emmo#VoltPerKelvin) |
 | `vol%` | [VolumePercent](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_db37b358_b2f0_4e06_b6ae_8c56c8fbb6ba) |
 | `W` | [Watt](https://w3id.org/emmo#Watt) |
+| `W/(m.K)` | [WattPerMetreKelvin](https://w3id.org/emmo#WattPerMetreKelvin) |
+| `W/(m2.K)` | [WattPerSquareMetreKelvin](https://w3id.org/emmo#WattPerSquareMetreKelvin) |
 | `W/kg` | [WattPerKilogram](https://w3id.org/emmo#WattPerKilogram) |
 | `W/L` | [WattPerLitre](http://qudt.org/vocab/unit/W-PER-L) |
 | `Wh` | [WattHour](https://w3id.org/emmo#Watthour) |
