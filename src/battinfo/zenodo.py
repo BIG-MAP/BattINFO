@@ -399,6 +399,27 @@ def _related_identifiers_from_citations(record: ZenodoCellRecord) -> list[dict[s
     return out
 
 
+def _clean_meta(val: Any) -> str | None:
+    """Drop empty / placeholder ('unknown') metadata so it never leaks into the
+    published title, description, or keywords."""
+    text = str(val).strip() if val is not None else ""
+    return text if text and text.lower() != "unknown" else None
+
+
+def _cell_record_deposit_title(record: ZenodoCellRecord, title: str | None = None) -> str:
+    """The title of a cell record's deposit: *title* when given, else the automatic one.
+
+    The Zenodo metadata, the staged deposit graph's catalog node and the
+    RO-Crate take this value, so a deposit made without a title still names
+    its catalog.
+    """
+    if isinstance(title, str) and title.strip():
+        return title
+    ct = record.cell_spec
+    clean_name = _clean_meta(ct.name) or _clean_meta(ct.model) or "Battery"
+    return f"{clean_name} — BattINFO Reference Datasets"
+
+
 def _build_zenodo_metadata(
     record: ZenodoCellRecord,
     *,
@@ -410,15 +431,7 @@ def _build_zenodo_metadata(
     extra_keywords: list[str] | None,
 ) -> dict[str, Any]:
     ct = record.cell_spec
-
-    def _clean_meta(val: Any) -> str | None:
-        """Drop empty / placeholder ('unknown') metadata so it never leaks into the
-        published title, description, or keywords."""
-        text = str(val).strip() if val is not None else ""
-        return text if text and text.lower() != "unknown" else None
-
-    clean_name = _clean_meta(ct.name) or _clean_meta(ct.model) or "Battery"
-    resolved_title = title or f"{clean_name} — BattINFO Reference Datasets"
+    resolved_title = _cell_record_deposit_title(record, title)
 
     if description is None:
         n = len(record.datasets)

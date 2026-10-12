@@ -1106,6 +1106,27 @@ def _not_found_locally_note(iris: list[str]) -> str:
     )
 
 
+def _clean_deposit_text(value: Any) -> str | None:
+    """*value* as text, or ``None`` when it is empty or a placeholder (``unknown``).
+
+    Keeps placeholders out of a deposit's title, description and keywords.
+    """
+    text = str(value).strip() if value is not None else ""
+    return text if text and text.lower() != "unknown" else None
+
+
+def _auto_deposit_title(specs: list[dict]) -> str:
+    """The title of a deposit given none, from the first saved cell spec's manufacturer and model."""
+    if not specs:
+        return "Battery Dataset — BattINFO"
+    first = specs[0]
+    subject = " ".join(
+        part for part in (_clean_deposit_text(first.get("manufacturer")), _clean_deposit_text(first.get("model")))
+        if part
+    )
+    return f"{subject or 'Battery'} — BattINFO Battery Dataset"
+
+
 def _apply_conformance_jsonld(
     node: dict,
     spec_id: str | None,
@@ -5433,6 +5454,10 @@ class AuthoringWorkspace:
                 "published, so nothing was sent to Zenodo: " + " | ".join(parameter_set_errors)
             )
 
+        # One title for the deposit graph, the RO-Crate and the Zenodo metadata:
+        # the one given, or the automatic one the metadata would derive, so a
+        # deposit made without a title still names its catalog node.
+        title = self._deposit_title(title)
         domain = "sandbox.zenodo.org" if sandbox else "zenodo.org"
 
         # ── Build staging directory ────────────────────────────────────────────
@@ -5458,7 +5483,7 @@ class AuthoringWorkspace:
                         prereserved_doi="10.5281/zenodo.RECORD_ID",
                         record_url=f"https://{domain}/records/RECORD_ID",
                         data_filenames=data_filenames,
-                        title=title or "",
+                        title=title,
                         description=description or "",
                         creators=creators or [],
                         contributors=contributors or [],
@@ -5507,7 +5532,7 @@ class AuthoringWorkspace:
                 prereserved_doi=prereserved_doi,
                 record_url=record_url,
                 data_filenames=data_filenames,
-                title=title or "",
+                title=title,
                 description=description or "",
                 creators=creators or [],
                 contributors=contributors or [],
@@ -5528,7 +5553,7 @@ class AuthoringWorkspace:
             self._build_rocrate(
                 tmpdir,
                 data_filenames,
-                title=title or "",
+                title=title,
                 description=description or "",
                 creators=creators or [],
                 contributors=contributors or [],
@@ -5730,6 +5755,8 @@ class AuthoringWorkspace:
         structure can be inspected without creating a deposit.  Pass the same
         ``title``/``creators``/``license`` you would give :meth:`upload` to preview
         the rights and attribution that will be embedded in the published record.
+        Without a ``title`` the preview carries the automatic title
+        :meth:`zenodo` would give the deposit.
 
         Parameters
         ----------
@@ -5772,7 +5799,7 @@ class AuthoringWorkspace:
             prereserved_doi="10.5281/zenodo.RECORD_ID",
             record_url="https://zenodo.org/records/RECORD_ID",
             data_filenames=data_filenames,
-            title=title or "",
+            title=self._deposit_title(title),
             description=description or "",
             creators=creators or [],
             contributors=contributors or [],
@@ -7135,17 +7162,8 @@ class AuthoringWorkspace:
             encoding="utf-8",
         )
 
-    def _build_zenodo_metadata(
-        self,
-        *,
-        title: str | None,
-        description: str | None,
-        creators: builtins.list[dict],
-        contributors: builtins.list[dict] | None = None,
-        license: str,
-        community: str | None,
-        extra_keywords: builtins.list[str] | None,
-    ) -> dict:
+    def _deposit_spec_summaries(self) -> builtins.list[dict]:
+        """Manufacturer, model, chemistry, format and IEC code of each saved cell spec, by file name."""
         ct_dir = self._ws.source_root / "cell-spec"
         specs: list[dict] = []
         if ct_dir.exists():
@@ -7163,13 +7181,32 @@ class AuthoringWorkspace:
                     })
                 except Exception:
                     continue
+        return specs
 
-        def _clean_meta(v: Any) -> str | None:
-            """Drop empty / placeholder ('unknown') metadata so it never leaks into
-            the published title, description, or keywords (no double spaces, no
-            literal 'unknown')."""
-            text = str(v).strip() if v is not None else ""
-            return text if text and text.lower() != "unknown" else None
+    def _deposit_title(self, title: str | None, specs: builtins.list[dict] | None = None) -> str:
+        """The deposit's title: *title* when given, else the automatic one.
+
+        The Zenodo metadata, the deposit graph's catalog node and the RO-Crate
+        all take this one value, so a deposit made without a title still
+        names its catalog, and the preview shows the name the deposit gets.
+        """
+        if isinstance(title, str) and title.strip():
+            return title
+        return _auto_deposit_title(self._deposit_spec_summaries() if specs is None else specs)
+
+    def _build_zenodo_metadata(
+        self,
+        *,
+        title: str | None,
+        description: str | None,
+        creators: builtins.list[dict],
+        contributors: builtins.list[dict] | None = None,
+        license: str,
+        community: str | None,
+        extra_keywords: builtins.list[str] | None,
+    ) -> dict:
+        specs = self._deposit_spec_summaries()
+        _clean_meta = _clean_deposit_text
 
         s0 = specs[0] if specs else {}
         ds_dir = self._ws.source_root / "dataset"
@@ -7179,7 +7216,6 @@ class AuthoringWorkspace:
             name_parts = [p for p in (_clean_meta(s0.get("manufacturer")), _clean_meta(s0.get("model"))) if p]
             attr_parts = [p for p in (_clean_meta(s0.get("format")), _clean_meta(s0.get("chemistry"))) if p]
             subject = " ".join(name_parts)
-            auto_title = f"{subject or 'Battery'} — BattINFO Battery Dataset"
             if attr_parts:
                 subject = f"{subject} ({', '.join(attr_parts)})".strip()
             auto_desc = (
@@ -7188,7 +7224,6 @@ class AuthoringWorkspace:
                 "Published via BattINFO (https://github.com/BIG-MAP/BattINFO)."
             )
         else:
-            auto_title = "Battery Dataset — BattINFO"
             auto_desc = "Battery dataset published via BattINFO."
 
         kw: list[str] = ["BattINFO", "battery", "electrochemistry"]
@@ -7203,7 +7238,7 @@ class AuthoringWorkspace:
 
         meta: dict = {
             "upload_type":  "dataset",
-            "title":        title or auto_title,
+            "title":        self._deposit_title(title, specs),
             "description":  description or auto_desc,
             "creators":     creators,
             "access_right": "open",
