@@ -5356,7 +5356,9 @@ class AuthoringWorkspace:
             explicit Zenodo record ID forks a new version from that record.
         publish:
             ``False`` (default) — leave a draft for review; publish by clicking on
-            Zenodo or re-running with ``publish=True``.
+            Zenodo or re-running with ``publish=True``. ``True`` runs the
+            publication check before it contacts Zenodo, so a refusal leaves
+            no draft behind.
         sandbox:
             Use ``sandbox.zenodo.org`` for testing.
         community:
@@ -5431,44 +5433,73 @@ class AuthoringWorkspace:
                 "published, so nothing was sent to Zenodo: " + " | ".join(parameter_set_errors)
             )
 
-        client = ZenodoClient(token=tok, sandbox=sandbox)
         domain = "sandbox.zenodo.org" if sandbox else "zenodo.org"
 
-        # ── Create / version / reuse the deposit ───────────────────────────────
-        # Files are synced incrementally below (sync_files): a new version inherits the
-        # prior version's files from Zenodo, so unchanged data is NOT re-uploaded.
-        if reuse_draft_id is not None:
-            deposit = client.get_deposit(reuse_draft_id)   # update existing draft
-        elif record_id is not None:
-            deposit = client.create_new_version(record_id)  # fork from published
-        else:
-            deposit = client.create_empty_deposit()         # brand-new record
-
-        deposit_id: int     = deposit["id"]
-        zenodo_record_id: int = deposit["record_id"]
-        prereserved_doi: str = (
-            deposit.get("metadata", {})
-            .get("prereserve_doi", {})
-            .get("doi", f"10.5281/zenodo.{zenodo_record_id}")
-        )
-
-        # A version (new fork or an updated draft) is a version of its concept record;
-        # record the lineage in the JSON-LD. For a new fork that's the source record_id;
-        # for a reused draft it's the deposit's concept record id.
-        if record_id:
-            is_version_of = f"https://{domain}/records/{record_id}"
-        elif reuse_draft_id and deposit.get("conceptrecid"):
-            is_version_of = f"https://{domain}/records/{deposit['conceptrecid']}"
-        else:
-            is_version_of = ""
-
         # ── Build staging directory ────────────────────────────────────────────
+        # The data files do not depend on the deposit, so they are staged before
+        # one exists, and with publish=True the graph is checked before too.
         tmpdir = Path(tempfile.mkdtemp(prefix="battinfo-zenodo-"))
         try:
-            record_url = f"https://{domain}/records/{zenodo_record_id}"
-
             # Bundle data files (zip by test kind if >90 files)
             data_filenames = self._bundle_data_files(tmpdir, records_dir)
+
+            if publish:
+                # Refuse before anything reaches Zenodo, so a refused publish leaves no
+                # draft behind. The graph is built as ws.preview_jsonld() builds it,
+                # with placeholders for the record id and DOI the deposit does not have
+                # yet. No check reads those values beyond their form, which the
+                # placeholders share, and the dataset records take the deposited file
+                # URLs only after the graph is built, so the verdict is the one the
+                # deposit's own graph gets. That graph is checked again before the DOI
+                # is minted.
+                self._assert_publishable(
+                    self._build_zenodo_jsonld(
+                        zenodo_record_id=0,
+                        prereserved_doi="10.5281/zenodo.RECORD_ID",
+                        record_url=f"https://{domain}/records/RECORD_ID",
+                        data_filenames=data_filenames,
+                        title=title or "",
+                        description=description or "",
+                        creators=creators or [],
+                        contributors=contributors or [],
+                        license=license or "",
+                        keywords=keywords or [],
+                        is_version_of=f"https://{domain}/records/{record_id}" if record_id else "",
+                    ),
+                    nothing_sent=True,
+                )
+
+            client = ZenodoClient(token=tok, sandbox=sandbox)
+
+            # ── Create / version / reuse the deposit ───────────────────────────
+            # Files are synced incrementally below (sync_files): a new version inherits the
+            # prior version's files from Zenodo, so unchanged data is NOT re-uploaded.
+            if reuse_draft_id is not None:
+                deposit = client.get_deposit(reuse_draft_id)   # update existing draft
+            elif record_id is not None:
+                deposit = client.create_new_version(record_id)  # fork from published
+            else:
+                deposit = client.create_empty_deposit()         # brand-new record
+
+            deposit_id: int     = deposit["id"]
+            zenodo_record_id: int = deposit["record_id"]
+            prereserved_doi: str = (
+                deposit.get("metadata", {})
+                .get("prereserve_doi", {})
+                .get("doi", f"10.5281/zenodo.{zenodo_record_id}")
+            )
+
+            # A version (new fork or an updated draft) is a version of its concept record;
+            # record the lineage in the JSON-LD. For a new fork that's the source record_id;
+            # for a reused draft it's the deposit's concept record id.
+            if record_id:
+                is_version_of = f"https://{domain}/records/{record_id}"
+            elif reuse_draft_id and deposit.get("conceptrecid"):
+                is_version_of = f"https://{domain}/records/{deposit['conceptrecid']}"
+            else:
+                is_version_of = ""
+
+            record_url = f"https://{domain}/records/{zenodo_record_id}"
 
             # Single consolidated JSON-LD (replaces all individual JSON records)
             jsonld = self._build_zenodo_jsonld(
@@ -5790,17 +5821,20 @@ class AuthoringWorkspace:
         print(f"  Data files:  {len(data_filenames)}")
         return out
 
-    def _assert_publishable(self, jsonld: dict) -> None:
+    def _assert_publishable(self, jsonld: dict, *, nothing_sent: bool = False) -> None:
         """Fail closed before minting an irreversible DOI: refuse to publish a record that has
         validation errors, or a distribution whose data file is missing from the deposit (R-7).
 
-        Missing data files are checked from the most recent :meth:`_bundle_data_files` run."""
+        Missing data files are checked from the most recent :meth:`_bundle_data_files` run.
+        ``nothing_sent`` says in the refusal that no deposit was made (the check
+        :meth:`zenodo` runs before it contacts Zenodo)."""
+        sent_note = " Nothing was sent to Zenodo." if nothing_sent else ""
         missing = getattr(self, "_missing_data_files", [])
         if missing:
             raise RuntimeError(
                 f"Refusing to publish: {len(missing)} distribution data file(s) are missing and were "
                 f"not uploaded, so the deposit would be incomplete: {'; '.join(missing[:5])}. "
-                "Fix the paths (or remove the distributions), then re-run."
+                f"Fix the paths (or remove the distributions), then re-run.{sent_note}"
             )
         try:
             from battinfo.validate import validate_publication_report  # noqa: PLC0415
@@ -5815,6 +5849,7 @@ class AuthoringWorkspace:
                 "(run ws.preview_jsonld() to see them, or leave the deposit as a draft): "
                 + "; ".join(i.message for i in errors[:5])
                 + (f" {_not_found_locally_note(unresolved)}" if unresolved else "")
+                + sent_note
             )
 
     def _bundle_data_files(self, tmpdir: Path, records_dir: Path) -> builtins.list[str]:

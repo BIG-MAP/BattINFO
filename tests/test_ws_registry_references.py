@@ -318,3 +318,110 @@ def test_without_a_copy_the_reference_stays_an_error_that_says_how_to_fetch_it(
     assert "Not found locally: 1 record(s)" in out and CELL_IRI in out
     assert "Open the workspace with a registry_url" in out
 
+
+class _FakeZenodo:
+    """Stands in for ZenodoClient: records each call and the files each upload carries."""
+
+    def __init__(self) -> None:
+        self.calls: list[str] = []
+        self.uploaded: dict[str, str] = {}
+
+    def client(self, *args: object, **kwargs: object) -> _FakeZenodo:
+        self.calls.append("client")
+        return self
+
+    def create_empty_deposit(self) -> dict:
+        self.calls.append("create")
+        return {"id": 7, "record_id": 7, "metadata": {"prereserve_doi": {"doi": "10.5281/zenodo.7"}}}
+
+    def sync_files(self, deposit_id: int, upload_map: dict) -> dict:
+        self.calls.append("upload")
+        self.uploaded = {name: Path(path).read_text(encoding="utf-8") for path, name in upload_map.items()}
+        return {"uploaded": sorted(self.uploaded), "kept": [], "removed": []}
+
+    def update_metadata(self, deposit_id: int, metadata: dict) -> dict:
+        self.calls.append("metadata")
+        return {}
+
+    def publish_deposit(self, deposit_id: int) -> dict:
+        self.calls.append("publish")
+        return {"doi": "10.5281/zenodo.7"}
+
+
+@pytest.fixture()
+def zenodo(monkeypatch: pytest.MonkeyPatch) -> _FakeZenodo:
+    fake = _FakeZenodo()
+    monkeypatch.setattr("battinfo.zenodo.ZenodoClient", fake.client)
+    return fake
+
+
+def test_a_refused_publish_leaves_nothing_on_zenodo(
+    tmp_path: Path, registry: FakeRegistry, zenodo: _FakeZenodo
+) -> None:
+    ws = _workspace_on_registry_cell(tmp_path, None)
+    with pytest.raises(RuntimeError) as excinfo:
+        ws.zenodo(publish=True, token="placeholder", title="NEW-1", creators=CREATORS)
+    message = str(excinfo.value)
+    assert message.startswith("Refusing to publish: 1 validation error(s)")
+    assert "Not found locally" in message and message.endswith("Nothing was sent to Zenodo.")
+    assert zenodo.calls == []  # no client, so no draft with a dangling cell IRI
+    assert not (tmp_path / ".battinfo" / "zenodo.json").exists()
+
+
+def test_a_publish_missing_a_data_file_leaves_nothing_on_zenodo(
+    tmp_path: Path, registry: FakeRegistry, zenodo: _FakeZenodo
+) -> None:
+    ws = _workspace_on_registry_cell(tmp_path, REGISTRY)
+    (tmp_path / "run.bdf.csv").unlink()
+    with pytest.raises(RuntimeError, match="data file\\(s\\) are missing") as excinfo:
+        ws.zenodo(publish=True, token="placeholder", title="NEW-1", creators=CREATORS)
+    assert str(excinfo.value).endswith("Nothing was sent to Zenodo.")
+    assert zenodo.calls == []
+
+
+def test_a_publish_on_a_registry_only_cell_deposits_its_stub(
+    tmp_path: Path, registry: FakeRegistry, zenodo: _FakeZenodo
+) -> None:
+    ws = _workspace_on_registry_cell(tmp_path, REGISTRY)
+    result = ws.zenodo(publish=True, token="placeholder", title="NEW-1", creators=CREATORS)
+    assert result.published
+    assert zenodo.calls == ["client", "create", "upload", "metadata", "publish"]
+    # The data file and the two metadata files; the reference copies stay local.
+    assert sorted(zenodo.uploaded) == ["battinfo.json", "ro-crate-metadata.json", "run.bdf.csv"]
+    deposited = json.loads(zenodo.uploaded["battinfo.json"])
+    stub = next(node for node in deposited["@graph"] if node["@id"] == CELL_IRI)
+    assert stub["rdfs:isDefinedBy"] == {"@id": CELL_IRI}
+
+
+@pytest.mark.parametrize("registry_url", [REGISTRY, None], ids=["copy-kept", "no-copy"])
+def test_the_check_before_the_deposit_gives_the_deposited_graph_verdict(
+    tmp_path: Path, registry: FakeRegistry, registry_url: str | None
+) -> None:
+    """ws.zenodo(publish=True) checks a placeholder graph before the deposit exists.
+
+    The graph it deposits has the real record id and DOI, and a graph rebuilt
+    after the upload reads records that point at the deposited file; neither
+    changes what the publication check reports.
+    """
+    ws = _workspace_on_registry_cell(tmp_path, registry_url)
+    common = {"data_filenames": ["run.bdf.csv"], "title": "NEW-1", "creators": CREATORS,
+              "license": "cc-by-4.0"}
+    before = ws._build_zenodo_jsonld(
+        zenodo_record_id=0, prereserved_doi="10.5281/zenodo.RECORD_ID",
+        record_url="https://zenodo.org/records/RECORD_ID", **common,
+    )
+    record_url = "https://zenodo.org/records/4242"
+    deposited = ws._build_zenodo_jsonld(
+        zenodo_record_id=4242, prereserved_doi="10.5281/zenodo.4242", record_url=record_url,
+        is_version_of="https://zenodo.org/records/4241", **common,
+    )
+    assert ws._apply_zenodo_file_urls(record_url, {"run.bdf.csv"}) == 1
+    rebuilt = ws._build_zenodo_jsonld(
+        zenodo_record_id=4242, prereserved_doi="10.5281/zenodo.4242", record_url=record_url,
+        is_version_of="https://zenodo.org/records/4241", **common,
+    )
+    for policy in ("publisher", "strict"):
+        for severity in ("error", "warning"):
+            verdict = _issues(before, policy, severity)
+            assert _issues(deposited, policy, severity) == verdict
+            assert _issues(rebuilt, policy, severity) == verdict
