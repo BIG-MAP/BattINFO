@@ -931,9 +931,14 @@ def _parameter_set_publication_errors(record_sets: dict[str, list[dict]]) -> lis
 
     problems: list[str] = []
     for record in record_sets.get("parameter-set", []):
-        result = validate_record(record, policy="publisher")
+        label = (entity_id_from_doc(record) if isinstance(record, dict) else None) or "a parameter set"
+        try:
+            result = validate_record(record, policy="publisher")
+        except (ValueError, TypeError) as exc:  # not a recognised record, as ws.submit() reports it
+            problems.append(f"{label}: not a recognised record ({exc})")
+            continue
         if not result.ok:
-            problems.append(f"{entity_id_from_doc(record) or 'a parameter set'}: {'; '.join(result.errors)}")
+            problems.append(f"{label}: {'; '.join(result.errors)}")
     return problems
 
 

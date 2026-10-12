@@ -780,7 +780,7 @@ def _parameter_file_body(
         f"{_PARAMETER_SET_IRI_BASE}{_normalized_dashed_uid(uid)}" if uid is not None else None
     )
     legacy_uid = _legacy_parameter_file_uid(parameters_sha256)
-    if given is not None and given.rsplit("/", 1)[-1] == legacy_uid:
+    if given is not None and str(given).rsplit("/", 1)[-1] == legacy_uid:
         raise ValueError(_legacy_uid_reused_message(given, legacy_uid))
     if given is not None and given != entity_id:
         raise ValueError(
