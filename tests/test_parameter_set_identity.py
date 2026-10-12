@@ -192,17 +192,53 @@ def test_a_legacy_record_is_found_by_its_spec_iri(tmp_path: Path) -> None:
         assert _find_record_path_by_id(legacy["parameter_set"]["id"], tmp_path) == path
 
 
-def test_query_parameter_sets_marks_legacy_rows(tmp_path: Path) -> None:
+def _migrated(tmp_path: Path) -> tuple[dict, dict]:
+    """A legacy claim batch and its dataset/ replacement, both saved, as after a migration."""
     legacy = _legacy(CLAIM_BATCH_EXAMPLE)
     save_parameter_set(legacy, source_root=tmp_path)
     replacement = _stripped(legacy)
     replacement["parameter_set"]["supersedes"] = legacy["parameter_set"]["id"]
-    save_parameter_set(replacement, source_root=tmp_path)
-    rows = {row["id"]: row for row in query_parameter_sets(source_root=tmp_path)}
+    saved = save_parameter_set(replacement, source_root=tmp_path)
+    return legacy, _load(Path(saved["path"]))
+
+
+def test_query_parameter_sets_marks_legacy_rows(tmp_path: Path) -> None:
+    legacy, replacement = _migrated(tmp_path)
+    rows = {row["id"]: row for row in query_parameter_sets(source_root=tmp_path, include_superseded=True)}
     assert len(rows) == 2
     assert rows[legacy["parameter_set"]["id"]]["legacy_spec_iri"] is True
-    replacement = next(row for row in rows.values() if row["supersedes"])
-    assert replacement["legacy_spec_iri"] is False
+    assert rows[replacement["parameter_set"]["id"]]["legacy_spec_iri"] is False
+
+
+def test_query_parameter_sets_leaves_out_a_record_its_replacement_supersedes(tmp_path: Path) -> None:
+    legacy, replacement = _migrated(tmp_path)
+    for filters in ({}, {"material_kind": "graphite"}, {"parameter": "particle_radius"}):
+        rows = query_parameter_sets(source_root=tmp_path, **filters)
+        assert [row["id"] for row in rows] == [replacement["parameter_set"]["id"]], filters
+    # Only a replacement in the same result counts: a search that finds the
+    # legacy record alone still returns it.
+    rows = query_parameter_sets(source_root=tmp_path, id=legacy["parameter_set"]["id"])
+    assert [row["id"] for row in rows] == [legacy["parameter_set"]["id"]]
+
+
+def test_collation_counts_a_migrated_source_once(tmp_path: Path) -> None:
+    from battinfo.parameters import collate_claims
+
+    legacy, replacement = _migrated(tmp_path)
+    claim_count = len(legacy["parameter_set"]["claims"])
+
+    def _count(collated: dict) -> int:
+        return sum(len(claims) for claims in collated.values())
+
+    rows = query_parameter_sets(source_root=tmp_path, material_kind="graphite")
+    collated = collate_claims([row["record"] for row in rows])
+    assert _count(collated) == claim_count
+    assert {claim["source"]["parameter_set_id"] for claims in collated.values() for claim in claims} == {
+        replacement["parameter_set"]["id"]
+    }
+    # collate_claims applies the same rule to the records it is given.
+    assert _count(collate_claims([legacy, replacement])) == claim_count
+    assert _count(collate_claims([legacy, replacement], include_superseded=True)) == 2 * claim_count
 
 
 def test_a_workspace_saves_a_legacy_record_and_refuses_to_submit_it(tmp_path: Path) -> None:

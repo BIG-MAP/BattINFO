@@ -973,6 +973,7 @@ def query_parameter_sets(
     parameter: str | None = None,
     source_root: PathLike | None = None,
     include_packaged_examples: bool = False,
+    include_superseded: bool = False,
     limit: int = 50,
     offset: int = 0,
 ) -> list[dict[str, Any]]:
@@ -987,9 +988,19 @@ def query_parameter_sets(
     A row whose record was minted under ``spec/`` before 2026-10-11 says so
     in ``legacy_spec_iri``; :func:`supersede_parameter_set` builds its
     ``dataset/`` replacement.
+
+    A record that another record in the result names in ``supersedes`` is
+    left out, as :func:`battinfo.parameters.collate_claims` leaves it out: its
+    replacement carries the same source's claims, so after a migration (or a
+    corrected file) a search does not count that source twice.
+    ``include_superseded=True`` brings such records back.
     """
     from battinfo.materials import resolve_material_kind  # noqa: PLC0415
-    from battinfo.parameters import parameter_set_claim_groups, resolve_parameter  # noqa: PLC0415
+    from battinfo.parameters import (  # noqa: PLC0415
+        parameter_set_claim_groups,
+        resolve_parameter,
+        superseded_parameter_set_ids,
+    )
 
     kind_filter = resolve_material_kind(material_kind) if material_kind is not None else None
     if material_kind is not None and kind_filter is None:
@@ -1058,4 +1069,7 @@ def query_parameter_sets(
         if parameter_filter is not None and parameter_filter not in rec.get("parameters", []):
             continue
         filtered.append(rec)
+    if not include_superseded:
+        superseded = superseded_parameter_set_ids(rec["record"] for rec in filtered)
+        filtered = [rec for rec in filtered if rec.get("id") not in superseded]
     return _paginate(filtered, limit=limit, offset=offset)

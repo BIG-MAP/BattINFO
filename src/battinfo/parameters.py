@@ -312,7 +312,29 @@ def parameter_set_claim_groups(body: Mapping[str, Any]) -> list[tuple[dict[str, 
     return [(context, claims)] if isinstance(claims, list) else []
 
 
-def collate_claims(records: Iterable[Mapping[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+def superseded_parameter_set_ids(records: Iterable[Mapping[str, Any]]) -> set[str]:
+    """The IRIs that a parameter set among *records* names in ``supersedes``.
+
+    A replacement carries its source's claims again (a corrected file, or the
+    ``dataset/`` republication of a record minted under ``spec/``), so a
+    record whose replacement is in the same collection would count that
+    source twice. :func:`collate_claims` and
+    :func:`battinfo.api.query_parameter_sets` leave such records out.
+    """
+    superseded: set[str] = set()
+    for record in records:
+        body = record.get("parameter_set")
+        if not isinstance(body, Mapping):
+            continue
+        old = body.get("supersedes")
+        if isinstance(old, str) and old and old != body.get("id"):
+            superseded.add(old)
+    return superseded
+
+
+def collate_claims(
+    records: Iterable[Mapping[str, Any]], *, include_superseded: bool = False
+) -> dict[str, list[dict[str, Any]]]:
     """Fold parameter-set records into ``{parameter: [claim, ...]}``.
 
     Each returned claim is a copy of the stored claim dict with the source
@@ -325,14 +347,21 @@ def collate_claims(records: Iterable[Mapping[str, Any]]) -> dict[str, list[dict[
     verbatim — collation is for reading what sources say, and tolerant import
     means unknown keys may carry real values.
 
+    A record that another of *records* names in ``supersedes`` is left out,
+    since its replacement carries the same source's claims
+    (:func:`superseded_parameter_set_ids`); ``include_superseded=True`` keeps
+    it.
+
     The spread across sources per parameter is the point: callers decide how
     to select (curated slate, newest, conditions filter) — this function never
     picks a winner.
     """
+    records = list(records)
+    superseded = set() if include_superseded else superseded_parameter_set_ids(records)
     collated: dict[str, list[dict[str, Any]]] = {}
     for record in records:
         body = record.get("parameter_set")
-        if not isinstance(body, Mapping):
+        if not isinstance(body, Mapping) or body.get("id") in superseded:
             continue
         provenance_raw = record.get("provenance")
         provenance: Mapping[str, Any] = provenance_raw if isinstance(provenance_raw, Mapping) else {}
