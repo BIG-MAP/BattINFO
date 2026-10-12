@@ -237,3 +237,84 @@ def test_a_cell_found_by_serial_is_not_looked_up_again_by_iri(tmp_path: Path, re
     ws.add("test", type="cycling", cell=CELL_IRI, name="by IRI")
     ws.add("test", type="cycling", cell=SERIAL, name="by serial again")
     assert len(registry.calls) == calls
+
+
+# ── The deposit describes a registry-only record it points at ────────────────
+#
+# A test and dataset on a cell only the registry holds saved, but the deposit
+# graph built by ws.preview_jsonld() and ws.zenodo() read the workspace's own
+# records only: it had no node for the cell, failed the publication check with
+# publication.reference_missing_node, and lost the cell part of the test's
+# name. The copy the workspace keeps now gives the cell, and a referenced test
+# spec, a "defined elsewhere" stub in the deposit.
+
+DATA = "test_time_second,voltage_volt,current_ampere\n0,3.0,0\n60,3.5,0.001\n"
+CREATORS = [{"name": "Doe, Jane"}]
+
+
+def _workspace_on_registry_cell(root: Path, registry_url: str | None) -> AuthoringWorkspace:
+    """The reproduction (n1_reference_not_in_deposit.py): a test with data on a registry-only cell."""
+    root.mkdir(parents=True, exist_ok=True)
+    (root / "run.bdf.csv").write_text(DATA, encoding="utf-8")
+    ws = AuthoringWorkspace(root=root, registry_url=registry_url)
+    ws.license("cc-by-4.0")
+    ws.add("test", type="cycling", cell=CELL_IRI, spec=PROTOCOL_IRI, data="run.bdf.csv")
+    ws.save()
+    return ws
+
+
+def _preview(ws: AuthoringWorkspace) -> dict:
+    return json.loads(ws.preview_jsonld(title="NEW-1", creators=CREATORS).read_text(encoding="utf-8"))
+
+
+def _issues(graph: dict, policy: str, severity: str = "error") -> list[str]:
+    from battinfo.validate import validate_publication_report
+
+    report = validate_publication_report(graph, policy=policy)
+    return sorted(issue.code for issue in report.issues if issue.severity == severity)
+
+
+def test_a_registry_only_cell_is_a_defined_elsewhere_node_of_the_deposit(
+    tmp_path: Path, registry: FakeRegistry
+) -> None:
+    ws = _workspace_on_registry_cell(tmp_path, REGISTRY)
+    graph = _preview(ws)
+    nodes = {node["@id"]: node for node in graph["@graph"]}
+
+    assert nodes[CELL_IRI] == {
+        "@id": CELL_IRI, "@type": "BatteryCell", "schema:name": SERIAL,
+        "rdfs:isDefinedBy": {"@id": CELL_IRI},
+    }
+    assert nodes[PROTOCOL_IRI] == {
+        "@id": PROTOCOL_IRI, "@type": ["prov:Plan", "schema:HowTo"],
+        "schema:name": "Svaluto-Ferro 2025 formation", "rdfs:isDefinedBy": {"@id": PROTOCOL_IRI},
+    }
+    test = next(node for node in graph["@graph"] if "BatteryTest" in node["@type"])
+    assert test["schema:name"] == f"cycling — {SERIAL}"  # was "cycling": the cell part was lost
+    assert _issues(graph, "publisher") == [] and _issues(graph, "strict") == []
+
+    # The published records are pointed at, not carried: no member, no file, no
+    # spec link or other field read from the copies.
+    catalog = next(node for node in graph["@graph"] if "dcat:Catalog" in node["@type"])
+    assert {ref["@id"] for ref in catalog["dcat:dataset"]} == {
+        node["@id"] for node in graph["@graph"] if "dcat:Dataset" in node["@type"]
+    }
+    assert SPEC_IRI not in json.dumps(graph)
+
+
+def test_without_a_copy_the_reference_stays_an_error_that_says_how_to_fetch_it(
+    tmp_path: Path, registry: FakeRegistry, capsys: pytest.CaptureFixture[str]
+) -> None:
+    ws = _workspace_on_registry_cell(tmp_path, None)  # offline: nothing was looked up
+    capsys.readouterr()
+    graph = _preview(ws)
+    out = capsys.readouterr().out
+
+    assert CELL_IRI not in {node["@id"] for node in graph["@graph"]}
+    test = next(node for node in graph["@graph"] if "BatteryTest" in node["@type"])
+    assert test["schema:name"] == "cycling"
+    assert _issues(graph, "publisher") == ["publication.reference_missing_node"]
+    assert _issues(graph, "strict") == ["publication.reference_missing_node"]
+    assert "Not found locally: 1 record(s)" in out and CELL_IRI in out
+    assert "Open the workspace with a registry_url" in out
+

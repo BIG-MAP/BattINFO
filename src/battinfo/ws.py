@@ -1021,6 +1021,91 @@ def _parameter_set_target_refs(records: list[dict]) -> list[tuple[str, Any]]:
     return sorted(refs.items())
 
 
+def _defined_elsewhere_stub(iri: str, stub_type: Any, name: str = "") -> dict:
+    """A deposit node for a record published at its own IRI and not carried here.
+
+    It states the record's type, its name when the graph labels other nodes
+    with it, and ``rdfs:isDefinedBy`` its own IRI, which is where its
+    description lives. Nothing else is copied, so the stub cannot drift from
+    the published record.
+    """
+    stub: dict = {"@id": iri, "@type": stub_type, "rdfs:isDefinedBy": {"@id": iri}}
+    if name:
+        stub["schema:name"] = name
+    return stub
+
+
+# Reference copies a deposit describes with a stub, by the folder the
+# workspace keeps them in (``.battinfo/references/<folder>/``). A cell spec
+# kept as a copy is left out: every cell spec a cell points at and the deposit
+# does not carry already gets an unnamed stub, which the importer recognises
+# as one by its keys.
+_REFERENCE_STUB_TYPES: dict[str, Any] = {
+    "cell-instance": "BatteryCell",
+    "test-protocol": ["prov:Plan", "schema:HowTo"],
+}
+
+
+def _reference_stub_sources(
+    referenced_records: dict[str, list[dict]] | None,
+) -> dict[str, tuple[str, Any, str]]:
+    """``{IRI: (folder, stub @type, name)}`` for the published records a workspace keeps copies of.
+
+    Only the type and the name are read from a copy. The record belongs to
+    whoever published it, not to the deposit that points at it.
+    """
+    sources: dict[str, tuple[str, Any, str]] = {}
+    for folder, stub_type in _REFERENCE_STUB_TYPES.items():
+        for record in (referenced_records or {}).get(folder, []):
+            iri = entity_id_from_doc(record) if isinstance(record, dict) else None
+            if not isinstance(iri, str) or not iri:
+                continue
+            body = next(
+                (v for v in record.values() if isinstance(v, dict) and v.get("id") == iri), {}
+            )
+            name = body.get("name")
+            sources[iri] = (folder, stub_type, name.strip() if isinstance(name, str) else "")
+    return sources
+
+
+def _unresolved_record_references(doc: dict) -> list[str]:
+    """BattINFO IRIs a deposit's tests and datasets point at that have no node in it, sorted.
+
+    The cell a test ran on (``hasTestObject``) and what a dataset is about
+    (``schema:about``). A record the workspace keeps a copy of gets a stub,
+    so an IRI left here was not found locally.
+    """
+    graph = [node for node in doc.get("@graph") or [] if isinstance(node, dict)]
+    present = {node.get("@id") for node in graph}
+    missing: set[str] = set()
+    for node in graph:
+        types = node.get("@type")
+        types = types if isinstance(types, list) else [types]
+        refs: list[Any] = []
+        if "BatteryTest" in types:
+            refs.append(node.get("hasTestObject"))
+        if "dcat:Dataset" in types:
+            about = node.get("schema:about")
+            refs.extend(about if isinstance(about, list) else [about])
+        for ref in refs:
+            iri = ref.get("@id") if isinstance(ref, dict) else None
+            if isinstance(iri, str) and iri.startswith("https://w3id.org/battinfo/") and iri not in present:
+                missing.add(iri)
+    return sorted(missing)
+
+
+def _not_found_locally_note(iris: list[str]) -> str:
+    """Why the records in *iris* have no node in the deposit, and how to fetch them."""
+    shown = ", ".join(iris[:5]) + (f" and {len(iris) - 5} more" if len(iris) > 5 else "")
+    return (
+        f"Not found locally: {len(iris)} record(s) this deposit points at are neither saved in "
+        "this workspace nor kept as a copy under .battinfo/references/ (looked up offline, or "
+        f"never looked up): {shown}. Open the workspace with a registry_url and reference each "
+        "again, for a cell with ws.load(ws.search(type=\"cell\", serial=...)[0]); the workspace "
+        "keeps a copy of the published record, and the deposit describes it from that copy."
+    )
+
+
 def _apply_conformance_jsonld(
     node: dict,
     spec_id: str | None,
@@ -3018,7 +3103,8 @@ class AuthoringWorkspace:
         resolved in this session, locally, then in the registry (referenced if it
         already exists).  A cell found in the registry is kept as a read-only copy
         of its published record under ``.battinfo/references/``, so the strict
-        save resolves it; the copy is never submitted.  With ``registry_url=None``
+        save resolves it and a Zenodo deposit describes it with a stub node;
+        the copy is never submitted or uploaded.  With ``registry_url=None``
         a cell this workspace does not hold cannot be checked, and ``ws.save()``
         reports the reference as unresolved.  ``data`` is a path or list of paths to files that
         exist; a relative path resolves against the workspace root, not the
@@ -3952,6 +4038,9 @@ class AuthoringWorkspace:
                 spec_nodes_by_iri[iri] = node
             elif any(t in types for t in ("BatteryCell", "CylindricalBattery", "PouchCell", "CoinCell", "PrismaticBattery")) \
                  and "BatteryCellSpecification" not in types:
+                defined_by = node.get("rdfs:isDefinedBy")
+                if isinstance(defined_by, dict) and defined_by.get("@id") == iri:
+                    continue  # a published cell the package points at, described at its own IRI
                 cell_nodes_by_iri[iri] = node
             elif "BatteryTest" in types:
                 test_nodes_by_iri[iri] = node
@@ -5395,6 +5484,10 @@ class AuthoringWorkspace:
                 keywords=keywords or [],
                 is_version_of=is_version_of,
             )
+            # Name the records the graph points at but has no node for (a draft is not checked).
+            _unresolved = _unresolved_record_references(jsonld)
+            if _unresolved:
+                print(f"  WARNING: {_not_found_locally_note(_unresolved)}")
             (tmpdir / BATTINFO_LD_FILENAME).write_text(
                 json.dumps(jsonld, indent=2, ensure_ascii=False),
                 encoding="utf-8",
@@ -5685,6 +5778,9 @@ class AuthoringWorkspace:
                     print(f"    ERROR   {message}")
                 for i in warnings:
                     print(f"    warning {i.message}")
+            unresolved = _unresolved_record_references(jsonld)
+            if unresolved:
+                print(f"  {_not_found_locally_note(unresolved)}")
         except Exception as exc:  # noqa: BLE001 — preview must still write + return its path
             print(f"  Gold-standard validation could not run: {exc}")
 
@@ -5713,10 +5809,12 @@ class AuthoringWorkspace:
             raise RuntimeError(f"Could not validate the record before publishing: {exc}") from exc
         errors = [i for i in report.issues if i.severity == "error"]
         if errors:
+            unresolved = _unresolved_record_references(jsonld)
             raise RuntimeError(
                 f"Refusing to publish: {len(errors)} validation error(s) in the record "
                 "(run ws.preview_jsonld() to see them, or leave the deposit as a draft): "
                 + "; ".join(i.message for i in errors[:5])
+                + (f" {_not_found_locally_note(unresolved)}" if unresolved else "")
             )
 
     def _bundle_data_files(self, tmpdir: Path, records_dir: Path) -> builtins.list[str]:
@@ -5876,6 +5974,7 @@ class AuthoringWorkspace:
         keywords: builtins.list[str] | None = None,
         version: str = "",
         is_version_of: str = "",
+        referenced_records: dict[str, builtins.list[dict]] | None = None,
     ) -> dict:
         """Assemble the consolidated battinfo JSON-LD from canonical record dicts.
 
@@ -5886,6 +5985,12 @@ class AuthoringWorkspace:
         interactive authoring flow (:meth:`_build_zenodo_jsonld`) and the
         programmatic contribution flow (``publication.build_zenodo_package``) emit
         byte-identical graphs.
+
+        ``referenced_records`` holds copies of published records the deposit
+        points at but does not carry, in the same shape (a workspace keeps
+        them under ``.battinfo/references/``). A cell or test spec among them
+        that a test or dataset points at gets a "defined elsewhere" stub,
+        typed and named from its copy; nothing else is taken from it.
 
         Cell specs use domain-battery OWL classes (``CylindricalBattery`` etc.)
         and EMMO's ``hasProperty`` / ``hasNumericalPart`` / ``hasMeasurementUnit``
@@ -6022,6 +6127,18 @@ class AuthoringWorkspace:
                         }
                 except Exception:
                     continue
+
+        # Published records this deposit may point at without carrying them:
+        # the copies a workspace keeps of a cell or test spec it referenced in
+        # the registry. A cell's name labels its tests and datasets whether the
+        # cell is carried here or only referenced.
+        _referenced = _reference_stub_sources(referenced_records)
+
+        def _cell_name(iri: str) -> str:
+            if iri in instances:
+                return instances[iri].get("name") or ""
+            folder, _stub_type, name = _referenced.get(iri, ("", None, ""))
+            return name if folder == "cell-instance" else ""
 
         # ── Map cell-spec IRI → the spec BODY ──────────────────────────────────
         # Not the built node: the half-cell rule reads cell_configuration, which
@@ -6177,7 +6294,7 @@ class AuthoringWorkspace:
                             "prov:used":     [{"@id": cell_id}],
                         }
                         # Human label so agents/consumers see more than an opaque IRI.
-                        _cell_nm = instances.get(cell_id, {}).get("name", "")
+                        _cell_nm = _cell_name(cell_id)
                         _label = (protocol or test.get("kind", "")).strip()
                         if _label and _cell_nm:
                             _label = f"{_label} — {_cell_nm}"
@@ -6450,7 +6567,7 @@ class AuthoringWorkspace:
                     sdl["dcterms:conformsTo"] = {"@id": BDF_TABLE_SCHEMA_IRI}
                 schema_dists.append(sdl)
 
-            cell_name = instances.get(meta.get("cell_id", ""), {}).get("name", "")
+            cell_name = _cell_name(meta.get("cell_id", ""))
             ds_name = meta.get("name") or (
                 f"{cell_name} {meta.get('kind', '')}".strip() or ds_id.split("/")[-1]
             )
@@ -6595,11 +6712,7 @@ class AuthoringWorkspace:
             tid = inst.get("cell_spec_id", "")
             if tid and tid not in _stub_iris:
                 _stub_iris.add(tid)
-                external_spec_stubs.append({
-                    "@id":             tid,
-                    "@type":           "BatteryCellSpecification",
-                    "rdfs:isDefinedBy": {"@id": tid},
-                })
+                external_spec_stubs.append(_defined_elsewhere_stub(tid, "BatteryCellSpecification"))
 
         # ── Compose @graph ─────────────────────────────────────────────────────
         # The Zenodo record is a CATALOG of the per-test datasets above, not a flat
@@ -6749,19 +6862,39 @@ class AuthoringWorkspace:
             + [channel_nodes[k] for k in sorted(channel_nodes)]
         )
 
-        # A parameter set names the cell spec, cell or material spec it is
-        # about; one the deposit does not carry gets the same non-drifting
-        # "defined elsewhere" stub as an external cell spec above, so the
-        # reference resolves to a node instead of failing the graph check.
         _present_ids = {node.get("@id") for node in graph if isinstance(node, dict)}
+
+        # A test or dataset may point at a cell or test spec that lives only in
+        # the registry (referenced by IRI or search hit). The workspace keeps a
+        # read-only copy of that published record, and the copy gives it the
+        # same non-drifting "defined elsewhere" stub as an external cell spec
+        # above, named as the tests and datasets that point at it are. Its body
+        # stays with the published record: this deposit does not carry it. A
+        # reference with no copy gets no node, and the graph check reports it.
+        _pointed_at: set[str] = set()
+        for _node in test_nodes:
+            _used = _node.get("prov:used")
+            for _ref in [_node.get("hasTestObject"), *(_used if isinstance(_used, list) else [_used])]:
+                if isinstance(_ref, dict) and isinstance(_ref.get("@id"), str):
+                    _pointed_at.add(_ref["@id"])
+        for _node in dataset_member_nodes:
+            _pointed_at.update(_ref["@id"] for _ref in _node.get("schema:about") or [])
+        for _target_iri in sorted(_pointed_at - _present_ids):
+            if _target_iri in _referenced:
+                _folder, _target_type, _name = _referenced[_target_iri]
+                _present_ids.add(_target_iri)
+                graph.append(_defined_elsewhere_stub(_target_iri, _target_type, _name))
+
+        # A parameter set names the cell spec, cell or material spec it is
+        # about; one the deposit does not carry gets the same stub, so the
+        # reference resolves to a node instead of failing the graph check.
         for _target_iri, _target_type in _parameter_set_target_refs(record_sets.get("parameter-set", [])):
             if _target_iri not in _present_ids:
                 _present_ids.add(_target_iri)
-                graph.append({
-                    "@id":              _target_iri,
-                    "@type":            _target_type,
-                    "rdfs:isDefinedBy": {"@id": _target_iri},
-                })
+                graph.append(_defined_elsewhere_stub(
+                    _target_iri, _target_type,
+                    _cell_name(_target_iri) if _target_type == "BatteryCell" else "",
+                ))
 
         # ── Record-level free-text notes → schema:comment ─────────────────────
         # Each record's top-level notes[] were dropped from the publication graph;
@@ -6828,11 +6961,14 @@ class AuthoringWorkspace:
         """Read this workspace's saved records and assemble the deposit JSON-LD.
 
         Thin adapter over :meth:`_assemble_zenodo_jsonld` (the shared graph builder):
-        it only sources the canonical record dicts from the workspace directory.
+        it only sources the canonical record dicts from the workspace directory,
+        and the copies of published records it references from
+        ``.battinfo/references/`` (read for stub nodes, never deposited).
         """
         record_sets, _replaced = _read_deposit_record_sets(self._ws.source_root)
         return self._assemble_zenodo_jsonld(
             record_sets,
+            referenced_records=_read_record_sets(self._references_root),
             zenodo_record_id=zenodo_record_id,
             prereserved_doi=prereserved_doi,
             record_url=record_url,
