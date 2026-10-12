@@ -33,8 +33,8 @@ export const site = {
   license: "Apache-2.0",
   // Pinned upstream ontology versions — keep in sync with battinfo.ttl.
   versions: {
-    domainBattery: "0.20.2",
-    domainElectrochemistry: "0.37.2",
+    domainBattery: "0.21.0",
+    domainElectrochemistry: "0.39.0",
     schema: "JSON Schema 2020-12",
   },
 } as const;

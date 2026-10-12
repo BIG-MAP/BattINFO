@@ -119,7 +119,7 @@ def _load_test_method_context_terms() -> dict:
 
 # Test-protocol ``kind`` -> characterisation-method class prefLabel. Only kinds whose
 # method has a published class are mapped; anything else keeps the untyped plan node.
-# Every prefLabel below is verified against domain-electrochemistry 0.37.2 (which
+# Every prefLabel below is verified against domain-electrochemistry 0.39.0 (which
 # imports chameo) and resolves in the bundled domain-battery context.
 TEST_METHOD_CLASS: dict[str, str] = {
     "gitt":            "GalvanostaticIntermittentTitrationTechnique",
