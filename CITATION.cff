@@ -44,5 +44,6 @@ keywords:
   - Battery Pass
   - semantic web
 license: Apache-2.0
-version: 0.7.0
-# date-released: 2026-XX-XX   # set on the first tagged release
+version: 0.8.0
+# Set to the day the v0.8.0 tag is pushed.
+date-released: 2026-10-12

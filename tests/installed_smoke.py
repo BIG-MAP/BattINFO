@@ -13,7 +13,7 @@ def main() -> None:
     import battinfo
     from battinfo.cli import app
 
-    assert battinfo.__version__ == "0.7.0"
+    assert battinfo.__version__ == "0.8.0"
     runner = CliRunner()
     result = runner.invoke(
         app,

@@ -7,9 +7,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-10-12
+
+0.8.0 is the first release of `battinfo` on PyPI (`pip install battinfo`). Version 0.7.0 was never tagged or uploaded, so 0.7.x users installed it from a Git checkout. This release gives one record model and SDK for describing and publishing battery data: 22 record types from materials to datasets, each with a JSON Schema, a JSON-LD emitter and a stable `https://w3id.org/battinfo/` IRI minted from the record's identity, so saving the same thing again, or from another folder, gives the same IRI. The workspace (`battinfo.workspace()`) goes from raw cycler files to validated records, a Zenodo deposit and the registry review queue, and the new `battinfo.registry.Registry` reads published records and data files back (provisional in 0.8). BPX parameter files import as one parameter-set record that exports back to BPX, and a dataset collection groups datasets into a DCAT dataset series. Code written for 0.7.x needs some changes: the record classes are now `CellSpec`, `Cell`, `TestSpec`, `Test` and `Dataset`, the `*Input` classes are replaced by those models, `battinfo.Workspace` gives way to `battinfo.workspace()`, and pandas, pyarrow, openpyxl and rocrate moved into the `tabular` and `publish` extras; the old names keep importing with a `DeprecationWarning` for one more release. Records and their JSON-LD changed as well: material, electrode and the other component specs now mint under `spec/` like cell and test specs, a spec's physical facts sit on the individual under `isDescriptionFor`, and older keys such as `co_type` and `solvent_mixture` still load but are written in their new form. Some identity seeds changed during this cycle (a cell with both a name and a serial number, a dataset made from a local file), so re-saving such a record from 0.7.x code can give a new IRI; pin one you already published with `iris=` on `ws.add("cell")` or `dataset_iris=` on `ws.add("test")`.
+
 ### Added
 
-- **A BPX file is one parameter-set record, addressed by its parameters.** `from_bpx_parameters(path).to_parameter_set(...)` turns one BPX file into one record that holds every value of the file, grouped by part: `cell`, each electrode's material part (OCP, diffusivity, stoichiometry window) and electrode part (thickness, porosity), `separator`, `electrolyte` and `state`. The Cell and State blocks are claims now as well, read the same from the v0.x layout and from the v1 `State` block, and `model_context.layout` (`v0` or `v1`) records which layout the file actually uses, since a file declaring BPX 1.0 may keep the v0.x one. The parameter vocabulary goes from 0.1.0 to 0.2.0 for this: a `state` scope, keys for the Cell and State values (nominal capacity, both cut-offs, the electrode area of one electrode pair and the pair count, volume, lumped density, specific heat capacity and thermal conductivity, reference, initial and ambient temperature, initial state of charge, heat transfer coefficient) and `ocp_hysteresis_decay_constant`, and a BPX mapping may name the BPX unit when it differs from the canonical one. A single-phase electrode's `OCP (lithiation) [V]` and `OCP (delithiation) [V]` tables are `ocp` curves with their `branch`. The `User-defined` block rides the record verbatim as its `annex`. What the record does not model yet (blended-electrode `Particle` blocks, initial hysteresis state, `Degradation`, `Validation` curves, unknown fields) is named in a warning and listed by BPX path in the record's new `not_imported` field. The caller says which cell the file describes, with exactly one of `cell_spec_id`, `cell_instance_id` or `virtual_cell=True`: the importer never guesses and creates no cell record, and a cell spec made for a new cell gets its identity only, since the file's cell numbers stay on the parameter set. The record's uid derives from the SHA-256 of the file's RFC 8785 canonical JSON, stored on the record as `parameters_sha256`, so a re-indented or CRLF copy, or one written by another JSON library that spells `1.0` as `1`, lands on the same IRI and any changed value mints a new one; the record validator refuses an `id` the fingerprint does not give under every policy (IDENTIFIER_POLICY 6.3, amended). The canonicaliser is vendored in `battinfo._jcs`, which also parses files strictly: a repeated key is refused with its path (JSON parsers disagree on which value counts), a UTF-8 byte order mark is skipped, and a number too large for a double or a NaN is refused in those words. A part's `phase` (reserved for blended electrodes) is allowed on material parts only. `ws.add("parameter_set", record=...)` queues a ready-built parameter-set record of either flavour, so `ws.save()` and `ws.submit()` publish it like any other record. A corrected file is a new record that names the old one in the new `supersedes` field (`to_parameter_set(supersedes=...)`, `dcterms:replaces` in JSON-LD). `query_parameter_sets` and `collate_claims` read the parts, so a search by material finds a file's material parts next to the literature claim batches. In JSON-LD the parts are blank `schema:Dataset` nodes under `schema:hasPart` and the fingerprint is a `schema:identifier`. Every claim node, in parts and in claim batches, names its parameter key in `schema:propertyID`, so `electrode_area` and `external_surface_area`, both an `Area`, stay apart in RDF. Seven of the new keys type as published EMMO classes (SpecificHeatCapacity, ThermalConductivity, ThermodynamicTemperature for the reference and initial temperatures, StateOfCharge, SurfaceCoefficientOfHeatTransfer, NumberOfEntities). `ambient_temperature` and `ocp_hysteresis_decay_constant` have no published class yet, so their claims are typed by value basis alone and validation warns `semantic.property_unmapped`; both are on the upstream list. The property reference lists the keys that are parameter-set claims only in a section of their own instead of as cell-spec properties. The five FaradayInstitution/BPX examples (MIT, (c) 2022 University of Oxford) are now five such records, marked `virtual_cell` and with their source pinned to a commit of that repository; the five invented example cell specs and the 32 per-block records are gone. The how-to [Publish a BPX parameter file](docs/howto/publish-a-bpx-parameter-file.md) walks through it.
+- **A BPX file is one parameter-set record, addressed by its parameters.** `from_bpx_parameters(path).to_parameter_set(...)` turns one BPX file into one record that holds every value of the file, grouped by part: `cell`, each electrode's material part (OCP, diffusivity, stoichiometry window) and electrode part (thickness, porosity), `separator`, `electrolyte` and `state`. The Cell and State blocks are claims now as well, read the same from the v0.x layout and from the v1 `State` block, and `model_context.layout` (`v0` or `v1`) records which layout the file actually uses, since a file declaring BPX 1.0 may keep the v0.x one. The parameter vocabulary goes from 0.1.0 to 0.2.0 for this: a `state` scope, keys for the Cell and State values (nominal capacity, both cut-offs, the electrode area of one electrode pair and the pair count, volume, lumped density, specific heat capacity and thermal conductivity, reference, initial and ambient temperature, initial state of charge, heat transfer coefficient) and `ocp_hysteresis_decay_constant`, and a BPX mapping may name the BPX unit when it differs from the canonical one. A single-phase electrode's `OCP (lithiation) [V]` and `OCP (delithiation) [V]` tables are `ocp` curves with their `branch`. The `User-defined` block rides the record verbatim as its `annex`. What the record does not model yet (blended-electrode `Particle` blocks, initial hysteresis state, `Degradation`, `Validation` curves, unknown fields) is named in a warning and listed by BPX path in the record's new `not_imported` field. The caller says which cell the file describes, with exactly one of `cell_spec_id`, `cell_instance_id` or `virtual_cell=True`: the importer never guesses and creates no cell record, and a cell spec made for a new cell gets its identity only, since the file's cell numbers stay on the parameter set. The record's uid derives from the SHA-256 of the file's RFC 8785 canonical JSON, stored on the record as `parameters_sha256`, so a re-indented or CRLF copy, or one written by another JSON library that spells `1.0` as `1`, lands on the same IRI and any changed value mints a new one; the record validator refuses an `id` the fingerprint does not give under every policy (IDENTIFIER_POLICY 6.3, amended). The canonicaliser is vendored in `battinfo._jcs`, which also parses files strictly: a repeated key is refused with its path (JSON parsers disagree on which value counts), a UTF-8 byte order mark is skipped, and a number too large for a double or a NaN is refused in those words. A part's `phase` (reserved for blended electrodes) is allowed on material parts only. `ws.add("parameter_set", record=...)` queues a ready-built parameter-set record of either flavour, so `ws.save()` and `ws.submit()` publish it like any other record. A corrected file is a new record that names the old one in the new `supersedes` field (`to_parameter_set(supersedes=...)`, `dcterms:replaces` in JSON-LD). `query_parameter_sets` and `collate_claims` read the parts, so a search by material finds a file's material parts next to the literature claim batches. In JSON-LD the parts are blank `schema:Dataset` nodes under `schema:hasPart` and the fingerprint is a `schema:identifier`. Every claim node, in parts and in claim batches, names its parameter key in `schema:propertyID`, so `electrode_area` and `external_surface_area`, both an `Area`, stay apart in RDF. Seven of the new keys type as published EMMO classes (SpecificHeatCapacity, ThermalConductivity, ThermodynamicTemperature for the reference and initial temperatures, StateOfCharge, SurfaceCoefficientOfHeatTransfer, NumberOfEntities). `ambient_temperature` and `ocp_hysteresis_decay_constant` have no published class yet, so their claims are typed by value basis alone and validation warns `semantic.property_unmapped`; both are on the upstream list. The property reference lists the keys that are parameter-set claims only in a section of their own instead of as cell-spec properties. The five FaradayInstitution/BPX examples (MIT, (c) 2022 University of Oxford) ship as five such records, marked `virtual_cell` and with their source pinned to a commit of that repository. The how-to [Publish a BPX parameter file](docs/howto/publish-a-bpx-parameter-file.md) walks through it.
 - **A parameter-file record carries its file, and the file is checked.** The file rides the record under `distributions`: exactly one `source`, checked against the bytes the parameters were read from, at most one `runnable` conversion, and any number of `mirror` copies of the same bytes, all on https, with checks named `bpx_parse` or `simulation_smoke`. `bpx_file_distribution` builds an entry from a file. A runnable copy needs `runnable_file=`: its sha256 must be its entry's checksum and its parameters those of `upgrade_bpx` applied to the source, so it can only be the source's layout conversion. `upgrade_bpx` rewrites a file in the v0.x layout (a 0.x file, or one that declares BPX 1.0 or later and keeps the old fields, as the BattMo export of Schmitt et al. 2026 does) in the v1 layout. It moves the fields BPX 1.0 relocated and adds the State values the bpx package's own migration adds when a file has none (initial state of charge 1, the ambient temperature from the reference temperature or 298.15 K, the initial temperature from the ambient one), naming each in its changes and in `conversion_note`; the lumped thermal conductivity moves to `User-defined`, where the bpx package drops it. The conversion is one standard-library module, `battinfo._bpx_layout`, which the registry vendors to check runnable copies. `check_bpx` records whether the official `bpx` parser accepts a file, with every parser warning in full and first. `to_bpx(record)` rebuilds the BPX document from the parts, at the file's own version or at `bpx_version=`, in that version's layout; a record whose `model_context.layout` is `v0` exported at 1.x goes through the same conversion, so the FaradayInstitution hysteresis example exported at 1.1.0 now gives PyBaMM the original's 1C capacity (12.254 Ah, where the missing initial state of charge gave 13.139 Ah). A value in another unit than BPX states is converted, a curve's x axis included, or the export raises `ValueError` naming the claim, as it does for a curve tabulated against another quantity than its BPX field and for an OCP branch at a 0.x version. `Header.BPX` is written as a string. The result's `complete` is false and its warnings say so when the document lacks a value the source file held (`strict=True` raises instead), and when the `bpx` package is installed its verdict on the document is in the warnings. An input that is neither a parameter-file record nor a cell spec raises `TypeError`; a registry resource JSON is unwrapped. On the eleven single-phase BPX files in our test corpus the official parser accepts the result and Parameterisation and State come back value for value. The record validator holds the file rules (a runnable naming its source, a mirror carrying the source's checksum, each part once) as errors under every policy. A parameter file without a source is fine for local work, a warning under `strict` and an error under `publisher`, so `ws.submit()` refuses it before sending anything. A record that is neither flavour gets a message saying what is missing or misplaced instead of a dump of the record, and a distributions count error names the role. In JSON-LD each file is a `schema:DataDownload` with `dcterms:conformsTo` and `schema:sha256`, and a conversion points at its source with `prov:wasDerivedFrom`.
 
 - **Research titles lead with their source.** `battinfo.naming.title_for()` takes `source=` (author and year), so a title reads `Flores 2026 graphite AQ-1 electrode spec` and stays distinguishable among many graphite records. A common-word subject loses its capital after the source; abbreviations keep theirs. Products keep their manufacturer-and-model titles, and a collection's label names its source.
@@ -96,11 +100,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Local `spec/` parameter sets still load and validate, with a warning.** The schema's `parameter_set.id` accepts a `spec/` IRI for a record minted before 2026-10-11, so such a record validates, saves and is found by its IRI, and gets the warning `semantic.parameter_set_legacy_namespace`, which names the `dataset/` IRI its replacement mints. Under the publisher policy that warning is an error, so `ws.submit()` and `ws.zenodo()` refuse the record (`ws.zenodo()` before it sends anything to Zenodo, a draft included) and say what to do instead: `supersede_parameter_set(record)` makes its replacement, a `dataset/` record minted from the current seeds that supersedes it, with everything else unchanged. `query_parameter_sets()` marks such rows with `minted_under_spec`. It and `collate_claims()` leave out a record that another record in the result names in `supersedes`, so a source whose old and new records both sit in a workspace is not counted twice; `include_superseded=True` keeps it. A parameter set that supersedes itself, keeps the uid of the record it supersedes, or carries the uid its fields had under `spec/` (the old uid moved to `dataset/`, with or without `supersedes`) is an error under every policy, and the builders refuse such a uid.
 - **`dataset/` holds two kinds of record.** Dataset records and parameter sets share it, and tooling reads the record, not the namespace, to tell them apart. `save_record` and the `save_*` functions refuse to save a record over one of another kind at the same IRI. The deposit checks that a dataset node names what it is about and carries at least one file apply to nodes typed as dataset records (`dcat:Dataset` in a workspace deposit, `BatteryTestResult` in a dataset publication package), the types every dataset record's node carries, so a parameter set, a plain `schema:Dataset` node, is not held to them. A deposit's catalog lists its parameter sets as members (`dcat:dataset`, `schema:hasPart`) after its per-test datasets, so a deposit holding only parameter sets passes the publication checks, and a cell spec, cell or material spec a parameter set names but the deposit does not carry gets a "defined elsewhere" stub node, as an external cell spec does; a parameter set minted under `spec/` that another record in the workspace supersedes is left out of the deposit, with a line saying so; a parameter file's file entries name the record in `schema:isPartOf`, and the validator reads a single `schema:about` or `schema:distribution` object as a one-item list (both as in #438).
 
-### Removed
-
-- `BpxParameterImportResult.to_records` and `load_parameter_set_members`. They built one record per BPX block plus a set record; a BPX file is now one record, and neither shipped in a release.
-- The parameter-set fields `members` and `set_id`, which held that set together. No published record carries them.
-
 ### Fixed
 
 - **A Zenodo deposit describes the registry-only records its tests point at.** Since a cell found only in the registry counts as resolved, a test or dataset on it saves, but `ws.preview_jsonld()` and `ws.zenodo()` built the deposit graph from the workspace's own records alone. The graph had no node for the cell, so publication validation failed with `publication.reference_missing_node` (199 errors for the Empa relink, under the publisher and strict policies), the tests lost the cell part of their names (199 tests shared 15 names), and `ws.zenodo(publish=True)` created and uploaded a draft before it refused. The deposit now reads the copies the workspace keeps under `.battinfo/references/`: a cell or test spec that a test or dataset points at and the deposit does not carry gets a "defined elsewhere" stub, the kind of node an external target of a parameter set already gets, with its IRI, type, name and `rdfs:isDefinedBy`, and test and dataset names take the cell's name from the copy. Nothing else is read from a copy, no copy is uploaded, and `ws.import_()` skips a cell stub instead of reporting a cell without a spec. It skips the tests and datasets on such a cell too, as before, but now says so: the counts it returns are the records it imported (they used to count every test in the graph), and `skipped` lists each test and dataset left out with its cell and the reason. A reference with no copy (looked up offline, or never looked up) is still an error, and the preview and the refusal now say that the record was not found locally and how to fetch it.
@@ -120,8 +119,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **BPX parameter units resolve to EMMO units.** The curated unit map had no entry for the SI units BPX states its parameters in, so most claim quantities emitted their unit as `schema:unitText`. Version 0.5.2 of the map adds `m2`, `m3`, `mol/m3`, `m2/s`, `J/mol`, `V/K`, `S/m`, `1/m`, `mol.m-2.s-1`, `J/(kg.K)`, `W/(m.K)` and `W/(m2.K)`, mapped to their EMMO 1.0.2 unit classes, and a curve claim's node carries its y unit as `schema:unitCode` next to the text. The Schmitt and Molicel P45B files now import with no unit left as free text. The unit names are added to the records context v1 and the EMMO label file.
 
 - **The JSON-LD of a BPX record says what it leaves out.** The record's `not_imported` paths and the names of its `annex` entries (the BPX `User-defined` block) did not reach the graph, so a linked-data reader could not tell that some values exist only in the source file or the record file. Both now ride the record node as `schema:additionalProperty` values named `not_imported` and `annex`, with existing schema.org terms only. The `not_imported` note points at the source file under `schema:distribution` only when the record carries one.
-
-- **A parameter set in a Zenodo deposit no longer fails the publication checks.** The parameter-set emitter writes a single `schema:about` and a single `schema:distribution` as objects, which mean the same in JSON-LD as one-item lists, and the publication validator refused them, so a workspace deposit holding a BPX record failed the checks `ws.preview_jsonld()` runs and `ws.zenodo(publish=True)` enforces. The validator now accepts an object or a list for both, and a parameter file's distribution nodes carry the `schema:isPartOf` link to their record that the validator requires of every deposit file.
 
 - **`to_bpx` names the fields a parameter-file export lacks.** `missing_required` listed only Cell keys, so an export with a missing electrode parameterisation reported `[]`. With the `bpx` package installed, every field and block the official parser reports missing is added. The list now has one format for both exports: `"<block>.<field>"` for a field, Cell fields included (`"Cell.Electrode area [m2]"`, where it used to say `"Electrode area [m2]"`), and `"<block>"` for a block missing whole.
 
@@ -191,7 +188,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - **The Zenodo deposit graph reads a dataset's own `about` and understands collections.** The deposit builder took a member dataset's `schema:about` and its generated-by test only from the tests' `dataset_ids`. A corpus that links each dataset to its cell and test through the dataset's `about` list, and leaves `dataset_ids` empty, got no `schema:about` on any member, so `preview_jsonld()` reported `publication.dataset_about_missing` for every dataset and publishing was refused (95 errors on the Flores half-cell corpus). The dataset's `about` is now the primary source, unioned with what `dataset_ids` gives, and a test lists every dataset that names it as `hasOutput`/`prov:generated`. A collection (`additional_type = "DatasetSeries"`) is now typed `dcat:DatasetSeries` in the deposit and carries no empty distribution arrays, and its members carry `dcat:inSeries` and `schema:isPartOf` pointing at it, as the record and resolver emitters already did. The publication validator and its SHACL shapes exempt a series from the about and distribution rules. A `dcat:inSeries` target inside the package must be typed `dcat:DatasetSeries` (`publication.series_target_not_series`); a target outside it only warns (`publication.series_not_in_package`), since a collection may be published before its members. On the Flores corpus the gold-standard check goes from 98 errors and 96 warnings to a clean pass.
 
-- **Pre-release fixes from the close-out review.** Four defects that would
+- **Pre-release fixes from the close-out review.** Three defects that would
   have frozen into 0.8.0:
   - *A collection could not be submitted.* `ws.submit()` sent
     `"distributions": []` for a dataset with no file of its own, which is
@@ -210,13 +207,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
     record lives. It is now recursive, checks that every kind and every
     file is reached, and a new test fails on any class or predicate that
     falls back to the document base.
-  - *The converter install line in the docs and in two error messages
-    installed the bare converter*, without the NEWARE, Excel and MATLAB
-    readers, so `ws.convert()` failed on `.ndax` for anyone following it.
-    The line now names the extras and pins the tested commit, lives in one
-    place in the code, and CI installs it with stock pip and converts a
-    file. CI also installs the built wheel into an empty environment and
-    runs the first Quickstart step outside the checkout.
 
 - **`ws.convert()` works against batterydf 0.2, the version the
   `processing` extra requires.** CI had been testing against a July
@@ -273,9 +263,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - *Onboarding (F8, F7 docs):* the Quickstart validates the record the
     reader just created instead of a repository checkout file, states the
     full emitted `@type` stack, and the getting-started CLI examples use
-    `--include-packaged-examples` so they work outside a checkout; the
-    processing-extra install note and the runtime `convert()` error both
-    name the batterydf Git workaround.
+    `--include-packaged-examples` so they work outside a checkout.
   - *Small fixes:* the BDC export docstring now states it is a partial
     inverse (measurement-availability flags are not reconstituted, F9);
     the docs navbar no longer loses the version/theme switchers to a
@@ -334,11 +322,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   aliases - as kwargs and in stored records - and normalize on
   round-trip. Packaged examples rewritten to the canonical keys.
 
-- **`electrode_area` and `external_surface_area` reach the cell-spec schema.** Importing the BPX
-  repository's examples exposed that the two keys (a Phase-1 ruling) had never reached the
-  cell-spec SpecSet, so `from_bpx` output failed schema validation; both now live in the
-  yaml/schema/pydantic/authoring-fields chain like every other spec property.
-
 - **Cell geometry gets a home (BPX Cell-block ruling).** `electrode_area`
   and `external_surface_area` join the curated property vocabulary
   (EMMO `Area`), beside the existing `volume` - as-designed engineering
@@ -373,14 +356,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   context rides the graph, never the class name),
   diffusivity_activation_energy and reaction_rate_activation_energy type
   as the generic ActivationEnergy with the of-what carried by key, label,
-  and claim structure. The fallbacks that remain are deliberate — the
-  classes do not exist upstream yet (GuestDiffusivity,
-  EntropicChangeCoefficient, TransportEfficiency, InitialConcentration,
-  first-cycle efficiency, theoretical specific capacity), or the published
-  flat context already pins the key to its placeholder
-  (ambient_temperature, append-only context policy); the asks and the
-  rule are filed in `docs/internal/ontology-additions-needed.md`
-  section 10.
+  and claim structure. A key with no published class gets no invented
+  one; see the entry on unmapped properties under Fixed above.
 
 - `ws.status()` and `ws.pending()` now send the publisher API key from `ws.login()` (or `BATTINFO_ADMIN_TOKEN` when set). The registry's workspace views became credentialed because they list staged, not-yet-public submissions; without a key these two calls now print a hint and return an empty list instead of listing the queue.
 
@@ -789,7 +766,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
   The shipped parameter vocabulary (`data/vocab/parameters.json`) defines the canonical keys, their physical scopes and units, and the model-tier completeness contract: `battinfo.parameters.completeness()` answers "which of bote/spm/spme/p2d can this material's claims support, and what is missing" — the same machine-readable contract downstream surfaces vendor so every consumer applies identical rules. Unknown keys are tolerated (tolerant-import policy) but never count toward a tier.
 
-  Surface: `create_parameter_set` / `save_parameter_set` / `query_parameter_sets` / `template_parameter_set` on `battinfo.api`; `ws.add("parameter_set", name=..., material=..., claims=[...])` queues through the same stamp path as materials, so contributor/license/funding reach the records. `from_bpx_parameters` / `import_bpx_parameters` extract the physics blocks `from_bpx` deliberately skips: electrode-material claims target the material the caller names (BPX does not name its materials), build claims (thickness/porosity/transport, separator, electrolyte) target the cell spec, and every unmapped field is warned, never silently dropped. Parameter sets have a JSON-LD emitter and go into deposits as nodes of their own (`DEPOSIT_STANDALONE_KINDS`).
+  Surface: `create_parameter_set` / `save_parameter_set` / `query_parameter_sets` / `template_parameter_set` on `battinfo.api`; `ws.add("parameter_set", name=..., material=..., claims=[...])` queues through the same stamp path as materials, so contributor/license/funding reach the records. `from_bpx_parameters` / `import_bpx_parameters` read the physics blocks `from_bpx` skips into one parameter-file record (see "A BPX file is one parameter-set record" above). Parameter sets have a JSON-LD emitter and go into deposits as nodes of their own (`DEPOSIT_STANDALONE_KINDS`).
 
 - **A cell instance can cite the electrodes built into it.** `cell_instance` gains
   optional `working_electrode_id` and `counter_electrode_id`, pointing at `electrode`
@@ -879,9 +856,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   `EndOfLifeCapacityThreshold`. `capacity_fade` also stops being a category error:
   it used to point at `CapacityFade`, an `ElectrochemicalDegradationPhenomenon` on
   the Process branch, so a unit-bearing datasheet value was typed as a process.
-  `records.context.v1.json` is append-only, so the six new class labels are added
-  there while the seven pre-existing snake_case terms keep their published values —
-  URL-context documents carry the new IRIs only for the class labels until a v2.
 
 - **The `battinfo:` vocabulary honesty check sees the whole source tree.** It
   matched only double-quoted CURIEs, so `bundle_generated.py` — where LinkML
@@ -1200,10 +1174,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **The site's own /docs quickstart crashed verbatim** (`cell_format=`, which
   `CellSpec` rejects) — fixed, and the snippet drift suite now EXECUTES every
   self-contained Python snippet on the site, so a non-running example fails CI.
-- **battinfo.org stops promising a PyPI package that isn't published yet**:
-  the version badge and footer link hide behind `site.pypiLive` (flipped by
-  the 0.8 release train), and the install snippet teaches the source install
-  until then. The /docs tutorial cards now link the six individual notebooks
+- **battinfo.org's /docs page** links the six tutorial notebooks one by one
   (with current titles) instead of one folder listing; the dead
   web-validator-plan link and the "live converter" over-claim are gone.
 
@@ -1230,8 +1201,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - New **Identifiers & PURLs** concepts page: the IRI anatomy, the three
   promises (opaque / stable / deterministic-from-identity), the Crockford
   Base32 UID, the namespace map, and why w3id.org.
-- New generated **Property & unit reference** (63 property keys, 35 unit
-  symbols, each linked to its EMMO/QUDT IRI) — produced from the curated
+- New generated **Property & unit reference** (every curated property key
+  and unit symbol, each linked to its EMMO/QUDT IRI) — produced from the curated
   mapping tables and drift-checked like the other generated references.
 - Terminology: the five record types are "record classes" everywhere (the
   word "models" appeared only in docs); the homepage Python example used
@@ -1420,10 +1391,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   (`status: exists`/`updated` with `content_changed: False`) instead of a duplicate corpus.
   Natural keys: cell-spec = manufacturer::model::format::chemistry::size_code;
   cell = cell_spec_id::serial::batch::name; test-spec = kind::name::version;
-  test = cell::kind::protocol::name; dataset = cell::test::locator::name. Records with no
-  distinguishing identity (e.g. a cell instance with no serial/batch/name) still mint
-  randomly — distinct anonymous records never silently dedup. Pass an explicit `uid=` to
-  reproduce the old always-random behaviour.
+  test = cell::kind::protocol::name; dataset = cell::test::locator::name. A record with no
+  distinguishing identity (e.g. a cell instance with no serial/batch/name) needs an explicit
+  `uid=` (see "Templates no longer write a placeholder IRI" above).
 
 ### Deprecated
 
@@ -1609,6 +1579,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   permits (readiness finding M4, still open).
 
 ## [0.7.0] — 2026-06-19
+
+This version was never tagged or uploaded to PyPI; 0.8.0 is the first PyPI release.
 
 First publication of the `battinfo` **Python package** (library + CLI) to PyPI.
 The package, CLI, and OWL application ontology now share a single version line,
