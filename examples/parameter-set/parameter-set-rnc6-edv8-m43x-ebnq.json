@@ -1,8 +1,8 @@
 {
   "schema_version": "0.2.0",
   "parameter_set": {
-    "id": "https://w3id.org/battinfo/spec/fe59-wews-8mmv-zwag",
-    "short_id": "fe59we",
+    "id": "https://w3id.org/battinfo/dataset/rnc6-edv8-m43x-ebnq",
+    "short_id": "rnc6ed",
     "name": "BPX NMC111 pouch",
     "virtual_cell": true,
     "parameters_sha256": "554fdd975bdc88bb7b53abc451980915180a57a2745c10b0f0434f55c058b926",

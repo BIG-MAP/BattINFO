@@ -213,6 +213,13 @@ class EntityKind:
         spec_ref_field: For an instance kind, the body field that links to its
             spec (e.g. ``"cell_spec_id"``); ``None`` for spec kinds.
         spec_entity_type: The ``entity_type`` that ``spec_ref_field`` points to.
+        legacy_iri_namespaces: Namespaces this kind minted under before it
+            moved to ``iri_namespace``. Nothing new mints there, but records
+            minted there keep their IRIs, so lookups search them too.
+        files_named_by_uid: Every record of this kind has only ever been
+            written at :func:`save_entity_path` (its file named by its uid),
+            so a lookup by IRI opens that one file rather than every file of
+            the kind (:func:`entity_files_for_uid`).
     """
 
     entity_type: str
@@ -222,6 +229,8 @@ class EntityKind:
     iri_namespace: str
     spec_ref_field: Optional[str] = None
     spec_entity_type: Optional[str] = None
+    legacy_iri_namespaces: tuple[str, ...] = ()
+    files_named_by_uid: bool = False
 
 
 # Registered in a deterministic order. Dispatch keys on ``record_key`` (unique),
@@ -293,12 +302,19 @@ ENTITY_KINDS: tuple[EntityKind, ...] = (
     # ``equipment_id`` lives in the record body, uid minted deterministically
     # from (equipment uid, index) — IDENTIFIER_POLICY 6.1.
     EntityKind("channel", "channel", "channel.schema.json", "channel", "channel"),
-    # Parameter sets are claim batches (one source, one target) rather than a
-    # spec+instance pair: a reusable description, minted under spec/ like every
-    # other one. The target link (material_kind / material_spec_id /
-    # cell_spec_id) lives in the record body, uid minted deterministically from
-    # (target, name) so re-importing the same source is idempotent.
-    EntityKind("parameter-set", "parameter_set", "parameter-set.schema.json", "parameter-set", "spec"),
+    # Parameter sets (claim batches and parameter files) are datasets, not
+    # descriptions: nothing is ever an instance of one. They mint under
+    # dataset/, which they share with dataset records (IDENTIFIER_POLICY 6.3),
+    # so the namespace does not say which of the two an IRI names. The target
+    # link (material_kind / material_spec_id / cell_spec_id) lives in the
+    # record body; a claim batch's uid derives from (target, scope, name), a
+    # parameter file's from its parameters_sha256. Parameter sets minted
+    # before 2026-10-11 keep their spec/ IRIs (they are superseded, not moved).
+    EntityKind(
+        "parameter-set", "parameter_set", "parameter-set.schema.json", "parameter-set", "dataset",
+        legacy_iri_namespaces=("spec",),
+        files_named_by_uid=True,
+    ),
     # Organizations are identity records (manufacturers, labs, publishers)
     # other records point at. Instance-only, minted under organization/; NEW
     # uids derive deterministically from the normalized name so re-creating
@@ -362,13 +378,17 @@ def iri_namespace_map() -> dict[str, str]:
 
 
 def entity_types_for_namespace(namespace: str) -> list[str]:
-    """Logical entity types that mint IRIs under *namespace*.
+    """Logical entity types whose records can have an IRI under *namespace*.
 
     Multiple kinds can share a namespace (``cell-spec`` and ``test-protocol``
-    both use ``spec/``). Falls back to ``[namespace]`` when nothing matches, to
-    preserve the previous best-effort lookup behavior.
+    both use ``spec/``, ``dataset`` and ``parameter-set`` both use
+    ``dataset/``). A kind that moved keeps its old records' IRIs, so it is
+    listed under its legacy namespace too, after the kinds that mint there
+    (``parameter-set`` under ``spec/``). Falls back to ``[namespace]`` when
+    nothing matches, to preserve the previous best-effort lookup behavior.
     """
     matches = [kind.entity_type for kind in ENTITY_KINDS if kind.iri_namespace == namespace]
+    matches += [kind.entity_type for kind in ENTITY_KINDS if namespace in kind.legacy_iri_namespaces]
     return matches or [namespace]
 
 
@@ -400,3 +420,22 @@ def iter_entity_files(entity_type: str, source_root: Path) -> list[Path]:
     if not directory.exists():
         return []
     return sorted(directory.glob("*.json"))
+
+
+def entity_files_for_uid(entity_type: str, uid: str, source_root: Path) -> list[Path]:
+    """The files a lookup of the *entity_type* record with *uid* opens, in order.
+
+    The canonical path (:func:`save_entity_path`) first, when it exists. A
+    record of most kinds may also sit under another file name (written by
+    hand or by an older release), so every other file of the kind follows. A
+    kind whose files are always named by uid (``files_named_by_uid``, the
+    parameter sets) stops at the canonical path: it is searched under two
+    namespaces (``dataset/`` and its legacy ``spec/``), and a miss in either
+    must not load every one of its files.
+    """
+    expected = save_entity_path(entity_type, uid, source_root)
+    found = [expected] if expected.exists() else []
+    kind = ENTITY_BY_TYPE.get(entity_type)
+    if kind is not None and kind.files_named_by_uid:
+        return found
+    return found + [path for path in iter_entity_files(entity_type, source_root) if path != expected]

@@ -203,7 +203,7 @@ only to a throwaway `_scratch/` directory next to it.
 
 Published records use:
 
-- `hasProperty` → `[ClassName, ConventionalProperty]` → `hasNumericalPart` → `hasNumericalValue` (canonical EMMO quantity pattern)
+- `hasProperty` → `[ClassName, ConventionalProperty]` → `hasNumericalPart` → `hasNumberValue` (canonical EMMO quantity pattern)
 - `hasMeasurementUnit` → full EMMO or QUDT IRI (never a bare string)
 - `@type` stacking: a cylindrical LFP cell is simultaneously `BatteryCell`, `CylindricalBattery`, `LithiumIonBattery`, `LithiumIronPhosphateBattery`, and `LithiumIonGraphiteBattery`
 
@@ -221,14 +221,9 @@ Published records use:
 - Reusable cell-spec library flows beyond the walkthrough fixtures.
 
 **In development (no stability promise)**
-- Registry sync/query (`battinfo push`, `battinfo registry`).
+- The folder-based batch path: `battinfo push` processes a folder of raw cycler files, packages it and deposits it on Zenodo; `battinfo batch` and `battinfo dataset` run the same steps one at a time.
+- Registry administration (`battinfo registry bootstrap`).
 - Large-scale reference validation.
-
-Run the verification gate locally:
-
-```powershell
-.venv\Scripts\python .tools/quality/run_verification.py
-```
 
 ## Repository layout
 
@@ -261,6 +256,12 @@ uv sync --all-extras
 uv run ruff check src tests
 uv run mypy
 uv run pytest -q tests
+```
+
+A shorter acceptance gate runs the acceptance tests, a smoke test of the installed package and a wheel build. It is part of the repository, not of the installed package, so run it from a checkout:
+
+```powershell
+uv run python .tools/quality/run_verification.py
 ```
 
 CI runs the same checks across Python 3.11/3.12 on Linux and Windows via the

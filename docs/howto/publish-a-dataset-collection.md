@@ -153,7 +153,9 @@ Each member points at it twice, once in DCAT (`dcat:inSeries`) and once for data
 }
 ```
 
-The single-record emitter (`battinfo.record_to_jsonld(record, "dataset")`) and the registry's resolver use the same two membership edges and the same series type.
+The single-record emitter (`battinfo.record_to_jsonld(record, "dataset")`) writes the same two membership edges and the same series type as the deposit graph.
+
+The registry is a different matter for now. It records each member's `series_id` in its index, so a registry query by collection lists the members and the collection's page shows them. The RDF it serves at a dataset's IRI does not carry `dcat:inSeries`, `schema:isPartOf` or the `dcat:DatasetSeries` type yet. It will once the registry serves battinfo's own JSON-LD for each record. Until then, read membership from the deposit graph or from `record_to_jsonld`, not from the registry's RDF.
 
 ## Rules that keep the links stable
 

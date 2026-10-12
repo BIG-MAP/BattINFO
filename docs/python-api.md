@@ -106,7 +106,7 @@ dataset_dir = Path("data/cr2032-run")
 dataset_dir.mkdir(parents=True, exist_ok=True)
 (dataset_dir / "capacity.csv").write_text("cycle,capacity_ah\n1,0.225\n")
 
-cell_spec = CellSpec(manufacturer="Energizer", model="CR2032", format="coin", chemistry="Li-primary")
+cell_spec = CellSpec(manufacturer="Energizer", model="CR2032", format="coin", chemistry="li-mno2", rechargeable=False)
 cell = Cell(cell_spec=cell_spec, serial_number="energizer-cr2032-202602-dtjrga")
 test = Test(cell=cell, kind="capacity_check", protocol="constant current discharging", status="completed")
 dataset = Dataset(path=str(dataset_dir), cell=cell, test=test, name="Energizer CR2032 dataset")

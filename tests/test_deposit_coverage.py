@@ -282,3 +282,133 @@ def test_standalone_kinds_are_registered_types() -> None:
     assert not unknown, f"DEPOSIT_STANDALONE_KINDS names unregistered types: {unknown}"
     overlap = sorted(set(DEPOSIT_STANDALONE_KINDS) & set(DEPOSIT_COVERAGE_EXEMPT))
     assert not overlap, f"types both promoted and exempt: {overlap}"
+
+
+def test_parameter_sets_are_not_checked_as_dataset_records() -> None:
+    """Parameter sets share dataset/ with dataset records (IDENTIFIER_POLICY 6.3).
+
+    A claim batch has no files and a virtual-cell parameter file is about no
+    record, so the checks a dataset record must pass (an about link, at least
+    one file) must not fire on them because of their namespace.
+    """
+    from battinfo.interop import from_bpx_parameters
+    from battinfo.validate import validate_publication_report
+
+    record_sets = _record_sets()
+    fixture = ROOT / "tests" / "fixtures" / "interop" / "bpx-dfn-full.bpx.json"
+    record_sets["parameter-set"].append(from_bpx_parameters(fixture).to_parameter_set(virtual_cell=True))
+    parameter_set_iris = {_record_iri(rec) for rec in record_sets["parameter-set"]}
+    assert all(iri.startswith("https://w3id.org/battinfo/dataset/") for iri in parameter_set_iris)
+
+    doc = _deposit_graph(record_sets)
+    paths = {f"@graph[{i}]" for i, node in enumerate(doc["@graph"]) if node.get("@id") in parameter_set_iris}
+    assert len(paths) == len(parameter_set_iris)
+    report = validate_publication_report(doc, policy="publisher")
+    flagged = [
+        issue for issue in report.issues
+        if issue.code in {"publication.dataset_about_missing", "publication.dataset_distribution_missing"}
+        and issue.path.split(".")[0] in paths
+    ]
+    assert not flagged, flagged
+
+
+@pytest.mark.parametrize("dataset_type", ["dcat:Dataset", "BatteryTestResult"])
+def test_dataset_record_nodes_are_held_to_the_dataset_checks(dataset_type: str) -> None:
+    """The checks key on the types a dataset record's node carries.
+
+    A node typed as a dataset record (dcat:Dataset in a workspace deposit,
+    BatteryTestResult in a dataset publication package) must name what it is
+    about and carry a file; a plain schema:Dataset node under dataset/, which
+    is what a parameter set is, is not held to them.
+    """
+    from battinfo.validate import validate_publication_report
+
+    context = {"schema": "https://schema.org/", "dcat": "http://www.w3.org/ns/dcat#"}
+    checks = {"publication.dataset_about_missing", "publication.dataset_distribution_missing"}
+    typed = {"@id": DATASET_IRI, "@type": ["schema:Dataset", dataset_type], "schema:name": "x"}
+    report = validate_publication_report({"@context": context, "@graph": [typed]}, policy="publisher")
+    assert checks <= {issue.code for issue in report.errors}
+
+    plain = {"@id": DATASET_IRI, "@type": "schema:Dataset", "schema:name": "x"}
+    report = validate_publication_report({"@context": context, "@graph": [plain]}, policy="publisher")
+    assert not checks & {issue.code for issue in report.issues}
+
+
+def test_a_claim_batch_node_states_only_the_scope_its_record_states() -> None:
+    """The emitter writes what the record says, and no default of its own."""
+    from battinfo.jsonld import record_to_jsonld
+
+    for target in ({"material_kind": "graphite"}, {"cell_spec_id": CELL_SPEC_IRI}):
+        record = create_parameter_set(
+            validate=False, name="Fit", claims=[
+                {"parameter": "density", "quantity": {"value": 2.2, "unit": "g/cm3"}, "provenance_class": "fitted"}
+            ], **target,
+        )
+        record["parameter_set"].pop("scope")
+        doc = record_to_jsonld(record, "parameter-set")
+        node = doc["@graph"][0] if "@graph" in doc else doc
+        facets = node.get("schema:additionalProperty") or []
+        facets = facets if isinstance(facets, list) else [facets]
+        assert not [facet for facet in facets if facet.get("schema:name") == "scope"]
+
+
+@pytest.mark.parametrize("scope", [["material", "cell"], {"@value": "material"}, 3])
+def test_a_scope_of_another_shape_does_not_break_the_publication_validator(scope: object) -> None:
+    """JSON-LD lets a value be a list or a value object; the validator reads the node's type only."""
+    from battinfo.validate import validate_publication_report
+
+    node = {
+        "@id": DATASET_IRI,
+        "@type": "schema:Dataset",
+        "schema:name": "x",
+        "schema:additionalProperty": {"@type": "schema:PropertyValue", "schema:name": "scope", "schema:value": scope},
+    }
+    report = validate_publication_report(
+        {"@context": {"schema": "https://schema.org/"}, "@graph": [node]}, policy="publisher"
+    )
+    assert not {"publication.dataset_about_missing", "publication.dataset_distribution_missing"} & {
+        issue.code for issue in report.issues
+    }
+
+
+def test_a_deposit_of_parameter_sets_alone_passes_publication_validation() -> None:
+    """Parameter sets are the catalog's member datasets when nothing else is.
+
+    The catalog must reference at least one member dataset (SHACL). A deposit
+    holding only parameter sets (a claim batch and a BPX file with its source)
+    lists them as members and passes the whole publication validator, every
+    issue code included.
+    """
+    from battinfo.interop import bpx_file_distribution, from_bpx_parameters
+    from battinfo.validate import validate_publication_report
+
+    fixture = ROOT / "tests" / "fixtures" / "interop" / "bpx-dfn-full.bpx.json"
+    claim_batch = create_parameter_set(
+        name="Demo source - graphite", material_kind="graphite",
+        claims=[{
+            "parameter": "specific_capacity",
+            "quantity": {"value": 372.0, "unit": "mAh/g"},
+            "provenance_class": "literature",
+        }],
+    )
+    parameter_file = from_bpx_parameters(fixture).to_parameter_set(
+        virtual_cell=True,
+        distributions=[bpx_file_distribution(fixture, content_url="https://example.org/dfn.bpx.json")],
+    )
+    records = [claim_batch, parameter_file]
+    doc = AuthoringWorkspace._assemble_zenodo_jsonld(
+        {"parameter-set": records},
+        zenodo_record_id=1,
+        prereserved_doi="10.5281/zenodo.1",
+        record_url="https://zenodo.org/records/1",
+        data_filenames=[],
+        title="Parameter sets only",
+        license="cc-by-4.0",
+        creators=[{"name": "Doe, Jane"}],
+    )
+    catalog = next(node for node in doc["@graph"] if "dcat:Catalog" in node.get("@type", []))
+    iris = sorted(_record_iri(record) for record in records)
+    assert [ref["@id"] for ref in catalog["dcat:dataset"]] == iris
+    assert [ref["@id"] for ref in catalog["schema:hasPart"]] == iris
+    report = validate_publication_report(doc, policy="publisher")
+    assert not report.errors, report.errors

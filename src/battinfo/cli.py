@@ -1390,7 +1390,7 @@ def library_save_cell_spec(
     dry_run: bool = typer.Option(False, "--dry-run", help="Preview save without writing files."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
-    """Save a reusable library cell type from cell-specification JSON or inline fields."""
+    """Save a reusable library cell spec from cell-specification JSON or inline fields."""
     fmt = _check_output_format(output_format)
     reg_mode = _check_save_mode(mode)
     dup_policy = _check_duplicate_policy(duplicate_policy)
@@ -1516,7 +1516,7 @@ def query_cell_specs(
     offset: int = typer.Option(0, min=0, help="Start offset."),
     output_format: str = typer.Option("table", "--format", help="Output format: table|json."),
 ) -> None:
-    """Query canonical cell types."""
+    """Query canonical cell specs."""
     fmt = _check_output_format(output_format)
     rows = api_query_cell_specs(
         id=id,
@@ -2640,7 +2640,7 @@ def publish_cell_spec(
     source_version: str | None = typer.Option(None, "--source-version", help="Optional source version override."),
     output_format: str = typer.Option("json", "--format", help="Output format: json|text."),
 ) -> None:
-    """Publish one cell type through the simplified BattINFO publish surface."""
+    """Publish one cell spec through the simplified BattINFO publish surface."""
     fmt = _check_workspace_output_format(output_format)
     try:
         if input_path is not None:
@@ -2688,7 +2688,7 @@ def publish_cell_spec(
         _emit_json(payload)
         return
 
-    typer.echo(f"Published cell type to {payload['destination']}")
+    typer.echo(f"Published cell spec to {payload['destination']}")
     typer.echo(f"Canonical id: {payload.get('canonical_id')}")
     typer.echo(f"Canonical IRI: {payload.get('canonical_iri')}")
     if payload.get("registry_resource_url"):
@@ -3292,7 +3292,7 @@ def dataset_publish(
 @batch_app.command("init")
 def batch_init(
     output_dir: Path = typer.Argument(..., help="Directory to create for this batch."),
-    cell_spec: str = typer.Option(..., "--cell-spec", "-t", help='Cell type IRI or name, e.g. "Energizer CR2032".'),
+    cell_spec: str = typer.Option(..., "--cell-spec", "-t", help='Cell spec: its IRI (https://w3id.org/battinfo/spec/...) or its manufacturer and model, e.g. "Energizer CR2032".'),
     count: int = typer.Option(..., "--count", "-n", help="Number of cells received."),
     batch_id: str | None = typer.Option(None, "--batch-id", help="Batch / lot identifier."),
     lab: str | None = typer.Option(None, "--lab", help="Institution or lab name."),
@@ -3351,7 +3351,7 @@ def batch_init(
         raise typer.Exit(code=1) from exc
 
     typer.echo(f"Initialised batch: {result['output_dir']}")
-    typer.echo(f"  Cell type : {result['cell_spec_name']}  ({result['cell_spec_iri']})")
+    typer.echo(f"  Cell spec : {result['cell_spec_name']}  ({result['cell_spec_iri']})")
     typer.echo(f"  Cells     : {result['count']}")
     typer.echo()
     for cell in result["cells"]:
@@ -3386,7 +3386,7 @@ def batch_add(
     """Add more cells to an existing batch directory.
 
     \b
-    Reads batch.yaml to inherit cell type, lab, operator, and project.
+    Reads batch.yaml to inherit cell spec, lab, operator, and project.
     New cells are numbered after the existing ones.
     Provide --batch-id / --operator / --project to override for the new cells.
     Updates the count in batch.yaml automatically.
@@ -3413,7 +3413,7 @@ def batch_add(
         raise typer.Exit(code=1) from exc
 
     typer.echo(f"Added {result['added']} cell(s) to {result['batch_dir']}")
-    typer.echo(f"  Cell type  : {result['cell_spec_name']}  ({result['cell_spec_iri']})")
+    typer.echo(f"  Cell spec  : {result['cell_spec_name']}  ({result['cell_spec_iri']})")
     typer.echo(f"  New total  : {result['total_count']}")
     typer.echo()
     for cell in result["new_cells"]:
@@ -3509,7 +3509,7 @@ def batch_status(
 
     console.print()
     console.print(f"[bold]Batch:[/bold] {batch_dir.name}")
-    console.print(f"  Cell type  : {manifest.get('cell_spec_name', manifest.get('cell_spec_iri', '?'))}")
+    console.print(f"  Cell spec  : {manifest.get('cell_spec_name', manifest.get('cell_spec_iri', '?'))}")
     console.print(f"  Cells      : {total}")
     console.print()
     console.print(f"  Cells with data      : {has_data}/{total}  {_status(has_data == total)}")
@@ -3715,7 +3715,7 @@ def push(
     folder: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True,
                                   help="Folder containing raw data files or an existing batch."),
     cell_spec: str | None = typer.Option(None, "--cell-spec", "-t",
-                                         help="Cell type, e.g. 'Energizer CR2032'. Required for unstructured folders."),
+                                         help="Cell spec: its IRI (https://w3id.org/battinfo/spec/...) or its manufacturer and model, e.g. 'Energizer CR2032'. Required for unstructured folders."),
     cells: int | None = typer.Option(None, "--cells", "-n",
                                      help="Number of cells (auto-detected from filenames if omitted)."),
     batch_id: str | None = typer.Option(None, "--batch-id", help="Batch / lot identifier."),
@@ -3784,7 +3784,7 @@ def push(
         console.print()
         console.print(f"[bold]Push:[/bold] {folder}")
         if cell_spec:
-            console.print(f"  Cell type : {cell_spec}")
+            console.print(f"  Cell spec : {cell_spec}")
         if not is_batch:
             groups = _group_files_by_cell(folder)
             if groups:

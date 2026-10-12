@@ -67,9 +67,11 @@ from battinfo.bundle import (
 )
 from battinfo.entities import (
     dataset_locator_seed,
+    entity_files_for_uid,
     entity_types_for_namespace,
     is_placeholder_iri,
     iter_entity_files,
+    kind_for_doc,
     save_entity_path,
 )
 from battinfo.validate.core import DEFAULT_POLICY, ValidationPolicy
@@ -992,29 +994,33 @@ def _candidate_types_for_namespace(namespace: str) -> list[str]:
     return entity_types_for_namespace(namespace)
 
 
-def _find_record_path_by_id(entity_id: str, source_root: Path) -> Path | None:
+def _find_record_by_id(entity_id: str, source_root: Path) -> tuple[Path, str] | None:
+    """The file under *source_root* holding *entity_id*, and the kind of record in it."""
     namespace, uid = _iri_tail(entity_id)
     cache = active_record_cache(source_root)
     if cache is not None:
-        found = cache.lookup(entity_id, _candidate_types_for_namespace(namespace))
-        return found[0] if found is not None else None
+        return cache.lookup(entity_id, _candidate_types_for_namespace(namespace))
+
+    def _holds(path: Path) -> tuple[Path, str] | None:
+        try:
+            doc = _load_json(path)
+            if _entity_id(doc) != entity_id:
+                return None
+        except Exception:  # noqa: BLE001
+            return None
+        kind = kind_for_doc(doc)
+        return (path, kind.entity_type) if kind is not None else None
+
     for entity_type in _candidate_types_for_namespace(namespace):
-        expected = _save_entity_path(entity_type, uid, source_root)
-        if expected.exists():
-            try:
-                if _entity_id(_load_json(expected)) == entity_id:
-                    return expected
-            except Exception:  # noqa: BLE001
-                pass
-        for path in _iter_entity_files(entity_type, source_root):
-            if path == expected:
-                continue
-            try:
-                if _entity_id(_load_json(path)) == entity_id:
-                    return path
-            except Exception:  # noqa: BLE001
-                continue
+        for path in entity_files_for_uid(entity_type, uid, source_root):
+            if (found := _holds(path)) is not None:
+                return found
     return None
+
+
+def _find_record_path_by_id(entity_id: str, source_root: Path) -> Path | None:
+    found = _find_record_by_id(entity_id, source_root)
+    return found[0] if found is not None else None
 
 
 def _validate_save_mode(mode: str) -> str:
@@ -1242,7 +1248,10 @@ _NATURAL_KEY_FIELDS = {
     "test-protocol": "name or version",
     "test": "name or protocol_name",
     "dataset": "name or access_url",
-    "parameter-set": "name and material_kind, material_spec_id or cell_spec_id",
+    "parameter-set": (
+        "name and material_kind, material_spec_id or cell_spec_id (a claim batch), "
+        "or parameters_sha256 (a parameter file)"
+    ),
     "organization": "name",
     "channel": "equipment_id and index",
 }
@@ -1321,15 +1330,10 @@ def _canonical_identity_uid(entity_type: str, body: Mapping[str, Any], *,
             parent_id=body.get("parent_id"), piece_id=body.get("piece_id"),
         )
     elif entity_type == "parameter-set":
-        target = next((body.get(field) for field in ("material_kind", "material_spec_id", "cell_spec_id")
-                       if isinstance(body.get(field), str)), None)
-        name = body.get("name")
-        if target is not None and isinstance(name, str) and name.strip():
-            parts = ["parameter-set", target, str(body.get("scope") or "")]
-            if body.get("electrode_polarity"):
-                parts.append(str(body["electrode_polarity"]))
-            parts.append(name.strip().lower())
-            seed = ":".join(parts)
+        # One recipe for both flavours, shared with the builder (IDENTIFIER_POLICY 6.3).
+        from battinfo.api._parameters import parameter_set_uid  # noqa: PLC0415
+
+        return parameter_set_uid(body)
     elif entity_type == "organization":
         name = body.get("name")
         if isinstance(name, str) and name.strip():
@@ -1372,8 +1376,6 @@ def _with_minted_id(doc: dict[str, Any], *, source_root: PathLike | None = None)
     key (see ``_canonical_identity_uid``) is refused rather than given a random
     IRI. A record that has an id is returned unchanged.
     """
-    from battinfo.entities import kind_for_doc  # noqa: PLC0415
-
     kind = kind_for_doc(doc)
     body = doc.get(kind.record_key) if kind is not None else None
     if kind is None or not isinstance(body, Mapping) or body.get("id"):
@@ -1571,8 +1573,37 @@ def save_record(
     entity_id = _entity_id(doc)
     _, uid = _iri_tail(entity_id)
     entity_type = _logical_entity_type_from_doc(doc)
-    existing_path = _find_record_path_by_id(entity_id, source_root_path)
+    existing = _find_record_by_id(entity_id, source_root_path)
+    if existing is not None and existing[1] != entity_type:
+        # Two kinds share some namespaces (dataset/ holds datasets and parameter
+        # sets), so an IRI found on disk may name another kind of record. An IRI
+        # names one record: never overwrite it with a record of another kind.
+        raise ValueError(
+            f"Cannot save this {entity_type} record: {entity_id} is already the IRI of the "
+            f"{existing[1]} record at {existing[0]}. An IRI names one record, so a {entity_type} "
+            f"cannot replace a {existing[1]}; give the {entity_type} its own IRI."
+        )
+    existing_path = existing[0] if existing is not None else None
     target_path = existing_path if existing_path is not None else _save_entity_path(entity_type, uid, source_root_path)
+    if existing_path is None and target_path.exists():
+        # Files are named by uid alone, while the lookup above matches the
+        # full IRI. A record under another namespace with the same uid (a
+        # parameter set minted under spec/ before the move to dataset/) lives
+        # at this path; writing would replace it without a word. A uid is
+        # never reused across namespaces (IDENTIFIER_POLICY 6.3), as the
+        # registry refuses with parameter_set_uid_taken.
+        try:
+            held_id = _entity_id(_load_json(target_path))
+        except Exception:  # noqa: BLE001 - an unreadable file is still not ours to overwrite
+            held_id = None
+        if held_id != entity_id:
+            held = f"the record {held_id}" if held_id else "a record that could not be read"
+            raise ValueError(
+                f"Cannot save {entity_id}: {target_path} already holds {held}, which has the same "
+                f"uid ({uid}) under another IRI. A uid is never reused across namespaces "
+                "(IDENTIFIER_POLICY 6.3). For a parameter set published under spec/, "
+                "supersede_parameter_set() mints the replacement a uid of its own."
+            )
 
     if resolve_references:
         _resolve_references_for_save(doc, source_root_path)
@@ -1822,7 +1853,67 @@ def save_dataset(
     dry_run: bool = False,
     stamp: Callable[[dict[str, Any]], None] | None = None,
 ) -> dict[str, Any]:
-    """Save a dataset from either draft payload or canonical record."""
+    """Save a dataset record into a records folder and return what was written.
+
+    *draft* is a :class:`battinfo.Dataset`, a dict of its fields, a canonical
+    record (``{"schema_version": ..., "dataset": {...}}``) or the path of a JSON
+    file holding either. A draft without an ``id`` gets an IRI minted from its
+    identity (see :func:`save_record`), so saving the same dataset again lands
+    on the same IRI.
+
+    Parameters
+    ----------
+    source_root:
+        The records folder to save into, for a workspace
+        ``<root>/.battinfo/records``. References are resolved against it.
+    mode:
+        ``"create_only"`` (default) refuses a record whose IRI is already
+        saved there; ``"upsert"`` updates it in place, and an unchanged
+        re-save writes nothing and reports ``content_changed: False``.
+    duplicate_policy:
+        What ``"create_only"`` does with a record that already exists:
+        ``"error"`` (default) raises ``ValueError``; ``"return_existing"``
+        returns the saved record's id and path with ``status: "exists"``.
+    resolve_references:
+        ``True`` (default) requires the cells and tests in the dataset's
+        ``about`` list to be saved under *source_root*, and raises
+        ``ValueError`` naming each one that is not. ``False`` skips that
+        check, for a dataset saved before the records it points at.
+        ``series_id`` is not checked here.
+    validate, validation_policy:
+        Validate the record before writing it, under the named policy
+        (``"default"``, ``"strict"``, ``"publisher"`` or ``"ingest"``); an
+        error raises ``ValueError`` and nothing is written.
+    publish, publish_root, build_jsonld, build_html:
+        Also write resolver artifacts for the record under *publish_root*.
+    dry_run:
+        Report what would be written without writing.
+    stamp:
+        A function applied to the record before it is compared and written
+        (the workspace uses it for funding and contributor stamps).
+
+    Returns a dict with ``status``, ``id``, ``entity_type``, ``path``, ``mode``
+    and ``published``. By status:
+
+    - ``"created"``: a new record was written. ``content_changed`` is
+      ``False``; it only describes a record that was already there.
+    - ``"updated"`` (``mode="upsert"`` over a saved record):
+      ``content_changed`` is ``True`` when the record differs from the saved
+      one and ``False`` when it does not, in which case nothing is rewritten.
+      The comparison ignores ``id``, ``uid`` and the ``created_at``,
+      ``modified_at``, ``retrieved_at``, ``generated_at`` and ``imported_at``
+      timestamps, but not ``published_at``: a ``Dataset`` saved without one
+      gets the save time, so its re-save compares as changed.
+    - ``"exists"`` (``mode="create_only"`` with
+      ``duplicate_policy="return_existing"``): nothing was written; ``path``
+      is the saved record and there is no ``content_changed`` key.
+    - ``"dry-run"``: nothing was written; ``content_changed`` is as it would
+      be for the real save.
+
+    With ``publish=True``, a ``"created"`` or ``"updated"`` result also
+    carries ``publish_result`` and ``published`` is ``True``; otherwise
+    ``published`` is ``False``.
+    """
     from battinfo.bundle import Dataset as DatasetBundle
 
     if isinstance(draft, (str, Path)):

@@ -210,6 +210,11 @@ def _is_absolute_uri(value: Any) -> bool:
     return bool(parsed.scheme and (parsed.netloc or parsed.path))
 
 
+# The types a dataset record's node carries: dcat:Dataset in a workspace
+# deposit, BatteryTestResult in a dataset publication package.
+_DATASET_RECORD_TYPES = frozenset({"dcat:Dataset", "BatteryTestResult"})
+
+
 def _type_values(node: dict[str, Any]) -> list[str]:
     value = node.get("@type")
     if isinstance(value, str):
@@ -336,7 +341,20 @@ def _shape_issues(data: dict[str, Any], policy: ValidationPolicy) -> ValidationR
             continue
 
         node_id = node.get("@id")
-        is_battinfo_dataset = isinstance(node_id, str) and node_id.startswith("https://w3id.org/battinfo/dataset/")
+        # The about and file checks hold dataset records to what a deposit needs,
+        # so they apply to nodes typed as dataset records (_DATASET_RECORD_TYPES):
+        # BattINFO emits every dataset record with one of those types. The
+        # namespace cannot decide it: dataset/ also holds parameter sets
+        # (IDENTIFIER_POLICY 6.3), plain schema:Dataset nodes that have no files
+        # (a claim batch) or are about no record (a virtual-cell parameter
+        # file), and 6.1 reads a record's kind from the record, not its IRI. Nor
+        # can a marker on parameter-set nodes: the checks would then hang on the
+        # emitter always writing it, and in one shape.
+        is_battinfo_dataset = (
+            isinstance(node_id, str)
+            and node_id.startswith("https://w3id.org/battinfo/dataset/")
+            and any(t in _DATASET_RECORD_TYPES for t in node_types)
+        )
         # A collection (dcat:DatasetSeries) groups member datasets: it is about
         # nothing in particular and has no files of its own, so the about and
         # distribution requirements apply to its members, not to it.
@@ -471,6 +489,22 @@ def validate_publication_report(
     *,
     policy: ValidationPolicy | str = DEFAULT_POLICY,
 ) -> ValidationReport:
+    """Check a publication JSON-LD graph and return every issue found.
+
+    *data* is the JSON-LD document a deposit carries, such as the file
+    ``ws.preview_jsonld()`` writes or a ``battinfo.publish.jsonld``, loaded
+    with ``json.load``. The checks cover the JSON-LD itself, the nodes and
+    the references between them, the datasets and distributions (absolute
+    URIs, checksums, a non-empty ``schema:about`` and a distribution on every
+    dataset but a collection, collection membership), the SHACL publication
+    shapes, test conditions and the licence.
+
+    *policy* is a :class:`ValidationPolicy` or one of the names
+    ``"default"``, ``"strict"``, ``"publisher"`` and ``"ingest"``. A policy
+    whose ``publication`` setting is ``"off"`` returns an empty report. The
+    function never raises over a finding: read ``report.ok``,
+    ``report.errors`` and ``report.warnings``, or ``report.to_dict()``.
+    """
     resolved_policy = get_validation_policy(policy) if isinstance(policy, str) else policy
     if resolved_policy.publication == "off":
         return ValidationReport(policy=resolved_policy)

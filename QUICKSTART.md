@@ -119,23 +119,17 @@ print(jsonld["@type"])
 
 print(jsonld["schema:name"])     # Panasonic NCR18650B
 print(jsonld["schema:size"])     # R18650
+
+cell = jsonld["isDescriptionFor"]
+print(cell["@type"])
+# ['BatteryCell', 'CylindricalBattery', 'LithiumIonBattery']
+print([prop["@type"][0] for prop in cell["hasProperty"]])
+# ['NominalCapacity', 'NominalVoltage', 'Mass']
 ```
 
-A cell spec is an *information entity* — a datasheet as data — not the physical
-cell it describes. So its `@type` is `BatteryCellSpecification` (an EMMO
-information object) stacked with `schema:ProductModel` and
-`schema:CreativeWork`, and an `isDescriptionFor`
-link points from the spec to the cell type it specifies. The EMMO type stacking
-that describes the physical cell itself — `BatteryCell`, `CylindricalBattery`,
-`LithiumIonBattery`, and friends — lives on the cell node inside the full
-publication package, not on this resolver document. See
-[Tutorial 4](docs/guides/04-semantic-layer.ipynb) for how the spec, the cell type,
-and their EMMO types relate.
+A cell spec is an *information entity*, a datasheet as data, not the physical cell it describes. So its `@type` is `BatteryCellSpecification` (an EMMO information object) stacked with `schema:ProductModel` and `schema:CreativeWork`. Its `isDescriptionFor` link points at a node for the cell the spec describes, and that node carries the EMMO types of the physical cell (`BatteryCell`, `CylindricalBattery`, `LithiumIonBattery`) and one `hasProperty` node per quantity: the class (`NominalCapacity`), its `hasNumericalPart` with the number in `hasNumberValue`, and the unit IRI in `hasMeasurementUnit`. See [Tutorial 4](docs/guides/04-semantic-layer.ipynb) for how the spec, the cell and their EMMO types relate.
 
-The resolver JSON-LD is the lightweight document served at the cell spec's IRI.
-The full EMMO-aligned publication package — with `hasProperty` nodes for each
-quantitative specification — is produced when you publish (see
-[Tutorial 3](docs/guides/03-linked-records.ipynb)).
+The resolver JSON-LD is the document served at the cell spec's IRI. When you publish cells, tests and datasets with the workspace, the publication package links them to this spec (see [Tutorial 3](docs/guides/03-linked-records.ipynb)).
 
 ---
 
@@ -150,10 +144,13 @@ linked records live:
      empty directory. -->
 <!-- doc-snippet: skip -->
 ```powershell
-# step 1 printed the exact filename (result.debug_paths["canonical_record_path"])
+# <id> is the end of the IRI step 1 printed (https://w3id.org/battinfo/spec/<id>);
+# print(result.debug_paths["canonical_record_path"]) gives the whole path
 .venv\Scripts\battinfo validate .battinfo/quickstart/examples/cell-spec/cell-spec-<id>.json `
     --source-root .battinfo/quickstart/examples --format json
 ```
+
+On a core install the output is:
 
 ```json
 {
@@ -161,17 +158,27 @@ linked records live:
   "mode": "record",
   "policy": "default",
   "profile": null,
-  "source_root": ".battinfo/quickstart/examples",
-  "issue_count": 0,
+  "source_root": ".battinfo\\quickstart\\examples",
+  "issue_count": 1,
   "error_count": 0,
+  "warning_count": 1,
   "errors": [],
-  "issues": []
+  "issues": [
+    {
+      "code": "shacl.unavailable",
+      "severity": "warning",
+      "path": "",
+      "message": "pyshacl is not installed; SHACL validation skipped. Install with: pip install pyshacl",
+      "hint": null,
+      "validator": "shacl",
+      "resource_type": null,
+      "profile": null
+    }
+  ]
 }
 ```
 
-The record is valid (`error_count: 0`). On a core install you will also see one
-expected warning: optional SHACL validation is skipped because `pyshacl` is not
-installed (it ships with `battinfo[dev]`).
+The record is valid (`ok: true`, `error_count: 0`). The one warning says that the optional SHACL check was skipped because `pyshacl` is not installed. With `pyshacl` installed (`pip install pyshacl`, or the `dev` extra) the check runs, and `issue_count` and `warning_count` are 0.
 
 ---
 

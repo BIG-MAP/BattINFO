@@ -116,10 +116,9 @@ def _validator_code(error: ValidationError) -> str:
     return f"schema.{validator}"
 
 
-# Parameter-set fields that belong to one flavour only.
+# Parameter-set fields that belong to one flavour only (supersedes belongs to both).
 _PARAMETER_FILE_ONLY = (
     "parts", "parameters_sha256", "virtual_cell", "cell_instance_id", "distributions", "not_imported",
-    "supersedes",
 )
 _CLAIM_BATCH_ONLY = ("material_kind", "material_spec_id", "scope", "electrode_polarity")
 _CELL_LINKS = ("cell_spec_id", "cell_instance_id", "virtual_cell")
@@ -218,6 +217,13 @@ def _enhance_message(error: ValidationError) -> str:
         }
         if titles == {"Claim batch", "Parameter file"}:
             msg = _parameter_set_flavour_message(error.instance) or msg
+    if error.validator == "anyOf" and list(error.path) == ["parameter_set", "id"]:
+        msg = (
+            f"{error.instance!r} is not a parameter-set IRI: parameter sets mint under "
+            "https://w3id.org/battinfo/dataset/{uid} (IDENTIFIER_POLICY 6.3), and a "
+            "https://w3id.org/battinfo/spec/{uid} IRI is accepted only for a record minted "
+            "before 2026-10-11."
+        )
     if error.validator == "additionalProperties" and list(error.path) == ["properties"]:
         msg += " Run 'battinfo properties list' to see all valid property names."
     if error.validator in ("pattern", "maxLength") and list(error.path)[-1:] == ["handle"]:

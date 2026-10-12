@@ -51,7 +51,7 @@ class TestResolveCellSpecification:
         assert iri == ENERGIZER_IRI
 
     def test_unknown_raises(self) -> None:
-        with pytest.raises(ValueError, match="No cell type found"):
+        with pytest.raises(ValueError, match="No cell spec found"):
             _resolve_cell_spec_for_batch("NoSuchManufacturer XYZ999")
 
 

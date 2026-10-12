@@ -85,6 +85,74 @@ def test_convert_clean_file_has_no_loss_warning(
     assert isinstance(manifest[str(written[0].resolve())], str)
 
 
+_NEWARE_SAMPLE = ROOT / "docs" / "guides" / "data" / "neware-sample.csv"
+
+
+def test_convert_does_not_call_a_row_counter_data_loss(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """Neware's ``Record`` column only numbers the rows (1, 2, 3, ...). The converted
+    file keeps the row order, so leaving it out loses nothing: the conversion says
+    so, without the DATA-LOSS warning, and records no loss in the manifest."""
+    pytest.importorskip("bdf")
+    (tmp_path / "neware-sample.csv").write_bytes(_NEWARE_SAMPLE.read_bytes())
+    ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
+
+    written = ws.convert("*.csv")
+
+    assert len(written) == 1
+    out = capsys.readouterr().out
+    assert "only numbers the rows: Record" in out
+    assert "DATA-LOSS WARNING" not in out
+    assert "NOT mapped" not in out
+    manifest = json.loads((tmp_path / ".battinfo" / "conversions.json").read_text(encoding="utf-8"))
+    assert isinstance(manifest[str(written[0].resolve())], str)
+
+
+def test_convert_still_reports_a_numbered_column_that_is_not_a_row_counter(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """The same column holding 10, 20, 30, ... is data the row order does not carry."""
+    pytest.importorskip("bdf")
+    header, *rows = _NEWARE_SAMPLE.read_text(encoding="utf-8").splitlines()
+    rows = [f"{10 * (index + 1)},{row.split(',', 1)[1]}" for index, row in enumerate(rows)]
+    (tmp_path / "neware-sample.csv").write_text("\n".join([header, *rows]) + "\n", encoding="utf-8")
+    ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
+
+    written = ws.convert("*.csv")
+
+    out = capsys.readouterr().out
+    assert "DATA-LOSS WARNING" in out
+    assert "- Record" in out
+    assert "only numbers the rows" not in out
+    manifest = json.loads((tmp_path / ".battinfo" / "conversions.json").read_text(encoding="utf-8"))
+    assert manifest[str(written[0].resolve())]["unmapped_columns"] == ["Record"]
+
+
+@pytest.mark.parametrize("values", [[1], [0, 1]], ids=["one-row", "two-row-flag"])
+def test_convert_does_not_judge_a_short_file_a_row_counter(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str], values: list[int]
+) -> None:
+    """A single 1, or a 0/1 flag over two rows, looks like a counter by chance. Below
+    the minimum row count the column stays reported as lost, in the printout and in
+    the conversion manifest."""
+    pytest.importorskip("bdf")
+    header, *rows = _NEWARE_SAMPLE.read_text(encoding="utf-8").splitlines()
+    rows = [f"{value},{row.split(',', 1)[1]}" for value, row in zip(values, rows)]
+    (tmp_path / "neware-sample.csv").write_text("\n".join([header, *rows]) + "\n", encoding="utf-8")
+    ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
+
+    written = ws.convert("*.csv")
+
+    assert len(written) == 1
+    out = capsys.readouterr().out
+    assert "DATA-LOSS WARNING" in out
+    assert "- Record" in out
+    assert "only numbers the rows" not in out
+    manifest = json.loads((tmp_path / ".battinfo" / "conversions.json").read_text(encoding="utf-8"))
+    assert manifest[str(written[0].resolve())]["unmapped_columns"] == ["Record"]
+
+
 def test_convert_csv_warns_on_non_canonical_columns(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:

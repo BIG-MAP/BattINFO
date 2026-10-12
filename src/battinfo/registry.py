@@ -544,9 +544,11 @@ class Registry:
         - ``cell_id``, ``cell_name``, ``cell_spec_id``
         - ``manufacturer``, ``model``, ``format``, ``chemistry``,
           ``positive_electrode_basis``, ``negative_electrode_basis``
-        - ``nominal_capacity_ah`` and ``nominal_capacity_source`` (which stated
-          capacity it is: nominal, rated, typical or minimum; empty when the
-          cell and its spec state none)
+        - ``nominal_capacity_ah`` and ``nominal_capacity_source`` (the
+          property the capacity was read from: ``nominal_capacity``,
+          ``rated_capacity``, ``typical_capacity`` or ``minimum_capacity``,
+          the first one the cell, or else its spec, states; empty when they
+          state none)
         - ``checksum_algorithm``, ``checksum_value``: the checksum the record
           states for the file, in any algorithm
 

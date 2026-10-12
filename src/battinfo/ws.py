@@ -24,7 +24,7 @@ import json
 import os
 import re
 import warnings
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -916,6 +916,111 @@ def _read_record_sets(source_root: Path) -> dict[str, list[dict]]:
     return record_sets
 
 
+def _replaced_legacy_parameter_sets(record_sets: dict[str, list[dict]]) -> dict[str, str]:
+    """Parameter sets minted under ``spec/`` that another record here supersedes.
+
+    Returns ``{old spec/ IRI: replacing IRI}``. The documented migration is
+    ``supersede_parameter_set(old)`` then ``ws.add(new)``: the workspace then
+    holds both, and the old record is replaced, not published again.
+    """
+    replaced: dict[str, str] = {}
+    for record in record_sets.get("parameter-set", []):
+        body = record.get("parameter_set") if isinstance(record, dict) else None
+        if not isinstance(body, dict):
+            continue
+        old, new = body.get("supersedes"), body.get("id")
+        if (
+            isinstance(old, str)
+            and old.startswith("https://w3id.org/battinfo/spec/")
+            and isinstance(new, str)
+            and new != old
+        ):
+            replaced[old] = new
+    return replaced
+
+
+def _read_deposit_record_sets(source_root: Path) -> tuple[dict[str, list[dict]], dict[str, str]]:
+    """The records a deposit carries, and the legacy parameter sets it leaves out.
+
+    A parameter set minted under ``spec/`` that another record in the
+    workspace supersedes stays out of the deposit and out of the record check
+    (its replacement carries its claims); one that nothing supersedes is
+    still refused by the check. Returns ``(record_sets, {old IRI: new IRI})``.
+    """
+    record_sets = _read_record_sets(source_root)
+    replaced = _replaced_legacy_parameter_sets(record_sets)
+    if replaced:
+        record_sets["parameter-set"] = [
+            record
+            for record in record_sets.get("parameter-set", [])
+            if not (
+                isinstance(record, dict)
+                and isinstance(body := record.get("parameter_set"), dict)
+                and isinstance(body.get("id"), str)
+                and body["id"] in replaced
+            )
+        ]
+    return record_sets, replaced
+
+
+def _print_replaced_legacy_parameter_sets(replaced: dict[str, str]) -> None:
+    for old, new in sorted(replaced.items()):
+        print(f"  Leaving out {old}: minted under spec/ and superseded by {new} in this workspace.")
+
+
+def _parameter_set_publication_errors(record_sets: dict[str, list[dict]]) -> list[str]:
+    """Why parameter sets in *record_sets* cannot be published, one line per record.
+
+    :meth:`AuthoringWorkspace.submit` validates every record under the
+    publisher policy before it sends anything. A deposit describes its
+    parameter sets as nodes of its own, so the Zenodo path runs the same
+    record check on them: it refuses a parameter set minted under ``spec/``
+    (``semantic.parameter_set_legacy_namespace``) and one that reuses a uid
+    (``semantic.parameter_set_uid_reused``), so nothing is published under
+    ``spec/`` by either route (IDENTIFIER_POLICY 6.3).
+    """
+    from battinfo.validate.record import validate_record  # noqa: PLC0415
+
+    problems: list[str] = []
+    for record in record_sets.get("parameter-set", []):
+        label = (entity_id_from_doc(record) if isinstance(record, dict) else None) or "a parameter set"
+        try:
+            result = validate_record(record, policy="publisher")
+        except (ValueError, TypeError) as exc:  # not a recognised record, as ws.submit() reports it
+            problems.append(f"{label}: not a recognised record ({exc})")
+            continue
+        if not result.ok:
+            problems.append(f"{label}: {'; '.join(result.errors)}")
+    return problems
+
+
+_MATERIAL_SPEC_STUB_TYPE = ["Description", "schema:ProductModel", "schema:CreativeWork"]
+
+
+def _parameter_set_target_refs(records: list[dict]) -> list[tuple[str, Any]]:
+    """``(IRI, stub @type)`` for every record a parameter set points at, sorted.
+
+    Cell spec, cell instance, material spec, and a parameter file's part
+    material specs. Material specs stub with the type their own records emit.
+    """
+    refs: dict[str, Any] = {}
+    for record in records:
+        body = record.get("parameter_set") if isinstance(record, dict) else None
+        if not isinstance(body, dict):
+            continue
+        if isinstance(body.get("cell_spec_id"), str):
+            refs.setdefault(body["cell_spec_id"], "BatteryCellSpecification")
+        if isinstance(body.get("cell_instance_id"), str):
+            refs.setdefault(body["cell_instance_id"], "BatteryCell")
+        if isinstance(body.get("material_spec_id"), str):
+            refs.setdefault(body["material_spec_id"], _MATERIAL_SPEC_STUB_TYPE)
+        parts = body.get("parts")
+        for part in parts if isinstance(parts, list) else []:
+            if isinstance(part, dict) and isinstance(part.get("material_spec_id"), str):
+                refs.setdefault(part["material_spec_id"], _MATERIAL_SPEC_STUB_TYPE)
+    return sorted(refs.items())
+
+
 def _apply_conformance_jsonld(
     node: dict,
     spec_id: str | None,
@@ -1150,6 +1255,54 @@ def _unmapped_source_columns(
         return unmapped
     except Exception:  # noqa: BLE001 — reporting is best-effort by design
         return []
+
+
+_ROW_COUNTER_MIN_ROWS = 10
+
+
+def _row_counter_columns(
+    src: Path, plugin_id: str | None, columns: list[str], n_rows: int
+) -> list[str]:
+    """The *columns* of *src* that only number its rows (best-effort).
+
+    A column holding 0, 1, 2, ... or 1, 2, 3, ..., one value per row of the
+    converted table, says nothing the row order of the converted file does not
+    already say (Neware's ``Record`` column is one), so leaving it out of the
+    BDF file loses no data. A column that cannot be read, or whose values are
+    anything else, is not a row counter and stays reported as lost.
+
+    A file shorter than ``_ROW_COUNTER_MIN_ROWS`` rows is never judged: a
+    single 1, or a 0/1 flag over two rows, looks like a counter by chance, and
+    calling it one would hide real data loss.
+    """
+    if not columns or n_rows < _ROW_COUNTER_MIN_ROWS:
+        return []
+    try:
+        import bdf.io as _bdf_io  # noqa: PLC0415
+        import polars as pl  # noqa: PLC0415
+
+        plugin = _bdf_io.PLUGINS[plugin_id] if plugin_id in _bdf_io.PLUGINS else None
+        parser = getattr(plugin, "table_parser", None)
+        if parser is None:
+            return []
+        frame = parser.read(src, normalize=False, lazy=True).select(columns).collect()
+    except Exception:  # noqa: BLE001 — best-effort, like the loss report itself
+        return []
+    counters: list[str] = []
+    for name in columns:
+        try:
+            values = frame.get_column(name)
+            if values.dtype.is_float() and not (values == values.floor()).all():
+                continue
+            values = values.cast(pl.Int64, strict=True)
+        except Exception:  # noqa: BLE001 — not whole numbers, so not a row counter
+            continue
+        if len(values) != n_rows or values.null_count() or values[0] not in (0, 1):
+            continue
+        if not (values.diff().drop_nulls() == 1).all():
+            continue
+        counters.append(name)
+    return counters
 
 
 # Legacy/authored test-spec condition keys -> (canonical condition name, default unit).
@@ -1424,6 +1577,36 @@ def _check_draft_keys(
         f"{path.name}: unknown key(s) in a {draft} draft: {', '.join(parts)}. "
         f"A {draft} draft accepts: {', '.join(sorted(allowed))}; keys starting with '_' "
         "are comments. Nothing was loaded."
+    )
+
+
+def _signature_keywords(fn: Callable[..., Any]) -> builtins.list[str]:
+    """The parameters *fn* takes by name, in signature order; ``**kwargs`` is not one."""
+    import inspect  # noqa: PLC0415
+
+    named = (inspect.Parameter.POSITIONAL_OR_KEYWORD, inspect.Parameter.KEYWORD_ONLY)
+    return [name for name, p in inspect.signature(fn).parameters.items() if p.kind in named]
+
+
+def _check_add_keywords(record_type: str, accepted: Iterable[str], kwargs: Mapping[str, Any]) -> None:
+    """Raise TypeError for keywords ``ws.add(record_type, ...)`` does not take, with a did-you-mean.
+
+    ``ws.add()`` hands its keywords to a private method, and from there to a
+    builder or an input model, so a stray keyword used to fail deep inside: as
+    Python's message naming the private method, as a pydantic error, or as a
+    complaint about another argument. *accepted* is read from those signatures
+    and models, so it follows them when they change.
+    """
+    from battinfo.bundle import _unknown_keyword_parts  # noqa: PLC0415
+
+    accepted = list(dict.fromkeys(accepted))
+    unknown = [key for key in kwargs if key not in accepted]
+    if not unknown:
+        return
+    raise TypeError(
+        f"Unknown keyword(s) for ws.add({record_type!r}): {_unknown_keyword_parts(unknown, accepted)}. "
+        f"ws.add({record_type!r}, ...) accepts: {', '.join(f'{name}=' for name in accepted)}. "
+        "Run help(ws.add) for what each one does."
     )
 
 
@@ -2287,6 +2470,14 @@ class AuthoringWorkspace:
             # behind a success message — compare the source header against what
             # actually survived and report every column left behind.
             unmapped = _unmapped_source_columns(src, reader, list(df.columns))
+            # A column that only numbers the rows is not data: the row order of
+            # the converted file carries it. Say so instead of calling it a loss.
+            counters = _row_counter_columns(src, reader, unmapped, len(df))
+            if counters:
+                unmapped = [col for col in unmapped if col not in counters]
+                print(f"  Left out {'a column' if len(counters) == 1 else 'columns'} that only "
+                      f"number{'s' if len(counters) == 1 else ''} the rows: {', '.join(counters)}. "
+                      f"The row order of {out.name} holds the same information.")
             if unmapped:
                 lossy.append((src.name, unmapped))
                 print(f"  WARNING: {len(unmapped)} source column(s) were NOT mapped to BDF "
@@ -2840,6 +3031,29 @@ class AuthoringWorkspace:
         For large batches you may instead pass ``datasets="glob"`` to match files to
         already-loaded cells by the 6-char short ID in each filename.
 
+        The keywords a test takes are ``type`` (or ``kind``), ``cell``, ``data``,
+        ``raw``, ``datasets``, ``spec`` (or ``protocol``), ``conformance``,
+        ``name``, ``handle``, ``iri``, ``uid``, ``dataset_iris``, ``series_id``,
+        ``instrument``, ``channel``, ``license``, ``description`` and ``status``.
+        Any other keyword raises ``TypeError`` naming the closest match and
+        listing the accepted ones, before anything is created; every record type
+        checks its keywords this way.
+
+        - ``spec`` (``protocol`` is the same keyword) is the test spec the run
+          followed: a ``battinfo.TestSpec``, saved with the test and linked to
+          it, or the IRI of a test spec that is already saved or published.
+        - ``description`` is free text about this run; ``status`` is
+          ``"completed"`` unless you pass ``"planned"``, ``"running"``,
+          ``"aborted"`` or ``"other"``.
+        - ``instrument`` names the cycler the test ran on.
+        - ``license`` sets the licence of the datasets made from ``data=``,
+          instead of the workspace default.
+        - ``raw`` attaches the original instrument file for each ``data`` file;
+          without it the originals recorded by ``ws.convert()`` are attached.
+        - ``conformance`` says whether the run followed its spec:
+          ``"conformant"``, ``"non-conformant"``, ``"unknown"``, or a dict with
+          ``status``, ``note`` and ``deviations``.
+
         ``series_id`` puts every dataset made from ``data=`` in a collection. Pass
         the collection's IRI; the collection itself is saved first, with
         ``battinfo.Dataset`` and ``battinfo.save_dataset``::
@@ -2875,24 +3089,53 @@ class AuthoringWorkspace:
         """
         rt_key = str(record_type).strip().lower().replace("_", "-")
         if rt_key == "equipment":
+            _check_add_keywords("equipment", _signature_keywords(self._add_equipment), kwargs)
             return self._add_equipment(**kwargs)
-        if rt_key == "material-spec":
-            return self._add_material_spec(**kwargs)
-        if rt_key == "material":
-            return self._add_material(**kwargs)
-        if rt_key == "electrode-spec":
-            return self._add_electrode_spec(**kwargs)
-        if rt_key == "electrode":
+        if rt_key in ("material-spec", "material", "electrode-spec", "electrode"):
+            from battinfo.api._components import (  # noqa: PLC0415
+                ElectrodeInput,
+                ElectrodeSpecInput,
+                MaterialInput,
+                MaterialSpecInput,
+            )
+            from battinfo.bundle import _model_keywords  # noqa: PLC0415
+
+            # The component paths hand their keywords to an input model. The
+            # instance paths set the spec link themselves from spec=, so the
+            # model's own spec-id keywords are not theirs to take.
+            if rt_key == "material-spec":
+                _check_add_keywords("material_spec", _model_keywords(MaterialSpecInput), kwargs)
+                return self._add_material_spec(**kwargs)
+            if rt_key == "electrode-spec":
+                _check_add_keywords("electrode_spec", _model_keywords(ElectrodeSpecInput), kwargs)
+                return self._add_electrode_spec(**kwargs)
+            if rt_key == "material":
+                linked = {"material_spec_id", "spec_id"}
+                accepted = [*_signature_keywords(self._add_material),
+                            *(k for k in _model_keywords(MaterialInput) if k not in linked)]
+                _check_add_keywords("material", accepted, kwargs)
+                return self._add_material(**kwargs)
+            linked = {"electrode_spec_id", "spec_id"}
+            accepted = [*_signature_keywords(self._add_electrode),
+                        *(k for k in _model_keywords(ElectrodeInput) if k not in linked)]
+            _check_add_keywords("electrode", accepted, kwargs)
             return self._add_electrode(**kwargs)
         if rt_key in ("parameter-set", "parameters"):
+            from battinfo.api._parameters import _record_from_parameter_set  # noqa: PLC0415
+
+            accepted = [*_signature_keywords(self._add_parameter_set),
+                        *_signature_keywords(_record_from_parameter_set)]
+            _check_add_keywords("parameter_set", accepted, kwargs)
             return self._add_parameter_set(**kwargs)
         try:
             rt = _canon_type(record_type)
         except ValueError:
             rt = None
         if rt == "cell":
+            _check_add_keywords("cell", _signature_keywords(self._add_cell_instances), kwargs)
             return self._add_cell_instances(**kwargs)
         if rt == "test":
+            _check_add_keywords("test", _signature_keywords(self._add_tests), kwargs)
             return self._add_tests(**kwargs)
         raise ValueError(
             f"add() supports type 'cell', 'test', 'equipment', 'material_spec', "
@@ -5028,7 +5271,8 @@ class AuthoringWorkspace:
         sandbox:
             Use ``sandbox.zenodo.org`` for testing.
         community:
-            Zenodo community identifier (default ``"battinfo-reference"``).
+            Zenodo community identifier (default ``"battery-knowledge-base"``).
+            ``None`` leaves the deposit out of any community.
         creators:
             List of ``{"name": "...", "affiliation": "...", "orcid": "..."}`` dicts.
         keywords:
@@ -5085,6 +5329,18 @@ class AuthoringWorkspace:
         records_dir = self._ws.source_root
         if not records_dir.exists():
             raise RuntimeError("No records found — run ws.save() first.")
+
+        # Fail closed before anything reaches Zenodo, a draft included (a draft
+        # is one click from published): the deposit's parameter sets must pass
+        # the record check ws.submit() runs.
+        deposit_records, replaced_legacy = _read_deposit_record_sets(records_dir)
+        _print_replaced_legacy_parameter_sets(replaced_legacy)
+        parameter_set_errors = _parameter_set_publication_errors(deposit_records)
+        if parameter_set_errors:
+            raise RuntimeError(
+                f"Refusing to deposit: {len(parameter_set_errors)} parameter set(s) cannot be "
+                "published, so nothing was sent to Zenodo: " + " | ".join(parameter_set_errors)
+            )
 
         client = ZenodoClient(token=tok, sandbox=sandbox)
         domain = "sandbox.zenodo.org" if sandbox else "zenodo.org"
@@ -5408,18 +5664,25 @@ class AuthoringWorkspace:
         # non-conformant record is surfaced up front rather than after an authoritative-looking
         # file has already been produced (D-4). Uses the FULL publication validator (JSON-LD +
         # structural + SHACL), not just the syntactic JSON-LD check.
+        # The record check ws.zenodo() runs on the parameter sets before it deposits
+        # counts here too.
         try:
             from battinfo.validate import validate_publication_report  # noqa: PLC0415
             report = validate_publication_report(jsonld, policy="publisher")
-            errors = [i for i in report.issues if i.severity == "error"]
+            deposit_records, replaced_legacy = _read_deposit_record_sets(records_dir)
+            _print_replaced_legacy_parameter_sets(replaced_legacy)
+            errors = [i.message for i in report.issues if i.severity == "error"] + [
+                f"parameter set {problem}"
+                for problem in _parameter_set_publication_errors(deposit_records)
+            ]
             warnings = [i for i in report.issues if i.severity == "warning"]
             if not errors and not warnings:
                 print("  Gold-standard: PASS (no validation issues)")
             else:
                 print(f"  Gold-standard: {len(errors)} error(s), {len(warnings)} warning(s) "
                       "-- address before publishing:")
-                for i in errors:
-                    print(f"    ERROR   {i.message}")
+                for message in errors:
+                    print(f"    ERROR   {message}")
                 for i in warnings:
                     print(f"    warning {i.message}")
         except Exception as exc:  # noqa: BLE001 — preview must still write + return its path
@@ -6344,7 +6607,21 @@ class AuthoringWorkspace:
         # alternative encodings of one dataset. schema:Dataset/Collection typing is
         # kept so Zenodo and schema.org consumers still see a top-level dataset — it
         # carries the DOI for the whole deposit.
-        member_refs = [{"@id": ds_id} for ds_id in sorted(ds_meta)]
+        # Parameter sets are datasets too (IDENTIFIER_POLICY 6.3), described by
+        # their own standalone nodes below: the catalog lists them as members
+        # after the per-test datasets, so a deposit holding only parameter sets
+        # still references a member dataset.
+        _parameter_set_iris = sorted({
+            _body["id"]
+            for _rec in record_sets.get("parameter-set", [])
+            if isinstance(_rec, dict)
+            and isinstance(_body := _rec.get("parameter_set"), dict)
+            and isinstance(_body.get("id"), str)
+            and _body["id"] not in ds_meta
+        })
+        member_refs = [{"@id": ds_id} for ds_id in sorted(ds_meta)] + [
+            {"@id": iri} for iri in _parameter_set_iris
+        ]
         catalog_node: dict = {
             # dcat:Catalog + schema:DataCatalog so catalog-aware consumers in both
             # vocabularies recognise it; schema:Dataset is retained so generic
@@ -6472,6 +6749,20 @@ class AuthoringWorkspace:
             + [channel_nodes[k] for k in sorted(channel_nodes)]
         )
 
+        # A parameter set names the cell spec, cell or material spec it is
+        # about; one the deposit does not carry gets the same non-drifting
+        # "defined elsewhere" stub as an external cell spec above, so the
+        # reference resolves to a node instead of failing the graph check.
+        _present_ids = {node.get("@id") for node in graph if isinstance(node, dict)}
+        for _target_iri, _target_type in _parameter_set_target_refs(record_sets.get("parameter-set", [])):
+            if _target_iri not in _present_ids:
+                _present_ids.add(_target_iri)
+                graph.append({
+                    "@id":              _target_iri,
+                    "@type":            _target_type,
+                    "rdfs:isDefinedBy": {"@id": _target_iri},
+                })
+
         # ── Record-level free-text notes → schema:comment ─────────────────────
         # Each record's top-level notes[] were dropped from the publication graph;
         # attach them to the node carrying that record's id so authored context
@@ -6539,7 +6830,7 @@ class AuthoringWorkspace:
         Thin adapter over :meth:`_assemble_zenodo_jsonld` (the shared graph builder):
         it only sources the canonical record dicts from the workspace directory.
         """
-        record_sets = _read_record_sets(self._ws.source_root)
+        record_sets, _replaced = _read_deposit_record_sets(self._ws.source_root)
         return self._assemble_zenodo_jsonld(
             record_sets,
             zenodo_record_id=zenodo_record_id,

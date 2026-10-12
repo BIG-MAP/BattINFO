@@ -8,8 +8,10 @@ Design rules under test:
   fields;
 - each claim carries exactly one of quantity / curve / expression, and curves
   must be well-formed (equal-length finite x/y);
-- IRIs mint under the shared spec/ namespace, DETERMINISTIC from
-  (target, scope, name) so re-importing one source is idempotent;
+- IRIs mint under dataset/ (a parameter set is a dataset, not a spec),
+  DETERMINISTIC from (target, scope, name) under the "parameter-claims" seed
+  so re-importing one source is idempotent; supersedes names the record a
+  set replaces, a dataset/ IRI or a spec/ one minted before 2026-10-11;
 - the parameter vocabulary + tier contract answers completeness ("can these
   claims support spm?") identically for every consumer, and BPX field
   resolution is block-scoped (electrode 'Conductivity' is electronic,
@@ -30,6 +32,7 @@ from battinfo.api import (
     save_parameter_set,
     template_parameter_set,
 )
+from battinfo.entities import stable_uid
 from battinfo.interop import from_bpx_parameters, import_bpx_parameters
 from battinfo.parameters import (
     cell_completeness,
@@ -45,9 +48,10 @@ from battinfo.parameters import (
 )
 from battinfo.validate.record import validate_record_report
 
-SPEC_IRI = re.compile(
-    r"^https://w3id\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+DATASET_IRI = re.compile(
+    r"^https://w3id\.org/battinfo/dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
 )
+LEGACY_IRI = "https://w3id.org/battinfo/spec/8qqs-rh43-wt8d-172n"
 CELL_SPEC_IRI = "https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd"
 MATERIAL_SPEC_IRI = "https://w3id.org/battinfo/spec/cccc-dddd-eeee-ffff"
 
@@ -92,9 +96,72 @@ def _record(**overrides):
 # ── identity ──────────────────────────────────────────────────────────────────
 
 
-def test_parameter_set_mints_under_shared_spec_namespace() -> None:
+def test_parameter_set_mints_under_the_dataset_namespace() -> None:
     record = _record()
-    assert SPEC_IRI.fullmatch(record["parameter_set"]["id"])
+    assert DATASET_IRI.fullmatch(record["parameter_set"]["id"])
+    assert validate_record_report(record).ok
+
+
+def test_claim_batch_seed_is_the_registry_contract() -> None:
+    # IDENTIFIER_POLICY 6.3: stable_uid("parameter-claims:<target>:<scope>
+    # [:<polarity>]:<name>"), name stripped and lowercased. The registry
+    # recomputes only parameter-file uids, not this one, but published records
+    # and their replacements rely on the seed, so the literal uids are pinned.
+    body = _record(name="  Chen 2020 - Graphite ")["parameter_set"]
+    seed = "parameter-claims:graphite:material:chen 2020 - graphite"
+    assert body["id"] == f"https://w3id.org/battinfo/dataset/{stable_uid(seed)}"
+    assert body["id"] == "https://w3id.org/battinfo/dataset/xm4e-fr60-10y6-ajqh"
+    assert body["short_id"] == "xm4efr"
+    electrode = _record(
+        material_kind=None, cell_spec_id=CELL_SPEC_IRI, scope="electrode",
+        electrode_polarity="negative", name="Fit - cell",
+    )["parameter_set"]
+    assert electrode["id"] == "https://w3id.org/battinfo/dataset/" + stable_uid(
+        f"parameter-claims:{CELL_SPEC_IRI}:electrode:negative:fit - cell"
+    )
+
+
+def test_explicit_id_must_be_a_dataset_iri() -> None:
+    pinned = "https://w3id.org/battinfo/dataset/aaaa-bbbb-cccc-dddd"
+    assert _record(id=pinned)["parameter_set"]["id"] == pinned
+    assert _record(uid="aaaa-bbbb-cccc-dddd")["parameter_set"]["id"] == pinned
+    with pytest.raises(ValueError, match="dataset/"):
+        _record(id="https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd")
+
+
+def test_a_spec_namespace_id_is_legacy_readable_but_not_publishable() -> None:
+    # Records minted under spec/ before 2026-10-11 keep validating (with a
+    # warning) so they stay readable; the publisher policy refuses them.
+    record = _record()
+    record["parameter_set"]["id"] = LEGACY_IRI
+    record["parameter_set"]["short_id"] = "8qqsrh"
+    report = validate_record_report(record)
+    assert report.ok, report.errors
+    assert [i.code for i in report.warnings] == ["semantic.parameter_set_legacy_namespace"]
+    publisher = validate_record_report(record, policy="publisher")
+    assert [i.code for i in publisher.errors] == ["semantic.parameter_set_legacy_namespace"]
+
+
+@pytest.mark.parametrize("old", [LEGACY_IRI, "https://w3id.org/battinfo/dataset/aaaa-bbbb-cccc-dddd"])
+def test_a_claim_batch_can_supersede_a_spec_or_dataset_record(old: str) -> None:
+    from battinfo.jsonld import record_to_jsonld
+
+    record = _record(supersedes=old)
+    assert record["parameter_set"]["supersedes"] == old
+    assert validate_record_report(record).ok
+    doc = record_to_jsonld(record, "parameter-set")
+    node = doc["@graph"][0] if "@graph" in doc else doc
+    assert node["dcterms:replaces"] == {"@id": old}
+
+
+def test_supersedes_takes_parameter_set_iris_only() -> None:
+    with pytest.raises(ValueError, match="parameter-set IRI"):
+        _record(supersedes="https://w3id.org/battinfo/cell/aaaa-bbbb-cccc-dddd")
+    with pytest.raises(ValueError, match="cannot supersede itself"):
+        _record(supersedes=_record()["parameter_set"]["id"])
+    record = _record()
+    record["parameter_set"]["supersedes"] = "https://w3id.org/battinfo/material/aaaa-bbbb-cccc-dddd"
+    assert not validate_record_report(record).ok
 
 
 def test_uid_is_deterministic_from_target_scope_and_name() -> None:
@@ -234,7 +301,7 @@ def test_template_record_passes_strict_schema_validation(tmp_path) -> None:
     report = validate_record_report(template_parameter_set(uid="pge5wer62q82v9k0"))
     assert report.ok, report.errors
     saved = save_parameter_set(template_parameter_set(), source_root=tmp_path)
-    assert saved["status"] == "created" and SPEC_IRI.fullmatch(saved["id"])
+    assert saved["status"] == "created" and DATASET_IRI.fullmatch(saved["id"])
 
 
 def test_save_and_query_round_trip(tmp_path) -> None:
