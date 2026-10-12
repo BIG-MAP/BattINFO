@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-title: "BattINFO: The semantic data layer for battery science"
+title: "BattINFO: The semantic data layer for battery technology"
 message: "If you use this software, please cite it using the metadata from this file."
 type: software
 # Zenodo concept DOI: resolves to the latest archived release.
@@ -29,7 +29,7 @@ authors:
 repository-code: "https://github.com/BIG-MAP/BattINFO"
 url: "https://github.com/BIG-MAP/BattINFO"
 abstract: >-
-  BattINFO is the semantic data layer for battery science. It provides a Python
+  BattINFO is the semantic data layer for battery technology. It provides a Python
   library, CLI, and canonical asset suite (JSON Schemas, ontology mappings, and
   examples) for creating, validating, and publishing battery metadata as
   machine-readable Linked Data, typed against the EMMO domain-battery ontology

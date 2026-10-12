@@ -106,6 +106,8 @@ The gaps known at release, with workarounds where they exist, are listed in [Sco
 
 ### Fixed
 
+- **PyYAML is a core dependency.** `battinfo push`, `battinfo batch init` and `battinfo dataset init` failed on a core install with `No module named 'yaml'`, and `battinfo config set` did too, while a `~/.battinfo/config.yaml` was silently ignored. The package now requires `pyyaml>=6.0.1`.
+
 - **A Zenodo deposit describes the registry-only records its tests point at.** Since a cell found only in the registry counts as resolved, a test or dataset on it saves, but `ws.preview_jsonld()` and `ws.zenodo()` built the deposit graph from the workspace's own records alone. The graph had no node for the cell, so publication validation failed with `publication.reference_missing_node` (199 errors for the Empa relink, under the publisher and strict policies), the tests lost the cell part of their names (199 tests shared 15 names), and `ws.zenodo(publish=True)` created and uploaded a draft before it refused. The deposit now reads the copies the workspace keeps under `.battinfo/references/`: a cell or test spec that a test or dataset points at and the deposit does not carry gets a "defined elsewhere" stub, the kind of node an external target of a parameter set already gets, with its IRI, type, name and `rdfs:isDefinedBy`, and test and dataset names take the cell's name from the copy. Nothing else is read from a copy, no copy is uploaded, and `ws.import_()` skips a cell stub instead of reporting a cell without a spec. It skips the tests and datasets on such a cell too, as before, but now says so: the counts it returns are the records it imported (they used to count every test in the graph), and `skipped` lists each test and dataset left out with its cell and the reason. A reference with no copy (looked up offline, or never looked up) is still an error, and the preview and the refusal now say that the record was not found locally and how to fetch it.
 
   `ws.zenodo(publish=True)` also runs its checks before it contacts Zenodo, so a publish refused for a graph error or a missing data file leaves no draft behind. The graph is the one `ws.preview_jsonld()` builds, with placeholders for the record id and DOI. No check reads those two values, and the deposited graph is checked again before the DOI is minted.
@@ -1396,8 +1398,8 @@ The gaps known at release, with workarounds where they exist, are listed in [Sco
   Natural keys: cell-spec = manufacturer::model::format::chemistry::size_code;
   cell = cell_spec_id::serial::batch::name; test-spec = kind::name::version;
   test = cell::kind::protocol::name; dataset = cell::test::locator::name. A record with no
-  distinguishing identity (e.g. a cell instance with no serial/batch/name) needs an explicit
-  `uid=` (see "Templates no longer write a placeholder IRI" above).
+  distinguishing identity (e.g. a cell instance with no serial/batch/name) still mints a
+  random IRI, so distinct anonymous records never silently dedup.
 
 ### Deprecated
 

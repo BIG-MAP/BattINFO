@@ -1,8 +1,8 @@
 <div align="center">
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="brand/assets/logo/logo-horizontal-on-dark.svg">
-  <img alt="BattINFO" src="brand/assets/logo/logo-horizontal.svg" width="420">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/BIG-MAP/BattINFO/main/brand/assets/logo/logo-horizontal-on-dark.svg">
+  <img alt="BattINFO" src="https://raw.githubusercontent.com/BIG-MAP/BattINFO/main/brand/assets/logo/logo-horizontal.svg" width="420">
 </picture>
 
 ### The semantic data layer for battery technology
@@ -15,7 +15,7 @@ and resolvable through persistent `https://w3id.org/battinfo/` identifiers.
 [![CI](https://github.com/BIG-MAP/BattINFO/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/BIG-MAP/BattINFO/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2FBIG-MAP%2FBattINFO%2Fmain%2Fpyproject.toml&logo=python&logoColor=white)](https://github.com/BIG-MAP/BattINFO/blob/main/pyproject.toml)
 [![PyPI](https://img.shields.io/pypi/v/battinfo?label=PyPI)](https://pypi.org/project/battinfo/)
-[![License: Apache 2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![License: Apache 2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](https://github.com/BIG-MAP/BattINFO/blob/main/LICENSE)
 <br/>
 <!-- Badges · activity & quality -->
 [![Contributors](https://img.shields.io/github/contributors/BIG-MAP/BattINFO?color=informational)](https://github.com/BIG-MAP/BattINFO/graphs/contributors)
@@ -33,14 +33,14 @@ and resolvable through persistent `https://w3id.org/battinfo/` identifiers.
 <!-- DOI: the Zenodo concept DOI; it resolves to the latest archived release -->
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6304782.svg)](https://doi.org/10.5281/zenodo.6304782)
 
-[**Quickstart**](QUICKSTART.md) ·
-[**Documentation**](docs/index.md) ·
-[**How-to guides**](docs/pages/howto.md) ·
+[**Quickstart**](https://github.com/BIG-MAP/BattINFO/blob/main/QUICKSTART.md) ·
+[**Documentation**](https://github.com/BIG-MAP/BattINFO/blob/main/docs/index.md) ·
+[**How-to guides**](https://github.com/BIG-MAP/BattINFO/blob/main/docs/pages/howto.md) ·
 [**Tutorials**](#tutorials) ·
 [**Contributing**](#contributing) ·
 [**Cite**](#citation)
 
-New words? The [plain-language glossary](docs/pages/glossary.md) decodes
+New words? The [plain-language glossary](https://github.com/BIG-MAP/BattINFO/blob/main/docs/pages/glossary.md) decodes
 *Linked Data*, *EMMO*, *IRI*, and friends in two sentences each.
 
 </div>
@@ -124,7 +124,7 @@ print(result.canonical_iri)
 That IRI is **permanent, but not yet resolvable on the web** — opening it in a
 browser returns 404 for a record published locally. A local publish mints the
 identity; it becomes dereferenceable once you publish the record to the
-registry (`ws.publish()`, see [Tutorial 6](docs/guides/06-publish-your-data.ipynb)).
+registry (`ws.publish()`, see [Tutorial 6](https://github.com/BIG-MAP/BattINFO/blob/main/docs/guides/06-publish-your-data.ipynb)).
 
 `destination="local"` writes to a `.battinfo/` directory (a dot-directory —
 `ls -a` to see it):
@@ -150,26 +150,26 @@ ws = battinfo.workspace(".")
 ws.quickstart()   # prints a copy-pasteable end-to-end example
 ```
 
-**Lab work?** Start at the [how-to guides](docs/pages/howto.md), where bench tasks such as registering materials, building a cell from components, labelling cells, converting cycler exports and publishing each map to a runnable recipe. The
-[capability table](docs/workspace-authoring.md#what-each-surface-can-author-today)
+**Lab work?** Start at the [how-to guides](https://github.com/BIG-MAP/BattINFO/blob/main/docs/pages/howto.md), where bench tasks such as registering materials, building a cell from components, labelling cells, converting cycler exports and publishing each map to a runnable recipe. The
+[capability table](https://github.com/BIG-MAP/BattINFO/blob/main/docs/workspace-authoring.md#what-each-surface-can-author-today)
 shows which surface (workspace, `battinfo.api`, CLI) authors which record types today.
 
-**→ Read the [full quickstart](QUICKSTART.md) and the [documentation index](docs/index.md).**
+**→ Read the [full quickstart](https://github.com/BIG-MAP/BattINFO/blob/main/QUICKSTART.md) and the [documentation index](https://github.com/BIG-MAP/BattINFO/blob/main/docs/index.md).**
 
 ## Tutorials
 
-Six tutorial notebooks in [`docs/guides/`](docs/guides/) — one story, from the
+Six tutorial notebooks in [`docs/guides/`](https://github.com/BIG-MAP/BattINFO/tree/main/docs/guides) — one story, from the
 record model to a published dataset. Each runs from its own folder and writes
 only to a throwaway `_scratch/` directory next to it.
 
 | Tutorial | What you'll learn |
 |---|---|
-| [1 — Concepts](docs/guides/01-concepts.ipynb) | The record model, IRIs, and the semantic layer |
-| [2 — Describing a cell](docs/guides/02-first-cell-type.ipynb) | Author and publish a cell spec, with a taste of material-level depth |
-| [3 — Linked records](docs/guides/03-linked-records.ipynb) | Cells, test specs, tests, and datasets with the workspace |
-| [4 — Semantic layer](docs/guides/04-semantic-layer.ipynb) | JSON-LD anatomy, EMMO type stacking, RDF and SPARQL |
-| [5 — Cell descriptors](docs/guides/05-descriptors.ipynb) | Research-grade composition: materials, BOMs, electrodes, electrolyte |
-| [6 — Publish your first dataset](docs/guides/06-publish-your-data.ipynb) | End to end: raw cycler CSV → validated records → DOI + registry |
+| [1 — Concepts](https://github.com/BIG-MAP/BattINFO/blob/main/docs/guides/01-concepts.ipynb) | The record model, IRIs, and the semantic layer |
+| [2 — Describing a cell](https://github.com/BIG-MAP/BattINFO/blob/main/docs/guides/02-first-cell-type.ipynb) | Author and publish a cell spec, with a taste of material-level depth |
+| [3 — Linked records](https://github.com/BIG-MAP/BattINFO/blob/main/docs/guides/03-linked-records.ipynb) | Cells, test specs, tests, and datasets with the workspace |
+| [4 — Semantic layer](https://github.com/BIG-MAP/BattINFO/blob/main/docs/guides/04-semantic-layer.ipynb) | JSON-LD anatomy, EMMO type stacking, RDF and SPARQL |
+| [5 — Cell descriptors](https://github.com/BIG-MAP/BattINFO/blob/main/docs/guides/05-descriptors.ipynb) | Research-grade composition: materials, BOMs, electrodes, electrolyte |
+| [6 — Publish your first dataset](https://github.com/BIG-MAP/BattINFO/blob/main/docs/guides/06-publish-your-data.ipynb) | End to end: raw cycler CSV → validated records → DOI + registry |
 
 ## What BattINFO does
 
@@ -185,10 +185,10 @@ only to a throwaway `_scratch/` directory next to it.
 | Layer | What it provides |
 |-------|-----------------|
 | `battinfo.ttl` | OWL application ontology; imports EMMO domain-battery 0.20.2 and domain-electrochemistry 0.37.2 with pinned versioned IRIs |
-| [`assets/mappings/domain-battery/`](assets/mappings/domain-battery/) | 114 curated property→EMMO-IRI mappings and 63 unit→EMMO-IRI mappings; drives JSON→JSON-LD transformation |
+| [`assets/mappings/domain-battery/`](https://github.com/BIG-MAP/BattINFO/tree/main/assets/mappings/domain-battery) | 114 curated property→EMMO-IRI mappings and 63 unit→EMMO-IRI mappings; drives JSON→JSON-LD transformation |
 | `assets/schemas/` | 25 JSON Schema (draft 2020-12) files: one for each of the 22 record types, plus the shared base, the canonical cell description and the ingest manifest |
-| [`src/battinfo/transform/json_to_jsonld.py`](src/battinfo/transform/json_to_jsonld.py) | Deterministic, mapping-table-driven transformation to EMMO-aligned JSON-LD using the canonical domain-battery context |
-| [`src/battinfo/validate/`](src/battinfo/validate/) | Multi-layer validation: JSON Schema, Pydantic, JSON-LD (URDNA2015), semantic rules, referential integrity, publication |
+| [`src/battinfo/transform/json_to_jsonld.py`](https://github.com/BIG-MAP/BattINFO/blob/main/src/battinfo/transform/json_to_jsonld.py) | Deterministic, mapping-table-driven transformation to EMMO-aligned JSON-LD using the canonical domain-battery context |
+| [`src/battinfo/validate/`](https://github.com/BIG-MAP/BattINFO/tree/main/src/battinfo/validate) | Multi-layer validation: JSON Schema, Pydantic, JSON-LD (URDNA2015), semantic rules, referential integrity, publication |
 
 Published records use:
 
@@ -198,7 +198,7 @@ Published records use:
 
 ## Project status
 
-> **Beta.** The test suite (3,221 tests at the 0.8.0 release) runs in CI on Python 3.11 and 3.12, on Linux and Windows. Ontology dependency versions are pinned and verified. See [`docs/scope.md`](docs/scope.md) for the full capability map and the [known limitations](docs/scope.md#known-limitations-in-080) of this release.
+> **Beta.** The test suite (3,221 tests at the 0.8.0 release) runs in CI on Python 3.11 and 3.12, on Linux and Windows. Ontology dependency versions are pinned and verified. See [`docs/scope.md`](https://github.com/BIG-MAP/BattINFO/blob/main/docs/scope.md) for the full capability map and the [known limitations](https://github.com/BIG-MAP/BattINFO/blob/main/docs/scope.md#known-limitations-in-080) of this release.
 
 **Supported**
 - Cell-descriptor validation and mapping, canonical record query/save/publish/index flows, JSON-LD-first publication, and validation policies.
@@ -217,19 +217,19 @@ Published records use:
 | Path | Contents |
 |------|----------|
 | `battinfo.ttl` | OWL application ontology |
-| [`assets/`](assets/) | Canonical schemas and mapping assets |
-| [`examples/`](examples/) | Canonical example records and guide notebooks |
-| [`src/battinfo/`](src/battinfo/) | Python package and CLI |
-| [`docs/`](docs/) | Adoption and usage documentation |
+| [`assets/`](https://github.com/BIG-MAP/BattINFO/tree/main/assets) | Canonical schemas and mapping assets |
+| [`examples/`](https://github.com/BIG-MAP/BattINFO/tree/main/examples) | Canonical example records and guide notebooks |
+| [`src/battinfo/`](https://github.com/BIG-MAP/BattINFO/tree/main/src/battinfo) | Python package and CLI |
+| [`docs/`](https://github.com/BIG-MAP/BattINFO/tree/main/docs) | Adoption and usage documentation |
 | `.tools/` | Maintainer tooling: `build/`, `datasheets/`, `library/`, `quality/`, `semantic/` |
-| [`tests/`](tests/) | Regression and contract tests |
+| [`tests/`](https://github.com/BIG-MAP/BattINFO/tree/main/tests) | Regression and contract tests |
 
 ## Core principles
 
 - **Domain-battery is the normative ontology** (semantics and terms). BattINFO is non-normative and operational (schemas, mappings, tooling).
 - **The canonical contract is JSON Schema**; Pydantic models are generated for the CLI and Python API.
 - **JSON-LD-first publication**: every record rendered for the resolver or registry is valid RDF aligned to domain-battery.
-- **Stable, opaque identifiers**: all published entities carry a `https://w3id.org/battinfo/{type}/{uid}` IRI, governed by [`IDENTIFIER_POLICY.md`](IDENTIFIER_POLICY.md).
+- **Stable, opaque identifiers**: all published entities carry a `https://w3id.org/battinfo/{type}/{uid}` IRI, governed by [`IDENTIFIER_POLICY.md`](https://github.com/BIG-MAP/BattINFO/blob/main/IDENTIFIER_POLICY.md).
 - Battery Pass JSON-LD outputs are supported and pinned per release.
 - BattINFO does not host or modify the domain-battery ontology.
 
@@ -252,9 +252,9 @@ uv run python .tools/quality/run_verification.py
 ```
 
 CI runs the same checks across Python 3.11/3.12 on Linux and Windows via the
-[CI](.github/workflows/ci.yml) workflow, alongside
-[Security](.github/workflows/security.yml) (pip-audit + CodeQL) and
-[Docs](.github/workflows/docs.yml) builds.
+[CI](https://github.com/BIG-MAP/BattINFO/blob/main/.github/workflows/ci.yml) workflow, alongside
+[Security](https://github.com/BIG-MAP/BattINFO/blob/main/.github/workflows/security.yml) (pip-audit + CodeQL) and
+[Docs](https://github.com/BIG-MAP/BattINFO/blob/main/.github/workflows/docs.yml) builds.
 
 ## Citation
 
@@ -279,7 +279,7 @@ each release also gets its own version DOI on Zenodo.
 
 ## License
 
-Distributed under the **Apache License 2.0**. See [`LICENSE`](LICENSE).
+Distributed under the **Apache License 2.0**. See [`LICENSE`](https://github.com/BIG-MAP/BattINFO/blob/main/LICENSE).
 
 ## Acknowledgements
 

@@ -9,7 +9,7 @@ description = "Implementation and interoperability layer for the domain-battery 
 readme = "README.md"
 requires-python = ">=3.11"
 license = "Apache-2.0"
-license-files = ["LICENSE"]
+license-files = ["LICENSE", "NOTICE"]
 authors = [
   { name = "Simon Clark" },
   { name = "Jesper Friis" },
@@ -48,6 +48,10 @@ dependencies = [
   "jsonschema>=4.21",
   "rdflib>=7.0",
   "pyld>=3.1.0",
+  # The CLI batch path (battinfo push / batch / dataset, contribution.py) and
+  # ~/.battinfo/config.yaml need it. 6.0.1 is the first release with Python
+  # 3.12 wheels.
+  "pyyaml>=6.0.1",
 ]
 
 [project.optional-dependencies]
