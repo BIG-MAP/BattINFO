@@ -22,88 +22,77 @@
             "quantity": {
               "value": 298.15,
               "unit": "K"
-            },
-            "provenance_class": "fitted"
+            }
           },
           {
             "parameter": "discharging_cutoff_voltage",
             "quantity": {
               "value": 2.7,
               "unit": "V"
-            },
-            "provenance_class": "fitted"
+            }
           },
           {
             "parameter": "charging_cutoff_voltage",
             "quantity": {
               "value": 4.2,
               "unit": "V"
-            },
-            "provenance_class": "fitted"
+            }
           },
           {
             "parameter": "nominal_capacity",
             "quantity": {
               "value": 12.5,
               "unit": "Ah"
-            },
-            "provenance_class": "fitted"
+            }
           },
           {
             "parameter": "specific_heat_capacity",
             "quantity": {
               "value": 913,
               "unit": "J/(kg.K)"
-            },
-            "provenance_class": "fitted"
+            }
           },
           {
             "parameter": "thermal_conductivity",
             "quantity": {
               "value": 2.04,
               "unit": "W/(m.K)"
-            },
-            "provenance_class": "fitted"
+            }
           },
           {
             "parameter": "density",
             "quantity": {
               "value": 1847,
               "unit": "kg/m3"
-            },
-            "provenance_class": "fitted"
+            }
           },
           {
             "parameter": "electrode_area",
             "quantity": {
               "value": 0.016808,
               "unit": "m2"
-            },
-            "provenance_class": "fitted"
+            }
           },
           {
             "parameter": "electrode_pair_count",
             "quantity": {
               "value": 34,
               "unit": "1"
-            },
-            "provenance_class": "fitted"
+            }
           },
           {
             "parameter": "external_surface_area",
             "quantity": {
               "value": 0.0379,
               "unit": "m2"
-            },
-            "provenance_class": "fitted"
+            }
           },
           {
             "parameter": "volume",
             "quantity": {
               "value": 0.000128,
               "unit": "m3"
-            },
-            "provenance_class": "fitted"
+            }
           }
         ]
       },
@@ -361,24 +350,21 @@
             "quantity": {
               "value": 298.15,
               "unit": "K"
-            },
-            "provenance_class": "fitted"
+            }
           },
           {
             "parameter": "initial_concentration",
             "quantity": {
               "value": 1000,
               "unit": "mol/m3"
-            },
-            "provenance_class": "fitted"
+            }
           },
           {
             "parameter": "ambient_temperature",
             "quantity": {
               "value": 298.15,
               "unit": "K"
-            },
-            "provenance_class": "fitted"
+            }
           }
         ]
       }

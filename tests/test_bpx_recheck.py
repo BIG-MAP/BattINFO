@@ -121,6 +121,20 @@ def test_the_provenance_class_does_not_change_the_export() -> None:
     assert to_bpx(plain).bpx == to_bpx(classed).bpx
 
 
+
+def test_the_packaged_bpx_examples_state_no_class_bpx_does_not_give() -> None:
+    examples = ROOT / "src" / "battinfo" / "data" / "examples" / "parameter-set"
+    files = 0
+    for path in sorted(examples.glob("parameter-set-*.json")):
+        body = json.loads(path.read_text(encoding="utf-8"))["parameter_set"]
+        if (body.get("model_context") or {}).get("tool") != "BPX" or not body.get("parts"):
+            continue
+        files += 1
+        for part in body["parts"]:
+            if part["part"] in ("cell", "state"):
+                assert all("provenance_class" not in claim for claim in part["claims"]), (path.name, part["part"])
+    assert files == 5
+
 @pytest.mark.parametrize(
     ("kwargs", "error", "match"),
     [
