@@ -1861,9 +1861,27 @@ def save_dataset(
         A function applied to the record before it is compared and written
         (the workspace uses it for funding and contributor stamps).
 
-    Returns a dict with ``status`` (``"created"``, ``"updated"``, ``"exists"``
-    or ``"dry-run"``), ``id``, ``entity_type``, ``path``, ``mode``,
-    ``content_changed`` and ``published``.
+    Returns a dict with ``status``, ``id``, ``entity_type``, ``path``, ``mode``
+    and ``published``. By status:
+
+    - ``"created"``: a new record was written. ``content_changed`` is
+      ``False``; it only describes a record that was already there.
+    - ``"updated"`` (``mode="upsert"`` over a saved record):
+      ``content_changed`` is ``True`` when the record differs from the saved
+      one and ``False`` when it does not, in which case nothing is rewritten.
+      The comparison ignores ``id``, ``uid`` and the ``created_at``,
+      ``modified_at``, ``retrieved_at``, ``generated_at`` and ``imported_at``
+      timestamps, but not ``published_at``: a ``Dataset`` saved without one
+      gets the save time, so its re-save compares as changed.
+    - ``"exists"`` (``mode="create_only"`` with
+      ``duplicate_policy="return_existing"``): nothing was written; ``path``
+      is the saved record and there is no ``content_changed`` key.
+    - ``"dry-run"``: nothing was written; ``content_changed`` is as it would
+      be for the real save.
+
+    With ``publish=True``, a ``"created"`` or ``"updated"`` result also
+    carries ``publish_result`` and ``published`` is ``True``; otherwise
+    ``published`` is ``False``.
     """
     from battinfo.bundle import Dataset as DatasetBundle
 
