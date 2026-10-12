@@ -750,6 +750,60 @@ def create_parameter_set(*, validate: bool = True, **fields: Any) -> dict[str, A
     return record
 
 
+def supersede_parameter_set(record: Mapping[str, Any], *, validate: bool = True) -> dict[str, Any]:
+    """The ``dataset/`` record that supersedes a parameter set minted under ``spec/``.
+
+    Parameter sets minted before 2026-10-11 have ``spec/`` IRIs
+    (IDENTIFIER_POLICY 6.3). They keep them and stay readable; a new version
+    is a new record under ``dataset/``, minted from the current seeds (a
+    claim batch from its target, scope, electrode polarity and name, a
+    parameter file from its ``parameters_sha256``), that names the old IRI
+    in ``supersedes``. Everything else is copied as it is, the file entries
+    of a parameter file included (a file's URL is not its identity). The
+    result is validated unless ``validate=False``.
+
+    A record already under ``dataset/`` is refused: a new version of one (a
+    corrected file or claim batch) is built afresh with ``supersedes=``.
+    """
+    import copy  # noqa: PLC0415
+
+    if not isinstance(record, Mapping) or not isinstance(record.get("parameter_set"), Mapping):
+        raise TypeError(
+            "supersede_parameter_set expects a parameter-set record, a dict with a 'parameter_set' body."
+        )
+    doc = record_to_snake_aliases(copy.deepcopy(dict(record)))
+    body = doc["parameter_set"]
+    old_id = body.get("id")
+    if isinstance(old_id, str) and DATASET_IRI_RE.fullmatch(old_id):
+        raise ValueError(
+            f"{old_id} is already under dataset/, so there is nothing to republish. A new version "
+            f"of it (a corrected file or claim batch) is built afresh with supersedes={old_id!r}."
+        )
+    if not isinstance(old_id, str) or not SPEC_IRI_RE.fullmatch(old_id):
+        raise ValueError(
+            "supersede_parameter_set republishes a parameter set minted under spec/ "
+            f"(https://w3id.org/battinfo/spec/{{uid}}); this record's id is {old_id!r}."
+        )
+    uid = parameter_set_uid(body)
+    if uid is None:
+        raise ValueError(
+            f"cannot mint a dataset/ IRI for {old_id}: a claim batch needs its name and one of "
+            "material_kind, material_spec_id or cell_spec_id, a parameter file its parameters_sha256."
+        )
+    new_body: dict[str, Any] = {"id": f"{_PARAMETER_SET_IRI_BASE}{uid}", "short_id": uid.replace("-", "")[:6]}
+    for key, value in body.items():
+        if key in ("id", "short_id", "supersedes"):
+            continue
+        if key in ("distributions", "description", "comment"):
+            new_body.setdefault("supersedes", old_id)  # where the builder puts it
+        new_body[key] = value
+    new_body.setdefault("supersedes", old_id)
+    doc["parameter_set"] = new_body
+    if validate:
+        _validate_canonical_record(doc, policy=DEFAULT_POLICY)
+    return doc
+
+
 def template_parameter_set(
     *, name: str = "Example source - graphite", uid: str | None = None
 ) -> dict[str, Any]:

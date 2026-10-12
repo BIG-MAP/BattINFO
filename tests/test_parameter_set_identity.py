@@ -4,7 +4,9 @@ Rules under test:
 - one seed per flavour, minted in one place: a record saved without an id
   lands on the IRI the builder gives the same fields, for every packaged
   example and for a filled-in template;
-- a save never overwrites a record of another kind that holds the same IRI.
+- a save never overwrites a record of another kind that holds the same IRI;
+- supersede_parameter_set() builds the dataset/ replacement of a legacy
+  record from the current seeds.
 """
 from __future__ import annotations
 
@@ -20,14 +22,17 @@ from battinfo.api import (
     create_parameter_set,
     save_dataset,
     save_parameter_set,
+    supersede_parameter_set,
     template_parameter_set,
 )
 from battinfo.bundle import Dataset, ProvenanceInfo
 from battinfo.entities import stable_uid
+from battinfo.validate import validate_record_report
 
 EXAMPLES = sorted((EXAMPLES_ROOT / "parameter-set").glob("parameter-set-*.json"))
 CLAIM_BATCH_EXAMPLE = EXAMPLES_ROOT / "parameter-set" / "parameter-set-xm4e-fr60-10y6-ajqh.json"
 PARAMETER_FILE_EXAMPLE = EXAMPLES_ROOT / "parameter-set" / "parameter-set-rnc6-edv8-m43x-ebnq.json"
+LEGACY_CODE = "semantic.parameter_set_legacy_namespace"
 
 
 def _load(path: Path) -> dict:
@@ -58,6 +63,10 @@ def _legacy(path: Path) -> dict:
     body["id"] = f"https://w3id.org/battinfo/spec/{uid}"
     body["short_id"] = uid.replace("-", "")[:6]
     return record
+
+
+def _codes(report, severity: str) -> list[str]:
+    return [issue.code for issue in report.issues if issue.severity == severity]
 
 
 # ── one seed per flavour ─────────────────────────────────────────────────────
@@ -127,3 +136,32 @@ def test_the_kind_check_holds_inside_a_bulk_session(tmp_path: Path) -> None:
         )
         with pytest.raises(ValueError, match="already the IRI of the dataset record"):
             save_parameter_set(clash, source_root=tmp_path, mode="upsert")
+
+
+# ── the migration helper ─────────────────────────────────────────────────────
+
+
+@pytest.mark.parametrize("path", [CLAIM_BATCH_EXAMPLE, PARAMETER_FILE_EXAMPLE], ids=["claims", "file"])
+def test_supersede_parameter_set_mints_the_replacement_from_the_current_seeds(path: Path) -> None:
+    legacy = _legacy(path)
+    replacement = supersede_parameter_set(legacy)
+    current = _load(path)  # the packaged example is the record the current seeds give
+    assert replacement["parameter_set"]["id"] == current["parameter_set"]["id"]
+    assert replacement["parameter_set"]["short_id"] == current["parameter_set"]["short_id"]
+    assert replacement["parameter_set"]["supersedes"] == legacy["parameter_set"]["id"]
+    # Everything else is the legacy record's, unchanged.
+    rest = {k: v for k, v in replacement["parameter_set"].items() if k not in ("id", "short_id", "supersedes")}
+    assert rest == {k: v for k, v in legacy["parameter_set"].items() if k not in ("id", "short_id")}
+    assert {k: v for k, v in replacement.items() if k != "parameter_set"} == {
+        k: v for k, v in legacy.items() if k != "parameter_set"
+    }
+    assert validate_record_report(replacement, policy="publisher").ok
+    assert LEGACY_CODE not in _codes(validate_record_report(replacement), "warning")
+    assert legacy == _legacy(path), "the legacy record is not modified"
+
+
+def test_supersede_parameter_set_refuses_a_record_already_under_dataset() -> None:
+    with pytest.raises(ValueError, match="already under dataset/"):
+        supersede_parameter_set(_load(CLAIM_BATCH_EXAMPLE))
+    with pytest.raises(TypeError, match="parameter-set record"):
+        supersede_parameter_set({"dataset": {"id": "https://w3id.org/battinfo/dataset/aaaa-bbbb-cccc-dddd"}})
