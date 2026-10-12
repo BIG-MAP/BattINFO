@@ -356,7 +356,9 @@ The 28 polarity-qualified anchor quantities deprecated in 0.38.0 and the six cor
 
 The SI-accepted units 0.38.0 brings into the closure (it imports EMMO's `siacceptedunits` module) are the EMMO IRIs `unit_map.curated.json` already used: `AmpereHour`, `MilliAmpereHour`, `Watthour`, `KiloWatthour`, `MegaWattHour`, `MilliLitre`, `MolePerLitre`, `WattHourPerKilogram` and `WattHourPerLitre` were referenced before but declared in no module of the 0.37.2 closure, and are declared now. No unit IRI changed.
 
-`records.context.v1.json` gains the five new class terms and changes none. Its `TemperatureCoefficientOfTheOpenCircuitVoltage` term still expands to the `CoatingThickness` IRI, a mistake made when `entropic_coefficient` was wired on 2026-10-11; no emitter uses that term any more, and correcting it in place is a maintainer decision (`PRE_RELEASE_CORRECTIONS` in `scripts/gen_context.py`, before 0.8.0 only).
+`records.context.v1.json` gains the five new class terms. Two of its terms were wrong and were corrected in place (owner ruling 2026-10-13, `PRE_RELEASE_CORRECTIONS` in `scripts/gen_context.py`): `TemperatureCoefficientOfTheOpenCircuitVoltage` expanded to the `CoatingThickness` IRI, a mistake made when `entropic_coefficient` was wired on 2026-10-11, and now expands to `electrochemistry_3bb5ae23_…`; `degC` expanded to `EMMO_36a9bf69_…`, EMMO's class for the programming language C, and now expands to `emmo:DegreeCelsius`, the IRI EMMO 1.0.2 declares for the unit in `disciplines/units/siunits`.
+
+Every unit IRI BattINFO writes is now checked against the measurement-unit classes of the closure. Four are not units there and are allowed by name in `tests/test_mapping_governance.py`: `MilliAmpereHour` and `emmo:Percent` (both in the defects list), and `WeightPercent` and `VolumePercent`, which `unit_map.curated.json` gives the symbols `%` and `vol%` but which domain-electrochemistry declares as `PercentQuantity` classes, quantities rather than units. Whether those two symbols should move to UnitOne with rescaling, or wait for `emmo:Percent` to enter the closure, is open.
 
 ### Test-protocol method classes (chameo, via domain-electrochemistry 0.36.0)
 
@@ -390,7 +392,7 @@ charging / discharging temperature limits, and the electrode chemistry classes
 Found while re-verifying every emitted IRI against the 0.20.2 / 0.37.2 / 0.15.0 / 1.0.2
 closure. None is caused by this repo; each is worked around locally.
 
-Rechecked against the 0.21.0 / 0.39.0 / 0.15.0 / 1.0.2 closure on 2026-10-12: every item below is still open except the `Postive` typo, which moved to the resolved list. Two were added in that pass (`LithiumNickelManganeseOxideElectrode` and `Percent`).
+Rechecked against the 0.21.0 / 0.39.0 / 0.15.0 / 1.0.2 closure on 2026-10-12: every item below is still open except the `Postive` typo, which moved to the resolved list. Three were added in that pass and the next (`LithiumNickelManganeseOxideElectrode`, `MilliAmpereHour` and `Percent`).
 
 - **`Watthour` / `KiloWatthour` spelling.** EMMO's local names carry a lower-case "h"
   while the prefLabels read `WattHour` / `KiloWattHour`. `unit_map.curated.json` now
@@ -410,6 +412,7 @@ Rechecked against the 0.21.0 / 0.39.0 / 0.15.0 / 1.0.2 closure on 2026-10-12: ev
   `electrochemistry_e3d3d21c_…` (`CapacityFade`) carries it as an altLabel, so the string
   resolves to two classes. battinfo maps neither by key; the label is allowlisted only.
 - **`LithiumNickelManganeseOxideElectrode` is deprecated with no replacement.** `electrochemistry_41ddf723_…` carries `owl:deprecated true` in 0.37.2 and 0.39.0 with no `dcterms:isReplacedBy` and no dated comment, while 0.37.2 un-deprecated its seven chemistry siblings as defined classes. battinfo emits it as the electrode node of `positive_electrode_basis: lnmo` (`entity_type_map.json`). Ask upstream to un-deprecate it like the siblings (it already has the `hasActiveMaterial some LithiumNickelManganeseOxide` restriction) or to name a replacement.
+- **`MilliAmpereHour` has no named superclass.** In EMMO 1.0.2 `disciplines/units/siacceptedunits`, `emmo:MilliAmpereHour` is defined by two restrictions only, while `AmpereHour` and `MilliAmpereHourPerGram` subclass their unit classes, so without a reasoner it does not classify as a `MeasurementUnit`. battinfo writes it for `mAh`, and the unit check allows it by name. Ask EMMO to give it the parents `AmpereHour` has (`ElectricChargeUnit`, `SIAcceptedDerivedUnit`).
 - **`Percent` is outside the import closure.** The records contexts map `%` to `emmo:Percent`, which EMMO 1.0.2 declares in `disciplines/units/specialunits`, a module the pinned chain does not import (domain-electrochemistry 0.38.0 added `siacceptedunits` for the hour and litre units, not this one). The curated unit map gives `%` the electrochemistry `WeightPercent` IRI for emitted quantities, so the context term (`CONTEXT_UNIT_SYMBOLS` in `jsonld.py`, frozen in v1) is the only place `emmo:Percent` appears.
 - **`NominalBatteryProperty` contradicts its own parent (red-team review, 2026-09-15).**
   `battery_fb9baf9b_680e_493e_a755_da9bb1fc9fae` is elucidated "a battery property

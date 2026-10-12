@@ -236,6 +236,48 @@ def test_import_accepts_legacy_shape_package(tmp_path: Path) -> None:
     assert spec.properties["nominal_capacity"]["unit"] == "Ah"
 
 
+def test_import_reads_the_celsius_unit_published_before_0_8(tmp_path: Path) -> None:
+    """Packages published before 0.8.0 gave Celsius temperatures EMMO's class for the
+    programming language C as their unit. They still import as degree Celsius."""
+    from battinfo.jsonld import _PROP_MAP
+
+    doc = {
+        "@context": {
+            "battery": "https://w3id.org/emmo/domain/battery#",
+            "electrochemistry": "https://w3id.org/emmo/domain/electrochemistry#",
+            "emmo": "https://w3id.org/emmo#",
+            "schema": "https://schema.org/",
+            "battinfo": "https://w3id.org/battinfo/",
+            "MaximumChargingTemperature": _PROP_MAP["maximum_charging_temperature"],
+        },
+        "@graph": [
+            {
+                "@type": ["BatteryCellSpecification", "schema:CreativeWork"],
+                "@id": SPEC_IRI,
+                "schema:name": "A123 ANR26650M1-B",
+                "schema:model": "ANR26650M1-B",
+                "schema:manufacturer": {"@type": "schema:Organization", "schema:name": "A123"},
+                "battinfo:chemistry": "Li-ion",
+                "battinfo:cellFormat": "cylindrical",
+                "isDescriptionFor": {"@type": ["BatteryCell", "CylindricalBattery", "LithiumIonBattery"]},
+                "hasProperty": [
+                    {
+                        "@type": ["MaximumChargingTemperature", "ConventionalProperty"],
+                        "hasNumericalPart": {"@type": "RealData", "hasNumberValue": 45},
+                        "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc",
+                    }
+                ],
+            }
+        ],
+    }
+
+    ws, _ = _import_package(tmp_path, doc)
+
+    # The importer names the key by its first spelling for this IRI.
+    (temperature,) = ws._ws.cell_specs[0].properties.values()
+    assert temperature == {"value": 45, "unit": "°C"}
+
+
 def _new_shape_package() -> dict:
     from battinfo.transform.cell_spec_node import label_to_compact
     from battinfo.ws import _RECORDS_CONTEXT

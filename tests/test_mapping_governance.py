@@ -310,7 +310,7 @@ def test_every_property_mapping_names_a_class_the_ontology_publishes() -> None:
 
 _MAPPING_DIR = ROOT / "src" / "battinfo" / "data" / "mappings" / "domain-battery"
 _CONTEXT_DIR = ROOT / "src" / "battinfo" / "data" / "context"
-_DEPRECATED_TERMS = ROOT / "tests" / "fixtures" / "emmo" / "deprecated-terms.json"
+_CLOSURE_TERMS = ROOT / "tests" / "fixtures" / "emmo" / "closure-terms.json"
 _ELECTROCHEMISTRY = "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_"
 OPEN_CIRCUIT_POTENTIAL = _ELECTROCHEMISTRY + "e272f229_7b45_4436_9b0b_30391ee4e5be"
 OPEN_CIRCUIT_VOLTAGE = _ELECTROCHEMISTRY + "9c657fdc_b9d3_4964_907c_f9a6e8c5f52b"
@@ -384,13 +384,13 @@ def _emitted_emmo_iris() -> dict[str, list[str]]:
     return found
 
 
-def test_deprecated_terms_fixture_matches_the_pinned_imports() -> None:
-    """The deprecation list was read from the closure battinfo.ttl imports.
+def test_closure_terms_fixture_matches_the_pinned_imports() -> None:
+    """The deprecation and unit lists were read from the closure battinfo.ttl imports.
 
-    Moving a pin without regenerating the list (.tools/quality/emmo_deprecated_terms.py)
-    would let the check below pass against the old release.
+    Moving a pin without regenerating them (.tools/quality/emmo_closure_terms.py)
+    would let the checks below pass against the old release.
     """
-    closure = _load_json(_DEPRECATED_TERMS)["closure"]
+    closure = _load_json(_CLOSURE_TERMS)["closure"]
     ttl = (ROOT / "battinfo.ttl").read_text(encoding="utf-8")
     pins = re.findall(r"owl:imports\s+<https://w3id\.org/emmo/domain/([a-z-]+)/([^/]+)/", ttl)
     assert len(pins) == 3, pins
@@ -399,7 +399,7 @@ def test_deprecated_terms_fixture_matches_the_pinned_imports() -> None:
 
 
 def test_no_emitted_emmo_iri_is_deprecated_in_the_pinned_closure() -> None:
-    deprecated = {entry["iri"]: entry for entry in _load_json(_DEPRECATED_TERMS)["deprecated"]}
+    deprecated = {entry["iri"]: entry for entry in _load_json(_CLOSURE_TERMS)["deprecated"]}
     emitted = _emitted_emmo_iris()
     assert len(emitted) > 300, "the inventory of emitted IRIs looks broken"
     hits = {
@@ -485,3 +485,120 @@ def test_parameter_keys_type_as_their_electrochemistry_0_39_classes(key: str, la
     assert (entry["class_pref_label"], entry["class_iri"]) == (label, _ELECTROCHEMISTRY + uuid)
     node = _descriptor_quantity_node(key, {"value": 1.0, "unit": "1"})
     assert node is not None and node["@type"][0] == label
+
+
+# ── Measurement units ──────────────────────────────────────────────────────────
+
+DEGREE_CELSIUS = "https://w3id.org/emmo#DegreeCelsius"
+# EMMO's class for the programming language C (a CompiledLanguage), which
+# BattINFO wrote as the unit of every Celsius temperature before 0.8.0.
+PROGRAMMING_LANGUAGE_C = "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
+
+# Written as a unit although the pinned closure does not make it one, each with
+# its reason. The set may only shrink: a test below fails once an entry is a unit.
+_NOT_A_UNIT_IN_USE = {
+    # A real EMMO unit, but EMMO 1.0.2 gives it no named superclass (only
+    # restrictions), so it does not classify as a MeasurementUnit without a reasoner.
+    "https://w3id.org/emmo#MilliAmpereHour",
+    # The `%` term of the records contexts. EMMO declares it in
+    # disciplines/units/specialunits, which the pinned chain does not import.
+    "https://w3id.org/emmo#Percent",
+    # WeightPercent and VolumePercent, the curated IRIs for `%` and `vol%`, are
+    # PercentQuantity classes in domain-electrochemistry, quantities rather than units.
+    _ELECTROCHEMISTRY + "2c0e66c8_d58d_44b2_b0ce_ba55194bd505",
+    _ELECTROCHEMISTRY + "db37b358_b2f0_4e06_b6ae_8c56c8fbb6ba",
+}
+
+
+def _written_unit_iris() -> dict[str, list[str]]:
+    """Every EMMO-family IRI BattINFO writes as a unit, with where each comes from."""
+    from battinfo.jsonld import _UNIT_MAP, CONTEXT_UNIT_SYMBOLS
+    from battinfo.transform.json_to_jsonld import _unit_type_map
+    from battinfo.validate.jsonld import _context_unit_terms
+
+    found: dict[str, list[str]] = {}
+
+    def add(iri: Any, source: str) -> None:
+        if isinstance(iri, str) and iri.startswith("https://w3id.org/emmo"):
+            found.setdefault(iri, []).append(source)
+
+    for symbol, iri in _unit_type_map().items():
+        add(iri, f"emitter:{symbol}")
+    for symbol, iri in _UNIT_MAP.items():
+        add(iri, f"publication:{symbol}")
+    for name in ("unit_map.curated.json", "unit_map.candidates.json"):
+        for entry in _load_json(_MAPPING_DIR / name)["mappings"]:
+            add(entry.get("unit_iri"), f"{name}:{entry['symbol']}")
+    for name in ("records.context.json", "records.context.v1.json"):
+        context = _load_json(_CONTEXT_DIR / name)["@context"]
+        for term in _context_unit_terms(context):
+            add(_expand_with(context, context[term]), f"{name}:{term}")
+        for symbol, value in CONTEXT_UNIT_SYMBOLS.items():
+            add(_expand_with(context, value), f"CONTEXT_UNIT_SYMBOLS:{symbol}")
+    return found
+
+
+def test_every_unit_iri_written_is_a_unit_of_the_pinned_closure() -> None:
+    """A unit IRI has to name a measurement unit. EMMO_36a9bf69_... was written for
+    every Celsius temperature and is the programming language C."""
+    units = set(_load_json(_CLOSURE_TERMS)["measurement_units"])
+    assert DEGREE_CELSIUS in units and PROGRAMMING_LANGUAGE_C not in units
+    written = _written_unit_iris()
+    assert len(written) > 50, "the inventory of unit IRIs looks broken"
+    not_units = {iri: sources for iri, sources in written.items() if iri not in units and iri not in _NOT_A_UNIT_IN_USE}
+    assert not not_units, not_units
+    assert not _NOT_A_UNIT_IN_USE & units, "an allowed non-unit is a unit now: drop it"
+
+
+@pytest.mark.parametrize("symbol", ["degC", "°C"])
+def test_celsius_temperatures_carry_the_degree_celsius_unit(symbol: str) -> None:
+    from battinfo.jsonld import CONTEXT_UNIT_SYMBOLS
+    from battinfo.transform.json_to_jsonld import _descriptor_quantity_node, _unit_iri
+
+    assert _unit_iri(symbol) == DEGREE_CELSIUS
+    node = _descriptor_quantity_node("maximum_charging_temperature", {"value": 45, "unit": symbol})
+    assert node is not None
+    unit = node["hasMeasurementUnit"]
+    assert (unit.get("@id") if isinstance(unit, dict) else unit) == DEGREE_CELSIUS
+    assert CONTEXT_UNIT_SYMBOLS["degC"] == "emmo:DegreeCelsius"
+    for name in ("records.context.json", "records.context.v1.json"):
+        context = _load_json(_CONTEXT_DIR / name)["@context"]
+        assert _expand_with(context, context["degC"]) == DEGREE_CELSIUS, name
+        assert PROGRAMMING_LANGUAGE_C not in json.dumps(context), name
+
+
+def test_a_curated_unit_beats_a_candidate_and_a_hand_kept_alias(monkeypatch: pytest.MonkeyPatch) -> None:
+    from battinfo.transform import json_to_jsonld
+
+    tables = {
+        "unit_map.curated.json": {"mappings": [{"symbol": "Xq", "unit_iri": "https://example.org/curated"}]},
+        "unit_map.candidates.json": {"mappings": [
+            {"symbol": "Xq", "unit_iri": "https://example.org/candidate"},
+            {"symbol": "Yq", "unit_iri": "https://example.org/candidate-only"},
+        ]},
+    }
+    monkeypatch.setattr(json_to_jsonld, "_load_mapping_file", lambda name: tables[name])
+    monkeypatch.setattr(json_to_jsonld, "MANUAL_UNIT_TYPES", {"Xq": "https://example.org/manual"})
+    json_to_jsonld._unit_type_map.cache_clear()
+    try:
+        table = json_to_jsonld._unit_type_map()
+        assert table["Xq"] == "https://example.org/curated"
+        assert table["Yq"] == "https://example.org/candidate-only"
+    finally:
+        json_to_jsonld._unit_type_map.cache_clear()
+
+
+def test_every_curated_unit_wins_in_the_emitter_table() -> None:
+    from battinfo.transform.json_to_jsonld import _unit_type_map
+
+    table = _unit_type_map()
+    for entry in _load_json(_MAPPING_DIR / "unit_map.curated.json")["mappings"]:
+        if entry.get("unit_iri"):
+            assert table[entry["symbol"]] == entry["unit_iri"], entry["symbol"]
+
+
+def test_the_programming_language_c_is_read_back_but_never_written() -> None:
+    from battinfo.transform.json_to_jsonld import LEGACY_UNIT_IRIS, _unit_type_map
+
+    assert LEGACY_UNIT_IRIS == {PROGRAMMING_LANGUAGE_C: "°C"}
+    assert PROGRAMMING_LANGUAGE_C not in _unit_type_map().values()

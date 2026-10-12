@@ -58,14 +58,17 @@ EMITTER_CLASS_TERMS = {
 }
 
 
-# One-time correction of v1 before the first release (owner ruling 2026-10-07).
-# v1 was frozen before domain-electrochemistry 0.37.1 and domain-battery 0.20.2
-# were adopted, so these terms kept a private battinfo: mint, a superseded class
-# or a deprecated IRI while the curated property map and the entity type map had
-# moved on. No released package has shipped v1, so it is corrected in place
-# rather than bumped to v2. After 0.8.0 this table must not grow: a change of
-# meaning then needs a v2 context. tests/test_context_v1_agreement.py fails if
-# v1 and the curated maps disagree again.
+# Corrections of v1 before the first release (owner rulings 2026-10-07 and
+# 2026-10-13). v1 was frozen before domain-electrochemistry 0.37.1 and
+# domain-battery 0.20.2 were adopted, so the first eight terms kept a private
+# battinfo: mint, a superseded class or a deprecated IRI while the curated
+# property map and the entity type map had moved on. The last two were wrong
+# from the start: degC named EMMO's class for the programming language C, and
+# TemperatureCoefficientOfTheOpenCircuitVoltage named the CoatingThickness IRI.
+# No released package has shipped v1, so it is corrected in place rather than
+# bumped to v2. After 0.8.0 this table must not grow: a change of meaning then
+# needs a v2 context. tests/test_context_v1_agreement.py fails if v1 and the
+# curated maps disagree again.
 PRE_RELEASE_CORRECTIONS = {
     # private battinfo: mints -> the classes added in domain-electrochemistry 0.37.1
     "power_capability": "electrochemistry:electrochemistry_4e6c4e9d_64cb_4c24_a0f3_5b4146ebbeb0",
@@ -78,6 +81,13 @@ PRE_RELEASE_CORRECTIONS = {
     "capacity_fade": "electrochemistry:electrochemistry_5b59a86e_99b4_493e_ae12_33ae8b5ec7c0",
     # deprecated hyphen-named IRI -> its underscore twin (domain-battery issue #73)
     "PrismaticBattery": "battery:battery_86c9ca80_de6f_417f_afdc_a7e52fa6322d",
+    # EMMO_36a9bf69_... is the programming language C (a CompiledLanguage), not
+    # the unit; EMMO 1.0.2 declares the degree Celsius as emmo:DegreeCelsius.
+    "degC": "emmo:DegreeCelsius",
+    # was electrochemistry_3b938708_..., the IRI of CoatingThickness
+    "TemperatureCoefficientOfTheOpenCircuitVoltage": (
+        "electrochemistry:electrochemistry_3bb5ae23_59fa_4bc7_9495_803eb6719f28"
+    ),
 }
 
 

@@ -7,7 +7,9 @@ table on its own. Before 0.8.0 that let eight terms drift: six kept a private
 ``battinfo:`` mint after domain-electrochemistry 0.37.1 added the real classes,
 ``capacity_fade`` kept the superseded CapacityFade phenomenon, and
 ``PrismaticBattery`` kept an IRI the battery ontology deprecated. They were
-corrected in place (``PRE_RELEASE_CORRECTIONS`` in scripts/gen_context.py).
+corrected in place (``PRE_RELEASE_CORRECTIONS`` in scripts/gen_context.py), and
+so, later, were ``degC`` (bound to EMMO's class for the programming language C)
+and ``TemperatureCoefficientOfTheOpenCircuitVoltage`` (bound to CoatingThickness).
 
 These tests fail when the curated sources and v1 disagree again. After 0.8.0
 the fix is a v2 context, not another edit to v1.

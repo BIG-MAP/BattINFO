@@ -1,17 +1,20 @@
-"""emmo_deprecated_terms.py — list the deprecated terms of the pinned EMMO import closure.
+"""emmo_closure_terms.py — record what the tests need to know about the pinned EMMO closure.
 
 Follows owl:imports from the three versioned modules battinfo.ttl imports
 (domain-battery, domain-electrochemistry, domain-chemical-substance) through
 every module they import, reading each file from its release tag on
-raw.githubusercontent.com, and writes every owl:deprecated term with its
-prefLabel and dcterms:isReplacedBy to tests/fixtures/emmo/deprecated-terms.json.
-tests/test_mapping_governance.py checks that no IRI the emitters use is in
-that list, and that the list was made for the versions battinfo.ttl pins.
-Run it after moving a pin, next to refresh_emmo_context.py.
+raw.githubusercontent.com, and writes two lists to
+tests/fixtures/emmo/closure-terms.json: every owl:deprecated term with its
+prefLabel and dcterms:isReplacedBy, and every class that is a measurement unit
+(a named subclass, at any depth, of EMMO's MeasurementUnit).
+tests/test_mapping_governance.py checks that no IRI the emitters use is
+deprecated, that every unit IRI they write is a unit, and that the lists were
+made for the versions battinfo.ttl pins. Run it after moving a pin, next to
+refresh_emmo_context.py.
 
 Usage:
-    python .tools/quality/emmo_deprecated_terms.py
-    python .tools/quality/emmo_deprecated_terms.py --check   # exit 1 when the fixture is stale
+    python .tools/quality/emmo_closure_terms.py
+    python .tools/quality/emmo_closure_terms.py --check   # exit 1 when the fixture is stale
 """
 
 from __future__ import annotations
@@ -25,11 +28,12 @@ import urllib.request
 from pathlib import Path
 
 import rdflib
-from rdflib.namespace import DCTERMS, OWL, SKOS
+from rdflib.namespace import DCTERMS, OWL, RDFS, SKOS
 
 ROOT = Path(__file__).resolve().parents[2]
 BATTINFO_TTL = ROOT / "battinfo.ttl"
-OUT = ROOT / "tests" / "fixtures" / "emmo" / "deprecated-terms.json"
+OUT = ROOT / "tests" / "fixtures" / "emmo" / "closure-terms.json"
+MEASUREMENT_UNIT = "https://w3id.org/emmo#EMMO_b081b346_7279_46ef_9a3d_2c088fcd79f4"
 RAW = "https://raw.githubusercontent.com/emmo-repo/{repo}/refs/tags/{tag}/{path}"
 TIMEOUT = 30
 
@@ -72,7 +76,7 @@ def _candidates(iri: str, importer: tuple[str, str] | None) -> list[tuple[str, s
 
 def _fetch(repo: str, tag: str, path: str) -> str | None:
     url = RAW.format(repo=repo, tag=tag, path=path)
-    request = urllib.request.Request(url, headers={"User-Agent": "battinfo-emmo-deprecations/0.1"})
+    request = urllib.request.Request(url, headers={"User-Agent": "battinfo-emmo-closure-terms/0.1"})
     try:
         with urllib.request.urlopen(request, timeout=TIMEOUT) as response:
             return response.read().decode("utf-8")
@@ -122,11 +126,23 @@ def build() -> dict:
     deprecated = sorted(
         {str(s) for s, o in graph.subject_objects(OWL.deprecated) if str(o).lower() == "true"}
     )
+    subclasses: dict[str, set[str]] = {}
+    for sub, sup in graph.subject_objects(RDFS.subClassOf):
+        if isinstance(sub, rdflib.URIRef) and isinstance(sup, rdflib.URIRef):
+            subclasses.setdefault(str(sup), set()).add(str(sub))
+    units: set[str] = set()
+    stack = [MEASUREMENT_UNIT]
+    while stack:
+        for unit in subclasses.get(stack.pop(), set()):
+            if unit not in units:
+                units.add(unit)
+                stack.append(unit)
     return {
         "description": (
-            "Every owl:deprecated term in the EMMO import closure battinfo.ttl pins, read from the "
-            "release tags by .tools/quality/emmo_deprecated_terms.py. tests/test_mapping_governance.py "
-            "checks that no IRI the emitters use is in this list. Regenerate it when the pins move."
+            "The owl:deprecated terms and the measurement-unit classes of the EMMO import closure "
+            "battinfo.ttl pins, read from the release tags by .tools/quality/emmo_closure_terms.py. "
+            "tests/test_mapping_governance.py checks that no IRI the emitters use is deprecated and "
+            "that every unit IRI they write is a unit. Regenerate it when the pins move."
         ),
         "closure": {repo: sorted(tags) for repo, tags in sorted(versions.items())},
         "deprecated": [
@@ -137,6 +153,7 @@ def build() -> dict:
             }
             for iri in deprecated
         ],
+        "measurement_units": sorted(units),
     }
 
 
@@ -152,13 +169,17 @@ def main(argv: list[str] | None = None) -> int:
     if args.check:
         current = OUT.read_text(encoding="utf-8") if OUT.exists() else ""
         if current.replace("\r\n", "\n") != text:
-            print(f"{OUT.relative_to(ROOT)} is stale; run .tools/quality/emmo_deprecated_terms.py")
+            print(f"{OUT.relative_to(ROOT)} is stale; run .tools/quality/emmo_closure_terms.py")
             return 1
         print(f"{OUT.relative_to(ROOT)} matches the pinned closure.")
         return 0
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(text, encoding="utf-8", newline="\n")
-    print(f"Wrote {OUT.relative_to(ROOT)} ({len(json.loads(text)['deprecated'])} deprecated terms).")
+    written = json.loads(text)
+    print(
+        f"Wrote {OUT.relative_to(ROOT)} ({len(written['deprecated'])} deprecated terms, "
+        f"{len(written['measurement_units'])} measurement units)."
+    )
     return 0
 
 

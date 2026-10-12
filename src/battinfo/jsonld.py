@@ -256,7 +256,7 @@ CONTEXT_UNIT_SYMBOLS: dict[str, str] = {
     "Ohm":    "emmo:Ohm",
     "mOhm":   "emmo:MilliOhm",
     "mohm":   "emmo:MilliOhm",
-    "degC":   "emmo:EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc",
+    "degC":   "emmo:DegreeCelsius",
     "K":      "emmo:Kelvin",
     "g":      "emmo:Gram",
     "kg":     "emmo:Kilogram",
