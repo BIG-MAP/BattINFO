@@ -599,7 +599,7 @@ files to cells (<code class="docutils literal notranslate"><span class="pre">ws.
 <td><p>Test executions</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/dataset/</span></code></p></td>
-<td><p>Datasets</p></td>
+<td><p>Datasets and parameter sets (both are data from one source)</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/material/</span></code>, <code class="docutils literal notranslate"><span class="pre">/electrode/</span></code>, <code class="docutils literal notranslate"><span class="pre">/separator/</span></code>, …</p></td>
 <td><p>Material and component instances</p></td>
@@ -611,11 +611,13 @@ files to cells (<code class="docutils literal notranslate"><span class="pre">ws.
 </table>
 </div>
 <p>The full map is code, not convention: <code class="docutils literal notranslate"><span class="pre">battinfo.entities.iri_namespace_map()</span></code>.</p>
-<p>Two more segment rules keep old links alive and new ones honest:</p>
+<p>A namespace can hold more than one record type: <code class="docutils literal notranslate"><span class="pre">/spec/</span></code> holds every kind of description, and <code class="docutils literal notranslate"><span class="pre">/dataset/</span></code> holds dataset records and parameter sets. Tooling never infers a record’s type from the segment; the type lives in the record.</p>
+<p>More segment rules keep old links alive and new ones honest:</p>
 <ul class="simple">
 <li><p><strong>Legacy segments are permanent aliases.</strong> Superseded namespaces
 (<code class="docutils literal notranslate"><span class="pre">/material-spec/</span></code>, <code class="docutils literal notranslate"><span class="pre">/electrode-spec/</span></code>, the older <code class="docutils literal notranslate"><span class="pre">/cell-type/</span></code> forms, …)
 keep resolving forever — anything ever minted stays dereferenceable.</p></li>
+<li><p><strong>Parameter sets minted under <code class="docutils literal notranslate"><span class="pre">/spec/</span></code> before 2026-10-11 keep their IRIs.</strong> Each resolves as a superseded record that points at its replacement, a new <code class="docutils literal notranslate"><span class="pre">/dataset/</span></code> record with a uid of its own. A uid is never reused under another namespace.</p></li>
 <li><p><strong>Reserved segments</strong> (<code class="docutils literal notranslate"><span class="pre">id</span></code>, <code class="docutils literal notranslate"><span class="pre">ontology</span></code>, <code class="docutils literal notranslate"><span class="pre">vocab</span></code>, <code class="docutils literal notranslate"><span class="pre">doc</span></code>, <code class="docutils literal notranslate"><span class="pre">context</span></code>,
 <code class="docutils literal notranslate"><span class="pre">resolver</span></code>, <code class="docutils literal notranslate"><span class="pre">twin</span></code>, <code class="docutils literal notranslate"><span class="pre">w3id</span></code>, <code class="docutils literal notranslate"><span class="pre">raw</span></code>, <code class="docutils literal notranslate"><span class="pre">inferred</span></code>, <code class="docutils literal notranslate"><span class="pre">turtle</span></code>, <code class="docutils literal notranslate"><span class="pre">latest</span></code>,
 <code class="docutils literal notranslate"><span class="pre">source</span></code>) can never become record namespaces — they are claimed by the

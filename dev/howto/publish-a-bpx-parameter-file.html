@@ -602,7 +602,7 @@
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="n">warning</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The uid comes from the SHA-256 of the file’s canonical JSON (RFC 8785), so a re-indented copy, a CRLF checkout or a copy written by another JSON library has the same uid, and any changed value gives a new one. A file that repeats a key inside an object is refused, because JSON parsers disagree on which of the two values counts.</p>
+<p>The uid comes from the SHA-256 of the file’s canonical JSON (RFC 8785), so a re-indented copy, a CRLF checkout or a copy written by another JSON library has the same uid, and any changed value gives a new one. The record’s IRI is <code class="docutils literal notranslate"><span class="pre">https://w3id.org/battinfo/dataset/&lt;uid&gt;</span></code>: a parameter set is a dataset, one piece of data from one source, so it shares the <code class="docutils literal notranslate"><span class="pre">dataset/</span></code> namespace with dataset records (IDENTIFIER_POLICY 6.3). A file that repeats a key inside an object is refused, because JSON parsers disagree on which of the two values counts.</p>
 <p>Some values have no home in a record yet: the <code class="docutils literal notranslate"><span class="pre">Particle</span></code> blocks of a blended electrode, the initial hysteresis state, <code class="docutils literal notranslate"><span class="pre">Degradation</span></code> and <code class="docutils literal notranslate"><span class="pre">Validation</span></code>. They are named in the warnings and listed in <code class="docutils literal notranslate"><span class="pre">not_imported</span></code>, which the record keeps, so a reader knows what only the file holds. <code class="docutils literal notranslate"><span class="pre">to_bpx(record)</span></code> says so too, and sets <code class="docutils literal notranslate"><span class="pre">complete=False</span></code> on its result.</p>
 </section>
 <section id="say-which-cell-the-file-describes">
@@ -705,11 +705,27 @@
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">record</span> <span class="o">=</span> <span class="n">from_bpx_parameters</span><span class="p">(</span><span class="s2">&quot;corrected.bpx.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to_parameter_set</span><span class="p">(</span>
     <span class="n">virtual_cell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">distributions</span><span class="o">=</span><span class="p">[</span><span class="n">corrected_source</span><span class="p">],</span>
-    <span class="n">supersedes</span><span class="o">=</span><span class="s2">&quot;https://w3id.org/battinfo/spec/&lt;old uid&gt;&quot;</span><span class="p">,</span>
+    <span class="n">supersedes</span><span class="o">=</span><span class="s2">&quot;https://w3id.org/battinfo/dataset/&lt;old uid&gt;&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
 </div>
-<p>When the same publisher owns both records, the registry marks the old one superseded and points it at the new one.</p>
+<p>Only the publisher of the old record can supersede it. The registry refuses a <code class="docutils literal notranslate"><span class="pre">supersedes</span></code> from anyone else; when it accepts the new record, it marks the old one superseded and points it at the new one.</p>
+</section>
+<section id="records-published-under-spec">
+<h2>Records published under spec/<a class="headerlink" href="#records-published-under-spec" title="Link to this heading">#</a></h2>
+<p>Parameter sets published before 2026-10-11 have <code class="docutils literal notranslate"><span class="pre">spec/</span></code> IRIs, and they keep them: the old IRI keeps resolving, and a local copy still loads, validates and is found by its IRI, with the warning <code class="docutils literal notranslate"><span class="pre">semantic.parameter_set_legacy_namespace</span></code>, which names the <code class="docutils literal notranslate"><span class="pre">dataset/</span></code> IRI of its replacement. Nothing is published under <code class="docutils literal notranslate"><span class="pre">spec/</span></code> any more, though, so the <code class="docutils literal notranslate"><span class="pre">publisher</span></code> policy makes that warning an error, and <code class="docutils literal notranslate"><span class="pre">ws.submit()</span></code> and <code class="docutils literal notranslate"><span class="pre">ws.zenodo()</span></code> refuse the record. Its new version is a new <code class="docutils literal notranslate"><span class="pre">dataset/</span></code> record that supersedes it, and <code class="docutils literal notranslate"><span class="pre">supersede_parameter_set</span></code> builds it. The IRI is minted from the current seeds (a file’s from its <code class="docutils literal notranslate"><span class="pre">parameters_sha256</span></code>, a claim batch’s from its target, scope and name), <code class="docutils literal notranslate"><span class="pre">supersedes</span></code> names the old IRI, and everything else is copied as it is, the file entries included, since a file’s URL is not its identity. For the Schmitt et al. 2026 file:</p>
+<!-- doc-snippet: skip -->
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">supersede_parameter_set</span>
+
+<span class="n">old</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;parameter-set-szxp-xwnx-vhyf-rvm0.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
+<span class="n">new</span> <span class="o">=</span> <span class="n">supersede_parameter_set</span><span class="p">(</span><span class="n">old</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">new</span><span class="p">[</span><span class="s2">&quot;parameter_set&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">])</span>          <span class="c1"># https://w3id.org/battinfo/dataset/7jnc-cjtw-5h3a-5t52</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">new</span><span class="p">[</span><span class="s2">&quot;parameter_set&quot;</span><span class="p">][</span><span class="s2">&quot;supersedes&quot;</span><span class="p">])</span>  <span class="c1"># https://w3id.org/battinfo/spec/szxp-xwnx-vhyf-rvm0</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;parameter_set&quot;</span><span class="p">,</span> <span class="n">record</span><span class="o">=</span><span class="n">new</span><span class="p">)</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Do not move the old uid to <code class="docutils literal notranslate"><span class="pre">dataset/</span></code> by editing the IRI. A uid is never reused, not even under another namespace, so a <code class="docutils literal notranslate"><span class="pre">dataset/</span></code> record that keeps the uid it had under <code class="docutils literal notranslate"><span class="pre">spec/</span></code> is refused under every policy, whether or not it names the old record in <code class="docutils literal notranslate"><span class="pre">supersedes</span></code>. Once both records sit in a workspace, <code class="docutils literal notranslate"><span class="pre">query_parameter_sets</span></code> and <code class="docutils literal notranslate"><span class="pre">collate_claims</span></code> return the new one only, and <code class="docutils literal notranslate"><span class="pre">ws.zenodo()</span></code> deposits the new one and leaves the old one out, saying so. You can keep the old file; there is no need to delete it.</p>
 </section>
 <section id="who-owns-a-file-s-iri">
 <h2>Who owns a file’s IRI<a class="headerlink" href="#who-owns-a-file-s-iri" title="Link to this heading">#</a></h2>
@@ -722,12 +738,12 @@
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">battery_genome</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">bg</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pybamm</span>
 
-<span class="n">doc</span> <span class="o">=</span> <span class="n">bg</span><span class="o">.</span><span class="n">bpx</span><span class="p">(</span><span class="s2">&quot;https://w3id.org/battinfo/spec/&lt;uid&gt;&quot;</span><span class="p">)</span>
+<span class="n">doc</span> <span class="o">=</span> <span class="n">bg</span><span class="o">.</span><span class="n">bpx</span><span class="p">(</span><span class="s2">&quot;https://w3id.org/battinfo/dataset/&lt;uid&gt;&quot;</span><span class="p">)</span>
 <span class="n">parameter_values</span> <span class="o">=</span> <span class="n">pybamm</span><span class="o">.</span><span class="n">ParameterValues</span><span class="o">.</span><span class="n">create_from_bpx_obj</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Without Python, ask the IRI for the file. curl does not check the checksum; the client does.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-L<span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/spec/&lt;uid&gt;?format=bpx&quot;</span><span class="w"> </span>-o<span class="w"> </span>cell.bpx.json
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-L<span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/dataset/&lt;uid&gt;?format=bpx&quot;</span><span class="w"> </span>-o<span class="w"> </span>cell.bpx.json
 </pre></div>
 </div>
 </section>
@@ -789,6 +805,7 @@
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#build-the-record-and-publish-it">4. Build the record and publish it</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#corrections">Corrections</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#records-published-under-spec">Records published under spec/</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#who-owns-a-file-s-iri">Who owns a file’s IRI</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#from-the-iri-to-pybamm">From the IRI to PyBaMM</a></li>
 </ul>

@@ -48,7 +48,7 @@ for warning in result.warnings:
     print("-", warning)
 ```
 
-The uid comes from the SHA-256 of the file's canonical JSON (RFC 8785), so a re-indented copy, a CRLF checkout or a copy written by another JSON library has the same uid, and any changed value gives a new one. A file that repeats a key inside an object is refused, because JSON parsers disagree on which of the two values counts.
+The uid comes from the SHA-256 of the file's canonical JSON (RFC 8785), so a re-indented copy, a CRLF checkout or a copy written by another JSON library has the same uid, and any changed value gives a new one. The record's IRI is `https://w3id.org/battinfo/dataset/<uid>`: a parameter set is a dataset, one piece of data from one source, so it shares the `dataset/` namespace with dataset records (IDENTIFIER_POLICY 6.3). A file that repeats a key inside an object is refused, because JSON parsers disagree on which of the two values counts.
 
 Some values have no home in a record yet: the `Particle` blocks of a blended electrode, the initial hysteresis state, `Degradation` and `Validation`. They are named in the warnings and listed in `not_imported`, which the record keeps, so a reader knows what only the file holds. `to_bpx(record)` says so too, and sets `complete=False` on its result.
 
@@ -166,11 +166,29 @@ A corrected file has other parameters, so it is a new record with a new IRI. The
 record = from_bpx_parameters("corrected.bpx.json").to_parameter_set(
     virtual_cell=True,
     distributions=[corrected_source],
-    supersedes="https://w3id.org/battinfo/spec/<old uid>",
+    supersedes="https://w3id.org/battinfo/dataset/<old uid>",
 )
 ```
 
-When the same publisher owns both records, the registry marks the old one superseded and points it at the new one.
+Only the publisher of the old record can supersede it. The registry refuses a `supersedes` from anyone else; when it accepts the new record, it marks the old one superseded and points it at the new one.
+
+## Records published under spec/
+
+Parameter sets published before 2026-10-11 have `spec/` IRIs, and they keep them: the old IRI keeps resolving, and a local copy still loads, validates and is found by its IRI, with the warning `semantic.parameter_set_legacy_namespace`, which names the `dataset/` IRI of its replacement. Nothing is published under `spec/` any more, though, so the `publisher` policy makes that warning an error, and `ws.submit()` and `ws.zenodo()` refuse the record. Its new version is a new `dataset/` record that supersedes it, and `supersede_parameter_set` builds it. The IRI is minted from the current seeds (a file's from its `parameters_sha256`, a claim batch's from its target, scope and name), `supersedes` names the old IRI, and everything else is copied as it is, the file entries included, since a file's URL is not its identity. For the Schmitt et al. 2026 file:
+
+<!-- doc-snippet: skip -->
+```python
+from battinfo.api import supersede_parameter_set
+
+old = json.loads(Path("parameter-set-szxp-xwnx-vhyf-rvm0.json").read_text(encoding="utf-8"))
+new = supersede_parameter_set(old)
+print(new["parameter_set"]["id"])          # https://w3id.org/battinfo/dataset/7jnc-cjtw-5h3a-5t52
+print(new["parameter_set"]["supersedes"])  # https://w3id.org/battinfo/spec/szxp-xwnx-vhyf-rvm0
+ws.add("parameter_set", record=new)
+ws.save()
+```
+
+Do not move the old uid to `dataset/` by editing the IRI. A uid is never reused, not even under another namespace, so a `dataset/` record that keeps the uid it had under `spec/` is refused under every policy, whether or not it names the old record in `supersedes`. Once both records sit in a workspace, `query_parameter_sets` and `collate_claims` return the new one only, and `ws.zenodo()` deposits the new one and leaves the old one out, saying so. You can keep the old file; there is no need to delete it.
 
 ## Who owns a file's IRI
 
@@ -185,12 +203,12 @@ The `battery-genome` client reads the record, downloads its BPX file (the runnab
 import battery_genome as bg
 import pybamm
 
-doc = bg.bpx("https://w3id.org/battinfo/spec/<uid>")
+doc = bg.bpx("https://w3id.org/battinfo/dataset/<uid>")
 parameter_values = pybamm.ParameterValues.create_from_bpx_obj(doc)
 ```
 
 Without Python, ask the IRI for the file. curl does not check the checksum; the client does.
 
 ```bash
-curl -L "https://w3id.org/battinfo/spec/<uid>?format=bpx" -o cell.bpx.json
+curl -L "https://w3id.org/battinfo/dataset/<uid>?format=bpx" -o cell.bpx.json
 ```
