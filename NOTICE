@@ -61,18 +61,3 @@ Licence: MIT. The copyright and permission notice of the source:
     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
-
-
-OEDB solvents and anions
-------------------------
-What:    the choice of electrolyte solvents and anions, with OEDB's
-         abbreviations, behind the substances marked "(OEDB)" in
-         battinfo/data/vocab/substances.json, plus methyl acetoacetate (MAA)
-         and methyl pyruvate (MPyr), which OEDB abbreviates MA and MP. Their
-         identifiers come from PubChem.
-From:    OEDB, the Open Electrolyte Database for Batteries, https://oedb.jp
-Licence: Creative Commons Attribution 4.0 International (CC BY 4.0),
-         https://creativecommons.org/licenses/by/4.0/
-Holder:  Copyright 2025-2026 The University of Tokyo. Cite: Nakamura K. et al.,
-         npj Computational Materials (2026),
-         https://doi.org/10.1038/s41524-026-02093-y

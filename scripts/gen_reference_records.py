@@ -1001,6 +1001,10 @@ FAMILIES = [
                     "The claim batch emits as one `schema:Dataset` node: scalar "
                     "claims as EMMO-typed quantities, the target on "
                     "`schema:about`.",
+                    "No claim batch ships among the packaged examples, which are "
+                    "all BPX files. Build one with `create_parameter_set`, as "
+                    "above, or in a workspace with "
+                    "`ws.add(\"parameter_set\", name=..., material=..., claims=[...])`.",
                 ],
             },
             {
@@ -1378,7 +1382,6 @@ SHELVES: dict[str, list[str]] = {
         "equipment/bw1k-j56y-r2ax-2adv.json",
     ],
     "parameter-sets": [
-        "parameter-set/parameter-set-xm4e-fr60-10y6-ajqh.json",
         "parameter-set/parameter-set-rnc6-edv8-m43x-ebnq.json",
         "parameter-set/parameter-set-h7g7-5082-63jk-9wm3.json",
         "parameter-set/parameter-set-6bpa-4qet-046r-1zzk.json",
