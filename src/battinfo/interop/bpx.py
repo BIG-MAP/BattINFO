@@ -2197,10 +2197,10 @@ _SET_FROM_THE_FILE = frozenset({
 
 def _check_record_kwargs(record_kwargs: Mapping[str, Any]) -> None:
     """``TypeError`` naming a keyword ``to_parameter_set`` does not take, with a did-you-mean."""
-    import difflib  # noqa: PLC0415
     import inspect  # noqa: PLC0415
 
     from battinfo.api._parameters import _record_from_parameter_set  # noqa: PLC0415
+    from battinfo.bundle import _unknown_keyword_parts  # noqa: PLC0415
 
     passed_through = sorted(
         {*inspect.signature(_record_from_parameter_set).parameters, "validate"} - _SET_FROM_THE_FILE
@@ -2212,13 +2212,9 @@ def _check_record_kwargs(record_kwargs: Mapping[str, Any]) -> None:
         name for name in inspect.signature(BpxParameterImportResult.to_parameter_set).parameters
         if name not in ("self", "record_kwargs")
     ]
-    accepted = [*own, *passed_through]
-    named = []
-    for key in unknown:
-        close = difflib.get_close_matches(key, accepted, n=1)
-        named.append(f"{key}=" + (f" (did you mean {close[0]}=?)" if close else ""))
     raise TypeError(
-        "to_parameter_set() got unknown keyword(s): " + ", ".join(named)
+        "to_parameter_set() got unknown keyword(s): "
+        + _unknown_keyword_parts(unknown, [*own, *passed_through])
         + f". It takes {', '.join(own)}, and the record fields {', '.join(passed_through)}."
     )
 
