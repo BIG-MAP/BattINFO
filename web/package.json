@@ -7,7 +7,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "tsc --noEmit",
     "sync:examples": "node scripts/sync-examples.mjs",
     "sync:schemas": "node scripts/sync-schemas.mjs",
     "sync:context": "node scripts/sync-context.mjs",
