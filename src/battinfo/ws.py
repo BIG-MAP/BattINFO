@@ -479,6 +479,33 @@ def _file_uri_to_path(url: str) -> Path:
     return Path(url)
 
 
+# dcat:mediaType is written as the IANA media-type IRI under this base
+# (text/csv -> https://www.iana.org/assignments/media-types/text/csv).
+_IANA_MEDIA_TYPES = "https://www.iana.org/assignments/media-types/"
+
+
+def _media_type_from_jsonld(value: Any) -> str:
+    """A distribution's media type, from either shape a deposit writes it in.
+
+    The inverse of the emitter: ``{"@id": <IANA media-type IRI>}`` (or the IRI
+    as a string) gives the media type it names, and a plain string such as
+    ``"text/csv"`` (older deposits) is returned as it is. Any other IRI is not
+    guessed at and gives ``""``.
+    """
+    if isinstance(value, Mapping):
+        value = value.get("@id")
+    if not isinstance(value, str):
+        return ""
+    if value.startswith(_IANA_MEDIA_TYPES):
+        return value[len(_IANA_MEDIA_TYPES):]
+    return "" if value.startswith(("http://", "https://")) else value
+
+
+def _jsonld_literal(value: Any) -> Any:
+    """The value of a typed JSON-LD literal (``{"@value": ..., "@type": ...}``), else *value*."""
+    return value.get("@value") if isinstance(value, Mapping) else value
+
+
 def _typed_date(value: "str | int | float") -> dict:
     """Wrap a date value as a typed JSON-LD value so consumers can parse it.
 
@@ -3915,8 +3942,13 @@ class AuthoringWorkspace:
         Returns
         -------
         dict
-            Counts of imported entities, e.g.
-            ``{"properties": 3, "instances": 8, "tests": 8, "datasets": 8}``.
+            Counts of the records imported, e.g.
+            ``{"properties": 3, "instances": 8, "tests": 8, "datasets": 8}``,
+            and under ``skipped`` the tests and datasets left out, each with
+            its cell and the reason: ``{"tests": [{"test": ..., "cell": ...,
+            "reason": ...}], "datasets": [...]}``. A test on a cell the
+            deposit only points at (a "defined elsewhere" stub, for a cell
+            published in the registry) is skipped, with its datasets.
 
         Example::
 
@@ -4047,7 +4079,8 @@ class AuthoringWorkspace:
         spec_nodes_by_iri: dict[str, dict] = {}
         cell_nodes_by_iri: dict[str, dict] = {}
         test_nodes_by_iri: dict[str, dict] = {}
-        dataset_node: dict | None = None
+        dataset_nodes: list[dict] = []
+        stub_cell_iris: set[str] = set()
 
         for node in graph:
             types = node.get("@type", [])
@@ -4061,12 +4094,15 @@ class AuthoringWorkspace:
                  and "BatteryCellSpecification" not in types:
                 defined_by = node.get("rdfs:isDefinedBy")
                 if isinstance(defined_by, dict) and defined_by.get("@id") == iri:
-                    continue  # a published cell the package points at, described at its own IRI
+                    stub_cell_iris.add(iri)  # a published cell the package points at, described at its own IRI
+                    continue
                 cell_nodes_by_iri[iri] = node
             elif "BatteryTest" in types:
                 test_nodes_by_iri[iri] = node
             elif "dcat:Dataset" in types or "schema:Dataset" in types:
-                dataset_node = node
+                # Each member dataset carries its own files; a deposit made
+                # before the catalog shape carried them all on one dataset.
+                dataset_nodes.append(node)
 
         # ── 5. Import cell specs ───────────────────────────────────────────────
         spec_objects: dict[str, Any] = {}   # IRI → CellSpec
@@ -4123,6 +4159,7 @@ class AuthoringWorkspace:
             print(f"  spec:     {node.get('schema:name', iri)}")
 
         # ── 6. Import cell instances ───────────────────────────────────────────
+        imported_cells = 0
         for iri, node in sorted(cell_nodes_by_iri.items()):
             spec_iri = (node.get("dcterms:conformsTo") or {}).get("@id", "")
             spec_obj  = spec_objects.get(spec_iri)
@@ -4134,21 +4171,26 @@ class AuthoringWorkspace:
                 spec_obj,
                 serial_number=node.get("schema:serialNumber"),
                 grade=node.get("schema:quality"),
-                manufactured_at=node.get("schema:productionDate"),
-                expires_at=node.get("schema:expires"),
+                # Written as typed literals ({"@value": ..., "@type": "xsd:date"}).
+                manufactured_at=_jsonld_literal(node.get("schema:productionDate")),
+                expires_at=_jsonld_literal(node.get("schema:expires")),
             )
             cell.id = iri
             sn = node.get("schema:serialNumber", "")
             self._index_cell(cell, sn)
+            imported_cells += 1
             print(f"  instance: {sn or iri}")
 
         # ── 7. Import tests + datasets ─────────────────────────────────────────
         dist_by_url: dict[str, dict] = {}
-        if dataset_node:
-            for dist in (dataset_node.get("dcat:distribution") or []):
-                url = dist.get("dcat:downloadURL", "")
+        dists_by_dataset: dict[str, builtins.list[dict]] = {}
+        for ds_node in dataset_nodes:
+            ds_dists = ds_node.get("dcat:distribution") or []
+            for dist in ds_dists if isinstance(ds_dists, list) else [ds_dists]:
+                url = dist.get("dcat:downloadURL", "") if isinstance(dist, dict) else ""
                 if url:
                     dist_by_url[url] = dist
+                    dists_by_dataset.setdefault(ds_node.get("@id", ""), []).append(dist)
 
         def _first_id(v: Any) -> str:
             """Resolve an @id from a node ref that may be a dict or a list of dicts."""
@@ -4156,53 +4198,87 @@ class AuthoringWorkspace:
                 v = v[0] if v else {}
             return v.get("@id", "") if isinstance(v, dict) else ""
 
+        def _generated_by(dist: dict, test_iri: str) -> bool:
+            generated = dist.get("prov:wasGeneratedBy")
+            return isinstance(generated, dict) and generated.get("@id") == test_iri
+
+        imported_tests = imported_datasets = 0
+        skipped_tests: builtins.list[dict] = []
+        skipped_datasets: builtins.list[dict] = []
         for test_iri, tnode in sorted(test_nodes_by_iri.items()):
             # prov:used may now be a list (cell + spec); hasTestObject is preferred.
             cell_iri = _first_id(tnode.get("hasTestObject")) or _first_id(tnode.get("prov:used"))
             test_cell = self._ws.cells[-1] if not cell_iri else next(
                 (c for c in self._ws.cells if c.id == cell_iri), None
             )
+            outputs = [o for o in (tnode.get("hasOutput") or []) if isinstance(o, dict)]
             if test_cell is None:
-                print(f"  WARNING: no cell found for test {test_iri} -- skipping")
+                # Not attached here: a test on a stub cell (one published in the
+                # registry) would need that cell in this workspace first.
+                reason = (
+                    "cell defined elsewhere" if cell_iri in stub_cell_iris
+                    else "cell not imported" if cell_iri in cell_nodes_by_iri
+                    else "cell not in the deposit"
+                )
+                if reason != "cell defined elsewhere":
+                    print(f"  WARNING: no cell found for test {test_iri} -- skipping")
+                skipped_tests.append({"test": test_iri, "cell": cell_iri, "reason": reason})
+                skipped_datasets.extend(
+                    {"dataset": o.get("@id", ""), "test": test_iri, "cell": cell_iri, "reason": reason}
+                    for o in outputs
+                )
+                continue
+            if not outputs:
+                skipped_tests.append({"test": test_iri, "cell": cell_iri, "reason": "no dataset"})
                 continue
 
             protocol  = tnode.get("schema:measurementTechnique", "")
             instr_node = tnode.get("hasTestEquipment", {})
             instrument = instr_node.get("schema:name", "") if isinstance(instr_node, dict) \
                          else tnode.get("schema:instrument", "")
+            # The emitter states the kind as schema:additionalType; a deposit
+            # without it leaves the kind to be read from the technique.
+            kind = tnode.get("schema:additionalType")
+            if not isinstance(kind, str) or not kind.strip():
+                kind = _import_test_kind_from_technique(protocol)
 
-            for output in (tnode.get("hasOutput") or []):
+            test_imported = False
+            for output in outputs:
                 ds_iri = output.get("@id", "")
-                # Find the distribution for this dataset
-                dist = next(
-                    (d for d in dist_by_url.values()
-                     if (d.get("prov:wasGeneratedBy") or {}).get("@id") == test_iri),
-                    None,
-                )
+                # Find the distribution for this dataset: its own file the test
+                # generated, then any file the test generated (one dataset held
+                # every file before the catalog shape), then its own first file,
+                # then a file whose URL carries the dataset uid.
+                own = dists_by_dataset.get(ds_iri, [])
+                dist = next((d for d in own if _generated_by(d, test_iri)), None) or next(
+                    (d for d in dist_by_url.values() if _generated_by(d, test_iri)), None
+                ) or (own[0] if own else None)
                 if dist is None:
-                    # Try matching by dataset IRI embedded in distribution URL or name
                     dist = next(
                         (d for d in dist_by_url.values()
                          if ds_iri.split("/")[-1] in d.get("dcat:downloadURL", "")),
                         None,
                     )
                 if dist is None:
+                    skipped_datasets.append(
+                        {"dataset": ds_iri, "test": test_iri, "cell": cell_iri, "reason": "no distribution"}
+                    )
                     continue
 
                 dl_url = dist.get("dcat:downloadURL", "")
                 cs     = (dist.get("spdx:checksum") or {})
-                fmt    = dist.get("dcat:mediaType", "")
+                fmt    = _media_type_from_jsonld(dist.get("dcat:mediaType"))
                 fname  = dist.get("schema:name", dl_url.split("/")[-1])
 
                 self._ws.record_test(
                     test_cell,
-                    kind=_import_test_kind_from_technique(protocol),
+                    kind=kind,
                     name=f"{test_cell.serial_number or cell_iri.split('/')[-1]} {protocol}",
                     protocol=protocol,
                     instrument=instrument,
                     status="completed",
                     access_url=dl_url,
-                    format=fmt,
+                    format=fmt or None,
                     checksum_algorithm=_spdx_algorithm_name(cs),
                     checksum_value=cs.get("spdx:checksumValue") or None,
                 )
@@ -4211,16 +4287,37 @@ class AuthoringWorkspace:
                     self._ws.tests[-1].id = test_iri
                 if self._ws.datasets and ds_iri:
                     self._ws.datasets[-1].id = ds_iri
+                test_imported = True
+                imported_datasets += 1
                 print(f"  test:     {fname}")
+            if test_imported:
+                imported_tests += 1
+            else:
+                skipped_tests.append({"test": test_iri, "cell": cell_iri, "reason": "no distribution"})
 
-        counts = {
-            "properties":     len(spec_objects),
-            "instances": len(cell_nodes_by_iri),
-            "tests":     len(test_nodes_by_iri),
-            "datasets":  sum(1 for t in test_nodes_by_iri.values()
-                             if t.get("hasOutput")),
+        counts: dict[str, Any] = {
+            "properties": len(spec_objects),
+            "instances":  imported_cells,
+            "tests":      imported_tests,
+            "datasets":   imported_datasets,
         }
         print(f"\nImported: {counts}")
+        counts["skipped"] = {"tests": skipped_tests, "datasets": skipped_datasets}
+        on_stubs = [s for s in skipped_tests if s["reason"] == "cell defined elsewhere"]
+        if on_stubs:
+            stub_cells = sorted({s["cell"] for s in on_stubs})
+            n_ds = sum(1 for s in skipped_datasets if s["reason"] == "cell defined elsewhere")
+            shown = ", ".join(stub_cells[:3]) + (f" and {len(stub_cells) - 3} more" if len(stub_cells) > 3 else "")
+            print(
+                f"Skipped {len(on_stubs)} test(s) and {n_ds} dataset(s) on {len(stub_cells)} cell(s) "
+                f"defined in the registry, not in this deposit: {shown}. ws.import_() does not attach "
+                "tests to a cell it does not hold; to bring one in, open a workspace with a registry_url, "
+                "reference the cell with ws.load(ws.search(type=\"cell\", serial=...)[0]) and add its "
+                "tests with ws.add(\"test\", cell=..., data=...)."
+            )
+        others = len(skipped_tests) - len(on_stubs)
+        if others:
+            print(f"Skipped {others} other test(s); counts[\"skipped\"] lists each one and why.")
         return counts
 
     def clear(self) -> None:
@@ -6565,7 +6662,7 @@ class AuthoringWorkspace:
                 # DCAT-AP: dcat:mediaType should be the IANA media-type IRI, not a bare
                 # string. schema:encodingFormat (below) keeps the MIME string for
                 # schema.org consumers.
-                _iana_media = (f"https://www.iana.org/assignments/media-types/{media_type}"
+                _iana_media = (f"{_IANA_MEDIA_TYPES}{media_type}"
                                if "/" in media_type else None)
                 dnode: dict = {
                     "@type":            "dcat:Distribution",

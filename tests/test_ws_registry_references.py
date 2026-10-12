@@ -302,6 +302,34 @@ def test_a_registry_only_cell_is_a_defined_elsewhere_node_of_the_deposit(
     assert SPEC_IRI not in json.dumps(graph)
 
 
+def test_importing_tests_on_a_stub_cell_reports_them_as_skipped(
+    tmp_path: Path, registry: FakeRegistry, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """ws.import_() does not attach tests to a cell the deposit only points at, and says so."""
+    ws = _workspace_on_registry_cell(tmp_path / "source", REGISTRY)
+    deposit = tmp_path / "battinfo.json"
+    deposit.write_text(json.dumps(_preview(ws)), encoding="utf-8")
+    test_iri = ws._ws.tests[0].id
+    dataset_iri = ws._ws.datasets[0].id
+    capsys.readouterr()
+
+    fresh = AuthoringWorkspace(root=tmp_path / "imported", registry_url=None)
+    counts = fresh.import_(str(deposit))
+    out = capsys.readouterr().out
+
+    reason = "cell defined elsewhere"
+    assert counts == {
+        "properties": 0, "instances": 0, "tests": 0, "datasets": 0,
+        "skipped": {
+            "tests": [{"test": test_iri, "cell": CELL_IRI, "reason": reason}],
+            "datasets": [{"dataset": dataset_iri, "test": test_iri, "cell": CELL_IRI, "reason": reason}],
+        },
+    }
+    assert fresh._ws.tests == [] and fresh._ws.datasets == []
+    assert f"Skipped 1 test(s) and 1 dataset(s) on 1 cell(s) defined in the registry, not in this deposit: {CELL_IRI}" in out
+    assert "ws.load(ws.search(type=\"cell\", serial=...)[0])" in out
+
+
 def test_without_a_copy_the_reference_stays_an_error_that_says_how_to_fetch_it(
     tmp_path: Path, registry: FakeRegistry, capsys: pytest.CaptureFixture[str]
 ) -> None:

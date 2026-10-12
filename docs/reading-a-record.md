@@ -80,7 +80,9 @@ handled by the BattINFO registry deployment.
 
 **Not restored on import** (the published graph is the source of truth; re-importing then
 re-publishing would drop these): conformance/quality annotations (`dqv`/`earl` +
-deviations), the catalog's creators/publisher/keywords/version, and the structured test
-conditions. Treat `battinfo.bundle.json` (the `ZenodoCellRecord`) as the lossless
+deviations), the catalog's creators/publisher/keywords/version, the structured test
+conditions, and test spec records (a test keeps its protocol name, not its link to the spec). Treat `battinfo.bundle.json` (the `ZenodoCellRecord`) as the lossless
 round-trip artifact; `battinfo.json` is the semantic-web view. (Closing this gap is a
 tracked enhancement.)
+
+A test whose cell the deposit only points at (a "defined elsewhere" stub for a cell published in the registry) is not imported, nor are its datasets. They are listed under `skipped` in the counts `import_()` returns, each with its cell and the reason, and the counts of tests and datasets say how many were imported.
