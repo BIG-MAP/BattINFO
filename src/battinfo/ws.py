@@ -479,6 +479,33 @@ def _file_uri_to_path(url: str) -> Path:
     return Path(url)
 
 
+# dcat:mediaType is written as the IANA media-type IRI under this base
+# (text/csv -> https://www.iana.org/assignments/media-types/text/csv).
+_IANA_MEDIA_TYPES = "https://www.iana.org/assignments/media-types/"
+
+
+def _media_type_from_jsonld(value: Any) -> str:
+    """A distribution's media type, from either shape a deposit writes it in.
+
+    The inverse of the emitter: ``{"@id": <IANA media-type IRI>}`` (or the IRI
+    as a string) gives the media type it names, and a plain string such as
+    ``"text/csv"`` (older deposits) is returned as it is. Any other IRI is not
+    guessed at and gives ``""``.
+    """
+    if isinstance(value, Mapping):
+        value = value.get("@id")
+    if not isinstance(value, str):
+        return ""
+    if value.startswith(_IANA_MEDIA_TYPES):
+        return value[len(_IANA_MEDIA_TYPES):]
+    return "" if value.startswith(("http://", "https://")) else value
+
+
+def _jsonld_literal(value: Any) -> Any:
+    """The value of a typed JSON-LD literal (``{"@value": ..., "@type": ...}``), else *value*."""
+    return value.get("@value") if isinstance(value, Mapping) else value
+
+
 def _typed_date(value: "str | int | float") -> dict:
     """Wrap a date value as a typed JSON-LD value so consumers can parse it.
 
@@ -1019,6 +1046,112 @@ def _parameter_set_target_refs(records: list[dict]) -> list[tuple[str, Any]]:
             if isinstance(part, dict) and isinstance(part.get("material_spec_id"), str):
                 refs.setdefault(part["material_spec_id"], _MATERIAL_SPEC_STUB_TYPE)
     return sorted(refs.items())
+
+
+def _defined_elsewhere_stub(iri: str, stub_type: Any, name: str = "") -> dict:
+    """A deposit node for a record published at its own IRI and not carried here.
+
+    It states the record's type, its name when the graph labels other nodes
+    with it, and ``rdfs:isDefinedBy`` its own IRI, which is where its
+    description lives. Nothing else is copied, so the stub cannot drift from
+    the published record.
+    """
+    stub: dict = {"@id": iri, "@type": stub_type, "rdfs:isDefinedBy": {"@id": iri}}
+    if name:
+        stub["schema:name"] = name
+    return stub
+
+
+# Reference copies a deposit describes with a stub, by the folder the
+# workspace keeps them in (``.battinfo/references/<folder>/``). A cell spec
+# kept as a copy is left out: every cell spec a cell points at and the deposit
+# does not carry already gets an unnamed stub, which the importer recognises
+# as one by its keys.
+_REFERENCE_STUB_TYPES: dict[str, Any] = {
+    "cell-instance": "BatteryCell",
+    "test-protocol": ["prov:Plan", "schema:HowTo"],
+}
+
+
+def _reference_stub_sources(
+    referenced_records: dict[str, list[dict]] | None,
+) -> dict[str, tuple[str, Any, str]]:
+    """``{IRI: (folder, stub @type, name)}`` for the published records a workspace keeps copies of.
+
+    Only the type and the name are read from a copy. The record belongs to
+    whoever published it, not to the deposit that points at it.
+    """
+    sources: dict[str, tuple[str, Any, str]] = {}
+    for folder, stub_type in _REFERENCE_STUB_TYPES.items():
+        for record in (referenced_records or {}).get(folder, []):
+            iri = entity_id_from_doc(record) if isinstance(record, dict) else None
+            if not isinstance(iri, str) or not iri:
+                continue
+            body = next(
+                (v for v in record.values() if isinstance(v, dict) and v.get("id") == iri), {}
+            )
+            name = body.get("name")
+            sources[iri] = (folder, stub_type, name.strip() if isinstance(name, str) else "")
+    return sources
+
+
+def _unresolved_record_references(doc: dict) -> list[str]:
+    """BattINFO IRIs a deposit's tests and datasets point at that have no node in it, sorted.
+
+    The cell a test ran on (``hasTestObject``) and what a dataset is about
+    (``schema:about``). A record the workspace keeps a copy of gets a stub,
+    so an IRI left here was not found locally.
+    """
+    graph = [node for node in doc.get("@graph") or [] if isinstance(node, dict)]
+    present = {node.get("@id") for node in graph}
+    missing: set[str] = set()
+    for node in graph:
+        types = node.get("@type")
+        types = types if isinstance(types, list) else [types]
+        refs: list[Any] = []
+        if "BatteryTest" in types:
+            refs.append(node.get("hasTestObject"))
+        if "dcat:Dataset" in types:
+            about = node.get("schema:about")
+            refs.extend(about if isinstance(about, list) else [about])
+        for ref in refs:
+            iri = ref.get("@id") if isinstance(ref, dict) else None
+            if isinstance(iri, str) and iri.startswith("https://w3id.org/battinfo/") and iri not in present:
+                missing.add(iri)
+    return sorted(missing)
+
+
+def _not_found_locally_note(iris: list[str]) -> str:
+    """Why the records in *iris* have no node in the deposit, and how to fetch them."""
+    shown = ", ".join(iris[:5]) + (f" and {len(iris) - 5} more" if len(iris) > 5 else "")
+    return (
+        f"Not found locally: {len(iris)} record(s) this deposit points at are neither saved in "
+        "this workspace nor kept as a copy under .battinfo/references/ (looked up offline, or "
+        f"never looked up): {shown}. Open the workspace with a registry_url and reference each "
+        "again, for a cell with ws.load(ws.search(type=\"cell\", serial=...)[0]); the workspace "
+        "keeps a copy of the published record, and the deposit describes it from that copy."
+    )
+
+
+def _clean_deposit_text(value: Any) -> str | None:
+    """*value* as text, or ``None`` when it is empty or a placeholder (``unknown``).
+
+    Keeps placeholders out of a deposit's title, description and keywords.
+    """
+    text = str(value).strip() if value is not None else ""
+    return text if text and text.lower() != "unknown" else None
+
+
+def _auto_deposit_title(specs: list[dict]) -> str:
+    """The title of a deposit given none, from the first saved cell spec's manufacturer and model."""
+    if not specs:
+        return "Battery Dataset — BattINFO"
+    first = specs[0]
+    subject = " ".join(
+        part for part in (_clean_deposit_text(first.get("manufacturer")), _clean_deposit_text(first.get("model")))
+        if part
+    )
+    return f"{subject or 'Battery'} — BattINFO Battery Dataset"
 
 
 def _apply_conformance_jsonld(
@@ -3018,7 +3151,8 @@ class AuthoringWorkspace:
         resolved in this session, locally, then in the registry (referenced if it
         already exists).  A cell found in the registry is kept as a read-only copy
         of its published record under ``.battinfo/references/``, so the strict
-        save resolves it; the copy is never submitted.  With ``registry_url=None``
+        save resolves it and a Zenodo deposit describes it with a stub node;
+        the copy is never submitted or uploaded.  With ``registry_url=None``
         a cell this workspace does not hold cannot be checked, and ``ws.save()``
         reports the reference as unresolved.  ``data`` is a path or list of paths to files that
         exist; a relative path resolves against the workspace root, not the
@@ -3808,8 +3942,13 @@ class AuthoringWorkspace:
         Returns
         -------
         dict
-            Counts of imported entities, e.g.
-            ``{"properties": 3, "instances": 8, "tests": 8, "datasets": 8}``.
+            Counts of the records imported, e.g.
+            ``{"properties": 3, "instances": 8, "tests": 8, "datasets": 8}``,
+            and under ``skipped`` the tests and datasets left out, each with
+            its cell and the reason: ``{"tests": [{"test": ..., "cell": ...,
+            "reason": ...}], "datasets": [...]}``. A test on a cell the
+            deposit only points at (a "defined elsewhere" stub, for a cell
+            published in the registry) is skipped, with its datasets.
 
         Example::
 
@@ -3940,7 +4079,8 @@ class AuthoringWorkspace:
         spec_nodes_by_iri: dict[str, dict] = {}
         cell_nodes_by_iri: dict[str, dict] = {}
         test_nodes_by_iri: dict[str, dict] = {}
-        dataset_node: dict | None = None
+        dataset_nodes: list[dict] = []
+        stub_cell_iris: set[str] = set()
 
         for node in graph:
             types = node.get("@type", [])
@@ -3952,11 +4092,17 @@ class AuthoringWorkspace:
                 spec_nodes_by_iri[iri] = node
             elif any(t in types for t in ("BatteryCell", "CylindricalBattery", "PouchCell", "CoinCell", "PrismaticBattery")) \
                  and "BatteryCellSpecification" not in types:
+                defined_by = node.get("rdfs:isDefinedBy")
+                if isinstance(defined_by, dict) and defined_by.get("@id") == iri:
+                    stub_cell_iris.add(iri)  # a published cell the package points at, described at its own IRI
+                    continue
                 cell_nodes_by_iri[iri] = node
             elif "BatteryTest" in types:
                 test_nodes_by_iri[iri] = node
             elif "dcat:Dataset" in types or "schema:Dataset" in types:
-                dataset_node = node
+                # Each member dataset carries its own files; a deposit made
+                # before the catalog shape carried them all on one dataset.
+                dataset_nodes.append(node)
 
         # ── 5. Import cell specs ───────────────────────────────────────────────
         spec_objects: dict[str, Any] = {}   # IRI → CellSpec
@@ -4013,6 +4159,7 @@ class AuthoringWorkspace:
             print(f"  spec:     {node.get('schema:name', iri)}")
 
         # ── 6. Import cell instances ───────────────────────────────────────────
+        imported_cells = 0
         for iri, node in sorted(cell_nodes_by_iri.items()):
             spec_iri = (node.get("dcterms:conformsTo") or {}).get("@id", "")
             spec_obj  = spec_objects.get(spec_iri)
@@ -4024,21 +4171,26 @@ class AuthoringWorkspace:
                 spec_obj,
                 serial_number=node.get("schema:serialNumber"),
                 grade=node.get("schema:quality"),
-                manufactured_at=node.get("schema:productionDate"),
-                expires_at=node.get("schema:expires"),
+                # Written as typed literals ({"@value": ..., "@type": "xsd:date"}).
+                manufactured_at=_jsonld_literal(node.get("schema:productionDate")),
+                expires_at=_jsonld_literal(node.get("schema:expires")),
             )
             cell.id = iri
             sn = node.get("schema:serialNumber", "")
             self._index_cell(cell, sn)
+            imported_cells += 1
             print(f"  instance: {sn or iri}")
 
         # ── 7. Import tests + datasets ─────────────────────────────────────────
         dist_by_url: dict[str, dict] = {}
-        if dataset_node:
-            for dist in (dataset_node.get("dcat:distribution") or []):
-                url = dist.get("dcat:downloadURL", "")
+        dists_by_dataset: dict[str, builtins.list[dict]] = {}
+        for ds_node in dataset_nodes:
+            ds_dists = ds_node.get("dcat:distribution") or []
+            for dist in ds_dists if isinstance(ds_dists, list) else [ds_dists]:
+                url = dist.get("dcat:downloadURL", "") if isinstance(dist, dict) else ""
                 if url:
                     dist_by_url[url] = dist
+                    dists_by_dataset.setdefault(ds_node.get("@id", ""), []).append(dist)
 
         def _first_id(v: Any) -> str:
             """Resolve an @id from a node ref that may be a dict or a list of dicts."""
@@ -4046,53 +4198,87 @@ class AuthoringWorkspace:
                 v = v[0] if v else {}
             return v.get("@id", "") if isinstance(v, dict) else ""
 
+        def _generated_by(dist: dict, test_iri: str) -> bool:
+            generated = dist.get("prov:wasGeneratedBy")
+            return isinstance(generated, dict) and generated.get("@id") == test_iri
+
+        imported_tests = imported_datasets = 0
+        skipped_tests: builtins.list[dict] = []
+        skipped_datasets: builtins.list[dict] = []
         for test_iri, tnode in sorted(test_nodes_by_iri.items()):
             # prov:used may now be a list (cell + spec); hasTestObject is preferred.
             cell_iri = _first_id(tnode.get("hasTestObject")) or _first_id(tnode.get("prov:used"))
             test_cell = self._ws.cells[-1] if not cell_iri else next(
                 (c for c in self._ws.cells if c.id == cell_iri), None
             )
+            outputs = [o for o in (tnode.get("hasOutput") or []) if isinstance(o, dict)]
             if test_cell is None:
-                print(f"  WARNING: no cell found for test {test_iri} -- skipping")
+                # Not attached here: a test on a stub cell (one published in the
+                # registry) would need that cell in this workspace first.
+                reason = (
+                    "cell defined elsewhere" if cell_iri in stub_cell_iris
+                    else "cell not imported" if cell_iri in cell_nodes_by_iri
+                    else "cell not in the deposit"
+                )
+                if reason != "cell defined elsewhere":
+                    print(f"  WARNING: no cell found for test {test_iri} -- skipping")
+                skipped_tests.append({"test": test_iri, "cell": cell_iri, "reason": reason})
+                skipped_datasets.extend(
+                    {"dataset": o.get("@id", ""), "test": test_iri, "cell": cell_iri, "reason": reason}
+                    for o in outputs
+                )
+                continue
+            if not outputs:
+                skipped_tests.append({"test": test_iri, "cell": cell_iri, "reason": "no dataset"})
                 continue
 
             protocol  = tnode.get("schema:measurementTechnique", "")
             instr_node = tnode.get("hasTestEquipment", {})
             instrument = instr_node.get("schema:name", "") if isinstance(instr_node, dict) \
                          else tnode.get("schema:instrument", "")
+            # The emitter states the kind as schema:additionalType; a deposit
+            # without it leaves the kind to be read from the technique.
+            kind = tnode.get("schema:additionalType")
+            if not isinstance(kind, str) or not kind.strip():
+                kind = _import_test_kind_from_technique(protocol)
 
-            for output in (tnode.get("hasOutput") or []):
+            test_imported = False
+            for output in outputs:
                 ds_iri = output.get("@id", "")
-                # Find the distribution for this dataset
-                dist = next(
-                    (d for d in dist_by_url.values()
-                     if (d.get("prov:wasGeneratedBy") or {}).get("@id") == test_iri),
-                    None,
-                )
+                # Find the distribution for this dataset: its own file the test
+                # generated, then any file the test generated (one dataset held
+                # every file before the catalog shape), then its own first file,
+                # then a file whose URL carries the dataset uid.
+                own = dists_by_dataset.get(ds_iri, [])
+                dist = next((d for d in own if _generated_by(d, test_iri)), None) or next(
+                    (d for d in dist_by_url.values() if _generated_by(d, test_iri)), None
+                ) or (own[0] if own else None)
                 if dist is None:
-                    # Try matching by dataset IRI embedded in distribution URL or name
                     dist = next(
                         (d for d in dist_by_url.values()
                          if ds_iri.split("/")[-1] in d.get("dcat:downloadURL", "")),
                         None,
                     )
                 if dist is None:
+                    skipped_datasets.append(
+                        {"dataset": ds_iri, "test": test_iri, "cell": cell_iri, "reason": "no distribution"}
+                    )
                     continue
 
                 dl_url = dist.get("dcat:downloadURL", "")
                 cs     = (dist.get("spdx:checksum") or {})
-                fmt    = dist.get("dcat:mediaType", "")
+                fmt    = _media_type_from_jsonld(dist.get("dcat:mediaType"))
                 fname  = dist.get("schema:name", dl_url.split("/")[-1])
 
                 self._ws.record_test(
                     test_cell,
-                    kind=_import_test_kind_from_technique(protocol),
+                    kind=kind,
                     name=f"{test_cell.serial_number or cell_iri.split('/')[-1]} {protocol}",
                     protocol=protocol,
                     instrument=instrument,
                     status="completed",
                     access_url=dl_url,
-                    format=fmt,
+                    format=fmt or None,
                     checksum_algorithm=_spdx_algorithm_name(cs),
                     checksum_value=cs.get("spdx:checksumValue") or None,
                 )
@@ -4101,16 +4287,37 @@ class AuthoringWorkspace:
                     self._ws.tests[-1].id = test_iri
                 if self._ws.datasets and ds_iri:
                     self._ws.datasets[-1].id = ds_iri
+                test_imported = True
+                imported_datasets += 1
                 print(f"  test:     {fname}")
+            if test_imported:
+                imported_tests += 1
+            else:
+                skipped_tests.append({"test": test_iri, "cell": cell_iri, "reason": "no distribution"})
 
-        counts = {
-            "properties":     len(spec_objects),
-            "instances": len(cell_nodes_by_iri),
-            "tests":     len(test_nodes_by_iri),
-            "datasets":  sum(1 for t in test_nodes_by_iri.values()
-                             if t.get("hasOutput")),
+        counts: dict[str, Any] = {
+            "properties": len(spec_objects),
+            "instances":  imported_cells,
+            "tests":      imported_tests,
+            "datasets":   imported_datasets,
         }
         print(f"\nImported: {counts}")
+        counts["skipped"] = {"tests": skipped_tests, "datasets": skipped_datasets}
+        on_stubs = [s for s in skipped_tests if s["reason"] == "cell defined elsewhere"]
+        if on_stubs:
+            stub_cells = sorted({s["cell"] for s in on_stubs})
+            n_ds = sum(1 for s in skipped_datasets if s["reason"] == "cell defined elsewhere")
+            shown = ", ".join(stub_cells[:3]) + (f" and {len(stub_cells) - 3} more" if len(stub_cells) > 3 else "")
+            print(
+                f"Skipped {len(on_stubs)} test(s) and {n_ds} dataset(s) on {len(stub_cells)} cell(s) "
+                f"defined in the registry, not in this deposit: {shown}. ws.import_() does not attach "
+                "tests to a cell it does not hold; to bring one in, open a workspace with a registry_url, "
+                "reference the cell with ws.load(ws.search(type=\"cell\", serial=...)[0]) and add its "
+                "tests with ws.add(\"test\", cell=..., data=...)."
+            )
+        others = len(skipped_tests) - len(on_stubs)
+        if others:
+            print(f"Skipped {others} other test(s); counts[\"skipped\"] lists each one and why.")
         return counts
 
     def clear(self) -> None:
@@ -5267,7 +5474,9 @@ class AuthoringWorkspace:
             explicit Zenodo record ID forks a new version from that record.
         publish:
             ``False`` (default) — leave a draft for review; publish by clicking on
-            Zenodo or re-running with ``publish=True``.
+            Zenodo or re-running with ``publish=True``. ``True`` runs the
+            publication check before it contacts Zenodo, so a refusal leaves
+            no draft behind.
         sandbox:
             Use ``sandbox.zenodo.org`` for testing.
         community:
@@ -5342,44 +5551,77 @@ class AuthoringWorkspace:
                 "published, so nothing was sent to Zenodo: " + " | ".join(parameter_set_errors)
             )
 
-        client = ZenodoClient(token=tok, sandbox=sandbox)
+        # One title for the deposit graph, the RO-Crate and the Zenodo metadata:
+        # the one given, or the automatic one the metadata would derive, so a
+        # deposit made without a title still names its catalog node.
+        title = self._deposit_title(title)
         domain = "sandbox.zenodo.org" if sandbox else "zenodo.org"
 
-        # ── Create / version / reuse the deposit ───────────────────────────────
-        # Files are synced incrementally below (sync_files): a new version inherits the
-        # prior version's files from Zenodo, so unchanged data is NOT re-uploaded.
-        if reuse_draft_id is not None:
-            deposit = client.get_deposit(reuse_draft_id)   # update existing draft
-        elif record_id is not None:
-            deposit = client.create_new_version(record_id)  # fork from published
-        else:
-            deposit = client.create_empty_deposit()         # brand-new record
-
-        deposit_id: int     = deposit["id"]
-        zenodo_record_id: int = deposit["record_id"]
-        prereserved_doi: str = (
-            deposit.get("metadata", {})
-            .get("prereserve_doi", {})
-            .get("doi", f"10.5281/zenodo.{zenodo_record_id}")
-        )
-
-        # A version (new fork or an updated draft) is a version of its concept record;
-        # record the lineage in the JSON-LD. For a new fork that's the source record_id;
-        # for a reused draft it's the deposit's concept record id.
-        if record_id:
-            is_version_of = f"https://{domain}/records/{record_id}"
-        elif reuse_draft_id and deposit.get("conceptrecid"):
-            is_version_of = f"https://{domain}/records/{deposit['conceptrecid']}"
-        else:
-            is_version_of = ""
-
         # ── Build staging directory ────────────────────────────────────────────
+        # The data files do not depend on the deposit, so they are staged before
+        # one exists, and with publish=True the graph is checked before too.
         tmpdir = Path(tempfile.mkdtemp(prefix="battinfo-zenodo-"))
         try:
-            record_url = f"https://{domain}/records/{zenodo_record_id}"
-
             # Bundle data files (zip by test kind if >90 files)
             data_filenames = self._bundle_data_files(tmpdir, records_dir)
+
+            if publish:
+                # Refuse before anything reaches Zenodo, so a refused publish leaves no
+                # draft behind. The graph is built as ws.preview_jsonld() builds it,
+                # with placeholders for the record id and DOI the deposit does not have
+                # yet. No check reads those values beyond their form, which the
+                # placeholders share, and the dataset records take the deposited file
+                # URLs only after the graph is built, so the verdict is the one the
+                # deposit's own graph gets. That graph is checked again before the DOI
+                # is minted.
+                self._assert_publishable(
+                    self._build_zenodo_jsonld(
+                        zenodo_record_id=0,
+                        prereserved_doi="10.5281/zenodo.RECORD_ID",
+                        record_url=f"https://{domain}/records/RECORD_ID",
+                        data_filenames=data_filenames,
+                        title=title,
+                        description=description or "",
+                        creators=creators or [],
+                        contributors=contributors or [],
+                        license=license or "",
+                        keywords=keywords or [],
+                        is_version_of=f"https://{domain}/records/{record_id}" if record_id else "",
+                    ),
+                    nothing_sent=True,
+                )
+
+            client = ZenodoClient(token=tok, sandbox=sandbox)
+
+            # ── Create / version / reuse the deposit ───────────────────────────
+            # Files are synced incrementally below (sync_files): a new version inherits the
+            # prior version's files from Zenodo, so unchanged data is NOT re-uploaded.
+            if reuse_draft_id is not None:
+                deposit = client.get_deposit(reuse_draft_id)   # update existing draft
+            elif record_id is not None:
+                deposit = client.create_new_version(record_id)  # fork from published
+            else:
+                deposit = client.create_empty_deposit()         # brand-new record
+
+            deposit_id: int     = deposit["id"]
+            zenodo_record_id: int = deposit["record_id"]
+            prereserved_doi: str = (
+                deposit.get("metadata", {})
+                .get("prereserve_doi", {})
+                .get("doi", f"10.5281/zenodo.{zenodo_record_id}")
+            )
+
+            # A version (new fork or an updated draft) is a version of its concept record;
+            # record the lineage in the JSON-LD. For a new fork that's the source record_id;
+            # for a reused draft it's the deposit's concept record id.
+            if record_id:
+                is_version_of = f"https://{domain}/records/{record_id}"
+            elif reuse_draft_id and deposit.get("conceptrecid"):
+                is_version_of = f"https://{domain}/records/{deposit['conceptrecid']}"
+            else:
+                is_version_of = ""
+
+            record_url = f"https://{domain}/records/{zenodo_record_id}"
 
             # Single consolidated JSON-LD (replaces all individual JSON records)
             jsonld = self._build_zenodo_jsonld(
@@ -5387,7 +5629,7 @@ class AuthoringWorkspace:
                 prereserved_doi=prereserved_doi,
                 record_url=record_url,
                 data_filenames=data_filenames,
-                title=title or "",
+                title=title,
                 description=description or "",
                 creators=creators or [],
                 contributors=contributors or [],
@@ -5395,6 +5637,10 @@ class AuthoringWorkspace:
                 keywords=keywords or [],
                 is_version_of=is_version_of,
             )
+            # Name the records the graph points at but has no node for (a draft is not checked).
+            _unresolved = _unresolved_record_references(jsonld)
+            if _unresolved:
+                print(f"  WARNING: {_not_found_locally_note(_unresolved)}")
             (tmpdir / BATTINFO_LD_FILENAME).write_text(
                 json.dumps(jsonld, indent=2, ensure_ascii=False),
                 encoding="utf-8",
@@ -5404,7 +5650,7 @@ class AuthoringWorkspace:
             self._build_rocrate(
                 tmpdir,
                 data_filenames,
-                title=title or "",
+                title=title,
                 description=description or "",
                 creators=creators or [],
                 contributors=contributors or [],
@@ -5606,6 +5852,8 @@ class AuthoringWorkspace:
         structure can be inspected without creating a deposit.  Pass the same
         ``title``/``creators``/``license`` you would give :meth:`upload` to preview
         the rights and attribution that will be embedded in the published record.
+        Without a ``title`` the preview carries the automatic title
+        :meth:`zenodo` would give the deposit.
 
         Parameters
         ----------
@@ -5648,7 +5896,7 @@ class AuthoringWorkspace:
             prereserved_doi="10.5281/zenodo.RECORD_ID",
             record_url="https://zenodo.org/records/RECORD_ID",
             data_filenames=data_filenames,
-            title=title or "",
+            title=self._deposit_title(title),
             description=description or "",
             creators=creators or [],
             contributors=contributors or [],
@@ -5685,6 +5933,9 @@ class AuthoringWorkspace:
                     print(f"    ERROR   {message}")
                 for i in warnings:
                     print(f"    warning {i.message}")
+            unresolved = _unresolved_record_references(jsonld)
+            if unresolved:
+                print(f"  {_not_found_locally_note(unresolved)}")
         except Exception as exc:  # noqa: BLE001 — preview must still write + return its path
             print(f"  Gold-standard validation could not run: {exc}")
 
@@ -5694,17 +5945,20 @@ class AuthoringWorkspace:
         print(f"  Data files:  {len(data_filenames)}")
         return out
 
-    def _assert_publishable(self, jsonld: dict) -> None:
+    def _assert_publishable(self, jsonld: dict, *, nothing_sent: bool = False) -> None:
         """Fail closed before minting an irreversible DOI: refuse to publish a record that has
         validation errors, or a distribution whose data file is missing from the deposit (R-7).
 
-        Missing data files are checked from the most recent :meth:`_bundle_data_files` run."""
+        Missing data files are checked from the most recent :meth:`_bundle_data_files` run.
+        ``nothing_sent`` says in the refusal that no deposit was made (the check
+        :meth:`zenodo` runs before it contacts Zenodo)."""
+        sent_note = " Nothing was sent to Zenodo." if nothing_sent else ""
         missing = getattr(self, "_missing_data_files", [])
         if missing:
             raise RuntimeError(
                 f"Refusing to publish: {len(missing)} distribution data file(s) are missing and were "
                 f"not uploaded, so the deposit would be incomplete: {'; '.join(missing[:5])}. "
-                "Fix the paths (or remove the distributions), then re-run."
+                f"Fix the paths (or remove the distributions), then re-run.{sent_note}"
             )
         try:
             from battinfo.validate import validate_publication_report  # noqa: PLC0415
@@ -5713,10 +5967,13 @@ class AuthoringWorkspace:
             raise RuntimeError(f"Could not validate the record before publishing: {exc}") from exc
         errors = [i for i in report.issues if i.severity == "error"]
         if errors:
+            unresolved = _unresolved_record_references(jsonld)
             raise RuntimeError(
                 f"Refusing to publish: {len(errors)} validation error(s) in the record "
                 "(run ws.preview_jsonld() to see them, or leave the deposit as a draft): "
                 + "; ".join(i.message for i in errors[:5])
+                + (f" {_not_found_locally_note(unresolved)}" if unresolved else "")
+                + sent_note
             )
 
     def _bundle_data_files(self, tmpdir: Path, records_dir: Path) -> builtins.list[str]:
@@ -5876,6 +6133,7 @@ class AuthoringWorkspace:
         keywords: builtins.list[str] | None = None,
         version: str = "",
         is_version_of: str = "",
+        referenced_records: dict[str, builtins.list[dict]] | None = None,
     ) -> dict:
         """Assemble the consolidated battinfo JSON-LD from canonical record dicts.
 
@@ -5886,6 +6144,12 @@ class AuthoringWorkspace:
         interactive authoring flow (:meth:`_build_zenodo_jsonld`) and the
         programmatic contribution flow (``publication.build_zenodo_package``) emit
         byte-identical graphs.
+
+        ``referenced_records`` holds copies of published records the deposit
+        points at but does not carry, in the same shape (a workspace keeps
+        them under ``.battinfo/references/``). A cell or test spec among them
+        that a test or dataset points at gets a "defined elsewhere" stub,
+        typed and named from its copy; nothing else is taken from it.
 
         Cell specs use domain-battery OWL classes (``CylindricalBattery`` etc.)
         and EMMO's ``hasProperty`` / ``hasNumericalPart`` / ``hasMeasurementUnit``
@@ -6022,6 +6286,18 @@ class AuthoringWorkspace:
                         }
                 except Exception:
                     continue
+
+        # Published records this deposit may point at without carrying them:
+        # the copies a workspace keeps of a cell or test spec it referenced in
+        # the registry. A cell's name labels its tests and datasets whether the
+        # cell is carried here or only referenced.
+        _referenced = _reference_stub_sources(referenced_records)
+
+        def _cell_name(iri: str) -> str:
+            if iri in instances:
+                return instances[iri].get("name") or ""
+            folder, _stub_type, name = _referenced.get(iri, ("", None, ""))
+            return name if folder == "cell-instance" else ""
 
         # ── Map cell-spec IRI → the spec BODY ──────────────────────────────────
         # Not the built node: the half-cell rule reads cell_configuration, which
@@ -6177,7 +6453,7 @@ class AuthoringWorkspace:
                             "prov:used":     [{"@id": cell_id}],
                         }
                         # Human label so agents/consumers see more than an opaque IRI.
-                        _cell_nm = instances.get(cell_id, {}).get("name", "")
+                        _cell_nm = _cell_name(cell_id)
                         _label = (protocol or test.get("kind", "")).strip()
                         if _label and _cell_nm:
                             _label = f"{_label} — {_cell_nm}"
@@ -6386,7 +6662,7 @@ class AuthoringWorkspace:
                 # DCAT-AP: dcat:mediaType should be the IANA media-type IRI, not a bare
                 # string. schema:encodingFormat (below) keeps the MIME string for
                 # schema.org consumers.
-                _iana_media = (f"https://www.iana.org/assignments/media-types/{media_type}"
+                _iana_media = (f"{_IANA_MEDIA_TYPES}{media_type}"
                                if "/" in media_type else None)
                 dnode: dict = {
                     "@type":            "dcat:Distribution",
@@ -6450,7 +6726,7 @@ class AuthoringWorkspace:
                     sdl["dcterms:conformsTo"] = {"@id": BDF_TABLE_SCHEMA_IRI}
                 schema_dists.append(sdl)
 
-            cell_name = instances.get(meta.get("cell_id", ""), {}).get("name", "")
+            cell_name = _cell_name(meta.get("cell_id", ""))
             ds_name = meta.get("name") or (
                 f"{cell_name} {meta.get('kind', '')}".strip() or ds_id.split("/")[-1]
             )
@@ -6595,11 +6871,7 @@ class AuthoringWorkspace:
             tid = inst.get("cell_spec_id", "")
             if tid and tid not in _stub_iris:
                 _stub_iris.add(tid)
-                external_spec_stubs.append({
-                    "@id":             tid,
-                    "@type":           "BatteryCellSpecification",
-                    "rdfs:isDefinedBy": {"@id": tid},
-                })
+                external_spec_stubs.append(_defined_elsewhere_stub(tid, "BatteryCellSpecification"))
 
         # ── Compose @graph ─────────────────────────────────────────────────────
         # The Zenodo record is a CATALOG of the per-test datasets above, not a flat
@@ -6749,19 +7021,39 @@ class AuthoringWorkspace:
             + [channel_nodes[k] for k in sorted(channel_nodes)]
         )
 
-        # A parameter set names the cell spec, cell or material spec it is
-        # about; one the deposit does not carry gets the same non-drifting
-        # "defined elsewhere" stub as an external cell spec above, so the
-        # reference resolves to a node instead of failing the graph check.
         _present_ids = {node.get("@id") for node in graph if isinstance(node, dict)}
+
+        # A test or dataset may point at a cell or test spec that lives only in
+        # the registry (referenced by IRI or search hit). The workspace keeps a
+        # read-only copy of that published record, and the copy gives it the
+        # same non-drifting "defined elsewhere" stub as an external cell spec
+        # above, named as the tests and datasets that point at it are. Its body
+        # stays with the published record: this deposit does not carry it. A
+        # reference with no copy gets no node, and the graph check reports it.
+        _pointed_at: set[str] = set()
+        for _node in test_nodes:
+            _used = _node.get("prov:used")
+            for _ref in [_node.get("hasTestObject"), *(_used if isinstance(_used, list) else [_used])]:
+                if isinstance(_ref, dict) and isinstance(_ref.get("@id"), str):
+                    _pointed_at.add(_ref["@id"])
+        for _node in dataset_member_nodes:
+            _pointed_at.update(_ref["@id"] for _ref in _node.get("schema:about") or [])
+        for _target_iri in sorted(_pointed_at - _present_ids):
+            if _target_iri in _referenced:
+                _folder, _target_type, _name = _referenced[_target_iri]
+                _present_ids.add(_target_iri)
+                graph.append(_defined_elsewhere_stub(_target_iri, _target_type, _name))
+
+        # A parameter set names the cell spec, cell or material spec it is
+        # about; one the deposit does not carry gets the same stub, so the
+        # reference resolves to a node instead of failing the graph check.
         for _target_iri, _target_type in _parameter_set_target_refs(record_sets.get("parameter-set", [])):
             if _target_iri not in _present_ids:
                 _present_ids.add(_target_iri)
-                graph.append({
-                    "@id":              _target_iri,
-                    "@type":            _target_type,
-                    "rdfs:isDefinedBy": {"@id": _target_iri},
-                })
+                graph.append(_defined_elsewhere_stub(
+                    _target_iri, _target_type,
+                    _cell_name(_target_iri) if _target_type == "BatteryCell" else "",
+                ))
 
         # ── Record-level free-text notes → schema:comment ─────────────────────
         # Each record's top-level notes[] were dropped from the publication graph;
@@ -6828,11 +7120,14 @@ class AuthoringWorkspace:
         """Read this workspace's saved records and assemble the deposit JSON-LD.
 
         Thin adapter over :meth:`_assemble_zenodo_jsonld` (the shared graph builder):
-        it only sources the canonical record dicts from the workspace directory.
+        it only sources the canonical record dicts from the workspace directory,
+        and the copies of published records it references from
+        ``.battinfo/references/`` (read for stub nodes, never deposited).
         """
         record_sets, _replaced = _read_deposit_record_sets(self._ws.source_root)
         return self._assemble_zenodo_jsonld(
             record_sets,
+            referenced_records=_read_record_sets(self._references_root),
             zenodo_record_id=zenodo_record_id,
             prereserved_doi=prereserved_doi,
             record_url=record_url,
@@ -6964,17 +7259,8 @@ class AuthoringWorkspace:
             encoding="utf-8",
         )
 
-    def _build_zenodo_metadata(
-        self,
-        *,
-        title: str | None,
-        description: str | None,
-        creators: builtins.list[dict],
-        contributors: builtins.list[dict] | None = None,
-        license: str,
-        community: str | None,
-        extra_keywords: builtins.list[str] | None,
-    ) -> dict:
+    def _deposit_spec_summaries(self) -> builtins.list[dict]:
+        """Manufacturer, model, chemistry, format and IEC code of each saved cell spec, by file name."""
         ct_dir = self._ws.source_root / "cell-spec"
         specs: list[dict] = []
         if ct_dir.exists():
@@ -6992,13 +7278,32 @@ class AuthoringWorkspace:
                     })
                 except Exception:
                     continue
+        return specs
 
-        def _clean_meta(v: Any) -> str | None:
-            """Drop empty / placeholder ('unknown') metadata so it never leaks into
-            the published title, description, or keywords (no double spaces, no
-            literal 'unknown')."""
-            text = str(v).strip() if v is not None else ""
-            return text if text and text.lower() != "unknown" else None
+    def _deposit_title(self, title: str | None, specs: builtins.list[dict] | None = None) -> str:
+        """The deposit's title: *title* when given, else the automatic one.
+
+        The Zenodo metadata, the deposit graph's catalog node and the RO-Crate
+        all take this one value, so a deposit made without a title still
+        names its catalog, and the preview shows the name the deposit gets.
+        """
+        if isinstance(title, str) and title.strip():
+            return title
+        return _auto_deposit_title(self._deposit_spec_summaries() if specs is None else specs)
+
+    def _build_zenodo_metadata(
+        self,
+        *,
+        title: str | None,
+        description: str | None,
+        creators: builtins.list[dict],
+        contributors: builtins.list[dict] | None = None,
+        license: str,
+        community: str | None,
+        extra_keywords: builtins.list[str] | None,
+    ) -> dict:
+        specs = self._deposit_spec_summaries()
+        _clean_meta = _clean_deposit_text
 
         s0 = specs[0] if specs else {}
         ds_dir = self._ws.source_root / "dataset"
@@ -7008,7 +7313,6 @@ class AuthoringWorkspace:
             name_parts = [p for p in (_clean_meta(s0.get("manufacturer")), _clean_meta(s0.get("model"))) if p]
             attr_parts = [p for p in (_clean_meta(s0.get("format")), _clean_meta(s0.get("chemistry"))) if p]
             subject = " ".join(name_parts)
-            auto_title = f"{subject or 'Battery'} — BattINFO Battery Dataset"
             if attr_parts:
                 subject = f"{subject} ({', '.join(attr_parts)})".strip()
             auto_desc = (
@@ -7017,7 +7321,6 @@ class AuthoringWorkspace:
                 "Published via BattINFO (https://github.com/BIG-MAP/BattINFO)."
             )
         else:
-            auto_title = "Battery Dataset — BattINFO"
             auto_desc = "Battery dataset published via BattINFO."
 
         kw: list[str] = ["BattINFO", "battery", "electrochemistry"]
@@ -7032,7 +7335,7 @@ class AuthoringWorkspace:
 
         meta: dict = {
             "upload_type":  "dataset",
-            "title":        title or auto_title,
+            "title":        self._deposit_title(title, specs),
             "description":  description or auto_desc,
             "creators":     creators,
             "access_right": "open",

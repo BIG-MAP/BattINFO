@@ -2124,6 +2124,7 @@ def _zenodo_publication_graph(
     (``AuthoringWorkspace._assemble_zenodo_jsonld``), so the programmatic contribution
     path and the interactive authoring path emit identical graph structures."""
     from battinfo.ws import AuthoringWorkspace  # local import avoids an import cycle
+    from battinfo.zenodo import _cell_record_deposit_title  # noqa: PLC0415
 
     record_sets, data_filenames = _record_sets_from_zenodo_record(record, entry_files, zenodo_record_url)
     record_id = zenodo_record_url.rstrip("/").split("/")[-1]
@@ -2133,7 +2134,9 @@ def _zenodo_publication_graph(
         prereserved_doi=f"10.5281/zenodo.{record_id}",
         record_url=zenodo_record_url,
         data_filenames=data_filenames,
-        title=record.cell_spec.name or "",
+        # The title the deposit's Zenodo metadata gets when upload_zenodo_package
+        # is given none, so the catalog node is named the same.
+        title=_cell_record_deposit_title(record),
     )
 
 
@@ -2147,6 +2150,8 @@ def _zenodo_ro_crate(
     bundle_filename: str,
     ro_crate_filename: str,
 ) -> dict[str, Any]:
+    from battinfo.zenodo import _cell_record_deposit_title  # noqa: PLC0415
+
     files_base_url = f"{zenodo_record_url}/files"
 
     meta_filenames = [publish_filename, bundle_filename]
@@ -2158,7 +2163,7 @@ def _zenodo_ro_crate(
     root_dataset: dict[str, Any] = _without_none({
         "@id": "./",
         "@type": "Dataset",
-        "name": record.cell_spec.name,
+        "name": _cell_record_deposit_title(record),
         "url": zenodo_record_url,
         "hasPart": has_part,
     })

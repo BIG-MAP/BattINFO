@@ -579,3 +579,177 @@ class TestZenodoOnlyPublicPath:
         assert ws._r2_configured() is False
         monkeypatch.setenv("R2_ENDPOINT", "https://acc.eu.r2.cloudflarestorage.com")
         assert ws._r2_configured() is True
+
+
+# ── A deposit made without a title names its catalog ──────────────────────────
+#
+# ws.zenodo() gave the Zenodo metadata an automatic title but built the deposit
+# graph with an empty one, so its catalog node had no schema:name and, where
+# pyshacl is installed, the publication check refused it: every
+# ws.publish(zenodo=True), which passes no title, was refused. The graph, the
+# RO-Crate and the metadata now take one title.
+
+LAB_SPEC = CellSpec(manufacturer="Example Lab", model="R2032", format="coin", chemistry="li-ion")
+AUTO_TITLE = "Example Lab R2032 — BattINFO Battery Dataset"
+
+
+def _titleless_workspace(root: Path):  # noqa: ANN202
+    from battinfo.ws import AuthoringWorkspace
+
+    root.mkdir(parents=True, exist_ok=True)
+    (root / "run.bdf.csv").write_text(
+        "test_time_second,voltage_volt,current_ampere\n0,3.0,0\n60,3.5,0.001\n", encoding="utf-8"
+    )
+    ws = AuthoringWorkspace(root=root, registry_url=None)
+    ws.license("cc-by-4.0")
+    ws.add("cell", spec=LAB_SPEC.model_copy(), serial_numbers=["C01"])
+    ws.add("test", type="cycling", cell="C01", data="run.bdf.csv")
+    ws.save()
+    return ws
+
+
+class _RecordingZenodo:
+    """Stands in for ZenodoClient: keeps the uploaded files and the metadata."""
+
+    def __init__(self) -> None:
+        self.uploaded: dict[str, str] = {}
+        self.metadata: dict = {}
+        self.published = False
+
+    def client(self, *args: object, **kwargs: object) -> "_RecordingZenodo":
+        return self
+
+    def create_empty_deposit(self) -> dict:
+        return {"id": 7, "record_id": 7, "metadata": {"prereserve_doi": {"doi": "10.5281/zenodo.7"}}}
+
+    def sync_files(self, deposit_id: int, upload_map: dict) -> dict:
+        self.uploaded = {name: Path(path).read_text(encoding="utf-8") for path, name in upload_map.items()}
+        return {"uploaded": sorted(self.uploaded), "kept": [], "removed": []}
+
+    def update_metadata(self, deposit_id: int, metadata: dict) -> dict:
+        self.metadata = metadata
+        return {}
+
+    def publish_deposit(self, deposit_id: int) -> dict:
+        self.published = True
+        return {"doi": "10.5281/zenodo.7"}
+
+
+@pytest.fixture()
+def recording_zenodo(monkeypatch: pytest.MonkeyPatch) -> _RecordingZenodo:
+    fake = _RecordingZenodo()
+    monkeypatch.setattr("battinfo.zenodo.ZenodoClient", fake.client)
+    monkeypatch.delenv("R2_ENDPOINT", raising=False)
+    return fake
+
+
+def _catalog(graph: dict) -> dict:
+    return next(node for node in graph["@graph"] if "dcat:Catalog" in node["@type"])
+
+
+def _publisher_errors(graph: dict) -> list[str]:
+    from battinfo.validate import validate_publication_report
+
+    report = validate_publication_report(graph, policy="publisher")
+    return [issue.message for issue in report.issues if issue.severity == "error"]
+
+
+class TestDepositTitle:
+    def test_zenodo_without_a_title_names_the_catalog_as_the_metadata(
+        self, tmp_path: Path, recording_zenodo: _RecordingZenodo
+    ) -> None:
+        pytest.importorskip("pyshacl")  # the catalog-name rule is a SHACL shape
+        ws = _titleless_workspace(tmp_path)
+        result = ws.zenodo(publish=True, token="placeholder", creators=CREATORS)
+
+        assert result.published and recording_zenodo.published
+        graph = json.loads(recording_zenodo.uploaded["battinfo.json"])
+        assert recording_zenodo.metadata["title"] == AUTO_TITLE
+        assert _catalog(graph)["schema:name"] == AUTO_TITLE
+        assert _catalog(graph)["dcterms:title"] == AUTO_TITLE
+        crate = json.loads(recording_zenodo.uploaded["ro-crate-metadata.json"])
+        assert next(node for node in crate["@graph"] if node["@id"] == "./")["name"] == AUTO_TITLE
+        assert _publisher_errors(graph) == []
+
+        # The empty title the graph used to get is what the check refused.
+        untitled = ws._build_zenodo_jsonld(
+            zenodo_record_id=7, prereserved_doi="10.5281/zenodo.7",
+            record_url="https://zenodo.org/records/7", data_filenames=["run.bdf.csv"],
+            creators=CREATORS, license="cc-by-4.0",
+        )
+        assert "Catalog must carry a schema:name (human title)." in _publisher_errors(untitled)
+
+    def test_publish_to_zenodo_without_a_title_is_not_refused(
+        self, tmp_path: Path, recording_zenodo: _RecordingZenodo, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        pytest.importorskip("pyshacl")
+        # ws.publish() takes no token; give it a placeholder so the test never
+        # depends on (or reads) a real token in the developer's environment.
+        monkeypatch.setenv("ZENODO_API_TOKEN", "placeholder")
+        ws = _titleless_workspace(tmp_path)
+        submitted: list[str | None] = []
+        monkeypatch.setattr(ws, "submit", lambda **kwargs: submitted.append(kwargs.get("doi")) or [])
+        ws.publish(zenodo=True, note="title check")
+
+        assert recording_zenodo.published and submitted == ["10.5281/zenodo.7"]
+        graph = json.loads(recording_zenodo.uploaded["battinfo.json"])
+        assert _catalog(graph)["schema:name"] == recording_zenodo.metadata["title"] == AUTO_TITLE
+
+    def test_an_explicit_title_reaches_the_graph_and_the_metadata(
+        self, tmp_path: Path, recording_zenodo: _RecordingZenodo
+    ) -> None:
+        ws = _titleless_workspace(tmp_path)
+        ws.zenodo(token="placeholder", title="Coin cell cycling, 2026", creators=CREATORS)
+        graph = json.loads(recording_zenodo.uploaded["battinfo.json"])
+        assert _catalog(graph)["schema:name"] == recording_zenodo.metadata["title"] == "Coin cell cycling, 2026"
+
+    def test_the_preview_without_a_title_shows_the_deposit_title(self, tmp_path: Path) -> None:
+        ws = _titleless_workspace(tmp_path)
+        graph = json.loads(ws.preview_jsonld(creators=CREATORS).read_text(encoding="utf-8"))
+        metadata = ws._build_zenodo_metadata(
+            title=None, description=None, creators=CREATORS, license="cc-by-4.0",
+            community=None, extra_keywords=None,
+        )
+        assert _catalog(graph)["schema:name"] == metadata["title"] == AUTO_TITLE
+
+    def test_a_workspace_without_cell_specs_gets_the_generic_title(
+        self, tmp_path: Path, recording_zenodo: _RecordingZenodo
+    ) -> None:
+        ws = _titleless_workspace(tmp_path)
+        for path in (ws._ws.source_root / "cell-spec").glob("*.json"):
+            path.unlink()
+        graph = json.loads(ws.preview_jsonld(creators=CREATORS).read_text(encoding="utf-8"))
+        assert _catalog(graph)["schema:name"] == "Battery Dataset — BattINFO"
+
+    def test_the_staged_package_names_its_catalog_as_the_metadata(self, tmp_path: Path) -> None:
+        """The CLI batch path (build_zenodo_package, then upload_zenodo_package with no title)."""
+        staging = _staged_package(tmp_path)
+        record = ZenodoCellRecord.from_path(staging / ZENODO_CELL_RECORD_FILENAME)
+        metadata = _build_zenodo_metadata(
+            record, creators=CREATORS, title=None, description=None, license="cc-by-4.0",
+            community=None, extra_keywords=None,
+        )
+        graph = json.loads((staging / DEFAULT_PUBLISH_FILENAME).read_text(encoding="utf-8"))
+        crate = json.loads((staging / DEFAULT_RO_CRATE_METADATA_FILENAME).read_text(encoding="utf-8"))
+        assert metadata["title"] == "Energizer CR2032 — BattINFO Reference Datasets"
+        assert _catalog(graph)["schema:name"] == metadata["title"]
+        assert next(node for node in crate["@graph"] if node["@id"] == "./")["name"] == metadata["title"]
+
+    @pytest.mark.parametrize("title", [None, "Explicit CLI title"])
+    def test_a_title_given_at_upload_reaches_the_staged_files(self, tmp_path: Path, title: str | None) -> None:
+        """upload_zenodo_package(title=...) renames the catalog and the RO-Crate root it uploads."""
+        staging = _staged_package(tmp_path)
+        client = MagicMock(spec=ZenodoClient)
+        client.create_empty_deposit.return_value = {
+            "id": 9, "record_id": 9, "metadata": {"prereserve_doi": {"doi": "10.5281/zenodo.9"}},
+        }
+        with patch("battinfo.zenodo.ZenodoClient", return_value=client):
+            upload_zenodo_package(staging, CREATORS, token="tok", title=title)
+
+        [metadata] = [call.args[1] for call in client.update_metadata.call_args_list]
+        expected = title or "Energizer CR2032 — BattINFO Reference Datasets"
+        assert metadata["title"] == expected
+        graph = json.loads((staging / DEFAULT_PUBLISH_FILENAME).read_text(encoding="utf-8"))
+        crate = json.loads((staging / DEFAULT_RO_CRATE_METADATA_FILENAME).read_text(encoding="utf-8"))
+        assert _catalog(graph)["schema:name"] == _catalog(graph)["dcterms:title"] == expected
+        assert next(node for node in crate["@graph"] if node["@id"] == "./")["name"] == expected

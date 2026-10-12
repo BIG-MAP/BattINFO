@@ -237,3 +237,219 @@ def test_a_cell_found_by_serial_is_not_looked_up_again_by_iri(tmp_path: Path, re
     ws.add("test", type="cycling", cell=CELL_IRI, name="by IRI")
     ws.add("test", type="cycling", cell=SERIAL, name="by serial again")
     assert len(registry.calls) == calls
+
+
+# ── The deposit describes a registry-only record it points at ────────────────
+#
+# A test and dataset on a cell only the registry holds saved, but the deposit
+# graph built by ws.preview_jsonld() and ws.zenodo() read the workspace's own
+# records only: it had no node for the cell, failed the publication check with
+# publication.reference_missing_node, and lost the cell part of the test's
+# name. The copy the workspace keeps now gives the cell, and a referenced test
+# spec, a "defined elsewhere" stub in the deposit.
+
+DATA = "test_time_second,voltage_volt,current_ampere\n0,3.0,0\n60,3.5,0.001\n"
+CREATORS = [{"name": "Doe, Jane"}]
+
+
+def _workspace_on_registry_cell(root: Path, registry_url: str | None) -> AuthoringWorkspace:
+    """The reproduction (n1_reference_not_in_deposit.py): a test with data on a registry-only cell."""
+    root.mkdir(parents=True, exist_ok=True)
+    (root / "run.bdf.csv").write_text(DATA, encoding="utf-8")
+    ws = AuthoringWorkspace(root=root, registry_url=registry_url)
+    ws.license("cc-by-4.0")
+    ws.add("test", type="cycling", cell=CELL_IRI, spec=PROTOCOL_IRI, data="run.bdf.csv")
+    ws.save()
+    return ws
+
+
+def _preview(ws: AuthoringWorkspace) -> dict:
+    return json.loads(ws.preview_jsonld(title="NEW-1", creators=CREATORS).read_text(encoding="utf-8"))
+
+
+def _issues(graph: dict, policy: str, severity: str = "error") -> list[str]:
+    from battinfo.validate import validate_publication_report
+
+    report = validate_publication_report(graph, policy=policy)
+    return sorted(issue.code for issue in report.issues if issue.severity == severity)
+
+
+def test_a_registry_only_cell_is_a_defined_elsewhere_node_of_the_deposit(
+    tmp_path: Path, registry: FakeRegistry
+) -> None:
+    ws = _workspace_on_registry_cell(tmp_path, REGISTRY)
+    graph = _preview(ws)
+    nodes = {node["@id"]: node for node in graph["@graph"]}
+
+    assert nodes[CELL_IRI] == {
+        "@id": CELL_IRI, "@type": "BatteryCell", "schema:name": SERIAL,
+        "rdfs:isDefinedBy": {"@id": CELL_IRI},
+    }
+    assert nodes[PROTOCOL_IRI] == {
+        "@id": PROTOCOL_IRI, "@type": ["prov:Plan", "schema:HowTo"],
+        "schema:name": "Svaluto-Ferro 2025 formation", "rdfs:isDefinedBy": {"@id": PROTOCOL_IRI},
+    }
+    test = next(node for node in graph["@graph"] if "BatteryTest" in node["@type"])
+    assert test["schema:name"] == f"cycling — {SERIAL}"  # was "cycling": the cell part was lost
+    assert _issues(graph, "publisher") == [] and _issues(graph, "strict") == []
+
+    # The published records are pointed at, not carried: no member, no file, no
+    # spec link or other field read from the copies.
+    catalog = next(node for node in graph["@graph"] if "dcat:Catalog" in node["@type"])
+    assert {ref["@id"] for ref in catalog["dcat:dataset"]} == {
+        node["@id"] for node in graph["@graph"] if "dcat:Dataset" in node["@type"]
+    }
+    assert SPEC_IRI not in json.dumps(graph)
+
+
+def test_importing_tests_on_a_stub_cell_reports_them_as_skipped(
+    tmp_path: Path, registry: FakeRegistry, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """ws.import_() does not attach tests to a cell the deposit only points at, and says so."""
+    ws = _workspace_on_registry_cell(tmp_path / "source", REGISTRY)
+    deposit = tmp_path / "battinfo.json"
+    deposit.write_text(json.dumps(_preview(ws)), encoding="utf-8")
+    test_iri = ws._ws.tests[0].id
+    dataset_iri = ws._ws.datasets[0].id
+    capsys.readouterr()
+
+    fresh = AuthoringWorkspace(root=tmp_path / "imported", registry_url=None)
+    counts = fresh.import_(str(deposit))
+    out = capsys.readouterr().out
+
+    reason = "cell defined elsewhere"
+    assert counts == {
+        "properties": 0, "instances": 0, "tests": 0, "datasets": 0,
+        "skipped": {
+            "tests": [{"test": test_iri, "cell": CELL_IRI, "reason": reason}],
+            "datasets": [{"dataset": dataset_iri, "test": test_iri, "cell": CELL_IRI, "reason": reason}],
+        },
+    }
+    assert fresh._ws.tests == [] and fresh._ws.datasets == []
+    assert f"Skipped 1 test(s) and 1 dataset(s) on 1 cell(s) defined in the registry, not in this deposit: {CELL_IRI}" in out
+    assert "ws.load(ws.search(type=\"cell\", serial=...)[0])" in out
+
+
+def test_without_a_copy_the_reference_stays_an_error_that_says_how_to_fetch_it(
+    tmp_path: Path, registry: FakeRegistry, capsys: pytest.CaptureFixture[str]
+) -> None:
+    ws = _workspace_on_registry_cell(tmp_path, None)  # offline: nothing was looked up
+    capsys.readouterr()
+    graph = _preview(ws)
+    out = capsys.readouterr().out
+
+    assert CELL_IRI not in {node["@id"] for node in graph["@graph"]}
+    test = next(node for node in graph["@graph"] if "BatteryTest" in node["@type"])
+    assert test["schema:name"] == "cycling"
+    assert _issues(graph, "publisher") == ["publication.reference_missing_node"]
+    assert _issues(graph, "strict") == ["publication.reference_missing_node"]
+    assert "Not found locally: 1 record(s)" in out and CELL_IRI in out
+    assert "Open the workspace with a registry_url" in out
+
+
+class _FakeZenodo:
+    """Stands in for ZenodoClient: records each call and the files each upload carries."""
+
+    def __init__(self) -> None:
+        self.calls: list[str] = []
+        self.uploaded: dict[str, str] = {}
+
+    def client(self, *args: object, **kwargs: object) -> _FakeZenodo:
+        self.calls.append("client")
+        return self
+
+    def create_empty_deposit(self) -> dict:
+        self.calls.append("create")
+        return {"id": 7, "record_id": 7, "metadata": {"prereserve_doi": {"doi": "10.5281/zenodo.7"}}}
+
+    def sync_files(self, deposit_id: int, upload_map: dict) -> dict:
+        self.calls.append("upload")
+        self.uploaded = {name: Path(path).read_text(encoding="utf-8") for path, name in upload_map.items()}
+        return {"uploaded": sorted(self.uploaded), "kept": [], "removed": []}
+
+    def update_metadata(self, deposit_id: int, metadata: dict) -> dict:
+        self.calls.append("metadata")
+        return {}
+
+    def publish_deposit(self, deposit_id: int) -> dict:
+        self.calls.append("publish")
+        return {"doi": "10.5281/zenodo.7"}
+
+
+@pytest.fixture()
+def zenodo(monkeypatch: pytest.MonkeyPatch) -> _FakeZenodo:
+    fake = _FakeZenodo()
+    monkeypatch.setattr("battinfo.zenodo.ZenodoClient", fake.client)
+    return fake
+
+
+def test_a_refused_publish_leaves_nothing_on_zenodo(
+    tmp_path: Path, registry: FakeRegistry, zenodo: _FakeZenodo
+) -> None:
+    ws = _workspace_on_registry_cell(tmp_path, None)
+    with pytest.raises(RuntimeError) as excinfo:
+        ws.zenodo(publish=True, token="placeholder", title="NEW-1", creators=CREATORS)
+    message = str(excinfo.value)
+    assert message.startswith("Refusing to publish: 1 validation error(s)")
+    assert "Not found locally" in message and message.endswith("Nothing was sent to Zenodo.")
+    assert zenodo.calls == []  # no client, so no draft with a dangling cell IRI
+    assert not (tmp_path / ".battinfo" / "zenodo.json").exists()
+
+
+def test_a_publish_missing_a_data_file_leaves_nothing_on_zenodo(
+    tmp_path: Path, registry: FakeRegistry, zenodo: _FakeZenodo
+) -> None:
+    ws = _workspace_on_registry_cell(tmp_path, REGISTRY)
+    (tmp_path / "run.bdf.csv").unlink()
+    with pytest.raises(RuntimeError, match="data file\\(s\\) are missing") as excinfo:
+        ws.zenodo(publish=True, token="placeholder", title="NEW-1", creators=CREATORS)
+    assert str(excinfo.value).endswith("Nothing was sent to Zenodo.")
+    assert zenodo.calls == []
+
+
+def test_a_publish_on_a_registry_only_cell_deposits_its_stub(
+    tmp_path: Path, registry: FakeRegistry, zenodo: _FakeZenodo
+) -> None:
+    ws = _workspace_on_registry_cell(tmp_path, REGISTRY)
+    result = ws.zenodo(publish=True, token="placeholder", title="NEW-1", creators=CREATORS)
+    assert result.published
+    assert zenodo.calls == ["client", "create", "upload", "metadata", "publish"]
+    # The data file and the two metadata files; the reference copies stay local.
+    assert sorted(zenodo.uploaded) == ["battinfo.json", "ro-crate-metadata.json", "run.bdf.csv"]
+    deposited = json.loads(zenodo.uploaded["battinfo.json"])
+    stub = next(node for node in deposited["@graph"] if node["@id"] == CELL_IRI)
+    assert stub["rdfs:isDefinedBy"] == {"@id": CELL_IRI}
+
+
+@pytest.mark.parametrize("registry_url", [REGISTRY, None], ids=["copy-kept", "no-copy"])
+def test_the_check_before_the_deposit_gives_the_deposited_graph_verdict(
+    tmp_path: Path, registry: FakeRegistry, registry_url: str | None
+) -> None:
+    """ws.zenodo(publish=True) checks a placeholder graph before the deposit exists.
+
+    The graph it deposits has the real record id and DOI, and a graph rebuilt
+    after the upload reads records that point at the deposited file; neither
+    changes what the publication check reports.
+    """
+    ws = _workspace_on_registry_cell(tmp_path, registry_url)
+    common = {"data_filenames": ["run.bdf.csv"], "title": "NEW-1", "creators": CREATORS,
+              "license": "cc-by-4.0"}
+    before = ws._build_zenodo_jsonld(
+        zenodo_record_id=0, prereserved_doi="10.5281/zenodo.RECORD_ID",
+        record_url="https://zenodo.org/records/RECORD_ID", **common,
+    )
+    record_url = "https://zenodo.org/records/4242"
+    deposited = ws._build_zenodo_jsonld(
+        zenodo_record_id=4242, prereserved_doi="10.5281/zenodo.4242", record_url=record_url,
+        is_version_of="https://zenodo.org/records/4241", **common,
+    )
+    assert ws._apply_zenodo_file_urls(record_url, {"run.bdf.csv"}) == 1
+    rebuilt = ws._build_zenodo_jsonld(
+        zenodo_record_id=4242, prereserved_doi="10.5281/zenodo.4242", record_url=record_url,
+        is_version_of="https://zenodo.org/records/4241", **common,
+    )
+    for policy in ("publisher", "strict"):
+        for severity in ("error", "warning"):
+            verdict = _issues(before, policy, severity)
+            assert _issues(deposited, policy, severity) == verdict
+            assert _issues(rebuilt, policy, severity) == verdict
