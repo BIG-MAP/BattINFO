@@ -91,7 +91,11 @@ out = Path("features")
 out.mkdir(exist_ok=True)
 
 for row in cycling.itertuples():
-    df = reg.read(row.dataset_id)
+    try:
+        df = reg.read(row.dataset_id)
+    except ValueError as err:  # a data file read() does not load, such as .xlsx
+        print(f"skipped {row.dataset_id}: {err}")
+        continue
     per_cycle = df.groupby("cycle_count").agg(
         v_min=("voltage_volt", "min"),
         v_max=("voltage_volt", "max"),
@@ -99,6 +103,8 @@ for row in cycling.itertuples():
     )
     per_cycle.to_parquet(out / f"{row.dataset_id.rsplit('/', 1)[1]}.parquet")
 ```
+
+`read()` loads `.parquet` and `.csv` files and raises `ValueError` for anything else, such as the spreadsheets (`.xlsx`) a few publishers share, so the loop skips those and says which instead of stopping at the first one.
 
 Keep the `dataset_id` with anything you derive. It is the persistent identifier to cite, and it is how you get back to the cell and test descriptions later.
 

@@ -646,7 +646,7 @@
 </section>
 <section id="check-the-deposit-graph">
 <h2>4. Check the deposit graph<a class="headerlink" href="#check-the-deposit-graph" title="Link to this heading">#</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">ws.preview_jsonld()</span></code> assembles the same JSON-LD graph a Zenodo deposit would carry, runs the publication checks on it and prints the result. Pass the same title and creators you will give the deposit. To check in code rather than by reading the printout, validate the written file:</p>
+<p><code class="docutils literal notranslate"><span class="pre">ws.preview_jsonld()</span></code> assembles the same JSON-LD graph a Zenodo deposit would carry, runs the publication checks on it and prints the result. Pass the same title and creators you will give the deposit; without a title, the preview and the deposit both take the automatic one built from the first saved cell spec. To check in code rather than by reading the printout, validate the written file:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.validate</span><span class="w"> </span><span class="kn">import</span> <span class="n">validate_publication_report</span>

@@ -655,7 +655,11 @@
 <span class="n">out</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">cycling</span><span class="o">.</span><span class="n">itertuples</span><span class="p">():</span>
-    <span class="n">df</span> <span class="o">=</span> <span class="n">reg</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">dataset_id</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">reg</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">dataset_id</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>  <span class="c1"># a data file read() does not load, such as .xlsx</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;skipped </span><span class="si">{</span><span class="n">row</span><span class="o">.</span><span class="n">dataset_id</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">err</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">continue</span>
     <span class="n">per_cycle</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;cycle_count&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span>
         <span class="n">v_min</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;voltage_volt&quot;</span><span class="p">,</span> <span class="s2">&quot;min&quot;</span><span class="p">),</span>
         <span class="n">v_max</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;voltage_volt&quot;</span><span class="p">,</span> <span class="s2">&quot;max&quot;</span><span class="p">),</span>
@@ -664,6 +668,7 @@
     <span class="n">per_cycle</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="n">out</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">row</span><span class="o">.</span><span class="n">dataset_id</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">.parquet&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
+<p><code class="docutils literal notranslate"><span class="pre">read()</span></code> loads <code class="docutils literal notranslate"><span class="pre">.parquet</span></code> and <code class="docutils literal notranslate"><span class="pre">.csv</span></code> files and raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> for anything else, such as the spreadsheets (<code class="docutils literal notranslate"><span class="pre">.xlsx</span></code>) a few publishers share, so the loop skips those and says which instead of stopping at the first one.</p>
 <p>Keep the <code class="docutils literal notranslate"><span class="pre">dataset_id</span></code> with anything you derive. It is the persistent identifier to cite, and it is how you get back to the cell and test descriptions later.</p>
 </section>
 <section id="look-at-individual-records">

@@ -651,10 +651,11 @@ handled by the BattINFO registry deployment.</p>
 (kind, protocol name, instrument), datasets and distributions — losslessly.</p>
 <p><strong>Not restored on import</strong> (the published graph is the source of truth; re-importing then
 re-publishing would drop these): conformance/quality annotations (<code class="docutils literal notranslate"><span class="pre">dqv</span></code>/<code class="docutils literal notranslate"><span class="pre">earl</span></code> +
-deviations), the catalog’s creators/publisher/keywords/version, and the structured test
-conditions. Treat <code class="docutils literal notranslate"><span class="pre">battinfo.bundle.json</span></code> (the <code class="docutils literal notranslate"><span class="pre">ZenodoCellRecord</span></code>) as the lossless
+deviations), the catalog’s creators/publisher/keywords/version, the structured test
+conditions, and test spec records (a test keeps its protocol name, not its link to the spec). Treat <code class="docutils literal notranslate"><span class="pre">battinfo.bundle.json</span></code> (the <code class="docutils literal notranslate"><span class="pre">ZenodoCellRecord</span></code>) as the lossless
 round-trip artifact; <code class="docutils literal notranslate"><span class="pre">battinfo.json</span></code> is the semantic-web view. (Closing this gap is a
 tracked enhancement.)</p>
+<p>A test whose cell the deposit only points at (a “defined elsewhere” stub for a cell published in the registry) is not imported, nor are its datasets. They are listed under <code class="docutils literal notranslate"><span class="pre">skipped</span></code> in the counts <code class="docutils literal notranslate"><span class="pre">import_()</span></code> returns, each with its cell and the reason, and the counts of tests and datasets say how many were imported.</p>
 </section>
 </section>
 
