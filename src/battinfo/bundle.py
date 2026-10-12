@@ -3016,6 +3016,17 @@ class Dataset(BundleJsonModel):
 
     @classmethod
     def from_record(cls, record: Mapping[str, Any], *, dataset_path: str | None = None) -> Self:
+        """Rebuild a ``Dataset`` from a stored dataset record, the JSON that ``ws.save()`` and ``save_dataset`` write.
+
+        For a dataset published in a registry, pass the record inside the
+        registry entry, not the entry that ``Registry.get`` returns:
+        ``entry["semantic_payload"]["battinfo_records"]["dataset"]``. The
+        registry lists a dataset's curve-preview files (roles ``plot_data``
+        and ``plot_static``) on the entry only, so they are not in that
+        record. To publish a new version that keeps its preview, add those
+        files to ``distributions`` before saving, as shown in
+        docs/howto/read-registry-data.md.
+        """
         record = record_to_snake_aliases(record)
         dataset = record.get("dataset")
         if not isinstance(dataset, Mapping):

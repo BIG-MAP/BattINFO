@@ -391,7 +391,8 @@ class Registry:
         cells to instances of one spec.
 
         A summary carries the IRI, title, publisher, status and a ``metadata``
-        dict. Use :meth:`get` for the full record with its links and files.
+        dict. Use :meth:`get` for the full entry with its links, its files and
+        the published record.
         """
         params: dict[str, Any] = {"resource_type": record_type, "kind": kind, "q": q, "status": status}
         if cell_spec is not None:
@@ -410,11 +411,26 @@ class Registry:
             offset += _PAGE_LIMIT
 
     def get(self, record: Any, *, record_type: str | None = None) -> dict:
-        """The full record for an IRI, an id, or a summary from :meth:`list`.
+        """The registry's entry for an IRI, an id, or a summary from :meth:`list`.
 
-        The result adds ``related_resources`` (links to the cell, test or spec)
+        The entry adds ``related_resources`` (links to the cell, test or spec)
         and ``distributions`` (files) to what the summary holds. A bare id
         needs *record_type*; an IRI or a summary already says what it is.
+
+        The entry is not a BattINFO record. The record as it was published
+        sits inside it, under the entry's ``resource_type``::
+
+            entry = reg.get(iri)
+            record = entry["semantic_payload"]["battinfo_records"][entry["resource_type"]]
+
+        That is the record the ``from_record`` methods take, for example
+        ``battinfo.Dataset.from_record(record)``. A cell's entry holds its
+        record under ``"cell"`` (the body key inside is ``cell_instance``)
+        and a copy of its spec under ``"cell_spec"``. The curve-preview files
+        of a dataset (roles ``plot_data`` and ``plot_static``) are listed in
+        the entry's ``distributions`` and not in the record; a new version
+        made from the record has to carry them over (see
+        docs/howto/read-registry-data.md).
         """
         segment, uid = _record_ref(record)
         segment = record_type or segment
