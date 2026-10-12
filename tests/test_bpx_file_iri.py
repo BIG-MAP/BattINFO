@@ -712,7 +712,7 @@ def test_jsonld_parts_are_datasets_with_their_claims() -> None:
         t for prop in by_part["cell"]["hasProperty"] for t in prop["@type"]
         if isinstance(prop["@type"], list)
     }
-    assert {"NominalCapacity", "Area", "NumberOfEntities"} <= cell_types
+    assert {"NominalCapacity", "Area", "NumberOfElectrodePairs"} <= cell_types
     assert "schema:about" not in by_part["separator"]
 
 

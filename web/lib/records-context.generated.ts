@@ -846,6 +846,11 @@ export const recordsContext: Record<string, unknown> = {
     "MolePerSquareMetrePerSecond": "emmo:MolePerSquareMetrePerSecond",
     "JoulePerKilogramKelvin": "emmo:JoulePerKilogramKelvin",
     "WattPerMetreKelvin": "emmo:WattPerMetreKelvin",
-    "WattPerSquareMetreKelvin": "emmo:WattPerSquareMetreKelvin"
+    "WattPerSquareMetreKelvin": "emmo:WattPerSquareMetreKelvin",
+    "NumberOfElectrodePairs": "electrochemistry:electrochemistry_f7a81b04_6600_4bbf_a70e_5ebbed911069",
+    "TemperatureCoefficientOfTheOpenCircuitPotential": "electrochemistry:electrochemistry_9b44a651_afa9_4889_ae07_9ac49ede8ac1",
+    "OpenCircuitPotential": "electrochemistry:electrochemistry_e272f229_7b45_4436_9b0b_30391ee4e5be",
+    "GuestDiffusivity": "electrochemistry:electrochemistry_fed4582e_0de4_43e1_b51a_e3496697c25d",
+    "TransportEfficiency": "electrochemistry:electrochemistry_3605456a_e952_4093_98b6_d8c24c37c19e"
   }
 };
