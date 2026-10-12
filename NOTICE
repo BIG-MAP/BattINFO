@@ -9,3 +9,70 @@ this project except in compliance with the License. You may obtain a copy of the
 License in the accompanying LICENSE file or at:
 
     https://www.apache.org/licenses/LICENSE-2.0
+
+
+Third-party material
+====================
+
+The battinfo package includes material from the following sources. Each keeps
+its own licence.
+
+
+EMMO ontologies
+---------------
+What:    battinfo/data/context/domain-battery.context.json, a copy of the
+         JSON-LD context of EMMO domain-battery 0.20.2, and the EMMO class and
+         unit IRIs and labels in battinfo/data/context/, battinfo/data/mappings/
+         and battinfo/data/vocab/, taken from EMMO 1.0.2, domain-battery 0.20.2,
+         domain-electrochemistry 0.37.2 and domain-chemical-substance. Selected
+         and rearranged for BattINFO.
+From:    https://github.com/emmo-repo
+Licence: Creative Commons Attribution 4.0 International (CC BY 4.0),
+         https://creativecommons.org/licenses/by/4.0/
+Holder:  the EMMO project (named as publisher in each ontology) and the
+         ontology authors.
+
+
+BPX example parameter files
+---------------------------
+What:    the five parameter-set examples titled "BPX ..." in
+         battinfo/data/examples/parameter-set/, built from the example files
+         of the BPX repository at commit
+         eb5da74588631ffee0e81f00746352a3f5ba5414.
+From:    https://github.com/FaradayInstitution/BPX
+Licence: MIT. The copyright and permission notice of the source:
+
+    Copyright (c) 2022 University of Oxford
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+
+
+OEDB solvents and anions
+------------------------
+What:    the choice of electrolyte solvents and anions, with OEDB's
+         abbreviations, behind the substances marked "(OEDB)" in
+         battinfo/data/vocab/substances.json, plus methyl acetoacetate (MAA)
+         and methyl pyruvate (MPyr), which OEDB abbreviates MA and MP. Their
+         identifiers come from PubChem.
+From:    OEDB, the Open Electrolyte Database for Batteries, https://oedb.jp
+Licence: Creative Commons Attribution 4.0 International (CC BY 4.0),
+         https://creativecommons.org/licenses/by/4.0/
+Holder:  Copyright 2025-2026 The University of Tokyo. Cite: Nakamura K. et al.,
+         npj Computational Materials (2026),
+         https://doi.org/10.1038/s41524-026-02093-y

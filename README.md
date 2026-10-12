@@ -265,7 +265,7 @@ each release also gets its own version DOI on Zenodo.
 ```bibtex
 @software{battinfo,
   title        = {BattINFO: The semantic data layer for battery technology},
-  author       = {Clark, Simon and Friis, Jesper and L{\o}nstad Bleken, Francesca and Flores, Eibar and Stier, Simon and Battaglia, Corsin},
+  author       = {Clark, Simon and Friis, Jesper and L{\o}nstad Bleken, Francesca and Andersen, Casper Welzel and Flores, Eibar and Snijder, Hendrik and Stier, Simon and Battaglia, Corsin},
   year         = {2026},
   publisher    = {Zenodo},
   doi          = {10.5281/zenodo.6304782},
