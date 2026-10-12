@@ -494,3 +494,17 @@ def test_supersede_parameter_set_refuses_a_record_already_under_dataset() -> Non
         supersede_parameter_set(_load(CLAIM_BATCH_EXAMPLE))
     with pytest.raises(TypeError, match="parameter-set record"):
         supersede_parameter_set({"dataset": {"id": "https://w3id.org/battinfo/dataset/aaaa-bbbb-cccc-dddd"}})
+
+
+@pytest.mark.parametrize("bad_parts", [3, 3.5, True, "parts"])
+def test_a_non_list_parts_value_is_a_finding_not_a_crash(bad_parts) -> None:
+    from battinfo.interop import from_bpx_parameters
+
+    fixture = Path(__file__).parent / "fixtures" / "interop" / "bpx-dfn-full.bpx.json"
+    record = from_bpx_parameters(fixture).to_parameter_set(
+        virtual_cell=True, materials={"negative": "graphite", "positive": "nmc811"}
+    )
+    record["parameter_set"]["parts"] = bad_parts
+    for policy in ("default", "publisher"):
+        report = validate_record_report(record, policy=policy)
+        assert not report.ok

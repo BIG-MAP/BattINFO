@@ -407,7 +407,7 @@ def parameter_file_issues(body: Mapping[str, Any]) -> list[tuple[str, str, str, 
                 f"({recipe}, IDENTIFIER_POLICY 6.3): it must be {expected}, not {body.get('id')}.",
             ))
     seen: set[tuple[Any, Any]] = set()
-    for index, part in enumerate(body.get("parts") or []):
+    for index, part in enumerate(body["parts"] if isinstance(body.get("parts"), list) else []):
         if not isinstance(part, Mapping):
             continue
         key = (part.get("part"), part.get("phase"))

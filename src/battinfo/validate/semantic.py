@@ -1230,6 +1230,12 @@ _BATTINFO_RECORD_IRI_RE = re.compile(
 )
 
 
+def _list_or_empty(value: Any) -> list[Any]:
+    """The value when it is a list, else an empty list: a malformed field is a schema
+    finding, never a crash in the semantic pass."""
+    return value if isinstance(value, list) else []
+
+
 def _validate_parameter_set_identity(
     body: Mapping[str, Any],
     issues: list[ValidationIssue],
@@ -1348,7 +1354,7 @@ def _validate_parameter_set_semantics(
 
     fraction_keys = frozenset(_FRACTION_PROPERTY_TERMS)
     claim_lists: list[tuple[str, Any]] = [("parameter_set.claims", body.get("claims"))]
-    for part_idx, part in enumerate(body.get("parts") or []):
+    for part_idx, part in enumerate(_list_or_empty(body.get("parts"))):
         if isinstance(part, Mapping):
             claim_lists.append((f"parameter_set.parts[{part_idx}].claims", part.get("claims")))
     for prefix, claims in claim_lists:
@@ -1495,7 +1501,7 @@ def validate_semantic_report(
         _check_props(body.get("case"), f"{body_key}.case")
         for idx, seal in enumerate(body.get("seals") or []):
             _check_props(seal, f"{body_key}.seals[{idx}]")
-        for idx, part in enumerate(body.get("parts") or []):
+        for idx, part in enumerate(_list_or_empty(body.get("parts"))):
             _check_props(part, f"{body_key}.parts[{idx}]")
 
     parameter_set = doc.get("parameter_set")

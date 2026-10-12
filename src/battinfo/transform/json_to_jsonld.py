@@ -2841,7 +2841,7 @@ def _to_domain_battery_jsonld_parameter_set(data: dict[str, Any]) -> dict[str, A
     node.update(_parameter_claim_nodes(body.get("claims")))
     part_nodes = [
         part_node
-        for part in body.get("parts") or []
+        for part in (body["parts"] if isinstance(body.get("parts"), list) else [])
         if isinstance(part, dict) and (part_node := _parameter_part_node(part, body.get("name"))) is not None
     ]
     if part_nodes:
@@ -2880,7 +2880,7 @@ def _to_domain_battery_jsonld_parameter_set(data: dict[str, Any]) -> dict[str, A
                     *(body.get("claims") or []),
                     *(
                         claim
-                        for part in body.get("parts") or []
+                        for part in (body["parts"] if isinstance(body.get("parts"), list) else [])
                         if isinstance(part, dict)
                         for claim in part.get("claims") or []
                     ),
