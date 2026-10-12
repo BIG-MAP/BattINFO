@@ -683,6 +683,9 @@ class TestDepositTitle:
         self, tmp_path: Path, recording_zenodo: _RecordingZenodo, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         pytest.importorskip("pyshacl")
+        # ws.publish() takes no token; give it a placeholder so the test never
+        # depends on (or reads) a real token in the developer's environment.
+        monkeypatch.setenv("ZENODO_API_TOKEN", "placeholder")
         ws = _titleless_workspace(tmp_path)
         submitted: list[str | None] = []
         monkeypatch.setattr(ws, "submit", lambda **kwargs: submitted.append(kwargs.get("doi")) or [])
