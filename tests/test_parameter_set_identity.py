@@ -236,8 +236,8 @@ def test_query_parameter_sets_marks_legacy_rows(tmp_path: Path) -> None:
     legacy, replacement = _migrated(tmp_path)
     rows = {row["id"]: row for row in query_parameter_sets(source_root=tmp_path, include_superseded=True)}
     assert len(rows) == 2
-    assert rows[legacy["parameter_set"]["id"]]["legacy_spec_iri"] is True
-    assert rows[replacement["parameter_set"]["id"]]["legacy_spec_iri"] is False
+    assert rows[legacy["parameter_set"]["id"]]["minted_under_spec"] is True
+    assert rows[replacement["parameter_set"]["id"]]["minted_under_spec"] is False
 
 
 def test_query_parameter_sets_leaves_out_a_record_its_replacement_supersedes(tmp_path: Path) -> None:

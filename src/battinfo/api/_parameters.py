@@ -986,7 +986,7 @@ def query_parameter_sets(
     parameter key, in any part. The returned rows carry the full ``record`` so
     results feed straight into :func:`battinfo.parameters.collate_claims`.
     A row whose record was minted under ``spec/`` before 2026-10-11 says so
-    in ``legacy_spec_iri``; :func:`supersede_parameter_set` builds its
+    in ``minted_under_spec``; :func:`supersede_parameter_set` builds its
     ``dataset/`` replacement.
 
     A record that another record in the result names in ``supersedes`` is
@@ -1029,7 +1029,7 @@ def query_parameter_sets(
             "cell_instance_id": body.get("cell_instance_id"),
             "virtual_cell": bool(body.get("virtual_cell")),
             "supersedes": body.get("supersedes"),
-            "legacy_spec_iri": bool(SPEC_IRI_RE.fullmatch(str(body.get("id")))),
+            "minted_under_spec": bool(SPEC_IRI_RE.fullmatch(str(body.get("id")))),
             "scope": body.get("scope"),
             "material_kinds": sorted({ctx["material_kind"] for ctx, _ in groups if ctx.get("material_kind")}),
             "material_spec_ids": sorted({
