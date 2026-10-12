@@ -174,7 +174,7 @@ Only the publisher of the old record can supersede it. The registry refuses a `s
 
 ## Records published under spec/
 
-Parameter sets published before 2026-10-11 have `spec/` IRIs, and they keep them: the old IRI keeps resolving, and a local copy still loads, validates and is found by its IRI, with the warning `semantic.parameter_set_legacy_namespace`. Nothing is published under `spec/` any more, though, so the `publisher` policy makes that warning an error and `ws.submit()` refuses the record. Its new version is a new `dataset/` record that supersedes it, and `supersede_parameter_set` builds it. The IRI is minted from the current seeds (a file's from its `parameters_sha256`, a claim batch's from its target, scope and name), `supersedes` names the old IRI, and everything else is copied as it is, the file entries included, since a file's URL is not its identity. For the Schmitt et al. 2026 file:
+Parameter sets published before 2026-10-11 have `spec/` IRIs, and they keep them: the old IRI keeps resolving, and a local copy still loads, validates and is found by its IRI, with the warning `semantic.parameter_set_legacy_namespace`, which names the `dataset/` IRI of its replacement. Nothing is published under `spec/` any more, though, so the `publisher` policy makes that warning an error, and `ws.submit()` and `ws.zenodo()` refuse the record. Its new version is a new `dataset/` record that supersedes it, and `supersede_parameter_set` builds it. The IRI is minted from the current seeds (a file's from its `parameters_sha256`, a claim batch's from its target, scope and name), `supersedes` names the old IRI, and everything else is copied as it is, the file entries included, since a file's URL is not its identity. For the Schmitt et al. 2026 file:
 
 <!-- doc-snippet: skip -->
 ```python
@@ -188,7 +188,7 @@ ws.add("parameter_set", record=new)
 ws.save()
 ```
 
-Do not move the old uid to `dataset/` by editing the IRI. A uid is never reused, not even under another namespace, and a record whose uid is that of the record it supersedes is refused under every policy.
+Do not move the old uid to `dataset/` by editing the IRI. A uid is never reused, not even under another namespace, so a `dataset/` record that keeps the uid it had under `spec/` is refused under every policy, whether or not it names the old record in `supersedes`. Once both records sit in a workspace, `query_parameter_sets` and `collate_claims` return the new one only.
 
 ## Who owns a file's IRI
 
