@@ -22,7 +22,9 @@ canonical form (IDENTIFIER_POLICY 6.3), and it carries the file itself under
 ``distributions``.
 
 Either way the record-level provenance block carries the source citation and
-each claim carries its own provenance class.
+each claim carries its own provenance class. Both flavours are datasets and
+mint under ``https://w3id.org/battinfo/dataset/`` (IDENTIFIER_POLICY 6.3);
+either may name the record it replaces in ``supersedes``.
 
 Import the public surface from ``battinfo.api``, not from this module.
 """
@@ -38,6 +40,7 @@ from battinfo._util import _as_path, _citation_url_value
 from battinfo.api._records import _assert_id_matches_uid, save_record
 from battinfo.api._shared import (
     CELL_IRI_RE,
+    DATASET_IRI_RE,
     DEFAULT_REGISTRATION_SOURCE_ROOT,
     DUPLICATE_POLICY_ERROR,
     MATERIAL_SPEC_IRI_RE,
@@ -62,6 +65,10 @@ _PARAMETER_KEY_RE = re.compile(r"^[a-z][a-z0-9_]*$")
 _PROVENANCE_CLASSES = ("measured", "fitted", "literature", "assumed", "derived")
 _SCOPES = ("material", "electrode", "separator", "electrolyte", "cell")
 _TARGET_FIELDS = ("material_kind", "material_spec_id", "cell_spec_id")
+# Every parameter set, of either flavour, is a dataset (IDENTIFIER_POLICY 6.3).
+# Records minted before 2026-10-11 live under spec/; a replacement names one in
+# supersedes, so that field takes either namespace.
+_PARAMETER_SET_IRI_BASE = "https://w3id.org/battinfo/dataset/"
 
 
 def _checked_claim(
@@ -162,14 +169,118 @@ _FILE_LINK_FIELDS = ("cell_spec_id", "cell_instance_id", "virtual_cell")
 _PART_FIELDS = frozenset({"part", "phase", "material_kind", "material_spec_id", "claims"})
 
 
+# The first part of each flavour's uid seed (IDENTIFIER_POLICY 6.3). Parameter
+# sets minted under spec/ before 2026-10-11 used the legacy seeds. Nothing mints
+# from those any more, but they give back the uid such a record had, which a
+# dataset/ record must never take (section 10).
+_CLAIM_BATCH_SEED = "parameter-claims"
+_PARAMETER_FILE_SEED = "parameter-file"
+_LEGACY_CLAIM_BATCH_SEED = "parameter-set"
+_LEGACY_PARAMETER_FILE_SEED = "parameter-set-file"
+
+
 def parameter_file_uid(parameters_sha256: str) -> str:
     """The uid of a parameter file's record (IDENTIFIER_POLICY 6.3).
 
-    ``stable_uid("parameter-set-file:<parameters_sha256>")``: the IRI names
-    the file's parameters, so anyone holding the file can check it against
-    the IRI.
+    ``stable_uid("parameter-file:<parameters_sha256>")``, under
+    ``dataset/``: the IRI names the file's parameters, so anyone holding the
+    file can check it against the IRI.
     """
-    return stable_uid(f"parameter-set-file:{parameters_sha256}")
+    return stable_uid(f"{_PARAMETER_FILE_SEED}:{parameters_sha256}")
+
+
+def _legacy_parameter_file_uid(parameters_sha256: str) -> str:
+    """The uid a parameter file minted under spec/ before 2026-10-11 has."""
+    return stable_uid(f"{_LEGACY_PARAMETER_FILE_SEED}:{parameters_sha256}")
+
+
+def claim_batch_uid(target: str, scope: str, name: str, electrode_polarity: str | None = None) -> str:
+    """The uid of a claim batch's record (IDENTIFIER_POLICY 6.3).
+
+    ``stable_uid("parameter-claims:<target>:<scope>[:<electrode_polarity>]:<name>")``,
+    under ``dataset/``, the name stripped and lowercased, so the same
+    source's claims about the same target re-import onto the same IRI. The
+    builder and a save of a record that has no id both mint through here.
+    """
+    return _seeded_claim_batch_uid(_CLAIM_BATCH_SEED, target, scope, name, electrode_polarity)
+
+
+def _seeded_claim_batch_uid(
+    seed: str, target: str, scope: str, name: str, electrode_polarity: str | None
+) -> str:
+    parts = [seed, target, scope]
+    if electrode_polarity:
+        parts.append(electrode_polarity)
+    parts.append(name.strip().lower())
+    return stable_uid(":".join(parts))
+
+
+def _default_scope(target_field: str) -> str:
+    """The scope a claim batch gets when it states none: its target's side."""
+    return "material" if target_field in ("material_kind", "material_spec_id") else "cell"
+
+
+def parameter_set_uid(body: Mapping[str, Any]) -> str | None:
+    """The uid the current seeds give a parameter-set body, of either flavour.
+
+    A parameter file's comes from its ``parameters_sha256``, a claim batch's
+    from its target, scope, electrode polarity and name, read from the
+    canonical fields exactly as the builder reads its arguments, so a
+    record saved without an id lands on the IRI the builder gives it.
+    ``None`` when the body lacks what its flavour's seed needs.
+    """
+    return _seeded_parameter_set_uid(body, legacy=False)
+
+
+def legacy_parameter_set_uid(body: Mapping[str, Any]) -> str | None:
+    """The uid the seeds of before 2026-10-11 give a parameter-set body.
+
+    The same fields as :func:`parameter_set_uid` under the seeds of the
+    time (``parameter-set`` for a claim batch, ``parameter-set-file`` for a
+    parameter file): the uid the record had, or would have had, under
+    ``spec/``. Nothing mints from them; a ``dataset/`` record must never
+    carry this uid (IDENTIFIER_POLICY 6.3 and 10).
+    """
+    return _seeded_parameter_set_uid(body, legacy=True)
+
+
+def _seeded_parameter_set_uid(body: Mapping[str, Any], *, legacy: bool) -> str | None:
+    if "parts" in body or "parameters_sha256" in body:
+        fingerprint = body.get("parameters_sha256")
+        if isinstance(fingerprint, str) and _SHA256_HEX_RE.fullmatch(fingerprint):
+            return _legacy_parameter_file_uid(fingerprint) if legacy else parameter_file_uid(fingerprint)
+        return None
+    target = next(
+        ((field, body[field]) for field in _TARGET_FIELDS if isinstance(body.get(field), str) and body[field]),
+        None,
+    )
+    name = body.get("name")
+    if target is None or not isinstance(name, str) or not name.strip():
+        return None
+    target_field, target_value = target
+    if target_field == "material_kind":
+        from battinfo.materials import resolve_material_kind  # noqa: PLC0415
+
+        target_value = resolve_material_kind(target_value) or target_value
+    scope = body.get("scope")
+    polarity = body.get("electrode_polarity")
+    return _seeded_claim_batch_uid(
+        _LEGACY_CLAIM_BATCH_SEED if legacy else _CLAIM_BATCH_SEED,
+        target_value,
+        scope if isinstance(scope, str) and scope else _default_scope(target_field),
+        name,
+        polarity if isinstance(polarity, str) and polarity else None,
+    )
+
+
+def _legacy_uid_reused_message(entity_id: str, legacy_uid: str) -> str:
+    legacy_iri = f"https://w3id.org/battinfo/spec/{legacy_uid}"
+    return (
+        f"{entity_id} reuses the uid of {legacy_iri}, the IRI this parameter set had under spec/ "
+        "before parameter sets moved to dataset/ on 2026-10-11. A uid is never reused, not even "
+        "under another namespace (IDENTIFIER_POLICY 6.3 and 10): leave id and uid out so the record "
+        f"mints its own, and name {legacy_iri} in supersedes."
+    )
 
 
 def _part_label(part: Mapping[str, Any]) -> str:
@@ -277,16 +388,26 @@ def parameter_file_issues(body: Mapping[str, Any]) -> list[tuple[str, str, str, 
     issues: list[tuple[str, str, str, str]] = []
     fingerprint = body.get("parameters_sha256")
     if isinstance(fingerprint, str) and _SHA256_HEX_RE.fullmatch(fingerprint):
-        expected = f"https://w3id.org/battinfo/spec/{parameter_file_uid(fingerprint)}"
+        if SPEC_IRI_RE.fullmatch(str(body.get("id"))):
+            # Minted under spec/ before 2026-10-11, from the seed of the time: it
+            # stays bound to its fingerprint (the legacy-namespace warning is
+            # the validator's, not this rule's).
+            expected = f"https://w3id.org/battinfo/spec/{_legacy_parameter_file_uid(fingerprint)}"
+            recipe = (
+                "stable_uid('parameter-set-file:' + parameters_sha256) for a parameter file "
+                "minted under spec/ before 2026-10-11"
+            )
+        else:
+            expected = f"{_PARAMETER_SET_IRI_BASE}{parameter_file_uid(fingerprint)}"
+            recipe = "stable_uid('parameter-file:' + parameters_sha256)"
         if body.get("id") != expected:
             issues.append((
                 "id_mismatch", "error", "parameter_set.id",
                 f"a parameter file's IRI derives from its parameters_sha256 "
-                f"(stable_uid('parameter-set-file:' + parameters_sha256), IDENTIFIER_POLICY 6.3): "
-                f"it must be {expected}, not {body.get('id')}.",
+                f"({recipe}, IDENTIFIER_POLICY 6.3): it must be {expected}, not {body.get('id')}.",
             ))
     seen: set[tuple[Any, Any]] = set()
-    for index, part in enumerate(body.get("parts") or []):
+    for index, part in enumerate(body["parts"] if isinstance(body.get("parts"), list) else []):
         if not isinstance(part, Mapping):
             continue
         key = (part.get("part"), part.get("phase"))
@@ -384,6 +505,15 @@ def _record_from_parameter_set(
 ) -> dict[str, Any]:
     if not isinstance(name, str) or not name.strip():
         raise ValueError("parameter set needs a non-empty name (convention: '<source> - <target>').")
+    if id is not None and SPEC_IRI_RE.fullmatch(str(id)):
+        # Records minted under spec/ before 2026-10-11 still load and validate,
+        # but nothing mints there any more (IDENTIFIER_POLICY 6.3).
+        raise ValueError(
+            f"{id} is a spec/ IRI: parameter sets have minted under https://w3id.org/battinfo/dataset/ "
+            "since 2026-10-11 (IDENTIFIER_POLICY 6.3), and a spec/ one names a record minted before "
+            "then. Publish a new version of such a record as a dataset/ record that supersedes it: "
+            f"supersede_parameter_set(record), or leave id out and pass supersedes={id!r}."
+        )
 
     if parts is not None:
         body = _parameter_file_body(
@@ -414,7 +544,6 @@ def _record_from_parameter_set(
                 ("parameters_sha256", parameters_sha256),
                 ("distributions", distributions or None),
                 ("not_imported", not_imported or None),
-                ("supersedes", supersedes),
             )
             if value is not None
         ]
@@ -453,10 +582,21 @@ def _record_from_parameter_set(
             raise ValueError("not_imported must be a list of BPX paths (non-empty strings).")
         body["not_imported"] = list(dict.fromkeys(not_imported))
     if supersedes is not None:
-        if not SPEC_IRI_RE.fullmatch(str(supersedes)):
-            raise ValueError("supersedes must be a parameter-set IRI: https://w3id.org/battinfo/spec/{uid}.")
+        # Either flavour may replace an earlier record; one minted before
+        # 2026-10-11 has a spec/ IRI (IDENTIFIER_POLICY 6.3).
+        if not (DATASET_IRI_RE.fullmatch(str(supersedes)) or SPEC_IRI_RE.fullmatch(str(supersedes))):
+            raise ValueError(
+                "supersedes must be a parameter-set IRI: https://w3id.org/battinfo/dataset/{uid}, "
+                "or https://w3id.org/battinfo/spec/{uid} for one minted before 2026-10-11."
+            )
         if supersedes == body["id"]:
-            raise ValueError("a parameter file cannot supersede itself: supersedes names an earlier record.")
+            raise ValueError("a parameter set cannot supersede itself: supersedes names an earlier record.")
+        if _iri_tail(str(supersedes))[1] == _iri_tail(body["id"])[1]:
+            raise ValueError(
+                f"{body['id']} reuses the uid of the record it supersedes ({supersedes}). A uid is "
+                "never reused, not even under another namespace (IDENTIFIER_POLICY 6.3 and 10): "
+                "leave id and uid out so the record mints its own."
+            )
         body["supersedes"] = str(supersedes)
     if distributions is not None and not isinstance(distributions, list):
         raise TypeError(
@@ -523,7 +663,7 @@ def _claim_batch_body(
     target_field, target_value = _resolved_target(material_kind, material_spec_id, cell_spec_id)
 
     if scope is None:
-        scope = "material" if target_field in ("material_kind", "material_spec_id") else "cell"
+        scope = _default_scope(target_field)
     if scope not in _SCOPES:
         raise ValueError(f"scope must be one of {', '.join(_SCOPES)}; got {scope!r}.")
     if electrode_polarity is not None:
@@ -542,24 +682,30 @@ def _claim_batch_body(
     ]
 
     if id is not None:
-        if not SPEC_IRI_RE.fullmatch(id):
-            raise ValueError("parameter-set id must match https://w3id.org/battinfo/spec/{uid}.")
+        if not DATASET_IRI_RE.fullmatch(id):
+            raise ValueError(
+                "parameter-set id must match https://w3id.org/battinfo/dataset/{uid} "
+                "(parameter sets are datasets, IDENTIFIER_POLICY 6.3)."
+            )
         if uid is not None:
             _assert_id_matches_uid(id, _normalized_dashed_uid(uid))
         entity_id = id
         _, dashed_uid = _iri_tail(entity_id)
     elif uid is not None:
         dashed_uid = _normalized_dashed_uid(uid)
-        entity_id = f"https://w3id.org/battinfo/spec/{dashed_uid}"
+        entity_id = f"{_PARAMETER_SET_IRI_BASE}{dashed_uid}"
     else:
         # Deterministic identity: the same (target, scope side, name) always
         # mints the same IRI, so re-importing a source is idempotent.
-        seed_parts = ["parameter-set", target_value, scope]
-        if electrode_polarity:
-            seed_parts.append(electrode_polarity)
-        seed_parts.append(name.strip().lower())
-        dashed_uid = stable_uid(":".join(seed_parts))
-        entity_id = f"https://w3id.org/battinfo/spec/{dashed_uid}"
+        dashed_uid = claim_batch_uid(target_value, scope, name, electrode_polarity)
+        entity_id = f"{_PARAMETER_SET_IRI_BASE}{dashed_uid}"
+    if id is not None or uid is not None:
+        # A pinned uid may not be the one this batch had under spec/.
+        legacy_uid = _seeded_claim_batch_uid(
+            _LEGACY_CLAIM_BATCH_SEED, target_value, scope, name, electrode_polarity
+        )
+        if dashed_uid == legacy_uid:
+            raise ValueError(_legacy_uid_reused_message(entity_id, legacy_uid))
 
     body: dict[str, Any] = {
         "id": entity_id,
@@ -629,10 +775,13 @@ def _parameter_file_body(
             "file's RFC 8785 canonical form (battinfo.interop.bpx_content_digest)."
         )
     dashed_uid = parameter_file_uid(parameters_sha256)
-    entity_id = f"https://w3id.org/battinfo/spec/{dashed_uid}"
+    entity_id = f"{_PARAMETER_SET_IRI_BASE}{dashed_uid}"
     given = id if id is not None else (
-        f"https://w3id.org/battinfo/spec/{_normalized_dashed_uid(uid)}" if uid is not None else None
+        f"{_PARAMETER_SET_IRI_BASE}{_normalized_dashed_uid(uid)}" if uid is not None else None
     )
+    legacy_uid = _legacy_parameter_file_uid(parameters_sha256)
+    if given is not None and str(given).rsplit("/", 1)[-1] == legacy_uid:
+        raise ValueError(_legacy_uid_reused_message(given, legacy_uid))
     if given is not None and given != entity_id:
         raise ValueError(
             f"a parameter file's IRI derives from its parameters_sha256 ({entity_id}); "
@@ -656,7 +805,8 @@ def create_parameter_set(*, validate: bool = True, **fields: Any) -> dict[str, A
     A claim batch (``claims=``) targets exactly one of ``material_kind``
     (curated kind key or alias), ``material_spec_id``, ``cell_spec_id``; its
     uid derives deterministically from (target, scope, name), so the same
-    source re-imports onto the same IRI.
+    source re-imports onto the same IRI. An explicit ``uid=`` or ``id=`` (a
+    ``dataset/`` IRI) overrides that.
 
     A parameter file (``parts=``, one BPX file; build it with
     :meth:`battinfo.interop.BpxParameterImportResult.to_parameter_set`) groups
@@ -666,7 +816,12 @@ def create_parameter_set(*, validate: bool = True, **fields: Any) -> dict[str, A
     hold exactly one source file, at most one runnable conversion that names
     the source's checksum, and mirrors of the source's bytes;
     ``not_imported`` lists the BPX paths of the file's values the record does
-    not hold, and ``supersedes`` the record of an earlier file it corrects.
+    not hold.
+
+    Both flavours mint under ``https://w3id.org/battinfo/dataset/``
+    (IDENTIFIER_POLICY 6.3). Either may name the record it replaces in
+    ``supersedes``: a ``dataset/`` IRI, or a ``spec/`` one for a parameter set
+    minted before 2026-10-11.
 
     Each claim carries exactly one of ``quantity`` / ``curve`` /
     ``expression`` plus its ``provenance_class`` (``default_provenance_class=``
@@ -676,6 +831,60 @@ def create_parameter_set(*, validate: bool = True, **fields: Any) -> dict[str, A
     if validate:
         _validate_canonical_record(record, policy=DEFAULT_POLICY)
     return record
+
+
+def supersede_parameter_set(record: Mapping[str, Any], *, validate: bool = True) -> dict[str, Any]:
+    """The ``dataset/`` record that supersedes a parameter set minted under ``spec/``.
+
+    Parameter sets minted before 2026-10-11 have ``spec/`` IRIs
+    (IDENTIFIER_POLICY 6.3). They keep them and stay readable; a new version
+    is a new record under ``dataset/``, minted from the current seeds (a
+    claim batch from its target, scope, electrode polarity and name, a
+    parameter file from its ``parameters_sha256``), that names the old IRI
+    in ``supersedes``. Everything else is copied as it is, the file entries
+    of a parameter file included (a file's URL is not its identity). The
+    result is validated unless ``validate=False``.
+
+    A record already under ``dataset/`` is refused: a new version of one (a
+    corrected file or claim batch) is built afresh with ``supersedes=``.
+    """
+    import copy  # noqa: PLC0415
+
+    if not isinstance(record, Mapping) or not isinstance(record.get("parameter_set"), Mapping):
+        raise TypeError(
+            "supersede_parameter_set expects a parameter-set record, a dict with a 'parameter_set' body."
+        )
+    doc = record_to_snake_aliases(copy.deepcopy(dict(record)))
+    body = doc["parameter_set"]
+    old_id = body.get("id")
+    if isinstance(old_id, str) and DATASET_IRI_RE.fullmatch(old_id):
+        raise ValueError(
+            f"{old_id} is already under dataset/, so there is nothing to republish. A new version "
+            f"of it (a corrected file or claim batch) is built afresh with supersedes={old_id!r}."
+        )
+    if not isinstance(old_id, str) or not SPEC_IRI_RE.fullmatch(old_id):
+        raise ValueError(
+            "supersede_parameter_set republishes a parameter set minted under spec/ "
+            f"(https://w3id.org/battinfo/spec/{{uid}}); this record's id is {old_id!r}."
+        )
+    uid = parameter_set_uid(body)
+    if uid is None:
+        raise ValueError(
+            f"cannot mint a dataset/ IRI for {old_id}: a claim batch needs its name and one of "
+            "material_kind, material_spec_id or cell_spec_id, a parameter file its parameters_sha256."
+        )
+    new_body: dict[str, Any] = {"id": f"{_PARAMETER_SET_IRI_BASE}{uid}", "short_id": uid.replace("-", "")[:6]}
+    for key, value in body.items():
+        if key in ("id", "short_id", "supersedes"):
+            continue
+        if key in ("distributions", "description", "comment"):
+            new_body.setdefault("supersedes", old_id)  # where the builder puts it
+        new_body[key] = value
+    new_body.setdefault("supersedes", old_id)
+    doc["parameter_set"] = new_body
+    if validate:
+        _validate_canonical_record(doc, policy=DEFAULT_POLICY)
+    return doc
 
 
 def template_parameter_set(
@@ -764,6 +973,7 @@ def query_parameter_sets(
     parameter: str | None = None,
     source_root: PathLike | None = None,
     include_packaged_examples: bool = False,
+    include_superseded: bool = False,
     limit: int = 50,
     offset: int = 0,
 ) -> list[dict[str, Any]]:
@@ -775,9 +985,22 @@ def query_parameter_sets(
     filters to sets carrying at least one claim for that (canonical)
     parameter key, in any part. The returned rows carry the full ``record`` so
     results feed straight into :func:`battinfo.parameters.collate_claims`.
+    A row whose record was minted under ``spec/`` before 2026-10-11 says so
+    in ``minted_under_spec``; :func:`supersede_parameter_set` builds its
+    ``dataset/`` replacement.
+
+    A record that another record in the result names in ``supersedes`` is
+    left out, as :func:`battinfo.parameters.collate_claims` leaves it out: its
+    replacement carries the same source's claims, so after a migration (or a
+    corrected file) a search does not count that source twice.
+    ``include_superseded=True`` brings such records back.
     """
     from battinfo.materials import resolve_material_kind  # noqa: PLC0415
-    from battinfo.parameters import parameter_set_claim_groups, resolve_parameter  # noqa: PLC0415
+    from battinfo.parameters import (  # noqa: PLC0415
+        parameter_set_claim_groups,
+        resolve_parameter,
+        superseded_parameter_set_ids,
+    )
 
     kind_filter = resolve_material_kind(material_kind) if material_kind is not None else None
     if material_kind is not None and kind_filter is None:
@@ -806,6 +1029,7 @@ def query_parameter_sets(
             "cell_instance_id": body.get("cell_instance_id"),
             "virtual_cell": bool(body.get("virtual_cell")),
             "supersedes": body.get("supersedes"),
+            "minted_under_spec": bool(SPEC_IRI_RE.fullmatch(str(body.get("id")))),
             "scope": body.get("scope"),
             "material_kinds": sorted({ctx["material_kind"] for ctx, _ in groups if ctx.get("material_kind")}),
             "material_spec_ids": sorted({
@@ -845,4 +1069,11 @@ def query_parameter_sets(
         if parameter_filter is not None and parameter_filter not in rec.get("parameters", []):
             continue
         filtered.append(rec)
+    if not include_superseded:
+        superseded = superseded_parameter_set_ids(rec["record"] for rec in filtered)
+        filtered = [
+            rec
+            for rec in filtered
+            if not (isinstance(rec.get("id"), str) and rec["id"] in superseded)
+        ]
     return _paginate(filtered, limit=limit, offset=offset)

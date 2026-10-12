@@ -1,8 +1,8 @@
 {
   "schema_version": "0.2.0",
   "parameter_set": {
-    "id": "https://w3id.org/battinfo/spec/q73c-bk3q-ceks-r4p6",
-    "short_id": "q73cbk",
+    "id": "https://w3id.org/battinfo/dataset/6bpa-4qet-046r-1zzk",
+    "short_id": "6bpa4q",
     "name": "BPX NMC111 pouch SPM",
     "virtual_cell": true,
     "parameters_sha256": "146b1f32a8b63a9be852b753a9770d49e6f59deb309cad00b783cfc9744710af",

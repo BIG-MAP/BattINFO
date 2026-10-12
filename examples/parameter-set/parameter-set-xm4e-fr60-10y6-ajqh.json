@@ -1,8 +1,8 @@
 {
   "schema_version": "0.2.0",
   "parameter_set": {
-    "id": "https://w3id.org/battinfo/spec/8qqs-rh43-wt8d-172n",
-    "short_id": "8qqsrh",
+    "id": "https://w3id.org/battinfo/dataset/xm4e-fr60-10y6-ajqh",
+    "short_id": "xm4efr",
     "name": "Chen 2020 - graphite",
     "material_kind": "graphite",
     "scope": "material",

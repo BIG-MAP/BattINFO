@@ -1774,8 +1774,9 @@ class BpxParameterImportResult:
         those of :func:`upgrade_bpx` applied to this file, so a runnable
         copy can only be this file's layout conversion.
 
-        ``supersedes`` names the record (a spec IRI) of an earlier file this
-        one corrects: a corrected file has other parameters, so it is a new
+        ``supersedes`` names the record of an earlier file this one corrects
+        (its ``dataset/`` IRI, or its ``spec/`` IRI if it was minted before
+        2026-10-11): a corrected file has other parameters, so it is a new
         record with a new IRI that points back at the old one.
 
         ``record_kwargs`` (description, citation, citation_doi, source_url,

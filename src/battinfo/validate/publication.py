@@ -210,6 +210,11 @@ def _is_absolute_uri(value: Any) -> bool:
     return bool(parsed.scheme and (parsed.netloc or parsed.path))
 
 
+# The types a dataset record's node carries: dcat:Dataset in a workspace
+# deposit, BatteryTestResult in a dataset publication package.
+_DATASET_RECORD_TYPES = frozenset({"dcat:Dataset", "BatteryTestResult"})
+
+
 def _type_values(node: dict[str, Any]) -> list[str]:
     value = node.get("@type")
     if isinstance(value, str):
@@ -217,6 +222,11 @@ def _type_values(node: dict[str, Any]) -> list[str]:
     if isinstance(value, list):
         return [item for item in value if isinstance(item, str)]
     return []
+
+
+def _one_or_many(value: Any) -> Any:
+    """A single JSON object as a one-item list: in JSON-LD the two mean the same."""
+    return [value] if isinstance(value, dict) else value
 
 
 def _graph_nodes(data: dict[str, Any]) -> list[tuple[str, dict[str, Any]]]:
@@ -331,20 +341,33 @@ def _shape_issues(data: dict[str, Any], policy: ValidationPolicy) -> ValidationR
             continue
 
         node_id = node.get("@id")
-        is_battinfo_dataset = isinstance(node_id, str) and node_id.startswith("https://w3id.org/battinfo/dataset/")
+        # The about and file checks hold dataset records to what a deposit needs,
+        # so they apply to nodes typed as dataset records (_DATASET_RECORD_TYPES):
+        # BattINFO emits every dataset record with one of those types. The
+        # namespace cannot decide it: dataset/ also holds parameter sets
+        # (IDENTIFIER_POLICY 6.3), plain schema:Dataset nodes that have no files
+        # (a claim batch) or are about no record (a virtual-cell parameter
+        # file), and 6.1 reads a record's kind from the record, not its IRI. Nor
+        # can a marker on parameter-set nodes: the checks would then hang on the
+        # emitter always writing it, and in one shape.
+        is_battinfo_dataset = (
+            isinstance(node_id, str)
+            and node_id.startswith("https://w3id.org/battinfo/dataset/")
+            and any(t in _DATASET_RECORD_TYPES for t in node_types)
+        )
         # A collection (dcat:DatasetSeries) groups member datasets: it is about
         # nothing in particular and has no files of its own, so the about and
         # distribution requirements apply to its members, not to it.
         is_series = "dcat:DatasetSeries" in node_types
 
-        about = node.get("schema:about")
+        about = _one_or_many(node.get("schema:about"))
         if about is not None and not isinstance(about, list):
             _append_issue(
                 issues,
                 code="publication.reference_invalid",
                 severity=severity,
                 path=f"{path}.schema:about" if path else "schema:about",
-                message="Publication schema:about must be a list of @id references.",
+                message="Publication schema:about must be an @id reference or a list of them.",
             )
         elif is_battinfo_dataset and has_graph and not is_series and (not isinstance(about, list) or not about):
             _append_issue(
@@ -379,14 +402,14 @@ def _shape_issues(data: dict[str, Any], policy: ValidationPolicy) -> ValidationR
                         message=f"Publication graph is missing a node for referenced BattINFO id '{ref_id}'.",
                     )
 
-        distributions = node.get("schema:distribution")
+        distributions = _one_or_many(node.get("schema:distribution"))
         if distributions is not None and not isinstance(distributions, list):
             _append_issue(
                 issues,
                 code="publication.distribution_invalid",
                 severity=severity,
                 path=f"{path}.schema:distribution" if path else "schema:distribution",
-                message="Publication schema:distribution must be a list of distribution objects.",
+                message="Publication schema:distribution must be a distribution object or a list of them.",
             )
             continue
         if (

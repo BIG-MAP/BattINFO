@@ -2786,9 +2786,10 @@ def _to_domain_battery_jsonld_parameter_set(data: dict[str, Any]) -> dict[str, A
     none when it is a virtual cell (stated as ``virtual_cell``). Its parts are
     blank schema:Dataset nodes under ``schema:hasPart``, each with its claims
     and, for a material part, the material on ``schema:about``; its
-    fingerprint is a ``schema:identifier``; the file itself rides
-    ``schema:distribution``; the record of an earlier file it corrects is
-    ``dcterms:replaces``.
+    fingerprint is a ``schema:identifier`` and the file itself rides
+    ``schema:distribution``. On either flavour, the record it replaces (an
+    earlier file's, or a parameter set minted under spec/ before 2026-10-11)
+    is ``dcterms:replaces``.
     """
     body = data.get("parameter_set") if isinstance(data.get("parameter_set"), dict) else {}
     node: dict[str, Any] = {}
@@ -2812,7 +2813,8 @@ def _to_domain_battery_jsonld_parameter_set(data: dict[str, Any]) -> dict[str, A
             "schema:value": body["parameters_sha256"],
         }
     if isinstance(body.get("supersedes"), str) and body["supersedes"]:
-        # A corrected parameter file is a new record that names the one it replaces.
+        # A corrected file, or a dataset/ republication of a spec/ record, is a
+        # new record that names the one it replaces.
         node["dcterms:replaces"] = {"@id": body["supersedes"]}
 
     scope_values = [
@@ -2839,7 +2841,7 @@ def _to_domain_battery_jsonld_parameter_set(data: dict[str, Any]) -> dict[str, A
     node.update(_parameter_claim_nodes(body.get("claims")))
     part_nodes = [
         part_node
-        for part in body.get("parts") or []
+        for part in (body["parts"] if isinstance(body.get("parts"), list) else [])
         if isinstance(part, dict) and (part_node := _parameter_part_node(part, body.get("name"))) is not None
     ]
     if part_nodes:
@@ -2853,6 +2855,10 @@ def _to_domain_battery_jsonld_parameter_set(data: dict[str, Any]) -> dict[str, A
         if (file_node := _parameter_file_node(item)) is not None
     ]
     if file_nodes:
+        if isinstance(body.get("id"), str) and body["id"]:
+            # The parent link every deposit file carries, as a dataset's files do.
+            for file_node in file_nodes:
+                file_node["schema:isPartOf"] = {"@id": body["id"]}
         node["schema:distribution"] = file_nodes[0] if len(file_nodes) == 1 else file_nodes
 
     citation = _citation_to_jsonld(data.get("provenance"))
@@ -2874,7 +2880,7 @@ def _to_domain_battery_jsonld_parameter_set(data: dict[str, Any]) -> dict[str, A
                     *(body.get("claims") or []),
                     *(
                         claim
-                        for part in body.get("parts") or []
+                        for part in (body["parts"] if isinstance(body.get("parts"), list) else [])
                         if isinstance(part, dict)
                         for claim in part.get("claims") or []
                     ),

@@ -53,11 +53,11 @@ Every record is one of 22 entity kinds registered in `ENTITY_KINDS` in `src/batt
 | Electrolyte | `electrolyte-spec` | `electrolyte` |
 | Housing | `housing-spec` | `housing` |
 | Equipment | `equipment-spec` | `equipment`, `channel` |
-| Parameter set | `parameter-set` | none |
+| Parameter set | none | `parameter-set` |
 | Dataset | none | `dataset` |
 | Organization | none | `organization` |
 
-A kind has four names and they do not always agree. The physical cell is entity type `cell`, record key `cell_instance`, folder `cell-instance` and IRI namespace `cell/`. The test protocol is entity type `test-protocol` with record key `test_spec`, and users and the CLI call it a test spec (`battinfo template test-spec`, with `test-protocol` kept as a hidden alias). All spec kinds and `parameter-set` mint IRIs under `https://w3id.org/battinfo/spec/`, so never infer a record's type from its IRI; read the record. Instances use their own noun (`cell/`, `material/`, `channel/` and so on).
+A kind has four names and they do not always agree. The physical cell is entity type `cell`, record key `cell_instance`, folder `cell-instance` and IRI namespace `cell/`. The test protocol is entity type `test-protocol` with record key `test_spec`, and users and the CLI call it a test spec (`battinfo template test-spec`, with `test-protocol` kept as a hidden alias). All spec kinds mint IRIs under `https://w3id.org/battinfo/spec/`, and parameter sets share `https://w3id.org/battinfo/dataset/` with datasets (IDENTIFIER_POLICY 6.3), so never infer a record's type from its IRI; read the record. Instances use their own noun (`cell/`, `material/`, `channel/` and so on).
 
 When code needs to dispatch on record type, derive it from the registry (`kind_for_doc`, `kind_for_type`, `save_entity_path`) rather than writing another hard-coded list.
 

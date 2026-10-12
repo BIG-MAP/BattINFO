@@ -89,6 +89,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
     immediately surfaced two more unvalidated links, both now validated:
     `electrode_spec.active_material_spec_id` and `channel.equipment_id`.
 
+### Changed (breaking — identifiers)
+
+- **Every parameter set now mints under `dataset/`, with a new uid.** Claim batches and parameter files get `https://w3id.org/battinfo/dataset/{uid}` IRIs instead of `spec/` ones. Nothing is ever an instance of a parameter set: it is one piece of data from one source, produced by one calibration or extraction, so it is a dataset (IDENTIFIER_POLICY 6.1 and 6.3, ruling of 2026-10-11). The seeds changed with the namespace, so no uid minted under `spec/` comes back under `dataset/`. A claim batch's uid is `stable_uid("parameter-claims:<target>:<scope>[:<electrode_polarity>]:<name>")` (it was `parameter-set:...`) and a parameter file's is `stable_uid("parameter-file:<parameters_sha256>")` (it was `parameter-set-file:...`). The builders and a save of a record without an id mint through the same two recipes, never under `spec/`, and an explicit `id=` on a claim batch must be a `dataset/` IRI. The six packaged parameter-set examples carry their new IRIs.
+- **The 18 parameter sets published under `spec/` are republished, not moved.** The 17 claim batches and the Schmitt et al. 2026 file are published again as new `dataset/` records that name the old IRI in `supersedes`, and the old IRIs keep resolving as superseded pages that point at their replacements. The Schmitt file record `spec/szxp-xwnx-vhyf-rvm0` is superseded by `dataset/7jnc-cjtw-5h3a-5t52`. `supersedes` now belongs to both flavours (`create_parameter_set(supersedes=...)`, `to_parameter_set(supersedes=...)`, `dcterms:replaces` in JSON-LD) and takes a `dataset/` or a `spec/` IRI. Only the publisher of the old record can supersede it: the registry refuses a `supersedes` from anyone else.
+- **Local `spec/` parameter sets still load and validate, with a warning.** The schema's `parameter_set.id` accepts a `spec/` IRI for a record minted before 2026-10-11, so such a record validates, saves and is found by its IRI, and gets the warning `semantic.parameter_set_legacy_namespace`, which names the `dataset/` IRI its replacement mints. Under the publisher policy that warning is an error, so `ws.submit()` and `ws.zenodo()` refuse the record (`ws.zenodo()` before it sends anything to Zenodo, a draft included) and say what to do instead: `supersede_parameter_set(record)` makes its replacement, a `dataset/` record minted from the current seeds that supersedes it, with everything else unchanged. `query_parameter_sets()` marks such rows with `minted_under_spec`. It and `collate_claims()` leave out a record that another record in the result names in `supersedes`, so a source whose old and new records both sit in a workspace is not counted twice; `include_superseded=True` keeps it. A parameter set that supersedes itself, keeps the uid of the record it supersedes, or carries the uid its fields had under `spec/` (the old uid moved to `dataset/`, with or without `supersedes`) is an error under every policy, and the builders refuse such a uid.
+- **`dataset/` holds two kinds of record.** Dataset records and parameter sets share it, and tooling reads the record, not the namespace, to tell them apart. `save_record` and the `save_*` functions refuse to save a record over one of another kind at the same IRI. The deposit checks that a dataset node names what it is about and carries at least one file apply to nodes typed as dataset records (`dcat:Dataset` in a workspace deposit, `BatteryTestResult` in a dataset publication package), the types every dataset record's node carries, so a parameter set, a plain `schema:Dataset` node, is not held to them. A deposit's catalog lists its parameter sets as members (`dcat:dataset`, `schema:hasPart`) after its per-test datasets, so a deposit holding only parameter sets passes the publication checks, and a cell spec, cell or material spec a parameter set names but the deposit does not carry gets a "defined elsewhere" stub node, as an external cell spec does; a parameter set minted under `spec/` that another record in the workspace supersedes is left out of the deposit, with a line saying so; a parameter file's file entries name the record in `schema:isPartOf`, and the validator reads a single `schema:about` or `schema:distribution` object as a one-item list (both as in #438).
+
 ### Removed
 
 - `BpxParameterImportResult.to_records` and `load_parameter_set_members`. They built one record per BPX block plus a set record; a BPX file is now one record, and neither shipped in a release.
@@ -746,37 +753,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   `DEPOSIT_STANDALONE_KINDS`, so published parameter sets are described nodes in
   every deposit rather than files a reader must open blind.
 
-- **Parameter claims: the `parameter-set` record type.** Simulation parameters now
-  have a home as *claims*: one record = one source (paper, BPX file, lab fit) making
-  claims about one target — a curated `material_kind` ("graphite", "nmc811"), a
-  specific `material_spec_id`, or a `cell_spec_id` for fitted sets and build
-  parameters. Many records may claim values for the same parameter of the same
-  material; the spread across sources is the point, and `battinfo.parameters.
-  collate_claims` folds any number of records into `{parameter: [claim, ...]}` with
-  per-claim source context. Each claim carries exactly one of `quantity` (scalar with
-  unit/conditions), `curve` (tabulated y(x), e.g. an OCP with a hysteresis `branch`),
-  or `expression` (a BPX-style function string kept verbatim), plus its own
-  `provenance_class` (measured/fitted/literature/assumed/derived); the record-level
-  provenance block carries the source citation. IRIs mint under `spec/` with a uid
-  derived from (target, scope, name), so re-importing the same source is idempotent.
+- **Parameter claims: the `parameter-set` record type.** Simulation parameters now have a home as *claims*: one record = one source (paper, BPX file, lab fit) making claims about one target — a curated `material_kind` ("graphite", "nmc811"), a specific `material_spec_id`, or a `cell_spec_id` for fitted sets and build parameters. Many records may claim values for the same parameter of the same material; the spread across sources is the point, and `battinfo.parameters.collate_claims` folds any number of records into `{parameter: [claim, ...]}` with per-claim source context. Each claim carries exactly one of `quantity` (scalar with unit/conditions), `curve` (tabulated y(x), e.g. an OCP with a hysteresis `branch`), or `expression` (a BPX-style function string kept verbatim), plus its own `provenance_class` (measured/fitted/literature/assumed/derived); the record-level provenance block carries the source citation. IRIs mint under `dataset/` with a uid derived from (target, scope, name), so re-importing the same source is idempotent. Parameter sets minted under `spec/` before 2026-10-11 are superseded by `dataset/` records; see "Changed (breaking — identifiers)" above.
 
-  The shipped parameter vocabulary (`data/vocab/parameters.json`) defines the
-  canonical keys, their physical scopes and units, and the model-tier completeness
-  contract: `battinfo.parameters.completeness()` answers "which of bote/spm/spme/p2d
-  can this material's claims support, and what is missing" — the same machine-readable
-  contract downstream surfaces vendor so every consumer applies identical rules.
-  Unknown keys are tolerated (tolerant-import policy) but never count toward a tier.
+  The shipped parameter vocabulary (`data/vocab/parameters.json`) defines the canonical keys, their physical scopes and units, and the model-tier completeness contract: `battinfo.parameters.completeness()` answers "which of bote/spm/spme/p2d can this material's claims support, and what is missing" — the same machine-readable contract downstream surfaces vendor so every consumer applies identical rules. Unknown keys are tolerated (tolerant-import policy) but never count toward a tier.
 
-  Surface: `create_parameter_set` / `save_parameter_set` / `query_parameter_sets` /
-  `template_parameter_set` on `battinfo.api`; `ws.add("parameter_set", name=...,
-  material=..., claims=[...])` queues through the same stamp path as materials, so
-  contributor/license/funding reach the records. `from_bpx_parameters` /
-  `import_bpx_parameters` extract the physics blocks `from_bpx` deliberately skips:
-  electrode-material claims target the material the caller names (BPX does not name
-  its materials), build claims (thickness/porosity/transport, separator, electrolyte)
-  target the cell spec, and every unmapped field is warned, never silently dropped.
-  Parameter sets are deposit-exempt for now (no JSON-LD emitter yet — the parameter
-  campaign's Phase 2 follow-up, tracked in `DEPOSIT_COVERAGE_EXEMPT`).
+  Surface: `create_parameter_set` / `save_parameter_set` / `query_parameter_sets` / `template_parameter_set` on `battinfo.api`; `ws.add("parameter_set", name=..., material=..., claims=[...])` queues through the same stamp path as materials, so contributor/license/funding reach the records. `from_bpx_parameters` / `import_bpx_parameters` extract the physics blocks `from_bpx` deliberately skips: electrode-material claims target the material the caller names (BPX does not name its materials), build claims (thickness/porosity/transport, separator, electrolyte) target the cell spec, and every unmapped field is warned, never silently dropped. Parameter sets have a JSON-LD emitter and go into deposits as nodes of their own (`DEPOSIT_STANDALONE_KINDS`).
 
 - **A cell instance can cite the electrodes built into it.** `cell_instance` gains
   optional `working_electrode_id` and `counter_electrode_id`, pointing at `electrode`

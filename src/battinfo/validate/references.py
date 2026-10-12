@@ -7,11 +7,10 @@ from typing import Any, Mapping
 
 from battinfo.canonical_aliases import record_to_snake_aliases
 from battinfo.entities import (
+    entity_files_for_uid,
     entity_id_from_doc,
     entity_types_for_namespace,
-    iter_entity_files,
     kind_for_doc,
-    save_entity_path,
 )
 from battinfo.validate.core import (
     DEFAULT_POLICY,
@@ -67,14 +66,6 @@ def _entity_type_from_doc(doc: dict[str, Any]) -> str:
     return kind.entity_type
 
 
-def _iter_entity_files(entity_type: str, source_root: Path) -> list[Path]:
-    return iter_entity_files(entity_type, source_root)
-
-
-def _save_entity_path(entity_type: str, uid: str, source_root: Path) -> Path:
-    return save_entity_path(entity_type, uid, source_root)
-
-
 def _candidate_types(namespace: str) -> list[str]:
     # A namespace can map to several types (spec/ covers both cell-spec specs and
     # test-protocol specs); the registry resolves this.
@@ -106,17 +97,7 @@ def _find_record_under(entity_id: str, source_root: Path) -> tuple[Path, str] | 
     if cache is not None:
         return cache.lookup(entity_id, _candidate_types(namespace))
     for entity_type in _candidate_types(namespace):
-        expected = _save_entity_path(entity_type, uid, source_root)
-        if expected.exists():
-            try:
-                doc = _load_json(expected)
-                if _entity_id(doc) == entity_id:
-                    return expected, _entity_type_from_doc(doc)
-            except Exception:  # noqa: BLE001
-                pass
-        for path in _iter_entity_files(entity_type, source_root):
-            if path == expected:
-                continue
+        for path in entity_files_for_uid(entity_type, uid, source_root):
             try:
                 doc = _load_json(path)
                 if _entity_id(doc) == entity_id:

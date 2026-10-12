@@ -9266,7 +9266,17 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           ],
           "properties": {
             "id": {
-              "$ref": "#/$defs/SpecIri"
+              "description": "The record's IRI. Parameter sets of both flavours are datasets and mint under dataset/ (IDENTIFIER_POLICY 6.3): a claim batch's uid is stable_uid('parameter-claims:<target>:<scope>[:<electrode_polarity>]:<name>'), the name stripped and lowercased, and a parameter file's is stable_uid('parameter-file:' + parameters_sha256). A spec/ IRI is accepted only for a record minted before 2026-10-11.",
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/DatasetIri",
+                  "description": "Every parameter set minted since 2026-10-11, and every new one."
+                },
+                {
+                  "$ref": "#/$defs/SpecIri",
+                  "description": "Only a parameter set minted under spec/ before 2026-10-11. It stays readable and validates with a warning (an error under the publisher policy); a new version is a dataset/ record that supersedes it (battinfo.api.supersede_parameter_set). Nothing mints under spec/ any more."
+                }
+              ]
             },
             "short_id": {
               "$ref": "#/$defs/ShortId"
@@ -9323,7 +9333,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             "parameters_sha256": {
               "type": "string",
               "pattern": "^[0-9a-f]{64}$",
-              "description": "Parameter files only: the SHA-256 (lowercase hex) of the RFC 8785 canonical form of the source file, the fingerprint the record's IRI derives from (stable_uid('parameter-set-file:' + parameters_sha256), IDENTIFIER_POLICY 6.3). Anyone can check a file against the IRI with it."
+              "description": "Parameter files only: the SHA-256 (lowercase hex) of the RFC 8785 canonical form of the source file, the fingerprint the record's IRI derives from (stable_uid('parameter-file:' + parameters_sha256), IDENTIFIER_POLICY 6.3). Anyone can check a file against the IRI with it."
             },
             "model_context": {
               "type": "object",
@@ -9395,8 +9405,8 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "description": "Parameter files only: the values of the source file the record does not hold, as BPX paths ('Parameterisation/Negative electrode/Particle', 'State/Degradation', 'Validation'). They stay in the source file; a document rebuilt from the record lacks them."
             },
             "supersedes": {
-              "$ref": "#/$defs/SpecIri",
-              "description": "Parameter files only: the parameter-set record of an earlier file this one corrects. A corrected file has other parameters and so a new IRI; this links the two, and the registry marks the earlier record superseded when one publisher owns both."
+              "$ref": "#/$defs/SupersededParameterSetIri",
+              "description": "The parameter-set record this one replaces, of either flavour: the record of an earlier file a corrected file replaces (a corrected file has other parameters and so a new IRI), or a parameter set minted under spec/ before 2026-10-11 that this dataset/ record republishes. Only the publisher of the earlier record may supersede it (the registry refuses anyone else), and the registry then marks it superseded. This record never reuses the earlier record's uid."
             },
             "distributions": {
               "type": "array",
@@ -9532,11 +9542,6 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
                     "required": [
                       "not_imported"
                     ]
-                  },
-                  {
-                    "required": [
-                      "supersedes"
-                    ]
                   }
                 ]
               }
@@ -9669,6 +9674,15 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         "SpecIri": {
           "type": "string",
           "pattern": "^https://w3id\\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+        },
+        "DatasetIri": {
+          "type": "string",
+          "pattern": "^https://w3id\\.org/battinfo/dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+        },
+        "SupersededParameterSetIri": {
+          "type": "string",
+          "pattern": "^https://w3id\\.org/battinfo/(?:dataset|spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "description": "A parameter-set IRI: under dataset/, or under spec/ for one minted before 2026-10-11."
         },
         "MaterialSpecIri": {
           "type": "string",

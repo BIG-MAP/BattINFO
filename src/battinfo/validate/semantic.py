@@ -1225,6 +1225,111 @@ def _validate_substance_resolution(
             _check(comp, "additive", f"{prefix}.additive[{idx}]")
 
 
+_BATTINFO_RECORD_IRI_RE = re.compile(
+    r"^https://w3id\.org/battinfo/([a-z][a-z0-9-]*)/([0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3})$"
+)
+
+
+def _list_or_empty(value: Any) -> list[Any]:
+    """The value when it is a list, else an empty list: a malformed field is a schema
+    finding, never a crash in the semantic pass."""
+    return value if isinstance(value, list) else []
+
+
+def _validate_parameter_set_identity(
+    body: Mapping[str, Any],
+    issues: list[ValidationIssue],
+    resource_type: str | None,
+    policy_name: str,
+) -> None:
+    """A parameter set's IRI against the namespace move of 2026-10-11 (IDENTIFIER_POLICY 6.3).
+
+    A record minted under spec/ before then is legacy: it stays readable, so
+    it is a warning, except under the publisher policy, where it is an error
+    because nothing is published under spec/ any more. The message names the
+    dataset/ IRI its replacement mints. A record that names its own IRI in
+    ``supersedes``, or carries a uid it had under spec/ (the uid of the
+    record it supersedes, or the one the seeds of the time give its fields,
+    whether or not it names that record), is an error under every policy: a
+    uid is never reused (section 10).
+    """
+    from battinfo.api._parameters import legacy_parameter_set_uid, parameter_set_uid  # noqa: PLC0415
+
+    record_id = body.get("id")
+    own = _BATTINFO_RECORD_IRI_RE.fullmatch(record_id) if isinstance(record_id, str) else None
+    if own is None:
+        return  # the schema reports a malformed id
+    if own.group(1) == "spec":
+        replacement_uid = parameter_set_uid(body)
+        replacement = (
+            f"its replacement is https://w3id.org/battinfo/dataset/{replacement_uid}, a new record "
+            "minted from the current seeds that supersedes this one"
+            if replacement_uid is not None
+            else "a new version is a new dataset/ record that supersedes this one"
+        )
+        _append_issue(
+            issues,
+            code="semantic.parameter_set_legacy_namespace",
+            severity="error" if policy_name == "publisher" else "warning",
+            path="parameter_set.id",
+            message=(
+                f"{record_id} was minted under spec/, before parameter sets moved to dataset/ on "
+                "2026-10-11 (IDENTIFIER_POLICY 6.3). The record stays readable, but nothing is "
+                f"published under spec/ any more: {replacement}, which "
+                "battinfo.api.supersede_parameter_set(record) builds."
+            ),
+            resource_type=resource_type,
+        )
+    supersedes = body.get("supersedes")
+    if isinstance(supersedes, str) and supersedes == record_id:
+        _append_issue(
+            issues,
+            code="semantic.parameter_set_supersedes_itself",
+            severity="error",
+            path="parameter_set.supersedes",
+            message=(
+                f"supersedes names this record's own IRI ({record_id}); it names the earlier "
+                "record this one replaces."
+            ),
+            resource_type=resource_type,
+        )
+        return
+    old = _BATTINFO_RECORD_IRI_RE.fullmatch(supersedes) if isinstance(supersedes, str) else None
+    if old is not None and old.group(2) == own.group(2):
+        _append_issue(
+            issues,
+            code="semantic.parameter_set_uid_reused",
+            severity="error",
+            path="parameter_set.id",
+            message=(
+                f"this record reuses the uid {own.group(2)} of the record it supersedes "
+                f"({supersedes}). A uid is never reused, not even under another namespace "
+                "(IDENTIFIER_POLICY 6.3 and 10): leave id out so the record mints its own uid "
+                "from the current seeds, or build it with battinfo.api.supersede_parameter_set()."
+            ),
+            resource_type=resource_type,
+        )
+        return
+    if own.group(1) == "dataset" and own.group(2) == legacy_parameter_set_uid(body):
+        legacy_iri = f"https://w3id.org/battinfo/spec/{own.group(2)}"
+        replacement_uid = parameter_set_uid(body)
+        _append_issue(
+            issues,
+            code="semantic.parameter_set_uid_reused",
+            severity="error",
+            path="parameter_set.id",
+            message=(
+                f"this record reuses the uid {own.group(2)} of {legacy_iri}, the IRI the seeds of "
+                "before 2026-10-11 give these fields under spec/. A uid is never reused, not even "
+                "under another namespace (IDENTIFIER_POLICY 6.3 and 10): the dataset/ record for "
+                f"these fields is https://w3id.org/battinfo/dataset/{replacement_uid}, minted from "
+                f"the current seeds, with supersedes naming {legacy_iri}; "
+                "battinfo.api.supersede_parameter_set() builds it from the spec/ record."
+            ),
+            resource_type=resource_type,
+        )
+
+
 def _validate_parameter_set_semantics(
     body: Mapping[str, Any],
     issues: list[ValidationIssue],
@@ -1241,6 +1346,7 @@ def _validate_parameter_set_semantics(
     under the default policy, a warning under strict, an error under the
     publisher policy.
     """
+    _validate_parameter_set_identity(body, issues, resource_type, policy_name)
     # Parameter-set claims emit through the same quantity nodes as properties,
     # so an unmapped parameter key gets the same warning. Fraction keys resolve
     # through the emitter's own table, as they do for properties.
@@ -1248,7 +1354,7 @@ def _validate_parameter_set_semantics(
 
     fraction_keys = frozenset(_FRACTION_PROPERTY_TERMS)
     claim_lists: list[tuple[str, Any]] = [("parameter_set.claims", body.get("claims"))]
-    for part_idx, part in enumerate(body.get("parts") or []):
+    for part_idx, part in enumerate(_list_or_empty(body.get("parts"))):
         if isinstance(part, Mapping):
             claim_lists.append((f"parameter_set.parts[{part_idx}].claims", part.get("claims")))
     for prefix, claims in claim_lists:
@@ -1395,7 +1501,7 @@ def validate_semantic_report(
         _check_props(body.get("case"), f"{body_key}.case")
         for idx, seal in enumerate(body.get("seals") or []):
             _check_props(seal, f"{body_key}.seals[{idx}]")
-        for idx, part in enumerate(body.get("parts") or []):
+        for idx, part in enumerate(_list_or_empty(body.get("parts"))):
             _check_props(part, f"{body_key}.parts[{idx}]")
 
     parameter_set = doc.get("parameter_set")

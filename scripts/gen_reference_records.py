@@ -541,8 +541,8 @@ def snippet_channel():
 def snippet_parameter_set():
     from battinfo.api import create_parameter_set
 
+    # The uid derives from the target, scope and name.
     record = create_parameter_set(
-        uid="fm9p-sqkk-tbx3-rr66",
         name="Graphite density claims, Smith 2026",
         material_kind="graphite",
         claims=[
@@ -1177,11 +1177,11 @@ def build_sections(family: dict) -> list[dict]:
     sections = []
     for section in family["sections"]:
         raw = section["fn"]()
-        # A parameter file's uid derives from its parameters: keep it.
+        # A parameter set's uid derives from its content (a claim batch's from
+        # its target, scope and name, a file's from its parameters): keep it, so
+        # the page shows the IRI the snippet mints.
         body = raw.get("parameter_set") if isinstance(raw.get("parameter_set"), dict) else {}
-        keep = frozenset(
-            [str(body["id"]).rsplit("/", 1)[-1]] if body.get("parameters_sha256") else []
-        )
+        keep = frozenset([str(body["id"]).rsplit("/", 1)[-1]] if body.get("id") else [])
         record = normalize(raw, keep=keep)
         verdict = _validate_or_die(
             record,
@@ -1378,12 +1378,12 @@ SHELVES: dict[str, list[str]] = {
         "equipment/bw1k-j56y-r2ax-2adv.json",
     ],
     "parameter-sets": [
-        "parameter-set/parameter-set-8qqs-rh43-wt8d-172n.json",
-        "parameter-set/parameter-set-fe59-wews-8mmv-zwag.json",
-        "parameter-set/parameter-set-xm1d-bz46-pc9v-pt70.json",
-        "parameter-set/parameter-set-q73c-bk3q-ceks-r4p6.json",
-        "parameter-set/parameter-set-6034-7wex-6cwr-fzv1.json",
-        "parameter-set/parameter-set-c8cb-d472-yt6s-kyjw.json",
+        "parameter-set/parameter-set-xm4e-fr60-10y6-ajqh.json",
+        "parameter-set/parameter-set-rnc6-edv8-m43x-ebnq.json",
+        "parameter-set/parameter-set-h7g7-5082-63jk-9wm3.json",
+        "parameter-set/parameter-set-6bpa-4qet-046r-1zzk.json",
+        "parameter-set/parameter-set-dpj6-1j9x-eetd-gs81.json",
+        "parameter-set/parameter-set-xms6-5z2m-gpsz-nzy9.json",
     ],
     "organizations": [
         "organization/A123.json",

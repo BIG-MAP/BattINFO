@@ -916,6 +916,111 @@ def _read_record_sets(source_root: Path) -> dict[str, list[dict]]:
     return record_sets
 
 
+def _replaced_legacy_parameter_sets(record_sets: dict[str, list[dict]]) -> dict[str, str]:
+    """Parameter sets minted under ``spec/`` that another record here supersedes.
+
+    Returns ``{old spec/ IRI: replacing IRI}``. The documented migration is
+    ``supersede_parameter_set(old)`` then ``ws.add(new)``: the workspace then
+    holds both, and the old record is replaced, not published again.
+    """
+    replaced: dict[str, str] = {}
+    for record in record_sets.get("parameter-set", []):
+        body = record.get("parameter_set") if isinstance(record, dict) else None
+        if not isinstance(body, dict):
+            continue
+        old, new = body.get("supersedes"), body.get("id")
+        if (
+            isinstance(old, str)
+            and old.startswith("https://w3id.org/battinfo/spec/")
+            and isinstance(new, str)
+            and new != old
+        ):
+            replaced[old] = new
+    return replaced
+
+
+def _read_deposit_record_sets(source_root: Path) -> tuple[dict[str, list[dict]], dict[str, str]]:
+    """The records a deposit carries, and the legacy parameter sets it leaves out.
+
+    A parameter set minted under ``spec/`` that another record in the
+    workspace supersedes stays out of the deposit and out of the record check
+    (its replacement carries its claims); one that nothing supersedes is
+    still refused by the check. Returns ``(record_sets, {old IRI: new IRI})``.
+    """
+    record_sets = _read_record_sets(source_root)
+    replaced = _replaced_legacy_parameter_sets(record_sets)
+    if replaced:
+        record_sets["parameter-set"] = [
+            record
+            for record in record_sets.get("parameter-set", [])
+            if not (
+                isinstance(record, dict)
+                and isinstance(body := record.get("parameter_set"), dict)
+                and isinstance(body.get("id"), str)
+                and body["id"] in replaced
+            )
+        ]
+    return record_sets, replaced
+
+
+def _print_replaced_legacy_parameter_sets(replaced: dict[str, str]) -> None:
+    for old, new in sorted(replaced.items()):
+        print(f"  Leaving out {old}: minted under spec/ and superseded by {new} in this workspace.")
+
+
+def _parameter_set_publication_errors(record_sets: dict[str, list[dict]]) -> list[str]:
+    """Why parameter sets in *record_sets* cannot be published, one line per record.
+
+    :meth:`AuthoringWorkspace.submit` validates every record under the
+    publisher policy before it sends anything. A deposit describes its
+    parameter sets as nodes of its own, so the Zenodo path runs the same
+    record check on them: it refuses a parameter set minted under ``spec/``
+    (``semantic.parameter_set_legacy_namespace``) and one that reuses a uid
+    (``semantic.parameter_set_uid_reused``), so nothing is published under
+    ``spec/`` by either route (IDENTIFIER_POLICY 6.3).
+    """
+    from battinfo.validate.record import validate_record  # noqa: PLC0415
+
+    problems: list[str] = []
+    for record in record_sets.get("parameter-set", []):
+        label = (entity_id_from_doc(record) if isinstance(record, dict) else None) or "a parameter set"
+        try:
+            result = validate_record(record, policy="publisher")
+        except (ValueError, TypeError) as exc:  # not a recognised record, as ws.submit() reports it
+            problems.append(f"{label}: not a recognised record ({exc})")
+            continue
+        if not result.ok:
+            problems.append(f"{label}: {'; '.join(result.errors)}")
+    return problems
+
+
+_MATERIAL_SPEC_STUB_TYPE = ["Description", "schema:ProductModel", "schema:CreativeWork"]
+
+
+def _parameter_set_target_refs(records: list[dict]) -> list[tuple[str, Any]]:
+    """``(IRI, stub @type)`` for every record a parameter set points at, sorted.
+
+    Cell spec, cell instance, material spec, and a parameter file's part
+    material specs. Material specs stub with the type their own records emit.
+    """
+    refs: dict[str, Any] = {}
+    for record in records:
+        body = record.get("parameter_set") if isinstance(record, dict) else None
+        if not isinstance(body, dict):
+            continue
+        if isinstance(body.get("cell_spec_id"), str):
+            refs.setdefault(body["cell_spec_id"], "BatteryCellSpecification")
+        if isinstance(body.get("cell_instance_id"), str):
+            refs.setdefault(body["cell_instance_id"], "BatteryCell")
+        if isinstance(body.get("material_spec_id"), str):
+            refs.setdefault(body["material_spec_id"], _MATERIAL_SPEC_STUB_TYPE)
+        parts = body.get("parts")
+        for part in parts if isinstance(parts, list) else []:
+            if isinstance(part, dict) and isinstance(part.get("material_spec_id"), str):
+                refs.setdefault(part["material_spec_id"], _MATERIAL_SPEC_STUB_TYPE)
+    return sorted(refs.items())
+
+
 def _apply_conformance_jsonld(
     node: dict,
     spec_id: str | None,
@@ -5086,6 +5191,18 @@ class AuthoringWorkspace:
         if not records_dir.exists():
             raise RuntimeError("No records found — run ws.save() first.")
 
+        # Fail closed before anything reaches Zenodo, a draft included (a draft
+        # is one click from published): the deposit's parameter sets must pass
+        # the record check ws.submit() runs.
+        deposit_records, replaced_legacy = _read_deposit_record_sets(records_dir)
+        _print_replaced_legacy_parameter_sets(replaced_legacy)
+        parameter_set_errors = _parameter_set_publication_errors(deposit_records)
+        if parameter_set_errors:
+            raise RuntimeError(
+                f"Refusing to deposit: {len(parameter_set_errors)} parameter set(s) cannot be "
+                "published, so nothing was sent to Zenodo: " + " | ".join(parameter_set_errors)
+            )
+
         client = ZenodoClient(token=tok, sandbox=sandbox)
         domain = "sandbox.zenodo.org" if sandbox else "zenodo.org"
 
@@ -5408,18 +5525,25 @@ class AuthoringWorkspace:
         # non-conformant record is surfaced up front rather than after an authoritative-looking
         # file has already been produced (D-4). Uses the FULL publication validator (JSON-LD +
         # structural + SHACL), not just the syntactic JSON-LD check.
+        # The record check ws.zenodo() runs on the parameter sets before it deposits
+        # counts here too.
         try:
             from battinfo.validate import validate_publication_report  # noqa: PLC0415
             report = validate_publication_report(jsonld, policy="publisher")
-            errors = [i for i in report.issues if i.severity == "error"]
+            deposit_records, replaced_legacy = _read_deposit_record_sets(records_dir)
+            _print_replaced_legacy_parameter_sets(replaced_legacy)
+            errors = [i.message for i in report.issues if i.severity == "error"] + [
+                f"parameter set {problem}"
+                for problem in _parameter_set_publication_errors(deposit_records)
+            ]
             warnings = [i for i in report.issues if i.severity == "warning"]
             if not errors and not warnings:
                 print("  Gold-standard: PASS (no validation issues)")
             else:
                 print(f"  Gold-standard: {len(errors)} error(s), {len(warnings)} warning(s) "
                       "-- address before publishing:")
-                for i in errors:
-                    print(f"    ERROR   {i.message}")
+                for message in errors:
+                    print(f"    ERROR   {message}")
                 for i in warnings:
                     print(f"    warning {i.message}")
         except Exception as exc:  # noqa: BLE001 — preview must still write + return its path
@@ -6344,7 +6468,21 @@ class AuthoringWorkspace:
         # alternative encodings of one dataset. schema:Dataset/Collection typing is
         # kept so Zenodo and schema.org consumers still see a top-level dataset — it
         # carries the DOI for the whole deposit.
-        member_refs = [{"@id": ds_id} for ds_id in sorted(ds_meta)]
+        # Parameter sets are datasets too (IDENTIFIER_POLICY 6.3), described by
+        # their own standalone nodes below: the catalog lists them as members
+        # after the per-test datasets, so a deposit holding only parameter sets
+        # still references a member dataset.
+        _parameter_set_iris = sorted({
+            _body["id"]
+            for _rec in record_sets.get("parameter-set", [])
+            if isinstance(_rec, dict)
+            and isinstance(_body := _rec.get("parameter_set"), dict)
+            and isinstance(_body.get("id"), str)
+            and _body["id"] not in ds_meta
+        })
+        member_refs = [{"@id": ds_id} for ds_id in sorted(ds_meta)] + [
+            {"@id": iri} for iri in _parameter_set_iris
+        ]
         catalog_node: dict = {
             # dcat:Catalog + schema:DataCatalog so catalog-aware consumers in both
             # vocabularies recognise it; schema:Dataset is retained so generic
@@ -6472,6 +6610,20 @@ class AuthoringWorkspace:
             + [channel_nodes[k] for k in sorted(channel_nodes)]
         )
 
+        # A parameter set names the cell spec, cell or material spec it is
+        # about; one the deposit does not carry gets the same non-drifting
+        # "defined elsewhere" stub as an external cell spec above, so the
+        # reference resolves to a node instead of failing the graph check.
+        _present_ids = {node.get("@id") for node in graph if isinstance(node, dict)}
+        for _target_iri, _target_type in _parameter_set_target_refs(record_sets.get("parameter-set", [])):
+            if _target_iri not in _present_ids:
+                _present_ids.add(_target_iri)
+                graph.append({
+                    "@id":              _target_iri,
+                    "@type":            _target_type,
+                    "rdfs:isDefinedBy": {"@id": _target_iri},
+                })
+
         # ── Record-level free-text notes → schema:comment ─────────────────────
         # Each record's top-level notes[] were dropped from the publication graph;
         # attach them to the node carrying that record's id so authored context
@@ -6539,7 +6691,7 @@ class AuthoringWorkspace:
         Thin adapter over :meth:`_assemble_zenodo_jsonld` (the shared graph builder):
         it only sources the canonical record dicts from the workspace directory.
         """
-        record_sets = _read_record_sets(self._ws.source_root)
+        record_sets, _replaced = _read_deposit_record_sets(self._ws.source_root)
         return self._assemble_zenodo_jsonld(
             record_sets,
             zenodo_record_id=zenodo_record_id,
