@@ -192,6 +192,36 @@ def test_a_legacy_record_is_found_by_its_spec_iri(tmp_path: Path) -> None:
         assert _find_record_path_by_id(legacy["parameter_set"]["id"], tmp_path) == path
 
 
+def test_a_lookup_opens_only_the_parameter_set_file_named_by_the_uid(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Parameter sets are searched under dataset/ and spec/; a miss in either
+    # used to JSON-load every parameter-set file in the folder.
+    import battinfo.api._records as records_module
+    import battinfo.validate.references as references_module
+
+    current = Path(save_parameter_set(_load(CLAIM_BATCH_EXAMPLE), source_root=tmp_path)["path"])
+    legacy = _legacy(PARAMETER_FILE_EXAMPLE)
+    save_parameter_set(legacy, source_root=tmp_path)
+    opened: list[Path] = []
+    for module in (records_module, references_module):
+        monkeypatch.setattr(
+            module, "_load_json", lambda path, load=module._load_json: opened.append(Path(path)) or load(path)
+        )
+
+    for missing in ("spec", "dataset"):
+        iri = f"https://w3id.org/battinfo/{missing}/aaaa-bbbb-cccc-dddd"
+        assert _find_record_path_by_id(iri, tmp_path) is None
+        assert _find_record(iri, tmp_path) is None
+    assert not [path for path in opened if path.parent.name == "parameter-set"]
+
+    assert _find_record_path_by_id(_load(CLAIM_BATCH_EXAMPLE)["parameter_set"]["id"], tmp_path) == current
+    assert _find_record(legacy["parameter_set"]["id"], tmp_path) is not None
+    assert [path.name for path in opened if path.parent.name == "parameter-set"] == [
+        current.name, f"parameter-set-{legacy['parameter_set']['id'].rsplit('/', 1)[-1]}.json",
+    ]
+
+
 def _migrated(tmp_path: Path) -> tuple[dict, dict]:
     """A legacy claim batch and its dataset/ replacement, both saved, as after a migration."""
     legacy = _legacy(CLAIM_BATCH_EXAMPLE)

@@ -216,6 +216,10 @@ class EntityKind:
         legacy_iri_namespaces: Namespaces this kind minted under before it
             moved to ``iri_namespace``. Nothing new mints there, but records
             minted there keep their IRIs, so lookups search them too.
+        files_named_by_uid: Every record of this kind has only ever been
+            written at :func:`save_entity_path` (its file named by its uid),
+            so a lookup by IRI opens that one file rather than every file of
+            the kind (:func:`entity_files_for_uid`).
     """
 
     entity_type: str
@@ -226,6 +230,7 @@ class EntityKind:
     spec_ref_field: Optional[str] = None
     spec_entity_type: Optional[str] = None
     legacy_iri_namespaces: tuple[str, ...] = ()
+    files_named_by_uid: bool = False
 
 
 # Registered in a deterministic order. Dispatch keys on ``record_key`` (unique),
@@ -308,6 +313,7 @@ ENTITY_KINDS: tuple[EntityKind, ...] = (
     EntityKind(
         "parameter-set", "parameter_set", "parameter-set.schema.json", "parameter-set", "dataset",
         legacy_iri_namespaces=("spec",),
+        files_named_by_uid=True,
     ),
     # Organizations are identity records (manufacturers, labs, publishers)
     # other records point at. Instance-only, minted under organization/; NEW
@@ -414,3 +420,22 @@ def iter_entity_files(entity_type: str, source_root: Path) -> list[Path]:
     if not directory.exists():
         return []
     return sorted(directory.glob("*.json"))
+
+
+def entity_files_for_uid(entity_type: str, uid: str, source_root: Path) -> list[Path]:
+    """The files a lookup of the *entity_type* record with *uid* opens, in order.
+
+    The canonical path (:func:`save_entity_path`) first, when it exists. A
+    record of most kinds may also sit under another file name (written by
+    hand or by an older release), so every other file of the kind follows. A
+    kind whose files are always named by uid (``files_named_by_uid``, the
+    parameter sets) stops at the canonical path: it is searched under two
+    namespaces (``dataset/`` and its legacy ``spec/``), and a miss in either
+    must not load every one of its files.
+    """
+    expected = save_entity_path(entity_type, uid, source_root)
+    found = [expected] if expected.exists() else []
+    kind = ENTITY_BY_TYPE.get(entity_type)
+    if kind is not None and kind.files_named_by_uid:
+        return found
+    return found + [path for path in iter_entity_files(entity_type, source_root) if path != expected]

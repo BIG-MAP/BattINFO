@@ -67,6 +67,7 @@ from battinfo.bundle import (
 )
 from battinfo.entities import (
     dataset_locator_seed,
+    entity_files_for_uid,
     entity_types_for_namespace,
     is_placeholder_iri,
     iter_entity_files,
@@ -1011,11 +1012,8 @@ def _find_record_by_id(entity_id: str, source_root: Path) -> tuple[Path, str] | 
         return (path, kind.entity_type) if kind is not None else None
 
     for entity_type in _candidate_types_for_namespace(namespace):
-        expected = _save_entity_path(entity_type, uid, source_root)
-        if expected.exists() and (found := _holds(expected)) is not None:
-            return found
-        for path in _iter_entity_files(entity_type, source_root):
-            if path != expected and (found := _holds(path)) is not None:
+        for path in entity_files_for_uid(entity_type, uid, source_root):
+            if (found := _holds(path)) is not None:
                 return found
     return None
 
