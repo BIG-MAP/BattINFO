@@ -696,7 +696,8 @@
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>The single-record emitter (<code class="docutils literal notranslate"><span class="pre">battinfo.record_to_jsonld(record,</span> <span class="pre">&quot;dataset&quot;)</span></code>) and the registry’s resolver use the same two membership edges and the same series type.</p>
+<p>The single-record emitter (<code class="docutils literal notranslate"><span class="pre">battinfo.record_to_jsonld(record,</span> <span class="pre">&quot;dataset&quot;)</span></code>) writes the same two membership edges and the same series type as the deposit graph.</p>
+<p>The registry is a different matter for now. It records each member’s <code class="docutils literal notranslate"><span class="pre">series_id</span></code> in its index, so a registry query by collection lists the members and the collection’s page shows them. The RDF it serves at a dataset’s IRI does not carry <code class="docutils literal notranslate"><span class="pre">dcat:inSeries</span></code>, <code class="docutils literal notranslate"><span class="pre">schema:isPartOf</span></code> or the <code class="docutils literal notranslate"><span class="pre">dcat:DatasetSeries</span></code> type yet. It will once the registry serves battinfo’s own JSON-LD for each record. Until then, read membership from the deposit graph or from <code class="docutils literal notranslate"><span class="pre">record_to_jsonld</span></code>, not from the registry’s RDF.</p>
 </section>
 <section id="rules-that-keep-the-links-stable">
 <h2>Rules that keep the links stable<a class="headerlink" href="#rules-that-keep-the-links-stable" title="Link to this heading">#</a></h2>

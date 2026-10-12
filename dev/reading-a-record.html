@@ -590,7 +590,7 @@ the node types, and how to follow the links.</p>
 </tr>
 <tr class="row-odd"><td><p>Battery domain</p></td>
 <td><p><strong>EMMO / domain-battery / -electrochemistry</strong></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">BatteryCell</span></code>, <code class="docutils literal notranslate"><span class="pre">BatteryCellSpecification</span></code>, <code class="docutils literal notranslate"><span class="pre">BatteryTest</span></code>, <code class="docutils literal notranslate"><span class="pre">hasProperty</span></code>, <code class="docutils literal notranslate"><span class="pre">hasNumericalValue</span></code>, <code class="docutils literal notranslate"><span class="pre">hasMeasurementUnit</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">BatteryCell</span></code>, <code class="docutils literal notranslate"><span class="pre">BatteryCellSpecification</span></code>, <code class="docutils literal notranslate"><span class="pre">BatteryTest</span></code>, <code class="docutils literal notranslate"><span class="pre">hasProperty</span></code>, <code class="docutils literal notranslate"><span class="pre">hasNumberValue</span></code>, <code class="docutils literal notranslate"><span class="pre">hasMeasurementUnit</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p>Quality / conformance</p></td>
 <td><p><strong>DQV + W3C EARL + OA</strong></p></td>
@@ -617,7 +617,7 @@ from one source so they cannot drift.</p>
 <p>Every quantity (capacity, voltage, …) uses <strong>one</strong> EMMO encoding everywhere — published
 record and SHACL validation alike:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NominalVoltage&quot;</span><span class="p">,</span>
-<span class="w">                  </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;hasNumericalValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">3.0</span><span class="w"> </span><span class="p">},</span>
+<span class="w">                  </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">3.0</span><span class="w"> </span><span class="p">},</span>
 <span class="w">                  </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;emmo:Volt&quot;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}]</span>
 </pre></div>
 </div>

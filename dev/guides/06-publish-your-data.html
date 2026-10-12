@@ -608,13 +608,9 @@
 <div class="output_area docutils container">
 <div class="highlight"><pre>
   neware-sample.csv  -&gt;  neware-sample.bdf.csv  (0.0 MB, via neware_csv)
-  WARNING: 1 source column(s) were NOT mapped to BDF and are missing from neware-sample.bdf.csv:
-    - Record
-    (reader plugin: neware_csv -- if that looks wrong, the file was likely detected as the wrong instrument format)
-    Fix: ws.bdf_columns() lists the canonical names, then ws.convert_csv(&#39;neware-sample.csv&#39;, hints={&#39;&lt;source column&gt;&#39;: &#39;&lt;bdf name&gt;&#39;}).
+  Left out a column that only numbers the rows: Record. The row order of neware-sample.bdf.csv holds the same information.
 
 Converted 1 file(s) -&gt; C:\Users\simonc\Documents\Github-local\battery-genome\waveG6\docs\guides\_scratch\guide-06\bdf
-  DATA-LOSS WARNING: 1 file(s) had unmapped source columns (details above) -- the converted files do NOT contain those columns.
 
 BDF columns: test_time_second,voltage_volt,current_ampere,unix_time_second,cycle_count,step_id,step_time_second,step_charging_capacity_ah,step_discharging_capacity_ah
 </pre></div></div>

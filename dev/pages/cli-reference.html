@@ -685,7 +685,7 @@ battinfo config set zenodo_token &lt;token&gt;</p>
 </ul>
 <p><strong>Options</strong>:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">-t,</span> <span class="pre">--cell-spec</span> <span class="pre">&lt;str&gt;</span></code>: Cell type, e.g. ‘Energizer CR2032’. Required for unstructured folders.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-t,</span> <span class="pre">--cell-spec</span> <span class="pre">&lt;str&gt;</span></code>: Cell spec: its IRI (https://w3id.org/battinfo/spec/…) or its manufacturer and model, e.g. ‘Energizer CR2032’. Required for unstructured folders.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">-n,</span> <span class="pre">--cells</span> <span class="pre">&lt;int&gt;</span></code>: Number of cells (auto-detected from filenames if omitted).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--batch-id</span> <span class="pre">&lt;str&gt;</span></code>: Batch / lot identifier.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--lab</span> <span class="pre">&lt;str&gt;</span></code>: Lab name.</p></li>
@@ -740,7 +740,7 @@ did not carry over.</p>
 </ul>
 <p><strong>Commands</strong>:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">cell-spec</span></code>: Query canonical cell types.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cell-spec</span></code>: Query canonical cell specs.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">cell-instance</span></code>: Query canonical cell instances.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">dataset</span></code>: Query canonical dataset records.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">test-protocol</span></code>: Query canonical test protocols.</p></li>
@@ -749,7 +749,7 @@ did not carry over.</p>
 </ul>
 <section id="battinfo-query-cell-spec">
 <h3><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">query</span> <span class="pre">cell-spec</span></code><a class="headerlink" href="#battinfo-query-cell-spec" title="Link to this heading">#</a></h3>
-<p>Query canonical cell types.</p>
+<p>Query canonical cell specs.</p>
 <p><strong>Usage</strong>:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>battinfo<span class="w"> </span>query<span class="w"> </span>cell-spec<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
 </pre></div>
@@ -942,13 +942,13 @@ did not carry over.</p>
 </ul>
 <p><strong>Commands</strong>:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">cell-spec</span></code>: Publish one cell type through the…</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cell-spec</span></code>: Publish one cell spec through the…</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">record</span></code>: Publish one record into resolver artifacts.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">batch</span></code>: Publish a deterministic batch of records…</p></li>
 </ul>
 <section id="battinfo-publish-cell-spec">
 <h3><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">publish</span> <span class="pre">cell-spec</span></code><a class="headerlink" href="#battinfo-publish-cell-spec" title="Link to this heading">#</a></h3>
-<p>Publish one cell type through the simplified BattINFO publish surface.</p>
+<p>Publish one cell spec through the simplified BattINFO publish surface.</p>
 <p><strong>Usage</strong>:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>battinfo<span class="w"> </span>publish<span class="w"> </span>cell-spec<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
 </pre></div>
@@ -1588,11 +1588,11 @@ did not carry over.</p>
 </ul>
 <p><strong>Commands</strong>:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">cell-spec</span></code>: Save a reusable library cell type from…</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cell-spec</span></code>: Save a reusable library cell spec from…</p></li>
 </ul>
 <section id="battinfo-library-save-cell-spec">
 <h4><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">library</span> <span class="pre">save</span> <span class="pre">cell-spec</span></code><a class="headerlink" href="#battinfo-library-save-cell-spec" title="Link to this heading">#</a></h4>
-<p>Save a reusable library cell type from cell-specification JSON or inline fields.</p>
+<p>Save a reusable library cell spec from cell-specification JSON or inline fields.</p>
 <p><strong>Usage</strong>:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>battinfo<span class="w"> </span>library<span class="w"> </span>save<span class="w"> </span>cell-spec<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
 </pre></div>
@@ -2387,7 +2387,7 @@ e.g. 2025-06-01__capacity_check__25degC.csv</p></li>
 </ul>
 <p><strong>Options</strong>:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">-t,</span> <span class="pre">--cell-spec</span> <span class="pre">&lt;str&gt;</span></code>: Cell type IRI or name, e.g. “Energizer CR2032”.  [required]</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-t,</span> <span class="pre">--cell-spec</span> <span class="pre">&lt;str&gt;</span></code>: Cell spec: its IRI (https://w3id.org/battinfo/spec/…) or its manufacturer and model, e.g. “Energizer CR2032”.  [required]</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">-n,</span> <span class="pre">--count</span> <span class="pre">&lt;int&gt;</span></code>: Number of cells received.  [required]</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--batch-id</span> <span class="pre">&lt;str&gt;</span></code>: Batch / lot identifier.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--lab</span> <span class="pre">&lt;str&gt;</span></code>: Institution or lab name.</p></li>
@@ -2403,7 +2403,7 @@ e.g. 2025-06-01__capacity_check__25degC.csv</p></li>
 <section id="battinfo-batch-add">
 <h3><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">batch</span> <span class="pre">add</span></code><a class="headerlink" href="#battinfo-batch-add" title="Link to this heading">#</a></h3>
 <p>Add more cells to an existing batch directory.</p>
-<p>Reads batch.yaml to inherit cell type, lab, operator, and project.
+<p>Reads batch.yaml to inherit cell spec, lab, operator, and project.
 New cells are numbered after the existing ones.
 Provide –batch-id / –operator / –project to override for the new cells.
 Updates the count in batch.yaml automatically.</p>

@@ -602,7 +602,7 @@
 <td><p>Cell description</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">nominal_capacity_ah</span></code>, <code class="docutils literal notranslate"><span class="pre">nominal_capacity_source</span></code></p></td>
-<td><p>Stated capacity in Ah, and whether it is the nominal, rated, typical or minimum figure</p></td>
+<td><p>Stated capacity in Ah, and the property it was read from: <code class="docutils literal notranslate"><span class="pre">nominal_capacity</span></code>, <code class="docutils literal notranslate"><span class="pre">rated_capacity</span></code>, <code class="docutils literal notranslate"><span class="pre">typical_capacity</span></code> or <code class="docutils literal notranslate"><span class="pre">minimum_capacity</span></code>, the first one the cell (or else its spec) states, in that order</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">checksum_algorithm</span></code>, <code class="docutils literal notranslate"><span class="pre">checksum_value</span></code></p></td>
 <td><p>The checksum the record states for the file (<code class="docutils literal notranslate"><span class="pre">sha256</span></code>, <code class="docutils literal notranslate"><span class="pre">md5</span></code>, …), which <code class="docutils literal notranslate"><span class="pre">download()</span></code> and <code class="docutils literal notranslate"><span class="pre">read()</span></code> verify</p></td>
@@ -630,6 +630,22 @@
 </pre></div>
 </div>
 </section>
+<section id="check-what-the-columns-mean">
+<h2>Check what the columns mean<a class="headerlink" href="#check-what-the-columns-mean" title="Link to this heading">#</a></h2>
+<p>Renaming makes the names agree. It does not make every file mean the same thing by them, so check these before you compute features across sources:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">current_ampere</span></code> is negative while the cell discharges and positive while it charges.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cycle_count</span></code> starts at 0 in some files and at 1 in others, depending on the cycler and the converter that wrote them. Take the first cycle from the data (<code class="docutils literal notranslate"><span class="pre">df.cycle_count.min()</span></code>) rather than assuming it is 1.</p></li>
+<li><p>Which capacity columns a file has depends on its source, and some published files do not follow the BDF definitions. Files from one publisher reset <code class="docutils literal notranslate"><span class="pre">cumulative_capacity_ah</span></code> at every step, so it holds a per-step capacity rather than a running total. Files from another reset <code class="docutils literal notranslate"><span class="pre">charging_capacity_ah</span></code> and <code class="docutils literal notranslate"><span class="pre">discharging_capacity_ah</span></code> every cycle. <code class="docutils literal notranslate"><span class="pre">step_capacity_ah</span></code>, a name from an earlier BDF version, does not always reset at a step boundary.</p></li>
+</ul>
+<p>When in doubt, compute capacity from current and time yourself. Per-cycle discharge capacity by coulomb counting:</p>
+<!-- doc-snippet: skip -->
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dt_h</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">test_time_second</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="mi">3600</span>
+<span class="n">discharge_ah</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">df</span><span class="o">.</span><span class="n">current_ampere</span><span class="p">)</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">lower</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="n">dt_h</span>
+<span class="n">per_cycle_discharge_ah</span> <span class="o">=</span> <span class="n">discharge_ah</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">cycle_count</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
 <section id="process-many-datasets">
 <h2>Process many datasets<a class="headerlink" href="#process-many-datasets" title="Link to this heading">#</a></h2>
 <!-- doc-snippet: skip -->
@@ -654,12 +670,13 @@
 <h2>Look at individual records<a class="headerlink" href="#look-at-individual-records" title="Link to this heading">#</a></h2>
 <!-- doc-snippet: skip -->
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tests</span> <span class="o">=</span> <span class="n">reg</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;cycling&quot;</span><span class="p">)</span>          <span class="c1"># summaries, all pages</span>
-<span class="n">record</span> <span class="o">=</span> <span class="n">reg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tests</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>                        <span class="c1"># the full record</span>
-<span class="n">reg</span><span class="o">.</span><span class="n">links</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>                                 <span class="c1"># {&#39;cell&#39;: [...], &#39;test_spec&#39;: [...]}</span>
+<span class="n">record</span> <span class="o">=</span> <span class="n">reg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tests</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>                        <span class="c1"># the registry&#39;s entry for the test</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">links</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>                                 <span class="c1"># e.g. {&#39;cell&#39;: [&#39;https://w3id.org/battinfo/cell/...&#39;]}</span>
 <span class="n">reg</span><span class="o">.</span><span class="n">files</span><span class="p">(</span><span class="s2">&quot;https://w3id.org/battinfo/dataset/xt2a-nsda-njps-9n50&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">list</span></code> accepts any record type (<code class="docutils literal notranslate"><span class="pre">dataset</span></code>, <code class="docutils literal notranslate"><span class="pre">test</span></code>, <code class="docutils literal notranslate"><span class="pre">cell</span></code>, <code class="docutils literal notranslate"><span class="pre">cell_spec</span></code>, <code class="docutils literal notranslate"><span class="pre">test_spec</span></code>, …). <code class="docutils literal notranslate"><span class="pre">get</span></code> takes an IRI, or a summary returned by <code class="docutils literal notranslate"><span class="pre">list</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">links</span></code> groups the IRIs a record points at by the type of the record they name, as the registry indexed them. Which keys appear depends on the record: a test has <code class="docutils literal notranslate"><span class="pre">cell</span></code>, plus <code class="docutils literal notranslate"><span class="pre">test_spec</span></code> only when it names its test spec; a dataset has <code class="docutils literal notranslate"><span class="pre">cell</span></code> and <code class="docutils literal notranslate"><span class="pre">test</span></code>; a cell has <code class="docutils literal notranslate"><span class="pre">cell_spec</span></code>, <code class="docutils literal notranslate"><span class="pre">test</span></code> and <code class="docutils literal notranslate"><span class="pre">dataset</span></code>. A type the record has no link to is left out rather than given an empty list, so read it with <code class="docutils literal notranslate"><span class="pre">reg.links(record).get(&quot;test_spec&quot;,</span> <span class="pre">[])</span></code>.</p>
 </section>
 <section id="where-things-are-kept">
 <h2>Where things are kept<a class="headerlink" href="#where-things-are-kept" title="Link to this heading">#</a></h2>
@@ -717,6 +734,7 @@
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#start-from-the-catalog">Start from the catalog</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#load-one-dataset">Load one dataset</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#check-what-the-columns-mean">Check what the columns mean</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#process-many-datasets">Process many datasets</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#look-at-individual-records">Look at individual records</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#where-things-are-kept">Where things are kept</a></li>

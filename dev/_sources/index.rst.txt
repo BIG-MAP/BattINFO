@@ -71,7 +71,7 @@ Here is a minimal example that creates a canonical cell-spec record and publishe
            "hasProperty": [
              {
                "@type": ["NominalCapacity", "ConventionalProperty"],
-               "hasNumericalPart": { "@type": "Real", "hasNumericalValue": 2.5 },
+               "hasNumericalPart": { "@type": "RealData", "hasNumberValue": 2.5 },
                "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
              }
            ]

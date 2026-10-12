@@ -615,7 +615,8 @@ record class and the <code class="docutils literal notranslate"><span class="pre
     <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Energizer&quot;</span><span class="p">,</span>
     <span class="n">model</span><span class="o">=</span><span class="s2">&quot;CR2032&quot;</span><span class="p">,</span>
     <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;coin&quot;</span><span class="p">,</span>
-    <span class="n">chemistry</span><span class="o">=</span><span class="s2">&quot;Li-primary&quot;</span><span class="p">,</span>
+    <span class="n">chemistry</span><span class="o">=</span><span class="s2">&quot;li-mno2&quot;</span><span class="p">,</span>
+    <span class="n">rechargeable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">properties</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;nominal_capacity&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">0.235</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;Ah&quot;</span><span class="p">}},</span>
 <span class="p">)</span>
 
@@ -643,20 +644,24 @@ directory. It is a dot-directory, so a plain <code class="docutils literal notra
 </section>
 <section id="cli-quick-reference">
 <h2>CLI quick reference<a class="headerlink" href="#cli-quick-reference" title="Link to this heading">#</a></h2>
-<p>BattINFO ships a command-line interface for validation and querying:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Validate a cell-spec record (here one of the repository examples;</span>
-<span class="c1"># point it at any record you created or downloaded)</span>
-battinfo<span class="w"> </span>validate<span class="w"> </span>examples/cell-spec/A123__ANR26650M1-B.json<span class="w"> </span>--profile<span class="w"> </span>cell-spec
+<p>BattINFO ships a command-line interface for validation and querying. The example records that come with the package can be searched from any folder:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>battinfo<span class="w"> </span>query<span class="w"> </span>cell-spec<span class="w"> </span>--include-packaged-examples
+</pre></div>
+</div>
+<p>The commands below continue from the CR2032 cell spec published above. Replace <code class="docutils literal notranslate"><span class="pre">&lt;id&gt;</span></code> with the end of the IRI it printed (<code class="docutils literal notranslate"><span class="pre">https://w3id.org/battinfo/spec/&lt;id&gt;</span></code>):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Validate the cell spec record</span>
+battinfo<span class="w"> </span>validate<span class="w"> </span>.battinfo/publish/energizer-cr2032/examples/cell-spec/cell-spec-&lt;id&gt;.json
 
-<span class="c1"># Query the example cell specs packaged with BattINFO — the flag searches</span>
-<span class="c1"># the bundled corpus, so this works outside a repository checkout (for</span>
-<span class="c1"># your own library, use the Python query_* functions with an explicit</span>
-<span class="c1"># directory)</span>
-battinfo<span class="w"> </span>query<span class="w"> </span>cell-spec<span class="w"> </span>--include-packaged-examples
+<span class="c1"># Write a draft for a physical cell of that spec</span>
+battinfo<span class="w"> </span>template<span class="w"> </span>cell-instance<span class="w"> </span>--cell-spec-id<span class="w"> </span>https://w3id.org/battinfo/spec/&lt;id&gt;<span class="w"> </span>--out<span class="w"> </span>draft.json
 
-<span class="c1"># Save a cell record from a draft file (--source-root is where your</span>
-<span class="c1"># linked records live)</span>
-battinfo<span class="w"> </span>save<span class="w"> </span>cell-instance<span class="w"> </span>--input<span class="w"> </span>draft.json<span class="w"> </span>--source-root<span class="w"> </span>records
+<span class="c1"># Set &quot;serial_number&quot; under &quot;cell_instance&quot; in draft.json, then save the cell</span>
+<span class="c1"># next to its spec, where the reference to the spec resolves</span>
+battinfo<span class="w"> </span>save<span class="w"> </span>cell-instance<span class="w"> </span>--input<span class="w"> </span>draft.json<span class="w"> </span>--source-root<span class="w"> </span>.battinfo/publish/energizer-cr2032/examples
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">validate</span></code> takes any record file, one you created or downloaded. The example records shipped with the package are JSON files in the <code class="docutils literal notranslate"><span class="pre">data/examples</span></code> folder of the installed package; this prints where that is:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import battinfo, pathlib; print(pathlib.Path(battinfo.__file__).parent / &#39;data&#39; / &#39;examples&#39;)&quot;</span>
 </pre></div>
 </div>
 <p>See the <a class="reference internal" href="cli-reference.html"><span class="doc">CLI reference</span></a> for every command.</p>
@@ -703,7 +708,7 @@ battinfo<span class="w"> </span>save<span class="w"> </span>cell-instance<span c
 <div class="sd-card-body docutils">
 <p class="sd-card-text">Validation policies and the machine-readable issue contract.</p>
 </div>
-<a class="sd-stretched-link sd-hide-link-text reference external" href="../validation-contract.html"><span>../validation-contract.html</span></a></div>
+<a class="sd-stretched-link sd-hide-link-text reference external" href="../guarantees.html#validation-contract"><span>../guarantees.html#validation-contract</span></a></div>
 </div>
 </div>
 </div>
