@@ -1242,7 +1242,10 @@ _NATURAL_KEY_FIELDS = {
     "test-protocol": "name or version",
     "test": "name or protocol_name",
     "dataset": "name or access_url",
-    "parameter-set": "name and material_kind, material_spec_id or cell_spec_id",
+    "parameter-set": (
+        "name and material_kind, material_spec_id or cell_spec_id (a claim batch), "
+        "or parameters_sha256 (a parameter file)"
+    ),
     "organization": "name",
     "channel": "equipment_id and index",
 }
@@ -1321,15 +1324,10 @@ def _canonical_identity_uid(entity_type: str, body: Mapping[str, Any], *,
             parent_id=body.get("parent_id"), piece_id=body.get("piece_id"),
         )
     elif entity_type == "parameter-set":
-        target = next((body.get(field) for field in ("material_kind", "material_spec_id", "cell_spec_id")
-                       if isinstance(body.get(field), str)), None)
-        name = body.get("name")
-        if target is not None and isinstance(name, str) and name.strip():
-            parts = ["parameter-set", target, str(body.get("scope") or "")]
-            if body.get("electrode_polarity"):
-                parts.append(str(body["electrode_polarity"]))
-            parts.append(name.strip().lower())
-            seed = ":".join(parts)
+        # One recipe for both flavours, shared with the builder (IDENTIFIER_POLICY 6.3).
+        from battinfo.api._parameters import parameter_set_uid  # noqa: PLC0415
+
+        return parameter_set_uid(body)
     elif entity_type == "organization":
         name = body.get("name")
         if isinstance(name, str) and name.strip():

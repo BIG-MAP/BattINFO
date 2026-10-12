@@ -179,6 +179,62 @@ def parameter_file_uid(parameters_sha256: str) -> str:
     return stable_uid(f"parameter-file:{parameters_sha256}")
 
 
+def claim_batch_uid(target: str, scope: str, name: str, electrode_polarity: str | None = None) -> str:
+    """The uid of a claim batch's record (IDENTIFIER_POLICY 6.3).
+
+    ``stable_uid("parameter-claims:<target>:<scope>[:<electrode_polarity>]:<name>")``,
+    under ``dataset/``, the name stripped and lowercased, so the same
+    source's claims about the same target re-import onto the same IRI. The
+    builder and a save of a record that has no id both mint through here.
+    """
+    parts = ["parameter-claims", target, scope]
+    if electrode_polarity:
+        parts.append(electrode_polarity)
+    parts.append(name.strip().lower())
+    return stable_uid(":".join(parts))
+
+
+def _default_scope(target_field: str) -> str:
+    """The scope a claim batch gets when it states none: its target's side."""
+    return "material" if target_field in ("material_kind", "material_spec_id") else "cell"
+
+
+def parameter_set_uid(body: Mapping[str, Any]) -> str | None:
+    """The uid the current seeds give a parameter-set body, of either flavour.
+
+    A parameter file's comes from its ``parameters_sha256``, a claim batch's
+    from its target, scope, electrode polarity and name, read from the
+    canonical fields exactly as the builder reads its arguments, so a
+    record saved without an id lands on the IRI the builder gives it.
+    ``None`` when the body lacks what its flavour's seed needs.
+    """
+    if "parts" in body or "parameters_sha256" in body:
+        fingerprint = body.get("parameters_sha256")
+        if isinstance(fingerprint, str) and _SHA256_HEX_RE.fullmatch(fingerprint):
+            return parameter_file_uid(fingerprint)
+        return None
+    target = next(
+        ((field, body[field]) for field in _TARGET_FIELDS if isinstance(body.get(field), str) and body[field]),
+        None,
+    )
+    name = body.get("name")
+    if target is None or not isinstance(name, str) or not name.strip():
+        return None
+    target_field, target_value = target
+    if target_field == "material_kind":
+        from battinfo.materials import resolve_material_kind  # noqa: PLC0415
+
+        target_value = resolve_material_kind(target_value) or target_value
+    scope = body.get("scope")
+    polarity = body.get("electrode_polarity")
+    return claim_batch_uid(
+        target_value,
+        scope if isinstance(scope, str) and scope else _default_scope(target_field),
+        name,
+        polarity if isinstance(polarity, str) and polarity else None,
+    )
+
+
 def _part_label(part: Mapping[str, Any]) -> str:
     phase = part.get("phase")
     return f"{part.get('part')!r}" + (f" (phase {phase!r})" if phase is not None else "")
@@ -534,7 +590,7 @@ def _claim_batch_body(
     target_field, target_value = _resolved_target(material_kind, material_spec_id, cell_spec_id)
 
     if scope is None:
-        scope = "material" if target_field in ("material_kind", "material_spec_id") else "cell"
+        scope = _default_scope(target_field)
     if scope not in _SCOPES:
         raise ValueError(f"scope must be one of {', '.join(_SCOPES)}; got {scope!r}.")
     if electrode_polarity is not None:
@@ -567,14 +623,8 @@ def _claim_batch_body(
         entity_id = f"{_PARAMETER_SET_IRI_BASE}{dashed_uid}"
     else:
         # Deterministic identity: the same (target, scope side, name) always
-        # mints the same IRI, so re-importing a source is idempotent. The
-        # "parameter-claims" seed replaced "parameter-set" when parameter sets
-        # moved from spec/ to dataset/ (IDENTIFIER_POLICY 6.3).
-        seed_parts = ["parameter-claims", target_value, scope]
-        if electrode_polarity:
-            seed_parts.append(electrode_polarity)
-        seed_parts.append(name.strip().lower())
-        dashed_uid = stable_uid(":".join(seed_parts))
+        # mints the same IRI, so re-importing a source is idempotent.
+        dashed_uid = claim_batch_uid(target_value, scope, name, electrode_polarity)
         entity_id = f"{_PARAMETER_SET_IRI_BASE}{dashed_uid}"
 
     body: dict[str, Any] = {
