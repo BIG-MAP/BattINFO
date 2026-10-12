@@ -50,7 +50,7 @@ UNIT_MAP = ROOT / "assets" / "mappings" / "domain-battery" / "unit_map.curated.j
         ("deg C", "°C"),
         ("℃", "°C"),
         ("percent", "%"),
-        ("wt.%", "wt%"),
+        ("wt%", "%"),
         ("hours", "h"),
         ("sec", "s"),
         ("ml", "mL"),

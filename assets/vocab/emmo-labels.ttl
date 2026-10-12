@@ -77,7 +77,6 @@
 <https://w3id.org/emmo#MolePerLitre> skos:prefLabel "MolePerLitre"@en .
 <https://w3id.org/emmo#NanoMetre> skos:prefLabel "NanoMetre"@en .
 <https://w3id.org/emmo#Ohm> skos:prefLabel "Ohm"@en .
-<https://w3id.org/emmo#Percent> skos:prefLabel "Percent"@en .
 <https://w3id.org/emmo#Second> skos:prefLabel "Second"@en .
 <https://w3id.org/emmo#SquareCentiMetre> skos:prefLabel "SquareCentiMetre"@en .
 <https://w3id.org/emmo#SquareMetrePerGram> skos:prefLabel "SquareMetrePerGram"@en .

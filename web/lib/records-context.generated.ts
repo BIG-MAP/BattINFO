@@ -834,7 +834,6 @@ export const recordsContext: Record<string, unknown> = {
     "AmperePerSquareMetre": "emmo:AmperePerSquareMetre",
     "ElectricCurrentDensity": "https://w3id.org/emmo#EMMO_7c8007b0_58a7_4486_bf1c_4772852caca0",
     "LowerCurrentDensityLimit": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_abdd3bbb_403a_4cb3_b522_50d027492a68",
-    "UpperCurrentDensityLimit": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_2a16f139_ab9c_4034_bd21_eabd2e1202e8",
-    "Percent": "emmo:Percent"
+    "UpperCurrentDensityLimit": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_2a16f139_ab9c_4034_bd21_eabd2e1202e8"
   }
 };
