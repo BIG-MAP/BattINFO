@@ -50,6 +50,34 @@ PARAMETER_FILE_PARTS: tuple[str, ...] = (
 )
 MATERIAL_PARTS: tuple[str, ...] = ("negative_material", "positive_material")
 
+# Transport parameters a physics model needs strictly positive. A scalar claim
+# of zero or less for one of them is a placeholder (a BPX file that keeps the
+# real model in User-defined, for example), not a value anyone obtained: the
+# BPX importer gives it no provenance class, and record validation warns. A
+# table may reach zero (a conductivity at zero concentration), so only
+# scalars count.
+_POSITIVE_TRANSPORT_PARAMETERS = frozenset({
+    "ionic_conductivity",
+    "electrolyte_diffusivity",
+    "transference_number",
+    "solid_diffusivity",
+    "electronic_conductivity",
+    "transport_efficiency",
+})
+
+
+def _nonpositive_transport_value(claim: Any) -> float | None:
+    """The value of a scalar transport claim that is zero or negative, else ``None``."""
+    if not isinstance(claim, Mapping):
+        return None
+    if (resolve_parameter(claim.get("parameter")) or claim.get("parameter")) not in _POSITIVE_TRANSPORT_PARAMETERS:
+        return None
+    quantity = claim.get("quantity")
+    value = quantity.get("value") if isinstance(quantity, Mapping) else None
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or value > 0:
+        return None
+    return value
+
 
 def _load_parameters_file() -> dict[str, Any]:
     packaged_path = resources.files("battinfo").joinpath("data", "vocab", "parameters.json")

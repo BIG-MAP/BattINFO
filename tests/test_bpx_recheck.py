@@ -220,9 +220,91 @@ def test_zero_transport_values_are_named_and_kept() -> None:
     assert exported["Negative electrode"]["Diffusivity [m2.s-1]"] == -1e-14
 
 
+def _placeholder_doc() -> dict:
+    """The fixture with the zero electrolyte transport values of the Molicel P45B file."""
+    doc = _doc()
+    electrolyte = doc["Parameterisation"]["Electrolyte"]
+    electrolyte["Conductivity [S.m-1]"] = 0
+    electrolyte["Diffusivity [m2.s-1]"] = 0
+    electrolyte["Cation transference number"] = 0
+    return doc
+
+
+PLACEHOLDERS = {"ionic_conductivity", "electrolyte_diffusivity", "transference_number"}
+
+
+def _electrolyte(record: dict) -> dict[str, dict]:
+    return {claim["parameter"]: claim for claim in _parts(record)["electrolyte"]}
+
+
+def test_a_transport_placeholder_gets_no_provenance_class() -> None:
+    result = from_bpx_parameters(_placeholder_doc())
+    record = result.to_parameter_set(virtual_cell=True)
+    claims = _electrolyte(record)
+    assert set(claims) == PLACEHOLDERS
+    assert all("provenance_class" not in claim for claim in claims.values())
+
+    # A positive value in the same part keeps the default class.
+    doc = _placeholder_doc()
+    doc["Parameterisation"]["Electrolyte"]["Cation transference number"] = 0.25
+    claims = _electrolyte(from_bpx_parameters(doc).to_parameter_set(virtual_cell=True))
+    assert claims["transference_number"]["provenance_class"] == "fitted"
+    assert "provenance_class" not in claims["ionic_conductivity"]
+
+    # Naming the part states a class for every claim of it, placeholders included.
+    named = result.to_parameter_set(virtual_cell=True, provenance_classes={"electrolyte": "fitted"})
+    assert {claim["provenance_class"] for claim in _electrolyte(named).values()} == {"fitted"}
+
+    # The collated claims and the JSON-LD say no more than the record does.
+    collated = collate_claims([record])
+    assert all("provenance_class" not in claim for key in PLACEHOLDERS for claim in collated[key])
+    node = _node(record_to_jsonld(record, "parameter-set"))
+    for part_node in _as_list(node["schema:hasPart"]):
+        facets = {f["schema:name"]: f["schema:value"] for f in _as_list(part_node["schema:additionalProperty"])}
+        if facets["part"] != "electrolyte":
+            continue
+        for claim_node in _as_list(part_node.get("hasProperty")):
+            assert not _as_list(claim_node.get("schema:additionalProperty")), claim_node["schema:propertyID"]
+
+
+@pytest.mark.parametrize("policy", ["default", "strict", "publisher"])
+def test_record_validation_warns_on_a_transport_placeholder(policy: str) -> None:
+    record = from_bpx_parameters(_placeholder_doc()).to_parameter_set(virtual_cell=True)
+    issues = [
+        issue for issue in validate_record_report(record, policy=policy).issues
+        if issue.code == "semantic.parameter_transport_not_positive"
+    ]
+    assert len(issues) == 3
+    assert all(issue.severity == "warning" for issue in issues)
+    named = " ".join(issue.message for issue in issues)
+    for key in PLACEHOLDERS:
+        assert f"claim '{key}'" in named, key
+    assert all(
+        issue.path.startswith("parameter_set.parts[") and issue.path.endswith(".quantity.value")
+        for issue in issues
+    )
+
+    # A claim batch gets the same warning, and a positive value none.
+    for value, expected in ((0.0, 1), (-1e-14, 1), (3.3e-14, 0)):
+        batch = create_parameter_set(
+            name="Example 2020 - graphite",
+            material_kind="graphite",
+            claims=[{
+                "parameter": "solid_diffusivity",
+                "quantity": {"value": value, "unit": "m2/s"},
+                "provenance_class": "literature",
+            }],
+        )
+        codes = [issue.code for issue in validate_record_report(batch, policy=policy).issues]
+        assert codes.count("semantic.parameter_transport_not_positive") == expected, value
+
+
 def test_a_transport_table_that_reaches_zero_is_not_a_placeholder() -> None:
     # The fixture's conductivity and diffusivity tables start at zero concentration.
     assert not any("transport values" in w for w in from_bpx_parameters(FIXTURE).warnings)
+    record = from_bpx_parameters(FIXTURE).to_parameter_set(virtual_cell=True)
+    codes = {issue.code for issue in validate_record_report(record, policy="strict").issues}
+    assert "semantic.parameter_transport_not_positive" not in codes
 
 
 # -- B-10: BPX units are EMMO units --------------------------------------------
@@ -257,9 +339,8 @@ def test_every_unit_a_bpx_import_writes_has_an_emmo_unit() -> None:
 
 
 def test_the_bpx_units_are_published_emmo_units() -> None:
-    """Each IRI is an EMMO 1.0.2 unit class: in the bundled domain-battery
-    context, or, where that context lacks it, named with its EMMO module in
-    the unit map entry's notes."""
+    """Each IRI is an EMMO 1.0.2 unit class in the bundled domain-battery
+    context, and the map's 0.5.2 note names every one."""
     data = ROOT / "src" / "battinfo" / "data"
     context = json.loads((data / "context" / "domain-battery.context.json").read_text(encoding="utf-8"))["@context"]
     published = {value if isinstance(value, str) else value.get("@id") for value in context.values()}
@@ -267,10 +348,13 @@ def test_the_bpx_units_are_published_emmo_units() -> None:
         (data / "mappings" / "domain-battery" / "unit_map.curated.json").read_text(encoding="utf-8")
     )
     entries = {entry["symbol"]: entry for entry in unit_map["mappings"]}
+    assert unit_map["version"] == "0.5.2"
+    (note,) = [note for note in unit_map["notes"] if note.startswith("0.5.2:")]
     for symbol, name in BPX_UNITS.items():
         entry = entries[symbol]
         assert entry["unit_iri"] == f"https://w3id.org/emmo#{name}", symbol
-        assert entry["unit_iri"] in published or "EMMO 1.0.2" in entry.get("notes", ""), symbol
+        assert entry["unit_iri"] in published, symbol
+        assert symbol in note and name in note, symbol
 
 
 @pytest.mark.parametrize("fixture", [FIXTURE, NODE_FIXTURE], ids=["python", "node"])
@@ -310,6 +394,23 @@ def test_the_jsonld_says_what_the_record_does_not_hold() -> None:
         stated[str(graph.value(value_node, schema.name))] = sorted(str(v) for v in graph.objects(value_node, schema.value))
     assert stated["not_imported"] == ["Validation"]
     assert stated["annex"] == sorted(body["annex"])
+
+
+def _not_imported_description(record: dict) -> str:
+    node = _node(record_to_jsonld(record, "parameter-set"))
+    (value,) = [v for v in _as_list(node["schema:additionalProperty"]) if v["schema:name"] == "not_imported"]
+    return value["schema:description"]
+
+
+def test_the_not_imported_note_points_at_the_file_only_when_there_is_one() -> None:
+    result = from_bpx_parameters(FIXTURE)
+    with_file = result.to_parameter_set(
+        virtual_cell=True, distributions=[bpx_file_distribution(FIXTURE, content_url=SOURCE_URL)]
+    )
+    assert "schema:distribution is the complete copy" in _not_imported_description(with_file)
+    without = _not_imported_description(result.to_parameter_set(virtual_cell=True))
+    assert "this record does not hold" in without
+    assert "distribution" not in without
 
 
 def test_a_record_that_holds_everything_says_nothing_more() -> None:
@@ -392,9 +493,13 @@ def test_missing_required_names_the_fields_the_parser_reports() -> None:
     }
     record = from_bpx_parameters(bpx).to_parameter_set(virtual_cell=True)
     missing = to_bpx(record).missing_required
+    # One format: "<block>.<field>", Cell fields included, and "<block>" for a block missing whole.
     assert "Negative electrode.Minimum stoichiometry" in missing
-    assert "Number of electrode pairs connected in parallel to make a cell" in missing
-    assert "Cell.Number of electrode pairs connected in parallel to make a cell" not in missing
+    assert "Cell.Number of electrode pairs connected in parallel to make a cell" in missing
+    assert "Number of electrode pairs connected in parallel to make a cell" not in missing
+    assert {"Electrolyte", "Separator", "Positive electrode"} <= set(missing)
+    blocks = {"Cell", "Electrolyte", "Negative electrode", "Positive electrode", "Separator", "State", "Header"}
+    assert all(path.split(".", 1)[0] in blocks for path in missing), missing
     assert len(missing) == len(set(missing))
 
 
@@ -405,6 +510,9 @@ def test_missing_required_names_the_fields_the_parser_reports() -> None:
         ("https://raw.githubusercontent.com/org/repo/refs/heads/main/x.bpx.json", True),
         ("https://github.com/org/repo/raw/v1.0/x.bpx.json", True),
         ("https://gitlab.com/group/project/-/raw/main/x.bpx.json", True),
+        ("https://raw.githubusercontent.com/org/repo/refs/tags/20241015/x.bpx.json", True),
+        ("https://raw.githubusercontent.com/org/repo/refs/heads/deadbeef/x.bpx.json", True),
+        ("https://github.com/org/repo/blob/refs/tags/1234567/x.bpx.json", True),
         ("https://raw.githubusercontent.com/org/repo/51092701/x.bpx.json", False),
         ("https://raw.githubusercontent.com/org/repo/" + "0123456789abcdef" * 2 + "01234567/x.bpx.json", False),
         ("https://zenodo.org/records/123/files/x.bpx.json", False),

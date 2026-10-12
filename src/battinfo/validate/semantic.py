@@ -1267,6 +1267,7 @@ def _validate_parameter_set_semantics(
                     path_prefix=f"{prefix}[{idx}]",
                     extra_known=fraction_keys,
                 )
+                _validate_transport_placeholder(claim, f"{prefix}[{idx}]", issues, resource_type)
 
     if "parts" not in body and "distributions" not in body:
         return
@@ -1301,6 +1302,40 @@ def _validate_parameter_set_semantics(
                 ),
                 resource_type=resource_type,
             )
+
+
+def _validate_transport_placeholder(
+    claim: Mapping[str, Any],
+    path: str,
+    issues: list[ValidationIssue],
+    resource_type: str | None,
+) -> None:
+    """Warn on a zero or negative scalar of a transport parameter a model needs positive.
+
+    Such a value is a placeholder (a BPX file that keeps the real model in
+    User-defined, for example), not one anyone obtained. The record keeps it
+    as its source states it; the warning fires on every check of the record,
+    so a reader of the saved record learns what the import warned about.
+    """
+    from battinfo.parameters import _nonpositive_transport_value  # noqa: PLC0415
+
+    value = _nonpositive_transport_value(claim)
+    if value is None:
+        return
+    unit = claim["quantity"].get("unit")
+    _append_issue(
+        issues,
+        code="semantic.parameter_transport_not_positive",
+        severity="warning",
+        path=f"{path}.quantity.value",
+        message=(
+            f"claim '{claim['parameter']}' is {value!r}{f' {unit}' if unit else ''}: a physics model "
+            "needs this transport parameter positive, so a zero or negative value is usually a "
+            "placeholder for a model kept elsewhere. The value stays as its source states it; check "
+            "the source before using it."
+        ),
+        resource_type=resource_type,
+    )
 
 
 def validate_semantic_report(

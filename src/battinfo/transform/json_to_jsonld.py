@@ -2842,14 +2842,17 @@ def _to_domain_battery_jsonld_parameter_set(data: dict[str, Any]) -> dict[str, A
     # that ride the record file verbatim rather than as claims.
     not_imported = [path for path in body.get("not_imported") or [] if isinstance(path, str) and path]
     if not_imported:
+        description = "Values of the source file that this record does not hold, by their path in the file"
+        if any(
+            isinstance(entry, Mapping) and entry.get("role") == "source"
+            for entry in body.get("distributions") or []
+        ):
+            description += "; the source file under schema:distribution is the complete copy"
         scope_values.append({
             "@type": "schema:PropertyValue",
             "schema:name": "not_imported",
             "schema:value": not_imported[0] if len(not_imported) == 1 else not_imported,
-            "schema:description": (
-                "Values of the source file that this record does not hold, by their path in the "
-                "file; the source file under schema:distribution is the complete copy."
-            ),
+            "schema:description": description + ".",
         })
     annex = body.get("annex")
     if isinstance(annex, dict) and annex:

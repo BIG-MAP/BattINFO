@@ -53,13 +53,13 @@ def test_computes_density_from_mass_and_volume(a123_record):
 def test_reports_unfillable_required_parameters(a123_record):
     result = to_bpx(a123_record)
     # A spec gives capacity but not electrode area / electrode-pair count.
-    assert "Electrode area [m2]" in result.missing_required
+    assert "Cell.Electrode area [m2]" in result.missing_required
     assert (
-        "Number of electrode pairs connected in parallel to make a cell"
+        "Cell.Number of electrode pairs connected in parallel to make a cell"
         in result.missing_required
     )
     # The A123 datasheet carries no explicit voltage cut-offs.
-    assert "Upper voltage cut-off [V]" in result.missing_required
+    assert "Cell.Upper voltage cut-off [V]" in result.missing_required
     assert any("physics parameters" in w for w in result.warnings)
 
 

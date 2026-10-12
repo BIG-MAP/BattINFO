@@ -584,11 +584,14 @@ class BpxExportResult:
     missing_required:
         Required BPX fields the document lacks: the user must supply
         these (or run a physics-parameterisation workflow) before the file
-        can drive a full model. Cell keys are named by themselves
-        (``"Electrode area [m2]"``). For a parameter-file record, when the
-        official ``bpx`` package is installed and rejects the document,
-        every other field it reports missing follows as
-        ``"<block>.<field>"`` (``"Negative electrode.OCP [V]"``).
+        can drive a full model. A field is ``"<block>.<field>"``
+        (``"Cell.Electrode area [m2]"``, ``"Negative electrode.OCP [V]"``,
+        a State field ``"State.<section>.<field>"``, as in ``filled``) and a
+        block missing whole is ``"<block>"`` (``"Electrolyte"``). The
+        required Cell fields are always checked; for a parameter-file
+        record, when the official ``bpx`` package is installed and rejects
+        the document, every field and block it reports missing is listed
+        too.
     warnings:
         What the caller should know: values the document lacks, unit
         conversions, values added by the v0-to-v1 layout conversion, and
@@ -746,8 +749,7 @@ def to_bpx(
         # The parser knows every block's required fields; the Cell check above
         # knows only the Cell's.
         for path in parser_missing:
-            block, _, name = path.partition(".")
-            if not (block == "Cell" and name in result.missing_required) and path not in result.missing_required:
+            if path not in result.missing_required:
                 result.missing_required.append(path)
     return result
 
@@ -888,7 +890,7 @@ def _cell_spec_to_bpx(
         warnings.append(
             "Required BPX Cell parameters not derivable from a cell spec "
             "(supply these before driving a full model): "
-            + ", ".join(missing_required)
+            + ", ".join(path.removeprefix("Cell.") for path in missing_required)
         )
 
     resolved_model = model or "Partial"
@@ -942,14 +944,14 @@ def _report_layout_changes(changes: list[str], version: str, warnings: list[str]
 
 
 def _missing_required_cell_fields(cell: Mapping[str, Any]) -> list[str]:
-    """The Cell fields every non-Partial BPX file needs and ``cell`` lacks."""
+    """The Cell fields every non-Partial BPX file needs and ``cell`` lacks, as ``"Cell.<field>"``."""
     missing = [
         bpx_key
         for _bi_key, (bpx_key, _table, required) in _BPX_EXPORT_DIRECT.items()
         if required and bpx_key not in cell
     ]
     missing.extend(k for k in _BPX_REQUIRED_UNFILLABLE if k not in cell)
-    return missing
+    return [f"Cell.{key}" for key in missing]
 
 
 # Parameter-file part -> (BPX block, vocabulary block for the field lookup).
@@ -1282,7 +1284,8 @@ def _parameter_file_to_bpx(
     missing_required = _missing_required_cell_fields(document["Parameterisation"].get("Cell", {}))
     if missing_required and header["Model"] != "Partial":
         warnings.append(
-            "Required BPX Cell parameters the record does not hold: " + ", ".join(missing_required)
+            "Required BPX Cell parameters the record does not hold: "
+            + ", ".join(path.removeprefix("Cell.") for path in missing_required)
         )
     not_imported = [str(path) for path in body.get("not_imported") or [] if isinstance(path, str)]
     if not_imported:
@@ -1832,9 +1835,13 @@ class BpxParameterImportResult:
         capacity, cut-offs, geometry, temperatures and initial state of
         charge may as well be datasheet values or conventions as fits. The
         electrode, material, separator and electrolyte parts get
-        ``default_provenance_class`` (``"fitted"``; ``None`` for no class).
-        ``provenance_classes`` sets the class of a whole part by its name,
-        for example ``{"cell": "measured"}`` or ``{"separator": None}``.
+        ``default_provenance_class`` (``"fitted"``; ``None`` for no class),
+        except a zero or negative scalar transport value (a conductivity,
+        diffusivity, transference number or transport efficiency), which is
+        a placeholder rather than a fit and gets no class either.
+        ``provenance_classes`` sets the class of every claim of a part by
+        its name, for example ``{"cell": "measured"}`` or
+        ``{"separator": None}``.
         """
         from battinfo._util import _citation_url_value  # noqa: PLC0415
         from battinfo.api import create_parameter_set  # noqa: PLC0415
@@ -1889,10 +1896,17 @@ class BpxParameterImportResult:
                 )
                 continue
             part.update(_material_target(target, side))
+        from battinfo.parameters import _nonpositive_transport_value  # noqa: PLC0415
+
         for part in parts:
             part_class = part_classes.get(part["part"])
-            if part_class is not None:
-                for claim in part["claims"]:
+            if part_class is None:
+                continue
+            # A zero or negative transport value is a placeholder, not a fit:
+            # it gets a class only when the caller names its part.
+            named = provenance_classes is not None and part["part"] in provenance_classes
+            for claim in part["claims"]:
+                if named or _nonpositive_transport_value(claim) is None:
                     claim.setdefault("provenance_class", part_class)
 
         if distributions is not None:
@@ -2253,18 +2267,6 @@ def _bpx_value_to_claim(key: str, raw_value: Any, entry: Mapping[str, Any], unit
 # BPX field -> the OCP branch it tabulates (single-phase electrodes, BPX 1.0+).
 _OCP_BRANCH_BY_FIELD: dict[str, str] = {field: branch for branch, field in _OCP_BRANCH_FIELDS.items()}
 
-# Transport parameters that are strictly positive in a physics model: a scalar
-# of zero or less in a BPX file is a placeholder, named in a warning. (A table
-# may reach zero, for example a conductivity at zero concentration.)
-_POSITIVE_TRANSPORT_KEYS = frozenset({
-    "ionic_conductivity",
-    "electrolyte_diffusivity",
-    "transference_number",
-    "solid_diffusivity",
-    "electronic_conductivity",
-    "transport_efficiency",
-})
-
 
 def _bpx_block_claims(
     block: Mapping[str, Any],
@@ -2279,7 +2281,12 @@ def _bpx_block_claims(
     ``path`` is the block's BPX path (``"Parameterisation/Cell"``); a field
     that is not read lands in ``not_imported`` under it.
     """
-    from battinfo.parameters import bpx_field, parameter_entry, resolve_bpx_field  # noqa: PLC0415
+    from battinfo.parameters import (  # noqa: PLC0415
+        _nonpositive_transport_value,
+        bpx_field,
+        parameter_entry,
+        resolve_bpx_field,
+    )
 
     out: list[tuple[dict[str, Any], list[str]]] = []
     unknown: list[str] = []
@@ -2316,7 +2323,7 @@ def _bpx_block_claims(
             )
             not_imported.append(f"{path}/{field_name}")
             continue
-        if key in _POSITIVE_TRANSPORT_KEYS and "quantity" in claim and claim["quantity"]["value"] <= 0:
+        if _nonpositive_transport_value(claim) is not None:
             not_positive.append(f"{path}/{field_name} = {raw_value!r}")
         out.append((claim, list(entry.get("scopes", []))))
     if unknown:
@@ -2329,7 +2336,8 @@ def _bpx_block_claims(
             "BPX transport values a physics model needs positive are zero or negative, which "
             "usually marks a placeholder (the file may model them elsewhere, for example in "
             "User-defined): " + "; ".join(not_positive) + ". They are read as claims as the file "
-            "states them; check the source before using them."
+            "states them, with no provenance class unless provenance_classes= names their part; "
+            "check the source before using them."
         )
     return out
 

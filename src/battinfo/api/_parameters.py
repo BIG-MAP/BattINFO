@@ -362,11 +362,13 @@ def parameter_file_issues(body: Mapping[str, Any]) -> list[tuple[str, str, str, 
     return issues
 
 
-# Git hosts' raw-file URLs: the ref is a path segment, and only a commit SHA pins it.
+# Git hosts' raw-file URLs: the ref is a path segment, and only a commit SHA pins
+# it. An explicit refs/heads/<x> or refs/tags/<x> is a branch or a tag whatever
+# <x> looks like; a bare segment counts as a commit only when it is all hex.
 _GIT_RAW_URL_RES = (
-    re.compile(r"^https://raw\.githubusercontent\.com/[^/]+/[^/]+/(?:refs/(?:heads|tags)/)?([^/]+)/"),
-    re.compile(r"^https://github\.com/[^/]+/[^/]+/(?:raw|blob)/(?:refs/(?:heads|tags)/)?([^/]+)/"),
-    re.compile(r"^https://gitlab\.com/.+?/-/(?:raw|blob)/([^/]+)/"),
+    re.compile(r"^https://raw\.githubusercontent\.com/[^/]+/[^/]+/((?:refs/(?:heads|tags)/)?)([^/]+)/"),
+    re.compile(r"^https://github\.com/[^/]+/[^/]+/(?:raw|blob)/((?:refs/(?:heads|tags)/)?)([^/]+)/"),
+    re.compile(r"^https://gitlab\.com/.+?/-/(?:raw|blob)/((?:refs/(?:heads|tags)/)?)([^/]+)/"),
 )
 _COMMIT_SHA_RE = re.compile(r"^[0-9a-f]{7,40}$")
 
@@ -378,8 +380,10 @@ def _unpinned_git_ref(url: Any) -> str | None:
     for pattern in _GIT_RAW_URL_RES:
         match = pattern.match(url)
         if match is not None:
-            ref = match.group(1)
-            return None if _COMMIT_SHA_RE.fullmatch(ref) else ref
+            prefix, ref = match.group(1), match.group(2)
+            if not prefix and _COMMIT_SHA_RE.fullmatch(ref):
+                return None
+            return prefix + ref
     return None
 
 
@@ -802,18 +806,19 @@ def query_parameter_sets(
 ) -> list[dict[str, Any]]:
     """Query saved parameter sets; the collation entry point.
 
-    ``material_kind`` accepts a kind key or alias. ``material_kind`` and
-    ``material_spec_id`` match a claim batch's target or any material part of
-    a parameter file, so a search by material finds both. ``parameter``
-    filters to sets carrying at least one claim for that (canonical)
-    parameter key, in any part. The returned rows carry the full ``record`` so
-    results feed straight into :func:`battinfo.parameters.collate_claims`.
     A row is a whole record, so a BPX file found by its graphite part also
     holds its cell, electrode and other-electrode claims: pass the same
     material filter to ``collate_claims`` to keep only that material's::
 
         rows = query_parameter_sets(material_kind="graphite", parameter="particle_radius")
         claims = collate_claims([row["record"] for row in rows], material_kind="graphite")
+
+    ``material_kind`` accepts a kind key or alias. ``material_kind`` and
+    ``material_spec_id`` match a claim batch's target or any material part of
+    a parameter file, so a search by material finds both. ``parameter``
+    filters to sets carrying at least one claim for that (canonical)
+    parameter key, in any part. The returned rows carry the full ``record`` so
+    results feed straight into :func:`battinfo.parameters.collate_claims`.
     """
     from battinfo.materials import resolve_material_kind  # noqa: PLC0415
     from battinfo.parameters import parameter_set_claim_groups, resolve_parameter  # noqa: PLC0415
