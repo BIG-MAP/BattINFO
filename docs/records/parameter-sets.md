@@ -22,8 +22,8 @@ How to describe parameter claims: a **parameter set** is a batch of claims about
 ```python
 from battinfo.api import create_parameter_set
 
+# The uid derives from the target, scope and name.
 record = create_parameter_set(
-    uid="fm9p-sqkk-tbx3-rr66",
     name="Graphite density claims, Smith 2026",
     material_kind="graphite",
     claims=[
@@ -42,8 +42,8 @@ record = create_parameter_set(
 {
   "schema_version": "0.2.0",
   "parameter_set": {
-    "id": "https://w3id.org/battinfo/dataset/fm9p-sqkk-tbx3-rr66",
-    "short_id": "fm9psq",
+    "id": "https://w3id.org/battinfo/dataset/qqf7-w7e0-zrpj-vy7q",
+    "short_id": "qqf7w7",
     "name": "Graphite density claims, Smith 2026",
     "material_kind": "graphite",
     "scope": "material",
@@ -73,7 +73,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 ```json
 {
   "@context": "https://w3id.org/battinfo/context/records/v1.json",
-  "@id": "https://w3id.org/battinfo/dataset/fm9p-sqkk-tbx3-rr66",
+  "@id": "https://w3id.org/battinfo/dataset/qqf7-w7e0-zrpj-vy7q",
   "@type": "schema:Dataset",
   "schema:name": "Graphite density claims, Smith 2026",
   "schema:about": {
@@ -5695,7 +5695,7 @@ Schema: [`parameter-set.schema.json`](https://w3id.org/battinfo/schema/parameter
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `id` | → DatasetIri | yes | The record's IRI. Parameter sets of both flavours are datasets and mint under dataset/ (IDENTIFIER_POLICY 6.3): a claim batch's uid is stable_uid('parameter-claims:<target>:<scope>[:<electrode_polarity>]:<name>'), the name stripped and lowercased, and a parameter file's is stable_uid('parameter-file:' + parameters_sha256). |
+| `id` | → DatasetIri or → SpecIri | yes | The record's IRI. Parameter sets of both flavours are datasets and mint under dataset/ (IDENTIFIER_POLICY 6.3): a claim batch's uid is stable_uid('parameter-claims:<target>:<scope>[:<electrode_polarity>]:<name>'), the name stripped and lowercased, and a parameter file's is stable_uid('parameter-file:' + parameters_sha256). A spec/ IRI is accepted only for a record minted before 2026-10-11. |
 | `short_id` | → ShortId |  |  |
 | `name` | string | yes | Human-readable label. A claim batch is conventionally named '<source> - <target>' (e.g. 'Chen 2020 - graphite'); a parameter file by its source (the BPX Header.Title). |
 | `handle` | → Handle |  | Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity. |
