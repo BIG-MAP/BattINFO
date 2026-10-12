@@ -1152,6 +1152,9 @@ def _unmapped_source_columns(
         return []
 
 
+_ROW_COUNTER_MIN_ROWS = 10
+
+
 def _row_counter_columns(
     src: Path, plugin_id: str | None, columns: list[str], n_rows: int
 ) -> list[str]:
@@ -1162,8 +1165,12 @@ def _row_counter_columns(
     already say (Neware's ``Record`` column is one), so leaving it out of the
     BDF file loses no data. A column that cannot be read, or whose values are
     anything else, is not a row counter and stays reported as lost.
+
+    A file shorter than ``_ROW_COUNTER_MIN_ROWS`` rows is never judged: a
+    single 1, or a 0/1 flag over two rows, looks like a counter by chance, and
+    calling it one would hide real data loss.
     """
-    if not columns or n_rows < 1:
+    if not columns or n_rows < _ROW_COUNTER_MIN_ROWS:
         return []
     try:
         import bdf.io as _bdf_io  # noqa: PLC0415
@@ -1187,7 +1194,7 @@ def _row_counter_columns(
             continue
         if len(values) != n_rows or values.null_count() or values[0] not in (0, 1):
             continue
-        if n_rows > 1 and not (values.diff().drop_nulls() == 1).all():
+        if not (values.diff().drop_nulls() == 1).all():
             continue
         counters.append(name)
     return counters
