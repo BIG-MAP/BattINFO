@@ -52,7 +52,7 @@ The uid comes from the SHA-256 of the file's canonical JSON (RFC 8785), so a re-
 
 Some values have no home in a record yet: the `Particle` blocks of a blended electrode, the initial hysteresis state, `Degradation` and `Validation`. They are named in the warnings and listed in `not_imported`, which the record keeps, so a reader knows what only the file holds. `to_bpx(record)` says so too, and sets `complete=False` on its result.
 
-A transport value of zero or less (an ionic conductivity, a diffusivity, a transference number) cannot drive a physics model, and in published files it usually marks a placeholder for a model kept elsewhere, such as in `User-defined`. Such a value is read as the file states it, so the record still says exactly what the file says, and a warning names its BPX path and value.
+A transport value of zero or less (an ionic conductivity, a diffusivity, a transference number) cannot drive a physics model, and in published files it usually marks a placeholder for a model kept elsewhere, such as in `User-defined`. Such a value is read as the file states it, so the record still says exactly what the file says, and a warning names its BPX path and value. The claim gets no provenance class, and validating the record warns about it every time (`semantic.parameter_transport_not_positive`).
 
 ## 2. Say which cell the file describes
 
@@ -87,7 +87,7 @@ print(cell_spec_id)
 
 BPX does not name its materials, so name each electrode's material with `materials=` to make its claims findable by material. A value is a material kind (`battinfo.materials.material_kind_keys()` lists them) or a material-spec IRI. Leave out an electrode that is blended: its per-particle values are not imported yet, so there is no material part to name.
 
-Each claim can say how its value was obtained. BPX does not say, so the claims of the `cell` and `state` parts get no provenance class: a file's capacity, cut-offs, geometry and temperatures may be datasheet values or conventions as easily as fits. The material, electrode, separator and electrolyte claims are marked `fitted` (`default_provenance_class=` changes that). If you know where a part's values came from, say so by part name, for example `provenance_classes={"cell": "measured"}`.
+Each claim can say how its value was obtained. BPX does not say, so the claims of the `cell` and `state` parts get no provenance class: a file's capacity, cut-offs, geometry and temperatures may be datasheet values or conventions as easily as fits. The material, electrode, separator and electrolyte claims are marked `fitted` (`default_provenance_class=` changes that), except a zero or negative transport placeholder, which gets no class either. If you know where a part's values came from, say so by part name, for example `provenance_classes={"cell": "measured"}`.
 
 ## 3. Put the file where a solver can fetch it
 
