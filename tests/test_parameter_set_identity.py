@@ -76,6 +76,15 @@ def _legacy(path: Path) -> dict:
     return record
 
 
+def _moved(path: Path) -> dict:
+    """The naive migration without supersedes: the spec/ record's uid under dataset/."""
+    record = _legacy(path)
+    body = record["parameter_set"]
+    body["id"] = body["id"].replace("/spec/", "/dataset/")
+    assert "supersedes" not in body
+    return record
+
+
 def _codes(report, severity: str) -> list[str]:
     return [issue.code for issue in report.issues if issue.severity == severity]
 
@@ -213,6 +222,50 @@ def test_a_workspace_saves_a_legacy_record_and_refuses_to_submit_it(tmp_path: Pa
     assert "supersede_parameter_set" in excinfo.value.failed[0]["error"]
 
 
+class _ZenodoReached(Exception):
+    pass
+
+
+def _no_zenodo(*args: object, **kwargs: object) -> None:
+    raise _ZenodoReached
+
+
+@pytest.mark.parametrize("record,code", [
+    (_legacy(CLAIM_BATCH_EXAMPLE), LEGACY_CODE),
+    (_moved(CLAIM_BATCH_EXAMPLE), "semantic.parameter_set_uid_reused"),
+], ids=["spec-iri", "spec-uid-under-dataset"])
+def test_ws_zenodo_refuses_a_parameter_set_ws_submit_refuses(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, record: dict, code: str
+) -> None:
+    # The Zenodo path ran only the publication JSON-LD checks, so it deposited a
+    # spec/ parameter set without complaint. It now refuses before contacting Zenodo.
+    monkeypatch.setattr("battinfo.zenodo.ZenodoClient", _no_zenodo)
+    ws = battinfo.workspace(str(tmp_path / "ws"), registry_url=None)
+    ws.license("cc-by-4.0")
+    if code == LEGACY_CODE:
+        ws.add("parameter_set", record=record)
+        ws.save()
+    else:
+        # A save refuses it too, so it reaches the folder the way a hand-copied file does.
+        path = ws._ws.source_root / "parameter-set" / "parameter-set-8qqs-rh43-wt8d-172n.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(record), encoding="utf-8")
+    with pytest.raises(RuntimeError, match="Refusing to deposit") as excinfo:
+        ws.zenodo(token="placeholder")
+    assert record["parameter_set"]["id"] in str(excinfo.value)
+    assert "supersede_parameter_set" in str(excinfo.value)
+
+
+def test_ws_zenodo_deposits_a_dataset_parameter_set(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr("battinfo.zenodo.ZenodoClient", _no_zenodo)
+    ws = battinfo.workspace(str(tmp_path / "ws"), registry_url=None)
+    ws.license("cc-by-4.0")
+    ws.add("parameter_set", record=_load(CLAIM_BATCH_EXAMPLE))
+    ws.save()
+    with pytest.raises(_ZenodoReached):
+        ws.zenodo(token="placeholder")
+
+
 # ── a uid is never reused ────────────────────────────────────────────────────
 
 
@@ -245,15 +298,6 @@ def test_the_builder_refuses_to_reuse_the_superseded_uid() -> None:
             uid=legacy["id"].rsplit("/", 1)[-1], supersedes=legacy["id"],
             name=legacy["name"], material_kind="graphite", claims=legacy["claims"],
         )
-
-
-def _moved(path: Path) -> dict:
-    """The naive migration without supersedes: the spec/ record's uid under dataset/."""
-    record = _legacy(path)
-    body = record["parameter_set"]
-    body["id"] = body["id"].replace("/spec/", "/dataset/")
-    assert "supersedes" not in body
-    return record
 
 
 @pytest.mark.parametrize("path", [CLAIM_BATCH_EXAMPLE, PARAMETER_FILE_EXAMPLE], ids=["claims", "file"])

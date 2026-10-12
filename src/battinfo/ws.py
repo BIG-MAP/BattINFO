@@ -916,6 +916,27 @@ def _read_record_sets(source_root: Path) -> dict[str, list[dict]]:
     return record_sets
 
 
+def _parameter_set_publication_errors(record_sets: dict[str, list[dict]]) -> list[str]:
+    """Why parameter sets in *record_sets* cannot be published, one line per record.
+
+    :meth:`AuthoringWorkspace.submit` validates every record under the
+    publisher policy before it sends anything. A deposit describes its
+    parameter sets as nodes of its own, so the Zenodo path runs the same
+    record check on them: it refuses a parameter set minted under ``spec/``
+    (``semantic.parameter_set_legacy_namespace``) and one that reuses a uid
+    (``semantic.parameter_set_uid_reused``), so nothing is published under
+    ``spec/`` by either route (IDENTIFIER_POLICY 6.3).
+    """
+    from battinfo.validate.record import validate_record  # noqa: PLC0415
+
+    problems: list[str] = []
+    for record in record_sets.get("parameter-set", []):
+        result = validate_record(record, policy="publisher")
+        if not result.ok:
+            problems.append(f"{entity_id_from_doc(record) or 'a parameter set'}: {'; '.join(result.errors)}")
+    return problems
+
+
 def _apply_conformance_jsonld(
     node: dict,
     spec_id: str | None,
@@ -5086,6 +5107,16 @@ class AuthoringWorkspace:
         if not records_dir.exists():
             raise RuntimeError("No records found — run ws.save() first.")
 
+        # Fail closed before anything reaches Zenodo, a draft included (a draft
+        # is one click from published): the deposit's parameter sets must pass
+        # the record check ws.submit() runs.
+        parameter_set_errors = _parameter_set_publication_errors(_read_record_sets(records_dir))
+        if parameter_set_errors:
+            raise RuntimeError(
+                f"Refusing to deposit: {len(parameter_set_errors)} parameter set(s) cannot be "
+                "published, so nothing was sent to Zenodo: " + " | ".join(parameter_set_errors)
+            )
+
         client = ZenodoClient(token=tok, sandbox=sandbox)
         domain = "sandbox.zenodo.org" if sandbox else "zenodo.org"
 
@@ -5408,18 +5439,23 @@ class AuthoringWorkspace:
         # non-conformant record is surfaced up front rather than after an authoritative-looking
         # file has already been produced (D-4). Uses the FULL publication validator (JSON-LD +
         # structural + SHACL), not just the syntactic JSON-LD check.
+        # The record check ws.zenodo() runs on the parameter sets before it deposits
+        # counts here too.
         try:
             from battinfo.validate import validate_publication_report  # noqa: PLC0415
             report = validate_publication_report(jsonld, policy="publisher")
-            errors = [i for i in report.issues if i.severity == "error"]
+            errors = [i.message for i in report.issues if i.severity == "error"] + [
+                f"parameter set {problem}"
+                for problem in _parameter_set_publication_errors(_read_record_sets(records_dir))
+            ]
             warnings = [i for i in report.issues if i.severity == "warning"]
             if not errors and not warnings:
                 print("  Gold-standard: PASS (no validation issues)")
             else:
                 print(f"  Gold-standard: {len(errors)} error(s), {len(warnings)} warning(s) "
                       "-- address before publishing:")
-                for i in errors:
-                    print(f"    ERROR   {i.message}")
+                for message in errors:
+                    print(f"    ERROR   {message}")
                 for i in warnings:
                     print(f"    warning {i.message}")
         except Exception as exc:  # noqa: BLE001 — preview must still write + return its path
