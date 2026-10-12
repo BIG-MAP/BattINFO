@@ -369,3 +369,46 @@ def test_a_scope_of_another_shape_does_not_break_the_publication_validator(scope
     assert not {"publication.dataset_about_missing", "publication.dataset_distribution_missing"} & {
         issue.code for issue in report.issues
     }
+
+
+def test_a_deposit_of_parameter_sets_alone_passes_publication_validation() -> None:
+    """Parameter sets are the catalog's member datasets when nothing else is.
+
+    The catalog must reference at least one member dataset (SHACL). A deposit
+    holding only parameter sets (a claim batch and a BPX file with its source)
+    lists them as members and passes the whole publication validator, every
+    issue code included.
+    """
+    from battinfo.interop import bpx_file_distribution, from_bpx_parameters
+    from battinfo.validate import validate_publication_report
+
+    fixture = ROOT / "tests" / "fixtures" / "interop" / "bpx-dfn-full.bpx.json"
+    claim_batch = create_parameter_set(
+        name="Demo source - graphite", material_kind="graphite",
+        claims=[{
+            "parameter": "specific_capacity",
+            "quantity": {"value": 372.0, "unit": "mAh/g"},
+            "provenance_class": "literature",
+        }],
+    )
+    parameter_file = from_bpx_parameters(fixture).to_parameter_set(
+        virtual_cell=True,
+        distributions=[bpx_file_distribution(fixture, content_url="https://example.org/dfn.bpx.json")],
+    )
+    records = [claim_batch, parameter_file]
+    doc = AuthoringWorkspace._assemble_zenodo_jsonld(
+        {"parameter-set": records},
+        zenodo_record_id=1,
+        prereserved_doi="10.5281/zenodo.1",
+        record_url="https://zenodo.org/records/1",
+        data_filenames=[],
+        title="Parameter sets only",
+        license="cc-by-4.0",
+        creators=[{"name": "Doe, Jane"}],
+    )
+    catalog = next(node for node in doc["@graph"] if "dcat:Catalog" in node.get("@type", []))
+    iris = sorted(_record_iri(record) for record in records)
+    assert [ref["@id"] for ref in catalog["dcat:dataset"]] == iris
+    assert [ref["@id"] for ref in catalog["schema:hasPart"]] == iris
+    report = validate_publication_report(doc, policy="publisher")
+    assert not report.errors, report.errors

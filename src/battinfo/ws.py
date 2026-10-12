@@ -6344,7 +6344,21 @@ class AuthoringWorkspace:
         # alternative encodings of one dataset. schema:Dataset/Collection typing is
         # kept so Zenodo and schema.org consumers still see a top-level dataset — it
         # carries the DOI for the whole deposit.
-        member_refs = [{"@id": ds_id} for ds_id in sorted(ds_meta)]
+        # Parameter sets are datasets too (IDENTIFIER_POLICY 6.3), described by
+        # their own standalone nodes below: the catalog lists them as members
+        # after the per-test datasets, so a deposit holding only parameter sets
+        # still references a member dataset.
+        _parameter_set_iris = sorted({
+            _body["id"]
+            for _rec in record_sets.get("parameter-set", [])
+            if isinstance(_rec, dict)
+            and isinstance(_body := _rec.get("parameter_set"), dict)
+            and isinstance(_body.get("id"), str)
+            and _body["id"] not in ds_meta
+        })
+        member_refs = [{"@id": ds_id} for ds_id in sorted(ds_meta)] + [
+            {"@id": iri} for iri in _parameter_set_iris
+        ]
         catalog_node: dict = {
             # dcat:Catalog + schema:DataCatalog so catalog-aware consumers in both
             # vocabularies recognise it; schema:Dataset is retained so generic

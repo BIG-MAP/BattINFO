@@ -224,6 +224,11 @@ def _type_values(node: dict[str, Any]) -> list[str]:
     return []
 
 
+def _one_or_many(value: Any) -> Any:
+    """A single JSON object as a one-item list: in JSON-LD the two mean the same."""
+    return [value] if isinstance(value, dict) else value
+
+
 def _graph_nodes(data: dict[str, Any]) -> list[tuple[str, dict[str, Any]]]:
     graph = data.get("@graph")
     if isinstance(graph, list):
@@ -355,14 +360,14 @@ def _shape_issues(data: dict[str, Any], policy: ValidationPolicy) -> ValidationR
         # distribution requirements apply to its members, not to it.
         is_series = "dcat:DatasetSeries" in node_types
 
-        about = node.get("schema:about")
+        about = _one_or_many(node.get("schema:about"))
         if about is not None and not isinstance(about, list):
             _append_issue(
                 issues,
                 code="publication.reference_invalid",
                 severity=severity,
                 path=f"{path}.schema:about" if path else "schema:about",
-                message="Publication schema:about must be a list of @id references.",
+                message="Publication schema:about must be an @id reference or a list of them.",
             )
         elif is_battinfo_dataset and has_graph and not is_series and (not isinstance(about, list) or not about):
             _append_issue(
@@ -397,14 +402,14 @@ def _shape_issues(data: dict[str, Any], policy: ValidationPolicy) -> ValidationR
                         message=f"Publication graph is missing a node for referenced BattINFO id '{ref_id}'.",
                     )
 
-        distributions = node.get("schema:distribution")
+        distributions = _one_or_many(node.get("schema:distribution"))
         if distributions is not None and not isinstance(distributions, list):
             _append_issue(
                 issues,
                 code="publication.distribution_invalid",
                 severity=severity,
                 path=f"{path}.schema:distribution" if path else "schema:distribution",
-                message="Publication schema:distribution must be a list of distribution objects.",
+                message="Publication schema:distribution must be a distribution object or a list of them.",
             )
             continue
         if (

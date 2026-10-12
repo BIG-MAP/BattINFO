@@ -2855,6 +2855,10 @@ def _to_domain_battery_jsonld_parameter_set(data: dict[str, Any]) -> dict[str, A
         if (file_node := _parameter_file_node(item)) is not None
     ]
     if file_nodes:
+        if isinstance(body.get("id"), str) and body["id"]:
+            # The parent link every deposit file carries, as a dataset's files do.
+            for file_node in file_nodes:
+                file_node["schema:isPartOf"] = {"@id": body["id"]}
         node["schema:distribution"] = file_nodes[0] if len(file_nodes) == 1 else file_nodes
 
     citation = _citation_to_jsonld(data.get("provenance"))

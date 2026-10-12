@@ -443,7 +443,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     "dcterms:type": "source",
     "dcterms:conformsTo": "BPX 1.1.0",
     "dcat:byteSize": 418,
-    "schema:sha256": "c0dc1d775e8e0322f39bc9add2bd975cc70d60c7733dbbca9a45088e77745c11"
+    "schema:sha256": "c0dc1d775e8e0322f39bc9add2bd975cc70d60c7733dbbca9a45088e77745c11",
+    "schema:isPartOf": {
+      "@id": "https://w3id.org/battinfo/dataset/j6a4-h1cs-bmyh-07qc"
+    }
   }
 }
 ```
@@ -1729,6 +1732,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "schema:value": true,
       "schema:description": "bpx 1.1.1 Parser warnings: Detected a legacy BPX v0.x file/object; converting to the v1.x schema for backward compatibility. The conversion is approximate: the 'State' block is synthesised from the v0.x parameterisation (initial SOC set to 1, ambient and initial temperatures resolved from those provided, lumped thermal conductivity dropped). Optional v1.x fields that have no v0.x equivalent (e.g. initial hysteresis state and heat transfer coefficient) are omitted from the converted object rather than given a value here, so any tool that consumes it will apply its own defaults for them. Cross-version semantic changes are not corrected. Re-export from bpx>=1 to silence this warning, or pass convert_legacy=False to disable conversion. | The maximum voltage computed from the STO limits (4.201761488607647 V) is higher than the upper voltage cut-off (4.2 V) with the absolute tolerance v_tol = 0.001 V. Parsed by the official bpx parser.",
       "dcterms:date": "2026-10-11"
+    },
+    "schema:isPartOf": {
+      "@id": "https://w3id.org/battinfo/dataset/rnc6-edv8-m43x-ebnq"
     }
   },
   "schema:citation": {
@@ -2831,6 +2837,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "schema:value": true,
       "schema:description": "bpx 1.1.1 Parser warnings: Detected a legacy BPX v0.x file/object; converting to the v1.x schema for backward compatibility. The conversion is approximate: the 'State' block is synthesised from the v0.x parameterisation (initial SOC set to 1, ambient and initial temperatures resolved from those provided, lumped thermal conductivity dropped). Optional v1.x fields that have no v0.x equivalent (e.g. initial hysteresis state and heat transfer coefficient) are omitted from the converted object rather than given a value here, so any tool that consumes it will apply its own defaults for them. Cross-version semantic changes are not corrected. Re-export from bpx>=1 to silence this warning, or pass convert_legacy=False to disable conversion.. Parsed by the official bpx parser.",
       "dcterms:date": "2026-10-11"
+    },
+    "schema:isPartOf": {
+      "@id": "https://w3id.org/battinfo/dataset/h7g7-5082-63jk-9wm3"
     }
   },
   "schema:citation": {
@@ -3661,6 +3670,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "schema:value": true,
       "schema:description": "bpx 1.1.1 Parser warnings: Detected a legacy BPX v0.x file/object; converting to the v1.x schema for backward compatibility. The conversion is approximate: the 'State' block is synthesised from the v0.x parameterisation (initial SOC set to 1, ambient and initial temperatures resolved from those provided, lumped thermal conductivity dropped). Optional v1.x fields that have no v0.x equivalent (e.g. initial hysteresis state and heat transfer coefficient) are omitted from the converted object rather than given a value here, so any tool that consumes it will apply its own defaults for them. Cross-version semantic changes are not corrected. Re-export from bpx>=1 to silence this warning, or pass convert_legacy=False to disable conversion. | The maximum voltage computed from the STO limits (4.201761488607647 V) is higher than the upper voltage cut-off (4.2 V) with the absolute tolerance v_tol = 0.001 V. Parsed by the official bpx parser.",
       "dcterms:date": "2026-10-11"
+    },
+    "schema:isPartOf": {
+      "@id": "https://w3id.org/battinfo/dataset/6bpa-4qet-046r-1zzk"
     }
   },
   "schema:citation": {
@@ -4558,6 +4570,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "schema:value": true,
       "schema:description": "bpx 1.1.1 Parser warnings: Detected a legacy BPX v0.x file/object; converting to the v1.x schema for backward compatibility. The conversion is approximate: the 'State' block is synthesised from the v0.x parameterisation (initial SOC set to 1, ambient and initial temperatures resolved from those provided, lumped thermal conductivity dropped). Optional v1.x fields that have no v0.x equivalent (e.g. initial hysteresis state and heat transfer coefficient) are omitted from the converted object rather than given a value here, so any tool that consumes it will apply its own defaults for them. Cross-version semantic changes are not corrected. Re-export from bpx>=1 to silence this warning, or pass convert_legacy=False to disable conversion.. Parsed by the official bpx parser.",
       "dcterms:date": "2026-10-11"
+    },
+    "schema:isPartOf": {
+      "@id": "https://w3id.org/battinfo/dataset/dpj6-1j9x-eetd-gs81"
     }
   },
   "schema:citation": {
@@ -5667,6 +5682,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "schema:value": true,
       "schema:description": "bpx 1.1.1 Parser warnings: Detected a legacy BPX v0.x file/object; converting to the v1.x schema for backward compatibility. The conversion is approximate: the 'State' block is synthesised from the v0.x parameterisation (initial SOC set to 1, ambient and initial temperatures resolved from those provided, lumped thermal conductivity dropped). Optional v1.x fields that have no v0.x equivalent (e.g. initial hysteresis state and heat transfer coefficient) are omitted from the converted object rather than given a value here, so any tool that consumes it will apply its own defaults for them. Cross-version semantic changes are not corrected. Re-export from bpx>=1 to silence this warning, or pass convert_legacy=False to disable conversion.. Parsed by the official bpx parser.",
       "dcterms:date": "2026-10-11"
+    },
+    "schema:isPartOf": {
+      "@id": "https://w3id.org/battinfo/dataset/xms6-5z2m-gpsz-nzy9"
     }
   },
   "schema:citation": {
