@@ -1071,5 +1071,9 @@ def query_parameter_sets(
         filtered.append(rec)
     if not include_superseded:
         superseded = superseded_parameter_set_ids(rec["record"] for rec in filtered)
-        filtered = [rec for rec in filtered if rec.get("id") not in superseded]
+        filtered = [
+            rec
+            for rec in filtered
+            if not (isinstance(rec.get("id"), str) and rec["id"] in superseded)
+        ]
     return _paginate(filtered, limit=limit, offset=offset)

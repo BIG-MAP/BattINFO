@@ -188,7 +188,7 @@ ws.add("parameter_set", record=new)
 ws.save()
 ```
 
-Do not move the old uid to `dataset/` by editing the IRI. A uid is never reused, not even under another namespace, so a `dataset/` record that keeps the uid it had under `spec/` is refused under every policy, whether or not it names the old record in `supersedes`. Once both records sit in a workspace, `query_parameter_sets` and `collate_claims` return the new one only.
+Do not move the old uid to `dataset/` by editing the IRI. A uid is never reused, not even under another namespace, so a `dataset/` record that keeps the uid it had under `spec/` is refused under every policy, whether or not it names the old record in `supersedes`. Once both records sit in a workspace, `query_parameter_sets` and `collate_claims` return the new one only, and `ws.zenodo()` deposits the new one and leaves the old one out, saying so. You can keep the old file; there is no need to delete it.
 
 ## Who owns a file's IRI
 

@@ -1585,6 +1585,25 @@ def save_record(
         )
     existing_path = existing[0] if existing is not None else None
     target_path = existing_path if existing_path is not None else _save_entity_path(entity_type, uid, source_root_path)
+    if existing_path is None and target_path.exists():
+        # Files are named by uid alone, while the lookup above matches the
+        # full IRI. A record under another namespace with the same uid (a
+        # parameter set minted under spec/ before the move to dataset/) lives
+        # at this path; writing would replace it without a word. A uid is
+        # never reused across namespaces (IDENTIFIER_POLICY 6.3), as the
+        # registry refuses with parameter_set_uid_taken.
+        try:
+            held_id = _entity_id(_load_json(target_path))
+        except Exception:  # noqa: BLE001 - an unreadable file is still not ours to overwrite
+            held_id = None
+        if held_id != entity_id:
+            held = f"the record {held_id}" if held_id else "a record that could not be read"
+            raise ValueError(
+                f"Cannot save {entity_id}: {target_path} already holds {held}, which has the same "
+                f"uid ({uid}) under another IRI. A uid is never reused across namespaces "
+                "(IDENTIFIER_POLICY 6.3). For a parameter set published under spec/, "
+                "supersede_parameter_set() mints the replacement a uid of its own."
+            )
 
     if resolve_references:
         _resolve_references_for_save(doc, source_root_path)

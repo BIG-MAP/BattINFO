@@ -361,7 +361,10 @@ def collate_claims(
     collated: dict[str, list[dict[str, Any]]] = {}
     for record in records:
         body = record.get("parameter_set")
-        if not isinstance(body, Mapping) or body.get("id") in superseded:
+        record_id = body.get("id") if isinstance(body, Mapping) else None
+        # Only a string id can be named in supersedes; testing anything else
+        # against the set would hash it (a list id raised TypeError).
+        if not isinstance(body, Mapping) or (isinstance(record_id, str) and record_id in superseded):
             continue
         provenance_raw = record.get("provenance")
         provenance: Mapping[str, Any] = provenance_raw if isinstance(provenance_raw, Mapping) else {}

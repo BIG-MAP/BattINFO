@@ -508,3 +508,151 @@ def test_a_non_list_parts_value_is_a_finding_not_a_crash(bad_parts) -> None:
     for policy in ("default", "publisher"):
         report = validate_record_report(record, policy=policy)
         assert not report.ok
+
+
+# ── a save keeps the record its uid-named file holds ─────────────────────────
+
+
+@pytest.mark.parametrize("mode", ["create_only", "upsert"])
+def test_a_save_never_replaces_another_record_held_under_the_same_uid(tmp_path: Path, mode: str) -> None:
+    # Files are named by uid alone. A dataset/ record that keeps a legacy
+    # record's uid under an edited name (so the uid-reuse finding, which
+    # recomputes the seed from the name, stays quiet) replaced the legacy file.
+    legacy = _legacy(CLAIM_BATCH_EXAMPLE)
+    saved = save_parameter_set(legacy, source_root=tmp_path)
+    before = Path(saved["path"]).read_text(encoding="utf-8")
+    clash = _moved(CLAIM_BATCH_EXAMPLE)
+    clash["parameter_set"]["name"] = "Chen 2020 - graphite (copy)"
+    with pytest.raises(ValueError, match="never reused across namespaces") as excinfo:
+        save_parameter_set(clash, source_root=tmp_path, mode=mode)
+    assert legacy["parameter_set"]["id"] in str(excinfo.value)
+    assert "supersede_parameter_set" in str(excinfo.value)
+    assert Path(saved["path"]).read_text(encoding="utf-8") == before
+
+
+# ── the documented migration deposits ────────────────────────────────────────
+
+
+def test_ws_zenodo_leaves_out_a_legacy_record_its_replacement_supersedes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setattr("battinfo.zenodo.ZenodoClient", _no_zenodo)
+    ws = battinfo.workspace(str(tmp_path / "ws"), registry_url=None)
+    ws.license("cc-by-4.0")
+    legacy = _legacy(CLAIM_BATCH_EXAMPLE)
+    ws.add("parameter_set", record=legacy)
+    ws.save()
+    replacement = supersede_parameter_set(legacy)
+    ws.add("parameter_set", record=replacement)
+    ws.save()
+    old_iri, new_iri = legacy["parameter_set"]["id"], replacement["parameter_set"]["id"]
+    capsys.readouterr()
+
+    with pytest.raises(_ZenodoReached):
+        ws.zenodo(token="placeholder")
+    assert f"Leaving out {old_iri}" in capsys.readouterr().out
+
+    preview = ws.preview_jsonld()
+    out = capsys.readouterr().out
+    assert f"Leaving out {old_iri}" in out
+    assert "supersede_parameter_set" not in out
+    ids = {node.get("@id") for node in json.loads(preview.read_text(encoding="utf-8"))["@graph"]}
+    assert new_iri in ids
+    assert old_iri not in ids
+
+
+# ── an id of another shape is skipped, not a crash ───────────────────────────
+
+
+@pytest.mark.parametrize("bad_id", [
+    ["https://w3id.org/battinfo/dataset/aaaa-bbbb-cccc-dddd"], {"@id": "https://example.org/x"},
+], ids=["list", "dict"])
+def test_a_parameter_set_id_of_another_shape_does_not_break_a_query(tmp_path: Path, bad_id: object) -> None:
+    from battinfo.parameters import collate_claims
+
+    record = _load(CLAIM_BATCH_EXAMPLE)
+    record["parameter_set"]["id"] = bad_id
+    claim_count = len(record["parameter_set"]["claims"])
+    for include in (False, True):
+        collated = collate_claims([record], include_superseded=include)
+        assert sum(len(claims) for claims in collated.values()) == claim_count
+    folder = tmp_path / "parameter-set"
+    folder.mkdir()
+    (folder / "parameter-set-bad.json").write_text(json.dumps(record), encoding="utf-8")
+    for include in (False, True):
+        assert len(query_parameter_sets(source_root=tmp_path, include_superseded=include)) == 1
+
+
+# ── a deposit of parameter sets alone resolves what they point at ────────────
+
+
+_SPECIFIC_CAPACITY = {
+    "parameter": "specific_capacity", "quantity": {"value": 372.0, "unit": "mAh/g"},
+    "provenance_class": "literature",
+}
+_NOMINAL_CAPACITY = {
+    "parameter": "nominal_capacity", "quantity": {"value": 5.0, "unit": "Ah"},
+    "provenance_class": "literature",
+}
+_MATERIAL_SPEC = "https://w3id.org/battinfo/spec/bbbb-cccc-dddd-eeee"
+_CELL_SPEC = "https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd"
+_CELL = "https://w3id.org/battinfo/cell/cccc-dddd-eeee-ffff"
+_MATERIAL_SPEC_TYPE = ["Description", "schema:ProductModel", "schema:CreativeWork"]
+
+
+def _parameter_file_about(**link: str) -> dict:
+    record = _load(PARAMETER_FILE_EXAMPLE)
+    body = record["parameter_set"]
+    body.pop("virtual_cell")
+    body.update(link)
+    return record
+
+
+def _part_with_material_spec() -> dict:
+    record = _load(PARAMETER_FILE_EXAMPLE)
+    record["parameter_set"]["parts"][0]["material_spec_id"] = _MATERIAL_SPEC
+    return record
+
+
+def _deposit(record_sets: dict[str, list[dict]]) -> tuple[dict, list[str]]:
+    from battinfo.validate import validate_publication_report
+    from battinfo.ws import AuthoringWorkspace
+
+    doc = AuthoringWorkspace._assemble_zenodo_jsonld(
+        record_sets, zenodo_record_id=1, prereserved_doi="10.5281/zenodo.1",
+        record_url="https://zenodo.org/records/1", data_filenames=[], title="Parameter sets",
+        license="cc-by-4.0", creators=[{"name": "Doe, Jane"}],
+    )
+    report = validate_publication_report(doc, policy="publisher")
+    return doc, [issue.code for issue in report.errors]
+
+
+@pytest.mark.parametrize("record,target,stub_type", [
+    (lambda: create_parameter_set(
+        validate=False, name="A - graphite", material_spec_id=_MATERIAL_SPEC, claims=[_SPECIFIC_CAPACITY],
+    ), _MATERIAL_SPEC, _MATERIAL_SPEC_TYPE),
+    (lambda: create_parameter_set(
+        validate=False, name="A - cell", cell_spec_id=_CELL_SPEC, claims=[_NOMINAL_CAPACITY],
+    ), _CELL_SPEC, "BatteryCellSpecification"),
+    (lambda: _parameter_file_about(cell_spec_id=_CELL_SPEC), _CELL_SPEC, "BatteryCellSpecification"),
+    (lambda: _parameter_file_about(cell_instance_id=_CELL), _CELL, "BatteryCell"),
+    (_part_with_material_spec, _MATERIAL_SPEC, _MATERIAL_SPEC_TYPE),
+], ids=["claims-material-spec", "claims-cell-spec", "file-cell-spec", "file-cell", "file-part"])
+def test_a_deposit_of_parameter_sets_alone_stubs_what_they_point_at(record, target: str, stub_type) -> None:
+    doc, errors = _deposit({"parameter-set": [record()]})
+    assert errors == []
+    stubs = [node for node in doc["@graph"] if node.get("@id") == target]
+    assert stubs == [{"@id": target, "@type": stub_type, "rdfs:isDefinedBy": {"@id": target}}]
+
+
+def test_a_target_the_deposit_carries_gets_no_stub() -> None:
+    material = _load(sorted((EXAMPLES_ROOT / "material-spec").glob("*.json"))[0])
+    target = material["material_spec"]["id"]
+    claim_batch = create_parameter_set(
+        validate=False, name="A - graphite", material_spec_id=target, claims=[_SPECIFIC_CAPACITY],
+    )
+    doc, errors = _deposit({"material-spec": [material], "parameter-set": [claim_batch]})
+    assert errors == []
+    nodes = [node for node in doc["@graph"] if node.get("@id") == target]
+    assert len(nodes) == 1
+    assert "rdfs:isDefinedBy" not in nodes[0]
