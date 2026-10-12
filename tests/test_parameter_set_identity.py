@@ -12,6 +12,10 @@ Rules under test:
   dataset/ record that keeps the uid of the spec/ record it supersedes, nor
   by one that keeps the uid the seeds of before 2026-10-11 give its fields;
 - the legacy warning names the dataset/ IRI the replacement mints;
+- ws.zenodo() refuses what ws.submit() refuses, before contacting Zenodo;
+- queries and collation return a replacement without the record it
+  supersedes, so a migrated source is counted once;
+- a lookup by IRI opens only the parameter-set file named by its uid;
 - a save never overwrites a record of another kind that holds the same IRI;
 - supersede_parameter_set() builds the dataset/ replacement of a legacy
   record from the current seeds.
