@@ -1,73 +1,61 @@
 # Releasing BattINFO
 
-BattINFO publishes the `battinfo` package to [PyPI](https://pypi.org/project/battinfo/)
-using **OIDC Trusted Publishing** — there are no API tokens to manage. The
-[`release.yml`](.github/workflows/release.yml) workflow builds, validates, and
-publishes automatically when a version tag is pushed.
+The [`release.yml`](.github/workflows/release.yml) workflow publishes the `battinfo` package to [PyPI](https://pypi.org/project/battinfo/) with trusted publishing (OIDC), so no API token is stored anywhere. The package, the CLI and the OWL ontology (`battinfo.ttl`) share one version line, continued from the ontology releases (v0.2.0, v0.6.0, ...). 0.8.0 is the first version on PyPI.
 
-The package, CLI, and OWL ontology share **one version line**, continued from the
-historical ontology releases (`v0.6.0` → `v0.7.0` → …).
+## One-time setup
 
-## One-time setup (per maintainer org)
+On [PyPI](https://pypi.org/manage/account/publishing/) and [TestPyPI](https://test.pypi.org/manage/account/publishing/), add a trusted publisher. Until the project exists on an index it is a pending publisher, created from the account's publishing page:
 
-On both [PyPI](https://pypi.org/manage/account/publishing/) and
-[TestPyPI](https://test.pypi.org/manage/account/publishing/), add a *pending
-trusted publisher*:
+| Field | PyPI | TestPyPI |
+|---|---|---|
+| Project name | `battinfo` | `battinfo` |
+| Owner | `BIG-MAP` | `BIG-MAP` |
+| Repository | `BattINFO` | `BattINFO` |
+| Workflow | `release.yml` | `release.yml` |
+| Environment | `pypi` | `testpypi` |
 
-| Field        | Value           |
-|--------------|-----------------|
-| Owner        | `BIG-MAP`       |
-| Repository   | `BattINFO`      |
-| Workflow     | `release.yml`   |
-| Environment  | `pypi` (PyPI) / `testpypi` (TestPyPI) |
+Create GitHub environments named `pypi` and `testpypi` in the repository settings. Required reviewers on `pypi` make every upload wait for an approval.
 
-Then create matching [GitHub environments](../../settings/environments) named
-`pypi` and `testpypi` (optionally with required reviewers as a publish gate).
+Keep the Zenodo integration switched on for the repository. Its webhook archives each published GitHub Release as a new version under the concept DOI [10.5281/zenodo.6304782](https://doi.org/10.5281/zenodo.6304782).
 
 ## Cutting a release
 
-1. **Bump the version.** Edit `__version__` in
-   [`src/battinfo/__init__.py`](src/battinfo/__init__.py) — this is the single
-   source of truth (`pyproject.toml` reads it dynamically). Keep
-   `owl:versionInfo`/`owl:versionIRI` in [`battinfo.ttl`](battinfo.ttl) and the
-   version in [`CITATION.cff`](CITATION.cff) in sync.
-2. **Update the changelog.** Move `[Unreleased]` entries under a new dated
-   `[X.Y.Z]` heading in [`CHANGELOG.md`](CHANGELOG.md).
-3. **Sweep expiring deprecations.** Anything that has carried a
-   `DeprecationWarning` for a full release is removed now (see
-   `_DEPRECATED_ALIASES` in `src/battinfo/__init__.py` and the deprecation
-   policy in [`CONTRIBUTING.md`](CONTRIBUTING.md)); deprecations introduced in
-   this release keep their shims for one more.
-4. **Verify locally:**
+1. On a branch `release/X.Y.Z`, set the version: `__version__` in `src/battinfo/__init__.py` (the build reads it from there), `owl:versionIRI` and `owl:versionInfo` in `battinfo.ttl`, `version` and `date-released` in `CITATION.cff`, the table in `SECURITY.md` and the pin in `tests/installed_smoke.py`. Then regenerate the files that embed it, at least `scripts/gen_reference_records.py` and `scripts/gen_web_examples.py`; AGENTS.md lists every generator.
+2. In `CHANGELOG.md`, move the `[Unreleased]` entries under `## [X.Y.Z] - <date>` and leave an empty `[Unreleased]` above.
+3. Remove what has warned for a full release (`_DEPRECATED_ALIASES` and `_LAZY_EXPORTS` in `src/battinfo/__init__.py`, policy in CONTRIBUTING.md). Deprecations added in this release keep their shims for one more.
+4. Run the checks listed in AGENTS.md, then build and check the distribution:
+
    ```bash
-   uv sync --all-extras
-   uv run pytest -q tests
    uv build
-   uv run python -m twine check dist/*
+   uvx twine check dist/*
    ```
-5. **(Recommended) Dry-run to TestPyPI** via the Actions tab →
-   *Release* → *Run workflow* → `target: testpypi`. Then verify install:
-   ```bash
-   pip install --index-url https://test.pypi.org/simple/ \
-               --extra-index-url https://pypi.org/simple/ battinfo
-   ```
-6. **Tag and push** — this triggers the real publish:
-   ```bash
-   git tag -a v0.7.0 -m "BattINFO 0.7.0"
-   git push origin v0.7.0
-   ```
-   The workflow guards that the tag matches the built version, publishes to
-   PyPI, and drafts a GitHub Release.
-7. **Finalize:** review and publish the drafted GitHub Release. Publishing it
-   archives the release on Zenodo through the repository's Zenodo webhook, as
-   a new version under the concept DOI 10.5281/zenodo.6304782. Zenodo reads the
-   metadata, author list included, from `CITATION.cff`, so check the authors
-   and `date-released` before tagging. The README badge and citation use the
-   concept DOI and need no change.
 
-## Notes
+5. Push the branch and rehearse on TestPyPI. The workflow runs CI as its gate, builds the distribution and uploads it:
 
-- **Never delete published tags or PyPI releases** — they are referenced by
-  downstream consumers and DOI archives.
-- PyPI rejects re-uploading an existing version. To fix a bad release, publish a
-  new patch version.
+   ```bash
+   gh workflow run release.yml --ref release/X.Y.Z -f target=testpypi
+   ```
+
+   Install the rehearsal into a clean environment, with dependencies from PyPI, and run `tests/installed_smoke.py` from a checkout against it:
+
+   ```bash
+   pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ "battinfo==X.Y.Z"
+   ```
+
+   An index never takes the same version twice, so each version can be rehearsed once.
+
+6. Open the pull request and merge it into `main`.
+7. If the tag day differs from the date in `CITATION.cff` and the changelog heading, correct both on `main` first. Then tag `main` and push the tag:
+
+   ```bash
+   git switch main
+   git pull
+   git tag -a vX.Y.Z -m "BattINFO X.Y.Z"
+   git push origin vX.Y.Z
+   ```
+
+   The tag runs `release.yml` again: the CI gate, the build, a check that the tag matches the built version, the upload to PyPI and a draft GitHub Release with the files attached. The docs workflow publishes the documentation for the tag.
+
+8. Review the draft release and publish it. Zenodo then archives it under the concept DOI and takes the metadata, authors included, from `CITATION.cff`. The README badge and citation use the concept DOI and need no change.
+
+Never delete a published tag or a PyPI release, because downstream users and the Zenodo archive refer to them. A bad release is fixed by publishing a patch release.

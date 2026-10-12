@@ -8,31 +8,13 @@ BattINFO is the semantic data layer for battery technology. It gives you:
 - Automatic JSON → JSON-LD conversion aligned with the EMMO Battery Domain Ontology
 - A reusable cell-spec library backed by canonical records in ``battinfo-records``
 
-Working at the bench? The :doc:`how-to guides <howto>` map twelve lab tasks —
-register materials, build a cell from components, label cells, publish — to
-short runnable recipes, and the :doc:`glossary <glossary>` decodes the
-vocabulary in plain language.
+Working at the bench? The :doc:`how-to guides <howto>` map lab tasks, such as registering materials, building a cell from components, labelling cells and publishing, to short runnable recipes, and the :doc:`glossary <glossary>` decodes the vocabulary in plain language.
 
 
 Installation
 ------------
 
-BattINFO requires Python 3.11 or later.
-
-.. note::
-
-   The package is not on PyPI yet — it publishes with the 0.8 release. Until
-   then, install from source.
-
-.. code-block:: bash
-
-   git clone https://github.com/BIG-MAP/BattINFO.git
-   cd BattINFO
-   pip install -e ".[dev]"
-
-Once 0.8 is released, ``pip install battinfo`` will work, with optional extras
-that add features as you need them (each missing dependency raises an error
-naming the extra to install):
+BattINFO requires Python 3.11 or later. Install it from PyPI. The optional extras add features as you need them, and a feature whose dependency is missing raises an error that names the extra to install:
 
 .. code-block:: bash
 
@@ -43,8 +25,9 @@ naming the extra to install):
 
 .. note::
 
-   The ``processing`` extra currently installs the batterydf 0.2 release
-   candidate from PyPI.
+   The ``processing`` extra requires ``batterydf[nda,excel,mat]>=0.2.0rc2,<0.3``, so pip installs the batterydf 0.2.0 release candidate until 0.2.0 itself is published.
+
+To work on BattINFO itself, clone the repository and follow the `contributing guide <https://github.com/BIG-MAP/BattINFO/blob/main/CONTRIBUTING.md>`_.
 
 
 If you have data: the workspace

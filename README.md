@@ -14,7 +14,7 @@ and resolvable through persistent `https://w3id.org/battinfo/` identifiers.
 <!-- Badges · status -->
 [![CI](https://github.com/BIG-MAP/BattINFO/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/BIG-MAP/BattINFO/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2FBIG-MAP%2FBattINFO%2Fmain%2Fpyproject.toml&logo=python&logoColor=white)](https://github.com/BIG-MAP/BattINFO/blob/main/pyproject.toml)
-[![Version](https://img.shields.io/badge/version-0.7.0-blue)](https://github.com/BIG-MAP/BattINFO/releases)
+[![PyPI](https://img.shields.io/pypi/v/battinfo?label=PyPI)](https://pypi.org/project/battinfo/)
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 <br/>
 <!-- Badges · activity & quality -->
@@ -83,18 +83,13 @@ JSON. BattINFO turns that into a single, semantically-grounded record model:
 
 ## Installation
 
-Requires **Python 3.11+**.
-
-BattINFO is not on PyPI until the 0.8 release. Until then, install from source
-into a virtual environment:
+Requires **Python 3.11+**. Install it from PyPI into a virtual environment:
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate            # Windows: .venv\Scripts\activate
-pip install "git+https://github.com/BIG-MAP/BattINFO.git"
+pip install battinfo
 ```
-
-<!-- 0.8 release: replace the block above with  pip install battinfo -->
 
 Optional extras: `battinfo[processing]` (cycler-file conversion via `ws.convert()` + plotting), `battinfo[tabular]` (CSV/Parquet/XLSX readers), `battinfo[publish]` (RO-Crate validation), `battinfo[storage]` (S3), `battinfo[docs]` (Sphinx), and `battinfo[dev]` (full test/lint/build toolchain). To convert raw cycler files, install the converter and the plotting libraries with:
 
@@ -102,13 +97,9 @@ Optional extras: `battinfo[processing]` (cycler-file conversion via `ws.convert(
 pip install "battinfo[processing]"
 ```
 
-The `processing` extra currently installs the batterydf 0.2 release candidate from PyPI.
+The `processing` extra requires `batterydf[nda,excel,mat]>=0.2.0rc2,<0.3`, so pip installs the batterydf 0.2.0 release candidate until 0.2.0 itself is published.
 
-**Developing on BattINFO?** This repo uses [uv](https://docs.astral.sh/uv/):
-
-```powershell
-uv sync --all-extras   # creates .venv and installs from uv.lock
-```
+To try the development version from GitHub instead: `pip install "git+https://github.com/BIG-MAP/BattINFO.git"`. Working on BattINFO itself? See [Contributing](#contributing).
 
 ## Quickstart
 
@@ -159,9 +150,7 @@ ws = battinfo.workspace(".")
 ws.quickstart()   # prints a copy-pasteable end-to-end example
 ```
 
-**Lab work?** Start at the [how-to guides](docs/pages/howto.md) — twelve bench
-tasks (register materials, build a cell from components, label cells, convert
-cycler exports, publish) each mapped to a runnable recipe. The
+**Lab work?** Start at the [how-to guides](docs/pages/howto.md), where bench tasks such as registering materials, building a cell from components, labelling cells, converting cycler exports and publishing each map to a runnable recipe. The
 [capability table](docs/workspace-authoring.md#what-each-surface-can-author-today)
 shows which surface (workspace, `battinfo.api`, CLI) authors which record types today.
 
@@ -196,8 +185,8 @@ only to a throwaway `_scratch/` directory next to it.
 | Layer | What it provides |
 |-------|-----------------|
 | `battinfo.ttl` | OWL application ontology; imports EMMO domain-battery 0.20.2 and domain-electrochemistry 0.37.2 with pinned versioned IRIs |
-| [`assets/mappings/domain-battery/`](assets/mappings/domain-battery/) | 77 curated property→EMMO-IRI mappings and 35 unit→EMMO-IRI mappings; drives JSON→JSON-LD transformation |
-| `assets/schemas/` | 23 JSON Schema (draft 2020-12) files covering cell specs, cell instances, electrodes, electrolytes, separators, tests, datasets, and organisations |
+| [`assets/mappings/domain-battery/`](assets/mappings/domain-battery/) | 114 curated property→EMMO-IRI mappings and 63 unit→EMMO-IRI mappings; drives JSON→JSON-LD transformation |
+| `assets/schemas/` | 25 JSON Schema (draft 2020-12) files: one for each of the 22 record types, plus the shared base, the canonical cell description and the ingest manifest |
 | [`src/battinfo/transform/json_to_jsonld.py`](src/battinfo/transform/json_to_jsonld.py) | Deterministic, mapping-table-driven transformation to EMMO-aligned JSON-LD using the canonical domain-battery context |
 | [`src/battinfo/validate/`](src/battinfo/validate/) | Multi-layer validation: JSON Schema, Pydantic, JSON-LD (URDNA2015), semantic rules, referential integrity, publication |
 
@@ -209,9 +198,7 @@ Published records use:
 
 ## Project status
 
-> **Beta.** **1,175 tests** pass across Python 3.11 and 3.12 on Linux
-> and Windows. Ontology dependency versions are pinned and verified.
-> See [`docs/scope.md`](docs/scope.md) for the full capability map.
+> **Beta.** The test suite (3,221 tests at the 0.8.0 release) runs in CI on Python 3.11 and 3.12, on Linux and Windows. Ontology dependency versions are pinned and verified. See [`docs/scope.md`](docs/scope.md) for the full capability map and the [known limitations](docs/scope.md#known-limitations-in-080) of this release.
 
 **Supported**
 - Cell-descriptor validation and mapping, canonical record query/save/publish/index flows, JSON-LD-first publication, and validation policies.
