@@ -312,30 +312,33 @@ def test_parameter_sets_are_not_checked_as_dataset_records() -> None:
     assert not flagged, flagged
 
 
-def test_other_dataset_nodes_are_still_held_to_the_dataset_checks() -> None:
-    """Only a node the emitter marks as a parameter set is exempt.
+@pytest.mark.parametrize("dataset_type", ["dcat:Dataset", "BatteryTestResult"])
+def test_dataset_record_nodes_are_held_to_the_dataset_checks(dataset_type: str) -> None:
+    """The checks key on the types a dataset record's node carries.
 
-    A hand-built schema:Dataset node under dataset/ is not a parameter set and
-    carries no dataset-record type; it must still name what it is about and
-    carry a file, as it did before parameter sets moved to dataset/.
+    A node typed as a dataset record (dcat:Dataset in a workspace deposit,
+    BatteryTestResult in a dataset publication package) must name what it is
+    about and carry a file; a plain schema:Dataset node under dataset/, which
+    is what a parameter set is, is not held to them.
     """
     from battinfo.validate import validate_publication_report
 
-    doc = {
-        "@context": {"schema": "https://schema.org/", "dcat": "http://www.w3.org/ns/dcat#"},
-        "@graph": [{"@id": DATASET_IRI, "@type": "schema:Dataset", "schema:name": "x"}],
-    }
-    report = validate_publication_report(doc, policy="publisher")
-    codes = {issue.code for issue in report.errors}
-    assert {"publication.dataset_about_missing", "publication.dataset_distribution_missing"} <= codes
+    context = {"schema": "https://schema.org/", "dcat": "http://www.w3.org/ns/dcat#"}
+    checks = {"publication.dataset_about_missing", "publication.dataset_distribution_missing"}
+    typed = {"@id": DATASET_IRI, "@type": ["schema:Dataset", dataset_type], "schema:name": "x"}
+    report = validate_publication_report({"@context": context, "@graph": [typed]}, policy="publisher")
+    assert checks <= {issue.code for issue in report.errors}
+
+    plain = {"@id": DATASET_IRI, "@type": "schema:Dataset", "schema:name": "x"}
+    report = validate_publication_report({"@context": context, "@graph": [plain]}, policy="publisher")
+    assert not checks & {issue.code for issue in report.issues}
 
 
-def test_a_claim_batch_without_a_scope_is_still_marked_as_a_parameter_set() -> None:
-    """The scope marks a claim batch's node, so the emitter always states one."""
+def test_a_claim_batch_node_states_only_the_scope_its_record_states() -> None:
+    """The emitter writes what the record says, and no default of its own."""
     from battinfo.jsonld import record_to_jsonld
-    from battinfo.transform.json_to_jsonld import is_parameter_set_node
 
-    for target, scope in (({"material_kind": "graphite"}, "material"), ({"cell_spec_id": CELL_SPEC_IRI}, "cell")):
+    for target in ({"material_kind": "graphite"}, {"cell_spec_id": CELL_SPEC_IRI}):
         record = create_parameter_set(
             validate=False, name="Fit", claims=[
                 {"parameter": "density", "quantity": {"value": 2.2, "unit": "g/cm3"}, "provenance_class": "fitted"}
@@ -344,9 +347,25 @@ def test_a_claim_batch_without_a_scope_is_still_marked_as_a_parameter_set() -> N
         record["parameter_set"].pop("scope")
         doc = record_to_jsonld(record, "parameter-set")
         node = doc["@graph"][0] if "@graph" in doc else doc
-        assert {"@type": "schema:PropertyValue", "schema:name": "scope", "schema:value": scope} in (
-            node["schema:additionalProperty"]
-            if isinstance(node["schema:additionalProperty"], list)
-            else [node["schema:additionalProperty"]]
-        )
-        assert is_parameter_set_node(node)
+        facets = node.get("schema:additionalProperty") or []
+        facets = facets if isinstance(facets, list) else [facets]
+        assert not [facet for facet in facets if facet.get("schema:name") == "scope"]
+
+
+@pytest.mark.parametrize("scope", [["material", "cell"], {"@value": "material"}, 3])
+def test_a_scope_of_another_shape_does_not_break_the_publication_validator(scope: object) -> None:
+    """JSON-LD lets a value be a list or a value object; the validator reads the node's type only."""
+    from battinfo.validate import validate_publication_report
+
+    node = {
+        "@id": DATASET_IRI,
+        "@type": "schema:Dataset",
+        "schema:name": "x",
+        "schema:additionalProperty": {"@type": "schema:PropertyValue", "schema:name": "scope", "schema:value": scope},
+    }
+    report = validate_publication_report(
+        {"@context": {"schema": "https://schema.org/"}, "@graph": [node]}, policy="publisher"
+    )
+    assert not {"publication.dataset_about_missing", "publication.dataset_distribution_missing"} & {
+        issue.code for issue in report.issues
+    }

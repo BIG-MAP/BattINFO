@@ -2715,35 +2715,6 @@ _PARAMETER_PART_LABELS: dict[str, str] = {
 
 #: ``schema:propertyID`` naming a parameter file's fingerprint identifier.
 PARAMETERS_SHA256_PROPERTY_ID = "parameters-sha256-rfc8785"
-#: The scopes of a claim batch, one of which its node always states.
-_CLAIM_BATCH_SCOPES = frozenset({"material", "electrode", "separator", "electrolyte", "cell"})
-
-
-def is_parameter_set_node(node: Mapping[str, Any]) -> bool:
-    """True for a node emitted from a parameter-set record, of either flavour.
-
-    Parameter sets share ``dataset/`` with dataset records (IDENTIFIER_POLICY
-    6.3) and are plain schema:Dataset nodes, so neither the IRI nor the type
-    tells them apart. What does is a marker this module always writes on a
-    parameter-set node and on no other: a parameter file's fingerprint (a
-    ``schema:identifier`` whose ``schema:propertyID`` is
-    :data:`PARAMETERS_SHA256_PROPERTY_ID`), or a claim batch's scope (a
-    ``schema:additionalProperty`` named ``scope`` with a claim-batch scope).
-    """
-    def _entries(value: Any) -> list[Any]:
-        return value if isinstance(value, list) else [value]
-
-    if any(
-        isinstance(entry, Mapping) and entry.get("schema:propertyID") == PARAMETERS_SHA256_PROPERTY_ID
-        for entry in _entries(node.get("schema:identifier"))
-    ):
-        return True
-    return any(
-        isinstance(entry, Mapping)
-        and entry.get("schema:name") == "scope"
-        and entry.get("schema:value") in _CLAIM_BATCH_SCOPES
-        for entry in _entries(node.get("schema:additionalProperty"))
-    )
 
 
 def _parameter_claim_nodes(claims: Any) -> dict[str, Any]:
@@ -2846,15 +2817,10 @@ def _to_domain_battery_jsonld_parameter_set(data: dict[str, Any]) -> dict[str, A
         # new record that names the one it replaces.
         node["dcterms:replaces"] = {"@id": body["supersedes"]}
 
-    facets = {key: body[key] for key in ("scope", "electrode_polarity") if isinstance(body.get(key), str) and body[key]}
-    if "claims" in body and "scope" not in facets:
-        # A claim batch always states its scope, the builder's default when the
-        # record leaves it out: it is what marks the node as a parameter set
-        # (is_parameter_set_node).
-        facets = {"scope": "cell" if body.get("cell_spec_id") else "material", **facets}
     scope_values = [
-        {"@type": "schema:PropertyValue", "schema:name": key, "schema:value": value}
-        for key, value in facets.items()
+        {"@type": "schema:PropertyValue", "schema:name": key, "schema:value": body[key]}
+        for key in ("scope", "electrode_polarity")
+        if isinstance(body.get(key), str) and body[key]
     ]
     if body.get("virtual_cell") is True:
         scope_values.append(
