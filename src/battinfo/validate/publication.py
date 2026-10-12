@@ -215,6 +215,14 @@ def _is_absolute_uri(value: Any) -> bool:
 _DATASET_RECORD_TYPES = frozenset({"dcat:Dataset", "BatteryTestResult"})
 
 
+def _is_parameter_set_node(node: dict[str, Any]) -> bool:
+    # The emitter owns the marker it writes; imported here to keep the
+    # validate -> transform import out of module load.
+    from battinfo.transform.json_to_jsonld import is_parameter_set_node  # noqa: PLC0415
+
+    return is_parameter_set_node(node)
+
+
 def _type_values(node: dict[str, Any]) -> list[str]:
     value = node.get("@type")
     if isinstance(value, str):
@@ -336,15 +344,16 @@ def _shape_issues(data: dict[str, Any], policy: ValidationPolicy) -> ValidationR
             continue
 
         node_id = node.get("@id")
-        # Parameter sets share the dataset/ namespace (IDENTIFIER_POLICY 6.3) but
-        # are plain schema:Dataset nodes, so the namespace alone does not make a
-        # node a dataset record: a claim batch has no files and a virtual-cell
-        # parameter file is about no record. A dataset record's node carries
-        # one of the dataset-record types.
+        # Parameter sets share the dataset/ namespace with dataset records
+        # (IDENTIFIER_POLICY 6.3), and they are no deposits: a claim batch has no
+        # files and a virtual-cell parameter file is about no record. Only a node
+        # the emitter marks as a parameter set is exempt from the about and file
+        # checks; every other schema:Dataset node under dataset/ is held to them,
+        # and so is any node typed as a dataset record, marker or not.
         is_battinfo_dataset = (
             isinstance(node_id, str)
             and node_id.startswith("https://w3id.org/battinfo/dataset/")
-            and any(t in _DATASET_RECORD_TYPES for t in node_types)
+            and (any(t in _DATASET_RECORD_TYPES for t in node_types) or not _is_parameter_set_node(node))
         )
         # A collection (dcat:DatasetSeries) groups member datasets: it is about
         # nothing in particular and has no files of its own, so the about and

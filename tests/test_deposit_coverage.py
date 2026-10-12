@@ -310,3 +310,43 @@ def test_parameter_sets_are_not_checked_as_dataset_records() -> None:
         and issue.path.split(".")[0] in paths
     ]
     assert not flagged, flagged
+
+
+def test_other_dataset_nodes_are_still_held_to_the_dataset_checks() -> None:
+    """Only a node the emitter marks as a parameter set is exempt.
+
+    A hand-built schema:Dataset node under dataset/ is not a parameter set and
+    carries no dataset-record type; it must still name what it is about and
+    carry a file, as it did before parameter sets moved to dataset/.
+    """
+    from battinfo.validate import validate_publication_report
+
+    doc = {
+        "@context": {"schema": "https://schema.org/", "dcat": "http://www.w3.org/ns/dcat#"},
+        "@graph": [{"@id": DATASET_IRI, "@type": "schema:Dataset", "schema:name": "x"}],
+    }
+    report = validate_publication_report(doc, policy="publisher")
+    codes = {issue.code for issue in report.errors}
+    assert {"publication.dataset_about_missing", "publication.dataset_distribution_missing"} <= codes
+
+
+def test_a_claim_batch_without_a_scope_is_still_marked_as_a_parameter_set() -> None:
+    """The scope marks a claim batch's node, so the emitter always states one."""
+    from battinfo.jsonld import record_to_jsonld
+    from battinfo.transform.json_to_jsonld import is_parameter_set_node
+
+    for target, scope in (({"material_kind": "graphite"}, "material"), ({"cell_spec_id": CELL_SPEC_IRI}, "cell")):
+        record = create_parameter_set(
+            validate=False, name="Fit", claims=[
+                {"parameter": "density", "quantity": {"value": 2.2, "unit": "g/cm3"}, "provenance_class": "fitted"}
+            ], **target,
+        )
+        record["parameter_set"].pop("scope")
+        doc = record_to_jsonld(record, "parameter-set")
+        node = doc["@graph"][0] if "@graph" in doc else doc
+        assert {"@type": "schema:PropertyValue", "schema:name": "scope", "schema:value": scope} in (
+            node["schema:additionalProperty"]
+            if isinstance(node["schema:additionalProperty"], list)
+            else [node["schema:additionalProperty"]]
+        )
+        assert is_parameter_set_node(node)
