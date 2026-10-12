@@ -27,7 +27,7 @@ dcat:Catalog (the deposit)          ── the DOI, title, licence, creators, pu
 | Packaging / catalog | **DCAT** (+ schema.org mirror) | `dcat:Catalog`, `dcat:dataset`, `dcat:distribution`, `dcat:downloadURL` |
 | Discovery / rights | **schema.org** | `schema:DataCatalog/Dataset/DataDownload`, `name`, `description`, `license`, `creator`, `publisher`, `keywords`, `version` |
 | Provenance | **PROV** | `prov:Activity`, `prov:Plan`, `prov:used`, `prov:generated`, `prov:wasGeneratedBy`, `prov:wasAttributedTo` |
-| Battery domain | **EMMO / domain-battery / -electrochemistry** | `BatteryCell`, `BatteryCellSpecification`, `BatteryTest`, `hasProperty`, `hasNumericalValue`, `hasMeasurementUnit` |
+| Battery domain | **EMMO / domain-battery / -electrochemistry** | `BatteryCell`, `BatteryCellSpecification`, `BatteryTest`, `hasProperty`, `hasNumberValue`, `hasMeasurementUnit` |
 | Quality / conformance | **DQV + W3C EARL + OA** | `dqv:hasQualityAnnotation`, `earl:outcome` (`earl:passed/failed/cantTell`), `oa:motivatedBy` |
 | Integrity | **SPDX** | `spdx:checksum` (`spdx:checksumAlgorithm`, `spdx:checksumValue`) |
 | Identifiers / dates | **dcterms / xsd** | `dcterms:license/isPartOf/conformsTo/isVersionOf`, typed dates (`xsd:gYearMonth`) |
@@ -44,7 +44,7 @@ record and SHACL validation alike:
 
 ```json
 "hasProperty": [{ "@type": "NominalVoltage",
-                  "hasNumericalPart": { "hasNumericalValue": 3.0 },
+                  "hasNumericalPart": { "@type": "RealData", "hasNumberValue": 3.0 },
                   "hasMeasurementUnit": { "@id": "emmo:Volt" } }]
 ```
 

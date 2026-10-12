@@ -24,7 +24,7 @@ import json
 import os
 import re
 import warnings
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -1257,6 +1257,54 @@ def _unmapped_source_columns(
         return []
 
 
+_ROW_COUNTER_MIN_ROWS = 10
+
+
+def _row_counter_columns(
+    src: Path, plugin_id: str | None, columns: list[str], n_rows: int
+) -> list[str]:
+    """The *columns* of *src* that only number its rows (best-effort).
+
+    A column holding 0, 1, 2, ... or 1, 2, 3, ..., one value per row of the
+    converted table, says nothing the row order of the converted file does not
+    already say (Neware's ``Record`` column is one), so leaving it out of the
+    BDF file loses no data. A column that cannot be read, or whose values are
+    anything else, is not a row counter and stays reported as lost.
+
+    A file shorter than ``_ROW_COUNTER_MIN_ROWS`` rows is never judged: a
+    single 1, or a 0/1 flag over two rows, looks like a counter by chance, and
+    calling it one would hide real data loss.
+    """
+    if not columns or n_rows < _ROW_COUNTER_MIN_ROWS:
+        return []
+    try:
+        import bdf.io as _bdf_io  # noqa: PLC0415
+        import polars as pl  # noqa: PLC0415
+
+        plugin = _bdf_io.PLUGINS[plugin_id] if plugin_id in _bdf_io.PLUGINS else None
+        parser = getattr(plugin, "table_parser", None)
+        if parser is None:
+            return []
+        frame = parser.read(src, normalize=False, lazy=True).select(columns).collect()
+    except Exception:  # noqa: BLE001 — best-effort, like the loss report itself
+        return []
+    counters: list[str] = []
+    for name in columns:
+        try:
+            values = frame.get_column(name)
+            if values.dtype.is_float() and not (values == values.floor()).all():
+                continue
+            values = values.cast(pl.Int64, strict=True)
+        except Exception:  # noqa: BLE001 — not whole numbers, so not a row counter
+            continue
+        if len(values) != n_rows or values.null_count() or values[0] not in (0, 1):
+            continue
+        if not (values.diff().drop_nulls() == 1).all():
+            continue
+        counters.append(name)
+    return counters
+
+
 # Legacy/authored test-spec condition keys -> (canonical condition name, default unit).
 # ws.template() used to emit unit-suffixed keys with bare scalars or {min,max}
 # dicts; these keep loading (coerced to proper quantities) so old drafts survive.
@@ -1529,6 +1577,36 @@ def _check_draft_keys(
         f"{path.name}: unknown key(s) in a {draft} draft: {', '.join(parts)}. "
         f"A {draft} draft accepts: {', '.join(sorted(allowed))}; keys starting with '_' "
         "are comments. Nothing was loaded."
+    )
+
+
+def _signature_keywords(fn: Callable[..., Any]) -> builtins.list[str]:
+    """The parameters *fn* takes by name, in signature order; ``**kwargs`` is not one."""
+    import inspect  # noqa: PLC0415
+
+    named = (inspect.Parameter.POSITIONAL_OR_KEYWORD, inspect.Parameter.KEYWORD_ONLY)
+    return [name for name, p in inspect.signature(fn).parameters.items() if p.kind in named]
+
+
+def _check_add_keywords(record_type: str, accepted: Iterable[str], kwargs: Mapping[str, Any]) -> None:
+    """Raise TypeError for keywords ``ws.add(record_type, ...)`` does not take, with a did-you-mean.
+
+    ``ws.add()`` hands its keywords to a private method, and from there to a
+    builder or an input model, so a stray keyword used to fail deep inside: as
+    Python's message naming the private method, as a pydantic error, or as a
+    complaint about another argument. *accepted* is read from those signatures
+    and models, so it follows them when they change.
+    """
+    from battinfo.bundle import _unknown_keyword_parts  # noqa: PLC0415
+
+    accepted = list(dict.fromkeys(accepted))
+    unknown = [key for key in kwargs if key not in accepted]
+    if not unknown:
+        return
+    raise TypeError(
+        f"Unknown keyword(s) for ws.add({record_type!r}): {_unknown_keyword_parts(unknown, accepted)}. "
+        f"ws.add({record_type!r}, ...) accepts: {', '.join(f'{name}=' for name in accepted)}. "
+        "Run help(ws.add) for what each one does."
     )
 
 
@@ -2392,6 +2470,14 @@ class AuthoringWorkspace:
             # behind a success message — compare the source header against what
             # actually survived and report every column left behind.
             unmapped = _unmapped_source_columns(src, reader, list(df.columns))
+            # A column that only numbers the rows is not data: the row order of
+            # the converted file carries it. Say so instead of calling it a loss.
+            counters = _row_counter_columns(src, reader, unmapped, len(df))
+            if counters:
+                unmapped = [col for col in unmapped if col not in counters]
+                print(f"  Left out {'a column' if len(counters) == 1 else 'columns'} that only "
+                      f"number{'s' if len(counters) == 1 else ''} the rows: {', '.join(counters)}. "
+                      f"The row order of {out.name} holds the same information.")
             if unmapped:
                 lossy.append((src.name, unmapped))
                 print(f"  WARNING: {len(unmapped)} source column(s) were NOT mapped to BDF "
@@ -2945,6 +3031,29 @@ class AuthoringWorkspace:
         For large batches you may instead pass ``datasets="glob"`` to match files to
         already-loaded cells by the 6-char short ID in each filename.
 
+        The keywords a test takes are ``type`` (or ``kind``), ``cell``, ``data``,
+        ``raw``, ``datasets``, ``spec`` (or ``protocol``), ``conformance``,
+        ``name``, ``handle``, ``iri``, ``uid``, ``dataset_iris``, ``series_id``,
+        ``instrument``, ``channel``, ``license``, ``description`` and ``status``.
+        Any other keyword raises ``TypeError`` naming the closest match and
+        listing the accepted ones, before anything is created; every record type
+        checks its keywords this way.
+
+        - ``spec`` (``protocol`` is the same keyword) is the test spec the run
+          followed: a ``battinfo.TestSpec``, saved with the test and linked to
+          it, or the IRI of a test spec that is already saved or published.
+        - ``description`` is free text about this run; ``status`` is
+          ``"completed"`` unless you pass ``"planned"``, ``"running"``,
+          ``"aborted"`` or ``"other"``.
+        - ``instrument`` names the cycler the test ran on.
+        - ``license`` sets the licence of the datasets made from ``data=``,
+          instead of the workspace default.
+        - ``raw`` attaches the original instrument file for each ``data`` file;
+          without it the originals recorded by ``ws.convert()`` are attached.
+        - ``conformance`` says whether the run followed its spec:
+          ``"conformant"``, ``"non-conformant"``, ``"unknown"``, or a dict with
+          ``status``, ``note`` and ``deviations``.
+
         ``series_id`` puts every dataset made from ``data=`` in a collection. Pass
         the collection's IRI; the collection itself is saved first, with
         ``battinfo.Dataset`` and ``battinfo.save_dataset``::
@@ -2980,24 +3089,53 @@ class AuthoringWorkspace:
         """
         rt_key = str(record_type).strip().lower().replace("_", "-")
         if rt_key == "equipment":
+            _check_add_keywords("equipment", _signature_keywords(self._add_equipment), kwargs)
             return self._add_equipment(**kwargs)
-        if rt_key == "material-spec":
-            return self._add_material_spec(**kwargs)
-        if rt_key == "material":
-            return self._add_material(**kwargs)
-        if rt_key == "electrode-spec":
-            return self._add_electrode_spec(**kwargs)
-        if rt_key == "electrode":
+        if rt_key in ("material-spec", "material", "electrode-spec", "electrode"):
+            from battinfo.api._components import (  # noqa: PLC0415
+                ElectrodeInput,
+                ElectrodeSpecInput,
+                MaterialInput,
+                MaterialSpecInput,
+            )
+            from battinfo.bundle import _model_keywords  # noqa: PLC0415
+
+            # The component paths hand their keywords to an input model. The
+            # instance paths set the spec link themselves from spec=, so the
+            # model's own spec-id keywords are not theirs to take.
+            if rt_key == "material-spec":
+                _check_add_keywords("material_spec", _model_keywords(MaterialSpecInput), kwargs)
+                return self._add_material_spec(**kwargs)
+            if rt_key == "electrode-spec":
+                _check_add_keywords("electrode_spec", _model_keywords(ElectrodeSpecInput), kwargs)
+                return self._add_electrode_spec(**kwargs)
+            if rt_key == "material":
+                linked = {"material_spec_id", "spec_id"}
+                accepted = [*_signature_keywords(self._add_material),
+                            *(k for k in _model_keywords(MaterialInput) if k not in linked)]
+                _check_add_keywords("material", accepted, kwargs)
+                return self._add_material(**kwargs)
+            linked = {"electrode_spec_id", "spec_id"}
+            accepted = [*_signature_keywords(self._add_electrode),
+                        *(k for k in _model_keywords(ElectrodeInput) if k not in linked)]
+            _check_add_keywords("electrode", accepted, kwargs)
             return self._add_electrode(**kwargs)
         if rt_key in ("parameter-set", "parameters"):
+            from battinfo.api._parameters import _record_from_parameter_set  # noqa: PLC0415
+
+            accepted = [*_signature_keywords(self._add_parameter_set),
+                        *_signature_keywords(_record_from_parameter_set)]
+            _check_add_keywords("parameter_set", accepted, kwargs)
             return self._add_parameter_set(**kwargs)
         try:
             rt = _canon_type(record_type)
         except ValueError:
             rt = None
         if rt == "cell":
+            _check_add_keywords("cell", _signature_keywords(self._add_cell_instances), kwargs)
             return self._add_cell_instances(**kwargs)
         if rt == "test":
+            _check_add_keywords("test", _signature_keywords(self._add_tests), kwargs)
             return self._add_tests(**kwargs)
         raise ValueError(
             f"add() supports type 'cell', 'test', 'equipment', 'material_spec', "
@@ -5133,7 +5271,8 @@ class AuthoringWorkspace:
         sandbox:
             Use ``sandbox.zenodo.org`` for testing.
         community:
-            Zenodo community identifier (default ``"battinfo-reference"``).
+            Zenodo community identifier (default ``"battery-knowledge-base"``).
+            ``None`` leaves the deposit out of any community.
         creators:
             List of ``{"name": "...", "affiliation": "...", "orcid": "..."}`` dicts.
         keywords:

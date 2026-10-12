@@ -1853,7 +1853,67 @@ def save_dataset(
     dry_run: bool = False,
     stamp: Callable[[dict[str, Any]], None] | None = None,
 ) -> dict[str, Any]:
-    """Save a dataset from either draft payload or canonical record."""
+    """Save a dataset record into a records folder and return what was written.
+
+    *draft* is a :class:`battinfo.Dataset`, a dict of its fields, a canonical
+    record (``{"schema_version": ..., "dataset": {...}}``) or the path of a JSON
+    file holding either. A draft without an ``id`` gets an IRI minted from its
+    identity (see :func:`save_record`), so saving the same dataset again lands
+    on the same IRI.
+
+    Parameters
+    ----------
+    source_root:
+        The records folder to save into, for a workspace
+        ``<root>/.battinfo/records``. References are resolved against it.
+    mode:
+        ``"create_only"`` (default) refuses a record whose IRI is already
+        saved there; ``"upsert"`` updates it in place, and an unchanged
+        re-save writes nothing and reports ``content_changed: False``.
+    duplicate_policy:
+        What ``"create_only"`` does with a record that already exists:
+        ``"error"`` (default) raises ``ValueError``; ``"return_existing"``
+        returns the saved record's id and path with ``status: "exists"``.
+    resolve_references:
+        ``True`` (default) requires the cells and tests in the dataset's
+        ``about`` list to be saved under *source_root*, and raises
+        ``ValueError`` naming each one that is not. ``False`` skips that
+        check, for a dataset saved before the records it points at.
+        ``series_id`` is not checked here.
+    validate, validation_policy:
+        Validate the record before writing it, under the named policy
+        (``"default"``, ``"strict"``, ``"publisher"`` or ``"ingest"``); an
+        error raises ``ValueError`` and nothing is written.
+    publish, publish_root, build_jsonld, build_html:
+        Also write resolver artifacts for the record under *publish_root*.
+    dry_run:
+        Report what would be written without writing.
+    stamp:
+        A function applied to the record before it is compared and written
+        (the workspace uses it for funding and contributor stamps).
+
+    Returns a dict with ``status``, ``id``, ``entity_type``, ``path``, ``mode``
+    and ``published``. By status:
+
+    - ``"created"``: a new record was written. ``content_changed`` is
+      ``False``; it only describes a record that was already there.
+    - ``"updated"`` (``mode="upsert"`` over a saved record):
+      ``content_changed`` is ``True`` when the record differs from the saved
+      one and ``False`` when it does not, in which case nothing is rewritten.
+      The comparison ignores ``id``, ``uid`` and the ``created_at``,
+      ``modified_at``, ``retrieved_at``, ``generated_at`` and ``imported_at``
+      timestamps, but not ``published_at``: a ``Dataset`` saved without one
+      gets the save time, so its re-save compares as changed.
+    - ``"exists"`` (``mode="create_only"`` with
+      ``duplicate_policy="return_existing"``): nothing was written; ``path``
+      is the saved record and there is no ``content_changed`` key.
+    - ``"dry-run"``: nothing was written; ``content_changed`` is as it would
+      be for the real save.
+
+    With ``publish=True``, a ``"created"`` or ``"updated"`` result also
+    carries ``publish_result`` and ``published`` is ``True``; otherwise
+    ``published`` is ``False``.
+    """
     from battinfo.bundle import Dataset as DatasetBundle
 
     if isinstance(draft, (str, Path)):

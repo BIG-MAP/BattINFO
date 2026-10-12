@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import difflib
+from collections.abc import Iterable
 from enum import StrEnum
 from pathlib import Path
 from typing import Annotated, Any, ClassVar, Mapping, Self
@@ -328,29 +329,44 @@ _FLAT_PROVENANCE_KEYS = (
 )
 
 
+def _model_keywords(cls: type[BaseModel]) -> list[str]:
+    """Every keyword a pydantic model accepts: its field names and their validation aliases."""
+    keywords: dict[str, None] = {}
+    for field_name, field_info in cls.model_fields.items():
+        keywords[field_name] = None
+        alias = field_info.validation_alias
+        if isinstance(alias, AliasChoices):
+            keywords.update((str(choice), None) for choice in alias.choices)
+        elif isinstance(alias, str):
+            keywords[alias] = None
+    return list(keywords)
+
+
+def _unknown_keyword_parts(unknown: Iterable[str], accepted: Iterable[str]) -> str:
+    """``"manufacture= (did you mean manufacturer=?), bogus="`` for the keywords in *unknown*.
+
+    The one did-you-mean behind every authoring surface that refuses a keyword (the
+    record models, ``ws.add``), so their messages read the same."""
+    candidates = sorted(set(accepted))
+    parts = []
+    for key in unknown:
+        close = difflib.get_close_matches(key, candidates, n=1)
+        parts.append(f"{key}=" + (f" (did you mean {close[0]}=?)" if close else ""))
+    return ", ".join(parts)
+
+
 def _reject_unknown_kwargs(cls: type[BaseModel], data: Mapping[str, Any], *, extra_allowed: tuple[str, ...] = ()) -> None:
     """Raise a teaching TypeError for kwargs that match no field or alias.
 
     ``extra="forbid"`` would reject them anyway, but as a pydantic ValidationError that
     names only the stray key. A typo like ``manufacture=`` deserves a did-you-mean.
     Call AFTER the __init__ alias absorption, so only genuine strays remain in *data*."""
-    allowed: set[str] = set(extra_allowed)
-    for field_name, field_info in cls.model_fields.items():
-        allowed.add(field_name)
-        alias = field_info.validation_alias
-        if isinstance(alias, AliasChoices):
-            allowed.update(str(choice) for choice in alias.choices)
-        elif isinstance(alias, str):
-            allowed.add(alias)
+    allowed = {*extra_allowed, *_model_keywords(cls)}
     unknown = [key for key in data if key not in allowed]
     if not unknown:
         return
-    parts = []
-    for key in unknown:
-        close = difflib.get_close_matches(key, sorted(allowed), n=1)
-        parts.append(f"{key}=" + (f" (did you mean {close[0]}=?)" if close else ""))
     raise TypeError(
-        f"Unknown field(s) for {cls.__name__}: " + ", ".join(parts)
+        f"Unknown field(s) for {cls.__name__}: {_unknown_keyword_parts(unknown, allowed)}"
         + f". Run help(battinfo.{cls.__name__}) for the accepted fields."
     )
 
@@ -2283,6 +2299,17 @@ class Artifact(BaseModel):
 
 
 class TestSpec(BundleJsonModel):
+    """A test spec: a reusable test procedure, saved as a ``test-protocol`` record.
+
+    Give the steps as PyBaMM-style strings with ``experiment=``
+    (``["Charge at C/3 until 4.2 V", "Discharge at C/10 until 2.5 V"]``,
+    plus ``cycles=``) or as structured ``method`` steps, and the test type with
+    ``kind=``. Each run of the procedure is a :class:`Test` that points at it:
+    ``Test(protocol=spec, ...)`` or ``ws.add("test", spec=spec, ...)``.
+    Save it with ``battinfo.save_test_spec``. A misspelled argument raises
+    ``TypeError`` with a did-you-mean; the fields below say what each holds.
+    """
+
     default_filename: ClassVar[str] = TEST_SPEC_FILENAME
 
     kind: str = "TestSpec"
@@ -2486,6 +2513,17 @@ class TestSpec(BundleJsonModel):
 
 
 class Test(BundleJsonModel):
+    """A test: one run of a procedure on one physical cell, saved as a ``test`` record.
+
+    Name the cell (``cell=`` a :class:`Cell`, or ``cell_id=`` its IRI), the
+    test type (``kind=``) and, when there is one, the :class:`TestSpec` it
+    followed (``protocol=``). As-run details go in ``conditions``,
+    ``instrument``, ``started_at`` and ``ended_at``. The data the run produced
+    is a :class:`Dataset` that points back at the test. A misspelled argument
+    raises ``TypeError`` with a did-you-mean; the fields below say what each
+    holds.
+    """
+
     default_filename: ClassVar[str] = TEST_FILENAME
 
     kind: str = "Test"
@@ -2736,6 +2774,18 @@ class Test(BundleJsonModel):
 
 
 class Dataset(BundleJsonModel):
+    """A dataset: one data artifact and where its files are, saved as a ``dataset`` record.
+
+    Point it at the cell and test the data is about (``cell=``, ``test=`` or
+    their IRIs) and at the data: a local file (``path``) or files already
+    archived elsewhere (``access_url`` and ``distributions``, each with a
+    checksum). A collection of datasets is a ``Dataset`` with
+    ``additional_type=["DatasetSeries"]`` and no cell, test or files; its
+    members name it in ``series_id``. Save it with ``battinfo.save_dataset``.
+    A misspelled argument raises ``TypeError`` with a did-you-mean; the
+    fields below say what each holds.
+    """
+
     default_filename: ClassVar[str] = DATASET_FILENAME
 
     kind: str = "Dataset"

@@ -489,6 +489,22 @@ def validate_publication_report(
     *,
     policy: ValidationPolicy | str = DEFAULT_POLICY,
 ) -> ValidationReport:
+    """Check a publication JSON-LD graph and return every issue found.
+
+    *data* is the JSON-LD document a deposit carries, such as the file
+    ``ws.preview_jsonld()`` writes or a ``battinfo.publish.jsonld``, loaded
+    with ``json.load``. The checks cover the JSON-LD itself, the nodes and
+    the references between them, the datasets and distributions (absolute
+    URIs, checksums, a non-empty ``schema:about`` and a distribution on every
+    dataset but a collection, collection membership), the SHACL publication
+    shapes, test conditions and the licence.
+
+    *policy* is a :class:`ValidationPolicy` or one of the names
+    ``"default"``, ``"strict"``, ``"publisher"`` and ``"ingest"``. A policy
+    whose ``publication`` setting is ``"off"`` returns an empty report. The
+    function never raises over a finding: read ``report.ok``,
+    ``report.errors`` and ``report.warnings``, or ``report.to_dict()``.
+    """
     resolved_policy = get_validation_policy(policy) if isinstance(policy, str) else policy
     if resolved_policy.publication == "off":
         return ValidationReport(policy=resolved_policy)

@@ -67,6 +67,23 @@ def validate_record_report(
     source_root: str | Path | None = None,
     policy: ValidationPolicy | str = DEFAULT_POLICY,
 ) -> ValidationReport:
+    """Validate one canonical record and return every issue found.
+
+    *doc* is a canonical record as saved on disk (``{"schema_version": ...,
+    "cell_spec": {...}}`` and so on, for any record type). The checks are the
+    record's JSON Schema, a refusal of the all-zero template IRI, the semantic
+    rules (controlled values, units, plausible ranges) and, for cell specs,
+    the SHACL shapes. With *source_root* (a records folder) every IRI the
+    record points at must also resolve to a saved record of the right type.
+
+    *policy* is a :class:`ValidationPolicy` or one of the names
+    ``"default"``, ``"strict"``, ``"publisher"`` and ``"ingest"``; it decides
+    which checks run and whether their findings are errors or warnings. The
+    function never raises over a finding: read ``report.ok``,
+    ``report.errors`` and ``report.warnings``, or ``report.to_dict()``. It
+    raises ``ValueError`` for an unknown policy name or a document that is
+    not a record of any known type.
+    """
     normalized_doc = record_to_snake_aliases(doc)
     resolved_policy = get_validation_policy(policy) if isinstance(policy, str) else policy
     reports: list[ValidationReport] = [_placeholder_iri_report(normalized_doc, resolved_policy)]

@@ -572,7 +572,7 @@ def _resolve_cell_spec_for_batch(cell_spec: str) -> tuple[str, str, str, str]:
 
     if not results:
         raise ValueError(
-            f"No cell type found matching {cell_spec!r}. "
+            f"No cell spec found matching {cell_spec!r}. "
             "Check the library or pass the IRI directly."
         )
     if len(results) > 1:
@@ -580,7 +580,7 @@ def _resolve_cell_spec_for_batch(cell_spec: str) -> tuple[str, str, str, str]:
             f"  {r['manufacturer']} {r['model']}  ({r['id']})" for r in results[:5]
         )
         raise ValueError(
-            f"Multiple cell types match {cell_spec!r}. "
+            f"Multiple cell specs match {cell_spec!r}. "
             f"Be more specific or pass the IRI directly.\n{options}"
         )
 
@@ -820,7 +820,7 @@ def add_to_batch(
 ) -> dict[str, Any]:
     """Add *count* more cell folders to an existing batch directory.
 
-    Reads ``batch.yaml`` to inherit cell type, lab, operator, project and
+    Reads ``batch.yaml`` to inherit cell spec, lab, operator, project and
     current count.  New cell folders are numbered sequentially after the
     existing ones.  Any keyword argument that is not None overrides the
     corresponding value from ``batch.yaml`` for the new cells only.
