@@ -165,7 +165,7 @@
         },
         "supersedes": {
           "$ref": "#/$defs/SupersededParameterSetIri",
-          "description": "The parameter-set record this one replaces, of either flavour: the record of an earlier file a corrected file replaces (a corrected file has other parameters and so a new IRI), or a parameter set minted under spec/ before 2026-10-11 that this dataset/ record republishes. The registry marks the earlier record superseded when one publisher owns both."
+          "description": "The parameter-set record this one replaces, of either flavour: the record of an earlier file a corrected file replaces (a corrected file has other parameters and so a new IRI), or a parameter set minted under spec/ before 2026-10-11 that this dataset/ record republishes. Only the publisher of the earlier record may supersede it (the registry refuses anyone else), and the registry then marks it superseded. This record never reuses the earlier record's uid."
         },
         "distributions": {
           "type": "array",

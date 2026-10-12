@@ -1,6 +1,6 @@
 # Parameter Set (Examples)
 
-Parameter claims from one source, in two flavours, both minted under the shared `spec/` namespace.
+Parameter claims from one source, in two flavours. A parameter set is a dataset, so both flavours mint under `dataset/`, the namespace they share with dataset records (IDENTIFIER_POLICY 6.3). Parameter sets published under `spec/` before 2026-10-11 still load and validate, with a warning, and `supersede_parameter_set()` builds the `dataset/` record that replaces one.
 
 A claim batch is one source (a paper, a lab fit) making parameter claims about one target: a curated material kind, a material spec, or a cell spec. Claims collate under the target across sources, and the spread between sources is data. Its uid derives from (target, scope, name), so re-importing a source is idempotent. Example: `Chen 2020 - graphite`.
 

@@ -159,7 +159,7 @@ The checks that bind the record to its file are errors under every policy: the I
 
 ## Corrections
 
-A corrected file has other parameters, so it is a new record with a new IRI. The old IRI keeps resolving to the old file, because a solver may already have been handed it. Name the record the new one replaces. Parameter sets published before 2026-10-11 have `spec/` IRIs, and `supersedes` takes those too:
+A corrected file has other parameters, so it is a new record with a new IRI. The old IRI keeps resolving to the old file, because a solver may already have been handed it. Name the record the new one replaces:
 
 <!-- doc-snippet: skip -->
 ```python
@@ -170,7 +170,25 @@ record = from_bpx_parameters("corrected.bpx.json").to_parameter_set(
 )
 ```
 
-When the same publisher owns both records, the registry marks the old one superseded and points it at the new one.
+Only the publisher of the old record can supersede it. The registry refuses a `supersedes` from anyone else; when it accepts the new record, it marks the old one superseded and points it at the new one.
+
+## Records published under spec/
+
+Parameter sets published before 2026-10-11 have `spec/` IRIs, and they keep them: the old IRI keeps resolving, and a local copy still loads, validates and is found by its IRI, with the warning `semantic.parameter_set_legacy_namespace`. Nothing is published under `spec/` any more, though, so the `publisher` policy makes that warning an error and `ws.submit()` refuses the record. Its new version is a new `dataset/` record that supersedes it, and `supersede_parameter_set` builds it. The IRI is minted from the current seeds (a file's from its `parameters_sha256`, a claim batch's from its target, scope and name), `supersedes` names the old IRI, and everything else is copied as it is, the file entries included, since a file's URL is not its identity. For the Schmitt et al. 2026 file:
+
+<!-- doc-snippet: skip -->
+```python
+from battinfo.api import supersede_parameter_set
+
+old = json.loads(Path("parameter-set-szxp-xwnx-vhyf-rvm0.json").read_text(encoding="utf-8"))
+new = supersede_parameter_set(old)
+print(new["parameter_set"]["id"])          # https://w3id.org/battinfo/dataset/7jnc-cjtw-5h3a-5t52
+print(new["parameter_set"]["supersedes"])  # https://w3id.org/battinfo/spec/szxp-xwnx-vhyf-rvm0
+ws.add("parameter_set", record=new)
+ws.save()
+```
+
+Do not move the old uid to `dataset/` by editing the IRI. A uid is never reused, not even under another namespace, and a record whose uid is that of the record it supersedes is refused under every policy.
 
 ## Who owns a file's IRI
 
