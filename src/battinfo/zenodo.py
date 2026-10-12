@@ -16,6 +16,7 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
+from battinfo._jsonio import write_json
 from battinfo.bundle import ZENODO_CELL_RECORD_FILENAME, ZenodoCellRecord
 
 PathLike = str | Path
@@ -537,6 +538,42 @@ def patch_zenodo_urls(
     return results
 
 
+def _apply_deposit_title(
+    staging: Path, title: str, *, publish_filename: str, ro_crate_filename: str
+) -> list[str]:
+    """Name the staged graph's catalog node and the RO-Crate root *title*.
+
+    ``build_zenodo_package`` names both with the automatic title; a title
+    given at upload replaces it there too, so the files carry the title the
+    Zenodo metadata gets. Returns the names of the files it changed.
+    """
+    changed: list[str] = []
+    for fname, matches, keys in (
+        (publish_filename, lambda node: "dcat:Catalog" in _type_list(node), ("schema:name", "dcterms:title")),
+        (ro_crate_filename, lambda node: node.get("@id") == "./", ("name",)),
+    ):
+        path = staging / fname
+        if not path.exists():
+            continue
+        doc = json.loads(path.read_text(encoding="utf-8"))
+        edited = False
+        for node in doc.get("@graph") or []:
+            if isinstance(node, dict) and matches(node):
+                for key in keys:
+                    if node.get(key) != title:
+                        node[key] = title
+                        edited = True
+        if edited:
+            write_json(path, doc)
+            changed.append(fname)
+    return changed
+
+
+def _type_list(node: dict[str, Any]) -> list[Any]:
+    types = node.get("@type")
+    return types if isinstance(types, list) else [types]
+
+
 def upload_zenodo_package(
     staging_dir: PathLike,
     creators: list[dict[str, Any]],
@@ -573,7 +610,8 @@ def upload_zenodo_package(
         sandbox: Use the Zenodo sandbox instead of production.
         community: Zenodo community identifier for submission
                    (``None`` skips community submission).
-        title: Override the auto-derived record title.
+        title: Override the auto-derived record title. The staged graph's
+               catalog node and the RO-Crate root take it too.
         description: Override the auto-derived record description.
         license: SPDX license identifier (default ``cc-by-4.0``).
         extra_keywords: Additional keywords appended to the auto-derived list.
@@ -620,6 +658,10 @@ def upload_zenodo_package(
         publish_filename=publish_filename,
         ro_crate_filename=ro_crate_filename,
         bundle_filename=bundle_filename,
+    )
+    _apply_deposit_title(
+        staging, _cell_record_deposit_title(record, title),
+        publish_filename=publish_filename, ro_crate_filename=ro_crate_filename,
     )
 
     all_files: list[Path] = sorted(f for f in staging.iterdir() if f.is_file())

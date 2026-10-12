@@ -731,3 +731,22 @@ class TestDepositTitle:
         assert metadata["title"] == "Energizer CR2032 — BattINFO Reference Datasets"
         assert _catalog(graph)["schema:name"] == metadata["title"]
         assert next(node for node in crate["@graph"] if node["@id"] == "./")["name"] == metadata["title"]
+
+    @pytest.mark.parametrize("title", [None, "Explicit CLI title"])
+    def test_a_title_given_at_upload_reaches_the_staged_files(self, tmp_path: Path, title: str | None) -> None:
+        """upload_zenodo_package(title=...) renames the catalog and the RO-Crate root it uploads."""
+        staging = _staged_package(tmp_path)
+        client = MagicMock(spec=ZenodoClient)
+        client.create_empty_deposit.return_value = {
+            "id": 9, "record_id": 9, "metadata": {"prereserve_doi": {"doi": "10.5281/zenodo.9"}},
+        }
+        with patch("battinfo.zenodo.ZenodoClient", return_value=client):
+            upload_zenodo_package(staging, CREATORS, token="tok", title=title)
+
+        [metadata] = [call.args[1] for call in client.update_metadata.call_args_list]
+        expected = title or "Energizer CR2032 — BattINFO Reference Datasets"
+        assert metadata["title"] == expected
+        graph = json.loads((staging / DEFAULT_PUBLISH_FILENAME).read_text(encoding="utf-8"))
+        crate = json.loads((staging / DEFAULT_RO_CRATE_METADATA_FILENAME).read_text(encoding="utf-8"))
+        assert _catalog(graph)["schema:name"] == _catalog(graph)["dcterms:title"] == expected
+        assert next(node for node in crate["@graph"] if node["@id"] == "./")["name"] == expected
