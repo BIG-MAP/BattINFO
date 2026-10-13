@@ -713,8 +713,8 @@ IRI: https://w3id.org/battinfo/spec/03yx-y1kk-q3mq-ck3w
     &#34;source_type&#34;: &#34;datasheet&#34;,
     &#34;source_name&#34;: &#34;INR21700-50E Product Specification Rev 1.0&#34;,
     &#34;source_url&#34;: &#34;https://example.com/samsung-inr21700-50e.pdf&#34;,
-    &#34;retrieved_at&#34;: 1791843048,
-    &#34;battinfo_version&#34;: &#34;0.7.0&#34;
+    &#34;retrieved_at&#34;: 1791870336,
+    &#34;battinfo_version&#34;: &#34;0.8.0&#34;
   }
 }
 </pre></div></div>
@@ -739,7 +739,8 @@ IRI: https://w3id.org/battinfo/spec/03yx-y1kk-q3mq-ck3w
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Properties:&quot;</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">described</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hasProperty&quot;</span><span class="p">,</span> <span class="p">[]):</span>
     <span class="n">t</span> <span class="o">=</span> <span class="n">prop</span><span class="p">[</span><span class="s2">&quot;@type&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prop</span><span class="p">[</span><span class="s2">&quot;@type&quot;</span><span class="p">],</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="n">prop</span><span class="p">[</span><span class="s2">&quot;@type&quot;</span><span class="p">]</span>
-    <span class="n">v</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hasNumericalPart&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hasNumberValue&quot;</span><span class="p">,</span> <span class="s2">&quot;—&quot;</span><span class="p">)</span>
+    <span class="c1"># A value stated as text, such as cycle_life &quot;&gt;500&quot;, is a hasStringValue.</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hasNumericalPart&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hasNumberValue&quot;</span><span class="p">,</span> <span class="n">prop</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hasStringValue&quot;</span><span class="p">))</span>
     <span class="n">u</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hasMeasurementUnit&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">t</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2"> [</span><span class="si">{</span><span class="n">u</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
 </pre></div>
@@ -774,7 +775,7 @@ Properties:
   MaximumContinuousDischargingCurrent: 9.8 [Ampere]
   MaximumChargingTemperature: 45 [DegreeCelsius]
   MinimumDischargingTemperature: -20 [DegreeCelsius]
-  CycleLife: — [EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978]
+  CycleLife: &gt;500 [EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978]
 </pre></div></div>
 </div>
 </section>
@@ -823,7 +824,7 @@ Solvents: [&#39;EC&#39;, &#39;DMC&#39;]
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.materials</span><span class="w"> </span><span class="kn">import</span> <span class="n">link_component_to_spec</span><span class="p">,</span> <span class="n">material_spec_from_component</span>
 
-<span class="n">lipf6</span> <span class="o">=</span> <span class="n">material_spec_from_component</span><span class="p">(</span><span class="n">lp30</span><span class="o">.</span><span class="n">salt</span><span class="p">,</span> <span class="n">material_class</span><span class="o">=</span><span class="s2">&quot;electrolyte_salt&quot;</span><span class="p">)</span>
+<span class="n">lipf6</span> <span class="o">=</span> <span class="n">material_spec_from_component</span><span class="p">(</span><span class="n">lp30</span><span class="o">.</span><span class="n">salt</span><span class="p">)</span>
 <span class="n">lipf6_id</span> <span class="o">=</span> <span class="n">lipf6</span><span class="p">[</span><span class="s2">&quot;material_spec&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Material-spec IRI:&quot;</span><span class="p">,</span> <span class="n">lipf6_id</span><span class="p">)</span>
 

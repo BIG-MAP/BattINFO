@@ -544,26 +544,10 @@
 <li><p>Automatic JSON → JSON-LD conversion aligned with the EMMO Battery Domain Ontology</p></li>
 <li><p>A reusable cell-spec library backed by canonical records in <code class="docutils literal notranslate"><span class="pre">battinfo-records</span></code></p></li>
 </ul>
-<p>Working at the bench? The <a class="reference internal" href="howto.html"><span class="doc">how-to guides</span></a> map twelve lab tasks —
-register materials, build a cell from components, label cells, publish — to
-short runnable recipes, and the <a class="reference internal" href="glossary.html"><span class="doc">glossary</span></a> decodes the
-vocabulary in plain language.</p>
+<p>Working at the bench? The <a class="reference internal" href="howto.html"><span class="doc">how-to guides</span></a> map lab tasks, such as registering materials, building a cell from components, labelling cells and publishing, to short runnable recipes, and the <a class="reference internal" href="glossary.html"><span class="doc">glossary</span></a> decodes the vocabulary in plain language.</p>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Link to this heading">#</a></h2>
-<p>BattINFO requires Python 3.11 or later.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>The package is not on PyPI yet — it publishes with the 0.8 release. Until
-then, install from source.</p>
-</div>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/BIG-MAP/BattINFO.git
-<span class="nb">cd</span><span class="w"> </span>BattINFO
-pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[dev]&quot;</span>
-</pre></div>
-</div>
-<p>Once 0.8 is released, <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">battinfo</span></code> will work, with optional extras
-that add features as you need them (each missing dependency raises an error
-naming the extra to install):</p>
+<p>BattINFO requires Python 3.11 or later. Install it from PyPI. The optional extras add features as you need them, and a feature whose dependency is missing raises an error that names the extra to install:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>battinfo<span class="w">                  </span><span class="c1"># core</span>
 pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;battinfo[processing]&quot;</span><span class="w">    </span><span class="c1"># cycler-file conversion (ws.convert) + plotting</span>
 pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;battinfo[tabular]&quot;</span><span class="w">       </span><span class="c1"># CSV/Parquet/XLSX readers</span>
@@ -572,9 +556,9 @@ pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">processing</span></code> extra currently installs the batterydf 0.2 release
-candidate from PyPI.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">processing</span></code> extra requires <code class="docutils literal notranslate"><span class="pre">batterydf[nda,excel,mat]&gt;=0.2.0rc2,&lt;0.3</span></code>, so pip installs the batterydf 0.2.0 release candidate until 0.2.0 itself is published.</p>
 </div>
+<p>To work on BattINFO itself, clone the repository and follow the <a class="reference external" href="https://github.com/BIG-MAP/BattINFO/blob/main/CONTRIBUTING.md">contributing guide</a>.</p>
 </section>
 <section id="if-you-have-data-the-workspace">
 <h2>If you have data: the workspace<a class="headerlink" href="#if-you-have-data-the-workspace" title="Link to this heading">#</a></h2>

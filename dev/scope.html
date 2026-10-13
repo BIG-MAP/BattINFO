@@ -683,6 +683,49 @@
 <li><p>reference validation for corpora larger than a repository-scale source tree</p></li>
 </ul>
 </section>
+<section id="known-limitations-in-0-8-0">
+<h2>Known limitations in 0.8.0<a class="headerlink" href="#known-limitations-in-0-8-0" title="Link to this heading">#</a></h2>
+<p>These gaps were known when 0.8.0 was released and are planned for 0.8.x or 0.9. Where there is a way around one, the line says how.</p>
+<section id="bpx-parameter-files">
+<h3>BPX parameter files<a class="headerlink" href="#bpx-parameter-files" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Blended electrodes (BPX <code class="docutils literal notranslate"><span class="pre">Particle</span></code> blocks) are not modelled: the import names them in a warning and in the record’s <code class="docutils literal notranslate"><span class="pre">not_imported</span></code>, and <code class="docutils literal notranslate"><span class="pre">to_bpx</span></code> returns <code class="docutils literal notranslate"><span class="pre">complete=False</span></code> for such a file.</p></li>
+<li><p>The initial hysteresis state, <code class="docutils literal notranslate"><span class="pre">Degradation</span></code> blocks and <code class="docutils literal notranslate"><span class="pre">Validation</span></code> curves stay in the source file and are listed in <code class="docutils literal notranslate"><span class="pre">not_imported</span></code>.</p></li>
+<li><p>Curve claims, such as an OCP table, are <code class="docutils literal notranslate"><span class="pre">schema:PropertyValue</span></code> nodes with no EMMO class.</p></li>
+<li><p>In a cell spec’s JSON-LD, <code class="docutils literal notranslate"><span class="pre">electrode_area</span></code> and <code class="docutils literal notranslate"><span class="pre">external_surface_area</span></code> are both an <code class="docutils literal notranslate"><span class="pre">Area</span></code> node labelled “Area”, so only the value tells them apart. Parameter sets name the key in <code class="docutils literal notranslate"><span class="pre">schema:propertyID</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">to_parameter_set(provenance_classes=...)</span></code> silently ignores the name of a part the file does not have.</p></li>
+</ul>
+</section>
+<section id="workspace-and-submission">
+<h3>Workspace and submission<a class="headerlink" href="#workspace-and-submission" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Registry.get</span></code> returns the registry’s entry, not the record, and no helper extracts the record yet; <a class="reference internal" href="howto/read-registry-data.html#get-the-record-out-of-an-entry"><span class="std std-ref">Get the record out of an entry</span></a> shows the one line that does.</p></li>
+<li><p>A new version of a published dataset made with <code class="docutils literal notranslate"><span class="pre">Dataset.from_record</span></code> loses the curve-preview files unless you copy them across from the registry entry, and nothing warns you; <a class="reference internal" href="howto/read-registry-data.html#make-a-new-version-of-a-published-dataset"><span class="std std-ref">Make a new version of a published dataset</span></a> shows how.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">save_dataset</span></code> resolves a dataset’s cell and test only against the workspace and the registry records the workspace has looked up, which never include tests, so a new version that keeps a published test link needs <code class="docutils literal notranslate"><span class="pre">resolve_references=False</span></code>.</p></li>
+<li><p>Once <code class="docutils literal notranslate"><span class="pre">ws.save()</span></code> has run in a session, <code class="docutils literal notranslate"><span class="pre">ws.submit()</span></code> sends only what that save wrote, even with <code class="docutils literal notranslate"><span class="pre">submit_all=True</span></code>. Submit records written by <code class="docutils literal notranslate"><span class="pre">save_dataset</span></code> or the other <code class="docutils literal notranslate"><span class="pre">save_*</span></code> functions from a new workspace object.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ws.add(&quot;test&quot;)</span></code> takes no as-run <code class="docutils literal notranslate"><span class="pre">conditions</span></code>, start or end time, notes or <code class="docutils literal notranslate"><span class="pre">source_url</span></code>, although the <code class="docutils literal notranslate"><span class="pre">Test</span></code> model has them.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ws.search(type=&quot;cell&quot;,</span> <span class="pre">serial=...)</span></code> fetches the registry’s whole cell list on every call; use <code class="docutils literal notranslate"><span class="pre">serials=[...]</span></code> to look up many cells at once.</p></li>
+<li><p>Adding tests to a test spec that is already published sends the spec again, and the registry stores an unchanged copy as a new version.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ws.pending()</span></code> lists submissions newest first, and approving in that order can publish datasets before the tests and cells they describe. Approve specs, cells and tests first.</p></li>
+<li><p>Saving unchanged records again marks datasets and cells <code class="docutils literal notranslate"><span class="pre">[updated]</span></code> with new timestamps, and a test rebuilt in a new workspace gets a new <code class="docutils literal notranslate"><span class="pre">retrieved_at</span></code>, so a re-submission can create versions whose content did not change.</p></li>
+<li><p>Collection rules are advice, not checks: a member whose <code class="docutils literal notranslate"><span class="pre">series_id</span></code> names a collection that was never saved passes strict validation (only <code class="docutils literal notranslate"><span class="pre">ws.preview_jsonld()</span></code> warns), and a collection with files or an <code class="docutils literal notranslate"><span class="pre">about</span></code> list still saves.</p></li>
+<li><p>The Zenodo deposit graph and <code class="docutils literal notranslate"><span class="pre">record_to_jsonld</span></code> describe tests and datasets differently: <code class="docutils literal notranslate"><span class="pre">schema:about</span></code> against <code class="docutils literal notranslate"><span class="pre">dcterms:subject</span></code> for a dataset’s cell and test, <code class="docutils literal notranslate"><span class="pre">prov:used</span></code> against <code class="docutils literal notranslate"><span class="pre">dcterms:conformsTo</span></code> for a test’s protocol, and different test titles. Neither emits a test’s <code class="docutils literal notranslate"><span class="pre">description</span></code>.</p></li>
+<li><p>In JSON-LD, <code class="docutils literal notranslate"><span class="pre">provenance.retrieved_at</span></code> is an untyped <code class="docutils literal notranslate"><span class="pre">prov:generatedAtTime</span></code> literal, not an <code class="docutils literal notranslate"><span class="pre">xsd:dateTime</span></code>.</p></li>
+<li><p>A value in <code class="docutils literal notranslate"><span class="pre">%</span></code> or <code class="docutils literal notranslate"><span class="pre">vol%</span></code> is typed with <code class="docutils literal notranslate"><span class="pre">WeightPercent</span></code> or <code class="docutils literal notranslate"><span class="pre">VolumePercent</span></code>, which EMMO defines as quantities rather than units, because EMMO’s <code class="docutils literal notranslate"><span class="pre">Percent</span></code> unit is outside the imported ontologies (and EMMO 1.0.2 gives it a conversion factor of 1 instead of 0.01).</p></li>
+<li><p>A cell record lists its dataset with role <code class="docutils literal notranslate"><span class="pre">raw</span></code> even when the dataset’s main file is the processed table.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TestSpec.experiment</span></code> writes a constant-current step that has a cutoff but no current as “Discharge until 0.9 V”, which the step grammar does not read back.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ws.save()</span></code> prints “ERROR: … failed validation” for some records it does write, such as a parameter set still minted under <code class="docutils literal notranslate"><span class="pre">spec/</span></code>.</p></li>
+<li><p>Display papercuts: <code class="docutils literal notranslate"><span class="pre">ws.search()</span></code> shows manufacturer and model in lower case, <code class="docutils literal notranslate"><span class="pre">ws.list(verbose=True)</span></code> shows cells by file name, the <code class="docutils literal notranslate"><span class="pre">ws.save()</span></code> summary cuts titles at about 36 characters and collapses after 20 records, and <code class="docutils literal notranslate"><span class="pre">battinfo.naming.title_for()</span></code> writes an all-lowercase method in capitals (“CYCLING test”).</p></li>
+<li><p>Submission reporting: outcomes and journal entries carry an empty <code class="docutils literal notranslate"><span class="pre">iri</span></code>, a deduplicated re-submission is reported as live, and <code class="docutils literal notranslate"><span class="pre">ws.status()</span></code> lists every submission in the shared registry workspace.</p></li>
+</ul>
+</section>
+<section id="dependencies">
+<h3>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>The <code class="docutils literal notranslate"><span class="pre">processing</span></code> extra requires <code class="docutils literal notranslate"><span class="pre">batterydf[nda,excel,mat]&gt;=0.2.0rc2,&lt;0.3</span></code>, so it installs the batterydf 0.2.0 release candidate until batterydf 0.2.0 is published.</p></li>
+</ul>
+</section>
+</section>
 <section id="verification">
 <h2>Verification<a class="headerlink" href="#verification" title="Link to this heading">#</a></h2>
 <p>A release is considered ready when:</p>
@@ -752,6 +795,12 @@ uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </sp
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#supported">Supported</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#preview">Preview</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#in-development">In development</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#known-limitations-in-0-8-0">Known limitations in 0.8.0</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bpx-parameter-files">BPX parameter files</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#workspace-and-submission">Workspace and submission</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dependencies">Dependencies</a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#verification">Verification</a></li>
 </ul>
   </nav></div>

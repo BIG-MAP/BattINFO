@@ -25,10 +25,10 @@
    "id": "6aa2a3a6",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-12T22:32:43.539484Z",
-     "iopub.status.busy": "2026-10-12T22:32:43.538952Z",
-     "iopub.status.idle": "2026-10-12T22:32:43.555213Z",
-     "shell.execute_reply": "2026-10-12T22:32:43.555213Z"
+     "iopub.execute_input": "2026-10-13T05:45:35.691181Z",
+     "iopub.status.busy": "2026-10-13T05:45:35.691181Z",
+     "iopub.status.idle": "2026-10-13T05:45:35.701477Z",
+     "shell.execute_reply": "2026-10-13T05:45:35.700863Z"
     }
    },
    "outputs": [],
@@ -58,10 +58,10 @@
    "id": "3e2a2bcd",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-12T22:32:43.563016Z",
-     "iopub.status.busy": "2026-10-12T22:32:43.562271Z",
-     "iopub.status.idle": "2026-10-12T22:32:44.998155Z",
-     "shell.execute_reply": "2026-10-12T22:32:44.997140Z"
+     "iopub.execute_input": "2026-10-13T05:45:35.705231Z",
+     "iopub.status.busy": "2026-10-13T05:45:35.705231Z",
+     "iopub.status.idle": "2026-10-13T05:45:36.615388Z",
+     "shell.execute_reply": "2026-10-13T05:45:36.615388Z"
     }
    },
    "outputs": [
@@ -124,10 +124,10 @@
    "id": "0bd7097b",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-12T22:32:45.005623Z",
-     "iopub.status.busy": "2026-10-12T22:32:45.005623Z",
-     "iopub.status.idle": "2026-10-12T22:32:45.015652Z",
-     "shell.execute_reply": "2026-10-12T22:32:45.013643Z"
+     "iopub.execute_input": "2026-10-13T05:45:36.619397Z",
+     "iopub.status.busy": "2026-10-13T05:45:36.618393Z",
+     "iopub.status.idle": "2026-10-13T05:45:36.624360Z",
+     "shell.execute_reply": "2026-10-13T05:45:36.623347Z"
     }
    },
    "outputs": [
@@ -203,8 +203,8 @@
       "    \"source_type\": \"datasheet\",\n",
       "    \"source_name\": \"INR21700-50E Product Specification Rev 1.0\",\n",
       "    \"source_url\": \"https://example.com/samsung-inr21700-50e.pdf\",\n",
-      "    \"retrieved_at\": 1791843048,\n",
-      "    \"battinfo_version\": \"0.7.0\"\n",
+      "    \"retrieved_at\": 1791870336,\n",
+      "    \"battinfo_version\": \"0.8.0\"\n",
       "  }\n",
       "}\n"
      ]
@@ -222,10 +222,10 @@
    "id": "65e1f16b",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-12T22:32:45.020663Z",
-     "iopub.status.busy": "2026-10-12T22:32:45.019663Z",
-     "iopub.status.idle": "2026-10-12T22:32:45.773748Z",
-     "shell.execute_reply": "2026-10-12T22:32:45.773748Z"
+     "iopub.execute_input": "2026-10-13T05:45:36.626354Z",
+     "iopub.status.busy": "2026-10-13T05:45:36.626354Z",
+     "iopub.status.idle": "2026-10-13T05:45:37.054378Z",
+     "shell.execute_reply": "2026-10-13T05:45:37.052366Z"
     }
    },
    "outputs": [
@@ -234,13 +234,7 @@
      "output_type": "stream",
      "text": [
       "<repo>\\src\\battinfo\\transform\\cell_spec_node.py:582: UserWarning: semantic.value_text_only: 'cycle_life' on https://w3id.org/battinfo/spec/03yx-y1kk-q3mq-ck3w carries only value_text - the JSON-LD export emits no numeric quantity value for it.\n",
-      "  property_nodes = cell_spec_property_nodes(\n"
-     ]
-    },
-    {
-     "name": "stderr",
-     "output_type": "stream",
-     "text": [
+      "  property_nodes = cell_spec_property_nodes(\n",
       "<repo>\\src\\battinfo\\transform\\cell_spec_node.py:582: UserWarning: semantic.value_text_only: 'cycle_life' on https://w3id.org/battinfo/spec/03yx-y1kk-q3mq-ck3w carries only value_text - the JSON-LD export emits no numeric quantity value for it.\n",
       "  property_nodes = cell_spec_property_nodes(\n"
      ]
@@ -262,7 +256,7 @@
       "  MaximumContinuousDischargingCurrent: 9.8 [Ampere]\n",
       "  MaximumChargingTemperature: 45 [DegreeCelsius]\n",
       "  MinimumDischargingTemperature: -20 [DegreeCelsius]\n",
-      "  CycleLife: — [EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978]\n"
+      "  CycleLife: >500 [EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978]\n"
      ]
     }
    ],
@@ -283,7 +277,8 @@
     "print(\"Properties:\")\n",
     "for prop in described.get(\"hasProperty\", []):\n",
     "    t = prop[\"@type\"][0] if isinstance(prop[\"@type\"], list) else prop[\"@type\"]\n",
-    "    v = prop.get(\"hasNumericalPart\", {}).get(\"hasNumberValue\", \"—\")\n",
+    "    # A value stated as text, such as cycle_life \">500\", is a hasStringValue.\n",
+    "    v = prop.get(\"hasNumericalPart\", {}).get(\"hasNumberValue\", prop.get(\"hasStringValue\"))\n",
     "    u = prop.get(\"hasMeasurementUnit\", \"\").split(\"#\")[-1]\n",
     "    print(f\"  {t}: {v} [{u}]\")"
    ]
@@ -314,10 +309,10 @@
    "id": "bb91e73d",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-12T22:32:45.779751Z",
-     "iopub.status.busy": "2026-10-12T22:32:45.778754Z",
-     "iopub.status.idle": "2026-10-12T22:32:45.788602Z",
-     "shell.execute_reply": "2026-10-12T22:32:45.787071Z"
+     "iopub.execute_input": "2026-10-13T05:45:37.059900Z",
+     "iopub.status.busy": "2026-10-13T05:45:37.058902Z",
+     "iopub.status.idle": "2026-10-13T05:45:37.069713Z",
+     "shell.execute_reply": "2026-10-13T05:45:37.068706Z"
     }
    },
    "outputs": [
@@ -363,10 +358,10 @@
    "id": "795996e9",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-12T22:32:45.794395Z",
-     "iopub.status.busy": "2026-10-12T22:32:45.788602Z",
-     "iopub.status.idle": "2026-10-12T22:32:45.802964Z",
-     "shell.execute_reply": "2026-10-12T22:32:45.800946Z"
+     "iopub.execute_input": "2026-10-13T05:45:37.072713Z",
+     "iopub.status.busy": "2026-10-13T05:45:37.071714Z",
+     "iopub.status.idle": "2026-10-13T05:45:37.078081Z",
+     "shell.execute_reply": "2026-10-13T05:45:37.077074Z"
     }
    },
    "outputs": [
@@ -382,7 +377,7 @@
    "source": [
     "from battinfo.materials import link_component_to_spec, material_spec_from_component\n",
     "\n",
-    "lipf6 = material_spec_from_component(lp30.salt, material_class=\"electrolyte_salt\")\n",
+    "lipf6 = material_spec_from_component(lp30.salt)\n",
     "lipf6_id = lipf6[\"material_spec\"][\"id\"]\n",
     "print(\"Material-spec IRI:\", lipf6_id)\n",
     "\n",

@@ -863,7 +863,7 @@ Model: ANR26650M1-B
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">material_specs</span><span class="p">)</span><span class="si">}</span><span class="s2"> standalone material spec(s):&quot;</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">material_specs</span><span class="p">:</span>
     <span class="n">m</span> <span class="o">=</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;material_spec&quot;</span><span class="p">]</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">m</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">14s</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">m</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;material_class&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;?&#39;</span><span class="p">)</span><span class="si">:</span><span class="s2">22s</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">m</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">m</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">14s</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">m</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;kind&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;?&#39;</span><span class="p">)</span><span class="si">:</span><span class="s2">16s</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">m</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -873,20 +873,20 @@ Model: ANR26650M1-B
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 14 standalone material spec(s):
-  LFP            active_material        https://w3id.org/battinfo/spec/s6y8-5mne-94gx-e5ve
-  PVDF           binder                 https://w3id.org/battinfo/spec/fm9p-sqkk-tbx3-rr66
-  Carbon black   conductive_additive    https://w3id.org/battinfo/spec/xz03-r714-wpa0-bwpb
-  Aluminium foil current_collector      https://w3id.org/battinfo/spec/92ny-p3qm-6j9n-vrym
-  Graphite       active_material        https://w3id.org/battinfo/spec/sm7b-n4y5-2hrk-dv6h
-  CMC            binder                 https://w3id.org/battinfo/spec/t4wz-ff8s-6vp6-af48
-  SBR            binder                 https://w3id.org/battinfo/spec/7p3d-2e22-7yae-spyb
-  Copper foil    current_collector      https://w3id.org/battinfo/spec/ftdw-5z5h-mbn7-x13m
-  LiPF6          electrolyte_salt       https://w3id.org/battinfo/spec/xcv1-hpy1-b0bw-z5s2
-  EC             electrolyte_solvent    https://w3id.org/battinfo/spec/z6sr-a9yw-gryf-3q55
-  DMC            electrolyte_solvent    https://w3id.org/battinfo/spec/va82-gnpn-v0bt-3qed
-  VC             electrolyte_additive   https://w3id.org/battinfo/spec/nbz6-pn8h-4458-dh91
-  FEC            electrolyte_additive   https://w3id.org/battinfo/spec/t59c-yz22-48as-tdkx
-  Polypropylene  separator_material     https://w3id.org/battinfo/spec/n24p-ymxz-gj1j-q6pb
+  LFP            lfp              https://w3id.org/battinfo/spec/s6y8-5mne-94gx-e5ve
+  PVDF           pvdf             https://w3id.org/battinfo/spec/fm9p-sqkk-tbx3-rr66
+  Carbon black   carbon_black     https://w3id.org/battinfo/spec/xz03-r714-wpa0-bwpb
+  Aluminium foil aluminium        https://w3id.org/battinfo/spec/92ny-p3qm-6j9n-vrym
+  Graphite       graphite         https://w3id.org/battinfo/spec/sm7b-n4y5-2hrk-dv6h
+  CMC            cmc              https://w3id.org/battinfo/spec/t4wz-ff8s-6vp6-af48
+  SBR            sbr              https://w3id.org/battinfo/spec/7p3d-2e22-7yae-spyb
+  Copper foil    copper           https://w3id.org/battinfo/spec/ftdw-5z5h-mbn7-x13m
+  LiPF6          lipf6            https://w3id.org/battinfo/spec/xcv1-hpy1-b0bw-z5s2
+  EC             ec               https://w3id.org/battinfo/spec/z6sr-a9yw-gryf-3q55
+  DMC            dmc              https://w3id.org/battinfo/spec/va82-gnpn-v0bt-3qed
+  VC             vc               https://w3id.org/battinfo/spec/nbz6-pn8h-4458-dh91
+  FEC            fec              https://w3id.org/battinfo/spec/t59c-yz22-48as-tdkx
+  Polypropylene  polypropylene    https://w3id.org/battinfo/spec/n24p-ymxz-gj1j-q6pb
 </pre></div></div>
 </div>
 </section>
@@ -900,7 +900,7 @@ Model: ANR26650M1-B
 <span class="n">desc_dir</span> <span class="o">=</span> <span class="n">SCRATCH</span> <span class="o">/</span> <span class="s2">&quot;descriptors&quot;</span>
 <span class="n">desc_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">desc_path</span> <span class="o">=</span> <span class="n">desc_dir</span> <span class="o">/</span> <span class="s2">&quot;a123-anr26650m1-b.descriptor.json&quot;</span>
-<span class="n">spec_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;schema_version&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span> <span class="s2">&quot;specification&quot;</span><span class="p">:</span> <span class="n">spec</span><span class="o">.</span><span class="n">to_json</span><span class="p">()}</span>
+<span class="n">spec_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;schema_version&quot;</span><span class="p">:</span> <span class="n">spec</span><span class="o">.</span><span class="n">schema_version</span><span class="p">,</span> <span class="s2">&quot;specification&quot;</span><span class="p">:</span> <span class="n">spec</span><span class="o">.</span><span class="n">to_json</span><span class="p">()}</span>
 <span class="n">desc_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">spec_dict</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Written:&quot;</span><span class="p">,</span> <span class="n">desc_path</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Top-level keys:&quot;</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">spec_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())[:</span><span class="mi">8</span><span class="p">])</span>
@@ -919,6 +919,7 @@ Top-level keys: [&#39;schema_version&#39;, &#39;specification&#39;]
 </section>
 <section id="Step-11:-Map-to-domain-battery-JSON-LD">
 <h2>Step 11: Map to domain-battery JSON-LD<a class="headerlink" href="#Step-11:-Map-to-domain-battery-JSON-LD" title="Link to this heading">#</a></h2>
+<p>The spec node in the JSON-LD is the description of the product: its name, manufacturer and model. Everything physical, the cell’s EMMO classes and the electrodes, electrolyte and separator built above, sits on the described cell under <code class="docutils literal notranslate"><span class="pre">isDescriptionFor</span></code>, an individual named <code class="docutils literal notranslate"><span class="pre">&lt;spec</span> <span class="pre">IRI&gt;#described</span></code>. That is where to read the electrodes from:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
@@ -928,13 +929,16 @@ Top-level keys: [&#39;schema_version&#39;, &#39;specification&#39;]
 <span class="n">descriptor_doc</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">desc_path</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
 <span class="n">desc_jsonld</span> <span class="o">=</span> <span class="n">to_jsonld</span><span class="p">(</span><span class="n">descriptor_doc</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="s2">&quot;domain-battery&quot;</span><span class="p">)</span>
 
-<span class="n">battery</span> <span class="o">=</span> <span class="n">desc_jsonld</span><span class="p">[</span><span class="s2">&quot;@graph&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;@type:&quot;</span><span class="p">,</span> <span class="n">battery</span><span class="p">[</span><span class="s2">&quot;@type&quot;</span><span class="p">])</span>
+<span class="n">spec_node</span> <span class="o">=</span> <span class="n">desc_jsonld</span><span class="p">[</span><span class="s2">&quot;@graph&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">described</span> <span class="o">=</span> <span class="n">spec_node</span><span class="p">[</span><span class="s2">&quot;isDescriptionFor&quot;</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Spec @type:          &quot;</span><span class="p">,</span> <span class="n">spec_node</span><span class="p">[</span><span class="s2">&quot;@type&quot;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Described cell:      &quot;</span><span class="p">,</span> <span class="n">described</span><span class="p">[</span><span class="s2">&quot;@id&quot;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Described cell @type:&quot;</span><span class="p">,</span> <span class="n">described</span><span class="p">[</span><span class="s2">&quot;@type&quot;</span><span class="p">])</span>
 <span class="nb">print</span><span class="p">()</span>
-<span class="n">pos</span> <span class="o">=</span> <span class="n">battery</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hasPositiveElectrode&quot;</span><span class="p">,</span> <span class="p">{})</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Positive electrode @type:&quot;</span><span class="p">,</span> <span class="n">pos</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;@type&quot;</span><span class="p">))</span>
-<span class="n">neg</span> <span class="o">=</span> <span class="n">battery</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hasNegativeElectrode&quot;</span><span class="p">,</span> <span class="p">{})</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Negative electrode @type:&quot;</span><span class="p">,</span> <span class="n">neg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;@type&quot;</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Positive electrode @type:&quot;</span><span class="p">,</span> <span class="n">described</span><span class="p">[</span><span class="s2">&quot;hasPositiveElectrode&quot;</span><span class="p">][</span><span class="s2">&quot;@type&quot;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Negative electrode @type:&quot;</span><span class="p">,</span> <span class="n">described</span><span class="p">[</span><span class="s2">&quot;hasNegativeElectrode&quot;</span><span class="p">][</span><span class="s2">&quot;@type&quot;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Electrolyte @type:       &quot;</span><span class="p">,</span> <span class="n">described</span><span class="p">[</span><span class="s2">&quot;hasElectrolyte&quot;</span><span class="p">][</span><span class="s2">&quot;@type&quot;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Separator @type:         &quot;</span><span class="p">,</span> <span class="n">described</span><span class="p">[</span><span class="s2">&quot;hasSeparator&quot;</span><span class="p">][</span><span class="s2">&quot;@type&quot;</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
@@ -943,10 +947,14 @@ Top-level keys: [&#39;schema_version&#39;, &#39;specification&#39;]
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-@type: [&#39;BatteryCellSpecification&#39;, &#39;schema:CreativeWork&#39;]
+Spec @type:           [&#39;BatteryCellSpecification&#39;, &#39;schema:ProductModel&#39;, &#39;schema:CreativeWork&#39;]
+Described cell:       https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0#described
+Described cell @type: [&#39;BatteryCell&#39;, &#39;CylindricalBattery&#39;, &#39;LithiumIonBattery&#39;, &#39;LithiumIonIronPhosphateBattery&#39;, &#39;LithiumIonGraphiteBattery&#39;]
 
 Positive electrode @type: LithiumIronPhosphateElectrode
 Negative electrode @type: GraphiteElectrode
+Electrolyte @type:        OrganicElectrolyte
+Separator @type:          [&#39;Polypropylene&#39;, &#39;Separator&#39;]
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -984,6 +992,7 @@ Domain-battery JSON-LD exported to: &lt;repo&gt;\docs\guides\_scratch\guide-05\d
     {
       &#34;@type&#34;: [
         &#34;BatteryCellSpecification&#34;,
+        &#34;schema:ProductModel&#34;,
         &#34;schema:CreativeWork&#34;
       ],
       &#34;isDescriptionFor&#34;: {
@@ -993,6 +1002,429 @@ Domain-battery JSON-LD exported to: &lt;repo&gt;\docs\guides\_scratch\guide-05\d
           &#34;LithiumIonBattery&#34;,
           &#34;LithiumIonIronPhosphateBattery&#34;,
           &#34;LithiumIonGraphiteBattery&#34;
+        ],
+        &#34;@id&#34;: &#34;https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0#described&#34;,
+        &#34;hasPositiveElectrode&#34;: {
+          &#34;hasCoating&#34;: {
+            &#34;@type&#34;: &#34;ElectrodeCoating&#34;,
+            &#34;hasActiveMaterial&#34;: {
+              &#34;@type&#34;: [
+                &#34;LithiumIronPhosphate&#34;,
+                &#34;ActiveMaterial&#34;
+              ],
+              &#34;schema:name&#34;: &#34;LFP&#34;,
+              &#34;hasProperty&#34;: {
+                &#34;@type&#34;: [
+                  &#34;MassFraction&#34;,
+                  &#34;ConventionalProperty&#34;
+                ],
+                &#34;hasNumericalPart&#34;: {
+                  &#34;@type&#34;: &#34;RealData&#34;,
+                  &#34;hasNumberValue&#34;: 0.9
+                },
+                &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&#34;
+              },
+              &#34;schema:description&#34;: &#34;LiFePO4, olivine structure, D50 ~ 3 \u00b5m (Aleees GEN2)&#34;
+            },
+            &#34;hasBinder&#34;: {
+              &#34;@type&#34;: [
+                &#34;PolyvinylideneFluoride&#34;,
+                &#34;Binder&#34;
+              ],
+              &#34;schema:name&#34;: &#34;PVDF&#34;,
+              &#34;hasProperty&#34;: {
+                &#34;@type&#34;: [
+                  &#34;MassFraction&#34;,
+                  &#34;ConventionalProperty&#34;
+                ],
+                &#34;hasNumericalPart&#34;: {
+                  &#34;@type&#34;: &#34;RealData&#34;,
+                  &#34;hasNumberValue&#34;: 0.05
+                },
+                &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&#34;
+              }
+            },
+            &#34;hasConductiveAdditive&#34;: {
+              &#34;@type&#34;: [
+                &#34;CarbonBlack&#34;,
+                &#34;ConductiveAdditive&#34;
+              ],
+              &#34;schema:name&#34;: &#34;Carbon black&#34;,
+              &#34;hasProperty&#34;: {
+                &#34;@type&#34;: [
+                  &#34;MassFraction&#34;,
+                  &#34;ConventionalProperty&#34;
+                ],
+                &#34;hasNumericalPart&#34;: {
+                  &#34;@type&#34;: &#34;RealData&#34;,
+                  &#34;hasNumberValue&#34;: 0.05
+                },
+                &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&#34;
+              },
+              &#34;schema:description&#34;: &#34;Imerys C65&#34;
+            },
+            &#34;hasProperty&#34;: [
+              {
+                &#34;@type&#34;: [
+                  &#34;CalenderedDensity&#34;,
+                  &#34;ConventionalProperty&#34;
+                ],
+                &#34;skos:prefLabel&#34;: &#34;CalenderedDensity&#34;,
+                &#34;hasNumericalPart&#34;: {
+                  &#34;@type&#34;: &#34;RealData&#34;,
+                  &#34;hasNumberValue&#34;: 2.4
+                },
+                &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#GramPerCubicCentiMetre&#34;
+              },
+              {
+                &#34;@type&#34;: [
+                  &#34;ActiveMassLoading&#34;,
+                  &#34;ConventionalProperty&#34;
+                ],
+                &#34;skos:prefLabel&#34;: &#34;ActiveMassLoading&#34;,
+                &#34;hasNumericalPart&#34;: {
+                  &#34;@type&#34;: &#34;RealData&#34;,
+                  &#34;hasNumberValue&#34;: 12.5
+                },
+                &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#MilliGramPerSquareCentiMetre&#34;
+              }
+            ],
+            &#34;schema:description&#34;: &#34;NMP-cast, roll-calendered to 85% theoretical density&#34;
+          },
+          &#34;hasCurrentCollector&#34;: {
+            &#34;@type&#34;: [
+              &#34;CurrentCollector&#34;,
+              &#34;Aluminium&#34;,
+              &#34;Foil&#34;
+            ],
+            &#34;schema:name&#34;: &#34;Aluminium foil&#34;,
+            &#34;hasProperty&#34;: {
+              &#34;@type&#34;: [
+                &#34;Thickness&#34;,
+                &#34;ConventionalProperty&#34;
+              ],
+              &#34;skos:prefLabel&#34;: &#34;Thickness&#34;,
+              &#34;hasNumericalPart&#34;: {
+                &#34;@type&#34;: &#34;RealData&#34;,
+                &#34;hasNumberValue&#34;: 16.0
+              },
+              &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#MicroMetre&#34;
+            }
+          },
+          &#34;@type&#34;: &#34;LithiumIronPhosphateElectrode&#34;
+        },
+        &#34;hasNegativeElectrode&#34;: {
+          &#34;hasCoating&#34;: {
+            &#34;@type&#34;: &#34;ElectrodeCoating&#34;,
+            &#34;hasActiveMaterial&#34;: {
+              &#34;@type&#34;: [
+                &#34;Graphite&#34;,
+                &#34;ActiveMaterial&#34;
+              ],
+              &#34;schema:name&#34;: &#34;Graphite&#34;,
+              &#34;hasProperty&#34;: {
+                &#34;@type&#34;: [
+                  &#34;MassFraction&#34;,
+                  &#34;ConventionalProperty&#34;
+                ],
+                &#34;hasNumericalPart&#34;: {
+                  &#34;@type&#34;: &#34;RealData&#34;,
+                  &#34;hasNumberValue&#34;: 0.955
+                },
+                &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&#34;
+              },
+              &#34;schema:description&#34;: &#34;Natural graphite, D50 ~ 20 \u00b5m&#34;
+            },
+            &#34;hasBinder&#34;: [
+              {
+                &#34;@type&#34;: [
+                  &#34;CarboxymethylCellulose&#34;,
+                  &#34;Binder&#34;
+                ],
+                &#34;schema:name&#34;: &#34;CMC&#34;,
+                &#34;hasProperty&#34;: {
+                  &#34;@type&#34;: [
+                    &#34;MassFraction&#34;,
+                    &#34;ConventionalProperty&#34;
+                  ],
+                  &#34;hasNumericalPart&#34;: {
+                    &#34;@type&#34;: &#34;RealData&#34;,
+                    &#34;hasNumberValue&#34;: 0.015
+                  },
+                  &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&#34;
+                }
+              },
+              {
+                &#34;@type&#34;: [
+                  &#34;StyreneButadiene&#34;,
+                  &#34;Binder&#34;
+                ],
+                &#34;schema:name&#34;: &#34;SBR&#34;,
+                &#34;hasProperty&#34;: {
+                  &#34;@type&#34;: [
+                    &#34;MassFraction&#34;,
+                    &#34;ConventionalProperty&#34;
+                  ],
+                  &#34;hasNumericalPart&#34;: {
+                    &#34;@type&#34;: &#34;RealData&#34;,
+                    &#34;hasNumberValue&#34;: 0.025
+                  },
+                  &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&#34;
+                }
+              }
+            ],
+            &#34;hasConductiveAdditive&#34;: {
+              &#34;@type&#34;: [
+                &#34;CarbonBlack&#34;,
+                &#34;ConductiveAdditive&#34;
+              ],
+              &#34;schema:name&#34;: &#34;Carbon black&#34;,
+              &#34;hasProperty&#34;: {
+                &#34;@type&#34;: [
+                  &#34;MassFraction&#34;,
+                  &#34;ConventionalProperty&#34;
+                ],
+                &#34;hasNumericalPart&#34;: {
+                  &#34;@type&#34;: &#34;RealData&#34;,
+                  &#34;hasNumberValue&#34;: 0.005
+                },
+                &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&#34;
+              }
+            },
+            &#34;hasProperty&#34;: [
+              {
+                &#34;@type&#34;: [
+                  &#34;CalenderedDensity&#34;,
+                  &#34;ConventionalProperty&#34;
+                ],
+                &#34;skos:prefLabel&#34;: &#34;CalenderedDensity&#34;,
+                &#34;hasNumericalPart&#34;: {
+                  &#34;@type&#34;: &#34;RealData&#34;,
+                  &#34;hasNumberValue&#34;: 1.55
+                },
+                &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#GramPerCubicCentiMetre&#34;
+              },
+              {
+                &#34;@type&#34;: [
+                  &#34;ActiveMassLoading&#34;,
+                  &#34;ConventionalProperty&#34;
+                ],
+                &#34;skos:prefLabel&#34;: &#34;ActiveMassLoading&#34;,
+                &#34;hasNumericalPart&#34;: {
+                  &#34;@type&#34;: &#34;RealData&#34;,
+                  &#34;hasNumberValue&#34;: 7.8
+                },
+                &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#MilliGramPerSquareCentiMetre&#34;
+              }
+            ]
+          },
+          &#34;hasCurrentCollector&#34;: {
+            &#34;@type&#34;: [
+              &#34;CurrentCollector&#34;,
+              &#34;Copper&#34;,
+              &#34;Foil&#34;
+            ],
+            &#34;schema:name&#34;: &#34;Copper foil&#34;,
+            &#34;hasProperty&#34;: {
+              &#34;@type&#34;: [
+                &#34;Thickness&#34;,
+                &#34;ConventionalProperty&#34;
+              ],
+              &#34;skos:prefLabel&#34;: &#34;Thickness&#34;,
+              &#34;hasNumericalPart&#34;: {
+                &#34;@type&#34;: &#34;RealData&#34;,
+                &#34;hasNumberValue&#34;: 10.0
+              },
+              &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#MicroMetre&#34;
+            }
+          },
+          &#34;@type&#34;: &#34;GraphiteElectrode&#34;
+        },
+        &#34;hasElectrolyte&#34;: {
+          &#34;@type&#34;: &#34;OrganicElectrolyte&#34;,
+          &#34;hasSolute&#34;: {
+            &#34;@type&#34;: [
+              &#34;LithiumHexafluorophosphate&#34;,
+              &#34;Solute&#34;
+            ],
+            &#34;schema:name&#34;: &#34;LiPF6&#34;,
+            &#34;hasProperty&#34;: {
+              &#34;@type&#34;: [
+                &#34;AmountConcentration&#34;,
+                &#34;ConventionalProperty&#34;
+              ],
+              &#34;skos:prefLabel&#34;: &#34;AmountConcentration&#34;,
+              &#34;hasNumericalPart&#34;: {
+                &#34;@type&#34;: &#34;RealData&#34;,
+                &#34;hasNumberValue&#34;: 1.0
+              },
+              &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#MolePerLitre&#34;
+            },
+            &#34;schema:inChIKey&#34;: &#34;AXPLOJNSKRXQPA-UHFFFAOYSA-N&#34;,
+            &#34;schema:smiles&#34;: &#34;[Li+].F[P-](F)(F)(F)(F)F&#34;,
+            &#34;schema:sameAs&#34;: {
+              &#34;@id&#34;: &#34;https://pubchem.ncbi.nlm.nih.gov/compound/23688915&#34;
+            }
+          },
+          &#34;hasSolvent&#34;: [
+            {
+              &#34;@type&#34;: [
+                &#34;EthyleneCarbonate&#34;,
+                &#34;Solvent&#34;
+              ],
+              &#34;schema:name&#34;: &#34;EC&#34;,
+              &#34;hasProperty&#34;: {
+                &#34;@type&#34;: [
+                  &#34;VolumeFraction&#34;,
+                  &#34;ConventionalProperty&#34;
+                ],
+                &#34;hasNumericalPart&#34;: {
+                  &#34;@type&#34;: &#34;RealData&#34;,
+                  &#34;hasNumberValue&#34;: 0.5
+                },
+                &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&#34;
+              },
+              &#34;schema:inChIKey&#34;: &#34;KMTRUDSVKNLOMY-UHFFFAOYSA-N&#34;,
+              &#34;schema:smiles&#34;: &#34;C1COC(=O)O1&#34;,
+              &#34;schema:sameAs&#34;: {
+                &#34;@id&#34;: &#34;https://pubchem.ncbi.nlm.nih.gov/compound/7303&#34;
+              }
+            },
+            {
+              &#34;@type&#34;: [
+                &#34;DimethylCarbonate&#34;,
+                &#34;Solvent&#34;
+              ],
+              &#34;schema:name&#34;: &#34;DMC&#34;,
+              &#34;hasProperty&#34;: {
+                &#34;@type&#34;: [
+                  &#34;VolumeFraction&#34;,
+                  &#34;ConventionalProperty&#34;
+                ],
+                &#34;hasNumericalPart&#34;: {
+                  &#34;@type&#34;: &#34;RealData&#34;,
+                  &#34;hasNumberValue&#34;: 0.5
+                },
+                &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&#34;
+              },
+              &#34;schema:inChIKey&#34;: &#34;IEJIGPNLZYLLBP-UHFFFAOYSA-N&#34;,
+              &#34;schema:smiles&#34;: &#34;COC(=O)OC&#34;,
+              &#34;schema:sameAs&#34;: {
+                &#34;@id&#34;: &#34;https://pubchem.ncbi.nlm.nih.gov/compound/12021&#34;
+              }
+            }
+          ],
+          &#34;hasAdditive&#34;: [
+            {
+              &#34;@type&#34;: [
+                &#34;VinyleneCarbonate&#34;,
+                &#34;ElectrolyteAdditive&#34;
+              ],
+              &#34;schema:name&#34;: &#34;VC&#34;,
+              &#34;hasProperty&#34;: {
+                &#34;@type&#34;: [
+                  &#34;MassFraction&#34;,
+                  &#34;ConventionalProperty&#34;
+                ],
+                &#34;hasNumericalPart&#34;: {
+                  &#34;@type&#34;: &#34;RealData&#34;,
+                  &#34;hasNumberValue&#34;: 0.02
+                },
+                &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&#34;
+              },
+              &#34;schema:inChIKey&#34;: &#34;VAYTZRYEBVHVLE-UHFFFAOYSA-N&#34;,
+              &#34;schema:smiles&#34;: &#34;C1=COC(=O)O1&#34;,
+              &#34;schema:sameAs&#34;: {
+                &#34;@id&#34;: &#34;https://pubchem.ncbi.nlm.nih.gov/compound/13385&#34;
+              },
+              &#34;schema:description&#34;: &#34;SEI-forming additive&#34;
+            },
+            {
+              &#34;@type&#34;: [
+                &#34;FluoroethyleneCarbonate&#34;,
+                &#34;ElectrolyteAdditive&#34;
+              ],
+              &#34;schema:name&#34;: &#34;FEC&#34;,
+              &#34;hasProperty&#34;: {
+                &#34;@type&#34;: [
+                  &#34;MassFraction&#34;,
+                  &#34;ConventionalProperty&#34;
+                ],
+                &#34;hasNumericalPart&#34;: {
+                  &#34;@type&#34;: &#34;RealData&#34;,
+                  &#34;hasNumberValue&#34;: 0.01
+                },
+                &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&#34;
+              },
+              &#34;schema:inChIKey&#34;: &#34;SBLRHMKNNHXPHG-UHFFFAOYSA-N&#34;,
+              &#34;schema:smiles&#34;: &#34;C1C(OC(=O)O1)F&#34;,
+              &#34;schema:sameAs&#34;: {
+                &#34;@id&#34;: &#34;https://pubchem.ncbi.nlm.nih.gov/compound/2769656&#34;
+              },
+              &#34;schema:description&#34;: &#34;Fluoroethylene carbonate&#34;
+            }
+          ],
+          &#34;schema:description&#34;: &#34;LP30 + 2% VC + 1% FEC&#34;
+        },
+        &#34;hasSeparator&#34;: {
+          &#34;@type&#34;: [
+            &#34;Polypropylene&#34;,
+            &#34;Separator&#34;
+          ],
+          &#34;schema:name&#34;: &#34;Polypropylene&#34;,
+          &#34;rdfs:comment&#34;: &#34;Celgard 2500, single-layer PP&#34;,
+          &#34;hasProperty&#34;: [
+            {
+              &#34;@type&#34;: [
+                &#34;Porosity&#34;,
+                &#34;ConventionalProperty&#34;
+              ],
+              &#34;hasNumericalPart&#34;: {
+                &#34;@type&#34;: &#34;RealData&#34;,
+                &#34;hasNumberValue&#34;: 0.41
+              },
+              &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&#34;
+            },
+            {
+              &#34;@type&#34;: [
+                &#34;Thickness&#34;,
+                &#34;ConventionalProperty&#34;
+              ],
+              &#34;skos:prefLabel&#34;: &#34;Thickness&#34;,
+              &#34;hasNumericalPart&#34;: {
+                &#34;@type&#34;: &#34;RealData&#34;,
+                &#34;hasNumberValue&#34;: 25.0
+              },
+              &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#MicroMetre&#34;
+            }
+          ],
+          &#34;schema:description&#34;: &#34;Celgard 2500, single-layer PP&#34;
+        },
+        &#34;schema:additionalProperty&#34;: [
+          {
+            &#34;@type&#34;: &#34;schema:PropertyValue&#34;,
+            &#34;schema:propertyID&#34;: &#34;construction.assembly_type&#34;,
+            &#34;schema:name&#34;: &#34;Assembly Type&#34;,
+            &#34;schema:value&#34;: &#34;wound&#34;
+          },
+          {
+            &#34;@type&#34;: &#34;schema:PropertyValue&#34;,
+            &#34;schema:propertyID&#34;: &#34;construction.layering&#34;,
+            &#34;schema:name&#34;: &#34;Layering&#34;,
+            &#34;schema:value&#34;: &#34;single_layer&#34;
+          },
+          {
+            &#34;@type&#34;: &#34;schema:PropertyValue&#34;,
+            &#34;schema:propertyID&#34;: &#34;construction.layer_count&#34;,
+            &#34;schema:name&#34;: &#34;Layer Count&#34;,
+            &#34;schema:value&#34;: 1
+          },
+          {
+            &#34;@type&#34;: &#34;schema:PropertyValue&#34;,
+            &#34;schema:propertyID&#34;: &#34;construction.comment&#34;,
+            &#34;schema:name&#34;: &#34;Construction Comment&#34;,
+            &#34;schema:value&#34;: &#34;Single jelly-roll, wound on 4 mm mandrel&#34;
+          }
         ]
       },
       &#34;@id&#34;: &#34;https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0&#34;,
@@ -1003,407 +1435,11 @@ Domain-battery JSON-LD exported to: &lt;repo&gt;\docs\guides\_scratch\guide-05\d
         &#34;schema:name&#34;: &#34;A123 Systems&#34;
       },
       &#34;schema:size&#34;: &#34;R26650&#34;,
-      &#34;hasPositiveElectrode&#34;: {
-        &#34;hasCoating&#34;: {
-          &#34;@type&#34;: &#34;ElectrodeCoating&#34;,
-          &#34;hasActiveMaterial&#34;: {
-            &#34;@type&#34;: [
-              &#34;LithiumIronPhosphate&#34;,
-              &#34;ActiveMaterial&#34;
-            ],
-            &#34;schema:name&#34;: &#34;LFP&#34;,
-            &#34;hasProperty&#34;: {
-              &#34;@type&#34;: [
-                &#34;MassFraction&#34;,
-                &#34;ConventionalProperty&#34;
-              ],
-              &#34;hasNumericalPart&#34;: {
-                &#34;@type&#34;: &#34;RealData&#34;,
-                &#34;hasNumberValue&#34;: 0.9
-              },
-              &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&#34;
-            },
-            &#34;schema:description&#34;: &#34;LiFePO4, olivine structure, D50 ~ 3 \u00b5m (Aleees GEN2)&#34;
-          },
-          &#34;hasBinder&#34;: {
-            &#34;@type&#34;: [
-              &#34;PolyvinylideneFluoride&#34;,
-              &#34;Binder&#34;
-            ],
-            &#34;schema:name&#34;: &#34;PVDF&#34;,
-            &#34;hasProperty&#34;: {
-              &#34;@type&#34;: [
-                &#34;MassFraction&#34;,
-                &#34;ConventionalProperty&#34;
-              ],
-              &#34;hasNumericalPart&#34;: {
-                &#34;@type&#34;: &#34;RealData&#34;,
-                &#34;hasNumberValue&#34;: 0.05
-              },
-              &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&#34;
-            }
-          },
-          &#34;hasConductiveAdditive&#34;: {
-            &#34;@type&#34;: [
-              &#34;CarbonBlack&#34;,
-              &#34;ConductiveAdditive&#34;
-            ],
-            &#34;schema:name&#34;: &#34;Carbon black&#34;,
-            &#34;hasProperty&#34;: {
-              &#34;@type&#34;: [
-                &#34;MassFraction&#34;,
-                &#34;ConventionalProperty&#34;
-              ],
-              &#34;hasNumericalPart&#34;: {
-                &#34;@type&#34;: &#34;RealData&#34;,
-                &#34;hasNumberValue&#34;: 0.05
-              },
-              &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&#34;
-            },
-            &#34;schema:description&#34;: &#34;Imerys C65&#34;
-          },
-          &#34;hasProperty&#34;: [
-            {
-              &#34;@type&#34;: [
-                &#34;CalenderedDensity&#34;,
-                &#34;ConventionalProperty&#34;
-              ],
-              &#34;skos:prefLabel&#34;: &#34;CalenderedDensity&#34;,
-              &#34;hasNumericalPart&#34;: {
-                &#34;@type&#34;: &#34;RealData&#34;,
-                &#34;hasNumberValue&#34;: 2.4
-              },
-              &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#GramPerCubicCentiMetre&#34;
-            },
-            {
-              &#34;@type&#34;: [
-                &#34;ActiveMassLoading&#34;,
-                &#34;ConventionalProperty&#34;
-              ],
-              &#34;skos:prefLabel&#34;: &#34;ActiveMassLoading&#34;,
-              &#34;hasNumericalPart&#34;: {
-                &#34;@type&#34;: &#34;RealData&#34;,
-                &#34;hasNumberValue&#34;: 12.5
-              },
-              &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#MilliGramPerSquareCentiMetre&#34;
-            }
-          ],
-          &#34;schema:description&#34;: &#34;NMP-cast, roll-calendered to 85% theoretical density&#34;
-        },
-        &#34;hasCurrentCollector&#34;: {
-          &#34;@type&#34;: [
-            &#34;CurrentCollector&#34;,
-            &#34;Aluminium&#34;,
-            &#34;Foil&#34;
-          ],
-          &#34;schema:name&#34;: &#34;Aluminium foil&#34;,
-          &#34;hasProperty&#34;: {
-            &#34;@type&#34;: [
-              &#34;Thickness&#34;,
-              &#34;ConventionalProperty&#34;
-            ],
-            &#34;skos:prefLabel&#34;: &#34;Thickness&#34;,
-            &#34;hasNumericalPart&#34;: {
-              &#34;@type&#34;: &#34;RealData&#34;,
-              &#34;hasNumberValue&#34;: 16.0
-            },
-            &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#MicroMetre&#34;
-          }
-        },
-        &#34;@type&#34;: &#34;LithiumIronPhosphateElectrode&#34;
-      },
-      &#34;hasNegativeElectrode&#34;: {
-        &#34;hasCoating&#34;: {
-          &#34;@type&#34;: &#34;ElectrodeCoating&#34;,
-          &#34;hasActiveMaterial&#34;: {
-            &#34;@type&#34;: [
-              &#34;Graphite&#34;,
-              &#34;ActiveMaterial&#34;
-            ],
-            &#34;schema:name&#34;: &#34;Graphite&#34;,
-            &#34;hasProperty&#34;: {
-              &#34;@type&#34;: [
-                &#34;MassFraction&#34;,
-                &#34;ConventionalProperty&#34;
-              ],
-              &#34;hasNumericalPart&#34;: {
-                &#34;@type&#34;: &#34;RealData&#34;,
-                &#34;hasNumberValue&#34;: 0.955
-              },
-              &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&#34;
-            },
-            &#34;schema:description&#34;: &#34;Natural graphite, D50 ~ 20 \u00b5m&#34;
-          },
-          &#34;hasBinder&#34;: [
-            {
-              &#34;@type&#34;: [
-                &#34;CarboxymethylCellulose&#34;,
-                &#34;Binder&#34;
-              ],
-              &#34;schema:name&#34;: &#34;CMC&#34;,
-              &#34;hasProperty&#34;: {
-                &#34;@type&#34;: [
-                  &#34;MassFraction&#34;,
-                  &#34;ConventionalProperty&#34;
-                ],
-                &#34;hasNumericalPart&#34;: {
-                  &#34;@type&#34;: &#34;RealData&#34;,
-                  &#34;hasNumberValue&#34;: 0.015
-                },
-                &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&#34;
-              }
-            },
-            {
-              &#34;@type&#34;: [
-                &#34;StyreneButadiene&#34;,
-                &#34;Binder&#34;
-              ],
-              &#34;schema:name&#34;: &#34;SBR&#34;,
-              &#34;hasProperty&#34;: {
-                &#34;@type&#34;: [
-                  &#34;MassFraction&#34;,
-                  &#34;ConventionalProperty&#34;
-                ],
-                &#34;hasNumericalPart&#34;: {
-                  &#34;@type&#34;: &#34;RealData&#34;,
-                  &#34;hasNumberValue&#34;: 0.025
-                },
-                &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&#34;
-              }
-            }
-          ],
-          &#34;hasConductiveAdditive&#34;: {
-            &#34;@type&#34;: [
-              &#34;CarbonBlack&#34;,
-              &#34;ConductiveAdditive&#34;
-            ],
-            &#34;schema:name&#34;: &#34;Carbon black&#34;,
-            &#34;hasProperty&#34;: {
-              &#34;@type&#34;: [
-                &#34;MassFraction&#34;,
-                &#34;ConventionalProperty&#34;
-              ],
-              &#34;hasNumericalPart&#34;: {
-                &#34;@type&#34;: &#34;RealData&#34;,
-                &#34;hasNumberValue&#34;: 0.005
-              },
-              &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&#34;
-            }
-          },
-          &#34;hasProperty&#34;: [
-            {
-              &#34;@type&#34;: [
-                &#34;CalenderedDensity&#34;,
-                &#34;ConventionalProperty&#34;
-              ],
-              &#34;skos:prefLabel&#34;: &#34;CalenderedDensity&#34;,
-              &#34;hasNumericalPart&#34;: {
-                &#34;@type&#34;: &#34;RealData&#34;,
-                &#34;hasNumberValue&#34;: 1.55
-              },
-              &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#GramPerCubicCentiMetre&#34;
-            },
-            {
-              &#34;@type&#34;: [
-                &#34;ActiveMassLoading&#34;,
-                &#34;ConventionalProperty&#34;
-              ],
-              &#34;skos:prefLabel&#34;: &#34;ActiveMassLoading&#34;,
-              &#34;hasNumericalPart&#34;: {
-                &#34;@type&#34;: &#34;RealData&#34;,
-                &#34;hasNumberValue&#34;: 7.8
-              },
-              &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#MilliGramPerSquareCentiMetre&#34;
-            }
-          ]
-        },
-        &#34;hasCurrentCollector&#34;: {
-          &#34;@type&#34;: [
-            &#34;CurrentCollector&#34;,
-            &#34;Copper&#34;,
-            &#34;Foil&#34;
-          ],
-          &#34;schema:name&#34;: &#34;Copper foil&#34;,
-          &#34;hasProperty&#34;: {
-            &#34;@type&#34;: [
-              &#34;Thickness&#34;,
-              &#34;ConventionalProperty&#34;
-            ],
-            &#34;skos:prefLabel&#34;: &#34;Thickness&#34;,
-            &#34;hasNumericalPart&#34;: {
-              &#34;@type&#34;: &#34;RealData&#34;,
-              &#34;hasNumberValue&#34;: 10.0
-            },
-            &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#MicroMetre&#34;
-          }
-        },
-        &#34;@type&#34;: &#34;GraphiteElectrode&#34;
-      },
-      &#34;hasElectrolyte&#34;: {
-        &#34;@type&#34;: &#34;OrganicElectrolyte&#34;,
-        &#34;hasSolute&#34;: {
-          &#34;@type&#34;: [
-            &#34;LithiumHexafluorophosphate&#34;,
-            &#34;Solute&#34;
-          ],
-          &#34;schema:name&#34;: &#34;LiPF6&#34;,
-          &#34;hasProperty&#34;: {
-            &#34;@type&#34;: [
-              &#34;AmountConcentration&#34;,
-              &#34;ConventionalProperty&#34;
-            ],
-            &#34;skos:prefLabel&#34;: &#34;AmountConcentration&#34;,
-            &#34;hasNumericalPart&#34;: {
-              &#34;@type&#34;: &#34;RealData&#34;,
-              &#34;hasNumberValue&#34;: 1.0
-            },
-            &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#MolePerLitre&#34;
-          }
-        },
-        &#34;hasSolvent&#34;: [
-          {
-            &#34;@type&#34;: [
-              &#34;EthyleneCarbonate&#34;,
-              &#34;Solvent&#34;
-            ],
-            &#34;schema:name&#34;: &#34;EC&#34;,
-            &#34;hasProperty&#34;: {
-              &#34;@type&#34;: [
-                &#34;VolumeFraction&#34;,
-                &#34;ConventionalProperty&#34;
-              ],
-              &#34;hasNumericalPart&#34;: {
-                &#34;@type&#34;: &#34;RealData&#34;,
-                &#34;hasNumberValue&#34;: 0.5
-              },
-              &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&#34;
-            }
-          },
-          {
-            &#34;@type&#34;: [
-              &#34;DimethylCarbonate&#34;,
-              &#34;Solvent&#34;
-            ],
-            &#34;schema:name&#34;: &#34;DMC&#34;,
-            &#34;hasProperty&#34;: {
-              &#34;@type&#34;: [
-                &#34;VolumeFraction&#34;,
-                &#34;ConventionalProperty&#34;
-              ],
-              &#34;hasNumericalPart&#34;: {
-                &#34;@type&#34;: &#34;RealData&#34;,
-                &#34;hasNumberValue&#34;: 0.5
-              },
-              &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&#34;
-            }
-          }
-        ],
-        &#34;hasAdditive&#34;: [
-          {
-            &#34;@type&#34;: [
-              &#34;VinyleneCarbonate&#34;,
-              &#34;ElectrolyteAdditive&#34;
-            ],
-            &#34;schema:name&#34;: &#34;VC&#34;,
-            &#34;hasProperty&#34;: {
-              &#34;@type&#34;: [
-                &#34;MassFraction&#34;,
-                &#34;ConventionalProperty&#34;
-              ],
-              &#34;hasNumericalPart&#34;: {
-                &#34;@type&#34;: &#34;RealData&#34;,
-                &#34;hasNumberValue&#34;: 0.02
-              },
-              &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&#34;
-            },
-            &#34;schema:description&#34;: &#34;SEI-forming additive&#34;
-          },
-          {
-            &#34;@type&#34;: [
-              &#34;FluoroethyleneCarbonate&#34;,
-              &#34;ElectrolyteAdditive&#34;
-            ],
-            &#34;schema:name&#34;: &#34;FEC&#34;,
-            &#34;hasProperty&#34;: {
-              &#34;@type&#34;: [
-                &#34;MassFraction&#34;,
-                &#34;ConventionalProperty&#34;
-              ],
-              &#34;hasNumericalPart&#34;: {
-                &#34;@type&#34;: &#34;RealData&#34;,
-                &#34;hasNumberValue&#34;: 0.01
-              },
-              &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&#34;
-            },
-            &#34;schema:description&#34;: &#34;Fluoroethylene carbonate&#34;
-          }
-        ],
-        &#34;schema:description&#34;: &#34;LP30 + 2% VC + 1% FEC&#34;
-      },
-      &#34;hasSeparator&#34;: {
-        &#34;@type&#34;: [
-          &#34;Polypropylene&#34;,
-          &#34;Separator&#34;
-        ],
-        &#34;schema:name&#34;: &#34;Polypropylene&#34;,
-        &#34;hasProperty&#34;: [
-          {
-            &#34;@type&#34;: [
-              &#34;Porosity&#34;,
-              &#34;ConventionalProperty&#34;
-            ],
-            &#34;hasNumericalPart&#34;: {
-              &#34;@type&#34;: &#34;RealData&#34;,
-              &#34;hasNumberValue&#34;: 0.41
-            },
-            &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978&#34;
-          },
-          {
-            &#34;@type&#34;: [
-              &#34;Thickness&#34;,
-              &#34;ConventionalProperty&#34;
-            ],
-            &#34;skos:prefLabel&#34;: &#34;Thickness&#34;,
-            &#34;hasNumericalPart&#34;: {
-              &#34;@type&#34;: &#34;RealData&#34;,
-              &#34;hasNumberValue&#34;: 25.0
-            },
-            &#34;hasMeasurementUnit&#34;: &#34;https://w3id.org/emmo#MicroMetre&#34;
-          }
-        ],
-        &#34;schema:description&#34;: &#34;Celgard 2500, single-layer PP&#34;
-      },
-      &#34;schema:additionalProperty&#34;: [
-        {
-          &#34;@type&#34;: &#34;schema:PropertyValue&#34;,
-          &#34;schema:propertyID&#34;: &#34;construction.assembly_type&#34;,
-          &#34;schema:name&#34;: &#34;Assembly Type&#34;,
-          &#34;schema:value&#34;: &#34;wound&#34;
-        },
-        {
-          &#34;@type&#34;: &#34;schema:PropertyValue&#34;,
-          &#34;schema:propertyID&#34;: &#34;construction.layering&#34;,
-          &#34;schema:name&#34;: &#34;Layering&#34;,
-          &#34;schema:value&#34;: &#34;single_layer&#34;
-        },
-        {
-          &#34;@type&#34;: &#34;schema:PropertyValue&#34;,
-          &#34;schema:propertyID&#34;: &#34;construction.layer_count&#34;,
-          &#34;schema:name&#34;: &#34;Layer Count&#34;,
-          &#34;schema:value&#34;: 1
-        },
-        {
-          &#34;@type&#34;: &#34;schema:PropertyValue&#34;,
-          &#34;schema:propertyID&#34;: &#34;construction.comment&#34;,
-          &#34;schema:name&#34;: &#34;Construction Comment&#34;,
-          &#34;schema:value&#34;: &#34;Single jelly-roll, wound on 4 mm mandrel&#34;
-        }
-      ],
       &#34;schema:description&#34;: [
         &#34;Descriptor curated from manufacturer datasheet and published literature.&#34;,
         &#34;Electrode loadings estimated from capacity balance and assumed density.&#34;
       ],
-      &#34;schema:schemaVersion&#34;: &#34;1.0.0&#34;
+      &#34;schema:schemaVersion&#34;: &#34;0.2.0&#34;
     }
   ]
 }
@@ -1483,7 +1519,7 @@ Record keys:  [&#39;schema_version&#39;, &#39;cell_spec&#39;, &#39;properties&#3
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-@type: [&#39;BatteryCellSpecification&#39;, &#39;schema:CreativeWork&#39;]
+@type: [&#39;BatteryCellSpecification&#39;, &#39;schema:ProductModel&#39;, &#39;schema:CreativeWork&#39;]
 </pre></div></div>
 </div>
 </section>

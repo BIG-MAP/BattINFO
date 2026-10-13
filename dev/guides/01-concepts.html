@@ -842,8 +842,11 @@ IRI: https://w3id.org/battinfo/spec/e4t5-w9re-mpq6-8g7e
     <span class="n">Path</span><span class="p">(</span><span class="n">output</span><span class="p">[</span><span class="s2">&quot;output_dir&quot;</span><span class="p">],</span> <span class="s2">&quot;index.jsonld&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
 <span class="p">)</span>
 
-<span class="c1"># EMMO @type stacking from format + chemistry + electrode basis</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;@type:&quot;</span><span class="p">,</span> <span class="n">jsonld</span><span class="p">[</span><span class="s2">&quot;@type&quot;</span><span class="p">])</span>
+<span class="c1"># The spec node is the description of the product. The EMMO classes derived</span>
+<span class="c1"># from format, chemistry and electrode basis sit on the described cell under</span>
+<span class="c1"># isDescriptionFor.</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Spec @type:          &quot;</span><span class="p">,</span> <span class="n">jsonld</span><span class="p">[</span><span class="s2">&quot;@type&quot;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Described cell @type:&quot;</span><span class="p">,</span> <span class="n">jsonld</span><span class="p">[</span><span class="s2">&quot;isDescriptionFor&quot;</span><span class="p">][</span><span class="s2">&quot;@type&quot;</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
@@ -852,7 +855,8 @@ IRI: https://w3id.org/battinfo/spec/e4t5-w9re-mpq6-8g7e
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-@type: [&#39;BatteryCellSpecification&#39;, &#39;schema:ProductModel&#39;, &#39;schema:CreativeWork&#39;]
+Spec @type:           [&#39;BatteryCellSpecification&#39;, &#39;schema:ProductModel&#39;, &#39;schema:CreativeWork&#39;]
+Described cell @type: [&#39;BatteryCell&#39;, &#39;CylindricalBattery&#39;, &#39;LithiumIonBattery&#39;, &#39;LithiumIonIronPhosphateBattery&#39;, &#39;LithiumIonGraphiteBattery&#39;]
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -900,7 +904,7 @@ Properties:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-JSON-LD exported to: C:\t\bi-v5\docs\guides\_scratch\guide-01\resolver\spec\e4t5-w9re-mpq6-8g7e\index.jsonld
+JSON-LD exported to: &lt;repo&gt;\docs\guides\_scratch\guide-01\resolver\spec\e4t5-w9re-mpq6-8g7e\index.jsonld
 
 {
   &#34;@context&#34;: [
@@ -973,7 +977,7 @@ JSON-LD exported to: C:\t\bi-v5\docs\guides\_scratch\guide-01\resolver\spec\e4t5
   &#34;dcterms:source&#34;: {
     &#34;@type&#34;: &#34;prov:Entity&#34;,
     &#34;dcterms:type&#34;: &#34;datasheet&#34;,
-    &#34;prov:generatedAtTime&#34;: &#34;2026-09-15T14:08:28+00:00&#34;
+    &#34;prov:generatedAtTime&#34;: &#34;2026-10-12T20:08:15+00:00&#34;
   }
 }
 </pre></div></div>

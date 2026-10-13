@@ -65,6 +65,43 @@ Present but with no stability promise:
 - semantic mapping candidate generation and review (`.tools/semantic/`)
 - reference validation for corpora larger than a repository-scale source tree
 
+## Known limitations in 0.8.0
+
+These gaps were known when 0.8.0 was released and are planned for 0.8.x or 0.9. Where there is a way around one, the line says how.
+
+### BPX parameter files
+
+- Blended electrodes (BPX `Particle` blocks) are not modelled: the import names them in a warning and in the record's `not_imported`, and `to_bpx` returns `complete=False` for such a file.
+- The initial hysteresis state, `Degradation` blocks and `Validation` curves stay in the source file and are listed in `not_imported`.
+- Curve claims, such as an OCP table, are `schema:PropertyValue` nodes with no EMMO class.
+- In a cell spec's JSON-LD, `electrode_area` and `external_surface_area` are both an `Area` node labelled "Area", so only the value tells them apart. Parameter sets name the key in `schema:propertyID`.
+- `to_parameter_set(provenance_classes=...)` silently ignores the name of a part the file does not have.
+
+### Workspace and submission
+
+- `Registry.get` returns the registry's entry, not the record, and no helper extracts the record yet; [Get the record out of an entry](howto/read-registry-data.md#get-the-record-out-of-an-entry) shows the one line that does.
+- A new version of a published dataset made with `Dataset.from_record` loses the curve-preview files unless you copy them across from the registry entry, and nothing warns you; [Make a new version of a published dataset](howto/read-registry-data.md#make-a-new-version-of-a-published-dataset) shows how.
+- `save_dataset` resolves a dataset's cell and test only against the workspace and the registry records the workspace has looked up, which never include tests, so a new version that keeps a published test link needs `resolve_references=False`.
+- Once `ws.save()` has run in a session, `ws.submit()` sends only what that save wrote, even with `submit_all=True`. Submit records written by `save_dataset` or the other `save_*` functions from a new workspace object.
+- `ws.add("test")` takes no as-run `conditions`, start or end time, notes or `source_url`, although the `Test` model has them.
+- `ws.search(type="cell", serial=...)` fetches the registry's whole cell list on every call; use `serials=[...]` to look up many cells at once.
+- Adding tests to a test spec that is already published sends the spec again, and the registry stores an unchanged copy as a new version.
+- `ws.pending()` lists submissions newest first, and approving in that order can publish datasets before the tests and cells they describe. Approve specs, cells and tests first.
+- Saving unchanged records again marks datasets and cells `[updated]` with new timestamps, and a test rebuilt in a new workspace gets a new `retrieved_at`, so a re-submission can create versions whose content did not change.
+- Collection rules are advice, not checks: a member whose `series_id` names a collection that was never saved passes strict validation (only `ws.preview_jsonld()` warns), and a collection with files or an `about` list still saves.
+- The Zenodo deposit graph and `record_to_jsonld` describe tests and datasets differently: `schema:about` against `dcterms:subject` for a dataset's cell and test, `prov:used` against `dcterms:conformsTo` for a test's protocol, and different test titles. Neither emits a test's `description`.
+- In JSON-LD, `provenance.retrieved_at` is an untyped `prov:generatedAtTime` literal, not an `xsd:dateTime`.
+- A value in `%` or `vol%` is typed with `WeightPercent` or `VolumePercent`, which EMMO defines as quantities rather than units, because EMMO's `Percent` unit is outside the imported ontologies (and EMMO 1.0.2 gives it a conversion factor of 1 instead of 0.01).
+- A cell record lists its dataset with role `raw` even when the dataset's main file is the processed table.
+- `TestSpec.experiment` writes a constant-current step that has a cutoff but no current as "Discharge until 0.9 V", which the step grammar does not read back.
+- `ws.save()` prints "ERROR: ... failed validation" for some records it does write, such as a parameter set still minted under `spec/`.
+- Display papercuts: `ws.search()` shows manufacturer and model in lower case, `ws.list(verbose=True)` shows cells by file name, the `ws.save()` summary cuts titles at about 36 characters and collapses after 20 records, and `battinfo.naming.title_for()` writes an all-lowercase method in capitals ("CYCLING test").
+- Submission reporting: outcomes and journal entries carry an empty `iri`, a deduplicated re-submission is reported as live, and `ws.status()` lists every submission in the shared registry workspace.
+
+### Dependencies
+
+- The `processing` extra requires `batterydf[nda,excel,mat]>=0.2.0rc2,<0.3`, so it installs the batterydf 0.2.0 release candidate until batterydf 0.2.0 is published.
+
 ## Verification
 
 A release is considered ready when:
