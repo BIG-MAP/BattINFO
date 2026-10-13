@@ -8,13 +8,16 @@ argument passed to the call, ws.login() in this session, an environment
 variable, this workspace's credentials file, then the default) and the checks
 that replace reading os.environ: ws.credentials_status(), ws.has_credential()
 and ws.whoami(). They also pin BATTINFO_REGISTRY_URL, which battinfo.workspace()
-used to ignore. Everything runs offline: the registry and Zenodo are fakes.
+used to ignore, what ws.login() writes to the file, and the bucket a private
+ws.upload() goes to. Everything runs offline: the registry, Zenodo and R2 are
+fakes.
 """
 from __future__ import annotations
 
 import json
 import os
 import sys
+import types
 import urllib.error
 import urllib.request
 from collections.abc import Iterator
@@ -324,7 +327,77 @@ def test_upload_reads_r2_settings_from_this_workspaces_file(tmp_path: Path, monk
         without_r2.upload(dry_run=True)
 
 
-# ── login() keeps what it saves to what the registry or the caller gave ───────
+class _NoSuchObject(Exception):
+    pass
+
+
+class _FakeR2:
+    """Stands in for the boto3 S3 client and remembers each upload."""
+
+    exceptions = types.SimpleNamespace(ClientError=_NoSuchObject)
+
+    def __init__(self) -> None:
+        self.uploads: list[tuple[str, str, dict]] = []
+        self._sha256: dict[tuple[str, str], str] = {}
+
+    def head_object(self, Bucket: str, Key: str) -> dict:  # boto3's argument names
+        if (Bucket, Key) not in self._sha256:
+            raise _NoSuchObject(Key)
+        return {"Metadata": {"sha256": self._sha256[(Bucket, Key)]}}
+
+    def upload_file(self, filename: str, bucket: str, key: str, ExtraArgs: dict, Config: object) -> None:
+        self.uploads.append((bucket, key, ExtraArgs))
+        self._sha256[(bucket, key)] = ExtraArgs["Metadata"]["sha256"]
+
+
+def _dataset_with_a_local_file(ws: AuthoringWorkspace) -> Path:
+    data = ws._root / "data" / "cycling.csv"
+    data.parent.mkdir(parents=True, exist_ok=True)
+    data.write_text("time_second,voltage_volt\n0,3.7\n", encoding="utf-8")
+    record = ws._ws.source_root / "dataset" / "ds-1.json"
+    record.parent.mkdir(parents=True, exist_ok=True)
+    record.write_text(json.dumps({"dataset": {"short_id": "ds-1", "access_url": "data/cycling.csv",
+                                              "distributions": [{"content_url": "data/cycling.csv"}]}}),
+                      encoding="utf-8")
+    return record
+
+
+def test_a_private_upload_never_goes_to_the_public_bucket(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    boto3 = pytest.importorskip("boto3")
+    ws = battinfo.workspace(tmp_path, registry_url=None)
+    ws.setup()  # the template sets R2_BUCKET = battinfo-public
+    ws._set_credentials({"R2_ENDPOINT": "https://r2.example", "R2_ACCESS_KEY_ID": "r2-id",
+                         "R2_SECRET_ACCESS_KEY": "r2-secret", "R2_PUBLIC_BASE_URL": "https://pub.example"})
+    record = _dataset_with_a_local_file(ws)
+    r2 = _FakeR2()
+    monkeypatch.setattr(boto3, "client", lambda service, **kwargs: r2)
+
+    with pytest.raises(RuntimeError, match="R2_BUCKET_PRIVATE"):
+        ws.upload(public=False)
+    assert r2.uploads == []
+
+    monkeypatch.setenv("R2_BUCKET_PRIVATE", "lab-private")
+    urls = ws.upload(public=False)
+
+    private_url = "s3://lab-private/datasets/ds-1/cycling.csv"
+    assert [(bucket, key) for bucket, key, _ in r2.uploads] == [("lab-private", "datasets/ds-1/cycling.csv")]
+    assert "ACL" not in r2.uploads[0][2]
+    assert urls == [private_url]  # not a download link under R2_PUBLIC_BASE_URL
+    assert json.loads(record.read_text(encoding="utf-8"))["dataset"]["access_url"] == private_url
+
+    r2.uploads.clear()
+    _dataset_with_a_local_file(ws)
+    assert ws.upload() == ["https://pub.example/datasets/ds-1/cycling.csv"]
+    assert [(bucket, extra.get("ACL")) for bucket, _, extra in r2.uploads] == [("battinfo-public", "public-read")]
+
+
+# ── what login() saves ───────────────────────────────────────────────────────
+
+
+def _credential_lines(path: Path, name: str) -> list[str]:
+    """The lines of a credentials file that set *name*, comments left out."""
+    return [line for line in path.read_text(encoding="utf-8").splitlines()
+            if not line.lstrip().startswith("#") and line.split("=", 1)[0].strip() == name]
 
 
 def test_login_does_not_save_another_workspaces_identity(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -368,6 +441,113 @@ def test_login_saves_the_identity_the_registry_returns(tmp_path: Path, monkeypat
     assert "ws-from-the-registry" in saved and "pub-from-the-registry" in saved
     assert result["workspace_id"] == "ws-from-the-registry"
     assert os.environ["BATTINFO_WORKSPACE_ID"] == "ws-from-the-environment"
+
+
+@pytest.mark.parametrize("exported", [None, "ws-from-the-environment"], ids=["clean", "id-exported"])
+def test_login_without_the_registry_saves_the_default_ids_a_hand_made_file_lacks(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], exported: str | None
+) -> None:
+    # The setup() template carries the default ids; a file written by hand may not.
+    path = _write_credentials(tmp_path, ZENODO_SANDBOX_TOKEN="sandbox-token")
+    if exported:
+        monkeypatch.setenv("BATTINFO_WORKSPACE_ID", exported)
+    ws = battinfo.workspace(tmp_path, registry_url=REGISTRY)
+    _registry_http(monkeypatch, urllib.error.URLError("registry down"))
+
+    result = ws.login(api_key="bk_test_key")
+
+    assert (result["workspace_id"], result["publisher_id"]) == (exported or "battinfo-records", "battinfo-authoring")
+    # The default is saved, never the exported id.
+    assert _credential_lines(path, "BATTINFO_WORKSPACE_ID") == [f"{'BATTINFO_WORKSPACE_ID':22} = battinfo-records"]
+    assert _credential_lines(path, "BATTINFO_PUBLISHER_ID") == [f"{'BATTINFO_PUBLISHER_ID':22} = battinfo-authoring"]
+    out = capsys.readouterr().out
+    assert ("BATTINFO_WORKSPACE_ID is taken from the environment and not saved" in out) == bool(exported)
+    monkeypatch.delenv("BATTINFO_WORKSPACE_ID", raising=False)
+    reopened = battinfo.workspace(tmp_path, registry_url=REGISTRY)
+    assert reopened._credential("BATTINFO_WORKSPACE_ID") == "battinfo-records"
+    assert reopened._credential("ZENODO_SANDBOX_TOKEN") == "sandbox-token"
+
+    # status() and submit() find the ids instead of asking for a login that already happened.
+    http = _registry_http(monkeypatch, [])
+    reopened.status()
+    assert http.urls == [f"{REGISTRY}/workspaces/battinfo-records/submissions"]
+    reopened.add("cell", spec=CellSpec(manufacturer="Example Lab", model="R2032", format="coin",
+                                       chemistry="li-ion"), serial_numbers=["C01"])
+    reopened.save()
+    sent: list[tuple[str, str, str]] = []
+
+    def fake_submit(payload: dict, *, registry_base_url: str, api_key: str, **kw: object) -> dict:
+        sent.append((api_key, payload["workspace_id"], payload["publisher_id"]))
+        return {"status": "ok", "response": {"status": "validated", "resources": [{"canonical_iri": "x"}]}}
+
+    monkeypatch.setattr("battinfo.api.submit_publication_package", fake_submit)
+    reopened.submit()
+    assert set(sent) == {("bk_test_key", "battinfo-records", "battinfo-authoring")}
+
+
+def test_login_without_the_registry_keeps_the_ids_this_workspace_has(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    path = _write_credentials(tmp_path, BATTINFO_WORKSPACE_ID="ws-from-the-file")
+    ws = battinfo.workspace(tmp_path, registry_url=REGISTRY)
+    _registry_http(monkeypatch, OSError("registry down"))
+
+    assert ws.login(api_key="bk_test_key")["workspace_id"] == "ws-from-the-file"
+    assert _credential_lines(path, "BATTINFO_WORKSPACE_ID") == [f"{'BATTINFO_WORKSPACE_ID':22} = ws-from-the-file"]
+
+    # Ids an earlier login() in this session got from the registry are this
+    # workspace's own: a file that lost them gets them back, not the defaults.
+    _registry_http(monkeypatch, {"workspace_id": "ws-from-the-registry", "publisher_id": "pub-from-the-registry"})
+    ws.login(api_key="bk_test_key")
+    path.write_text("BATTINFO_API_KEY = bk_test_key\n", encoding="utf-8")
+    _registry_http(monkeypatch, OSError("registry down"))
+    ws.login(api_key="bk_test_key")
+    reopened = battinfo.workspace(tmp_path, registry_url=REGISTRY)
+    assert reopened._credential("BATTINFO_WORKSPACE_ID") == "ws-from-the-registry"
+    assert reopened._credential("BATTINFO_PUBLISHER_ID") == "pub-from-the-registry"
+
+
+def test_login_leaves_one_line_for_each_name_it_saves(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    ws = battinfo.workspace(tmp_path, registry_url=REGISTRY)
+    path = ws.setup()
+    # Appended by hand below the template's own lines for the same names. The
+    # last line with a value wins when the file is read, so a login() that
+    # rewrote only the first line would be undone by the next session.
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write("BATTINFO_API_KEY = bk_old_appended_by_hand\n"
+                     "BATTINFO_WORKSPACE_ID = ws-old-appended-by-hand\n")
+    assert battinfo.workspace(tmp_path, registry_url=REGISTRY)._credential("BATTINFO_API_KEY") == (
+        "bk_old_appended_by_hand")
+    _registry_http(monkeypatch, {"workspace_id": "ws-from-the-registry", "publisher_id": "pub-from-the-registry"})
+
+    ws.login(api_key="bk_new_rotated")
+
+    reopened = battinfo.workspace(tmp_path, registry_url=REGISTRY)
+    assert reopened._credential("BATTINFO_API_KEY") == "bk_new_rotated"
+    assert reopened._credential("BATTINFO_WORKSPACE_ID") == "ws-from-the-registry"
+    assert reopened._credential("BATTINFO_PUBLISHER_ID") == "pub-from-the-registry"
+    for name in ("BATTINFO_API_KEY", "BATTINFO_WORKSPACE_ID", "BATTINFO_PUBLISHER_ID"):
+        assert len(_credential_lines(path, name)) == 1, name
+    assert "appended-by-hand" not in path.read_text(encoding="utf-8")
+
+
+def test_login_rewrites_a_credentials_file_saved_with_a_byte_order_mark(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    path = tmp_path / ".battinfo" / "credentials"
+    path.parent.mkdir()
+    path.write_text("BATTINFO_API_KEY = bk_old\nZENODO_API_TOKEN = zt-kept\n", encoding="utf-8-sig")
+    ws = battinfo.workspace(tmp_path, registry_url=REGISTRY)
+    assert ws._credential("BATTINFO_API_KEY") == "bk_old"
+    _registry_http(monkeypatch, {"workspace_id": "ws-1", "publisher_id": "pub-1"})
+
+    ws.login(api_key="bk_new")
+
+    text = path.read_text(encoding="utf-8")
+    assert "bk_old" not in text and len(_credential_lines(path, "BATTINFO_API_KEY")) == 1
+    reopened = battinfo.workspace(tmp_path, registry_url=REGISTRY)
+    assert reopened._credential("BATTINFO_API_KEY") == "bk_new"
+    assert reopened._credential("ZENODO_API_TOKEN") == "zt-kept"
 
 
 # ── BATTINFO_REGISTRY_URL ────────────────────────────────────────────────────
@@ -474,6 +654,12 @@ def test_has_credential_rejects_a_name_the_workspace_never_reads(tmp_path: Path)
     ws = battinfo.workspace(tmp_path, registry_url=None)
     with pytest.raises(ValueError, match="ZENODO_API_TOKEN"):
         ws.has_credential("ZENODO_TOKEN")
+
+
+def test_commands_lists_both_credential_checks(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    battinfo.workspace(tmp_path, registry_url=None).commands()
+    out = capsys.readouterr().out
+    assert "ws.credentials_status()" in out and "ws.has_credential(" in out
 
 
 def test_whoami_says_where_each_credential_came_from(

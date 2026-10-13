@@ -249,6 +249,7 @@ _CREDENTIALS_TEMPLATE = """\
 #   5. the default, for the few names that have one
 # The values here belong to this workspace. They are not copied into the
 # environment, so other workspaces in the same Python session never see them.
+# A name set on more than one line takes the value of the last one.
 # ws.credentials_status() shows which names are set and where each one comes
 # from, without the values.
 
@@ -265,10 +266,13 @@ BATTINFO_ADMIN_TOKEN   =
 BATTINFO_REGISTRY_URL  =
 
 # Optional - only needed for ws.upload() (Cloudflare R2 dataset storage).
+# R2_BUCKET is the public bucket. ws.upload(public=False) uses R2_BUCKET_PRIVATE
+# and never falls back to the public one.
 R2_ENDPOINT            =
 R2_ACCESS_KEY_ID       =
 R2_SECRET_ACCESS_KEY   =
 R2_BUCKET              = battinfo-public
+R2_BUCKET_PRIVATE      =
 R2_PUBLIC_BASE_URL     =
 
 # Optional - only needed for ws.zenodo() archival.
@@ -296,6 +300,12 @@ _CREDENTIAL_NAMES: tuple[str, ...] = (
     "ZENODO_API_TOKEN",
     "ZENODO_SANDBOX_TOKEN",
 )
+
+# The ids login() and whoami() fall back to, the same as the setup() template's.
+_DEFAULT_IDENTITY: dict[str, str] = {
+    "BATTINFO_WORKSPACE_ID": "battinfo-records",
+    "BATTINFO_PUBLISHER_ID": "battinfo-authoring",
+}
 
 # Where a credential came from, as ws.whoami() prints it. The keys are the
 # sources ws.credentials_status() reports, in lookup order.
@@ -325,8 +335,10 @@ def _read_credentials_file(path: Path) -> dict[str, str]:
     """Parse the BATTINFO_*, R2_* and ZENODO_* ``key = value`` lines of *path*.
 
     Returns an empty dict when the file does not exist. Comments, blank lines,
-    empty values and names with other prefixes are skipped. Nothing is written to
-    ``os.environ``: the values belong to the workspace that reads the file.
+    empty values and names with other prefixes are skipped, and a name set on
+    more than one line takes the last value (``_set_credentials`` leaves one line
+    for each name it writes). Nothing is written to ``os.environ``: the values
+    belong to the workspace that reads the file.
     """
     if not path.exists():
         return {}
@@ -1987,22 +1999,33 @@ class AuthoringWorkspace:
             gitignore.write_text(entry + "\n", encoding="utf-8")
 
     def _set_credentials(self, updates: dict[str, str]) -> Path:
-        """Merge key=value pairs into .battinfo/credentials, preserving other lines."""
+        """Merge key=value pairs into .battinfo/credentials, preserving other lines.
+
+        Each updated name ends up on one line: its first line in the file takes
+        the new value and any later lines for it are dropped. The file is read
+        with the last line winning, so a later line left in place would undo the
+        update in the next session.
+        """
         path = self._credentials_path()
         path.parent.mkdir(parents=True, exist_ok=True)
-        source = path.read_text(encoding="utf-8") if path.exists() else _CREDENTIALS_TEMPLATE
-        remaining = dict(updates)
+        # utf-8-sig, as _read_credentials_file reads it: a byte order mark must
+        # not hide the name on the first line.
+        source = path.read_text(encoding="utf-8-sig") if path.exists() else _CREDENTIALS_TEMPLATE
+        written: set[str] = set()
         out: list[str] = []
         for line in source.splitlines():
             stripped = line.strip()
             if stripped and not stripped.startswith("#") and "=" in stripped:
                 key = stripped.split("=", 1)[0].strip()
-                if key in remaining:
-                    out.append(f"{key:22} = {remaining.pop(key)}")
+                if key in updates:
+                    if key not in written:
+                        out.append(f"{key:22} = {updates[key]}")
+                        written.add(key)
                     continue
             out.append(line)
-        for key, value in remaining.items():
-            out.append(f"{key:22} = {value}")
+        for key, value in updates.items():
+            if key not in written:
+                out.append(f"{key:22} = {value}")
         # This file holds API keys, R2 secrets and Zenodo tokens: owner-only from
         # the first byte, and a failed write keeps the old file.
         _write_private_text(path, "\n".join(out) + "\n")
@@ -2175,15 +2198,17 @@ class AuthoringWorkspace:
         (Battery Genome - https://www.battery-genome.org, or your team's
         registry admin).
 
-        If the registry does not expose a profile endpoint yet, the key is still
-        saved and sensible defaults are used — everything keeps working.
-
         The key and identity belong to this workspace: they are kept on this
         instance and in its own credentials file, never in the environment.
-        Only the key you pass and the ids the registry returns are saved. When
-        the registry cannot be asked, the workspace and publisher ids come from
-        the usual lookup (the environment, this workspace's credentials file,
-        then the defaults) and are not written to the file.
+        The key you pass and the ids the registry returns are saved.
+
+        If the registry cannot be asked (no profile endpoint, or no network),
+        the key is still saved and the workspace and publisher ids come from
+        the usual lookup: this session, the environment, this workspace's
+        credentials file, then the defaults. An id the file lacks is then
+        saved there, as the default or as the id an earlier login() in this
+        session got, so :meth:`submit` and :meth:`status` work in later
+        sessions. An id found only in the environment is used but not saved.
 
         The registry is *registry_url*, else the workspace's. A workspace opened
         with ``registry_url=None`` needs one passed here or set as
@@ -2226,9 +2251,12 @@ class AuthoringWorkspace:
         if not isinstance(profile, dict):
             profile = {}
 
-        # Save the key the caller passed and the ids the registry returned, and
-        # nothing else: an id found in the environment is used for this session
-        # but never written into this workspace's file.
+        # The session takes the key passed and the ids the registry returned.
+        # The file takes them too and, for an id the registry did not return
+        # and the file lacks, this workspace's own (from an earlier login()) or
+        # the default, as the setup() template has it, so later sessions can
+        # submit. An id found only in the environment may not be this
+        # workspace's: it is used here but never saved.
         identity = {"BATTINFO_API_KEY": api_key}
         for key, field_name in (("BATTINFO_WORKSPACE_ID", "workspace_id"),
                                 ("BATTINFO_PUBLISHER_ID", "publisher_id")):
@@ -2236,11 +2264,16 @@ class AuthoringWorkspace:
             if isinstance(value, str) and value.strip():
                 identity[key] = value.strip()
         self._session_credentials.update(identity)
+        # Resolved before the file is written, so the message says where each id came from.
+        wid, wid_source = self._resolve_credential("BATTINFO_WORKSPACE_ID", _DEFAULT_IDENTITY["BATTINFO_WORKSPACE_ID"])
+        pid, pid_source = self._resolve_credential("BATTINFO_PUBLISHER_ID", _DEFAULT_IDENTITY["BATTINFO_PUBLISHER_ID"])
+        saved = dict(identity)
+        in_file = self._file_credential_values()
+        for key, default in _DEFAULT_IDENTITY.items():
+            if key not in saved and not in_file.get(key):
+                saved[key] = self._session_credentials.get(key) or default
         self._ensure_gitignore()
-        path = self._set_credentials(identity)
-
-        wid, wid_source = self._resolve_credential("BATTINFO_WORKSPACE_ID", "battinfo-records")
-        pid, pid_source = self._resolve_credential("BATTINFO_PUBLISHER_ID", "battinfo-authoring")
+        path = self._set_credentials(saved)
         name = profile.get("display_name") or pid
 
         if profile:
@@ -2248,8 +2281,12 @@ class AuthoringWorkspace:
         else:
             print(f"API key saved. Using workspace {wid!r} ({_CREDENTIAL_SOURCE_TEXT[wid_source or 'default']}), "
                   f"publisher {pid!r} ({_CREDENTIAL_SOURCE_TEXT[pid_source or 'default']}).")
-            print("  (Registry profile lookup unavailable - edit BATTINFO_WORKSPACE_ID "
-                  "in .battinfo/credentials if these are wrong.)")
+            print("  (Registry profile lookup unavailable - edit BATTINFO_WORKSPACE_ID and "
+                  "BATTINFO_PUBLISHER_ID in .battinfo/credentials if these are wrong.)")
+            for key, source in (("BATTINFO_WORKSPACE_ID", wid_source), ("BATTINFO_PUBLISHER_ID", pid_source)):
+                if source == "environment":
+                    print(f"  ({key} is taken from the environment and not saved; "
+                          f".battinfo/credentials has {self._file_credential_values().get(key)!r}.)")
         print(f"  Credentials: {path}")
         return {"workspace_id": wid, "publisher_id": pid, "display_name": name, "registry_url": url}
 
@@ -2310,8 +2347,8 @@ class AuthoringWorkspace:
         else:
             print("  (no registry: this workspace was opened with registry_url=None. Pass "
                   "registry_url=..., or set BATTINFO_REGISTRY_URL.)")
-        wid, wid_source = self._resolve_credential("BATTINFO_WORKSPACE_ID", "battinfo-records")
-        pid, pid_source = self._resolve_credential("BATTINFO_PUBLISHER_ID", "battinfo-authoring")
+        wid, wid_source = self._resolve_credential("BATTINFO_WORKSPACE_ID", _DEFAULT_IDENTITY["BATTINFO_WORKSPACE_ID"])
+        pid, pid_source = self._resolve_credential("BATTINFO_PUBLISHER_ID", _DEFAULT_IDENTITY["BATTINFO_PUBLISHER_ID"])
         sources["BATTINFO_WORKSPACE_ID"] = wid_source
         sources["BATTINFO_PUBLISHER_ID"] = pid_source
         print(f"  workspace:  {wid}  ({_CREDENTIAL_SOURCE_TEXT[wid_source or 'default']})")
@@ -3044,6 +3081,7 @@ class AuthoringWorkspace:
         groups = [
             ("Set up",   ["setup()", "login(api_key=...)", "whoami()",
                           "credentials_status()                # which credentials are set, and where from",
+                          "has_credential('ZENODO_API_TOKEN')  # True or False",
                           "project('101103997')               # tag work with a grant"]),
             ("Discover", ["search('duracell mn2400')           # cell-specs (fuzzy)",
                           "search(type='cell', serial='...')   # existing instances",
@@ -5536,11 +5574,14 @@ class AuthoringWorkspace:
         Reads these from the environment, then from this workspace's
         ``.battinfo/credentials``:
 
-        * ``R2_ENDPOINT`` — e.g. ``https://<account>.eu.r2.cloudflarestorage.com``
+        * ``R2_ENDPOINT``, e.g. ``https://<account>.eu.r2.cloudflarestorage.com``
         * ``R2_ACCESS_KEY_ID``
         * ``R2_SECRET_ACCESS_KEY``
-        * ``R2_BUCKET`` — defaults to ``battinfo-public``
-        * ``R2_PUBLIC_BASE_URL`` — public download root, e.g. ``https://pub-xxx.r2.dev``
+        * ``R2_BUCKET``: the public bucket, ``battinfo-public`` in the
+          ``ws.setup()`` template (``R2_BUCKET_PUBLIC`` is read when it is unset)
+        * ``R2_BUCKET_PRIVATE``: the bucket for ``public=False``
+        * ``R2_PUBLIC_BASE_URL``: the public bucket's download root, e.g.
+          ``https://pub-xxx.r2.dev``
 
         Upload is **idempotent**: if an object already exists in R2 with a
         matching SHA-256, the file is skipped.  Each dataset record on disk is
@@ -5551,15 +5592,20 @@ class AuthoringWorkspace:
         bucket:
             Override the R2 bucket name.
         public:
-            Write to the public bucket (default).  Pass ``False`` to use
-            ``R2_BUCKET_PRIVATE`` / a private bucket.
+            Write to the public bucket (default), with a public-read ACL and
+            download URLs under ``R2_PUBLIC_BASE_URL``. ``False`` writes to
+            ``R2_BUCKET_PRIVATE`` (or *bucket*) without the ACL and gives the
+            records ``s3://`` locations. It never falls back to the public
+            bucket: with no private bucket set it raises.
         dry_run:
             Print what would be uploaded without doing anything.
 
         Returns
         -------
         list[str]
-            Public URLs of all uploaded (or already present) files.
+            The new location of each dataset's file: a download URL under
+            ``R2_PUBLIC_BASE_URL``, or an ``s3://`` location for a private
+            upload or when that is unset.
 
         Example::
 
@@ -5580,15 +5626,26 @@ class AuthoringWorkspace:
         endpoint = self._credential("R2_ENDPOINT")
         access_key = self._credential("R2_ACCESS_KEY_ID")
         secret_key = self._credential("R2_SECRET_ACCESS_KEY")
-        bucket_name = self._credential("R2_BUCKET", explicit=bucket) or self._credential(
-            "R2_BUCKET_PUBLIC" if public else "R2_BUCKET_PRIVATE"
-        )
-        public_base = (self._credential("R2_PUBLIC_BASE_URL") or "").rstrip("/")
+        if public:
+            bucket_name = self._credential("R2_BUCKET", explicit=bucket) or self._credential("R2_BUCKET_PUBLIC")
+            public_base = (self._credential("R2_PUBLIC_BASE_URL") or "").rstrip("/")
+        else:
+            # R2_BUCKET is the public bucket (the setup() template sets it to
+            # battinfo-public), and R2_PUBLIC_BASE_URL is its download root: a
+            # private upload uses neither, and its records get s3:// locations.
+            bucket_name = self._credential("R2_BUCKET_PRIVATE", explicit=bucket)
+            public_base = ""
 
         if not endpoint:
             raise RuntimeError("R2_ENDPOINT required. Set it or add to .battinfo/credentials.")
         if not access_key or not secret_key:
             raise RuntimeError("R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY required.")
+        if not bucket_name and not public:
+            raise RuntimeError(
+                "R2_BUCKET_PRIVATE required for upload(public=False). Set it or add it to "
+                ".battinfo/credentials, or pass bucket=...; R2_BUCKET is the public bucket, "
+                "and a private upload never uses it."
+            )
         if not bucket_name:
             raise RuntimeError("R2_BUCKET required. Set it or add to .battinfo/credentials.")
 

@@ -2,13 +2,16 @@
 error message must not leak the api_key (defence in depth against a registry that echoes it).
 
 The same holds for every file that keeps a secret: the .battinfo/credentials file that
-ws.setup() creates or ws.login() updates, and ~/.battinfo/config.yaml, which can hold a
-Zenodo token."""
+ws.setup() creates or ws.login() updates, ~/.battinfo/config.yaml, which can hold a
+Zenodo token, and the publisher API key that `battinfo registry bootstrap --api-key-file`
+writes."""
 from __future__ import annotations
 
+import json
 import os
 import stat
 import sys
+import urllib.request
 from pathlib import Path
 
 import pytest
@@ -113,3 +116,84 @@ def test_every_secret_file_write_asks_for_owner_only_permissions(
     requested.clear()
     config.set_user_config_value("zenodo_token", "zt_live_8f3a91c2d4e5b6a7")
     assert requested == [(config_path.resolve(), 0o600)]
+
+
+class _Created:
+    """A registry answer of HTTP 201 with a JSON body."""
+
+    status = 201
+
+    def __init__(self, body: dict) -> None:
+        self._body = json.dumps(body).encode("utf-8")
+
+    def __enter__(self) -> _Created:
+        return self
+
+    def __exit__(self, *exc: object) -> bool:
+        return False
+
+    def read(self) -> bytes:
+        return self._body
+
+
+def test_registry_bootstrap_writes_the_new_api_key_owner_only(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from typer.testing import CliRunner
+
+    from battinfo.cli import app
+
+    requested: list[tuple[Path, int]] = []
+    real_chmod = os.chmod
+
+    def recording_chmod(path: str | os.PathLike[str], mode: int, *args: object, **kwargs: object) -> None:
+        requested.append((Path(path).resolve(), mode))
+        real_chmod(path, mode, *args, **kwargs)  # type: ignore[arg-type]
+
+    def fake_registry(request: urllib.request.Request, timeout: float = 0) -> _Created:
+        # The publisher is new, so the registry mints its API key.
+        minted = request.full_url.endswith("/publishers")
+        return _Created({"api_key": "bk_live_minted_9f8e7d6c"} if minted else {})
+
+    monkeypatch.setattr(os, "chmod", recording_chmod)
+    monkeypatch.setattr(urllib.request, "urlopen", fake_registry)
+    key_file = tmp_path / "publisher.key"
+
+    # The default --format, text, used to be refused once the publisher existed.
+    result = CliRunner().invoke(app, [
+        "registry", "bootstrap", "--workspace-id", "lab", "--publisher-id", "lab",
+        "--registry-url", "https://registry.example", "--admin-token", "admin-token",
+        "--api-key-file", str(key_file),
+    ])
+
+    assert result.exit_code == 0, result.output
+    assert "Saved to:" in result.output
+    assert key_file.read_text(encoding="utf-8") == "bk_live_minted_9f8e7d6c"
+    assert (key_file.resolve(), 0o600) in requested
+    if os.name != "nt":
+        assert _mode(key_file) == 0o600, oct(_mode(key_file))
+
+
+@pytest.mark.parametrize(("output_format", "exit_code", "asked"), [("xml", 2, False), ("table", 0, True)])
+def test_registry_bootstrap_checks_the_format_before_asking_the_registry(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, output_format: str, exit_code: int, asked: bool
+) -> None:
+    from typer.testing import CliRunner
+
+    from battinfo.cli import app
+
+    urls: list[str] = []
+
+    def fake_registry(request: urllib.request.Request, timeout: float = 0) -> _Created:
+        urls.append(request.full_url)
+        return _Created({})
+
+    monkeypatch.setattr(urllib.request, "urlopen", fake_registry)
+    result = CliRunner().invoke(app, [
+        "registry", "bootstrap", "--workspace-id", "lab", "--publisher-id", "lab",
+        "--registry-url", "https://registry.example", "--admin-token", "admin-token",
+        "--format", output_format,
+    ])
+
+    assert result.exit_code == exit_code, result.output
+    assert bool(urls) == asked

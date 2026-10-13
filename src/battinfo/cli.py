@@ -2883,6 +2883,14 @@ def registry_bootstrap(
     import urllib.error
     import urllib.request
 
+    from battinfo._jsonio import write_private_text
+
+    # Checked before the registry is asked: a new publisher's key is returned
+    # once. "table", the only plain-text value accepted before, still works.
+    fmt = output_format.lower().strip()
+    if fmt not in {"text", "table", "json"}:
+        raise typer.BadParameter("--format must be 'text' or 'json'.")
+
     resolved_url = registry_url or os.environ.get("BATTINFO_REGISTRY_URL", "").strip()
     if not resolved_url:
         typer.echo("Registry URL is required. Pass --registry-url or set BATTINFO_REGISTRY_URL.")
@@ -2946,10 +2954,9 @@ def registry_bootstrap(
     api_key: str | None = body.get("api_key") if s in (200, 201) else None
 
     if api_key and resolved_key_file:
-        resolved_key_file.write_text(api_key, encoding="utf-8")
+        write_private_text(resolved_key_file, api_key)
         results["api_key_file"] = str(resolved_key_file)
 
-    fmt = _check_output_format(output_format)
     if fmt == "json":
         _emit_json({**results, "api_key": api_key})
         return
@@ -3892,9 +3899,9 @@ def config_set(
       battinfo config set license CC-BY-4.0
       battinfo config set community battinfo-reference
 
-    A secret, such as zenodo_token, is echoed with all but its last four
-    characters hidden. A config file that is not valid YAML is left as it is:
-    fix it by hand first.
+    A secret, such as zenodo_token, is echoed with only its last four
+    characters shown, or fully hidden when it is shorter than 12 characters.
+    A config file that is not valid YAML is left as it is: fix it by hand first.
     """
     from battinfo.config import USER_CONFIG_PATH, _is_secret_key, _masked, set_user_config_value
     try:
@@ -3913,7 +3920,8 @@ def config_set(
 def config_show() -> None:
     """Show current user preferences.
 
-    Secrets, such as zenodo_token, show only their last four characters.
+    Secrets, such as zenodo_token, show only their last four characters, or
+    nothing when they are shorter than 12 characters.
     """
     from battinfo.config import USER_CONFIG_PATH, _shown_value
     if not USER_CONFIG_PATH.exists():
