@@ -23,7 +23,10 @@ deposit that continues the record keeps the copy it already holds (a kept
 file, never sent again), and any other deposit lists it as missing. A copy
 of the workspace's own data whose local file the index does not know, such
 as an R2 copy an earlier build made, refuses the deposit instead of being
-linked to (:meth:`DepositContext.refusal_for`).
+linked to (:meth:`DepositContext.refusal_for`). Any other Zenodo file URL
+on the deposit's Zenodo is put to Zenodo before anything is created
+(:meth:`DepositContext.unplaced_record`), since an earlier build may have
+pointed records at a draft or a version it never recorded.
 
 A location in a record is screened from its text before the file system is
 asked about it (:func:`location_path`). A network path outside the workspace
@@ -265,9 +268,11 @@ class DepositContext:
     record, or when no concept id was recorded), and ``records`` the record
     ids of that record's versions this workspace knows: a URL under one of
     them names a file the record already holds, whether or not the index
-    knows the local file behind it. ``index`` is the loaded deposit index.
-    ``hosted_bases`` are the URLs ``ws.upload()`` puts its R2 copies under
-    (``R2_PUBLIC_BASE_URL``), when one is configured.
+    knows the local file behind it. ``starts_from`` is the record whose files
+    the deposit starts from: the draft it updates, or the published record a
+    new version is made from (``None`` for a new record). ``index`` is the
+    loaded deposit index. ``hosted_bases`` are the URLs ``ws.upload()`` puts
+    its R2 copies under (``R2_PUBLIC_BASE_URL``), when one is configured.
     """
 
     environment: str = "production"
@@ -275,14 +280,21 @@ class DepositContext:
     records: frozenset[str] = frozenset()
     index: Mapping[str, Any] = field(default_factory=dict)
     hosted_bases: tuple[str, ...] = ()
+    starts_from: str | None = None
+
+    def held_files(self) -> dict[str, IndexedFile]:
+        """The files the index lists for the record the deposit starts from, by deposit file name.
+
+        A copy the deposit keeps, with no local file to send, is the one
+        that record holds, so its size and digests are the ones the index
+        noted for that record. A draft that was never published does not
+        count, unless the deposit updates that very draft.
+        """
+        return deposited_files(self.index, self.environment, self.concept, self.starts_from)
 
     def recorded_names(self) -> dict[str, str]:
         """The name each local file has in the record the deposit continues, keyed by :func:`path_key`."""
-        return {
-            item.path_key(): name
-            for name, item in deposited_files(self.index, self.environment, self.concept).items()
-            if item.path
-        }
+        return {item.path_key(): name for name, item in self.held_files().items() if item.path}
 
     def source_for(self, url: str) -> RemoteSource | None:
         """The deposit file *url* names, or ``None`` for a URL elsewhere on the web.
@@ -291,27 +303,31 @@ class DepositContext:
         names a deposit file when the index knows the local file behind it,
         under any record of this workspace, or when ``<id>`` is a record the
         deposit continues. Any other URL does when ``ws.upload()`` made it.
+        The local file is the one the index noted for the URL's own record;
+        the size and digests of a copy the deposit keeps are those the index
+        noted for the record the deposit starts from (:meth:`held_files`).
         """
         zenodo_url = parse_zenodo_file_url(url)
         if zenodo_url is not None:
-            same_environment = zenodo_url.environment == self.environment
-            concept = concept_of_record(self.index, zenodo_url.environment, zenodo_url.record_id)
-            continued = same_environment and (
-                zenodo_url.record_id in self.records or (concept is not None and concept == self.concept)
+            environment, record, name = zenodo_url.environment, zenodo_url.record_id, zenodo_url.name
+            concept = concept_of_record(self.index, environment, record)
+            continued = environment == self.environment and (
+                record in self.records or (concept is not None and concept == self.concept)
             )
-            known = deposited_files(self.index, zenodo_url.environment, concept).get(zenodo_url.name)
+            known = deposited_files(self.index, environment, concept, record).get(name)
             if known is None and not continued:
                 return None
-            return _remote(url, zenodo_url.name, known, continued=continued)
+            held = self.held_files().get(name) if continued else None
+            return _remote(url, name, known or held, held if continued else known, continued=continued)
         hosted = hosted_file(self.index, url)
         if hosted is None or not hosted.path:
             return None
         # The name and digests the file has in the record the deposit
         # continues, when an earlier version of it deposited the file.
-        for name, item in deposited_files(self.index, self.environment, self.concept).items():
+        for name, item in self.held_files().items():
             if item.path and item.path_key() == hosted.path_key():
-                return _remote(url, name, item, continued=True, hosted=True)
-        return _remote(url, "", hosted, hosted=True)
+                return _remote(url, name, item, item, continued=True, hosted=True)
+        return _remote(url, "", hosted, hosted, hosted=True)
 
     def refusal_for(self, url: str, *, short_id: str = "") -> str | None:
         """Why a deposit refuses a dataset whose data *url* names, or ``None``.
@@ -361,37 +377,43 @@ class DepositContext:
         return None
 
     def unplaced_record(self, url: str) -> str | None:
-        """The record id of a Zenodo file *url* that may be in a version of the deposit's own record, or ``None``.
+        """The record id of a Zenodo file *url* the deposit cannot tell a link from a copy of its own, or ``None``.
 
-        That is a URL on this context's Zenodo, while the deposit continues a
-        record, under a record that is neither one of ``records`` nor one the
-        index files under any record of the workspace. An earlier build may
-        have pointed the records at a version it never recorded. Only Zenodo
-        can tell whether the record is a version of the deposit's own, and
-        ``ws.zenodo()`` asks it before it creates or changes anything.
+        Called for a URL :meth:`source_for` does not place: a URL on this
+        context's Zenodo under a record the deposit does not continue, whose
+        file the index does not know. An earlier build pointed the records at
+        the drafts and versions it made without recording them, so such a
+        URL may be a copy of the workspace's own data, in a draft no reader
+        can download or in a version of the deposit's own record. Only Zenodo
+        can tell, and ``ws.zenodo()`` asks it before it creates or changes
+        anything. A URL on the other Zenodo gives ``None``: the deposit's
+        token cannot ask there.
         """
-        if not self.records:
-            return None
         zenodo_url = parse_zenodo_file_url(url)
         if zenodo_url is None or zenodo_url.environment != self.environment:
             return None
         if zenodo_url.record_id in self.records:
             return None
-        if concept_of_record(self.index, self.environment, zenodo_url.record_id) is not None:
-            return None
         return zenodo_url.record_id
 
 
 def _remote(
-    url: str, name: str, known: IndexedFile | None, *, continued: bool = False, hosted: bool = False
+    url: str,
+    name: str,
+    local: IndexedFile | None,
+    digests: IndexedFile | None,
+    *,
+    continued: bool = False,
+    hosted: bool = False,
 ) -> RemoteSource:
+    """A :class:`RemoteSource` whose local file is *local*'s and whose size and digests are *digests*'s."""
     return RemoteSource(
         url=url,
         name=name,
-        path=Path(known.path) if known is not None and known.path else None,
-        size=known.size if known is not None else 0,
-        md5=known.md5 if known is not None else "",
-        sha256=known.sha256 if known is not None else "",
+        path=Path(local.path) if local is not None and local.path else None,
+        size=digests.size if digests is not None else 0,
+        md5=digests.md5 if digests is not None else "",
+        sha256=digests.sha256 if digests is not None else "",
         continued=continued,
         hosted=hosted,
     )
@@ -489,10 +511,11 @@ class DepositFilePlan:
     #: URLs of copies hosted elsewhere (R2) whose files the deposit carries
     #: too; the records keep pointing at these.
     hosted: frozenset[str] = frozenset()
-    #: Zenodo file URLs that may be in a version of the deposit's own record
-    #: this workspace never recorded, by record id, each as ``(dataset, URL)``
-    #: (see :meth:`DepositContext.unplaced_record`). The deposit links to
-    #: them unless Zenodo says the record is a version of its own.
+    #: Zenodo file URLs on the deposit's Zenodo that the workspace cannot
+    #: tell a link from a copy of its own data, by record id, each as
+    #: ``(dataset, URL)`` (see :meth:`DepositContext.unplaced_record`). The
+    #: deposit links to them unless Zenodo says the record is a draft of this
+    #: account or a version of the deposit's own record.
     unplaced: dict[str, list[tuple[str, str]]] = field(default_factory=dict)
     _by_key: dict[str, DepositFile] = field(default_factory=dict, repr=False)
     _by_location: dict[str, DepositFile | None] = field(default_factory=dict, repr=False)
@@ -768,6 +791,24 @@ def listed_files(listing: object) -> dict[str, str]:
         algorithm, _, digest = str(entry.get("checksum") or "").rpartition(":")
         files[name] = digest.strip().lower() if algorithm.lower() in ("", "md5") else ""
     return files
+
+
+def kept_copy_problems(listing: object, keep: Mapping[str, str]) -> dict[str, str]:
+    """Which of the files in *keep* a deposit, by its file *listing*, does not hold as given.
+
+    *keep* maps ``{name: md5}``; an empty md5 accepts any copy. Returns
+    ``{name: problem}`` for each file that is not listed, or is listed with
+    another md5, where the problem completes a sentence that starts with the
+    name (``"is not on it"``).
+    """
+    on_deposit = listed_files(listing)
+    problems: dict[str, str] = {}
+    for name, md5 in sorted(keep.items()):
+        if name not in on_deposit:
+            problems[name] = "is not on it"
+        elif md5 and on_deposit[name] != md5.lower():
+            problems[name] = f"is on it with md5 {on_deposit[name] or '(none listed)'}, not {md5}"
+    return problems
 
 
 def _graph_nodes(graph: Mapping[str, Any]) -> list[Mapping[str, Any]]:

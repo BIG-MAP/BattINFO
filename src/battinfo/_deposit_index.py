@@ -31,6 +31,10 @@ The index is a JSON object::
             "files": {
               "cycling.csv": {"path": "C:/lab/C01/cycling.csv", "size": 70,
                               "md5": "...", "sha256": "..."}
+            },
+            "drafts": {
+              "7002": {"cycling.csv": {"path": "C:/lab/C01/cycling.csv", "size": 74,
+                                       "md5": "...", "sha256": "..."}}
             }
           }
         }
@@ -45,10 +49,13 @@ The index is a JSON object::
 registered. ``deposits`` is keyed by environment (``production`` or
 ``sandbox``), then by the concept record id that groups the versions of
 one Zenodo record, and lists the record ids of those versions this
-workspace made and each file it deposited, by deposit file name, with its
-local path, size, md5 and sha256. Entries are kept across versions.
-``hosted`` maps each URL ``ws.upload()`` gave a record to the local file
-behind it.
+workspace made and each file its published versions deposited, by deposit
+file name, with its local path, size, md5 and sha256. Entries are kept
+across versions. ``drafts`` lists, by record id, the files of a draft that
+is not published yet: a draft that is never published (one deleted on the
+Zenodo website) leaves the entries of the published versions as they were,
+and a published one joins them. ``hosted`` maps each URL ``ws.upload()``
+gave a record to the local file behind it.
 
 The deposit state names the Zenodo record the next ``ws.zenodo()``
 continues, one file for each Zenodo: ``zenodo.json`` for zenodo.org and
@@ -198,13 +205,31 @@ def _concepts(index: Mapping[str, Any], environment: str) -> Mapping[str, Any]:
     return concepts if isinstance(concepts, Mapping) else {}
 
 
-def deposited_files(index: Mapping[str, Any], environment: str, concept: str | None) -> dict[str, IndexedFile]:
-    """The files the index lists for the Zenodo record *concept* in *environment*, by deposit file name."""
-    entry = _concepts(index, environment).get(concept or "")
-    files = entry.get("files") if isinstance(entry, Mapping) else None
+def _file_entries(files: object) -> dict[str, IndexedFile]:
     if not isinstance(files, Mapping):
         return {}
     return {name: IndexedFile.from_entry(item) for name, item in files.items() if isinstance(item, Mapping)}
+
+
+def deposited_files(
+    index: Mapping[str, Any], environment: str, concept: str | None, record: str | None = None
+) -> dict[str, IndexedFile]:
+    """The files the index lists for the Zenodo record *concept* in *environment*, by deposit file name.
+
+    These are the files its published versions deposited, the latest entry
+    for each name. With *record*, the files the index lists for that record
+    as a draft are laid over them: a draft holds the files of the version it
+    was made from and those its runs sent, and keeps them once published. A
+    draft that is never published changes nothing for any other record.
+    """
+    entry = _concepts(index, environment).get(concept or "")
+    if not isinstance(entry, Mapping):
+        return {}
+    found = _file_entries(entry.get("files"))
+    drafts = entry.get("drafts")
+    if record and isinstance(drafts, Mapping):
+        found.update(_file_entries(drafts.get(record)))
+    return found
 
 
 def concept_records(index: Mapping[str, Any], environment: str, concept: str | None) -> frozenset[str]:
@@ -230,12 +255,20 @@ def note_deposit(
     *,
     record_ids: Iterable[str] = (),
     files: Mapping[str, IndexedFile] | None = None,
+    draft: str | None = None,
 ) -> bool:
-    """Add *record_ids* and *files* (by deposit file name) to the entry of *concept*; True when it changed."""
+    """Add *record_ids* and *files* (by deposit file name) to the entry of *concept*; True when it changed.
+
+    With *draft*, the record id of a draft, *files* are the files that draft
+    holds. They are kept apart from those of the published versions until
+    :func:`note_published` says the draft was published.
+    """
     deposits = index.setdefault("deposits", {})
     entry = deposits.setdefault(environment, {}).setdefault(concept, {})
     records = entry.setdefault("records", [])
     files_entry = entry.setdefault("files", {})
+    if draft:
+        files_entry = entry.setdefault("drafts", {}).setdefault(draft, {})
     changed = False
     for record_id in record_ids:
         if record_id and record_id not in records:
@@ -247,6 +280,23 @@ def note_deposit(
             files_entry[name] = value
             changed = True
     return changed
+
+
+def note_published(index: dict[str, Any], environment: str, concept: str | None, record_id: str) -> bool:
+    """Count the files the draft *record_id* holds among those of the published versions; True when the index changed."""
+    entry = _concepts(index, environment).get(concept or "")
+    if not isinstance(entry, dict):
+        return False
+    drafts = entry.get("drafts")
+    if not isinstance(drafts, dict) or record_id not in drafts:
+        return False
+    held = drafts.pop(record_id)
+    if not drafts:
+        del entry["drafts"]
+    if isinstance(held, Mapping):
+        files = entry.setdefault("files", {})
+        files.update({name: dict(item) for name, item in held.items() if isinstance(item, Mapping)})
+    return True
 
 
 def hosted_file(index: Mapping[str, Any], url: str) -> IndexedFile | None:
@@ -425,6 +475,16 @@ def _index_shape_problem(index: Mapping[str, Any]) -> str | None:
                 problem = _file_entry_problem(item)
                 if problem:
                     return f"the file {name!r} of its {where} {problem}"
+            drafts = entry.get("drafts", {})
+            if not isinstance(drafts, Mapping):
+                return f"its {where} 'drafts' is not an object"
+            for draft, held in drafts.items():
+                if not isinstance(held, Mapping):
+                    return f"its {where} draft {draft!r} is not an object"
+                for name, item in held.items():
+                    problem = _file_entry_problem(item)
+                    if problem:
+                        return f"the file {name!r} of draft {draft!r} in its {where} {problem}"
     hosted = index.get("hosted", {})
     if not isinstance(hosted, Mapping):
         return "its 'hosted' is not an object"

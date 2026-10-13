@@ -42,6 +42,7 @@ from battinfo._deposit_files import (
     build_deposit_file_plan,
     dataset_distributions,
     deposit_file_problems,
+    kept_copy_problems,
     location_key,
     location_path,
     measured_file,
@@ -49,6 +50,7 @@ from battinfo._deposit_files import (
 )
 from battinfo._deposit_index import (
     ZENODO_HOSTS,
+    DepositIndexError,
     IndexedFile,
     concept_of_record,
     concept_records,
@@ -56,6 +58,7 @@ from battinfo._deposit_index import (
     load_deposit_state,
     note_deposit,
     note_hosted,
+    note_published,
     register_sources,
     registered_keys,
     save_deposit_index,
@@ -529,6 +532,44 @@ def _unreadable_draft_message(state: Mapping[str, Any], exc: Exception) -> str:
                 f"{state_file(environment)} to start a new record on {ZENODO_HOSTS[environment]}."
             )
     return f"{text} Nothing was created on Zenodo."
+
+
+#: How a deposit refusal tells the user to give a dataset its local data file back.
+_POINT_AT_LOCAL_FILE = "Point each dataset at its local file again (ws.add(..., data=...), then ws.save())"
+
+
+def _kept_copies_refusal(
+    plan: DepositFilePlan, datasets: Iterable[object], lacking: Mapping[str, str], holder: str
+) -> str:
+    """The refusal of a deposit that keeps copies *holder* does not hold, naming each dataset that points at one.
+
+    *lacking* maps each such file's deposit name to what is wrong, as
+    :func:`~battinfo._deposit_files.kept_copy_problems` gives it, and
+    *datasets* are the dataset records the deposit read.
+    """
+    lines: builtins.list[str] = []
+    named: set[str] = set()
+    for record in datasets:
+        body = record.get("dataset") if isinstance(record, dict) else None
+        if not isinstance(body, dict):
+            continue
+        usable, _problems = dataset_distributions(body)
+        for dist in usable:
+            entry = plan.entry_for(dist["content_url"])
+            if entry is None or not entry.kept or entry.name not in lacking:
+                continue
+            lines.append(
+                f"dataset {body.get('id') or '(no id)'}: {dist['content_url']} "
+                f"({entry.name} {lacking[entry.name]})"
+            )
+            named.add(entry.name)
+    lines += [f"{name} {problem}" for name, problem in lacking.items() if name not in named]
+    return (
+        f"Refusing to deposit: {holder} does not hold {len(lacking)} data file(s) that the dataset "
+        "records point at and for which this workspace has no local file to send: "
+        + "; ".join(dict.fromkeys(lines))
+        + f". {_POINT_AT_LOCAL_FILE}, then re-run."
+    )
 
 
 def _deposit_record_iris(record_sets: Mapping[str, list[dict]], graph: Mapping[str, Any]) -> list[str]:
@@ -5904,19 +5945,20 @@ class AuthoringWorkspace:
         all data files plus a ``battinfo.json`` linked data document, and
         optionally publishes.
 
-        Safe to re-run: if the workspace already has a record this never errors. With
-        ``record_id=None`` it *warns* and moves the workflow forward — a published
-        record forks a NEW VERSION; an existing open draft is UPDATED in place (Zenodo
-        permits one open draft per concept). A recorded draft is first checked with
-        Zenodo, so a draft published on the website since, or by a run that stopped
-        before it recorded the publish, gets a new version. A recorded draft deleted
-        on the website stops the run, which names the way on: a new version of the
-        published record the draft was made from (``record_id=``), or, when nothing
-        of the record was published, a new record. Delete ``.battinfo/zenodo.json``
-        (``.battinfo/zenodo-sandbox.json`` for the sandbox) to force a brand-new
-        record. Default ``publish=False`` leaves a reviewable draft, so a new
-        version is never published (and no DOI minted) without an explicit
-        ``publish=True`` or a click on Zenodo.
+        Re-running it continues the workspace's record and never starts a second
+        one by itself. With ``record_id=None`` it *warns* and moves the workflow
+        forward: a published record forks a NEW VERSION; an existing open draft is
+        UPDATED in place (Zenodo permits one open draft per concept). A recorded
+        draft is first checked with Zenodo, so a draft published on the website
+        since, or by a run that stopped before it recorded the publish, gets a new
+        version. A run can still stop with a refusal, and each refusal names the
+        way on. A recorded draft deleted on the website is one: the way on is a
+        new version of the published record the draft was made from
+        (``record_id=``), or, when nothing of the record was published, a new
+        record. Delete ``.battinfo/zenodo.json`` (``.battinfo/zenodo-sandbox.json``
+        for the sandbox) to force a brand-new record. Default ``publish=False``
+        leaves a reviewable draft, so a new version is never published (and no DOI
+        minted) without an explicit ``publish=True`` or a click on Zenodo.
 
         Each Zenodo has its own record: ``.battinfo/zenodo.json`` names the one on
         zenodo.org and ``.battinfo/zenodo-sandbox.json`` the one on the sandbox, so
@@ -5947,24 +5989,33 @@ class AuthoringWorkspace:
         ``.battinfo/deposit-files.json`` records the local file behind each
         deposited copy, with its size, md5 and sha256, so a new version, a retry
         after a failed run, or a new record after ``.battinfo/zenodo.json`` was
-        deleted finds the file again. A file whose local copy is gone is kept as
-        the record already holds it (the copy a new version takes over from the
-        one before), when its md5 is the one recorded; with no such copy the
-        deposit is refused, before anything is sent for a new record, else
-        before any file on the deposit changes. Each file keeps its name, and so
-        its URL, from one version to the next. The files :meth:`upload` put in R2
-        storage go into the deposit too, while their records keep the R2 URLs.
+        deleted finds the file again. A draft's files count there only once the
+        draft is published, so a draft deleted on the website leaves the entries
+        of the published record as they were. A file whose local copy is gone is
+        kept as the record the deposit starts from holds it (the copy a new
+        version takes over from the one before), when its md5 is the one
+        recorded. Zenodo is asked for that record's files before anything is
+        created or changed, and a copy it does not hold refuses the deposit,
+        naming each dataset and how to point it at its local file again; with no
+        record to start from, a file with no local copy refuses the deposit
+        before anything is sent. Each file keeps its name, and so its URL, from
+        one version to the next. The files :meth:`upload` put in R2 storage go
+        into the deposit too, while their records keep the R2 URLs.
 
         A record that points at a copy of its data the deposit should carry, but
         whose local file this workspace has no record of, refuses the deposit
         rather than being linked to: an R2 copy an earlier build's
-        :meth:`upload` made, an ``s3:`` URL, a file in a sandbox record (from a
-        deposit on zenodo.org), and a file in a version of this workspace's own
-        Zenodo record that the workspace never recorded. Zenodo is asked about
-        the last before the deposit is created or changed: a Zenodo record of
-        this account in the same concept counts, and anyone else's record stays
-        a link. The refusal names each dataset and how to point it at its local
-        file again.
+        :meth:`upload` made, an ``s3:`` URL, and a file in a sandbox record
+        (from a deposit on zenodo.org). Any other Zenodo file URL on the
+        deposit's Zenodo that the workspace cannot place is put to Zenodo
+        before the deposit is created or changed, whether or not the deposit
+        continues a record, since an earlier build pointed records at the drafts
+        and versions it made without recording them. A draft of this account
+        that is not published refuses the deposit, since no reader can download
+        its files, and so does a version of the record the deposit continues.
+        A published record of this account in another concept, and anyone
+        else's record, stay links. The refusal names each dataset and how to
+        point it at its local file again.
 
         A deposit carries every record or none. A record the deposit graph
         cannot convert, or a distribution entry that is not an object with a
@@ -6057,7 +6108,7 @@ class AuthoringWorkspace:
         import shutil
         import tempfile
 
-        from battinfo.zenodo import ZenodoClient, ZenodoError
+        from battinfo.zenodo import KeptFilesError, ZenodoClient, ZenodoError
 
         # Each numbered step runs only once the steps before it have passed, so
         # a refusal leaves as little behind as it can. ws.publish(zenodo=True)
@@ -6151,13 +6202,14 @@ class AuthoringWorkspace:
         live_draft: dict | None = None
         if record_id is None and state and not state.get("published"):
             try:
-                live_draft = self._reconcile_zenodo_draft(client, state)
+                live_draft = self._reconcile_zenodo_draft(client, state, index=index)
             except ZenodoError as exc:
                 raise ZenodoError(_unreadable_draft_message(state, exc), status=exc.status) from exc
-        # A record may point at a file in a version of this record that the
-        # workspace never recorded. Only Zenodo knows; ask before anything is
-        # created or changed.
-        self._refuse_unrecorded_versions(
+        # A record may point at a Zenodo file the workspace cannot place: a
+        # copy an earlier build made in a draft or a version it never
+        # recorded, or a link to someone else's record. Only Zenodo knows; ask
+        # before anything is created or changed.
+        self._refuse_unknown_zenodo_copies(
             client, plan, context,
             continues=record_id or state.get("deposit_id") or state.get("record_id"),
             live_draft=live_draft,
@@ -6168,6 +6220,14 @@ class AuthoringWorkspace:
         stored_record = state.get("record_id")
         record_id, reuse_draft_id, _version_warning = _plan_zenodo_deposit(
             stored_record, bool(state.get("published")), record_id, recorded_in=recorded_in,
+        )
+        # A file with no local copy is kept as the record the deposit starts
+        # from holds it; a copy that record lacks refuses the deposit before a
+        # draft is made or changed.
+        self._refuse_missing_kept_copies(
+            client, plan, deposit_records.get("dataset", []),
+            starts_from=reuse_draft_id if reuse_draft_id is not None else record_id,
+            updates_draft=reuse_draft_id is not None,
         )
         if _version_warning:
             warnings.warn(_version_warning, stacklevel=2)
@@ -6311,6 +6371,13 @@ class AuthoringWorkspace:
             # unchanged files already on the deposit are kept.
             try:
                 sync = client.sync_files(deposit_id, upload_map, keep=keep)
+            except KeptFilesError as exc:
+                # Checked in step 5 against the record the draft starts from;
+                # the draft itself lacks the copy all the same.
+                raise ZenodoError(
+                    _kept_copies_refusal(plan, deposit_records.get("dataset", []), exc.files, f"the draft {draft_url}")
+                    + f" No file on the draft was changed, and the draft is recorded in {recorded_in}."
+                ) from exc
             except ZenodoError as exc:
                 raise ZenodoError(
                     f"{exc} The draft ({draft_url}) is recorded in {recorded_in}, so the "
@@ -6322,13 +6389,19 @@ class AuthoringWorkspace:
                   f"{len(sync['removed'])} removed")
             for name in sync["uploaded"]:
                 print(f"    + {name}")
-            # The local file behind each deposited copy, recorded before any
-            # record names only the copy, so the next deposit still finds it.
+            # The local file behind each copy the draft holds, recorded before
+            # any record names only the copy, so the next deposit still finds
+            # it. They count for the published versions only once the draft is
+            # published: a draft deleted on the website leaves the entries of
+            # the record it was made from as they were.
+            # A kept copy is listed too when its local file and digests are
+            # known, so the draft's entries cover every data file it holds.
             deposited = {
                 f.name: IndexedFile(path=str(f.path), size=f.size, md5=f.md5, sha256=f.sha256)
-                for f in plan.local_files() if not f.archive
+                for f in plan.files
+                if not f.archive and (not f.kept or (f.path.parts and f.md5))
             }
-            if note_deposit(index, environment, concept, files=deposited):
+            if note_deposit(index, environment, concept, files=deposited, draft=str(zenodo_record_id)):
                 save_deposit_index(self._root, index)
 
         finally:
@@ -6381,6 +6454,7 @@ class AuthoringWorkspace:
             state = {key: value for key, value in state.items() if key != "version_of"}
             state = {**state, "doi": doi, "published": True}
             self._save_zenodo_state(state)
+            self._note_draft_published(index, environment, concept, str(zenodo_record_id))
             print(f"  Published: {record_url}")
             print(f"  DOI: {doi}")
         else:
@@ -6750,8 +6824,12 @@ class AuthoringWorkspace:
         ``.battinfo/deposit-files.json`` (*index*) unless given. *sandbox*
         ``None`` is zenodo.org, as for the previews. The deposit continues the
         record the state names, unless *record_id* names a record outside it;
-        it then continues that one. The R2 public base URL, when one is
-        configured, tells a copy :meth:`upload` made from any other URL.
+        it then continues that one. The records it knows of are the state's
+        record, deposit and the published record a draft of a new version was
+        made from, and the versions the index lists for its concept. It starts
+        from *record_id* when given, else from the state's record. The R2
+        public base URL, when one is configured, tells a copy :meth:`upload`
+        made from any other URL.
         """
         environment = zenodo_environment(bool(sandbox))
         state = self._load_zenodo_state(environment) if state is None else state
@@ -6759,14 +6837,18 @@ class AuthoringWorkspace:
         public_base = (self._credential("R2_PUBLIC_BASE_URL") or "").strip().rstrip("/")
         concept: str | None = None
         records: set[str] = set()
+        starts_from = record_id
         if state and state.get("environment") == environment:
             stored = str(state["record_id"])
             stored_concept = state.get("concept_record_id") or concept_of_record(index, environment, stored)
             stored_records = {stored, *concept_records(index, environment, stored_concept)}
-            if state.get("deposit_id"):
-                stored_records.add(str(state["deposit_id"]))
+            for key in ("deposit_id", "version_of"):
+                if state.get(key):
+                    stored_records.add(str(state[key]))
             if record_id is None or record_id in stored_records:
                 concept, records = stored_concept, stored_records
+            if record_id is None:
+                starts_from = stored
         if record_id is not None and record_id not in records:
             concept = concept_of_record(index, environment, record_id)
             records = {record_id, *concept_records(index, environment, concept)}
@@ -6776,6 +6858,7 @@ class AuthoringWorkspace:
             records=frozenset(records),
             index=index,
             hosted_bases=(public_base,) if public_base else (),
+            starts_from=starts_from,
         )
 
     def _registered_sources(self) -> frozenset[str]:
@@ -6819,8 +6902,8 @@ class AuthoringWorkspace:
         whose local file the index does not know is an omission instead of a
         link (see ``DepositContext.refusal_for``): an R2 copy an earlier build
         made, an ``s3:`` URL, or a URL in a sandbox record from a deposit on
-        zenodo.org. A Zenodo URL under a record the workspace does not know,
-        while the deposit continues one, goes into ``plan.unplaced`` for
+        zenodo.org. Any other Zenodo file URL on the deposit's Zenodo that
+        the workspace cannot place goes into ``plan.unplaced`` for
         :meth:`zenodo` to ask Zenodo about.
 
         Each location is screened from its text before anything asks the file
@@ -8348,17 +8431,22 @@ class AuthoringWorkspace:
         """Write *state* to the state file of its environment, atomically."""
         save_deposit_state(self._root, state)
 
-    def _reconcile_zenodo_draft(self, client: Any, state: dict) -> dict | None:
+    def _reconcile_zenodo_draft(
+        self, client: Any, state: dict, *, index: dict[str, Any] | None = None
+    ) -> dict | None:
         """Ask Zenodo whether the draft *state* records is still a draft.
 
         Returns the live draft when it is. When it was published since, on the
         Zenodo website or by a run that stopped before it recorded the
-        publish, *state* is updated to say so (with the DOI) and saved, and
-        ``None`` is returned.
+        publish, *state* is updated to say so (with the DOI) and saved, the
+        files the draft holds count among those of the published versions in
+        the deposit index (*index*, else the one on disk, when it can be
+        read), and ``None`` is returned.
         """
         from battinfo.zenodo import deposit_is_published  # noqa: PLC0415
 
-        deposit = client.get_deposit(state.get("deposit_id") or state["record_id"])
+        draft = state["record_id"]
+        deposit = client.get_deposit(state.get("deposit_id") or draft)
         if not deposit_is_published(deposit):
             return deposit
         metadata = deposit.get("metadata") if isinstance(deposit.get("metadata"), dict) else {}
@@ -8366,15 +8454,44 @@ class AuthoringWorkspace:
         state.update(
             published=True,
             doi=str(doi or ""),
-            record_id=str(deposit.get("record_id") or state["record_id"]),
+            record_id=str(deposit.get("record_id") or draft),
         )
         state.pop("version_of", None)   # published, it is the version the next one is made from
         self._save_zenodo_state(state)
+        environment = str(state.get("environment") or "production")
+        if index is None:
+            try:
+                index = load_deposit_index(self._root)
+            except DepositIndexError:
+                index = None   # ws.zenodo() names the file when it reads it
+        if index is not None:
+            concept = state.get("concept_record_id") or concept_of_record(index, environment, draft)
+            self._note_draft_published(index, environment, concept, draft)
         print(f"  The Zenodo draft {state['record_id']} has been published since this workspace "
-              f"recorded it; {state_file(str(state.get('environment') or 'production'))} now says so.")
+              f"recorded it; {state_file(environment)} now says so.")
         return None
 
-    def _refuse_unrecorded_versions(
+    def _note_draft_published(
+        self, index: dict[str, Any], environment: str, concept: str | None, record_id: str
+    ) -> None:
+        """Count the files the draft *record_id*, now published, holds among those of the published versions.
+
+        An index that cannot be written is left as it is, with a warning:
+        the draft's own entries give the next deposit, which starts from
+        this record, the same files.
+        """
+        try:
+            if note_published(index, environment, concept, record_id):
+                save_deposit_index(self._root, index)
+        except OSError as exc:
+            warnings.warn(
+                f"The Zenodo record {record_id} is published, but .battinfo/deposit-files.json could not "
+                f"be written ({exc}). It still lists the record's files as those of a draft, which the "
+                "next deposit reads the same way.",
+                stacklevel=3,
+            )
+
+    def _refuse_unknown_zenodo_copies(
         self,
         client: Any,
         plan: DepositFilePlan,
@@ -8383,32 +8500,41 @@ class AuthoringWorkspace:
         continues: str | None,
         live_draft: Mapping[str, Any] | None,
     ) -> None:
-        """Refuse a deposit whose records point at files in a version of its own record that the workspace never recorded.
+        """Refuse a deposit whose records point at Zenodo files that may be copies of its own data no reader can use.
 
         *plan* lists such URLs by record id (``plan.unplaced``): Zenodo file
-        URLs on the deposit's Zenodo, under a record the workspace does not
-        know, while the deposit continues a record (*continues*, the record or
-        draft the run starts from; *live_draft* is that draft as Zenodo
-        returned it, when the run already asked). An earlier build pointed
-        records at the versions it made without recording them, so the URL
-        may be the deposit's own copy of a file whose local source this
-        workspace does not know, and the version the deposit is made from
-        need not hold it. Zenodo is asked about each such record: one this
-        account can read whose concept record is the deposit's refuses the
-        deposit, before anything is created or changed. A record Zenodo does
-        not show this account (HTTP 403, 404 or 410) is someone else's, and
-        the deposit links to it.
-        """
-        if not plan.unplaced or not continues:
-            return
-        from battinfo.zenodo import ZenodoError  # noqa: PLC0415
+        URLs on the deposit's Zenodo, under a record the deposit does not
+        continue, whose file the deposit index does not know. An earlier build
+        pointed records at the drafts and versions it made without recording
+        them, so the URL may be a copy of a file whose local source this
+        workspace does not know. Zenodo is asked about each such record, before
+        anything is created or changed:
 
+        - a record Zenodo does not show this account (HTTP 403, 404 or 410) is
+          someone else's, and the deposit links to it;
+        - a draft of this account that is not published serves its files to no
+          reader, and refuses the deposit;
+        - a published record of this account refuses the deposit when it is a
+          version of the record the deposit continues (*continues*, the record
+          or draft the run starts from; *live_draft* is that draft as Zenodo
+          returned it, when the run already asked), since the version the
+          deposit is made from need not hold its files. Any other is a link.
+
+        The concept record of the continued record is looked up only when a
+        published record needs the comparison. The refusal names each dataset
+        and how to point it at its local file again.
+        """
+        if not plan.unplaced:
+            return
+        from battinfo.zenodo import ZenodoError, deposit_is_published  # noqa: PLC0415
+
+        host = ZENODO_HOSTS[context.environment]
         concept = context.concept
+        # Without a recorded concept, the continued record's is asked of
+        # Zenodo once, when a published record needs the comparison.
+        concept_known = bool(concept) or not continues
+        refused: builtins.list[str] = []
         try:
-            if not concept:
-                stored = live_draft if live_draft is not None else client.get_deposit(continues)
-                concept = str(stored.get("conceptrecid") or "") or None
-            own: builtins.list[tuple[str, str]] = []
             for record, uses in sorted(plan.unplaced.items()):
                 try:
                     found = client.get_deposit(record)
@@ -8416,26 +8542,80 @@ class AuthoringWorkspace:
                     if exc.status in (403, 404, 410):
                         continue   # not this account's record: a link elsewhere
                     raise
-                if concept and str(found.get("conceptrecid") or "") == concept:
-                    own.extend(uses)
+                if not deposit_is_published(found):
+                    why = (
+                        f"is in the draft {record} on {host}, which this Zenodo account has not "
+                        "published, so no reader can download it"
+                    )
+                else:
+                    if not concept_known:
+                        stored = live_draft if live_draft is not None else client.get_deposit(continues)
+                        concept = str(stored.get("conceptrecid") or "") or None
+                        concept_known = True
+                    if not concept or str(found.get("conceptrecid") or "") != concept:
+                        continue   # another published record of this account: a link
+                    why = (
+                        f"is in the record {record}, a version of this workspace's own Zenodo record "
+                        f"(concept {concept} on {host}) that the workspace never recorded, and the "
+                        "version this deposit is made from need not hold it"
+                    )
+                refused.extend(f"dataset {dataset}: {url} {why}" for dataset, url in uses)
         except ZenodoError as exc:
             raise ZenodoError(
                 f"{exc} (asked to tell which Zenodo record holds files the dataset records point at). "
                 "Nothing was created on Zenodo.",
                 status=exc.status,
             ) from exc
-            if str(found.get("conceptrecid") or "") == concept:
-                own.extend(uses)
-        if own:
-            host = ZENODO_HOSTS[context.environment]
+        if refused:
             raise RuntimeError(
-                f"Refusing to deposit: {len(own)} distribution(s) point at files in a version of this "
-                f"workspace's own Zenodo record (concept {concept} on {host}) that the workspace has "
-                "no record of, so it does not know the local files behind them, and the version "
-                "this deposit is made from need not hold them: "
-                + "; ".join(f"dataset {dataset}: {url}" for dataset, url in own)
-                + ". Point each dataset at its local file again (ws.add(..., data=...), then "
-                "ws.save()), then re-run. Nothing was created on Zenodo."
+                f"Refusing to deposit: {len(refused)} distribution(s) point at a copy on Zenodo whose "
+                "local file this workspace has no record of, and the deposit cannot link to it: "
+                + "; ".join(refused)
+                + f". {_POINT_AT_LOCAL_FILE}, then re-run. Nothing was created on Zenodo."
+            )
+
+    def _refuse_missing_kept_copies(
+        self,
+        client: Any,
+        plan: DepositFilePlan,
+        datasets: Iterable[object],
+        *,
+        starts_from: str | None,
+        updates_draft: bool,
+    ) -> None:
+        """Refuse a deposit whose kept copies the record it starts from does not hold, before anything is created.
+
+        A data file with no local copy is kept as the record the deposit
+        starts from (*starts_from*) holds it: the draft it updates
+        (*updates_draft*), or the published record a new version is made from,
+        whose files the new version takes over. Zenodo is asked for that
+        record's files, so a copy it does not hold, or holds with another md5
+        than the one recorded, refuses the deposit before a draft is made or
+        changed. *datasets* are the dataset records, to name the ones whose
+        copy is missing.
+        """
+        kept = plan.kept_files()
+        if not kept or starts_from is None:
+            return
+        from battinfo.zenodo import ZenodoError  # noqa: PLC0415
+
+        try:
+            listing = client.list_files(starts_from)
+        except ZenodoError as exc:
+            raise ZenodoError(
+                f"{exc} (asked which data files the Zenodo record {starts_from} holds). "
+                "Nothing was created on Zenodo.",
+                status=exc.status,
+            ) from exc
+        lacking = kept_copy_problems(listing, {entry.name: entry.md5 for entry in kept})
+        if lacking:
+            holder = (
+                f"the draft {starts_from} that this deposit updates" if updates_draft
+                else f"the published record {starts_from} that this deposit makes a new version of"
+            )
+            raise RuntimeError(
+                _kept_copies_refusal(plan, datasets, lacking, holder)
+                + " Nothing was created or changed on Zenodo."
             )
 
     def _submission_doi(self, doi: str | None) -> Callable[[object], str | None]:

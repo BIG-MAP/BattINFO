@@ -14,9 +14,11 @@ import os
 import time
 import urllib.error
 import urllib.request
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
+from battinfo._deposit_files import kept_copy_problems
 from battinfo._jsonio import write_json
 from battinfo._util import url_segment
 from battinfo.bundle import ZENODO_CELL_RECORD_FILENAME, ZenodoCellRecord
@@ -72,6 +74,18 @@ class ZenodoError(RuntimeError):
     def __init__(self, message: str, *, status: int | None = None) -> None:
         super().__init__(message)
         self.status = status
+
+
+class KeptFilesError(ZenodoError):
+    """A deposit does not hold, as given, the files :meth:`ZenodoClient.sync_files` was asked to keep.
+
+    ``files`` maps each such file name to what is wrong (``"is not on it"``,
+    or the md5 it is listed with).
+    """
+
+    def __init__(self, message: str, *, files: Mapping[str, str]) -> None:
+        super().__init__(message)
+        self.files = dict(files)
 
 
 def _metadata_errors(reply: Any) -> list[str]:
@@ -381,7 +395,8 @@ class ZenodoClient:
 
         Nothing on the deposit changes when a local file in ``files`` is missing
         (``FileNotFoundError``), or when a file in ``keep`` is not on the deposit or
-        has another md5 there (:class:`ZenodoError`, naming each).
+        has another md5 there (:class:`KeptFilesError`, a :class:`ZenodoError`
+        naming each).
 
         Returns ``{"uploaded": [...], "kept": [...], "removed": [...]}``.
         """
@@ -390,23 +405,18 @@ class ZenodoClient:
             raise FileNotFoundError(
                 f"Not uploaded to deposit {deposit_id}: no local file for {'; '.join(absent)}."
             )
-        existing = {(f.get("filename") or f.get("key")): f for f in self.list_files(deposit_id)}
+        listing = self.list_files(deposit_id)
+        existing = {(f.get("filename") or f.get("key")): f for f in listing}
         desired = {name: Path(path) for path, name in files.items()}
         keep = {name: md5 for name, md5 in (keep or {}).items() if name not in desired}
 
-        lacking: list[str] = []
-        for name, md5 in sorted(keep.items()):
-            ex = existing.get(name)
-            listed = _listed_md5(ex.get("checksum")) if ex is not None else ""
-            if ex is None:
-                lacking.append(f"{name} is not on it")
-            elif md5 and listed != md5.lower():
-                lacking.append(f"{name} is on it with md5 {listed or '(none listed)'}, not {md5}")
+        lacking = kept_copy_problems(listing, keep)
         if lacking:
-            raise ZenodoError(
+            raise KeptFilesError(
                 f"Deposit {deposit_id} does not hold the files that have no local copy to upload: "
-                + "; ".join(lacking)
-                + ". Nothing on the deposit was changed."
+                + "; ".join(f"{name} {problem}" for name, problem in lacking.items())
+                + ". Nothing on the deposit was changed.",
+                files=lacking,
             )
 
         to_upload: dict[Path, str] = {}
@@ -813,6 +823,7 @@ def upload_zenodo_package(
 
 
 __all__ = [
+    "KeptFilesError",
     "ZenodoClient",
     "ZenodoError",
     "patch_zenodo_urls",
