@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib
+import inspect
 import json
 import sys
 from pathlib import Path
@@ -166,6 +167,57 @@ def test_publish_preserves_legacy_publication_package_call_shape(monkeypatch) ->
 def test_publish_requires_object_or_legacy_keywords() -> None:
     with pytest.raises(TypeError, match="requires a BattINFO object"):
         publish()
+
+
+def test_publish_lists_its_parameters_as_keyword_only() -> None:
+    parameters = inspect.signature(publish).parameters
+    for name in (
+        "root", "force", "validation_policy", "registry_base_url", "api_key", "api_key_header",
+        "platform_base_url", "workspace_id", "publisher_id", "source_version",
+    ):
+        assert parameters[name].kind is inspect.Parameter.KEYWORD_ONLY, name
+
+
+def test_publish_rejects_an_unknown_keyword() -> None:
+    with pytest.raises(TypeError, match="roots"):
+        publish(_sample_cell_spec(), destination="local", roots="publish-out")
+
+
+def test_publish_rejects_a_legacy_keyword_next_to_an_object() -> None:
+    with pytest.raises(TypeError, match="cell_instance"):
+        publish(_sample_cell_spec(), destination="local", cell_instance="cell-instance")
+
+
+def test_legacy_publish_warns_that_it_is_removed_in_0_9_0(monkeypatch) -> None:
+    monkeypatch.setattr(publish_module, "_legacy_publish", lambda **kwargs: {"status": "ok"})
+
+    with pytest.warns(DeprecationWarning, match=r"removed in 0\.9\.0"):
+        publish(cell_spec="cell-spec", cell_instance="cell-instance", test="test", dataset="dataset")
+
+
+def test_legacy_publish_forwards_its_own_keywords_and_validation_policy(monkeypatch) -> None:
+    calls: list[dict[str, object]] = []
+    monkeypatch.setattr(publish_module, "_legacy_publish", lambda **kwargs: calls.append(kwargs) or {"status": "ok"})
+
+    publish(
+        cell_spec="cell-spec", cell_instance="cell-instance", test="test", dataset="dataset",
+        emit_html_page=True, validation_policy="strict",
+    )
+
+    assert calls == [{
+        "cell_spec": "cell-spec", "cell_instance": "cell-instance", "test": "test", "dataset": "dataset",
+        "emit_html_page": True, "validation_policy": "strict",
+    }]
+
+
+@pytest.mark.parametrize("extra", [{"root": "out"}, {"force": True}, {"api_key": "secret"}, {"bogus": 1}])
+def test_legacy_publish_rejects_keywords_it_does_not_take(monkeypatch, extra: dict[str, object]) -> None:
+    calls: list[dict[str, object]] = []
+    monkeypatch.setattr(publish_module, "_legacy_publish", lambda **kwargs: calls.append(kwargs) or {"status": "ok"})
+
+    with pytest.raises(TypeError, match=next(iter(extra))):
+        publish(cell_spec="cell-spec", cell_instance="cell-instance", test="test", dataset="dataset", **extra)
+    assert calls == []
 
 
 # ---------------------------------------------------------------------------

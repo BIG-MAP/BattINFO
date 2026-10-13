@@ -160,6 +160,8 @@ The record-type pages under `docs/records/` run each authoring snippet against t
 
 Transient output goes under `.battinfo/` (gitignored) or a test's temporary directory. Do not edit `src/battinfo/data/` by hand except to copy in a changed schema or mapping table, and edit `examples/` only when the task is about the examples themselves. Keep work logs and planning notes out of commits; `WORK_LOG.md` and `CLAUDE.md` are already in `.gitignore`.
 
+Package code deletes folders through `battinfo._fs_guard`: `remove_tree` for a folder a caller named or read from a manifest, passing the operation's inputs, and `remove_temp_tree` for a temporary folder the code made itself. An output root BattINFO creates gets the marker from `write_marker`. `tests/test_fs_guard.py` fails if any other module calls `shutil.rmtree`.
+
 ## Key source files
 
 | Path | What it holds |

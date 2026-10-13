@@ -436,7 +436,7 @@ $ battinfo publish cell-spec [OPTIONS]
 * `--source-file <str>`: Optional provenance source file.
 * `--destination <str>`: Publish destination: local|registry|battery-genome|staging|production.  [default: local]
 * `--root <path>`: Optional workspace root for generated artifacts.
-* `--force`: Replace an existing generated workspace root.
+* `--force`: Delete the workspace root and build it again. Only a folder BattINFO created is deleted, never one that holds the --input file.
 * `--validation-policy <str>`: Validation policy: default|strict|publisher|ingest.  [default: strict]
 * `--registry-url <str>`: Optional registry base URL override.
 * `--api-key <str>`: Optional registry API key override.
@@ -1581,7 +1581,7 @@ $ battinfo demo setup [OPTIONS] [root]
 * `--registry <str>`: Registry tenant/workspace slug.  [default: digibatt/hello-world]
 * `--publisher-id <str>`: Publisher id used for the generated submission package.  [default: demo-lab]
 * `--version <str>`: Release version and submission source_version.  [default: 1.0.0]
-* `--force`: Replace the existing demo root before regenerating it.
+* `--force`: Delete ROOT/workspace and ROOT/release and build them again. Only folders BattINFO created are deleted.
 * `--format <str>`: Output format: json|text.  [default: json]
 * `--help`: Show this message and exit.
 
@@ -1610,7 +1610,7 @@ $ battinfo demo verify [OPTIONS] [root]
 * `--api-key-header <str>`: Registry submission API key header.  [default: X-Battinfo-API-Key]
 * `--timeout-sec <float>`: Timeout window for registry and platform checks.  [default: 30.0]
 * `--poll-interval-sec <float>`: Polling interval while waiting for responses.  [default: 1.0]
-* `--force`: Replace the existing demo root before regenerating it.
+* `--force`: Delete ROOT/workspace and ROOT/release and build them again. Only folders BattINFO created are deleted.
 * `--allow-local-files`: Send the demo dataset although its file is a local path. Only for a local test registry.
 * `--format <str>`: Output format: json|text.  [default: json]
 * `--help`: Show this message and exit.
@@ -1721,7 +1721,7 @@ $ battinfo ingest build [OPTIONS] {ingest_root}
 * `--source-version <str>`: Submission source version.
 * `--license <str>`: Dataset license to apply.
 * `--artifact-base-url <str>`: Optional public base URL for packaged artifact files.
-* `--force`: Replace the existing workspace root before regenerating it.
+* `--force`: Delete the workspace root and build it again. Only a folder BattINFO created is deleted, never one that holds the evidence files.
 * `--bundle / --no-bundle`: Also build the submission package after authoring the workspace.  [default: bundle]
 * `--validation-policy <str>`: Validation policy: strict|set|quick.  [default: strict]
 * `--format <str>`: Output format: json|text.  [default: json]
@@ -1772,7 +1772,7 @@ $ battinfo ingest publish [OPTIONS] {ingest_root}
 * `--platform-url <str>`: Optional Battery Genome base URL.
 * `--api-key-header <str>`: Registry API key header.  [default: X-Battinfo-API-Key]
 * `--timeout-sec <float>`: Registry submission timeout in seconds.  [default: 300.0]
-* `--force`: Replace the existing workspace root before regenerating it.
+* `--force`: Delete the workspace root and build it again. Only a folder BattINFO created is deleted, never one that holds the evidence files.
 * `--validation-policy <str>`: Validation policy: strict|set|quick.  [default: strict]
 * `--process-artifacts`: Convert timeseries CSVs to BDF and generate static/interactive plots. Requires battinfo.
 * `--allow-local-files`: Send records whose files are local paths. Only for a local test registry.
@@ -1901,7 +1901,7 @@ $ battinfo dataset process [OPTIONS] {folder}
 
 **Options**:
 
-* `--force`: Rebuild from scratch.
+* `--force`: Delete the generated workspace (.battinfo/ingest/ in the current folder) and build it again. Only a folder BattINFO created is deleted.
 * `--validation-policy <str>`: strict|set|quick  [default: strict]
 * `--json`: Emit machine-readable JSON to stdout.
 * `--help`: Show this message and exit.

@@ -25,11 +25,17 @@ def setup_demo_environment(
     version: str = DEFAULT_DEMO_VERSION,
     force: bool = False,
 ) -> dict[str, Any]:
+    """Author the demo records and write their submission package.
+
+    The demo writes ``<root>/workspace`` and ``<root>/release``. ``force=True``
+    deletes those two folders first and builds them again; a folder BattINFO
+    did not create is not deleted.
+    """
     root_path = Path(root)
     workspace_root = root_path / "workspace"
     release_root = root_path / "release"
 
-    workspace = Workspace(root=workspace_root, clean=force)
+    workspace = Workspace(root=workspace_root, clean=force, generated=True)
     dataset_file = workspace.root / "inputs" / "cycle-life.csv"
     dataset_file.parent.mkdir(parents=True, exist_ok=True)
     dataset_file.write_text(

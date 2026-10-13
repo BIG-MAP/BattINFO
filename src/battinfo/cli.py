@@ -6,7 +6,9 @@ from typing import Any
 
 import typer
 
+from battinfo._fs_guard import check_remove
 from battinfo._jsonio import write_json as _write_json_file
+from battinfo._publish import default_publish_root
 from battinfo._publish import publish as publish_object
 from battinfo.api import (
     build_cell_spec_library_rdf as api_build_cell_spec_library_rdf,
@@ -514,7 +516,7 @@ def demo_setup(
     registry: str = typer.Option("digibatt/hello-world", help="Registry tenant/workspace slug."),
     publisher_id: str = typer.Option("demo-lab", help="Publisher id used for the generated submission package."),
     version: str = typer.Option("1.0.0", help="Release version and submission source_version."),
-    force: bool = typer.Option(False, "--force", help="Replace the existing demo root before regenerating it."),
+    force: bool = typer.Option(False, "--force", help="Delete ROOT/workspace and ROOT/release and build them again. Only folders BattINFO created are deleted."),
     output_format: str = typer.Option("json", "--format", help="Output format: json|text."),
 ) -> None:
     """Author a BattINFO demo environment from Python objects and write a submission package."""
@@ -555,7 +557,7 @@ def demo_verify(
     api_key_header: str = typer.Option("X-Battinfo-API-Key", "--api-key-header", help="Registry submission API key header."),
     timeout_sec: float = typer.Option(30.0, "--timeout-sec", help="Timeout window for registry and platform checks."),
     poll_interval_sec: float = typer.Option(1.0, "--poll-interval-sec", help="Polling interval while waiting for responses."),
-    force: bool = typer.Option(False, "--force", help="Replace the existing demo root before regenerating it."),
+    force: bool = typer.Option(False, "--force", help="Delete ROOT/workspace and ROOT/release and build them again. Only folders BattINFO created are deleted."),
     allow_local_files: bool = typer.Option(False, "--allow-local-files", help="Send the demo dataset although its file is a local path. Only for a local test registry."),
     output_format: str = typer.Option("json", "--format", help="Output format: json|text."),
 ) -> None:
@@ -692,7 +694,7 @@ def ingest_build(
     source_version: str | None = typer.Option(None, "--source-version", help="Submission source version."),
     license: str | None = typer.Option(None, "--license", help="Dataset license to apply."),
     artifact_base_url: str | None = typer.Option(None, "--artifact-base-url", help="Optional public base URL for packaged artifact files."),
-    clean: bool = typer.Option(False, "--force", help="Replace the existing workspace root before regenerating it."),
+    clean: bool = typer.Option(False, "--force", help="Delete the workspace root and build it again. Only a folder BattINFO created is deleted, never one that holds the evidence files."),
     bundle: bool = typer.Option(True, "--bundle/--no-bundle", help="Also build the submission package after authoring the workspace."),
     validation_policy: str = typer.Option("strict", "--validation-policy", help="Validation policy: strict|set|quick."),
     output_format: str = typer.Option("json", "--format", help="Output format: json|text."),
@@ -754,7 +756,7 @@ def ingest_publish(
     platform_url: str | None = typer.Option(None, "--platform-url", help="Optional Battery Genome base URL."),
     api_key_header: str = typer.Option("X-Battinfo-API-Key", "--api-key-header", help="Registry API key header."),
     timeout_sec: float = typer.Option(300.0, "--timeout-sec", help="Registry submission timeout in seconds."),
-    clean: bool = typer.Option(False, "--force", help="Replace the existing workspace root before regenerating it."),
+    clean: bool = typer.Option(False, "--force", help="Delete the workspace root and build it again. Only a folder BattINFO created is deleted, never one that holds the evidence files."),
     validation_policy: str = typer.Option("strict", "--validation-policy", help="Validation policy: strict|set|quick."),
     process_artifacts: bool = typer.Option(False, "--process-artifacts", help="Convert timeseries CSVs to BDF and generate static/interactive plots. Requires battinfo[processing]."),
     allow_local_files: bool = typer.Option(False, "--allow-local-files", help="Send records whose files are local paths. Only for a local test registry."),
@@ -2629,7 +2631,7 @@ def publish_cell_spec(
     source_file: str | None = typer.Option(None, "--source-file", help="Optional provenance source file."),
     destination: str = typer.Option("local", help="Publish destination: local|registry|battery-genome|staging|production."),
     root: Path | None = typer.Option(None, "--root", help="Optional workspace root for generated artifacts."),
-    force: bool = typer.Option(False, "--force", help="Replace an existing generated workspace root."),
+    force: bool = typer.Option(False, "--force", help="Delete the workspace root and build it again. Only a folder BattINFO created is deleted, never one that holds the --input file."),
     validation_policy: str = typer.Option("strict", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
     registry_url: str | None = typer.Option(None, "--registry-url", help="Optional registry base URL override."),
     api_key: str | None = typer.Option(None, "--api-key", help="Optional registry API key override."),
@@ -2663,6 +2665,9 @@ def publish_cell_spec(
                 source={"type": source_type, "file": source_file},
             )
 
+        if force and input_path is not None:
+            # Refuse before publishing when --force would delete the input file.
+            check_remove(root if root is not None else default_publish_root(cell_spec), inputs=[input_path])
         result = publish_object(
             cell_spec,
             destination=destination,
@@ -3096,7 +3101,7 @@ def _process_single_cell(
 @dataset_app.command("process")
 def dataset_process(
     folder: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True),
-    clean: bool = typer.Option(False, "--force", help="Rebuild from scratch."),
+    clean: bool = typer.Option(False, "--force", help="Delete the generated workspace (.battinfo/ingest/ in the current folder) and build it again. Only a folder BattINFO created is deleted."),
     validation_policy: str = typer.Option("strict", "--validation-policy", help="strict|set|quick"),
     json_output: bool = typer.Option(False, "--json", help="Emit machine-readable JSON to stdout."),
 ) -> None:

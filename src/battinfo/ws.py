@@ -32,6 +32,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from battinfo._workspace import Workspace
 
+from battinfo._fs_guard import remove_temp_tree
 from battinfo._jsonio import atomic_write_text as _atomic_write_text
 from battinfo._jsonio import read_json as _read_json
 from battinfo._util import _now_iso, is_dataset_series, local_file_references
@@ -5507,7 +5508,6 @@ class AuthoringWorkspace:
         deposit; otherwise the workspace default (``ws.license(...)``) is used; if
         neither is set, ``cc-by-4.0`` is applied (Zenodo requires a license).
         """
-        import shutil
         import tempfile
 
         from battinfo.zenodo import ZenodoClient
@@ -5682,7 +5682,7 @@ class AuthoringWorkspace:
                 print(f"  Dataset records updated with Zenodo file URLs: {patched}")
 
         finally:
-            shutil.rmtree(tmpdir, ignore_errors=True)
+            remove_temp_tree(tmpdir)
 
         # ── Set metadata ───────────────────────────────────────────────────────
         metadata = self._build_zenodo_metadata(
@@ -5787,7 +5787,7 @@ class AuthoringWorkspace:
             print(f"  Validation failed: {exc}")
             return False
         finally:
-            shutil.rmtree(tmpdir, ignore_errors=True)
+            remove_temp_tree(tmpdir)
 
     def preview_rocrate(
         self,
@@ -5831,7 +5831,7 @@ class AuthoringWorkspace:
             out = Path(output) if output else self._root / "ro-crate-metadata.preview.json"
             shutil.copy2(src, out)
         finally:
-            shutil.rmtree(tmpdir, ignore_errors=True)
+            remove_temp_tree(tmpdir)
 
         print(f"  Written: {out}")
         return out
@@ -5874,7 +5874,6 @@ class AuthoringWorkspace:
             ws.save()
             ws.preview_jsonld()   # writes battinfo.preview.jsonld
         """
-        import shutil
         import tempfile
 
         records_dir = self._ws.source_root
@@ -5892,7 +5891,7 @@ class AuthoringWorkspace:
         try:
             data_filenames = self._bundle_data_files(tmpdir, records_dir)
         finally:
-            shutil.rmtree(tmpdir, ignore_errors=True)
+            remove_temp_tree(tmpdir)
 
         jsonld = self._build_zenodo_jsonld(
             zenodo_record_id=0,
