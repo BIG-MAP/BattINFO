@@ -79,6 +79,7 @@ The JSON Schema is the save-time contract and the pydantic models in `src/battin
 - Set funding, ORCID and licence once with `ws.project(...)`, `ws.contributor(...)` and `ws.license(...)`; `ws.save()` stamps them onto every record.
 - `ws.preview_jsonld()` writes the JSON-LD graph a Zenodo deposit would carry and prints the publication checks. `ws.zenodo()` makes the deposit and leaves a draft unless you pass `publish=True`.
 - `ws.submit()` sends this session's records to the registry review queue: what the last `ws.save()` wrote, and the equipment records `ws.add("equipment")` saved when it was called. `ws.publish()` does save and submit in one call, with a Zenodo deposit first when `zenodo=True`.
+- `ws.login(api_key=...)` stores the registry key in the workspace's own `.battinfo/credentials`. `ws.credentials_status()` and `ws.has_credential(name)` say which credentials a workspace has and where each comes from, without the values.
 - `ws.import_(...)` rebuilds a workspace from a published `battinfo.json`, and `ws.export(fmt)` writes the saved records as RDF.
 
 `help(ws.add)` and `ws.commands()` list the rest. A minimal offline session:
@@ -98,7 +99,9 @@ ws.save()            # lab/.battinfo/records/<folder>/*.json
 ws.preview_jsonld()  # lab/battinfo.preview.jsonld, then the publication checks
 ```
 
-The default `registry_url` points at the production registry; pass `registry_url=None` whenever a session must stay offline.
+Left out, `registry_url` is `BATTINFO_REGISTRY_URL` from the environment, then from the workspace's `.battinfo/credentials`, else the production registry, looked up each time it is used; pass `registry_url=None` whenever a session must stay offline.
+
+Credentials belong to their workspace. Each one is looked up in one order (an argument passed to the call, a value `ws.login()` set in this session, an environment variable, the workspace's `.battinfo/credentials`, then the default) by `AuthoringWorkspace._credential()`, and nothing writes them to `os.environ`. New code that needs a credential goes through that method, and code that checks for one asks `ws.has_credential(name)`, not `os.environ`. A file that holds secrets is written with `battinfo._jsonio.write_private_text`, which writes it atomically and readable by its owner only.
 
 A few record types are written outside the workspace. Separators, current collectors, electrolytes and housings go through `battinfo.api.create_component_spec` and `save_component_spec` (and the `*_component_instance` pair), as in `docs/howto/build-a-cell-from-components.md`. Organizations have `battinfo.api.create_organization` and `save_organization`. Datasets that describe files already archived elsewhere, collection members among them, use the `battinfo.Dataset` model with `battinfo.save_dataset`.
 
