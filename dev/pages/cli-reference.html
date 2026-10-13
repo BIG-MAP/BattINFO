@@ -969,7 +969,7 @@ did not carry over.</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">--source-file</span> <span class="pre">&lt;str&gt;</span></code>: Optional provenance source file.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--destination</span> <span class="pre">&lt;str&gt;</span></code>: Publish destination: local|registry|battery-genome|staging|production.  [default: local]</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--root</span> <span class="pre">&lt;path&gt;</span></code>: Optional workspace root for generated artifacts.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">--force</span></code>: Replace an existing generated workspace root.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--force</span></code>: Delete the workspace root and build it again. Only a folder BattINFO created is deleted, never one that holds the –input file.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--validation-policy</span> <span class="pre">&lt;str&gt;</span></code>: Validation policy: default|strict|publisher|ingest.  [default: strict]</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--registry-url</span> <span class="pre">&lt;str&gt;</span></code>: Optional registry base URL override.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--api-key</span> <span class="pre">&lt;str&gt;</span></code>: Optional registry API key override.</p></li>
@@ -1526,7 +1526,7 @@ did not carry over.</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">--aggregate-jsonld</span> <span class="pre">&lt;path&gt;</span></code>: Path for the aggregated library JSON-LD file.  [default: .battinfo/library/cell-spec.jsonld]</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--manifest-json</span> <span class="pre">&lt;path&gt;</span></code>: Path for the generated library manifest JSON.  [default: .battinfo/library-rdf/cell-spec.index.json]</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--glob</span> <span class="pre">&lt;str&gt;</span></code>: File glob used to select library cell specifications.  [default: *.json]</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">--clean-output</span></code>: Remove existing JSON-LD outputs before writing.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--clean-output</span></code>: Delete the JSON-LD files the previous build listed in its manifest before rebuilding.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--format</span> <span class="pre">&lt;str&gt;</span></code>: Output format: table|json.  [default: json]</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--help</span></code>: Show this message and exit.</p></li>
 </ul>
@@ -1623,7 +1623,7 @@ did not carry over.</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">--output-jsonld-dir</span> <span class="pre">&lt;path&gt;</span></code>: Directory for per-record domain-battery JSON-LD artifacts.  [default: .battinfo/library-rdf/cell-spec]</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--aggregate-jsonld</span> <span class="pre">&lt;path&gt;</span></code>: Path for the aggregated library JSON-LD file.  [default: .battinfo/library/cell-spec.jsonld]</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--manifest-json</span> <span class="pre">&lt;path&gt;</span></code>: Path for the generated library manifest JSON.  [default: .battinfo/library-rdf/cell-spec.index.json]</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">--clean-output</span></code>: Clean existing JSON-LD outputs before rebuilding.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--clean-output</span></code>: Before rebuilding with –build-rdf, delete the JSON-LD files the previous build listed in its manifest.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--dry-run</span></code>: Preview save without writing files.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--format</span> <span class="pre">&lt;str&gt;</span></code>: Output format: table|json.  [default: json]</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--help</span></code>: Show this message and exit.</p></li>
@@ -2016,7 +2016,7 @@ did not carry over.</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">--registry</span> <span class="pre">&lt;str&gt;</span></code>: Registry tenant/workspace slug.  [default: digibatt/hello-world]</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--publisher-id</span> <span class="pre">&lt;str&gt;</span></code>: Publisher id used for the generated submission package.  [default: demo-lab]</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--version</span> <span class="pre">&lt;str&gt;</span></code>: Release version and submission source_version.  [default: 1.0.0]</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">--force</span></code>: Replace the existing demo root before regenerating it.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--force</span></code>: Delete ROOT/workspace and ROOT/release and build them again. Only folders BattINFO created are deleted.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--format</span> <span class="pre">&lt;str&gt;</span></code>: Output format: json|text.  [default: json]</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--help</span></code>: Show this message and exit.</p></li>
 </ul>
@@ -2043,7 +2043,7 @@ did not carry over.</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">--api-key-header</span> <span class="pre">&lt;str&gt;</span></code>: Registry submission API key header.  [default: X-Battinfo-API-Key]</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--timeout-sec</span> <span class="pre">&lt;float&gt;</span></code>: Timeout window for registry and platform checks.  [default: 30.0]</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--poll-interval-sec</span> <span class="pre">&lt;float&gt;</span></code>: Polling interval while waiting for responses.  [default: 1.0]</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">--force</span></code>: Replace the existing demo root before regenerating it.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--force</span></code>: Delete ROOT/workspace and ROOT/release and build them again. Only folders BattINFO created are deleted.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--allow-local-files</span></code>: Send the demo dataset although its file is a local path. Only for a local test registry.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--format</span> <span class="pre">&lt;str&gt;</span></code>: Output format: json|text.  [default: json]</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--help</span></code>: Show this message and exit.</p></li>
@@ -2146,7 +2146,7 @@ did not carry over.</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">--source-version</span> <span class="pre">&lt;str&gt;</span></code>: Submission source version.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--license</span> <span class="pre">&lt;str&gt;</span></code>: Dataset license to apply.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--artifact-base-url</span> <span class="pre">&lt;str&gt;</span></code>: Optional public base URL for packaged artifact files.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">--force</span></code>: Replace the existing workspace root before regenerating it.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--force</span></code>: Delete the workspace root and build it again. Only a folder BattINFO created is deleted, never one that holds the evidence files.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--bundle</span> <span class="pre">/</span> <span class="pre">--no-bundle</span></code>: Also build the submission package after authoring the workspace.  [default: bundle]</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--validation-policy</span> <span class="pre">&lt;str&gt;</span></code>: Validation policy: strict|set|quick.  [default: strict]</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--format</span> <span class="pre">&lt;str&gt;</span></code>: Output format: json|text.  [default: json]</p></li>
@@ -2192,7 +2192,7 @@ BATTINFO_STORAGE_PUBLIC_BASE_URL  public CDN base URL for artifact links</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">--platform-url</span> <span class="pre">&lt;str&gt;</span></code>: Optional Battery Genome base URL.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--api-key-header</span> <span class="pre">&lt;str&gt;</span></code>: Registry API key header.  [default: X-Battinfo-API-Key]</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--timeout-sec</span> <span class="pre">&lt;float&gt;</span></code>: Registry submission timeout in seconds.  [default: 300.0]</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">--force</span></code>: Replace the existing workspace root before regenerating it.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--force</span></code>: Delete the workspace root and build it again. Only a folder BattINFO created is deleted, never one that holds the evidence files.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--validation-policy</span> <span class="pre">&lt;str&gt;</span></code>: Validation policy: strict|set|quick.  [default: strict]</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--process-artifacts</span></code>: Convert timeseries CSVs to BDF and generate static/interactive plots. Requires battinfo.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--allow-local-files</span></code>: Send records whose files are local paths. Only for a local test registry.</p></li>
@@ -2307,7 +2307,7 @@ sub-folders are processed automatically.</p>
 </ul>
 <p><strong>Options</strong>:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">--force</span></code>: Rebuild from scratch.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--force</span></code>: Delete the generated workspace (.battinfo/ingest/ in the current folder) and build it again. Only a folder BattINFO created is deleted.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--validation-policy</span> <span class="pre">&lt;str&gt;</span></code>: strict|set|quick  [default: strict]</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--json</span></code>: Emit machine-readable JSON to stdout.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--help</span></code>: Show this message and exit.</p></li>

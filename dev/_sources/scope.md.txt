@@ -82,7 +82,7 @@ These gaps were known when 0.8.0 was released and are planned for 0.8.x or 0.9. 
 - `Registry.get` returns the registry's entry, not the record, and no helper extracts the record yet; [Get the record out of an entry](howto/read-registry-data.md#get-the-record-out-of-an-entry) shows the one line that does.
 - A new version of a published dataset made with `Dataset.from_record` loses the curve-preview files unless you copy them across from the registry entry, and nothing warns you; [Make a new version of a published dataset](howto/read-registry-data.md#make-a-new-version-of-a-published-dataset) shows how.
 - `save_dataset` resolves a dataset's cell and test only against the workspace and the registry records the workspace has looked up, which never include tests, so a new version that keeps a published test link needs `resolve_references=False`.
-- Once `ws.save()` has run in a session, `ws.submit()` sends only what that save wrote, even with `submit_all=True`. Submit records written by `save_dataset` or the other `save_*` functions from a new workspace object.
+- Once `ws.save()` or `ws.add("equipment")` has written records in a session, `ws.submit()` sends only those, even with `submit_all=True`. Submit records written by `save_dataset` or the other `save_*` functions from a new workspace object.
 - `ws.add("test")` takes no as-run `conditions`, start or end time, notes or `source_url`, although the `Test` model has them.
 - `ws.search(type="cell", serial=...)` fetches the registry's whole cell list on every call; use `serials=[...]` to look up many cells at once.
 - Adding tests to a test spec that is already published sends the spec again, and the registry stores an unchanged copy as a new version.

@@ -177,7 +177,7 @@ result = ws.zenodo(
 )
 ```
 
-`ws.zenodo()` leaves a draft unless you pass `publish=True`. To send the records to the registry instead, use `ws.submit(submit_all=True)`. The `submit_all` flag matters here: `ws.submit()` normally sends only what the last `ws.save()` wrote, and datasets written with `save_dataset` are not part of that.
+`ws.zenodo()` leaves a draft unless you pass `publish=True`. To send the records to the registry instead, use `ws.submit(submit_all=True)`. The `submit_all` flag matters here: `ws.submit()` normally sends only the records this session wrote with `ws.save()` or `ws.add("equipment")`, and datasets written with `save_dataset` are not among them.
 
 The registry route refuses any record that still points at a file on your computer: a `file:///` or plain path in an access URL, a distribution's content URL, a download URL or `provenance.source_url`, or an absolute path in a `source_file` or an artifact `locator`. The registry would publish that path as the download link, and nobody else can follow it. `ws.submit()` lists each such record and field and sends nothing. The members in this example already point at Zenodo, so they pass. For datasets made from local files, run `ws.zenodo()` first: it uploads the files and points each record at its deposited copy, and `ws.submit()` then sends https URLs. Only for a local test registry, `ws.submit(allow_local_files=True)` lifts the check.
 

@@ -704,7 +704,8 @@ workspace. Nothing exists “only in the CLI”, which is why the
 └── bundle_generated.py + bundle_adapter.py   EMMO-annotated schema layer (generated)
 </pre></div>
 </div>
-<p>Supporting cast: <code class="docutils literal notranslate"><span class="pre">_jsonio.py</span></code> (atomic JSON file I/O), <code class="docutils literal notranslate"><span class="pre">_record_index.py</span></code>
+<p>Supporting cast: <code class="docutils literal notranslate"><span class="pre">_jsonio.py</span></code> (atomic JSON file I/O), <code class="docutils literal notranslate"><span class="pre">_fs_guard.py</span></code> (the
+one place that deletes folders, the checks it makes first, and the check on the paths a workspace manifest names), <code class="docutils literal notranslate"><span class="pre">_record_index.py</span></code>
 (the bulk-save id→path cache), <code class="docutils literal notranslate"><span class="pre">canonical_aliases.py</span></code> (legacy key
 normalisation), <code class="docutils literal notranslate"><span class="pre">testmethod.py</span></code> (structured test-method steps),
 <code class="docutils literal notranslate"><span class="pre">metadata.py</span></code> (CSVW/DCAT dataset enrichment).</p>

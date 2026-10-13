@@ -149,7 +149,8 @@ src/battinfo/
 └── bundle_generated.py + bundle_adapter.py   EMMO-annotated schema layer (generated)
 ```
 
-Supporting cast: `_jsonio.py` (atomic JSON file I/O), `_record_index.py`
+Supporting cast: `_jsonio.py` (atomic JSON file I/O), `_fs_guard.py` (the
+one place that deletes folders, the checks it makes first, and the check on the paths a workspace manifest names), `_record_index.py`
 (the bulk-save id→path cache), `canonical_aliases.py` (legacy key
 normalisation), `testmethod.py` (structured test-method steps),
 `metadata.py` (CSVW/DCAT dataset enrichment).

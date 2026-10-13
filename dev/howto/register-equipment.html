@@ -593,6 +593,7 @@ knows about:</p>
 <p>The saved test record now contains the channel’s <code class="docutils literal notranslate"><span class="pre">equipment_id</span></code> and
 <code class="docutils literal notranslate"><span class="pre">channel_id</span></code>, so “which slot of which cycler produced this data” survives into
 the published record.</p>
+<p><code class="docutils literal notranslate"><span class="pre">ws.add(&quot;equipment&quot;,</span> <span class="pre">...)</span></code> saved the spec, the unit and its channels straight away. <code class="docutils literal notranslate"><span class="pre">ws.submit()</span></code> or <code class="docutils literal notranslate"><span class="pre">ws.publish()</span></code> sends them together with the cell and the test that <code class="docutils literal notranslate"><span class="pre">ws.save()</span></code> wrote.</p>
 </section>
 
 
