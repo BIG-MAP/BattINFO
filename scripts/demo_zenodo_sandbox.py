@@ -9,6 +9,7 @@ Prereqs:
     ``deposit:write`` and ``deposit:actions``.
   * Set it in the environment before running:
         $env:ZENODO_SANDBOX_TOKEN = "your-sandbox-token"   # PowerShell
+    or put a ZENODO_SANDBOX_TOKEN line in the demo folder's .battinfo/credentials.
 
 Run:
     .venv/Scripts/python.exe scripts/demo_zenodo_sandbox.py
@@ -16,7 +17,6 @@ Run:
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
 
 import battinfo
@@ -52,7 +52,7 @@ ws.save()
 print("[ok] authored + saved workspace at", ROOT)
 
 # 5. Push to the Zenodo SANDBOX as a draft (only if a token is present).
-if not os.environ.get("ZENODO_SANDBOX_TOKEN"):
+if not ws.has_credential("ZENODO_SANDBOX_TOKEN"):
     print("\nSet ZENODO_SANDBOX_TOKEN and re-run to push the draft to sandbox.zenodo.org.")
     raise SystemExit(0)
 

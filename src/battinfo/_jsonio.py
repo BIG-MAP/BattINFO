@@ -5,6 +5,7 @@ almost every module. ``read_json`` returns the parsed object as-is;
 ``read_record_json`` additionally normalises keys to their canonical snake_case
 aliases (used by the record-loading modules); ``write_json`` writes
 pretty-printed UTF-8 JSON, creating parent directories as needed.
+``write_private_text`` and ``chmod_owner_only`` are for files that hold secrets.
 """
 
 from __future__ import annotations
@@ -78,3 +79,29 @@ def atomic_write_text(path: Path, text: str, *, encoding: str = "utf-8", durable
 def write_json(path: Path, payload: Mapping[str, Any], *, durable: bool = True) -> None:
     """Atomically write ``payload`` as pretty-printed UTF-8 JSON, creating parent dirs."""
     atomic_write_text(path, json.dumps(payload, indent=2, ensure_ascii=False) + "\n", durable=durable)
+
+
+def chmod_owner_only(path: Path) -> None:
+    """Let only the owner read and write ``path`` (mode 0600).
+
+    Best effort: Windows keeps only a read-only flag, and some filesystems have
+    no POSIX permission bits, so a failure is ignored.
+    """
+    try:
+        os.chmod(path, 0o600)
+    except OSError:
+        pass
+
+
+def write_private_text(path: Path, text: str) -> None:
+    """Atomically write ``text`` to a file that holds secrets, readable by its owner only.
+
+    Written as :func:`atomic_write_text` writes, so a failed write leaves the old
+    file in place. On POSIX systems the temporary file is created with mode 0600,
+    so the text is never in a file others can read, and the result is set to 0600
+    as well (best effort, see :func:`chmod_owner_only`). A symlink is followed: its
+    target is replaced and the link stays.
+    """
+    target = path.resolve()
+    atomic_write_text(target, text)
+    chmod_owner_only(target)
