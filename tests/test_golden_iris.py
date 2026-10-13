@@ -64,6 +64,10 @@ KIND_RESOLVED = (
     "A material or electrode spec saved without an id seeds its kind as the builders do: "
     "resolved through the vocabulary, else from its name or product id."
 )
+PUBLICATION_SERIAL_FIRST = (
+    "The publication package seeds a cell with the shared cell seed, serial first, so a cell "
+    "with a serial and another name gets the IRI every other path gives it."
+)
 
 #: Cases whose IRI moved since 057b66a0: case id -> (what it mints now, why it moved).
 MOVED: dict[str, tuple[str, str]] = {
@@ -126,6 +130,14 @@ MOVED: dict[str, tuple[str, str]] = {
     "cell-spec | ws | chemistry upper case": (
         "https://w3id.org/battinfo/spec/pmda-v1sm-tv57-zrqt",
         CHEMISTRY_KEY,
+    ),
+    "cell | publication | serial and name": (
+        "https://w3id.org/battinfo/cell/df2p-j6g8-f4ks-av3c",
+        PUBLICATION_SERIAL_FIRST,
+    ),
+    "cell | publication | serial, batch and name": (
+        "https://w3id.org/battinfo/cell/pxp5-t8ca-9d85-hkk9",
+        PUBLICATION_SERIAL_FIRST,
     ),
     "electrode-spec | bridge | extended example, A123 ANR26650M1-B negative electrode": (
         "https://w3id.org/battinfo/spec/58e8-7982-avxm-w0y4",

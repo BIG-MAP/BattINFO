@@ -26,7 +26,13 @@ from battinfo.bundle import (
     Test,
     ZenodoCellRecord,
 )
-from battinfo.entities import cell_spec_identity_seed, dataset_locator_seed, seed_text, stable_uid
+from battinfo.entities import (
+    cell_instance_identity_seed,
+    cell_spec_identity_seed,
+    dataset_locator_seed,
+    seed_text,
+    stable_uid,
+)
 from battinfo.jsonld import dataset_series_edges, electrode_role_links, schema_checksum_terms
 from battinfo.validate.core import PUBLISHER_POLICY, ValidationPolicy
 from battinfo.validate.publication import validate_publication_report
@@ -160,7 +166,6 @@ RO_CRATE_CONTEXT_URL = "https://w3id.org/ro/crate/1.2/context"
 RO_CRATE_PROFILE_URL = "https://w3id.org/ro/crate/1.2"
 OWL_CLASS_IRI = "http://www.w3.org/2002/07/owl#Class"
 RDFS_SUBCLASS_OF_IRI = "http://www.w3.org/2000/01/rdf-schema#subClassOf"
-UID_ALPHABET = "0123456789abcdefghjkmnpqrstvwxyz"
 
 PROPERTY_TYPE_MAP = {
     "diameter": "Diameter",
@@ -202,11 +207,6 @@ def _tail_id(entity_id: str) -> str:
     return entity_id.rstrip("/").split("/")[-1]
 
 
-def _stable_uid(seed: str) -> str:
-    # The shared minting primitive, with its Unicode NFC step.
-    return stable_uid(seed)
-
-
 _PUB_IRI_NAMESPACE: dict[str, str] = {
     "cell-spec": "spec",
     "cell": "cell",
@@ -222,8 +222,9 @@ _BATTINFO_BASE = "https://w3id.org/battinfo/"
 
 
 def _entity_iri(entity_type: str, seed: str) -> str:
+    """The IRI an identity seed mints, through the shared primitive ``entities.stable_uid``."""
     namespace = _PUB_IRI_NAMESPACE.get(entity_type, entity_type)
-    return f"{_BATTINFO_BASE}{namespace}/{_stable_uid(seed)}"
+    return f"{_BATTINFO_BASE}{namespace}/{stable_uid(seed)}"
 
 
 def _cell_specification_iri(entity_id: str) -> str:
@@ -1523,17 +1524,21 @@ def _finalize_cell_instance(
     if finalized.name is None:
         finalized.name = finalized.serial_number or finalized.batch_id or dataset_dir.name
     if finalized.id is None:
-        finalized.id = _entity_iri(
-            "cell",
-            "::".join(
-                [
-                    _with_default(finalized.cell_spec_id, "unknown-cell-spec"),
-                    seed_text(finalized.serial_number),
-                    seed_text(finalized.batch_id),
-                    _seed_text_or(finalized.name, seed_text(dataset_dir.name)),
-                ]
-            ),
+        # The cell identity every surface shares (entities.cell_instance_identity_seed):
+        # the serial first, so renaming a cell that has one keeps its IRI, then the
+        # name, then the batch. A cell whose serial, batch and name are all blank is
+        # seeded from its dataset folder's name, as before.
+        seed = cell_instance_identity_seed(
+            cell_spec_id=finalized.cell_spec_id,
+            serial_number=finalized.serial_number,
+            batch_id=finalized.batch_id,
+            name=finalized.name,
         )
+        if seed is None:
+            seed = "::".join(
+                [_with_default(finalized.cell_spec_id, "unknown-cell-spec"), "", "", seed_text(dataset_dir.name)]
+            )
+        finalized.id = _entity_iri("cell", seed)
     finalized.dataset_ids = _append_unique(finalized.dataset_ids, dataset_id)
     source = finalized.source.model_copy(deep=True)
     if source.type is None:

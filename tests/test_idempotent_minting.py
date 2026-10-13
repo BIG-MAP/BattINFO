@@ -165,9 +165,10 @@ def test_workspace_rename_with_a_serial_keeps_the_iri(tmp_path: Path) -> None:
 
 # ── Parity: one identity, one IRI, on every minting path ──────────────────────
 #
-# The workspace (ws.add), the create_* builders, the save_* functions, a save of
-# a record without an id (save_record) and the embedded-to-standalone bridges
-# mint the same material-spec and electrode-spec IRI for the same identity.
+# The workspace (ws.add and the engine behind it), the create_* builders, the
+# save_* functions, a save of a record without an id (save_record), the
+# publication package and the embedded-to-standalone bridges mint the same cell,
+# material-spec and electrode-spec IRI for the same identity.
 
 
 def _without_id_save(body_key: str, body: dict, root: Path) -> str:
@@ -297,3 +298,66 @@ def test_a_save_without_an_id_refuses_an_unknown_kind_as_the_builders_do(tmp_pat
         api.create_electrode_spec(validate=False, **electrode)
     with pytest.raises(ValueError, match="Unknown electrode kind 'unobtainium'"):
         _without_id_save("electrode_spec", electrode, tmp_path)
+
+
+CELL_IDENTITIES = {
+    "serial and name": {"serial_number": "S1", "name": "Cell A"},
+    "serial, batch and name": {"serial_number": "S2", "batch_id": "B7", "name": "Cell B"},
+    "serial": {"serial_number": "S3"},
+    "name": {"name": "Cell C"},
+    "batch": {"batch_id": "B8"},
+    "batch and name": {"batch_id": "B9", "name": "Cell D"},
+}
+
+
+def _publication_cell_iri(root: Path, **fields: str) -> str:
+    """The IRI the publication package (build_publication_package, publish) mints for a cell."""
+    from battinfo.bundle import Cell, CellSpec, Dataset, Test
+    from battinfo.publication import _finalize_publication_bundle
+
+    run = root / "run1"
+    run.mkdir(parents=True, exist_ok=True)
+    bundle, _ = _finalize_publication_bundle(
+        cell_spec=CellSpec(id=CELL_SPEC_IRI, **SPEC_FIELDS),
+        cell_instance=Cell(cell_spec_id=CELL_SPEC_IRI, **fields),
+        test=Test(test_kind="cycling"),
+        dataset=Dataset(dataset_path=str(run)),
+    )
+    return str(bundle.cell_instance.id)
+
+
+@pytest.mark.parametrize("case", sorted(CELL_IDENTITIES))
+def test_every_path_mints_one_cell_iri(case: str, tmp_path: Path) -> None:
+    import battinfo
+    from battinfo.bundle import CellSpec
+
+    fields = CELL_IDENTITIES[case]
+    engine = Workspace(tmp_path / "engine")
+    cell = engine.cell(CellSpec(id=CELL_SPEC_IRI, **SPEC_FIELDS), **fields)
+    engine.render()
+    iris = {
+        "engine": str(cell.id),
+        "save": api.save_cell_instance(
+            {"cell_spec_id": CELL_SPEC_IRI, **fields}, source_root=tmp_path / "save", resolve_references=False
+        )["id"],
+        "save_record": _without_id_save("cell_instance", {"cell_spec_id": CELL_SPEC_IRI, **fields}, tmp_path / "rec"),
+        "publication": _publication_cell_iri(tmp_path / "publication", **fields),
+    }
+    if "batch_id" not in fields:  # ws.add("cell") takes names and serial numbers
+        ws = battinfo.workspace(tmp_path / "ws", registry_url=None)
+        names = [fields["name"]] if "name" in fields else None
+        serials = [fields["serial_number"]] if "serial_number" in fields else None
+        (added,) = ws.add("cell", spec=CellSpec(id=CELL_SPEC_IRI, **SPEC_FIELDS), names=names, serial_numbers=serials)
+        ws._ws.render()  # mints the IRIs a ws.save() writes
+        iris["ws"] = str(added.id)
+    if set(fields) == {"serial_number"}:  # create_cell_instance takes a serial number only
+        iris["create"] = api.create_cell_instance(
+            cell_spec_id=CELL_SPEC_IRI, serial_number=fields["serial_number"], validate=False
+        )["cell_instance"]["id"]
+    assert len(set(iris.values())) == 1, iris
+
+
+def test_renaming_a_cell_with_a_serial_keeps_its_iri_in_the_publication_package(tmp_path: Path) -> None:
+    first = _publication_cell_iri(tmp_path / "a", serial_number="FAC-001", name="Cell A")
+    renamed = _publication_cell_iri(tmp_path / "b", serial_number="FAC-001", name="Graphite AQ-1 cell FAC-001")
+    assert first == renamed

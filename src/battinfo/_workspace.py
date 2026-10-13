@@ -67,7 +67,6 @@ from battinfo.publication import publish as publish_bundle
 from battinfo.validate.record import validate_record_report
 
 PathLike = str | Path
-UID_ALPHABET = "0123456789abcdefghjkmnpqrstvwxyz"
 EXTENSION_MEDIA_TYPE_MAP = {
     ".csv": "text/csv",
     ".tsv": "text/tab-separated-values",
