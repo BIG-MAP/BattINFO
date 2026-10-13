@@ -92,6 +92,8 @@ def publish(
     registry_base_url, api_key, api_key_header, platform_base_url, workspace_id, publisher_id, source_version:
         Override the destination's configured values.
 
+    Notes
+    -----
     The deprecated form ``publish(cell_spec=..., cell_instance=..., test=...,
     dataset=...)`` still builds a dataset publication package, with a
     ``DeprecationWarning``, and accepts only the keywords of
