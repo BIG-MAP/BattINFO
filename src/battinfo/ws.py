@@ -680,6 +680,42 @@ def _normalize_orcid(value: str) -> str:
     return token
 
 
+# How to give a Zenodo deposit its creators: the refusal and the preview say it.
+_CREATORS_HINT = (
+    'Pass creators=[{"name": "Family, Given", "orcid": "0000-0002-1825-0097"}], or credit '
+    'each author once with ws.contributor("0000-0002-1825-0097", name="Family, Given"), '
+    'or set a default with: battinfo config set creator "Family, Given; Institution".'
+)
+
+
+def _deposit_agents(agents: Iterable[Any], role: str) -> list[dict]:
+    """Copies of a deposit's creator or contributor dicts, each ORCID a bare id.
+
+    An ORCID may be given as the id or as its ``https://orcid.org/`` (or
+    ``http://``) URL. Zenodo takes the bare id, and the deposit graph and the
+    RO-Crate put ``https://orcid.org/`` in front of it once. Raises
+    ValueError, naming the *role* and the entry, for an entry that is not a
+    dict with a name, or an ORCID that is not one.
+    """
+    out: list[dict] = []
+    for position, agent in enumerate(agents, start=1):
+        if not isinstance(agent, Mapping) or not str(agent.get("name") or "").strip():
+            raise ValueError(
+                f"{role} {position} has no name. Give each {role} as a dict such as "
+                '{"name": "Family, Given", "orcid": "0000-0002-1825-0097"}.'
+            )
+        entry = dict(agent)
+        if entry.get("orcid"):
+            try:
+                entry["orcid"] = _normalize_orcid(entry["orcid"])
+            except ValueError as exc:
+                raise ValueError(f"{role} {entry['name']!r}: {exc}") from None
+        else:
+            entry.pop("orcid", None)  # an empty ORCID is left out
+        out.append(entry)
+    return out
+
+
 # A pragmatic set of the license identifiers Zenodo accepts most often (open
 # data + common software licenses), lower-cased for comparison. This is a
 # recognition list, not a hard allowlist: an unknown identifier is kept verbatim
@@ -3522,6 +3558,7 @@ class AuthoringWorkspace:
         *,
         zenodo: bool = False,
         sandbox: bool = False,
+        creators: builtins.list[dict] | None = None,
         doi: str | None = None,
         only: str | builtins.list[str] | None = None,
         publication_mode: str = STAGED_PUBLICATION_MODE,
@@ -3542,9 +3579,13 @@ class AuthoringWorkspace:
         This is equivalent to running, in order::
 
             ws.save()
-            ws.upload()              # only when zenodo=True
-            ws.zenodo(publish=True)  # only when zenodo=True
+            ws.upload()                                 # only when zenodo=True
+            ws.zenodo(publish=True, creators=creators)  # only when zenodo=True
             ws.submit(note=note, doi=...)
+
+        With ``zenodo=True`` the Zenodo token and the deposit's creators are
+        looked up first, so a call that lacks either is refused before anything
+        is saved, uploaded or sent.
 
         For finer control — e.g. reviewing a Zenodo draft before it goes live —
         call those four steps individually instead.
@@ -3563,6 +3604,11 @@ class AuthoringWorkspace:
             split it.
         sandbox:
             Use ``sandbox.zenodo.org`` (only relevant with ``zenodo=True``).
+        creators:
+            The Zenodo deposit's creators (only with ``zenodo=True``), as
+            :meth:`zenodo` takes them. Without them the workspace contributors
+            (:meth:`contributor`) are the creators, and without those the creator
+            set with ``battinfo config set creator``.
         doi:
             A pre-existing DOI to attach (e.g. from a Zenodo draft you reviewed).
         only:
@@ -3573,6 +3619,11 @@ class AuthoringWorkspace:
             the records at the deposited copies. ``True`` lifts the check, for a
             local test registry only.
         """
+        if zenodo:
+            # A deposit without a token or a creator is refused before the save,
+            # the zip check and the R2 upload, not by ws.zenodo() after them.
+            self._zenodo_token(None, sandbox)
+            creators = self._deposit_creators(creators)
         self._publishing = True
         try:
             self.save()
@@ -3591,7 +3642,7 @@ class AuthoringWorkspace:
                     "data files (records get the Zenodo download URLs). R2 is "
                     "only needed for team-internal registry hosting."
                 )
-            result = self.zenodo(publish=True, sandbox=sandbox)
+            result = self.zenodo(publish=True, sandbox=sandbox, creators=creators)
             doi = doi or result.doi
         return self.submit(
             note=note, doi=doi, only=only,
@@ -5455,6 +5506,43 @@ class AuthoringWorkspace:
         print(f"\nPushed {len(urls)} dataset(s) to {bucket_name}")
         return urls
 
+    def _zenodo_token(self, token: str | None, sandbox: bool) -> str:
+        """The Zenodo token: *token*, else ``ZENODO_SANDBOX_TOKEN`` or ``ZENODO_API_TOKEN``."""
+        var = "ZENODO_SANDBOX_TOKEN" if sandbox else "ZENODO_API_TOKEN"
+        tok = token or self._credential(var)
+        if not tok:
+            raise RuntimeError(
+                f"Zenodo token required. Set {var} in .battinfo/credentials, or pass token= to ws.zenodo()."
+            )
+        return tok
+
+    def _deposit_creators(
+        self, creators: builtins.list[dict] | None, *, required: bool = True
+    ) -> builtins.list[dict]:
+        """The creators of this workspace's Zenodo deposit, each ORCID a bare id.
+
+        The first of these that names anyone: *creators*, the workspace
+        contributors (:meth:`contributor`), and the creator set with
+        ``battinfo config set creator`` (``~/.battinfo/config.yaml``). With
+        *required*, finding none raises ValueError. :meth:`zenodo` asks before
+        it sends anything, and :meth:`publish` with ``zenodo=True`` before it
+        saves or uploads.
+        """
+        chosen: builtins.list[Any] = list(creators or [])
+        if not chosen:
+            chosen = [ref.to_dict() for ref in self._get_contributors()]
+        if not chosen:
+            from battinfo.config import resolve_creators  # noqa: PLC0415
+
+            chosen = list(resolve_creators(None))
+        if not chosen and required:
+            raise ValueError(
+                "No creators for the Zenodo deposit: creators= is empty, the workspace has no "
+                "contributors, and no creator was read from ~/.battinfo/config.yaml. Zenodo does "
+                f"not publish a deposit without one. Nothing was sent to Zenodo. {_CREATORS_HINT}"
+            )
+        return _deposit_agents(chosen, "creator")
+
     def zenodo(
         self,
         *,
@@ -5484,6 +5572,17 @@ class AuthoringWorkspace:
         version is never published (and no DOI minted) without an explicit ``publish=True``
         or a click on Zenodo.
 
+        Nothing is sent before the token and the creators are known and the
+        deposit graph passes the publication check. A draft gets that check as
+        a publish does, since it is one click from published. The deposit is
+        recorded in ``.battinfo/zenodo.json`` as soon as it exists, so a run
+        that fails after that leaves a draft the next run updates. The metadata
+        goes up before any file, and metadata Zenodo does not accept stops the
+        run with a :class:`~battinfo.zenodo.ZenodoError` naming the fields. The
+        data files go up before the graph and the RO-Crate that describe them,
+        and the dataset records are pointed at the deposited files last (after
+        the publish, when there is one).
+
         Each local data file is deposited once, under its own name, however many
         distributions name it. Names are compared as Windows and macOS compare
         them, ignoring case and Unicode normalisation: a file whose name another
@@ -5502,17 +5601,25 @@ class AuthoringWorkspace:
             record, or update its open draft); first run creates a new record. An
             explicit Zenodo record ID forks a new version from that record.
         publish:
-            ``False`` (default) — leave a draft for review; publish by clicking on
-            Zenodo or re-running with ``publish=True``. ``True`` runs the
-            publication check before it contacts Zenodo, so a refusal leaves
-            no draft behind.
+            ``False`` (default) leaves a draft for review: publish it by clicking
+            on Zenodo, or re-run with ``publish=True``. Either way the publication
+            check runs before Zenodo is contacted, so a refusal leaves no draft
+            behind.
         sandbox:
             Use ``sandbox.zenodo.org`` for testing.
         community:
             Zenodo community identifier (default ``"battery-knowledge-base"``).
             ``None`` leaves the deposit out of any community.
         creators:
-            List of ``{"name": "...", "affiliation": "...", "orcid": "..."}`` dicts.
+            List of ``{"name": "Family, Given", "affiliation": "...", "orcid": "..."}``
+            dicts. Without them the workspace contributors (:meth:`contributor`)
+            are the creators, and without those the creator set with
+            ``battinfo config set creator``. With none of these the call is
+            refused before anything is sent. An ORCID may be the bare id or its
+            ``https://orcid.org/`` URL; Zenodo gets the bare id.
+        contributors:
+            More people, as dicts like ``creators``, each with an optional Zenodo
+            contributor ``"type"`` (default ``"ProjectMember"``).
         keywords:
             Extra keywords appended to auto-derived list.
 
@@ -5536,26 +5643,22 @@ class AuthoringWorkspace:
         import shutil
         import tempfile
 
-        from battinfo.zenodo import ZenodoClient
+        from battinfo.zenodo import ZenodoClient, ZenodoError
 
+        # Each numbered step runs only once the steps before it have passed, so
+        # a refusal leaves as little behind as it can. ws.publish(zenodo=True)
+        # runs step 1 before it saves or uploads anything.
+
+        # ── 1. Token and creators, before anything is sent ────────────────────
         # License precedence: explicit arg > workspace default > cc-by-4.0.
         if license is None:
             license = self._get_license() or "cc-by-4.0"
+        tok = self._zenodo_token(token, sandbox)
+        creators = self._deposit_creators(creators)
+        contributors = _deposit_agents(contributors or [], "contributor")
 
-        # ── Resolve token ──────────────────────────────────────────────────────
-        tok = token or os.environ.get(
-            "ZENODO_SANDBOX_TOKEN" if sandbox else "ZENODO_API_TOKEN"
-        )
-        if not tok:
-            var = "ZENODO_SANDBOX_TOKEN" if sandbox else "ZENODO_API_TOKEN"
-            raise RuntimeError(
-                f"Zenodo token required. Pass token= or set {var} in .battinfo/credentials."
-            )
-
-        # ── Resolve what this call should do (warn, never error) ───────────────
-        # A workspace that already has a record keeps moving forward on re-run: a
+        # What this call does to the workspace's record (warn, never error): a
         # published record forks a new version; an open draft is updated in place.
-        import warnings  # noqa: PLC0415
         state = self._load_zenodo_state()
         record_id, reuse_draft_id, _version_warning = _plan_zenodo_deposit(
             state.get("record_id"), bool(state.get("published")), record_id,
@@ -5564,13 +5667,12 @@ class AuthoringWorkspace:
             warnings.warn(_version_warning, stacklevel=2)
             print(f"  WARNING: {_version_warning}")
 
+        # ── 2. Records, read fail-closed ───────────────────────────────────────
         records_dir = self._ws.source_root
         if not records_dir.exists():
             raise RuntimeError("No records found — run ws.save() first.")
 
-        # Fail closed before anything reaches Zenodo, a draft included (a draft
-        # is one click from published): the deposit's parameter sets must pass
-        # the record check ws.submit() runs.
+        # The deposit's parameter sets must pass the record check ws.submit() runs.
         deposit_records, replaced_legacy = _read_deposit_record_sets(records_dir)
         _print_replaced_legacy_parameter_sets(replaced_legacy)
         parameter_set_errors = _parameter_set_publication_errors(deposit_records)
@@ -5586,49 +5688,50 @@ class AuthoringWorkspace:
         title = self._deposit_title(title)
         domain = "sandbox.zenodo.org" if sandbox else "zenodo.org"
 
-        # ── Plan and stage the data files ──────────────────────────────────────
-        # The data files do not depend on the deposit, so they are planned (one
-        # entry per local file, with its deposit name and digests) and staged
-        # before one exists, and with publish=True the graph is checked before
-        # too. Everything below takes file names and URLs from the plan.
+        # ── 3. File plan ───────────────────────────────────────────────────────
+        # One entry per local file, with its deposit name and digests. Everything
+        # below takes file names and URLs from the plan.
         plan = self._deposit_file_plan(records_dir)
+
+        # ── 4. Placeholder graph, checked for a draft as for a publish ─────────
+        # A refusal here leaves no draft behind. The graph is built as
+        # ws.preview_jsonld() builds it, with placeholders for the record id and
+        # DOI the deposit does not have yet. No check reads those values beyond
+        # their form, which the placeholders share, and the dataset records take
+        # the deposited file URLs only at the end, so the verdict is the one the
+        # deposit's own graph gets. That graph is checked again before a DOI is
+        # minted.
+        self._assert_publishable(
+            self._build_zenodo_jsonld(
+                zenodo_record_id=0,
+                prereserved_doi="10.5281/zenodo.RECORD_ID",
+                record_url=f"https://{domain}/records/RECORD_ID",
+                file_plan=plan,
+                title=title,
+                description=description or "",
+                creators=creators,
+                contributors=contributors,
+                license=license or "",
+                keywords=keywords or [],
+                is_version_of=f"https://{domain}/records/{record_id}" if record_id else "",
+            ),
+            nothing_sent=True,
+            draft=not publish,
+        )
+
+        # ── 5. Reconcile with the live deposit ─────────────────────────────────
+        # Not done yet: a draft that was published on Zenodo after this
+        # workspace recorded it is still taken for a draft here.
+
         tmpdir = Path(tempfile.mkdtemp(prefix="battinfo-zenodo-"))
         try:
             # The files to upload: the data files themselves, or one zip per
             # test kind when there are more than _ZENODO_ZIP_THRESHOLD.
             data_files = self._bundle_data_files(tmpdir, plan)
 
-            if publish:
-                # Refuse before anything reaches Zenodo, so a refused publish leaves no
-                # draft behind. The graph is built as ws.preview_jsonld() builds it,
-                # with placeholders for the record id and DOI the deposit does not have
-                # yet. No check reads those values beyond their form, which the
-                # placeholders share, and the dataset records take the deposited file
-                # URLs only after the graph is built, so the verdict is the one the
-                # deposit's own graph gets. That graph is checked again before the DOI
-                # is minted.
-                self._assert_publishable(
-                    self._build_zenodo_jsonld(
-                        zenodo_record_id=0,
-                        prereserved_doi="10.5281/zenodo.RECORD_ID",
-                        record_url=f"https://{domain}/records/RECORD_ID",
-                        file_plan=plan,
-                        title=title,
-                        description=description or "",
-                        creators=creators or [],
-                        contributors=contributors or [],
-                        license=license or "",
-                        keywords=keywords or [],
-                        is_version_of=f"https://{domain}/records/{record_id}" if record_id else "",
-                    ),
-                    nothing_sent=True,
-                )
-
             client = ZenodoClient(token=tok, sandbox=sandbox)
 
-            # ── Create / version / reuse the deposit ───────────────────────────
-            # Files are synced incrementally below (sync_files): a new version inherits the
-            # prior version's files from Zenodo, so unchanged data is NOT re-uploaded.
+            # ── 6. Create or reuse the deposit, and record it ──────────────────
             if reuse_draft_id is not None:
                 deposit = client.get_deposit(reuse_draft_id)   # update existing draft
             elif record_id is not None:
@@ -5643,6 +5746,14 @@ class AuthoringWorkspace:
                 .get("prereserve_doi", {})
                 .get("doi", f"10.5281/zenodo.{zenodo_record_id}")
             )
+            # Recorded now, so a run that fails below leaves a draft the next
+            # run updates instead of one it forgets.
+            self._save_zenodo_state({
+                "record_id": str(zenodo_record_id),
+                "doi":       prereserved_doi,
+                "published": False,
+                "sandbox":   sandbox,
+            })
 
             # A version (new fork or an updated draft) is a version of its concept record;
             # record the lineage in the JSON-LD. For a new fork that's the source record_id;
@@ -5655,7 +5766,26 @@ class AuthoringWorkspace:
                 is_version_of = ""
 
             record_url = f"https://{domain}/records/{zenodo_record_id}"
+            draft_url = f"https://{domain}/deposit/{deposit_id}"
 
+            # ── 7. Metadata, before any file ───────────────────────────────────
+            # Metadata Zenodo does not accept raises a ZenodoError naming the
+            # fields, so no file goes up to a deposit whose metadata was refused.
+            try:
+                client.update_metadata(deposit_id, self._build_zenodo_metadata(
+                    title=title, description=description,
+                    creators=creators,
+                    contributors=contributors,
+                    license=license, community=community,
+                    extra_keywords=keywords,
+                ))
+            except ZenodoError as exc:
+                raise ZenodoError(
+                    f"{exc} This run uploaded no file. The draft ({draft_url}) is recorded in "
+                    ".battinfo/zenodo.json, so the next ws.zenodo() updates it."
+                ) from exc
+
+            # ── 8. and 9. Data files, then the graph and the RO-Crate ──────────
             # Single consolidated JSON-LD (replaces all individual JSON records)
             jsonld = self._build_zenodo_jsonld(
                 zenodo_record_id=zenodo_record_id,
@@ -5664,16 +5794,12 @@ class AuthoringWorkspace:
                 file_plan=plan,
                 title=title,
                 description=description or "",
-                creators=creators or [],
-                contributors=contributors or [],
+                creators=creators,
+                contributors=contributors,
                 license=license or "",
                 keywords=keywords or [],
                 is_version_of=is_version_of,
             )
-            # Name the records the graph points at but has no node for (a draft is not checked).
-            _unresolved = _unresolved_record_references(jsonld)
-            if _unresolved:
-                print(f"  WARNING: {_not_found_locally_note(_unresolved)}")
             (tmpdir / BATTINFO_LD_FILENAME).write_text(
                 json.dumps(jsonld, indent=2, ensure_ascii=False),
                 encoding="utf-8",
@@ -5685,23 +5811,25 @@ class AuthoringWorkspace:
                 data_files,
                 title=title,
                 description=description or "",
-                creators=creators or [],
-                contributors=contributors or [],
+                creators=creators,
+                contributors=contributors,
                 license=license,
                 zenodo_record_id=zenodo_record_id,
                 prereserved_doi=prereserved_doi,
                 sandbox=sandbox,
             )
 
-            # Each file under its deposit name, the data files from where they are.
-            # The map is built from the plan, not from a folder listing, which on
+            # Each file under its deposit name, the data files from where they
+            # are, and before the graph and the RO-Crate that link to them. The
+            # map is built from the plan, not from a folder listing, which on
             # macOS can hand names back in another Unicode form.
-            uploads = [(f.path, f.name) for f in data_files] + [
-                (tmpdir / name, name) for name in (BATTINFO_LD_FILENAME, _ROCRATE_FILENAME)
-            ]
-            upload_map = {path: name for path, name in sorted(uploads, key=lambda item: item[1])}
+            upload_map = {f.path: f.name for f in sorted(data_files, key=lambda f: f.name)}
+            for name in (BATTINFO_LD_FILENAME, _ROCRATE_FILENAME):
+                upload_map[tmpdir / name] = name
             # Incremental sync: only files whose content changed are uploaded; unchanged
-            # files already on the deposit (e.g. inherited data on a new version) are kept.
+            # files already on the deposit are kept. Not done yet: a file on the
+            # deposit that the map does not name is removed, among them the data
+            # files a new version inherits for records already pointed at Zenodo.
             sync = client.sync_files(deposit_id, upload_map)
             print(f"  Files on deposit {deposit_id}: "
                   f"{len(sync['uploaded'])} uploaded, {len(sync['kept'])} unchanged (kept), "
@@ -5709,28 +5837,14 @@ class AuthoringWorkspace:
             for name in sync["uploaded"]:
                 print(f"    + {name}")
 
-            # Zenodo now hosts these files: point the dataset records at the
-            # public record URLs so ws.submit() sends resolvable links even
-            # when no R2 object storage is configured (the public path).
-            patched = self._apply_zenodo_file_urls(record_url, plan)
-            if patched:
-                print(f"  Dataset records updated with Zenodo file URLs: {patched}")
-
         finally:
             shutil.rmtree(tmpdir, ignore_errors=True)
 
-        # ── Set metadata ───────────────────────────────────────────────────────
-        metadata = self._build_zenodo_metadata(
-            title=title, description=description,
-            creators=creators or [],
-            contributors=contributors or [],
-            license=license, community=community,
-            extra_keywords=keywords,
-        )
-        client.update_metadata(deposit_id, metadata)
+        # ── 10. Check the deposit's files ──────────────────────────────────────
+        # Not done yet: the deposit's files are not listed and compared with the
+        # plan, by name and md5, before the deposit is published.
 
-        # ── Publish or leave as draft ──────────────────────────────────────────
-        draft_url = f"https://{domain}/deposit/{deposit_id}"
+        # ── 11. and 12. Publish, and record the deposit as published ───────────
         doi        = prereserved_doi
         published  = False
 
@@ -5739,6 +5853,12 @@ class AuthoringWorkspace:
             pub = client.publish_deposit(deposit_id)
             doi = pub.get("doi", prereserved_doi)
             published = True
+            self._save_zenodo_state({
+                "record_id": str(zenodo_record_id),
+                "doi":       doi,
+                "published": True,
+                "sandbox":   sandbox,
+            })
             print(f"  Published: {record_url}")
             print(f"  DOI: {doi}")
         else:
@@ -5746,12 +5866,12 @@ class AuthoringWorkspace:
             print(f"  Pre-reserved DOI: {doi}")
             print("  Review it, then click \"Publish\" on Zenodo -- or re-run with publish=True.")
 
-        self._save_zenodo_state({
-            "record_id": str(zenodo_record_id),
-            "doi":       doi,
-            "published": published,
-            "sandbox":   sandbox,
-        })
+        # ── 13. Point the dataset records at the deposited files ───────────────
+        # Zenodo now hosts these files: ws.submit() then sends resolvable links
+        # even when no R2 object storage is configured (the public path).
+        patched = self._apply_zenodo_file_urls(record_url, plan)
+        if patched:
+            print(f"  Dataset records updated with Zenodo file URLs: {patched}")
 
         return ZenodoResult(
             record_id=str(zenodo_record_id),
@@ -5835,7 +5955,8 @@ class AuthoringWorkspace:
     ) -> Path:
         """Generate ``ro-crate-metadata.json`` locally for review.
 
-        Uses placeholder values for the Zenodo URL.
+        Uses placeholder values for the Zenodo URL. The creators and their
+        ORCIDs are the ones :meth:`zenodo` would give the deposit.
 
         Example::
 
@@ -5845,6 +5966,8 @@ class AuthoringWorkspace:
         import shutil
         import tempfile
 
+        creators = self._deposit_creators(creators, required=False)
+        contributors = _deposit_agents(contributors or [], "contributor")
         records_dir = self._ws.source_root
         if not records_dir.exists():
             raise RuntimeError("No records found — run ws.save() first.")
@@ -5859,7 +5982,7 @@ class AuthoringWorkspace:
             self._build_rocrate(
                 tmpdir, data_files,
                 title=title, description=description,
-                creators=creators or [], contributors=contributors or [],
+                creators=creators, contributors=contributors,
                 license=license,
                 zenodo_record_id=0, prereserved_doi="10.5281/zenodo.RECORD_ID",
             )
@@ -5889,10 +6012,12 @@ class AuthoringWorkspace:
 
         Uses placeholder values for the Zenodo record URL and DOI so the
         structure can be inspected without creating a deposit.  Pass the same
-        ``title``/``creators``/``license`` you would give :meth:`upload` to preview
+        ``title``/``creators``/``license`` you would give :meth:`zenodo` to preview
         the rights and attribution that will be embedded in the published record.
         Without a ``title`` the preview carries the automatic title
-        :meth:`zenodo` would give the deposit.
+        :meth:`zenodo` would give the deposit, and without ``creators`` the
+        creators it would find (see :meth:`zenodo`); with none, the checks
+        report it, since :meth:`zenodo` refuses such a deposit.
 
         Parameters
         ----------
@@ -5919,6 +6044,9 @@ class AuthoringWorkspace:
         # when neither is set, which the gold-standard panel then nudges on.
         if not license:
             license = self._get_license() or ""
+        # The creators ws.zenodo() would find, every ORCID a bare id.
+        creators = self._deposit_creators(creators, required=False)
+        contributors = _deposit_agents(contributors or [], "contributor")
 
         # The data files and their deposit names, planned as ws.zenodo() plans
         # them. The graph needs only the names, so the files are not read.
@@ -5931,8 +6059,8 @@ class AuthoringWorkspace:
             file_plan=plan,
             title=self._deposit_title(title),
             description=description or "",
-            creators=creators or [],
-            contributors=contributors or [],
+            creators=creators,
+            contributors=contributors,
             license=license or "",
             keywords=keywords or [],
             version=version or "",
@@ -5956,6 +6084,8 @@ class AuthoringWorkspace:
                 f"parameter set {problem}"
                 for problem in _parameter_set_publication_errors(deposit_records)
             ]
+            if not creators:
+                errors.append(f"no creators: ws.zenodo() refuses a deposit without them. {_CREATORS_HINT}")
             warnings = [i for i in report.issues if i.severity == "warning"]
             if not errors and not warnings:
                 print("  Gold-standard: PASS (no validation issues)")
@@ -5978,18 +6108,21 @@ class AuthoringWorkspace:
         print(f"  Data files:  {len(plan.deposited_names())}")
         return out
 
-    def _assert_publishable(self, jsonld: dict, *, nothing_sent: bool = False) -> None:
+    def _assert_publishable(self, jsonld: dict, *, nothing_sent: bool = False, draft: bool = False) -> None:
         """Fail closed before minting an irreversible DOI: refuse to publish a record that has
         validation errors, or a distribution whose data file is missing from the deposit (R-7).
 
         Missing data files are checked from the most recent deposit file plan
         (:meth:`_deposit_file_plan`). ``nothing_sent`` says in the refusal that no
-        deposit was made (the check :meth:`zenodo` runs before it contacts Zenodo)."""
+        deposit was made (the check :meth:`zenodo` runs before it contacts Zenodo).
+        With ``draft`` the refusal is of the deposit itself: :meth:`zenodo` checks a
+        draft as it checks a publish, since a draft is one click from published."""
+        verb, doing = ("deposit", "depositing") if draft else ("publish", "publishing")
         sent_note = " Nothing was sent to Zenodo." if nothing_sent else ""
         missing = getattr(self, "_missing_data_files", [])
         if missing:
             raise RuntimeError(
-                f"Refusing to publish: {len(missing)} distribution data file(s) are missing and were "
+                f"Refusing to {verb}: {len(missing)} distribution data file(s) are missing and were "
                 f"not uploaded, so the deposit would be incomplete: {'; '.join(missing[:5])}. "
                 f"Fix the paths (or remove the distributions), then re-run.{sent_note}"
             )
@@ -5997,13 +6130,14 @@ class AuthoringWorkspace:
             from battinfo.validate import validate_publication_report  # noqa: PLC0415
             report = validate_publication_report(jsonld, policy="publisher")
         except Exception as exc:  # noqa: BLE001
-            raise RuntimeError(f"Could not validate the record before publishing: {exc}") from exc
+            raise RuntimeError(f"Could not validate the record before {doing}: {exc}") from exc
         errors = [i for i in report.issues if i.severity == "error"]
         if errors:
             unresolved = _unresolved_record_references(jsonld)
+            draft_hint = "" if draft else ", or leave the deposit as a draft"
             raise RuntimeError(
-                f"Refusing to publish: {len(errors)} validation error(s) in the record "
-                "(run ws.preview_jsonld() to see them, or leave the deposit as a draft): "
+                f"Refusing to {verb}: {len(errors)} validation error(s) in the record "
+                f"(run ws.preview_jsonld() to see them{draft_hint}): "
                 + "; ".join(i.message for i in errors[:5])
                 + (f" {_not_found_locally_note(unresolved)}" if unresolved else "")
                 + sent_note

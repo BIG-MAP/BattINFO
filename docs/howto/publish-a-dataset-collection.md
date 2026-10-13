@@ -97,7 +97,7 @@ The tests do not need to list their datasets in `dataset_ids`. The deposit graph
 
 ## 4. Check the deposit graph
 
-`ws.preview_jsonld()` assembles the same JSON-LD graph a Zenodo deposit would carry, runs the publication checks on it and prints the result. Pass the same title and creators you will give the deposit; without a title, the preview and the deposit both take the automatic one built from the first saved cell spec. To check in code rather than by reading the printout, validate the written file:
+`ws.preview_jsonld()` assembles the same JSON-LD graph a Zenodo deposit would carry, runs the publication checks on it and prints the result. Pass the same title and creators you will give the deposit. Without a title, the preview and the deposit both take the automatic one built from the first saved cell spec; without creators, both credit the workspace contributors (`ws.contributor()`), or failing those the creator set with `battinfo config set creator`. With no creators at all, `ws.zenodo()` refuses the deposit before it sends anything, and the preview lists that as an error. To check in code rather than by reading the printout, validate the written file:
 
 ```python
 import json

@@ -413,7 +413,8 @@ def test_a_publish_on_a_registry_only_cell_deposits_its_stub(
     ws = _workspace_on_registry_cell(tmp_path, REGISTRY)
     result = ws.zenodo(publish=True, token="placeholder", title="NEW-1", creators=CREATORS)
     assert result.published
-    assert zenodo.calls == ["client", "create", "upload", "metadata", "publish"]
+    # The metadata goes up as soon as the deposit exists, before any file.
+    assert zenodo.calls == ["client", "create", "metadata", "upload", "publish"]
     # The data file and the two metadata files; the reference copies stay local.
     assert sorted(zenodo.uploaded) == ["battinfo.json", "ro-crate-metadata.json", "run.bdf.csv"]
     deposited = json.loads(zenodo.uploaded["battinfo.json"])

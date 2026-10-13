@@ -55,6 +55,31 @@ class ZenodoError(RuntimeError):
     """Raised when the Zenodo API returns an error response."""
 
 
+def _metadata_errors(reply: Any) -> list[str]:
+    """The problems a deposit reply lists under ``errors``, one string each.
+
+    An entry is ``{"field": ..., "messages": [...]}`` (InvenioRDM) or
+    ``{"field": ..., "message": ...}`` (the older deposit API), shown as
+    ``field (message; message)``; an entry of any other shape is shown as it is.
+    """
+    errors = reply.get("errors") if isinstance(reply, dict) else None
+    if not errors:
+        return []
+    problems: list[str] = []
+    for error in errors if isinstance(errors, list) else [errors]:
+        if not isinstance(error, dict):
+            problems.append(str(error))
+            continue
+        messages = error.get("messages", error.get("message"))
+        if isinstance(messages, (list, tuple)):
+            text = "; ".join(str(message) for message in messages)
+        else:
+            text = str(messages) if messages else ""
+        field = str(error.get("field") or "metadata")
+        problems.append(f"{field} ({text})" if text else field)
+    return problems
+
+
 class ZenodoClient:
     def __init__(self, *, token: str, sandbox: bool = False) -> None:
         self._token = token
@@ -138,12 +163,24 @@ class ZenodoClient:
         return self._json("GET", f"/deposit/depositions/{deposit_id}")
 
     def update_metadata(self, deposit_id: int | str, metadata: dict) -> dict:
-        """Update the metadata of an existing draft deposit."""
-        return self._json(
+        """Update the metadata of an existing draft deposit.
+
+        Zenodo answers metadata it does not accept with HTTP 200 and lists the
+        problems under ``errors`` in the reply. A non-empty list raises a
+        :class:`ZenodoError` that names the fields, so the caller stops there
+        instead of going on with a deposit whose metadata was refused.
+        """
+        reply = self._json(
             "PUT",
             f"/deposit/depositions/{deposit_id}",
             {"metadata": metadata},
         )
+        problems = _metadata_errors(reply)
+        if problems:
+            raise ZenodoError(
+                f"Zenodo did not accept the metadata of deposit {deposit_id}: " + "; ".join(problems)
+            )
+        return reply
 
     def get_deposit(self, deposit_id: int | str) -> dict:
         return self._json("GET", f"/deposit/depositions/{deposit_id}")

@@ -692,7 +692,7 @@ class TestDepositTitle:
         ws = _titleless_workspace(tmp_path)
         submitted: list[str | None] = []
         monkeypatch.setattr(ws, "submit", lambda **kwargs: submitted.append(kwargs.get("doi")) or [])
-        ws.publish(zenodo=True, note="title check")
+        ws.publish(zenodo=True, note="title check", creators=CREATORS)
 
         assert recording_zenodo.published and submitted == ["10.5281/zenodo.7"]
         graph = json.loads(recording_zenodo.uploaded["battinfo.json"])
