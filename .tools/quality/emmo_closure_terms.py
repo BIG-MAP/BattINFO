@@ -69,8 +69,11 @@ def _candidates(iri: str, importer: tuple[str, str] | None) -> list[tuple[str, s
     if match:
         version, rest = match.group(1), match.group(2) or "emmo"
         base = rest.split("/")[-1]
-        return [("EMMO", version, rest + ".ttl"), ("EMMO", version, f"{rest}/{base}.ttl"),
-                ("EMMO", version, f"foundation/{base}.ttl")]
+        return [
+            ("EMMO", version, rest + ".ttl"),
+            ("EMMO", version, f"{rest}/{base}.ttl"),
+            ("EMMO", version, f"foundation/{base}.ttl"),
+        ]
     return []
 
 
@@ -123,9 +126,7 @@ def build() -> dict:
     for module_name in modules:
         repo, tag = module_name.split(":")[0].split("@")
         versions.setdefault(repo, set()).add(tag)
-    deprecated = sorted(
-        {str(s) for s, o in graph.subject_objects(OWL.deprecated) if str(o).lower() == "true"}
-    )
+    deprecated = sorted({str(s) for s, o in graph.subject_objects(OWL.deprecated) if str(o).lower() == "true"})
     subclasses: dict[str, set[str]] = {}
     for sub, sup in graph.subject_objects(RDFS.subClassOf):
         if isinstance(sub, rdflib.URIRef) and isinstance(sup, rdflib.URIRef):

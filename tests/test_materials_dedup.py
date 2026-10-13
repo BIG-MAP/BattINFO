@@ -1,6 +1,7 @@
 """Regression tests: material extraction must not silently lose materials
 (audit theme D).
 """
+
 from __future__ import annotations
 
 import sys
@@ -27,10 +28,12 @@ def test_property_wrapped_in_single_element_list_is_preserved() -> None:
 
 def test_same_name_distinct_materials_warn_not_silent() -> None:
     record = {
-        "positive_electrode": {"coating": {"component": {"active_material": [
-            {"name": "NMC", "molecular_formula": "LiNi0.8Mn0.1Co0.1O2"}]}}},
-        "negative_electrode": {"coating": {"component": {"active_material": [
-            {"name": "NMC", "molecular_formula": "LiNi0.5Mn0.3Co0.2O2"}]}}},
+        "positive_electrode": {
+            "coating": {"component": {"active_material": [{"name": "NMC", "molecular_formula": "LiNi0.8Mn0.1Co0.1O2"}]}}
+        },
+        "negative_electrode": {
+            "coating": {"component": {"active_material": [{"name": "NMC", "molecular_formula": "LiNi0.5Mn0.3Co0.2O2"}]}}
+        },
     }
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")

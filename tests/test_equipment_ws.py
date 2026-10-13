@@ -9,6 +9,7 @@ Covers:
   strict-valid canonical record with a deterministic IRI;
 - the committed MC3000 examples pass strict validation.
 """
+
 from __future__ import annotations
 
 import json
@@ -47,9 +48,7 @@ def _record_counts(ws) -> tuple[int, int, int]:
 
 def test_add_equipment_creates_unit_and_channels_and_is_idempotent(tmp_path: Path, capsys) -> None:
     ws = _ws(tmp_path)
-    records = ws.add(
-        "equipment", spec=_spec_record(), serial_number=SERIAL, name="Cycler 1", location="Lab B"
-    )
+    records = ws.add("equipment", spec=_spec_record(), serial_number=SERIAL, name="Cycler 1", location="Lab B")
     # Unit + 4 channels returned (channel count from the spec's channel_count).
     assert len(records) == 5
     assert "equipment" in records[0]
@@ -60,9 +59,7 @@ def test_add_equipment_creates_unit_and_channels_and_is_idempotent(tmp_path: Pat
     assert "Cycler 1" in out and "4 registered" in out
 
     # Re-running with the same inputs converges: same IRIs, no new files.
-    again = ws.add(
-        "equipment", spec=_spec_record(), serial_number=SERIAL, name="Cycler 1", location="Lab B"
-    )
+    again = ws.add("equipment", spec=_spec_record(), serial_number=SERIAL, name="Cycler 1", location="Lab B")
     assert [r.get("equipment", r.get("channel"))["id"] for r in again] == first_ids
     assert _record_counts(ws) == (1, 1, 4)
 
@@ -202,8 +199,7 @@ def test_mc3000_examples_are_the_canonical_equipment_examples() -> None:
     assert eq_body["id"].rsplit("/", 1)[-1] == stable_uid(f"equipment:{spec_uid}:{SERIAL}")
 
     channels = [
-        json.loads(p.read_text(encoding="utf-8"))["channel"]
-        for p in sorted((EXAMPLES / "channel").glob("*.json"))
+        json.loads(p.read_text(encoding="utf-8"))["channel"] for p in sorted((EXAMPLES / "channel").glob("*.json"))
     ]
     assert sorted(c["index"] for c in channels) == [1, 2, 3, 4]
     assert {c["label"] for c in channels} == {f"MC3000-A/CH{i}" for i in range(1, 5)}

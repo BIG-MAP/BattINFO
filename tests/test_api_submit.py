@@ -9,6 +9,7 @@ Pins ``submit_publication_package`` against a hostile / cold-starting registry:
 - a 409 still raises a ``RuntimeError`` whose message contains "409" and is not
   retried, so ``ws._do_submit``'s version-bump handling keeps working.
 """
+
 from __future__ import annotations
 
 import io

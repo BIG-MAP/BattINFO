@@ -6,6 +6,7 @@ identity seed (manufacturer::model::format::chemistry::size_code), so before the
 they minted the same IRI and one overwrote the other on save. The fix re-mints every
 member of a collision group from its content, deterministically and order-independently.
 """
+
 from __future__ import annotations
 
 import json
@@ -26,9 +27,15 @@ def _ws(root: Path) -> Workspace:
 
 def _spec(ws: Workspace, capacity: float) -> None:
     ws.cell_spec(
-        manufacturer="Acme", model="X1", format="cylindrical", chemistry="Li-ion", size_code="R26650",
-        positive_electrode_basis="LFP", negative_electrode_basis="graphite",
-        specs={"nominal_capacity": quantity(capacity, "Ah")}, source_file=f"x-{capacity}.json",
+        manufacturer="Acme",
+        model="X1",
+        format="cylindrical",
+        chemistry="Li-ion",
+        size_code="R26650",
+        positive_electrode_basis="LFP",
+        negative_electrode_basis="graphite",
+        specs={"nominal_capacity": quantity(capacity, "Ah")},
+        source_file=f"x-{capacity}.json",
     )
 
 
@@ -103,9 +110,15 @@ def test_cells_link_to_their_own_colliding_spec(tmp_path: Path) -> None:
 
 def _ws_spec(ws: Workspace, capacity: float):
     return ws.cell_spec(
-        manufacturer="Acme", model="X1", format="cylindrical", chemistry="Li-ion", size_code="R26650",
-        positive_electrode_basis="LFP", negative_electrode_basis="graphite",
-        specs={"nominal_capacity": quantity(capacity, "Ah")}, source_file=f"x-{capacity}.json",
+        manufacturer="Acme",
+        model="X1",
+        format="cylindrical",
+        chemistry="Li-ion",
+        size_code="R26650",
+        positive_electrode_basis="LFP",
+        negative_electrode_basis="graphite",
+        specs={"nominal_capacity": quantity(capacity, "Ah")},
+        source_file=f"x-{capacity}.json",
     )
 
 
@@ -115,10 +128,18 @@ def test_colliding_test_specs_get_distinct_ids_and_tests_link_own(tmp_path: Path
     # distinct protocols into one canonical record.
     ws = _ws(tmp_path / "ws")
     cell = ws.cell(_ws_spec(ws, 2.5), serial_number="c1", source_type="lab")
-    ts1 = ws.test_spec(name="Cycling", type="cycling", version="1",
-                       experiment=["Charge at 1C until 4.2 V", "Discharge at 1C until 2.5 V"])
-    ts2 = ws.test_spec(name="Cycling", type="cycling", version="1",
-                       experiment=["Charge at C/2 until 4.2 V", "Discharge at C/2 until 2.5 V"])
+    ts1 = ws.test_spec(
+        name="Cycling",
+        type="cycling",
+        version="1",
+        experiment=["Charge at 1C until 4.2 V", "Discharge at 1C until 2.5 V"],
+    )
+    ts2 = ws.test_spec(
+        name="Cycling",
+        type="cycling",
+        version="1",
+        experiment=["Charge at C/2 until 4.2 V", "Discharge at C/2 until 2.5 V"],
+    )
     ws.test(cell, type="cycling", protocol_ref=ts1, status="completed")
     ws.test(cell, type="cycling", protocol_ref=ts2, status="completed")
     ws._finalize()

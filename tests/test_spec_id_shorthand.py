@@ -4,6 +4,7 @@ The record keeps its self-describing ``<type>_spec_id`` key; ``spec_id=`` is
 the kwarg a person types. The prefixed kwarg stays accepted, and disagreeing
 spellings are an error, never a silent pick.
 """
+
 from __future__ import annotations
 
 import pytest
@@ -31,15 +32,11 @@ def test_component_families_accept_both_spellings() -> None:
 
 
 def test_equipment_accepts_spec_id() -> None:
-    rec = api.create_equipment(
-        spec_id=SPEC, serial_number="SN-1", name="Cycler 1", validate=False
-    )
+    rec = api.create_equipment(spec_id=SPEC, serial_number="SN-1", name="Cycler 1", validate=False)
     assert rec["equipment"]["equipment_spec_id"] == SPEC
 
 
 def test_disagreeing_spellings_are_rejected() -> None:
     other = "https://w3id.org/battinfo/spec/ffff-2345-6789-abcd"
     with pytest.raises(ValueError, match="disagree"):
-        api.create_component_instance(
-            "separator", spec_id=SPEC, separator_spec_id=other, validate=False
-        )
+        api.create_component_instance("separator", spec_id=SPEC, separator_spec_id=other, validate=False)

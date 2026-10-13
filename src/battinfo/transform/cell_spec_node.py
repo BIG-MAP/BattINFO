@@ -27,6 +27,7 @@ The node shape is the canonical target shape:
 - Provenance uses standard vocabularies only (dcterms / PROV-O) — no new
   ``battinfo:`` terms are minted.
 """
+
 from __future__ import annotations
 
 import json
@@ -72,7 +73,7 @@ def compact_iri(iri: str) -> str:
     """Shorten a full EMMO-family IRI to its compact (prefixed) form."""
     for prefix, base in _COMPACT_PREFIXES:
         if iri.startswith(base):
-            return prefix + iri[len(base):]
+            return prefix + iri[len(base) :]
     return iri
 
 
@@ -90,35 +91,35 @@ def _domain_battery_context() -> dict[str, Any]:
 # (records) context.  The kept static table mirrors the table formerly maintained
 # inline in AuthoringWorkspace._assemble_zenodo_jsonld.
 _STATIC_LABEL_TO_COMPACT: dict[str, str] = {
-    "BatteryTest":             "battery:battery_dca7729a_421a_4921_90cf_9692bb9eb081",
-    "BatteryCell":             "battery:battery_68ed592a_7924_45d0_a108_94d6275d57f0",
+    "BatteryTest": "battery:battery_dca7729a_421a_4921_90cf_9692bb9eb081",
+    "BatteryCell": "battery:battery_68ed592a_7924_45d0_a108_94d6275d57f0",
     "BatteryCellSpecification": "battery:battery_1cfbba6c_8824_4932_a23e_2141483acef7",
-    "CylindricalBattery":      "battery:battery_ac604ecd_cc60_4b98_b57c_74cd5d3ccd40",
+    "CylindricalBattery": "battery:battery_ac604ecd_cc60_4b98_b57c_74cd5d3ccd40",
     # domain-battery 0.20.2 minted an underscore-named twin and deprecated the
     # hyphen-named original (dcterms:isReplacedBy, upstream issue #73). Records
     # minted from here carry the twin; the validator still accepts the hyphen
     # form so previously published records keep validating.
-    "PrismaticBattery":        "battery:battery_86c9ca80_de6f_417f_afdc_a7e52fa6322d",
-    "PouchCell":               "battery:battery_392b3f47_d62a_4bd4_a819_b58b09b8843a",
-    "CoinCell":                "battery:battery_b7fdab58_6e91_4c84_b097_b06eff86a124",
-    "LithiumIonBattery":                   "battery:battery_96addc62_ea04_449a_8237_4cd541dd8e5f",
-    "LithiumMetalBattery":                 "battery:battery_ada13509_4eed_4e40_a7b1_4cc488144154",
-    "SodiumIonBattery":                    "battery:battery_42329a95_03fe_4ec1_83cb_b7e8ed52f68a",
+    "PrismaticBattery": "battery:battery_86c9ca80_de6f_417f_afdc_a7e52fa6322d",
+    "PouchCell": "battery:battery_392b3f47_d62a_4bd4_a819_b58b09b8843a",
+    "CoinCell": "battery:battery_b7fdab58_6e91_4c84_b097_b06eff86a124",
+    "LithiumIonBattery": "battery:battery_96addc62_ea04_449a_8237_4cd541dd8e5f",
+    "LithiumMetalBattery": "battery:battery_ada13509_4eed_4e40_a7b1_4cc488144154",
+    "SodiumIonBattery": "battery:battery_42329a95_03fe_4ec1_83cb_b7e8ed52f68a",
     "AlkalineZincManganeseDioxideBattery": "battery:battery_b572826a_b4e4_4986_b57d_f7b945061f8b",
-    "AlkalineCell":                        "battery:battery_50b911f7_c903_4700_9764_c308d8a95470",
-    "PrimaryBattery":                      "battery:battery_3b0b0d6e_8b0e_4491_885e_8421d3eb3b69",
-    "SecondaryBattery":                    "battery:battery_efc38420_ecbb_42e4_bb3f_208e7c417098",
+    "AlkalineCell": "battery:battery_50b911f7_c903_4700_9764_c308d8a95470",
+    "PrimaryBattery": "battery:battery_3b0b0d6e_8b0e_4491_885e_8421d3eb3b69",
+    "SecondaryBattery": "battery:battery_efc38420_ecbb_42e4_bb3f_208e7c417098",
     # IEC standard size codes — subclasses already defined in domain-battery
-    "LR03":   "battery:battery_a5299801_2a8d_4d03_a476_ca2c5e9ca702",  # AAA alkaline
-    "LR6":    "battery:battery_6b2540b9_5af6_478a_81ae_583db9636db8",  # AA alkaline
-    "LR14":   "battery:battery_d00e842e_ee0b_4e25_bd17_d64d76d69730",  # C alkaline
-    "LR20":   "battery:battery_0c9979c2_c981_48ea_a8e1_72bdcb58fd58",  # D alkaline
-    "LR1":    "battery:battery_1c0306f5_5698_4874_b6ce_e5cc45a46b91",  # N alkaline
+    "LR03": "battery:battery_a5299801_2a8d_4d03_a476_ca2c5e9ca702",  # AAA alkaline
+    "LR6": "battery:battery_6b2540b9_5af6_478a_81ae_583db9636db8",  # AA alkaline
+    "LR14": "battery:battery_d00e842e_ee0b_4e25_bd17_d64d76d69730",  # C alkaline
+    "LR20": "battery:battery_0c9979c2_c981_48ea_a8e1_72bdcb58fd58",  # D alkaline
+    "LR1": "battery:battery_1c0306f5_5698_4874_b6ce_e5cc45a46b91",  # N alkaline
     "CR2032": "battery:battery_b61b96ac_f2f4_4b74_82d5_565fe3a2d88b",  # coin
     "CR2025": "battery:battery_9984642f_c9dc_4b98_94f6_6ffe20cfc014",  # coin
-    "LR44":   "battery:battery_d10ff656_f9fd_4b0e_9de9_4812a44ea359",  # button
-    "HR6":    "battery:battery_a71a4bf2_dee6_4aa4_8ad4_9f38c261fb84",  # AA NiMH
-    "KR6":    "battery:battery_ad7c1d81_9a9f_4174_88ea_3ba3e8f4dbe2",  # AA NiCd
+    "LR44": "battery:battery_d10ff656_f9fd_4b0e_9de9_4812a44ea359",  # button
+    "HR6": "battery:battery_a71a4bf2_dee6_4aa4_8ad4_9f38c261fb84",  # AA NiMH
+    "KR6": "battery:battery_ad7c1d81_9a9f_4174_88ea_3ba3e8f4dbe2",  # AA NiCd
 }
 
 # Structure / co-type terms emitted by the shared quantity-node builder that are
@@ -396,9 +397,7 @@ def provenance_node(provenance: Any) -> dict[str, Any] | None:
     return node if len(node) > 1 else None
 
 
-def cell_spec_property_nodes(
-    properties: Any, *, context_label: str = ""
-) -> list[dict[str, Any]]:
+def cell_spec_property_nodes(properties: Any, *, context_label: str = "") -> list[dict[str, Any]]:
     """EMMO ``hasProperty`` nodes for a cell-spec ``properties`` mapping.
 
     Emits the shared quantity-node shape and warns (never silently) at the two
@@ -433,9 +432,7 @@ def cell_spec_property_nodes(
                 "the JSON-LD export emits no numeric quantity value for it.",
                 stacklevel=2,
             )
-        node = _descriptor_quantity_node(
-            str(key), quantity if isinstance(quantity, dict) else dict(quantity)
-        )
+        node = _descriptor_quantity_node(str(key), quantity if isinstance(quantity, dict) else dict(quantity))
         if node is not None:
             nodes.append(node)
     return nodes
@@ -503,9 +500,7 @@ def build_cell_spec_node(record: Mapping[str, Any]) -> dict[str, Any]:
     iri = cell.get("id") or ""
     tail = _iri_tail(str(iri))
     manufacturer = cell.get("manufacturer")
-    manufacturer_name = (
-        manufacturer.get("name") if isinstance(manufacturer, Mapping) else manufacturer
-    )
+    manufacturer_name = manufacturer.get("name") if isinstance(manufacturer, Mapping) else manufacturer
 
     # Three personas on one node (see docs/records/cells.md "What the spec
     # node says"): the EMMO information artifact (BatteryCellSpecification),
@@ -579,9 +574,7 @@ def build_cell_spec_node(record: Mapping[str, Any]) -> dict[str, Any]:
         node["schema:schemaVersion"] = schema_version
 
     described = node["isDescriptionFor"]
-    property_nodes = cell_spec_property_nodes(
-        record.get("properties"), context_label=str(iri or name or "cell-spec")
-    )
+    property_nodes = cell_spec_property_nodes(record.get("properties"), context_label=str(iri or name or "cell-spec"))
     if property_nodes:
         described["hasProperty"] = property_nodes
     # schema.org convenience mirror (weight/dimensions on the ProductModel

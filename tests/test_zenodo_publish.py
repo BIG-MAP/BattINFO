@@ -2,6 +2,7 @@
 retry a write (a publish retry could mint a second DOI), (3) surface connection/timeout errors as
 a clean ZenodoError instead of a raw urllib exception, and (4) confirm-on-transient for publish so
 a timed-out-but-committed publish is reported as success rather than a phantom failure."""
+
 from __future__ import annotations
 
 import io

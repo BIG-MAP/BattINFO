@@ -118,21 +118,13 @@ def test_template_test_protocol_accepts_new_kinds() -> None:
 def test_shipped_example_chain_is_consistent() -> None:
     # The canonical A123 cell-spec anchors the linked chain. The research/ detailed
     # and extended/minimal descriptors are separate example records (own IRIs).
-    cell_spec = json.loads(
-        (ROOT / "examples" / "cell-spec" / "A123__ANR26650M1-B.json").read_text(encoding="utf-8")
-    )
+    cell_spec = json.loads((ROOT / "examples" / "cell-spec" / "A123__ANR26650M1-B.json").read_text(encoding="utf-8"))
     cell_instance = json.loads(
-        (ROOT / "examples" / "cell-instance" / "cell-3m6k-9t2p-7x4h-9nq8.json").read_text(
-            encoding="utf-8"
-        )
+        (ROOT / "examples" / "cell-instance" / "cell-3m6k-9t2p-7x4h-9nq8.json").read_text(encoding="utf-8")
     )
-    test_record = json.loads(
-        (ROOT / "examples" / "test" / "test-5p7v-2n8k-4m3t-6q9r.json").read_text(encoding="utf-8")
-    )
+    test_record = json.loads((ROOT / "examples" / "test" / "test-5p7v-2n8k-4m3t-6q9r.json").read_text(encoding="utf-8"))
     dataset = json.loads(
-        (ROOT / "examples" / "dataset" / "dataset-1f8r-6v2k-9p4m-3t7x.json").read_text(
-            encoding="utf-8"
-        )
+        (ROOT / "examples" / "dataset" / "dataset-1f8r-6v2k-9p4m-3t7x.json").read_text(encoding="utf-8")
     )
 
     assert cell_spec["cell_spec"]["id"] == cell_instance["cell_instance"]["cell_spec_id"]
@@ -681,8 +673,16 @@ def test_publish_record_dataset_jsonld_preserves_rich_metadata(tmp_path: Path) -
                 }
             ],
             "publisher": {"type": "Organization", "name": "BattINFO", "same_as": "https://ror.org/03yrm5c26"},
-            "funders": [{"type": "Organization", "name": "Battery Data Alliance", "same_as": "https://ror.org/02mhbdp94"}],
-            "citations": [{"name": "Example paper", "url": "https://doi.org/10.1000/example-paper", "doi": "10.1000/example-paper"}],
+            "funders": [
+                {"type": "Organization", "name": "Battery Data Alliance", "same_as": "https://ror.org/02mhbdp94"}
+            ],
+            "citations": [
+                {
+                    "name": "Example paper",
+                    "url": "https://doi.org/10.1000/example-paper",
+                    "doi": "10.1000/example-paper",
+                }
+            ],
             "measurement_techniques": ["electrochemical cycling"],
             "variable_measured": [{"name": "Voltage", "unit_text": "V"}],
             "included_in_data_catalog": {
@@ -1371,9 +1371,7 @@ def test_library_flat_dict_carries_full_physical_structure(tmp_path: Path) -> No
                         "active_material": [
                             {"name": "LFP", "property": {"mass_fraction": {"value": 0.92, "unit": "1"}}}
                         ],
-                        "binder": [
-                            {"name": "PVDF", "property": {"mass_fraction": {"value": 0.08, "unit": "1"}}}
-                        ],
+                        "binder": [{"name": "PVDF", "property": {"mass_fraction": {"value": 0.08, "unit": "1"}}}],
                     },
                     "property": {"thickness": {"value": 55.0, "unit": "um"}},
                 },
@@ -1385,9 +1383,7 @@ def test_library_flat_dict_carries_full_physical_structure(tmp_path: Path) -> No
                         "active_material": [
                             {"name": "Graphite", "property": {"mass_fraction": {"value": 0.95, "unit": "1"}}}
                         ],
-                        "binder": [
-                            {"name": "CMC/SBR", "property": {"mass_fraction": {"value": 0.05, "unit": "1"}}}
-                        ],
+                        "binder": [{"name": "CMC/SBR", "property": {"mass_fraction": {"value": 0.05, "unit": "1"}}}],
                     },
                 },
                 "current_collector": {"name": "Cu foil"},
@@ -1411,8 +1407,3 @@ def test_library_flat_dict_carries_full_physical_structure(tmp_path: Path) -> No
     assert spec["electrolyte"]["salt"]["name"] == "LiPF6"
     assert spec["separator"]["material"] == "PP membrane"
     assert spec["housing"]["case"]["size_code"] == "2032"
-
-
-
-
-

@@ -21,21 +21,13 @@ from battinfo.validate.core import (
     get_validation_policy,
 )
 
-SPEC_IRI_RE = re.compile(
-    r"^https://w3id\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
-)
+SPEC_IRI_RE = re.compile(r"^https://w3id\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$")
 # Aliases kept for clarity — cell specs and test protocols both use spec/ namespace
 CELL_SPEC_IRI_RE = SPEC_IRI_RE
 TEST_SPEC_IRI_RE = SPEC_IRI_RE
-CELL_IRI_RE = re.compile(
-    r"^https://w3id\.org/battinfo/cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
-)
-DATASET_IRI_RE = re.compile(
-    r"^https://w3id\.org/battinfo/dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
-)
-TEST_IRI_RE = re.compile(
-    r"^https://w3id\.org/battinfo/test/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
-)
+CELL_IRI_RE = re.compile(r"^https://w3id\.org/battinfo/cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$")
+DATASET_IRI_RE = re.compile(r"^https://w3id\.org/battinfo/dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$")
+TEST_IRI_RE = re.compile(r"^https://w3id\.org/battinfo/test/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$")
 
 
 def _load_json(path: Path) -> dict[str, Any]:

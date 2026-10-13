@@ -6,6 +6,7 @@ to 0.05 mA/cm2. Both JSON-LD emitters dropped the current-density setpoint and
 emitted the cutoff as a unitless TerminationQuantity, so no consumer of the
 semantic layer could tell what current a protocol used.
 """
+
 from __future__ import annotations
 
 import json
@@ -31,17 +32,30 @@ SPEC_ID = "https://w3id.org/battinfo/spec/0000-0000-0000-0001"
 def _empa_spec() -> battinfo.TestSpec:
     """The reproduction from the evaluation (scripts/repro/e04_e05_testspec.py)."""
     return battinfo.TestSpec(
-        id=SPEC_ID, name="CCCV at 0.1 mA/cm2", kind="cycling",
-        source_type="import", retrieved_at=1750032000,
+        id=SPEC_ID,
+        name="CCCV at 0.1 mA/cm2",
+        kind="cycling",
+        source_type="import",
+        retrieved_at=1750032000,
         method=[
-            {"mode": "cc", "direction": "charge",
-             "setpoints": {"current_density": {"value": 0.1, "unit": "mA/cm2"}},
-             "termination": [{"quantity": "voltage", "value": 4.2, "unit": "V", "direction": "above"}]},
-            {"mode": "cv", "direction": "hold", "setpoints": {"voltage": {"value": 4.2, "unit": "V"}},
-             "termination": [{"quantity": "current", "value": 0.05, "unit": "mA/cm2", "direction": "below"}]},
+            {
+                "mode": "cc",
+                "direction": "charge",
+                "setpoints": {"current_density": {"value": 0.1, "unit": "mA/cm2"}},
+                "termination": [{"quantity": "voltage", "value": 4.2, "unit": "V", "direction": "above"}],
+            },
+            {
+                "mode": "cv",
+                "direction": "hold",
+                "setpoints": {"voltage": {"value": 4.2, "unit": "V"}},
+                "termination": [{"quantity": "current", "value": 0.05, "unit": "mA/cm2", "direction": "below"}],
+            },
             {"mode": "rest", "direction": "rest", "duration": {"value": 6, "unit": "h"}},
-            {"mode": "group", "count": 3,
-             "steps": [{"mode": "rest", "direction": "rest", "duration": {"value": 60, "unit": "s"}}]},
+            {
+                "mode": "group",
+                "count": 3,
+                "steps": [{"mode": "rest", "direction": "rest", "duration": {"value": 60, "unit": "s"}}],
+            },
         ],
     )
 
@@ -60,8 +74,12 @@ def _deposit_node(record: dict) -> tuple[dict, dict]:
     """The protocol node of the deposit graph (``ws.preview_jsonld()``) and the graph."""
     doc = AuthoringWorkspace._assemble_zenodo_jsonld(
         {"cell-spec": [], "cell-instance": [], "test": [], "test-protocol": [record], "dataset": []},
-        zenodo_record_id=0, prereserved_doi="", record_url="https://example.org/records/0",
-        data_filenames=[], title="t", description="d",
+        zenodo_record_id=0,
+        prereserved_doi="",
+        record_url="https://example.org/records/0",
+        data_filenames=[],
+        title="t",
+        description="d",
     )
     node = next(n for n in doc["@graph"] if n.get("@id") == record["test_spec"]["id"])
     return node, doc
@@ -72,20 +90,24 @@ def _deposit_node(record: dict) -> tuple[dict, dict]:
 
 def test_current_density_setpoint_is_a_typed_control_parameter() -> None:
     doc = record_to_jsonld(_empa_spec().to_record(), "test-protocol")
-    assert doc["hasTask"][0]["hasControlParameter"] == [{
-        "@type": "ElectricCurrentDensity",
-        "hasNumericalPart": {"hasNumberValue": 0.1},
-        "hasMeasurementUnit": {"@id": "emmo:MilliAmperePerSquareCentiMetre"},
-    }]
+    assert doc["hasTask"][0]["hasControlParameter"] == [
+        {
+            "@type": "ElectricCurrentDensity",
+            "hasNumericalPart": {"hasNumberValue": 0.1},
+            "hasMeasurementUnit": {"@id": "emmo:MilliAmperePerSquareCentiMetre"},
+        }
+    ]
 
 
 def test_current_cutoff_per_area_is_a_current_density_limit_with_its_unit() -> None:
     doc = record_to_jsonld(_empa_spec().to_record(), "test-protocol")
-    assert doc["hasTask"][1]["hasTerminationParameter"] == [{
-        "@type": "LowerCurrentDensityLimit",
-        "hasNumericalPart": {"hasNumberValue": 0.05},
-        "hasMeasurementUnit": {"@id": "emmo:MilliAmperePerSquareCentiMetre"},
-    }]
+    assert doc["hasTask"][1]["hasTerminationParameter"] == [
+        {
+            "@type": "LowerCurrentDensityLimit",
+            "hasNumericalPart": {"hasNumberValue": 0.05},
+            "hasMeasurementUnit": {"@id": "emmo:MilliAmperePerSquareCentiMetre"},
+        }
+    ]
 
 
 def test_rising_current_density_cutoff_is_an_upper_limit() -> None:
@@ -115,10 +137,12 @@ def test_plain_current_setpoint_and_cutoff_are_unchanged() -> None:
 
 
 def test_a_cutoff_whose_unit_has_no_iri_keeps_the_unit_as_text() -> None:
-    record = _step(termination=[
-        {"quantity": "current", "value": 5, "unit": "µA/cm2", "direction": "below"},
-        {"quantity": "capacity", "value": 300, "unit": "mAh/g", "direction": "above"},
-    ])
+    record = _step(
+        termination=[
+            {"quantity": "current", "value": 5, "unit": "µA/cm2", "direction": "below"},
+            {"quantity": "capacity", "value": 300, "unit": "mAh/g", "direction": "above"},
+        ]
+    )
     terms = record_to_jsonld(record, "test-protocol")["hasTask"][0]["hasTerminationParameter"]
     assert terms[0]["@type"] == "LowerCurrentDensityLimit"
     assert terms[0]["schema:unitText"] == "µA/cm2"
@@ -129,11 +153,13 @@ def test_a_cutoff_whose_unit_has_no_iri_keeps_the_unit_as_text() -> None:
 
 def test_step_duration_keeps_its_unit() -> None:
     doc = record_to_jsonld(_empa_spec().to_record(), "test-protocol")
-    assert doc["hasTask"][2]["hasTerminationParameter"] == [{
-        "@type": "Duration",
-        "hasNumericalPart": {"hasNumberValue": 6.0},
-        "hasMeasurementUnit": {"@id": "emmo:Hour"},
-    }]
+    assert doc["hasTask"][2]["hasTerminationParameter"] == [
+        {
+            "@type": "Duration",
+            "hasNumericalPart": {"hasNumberValue": 6.0},
+            "hasMeasurementUnit": {"@id": "emmo:Hour"},
+        }
+    ]
 
 
 def test_deposit_graph_carries_the_same_current_densities() -> None:
@@ -215,9 +241,11 @@ def test_curated_current_density_units_are_published_unit_iris() -> None:
 def test_hosted_context_defines_the_current_density_terms() -> None:
     from importlib import resources
 
-    with resources.files("battinfo").joinpath("data", "context", "records.context.v1.json").open(
-        "r", encoding="utf-8"
-    ) as handle:
+    with (
+        resources.files("battinfo")
+        .joinpath("data", "context", "records.context.v1.json")
+        .open("r", encoding="utf-8") as handle
+    ):
         hosted = json.load(handle)["@context"]
     assert hosted["ElectricCurrentDensity"].endswith("#EMMO_7c8007b0_58a7_4486_bf1c_4772852caca0")
     assert hosted["LowerCurrentDensityLimit"].endswith("#electrochemistry_abdd3bbb_403a_4cb3_b522_50d027492a68")
@@ -283,7 +311,10 @@ def test_a_current_density_protocol_round_trips_through_its_strings() -> None:
     first, hold = again.method[0], again.method[1]
     assert first.setpoints["current_density"].model_dump(exclude_none=True) == {"value": 0.1, "unit": "mA/cm2"}
     assert hold.termination[0].model_dump() == {
-        "quantity": "current", "value": 0.05, "unit": "mA/cm2", "direction": "below",
+        "quantity": "current",
+        "value": 0.05,
+        "unit": "mA/cm2",
+        "direction": "below",
     }
     assert again.method[2].duration is not None and again.method[2].duration.value == 6 * 3600
     assert again.experiment == spec.experiment
@@ -291,7 +322,9 @@ def test_a_current_density_protocol_round_trips_through_its_strings() -> None:
 
 def test_a_protocol_authored_as_strings_emits_current_densities() -> None:
     spec = battinfo.TestSpec(
-        id=SPEC_ID, name="strings", kind="cycling",
+        id=SPEC_ID,
+        name="strings",
+        kind="cycling",
         experiment=["Charge at 0.1 mA/cm2 until 4.2 V", "Hold at 4.2 V until 0.05 mA/cm2"],
     )
     tasks = record_to_jsonld(spec.to_record(), "test-protocol")["hasTask"]
@@ -306,9 +339,11 @@ def test_parsed_current_density_steps_pass_the_save_time_schema() -> None:
 
     from battinfo.testmethod import parse_step
 
-    with resources.files("battinfo").joinpath("data", "schemas", "test-protocol.schema.json").open(
-        "r", encoding="utf-8"
-    ) as handle:
+    with (
+        resources.files("battinfo")
+        .joinpath("data", "schemas", "test-protocol.schema.json")
+        .open("r", encoding="utf-8") as handle
+    ):
         schema = json.load(handle)
     validator = Draft202012Validator({**schema["$defs"]["Step"], "$defs": schema["$defs"]})
     for text in ("Charge at 0.1 mA/cm2 until 4.2 V", "Hold at 4.2 V until 0.05 mA/cm2"):
@@ -349,8 +384,11 @@ def test_a_step_built_from_a_dict_warns_about_a_current_cutoff_in_another_unit(u
     from battinfo.testmethod import Step
 
     with pytest.warns(UserWarning, match=message):
-        step = Step(mode="cv", direction="hold",
-                    termination=[{"quantity": "current", "value": 1, "unit": unit, "direction": "below"}])
+        step = Step(
+            mode="cv",
+            direction="hold",
+            termination=[{"quantity": "current", "value": 1, "unit": unit, "direction": "below"}],
+        )
     assert step.termination[0].unit == unit
 
 
@@ -370,7 +408,10 @@ def test_a_stored_spec_with_a_current_cutoff_in_another_unit_still_loads() -> No
         "Use quantity 'c_rate' for that cutoff. It is kept as written."
     ]
     assert spec.method[1].termination[0].model_dump() == {
-        "quantity": "current", "value": 0.05, "unit": "C", "direction": "below",
+        "quantity": "current",
+        "value": 0.05,
+        "unit": "C",
+        "direction": "below",
     }
     # It still emits: the cutoff stays a generic termination quantity with its unit.
     term = record_to_jsonld(spec.to_record(), "test-protocol")["hasTask"][1]["hasTerminationParameter"][0]
@@ -472,8 +513,12 @@ def test_plain_unit_prefixes_are_case_sensitive_too() -> None:
     assert parse_step("Discharge at 5 µA until 3 V").setpoints["current"].value == 5e-6
     assert parse_step("Discharge at 200 ma until 3 V").setpoints["current"].value == 0.2
     assert parse_step("Discharge at 9 mA until 3 V").setpoints["current"].value == 0.009
-    for text in ("Discharge at 1 MW until 3 V", "Hold at 1 MV until 0.1 A", "Discharge at 1 Ma until 3 V",
-                 "Discharge at 1 KA until 3 V"):
+    for text in (
+        "Discharge at 1 MW until 3 V",
+        "Hold at 1 MV until 0.1 A",
+        "Discharge at 1 Ma until 3 V",
+        "Discharge at 1 KA until 3 V",
+    ):
         with pytest.raises(ExperimentSyntaxError):
             parse_step(text)
 
@@ -482,8 +527,10 @@ def test_plain_unit_prefixes_are_case_sensitive_too() -> None:
 def test_the_emitters_leave_an_unreadable_stored_unit_as_written(unit: str) -> None:
     """A stored record with a unit the grammar refuses still emits; the value
     keeps its unit as text and is not typed as a current density."""
-    record = _step(setpoints={"current": {"value": 1, "unit": unit}},
-                   termination=[{"quantity": "current", "value": 1, "unit": unit, "direction": "below"}])
+    record = _step(
+        setpoints={"current": {"value": 1, "unit": unit}},
+        termination=[{"quantity": "current", "value": 1, "unit": unit, "direction": "below"}],
+    )
     task = record_to_jsonld(record, "test-protocol")["hasTask"][0]
     assert task["hasControlParameter"][0]["@type"] == "ElectricCurrent"
     assert task["hasControlParameter"][0]["schema:unitText"] == unit

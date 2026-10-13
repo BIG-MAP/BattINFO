@@ -1,4 +1,5 @@
 """Validate component and record examples against their schemas."""
+
 from __future__ import annotations
 
 import json
@@ -13,21 +14,32 @@ SCHEMA_DIR = ROOT / "assets" / "schemas"
 
 EXAMPLES = [
     # component examples
-    ("examples/components/lfp-positive-electrode.example.json",
-     "https://w3id.org/battinfo/schema/modules/components/electrode.schema.json"),
-    ("examples/components/graphite-negative-electrode.example.json",
-     "https://w3id.org/battinfo/schema/modules/components/electrode.schema.json"),
-    ("examples/components/lp30-organic-electrolyte.example.json",
-     "https://w3id.org/battinfo/schema/modules/components/electrolyte.schema.json"),
-    ("examples/components/celgard-2400-separator.example.json",
-     "https://w3id.org/battinfo/schema/modules/components/separator.schema.json"),
-    ("examples/components/aluminium-current-collector.example.json",
-     "https://w3id.org/battinfo/schema/modules/components/current-collector.schema.json"),
-    ("examples/components/lfp-active-material.example.json",
-     "https://w3id.org/battinfo/schema/modules/components/material-component.schema.json"),
+    (
+        "examples/components/lfp-positive-electrode.example.json",
+        "https://w3id.org/battinfo/schema/modules/components/electrode.schema.json",
+    ),
+    (
+        "examples/components/graphite-negative-electrode.example.json",
+        "https://w3id.org/battinfo/schema/modules/components/electrode.schema.json",
+    ),
+    (
+        "examples/components/lp30-organic-electrolyte.example.json",
+        "https://w3id.org/battinfo/schema/modules/components/electrolyte.schema.json",
+    ),
+    (
+        "examples/components/celgard-2400-separator.example.json",
+        "https://w3id.org/battinfo/schema/modules/components/separator.schema.json",
+    ),
+    (
+        "examples/components/aluminium-current-collector.example.json",
+        "https://w3id.org/battinfo/schema/modules/components/current-collector.schema.json",
+    ),
+    (
+        "examples/components/lfp-active-material.example.json",
+        "https://w3id.org/battinfo/schema/modules/components/material-component.schema.json",
+    ),
     # organization example
-    ("examples/organization/SINTEF.json",
-     "https://w3id.org/battinfo/schema/organization.schema.json"),
+    ("examples/organization/SINTEF.json", "https://w3id.org/battinfo/schema/organization.schema.json"),
 ]
 
 

@@ -49,7 +49,9 @@ class _FakePsutil:
     def process_iter(self, attrs: list[str]) -> list[_FakeProcess]:
         return list(self._processes)
 
-    def wait_procs(self, processes: list[_FakeProcess], timeout: float) -> tuple[list[_FakeProcess], list[_FakeProcess]]:
+    def wait_procs(
+        self, processes: list[_FakeProcess], timeout: float
+    ) -> tuple[list[_FakeProcess], list[_FakeProcess]]:
         alive_ids = {proc.pid for proc in self._alive_after_terminate}
         alive = [proc for proc in processes if proc.pid in alive_ids and not proc.killed]
         gone = [proc for proc in processes if proc.pid not in alive_ids or proc.killed]
@@ -67,7 +69,9 @@ def test_recover_notebook_runtime_stops_repo_local_ipykernel_process_tree(tmp_pa
     (runtime_dir / "kernel.json").write_text("{}", encoding="utf-8")
 
     child = _FakeProcess(102, str(venv_python), ["python", "worker.py"])
-    kernel = _FakeProcess(101, str(venv_python), ["python", "-m", "ipykernel_launcher", "-f", "kernel-101.json"], [child])
+    kernel = _FakeProcess(
+        101, str(venv_python), ["python", "-m", "ipykernel_launcher", "-f", "kernel-101.json"], [child]
+    )
     unrelated = _FakeProcess(201, str(venv_python), ["python", "-m", "pytest"])
     foreign = _FakeProcess(301, str(tmp_path / "other" / "python.exe"), ["python", "-m", "ipykernel_launcher"])
 
@@ -85,5 +89,3 @@ def test_recover_notebook_runtime_stops_repo_local_ipykernel_process_tree(tmp_pa
     assert kernel.killed is True
     assert unrelated.terminated is False
     assert runtime_dir.exists() is False
-
-

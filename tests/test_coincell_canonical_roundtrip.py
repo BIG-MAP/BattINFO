@@ -11,6 +11,7 @@ Locks in the BattINFO ↔ BattINFO Converter integration seam:
 3. A coin cell authored with the BattINFO authoring API exports to converter-shaped
    JSON-LD — the "BattINFO Converter imports battinfo" direction.
 """
+
 from __future__ import annotations
 
 import json
@@ -113,20 +114,31 @@ def test_domain_battery_export_uses_canonical_capacity_types() -> None:
 def test_author_in_battinfo_exports_converter_jsonld() -> None:
     """The 'converter imports battinfo' direction: author objects, get converter JSON-LD."""
     cathode = electrode(
-        bom=bom(active_material=material("NMC811", mass_fraction={"value": 96, "unit": "%"},
-                                         molecular_formula="LiNi0.8Mn0.1Co0.1O2")),
+        bom=bom(
+            active_material=material(
+                "NMC811", mass_fraction={"value": 96, "unit": "%"}, molecular_formula="LiNi0.8Mn0.1Co0.1O2"
+            )
+        ),
         current_collector="Aluminium foil",
         diameter={"value": 11, "unit": "mm"},
         rated_specific_discharge_capacity={"value": 160, "unit": "mAh/g"},
     )
     spec = cell_description(
         id="https://w3id.org/battinfo/spec/authored-1",
-        manufacturer="Lab", model="NMC811-Graphite", format="coin", chemistry="li-ion",
-        positive_electrode_basis="nmc", negative_electrode_basis="graphite", size_code="R2032",
+        manufacturer="Lab",
+        model="NMC811-Graphite",
+        format="coin",
+        chemistry="li-ion",
+        positive_electrode_basis="nmc",
+        negative_electrode_basis="graphite",
+        size_code="R2032",
         positive_electrode=cathode,
-        electrolyte=electrolyte_recipe(family="organic", salt="LiPF6",
-                                       salt_concentration={"value": 1.0, "unit": "mol/L"},
-                                       solvents=[material("EC"), material("EMC")]),
+        electrolyte=electrolyte_recipe(
+            family="organic",
+            salt="LiPF6",
+            salt_concentration={"value": 1.0, "unit": "mol/L"},
+            solvents=[material("EC"), material("EMC")],
+        ),
         separator=separator_spec(material="polypropylene", thickness={"value": 25, "unit": "um"}),
     )
     doc = to_jsonld(_descriptor_input(spec.to_json()), target="converter-compatible")

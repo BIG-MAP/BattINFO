@@ -5,6 +5,7 @@
 of named top-level schemas, so `cell-spec.schema.json` and the `modules/components/*` sub-schemas could
 (and did) drift silently. This gate covers the WHOLE packaged tree: edit assets/schemas first, then
 re-sync the packaged copy."""
+
 from __future__ import annotations
 
 import json

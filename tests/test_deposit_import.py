@@ -8,6 +8,7 @@ importer expected the older plain strings and one dataset holding every
 file, so importing any deposit with a data file raised a pydantic error.
 Both shapes now import.
 """
+
 from __future__ import annotations
 
 import copy
@@ -36,7 +37,10 @@ def source(tmp_path: Path) -> tuple[Path, dict]:
     ws = AuthoringWorkspace(root=root, registry_url=None)
     ws.license("cc-by-4.0")
     spec = battinfo.CellSpec(
-        manufacturer="Example Lab", model="R2032", format="coin", chemistry="li-ion",
+        manufacturer="Example Lab",
+        model="R2032",
+        format="coin",
+        chemistry="li-ion",
         properties={"nominal_capacity": {"value": 0.005, "unit": "Ah"}},
     )
     ws.add("cell", spec=spec, serial_numbers=["C01", "C02"], production_date="2026-01-15")
@@ -46,8 +50,12 @@ def source(tmp_path: Path) -> tuple[Path, dict]:
         ws.add("test", type="cycling", cell=serial, spec=protocol, data=f"{serial}.bdf.csv")
     ws.save()
     graph = ws._build_zenodo_jsonld(
-        zenodo_record_id=1, prereserved_doi="10.5281/zenodo.1", record_url=RECORD_URL,
-        data_filenames=["C01.bdf.csv", "C02.bdf.csv"], title="Round trip", creators=[{"name": "Doe, Jane"}],
+        zenodo_record_id=1,
+        prereserved_doi="10.5281/zenodo.1",
+        record_url=RECORD_URL,
+        data_filenames=["C01.bdf.csv", "C02.bdf.csv"],
+        title="Round trip",
+        creators=[{"name": "Doe, Jane"}],
     )
     return root, graph
 
@@ -71,7 +79,10 @@ def test_a_deposit_written_today_imports_back(tmp_path: Path, source: tuple[Path
     dst, counts = _import(tmp_path, graph)
 
     assert counts == {
-        "properties": 1, "instances": 2, "tests": 2, "datasets": 2,
+        "properties": 1,
+        "instances": 2,
+        "tests": 2,
+        "datasets": 2,
         "skipped": {"tests": [], "datasets": []},
     }
 
@@ -80,8 +91,10 @@ def test_a_deposit_written_today_imports_back(tmp_path: Path, source: tuple[Path
         assert dst_spec["cell_spec"][field] == src_spec["cell_spec"][field], field
     assert dst_spec["properties"]["nominal_capacity"] == src_spec["properties"]["nominal_capacity"]
 
-    src_cells, dst_cells = _by_id(_saved(src, "cell-instance"), "cell_instance"), _by_id(
-        _saved(dst, "cell-instance"), "cell_instance")
+    src_cells, dst_cells = (
+        _by_id(_saved(src, "cell-instance"), "cell_instance"),
+        _by_id(_saved(dst, "cell-instance"), "cell_instance"),
+    )
     assert dst_cells.keys() == src_cells.keys()
     for iri, cell in src_cells.items():
         for field in ("cell_spec_id", "serial_number", "manufactured_at"):
@@ -129,15 +142,20 @@ def test_a_deposit_in_the_older_string_form_still_imports(tmp_path: Path, source
     assert {t["test"]["kind"] for t in _saved(dst, "test")} == {"cycling"}
 
 
-@pytest.mark.parametrize("value,expected", [
-    ({"@id": "https://www.iana.org/assignments/media-types/text/csv"}, "text/csv"),
-    ("https://www.iana.org/assignments/media-types/application/vnd.apache.parquet",
-     "application/vnd.apache.parquet"),
-    ("text/csv", "text/csv"),
-    ("application/x-parquet", "application/x-parquet"),
-    ({"@id": "https://example.org/formats/csv"}, ""),  # not an IANA media type: not guessed
-    (None, ""),
-])
+@pytest.mark.parametrize(
+    "value,expected",
+    [
+        ({"@id": "https://www.iana.org/assignments/media-types/text/csv"}, "text/csv"),
+        (
+            "https://www.iana.org/assignments/media-types/application/vnd.apache.parquet",
+            "application/vnd.apache.parquet",
+        ),
+        ("text/csv", "text/csv"),
+        ("application/x-parquet", "application/x-parquet"),
+        ({"@id": "https://example.org/formats/csv"}, ""),  # not an IANA media type: not guessed
+        (None, ""),
+    ],
+)
 def test_media_type_reads_both_shapes(value: object, expected: str) -> None:
     from battinfo.ws import _media_type_from_jsonld
 

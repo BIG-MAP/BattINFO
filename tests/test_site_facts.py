@@ -1,4 +1,5 @@
 """battinfo.org states facts about the release; keep them in step with the repo."""
+
 from __future__ import annotations
 
 import re

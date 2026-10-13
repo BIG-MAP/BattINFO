@@ -90,7 +90,9 @@ def main() -> None:
 
     def log(line: str) -> None:
         if log_path:
-            log_path.write_text(log_path.read_text(encoding="utf-8") + line + "\n", encoding="utf-8") if log_path.exists() else log_path.write_text(line + "\n", encoding="utf-8")
+            log_path.write_text(
+                log_path.read_text(encoding="utf-8") + line + "\n", encoding="utf-8"
+            ) if log_path.exists() else log_path.write_text(line + "\n", encoding="utf-8")
 
     for idx in range(args.start, end):
         row = rows[idx]

@@ -97,8 +97,9 @@ def test_component_jsonld_emits_expected_type(base, record_key, family, type_tok
 
 def test_component_spec_instance_roundtrip(tmp_path):
     # separator spec + instance through the generic API
-    spec = bi.create_separator_spec(uid="sepa23456789abcd", name="Celgard 2400",
-                                    body={"material": "polypropylene", "structure": "monolayer"})
+    spec = bi.create_separator_spec(
+        uid="sepa23456789abcd", name="Celgard 2400", body={"material": "polypropylene", "structure": "monolayer"}
+    )
     api.save_component_spec("separator", spec, source_root=tmp_path)
     inst = bi.create_separator(uid="seps23456789abcd", spec_id=spec["separator_spec"]["id"], lot_id="L1")
     api.save_component_instance("separator", inst, source_root=tmp_path)
@@ -110,10 +111,14 @@ def test_component_spec_instance_roundtrip(tmp_path):
 def test_electrolyte_assembles_material_specs(tmp_path):
     # electrolyte-spec salt + solvents reference material-specs; missing ones are flagged
     spec = bi.create_electrolyte_spec(
-        uid="elye23456789abcd", name="1M LiPF6 EC:EMC",
-        body={"family": "organic",
-              "salt": {"name": "LiPF6", "material_spec_id": "https://w3id.org/battinfo/spec/0000-0000-0000-0000"}},
-        validate=False)
+        uid="elye23456789abcd",
+        name="1M LiPF6 EC:EMC",
+        body={
+            "family": "organic",
+            "salt": {"name": "LiPF6", "material_spec_id": "https://w3id.org/battinfo/spec/0000-0000-0000-0000"},
+        },
+        validate=False,
+    )
     result = validate_record(spec, source_root=tmp_path)
     assert any(i.code == "reference.missing" for i in result.issues)
 
@@ -125,14 +130,18 @@ def test_electrolyte_solvent_takes_one_or_many() -> None:
     from battinfo.jsonld import record_to_jsonld
 
     pure = create_electrolyte_spec(
-        uid="elyp23456789abcd", name="PC electrolyte", family="organic",
+        uid="elyp23456789abcd",
+        name="PC electrolyte",
+        family="organic",
         solvent={"name": "PC", "property": {"volume_fraction": {"value": 1.0, "unit": "1"}}},
         validate=False,
     )
     assert pure["electrolyte_spec"]["solvent"]["name"] == "PC"
 
     mixture = create_electrolyte_spec(
-        uid="elym23456789abcd", name="EC:EMC electrolyte", family="organic",
+        uid="elym23456789abcd",
+        name="EC:EMC electrolyte",
+        family="organic",
         solvent=[{"name": "EC"}, {"name": "EMC"}],
         validate=False,
     )
@@ -140,7 +149,9 @@ def test_electrolyte_solvent_takes_one_or_many() -> None:
     assert isinstance(solvents, list) and len(solvents) == 2
 
     legacy = create_electrolyte_spec(
-        uid="elyl23456789abcd", name="Legacy spelling", family="organic",
+        uid="elyl23456789abcd",
+        name="Legacy spelling",
+        family="organic",
         solvent_mixture={"component": [{"name": "EC"}, {"name": "EMC"}]},
         validate=False,
     )
@@ -163,17 +174,14 @@ def test_component_specs_emit_as_descriptions() -> None:
         "housing": "ElectrochemicalComponent",
     }
     for family, physical in cases.items():
-        spec = create_component_spec(
-            family, uid="abcd23456789abcd", name=f"{family} product", validate=False
-        )
+        spec = create_component_spec(family, uid="abcd23456789abcd", name=f"{family} product", validate=False)
         node = record_to_jsonld(spec, f"{family}-spec".replace("_", "-"))
         assert node["@type"] == ["Description", "schema:ProductModel", "schema:CreativeWork"], (family, node["@type"])
         assert physical in str(node["isDescriptionFor"]["@type"]), (family, node["isDescriptionFor"])
         assert node["isDescriptionFor"]["skos:prefLabel"] == f"{family} product"
 
         inst = create_component_instance(
-            family, uid="bcde23456789abcd",
-            spec_id="https://w3id.org/battinfo/spec/abcd-2345-6789-abcd", validate=False
+            family, uid="bcde23456789abcd", spec_id="https://w3id.org/battinfo/spec/abcd-2345-6789-abcd", validate=False
         )
         inst_node = record_to_jsonld(inst, family.replace("_", "-"))
         assert "Description" not in str(inst_node["@type"]), (family, inst_node["@type"])
@@ -186,7 +194,9 @@ def test_electrolyte_salt_ions_are_not_retyped() -> None:
     from battinfo.validate.record import validate_record_report
 
     old = create_electrolyte_spec(
-        uid="elyi23456789abcd", name="1M LiPF6", family="organic",
+        uid="elyi23456789abcd",
+        name="1M LiPF6",
+        family="organic",
         salt={"name": "LiPF6", "cation": "Li+", "anion": "PF6-"},
         validate=False,
     )
@@ -201,7 +211,8 @@ def test_superseded_spec_namespaces_still_load(tmp_path) -> None:
     from battinfo.validate.record import validate_record_report
 
     spec = create_separator_spec(
-        uid="sepa23456789abcd", name="Celgard 2400",
+        uid="sepa23456789abcd",
+        name="Celgard 2400",
         id="https://w3id.org/battinfo/separator-spec/sepa-2345-6789-abcd",
     )
     assert spec["separator_spec"]["id"].startswith("https://w3id.org/battinfo/separator-spec/")

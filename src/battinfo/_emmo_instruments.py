@@ -2,6 +2,7 @@
 
 Previously duplicated (identically) in ``battinfo.api`` and ``battinfo.publication``.
 """
+
 from __future__ import annotations
 
 from typing import Any

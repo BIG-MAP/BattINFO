@@ -1,6 +1,7 @@
 """Regression tests: interop export/round-trip must not silently lose data
 (audit theme E).
 """
+
 from __future__ import annotations
 
 import copy

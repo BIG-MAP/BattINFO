@@ -6,6 +6,7 @@
   serializers. All records now emit the full provenance block via one shared serializer,
   the schemas accept it, and from_record reads it back losslessly.
 """
+
 from __future__ import annotations
 
 import sys
@@ -42,14 +43,20 @@ PROVENANCE_KWARGS = dict(
 def test_specs_non_mapping_raises_with_the_fix() -> None:
     with pytest.raises(TypeError, match="specs= must be a mapping"):
         CellSpec(
-            manufacturer="Acme", model_name="X", chemistry="LFP", format="cylindrical",
+            manufacturer="Acme",
+            model_name="X",
+            chemistry="LFP",
+            format="cylindrical",
             specs=[("nominal_capacity", 2.5)],
         )
 
 
 def test_specs_mapping_still_accepted() -> None:
     spec = CellSpec(
-        manufacturer="Acme", model_name="X", chemistry="LFP", format="cylindrical",
+        manufacturer="Acme",
+        model_name="X",
+        chemistry="LFP",
+        format="cylindrical",
         specs={"nominal_capacity": {"value": 2.5, "unit": "Ah"}},
     )
     assert spec.properties["nominal_capacity"] == {"value": 2.5, "unit": "Ah"}
@@ -70,37 +77,61 @@ def _assert_provenance_survives(record: dict, model_cls, prov_key: str = "proven
 
 
 def test_cell_spec_provenance_round_trip() -> None:
-    record = _record_from_cell_spec(CellSpec(
-        manufacturer="Acme", model_name="X", chemistry="LFP", format="cylindrical",
-        uid=UID, **PROVENANCE_KWARGS,
-    ))
+    record = _record_from_cell_spec(
+        CellSpec(
+            manufacturer="Acme",
+            model_name="X",
+            chemistry="LFP",
+            format="cylindrical",
+            uid=UID,
+            **PROVENANCE_KWARGS,
+        )
+    )
     _assert_provenance_survives(record, CellSpec)
 
 
 def test_cell_instance_provenance_round_trip() -> None:
-    record = _record_from_cell_instance(Cell(
-        uid=UID, cell_spec_id=SPEC_IRI, **PROVENANCE_KWARGS,
-    ))
+    record = _record_from_cell_instance(
+        Cell(
+            uid=UID,
+            cell_spec_id=SPEC_IRI,
+            **PROVENANCE_KWARGS,
+        )
+    )
     _assert_provenance_survives(record, Cell)
 
 
 def test_test_provenance_round_trip() -> None:
-    record = _record_from_test(Test(
-        uid=UID, cell_id=CELL_IRI, name="T", kind="cycling", **PROVENANCE_KWARGS,
-    ))
+    record = _record_from_test(
+        Test(
+            uid=UID,
+            cell_id=CELL_IRI,
+            name="T",
+            kind="cycling",
+            **PROVENANCE_KWARGS,
+        )
+    )
     _assert_provenance_survives(record, Test)
 
 
 def test_test_spec_provenance_round_trip() -> None:
-    record = _record_from_test_protocol(TestSpec(
-        name="P", uid=UID, **PROVENANCE_KWARGS,
-    ))
+    record = _record_from_test_protocol(
+        TestSpec(
+            name="P",
+            uid=UID,
+            **PROVENANCE_KWARGS,
+        )
+    )
     _assert_provenance_survives(record, TestSpec)
 
 
 def test_cell_instance_conflicting_spec_references_raise() -> None:
     spec = CellSpec(
-        id=SPEC_IRI, manufacturer="Acme", model_name="X", chemistry="LFP", format="cylindrical",
+        id=SPEC_IRI,
+        manufacturer="Acme",
+        model_name="X",
+        chemistry="LFP",
+        format="cylindrical",
     )
     other = "https://w3id.org/battinfo/spec/cccc-cccc-cccc-cccc"
     with pytest.raises(ValueError, match="Conflicting cell spec references"):
@@ -109,7 +140,11 @@ def test_cell_instance_conflicting_spec_references_raise() -> None:
 
 def test_cell_instance_positional_spec_with_matching_id_is_kept() -> None:
     spec = CellSpec(
-        id=SPEC_IRI, manufacturer="Acme", model_name="X", chemistry="LFP", format="cylindrical",
+        id=SPEC_IRI,
+        manufacturer="Acme",
+        model_name="X",
+        chemistry="LFP",
+        format="cylindrical",
     )
     # Previously the positional object was silently discarded whenever cell_spec_id= was given.
     instance = Cell(spec, cell_spec_id=SPEC_IRI)
@@ -132,7 +167,12 @@ def test_test_positional_cell_with_matching_id_is_kept() -> None:
 
 
 def test_dataset_provenance_round_trip() -> None:
-    record = _record_from_dataset(Dataset(
-        uid=UID, title="D", access_url="https://data.example.com/d", **PROVENANCE_KWARGS,
-    ))
+    record = _record_from_dataset(
+        Dataset(
+            uid=UID,
+            title="D",
+            access_url="https://data.example.com/d",
+            **PROVENANCE_KWARGS,
+        )
+    )
     _assert_provenance_survives(record, Dataset)

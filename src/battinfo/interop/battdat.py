@@ -26,63 +26,63 @@ PathLike = str | Path
 
 # BDF canonical column name → (variable_measured name, unit_text)
 _BDF_VARIABLE_MAP: dict[str, tuple[str, str]] = {
-    "test_time_second":              ("test_time",              "s"),
-    "unix_time_second":              ("time",                   "s"),
-    "voltage_volt":                  ("voltage",                "V"),
-    "current_ampere":                ("current",                "A"),
-    "cycle_count":                   ("cycle_index",            ""),
-    "step_count":                    ("step_index",             ""),
-    "step_index":                    ("step_index",             ""),
-    "ambient_temperature_celsius":   ("temperature",            "°C"),
-    "charging_capacity_ah":          ("charging_capacity",      "Ah"),
-    "discharging_capacity_ah":       ("discharging_capacity",   "Ah"),
-    "step_capacity_ah":              ("step_capacity",          "Ah"),
-    "net_capacity_ah":               ("net_capacity",           "Ah"),
-    "cumulative_capacity_ah":        ("cumulative_capacity",    "Ah"),
-    "charging_energy_wh":            ("charging_energy",        "Wh"),
-    "discharging_energy_wh":         ("discharging_energy",     "Wh"),
-    "step_energy_wh":                ("step_energy",            "Wh"),
-    "net_energy_wh":                 ("net_energy",             "Wh"),
-    "cumulative_energy_wh":          ("cumulative_energy",      "Wh"),
-    "power_watt":                    ("power",                  "W"),
-    "internal_resistance_ohm":       ("internal_resistance",    "Ω"),
-    "temperature_t1_celsius":        ("temperature_t1",         "°C"),
-    "temperature_t2_celsius":        ("temperature_t2",         "°C"),
-    "temperature_t3_celsius":        ("temperature_t3",         "°C"),
-    "temperature_t4_celsius":        ("temperature_t4",         "°C"),
-    "temperature_t5_celsius":        ("temperature_t5",         "°C"),
+    "test_time_second": ("test_time", "s"),
+    "unix_time_second": ("time", "s"),
+    "voltage_volt": ("voltage", "V"),
+    "current_ampere": ("current", "A"),
+    "cycle_count": ("cycle_index", ""),
+    "step_count": ("step_index", ""),
+    "step_index": ("step_index", ""),
+    "ambient_temperature_celsius": ("temperature", "°C"),
+    "charging_capacity_ah": ("charging_capacity", "Ah"),
+    "discharging_capacity_ah": ("discharging_capacity", "Ah"),
+    "step_capacity_ah": ("step_capacity", "Ah"),
+    "net_capacity_ah": ("net_capacity", "Ah"),
+    "cumulative_capacity_ah": ("cumulative_capacity", "Ah"),
+    "charging_energy_wh": ("charging_energy", "Wh"),
+    "discharging_energy_wh": ("discharging_energy", "Wh"),
+    "step_energy_wh": ("step_energy", "Wh"),
+    "net_energy_wh": ("net_energy", "Wh"),
+    "cumulative_energy_wh": ("cumulative_energy", "Wh"),
+    "power_watt": ("power", "W"),
+    "internal_resistance_ohm": ("internal_resistance", "Ω"),
+    "temperature_t1_celsius": ("temperature_t1", "°C"),
+    "temperature_t2_celsius": ("temperature_t2", "°C"),
+    "temperature_t3_celsius": ("temperature_t3", "°C"),
+    "temperature_t4_celsius": ("temperature_t4", "°C"),
+    "temperature_t5_celsius": ("temperature_t5", "°C"),
 }
 
 # In-memory frames from bdf.read() carry human-readable "Name / unit" column
 # headers (bdf.io.save() writes the snake_case machine labels above to disk).
 # This maps the lowercased, space→underscore name part to battinfo variable names.
 _BDF_HUMAN_NAME_MAP: dict[str, str] = {
-    "voltage":                  "voltage",
-    "current":                  "current",
-    "test_time":                "test_time",
-    "unix_time":                "time",
-    "cycle_count":              "cycle_index",
-    "cycle_index":              "cycle_index",
-    "step_count":               "step_index",
-    "step_index":               "step_index",
-    "ambient_temperature":      "temperature",
-    "charging_capacity":        "charging_capacity",
-    "discharging_capacity":     "discharging_capacity",
-    "step_capacity":            "step_capacity",
-    "net_capacity":             "net_capacity",
-    "cumulative_capacity":      "cumulative_capacity",
-    "charging_energy":          "charging_energy",
-    "discharging_energy":       "discharging_energy",
-    "step_energy":              "step_energy",
-    "net_energy":               "net_energy",
-    "cumulative_energy":        "cumulative_energy",
-    "power":                    "power",
-    "internal_resistance":      "internal_resistance",
-    "temperature_t1":           "temperature_t1",
-    "temperature_t2":           "temperature_t2",
-    "temperature_t3":           "temperature_t3",
-    "temperature_t4":           "temperature_t4",
-    "temperature_t5":           "temperature_t5",
+    "voltage": "voltage",
+    "current": "current",
+    "test_time": "test_time",
+    "unix_time": "time",
+    "cycle_count": "cycle_index",
+    "cycle_index": "cycle_index",
+    "step_count": "step_index",
+    "step_index": "step_index",
+    "ambient_temperature": "temperature",
+    "charging_capacity": "charging_capacity",
+    "discharging_capacity": "discharging_capacity",
+    "step_capacity": "step_capacity",
+    "net_capacity": "net_capacity",
+    "cumulative_capacity": "cumulative_capacity",
+    "charging_energy": "charging_energy",
+    "discharging_energy": "discharging_energy",
+    "step_energy": "step_energy",
+    "net_energy": "net_energy",
+    "cumulative_energy": "cumulative_energy",
+    "power": "power",
+    "internal_resistance": "internal_resistance",
+    "temperature_t1": "temperature_t1",
+    "temperature_t2": "temperature_t2",
+    "temperature_t3": "temperature_t3",
+    "temperature_t4": "temperature_t4",
+    "temperature_t5": "temperature_t5",
 }
 
 
@@ -128,6 +128,7 @@ def _read_df(source: Any, warnings: list[str]) -> tuple[Any, Path | None]:
     # the ratified tz="UTC" timestamp policy.
     try:
         from battinfo.processing import _read_bdf_pandas  # noqa: PLC0415
+
         df, _meta = _read_bdf_pandas(path, validate=False)
         return df, path
     except ImportError:
@@ -136,9 +137,7 @@ def _read_df(source: Any, warnings: list[str]) -> tuple[Any, Path | None]:
             'BDF normalisation.  Install with: pip install "battinfo[processing]"'
         )
     except Exception as exc:
-        warnings.append(
-            f"bdf.read() failed ({exc}); falling back to pandas.read_csv()."
-        )
+        warnings.append(f"bdf.read() failed ({exc}); falling back to pandas.read_csv().")
 
     df = pd.read_csv(path)
     return df, path
@@ -147,6 +146,7 @@ def _read_df(source: Any, warnings: list[str]) -> tuple[Any, Path | None]:
 def _infer_kind(df: Any) -> str | None:
     """Infer BattINFO test kind from BDF DataFrame column names."""
     from battinfo.processing import _infer_test_type_from_df  # noqa: PLC0415
+
     return _infer_test_type_from_df(df)
 
 
@@ -208,17 +208,17 @@ def _infer_technique(kind: str | None) -> list[str]:
     if kind is None:
         return []
     _MAP = {
-        "cycling":          "galvanostatic cycling",
-        "capacity_check":   "galvanostatic capacity check",
-        "rate_capability":  "rate capability",
-        "eis":              "electrochemical impedance spectroscopy",
-        "hppc":             "HPPC",
-        "ici":              "incremental capacity analysis",
-        "gitt":             "GITT",
-        "dcir":             "DCIR",
-        "quasi_ocv":        "quasi-OCV",
-        "formation":        "formation cycling",
-        "calendar_ageing":  "calendar ageing",
+        "cycling": "galvanostatic cycling",
+        "capacity_check": "galvanostatic capacity check",
+        "rate_capability": "rate capability",
+        "eis": "electrochemical impedance spectroscopy",
+        "hppc": "HPPC",
+        "ici": "incremental capacity analysis",
+        "gitt": "GITT",
+        "dcir": "DCIR",
+        "quasi_ocv": "quasi-OCV",
+        "formation": "formation cycling",
+        "calendar_ageing": "calendar ageing",
     }
     label = _MAP.get(kind)
     return [label] if label is not None else [kind]
@@ -290,8 +290,7 @@ def from_battdat(
     resolved_kind = kind or inferred_kind
     if resolved_kind is None:
         warnings.append(
-            "Test kind could not be inferred from BDF column names; "
-            "set kind= explicitly if you know the test type."
+            "Test kind could not be inferred from BDF column names; set kind= explicitly if you know the test type."
         )
 
     auto_started, auto_ended = _extract_timestamps(df)
@@ -299,9 +298,7 @@ def from_battdat(
     resolved_ended_at = ended_at if ended_at is not None else auto_ended
 
     resolved_source_file = source_file or (source_path.name if source_path is not None else None)
-    resolved_name = name or (
-        f"{cell_id.rsplit('/', 1)[-1]} {resolved_kind or 'test'} test"
-    )
+    resolved_name = name or (f"{cell_id.rsplit('/', 1)[-1]} {resolved_kind or 'test'} test")
 
     # ── Test record ───────────────────────────────────────────────────────────
     test_inner: dict[str, Any] = {

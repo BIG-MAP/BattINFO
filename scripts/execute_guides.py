@@ -9,6 +9,7 @@ tests/test_notebook_hygiene.py fails if a committed output leaks a local path.
 Usage:
     uv run python scripts/execute_guides.py
 """
+
 from __future__ import annotations
 
 import json
@@ -52,8 +53,7 @@ def scrub(notebook: Path) -> int:
 def main() -> int:
     for nb in GUIDES:
         subprocess.run(
-            [sys.executable, "-m", "jupyter", "nbconvert", "--to", "notebook",
-             "--execute", "--inplace", str(nb)],
+            [sys.executable, "-m", "jupyter", "nbconvert", "--to", "notebook", "--execute", "--inplace", str(nb)],
             check=True,
             cwd=ROOT,
         )

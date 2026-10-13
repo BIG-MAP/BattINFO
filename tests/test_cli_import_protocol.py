@@ -1,4 +1,5 @@
 """The one-liner protocol import: `battinfo import-protocol <file>`."""
+
 from __future__ import annotations
 
 import json
@@ -50,7 +51,7 @@ def test_import_protocol_sniffs_pybamm_text(tmp_path: Path) -> None:
     )
     result = CliRunner().invoke(app, ["import-protocol", str(source)])
     assert result.exit_code == 0, result.output
-    record = json.loads(result.output[result.output.index("{"):])
+    record = json.loads(result.output[result.output.index("{") :])
     assert len(record["method"]) == 3
     assert record["artifacts"][0]["format"] == "pybamm-experiment"
 

@@ -7,12 +7,8 @@ import secrets
 from datetime import datetime, timezone
 from pathlib import Path
 
-CELL_TYPE_IRI_RE = re.compile(
-    r"^https://w3id\.org/battinfo/cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
-)
-DATASET_IRI_RE = re.compile(
-    r"^https://w3id\.org/battinfo/dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
-)
+CELL_TYPE_IRI_RE = re.compile(r"^https://w3id\.org/battinfo/cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$")
+DATASET_IRI_RE = re.compile(r"^https://w3id\.org/battinfo/dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$")
 UID_UNDASHED_RE = re.compile(r"^[0-9a-hjkmnp-tv-z]{16}$")
 UID_ALPHABET = "0123456789abcdefghjkmnpqrstvwxyz"
 
@@ -38,9 +34,7 @@ def normalize_uid(value: str) -> str:
     token = value.strip().lower().replace("-", "")
     token = token.replace("o", "0").replace("i", "1").replace("l", "1")
     if not UID_UNDASHED_RE.fullmatch(token):
-        raise SystemExit(
-            "Invalid UID. Expected 16 Crockford Base32 characters (dashed or undashed)."
-        )
+        raise SystemExit("Invalid UID. Expected 16 Crockford Base32 characters (dashed or undashed).")
     return dashed_uid(token)
 
 
@@ -71,10 +65,7 @@ def main() -> None:
     if not cell_spec_id:
         raise SystemExit("cell_spec.id missing in cell-spec JSON")
     if not CELL_TYPE_IRI_RE.fullmatch(cell_spec_id):
-        raise SystemExit(
-            "cell_spec.id must be a BattINFO cell-spec IRI "
-            "(https://w3id.org/battinfo/cell/{uid})."
-        )
+        raise SystemExit("cell_spec.id must be a BattINFO cell-spec IRI (https://w3id.org/battinfo/cell/{uid}).")
 
     uid = normalize_uid(args.uid) if args.uid else mint_uid()
     instance_id = f"https://w3id.org/battinfo/cell/{uid}"
@@ -86,9 +77,7 @@ def main() -> None:
     if args.dataset_id is not None:
         dataset_id = args.dataset_id.strip()
         if not DATASET_IRI_RE.fullmatch(dataset_id):
-            raise SystemExit(
-                "--dataset-id must match https://w3id.org/battinfo/dataset/{uid}."
-            )
+            raise SystemExit("--dataset-id must match https://w3id.org/battinfo/dataset/{uid}.")
         provenance["dataset_id"] = dataset_id
         provenance["dataset_ids"] = [dataset_id]
 

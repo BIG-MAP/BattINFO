@@ -67,7 +67,7 @@ def test_inspect_ingest_root_rejects_manifest_outside_contract(tmp_path: Path) -
         json.dumps(
             {
                 "resource_type": "cell-instance",
-                "cell_spec": "battinfo-records/records/cell-spec/google--g20m7--2025/record.json"
+                "cell_spec": "battinfo-records/records/cell-spec/google--g20m7--2025/record.json",
             },
             indent=2,
         ),

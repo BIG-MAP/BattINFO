@@ -137,9 +137,7 @@ def test_finalize_disambiguates_colliding_test_and_cell_ids(tmp_path: Path) -> N
 def test_workspace_loads_cell_spec_from_validated_json_record(tmp_path: Path) -> None:
     workspace = Workspace(root=tmp_path / "workspace")
 
-    cell_spec = workspace.load_cell_spec(
-        ROOT / "examples" / "cell-spec" / "A123__ANR26650M1-B.json"
-    )
+    cell_spec = workspace.load_cell_spec(ROOT / "examples" / "cell-spec" / "A123__ANR26650M1-B.json")
 
     assert len(workspace.cell_specs) == 1
     assert cell_spec.manufacturer == "A123"
@@ -197,7 +195,9 @@ def test_workspace_loads_cell_spec_from_authoring_json_and_canonizes_on_save(tmp
     assert save_result["index"]["cell_spec_count"] == 1
     assert isinstance(cell_spec.id, str)
     assert cell_spec.id.startswith("https://w3id.org/battinfo/spec/")
-    record_path = tmp_path / "workspace" / "examples" / "cell-spec" / f"cell-spec-{cell_spec.id.rsplit('/', 1)[-1]}.json"
+    record_path = (
+        tmp_path / "workspace" / "examples" / "cell-spec" / f"cell-spec-{cell_spec.id.rsplit('/', 1)[-1]}.json"
+    )
     record = json.loads(record_path.read_text(encoding="utf-8"))
     assert isinstance(record["cell_spec"]["short_id"], str)
     assert len(record["cell_spec"]["short_id"]) == 6
@@ -337,10 +337,12 @@ def test_workspace_test_conformance_round_trip(tmp_path: Path) -> None:
     # model round-trip
 
     from battinfo.bundle import Test
+
     test_dir = tmp_path / "workspace" / "examples" / "test"
     test_files = list(test_dir.glob("*.json"))
     assert len(test_files) == 1
     import json
+
     reloaded = Test.from_record(json.loads(test_files[0].read_text()))
     assert reloaded.conformance is not None
     assert reloaded.conformance.status == "non-conformant"
@@ -574,7 +576,10 @@ def test_workspace_add_dataset_pulls_in_linked_dependencies(tmp_path: Path) -> N
     assert result["index"]["cell_instance_count"] == 1
     assert result["index"]["test_count"] == 1
     assert result["index"]["dataset_count"] == 1
-    assert workspace.render()["datasets"][0]["dataset"]["about"][0] == workspace.render()["cell_instances"][0]["cell_instance"]["id"]
+    assert (
+        workspace.render()["datasets"][0]["dataset"]["about"][0]
+        == workspace.render()["cell_instances"][0]["cell_instance"]["id"]
+    )
 
 
 def test_workspace_publish_stages_file_backed_dataset(tmp_path: Path) -> None:
@@ -624,9 +629,7 @@ def test_workspace_publish_stages_file_backed_dataset(tmp_path: Path) -> None:
     datacite_payload = json.loads(Path(publish_result["datacite_metadata_path"]).read_text(encoding="utf-8"))
     dataset_node = next(node for node in payload["@graph"] if node.get("@id") == publish_result["dataset_id"])
     distribution_names = {
-        entry.get("schema:name")
-        for entry in dataset_node.get("schema:distribution", [])
-        if isinstance(entry, dict)
+        entry.get("schema:name") for entry in dataset_node.get("schema:distribution", []) if isinstance(entry, dict)
     }
 
     assert publish_path.exists()
@@ -864,9 +867,3 @@ def test_test_uses_enum_backed_test_type_and_rejects_unknown_values() -> None:
         assert "made_up_test" in str(exc)
     else:
         raise AssertionError("Expected invalid test_type to fail validation")
-
-
-
-
-
-

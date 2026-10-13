@@ -133,13 +133,24 @@ def test_material_property_conditions_emit_measurement_parameters() -> None:
     from battinfo.transform.json_to_jsonld import to_jsonld
 
     rec = api.create_material_spec(
-        uid="abcd23456789abcd", name="LFP", material_class="active_material", formula="LiFePO4",
-        property={"specific_capacity": {"value": 160, "unit": "mAh/g", "co_type": "Measured",
-                                        "conditions": {"discharging_c_rate": {"value": 0.1, "unit": "C"},
-                                                       "lower_voltage_limit": {"value": 2.5, "unit": "V"},
-                                                       "temperature": {"value": 25, "unit": "degC"},
-                                                       "voltage_reference": {"value_text": "Li/Li+"},
-                                                       "atmosphere": {"value_text": "argon"}}}},
+        uid="abcd23456789abcd",
+        name="LFP",
+        material_class="active_material",
+        formula="LiFePO4",
+        property={
+            "specific_capacity": {
+                "value": 160,
+                "unit": "mAh/g",
+                "co_type": "Measured",
+                "conditions": {
+                    "discharging_c_rate": {"value": 0.1, "unit": "C"},
+                    "lower_voltage_limit": {"value": 2.5, "unit": "V"},
+                    "temperature": {"value": 25, "unit": "degC"},
+                    "voltage_reference": {"value_text": "Li/Li+"},
+                    "atmosphere": {"value_text": "argon"},
+                },
+            }
+        },
     )
     node = to_jsonld(rec, target="domain-battery")["@graph"][0]["isDescriptionFor"]
     assert node["@type"] == "LithiumIronPhosphate"
@@ -171,8 +182,12 @@ def test_material_property_conditions_emit_measurement_parameters() -> None:
 def test_material_property_out_of_range_warns() -> None:
     from battinfo.validate.semantic import validate_semantic_report
 
-    rec = api.create_material_spec(uid="abcd23456789abcd", name="LFP",
-                                   property={"specific_capacity": {"value": 16000, "unit": "mAh/g"}}, validate=False)
+    rec = api.create_material_spec(
+        uid="abcd23456789abcd",
+        name="LFP",
+        property={"specific_capacity": {"value": 16000, "unit": "mAh/g"}},
+        validate=False,
+    )
     report = validate_semantic_report(rec, policy="default")
     assert any(i.code == "semantic.value_out_of_plausible_range" for i in report.issues)
 
@@ -183,7 +198,10 @@ def test_material_spec_composition_reference_resolves(tmp_path: Path) -> None:
     base = api.create_material_spec(uid="base23456789abcd", name="NMC811", material_class="active_material")
     api.save_material_spec(base, source_root=tmp_path)
     coated = api.create_material_spec(
-        uid="coat23456789abcd", name="Al2O3-coated NMC811", kind="nmc811", material_class="active_material",
+        uid="coat23456789abcd",
+        name="Al2O3-coated NMC811",
+        kind="nmc811",
+        material_class="active_material",
         composition={"base_material_id": base["material_spec"]["id"]},
     )
     api.save_material_spec(coated, source_root=tmp_path)
@@ -196,8 +214,11 @@ def test_material_instance_dataset_link_reference_checked(tmp_path: Path) -> Non
     spec = api.create_material_spec(uid="abcd23456789abcd", name="LFP")
     api.save_material_spec(spec, source_root=tmp_path)
     material = api.create_material(
-        uid="1234abcd5678ef90", material_spec_id=spec["material_spec"]["id"], lot_id="LOT-1",
-        dataset_ids=["https://w3id.org/battinfo/dataset/1f8r-6v2k-9p4m-3t7x"], validate=False,
+        uid="1234abcd5678ef90",
+        material_spec_id=spec["material_spec"]["id"],
+        lot_id="LOT-1",
+        dataset_ids=["https://w3id.org/battinfo/dataset/1f8r-6v2k-9p4m-3t7x"],
+        validate=False,
     )
     # The dataset is not registered, so the link is flagged.
     result = validate_record(material, source_root=tmp_path)

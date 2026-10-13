@@ -134,6 +134,7 @@ def material_kind_exact_match_iris(entry: Mapping[str, Any] | None) -> list[str]
             iris.append(template.format(value.strip()))
     return iris
 
+
 # Cell-cell-specific composition fractions are not intrinsic material properties,
 # so they are dropped when lifting an embedded holder to a standalone spec.
 _CELL_LOCAL_PROPERTY_KEYS = {"mass_fraction", "volume_fraction", "weight_fraction"}

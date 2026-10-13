@@ -101,7 +101,9 @@ def test_query_tests_by_cell_and_dataset_json() -> None:
     assert payload["resource"] == "tests"
     assert payload["count"] >= 1
     assert all(item["cell_id"] == "https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8" for item in payload["items"])
-    assert all("https://w3id.org/battinfo/dataset/1f8r-6v2k-9p4m-3t7x" in item["dataset_ids"] for item in payload["items"])
+    assert all(
+        "https://w3id.org/battinfo/dataset/1f8r-6v2k-9p4m-3t7x" in item["dataset_ids"] for item in payload["items"]
+    )
 
 
 def test_query_datasets_by_related_cell_and_test_json() -> None:
@@ -411,19 +413,16 @@ def test_save_test_protocol_and_test_with_protocol_id(tmp_path: Path) -> None:
                     "identifier": "cell-spec:pge5-wer6-2q82-v9k0",
                     "name": "A123 ANR26650M1-B",
                     "model": "ANR26650M1-B",
-                    "manufacturer": {
-                        "type": "Organization",
-                        "name": "A123"
-                    },
+                    "manufacturer": {"type": "Organization", "name": "A123"},
                     "cell_format": "cylindrical",
-                    "chemistry": "Li-ion"
+                    "chemistry": "Li-ion",
                 },
                 "properties": {},
                 "provenance": {
                     "source_type": "datasheet",
                     "source_file": "A123__ANR26650M1-B.pdf",
-                    "retrieved_at": 1773811200
-                }
+                    "retrieved_at": 1773811200,
+                },
             },
             indent=2,
         ),
@@ -540,9 +539,7 @@ def test_validate_can_run_canonical_record_validation_with_source_root() -> None
 def test_validate_json_output_includes_warnings_on_success(tmp_path: Path) -> None:
     runner = CliRunner()
     warn_path = tmp_path / "warn-test.json"
-    source = json.loads(
-        (ROOT / "examples" / "test" / "test-5p7v-2n8k-4m3t-6q9r.json").read_text(encoding="utf-8")
-    )
+    source = json.loads((ROOT / "examples" / "test" / "test-5p7v-2n8k-4m3t-6q9r.json").read_text(encoding="utf-8"))
     source["test"]["short_id"] = "xxxxxx"
     warn_path.write_text(json.dumps(source, indent=2), encoding="utf-8")
     result = runner.invoke(
@@ -567,9 +564,7 @@ def test_validate_json_output_includes_warnings_on_success(tmp_path: Path) -> No
 def test_validate_strict_policy_fails_on_semantic_issue(tmp_path: Path) -> None:
     runner = CliRunner()
     bad_path = tmp_path / "bad-test.json"
-    source = json.loads(
-        (ROOT / "examples" / "test" / "test-5p7v-2n8k-4m3t-6q9r.json").read_text(encoding="utf-8")
-    )
+    source = json.loads((ROOT / "examples" / "test" / "test-5p7v-2n8k-4m3t-6q9r.json").read_text(encoding="utf-8"))
     source["test"]["short_id"] = "xxxxxx"
     bad_path.write_text(json.dumps(source, indent=2), encoding="utf-8")
     result = runner.invoke(
@@ -591,9 +586,7 @@ def test_validate_strict_policy_fails_on_semantic_issue(tmp_path: Path) -> None:
 def test_validate_json_output_failure_has_structured_issue_metadata(tmp_path: Path) -> None:
     runner = CliRunner()
     bad_path = tmp_path / "bad-test.json"
-    source = json.loads(
-        (ROOT / "examples" / "test" / "test-5p7v-2n8k-4m3t-6q9r.json").read_text(encoding="utf-8")
-    )
+    source = json.loads((ROOT / "examples" / "test" / "test-5p7v-2n8k-4m3t-6q9r.json").read_text(encoding="utf-8"))
     source["test"]["short_id"] = "xxxxxx"
     bad_path.write_text(json.dumps(source, indent=2), encoding="utf-8")
     result = runner.invoke(
@@ -619,9 +612,7 @@ def test_validate_json_output_failure_has_structured_issue_metadata(tmp_path: Pa
 def test_save_record_strict_policy_fails_on_semantic_issue(tmp_path: Path) -> None:
     runner = CliRunner()
     bad_path = tmp_path / "bad-test.json"
-    source = json.loads(
-        (ROOT / "examples" / "test" / "test-5p7v-2n8k-4m3t-6q9r.json").read_text(encoding="utf-8")
-    )
+    source = json.loads((ROOT / "examples" / "test" / "test-5p7v-2n8k-4m3t-6q9r.json").read_text(encoding="utf-8"))
     source["test"]["short_id"] = "xxxxxx"
     bad_path.write_text(json.dumps(source, indent=2), encoding="utf-8")
 
@@ -1412,10 +1403,3 @@ def test_library_cli_save_cell_spec_inline_without_input(tmp_path: Path) -> None
     assert stored["specification"]["model"] == "ANR26650M1-B"
     assert stored["specification"]["size_code"] == "R26650"
     assert stored["provenance"]["source_type"] == "datasheet"
-
-
-
-
-
-
-

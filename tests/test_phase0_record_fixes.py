@@ -40,7 +40,9 @@ JAN_2030 = 1893456000  # 2030-01-01T00:00:00Z
 
 def test_dataset_creator_orcid_survives_and_is_a_person() -> None:
     dataset = Dataset(
-        "d.csv", creators=[{"name": "Jane Doe", "orcid": ORCID}], uid=UID,
+        "d.csv",
+        creators=[{"name": "Jane Doe", "orcid": ORCID}],
+        uid=UID,
         access_url="https://data.example.com/d",
     )
     record = _record_from_dataset(dataset)
@@ -121,9 +123,7 @@ def test_explicit_source_citation_wins_over_flat_kwarg() -> None:
 
 
 def test_expires_at_converts_like_manufactured_at() -> None:
-    instance = Cell(
-        cell_spec_id=SPEC_IRI, manufactured_at="2024-01-01", expires_at="2030-01-01", uid=UID
-    )
+    instance = Cell(cell_spec_id=SPEC_IRI, manufactured_at="2024-01-01", expires_at="2030-01-01", uid=UID)
     record = _record_from_cell_instance(instance)
     assert record["cell_instance"]["manufactured_at"] == JAN_2024
     assert record["cell_instance"]["expires_at"] == JAN_2030
@@ -136,13 +136,9 @@ def test_expires_at_garbage_raises() -> None:
 
 
 def test_retrieved_at_iso_string_converts_on_every_builder() -> None:
-    spec_rec = _record_from_cell_spec(
-        CellSpec(manufacturer="ACME", model="X1", retrieved_at="2024-01-01", uid=UID)
-    )
+    spec_rec = _record_from_cell_spec(CellSpec(manufacturer="ACME", model="X1", retrieved_at="2024-01-01", uid=UID))
     assert spec_rec["provenance"]["retrieved_at"] == JAN_2024
-    inst_rec = _record_from_cell_instance(
-        Cell(cell_spec_id=SPEC_IRI, retrieved_at="2024-01-01", uid=UID)
-    )
+    inst_rec = _record_from_cell_instance(Cell(cell_spec_id=SPEC_IRI, retrieved_at="2024-01-01", uid=UID))
     assert inst_rec["provenance"]["retrieved_at"] == JAN_2024
     test_rec = _record_from_test(
         Test(cell_instance_id=CELL_IRI, test_type="cycling", retrieved_at="2024-01-01", uid=UID)

@@ -3,6 +3,7 @@
 The descriptions power help(), IDE hover, and .model_json_schema() — this gate keeps a
 newly added field from shipping undocumented.
 """
+
 from __future__ import annotations
 
 import sys

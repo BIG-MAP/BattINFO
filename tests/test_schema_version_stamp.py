@@ -12,6 +12,7 @@ Scope note: this covers the canonical corpus (``examples/``) and the
 (e.g. ``web/lib/create-model.ts``) is out of scope here — it is not a committed
 fixture and is regenerated/authored elsewhere.
 """
+
 from __future__ import annotations
 
 import re

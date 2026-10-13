@@ -89,9 +89,7 @@ def _organization_to_snake(organization: dict[str, Any]) -> dict[str, Any]:
     if isinstance(normalized.get("location"), Mapping):
         normalized["location"] = _map_keys(dict(normalized["location"]), _ORG_LOCATION_TO_SNAKE)
     if isinstance(normalized.get("parent_organization"), Mapping):
-        normalized["parent_organization"] = _map_keys(
-            dict(normalized["parent_organization"]), _ORGANIZATION_TO_SNAKE
-        )
+        normalized["parent_organization"] = _map_keys(dict(normalized["parent_organization"]), _ORGANIZATION_TO_SNAKE)
     return normalized
 
 
@@ -120,7 +118,9 @@ def _dataset_to_snake(dataset: dict[str, Any]) -> dict[str, Any]:
     if isinstance(normalized.get("included_in_data_catalog"), Mapping):
         normalized["included_in_data_catalog"] = _data_catalog_to_snake(normalized["included_in_data_catalog"])
     if isinstance(normalized.get("citations"), list):
-        normalized["citations"] = [copy.deepcopy(dict(item)) for item in normalized["citations"] if isinstance(item, Mapping)]
+        normalized["citations"] = [
+            copy.deepcopy(dict(item)) for item in normalized["citations"] if isinstance(item, Mapping)
+        ]
     if isinstance(normalized.get("variable_measured"), list):
         normalized["variable_measured"] = [
             _variable_to_snake(item) for item in normalized["variable_measured"] if isinstance(item, Mapping)

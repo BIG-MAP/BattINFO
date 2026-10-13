@@ -5,6 +5,7 @@
 - CellConstruction stack/winding fields -> ElectrodeStack / JellyRoll
 - legacy coin_hardware -> housing migration adapter and round-trip
 """
+
 from __future__ import annotations
 
 import sys
@@ -65,8 +66,12 @@ def _prop_types(node: dict) -> set[str]:
 
 def _prismatic_housing():
     return housing(
-        case=case(material="Aluminium", size_code="173x115x45",
-                  weight={"value": 115, "unit": "g"}, available_volume={"value": 778, "unit": "cm3"}),
+        case=case(
+            material="Aluminium",
+            size_code="173x115x45",
+            weight={"value": 115, "unit": "g"},
+            available_volume={"value": 778, "unit": "cm3"},
+        ),
         cap=hardware_part("cap", material="Aluminium", weight={"value": 113, "unit": "g"}),
         terminals=[
             terminal(polarity="positive", material="Aluminium", width={"value": 50, "unit": "mm"}),
@@ -79,9 +84,14 @@ def _prismatic_housing():
 def _prismatic_spec(housing_model=None, construction_model=None):
     return cell_description(
         id="https://w3id.org/battinfo/spec/eng-prism",
-        manufacturer="EngCo", model="prism-100Ah", format="prismatic", chemistry="li-ion",
-        positive_electrode_basis="lfp", negative_electrode_basis="graphite",
-        housing=housing_model, construction=construction_model,
+        manufacturer="EngCo",
+        model="prism-100Ah",
+        format="prismatic",
+        chemistry="li-ion",
+        positive_electrode_basis="lfp",
+        negative_electrode_basis="graphite",
+        housing=housing_model,
+        construction=construction_model,
         properties=properties(nominal_capacity={"value": 100, "unit": "Ah"}),
     )
 
@@ -122,8 +132,13 @@ def test_case_type_follows_cell_format() -> None:
     expected = {"prismatic": "PrismaticCase", "pouch": "PouchCase", "cylindrical": "CylindricalCase"}
     for fmt, case_type in expected.items():
         spec = cell_description(
-            id=f"https://w3id.org/battinfo/spec/{fmt}", manufacturer="M", model=fmt, format=fmt,
-            chemistry="li-ion", positive_electrode_basis="lfp", negative_electrode_basis="graphite",
+            id=f"https://w3id.org/battinfo/spec/{fmt}",
+            manufacturer="M",
+            model=fmt,
+            format=fmt,
+            chemistry="li-ion",
+            positive_electrode_basis="lfp",
+            negative_electrode_basis="graphite",
             housing=housing(case=case(material="Aluminium")),
         )
         battery = _battery_node(spec)
@@ -138,10 +153,16 @@ def test_case_type_follows_cell_format() -> None:
 
 def test_electrode_tab_round_trips_and_emits() -> None:
     spec = cell_description(
-        id="https://w3id.org/battinfo/spec/eng-tab", manufacturer="EngCo", model="tab", format="prismatic",
-        chemistry="li-ion", positive_electrode_basis="lfp", negative_electrode_basis="graphite",
+        id="https://w3id.org/battinfo/spec/eng-tab",
+        manufacturer="EngCo",
+        model="tab",
+        format="prismatic",
+        chemistry="li-ion",
+        positive_electrode_basis="lfp",
+        negative_electrode_basis="graphite",
         positive_electrode=electrode(
-            bom=bom(active_material=material("LFP")), current_collector="Aluminium foil",
+            bom=bom(active_material=material("LFP")),
+            current_collector="Aluminium foil",
             tab=tab(material="Aluminium", width={"value": 50, "unit": "mm"}, thickness={"value": 0.65, "unit": "mm"}),
         ),
     )
@@ -169,9 +190,15 @@ def _assembly_node(battery: dict, type_name: str) -> dict | None:
 
 
 def test_stacked_construction_emits_electrode_stack() -> None:
-    spec = _prismatic_spec(construction_model=construction(
-        assembly_type="stacked", cathode_sheet_count=127, anode_sheet_count=130,
-        separator_sheet_count=258, electrode_length={"value": 155, "unit": "mm"}))
+    spec = _prismatic_spec(
+        construction_model=construction(
+            assembly_type="stacked",
+            cathode_sheet_count=127,
+            anode_sheet_count=130,
+            separator_sheet_count=258,
+            electrode_length={"value": 155, "unit": "mm"},
+        )
+    )
     battery = _battery_node(spec)
     stack = _assembly_node(battery, "ElectrodeStack")
     assert stack is not None, "expected an ElectrodeStack constituent"
@@ -183,10 +210,19 @@ def test_stacked_construction_emits_electrode_stack() -> None:
 
 def test_wound_construction_emits_wound_stack() -> None:
     spec = cell_description(
-        id="https://w3id.org/battinfo/spec/eng-roll", manufacturer="EngCo", model="roll", format="cylindrical",
-        chemistry="li-ion", positive_electrode_basis="nca", negative_electrode_basis="graphite",
-        construction=construction(assembly_type="wound", layering="jelly-roll", winding_turns=28,
-                                  jellyroll_volume={"value": 663, "unit": "cm3"}),
+        id="https://w3id.org/battinfo/spec/eng-roll",
+        manufacturer="EngCo",
+        model="roll",
+        format="cylindrical",
+        chemistry="li-ion",
+        positive_electrode_basis="nca",
+        negative_electrode_basis="graphite",
+        construction=construction(
+            assembly_type="wound",
+            layering="jelly-roll",
+            winding_turns=28,
+            jellyroll_volume={"value": 663, "unit": "cm3"},
+        ),
     )
     battery = _battery_node(spec)
     # WoundStack is the EMMO prefLabel; JellyRoll / SwissRoll are its altLabels.
@@ -202,8 +238,13 @@ def test_wound_construction_emits_wound_stack() -> None:
 
 def test_legacy_coin_hardware_kwarg_migrates_to_housing() -> None:
     spec = cell_description(
-        id="https://w3id.org/battinfo/spec/eng-coin", manufacturer="M", model="coin", format="coin",
-        chemistry="li-ion", positive_electrode_basis="lfp", negative_electrode_basis="graphite",
+        id="https://w3id.org/battinfo/spec/eng-coin",
+        manufacturer="M",
+        model="coin",
+        format="coin",
+        chemistry="li-ion",
+        positive_electrode_basis="lfp",
+        negative_electrode_basis="graphite",
         coin_hardware={
             "case": {"size_code": "R2032", "material": "Stainless steel"},
             "spring": {"property": {"diameter": {"value": 15, "unit": "mm"}}},
@@ -221,10 +262,15 @@ def test_legacy_coin_hardware_record_loads_into_housing() -> None:
     record = {
         "schema_version": "1.0.0",
         "specification": {
-            "id": "https://w3id.org/battinfo/spec/eng-legacy", "manufacturer": "M", "model": "legacy",
-            "format": "coin", "chemistry": "li-ion",
-            "coin_hardware": {"case": {"size_code": "R2032", "material": "Stainless steel"},
-                              "spring": {"property": {"diameter": {"value": 15, "unit": "mm"}}}},
+            "id": "https://w3id.org/battinfo/spec/eng-legacy",
+            "manufacturer": "M",
+            "model": "legacy",
+            "format": "coin",
+            "chemistry": "li-ion",
+            "coin_hardware": {
+                "case": {"size_code": "R2032", "material": "Stainless steel"},
+                "spring": {"property": {"diameter": {"value": 15, "unit": "mm"}}},
+            },
         },
         "provenance": {},
     }
@@ -240,10 +286,17 @@ def test_legacy_coin_hardware_record_loads_into_housing() -> None:
 def test_coin_housing_still_emits_case_and_hardware() -> None:
     """The coin descriptor path keeps emitting a case + spring/spacer from the migrated housing."""
     spec = cell_description(
-        id="https://w3id.org/battinfo/spec/eng-coin2", manufacturer="M", model="coin2", format="coin",
-        chemistry="li-ion", positive_electrode_basis="lfp", negative_electrode_basis="graphite",
-        coin_hardware={"case": {"size_code": "R2032", "material": "Stainless steel"},
-                       "spring": {"property": {"diameter": {"value": 15, "unit": "mm"}}}},
+        id="https://w3id.org/battinfo/spec/eng-coin2",
+        manufacturer="M",
+        model="coin2",
+        format="coin",
+        chemistry="li-ion",
+        positive_electrode_basis="lfp",
+        negative_electrode_basis="graphite",
+        coin_hardware={
+            "case": {"size_code": "R2032", "material": "Stainless steel"},
+            "spring": {"property": {"diameter": {"value": 15, "unit": "mm"}}},
+        },
     )
     battery = _battery_node(spec)
     assert battery["hasCase"]["schema:size"] == "R2032"
@@ -267,9 +320,11 @@ def test_cell_spec_record_with_inline_housing_classifies_as_record() -> None:
         "schema_version": "0.2.0",
         "cell_spec": {
             "id": "https://w3id.org/battinfo/spec/eng-inline-0001",
-            "name": "Inline", "model": "M",
+            "name": "Inline",
+            "model": "M",
             "manufacturer": {"type": "Organization", "name": "A"},
-            "cell_format": "cylindrical", "chemistry": "Li-ion",
+            "cell_format": "cylindrical",
+            "chemistry": "Li-ion",
         },
         "housing": {
             "cell_format": "cylindrical",
@@ -301,7 +356,8 @@ def test_housing_spec_save_gate_accepts_vent_part() -> None:
         "schema_version": "0.2.0",
         "housing_spec": {
             "id": "https://w3id.org/battinfo/housing-spec/aaaa-bbbb-cccc-dddd",
-            "name": "vented can", "cell_format": "cylindrical",
+            "name": "vented can",
+            "cell_format": "cylindrical",
             "case": {"material": "steel"},
             "parts": [{"type": "vent"}],
         },

@@ -1,6 +1,7 @@
 """R-7: publishing to Zenodo is irreversible, so the workspace must fail closed BEFORE minting a
 DOI when (a) a file-scheme distribution's local data file is missing (the deposit would be
 incomplete) or (b) the record has validation errors. The check must pass for a clean record."""
+
 from __future__ import annotations
 
 import sys
@@ -29,9 +30,7 @@ def _patch_validator(monkeypatch: pytest.MonkeyPatch, report: types.SimpleNamesp
     monkeypatch.setattr(v, "validate_publication_report", lambda *a, **k: report)
 
 
-def test_publish_refused_when_data_file_missing(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_publish_refused_when_data_file_missing(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     _patch_validator(monkeypatch, _fake_report())  # no validation errors
     ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
     ws._missing_data_files = ["/data/run_042.csv"]
@@ -39,9 +38,7 @@ def test_publish_refused_when_data_file_missing(
         ws._assert_publishable({"@graph": []})
 
 
-def test_publish_refused_when_validation_errors(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_publish_refused_when_validation_errors(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     _patch_validator(monkeypatch, _fake_report(_issue("error", "missing dataset license")))
     ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
     ws._missing_data_files = []
@@ -49,9 +46,7 @@ def test_publish_refused_when_validation_errors(
         ws._assert_publishable({"@graph": []})
 
 
-def test_publish_allowed_for_clean_record(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_publish_allowed_for_clean_record(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     # warnings alone must not block publishing — only errors do.
     _patch_validator(monkeypatch, _fake_report(_issue("warning", "consider adding keywords")))
     ws = AuthoringWorkspace(root=tmp_path, registry_url=None)

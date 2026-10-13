@@ -67,9 +67,7 @@ def _check_cell_instances(dir_path: Path, errors: list[str]) -> None:
         provenance = doc.get("provenance", {})
         if isinstance(provenance, dict):
             dataset_id = provenance.get("dataset_id")
-            if dataset_id is not None and (
-                not isinstance(dataset_id, str) or not DATASET_IRI_RE.fullmatch(dataset_id)
-            ):
+            if dataset_id is not None and (not isinstance(dataset_id, str) or not DATASET_IRI_RE.fullmatch(dataset_id)):
                 errors.append(f"{path}: invalid provenance.dataset_id '{dataset_id}'")
             dataset_ids = provenance.get("dataset_ids")
             if isinstance(dataset_ids, list):
@@ -116,6 +114,7 @@ def _dirs() -> Iterable[tuple[str, Path]]:
     yield "pkg cell-instance", ROOT / "src" / "battinfo" / "data" / "examples" / "cell-instance"
     yield "pkg dataset", ROOT / "src" / "battinfo" / "data" / "examples" / "dataset"
 
+
 def main() -> None:
     errors: list[str] = []
 
@@ -142,4 +141,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

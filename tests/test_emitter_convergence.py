@@ -10,6 +10,7 @@ Covers the three convergence steps:
    with the round-trip importer accepting both the old and the new shapes.
 3. B and C share one builder: byte-identical spec nodes for the same record.
 """
+
 from __future__ import annotations
 
 import json
@@ -106,9 +107,7 @@ def test_resolver_cell_spec_emits_standard_vocab_provenance() -> None:
     prov = doc["dcterms:source"]
     assert prov["@type"] == "prov:Entity"
     assert prov["dcterms:type"] == "datasheet"
-    assert prov["prov:hadPrimarySource"] == {
-        "@id": "https://example.org/datasheets/anr26650m1-b.pdf"
-    }
+    assert prov["prov:hadPrimarySource"] == {"@id": "https://example.org/datasheets/anr26650m1-b.pdf"}
     assert prov["prov:generatedAtTime"].startswith("2026-01-28T")
     assert prov["dcterms:bibliographicCitation"].startswith("A123 Systems (2012)")
 
@@ -144,9 +143,7 @@ def test_shipped_example_record_resolves_without_drops() -> None:
 
 
 def test_unmapped_property_key_warns_at_emit_time() -> None:
-    record = _cell_spec_record(
-        properties={"frobnication_index": {"value": 42.0, "unit": "V"}}
-    )
+    record = _cell_spec_record(properties={"frobnication_index": {"value": 42.0, "unit": "V"}})
     with pytest.warns(UserWarning, match="semantic.property_unmapped.*frobnication_index"):
         doc = build_cell_spec_node(record)
     # Kept in the graph, typed by its value basis only and labelled with its
@@ -157,9 +154,7 @@ def test_unmapped_property_key_warns_at_emit_time() -> None:
 
 
 def test_value_text_only_property_warns_at_emit_time() -> None:
-    record = _cell_spec_record(
-        properties={"cycle_life": {"value_text": ">=1000 cycles"}}
-    )
+    record = _cell_spec_record(properties={"cycle_life": {"value_text": ">=1000 cycles"}})
     with pytest.warns(UserWarning, match="semantic.value_text_only.*cycle_life"):
         build_cell_spec_node(record)
 
@@ -228,9 +223,9 @@ def test_import_accepts_legacy_shape_package(tmp_path: Path) -> None:
     assert counts["properties"] == 1
     spec = ws._ws.cell_specs[0]
     assert spec.id == SPEC_IRI
-    assert spec.format == "cylindrical"       # verbatim battinfo: literal wins
+    assert spec.format == "cylindrical"  # verbatim battinfo: literal wins
     assert spec.chemistry == "Li-ion"
-    assert spec.size_code == "R26650"          # legacy schema:identifier slot
+    assert spec.size_code == "R26650"  # legacy schema:identifier slot
     assert spec.iec_code == "IFpR26650"
     assert spec.properties["nominal_capacity"]["value"] == 2.5
     assert spec.properties["nominal_capacity"]["unit"] == "Ah"
@@ -299,9 +294,9 @@ def test_import_reads_new_shape_package_with_descriptors_intact(tmp_path: Path) 
     assert counts["properties"] == 1
     spec = ws._ws.cell_specs[0]
     assert spec.id == SPEC_IRI
-    assert spec.format == "cylindrical"        # from CylindricalBattery
-    assert spec.chemistry == "li-ion"          # from LithiumIonBattery
-    assert spec.size_code == "R26650"          # from schema:size
+    assert spec.format == "cylindrical"  # from CylindricalBattery
+    assert spec.chemistry == "li-ion"  # from LithiumIonBattery
+    assert spec.size_code == "R26650"  # from schema:size
     assert spec.properties["nominal_capacity"]["value"] == 2.5
     assert spec.properties["nominal_capacity"]["unit"] == "Ah"
     assert spec.properties["nominal_voltage"]["value"] == 3.3
@@ -329,7 +324,7 @@ def test_import_skips_external_spec_stub_with_reference_only_description(tmp_pat
 
 
 def test_import_tolerates_string_isDescriptionFor(tmp_path: Path) -> None:
-    """"isDescriptionFor": "<iri>" is legal JSON-LD under the @id-typed context
+    """ "isDescriptionFor": "<iri>" is legal JSON-LD under the @id-typed context
     term; a spec node with a real body must import without crashing on it."""
     doc = {
         "@context": {"schema": "https://schema.org/"},
@@ -354,9 +349,7 @@ def test_import_keeps_minimal_spec_without_properties(tmp_path: Path) -> None:
     spec, not a stub — the stub guard must not skip it."""
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        node = build_cell_spec_node(
-            _cell_spec_record(properties={})
-        )
+        node = build_cell_spec_node(_cell_spec_record(properties={}))
     # Strip quantities entirely so only catalogue facts + typed witness remain.
     node.get("isDescriptionFor", {}).pop("hasProperty", None)
     doc = {"@context": _new_shape_package()["@context"], "@graph": [node]}
@@ -413,13 +406,9 @@ def test_resolver_and_package_spec_nodes_are_byte_identical() -> None:
     resolver_node = {k: v for k, v in resolver_doc.items() if k != "@context"}
 
     package = _assemble_package(record)
-    package_node = next(
-        n for n in package["@graph"] if n.get("@id") == record["cell_spec"]["id"]
-    )
+    package_node = next(n for n in package["@graph"] if n.get("@id") == record["cell_spec"]["id"])
 
-    assert json.dumps(resolver_node, sort_keys=False) == json.dumps(
-        package_node, sort_keys=False
-    )
+    assert json.dumps(resolver_node, sort_keys=False) == json.dumps(package_node, sort_keys=False)
 
 
 def test_package_spec_node_drops_battinfo_literals_for_type_stack() -> None:

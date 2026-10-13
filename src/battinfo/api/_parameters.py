@@ -28,6 +28,7 @@ either may name the record it replaces in ``supersedes``.
 
 Import the public surface from ``battinfo.api``, not from this module.
 """
+
 from __future__ import annotations
 
 import math
@@ -97,9 +98,7 @@ def _checked_claim(
             raise ValueError(f"{where}[{index}].curve must be a mapping.")
         xs, ys = curve.get("x"), curve.get("y")
         if not isinstance(xs, list) or not isinstance(ys, list) or len(xs) != len(ys):
-            raise ValueError(
-                f"{where}[{index}].curve ({parameter}): x and y must be lists of equal length."
-            )
+            raise ValueError(f"{where}[{index}].curve ({parameter}): x and y must be lists of equal length.")
         if len(xs) < 2:
             raise ValueError(f"{where}[{index}].curve ({parameter}): need at least 2 points.")
         for name, values in (("x", xs), ("y", ys)):
@@ -147,16 +146,12 @@ def _resolved_target(
 
         resolved = resolve_material_kind(value)
         if resolved is None:
-            raise ValueError(
-                f"unknown material kind {value!r}. Valid kinds: "
-                f"{', '.join(material_kind_keys())}."
-            )
+            raise ValueError(f"unknown material kind {value!r}. Valid kinds: {', '.join(material_kind_keys())}.")
         return field, resolved
     if field == "material_spec_id":
         if not MATERIAL_SPEC_IRI_RE.fullmatch(str(value)):
             raise ValueError(
-                "material_spec_id must be a canonical material-spec IRI "
-                "(https://w3id.org/battinfo/spec/{uid})."
+                "material_spec_id must be a canonical material-spec IRI (https://w3id.org/battinfo/spec/{uid})."
             )
         return field, str(value)
     if not SPEC_IRI_RE.fullmatch(str(value)):
@@ -205,9 +200,7 @@ def claim_batch_uid(target: str, scope: str, name: str, electrode_polarity: str 
     return _seeded_claim_batch_uid(_CLAIM_BATCH_SEED, target, scope, name, electrode_polarity)
 
 
-def _seeded_claim_batch_uid(
-    seed: str, target: str, scope: str, name: str, electrode_polarity: str | None
-) -> str:
+def _seeded_claim_batch_uid(seed: str, target: str, scope: str, name: str, electrode_polarity: str | None) -> str:
     parts = [seed, target, scope]
     if electrode_polarity:
         parts.append(electrode_polarity)
@@ -302,9 +295,7 @@ def _checked_parts(parts: Any, default_provenance_class: str | None) -> list[dic
             raise ValueError(f"parts[{index}] must be a mapping, got {type(part).__name__}.")
         name = part.get("part")
         if name not in PARAMETER_FILE_PARTS:
-            raise ValueError(
-                f"parts[{index}].part must be one of {', '.join(PARAMETER_FILE_PARTS)}; got {name!r}."
-            )
+            raise ValueError(f"parts[{index}].part must be one of {', '.join(PARAMETER_FILE_PARTS)}; got {name!r}.")
         unknown = sorted(set(part) - _PART_FIELDS)
         if unknown:
             raise ValueError(f"parts[{index}] ({name}) has unknown fields: {', '.join(unknown)}.")
@@ -329,8 +320,7 @@ def _checked_parts(parts: Any, default_provenance_class: str | None) -> list[dic
         if kind is not None or spec is not None:
             if name not in MATERIAL_PARTS:
                 raise ValueError(
-                    f"parts[{index}] ({name}): only a material part "
-                    f"({', '.join(MATERIAL_PARTS)}) names a material."
+                    f"parts[{index}] ({name}): only a material part ({', '.join(MATERIAL_PARTS)}) names a material."
                 )
             if kind is not None and spec is not None:
                 raise ValueError(
@@ -403,22 +393,29 @@ def parameter_file_issues(body: Mapping[str, Any]) -> list[tuple[str, str, str, 
             expected = f"{_PARAMETER_SET_IRI_BASE}{parameter_file_uid(fingerprint)}"
             recipe = "stable_uid('parameter-file:' + parameters_sha256)"
         if body.get("id") != expected:
-            issues.append((
-                "id_mismatch", "error", "parameter_set.id",
-                f"a parameter file's IRI derives from its parameters_sha256 "
-                f"({recipe}, IDENTIFIER_POLICY 6.3): it must be {expected}, not {body.get('id')}.",
-            ))
+            issues.append(
+                (
+                    "id_mismatch",
+                    "error",
+                    "parameter_set.id",
+                    f"a parameter file's IRI derives from its parameters_sha256 "
+                    f"({recipe}, IDENTIFIER_POLICY 6.3): it must be {expected}, not {body.get('id')}.",
+                )
+            )
     seen: set[tuple[Any, Any]] = set()
     for index, part in enumerate(body["parts"] if isinstance(body.get("parts"), list) else []):
         if not isinstance(part, Mapping):
             continue
         key = (part.get("part"), part.get("phase"))
         if key in seen:
-            issues.append((
-                "part_repeated", "error", f"parameter_set.parts[{index}]",
-                f"part {_part_label(part)} appears twice; each (part, phase) pair names one "
-                "part of the file.",
-            ))
+            issues.append(
+                (
+                    "part_repeated",
+                    "error",
+                    f"parameter_set.parts[{index}]",
+                    f"part {_part_label(part)} appears twice; each (part, phase) pair names one part of the file.",
+                )
+            )
         seen.add(key)
 
     distributions = body.get("distributions")
@@ -428,15 +425,23 @@ def parameter_file_issues(body: Mapping[str, Any]) -> list[tuple[str, str, str, 
     sources = [(i, d) for i, d in entries if d.get("role") == "source"]
     runnables = [(i, d) for i, d in entries if d.get("role") == "runnable"]
     if len(sources) != 1:
-        issues.append((
-            "source_count", "error", "parameter_set.distributions",
-            f"a parameter file carries exactly one source file; found {len(sources)}.",
-        ))
+        issues.append(
+            (
+                "source_count",
+                "error",
+                "parameter_set.distributions",
+                f"a parameter file carries exactly one source file; found {len(sources)}.",
+            )
+        )
     if len(runnables) > 1:
-        issues.append((
-            "runnable_count", "error", "parameter_set.distributions",
-            f"a parameter file carries at most one runnable file; found {len(runnables)}.",
-        ))
+        issues.append(
+            (
+                "runnable_count",
+                "error",
+                "parameter_set.distributions",
+                f"a parameter file carries at most one runnable file; found {len(runnables)}.",
+            )
+        )
     if len(sources) != 1:
         return issues
     source = sources[0][1]
@@ -446,40 +451,52 @@ def parameter_file_issues(body: Mapping[str, Any]) -> list[tuple[str, str, str, 
         if role == "runnable" and source_hex is not None:
             derived = entry.get("derived_from")
             if derived != f"sha256:{source_hex}":
-                issues.append((
-                    "runnable_not_from_source", "error",
-                    f"parameter_set.distributions[{index}].derived_from",
-                    f"a runnable file must name the source it was converted from: derived_from is "
-                    f"{derived!r}, the source checksum is 'sha256:{source_hex}'.",
-                ))
+                issues.append(
+                    (
+                        "runnable_not_from_source",
+                        "error",
+                        f"parameter_set.distributions[{index}].derived_from",
+                        f"a runnable file must name the source it was converted from: derived_from is "
+                        f"{derived!r}, the source checksum is 'sha256:{source_hex}'.",
+                    )
+                )
         elif role == "mirror" and _checksum_hex(entry) != source_hex:
-            issues.append((
-                "mirror_checksum_differs", "error",
-                f"parameter_set.distributions[{index}].checksum",
-                "a mirror serves the source's exact bytes, so its checksum must equal the "
-                f"source's ({source_hex}).",
-            ))
+            issues.append(
+                (
+                    "mirror_checksum_differs",
+                    "error",
+                    f"parameter_set.distributions[{index}].checksum",
+                    "a mirror serves the source's exact bytes, so its checksum must equal the "
+                    f"source's ({source_hex}).",
+                )
+            )
     source_parses = any(
         isinstance(check, Mapping) and check.get("check") == "bpx_parse" and check.get("passed") is True
         for check in source.get("checks") or []
     )
     if runnables and source_parses:
-        issues.append((
-            "runnable_not_needed", "warning",
-            f"parameter_set.distributions[{runnables[0][0]}]",
-            "the source carries a passing bpx_parse check, so the official parser reads it as "
-            "published: a runnable copy is made only when the parser rejects the source.",
-        ))
+        issues.append(
+            (
+                "runnable_not_needed",
+                "warning",
+                f"parameter_set.distributions[{runnables[0][0]}]",
+                "the source carries a passing bpx_parse check, so the official parser reads it as "
+                "published: a runnable copy is made only when the parser rejects the source.",
+            )
+        )
     for index, entry in entries:
         ref = _unpinned_git_ref(entry.get("content_url"))
         if ref is not None:
-            issues.append((
-                "content_url_unpinned", "warning",
-                f"parameter_set.distributions[{index}].content_url",
-                f"{entry['content_url']} serves the file at the git ref {ref!r}, a branch or tag "
-                "whose content can change, so the record could come to point at other bytes than "
-                "its checksum: pin the URL to a commit (its SHA).",
-            ))
+            issues.append(
+                (
+                    "content_url_unpinned",
+                    "warning",
+                    f"parameter_set.distributions[{index}].content_url",
+                    f"{entry['content_url']} serves the file at the git ref {ref!r}, a branch or tag "
+                    "whose content can change, so the record could come to point at other bytes than "
+                    "its checksum: pin the URL to a commit (its SHA).",
+                )
+            )
     return issues
 
 
@@ -613,9 +630,7 @@ def _record_from_parameter_set(
         body["annex"] = dict(annex)
     if not_imported:
         # The source file's values the record does not hold, by BPX path.
-        if not isinstance(not_imported, list) or not all(
-            isinstance(item, str) and item for item in not_imported
-        ):
+        if not isinstance(not_imported, list) or not all(isinstance(item, str) and item for item in not_imported):
             raise ValueError("not_imported must be a list of BPX paths (non-empty strings).")
         body["not_imported"] = list(dict.fromkeys(not_imported))
     if supersedes is not None:
@@ -647,11 +662,7 @@ def _record_from_parameter_set(
         if not all(isinstance(item, Mapping) for item in distributions):
             raise TypeError("each distributions entry is a parameter-file dict (from bpx_file_distribution()).")
         body["distributions"] = [dict(item) for item in distributions]
-        errors = [
-            message
-            for _code, severity, _path, message in parameter_file_issues(body)
-            if severity == "error"
-        ]
+        errors = [message for _code, severity, _path, message in parameter_file_issues(body) if severity == "error"]
         if errors:
             raise ValueError("distributions: " + " ".join(errors))
     if description is not None:
@@ -710,13 +721,8 @@ def _claim_batch_body(
             raise ValueError("electrode_polarity only applies to scope='electrode' claims.")
 
     if not isinstance(claims, list) or not claims:
-        raise ValueError(
-            "claims must be a non-empty list of claim dicts (or pass parts=... for a "
-            "parameter file)."
-        )
-    checked_claims = [
-        _checked_claim(claim, i, default_provenance_class) for i, claim in enumerate(claims)
-    ]
+        raise ValueError("claims must be a non-empty list of claim dicts (or pass parts=... for a parameter file).")
+    checked_claims = [_checked_claim(claim, i, default_provenance_class) for i, claim in enumerate(claims)]
 
     if id is not None:
         if not DATASET_IRI_RE.fullmatch(id):
@@ -738,9 +744,7 @@ def _claim_batch_body(
         entity_id = f"{_PARAMETER_SET_IRI_BASE}{dashed_uid}"
     if id is not None or uid is not None:
         # A pinned uid may not be the one this batch had under spec/.
-        legacy_uid = _seeded_claim_batch_uid(
-            _LEGACY_CLAIM_BATCH_SEED, target_value, scope, name, electrode_polarity
-        )
+        legacy_uid = _seeded_claim_batch_uid(_LEGACY_CLAIM_BATCH_SEED, target_value, scope, name, electrode_polarity)
         if dashed_uid == legacy_uid:
             raise ValueError(_legacy_uid_reused_message(entity_id, legacy_uid))
 
@@ -802,9 +806,7 @@ def _parameter_file_body(
         raise ValueError("cell_spec_id must match https://w3id.org/battinfo/spec/{uid}.")
     if link_field == "cell_instance_id" and not CELL_IRI_RE.fullmatch(str(cell_instance_id)):
         raise ValueError("cell_instance_id must match https://w3id.org/battinfo/cell/{uid}.")
-    link_value: Any = {"cell_spec_id": cell_spec_id, "cell_instance_id": cell_instance_id}.get(
-        link_field, True
-    )
+    link_value: Any = {"cell_spec_id": cell_spec_id, "cell_instance_id": cell_instance_id}.get(link_field, True)
 
     if not isinstance(parameters_sha256, str) or not _SHA256_HEX_RE.fullmatch(parameters_sha256):
         raise ValueError(
@@ -813,16 +815,17 @@ def _parameter_file_body(
         )
     dashed_uid = parameter_file_uid(parameters_sha256)
     entity_id = f"{_PARAMETER_SET_IRI_BASE}{dashed_uid}"
-    given = id if id is not None else (
-        f"{_PARAMETER_SET_IRI_BASE}{_normalized_dashed_uid(uid)}" if uid is not None else None
+    given = (
+        id
+        if id is not None
+        else (f"{_PARAMETER_SET_IRI_BASE}{_normalized_dashed_uid(uid)}" if uid is not None else None)
     )
     legacy_uid = _legacy_parameter_file_uid(parameters_sha256)
     if given is not None and str(given).rsplit("/", 1)[-1] == legacy_uid:
         raise ValueError(_legacy_uid_reused_message(given, legacy_uid))
     if given is not None and given != entity_id:
         raise ValueError(
-            f"a parameter file's IRI derives from its parameters_sha256 ({entity_id}); "
-            f"got {given}. Leave id/uid out."
+            f"a parameter file's IRI derives from its parameters_sha256 ({entity_id}); got {given}. Leave id/uid out."
         )
 
     return {
@@ -888,9 +891,7 @@ def supersede_parameter_set(record: Mapping[str, Any], *, validate: bool = True)
     import copy  # noqa: PLC0415
 
     if not isinstance(record, Mapping) or not isinstance(record.get("parameter_set"), Mapping):
-        raise TypeError(
-            "supersede_parameter_set expects a parameter-set record, a dict with a 'parameter_set' body."
-        )
+        raise TypeError("supersede_parameter_set expects a parameter-set record, a dict with a 'parameter_set' body.")
     doc = record_to_snake_aliases(copy.deepcopy(dict(record)))
     body = doc["parameter_set"]
     old_id = body.get("id")
@@ -924,9 +925,7 @@ def supersede_parameter_set(record: Mapping[str, Any], *, validate: bool = True)
     return doc
 
 
-def template_parameter_set(
-    *, name: str = "Example source - graphite", uid: str | None = None
-) -> dict[str, Any]:
+def template_parameter_set(*, name: str = "Example source - graphite", uid: str | None = None) -> dict[str, Any]:
     """Build a starter canonical parameter-set document for save workflows.
 
     The document has no ``id`` unless *uid* is given; saving it mints the IRI
@@ -1063,40 +1062,42 @@ def query_parameter_sets(
         if not isinstance(body, Mapping):
             continue
         groups = parameter_set_claim_groups(body)
-        records.append({
-            "id": body.get("id"),
-            "short_id": body.get("short_id"),
-            "name": body.get("name"),
-            "material_kind": body.get("material_kind"),
-            "material_spec_id": body.get("material_spec_id"),
-            "cell_spec_id": body.get("cell_spec_id"),
-            "cell_instance_id": body.get("cell_instance_id"),
-            "virtual_cell": bool(body.get("virtual_cell")),
-            "supersedes": body.get("supersedes"),
-            "minted_under_spec": bool(SPEC_IRI_RE.fullmatch(str(body.get("id")))),
-            "scope": body.get("scope"),
-            "material_kinds": sorted({ctx["material_kind"] for ctx, _ in groups if ctx.get("material_kind")}),
-            "material_spec_ids": sorted({
-                ctx["material_spec_id"] for ctx, _ in groups if ctx.get("material_spec_id")
-            }),
-            "parameters": sorted({
-                c.get("parameter")
-                for _, claims in groups
-                for c in claims
-                if isinstance(c, Mapping) and c.get("parameter")
-            }),
-            "origin": origin,
-            "path": str(path),
-            "record": doc,
-        })
+        records.append(
+            {
+                "id": body.get("id"),
+                "short_id": body.get("short_id"),
+                "name": body.get("name"),
+                "material_kind": body.get("material_kind"),
+                "material_spec_id": body.get("material_spec_id"),
+                "cell_spec_id": body.get("cell_spec_id"),
+                "cell_instance_id": body.get("cell_instance_id"),
+                "virtual_cell": bool(body.get("virtual_cell")),
+                "supersedes": body.get("supersedes"),
+                "minted_under_spec": bool(SPEC_IRI_RE.fullmatch(str(body.get("id")))),
+                "scope": body.get("scope"),
+                "material_kinds": sorted({ctx["material_kind"] for ctx, _ in groups if ctx.get("material_kind")}),
+                "material_spec_ids": sorted(
+                    {ctx["material_spec_id"] for ctx, _ in groups if ctx.get("material_spec_id")}
+                ),
+                "parameters": sorted(
+                    {
+                        c.get("parameter")
+                        for _, claims in groups
+                        for c in claims
+                        if isinstance(c, Mapping) and c.get("parameter")
+                    }
+                ),
+                "origin": origin,
+                "path": str(path),
+                "record": doc,
+            }
+        )
 
     filtered: list[dict[str, Any]] = []
     for rec in records:
         if id is not None and rec.get("id") != id:
             continue
-        if short_id_prefix and not str(rec.get("short_id", "")).lower().startswith(
-            short_id_prefix.lower()
-        ):
+        if short_id_prefix and not str(rec.get("short_id", "")).lower().startswith(short_id_prefix.lower()):
             continue
         if not _str_eq(rec.get("name"), name):
             continue
@@ -1115,9 +1116,5 @@ def query_parameter_sets(
         filtered.append(rec)
     if not include_superseded:
         superseded = superseded_parameter_set_ids(rec["record"] for rec in filtered)
-        filtered = [
-            rec
-            for rec in filtered
-            if not (isinstance(rec.get("id"), str) and rec["id"] in superseded)
-        ]
+        filtered = [rec for rec in filtered if not (isinstance(rec.get("id"), str) and rec["id"] in superseded)]
     return _paginate(filtered, limit=limit, offset=offset)

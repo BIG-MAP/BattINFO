@@ -164,7 +164,9 @@ def main() -> int:
             f"unknown_manufacturer={unknown_manufacturer} exceeds max_unknown_manufacturer={args.max_unknown_manufacturer}"
         )
     if unknown_chemistry > args.max_unknown_chemistry:
-        failures.append(f"unknown_chemistry={unknown_chemistry} exceeds max_unknown_chemistry={args.max_unknown_chemistry}")
+        failures.append(
+            f"unknown_chemistry={unknown_chemistry} exceeds max_unknown_chemistry={args.max_unknown_chemistry}"
+        )
     if unknown_positive > args.max_unknown_positive_electrode_basis:
         failures.append(
             "unknown_positive_electrode_basis="
@@ -222,4 +224,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

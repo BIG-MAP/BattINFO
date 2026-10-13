@@ -11,6 +11,7 @@ this test until someone decides which it is.
 The expected sets are authored here, independently of references.py, on
 purpose: a generator must not certify itself (review §2).
 """
+
 from __future__ import annotations
 
 import json
@@ -62,8 +63,7 @@ VALIDATED: set[tuple[str, str]] = {
 # Moving a row out of here requires adding the validation and its tests.
 EXEMPT: dict[tuple[str, str], str] = {
     ("cell-instance.schema.json", "supersedes"): (
-        "lineage pointer — the superseded record may be retired or archived "
-        "outside the current source_root by design"
+        "lineage pointer — the superseded record may be retired or archived outside the current source_root by design"
     ),
     ("dataset.schema.json", "series_id"): (
         "dataset-series backlink — the collection record is published in the "
@@ -78,20 +78,15 @@ EXEMPT: dict[tuple[str, str], str] = {
         "organization tree may reference a parent org that has no record "
         "(publishing a subsidiary must not require describing the parent)"
     ),
-    ("organization.schema.json", "parent_organization"): (
-        "snake_case canon of parentOrganization — same reason"
-    ),
+    ("organization.schema.json", "parent_organization"): ("snake_case canon of parentOrganization — same reason"),
     ("parameter-set.schema.json", "material_spec_id"): (
         "claim target — claims may target specs published elsewhere; targets "
         "are resolved by the downstream resolve cascade, not save-time "
         "reference validation"
     ),
-    ("parameter-set.schema.json", "cell_spec_id"): (
-        "claim target — same policy as material_spec_id"
-    ),
+    ("parameter-set.schema.json", "cell_spec_id"): ("claim target — same policy as material_spec_id"),
     ("parameter-set.schema.json", "cell_instance_id"): (
-        "the physical cell a parameter file was fitted on — a description "
-        "link like cell_spec_id, same policy"
+        "the physical cell a parameter file was fitted on — a description link like cell_spec_id, same policy"
     ),
     ("parameter-set.schema.json", "supersedes"): (
         "lineage pointer, as on cell instances — the earlier parameter file's "

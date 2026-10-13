@@ -5,6 +5,7 @@ emitter — the last "no JSON-LD emitter" gap on the docs pages. These pin the
 new emitters and the convergence rule: a standalone equipment record emits the
 SAME node shape the deposit graph builds for hasTestEquipment targets.
 """
+
 from __future__ import annotations
 
 import sys
@@ -22,8 +23,12 @@ SPEC_IRI = f"https://w3id.org/battinfo/spec/{SPEC_UID}"
 
 def _spec() -> dict:
     return create_equipment_spec(
-        uid=SPEC_UID, name="SkyRC MC3000", manufacturer="SkyRC", model="MC3000",
-        equipment_class="cycler", channel_count=4,
+        uid=SPEC_UID,
+        name="SkyRC MC3000",
+        manufacturer="SkyRC",
+        model="MC3000",
+        equipment_class="cycler",
+        channel_count=4,
         supported_chemistries=["NiMH", "Li-ion"],
         property={"max_current": {"value": 3.0, "unit": "A"}},
     )
@@ -46,8 +51,12 @@ def test_equipment_spec_follows_the_description_pattern() -> None:
 
 def test_equipment_unit_matches_the_deposit_node_shape() -> None:
     unit = create_equipment(
-        uid="bbbb-cccc-dddd-eeee", spec_id=SPEC_IRI, serial_number="MC3K-1",
-        name="Cycler 1", location="Lab B", status="active",
+        uid="bbbb-cccc-dddd-eeee",
+        spec_id=SPEC_IRI,
+        serial_number="MC3K-1",
+        name="Cycler 1",
+        location="Lab B",
+        status="active",
     )
     ld = record_to_jsonld(unit, "equipment")
     assert ld["@type"] == ["BatteryCycler", "prov:Entity"]
@@ -73,8 +82,7 @@ def test_every_emitted_term_resolves_in_the_hosted_context() -> None:
     import json
 
     v1 = json.loads(
-        (ROOT / "src" / "battinfo" / "data" / "context" / "records.context.v1.json")
-        .read_text(encoding="utf-8")
+        (ROOT / "src" / "battinfo" / "data" / "context" / "records.context.v1.json").read_text(encoding="utf-8")
     )["@context"]
 
     def bare_terms(value, out):
@@ -86,7 +94,7 @@ def test_every_emitted_term_resolves_in_the_hosted_context() -> None:
                 if not k.startswith("@") and ":" not in k:
                     out.add(k)
                 if k == "@type":
-                    for t in (v if isinstance(v, list) else [v]):
+                    for t in v if isinstance(v, list) else [v]:
                         if isinstance(t, str) and ":" not in t:
                             out.add(t)
                 else:
@@ -95,7 +103,8 @@ def test_every_emitted_term_resolves_in_the_hosted_context() -> None:
     unit = create_equipment(uid="bbbb-cccc-dddd-eeee", spec_id=SPEC_IRI, serial_number="S1")
     channel = create_channel(
         uid="cccc-dddd-eeee-ffff",
-        equipment_id="https://w3id.org/battinfo/equipment/bbbb-cccc-dddd-eeee", index=1,
+        equipment_id="https://w3id.org/battinfo/equipment/bbbb-cccc-dddd-eeee",
+        index=1,
     )
     for rec, rt in ((_spec(), "equipment-spec"), (unit, "equipment"), (channel, "channel")):
         ld = record_to_jsonld(rec, rt, context="inline")

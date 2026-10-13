@@ -9,6 +9,7 @@ publication-package path (publish_publication_package and
 Workspace.build_publication_package) seeded on the dataset folder's absolute
 URI the same way and now follows the same rule.
 """
+
 from __future__ import annotations
 
 import json
@@ -66,10 +67,19 @@ def test_https_access_url_seeds_as_before(tmp_path: Path) -> None:
     expected = f"https://w3id.org/battinfo/dataset/{stable_uid('::'.join([cell, test, URL, name]))}"
 
     saved = battinfo.save_dataset(
-        battinfo.Dataset(name=name, cell_instance_id=cell, test_id=test, access_url=URL,
-                         license="cc-by-4.0", source={"type": "measurement"}),
-        source_root=tmp_path / "ws" / ".battinfo" / "records", mode="upsert",
-        resolve_references=False, build_jsonld=False, build_html=False,
+        battinfo.Dataset(
+            name=name,
+            cell_instance_id=cell,
+            test_id=test,
+            access_url=URL,
+            license="cc-by-4.0",
+            source={"type": "measurement"},
+        ),
+        source_root=tmp_path / "ws" / ".battinfo" / "records",
+        mode="upsert",
+        resolve_references=False,
+        build_jsonld=False,
+        build_html=False,
     )
     assert saved["id"] == expected
 
@@ -85,10 +95,18 @@ def test_collection_iri_from_https_access_url_is_unchanged(tmp_path: Path) -> No
     name = "Graphite half-cell pOCV collection"
     expected = f"https://w3id.org/battinfo/dataset/{stable_uid('::'.join(['unknown-cell', '', URL, name]))}"
     saved = battinfo.save_dataset(
-        battinfo.Dataset(name=name, additional_type=["DatasetSeries"], access_url=URL,
-                         license="cc-by-4.0", source={"type": "measurement"}),
-        source_root=tmp_path / "records", mode="upsert",
-        validation_policy="strict", build_jsonld=False, build_html=False,
+        battinfo.Dataset(
+            name=name,
+            additional_type=["DatasetSeries"],
+            access_url=URL,
+            license="cc-by-4.0",
+            source={"type": "measurement"},
+        ),
+        source_root=tmp_path / "records",
+        mode="upsert",
+        validation_policy="strict",
+        build_jsonld=False,
+        build_html=False,
     )
     assert saved["id"] == expected
 
@@ -99,10 +117,18 @@ def test_save_dataset_into_a_workspace_agrees_with_the_workspace(tmp_path: Path)
     ids = _build(root)
     data_uri = (root / "bdf" / "C1.bdf.csv").resolve().as_uri()
     saved = battinfo.save_dataset(
-        battinfo.Dataset(name="C1 data", cell_instance_id=ids["cell"][0], test_id=ids["test"][0],
-                         access_url=data_uri, source={"type": "measurement"}),
-        source_root=root / ".battinfo" / "records", mode="upsert",
-        resolve_references=False, build_jsonld=False, build_html=False,
+        battinfo.Dataset(
+            name="C1 data",
+            cell_instance_id=ids["cell"][0],
+            test_id=ids["test"][0],
+            access_url=data_uri,
+            source={"type": "measurement"},
+        ),
+        source_root=root / ".battinfo" / "records",
+        mode="upsert",
+        resolve_references=False,
+        build_jsonld=False,
+        build_html=False,
     )
     assert saved["id"] == ids["dataset"][0]
 
@@ -121,10 +147,15 @@ def test_locator_takes_the_relative_path_or_the_folder_and_name(tmp_path: Path) 
     assert dataset_locator_seed(dataset_path="/ext/run1/data.csv") == "run1/data.csv"
     # An explicit remote URL wins over a local path, access_url before download_url.
     assert dataset_locator_seed(access_url=URL, dataset_path=inside, workspace_root=root) == URL
-    assert dataset_locator_seed(
-        access_url=inside.resolve().as_uri(), download_url="https://example.org/C1.csv",
-        dataset_path=inside, workspace_root=root,
-    ) == "https://example.org/C1.csv"
+    assert (
+        dataset_locator_seed(
+            access_url=inside.resolve().as_uri(),
+            download_url="https://example.org/C1.csv",
+            dataset_path=inside,
+            workspace_root=root,
+        )
+        == "https://example.org/C1.csv"
+    )
     assert dataset_locator_seed() == ""
 
 
@@ -156,11 +187,19 @@ def test_publication_package_agrees_with_save_dataset_on_a_remote_url(tmp_path: 
     """With a remote access URL the package mints the IRI save_dataset mints for the same fields."""
     published = _publish_package(tmp_path / "package", name="C1 data", access_url=URL)
     saved = battinfo.save_dataset(
-        battinfo.Dataset(name="C1 data", cell_instance_id=published["cell_instance_id"],
-                         test_id=published["test_id"], access_url=URL, license="cc-by-4.0",
-                         source={"type": "measurement"}),
-        source_root=tmp_path / "records", mode="upsert",
-        resolve_references=False, build_jsonld=False, build_html=False,
+        battinfo.Dataset(
+            name="C1 data",
+            cell_instance_id=published["cell_instance_id"],
+            test_id=published["test_id"],
+            access_url=URL,
+            license="cc-by-4.0",
+            source={"type": "measurement"},
+        ),
+        source_root=tmp_path / "records",
+        mode="upsert",
+        resolve_references=False,
+        build_jsonld=False,
+        build_html=False,
     )
     assert published["dataset_id"] == saved["id"]
 
@@ -188,10 +227,19 @@ def _save_outside(tmp_path: Path, folder: str) -> dict:
     data.parent.mkdir(parents=True, exist_ok=True)
     data.write_text(CSV, encoding="utf-8")
     return battinfo.save_dataset(
-        battinfo.Dataset(name="data", path=str(data), access_url=data.resolve().as_uri(), cell_instance_id="https://w3id.org/battinfo/cell/2435-kc9w-g9q0-1xsm",
-                         test_id="https://w3id.org/battinfo/test/y4gj-dvk5-e8x4-3y3t", license="cc-by-4.0",
-                         source={"type": "measurement"}),
-        source_root=tmp_path / "records", resolve_references=False, build_jsonld=False, build_html=False,
+        battinfo.Dataset(
+            name="data",
+            path=str(data),
+            access_url=data.resolve().as_uri(),
+            cell_instance_id="https://w3id.org/battinfo/cell/2435-kc9w-g9q0-1xsm",
+            test_id="https://w3id.org/battinfo/test/y4gj-dvk5-e8x4-3y3t",
+            license="cc-by-4.0",
+            source={"type": "measurement"},
+        ),
+        source_root=tmp_path / "records",
+        resolve_references=False,
+        build_jsonld=False,
+        build_html=False,
     )
 
 
@@ -221,12 +269,20 @@ def test_save_dataset_with_a_relative_path_mints_one_iri_from_any_directory(tmp_
         saved = battinfo.save_dataset(
             # access_url as a naive caller derives it, from the current directory; the
             # IRI must not follow it.
-            battinfo.Dataset(name="C01 data", path="data/C01.csv", license="cc-by-4.0",
-                             access_url=Path("data/C01.csv").resolve().as_uri(),
-                             cell_instance_id="https://w3id.org/battinfo/cell/2435-kc9w-g9q0-1xsm",
-                             source={"type": "measurement"}),
-            source_root=root / ".battinfo" / "records", mode="upsert", validate=False,
-            resolve_references=False, build_jsonld=False, build_html=False,
+            battinfo.Dataset(
+                name="C01 data",
+                path="data/C01.csv",
+                license="cc-by-4.0",
+                access_url=Path("data/C01.csv").resolve().as_uri(),
+                cell_instance_id="https://w3id.org/battinfo/cell/2435-kc9w-g9q0-1xsm",
+                source={"type": "measurement"},
+            ),
+            source_root=root / ".battinfo" / "records",
+            mode="upsert",
+            validate=False,
+            resolve_references=False,
+            build_jsonld=False,
+            build_html=False,
         )
         ids.append(saved["id"])
     assert ids[0] == ids[1]
@@ -235,6 +291,7 @@ def test_save_dataset_with_a_relative_path_mints_one_iri_from_any_directory(tmp_
 def test_colliding_datasets_are_re_minted_the_same_in_any_folder(tmp_path: Path) -> None:
     """Two datasets on one file and title collide; the content-seeded re-mint that keeps
     them apart names the file by its locator, so it does not move with the folder."""
+
     def build(root: Path) -> list[str]:
         engine = Workspace(root=root)
         data = root / "bdf" / "C1.bdf.csv"

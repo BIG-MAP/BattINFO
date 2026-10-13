@@ -5,6 +5,7 @@ public, top-level API (``from battinfo import ...``), following the documented w
 double as (a) a regression guard on the whole spine and (b) the concrete evidence of which public
 surface the real workflows actually depend on. All offline and deterministic.
 """
+
 from __future__ import annotations
 
 import json
@@ -20,7 +21,10 @@ def test_quickstart_product_publish(tmp_path: Path) -> None:
     from battinfo import CellSpec, publish
 
     cell_spec = CellSpec(
-        manufacturer="Panasonic", model="NCR18650B", format="cylindrical", chemistry="Li-ion",
+        manufacturer="Panasonic",
+        model="NCR18650B",
+        format="cylindrical",
+        chemistry="Li-ion",
         size_code="R18650",
         nominal_capacity={"value": 3.4, "unit": "Ah"},
         nominal_voltage={"value": 3.6, "unit": "V"},
@@ -43,10 +47,12 @@ def test_full_chain_and_type_stacking(tmp_path: Path) -> None:
 
     w = Workspace(root=tmp_path / "workspace")
     spec = w.cell_spec(
-        manufacturer="Panasonic", model="NCR18650B", format="cylindrical", chemistry="Li-ion",
+        manufacturer="Panasonic",
+        model="NCR18650B",
+        format="cylindrical",
+        chemistry="Li-ion",
         size_code="R18650",
-        specs={"nominal_capacity": {"value": 3.4, "unit": "Ah"},
-               "nominal_voltage": {"value": 3.6, "unit": "V"}},
+        specs={"nominal_capacity": {"value": 3.4, "unit": "Ah"}, "nominal_voltage": {"value": 3.6, "unit": "V"}},
     )
     cell = w.cell(spec, serial_number="FAC-001")
     test = w.test(cell, type="capacity_check", instrument="Maccor 4200")
@@ -89,7 +95,11 @@ def test_invalid_spec_fails_closed_at_save(tmp_path: Path) -> None:
 
     w = Workspace(root=tmp_path / "workspace")
     w.cell_spec(
-        manufacturer="Acme", model="X", format="coin", chemistry="Li-ion", size_code="R2032",
+        manufacturer="Acme",
+        model="X",
+        format="coin",
+        chemistry="Li-ion",
+        size_code="R2032",
         specs={"nominal_capacity": {"value": 2.5, "unit": "furlongs"}},  # nonsense unit
     )
     with pytest.raises(Exception):  # strict save must reject an implausible unit, not persist it

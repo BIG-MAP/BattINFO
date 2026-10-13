@@ -11,6 +11,7 @@ Install dependencies with::
 
 which pulls in: batterydf, matplotlib, plotly.
 """
+
 from __future__ import annotations
 
 import json
@@ -110,6 +111,7 @@ def process_timeseries_csv(
 
 # ── Internal helpers ──────────────────────────────────────────────────────────
 
+
 def _read_bdf_pandas(source: Path, *, validate: bool = False):
     """Read a cycler file with ``bdf.read`` and return ``(pandas_df, metadata)``.
 
@@ -137,9 +139,7 @@ def _read_bdf_pandas(source: Path, *, validate: bool = False):
         read_kwargs["lazy"] = False
 
     with _warnings.catch_warnings():
-        _warnings.filterwarnings(
-            "ignore", message="tz defaulted to UTC", category=UserWarning
-        )
+        _warnings.filterwarnings("ignore", message="tz defaulted to UTC", category=UserWarning)
         frame, metadata = bdf.read(source, **read_kwargs)
     return frame.to_pandas(), metadata
 
@@ -189,6 +189,7 @@ def _read_bdf_csv(path: Path):
     """Read a BDF CSV or Parquet file into a DataFrame, returning None on failure."""
     try:
         import pandas as pd
+
         if str(path).lower().endswith(".parquet"):
             return pd.read_parquet(path)
         return pd.read_csv(path)
@@ -225,7 +226,9 @@ def generate_dataset_plots(
     out_dir.mkdir(parents=True, exist_ok=True)
     stem = data_path.stem.replace(".bdf", "")
     plot_title = title or stem
-    json_path = _make_interactive_plot(data_path, out_dir, stem, plot_title, xunit, yunit, yyunit, max_points=max_points)
+    json_path = _make_interactive_plot(
+        data_path, out_dir, stem, plot_title, xunit, yunit, yyunit, max_points=max_points
+    )
     png_path = _make_static_plot(data_path, out_dir, stem, plot_title, xunit, yunit, yyunit, max_points=max_points)
     return json_path, png_path
 
@@ -310,9 +313,11 @@ def convert_raw_to_bdf(raw_path: Path) -> tuple[Path | None, str | None]:
     try:
         import contextlib as _cl
         import io as _io
+
         df = None
         if out_path.exists():
             import pandas as pd
+
             try:
                 df = pd.read_parquet(out_path)
             except Exception:
@@ -344,6 +349,7 @@ def _make_static_plot(
     """Generate a static PNG via bdf.plot; return output path or None."""
     try:
         import matplotlib
+
         matplotlib.use("Agg")  # non-interactive backend
         import bdf
     except ImportError:
@@ -381,10 +387,12 @@ def _make_static_plot(
             show=False,
         )
         import matplotlib.pyplot as plt
+
         plt.close("all")
         return out_path if out_path.exists() else None
     except Exception:
         import matplotlib.pyplot as plt
+
         plt.close("all")
         return None
 

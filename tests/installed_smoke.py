@@ -62,16 +62,22 @@ def main() -> None:
             name="Installed smoke dataset",
         )
 
-        publish_result = battinfo.publish_publication_package(cell_spec=cell_spec, cell_instance=cell, test=test, dataset=dataset)
+        publish_result = battinfo.publish_publication_package(
+            cell_spec=cell_spec, cell_instance=cell, test=test, dataset=dataset
+        )
         publication_payload = json.loads(Path(publish_result["publish_path"]).read_text(encoding="utf-8"))
         graph = publication_payload["@graph"]
         cell_spec_node = next(node for node in graph if node.get("@id") == publish_result["cell_spec_id"])
         cell_instance_node = next(node for node in graph if node.get("@id") == publish_result["cell_instance_id"])
-        cell_spec_types = cell_spec_node["@type"] if isinstance(cell_spec_node["@type"], list) else [cell_spec_node["@type"]]
+        cell_spec_types = (
+            cell_spec_node["@type"] if isinstance(cell_spec_node["@type"], list) else [cell_spec_node["@type"]]
+        )
         assert "BatteryCellSpecification" in cell_spec_types
         assert "schema:CreativeWork" in cell_spec_types
         assert publish_result["cell_spec_id"] not in (
-            cell_instance_node["@type"] if isinstance(cell_instance_node["@type"], list) else [cell_instance_node["@type"]]
+            cell_instance_node["@type"]
+            if isinstance(cell_instance_node["@type"], list)
+            else [cell_instance_node["@type"]]
         )
         assert cell_instance_node["hasDescription"]["@id"] == publish_result["cell_spec_id"]
         test_node = next(node for node in graph if node.get("@id") == publish_result["test_id"])
@@ -89,5 +95,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-

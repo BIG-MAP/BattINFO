@@ -169,6 +169,7 @@ def test_semantic_validation_rejects_size_code_prefix_mismatch_for_format() -> N
     assert not report.ok
     assert any(issue.code == "semantic.size_code_prefix_mismatch" for issue in report.errors)
 
+
 # ── #299: unmapped property keys surface on COMPONENT records too ─────────────
 
 
@@ -234,9 +235,7 @@ def test_property_unmapped_message_matches_transform_reality() -> None:
 # drifted the same way for eight more keys.
 
 
-@pytest.mark.parametrize(
-    "key", ["areal_capacity", "nominal_areal_capacity", "reversible_areal_capacity"]
-)
+@pytest.mark.parametrize("key", ["areal_capacity", "nominal_areal_capacity", "reversible_areal_capacity"])
 def test_electrode_design_values_do_not_warn(key: str) -> None:
     """E5: the electrode emitter maps these to AreicCapacity; nothing may warn."""
     rec = {
@@ -302,4 +301,3 @@ def test_validator_known_keys_equal_the_emitter_registry() -> None:
 
     expected = {key for table in COMPONENT_PROPERTY_TERM_TABLES for key in table}
     assert set(_component_property_terms()) == expected
-

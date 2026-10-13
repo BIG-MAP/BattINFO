@@ -100,21 +100,23 @@ def _default_manifest_payload(
     source_version: str | None = None,
     license: str | None = None,
 ) -> dict[str, Any]:
-    return _drop_none({
-        "resource_type": resource_type or "cell-instance",
-        "type_record": str(type_record) if type_record is not None else None,
-        "resource_iri": resource_iri,
-        "resource_name": resource_name,
-        "workspace_id": workspace_id,
-        "publisher_id": publisher_id,
-        "source_version": source_version,
-        "license": license,
-        "rules": {
-            "photo_glob": list(DEFAULT_PHOTO_GLOBS),
-            "timeseries_glob": list(DEFAULT_TIMESERIES_GLOBS),
-            "test_kind_from_filename": dict(DEFAULT_TEST_KIND_FROM_FILENAME),
-        },
-    })
+    return _drop_none(
+        {
+            "resource_type": resource_type or "cell-instance",
+            "type_record": str(type_record) if type_record is not None else None,
+            "resource_iri": resource_iri,
+            "resource_name": resource_name,
+            "workspace_id": workspace_id,
+            "publisher_id": publisher_id,
+            "source_version": source_version,
+            "license": license,
+            "rules": {
+                "photo_glob": list(DEFAULT_PHOTO_GLOBS),
+                "timeseries_glob": list(DEFAULT_TIMESERIES_GLOBS),
+                "test_kind_from_filename": dict(DEFAULT_TEST_KIND_FROM_FILENAME),
+            },
+        }
+    )
 
 
 def _pick_first(*values: Any) -> Any:
@@ -206,9 +208,7 @@ def _distribution_public_url(package_path: str | None, artifact_base_url: str | 
 def _normalize_resource_type(resource_type: str | None) -> str:
     resolved = (resource_type or "cell-instance").strip().lower()
     if resolved != "cell-instance":
-        raise NotImplementedError(
-            f"resource_type '{resolved}' is not implemented yet. Supported today: cell-instance."
-        )
+        raise NotImplementedError(f"resource_type '{resolved}' is not implemented yet. Supported today: cell-instance.")
     return resolved
 
 
@@ -340,11 +340,10 @@ def inspect_ingest_root(
     return {
         "status": "ok",
         "ingest_root": str(root),
-        "manifest_path": str((_as_path(manifest_path) if manifest_path is not None else (root / DEFAULT_INGEST_MANIFEST)))
-        if (
-            manifest_path is not None
-            or (root / DEFAULT_INGEST_MANIFEST).exists()
+        "manifest_path": str(
+            (_as_path(manifest_path) if manifest_path is not None else (root / DEFAULT_INGEST_MANIFEST))
         )
+        if (manifest_path is not None or (root / DEFAULT_INGEST_MANIFEST).exists())
         else None,
         "resource_type": str(resolved_resource_type),
         "type_record": str(resolved_type_record) if resolved_type_record is not None else None,
@@ -426,11 +425,7 @@ def _prepare_live_submission_payload(
     if cell_resource is not None and all_dataset_resources:
         related_resources = cell_resource.get("related_resources")
         if isinstance(related_resources, list):
-            existing_ids = {
-                item.get("source_local_id")
-                for item in related_resources
-                if isinstance(item, dict)
-            }
+            existing_ids = {item.get("source_local_id") for item in related_resources if isinstance(item, dict)}
             for dataset_resource in all_dataset_resources:
                 source_local_id = dataset_resource.get("source_local_id")
                 if isinstance(source_local_id, str) and source_local_id not in existing_ids:
@@ -613,7 +608,9 @@ def build_ingest_workspace(
     for photo_entry in [item for item in inspection["datasets"] if item["role"] == "photo"]:
         photo_path = Path(str(photo_entry["path"]))
         created_photo_tests += 1
-        test_name = "Instance photography" if created_photo_tests == 1 else f"Instance photography {created_photo_tests}"
+        test_name = (
+            "Instance photography" if created_photo_tests == 1 else f"Instance photography {created_photo_tests}"
+        )
         photo_test = workspace.test(
             cell,
             kind="other",
@@ -767,7 +764,7 @@ def _upload_workspace_artifacts(
                     continue
                 key = package_path.replace("\\", "/").lstrip("/")
                 if key.startswith("artifacts/"):
-                    key = key[len("artifacts/"):]
+                    key = key[len("artifacts/") :]
                 filename = Path(key).name
                 matches = list(ingest_root.rglob(filename))
                 if not matches:
@@ -802,23 +799,27 @@ def _upload_workspace_artifacts(
                 if processed.bdf_path is not None and processed.bdf_path.exists():
                     bdf_key = f"timeseries/bdf/{short_id}/{processed.bdf_path.name}"
                     bdf_url = uploader(bdf_key, processed.bdf_path)
-                    extra_distributions.append({
-                        "title": f"{distribution.get('title', filename)} (BDF)",
-                        "access_url": bdf_url,
-                        "media_type": "text/csv",
-                        "role": "bdf",
-                    })
+                    extra_distributions.append(
+                        {
+                            "title": f"{distribution.get('title', filename)} (BDF)",
+                            "access_url": bdf_url,
+                            "media_type": "text/csv",
+                            "role": "bdf",
+                        }
+                    )
 
                 # Static PNG → timeseries/plot/<short_id>/<stem>.png
                 if processed.plot_png_path is not None and processed.plot_png_path.exists():
                     png_key = f"timeseries/plot/{short_id}/{processed.plot_png_path.name}"
                     png_url = uploader(png_key, processed.plot_png_path)
-                    extra_distributions.append({
-                        "title": f"{distribution.get('title', filename)} (plot)",
-                        "access_url": png_url,
-                        "media_type": "image/png",
-                        "role": "plot_static",
-                    })
+                    extra_distributions.append(
+                        {
+                            "title": f"{distribution.get('title', filename)} (plot)",
+                            "access_url": png_url,
+                            "media_type": "image/png",
+                            "role": "plot_static",
+                        }
+                    )
                     # Set as preview image on the dataset's semantic_payload
                     semantic_payload = resource.get("semantic_payload")
                     if isinstance(semantic_payload, dict):
@@ -846,12 +847,14 @@ def _upload_workspace_artifacts(
                 if processed.plot_json_path is not None and processed.plot_json_path.exists():
                     json_key = f"timeseries/plot/{short_id}/{processed.plot_json_path.name}"
                     json_url = uploader(json_key, processed.plot_json_path)
-                    extra_distributions.append({
-                        "title": f"{distribution.get('title', filename)} (interactive)",
-                        "access_url": json_url,
-                        "media_type": "application/json",
-                        "role": "plot_data",
-                    })
+                    extra_distributions.append(
+                        {
+                            "title": f"{distribution.get('title', filename)} (interactive)",
+                            "access_url": json_url,
+                            "media_type": "application/json",
+                            "role": "plot_data",
+                        }
+                    )
 
             distributions.extend(extra_distributions)
             if resource.get("resource_type") == "dataset":
@@ -951,8 +954,12 @@ def publish_ingest_workspace(
     response_payload = submit_result.get("response") or {}
     canonical_id_map = response_payload.get("canonical_id_map") if isinstance(response_payload, dict) else {}
     resources = submission_payload.get("resources", [])
-    cell_resource = next((item for item in resources if isinstance(item, dict) and item.get("resource_type") == "cell"), None)
-    dataset_resources = [item for item in resources if isinstance(item, dict) and item.get("resource_type") == "dataset"]
+    cell_resource = next(
+        (item for item in resources if isinstance(item, dict) and item.get("resource_type") == "cell"), None
+    )
+    dataset_resources = [
+        item for item in resources if isinstance(item, dict) and item.get("resource_type") == "dataset"
+    ]
     cell_source_local_id = cell_resource.get("source_local_id") if isinstance(cell_resource, dict) else None
     cell_canonical_id = canonical_id_map.get(cell_source_local_id) if isinstance(canonical_id_map, dict) else None
 
@@ -981,7 +988,9 @@ def publish_ingest_workspace(
         },
         "platform": {
             "url": page_url,
-        } if page_url is not None else None,
+        }
+        if page_url is not None
+        else None,
         "canonical_ids": {
             "cell": cell_canonical_id,
             "datasets": dataset_canonical_ids,

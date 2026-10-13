@@ -4,6 +4,7 @@ The IRI names the parameters, not the bytes (IDENTIFIER_POLICY 6.3), so the
 canonical form has to agree with every other JCS implementation: the number
 vectors are RFC 8785 Appendix B, and the worked example is section 3.2.4.
 """
+
 from __future__ import annotations
 
 import json
@@ -64,12 +65,12 @@ def test_appendix_b_nan_and_infinity_are_refused(bits: str) -> None:
 
 
 def test_section_3_2_4_example() -> None:
-    source = r'''{
+    source = r"""{
       "numbers": [333333333.33333329, 1E30, 4.50, 2e-3, 0.000000000000000000000000001],
       "string": "\u20ac$\u000F\u000aA'\u0042\u0022\u005c\\\"\/",
       "literals": [null, true, false]
-    }'''
-    expected = r'''{"literals":[null,true,false],"numbers":[333333333.3333333,1e+30,4.5,0.002,1e-27],"string":"€$\u000f\nA'B\"\\\\\"/"}'''
+    }"""
+    expected = r"""{"literals":[null,true,false],"numbers":[333333333.3333333,1e+30,4.5,0.002,1e-27],"string":"€$\u000f\nA'B\"\\\\\"/"}"""
     assert canonical_json(json.loads(source)) == expected
     assert canonical_json_bytes(json.loads(source)) == expected.encode("utf-8")
 
@@ -120,7 +121,9 @@ def test_member_order_and_whitespace_do_not_matter() -> None:
 
 def test_strings_get_minimal_escaping() -> None:
     value = "Tops\N{LATIN SMALL LETTER O WITH STROKE}e \N{EURO SIGN} \N{LINE SEPARATOR}" + '"\\\n\t\x1f\x7f/'
-    expected = '"Tops\N{LATIN SMALL LETTER O WITH STROKE}e \N{EURO SIGN} \N{LINE SEPARATOR}' + r'\"\\\n\t\u001f' + '\x7f/"'
+    expected = (
+        '"Tops\N{LATIN SMALL LETTER O WITH STROKE}e \N{EURO SIGN} \N{LINE SEPARATOR}' + r"\"\\\n\t\u001f" + '\x7f/"'
+    )
     assert canonical_json(value) == expected
     # Non-ASCII stays literal and is encoded as UTF-8.
     assert canonical_json_bytes("\N{EURO SIGN}") == b'"\xe2\x82\xac"'

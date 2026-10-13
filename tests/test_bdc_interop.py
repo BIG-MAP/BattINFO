@@ -11,6 +11,7 @@ Two-way mapping with the BDC dataset registry
 Fixtures are trimmed real canonical records spanning the formats and a software
 record (skipped) — see tests/fixtures/interop/bdc/PROVENANCE.md.
 """
+
 from __future__ import annotations
 
 import json
@@ -38,19 +39,25 @@ def _record(name: str) -> dict:
 
 
 def test_bdc_warns_on_non_numeric_capacity() -> None:
-    rec = import_bdc_record({
-        "id": "bdc_x", "categories": ["dataset"],
-        "overview": {"battery_model": "X", "manufacturer": "M", "case": "cylindrical"},
-        "electrodes": {"positive": "NMC", "negative": "graphite"},
-        "reported_values": {"rated_capacity_Ah": "45"},  # present but not a usable number
-    }, validate=False)
+    rec = import_bdc_record(
+        {
+            "id": "bdc_x",
+            "categories": ["dataset"],
+            "overview": {"battery_model": "X", "manufacturer": "M", "case": "cylindrical"},
+            "electrodes": {"positive": "NMC", "negative": "graphite"},
+            "reported_values": {"rated_capacity_Ah": "45"},  # present but not a usable number
+        },
+        validate=False,
+    )
     assert rec is not None
     assert any("rated_capacity_Ah" in w for w in rec.warnings), "a dropped capacity was not surfaced"
 
 
 def test_batch_import_bdc_aggregates_warnings(tmp_path: Path) -> None:
     rec = {
-        "id": "bdc_bad", "record_status": "active", "categories": ["dataset"],
+        "id": "bdc_bad",
+        "record_status": "active",
+        "categories": ["dataset"],
         "overview": {"battery_model": "X", "manufacturer": "M", "case": "cylindrical"},
         "electrodes": {"positive": "NMC", "negative": "graphite"},
         "reported_values": {"rated_capacity_Ah": "not-a-number"},
@@ -76,11 +83,11 @@ def test_batch_import_skips_software_and_builds_chains() -> None:
 def test_case_maps_to_cell_format() -> None:
     pkg = batch_import_bdc(FX, validate=False)
     fmt = {imp.bdc_id: imp.cell_spec["cell_spec"]["cell_format"] for imp in pkg.imports}
-    assert fmt["bdc_000001"] == "coin"        # CoinCase
+    assert fmt["bdc_000001"] == "coin"  # CoinCase
     assert fmt["bdc_000005"] == "cylindrical"  # R18650
-    assert fmt["bdc_000004"] == "pouch"        # PouchCase
-    assert fmt["bdc_000002"] == "prismatic"    # PrismaticCase
-    assert fmt["bdc_000014"] == "unknown"      # Unknown
+    assert fmt["bdc_000004"] == "pouch"  # PouchCase
+    assert fmt["bdc_000002"] == "prismatic"  # PrismaticCase
+    assert fmt["bdc_000014"] == "unknown"  # Unknown
     # the R-code becomes the size code
     r18650 = next(i for i in pkg.imports if i.bdc_id == "bdc_000005")
     assert r18650.cell_spec["cell_spec"]["size_code"] == "R18650"
@@ -121,8 +128,7 @@ def test_all_iris_unique() -> None:
 def test_import_is_idempotent() -> None:
     a = [i.bdc_id for i in batch_import_bdc(FX, validate=False).imports]
     iris = lambda pkg: sorted(  # noqa: E731
-        b["id"] for r in pkg.records() for b in r.values()
-        if isinstance(b, dict) and isinstance(b.get("id"), str)
+        b["id"] for r in pkg.records() for b in r.values() if isinstance(b, dict) and isinstance(b.get("id"), str)
     )
     assert iris(batch_import_bdc(FX, validate=False)) == iris(batch_import_bdc(FX, validate=False))
     assert a  # sanity
@@ -148,9 +154,7 @@ def test_to_bdc_record_converts_mah_capacity_to_ah() -> None:
 
 
 def test_to_bdc_record_preserves_ah_capacity_and_drops_unknown_units() -> None:
-    ah = to_bdc_record(
-        {"cell_spec": {"model": "Y"}, "properties": {"nominal_capacity": {"value": 2.5, "unit": "Ah"}}}
-    )
+    ah = to_bdc_record({"cell_spec": {"model": "Y"}, "properties": {"nominal_capacity": {"value": 2.5, "unit": "Ah"}}})
     assert ah["reported_values"]["rated_capacity_Ah"] == 2.5
 
     # An unconvertible unit is omitted rather than written verbatim under an Ah key.

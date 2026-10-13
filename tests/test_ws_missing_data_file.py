@@ -5,6 +5,7 @@ in a folder that had no such file, with no error or warning; only the deposit
 preview complained later, about something else. A missing data file now raises
 FileNotFoundError naming the path it resolved to, before any record is created.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
