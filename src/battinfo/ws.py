@@ -33,7 +33,9 @@ if TYPE_CHECKING:
     from battinfo._workspace import Workspace
 
 from battinfo._jsonio import atomic_write_text as _atomic_write_text
+from battinfo._jsonio import chmod_owner_only as _chmod_owner_only
 from battinfo._jsonio import read_json as _read_json
+from battinfo._jsonio import write_private_text as _write_private_text
 from battinfo._util import _now_iso, is_dataset_series, local_file_references
 from battinfo._util import local_files_message as _local_files_message
 from battinfo.entities import entity_id_from_doc, kind_for_type, record_set_dirs, save_entity_path
@@ -1946,6 +1948,9 @@ class AuthoringWorkspace:
         order in which a credential is looked up; :meth:`credentials_status`
         shows where each one comes from.
 
+        The file is readable by its owner only (mode 0600; Windows ignores the
+        mode).  A file that already exists is kept as it is, apart from that mode.
+
         Example::
 
             ws.setup()
@@ -1954,10 +1959,10 @@ class AuthoringWorkspace:
         self._ensure_gitignore()
         cred_path = self._credentials_path()
         if cred_path.exists():
+            _chmod_owner_only(cred_path)
             print(f"Credentials file already exists: {cred_path}")
         else:
-            cred_path.parent.mkdir(parents=True, exist_ok=True)
-            cred_path.write_text(_CREDENTIALS_TEMPLATE, encoding="utf-8")
+            _write_private_text(cred_path, _CREDENTIALS_TEMPLATE)
             self._reload_file_credentials()
             print(f"Created: {cred_path}")
         print("\n  Next: get an API key (no self-service page yet - request one from")
@@ -1998,14 +2003,9 @@ class AuthoringWorkspace:
             out.append(line)
         for key, value in remaining.items():
             out.append(f"{key:22} = {value}")
-        path.write_text("\n".join(out) + "\n", encoding="utf-8")
-        # A-6: this file holds API keys / R2 secrets / Zenodo tokens — restrict to owner-only.
-        # Best-effort: a no-op on Windows and filesystems without POSIX permission bits.
-        try:
-            import os
-            os.chmod(path, 0o600)
-        except OSError:
-            pass
+        # This file holds API keys, R2 secrets and Zenodo tokens: owner-only from
+        # the first byte, and a failed write keeps the old file.
+        _write_private_text(path, "\n".join(out) + "\n")
         self._reload_file_credentials()
         return path
 

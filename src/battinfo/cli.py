@@ -3552,9 +3552,10 @@ def batch_package(
     After packaging, upload with:
       battinfo batch upload <staging-dir> --token $ZENODO_TOKEN --sandbox
     """
-    from battinfo.config import load_user_config, resolve_creators
+    from battinfo.config import resolve_creators
     from battinfo.contribution import package_batch
 
+    cfg = _user_config_or_exit(json_output=json_output)
     creators = resolve_creators(creator)
     if not creators:
         typer.echo(
@@ -3564,7 +3565,6 @@ def batch_package(
         )
         raise typer.Exit(code=1)
 
-    cfg = load_user_config()
     effective_community = None if no_community else (community or cfg.get("community", "battinfo-reference"))
 
     try:
@@ -3638,9 +3638,10 @@ def batch_upload(
     The deposit URL is printed at the end -- open it to review and publish.
     """
 
-    from battinfo.config import load_user_config, resolve_creators, resolve_zenodo_token
+    from battinfo.config import resolve_creators, resolve_zenodo_token
     from battinfo.zenodo import upload_zenodo_package
 
+    cfg = _user_config_or_exit(json_output=json_output)
     resolved_token = resolve_zenodo_token(token)
     if not resolved_token:
         typer.echo(
@@ -3659,7 +3660,6 @@ def batch_upload(
         )
         raise typer.Exit(code=1)
 
-    cfg = load_user_config()
     effective_community = None if no_community else (community or cfg.get("community", "battinfo-reference"))
 
     if not json_output:
@@ -3747,11 +3747,11 @@ def push(
     """
     from rich.console import Console
 
-    from battinfo.config import load_user_config, resolve_creators, resolve_zenodo_token
+    from battinfo.config import resolve_creators, resolve_zenodo_token
     from battinfo.contribution import BATCH_MANIFEST, _group_files_by_cell, push_batch
 
     console = Console(highlight=False)
-    cfg = load_user_config()
+    cfg = _user_config_or_exit(json_output=json_output)
 
     def _err(msg: str) -> None:
         if json_output:
@@ -3860,6 +3860,24 @@ def push(
 
 # ── Config commands ────────────────────────────────────────────────────────────
 
+def _user_config_or_exit(*, json_output: bool = False) -> dict[str, Any]:
+    """The values in ~/.battinfo/config.yaml, or exit with an error naming it when it cannot be read.
+
+    For the commands that take defaults (creator, Zenodo token, community) from
+    the file: without them they would build or deposit the wrong package.
+    """
+    from battinfo.config import UserConfigError, load_user_config
+
+    try:
+        return load_user_config(strict=True)
+    except UserConfigError as exc:
+        if json_output:
+            typer.echo(json.dumps({"ok": False, "error": str(exc)}))
+        else:
+            typer.echo(f"Error: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
+
+
 @config_app.command("set")
 def config_set(
     key: str = typer.Argument(..., help="Config key: creator, license, community, zenodo_token."),
@@ -3873,29 +3891,45 @@ def config_set(
       battinfo config set creator "Clark, Simon; SINTEF | Smith, Jane; NTNU"
       battinfo config set license CC-BY-4.0
       battinfo config set community battinfo-reference
+
+    A secret, such as zenodo_token, is echoed with all but its last four
+    characters hidden. A config file that is not valid YAML is left as it is:
+    fix it by hand first.
     """
-    from battinfo.config import USER_CONFIG_PATH, set_user_config_value
+    from battinfo.config import USER_CONFIG_PATH, _is_secret_key, _masked, set_user_config_value
     try:
         set_user_config_value(key, value)
-        typer.echo(f"Set {key} = {value!r}  (saved to {USER_CONFIG_PATH})")
     except ValueError as exc:
         typer.echo(f"Error: {exc}", err=True)
         raise typer.Exit(code=1) from exc
+    except OSError as exc:
+        typer.echo(f"Error: could not write {USER_CONFIG_PATH}: {exc.strerror or exc}", err=True)
+        raise typer.Exit(code=1) from exc
+    shown = _masked(value) if _is_secret_key(key) else repr(value)
+    typer.echo(f"Set {key} = {shown}  (saved to {USER_CONFIG_PATH})")
 
 
 @config_app.command("show")
 def config_show() -> None:
-    """Show current user preferences."""
-    from battinfo.config import USER_CONFIG_PATH, load_user_config
-    cfg = load_user_config()
-    if not cfg:
+    """Show current user preferences.
+
+    Secrets, such as zenodo_token, show only their last four characters.
+    """
+    from battinfo.config import USER_CONFIG_PATH, _shown_value
+    if not USER_CONFIG_PATH.exists():
         typer.echo(f"No config file at {USER_CONFIG_PATH}")
         typer.echo("Set defaults with: battinfo config set creator \"Family, Given; Institution\"")
         return
+    cfg = _user_config_or_exit()
     typer.echo(f"Config file: {USER_CONFIG_PATH}")
     typer.echo()
-    for k, v in sorted(cfg.items()):
-        typer.echo(f"  {k}: {v}")
+    if not cfg:
+        typer.echo("  (no values set)")
+        typer.echo()
+        typer.echo("Set defaults with: battinfo config set creator \"Family, Given; Institution\"")
+        return
+    for k, v in sorted(cfg.items(), key=lambda item: str(item[0])):
+        typer.echo(f"  {k}: {_shown_value(k, v)}")
 
 
 # ---------------------------------------------------------------------------

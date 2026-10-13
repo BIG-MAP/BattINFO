@@ -2163,6 +2163,10 @@ Examples:
   battinfo config set license CC-BY-4.0
   battinfo config set community battinfo-reference
 
+A secret, such as zenodo_token, is echoed with all but its last four
+characters hidden. A config file that is not valid YAML is left as it is:
+fix it by hand first.
+
 **Usage**:
 
 ```console
@@ -2181,6 +2185,8 @@ $ battinfo config set [OPTIONS] {key} {value}
 ### `battinfo config show`
 
 Show current user preferences.
+
+Secrets, such as zenodo_token, show only their last four characters.
 
 **Usage**:
 

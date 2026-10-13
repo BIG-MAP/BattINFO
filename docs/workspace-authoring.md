@@ -55,7 +55,7 @@ Every verb is a method on the returned `AuthoringWorkspace` (also importable as
 
 ## Credentials
 
-`ws.login(api_key=...)` keeps your registry key, workspace id and publisher id in `.battinfo/credentials` in the workspace folder. `ws.setup()` writes the same file with a line for every name the workspace reads, the Zenodo and R2 settings included. The file is git-ignored. Each name is looked up in this order, and the first value found is used:
+`ws.login(api_key=...)` keeps your registry key, workspace id and publisher id in `.battinfo/credentials` in the workspace folder. `ws.setup()` writes the same file with a line for every name the workspace reads, the Zenodo and R2 settings included. The file is git-ignored, and both calls make it readable by you only (mode 0600 on Linux and macOS). Each name is looked up in this order, and the first value found is used:
 
 1. an argument passed to the call, such as `ws.zenodo(token=...)` or `ws.submit(api_key=...)`;
 2. a value `ws.login()` set on this workspace in this session;
