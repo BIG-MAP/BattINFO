@@ -77,7 +77,7 @@ The JSON Schema is the save-time contract and the pydantic models in `src/battin
 - `ws.save()` validates under the strict policy by default and writes each record to `<root>/.battinfo/records/<folder>/`.
 - Set funding, ORCID and licence once with `ws.project(...)`, `ws.contributor(...)` and `ws.license(...)`; `ws.save()` stamps them onto every record.
 - `ws.preview_jsonld()` writes the JSON-LD graph a Zenodo deposit would carry and prints the publication checks. `ws.zenodo()` makes the deposit and leaves a draft unless you pass `publish=True`.
-- `ws.submit()` sends what the last `ws.save()` wrote to the registry review queue. `ws.publish()` does save and submit in one call, with a Zenodo deposit first when `zenodo=True`.
+- `ws.submit()` sends this session's records to the registry review queue: what the last `ws.save()` wrote, and the equipment records `ws.add("equipment")` saved when it was called. `ws.publish()` does save and submit in one call, with a Zenodo deposit first when `zenodo=True`.
 - `ws.import_(...)` rebuilds a workspace from a published `battinfo.json`, and `ws.export(fmt)` writes the saved records as RDF.
 
 `help(ws.add)` and `ws.commands()` list the rest. A minimal offline session:

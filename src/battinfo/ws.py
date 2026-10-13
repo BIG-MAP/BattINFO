@@ -1798,9 +1798,15 @@ class AuthoringWorkspace:
         self._search_cache: list[dict] | None = None
         # converted-file → original-source mapping (lazy-loaded from manifest)
         self._conversion_sources: dict[str, Any] | None = None
-        # paths written by the most recent ws.save() — submit() uses this to
-        # avoid re-submitting records from previous sessions in the same directory
+        # Record files this session wrote: by the most recent ws.save(), by
+        # ws.add() (see _added_paths), and by ws.upload() or ws.zenodo(), which
+        # rewrite dataset records. submit() sends only these, so records left in
+        # the same directory by earlier sessions are not sent again.
         self._session_paths: set[Path] = set()
+        # Record files ws.add() wrote itself (an equipment unit, its spec and its
+        # channels). ws.save() does not write them, so it starts the session set
+        # from this one instead of discarding them.
+        self._added_paths: set[Path] = set()
         # First-class material queues (Level 2 spec / Level 3 instance). Materials
         # are not engine model objects, so the AuthoringWorkspace holds their
         # canonical records and writes them in ws.save() through the SAME stamp
@@ -3293,9 +3299,10 @@ class AuthoringWorkspace:
         the index rejects under ``validation_policy`` (a reference that does not
         resolve, for example) is still written, but is listed as ``[failed]``
         with its error, and its summary item carries ``failed`` and ``error``.
-        Only the records saved in this call will be submitted by the next
-        ``ws.submit()`` — records left over from previous sessions in the
-        same directory are ignored.
+        The next ``ws.submit()`` sends the records saved in this call and the
+        equipment records that ``ws.add("equipment", ...)`` wrote in this
+        session. Records left over from previous sessions in the same
+        directory are ignored.
 
         ``mode`` controls how an existing on-disk record with the same IRI is
         treated. The default ``"upsert"`` updates it in place (the normal
@@ -3336,7 +3343,8 @@ class AuthoringWorkspace:
                     ):
                         stamped += 1
         # Track the exact files written so submit() only sends this session's work.
-        self._session_paths = set()
+        # ws.add("equipment") wrote its records itself, so they start the set.
+        self._session_paths = set(self._added_paths)
         for key in _STAMPED_KEYS:
             for item in result.get(key, []):
                 p = item.get("path") if isinstance(item, dict) else str(item)
@@ -4341,6 +4349,7 @@ class AuthoringWorkspace:
         self._cells_by_short_id = {}
         self._ambiguous_cell_keys = set()
         self._session_paths = set()
+        self._added_paths = set()
         print("Workspace cleared.")
 
     def submit(
@@ -4534,7 +4543,8 @@ class AuthoringWorkspace:
 
         # ── Select which files to submit (R-9: never silently submit leftovers) ─
         if self._session_paths:
-            # Only what the most recent ws.save() wrote this session.
+            # Only what this session wrote: the most recent ws.save(), and the
+            # records ws.add("equipment") wrote itself.
             selected = {s: [f for f in _all_in(s) if f in self._session_paths] for s in wanted}
         elif submit_all:
             selected = {s: _all_in(s) for s in wanted}
@@ -8390,12 +8400,14 @@ class AuthoringWorkspace:
         source_root = self._ws.source_root
 
         def _track(result: dict) -> dict:
-            # Equipment records are written at add()-time, not by ws.save(), so
-            # register them in the session set here — otherwise a subsequent
-            # ws.submit()/publish() in the same session would not select them.
+            # Equipment records are written at add() time, not by ws.save(), so
+            # register them in the session set here, and in _added_paths, which
+            # ws.save() starts the session set from. Otherwise a later
+            # ws.submit() or ws.publish() in the same session would not select them.
             path = result.get("path")
             if path:
                 self._session_paths.add(Path(path))
+                self._added_paths.add(Path(path))
             return result
 
         spec_result = _track(save_record(spec_record, source_root=source_root, mode="upsert"))

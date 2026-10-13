@@ -581,6 +581,132 @@ def test_only_equipment_filters_the_sweep(
     assert [p["resource"]["resource_type"] for p in fake.payloads] == ["equipment_spec", "channel"]
 
 
+# ws.add("equipment") writes its records at once, and ws.save() used to reset the
+# session set to the files it wrote itself. A session that added a unit, a cell
+# and a test on one of the unit's channels then sent the cell and the test, but
+# not the unit, its spec or the channel the test points at.
+
+_SESSION_RECORD_TYPES = ["equipment_spec", "equipment", "channel", "channel", "cell_spec", "cell", "test"]
+
+
+def _author_equipment_cell_and_test(ws: AuthoringWorkspace) -> None:
+    from battinfo import CellSpec
+
+    ws.add("equipment", spec=str(_EQUIPMENT_SPEC_EXAMPLE),
+           serial_number="AA:BB:CC:DD:EE:FF", name="Bench unit", channels=2)
+    spec = CellSpec(manufacturer="Acme", model="X-1", format="cylindrical", chemistry="Li-ion")
+    ws.add("cell", spec=spec, serial_numbers=["CELL-001"])
+    ws.add("test", type="cycling", cell="CELL-001", channel="Bench unit/CH2")
+
+
+def _sent_iris(fake: _FakeRegistry) -> set[str | None]:
+    from battinfo.entities import entity_id_from_doc
+
+    return {
+        entity_id_from_doc(record)
+        for payload in fake.payloads
+        for record in payload["resource"]["semantic_payload"]["battinfo_records"].values()
+    }
+
+
+def _saved_iris(ws: AuthoringWorkspace) -> set[str | None]:
+    import json
+
+    from battinfo.entities import entity_id_from_doc
+
+    return {
+        entity_id_from_doc(json.loads(path.read_text(encoding="utf-8")))
+        for path in ws._ws.source_root.glob("*/*.json")
+    }
+
+
+def test_save_then_submit_sends_the_equipment_records_add_wrote(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
+    _author_equipment_cell_and_test(ws)
+    ws.save(validation_policy="strict")
+    fake = _patch_registry(monkeypatch, lambda p: _result("validated"))
+
+    outcomes = ws.submit(**_CREDS)
+
+    assert [p["resource"]["resource_type"] for p in fake.payloads] == _SESSION_RECORD_TYPES
+    assert all(o["ok"] for o in outcomes)
+    assert _sent_iris(fake) == _saved_iris(ws)
+    test_record = fake.payloads[-1]["resource"]["semantic_payload"]["battinfo_records"]["test"]
+    assert {test_record["test"]["equipment_id"], test_record["test"]["channel_id"]} <= _sent_iris(fake)
+
+
+def test_a_second_save_keeps_the_equipment_records_in_the_session(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
+    _author_equipment_cell_and_test(ws)
+    ws.save(validation_policy="strict")
+    ws.save(validation_policy="strict")
+    fake = _patch_registry(monkeypatch, lambda p: _result("validated"))
+
+    ws.submit(**_CREDS)
+
+    assert [p["resource"]["resource_type"] for p in fake.payloads] == _SESSION_RECORD_TYPES
+
+
+def _set_registry_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("BATTINFO_REGISTRY_URL", "https://registry.example")
+    monkeypatch.setenv("BATTINFO_API_KEY", "k")
+    monkeypatch.setenv("BATTINFO_WORKSPACE_ID", "w")
+    monkeypatch.setenv("BATTINFO_PUBLISHER_ID", "p")
+
+
+def test_publish_sends_the_equipment_records_add_wrote(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _set_registry_env(monkeypatch)
+    ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
+    _author_equipment_cell_and_test(ws)
+    fake = _patch_registry(monkeypatch, lambda p: _result("validated"))
+
+    outcomes = ws.publish()
+
+    assert [p["resource"]["resource_type"] for p in fake.payloads] == _SESSION_RECORD_TYPES
+    assert all(o["ok"] for o in outcomes)
+    assert _sent_iris(fake) == _saved_iris(ws)
+
+
+def test_publish_of_an_equipment_only_session_sends_it(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # publish() saves first, and that save left nothing for submit() to select,
+    # which then refused with "No records were saved in this session".
+    _set_registry_env(monkeypatch)
+    ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
+    ws.add("equipment", spec=str(_EQUIPMENT_SPEC_EXAMPLE),
+           serial_number="AA:BB:CC:DD:EE:FF", name="Bench unit", channels=1)
+    fake = _patch_registry(monkeypatch, lambda p: _result("validated"))
+
+    ws.publish()
+
+    assert [p["resource"]["resource_type"] for p in fake.payloads] == ["equipment_spec", "equipment", "channel"]
+
+
+def test_clear_drops_equipment_records_from_the_next_submit(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # After ws.clear() the unit belongs to an earlier session: it stays on disk,
+    # and the next submit() leaves it out like any record an earlier session wrote.
+    ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
+    ws.add("equipment", spec=str(_EQUIPMENT_SPEC_EXAMPLE),
+           serial_number="AA:BB:CC:DD:EE:FF", name="Bench unit", channels=1)
+    ws.clear()
+    _author_specs(ws, 1)
+    ws.save(validation_policy="strict")
+    fake = _patch_registry(monkeypatch, lambda p: _result("validated"))
+
+    ws.submit(**_CREDS)
+
+    assert [p["resource"]["resource_type"] for p in fake.payloads] == ["cell_spec"]
+
+
 def test_unknown_only_token_lists_the_new_types(tmp_path: Path) -> None:
     ws = _saved_ws(tmp_path)
     with pytest.raises(ValueError, match="equipment-spec, equipment, channel, parameter-set"):
