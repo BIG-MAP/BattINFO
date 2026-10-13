@@ -39,8 +39,7 @@ from one source so they cannot drift.
 
 ## Quantities
 
-Every quantity (capacity, voltage, …) uses **one** EMMO encoding everywhere — published
-record and SHACL validation alike:
+Every quantity (capacity, voltage, …) uses **one** EMMO encoding in this graph, in `battinfo.record_to_jsonld` output and in the SHACL shapes that check them:
 
 ```json
 "hasProperty": [{ "@type": "NominalVoltage",
@@ -71,7 +70,7 @@ conditions as `schema:PropertyValue`s — not just prose — so they are queryab
 Every `@id` either resolves to a node in the document or is a typed stub pointing at the
 authoritative resource (e.g. a remote `BatteryCellSpecification` with `rdfs:isDefinedBy`).
 Registry IRI resolution (`w3id.org/battinfo/spec/…`) and the published context URL are
-handled by the BattINFO registry deployment.
+handled by the BattINFO registry deployment. What a record's IRI serves today is the record body expanded with the records context, not the graph this page describes; see the [known limitations](scope.md#known-limitations-in-080).
 
 ## Round-trip fidelity (`ws.import_`)
 

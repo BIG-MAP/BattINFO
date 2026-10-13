@@ -98,6 +98,14 @@ These gaps were known when 0.8.0 was released and are planned for 0.8.x or 0.9. 
 - Display papercuts: `ws.search()` shows manufacturer and model in lower case, `ws.list(verbose=True)` shows cells by file name, the `ws.save()` summary cuts titles at about 36 characters and collapses after 20 records, and `battinfo.naming.title_for()` writes an all-lowercase method in capitals ("CYCLING test").
 - Submission reporting: outcomes and journal entries carry an empty `iri`, a deduplicated re-submission is reported as live, and `ws.status()` lists every submission in the shared registry workspace.
 
+### Linked data at record IRIs
+
+- A record's `https://w3id.org/battinfo/` IRI serves the record body expanded with the v1 records context, not the EMMO model that `battinfo.record_to_jsonld`, `ws.export` and the Zenodo deposit graph write. In that body a quantity key such as `nominal_capacity` is a property named by its EMMO class IRI, with `schema:value` and `schema:unitText`, and the record's own id is a `schema:productID` literal. For the EMMO model, run `record_to_jsonld` on the record or read the deposit's `battinfo.json`. Serving that model at record IRIs is planned for 0.9.
+
+### Command line
+
+- `battinfo dataset` is experimental: its `init`, `process` and `publish` steps cannot take a contribution through to a published dataset in 0.8.0. Publish a dataset from Python with `ws.add("test", data=...)` and `ws.zenodo()` instead.
+
 ### Dependencies
 
 - The `processing` extra requires `batterydf[nda,excel,mat]>=0.2.0rc2,<0.3`, so it installs the batterydf 0.2.0 release candidate until batterydf 0.2.0 is published.

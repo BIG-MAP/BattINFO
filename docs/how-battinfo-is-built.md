@@ -97,7 +97,7 @@ EMMO-aligned JSON-LD. It is **table-driven**: curated mapping files in
 `assets/mappings/domain-battery/` say that the key `nominal_capacity` *is*
 `emmo:NominalCapacity` and the unit `"Ah"` *is* `emmo:AmpereHour`. The
 transform stacks types (a cylindrical LFP cell is simultaneously
-`BatteryCell`, `CylindricalBattery`, `LithiumIronPhosphateBattery`) and emits
+`BatteryCell`, `CylindricalBattery`, `LithiumIonIronPhosphateBattery`) and emits
 the canonical EMMO quantity pattern. No inference, no LLMs, no network —
 deterministic output from those tables, which is why the website can show
 [real before/after pairs](https://battinfo.org/examples) generated at build

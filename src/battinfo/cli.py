@@ -163,7 +163,12 @@ registry_app = typer.Typer(
     add_completion=False, no_args_is_help=True, help="Manage registry tenants, workspaces, and publishers."
 )
 dataset_app = typer.Typer(
-    add_completion=False, no_args_is_help=True, help="Contribute measurement datasets: init -> process -> publish."
+    add_completion=False,
+    no_args_is_help=True,
+    help=(
+        "Experimental: contribute measurement datasets (init -> process -> publish). "
+        "The flow cannot complete in 0.8.0; publish a dataset with ws.zenodo() instead."
+    ),
 )
 batch_app = typer.Typer(
     add_completion=False, no_args_is_help=True, help="Scaffold and manage multi-cell batch contributions."
@@ -3513,7 +3518,10 @@ def dataset_publish(
     community: str = typer.Option("battery-genome", "--community", help="Zenodo community identifier."),
     no_community: bool = typer.Option(False, "--no-community", help="Skip community submission."),
 ) -> None:
-    """Publish the processed contribution folder.
+    """Experimental: publish the processed contribution folder.
+
+    The init, process and publish flow cannot complete in 0.8.0. Publish a
+    dataset from Python with ws.zenodo() instead.
 
     \b
     Options:

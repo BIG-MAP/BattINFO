@@ -1,7 +1,9 @@
 """Execute the code snippets in the newcomer-path docs so they cannot rot.
 
 Extracts fenced code blocks from QUICKSTART.md, docs/python-api.md, and
-docs/pages/getting-started.rst, then executes the safe ones:
+docs/pages/getting-started.rst, and the ``::`` example blocks of the module
+docstrings listed (a ``.py`` path in ``SNIPPET_FILES``), then executes the
+safe ones:
 
 - ``python`` blocks run cumulatively per file (each block re-runs the file's
   previous blocks first, in a fresh temp directory, so later blocks may use
@@ -20,12 +22,14 @@ reported with its reason so silent rot is impossible.
 
 from __future__ import annotations
 
+import ast
 import re
 import shlex
 import shutil
 import subprocess
 import sys
 import tempfile
+import textwrap
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -46,6 +50,8 @@ SNIPPET_FILES = (
     "docs/howto/publish-a-bpx-parameter-file.md",
     "docs/howto/register-equipment.md",
     "docs/howto/register-materials.md",
+    # Module docstrings: the first example a reader of help(battinfo.ws) meets.
+    "src/battinfo/ws.py",
 )
 
 SKIP_MARKERS = ("<!-- doc-snippet: skip -->", ".. doc-snippet: skip")
@@ -138,8 +144,44 @@ def _extract_rst(path: Path, rel: str) -> list[Block]:
     return blocks
 
 
+def _extract_module_docstring(path: Path, rel: str) -> list[Block]:
+    """The ``::`` literal blocks of a module docstring, as python blocks."""
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    docstring = ast.get_docstring(tree, clean=True)
+    if not docstring:
+        return []
+    first_line = tree.body[0].lineno  # the docstring's first line in the file
+    lines = docstring.splitlines()
+    blocks: list[Block] = []
+    i = 0
+    while i < len(lines):
+        if not lines[i].rstrip().endswith("::"):
+            i += 1
+            continue
+        indent = len(lines[i]) - len(lines[i].lstrip())
+        j = i + 1
+        while j < len(lines) and (not lines[j].strip() or len(lines[j]) - len(lines[j].lstrip()) > indent):
+            j += 1
+        body = lines[i + 1 : j]
+        start = next((k for k, line in enumerate(body) if line.strip()), None)
+        if start is not None:
+            blocks.append(
+                Block(
+                    path=rel,
+                    line=first_line + i + 1 + start,
+                    lang="python",
+                    text=textwrap.dedent("\n".join(body)).strip("\n"),
+                    skip_marked=False,
+                )
+            )
+        i = j
+    return blocks
+
+
 def _extract(rel: str) -> list[Block]:
     path = REPO_ROOT / rel
+    if rel.endswith(".py"):
+        return _extract_module_docstring(path, rel)
     if rel.endswith(".rst"):
         return _extract_rst(path, rel)
     return _extract_markdown(path, rel)

@@ -25,7 +25,6 @@ from battinfo.api import (
     save_test_spec,
 )
 from battinfo.bundle import BattinfoBundle, Cell, CellSpec, Dataset, ProvenanceInfo, Test, TestSpec
-from battinfo.bundle_generated import SpecValue
 from battinfo.jsonld import record_to_jsonld
 from battinfo.materials import material_kinds
 from battinfo.publication import build_publication_package, load_publication_package
@@ -44,7 +43,6 @@ __all__ = [
     "Dataset",
     "ProvenanceInfo",
     "PublishResult",
-    "SpecValue",
     "Test",
     "TestSpec",
     "build_publication_package",
@@ -113,6 +111,7 @@ _LAZY_EXPORTS: dict[str, str] = {
     "SolidStateImportResult": "battinfo.interop",
     "SolventMixture": "battinfo.bundle",
     "SpecSet": "battinfo.bundle_generated",
+    "SpecValue": "battinfo.bundle_generated",
     "TableColumn": "battinfo.metadata",
     "TableSchema": "battinfo.metadata",
     "Terminal": "battinfo.bundle",

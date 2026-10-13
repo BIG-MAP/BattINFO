@@ -27,7 +27,7 @@ What actually happened (include the full error/traceback if any).
 
 ## Environment
 
-- BattINFO version: <!-- `battinfo --version` or pip show battinfo -->
+- BattINFO version: <!-- the output of: python -c "import battinfo; print(battinfo.__version__)" -->
 - Python version:
 - OS:
 

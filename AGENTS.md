@@ -35,7 +35,7 @@ uv run sphinx-build -b html -W --keep-going docs docs/_build/html
 
 The test suite runs with sockets disabled (pytest-socket, set in `pyproject.toml`). Mock network calls; a test that really needs the network opts in with `@pytest.mark.enable_socket`. Coverage has to stay at or above the `fail_under` floor in `pyproject.toml`.
 
-The doc-snippets job executes the code blocks of the pages listed in `SNIPPET_FILES` in `.tools/quality/run_doc_snippets.py`. Add a new how-to page to that list, and put `<!-- doc-snippet: skip -->` on the line above any block that cannot run offline. The Sphinx build turns warnings into errors and needs pandoc on the PATH to render the notebooks.
+The doc-snippets job executes the code blocks of the pages listed in `SNIPPET_FILES` in `.tools/quality/run_doc_snippets.py`, and the `::` examples in the docstring of each module listed there (`src/battinfo/ws.py`). Add a new how-to page to that list, and put `<!-- doc-snippet: skip -->` on the line above any block that cannot run offline. The Sphinx build turns warnings into errors and needs pandoc on the PATH to render the notebooks.
 
 `.tools/quality/run_verification.py` is a shorter acceptance gate: the three acceptance test files, `tests/installed_smoke.py` and a wheel build. Pass `--report-json <path>` for a machine-readable summary. Key paths are also listed in `.tools/agent/manifest.json`, and `tests/test_agent_readiness.py` checks that those paths exist.
 

@@ -1,0 +1,221 @@
+"""The files a new user meets first promise only what the package does.
+
+The README is also the PyPI page, and neither it nor the wheel can change once
+uploaded. These checks run the commands and examples those files give, or compare
+what they name with what the library emits, so a stale claim fails here.
+"""
+
+from __future__ import annotations
+
+import importlib.util
+import json
+import re
+import shlex
+import sys
+from pathlib import Path
+from types import ModuleType
+
+import pytest
+import yaml
+from typer.testing import CliRunner
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
+
+import battinfo  # noqa: E402
+from battinfo import record_to_jsonld  # noqa: E402
+from battinfo.cli import app  # noqa: E402
+
+runner = CliRunner()
+
+# A backticked EMMO class name for a cell or battery, such as `BatteryCell`.
+BATTERY_CLASS = re.compile(r"`([A-Z][A-Za-z]*(?:Battery|Cell))`")
+
+
+def _read(rel: str) -> str:
+    return (ROOT / rel).read_text(encoding="utf-8")
+
+
+def _fenced_blocks(text: str) -> list[tuple[str, str]]:
+    """(language, body) of every fenced code block in a Markdown text."""
+    pattern = re.compile(r"^```(\w*)[ \t]*\n(.*?)^```", re.MULTILINE | re.DOTALL)
+    return [(match.group(1).lower(), match.group(2)) for match in pattern.finditer(text)]
+
+
+def _section(text: str, heading: str) -> str:
+    """The Markdown under the ``## `` heading that starts with *heading*, up to the next one."""
+    start = text.index(f"\n{heading}")
+    end = text.find("\n## ", start + 1)
+    return text[start:] if end == -1 else text[start:end]
+
+
+def _load_tool(rel: str) -> ModuleType:
+    name = Path(rel).stem
+    spec = importlib.util.spec_from_file_location(name, ROOT / rel)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[name] = module  # dataclasses look their module up while the class is built
+    spec.loader.exec_module(module)
+    return module
+
+
+# ── README: Battery Pass, classes and type stacking ──────────────────────────────
+
+
+def test_readme_promises_no_battery_pass_output() -> None:
+    readme = _read("README.md")
+    assert "img.shields.io/badge/Battery%20Pass" not in readme, "0.8.0 has no Battery Pass mapping to badge"
+    for claim in ("Battery Pass-compatible", "Battery Pass compatible", "Battery Pass JSON-LD"):
+        assert claim not in readme, f"the README still claims {claim!r} output"
+    acknowledgements = readme.partition("## Acknowledgements")[2]
+    assert "thebatterypass.eu" in acknowledgements, "the Battery Pass acknowledgement stays"
+
+
+@pytest.mark.parametrize(
+    "rel",
+    ["README.md", "QUICKSTART.md", "docs/how-battinfo-is-built.md", "docs/pages/glossary.md"],
+)
+def test_battery_classes_named_in_the_docs_exist(rel: str) -> None:
+    context = json.loads(_read("src/battinfo/data/context/records.context.v1.json"))["@context"]
+    named = set(BATTERY_CLASS.findall(_read(rel)))
+    assert named, f"{rel} names no battery class; drop it from this check"
+    missing = sorted(name for name in named if name not in context)
+    assert not missing, f"{rel} names classes the records context does not define: {missing}"
+
+
+@pytest.mark.filterwarnings("ignore:semantic.value_text_only")
+def test_readme_type_stacking_example_is_what_the_emitter_writes() -> None:
+    """The README's cylindrical LFP example is the A123 flagship, whose negative basis is unknown."""
+    record = json.loads(_read("examples/cell-spec/A123__ANR26650M1-B.json"))
+    stacked = set(record_to_jsonld(record, "cell-spec")["isDescriptionFor"]["@type"])
+    line = next(ln for ln in _read("README.md").splitlines() if "`@type` stacking" in ln)
+    named = set(BATTERY_CLASS.findall(line))
+    assert stacked <= named, f"the README's stacking example leaves out {sorted(stacked - named)}"
+    extra = named - stacked
+    assert extra <= {"LithiumIonGraphiteBattery"}, f"the emitter does not stack {sorted(extra)} on this cell"
+    if extra:
+        assert "negative_electrode_basis" in line, "say that the graphite class comes from the negative electrode"
+
+
+# ── QUICKSTART step 4 ─────────────────────────────────────────────────────────
+
+
+def test_quickstart_step_4_runs_as_written_in_any_shell(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    quickstart = _read("QUICKSTART.md")
+    step1 = next(body for lang, body in _fenced_blocks(_section(quickstart, "## 1. ")) if lang == "python")
+    step4 = _fenced_blocks(_section(quickstart, "## 4. "))
+    shell_blocks = [(lang, body) for lang, body in step4 if lang not in {"json", "python", "text"}]
+    assert len(shell_blocks) == 1, shell_blocks
+    lang, body = shell_blocks[0]
+    assert lang in {"bash", "sh", "shell", "console"}, f"step 4 is a {lang} block"
+    lines = [ln.strip() for ln in body.splitlines() if ln.strip() and not ln.lstrip().startswith("#")]
+    assert len(lines) == 1, f"step 4 should be one command on one line, with no line continuation: {lines}"
+    command = lines[0]
+    assert not re.search(r"[<>`\\]", command), f"step 4 has shell-specific syntax or a placeholder: {command}"
+    argv = shlex.split(command)
+    assert argv[0] == "battinfo", "with the virtual environment active, battinfo is on the PATH in every shell"
+
+    monkeypatch.chdir(tmp_path)
+    namespace: dict = {"__name__": "quickstart_step_1"}
+    exec(compile(step1, "QUICKSTART.md step 1", "exec"), namespace)
+    printed_iri = re.search(r"^# (https://w3id\.org/battinfo/spec/\S+)$", step1, re.MULTILINE)
+    assert printed_iri, "step 1 shows the IRI it prints"
+    assert namespace["result"].canonical_iri == printed_iri.group(1), "the IRI step 1 shows is the one it mints"
+
+    result = runner.invoke(app, argv[1:])
+    assert result.exit_code == 0, result.output
+    payload = json.loads(result.stdout)
+    expected = json.loads(next(body for lang, body in step4 if lang == "json"))
+    assert payload["ok"] is expected["ok"] is True
+    assert payload["error_count"] == expected["error_count"] == 0
+    assert payload["mode"] == expected["mode"]
+    assert Path(payload["source_root"]).as_posix() == expected["source_root"]
+
+
+# ── Issue templates ───────────────────────────────────────────────────────────
+
+
+def test_issue_chooser_sends_questions_to_a_template() -> None:
+    folder = ROOT / ".github" / "ISSUE_TEMPLATE"
+    config = yaml.safe_load((folder / "config.yml").read_text(encoding="utf-8"))
+    urls = [link["url"] for link in config.get("contact_links") or []]
+    # Discussions are turned off for BIG-MAP/BattINFO, so the link would 404.
+    # If they are turned on again, this check can go.
+    assert not any(url.rstrip("/").endswith("/discussions") for url in urls), urls
+    if config.get("blank_issues_enabled") is False:
+        labels = []
+        for template in folder.glob("*.md"):
+            front_matter = template.read_text(encoding="utf-8").split("---")[1]
+            labels.append(str(yaml.safe_load(front_matter).get("labels", "")))
+        assert any("question" in label for label in labels), "with blank issues off, a template must take questions"
+
+
+def test_issue_templates_ask_for_commands_that_work(capsys: pytest.CaptureFixture[str]) -> None:
+    folder = ROOT / ".github" / "ISSUE_TEMPLATE"
+    for template in sorted(folder.glob("*.md")):
+        text = template.read_text(encoding="utf-8")
+        for argv in re.findall(r"`battinfo ([^`]+)`", text):
+            result = runner.invoke(app, shlex.split(argv))
+            assert result.exit_code == 0, f"{template.name} asks for `battinfo {argv}`, which fails: {result.output}"
+        for code in re.findall(r'python -c "([^"]+)"', text):
+            capsys.readouterr()
+            exec(code, {})
+            assert capsys.readouterr().out.strip() == battinfo.__version__, f"{template.name}: {code}"
+    bug_report = (folder / "bug_report.md").read_text(encoding="utf-8")
+    assert 'python -c "import battinfo; print(battinfo.__version__)"' in bug_report
+
+
+# ── battinfo dataset and its contribution template ────────────────────────────
+
+
+def test_dataset_commands_say_they_are_experimental() -> None:
+    group = runner.invoke(app, ["dataset", "--help"])
+    assert group.exit_code == 0, group.output
+    assert "Experimental" in group.stdout and "ws.zenodo()" in group.stdout, group.stdout
+    publish = runner.invoke(app, ["dataset", "publish", "--help"])
+    assert publish.exit_code == 0, publish.output
+    assert "Experimental" in publish.stdout and "ws.zenodo()" in publish.stdout, publish.stdout
+
+
+def test_contribution_template_gives_only_commands_that_exist() -> None:
+    readme = _read("src/battinfo/data/templates/contribution/README.md")
+    commands = [
+        line.strip()
+        for _lang, body in _fenced_blocks(readme)
+        for line in body.splitlines()
+        if line.strip().startswith("battinfo ")
+    ]
+    assert commands
+    for command in commands:
+        # --help is eager, so the command is not run; an option that does not exist still fails.
+        result = runner.invoke(app, [*shlex.split(command)[1:], "--help"])
+        assert result.exit_code == 0, f"{command!r} fails: {result.output}"
+    assert "dist/" not in readme, "battinfo dataset process writes no dist/ folder into the contribution"
+    assert "Experimental" in readme
+
+
+# ── Generated layer ───────────────────────────────────────────────────────────
+
+
+def test_makefile_leaves_bundle_generated_alone() -> None:
+    assert "bundle_generated.py" not in _read("Makefile"), (
+        "bundle_generated.py has been edited by hand since it was generated, and the locked linkml "
+        "has no --pydantic-version option; regenerating or retiring it waits for 0.9"
+    )
+
+
+# ── The battinfo.ws module docstring ──────────────────────────────────────────
+
+
+def test_ws_module_docstring_example_runs_offline(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    snippets = _load_tool(".tools/quality/run_doc_snippets.py")
+    assert "src/battinfo/ws.py" in snippets.SNIPPET_FILES, "the doc-snippet job runs the module docstring"
+    blocks = [block for block in snippets._extract("src/battinfo/ws.py") if block.lang == "python"]
+    assert blocks, "the battinfo.ws module docstring has no example"
+    monkeypatch.chdir(tmp_path)
+    namespace: dict = {"__name__": "ws_docstring"}
+    for block in blocks:
+        # Sockets are off in the test suite, so this also proves the example needs no network.
+        exec(compile(block.text, block.label, "exec"), namespace)
+    saved = sorted(path.parent.name for path in tmp_path.glob("**/.battinfo/records/*/*.json"))
+    assert {"cell-spec", "cell-instance", "test-protocol", "test"} <= set(saved), saved
