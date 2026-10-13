@@ -8,6 +8,10 @@ deposit graph, the RO-Crate and the rewrite of the dataset records all take
 names, URLs and checksums from the plan, and find a record's file by its
 resolved path, never by its name. Two files called ``cycling.csv`` in two
 folders are two files in the deposit.
+
+A record, or a distribution entry, that cannot be read is an
+:class:`Omission`, never a silent skip, and :func:`deposit_file_problems`
+checks the deposit's files against the deposit graph before it is published.
 """
 from __future__ import annotations
 
@@ -18,6 +22,8 @@ import unicodedata
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
+from urllib.parse import unquote
 
 from battinfo._util import file_uri_to_path, is_local_location, path_tail, url_segment
 
@@ -115,6 +121,69 @@ def measured_file(path: Path, name: str, *, kind: str = "other") -> DepositFile:
     )
 
 
+@dataclass(frozen=True)
+class Omission:
+    """A record, or a distribution of one, that a deposit would leave out, and why."""
+
+    #: The kind of record, named as the folder it is saved in: ``test``,
+    #: ``dataset``, ``cell-instance`` and so on.
+    kind: str
+    #: The record's IRI or, for a record without one, its file or its place
+    #: among the records of its kind (``#2``).
+    record: str
+    reason: str
+
+    def __str__(self) -> str:
+        return f"{self.kind} {self.record}: {self.reason}"
+
+
+def _brief(value: object) -> str:
+    """*value* as ``repr`` shows it, cut to 80 characters."""
+    text = repr(value)
+    return text if len(text) <= 80 else f"{text[:77]}..."
+
+
+def distribution_problem(dist: object, position: int) -> str | None:
+    """Why the *position*-th distribution entry of a dataset cannot be deposited, or ``None``.
+
+    An entry is an object whose ``content_url`` is text, as the dataset
+    schema requires. Anything else names no file a deposit could carry or
+    link to. The deposit file plan and the deposit graph both ask, so the two
+    report one problem in the same words.
+    """
+    if not isinstance(dist, Mapping):
+        return f"distribution {position} is not an object ({_brief(dist)})"
+    url = dist.get("content_url")
+    if url is None or (isinstance(url, str) and not url.strip()):
+        return f"distribution {position} has no content_url"
+    if not isinstance(url, str):
+        return f"distribution {position} has a content_url that is not text ({_brief(url)})"
+    return None
+
+
+def dataset_distributions(dataset: Mapping[str, Any]) -> tuple[list[Mapping[str, Any]], list[str]]:
+    """The distribution entries of a dataset body a deposit can use, and why it cannot use the rest.
+
+    Returns ``(entries, problems)``: the entries :func:`distribution_problem`
+    finds nothing wrong with, in order, and one line for each it does, or
+    for a ``distributions`` value that is not a list.
+    """
+    entries = dataset.get("distributions")
+    if not entries:
+        return [], []
+    if not isinstance(entries, list):
+        return [], [f"its distributions are not a list ({_brief(entries)})"]
+    usable: list[Mapping[str, Any]] = []
+    problems: list[str] = []
+    for position, entry in enumerate(entries, start=1):
+        problem = distribution_problem(entry, position)
+        if problem is not None:
+            problems.append(problem)
+        elif isinstance(entry, Mapping):   # always so once distribution_problem passes it
+            usable.append(entry)
+    return usable, problems
+
+
 @dataclass
 class DepositFilePlan:
     """The local files one deposit carries, each named once and found by its resolved path."""
@@ -125,6 +194,9 @@ class DepositFilePlan:
     missing: list[str] = field(default_factory=list)
     #: Artifacts left out of the deposit, one warning each.
     artifact_warnings: list[str] = field(default_factory=list)
+    #: Record files and distribution entries that could not be read, so no
+    #: file could be planned for them.
+    omissions: list[Omission] = field(default_factory=list)
     #: True when the files travel in one zip archive per test kind.
     zipped: bool = False
     #: False when the files were located and named but not read (no sizes or digests).
@@ -192,6 +264,7 @@ def build_deposit_file_plan(
     root: Path,
     artifacts: Iterable[Path] = (),
     artifact_warnings: Iterable[str] = (),
+    omissions: Iterable[Omission] = (),
     recorded_names: Mapping[str, str] | None = None,
     reserved_names: Iterable[str] = (),
     zip_threshold: int | None = None,
@@ -204,7 +277,8 @@ def build_deposit_file_plan(
     files already chosen for the deposit. A file named twice, by two
     distributions or two datasets, is one entry, under the first kind that
     names it. A location whose file is missing, or is not a file, is listed
-    in ``missing``.
+    in ``missing``. *omissions* are the records the caller could not read,
+    kept in the plan for the caller to refuse.
 
     Each file keeps the name *recorded_names* gives its :func:`path_key` (the
     name an earlier deposit gave it), or else takes its own name in NFC form.
@@ -289,8 +363,118 @@ def build_deposit_file_plan(
         files=list(by_key.values()),
         missing=missing,
         artifact_warnings=list(artifact_warnings),
+        omissions=list(omissions),
         zipped=zipped,
         measured=measure,
         _by_key=by_key,
         _by_location=by_location,
     )
+
+
+def listed_files(listing: object) -> dict[str, str]:
+    """The files a deposit lists, as ``{name: md5}``.
+
+    *listing* is Zenodo's reply to a listing of the deposit's files. A
+    checksum may carry an ``md5:`` prefix; a file listed with no md5 (another
+    algorithm, or none) maps to ``""``. A reply that is not a list lists
+    nothing.
+    """
+    files: dict[str, str] = {}
+    for entry in listing if isinstance(listing, list) else []:
+        if not isinstance(entry, Mapping):
+            continue
+        name = entry.get("filename") or entry.get("key")
+        if not isinstance(name, str) or not name:
+            continue
+        algorithm, _, digest = str(entry.get("checksum") or "").rpartition(":")
+        files[name] = digest.strip().lower() if algorithm.lower() in ("", "md5") else ""
+    return files
+
+
+def _graph_nodes(graph: Mapping[str, Any]) -> list[Mapping[str, Any]]:
+    nodes = graph.get("@graph")
+    return [node for node in nodes if isinstance(node, Mapping)] if isinstance(nodes, list) else []
+
+
+def _url_of(value: object) -> str:
+    """The URL a ``dcat:downloadURL`` holds, written as text or as ``{"@id": ...}``."""
+    if isinstance(value, Mapping):
+        value = value.get("@id")
+    return value.strip() if isinstance(value, str) else ""
+
+
+def _stated_md5(dist: Mapping[str, Any]) -> str:
+    """The md5 a distribution node states for its file (``spdx:checksum``), or ``""``."""
+    checksum = dist.get("spdx:checksum")
+    if not isinstance(checksum, Mapping):
+        return ""
+    algorithm = checksum.get("spdx:checksumAlgorithm")
+    if isinstance(algorithm, Mapping):
+        algorithm = algorithm.get("@id")
+    value = checksum.get("spdx:checksumValue")
+    if not isinstance(algorithm, str) or not algorithm.lower().endswith("md5") or not isinstance(value, str):
+        return ""
+    return value.strip().lower()
+
+
+def deposit_file_problems(
+    graph: Mapping[str, Any],
+    *,
+    files_base: str,
+    listing: object,
+    sent: Mapping[str, str],
+) -> list[str]:
+    """What is wrong with a deposit's files, one line each; empty when nothing is.
+
+    *graph* is the deposit graph, *files_base* the URL the deposit serves its
+    files under (``{record_url}/files``), *listing* the deposit's file
+    listing, and *sent* the ``{name: md5}`` of the files this run uploaded or
+    kept. The deposit must hold:
+
+    - every file in *sent*, with that md5;
+    - every file a ``dcat:downloadURL`` in the graph names under
+      *files_base* (the name percent-encoded), with the md5 its distribution
+      states when it states one and is the file itself, not an archive that
+      holds it;
+    - a download URL for every distribution of every member dataset
+      (``dcat:Dataset``), either a file of the deposit or an http(s) URL
+      elsewhere, which counts as external.
+    """
+    on_deposit = listed_files(listing)
+    problems: list[str] = []
+    for name, md5 in sorted(sent.items()):
+        if name not in on_deposit:
+            problems.append(f"{name} was uploaded but is not on the deposit")
+        elif on_deposit[name] != md5:
+            held = f"with md5 {on_deposit[name]}" if on_deposit[name] else "without an md5"
+            problems.append(f"{name} is on the deposit {held}, but the file uploaded has md5 {md5}")
+    prefix = files_base.rstrip("/") + "/"
+    for node in _graph_nodes(graph):
+        types = node.get("@type")
+        member = "dcat:Dataset" in (types if isinstance(types, list) else [types])
+        owner = f"dataset {node.get('@id')}" if member else str(node.get("@id") or "a node")
+        distributions = node.get("dcat:distribution")
+        for dist in distributions if isinstance(distributions, list) else [distributions]:
+            if not isinstance(dist, Mapping):
+                continue
+            url = _url_of(dist.get("dcat:downloadURL"))
+            label = str(dist.get("schema:name") or "a distribution")
+            if url.startswith(prefix):
+                name = unquote(url[len(prefix):])
+                if name not in on_deposit:
+                    if name not in sent:   # an upload that did not arrive is reported above
+                        problems.append(f"{owner}: links to {name}, which is not on the deposit")
+                    continue
+                stated = _stated_md5(dist)
+                if stated and name == label and on_deposit[name] and stated != on_deposit[name]:
+                    problems.append(
+                        f"{owner}: {name} is on the deposit with md5 {on_deposit[name]}, "
+                        f"but the record states md5 {stated}"
+                    )
+            elif member and not url:
+                problems.append(f"{owner}: {label} has no download URL")
+            elif member and not url.startswith(("http://", "https://")):
+                problems.append(
+                    f"{owner}: {label} has the download URL {url}, which is neither on the deposit nor on the web"
+                )
+    return list(dict.fromkeys(problems))

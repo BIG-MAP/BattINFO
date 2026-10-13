@@ -87,7 +87,8 @@ def _deposit_graph(algorithm: str, value: str) -> dict:
         "cell-spec": [{"cell_spec": {
             "id": "https://w3id.org/battinfo/spec/cs1", "name": "Half cell",
             "manufacturer": "M", "model": "HC", "format": "coin", "chemistry": "li-metal"}}],
-        "cell-instance": [{"cell": {
+        # The body key is cell_instance; the graph builder refuses a record without one.
+        "cell-instance": [{"cell_instance": {
             "id": "https://w3id.org/battinfo/cell/c1", "serial_number": "SN-001",
             "cell_spec_id": "https://w3id.org/battinfo/spec/cs1"}}],
         "test": [{"test": {

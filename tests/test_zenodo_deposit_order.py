@@ -10,8 +10,9 @@
 - The metadata goes up as soon as the deposit exists, before any file, and an
   ``errors`` list in Zenodo's reply stops the run there, with the draft saved
   for the next run to update.
-- The data files go up before the graph and the RO-Crate, the deposit is
-  published last, and the records point at the deposited files only then.
+- The data files go up before the graph and the RO-Crate, the deposit's
+  files are listed and checked, the deposit is published last, and the
+  records point at the deposited files only then.
 
 All offline: Zenodo's HTTP API is answered in memory, so the real client runs.
 """
@@ -352,6 +353,7 @@ def test_a_publish_sends_the_metadata_first_and_points_the_records_last(tmp_path
         "PUT /files/bucket-7/cycling.csv",             # the data first,
         "PUT /files/bucket-7/battinfo.json",           # then the graph that links to it
         "PUT /files/bucket-7/ro-crate-metadata.json",
+        "GET /deposit/depositions/7/files",            # the deposit's files, checked
         "POST /deposit/depositions/7/actions/publish",
     ]
     # The draft was saved before its metadata went up, as unpublished.

@@ -151,8 +151,9 @@ src/battinfo/
 
 Supporting cast: `_jsonio.py` (atomic JSON file I/O), `_record_index.py`
 (the bulk-save id→path cache), `_deposit_files.py` (the data files of a
-Zenodo deposit: names, URLs and checksums), `canonical_aliases.py` (legacy key
-normalisation), `testmethod.py` (structured test-method steps),
+Zenodo deposit: names, URLs and checksums, what a deposit would leave out,
+and the check of its files before a publish), `canonical_aliases.py`
+(legacy key normalisation), `testmethod.py` (structured test-method steps),
 `metadata.py` (CSVW/DCAT dataset enrichment).
 
 ## How it stays correct

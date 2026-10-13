@@ -64,6 +64,12 @@ class _FakeZenodo:
         self.uploaded = {name: Path(path).read_bytes() for path, name in upload_map.items()}
         return {"uploaded": sorted(self.uploaded), "kept": [], "removed": []}
 
+    def list_files(self, deposit_id: int) -> list[dict]:
+        return [
+            {"filename": name, "checksum": hashlib.md5(data).hexdigest()}  # noqa: S324 - Zenodo's checksum
+            for name, data in self.uploaded.items()
+        ]
+
     def update_metadata(self, deposit_id: int, metadata: dict) -> dict:
         return {}
 

@@ -616,6 +616,7 @@ class _RecordingZenodo:
 
     def __init__(self) -> None:
         self.uploaded: dict[str, str] = {}
+        self.md5: dict[str, str] = {}
         self.metadata: dict = {}
         self.published = False
 
@@ -627,7 +628,11 @@ class _RecordingZenodo:
 
     def sync_files(self, deposit_id: int, upload_map: dict) -> dict:
         self.uploaded = {name: Path(path).read_text(encoding="utf-8") for path, name in upload_map.items()}
+        self.md5 = {name: _file_md5(Path(path)) for path, name in upload_map.items()}
         return {"uploaded": sorted(self.uploaded), "kept": [], "removed": []}
+
+    def list_files(self, deposit_id: int) -> list[dict]:
+        return [{"filename": name, "checksum": md5} for name, md5 in self.md5.items()]
 
     def update_metadata(self, deposit_id: int, metadata: dict) -> dict:
         self.metadata = metadata

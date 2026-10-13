@@ -35,7 +35,10 @@ if TYPE_CHECKING:
 from battinfo._deposit_files import (
     DepositFile,
     DepositFilePlan,
+    Omission,
     build_deposit_file_plan,
+    dataset_distributions,
+    deposit_file_problems,
     location_key,
     measured_file,
     path_key,
@@ -393,12 +396,42 @@ def validate_jsonld(doc: dict, *, where: str = "battinfo.json") -> dict:
     return doc
 
 
-def _unix_to_iso(ts: int | None) -> str | None:
-    """Convert a Unix timestamp (seconds) to an ISO-8601 datetime string."""
-    if ts is None:
+def _unix_to_iso(ts: int | float | str | None, *, what: str = "a timestamp") -> str | None:
+    """An ISO 8601 UTC datetime for a Unix time in seconds.
+
+    A string of digits is read as seconds, and any other string is returned
+    as it is: a time a record gives in ISO 8601 (a deviation's
+    ``occurred_at`` may be one) needs no conversion. A number no date can be
+    made of, such as a time in milliseconds (past the year 9999 as seconds),
+    gives ``None`` with a warning that names *what* it is, so a graph leaves
+    the time out rather than the record that holds it. Validation under the
+    strict policy reports such a time (``semantic.timestamp_out_of_range``).
+    """
+    if ts is None or isinstance(ts, bool):
         return None
+    if isinstance(ts, str):
+        text = ts.strip()
+        if not text.isdigit():
+            return text or None
+        ts = int(text)
     import datetime
-    return datetime.datetime.fromtimestamp(ts, tz=datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    try:
+        moment = datetime.datetime(1970, 1, 1, tzinfo=datetime.timezone.utc) + datetime.timedelta(seconds=ts)
+    except (OverflowError, ValueError):
+        warnings.warn(
+            f"{what} = {ts!r} is out of range as a Unix time in seconds (is it in milliseconds?), "
+            "so it is left out.",
+            stacklevel=2,
+        )
+        return None
+    except TypeError:
+        warnings.warn(
+            f"{what} = {ts!r} is neither a Unix time nor an ISO 8601 string, so it is left out.",
+            stacklevel=2,
+        )
+        return None
+    return moment.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def _plan_zenodo_deposit(
@@ -478,13 +511,17 @@ def _distribution_file_name(url: str) -> str:
     """The file name a distribution URL ends in, decoded, for display.
 
     A hosted URL carries its file name percent-encoded (``cell%2001.csv``);
-    the name shown in the graph is the decoded one (``cell 01.csv``).
+    the name shown in the graph is the decoded one (``cell 01.csv``). A URL
+    that cannot be parsed gives the text after its last ``/``.
     """
-    if url.startswith(("http://", "https://")):
-        from urllib.parse import unquote, urlparse  # noqa: PLC0415
+    try:
+        if url.startswith(("http://", "https://")):
+            from urllib.parse import unquote, urlparse  # noqa: PLC0415
 
-        return unquote(urlparse(url).path.rsplit("/", 1)[-1])
-    return _file_uri_to_path(url).name
+            return unquote(urlparse(url).path.rsplit("/", 1)[-1])
+        return _file_uri_to_path(url).name
+    except (OSError, ValueError):
+        return url.rstrip("/").rsplit("/", 1)[-1]
 
 
 # dcat:mediaType is written as the IANA media-type IRI under this base
@@ -1165,6 +1202,13 @@ def _unresolved_record_references(doc: dict) -> list[str]:
     return sorted(missing)
 
 
+def _omission_list(omissions: Iterable[Omission], limit: int = 10) -> str:
+    """*omissions* on one line for a message: each once, the first *limit*, then how many more."""
+    unique = list(dict.fromkeys(omissions))
+    shown = "; ".join(str(omission) for omission in unique[:limit])
+    return shown + (f"; and {len(unique) - limit} more" if len(unique) > limit else "")
+
+
 def _not_found_locally_note(iris: list[str]) -> str:
     """Why the records in *iris* have no node in the deposit, and how to fetch them."""
     shown = ", ".join(iris[:5]) + (f" and {len(iris) - 5} more" if len(iris) > 5 else "")
@@ -1277,7 +1321,10 @@ def _apply_conformance_jsonld(
                 }
             if dev.get("description"):
                 dev_node["schema:description"] = dev["description"]
-            iso_ts = _unix_to_iso(dev.get("occurred_at"))
+            # An ISO 8601 string, as the schema allows, or a Unix time.
+            iso_ts = _unix_to_iso(
+                dev.get("occurred_at"), what=f"occurred_at of a deviation of {node.get('@id') or 'a record'}"
+            )
             if iso_ts:
                 dev_node["prov:startedAtTime"] = iso_ts
             duration_s = dev.get("duration_s")
@@ -5283,15 +5330,22 @@ class AuthoringWorkspace:
 
         patched = 0
         for record_path in sorted(ds_dir.glob("*.json")):
-            raw = json.loads(record_path.read_text(encoding="utf-8"))
-            ds = raw.get("dataset", {})
-            dists = ds.get("distributions") or []
-            if not dists:
+            # Read as the deposit read it (a BOM is allowed), and leave alone what
+            # is not a dataset record: this runs after a publish, and must not fail.
+            raw = _read_json(record_path)
+            ds = raw.get("dataset") if isinstance(raw, dict) else None
+            if not isinstance(ds, dict):
+                continue
+            dists = ds.get("distributions")
+            if not dists or not isinstance(dists, list):
                 continue
             new_dists: list[dict] = []
             primary_url: str | None = None
             changed = False
             for dist in dists:
+                if not isinstance(dist, dict):
+                    new_dists.append(dist)
+                    continue
                 local_url = dist.get("content_url") or ds.get("access_url") or ""
                 entry = plan.entry_for(local_url)
                 if entry is None or entry.archive:
@@ -5583,6 +5637,19 @@ class AuthoringWorkspace:
         and the dataset records are pointed at the deposited files last (after
         the publish, when there is one).
 
+        A deposit carries every record or none. A record the deposit graph
+        cannot convert, or a distribution entry that is not an object with a
+        ``content_url``, refuses the deposit, a draft too, before anything is
+        sent, and the refusal names each record and why. A time that is no date,
+        such as a Unix time in milliseconds, is only left out, with a warning.
+        Once the files are up, the deposit's file list is checked: every file
+        sent must be on it with its md5, every download URL in the graph under
+        this record must name a file the deposit holds, and every distribution
+        of a member dataset needs a download URL, a file of the deposit or an
+        http(s) URL elsewhere. A publish that fails the check is refused before
+        the DOI is minted; a draft is kept, with a warning that lists the
+        problems.
+
         Each local data file is deposited once, under its own name, however many
         distributions name it. Names are compared as Windows and macOS compare
         them, ignoring case and Unicode normalisation: a file whose name another
@@ -5604,7 +5671,9 @@ class AuthoringWorkspace:
             ``False`` (default) leaves a draft for review: publish it by clicking
             on Zenodo, or re-run with ``publish=True``. Either way the publication
             check runs before Zenodo is contacted, so a refusal leaves no draft
-            behind.
+            behind. With ``True`` the deposit's files are checked after the
+            upload and before the publish, and a draft whose files do not match
+            stays a draft.
         sandbox:
             Use ``sandbox.zenodo.org`` for testing.
         community:
@@ -5700,24 +5769,24 @@ class AuthoringWorkspace:
         # their form, which the placeholders share, and the dataset records take
         # the deposited file URLs only at the end, so the verdict is the one the
         # deposit's own graph gets. That graph is checked again before a DOI is
-        # minted.
-        self._assert_publishable(
-            self._build_zenodo_jsonld(
-                zenodo_record_id=0,
-                prereserved_doi="10.5281/zenodo.RECORD_ID",
-                record_url=f"https://{domain}/records/RECORD_ID",
-                file_plan=plan,
-                title=title,
-                description=description or "",
-                creators=creators,
-                contributors=contributors,
-                license=license or "",
-                keywords=keywords or [],
-                is_version_of=f"https://{domain}/records/{record_id}" if record_id else "",
-            ),
-            nothing_sent=True,
-            draft=not publish,
+        # minted. A record the plan or the graph had to leave out refuses the
+        # deposit first, naming each record and why.
+        omissions = list(plan.omissions)
+        placeholder_graph = self._build_zenodo_jsonld(
+            zenodo_record_id=0,
+            prereserved_doi="10.5281/zenodo.RECORD_ID",
+            record_url=f"https://{domain}/records/RECORD_ID",
+            file_plan=plan,
+            title=title,
+            description=description or "",
+            creators=creators,
+            contributors=contributors,
+            license=license or "",
+            keywords=keywords or [],
+            is_version_of=f"https://{domain}/records/{record_id}" if record_id else "",
+            omissions=omissions,
         )
+        self._assert_publishable(placeholder_graph, omissions=omissions, nothing_sent=True, draft=not publish)
 
         # ── 5. Reconcile with the live deposit ─────────────────────────────────
         # Not done yet: a draft that was published on Zenodo after this
@@ -5824,8 +5893,11 @@ class AuthoringWorkspace:
             # map is built from the plan, not from a folder listing, which on
             # macOS can hand names back in another Unicode form.
             upload_map = {f.path: f.name for f in sorted(data_files, key=lambda f: f.name)}
+            # The md5 of each file as sent, for the check in step 10.
+            sent = {f.name: f.md5 for f in data_files}
             for name in (BATTINFO_LD_FILENAME, _ROCRATE_FILENAME):
                 upload_map[tmpdir / name] = name
+                sent[name] = measured_file(tmpdir / name, name).md5
             # Incremental sync: only files whose content changed are uploaded; unchanged
             # files already on the deposit are kept. Not done yet: a file on the
             # deposit that the map does not name is removed, among them the data
@@ -5841,8 +5913,35 @@ class AuthoringWorkspace:
             shutil.rmtree(tmpdir, ignore_errors=True)
 
         # ── 10. Check the deposit's files ──────────────────────────────────────
-        # Not done yet: the deposit's files are not listed and compared with the
-        # plan, by name and md5, before the deposit is published.
+        # The deposit must hold every file sent, with its md5, and every file
+        # the graph links to under this record; each distribution of a member
+        # dataset needs a download URL, a file of the deposit or an http(s) URL
+        # elsewhere. A publish is refused here, before the DOI exists; a draft
+        # is left as it is, with the problems reported.
+        try:
+            listing: object = client.list_files(deposit_id)
+            file_problems = deposit_file_problems(
+                jsonld, files_base=f"{record_url}/files", listing=listing, sent=sent,
+            )
+        except ZenodoError as exc:
+            file_problems = [f"the deposit's files could not be listed ({exc})"]
+        if file_problems and publish:
+            raise RuntimeError(
+                "Refusing to publish: the deposit does not hold the files its records point at: "
+                + "; ".join(file_problems)
+                + f". Nothing was published. The draft ({draft_url}) is recorded in "
+                ".battinfo/zenodo.json, so the next ws.zenodo() updates it."
+            )
+        if file_problems:
+            warnings.warn(
+                f"The Zenodo draft {draft_url} does not hold the files its records point at: "
+                + "; ".join(file_problems)
+                + ". Do not publish it as it is.",
+                stacklevel=2,
+            )
+            print(f"  WARNING: the draft does not hold the files its records point at ({len(file_problems)}):")
+            for problem in file_problems:
+                print(f"    {problem}")
 
         # ── 11. and 12. Publish, and record the deposit as published ───────────
         doi        = prereserved_doi
@@ -6017,7 +6116,10 @@ class AuthoringWorkspace:
         Without a ``title`` the preview carries the automatic title
         :meth:`zenodo` would give the deposit, and without ``creators`` the
         creators it would find (see :meth:`zenodo`); with none, the checks
-        report it, since :meth:`zenodo` refuses such a deposit.
+        report it, since :meth:`zenodo` refuses such a deposit. A record the
+        deposit would leave out, because it cannot be converted or a
+        distribution entry of it names no file, is listed as an error too,
+        with the reason.
 
         Parameters
         ----------
@@ -6052,6 +6154,9 @@ class AuthoringWorkspace:
         # them. The graph needs only the names, so the files are not read.
         plan = self._deposit_file_plan(records_dir, measure=False)
 
+        # What the plan and the graph leave out is listed below as errors, since
+        # ws.zenodo() refuses a deposit over any of it.
+        omissions = list(plan.omissions)
         jsonld = self._build_zenodo_jsonld(
             zenodo_record_id=0,
             prereserved_doi="10.5281/zenodo.RECORD_ID",
@@ -6065,6 +6170,7 @@ class AuthoringWorkspace:
             keywords=keywords or [],
             version=version or "",
             is_version_of=is_version_of or "",
+            omissions=omissions,
         )
 
         out = Path(output) if output else self._root / "battinfo.preview.jsonld"
@@ -6080,7 +6186,8 @@ class AuthoringWorkspace:
             report = validate_publication_report(jsonld, policy="publisher")
             deposit_records, replaced_legacy = _read_deposit_record_sets(records_dir)
             _print_replaced_legacy_parameter_sets(replaced_legacy)
-            errors = [i.message for i in report.issues if i.severity == "error"] + [
+            errors = [f"left out of the deposit: {omission}" for omission in dict.fromkeys(omissions)]
+            errors += [i.message for i in report.issues if i.severity == "error"] + [
                 f"parameter set {problem}"
                 for problem in _parameter_set_publication_errors(deposit_records)
             ]
@@ -6096,7 +6203,10 @@ class AuthoringWorkspace:
                     print(f"    ERROR   {message}")
                 for i in warnings:
                     print(f"    warning {i.message}")
-            unresolved = _unresolved_record_references(jsonld)
+            # A record left out above has no node because it could not be
+            # converted, not because it is missing locally.
+            left_out = {omission.record for omission in omissions}
+            unresolved = [iri for iri in _unresolved_record_references(jsonld) if iri not in left_out]
             if unresolved:
                 print(f"  {_not_found_locally_note(unresolved)}")
         except Exception as exc:  # noqa: BLE001 — preview must still write + return its path
@@ -6108,17 +6218,35 @@ class AuthoringWorkspace:
         print(f"  Data files:  {len(plan.deposited_names())}")
         return out
 
-    def _assert_publishable(self, jsonld: dict, *, nothing_sent: bool = False, draft: bool = False) -> None:
+    def _assert_publishable(
+        self,
+        jsonld: dict,
+        *,
+        omissions: Iterable[Omission] = (),
+        nothing_sent: bool = False,
+        draft: bool = False,
+    ) -> None:
         """Fail closed before minting an irreversible DOI: refuse to publish a record that has
         validation errors, or a distribution whose data file is missing from the deposit (R-7).
 
-        Missing data files are checked from the most recent deposit file plan
-        (:meth:`_deposit_file_plan`). ``nothing_sent`` says in the refusal that no
+        *omissions* are what the deposit file plan and the deposit graph left out
+        (``plan.omissions``, and the list :meth:`_build_zenodo_jsonld` fills):
+        any at all refuses, naming each record and why, before the rest is
+        checked. Missing data files are checked from the most recent deposit file
+        plan (:meth:`_deposit_file_plan`). ``nothing_sent`` says in the refusal that no
         deposit was made (the check :meth:`zenodo` runs before it contacts Zenodo).
         With ``draft`` the refusal is of the deposit itself: :meth:`zenodo` checks a
         draft as it checks a publish, since a draft is one click from published."""
         verb, doing = ("deposit", "depositing") if draft else ("publish", "publishing")
         sent_note = " Nothing was sent to Zenodo." if nothing_sent else ""
+        left_out = list(dict.fromkeys(omissions))
+        if left_out:
+            records = len({(omission.kind, omission.record) for omission in left_out})
+            raise RuntimeError(
+                f"Refusing to {verb}: {records} record(s) could not be converted in full, so the deposit "
+                f"would leave out what it could not convert: {_omission_list(left_out)}. Fix or remove "
+                f"these records, then re-run.{sent_note}"
+            )
         missing = getattr(self, "_missing_data_files", [])
         if missing:
             raise RuntimeError(
@@ -6192,62 +6320,77 @@ class AuthoringWorkspace:
         and kept for zenodo() and publish to act on; without it the files are only
         planned (the up-front count in publish()). Without *measure* the files are
         not read.
+
+        Nothing is skipped in silence. A record file that cannot be read, and a
+        distribution entry that is not an object with a ``content_url``, become
+        omissions (``plan.omissions``, printed with *report*): :meth:`zenodo`
+        refuses the deposit over them, and :meth:`preview_jsonld` lists them as
+        errors. A record whose body is not an object is left to the deposit
+        graph, which names it the same way.
         """
+        omissions: list[Omission] = []
+
+        def _saved(folder: str) -> list[tuple[Path, dict]]:
+            """The records saved under *folder*, with their files, in file order."""
+            saved: list[tuple[Path, dict]] = []
+            sub_dir = records_dir / folder
+            for path in sorted(sub_dir.glob("*.json")) if sub_dir.is_dir() else []:
+                try:
+                    record = _read_json(path)
+                except (OSError, ValueError) as exc:
+                    omissions.append(Omission(folder, path.name, f"its file cannot be read ({exc})"))
+                    continue
+                if isinstance(record, dict):
+                    saved.append((path, record))
+            return saved
+
         # Map dataset IRI → test kind via test records (test.dataset_ids), with the
         # dataset's own about naming its test as the fallback, the same links the
         # deposit graph uses to pick each file's <kind>.zip.
+        tests = _saved("test")
         ds_to_kind: dict[str, str] = {}
         test_kind: dict[str, str] = {}
-        test_dir = records_dir / "test"
-        if test_dir.exists():
-            for f in sorted(test_dir.glob("*.json")):
-                try:
-                    raw  = json.loads(f.read_text(encoding="utf-8"))
-                    test = raw.get("test", {})
-                    kind = test.get("kind", "other")
-                    if test.get("id"):
-                        test_kind[test["id"]] = kind
-                    for ds_id in (test.get("dataset_ids") or []):
-                        ds_to_kind[ds_id] = kind
-                except Exception:
-                    continue
+        for _path, raw in tests:
+            test = raw.get("test")
+            if not isinstance(test, dict):
+                continue
+            kind = str(test.get("kind") or "other")
+            if isinstance(test.get("id"), str) and test["id"]:
+                test_kind[test["id"]] = kind
+            dataset_ids = test.get("dataset_ids")
+            for ds_id in dataset_ids if isinstance(dataset_ids, list) else []:
+                if isinstance(ds_id, str):
+                    ds_to_kind[ds_id] = kind
 
         # The local data file locations, as the records give them, in record order.
         # Nothing here touches a data file: the plan reads each location as text
-        # before it asks the file system about it.
+        # before it asks the file system about it. A distribution entry that names
+        # no file is an omission; the dataset's other files are still planned.
         locations: list[tuple[str, str]] = []  # (content_url, kind)
-        ds_dir = records_dir / "dataset"
-        if ds_dir.exists():
-            for ds_file in sorted(ds_dir.glob("*.json")):
-                try:
-                    raw   = json.loads(ds_file.read_text(encoding="utf-8"))
-                    ds    = raw.get("dataset", {})
-                    ds_id = ds.get("id", "")
-                    kind  = ds_to_kind.get(ds_id) or next(
-                        (test_kind[a] for a in (ds.get("about") or []) if a in test_kind),
-                        "other",
-                    )
-                    for dist in (ds.get("distributions") or []):
-                        url = dist.get("content_url") or ""
-                        if url.startswith("file://"):
-                            locations.append((url, kind))
-                except Exception:
-                    continue
+        for record_path, raw in _saved("dataset"):
+            ds = raw.get("dataset")
+            if not isinstance(ds, dict):
+                continue
+            ds_id = ds["id"] if isinstance(ds.get("id"), str) and ds["id"] else ""
+            about = ds.get("about")
+            kind = ds_to_kind.get(ds_id) or next(
+                (test_kind[a] for a in (about if isinstance(about, list) else [])
+                 if isinstance(a, str) and a in test_kind),
+                "other",
+            )
+            usable, problems = dataset_distributions(ds)
+            omissions.extend(Omission("dataset", ds_id or record_path.name, problem) for problem in problems)
+            for dist in usable:
+                url = dist["content_url"]
+                if url.startswith("file://"):
+                    locations.append((url, kind))
 
         # ── Actionable artifacts (Layer B) ─────────────────────────────────────
         # Only files the user has explicitly placed in the workspace are published;
         # artifacts that live elsewhere are flagged (warn, never block) and left out
         # rather than auto-copied, so publication contains exactly what was opted in.
         from battinfo.publication import plan_artifact_inclusion  # noqa: PLC0415
-        artifact_records: list[dict] = []
-        for sub in ("test-protocol", "test"):
-            sub_dir = records_dir / sub
-            if sub_dir.exists():
-                for f in sorted(sub_dir.glob("*.json")):
-                    try:
-                        artifact_records.append(json.loads(f.read_text(encoding="utf-8")))
-                    except Exception:
-                        continue
+        artifact_records = [raw for _path, raw in _saved("test-protocol")] + [raw for _path, raw in tests]
         artifact_files, artifact_warnings = plan_artifact_inclusion(artifact_records, self._root)
 
         plan = build_deposit_file_plan(
@@ -6255,6 +6398,7 @@ class AuthoringWorkspace:
             root=self._root,
             artifacts=artifact_files,
             artifact_warnings=artifact_warnings,
+            omissions=omissions,
             recorded_names=self._recorded_deposit_names(),
             # A data file never takes the name of the deposit's own metadata files.
             reserved_names=(BATTINFO_LD_FILENAME, _ROCRATE_FILENAME),
@@ -6267,6 +6411,8 @@ class AuthoringWorkspace:
             # file that was never uploaded). Warn now; block publish later (R-7).
             for path in plan.missing:
                 print(f"  WARNING: data file for a distribution is missing (not uploaded): {path}")
+            for omission in plan.omissions:
+                print(f"  WARNING: left out of the deposit: {omission}")
             # Surfaced to zenodo()/publish so publishing can fail closed on an incomplete deposit.
             self._missing_data_files = list(plan.missing)
             self._artifact_warnings = list(plan.artifact_warnings)
@@ -6312,6 +6458,7 @@ class AuthoringWorkspace:
         is_version_of: str = "",
         referenced_records: dict[str, builtins.list[dict]] | None = None,
         file_plan: DepositFilePlan | None = None,
+        omissions: builtins.list[Omission] | None = None,
     ) -> dict:
         """Assemble the consolidated battinfo JSON-LD from canonical record dicts.
 
@@ -6322,6 +6469,16 @@ class AuthoringWorkspace:
         interactive authoring flow (:meth:`_build_zenodo_jsonld`) and the
         programmatic contribution flow (``publication.build_zenodo_package``) emit
         byte-identical graphs.
+
+        A record the builder cannot convert (one that is not an object, has no
+        id, or raises while its node is built) and a distribution entry that is
+        not an object with a ``content_url`` are left out of the graph with a
+        warning that names them and why. Given an ``omissions`` list, the
+        builder appends each to it and returns the graph, for the caller to
+        refuse (:meth:`zenodo`) or report (:meth:`preview_jsonld`). Without
+        one it raises a ``ValueError`` naming them all, so no caller publishes
+        a graph with records missing. A time it cannot read as a date is left
+        out with a warning, not the record that holds it (see ``_unix_to_iso``).
 
         A local file's download URL is ``{files_base_url}/{name}`` with the name
         percent-encoded. With ``file_plan`` (a workspace deposit) a distribution
@@ -6425,6 +6582,43 @@ class AuthoringWorkspace:
 
             return artifact_distribution_node(art, locator_url=_artifact_download_url)
 
+        # ── Records left out, never in silence ─────────────────────────────────
+        # A record that cannot be converted is named, with the reason, in a
+        # warning and in the omissions the caller gets back, or in the
+        # ValueError raised once the graph is built when the caller asked for
+        # none: a deposit with records missing must not be published.
+        _omitted: builtins.list[Omission] = []
+
+        def _omit(kind: str, record: str, reason: object, *, whole: bool = True) -> None:
+            """Leave *record* (or, without *whole*, a part of it) out of the graph, and say so."""
+            if isinstance(reason, BaseException):
+                reason = f"{type(reason).__name__}: {reason}"
+            omission = Omission(kind, record, str(reason))
+            if omission in _omitted:
+                return
+            _omitted.append(omission)
+            what = (
+                f"The {kind} record {record} could not be converted to JSON-LD and is left out"
+                if whole else f"Part of the {kind} record {record} is left out"
+            )
+            warnings.warn(f"{what} of the deposit graph: {omission.reason}", stacklevel=3)
+
+        def _record_body(raw: object, key: str, kind: str, index: int) -> tuple[dict, str] | None:
+            """A record's body (``raw[key]``) and IRI, or ``None``, and an omission, without them.
+
+            A record without an IRI is named by its place among the records of
+            its kind (``#2``).
+            """
+            body = raw.get(key) if isinstance(raw, dict) else None
+            if not isinstance(body, dict):
+                _omit(kind, f"#{index + 1}", f"not a {kind} record (no '{key}' object)")
+                return None
+            iri = body.get("id")
+            if not isinstance(iri, str) or not iri:
+                _omit(kind, f"#{index + 1}", "it has no id")
+                return None
+            return body, iri
+
         # ── Load cell specs ────────────────────────────────────────────────────
         # One canonical builder (shared with the resolver path): the physical
         # @type stack via isDescriptionFor expresses chemistry/format (no
@@ -6434,50 +6628,40 @@ class AuthoringWorkspace:
         # chemistry/format keyword strings, collected from the records (the node
         # no longer carries the verbatim literals).
         _spec_keywords: set[str] = set()
-        _ct_recs = record_sets.get("cell-spec", [])
-        if _ct_recs:
-            for raw in _ct_recs:
-                prod = raw.get("cell_spec", {}) if isinstance(raw, dict) else {}
-                iri = prod.get("id", "") if isinstance(prod, dict) else ""
-                if not iri:
-                    continue
-                try:
-                    spec_nodes[iri] = build_cell_spec_node(raw)
-                except Exception as exc:  # noqa: BLE001 - one bad record must not sink the deposit
-                    warnings.warn(
-                        f"cell-spec record '{iri}' could not be converted to "
-                        f"JSON-LD and will be OMITTED from the publication graph: {exc}",
-                        stacklevel=2,
-                    )
-                    continue
-                for _field in ("chemistry", "cell_format"):
-                    if prod.get(_field):
-                        _spec_keywords.add(str(prod[_field]))
+        for _index, raw in enumerate(record_sets.get("cell-spec", []) or []):
+            _found = _record_body(raw, "cell_spec", "cell-spec", _index)
+            if _found is None:
+                continue
+            prod, iri = _found
+            try:
+                spec_nodes[iri] = build_cell_spec_node(raw)
+            except Exception as exc:  # noqa: BLE001 - collected; the deposit is refused, not sunk
+                _omit("cell-spec", iri, exc)
+                continue
+            for _field in ("chemistry", "cell_format"):
+                if prod.get(_field):
+                    _spec_keywords.add(str(prod[_field]))
 
         # ── Map cell instance IRI → {cell_spec_id, serial_number} ──────────────────
         instances: dict[str, dict] = {}
-        _ci_recs = record_sets.get("cell-instance", [])
-        if _ci_recs:
-            for raw in _ci_recs:
-                try:
-                    ci  = raw.get("cell_instance", {})
-                    iri = ci.get("id", "")
-                    if iri:
-                        instances[iri] = {
-                            "name":           ci.get("name", ""),
-                            "serial_number":  ci.get("serial_number", ""),
-                            "cell_spec_id":        ci.get("cell_spec_id", ""),
-                            "grade":          ci.get("grade"),
-                            "manufactured_at": ci.get("manufactured_at"),
-                            "expires_at":      ci.get("expires_at"),
-                            "batch_id":        ci.get("batch_id"),
-                            "conformance":    ci.get("conformance"),
-                            # The electrode records built into this cell, kept
-                            # whole so the node builder can role-type them.
-                            "cell_instance":  ci,
-                        }
-                except Exception:
-                    continue
+        for _index, raw in enumerate(record_sets.get("cell-instance", []) or []):
+            _found = _record_body(raw, "cell_instance", "cell-instance", _index)
+            if _found is None:
+                continue
+            ci, iri = _found
+            instances[iri] = {
+                "name":           ci.get("name", ""),
+                "serial_number":  ci.get("serial_number", ""),
+                "cell_spec_id":        ci.get("cell_spec_id", ""),
+                "grade":          ci.get("grade"),
+                "manufactured_at": ci.get("manufactured_at"),
+                "expires_at":      ci.get("expires_at"),
+                "batch_id":        ci.get("batch_id"),
+                "conformance":    ci.get("conformance"),
+                # The electrode records built into this cell, kept
+                # whole so the node builder can role-type them.
+                "cell_instance":  ci,
+            }
 
         # Published records this deposit may point at without carrying them:
         # the copies a workspace keeps of a cell or test spec it referenced in
@@ -6616,10 +6800,12 @@ class AuthoringWorkspace:
         test_nodes: list[dict] = []
         _test_recs = record_sets.get("test", [])
         if _test_recs:
-            for raw in _test_recs:
+            for _index, raw in enumerate(_test_recs):
+                _found = _record_body(raw, "test", "test", _index)
+                if _found is None:
+                    continue
+                test, test_iri = _found
                 try:
-                    test     = raw.get("test", {})
-                    test_iri = test.get("id", "")
                     cell_id  = test.get("cell_id", "")
                     protocol = test.get("protocol_name", "")
                     instrument = test.get("instrument_name", "")
@@ -6630,12 +6816,11 @@ class AuthoringWorkspace:
                         "protocol":   protocol,
                         "test_iri":   test_iri,
                     }
-                    if test_iri:
-                        test_info[test_iri] = _tinfo
+                    test_info[test_iri] = _tinfo
                     for ds_id in (test.get("dataset_ids") or []):
                         ds_to_test[ds_id] = dict(_tinfo)
 
-                    if test_iri and cell_id:
+                    if cell_id:
                         tnode: dict = {
                             "@type":         ["BatteryTest", "schema:Action", "prov:Activity"],
                             "@id":           test_iri,
@@ -6707,9 +6892,10 @@ class AuthoringWorkspace:
                             tnode["prov:generated"] = outputs
                         # Activity timing (measured period, sourced from the data) —
                         # PROV start/end plus schema.org mirror so the test is placed in
-                        # time without parsing the time-series.
-                        _start = _unix_to_iso(int(test["started_at"])) if str(test.get("started_at") or "").isdigit() else test.get("started_at")
-                        _end = _unix_to_iso(int(test["ended_at"])) if str(test.get("ended_at") or "").isdigit() else test.get("ended_at")
+                        # time without parsing the time-series. A time that is no date
+                        # (one in milliseconds) is left out with a warning, not the test.
+                        _start = _unix_to_iso(test.get("started_at") or None, what=f"started_at of test {test_iri}")
+                        _end = _unix_to_iso(test.get("ended_at") or None, what=f"ended_at of test {test_iri}")
                         if _start:
                             tnode["prov:startedAtTime"] = _start
                             tnode["schema:startTime"] = _start
@@ -6726,7 +6912,10 @@ class AuthoringWorkspace:
                                 _artifact_distribution(a) for a in raw["artifacts"] if isinstance(a, dict)
                             ]
                         test_nodes.append(tnode)
-                except Exception:
+                    else:
+                        _omit("test", test_iri, "it names no cell (cell_id)")
+                except Exception as exc:  # noqa: BLE001 - collected; the deposit is refused, not sunk
+                    _omit("test", test_iri, exc)
                     continue
 
         # ── Build test spec (protocol) nodes ───────────────────────────────────
@@ -6739,12 +6928,14 @@ class AuthoringWorkspace:
         # The importer keys off ``BatteryTest``/``BatteryCellSpecification`` types
         # (see import_), so these nodes are ignored on round-trip — safe to add.
         test_spec_nodes: list[dict] = []
-        for raw in record_sets.get("test-protocol", []):
-            if not isinstance(raw, dict):
+        for _index, raw in enumerate(record_sets.get("test-protocol", []) or []):
+            _found = _record_body(raw, "test_spec", "test-protocol", _index)
+            if _found is None:
                 continue
             try:
                 snode = test_protocol_node(raw, locator_url=_artifact_download_url)
-            except Exception:
+            except Exception as exc:  # noqa: BLE001 - collected; the deposit is refused, not sunk
+                _omit("test-protocol", _found[1], exc)
                 continue
             if snode is not None:
                 test_spec_nodes.append(snode)
@@ -6754,60 +6945,62 @@ class AuthoringWorkspace:
         # "processed" file plus the original "raw" instrument file kept for
         # provenance. Collect every distribution, not just the last.
         ds_meta: dict[str, dict] = {}
-        _ds_recs = record_sets.get("dataset", [])
-        if _ds_recs:
-            for raw in _ds_recs:
-                try:
-                    ds    = raw.get("dataset", {})
-                    ds_id = ds.get("id", "")
-                    ti    = dict(ds_to_test.get(ds_id, {}))
-                    own_about = ds_about.get(ds_id, [])
-                    # No test lists this dataset: take the test and cell from the
-                    # dataset's own about (first entry of each kind is the primary,
-                    # matching Dataset.to_record's ordering).
-                    if not ti.get("test_iri"):
-                        _t = next((a for a in own_about if _about_kind(a) == "test"), "")
-                        if _t:
-                            ti = {**test_info.get(_t, {}), **{k: v for k, v in ti.items() if v}}
-                            ti["test_iri"] = _t
-                    if not ti.get("cell_id"):
-                        ti["cell_id"] = next(
-                            (a for a in own_about if _about_kind(a) == "cell"), ""
-                        ) or test_info.get(ti.get("test_iri", ""), {}).get("cell_id", "")
-                    dists = []
-                    for dist in (ds.get("distributions") or []):
-                        url   = dist.get("content_url") or ""
-                        # A deposited file is named as the deposit names it.
-                        _entry = file_plan.entry_for(url) if file_plan is not None else None
-                        fname = _entry.name if _entry is not None else _distribution_file_name(url)
-                        dists.append({
-                            "filename":     fname,
-                            "content_url":  url,
-                            "format":       dist.get("encoding_format", ""),
-                            # The whole checksum block, algorithm included. Carrying
-                            # only the value here is what let an md5 digest be
-                            # published under the sha256 term downstream.
-                            "checksum":     dist.get("checksum") or {},
-                            "role":         dist.get("role", ""),
-                            "description":  dist.get("description", ""),
-                            "content_size": dist.get("content_size", ""),
-                        })
-                    ds_meta[ds_id] = {
-                        "name":      ds.get("name", ""),
-                        "cell_id":   ti.get("cell_id", ""),
-                        "test_iri":  ti.get("test_iri", ""),
-                        "kind":      ti.get("kind", ""),
-                        # schema:about: the record's own about first, then the cell
-                        # the reverse (test.dataset_ids) mapping found.
-                        "about":     list(dict.fromkeys(
-                            [*own_about, *([ti["cell_id"]] if ti.get("cell_id") else [])]
-                        )),
-                        "is_series": is_dataset_series(ds.get("additional_type")),
-                        "dists":     dists,
-                        "ds":        ds,   # full dataset record for discoverability fields
-                    }
-                except Exception:
-                    continue
+        for _index, raw in enumerate(record_sets.get("dataset", []) or []):
+            _found = _record_body(raw, "dataset", "dataset", _index)
+            if _found is None:
+                continue
+            ds, ds_id = _found
+            ti    = dict(ds_to_test.get(ds_id, {}))
+            own_about = ds_about.get(ds_id, [])
+            # No test lists this dataset: take the test and cell from the
+            # dataset's own about (first entry of each kind is the primary,
+            # matching Dataset.to_record's ordering).
+            if not ti.get("test_iri"):
+                _t = next((a for a in own_about if _about_kind(a) == "test"), "")
+                if _t:
+                    ti = {**test_info.get(_t, {}), **{k: v for k, v in ti.items() if v}}
+                    ti["test_iri"] = _t
+            if not ti.get("cell_id"):
+                ti["cell_id"] = next(
+                    (a for a in own_about if _about_kind(a) == "cell"), ""
+                ) or test_info.get(ti.get("test_iri", ""), {}).get("cell_id", "")
+            # An entry that is not an object with a content_url names no file:
+            # it is left out and reported, the dataset's other files kept.
+            _usable, _problems = dataset_distributions(ds)
+            for _problem in _problems:
+                _omit("dataset", ds_id, _problem, whole=False)
+            dists = []
+            for dist in _usable:
+                url   = dist["content_url"]
+                # A deposited file is named as the deposit names it.
+                _entry = file_plan.entry_for(url) if file_plan is not None else None
+                fname = _entry.name if _entry is not None else _distribution_file_name(url)
+                dists.append({
+                    "filename":     fname,
+                    "content_url":  url,
+                    "format":       dist.get("encoding_format", ""),
+                    # The whole checksum block, algorithm included. Carrying
+                    # only the value here is what let an md5 digest be
+                    # published under the sha256 term downstream.
+                    "checksum":     dist.get("checksum") or {},
+                    "role":         dist.get("role", ""),
+                    "description":  dist.get("description", ""),
+                    "content_size": dist.get("content_size", ""),
+                })
+            ds_meta[ds_id] = {
+                "name":      ds.get("name", ""),
+                "cell_id":   ti.get("cell_id", ""),
+                "test_iri":  ti.get("test_iri", ""),
+                "kind":      ti.get("kind", ""),
+                # schema:about: the record's own about first, then the cell
+                # the reverse (test.dataset_ids) mapping found.
+                "about":     list(dict.fromkeys(
+                    [*own_about, *([ti["cell_id"]] if ti.get("cell_id") else [])]
+                )),
+                "is_series": is_dataset_series(ds.get("additional_type")),
+                "dists":     dists,
+                "ds":        ds,   # full dataset record for discoverability fields
+            }
 
         # ── Build member dataset nodes (one dcat:Dataset per test result) ──────
         # The Zenodo record is a CATALOG; each test result is its own dcat:Dataset
@@ -6959,7 +7152,7 @@ class AuthoringWorkspace:
             _ds = meta.get("ds") or {}
             if _ds.get("description"):
                 member["schema:description"] = _ds["description"]
-            if _ds.get("access_url", "").startswith(("http://", "https://")):
+            if isinstance(_ds.get("access_url"), str) and _ds["access_url"].startswith(("http://", "https://")):
                 # Only publish a web access URL here; a local file:// directory URL
                 # (local-publication case) is set by that path's adapter instead.
                 member["schema:url"] = _ds["access_url"]
@@ -6988,13 +7181,12 @@ class AuthoringWorkspace:
                 member["schema:measurementTechnique"] = list(_ds["measurement_techniques"])
             if _ds.get("measurement_methods"):
                 member["schema:measurementMethod"] = list(_ds["measurement_methods"])
-            # Dates: convert Unix timestamps to ISO-8601; pass ISO strings through.
-            def _as_iso(v: object) -> object:
-                return _unix_to_iso(int(v)) if isinstance(v, (int, float)) else v
-            if _ds.get("created_at"):
-                member["schema:dateCreated"] = _as_iso(_ds["created_at"])
-            if _ds.get("modified_at"):
-                member["schema:dateModified"] = _as_iso(_ds["modified_at"])
+            # Dates: Unix times as ISO 8601, ISO strings as they are. A time that
+            # is no date (one in milliseconds) is left out with a warning.
+            for _field, _term in (("created_at", "schema:dateCreated"), ("modified_at", "schema:dateModified")):
+                _when = _unix_to_iso(_ds.get(_field) or None, what=f"{_field} of dataset {ds_id}")
+                if _when:
+                    member[_term] = _when
             # NOTE: no per-member schema:datePublished — a member dataset isn't published
             # independently; the deposit's publication date lives on the catalog (set at
             # Zenodo publish). The *measured* period is schema:temporalCoverage below,
@@ -7020,40 +7212,44 @@ class AuthoringWorkspace:
         instance_nodes: list[dict] = []
         for cell_iri, inst in sorted(instances.items()):
             cell_spec_id   = inst.get("cell_spec_id", "")
-            spec_node = spec_nodes.get(cell_spec_id, {})
-            # Inherit the physical type from the spec's isDescriptionFor
-            phys_type = spec_node.get("isDescriptionFor", {}).get("@type", "BatteryCell")
+            try:
+                spec_node = spec_nodes.get(cell_spec_id, {})
+                # Inherit the physical type from the spec's isDescriptionFor
+                phys_type = spec_node.get("isDescriptionFor", {}).get("@type", "BatteryCell")
 
-            inode: dict = {
-                "@type": phys_type,
-                "@id":   cell_iri,
-                "dcterms:conformsTo":  {"@id": cell_spec_id},   # instance-of link
-                "hasDescription":      {"@id": cell_spec_id},
-                "schema:isVariantOf":  {"@id": cell_spec_id},   # ProductModel persona
-            }
-            # The electrode records this cell was built from. The spec body is in
-            # hand here, so a half cell's counter electrode also carries
-            # ReferenceElectrode — the reading an instance cannot make alone.
-            inode.update(
-                electrode_role_links(
-                    inst.get("cell_instance") or {}, cell_spec_bodies.get(cell_spec_id)
+                inode: dict = {
+                    "@type": phys_type,
+                    "@id":   cell_iri,
+                    "dcterms:conformsTo":  {"@id": cell_spec_id},   # instance-of link
+                    "hasDescription":      {"@id": cell_spec_id},
+                    "schema:isVariantOf":  {"@id": cell_spec_id},   # ProductModel persona
+                }
+                # The electrode records this cell was built from. The spec body is in
+                # hand here, so a half cell's counter electrode also carries
+                # ReferenceElectrode — the reading an instance cannot make alone.
+                inode.update(
+                    electrode_role_links(
+                        inst.get("cell_instance") or {}, cell_spec_bodies.get(cell_spec_id)
+                    )
                 )
-            )
-            if inst.get("name"):
-                inode["schema:name"] = inst["name"]
-            if inst.get("serial_number"):
-                inode["schema:serialNumber"] = inst["serial_number"]
-            if inst.get("grade"):
-                inode["schema:quality"] = inst["grade"]
-            if inst.get("manufactured_at"):
-                inode["schema:productionDate"] = _typed_date(inst["manufactured_at"])
-            if inst.get("expires_at"):
-                inode["schema:expires"] = _typed_date(inst["expires_at"])
-            if inst.get("batch_id"):
-                inode["schema:identifier"] = inst["batch_id"]
-            # Conformance assessment (vs the cell spec) as a DQV annotation; the
-            # instance-of link above already ties the cell to its spec.
-            _apply_conformance_jsonld(inode, cell_spec_id, inst.get("conformance"), add_spec_links=False)
+                if inst.get("name"):
+                    inode["schema:name"] = inst["name"]
+                if inst.get("serial_number"):
+                    inode["schema:serialNumber"] = inst["serial_number"]
+                if inst.get("grade"):
+                    inode["schema:quality"] = inst["grade"]
+                if inst.get("manufactured_at"):
+                    inode["schema:productionDate"] = _typed_date(inst["manufactured_at"])
+                if inst.get("expires_at"):
+                    inode["schema:expires"] = _typed_date(inst["expires_at"])
+                if inst.get("batch_id"):
+                    inode["schema:identifier"] = inst["batch_id"]
+                # Conformance assessment (vs the cell spec) as a DQV annotation; the
+                # instance-of link above already ties the cell to its spec.
+                _apply_conformance_jsonld(inode, cell_spec_id, inst.get("conformance"), add_spec_links=False)
+            except Exception as exc:  # noqa: BLE001 - collected; the deposit is refused, not sunk
+                _omit("cell-instance", cell_iri, exc)
+                continue
             instance_nodes.append(inode)
 
         # ── Build typed stubs for externally-defined cell specs ────────────────
@@ -7294,6 +7490,18 @@ class AuthoringWorkspace:
         for _term, _val in TEST_METHOD_CONTEXT_TERMS.items():
             context.setdefault(_term, _val)
 
+        # What was left out goes back to a caller that asked for it, and stops
+        # any other: a graph with records missing is not published.
+        if _omitted:
+            if omissions is None:
+                _records = len({(omission.kind, omission.record) for omission in _omitted})
+                raise ValueError(
+                    f"{_records} record(s) could not be converted in full to JSON-LD, so a graph "
+                    f"of them would be incomplete: {_omission_list(_omitted)}. Fix or remove these "
+                    "records, then build the graph again."
+                )
+            omissions.extend(omission for omission in _omitted if omission not in omissions)
+
         doc = {"@context": context, "@graph": graph}
         # Fail fast if the assembled document is not valid JSON-LD, rather than
         # discovering it only after upload (or in a downstream consumer).
@@ -7315,6 +7523,7 @@ class AuthoringWorkspace:
         version: str = "",
         is_version_of: str = "",
         file_plan: DepositFilePlan | None = None,
+        omissions: builtins.list[Omission] | None = None,
     ) -> dict:
         """Read this workspace's saved records and assemble the deposit JSON-LD.
 
@@ -7323,7 +7532,9 @@ class AuthoringWorkspace:
         and the copies of published records it references from
         ``.battinfo/references/`` (read for stub nodes, never deposited).
         :meth:`zenodo` and :meth:`preview_jsonld` pass the deposit's ``file_plan``
-        (:meth:`_deposit_file_plan`), which names every local file.
+        (:meth:`_deposit_file_plan`), which names every local file, and an
+        ``omissions`` list that collects the records the graph leaves out;
+        without one a record left out raises a ``ValueError``.
         """
         record_sets, _replaced = _read_deposit_record_sets(self._ws.source_root)
         return self._assemble_zenodo_jsonld(
@@ -7334,6 +7545,7 @@ class AuthoringWorkspace:
             record_url=record_url,
             data_filenames=data_filenames,
             file_plan=file_plan,
+            omissions=omissions,
             title=title,
             description=description,
             creators=creators,

@@ -13,6 +13,7 @@ The registry is mocked (sockets are disabled in the test suite).
 from __future__ import annotations
 
 import copy
+import hashlib
 import io
 import json
 import urllib.error
@@ -353,6 +354,7 @@ class _FakeZenodo:
     def __init__(self) -> None:
         self.calls: list[str] = []
         self.uploaded: dict[str, str] = {}
+        self.md5: dict[str, str] = {}
 
     def client(self, *args: object, **kwargs: object) -> _FakeZenodo:
         self.calls.append("client")
@@ -365,7 +367,15 @@ class _FakeZenodo:
     def sync_files(self, deposit_id: int, upload_map: dict) -> dict:
         self.calls.append("upload")
         self.uploaded = {name: Path(path).read_text(encoding="utf-8") for path, name in upload_map.items()}
+        self.md5 = {
+            name: hashlib.md5(Path(path).read_bytes()).hexdigest()  # noqa: S324 - Zenodo's checksum
+            for path, name in upload_map.items()
+        }
         return {"uploaded": sorted(self.uploaded), "kept": [], "removed": []}
+
+    def list_files(self, deposit_id: int) -> list[dict]:
+        self.calls.append("list")
+        return [{"filename": name, "checksum": md5} for name, md5 in self.md5.items()]
 
     def update_metadata(self, deposit_id: int, metadata: dict) -> dict:
         self.calls.append("metadata")
@@ -413,8 +423,9 @@ def test_a_publish_on_a_registry_only_cell_deposits_its_stub(
     ws = _workspace_on_registry_cell(tmp_path, REGISTRY)
     result = ws.zenodo(publish=True, token="placeholder", title="NEW-1", creators=CREATORS)
     assert result.published
-    # The metadata goes up as soon as the deposit exists, before any file.
-    assert zenodo.calls == ["client", "create", "metadata", "upload", "publish"]
+    # The metadata goes up as soon as the deposit exists, before any file, and
+    # the deposit's files are listed and checked before the publish.
+    assert zenodo.calls == ["client", "create", "metadata", "upload", "list", "publish"]
     # The data file and the two metadata files; the reference copies stay local.
     assert sorted(zenodo.uploaded) == ["battinfo.json", "ro-crate-metadata.json", "run.bdf.csv"]
     deposited = json.loads(zenodo.uploaded["battinfo.json"])
