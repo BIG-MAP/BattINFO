@@ -6,7 +6,6 @@ import shutil
 from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
-from urllib.parse import unquote, urlparse
 
 if TYPE_CHECKING:
     from battinfo.local_workspace import LocalWorkspace
@@ -17,6 +16,8 @@ from battinfo._util import (
     _as_path,
     _now_unix,
     _sha256,
+    file_uri_to_path,
+    is_file_uri,
     is_local_location,
     workspace_layout_root,
 )
@@ -247,15 +248,8 @@ def _disambiguate_entity_ids(
 
 
 def _path_from_file_uri(uri: str) -> Path | None:
-    parsed = urlparse(uri)
-    if parsed.scheme != "file":
-        return None
-    path_text = unquote(parsed.path)
-    if parsed.netloc:
-        path_text = f"//{parsed.netloc}{path_text}"
-    if path_text.startswith("/") and len(path_text) > 2 and path_text[2] == ":":
-        path_text = path_text[1:]
-    return Path(path_text)
+    """The path a ``file:`` URI names (see :func:`battinfo._util.file_uri_to_path`), or ``None``."""
+    return file_uri_to_path(uri) if is_file_uri(uri) else None
 
 
 def _guess_media_type(value: str | None) -> str | None:

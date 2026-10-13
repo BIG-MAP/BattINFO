@@ -12,6 +12,16 @@ folders are two files in the deposit.
 A record, or a distribution entry, that cannot be read is an
 :class:`Omission`, never a silent skip, and :func:`deposit_file_problems`
 checks the deposit's files against the deposit graph before it is published.
+
+A location in a record is screened from its text before the file system is
+asked about it (:func:`location_path`). A network path outside the workspace
+folder is not read unless the workspace registered the file
+(``.battinfo/deposit-files.json``, see :mod:`battinfo._deposit_index`), and
+a path that goes up a folder with ``..`` is never read. Asking Windows about
+a file on another computer sends that computer the user's network
+credentials, so a record must not make a deposit ask about one the workspace
+did not take in itself. Imported records carry no local location at all:
+``ws.import_()`` keeps only http(s) URLs.
 """
 from __future__ import annotations
 
@@ -19,13 +29,22 @@ import hashlib
 import os
 import re
 import unicodedata
-from collections.abc import Iterable, Mapping
+from collections.abc import Collection, Iterable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 from urllib.parse import unquote
 
-from battinfo._util import file_uri_to_path, is_local_location, path_tail, url_segment
+from battinfo._util import (
+    file_uri_to_path,
+    has_parent_reference,
+    is_local_location,
+    lexical_key,
+    lexically_within,
+    network_host,
+    path_tail,
+    url_segment,
+)
 
 #: Bytes read at a time while a file is measured.
 _CHUNK = 1 << 20
@@ -43,18 +62,64 @@ def name_key(name: str) -> str:
     return unicodedata.normalize("NFC", unicodedata.normalize("NFC", name).casefold())
 
 
-def location_path(location: str, root: Path) -> Path | None:
-    """The local path a record location names, read from its text alone.
+class UnsafeLocation(ValueError):
+    """A record location the screen refuses: nothing may read the file it names.
+
+    ``reason`` completes a sentence that starts with the location. ``host`` is
+    the computer a refused network path names; it is empty for a path that
+    goes up a folder.
+    """
+
+    def __init__(self, location: str, reason: str, *, host: str = "") -> None:
+        super().__init__(f"{location} {reason}")
+        self.location = location
+        self.reason = reason
+        self.host = host
+
+    def refusal(self) -> str:
+        """What was not done with the data file at this location, and why, for a record's report line."""
+        if self.host:
+            return (
+                f"its data file {self.location} {self.reason} and was not added to this workspace "
+                "with ws.add(..., data=...), so it was not read"
+            )
+        return f"its data file {self.location} {self.reason}, so it was not read"
+
+
+def location_path(location: str, root: Path, *, registered: Collection[str] = frozenset()) -> Path | None:
+    """The local path a record location names, screened from its text alone.
 
     *location* is a ``file:`` URI or a plain path, and a relative path is read
-    against *root*. A URL with any other scheme gives ``None``. Nothing here
-    touches the file system.
+    against *root*, the resolved workspace folder. A URL with any other scheme
+    gives ``None``. Nothing here touches the file system: this runs before
+    anything asks it about the file.
+
+    A path that goes up a folder with ``..`` is refused with
+    :class:`UnsafeLocation`: the workspace never writes one, and the text of
+    such a path does not say where it leads. A network path
+    (``file://server/share/...``, ``file:////server/share/...``,
+    ``\\\\server\\share\\...``) is refused too, unless it lies in *root* or
+    the workspace registered the file (its :func:`~battinfo._util.lexical_key`
+    is in *registered*). A workspace kept on a network share, or on a drive
+    mapped to one, resolves to a network path itself, so its own files pass.
     """
     text = location.strip()
     if not text or not is_local_location(text):
         return None
-    path = file_uri_to_path(text)
-    return path if path.is_absolute() else root / path
+    written = file_uri_to_path(text)
+    # Read from the path as written: on Linux and macOS a \\server\share path
+    # is a relative name, but it names another computer all the same.
+    host = network_host(written)
+    path = written if written.is_absolute() else root / written
+    if has_parent_reference(path):
+        raise UnsafeLocation(text, "goes up a folder with '..'")
+    if (
+        host is not None
+        and not (written.is_absolute() and lexically_within(path, root))
+        and lexical_key(path) not in registered
+    ):
+        raise UnsafeLocation(text, f"is on another computer ({host!r})", host=host)
+    return path
 
 
 def _resolved(path: Path) -> Path:
@@ -69,10 +134,14 @@ def path_key(path: Path) -> str:
     return os.path.normcase(str(_resolved(path)))
 
 
-def location_key(location: str, root: Path) -> str | None:
-    """The :func:`path_key` of the file *location* names, or ``None`` when it names no local file."""
+def location_key(location: str, root: Path, *, registered: Collection[str] = frozenset()) -> str | None:
+    """The :func:`path_key` of the file *location* names.
+
+    ``None`` when it names no local file, and when :func:`location_path`
+    refuses it, in which case nothing asks the file system about it.
+    """
     try:
-        path = location_path(location, root)
+        path = location_path(location, root, registered=registered)
     except (OSError, ValueError):
         return None
     return path_key(path) if path is not None else None
@@ -195,25 +264,29 @@ class DepositFilePlan:
     #: Artifacts left out of the deposit, one warning each.
     artifact_warnings: list[str] = field(default_factory=list)
     #: Record files and distribution entries that could not be read, so no
-    #: file could be planned for them.
+    #: file could be planned for them, and data file locations the screen
+    #: refused (see :func:`location_path`).
     omissions: list[Omission] = field(default_factory=list)
     #: True when the files travel in one zip archive per test kind.
     zipped: bool = False
     #: False when the files were located and named but not read (no sizes or digests).
     measured: bool = True
+    #: The :func:`~battinfo._util.lexical_key` of each file the workspace registered.
+    registered: frozenset[str] = frozenset()
     _by_key: dict[str, DepositFile] = field(default_factory=dict, repr=False)
     _by_location: dict[str, DepositFile | None] = field(default_factory=dict, repr=False)
 
     def entry_for(self, location: object) -> DepositFile | None:
         """The planned file a record location names (a ``file:`` URI or a path), by resolved path.
 
-        ``None`` for a remote URL, for a file the deposit does not carry, and
-        for anything that is not a string.
+        ``None`` for a remote URL, for a file the deposit does not carry, for
+        a location the screen refuses (nothing asks the file system about
+        it), and for anything that is not a string.
         """
         if not isinstance(location, str):
             return None
         if location not in self._by_location:
-            key = location_key(location, self.root)
+            key = location_key(location, self.root, registered=self.registered)
             self._by_location[location] = self._by_key.get(key) if key is not None else None
         return self._by_location[location]
 
@@ -269,6 +342,8 @@ def build_deposit_file_plan(
     reserved_names: Iterable[str] = (),
     zip_threshold: int | None = None,
     measure: bool = True,
+    registered: Collection[str] = frozenset(),
+    owners: Mapping[str, str] | None = None,
 ) -> DepositFilePlan:
     """Plan the files of one deposit.
 
@@ -279,6 +354,12 @@ def build_deposit_file_plan(
     names it. A location whose file is missing, or is not a file, is listed
     in ``missing``. *omissions* are the records the caller could not read,
     kept in the plan for the caller to refuse.
+
+    Each location is screened first, from its text alone (:func:`location_path`,
+    with *registered* the keys of the files the workspace registered). A
+    location the screen refuses is never looked up: it becomes an omission of
+    the dataset *owners* maps it to (the location itself when it maps it to
+    none), for the caller to refuse the deposit over.
 
     Each file keeps the name *recorded_names* gives its :func:`path_key` (the
     name an earlier deposit gave it), or else takes its own name in NFC form.
@@ -297,6 +378,8 @@ def build_deposit_file_plan(
     seen: set[str] = set()
     key_of_location: dict[str, str] = {}
     missing: list[str] = []
+    left_out = list(omissions)
+    refused: set[str] = set()
 
     def _add(key: str, path: Path, kind: str) -> None:
         if key not in seen:
@@ -305,7 +388,13 @@ def build_deposit_file_plan(
 
     for location, kind in locations:
         try:
-            path = location_path(location, root)
+            path = location_path(location, root, registered=registered)
+        except UnsafeLocation as exc:
+            if location not in refused:
+                refused.add(location)
+                owner = (owners or {}).get(location) or location
+                left_out.append(Omission("dataset", owner, exc.refusal()))
+            continue
         except (OSError, ValueError):
             missing.append(location)
             continue
@@ -358,14 +447,17 @@ def build_deposit_file_plan(
         )
     for location, key in key_of_location.items():
         by_location[location] = by_key[key]
+    for location in refused:
+        by_location[location] = None
     return DepositFilePlan(
         root=root,
         files=list(by_key.values()),
         missing=missing,
         artifact_warnings=list(artifact_warnings),
-        omissions=list(omissions),
+        omissions=left_out,
         zipped=zipped,
         measured=measure,
+        registered=frozenset(registered),
         _by_key=by_key,
         _by_location=by_location,
     )

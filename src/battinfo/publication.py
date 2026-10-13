@@ -10,8 +10,8 @@ import warnings
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping, Sequence
-from urllib.parse import unquote, urlparse
 
+from battinfo._deposit_files import UnsafeLocation, location_path
 from battinfo._emmo_instruments import _instrument_node
 from battinfo._jsonio import read_record_json as _load_json
 from battinfo._jsonio import write_json as _write_json
@@ -21,7 +21,9 @@ from battinfo._util import (
     _now_iso,
     _now_unix,
     _sha256,
+    file_uri_to_path,
     is_dataset_series,
+    is_file_uri,
     url_segment,
 )
 from battinfo.bundle import (
@@ -63,6 +65,12 @@ def plan_artifact_inclusion(
     resolve to a file inside *workspace_root* is NOT copied automatically — it
     yields a non-blocking warning telling the user to place the file in the
     workspace if they want it published. Returns ``(files_to_include, warnings)``.
+
+    A locator is read as a deposit reads a data file location
+    (:func:`battinfo._deposit_files.location_path`): a ``file:`` URI or a path,
+    screened from its text before the file system is asked about it. A network
+    path outside the workspace, or a path that goes up a folder with ``..``,
+    is never looked up, and gets the warning too.
     """
     root = Path(workspace_root)
     included: list[Path] = []
@@ -78,11 +86,16 @@ def plan_artifact_inclusion(
             text = str(loc)
             if text.startswith(("http://", "https://")):
                 continue  # already hosted elsewhere — nothing to upload
-            raw = text[len("file://"):] if text.startswith("file://") else text
-            raw = unquote(raw)
-            candidate = Path(raw)
-            resolved = candidate if candidate.is_absolute() else (root / candidate)
-            if resolved.is_file() and _is_within(resolved, root):
+            try:
+                resolved = location_path(text, root)
+            except UnsafeLocation as exc:
+                warnings_out.append(
+                    f"Artifact {text!r} (format {art.get('format', 'unknown')!r}) {exc.reason}, so it "
+                    f"was not read and will NOT be included in the publication. Place the file under "
+                    f"{root} to publish it."
+                )
+                continue
+            if resolved is not None and resolved.is_file() and _is_within(resolved, root):
                 key = resolved.resolve().as_posix()
                 if key not in seen:
                     seen.add(key)
@@ -115,7 +128,10 @@ def check_artifact_conformance(
     when the descriptive method diverges from the executable source of truth.
 
     Only artifacts whose format has an importer and whose file resolves inside the
-    workspace are checked; everything else is silently skipped. Returns warnings."""
+    workspace are checked; everything else is silently skipped, and a locator the
+    screen of :func:`battinfo._deposit_files.location_path` refuses (a network
+    path outside the workspace, or a path that goes up a folder) is never looked
+    up. Returns warnings."""
     from battinfo.interop import protocols as _protocols  # noqa: PLC0415
 
     root = Path(workspace_root)
@@ -128,11 +144,11 @@ def check_artifact_conformance(
         loc = art.get("locator")
         if not importer_name or not loc or str(loc).startswith(("http://", "https://")):
             continue
-        raw = str(loc)[len("file://"):] if str(loc).startswith("file://") else str(loc)
-        resolved = Path(unquote(raw))
-        if not resolved.is_absolute():
-            resolved = root / resolved
-        if not (resolved.is_file() and _is_within(resolved, root)):
+        try:
+            resolved = location_path(str(loc), root)
+        except UnsafeLocation:
+            continue
+        if resolved is None or not (resolved.is_file() and _is_within(resolved, root)):
             continue
         try:
             imported = getattr(_protocols, importer_name)(resolved)
@@ -337,15 +353,8 @@ def _append_unique(values: list[str], value: str | None) -> list[str]:
 
 
 def _path_from_file_uri(uri: str) -> Path | None:
-    parsed = urlparse(uri)
-    if parsed.scheme != "file":
-        return None
-    path_text = unquote(parsed.path)
-    if parsed.netloc:
-        path_text = f"//{parsed.netloc}{path_text}"
-    if path_text.startswith("/") and len(path_text) > 2 and path_text[2] == ":":
-        path_text = path_text[1:]
-    return Path(path_text)
+    """The path a ``file:`` URI names (see :func:`battinfo._util.file_uri_to_path`), or ``None``."""
+    return file_uri_to_path(uri) if is_file_uri(uri) else None
 
 
 def _resolve_dataset_dir(dataset: Dataset) -> Path:

@@ -36,16 +36,19 @@ from battinfo._deposit_files import (
     DepositFile,
     DepositFilePlan,
     Omission,
+    UnsafeLocation,
     build_deposit_file_plan,
     dataset_distributions,
     deposit_file_problems,
     location_key,
+    location_path,
     measured_file,
     path_key,
 )
+from battinfo._deposit_index import load_deposit_index, register_sources, registered_keys
 from battinfo._jsonio import atomic_write_text as _atomic_write_text
 from battinfo._jsonio import read_json as _read_json
-from battinfo._util import _now_iso, is_dataset_series, local_file_references, url_segment
+from battinfo._util import _now_iso, is_dataset_series, local_file_references, path_name, url_segment
 from battinfo._util import file_uri_to_path as _file_uri_to_path
 from battinfo._util import local_files_message as _local_files_message
 from battinfo.entities import entity_id_from_doc, kind_for_type, record_set_dirs, save_entity_path
@@ -519,9 +522,29 @@ def _distribution_file_name(url: str) -> str:
             from urllib.parse import unquote, urlparse  # noqa: PLC0415
 
             return unquote(urlparse(url).path.rsplit("/", 1)[-1])
-        return _file_uri_to_path(url).name
+        return path_name(_file_uri_to_path(url))
     except (OSError, ValueError):
         return url.rstrip("/").rsplit("/", 1)[-1]
+
+
+def _import_web_url(value: Any) -> str:
+    """*value* when it is an http(s) URL with a host, as text or as ``{"@id": ...}``; else ``""``.
+
+    ``ws.import_()`` keeps a URL from the document it reads only when this
+    returns it.
+    """
+    from urllib.parse import urlparse  # noqa: PLC0415
+
+    if isinstance(value, Mapping):
+        value = value.get("@id")
+    if not isinstance(value, str):
+        return ""
+    text = value.strip()
+    try:
+        parsed = urlparse(text)
+    except ValueError:
+        return ""
+    return text if parsed.scheme.lower() in ("http", "https") and parsed.netloc else ""
 
 
 # dcat:mediaType is written as the IANA media-type IRI under this base
@@ -2606,6 +2629,10 @@ class AuthoringWorkspace:
         — export a CSV from the instrument software first, then
         ``ws.convert('*.csv')`` or :meth:`convert_csv`.
 
+        Each file converted, and each file written, is registered as a data
+        file of this workspace in ``.battinfo/deposit-files.json``, so a Zenodo
+        deposit may read it (see :meth:`zenodo`).
+
         Parameters
         ----------
         pattern:
@@ -3248,7 +3275,11 @@ class AuthoringWorkspace:
         reports the reference as unresolved.  ``data`` is a path or list of paths to files that
         exist; a relative path resolves against the workspace root, not the
         current directory, and a missing file raises ``FileNotFoundError``
-        naming the path it resolved to.  ``type`` is the test
+        naming the path it resolved to.  The workspace registers each data
+        file, and each original from ``raw=`` or :meth:`convert`, in
+        ``.battinfo/deposit-files.json``, so a Zenodo deposit reads it even
+        on a network share outside the workspace folder (see :meth:`zenodo`).
+        ``type`` is the test
         type (``"cycling"``, ``"capacity_check"``, …); ``kind`` is accepted as an alias.
         ``channel`` attaches the test to an equipment channel — a channel IRI, a
         channel label, or ``"<unit>/CHn"`` (see ``ws.add("equipment", ...)``).
@@ -4035,7 +4066,8 @@ class AuthoringWorkspace:
             One of:
 
             * A **Zenodo record ID** (string of digits, e.g. ``"14523891"``)
-            * A **URL** pointing directly to a ``battinfo.json`` file
+            * An **http(s) URL** pointing directly to a ``battinfo.json`` file;
+              a URL with any other scheme is refused
             * A **local file path** to a ``battinfo.json`` file (the legacy
               ``battinfo.jsonld`` name is still accepted)
 
@@ -4043,7 +4075,10 @@ class AuthoringWorkspace:
             When *source* is a Zenodo record ID, use ``sandbox.zenodo.org``
             instead of production.
         token:
-            Optional Zenodo API token for private records.
+            Optional Zenodo API token for private records. It is sent only
+            over https to the Zenodo host *sandbox* chooses (``zenodo.org`` or
+            ``sandbox.zenodo.org``): never to another host, and never on a
+            redirect. A URL on another host is read without it, with a warning.
 
         Returns
         -------
@@ -4055,6 +4090,16 @@ class AuthoringWorkspace:
             "reason": ...}], "datasets": [...]}``. A test on a cell the
             deposit only points at (a "defined elsewhere" stub, for a cell
             published in the registry) is skipped, with its datasets.
+
+        The document may come from anyone, so only http(s) download URLs come
+        into the workspace. A distribution whose download URL is anything else, a
+        ``file:`` URL or a path to this computer or another one, is left out
+        with a warning, so a later deposit of this workspace never reads a file
+        a document named. A dataset left with no file keeps the http(s) page
+        the deposit gives it (its ``schema:url``, else the deposit record) as
+        its ``access_url``, with the URL that was left out in its notes; a
+        dataset without such a page is skipped, with the reason ``no http(s)
+        download URL``.
 
         Example::
 
@@ -4291,15 +4336,34 @@ class AuthoringWorkspace:
             print(f"  instance: {sn or iri}")
 
         # ── 7. Import tests + datasets ─────────────────────────────────────────
+        # The document may come from anyone, so only http(s) download URLs
+        # enter the workspace. A file: URL or a path would point this
+        # workspace's next deposit at a file on this computer or on another
+        # one, so each is left out, with a warning.
         dist_by_url: dict[str, dict] = {}
         dists_by_dataset: dict[str, builtins.list[dict]] = {}
+        dataset_node_by_iri: dict[str, dict] = {}
+        left_out_urls: dict[str, builtins.list[str]] = {}
         for ds_node in dataset_nodes:
+            ds_iri = ds_node.get("@id", "")
+            dataset_node_by_iri.setdefault(ds_iri, ds_node)
             ds_dists = ds_node.get("dcat:distribution") or []
             for dist in ds_dists if isinstance(ds_dists, list) else [ds_dists]:
-                url = dist.get("dcat:downloadURL", "") if isinstance(dist, dict) else ""
+                raw_url = dist.get("dcat:downloadURL") if isinstance(dist, dict) else None
+                url = _import_web_url(raw_url)
                 if url:
+                    dist = {**dist, "dcat:downloadURL": url}
                     dist_by_url[url] = dist
-                    dists_by_dataset.setdefault(ds_node.get("@id", ""), []).append(dist)
+                    dists_by_dataset.setdefault(ds_iri, []).append(dist)
+                elif raw_url:
+                    shown = raw_url.get("@id", raw_url) if isinstance(raw_url, Mapping) else raw_url
+                    left_out_urls.setdefault(ds_iri, []).append(str(shown))
+                    warnings.warn(
+                        f"Left out the download URL {shown!r} of dataset {ds_iri}: ws.import_() keeps "
+                        "only http(s) URLs, so that a deposit cannot point this workspace at a file "
+                        "on this computer or on another one.",
+                        stacklevel=2,
+                    )
 
         def _first_id(v: Any) -> str:
             """Resolve an @id from a node ref that may be a dict or a list of dicts."""
@@ -4354,30 +4418,59 @@ class AuthoringWorkspace:
             test_imported = False
             for output in outputs:
                 ds_iri = output.get("@id", "")
-                # Find the distribution for this dataset: its own file the test
-                # generated, then any file the test generated (one dataset held
-                # every file before the catalog shape), then its own first file,
-                # then a file whose URL carries the dataset uid.
                 own = dists_by_dataset.get(ds_iri, [])
-                dist = next((d for d in own if _generated_by(d, test_iri)), None) or next(
-                    (d for d in dist_by_url.values() if _generated_by(d, test_iri)), None
-                ) or (own[0] if own else None)
-                if dist is None:
-                    dist = next(
-                        (d for d in dist_by_url.values()
-                         if ds_iri.split("/")[-1] in d.get("dcat:downloadURL", "")),
-                        None,
+                left_out = left_out_urls.get(ds_iri, [])
+                dist = None
+                if own or not left_out:
+                    # Find the distribution for this dataset: its own file the test
+                    # generated, then any file the test generated (one dataset held
+                    # every file before the catalog shape), then its own first file,
+                    # then a file whose URL carries the dataset uid. A dataset whose
+                    # own files were all left out never borrows another's.
+                    dist = next((d for d in own if _generated_by(d, test_iri)), None) or next(
+                        (d for d in dist_by_url.values() if _generated_by(d, test_iri)), None
+                    ) or (own[0] if own else None)
+                    if dist is None:
+                        dist = next(
+                            (d for d in dist_by_url.values()
+                             if ds_iri.split("/")[-1] in d.get("dcat:downloadURL", "")),
+                            None,
+                        )
+                note = None
+                if dist is not None:
+                    dl_url = dist["dcat:downloadURL"]
+                    cs     = (dist.get("spdx:checksum") or {})
+                    fmt    = _media_type_from_jsonld(dist.get("dcat:mediaType"))
+                    fname  = dist.get("schema:name") or _distribution_file_name(dl_url)
+                elif left_out:
+                    # Every download URL the dataset had was left out. It is kept
+                    # without a file, at the http(s) page the deposit gives it,
+                    # and its notes say what was left out.
+                    ds_node = dataset_node_by_iri.get(ds_iri) or {}
+                    dl_url = _import_web_url(ds_node.get("schema:url")) or _import_web_url(
+                        ds_node.get("dcterms:isPartOf")
                     )
-                if dist is None:
+                    if not dl_url:
+                        skipped_datasets.append({
+                            "dataset": ds_iri, "test": test_iri, "cell": cell_iri,
+                            "reason": "no http(s) download URL",
+                        })
+                        continue
+                    cs, fmt = {}, ""
+                    fname = f"{ds_node.get('schema:name') or ds_iri} (without its file)"
+                    listed = ", ".join(repr(location) for location in left_out)
+                    note = (
+                        f"Imported without a file: the deposit gave the download URL {listed}, which "
+                        "ws.import_() does not keep, as it is not an http(s) URL."
+                        if len(left_out) == 1 else
+                        f"Imported without a file: the deposit gave the download URLs {listed}, which "
+                        "ws.import_() does not keep, as they are not http(s) URLs."
+                    )
+                else:
                     skipped_datasets.append(
                         {"dataset": ds_iri, "test": test_iri, "cell": cell_iri, "reason": "no distribution"}
                     )
                     continue
-
-                dl_url = dist.get("dcat:downloadURL", "")
-                cs     = (dist.get("spdx:checksum") or {})
-                fmt    = _media_type_from_jsonld(dist.get("dcat:mediaType"))
-                fname  = dist.get("schema:name") or _distribution_file_name(dl_url)
 
                 self._ws.record_test(
                     test_cell,
@@ -4396,6 +4489,8 @@ class AuthoringWorkspace:
                     self._ws.tests[-1].id = test_iri
                 if self._ws.datasets and ds_iri:
                     self._ws.datasets[-1].id = ds_iri
+                if note is not None and self._ws.datasets:
+                    self._ws.datasets[-1].comment.append(note)
                 test_imported = True
                 imported_datasets += 1
                 print(f"  test:     {fname}")
@@ -5457,6 +5552,10 @@ class AuthoringWorkspace:
             print("  No dataset records -- run ws.save() first.")
             return []
 
+        # A location is screened as a Zenodo deposit screens it: a network path
+        # outside the workspace that it did not register, or a path that goes
+        # up a folder, is never read.
+        registered = self._registered_sources()
         urls: list[str] = []
         for record_path in sorted(ds_dir.glob("*.json")):
             raw = json.loads(record_path.read_text(encoding="utf-8"))
@@ -5473,9 +5572,15 @@ class AuthoringWorkspace:
             public_by_path: dict[str, str] = {}
             for dist in dists:
                 local_url = dist.get("content_url") or ds.get("access_url") or ""
-                local_file = _file_uri_to_path(local_url)
-                if not local_file.is_absolute():
-                    local_file = self._root / local_file
+                try:
+                    local_file = location_path(local_url, self._root, registered=registered)
+                except UnsafeLocation as exc:
+                    print(f"  WARNING: dataset {ds.get('id') or record_path.name}: {exc.refusal()}")
+                    new_dists.append(dist)
+                    continue
+                if local_file is None:
+                    new_dists.append(dist)   # already at a URL elsewhere
+                    continue
 
                 if not local_file.exists():
                     print(f"  WARNING: file not found, skipping: {local_file.name}")
@@ -5548,7 +5653,10 @@ class AuthoringWorkspace:
             raw["dataset"]["distributions"] = new_dists
 
             def _r2_public_url(location: object) -> str | None:
-                key = location_key(location, self._root) if isinstance(location, str) else None
+                key = (
+                    location_key(location, self._root, registered=registered)
+                    if isinstance(location, str) else None
+                )
                 return public_by_path.get(key) if key is not None else None
 
             _point_source_url_at_public_copy(raw, _r2_public_url)
@@ -5657,6 +5765,17 @@ class AuthoringWorkspace:
         workspace in front (``3f2a9c1d-cycling.csv``), and the first file keeps
         its name. URLs carry the names percent-encoded.
         A deposit of more than 90 data files is zipped, one archive per test kind.
+
+        Each data file location in the records is screened from its text before
+        anything asks the file system about it. A file on this computer is read
+        wherever it lies. A file on another computer (``file://server/share/...``
+        or ``\\\\server\\share\\...``) is read only when it lies in the workspace
+        folder, as every file of a workspace kept on a network share or a mapped
+        drive does, or when this workspace registered it: ``ws.add(..., data=...)``
+        and :meth:`convert` register the files they are given in
+        ``.battinfo/deposit-files.json``. A path that goes up a folder with
+        ``..`` is never read. A record that names a file the screen refuses
+        stops the deposit before anything is sent, and the refusal names it.
 
         Credentials are read from ``.battinfo/credentials`` or env vars:
         ``ZENODO_API_TOKEN`` (production) / ``ZENODO_SANDBOX_TOKEN`` (sandbox).
@@ -6243,9 +6362,8 @@ class AuthoringWorkspace:
         if left_out:
             records = len({(omission.kind, omission.record) for omission in left_out})
             raise RuntimeError(
-                f"Refusing to {verb}: {records} record(s) could not be converted in full, so the deposit "
-                f"would leave out what it could not convert: {_omission_list(left_out)}. Fix or remove "
-                f"these records, then re-run.{sent_note}"
+                f"Refusing to {verb}: {records} record(s) would go into the deposit incomplete: "
+                f"{_omission_list(left_out)}. Fix or remove these records, then re-run.{sent_note}"
             )
         missing = getattr(self, "_missing_data_files", [])
         if missing:
@@ -6304,6 +6422,21 @@ class AuthoringWorkspace:
         """
         return {}
 
+    def _registered_sources(self) -> frozenset[str]:
+        """The keys of the local data files this workspace registered (``.battinfo/deposit-files.json``).
+
+        A deposit reads a file on another computer only when it lies in the
+        workspace folder or is registered here (see
+        :func:`battinfo._deposit_files.location_path`). Raises
+        :class:`~battinfo._deposit_index.DepositIndexError` when the file
+        cannot be read.
+        """
+        return registered_keys(load_deposit_index(self._root))
+
+    def _register_sources(self, paths: Iterable[Path | None], *, by: str) -> None:
+        """Register each of *paths* (``None`` entries skipped) as a data file of this workspace."""
+        register_sources(self._root, [path for path in paths if path is not None], by=by)
+
     def _deposit_file_plan(
         self, records_dir: Path, *, report: bool = True, measure: bool = True
     ) -> DepositFilePlan:
@@ -6315,6 +6448,13 @@ class AuthoringWorkspace:
         resolved local file, each with its deposit name, percent-encoded URL
         segment, size, md5 and sha256. Staging, the deposit graph, the RO-Crate
         and the record rewrite read their names from the result.
+
+        Each location is screened from its text before anything asks the file
+        system about it. A network path outside the workspace folder that this
+        workspace did not register (``ws.add(..., data=...)`` and
+        :meth:`convert` register their files), and a path that goes up a
+        folder with ``..``, are never read: each is an omission that names its
+        dataset.
 
         With *report* the missing data files and the artifact warnings are printed
         and kept for zenodo() and publish to act on; without it the files are only
@@ -6363,10 +6503,13 @@ class AuthoringWorkspace:
                     ds_to_kind[ds_id] = kind
 
         # The local data file locations, as the records give them, in record order.
-        # Nothing here touches a data file: the plan reads each location as text
-        # before it asks the file system about it. A distribution entry that names
-        # no file is an omission; the dataset's other files are still planned.
+        # Nothing here touches a data file: the plan screens each location from
+        # its text before it asks the file system about it, and refuses a network
+        # path outside the workspace that ws.add() did not register, and a path
+        # that goes up a folder. A distribution entry that names no file is an
+        # omission; the dataset's other files are still planned.
         locations: list[tuple[str, str]] = []  # (content_url, kind)
+        owners: dict[str, str] = {}  # content_url -> the dataset that names it first
         for record_path, raw in _saved("dataset"):
             ds = raw.get("dataset")
             if not isinstance(ds, dict):
@@ -6384,6 +6527,7 @@ class AuthoringWorkspace:
                 url = dist["content_url"]
                 if url.startswith("file://"):
                     locations.append((url, kind))
+                    owners.setdefault(url, ds_id or record_path.name)
 
         # ── Actionable artifacts (Layer B) ─────────────────────────────────────
         # Only files the user has explicitly placed in the workspace are published;
@@ -6404,6 +6548,8 @@ class AuthoringWorkspace:
             reserved_names=(BATTINFO_LD_FILENAME, _ROCRATE_FILENAME),
             zip_threshold=_ZENODO_ZIP_THRESHOLD,
             measure=measure,
+            registered=self._registered_sources(),
+            owners=owners,
         )
         if report:
             # Do NOT silently drop a distribution whose data file is missing: the
@@ -6569,8 +6715,7 @@ class AuthoringWorkspace:
             if file_plan is not None:
                 entry = file_plan.entry_for(text)
                 return {"@id": entry.url(files_base)} if entry is not None else text
-            raw = text[len("file://"):] if text.startswith("file://") else text
-            fname = Path(raw).name
+            fname = path_name(_file_uri_to_path(text))
             if fname in named_files:
                 return {"@id": f"{files_base}/{url_segment(fname)}"}
             return text
@@ -7813,7 +7958,11 @@ class AuthoringWorkspace:
         names are recorded alongside the source link so the loss stays visible
         after the session ends. Entries without loss keep the legacy plain-string
         form (out -> src) for compatibility with existing manifests.
+
+        Both files are registered as data files of this workspace too, so a
+        Zenodo deposit may read them wherever they lie (see :meth:`zenodo`).
         """
+        self._register_sources([src, out], by="ws.convert")
         conv = self._load_conversions()
         if unmapped_columns:
             conv[str(out.resolve())] = {
@@ -9382,6 +9531,14 @@ class AuthoringWorkspace:
                     "to use the originals recorded by ws.convert()."
                 )
             pinned_dataset_ids = self._pinned_dataset_iris(dataset_iris, len(files))
+            # The original of each data file: explicit raw= wins; otherwise the
+            # convert() manifest.
+            sources: builtins.list[Path | None] = (
+                list(raw_files) if raw_files else [self._resolve_raw_source(f) for f in files]
+            )
+            # The workspace registers every file it makes a dataset from, so a
+            # Zenodo deposit may read it wherever it lies (a lab share, say).
+            self._register_sources([*files, *sources], by="ws.add")
             # Measured period per data file (from the BDF unix_time_second column), so
             # the test activity and each dataset are placed in time from the data itself
             # rather than the record-assembly clock.
@@ -9417,8 +9574,7 @@ class AuthoringWorkspace:
             label = getattr(resolved, "name", None) or getattr(resolved, "serial_number", None) or resolved.id or "cell"
             n_raw = 0
             for i, f in enumerate(files):
-                # Explicit raw= wins; otherwise fall back to the convert() manifest.
-                src = raw_files[i] if raw_files else self._resolve_raw_source(f)
+                src = sources[i]
                 if src is not None:
                     n_raw += 1
                 _per = periods[i]
@@ -9675,6 +9831,10 @@ class AuthoringWorkspace:
                 "  Or reference existing ones: ws.load(ws.search(type='cell', batch='...'))"
             )
 
+        # Registered as the explicit form registers its files (see _register_sources).
+        self._register_sources(
+            [*matched_files, *(self._resolve_raw_source(f) for f in matched_files)], by="ws.add"
+        )
         print(f"Matching {len(matched_files)} file(s) to cell instances...")
         unmatched: list[Path] = []
         tests = []
@@ -10312,8 +10472,19 @@ def _bump_version(ver: str) -> str:
 
 
 def _import_resolve_source(source: str, *, sandbox: bool = False, token: str | None = None) -> str:
-    """Return raw JSON-LD text from a Zenodo record ID, URL, or local file path."""
-    import urllib.request
+    """Return raw JSON-LD text from a Zenodo record ID, an http(s) URL, or a local file path.
+
+    *token* goes only over https to the Zenodo API host of the environment
+    *sandbox* chooses (``zenodo.org``, or ``sandbox.zenodo.org``), for the
+    record's file list and for a file link on that host: never to another
+    host, never over plain http, and never on a redirect (see
+    :func:`_import_fetch`). A source URL whose scheme is not http or https is
+    refused, and so is a link in Zenodo's file list that is not an http(s) URL;
+    such a link is never read as a local path.
+    """
+    from urllib.parse import urlparse  # noqa: PLC0415
+
+    api_host = "sandbox.zenodo.org" if sandbox else "zenodo.org"
 
     # Local file
     p = Path(source)
@@ -10321,24 +10492,14 @@ def _import_resolve_source(source: str, *, sandbox: bool = False, token: str | N
         return p.read_text(encoding="utf-8")
 
     # URL
-    if source.startswith("http://") or source.startswith("https://"):
-        headers = {"User-Agent": "battinfo-client/1.0"}
-        if token:
-            headers["Authorization"] = f"Bearer {token}"
-        req = urllib.request.Request(source, headers=headers)
-        with urllib.request.urlopen(req, timeout=30) as resp:  # noqa: S310
-            return resp.read().decode("utf-8")
+    scheme = urlparse(source).scheme.lower()
+    if scheme in ("http", "https"):
+        return _import_fetch(source, token=token, api_host=api_host, timeout=30)
 
     # Zenodo record ID (numeric string)
     if source.isdigit():
-        domain = "sandbox.zenodo.org" if sandbox else "zenodo.org"
-        api_url = f"https://{domain}/api/records/{source}/files"
-        headers = {"User-Agent": "battinfo-client/1.0"}
-        if token:
-            headers["Authorization"] = f"Bearer {token}"
-        req = urllib.request.Request(api_url, headers=headers)
-        with urllib.request.urlopen(req, timeout=15) as resp:  # noqa: S310
-            files = json.loads(resp.read())
+        api_url = f"https://{api_host}/api/records/{source}/files"
+        files = json.loads(_import_fetch(api_url, token=token, api_host=api_host, timeout=15))
 
         # Find the linked-data document (current battinfo.json, or legacy battinfo.jsonld).
         entry = next(
@@ -10353,12 +10514,47 @@ def _import_resolve_source(source: str, *, sandbox: bool = False, token: str | N
                 f"({BATTINFO_LD_FILENAME} is the standard entry point for battinfo Zenodo deposits.)"
             )
         download_url = entry.get("links", {}).get("content") or entry.get("url", "")
-        return _import_resolve_source(download_url, token=token)
+        if not _import_web_url(download_url):
+            raise RuntimeError(
+                f"Zenodo record {source} links its {entry.get('key')} at {download_url!r}, which is "
+                "not an http(s) URL, so nothing was read from it."
+            )
+        return _import_fetch(download_url, token=token, api_host=api_host, timeout=30)
 
+    # A URL of any other scheme (a one-letter scheme is a Windows drive).
+    if len(scheme) > 1:
+        raise ValueError(
+            f"Cannot import from {source!r}: ws.import_() reads only http and https URLs. "
+            "Pass a Zenodo record ID, an http(s) URL, or the path of a local file."
+        )
     raise ValueError(
         f"Cannot resolve import source {source!r}. "
         "Pass a Zenodo record ID, a URL, or a local file path."
     )
+
+
+def _import_fetch(url: str, *, token: str | None, api_host: str, timeout: float) -> str:
+    """The text at the http(s) *url*, sent with *token* only where a Zenodo token may go.
+
+    The token goes along only when urllib will connect to *api_host* over
+    https. It is added as an unredirected header, which urllib leaves behind
+    when it follows a redirect: urllib copies every other header onto the
+    request it is redirected to, whatever host that request goes to.
+    """
+    import urllib.request  # noqa: PLC0415
+
+    request = urllib.request.Request(url, headers={"User-Agent": "battinfo-client/1.0"})
+    if token:
+        if request.type == "https" and request.host.lower() in (api_host, f"{api_host}:443"):
+            request.add_unredirected_header("Authorization", f"Bearer {token}")
+        else:
+            warnings.warn(
+                f"The Zenodo token was not sent to {url}: ws.import_() sends it only over https "
+                f"to {api_host}.",
+                stacklevel=4,
+            )
+    with urllib.request.urlopen(request, timeout=timeout) as resp:  # noqa: S310
+        return resp.read().decode("utf-8")
 
 
 def _test_kind_values() -> list[str]:

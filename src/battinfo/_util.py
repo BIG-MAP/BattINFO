@@ -10,6 +10,7 @@ normalization.
 from __future__ import annotations
 
 import hashlib
+import os
 import re
 from datetime import datetime, timezone
 from pathlib import Path, PureWindowsPath
@@ -74,19 +75,55 @@ def is_local_location(value: object) -> bool:
     return urlparse(text).scheme.lower() in ("", "file")
 
 
-def file_uri_to_path(url: str) -> Path:
-    """Convert a file:// URI (or plain path string) to a local Path.
+def is_file_uri(value: object) -> bool:
+    """True for a ``file:`` URI, in any letter case."""
+    return isinstance(value, str) and urlparse(value.strip()).scheme.lower() == "file"
 
-    The old inline ``.replace("file:///", "")`` pattern silently turned POSIX
-    URIs into RELATIVE paths (file:///tmp/x -> tmp/x), so downstream
-    existence checks failed on Linux while passing on Windows (/C:/... keeps
-    its drive). urllib handles both platforms and percent-encoding.
+
+# A drive letter where a file: URI has a host (file://C:/x) or starts its path
+# (/C:/x, or /C|/x in the oldest form).
+_URI_DRIVE_RE = re.compile(r"^[A-Za-z][:|]$")
+_URI_DRIVE_PATH_RE = re.compile(r"^/[A-Za-z][:|](?=[/\\]|$)")
+
+
+def _file_uri_path_text(uri: str) -> str:
+    """The path a ``file:`` URI names, as text with ``/`` separators, percent-decoded.
+
+    The one reading of a file URI, so that every caller agrees on it:
+
+    - ``file://server/share/x.csv`` and ``file:////server/share/x.csv`` name
+      the network path ``//server/share/x.csv``: the host is kept.
+    - ``file://localhost/C:/x.csv``, ``file:///C:/x.csv`` and ``file://C:/x.csv``
+      name ``C:/x.csv``: ``localhost`` is this computer, and the ``/`` in
+      front of a drive letter is dropped.
+    - ``file:///tmp/x.csv`` names ``/tmp/x.csv``.
     """
-    if url.startswith("file:"):
-        from urllib.request import url2pathname
+    parsed = urlparse(uri.strip())
+    host, path = unquote(parsed.netloc), unquote(parsed.path)
+    if host.lower() == "localhost":
+        host = ""
+    elif _URI_DRIVE_RE.fullmatch(host):
+        host, path = "", f"/{host[0]}:{path}"
+    if host:
+        return f"//{host}{path}"
+    if path.startswith("//"):
+        return "//" + path.lstrip("/")
+    if _URI_DRIVE_PATH_RE.match(path):
+        return f"{path[1]}:{path[3:]}"
+    return path
 
-        return Path(url2pathname(urlparse(url).path))
-    return Path(url)
+
+def file_uri_to_path(url: str) -> Path:
+    """The path a ``file:`` URI, or a plain path string, names, read from the text alone.
+
+    A file URI is read as :func:`_file_uri_path_text` describes: a network
+    host is kept (``file://server/share/x`` is ``\\\\server\\share\\x`` on
+    Windows), ``localhost`` is dropped and so is the ``/`` before a drive
+    letter, and percent-escapes are decoded. Anything else is taken as a path.
+    Nothing here touches the file system.
+    """
+    text = url.strip()
+    return Path(_file_uri_path_text(text)) if is_file_uri(text) else Path(text)
 
 
 #: Characters a URL path segment may carry as they are, besides letters,
@@ -117,16 +154,51 @@ def local_path(value: object) -> Path | None:
         return value
     if not is_local_location(value):
         return None
-    text = str(value).strip()
-    parsed = urlparse(text)
-    if parsed.scheme.lower() == "file":
-        path_text = unquote(parsed.path)
-        if parsed.netloc:
-            path_text = f"//{parsed.netloc}{path_text}"
-        if path_text.startswith("/") and len(path_text) > 2 and path_text[2] == ":":
-            path_text = path_text[1:]  # /C:/... -> C:/...
-        return Path(path_text)
-    return Path(text)
+    return file_uri_to_path(str(value))
+
+
+def network_host(path: PathLike) -> str | None:
+    """The computer a network path names (``//server/share/x`` or ``\\\\server\\share\\x``), else ``None``.
+
+    Read from the text alone. A Windows device path (``\\\\?\\C:\\x``) starts
+    the same way and gives ``"?"``.
+    """
+    text = str(path).replace("\\", "/")
+    if not text.startswith("//"):
+        return None
+    return text.lstrip("/").split("/", 1)[0]
+
+
+def has_parent_reference(path: PathLike) -> bool:
+    """True when a part of *path* goes up a folder: ``..``, or a name Windows reads as one (``.. ``).
+
+    Parts are split on ``/`` and ``\\`` alike. A part made only of dots and
+    spaces, with two dots or more, counts.
+    """
+    return any(part.count(".") >= 2 and not part.strip(". ") for part in re.split(r"[\\/]", str(path)))
+
+
+def lexical_key(path: PathLike) -> str:
+    """*path* normalised from its text alone (``normpath``, then the case the OS compares in).
+
+    Two spellings of one absolute path, such as ``C:/Data/x.csv`` and
+    ``c:\\data\\x.csv`` on Windows, get one key. Symbolic links are not
+    followed, and nothing touches the file system.
+    """
+    return os.path.normcase(os.path.normpath(str(path)))
+
+
+def lexically_within(path: PathLike, root: PathLike) -> bool:
+    """True when *path* is *root* or lies under it, read from the text of both alone.
+
+    Both should be absolute. A path that goes up a folder (see
+    :func:`has_parent_reference`) is compared after ``normpath`` folds the
+    ``..`` away; callers that must not trust such a path check for it first.
+    """
+    inner, outer = lexical_key(path), lexical_key(root)
+    if inner == outer:
+        return True
+    return inner.startswith(outer if outer.endswith(os.sep) else outer + os.sep)
 
 
 #: Record fields that say where a file or its source can be downloaded. A
