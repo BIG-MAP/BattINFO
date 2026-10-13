@@ -27,7 +27,7 @@ protocol = TestSpec(
     id="https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
     name="1C cycle life at 25 degC",
     kind="cycling",
-    experiment=[                       # PyBaMM syntax — runnable as-is
+    experiment=[  # PyBaMM syntax — runnable as-is
         "Charge at 1C until 4.2 V",
         "Hold at 4.2 V until C/20",
         "Discharge at 1C until 2.5 V",
@@ -313,20 +313,22 @@ cell = Cell(
     id="https://w3id.org/battinfo/cell/y9xy-kr0v-y5tn-dfj7",
     cell_spec=CellSpec(
         id="https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
-        manufacturer="Samsung SDI", model="INR21700-50E",
-        format="cylindrical", chemistry="Li-ion",
+        manufacturer="Samsung SDI",
+        model="INR21700-50E",
+        format="cylindrical",
+        chemistry="Li-ion",
     ),
     serial_number="LAB-2026-0001",
 )
-protocol = TestSpec(                   # the protocol defined above
+protocol = TestSpec(  # the protocol defined above
     id="https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
     name="1C cycle life at 25 degC",
     kind="cycling",
 )
 test = Test(
     id="https://w3id.org/battinfo/test/3w87-0ddf-ryjg-evxe",
-    cell=cell,                         # what you did, to which cell
-    protocol=protocol,                 # kind, name, protocol_id all derive
+    cell=cell,  # what you did, to which cell
+    protocol=protocol,  # kind, name, protocol_id all derive
     instrument="Biologic VMP-300",
     status="completed",
     # As-run conditions: what actually applied, as {value, unit}

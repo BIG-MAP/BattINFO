@@ -195,7 +195,7 @@ spec = CellSpec(
 )
 cell = Cell(
     id="https://w3id.org/battinfo/cell/y9xy-kr0v-y5tn-dfj7",
-    cell_spec=spec,                    # every cell links to its spec
+    cell_spec=spec,  # every cell links to its spec
     serial_number="LAB-2026-0001",
     batch_id="2026-W03",
     manufactured_at="2026-01-15",

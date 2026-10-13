@@ -27,7 +27,7 @@ record = create_equipment_spec(
     name="SkyRC MC3000",
     manufacturer="SkyRC",
     model="MC3000",
-    equipment_class="cycler",          # category is data, never a namespace
+    equipment_class="cycler",  # category is data, never a namespace
     channel_count=4,
     supported_chemistries=["NiMH", "Li-ion", "LiFePO4", "Na-ion"],
 )

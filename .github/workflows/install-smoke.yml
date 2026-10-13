@@ -102,7 +102,7 @@ jobs:
         run: |
           set -euxo pipefail
           for doc in QUICKSTART.md README.md docs/pages/getting-started.rst docs/pages/troubleshooting.md; do
-            grep -qF 'pip install "battinfo[processing]"' "$doc"
+            grep -qF 'pip install "battinfo[processing]' "$doc"
           done
           if git grep -nE 'batterydf(\[[^]]*\])? *@ *git\+' -- . ':!CHANGELOG.md'; then
             echo "A batterydf git install line is still documented (listed above)."

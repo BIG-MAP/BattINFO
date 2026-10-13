@@ -26,14 +26,18 @@ cell = Cell(
     id="https://w3id.org/battinfo/cell/y9xy-kr0v-y5tn-dfj7",
     cell_spec=CellSpec(
         id="https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
-        manufacturer="Samsung SDI", model="INR21700-50E",
-        format="cylindrical", chemistry="Li-ion",
+        manufacturer="Samsung SDI",
+        model="INR21700-50E",
+        format="cylindrical",
+        chemistry="Li-ion",
     ),
     serial_number="LAB-2026-0001",
 )
 test = Test(
     id="https://w3id.org/battinfo/test/3w87-0ddf-ryjg-evxe",
-    cell=cell, kind="cycling", status="completed",
+    cell=cell,
+    kind="cycling",
+    status="completed",
 )
 dataset = Dataset(
     id="https://w3id.org/battinfo/dataset/6nec-h262-tthy-4rnt",
@@ -66,18 +70,20 @@ dataset = Dataset(
     # The table schema of the processed file (CSVW): column names,
     # datatypes and units, so a consumer knows the shape of the data
     # without downloading it.
-    main_entity=[{
-        "type": "Table",
-        "url": "run.bdf.parquet",
-        "table_schema": {
-            "columns": [
-                {"name": "test_time_s", "datatype": "number", "unit_text": "s"},
-                {"name": "voltage_v", "datatype": "number", "unit_text": "V"},
-                {"name": "current_a", "datatype": "number", "unit_text": "A"},
-                {"name": "discharging_capacity_ah", "datatype": "number", "unit_text": "Ah"},
-            ],
-        },
-    }],
+    main_entity=[
+        {
+            "type": "Table",
+            "url": "run.bdf.parquet",
+            "table_schema": {
+                "columns": [
+                    {"name": "test_time_s", "datatype": "number", "unit_text": "s"},
+                    {"name": "voltage_v", "datatype": "number", "unit_text": "V"},
+                    {"name": "current_a", "datatype": "number", "unit_text": "A"},
+                    {"name": "discharging_capacity_ah", "datatype": "number", "unit_text": "Ah"},
+                ],
+            },
+        }
+    ],
     # Membership in a dataset series (a collection record): emitted as
     # dcat:inSeries and schema:isPartOf. The collection publishes first.
     series_id="https://w3id.org/battinfo/dataset/0rp6-kncv-cyem-qwcd",
