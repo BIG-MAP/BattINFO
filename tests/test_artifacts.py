@@ -1,6 +1,7 @@
 """Tests for the actionable-artifact layer (Layer B): linking runnable protocol
 files on test specs and tests, round-tripping records, and emitting them as
 dcat:Distribution nodes in the published JSON-LD."""
+
 from __future__ import annotations
 
 import sys
@@ -20,14 +21,21 @@ TEST_ID = "https://w3id.org/battinfo/test/aaaa-bbbb-cccc-dddd"
 
 def test_test_spec_artifact_roundtrip_and_validates() -> None:
     spec = TestSpec(
-        id=SPEC_ID, name="CC discharge", test_kind="capacity_check",
+        id=SPEC_ID,
+        name="CC discharge",
+        test_kind="capacity_check",
         experiment=["Discharge at C/10 until 2.5 V"],
-        artifacts=[Artifact(
-            role="source_protocol", format="aurora-unicycler-json",
-            locator="files/cc.unicycler.json",
-            conforms_to="https://github.com/EmpaEconversion/aurora-unicycler",
-            sha256="a" * 64, byte_size=1024, generated=["biologic-mps"],
-        )],
+        artifacts=[
+            Artifact(
+                role="source_protocol",
+                format="aurora-unicycler-json",
+                locator="files/cc.unicycler.json",
+                conforms_to="https://github.com/EmpaEconversion/aurora-unicycler",
+                sha256="a" * 64,
+                byte_size=1024,
+                generated=["biologic-mps"],
+            )
+        ],
         source={"type": "manual", "retrieved_at": 1781589239},
     )
     record = spec.to_record()
@@ -42,10 +50,11 @@ def test_test_spec_artifact_roundtrip_and_validates() -> None:
 
 def test_test_artifact_roundtrip_and_validates() -> None:
     test = Test(
-        id=TEST_ID, name="cc run", test_kind="capacity_check",
+        id=TEST_ID,
+        name="cc run",
+        test_kind="capacity_check",
         cell_instance_id=CELL_ID,
-        artifacts=[Artifact(role="executed_protocol", format="biologic-mps",
-                            locator="files/run.mps")],
+        artifacts=[Artifact(role="executed_protocol", format="biologic-mps", locator="files/run.mps")],
         source={"type": "measurement", "retrieved_at": 1781589239},
     )
     record = test.to_record()
@@ -59,18 +68,32 @@ def test_plan_artifact_inclusion_only_includes_workspace_files(tmp_path) -> None
 
     (tmp_path / "files").mkdir()
     (tmp_path / "files" / "in.unicycler.json").write_text("{}", encoding="utf-8")
-    records = [{
-        "artifacts": [
-            {"role": "source_protocol", "format": "aurora-unicycler-json",
-             "locator": "files/in.unicycler.json"},                      # in workspace → include
-            {"role": "executed_protocol", "format": "biologic-mps",
-             "locator": "/somewhere/else/run.mps"},                      # absolute, elsewhere → warn
-            {"role": "source_protocol", "format": "pybamm-experiment",
-             "locator": "files/missing.py"},                            # relative, missing → warn
-            {"role": "vendor_export", "format": "neware-xml",
-             "locator": "https://example.org/remote.xml"},               # remote → no upload, no warn
-        ]
-    }]
+    records = [
+        {
+            "artifacts": [
+                {
+                    "role": "source_protocol",
+                    "format": "aurora-unicycler-json",
+                    "locator": "files/in.unicycler.json",
+                },  # in workspace → include
+                {
+                    "role": "executed_protocol",
+                    "format": "biologic-mps",
+                    "locator": "/somewhere/else/run.mps",
+                },  # absolute, elsewhere → warn
+                {
+                    "role": "source_protocol",
+                    "format": "pybamm-experiment",
+                    "locator": "files/missing.py",
+                },  # relative, missing → warn
+                {
+                    "role": "vendor_export",
+                    "format": "neware-xml",
+                    "locator": "https://example.org/remote.xml",
+                },  # remote → no upload, no warn
+            ]
+        }
+    ]
     included, warnings = plan_artifact_inclusion(records, tmp_path)
 
     assert [p.name for p in included] == ["in.unicycler.json"]
@@ -95,8 +118,7 @@ def test_check_artifact_conformance_warns_on_divergence(tmp_path) -> None:
     }
     (tmp_path / "cc.unicycler.json").write_text(json.dumps(aurora), encoding="utf-8")
 
-    artifact = {"role": "source_protocol", "format": "aurora-unicycler-json",
-                "locator": "cc.unicycler.json"}
+    artifact = {"role": "source_protocol", "format": "aurora-unicycler-json", "locator": "cc.unicycler.json"}
 
     # Spec facets that LIE about the method (claim no CV hold) → divergence warning.
     diverging = {"facets": {"has_cv_hold": False, "modes": ["cc"]}, "artifacts": [artifact]}
@@ -108,31 +130,51 @@ def test_check_artifact_conformance_warns_on_divergence(tmp_path) -> None:
     assert check_artifact_conformance(consistent, tmp_path) == []
 
     # Artifact outside the workspace is skipped (not a conformance failure).
-    external = {"facets": {"has_cv_hold": False},
-                "artifacts": [{"role": "source_protocol", "format": "aurora-unicycler-json",
-                               "locator": "/elsewhere/cc.unicycler.json"}]}
+    external = {
+        "facets": {"has_cv_hold": False},
+        "artifacts": [
+            {"role": "source_protocol", "format": "aurora-unicycler-json", "locator": "/elsewhere/cc.unicycler.json"}
+        ],
+    }
     assert check_artifact_conformance(external, tmp_path) == []
 
 
 def test_artifacts_emit_dcat_distributions_in_jsonld() -> None:
     doc = AuthoringWorkspace._assemble_zenodo_jsonld(
         {
-            "cell-spec": [], "cell-instance": [], "test": [],
-            "test-protocol": [{
-                "test_spec": {"id": SPEC_ID, "name": "CC discharge", "kind": "capacity_check"},
-                "method": [{"mode": "cc", "direction": "discharge",
+            "cell-spec": [],
+            "cell-instance": [],
+            "test": [],
+            "test-protocol": [
+                {
+                    "test_spec": {"id": SPEC_ID, "name": "CC discharge", "kind": "capacity_check"},
+                    "method": [
+                        {
+                            "mode": "cc",
+                            "direction": "discharge",
                             "setpoints": {"c_rate": {"value": 0.1, "unit": "A/Ah"}},
-                            "termination": [{"quantity": "voltage", "direction": "below",
-                                             "value": 2.5, "unit": "V"}]}],
-                "artifacts": [{"role": "source_protocol", "format": "aurora-unicycler-json",
-                               "locator": "files/cc.unicycler.json",
-                               "media_type": "application/json",
-                               "conforms_to": "https://github.com/EmpaEconversion/aurora-unicycler"}],
-            }],
+                            "termination": [{"quantity": "voltage", "direction": "below", "value": 2.5, "unit": "V"}],
+                        }
+                    ],
+                    "artifacts": [
+                        {
+                            "role": "source_protocol",
+                            "format": "aurora-unicycler-json",
+                            "locator": "files/cc.unicycler.json",
+                            "media_type": "application/json",
+                            "conforms_to": "https://github.com/EmpaEconversion/aurora-unicycler",
+                        }
+                    ],
+                }
+            ],
             "dataset": [],
         },
-        zenodo_record_id=0, prereserved_doi="", record_url="https://example.org/records/0",
-        data_filenames=[], title="t", description="d",
+        zenodo_record_id=0,
+        prereserved_doi="",
+        record_url="https://example.org/records/0",
+        data_filenames=[],
+        title="t",
+        description="d",
     )
     plan = next(n for n in doc["@graph"] if "prov:Plan" in (n.get("@type") or []))
     dist = plan["dcat:distribution"][0]
@@ -152,18 +194,24 @@ def test_artifact_download_url_resolves_to_hosted_when_uploaded() -> None:
     from battinfo.ws import AuthoringWorkspace
 
     record = {
-        "test_spec": {"id": "https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd",
-                      "name": "CC", "kind": "capacity_check"},
-        "artifacts": [{"role": "source_protocol", "format": "aurora-unicycler-json",
-                       "locator": "files/cc.unicycler.json"}],
+        "test_spec": {
+            "id": "https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd",
+            "name": "CC",
+            "kind": "capacity_check",
+        },
+        "artifacts": [
+            {"role": "source_protocol", "format": "aurora-unicycler-json", "locator": "files/cc.unicycler.json"}
+        ],
     }
     doc = AuthoringWorkspace._assemble_zenodo_jsonld(
-        {"cell-spec": [], "cell-instance": [], "test": [],
-         "test-protocol": [record], "dataset": []},
-        zenodo_record_id=42, prereserved_doi="", record_url="https://zenodo.org/records/42",
-        data_filenames=["cc.unicycler.json"],            # the file IS being uploaded
+        {"cell-spec": [], "cell-instance": [], "test": [], "test-protocol": [record], "dataset": []},
+        zenodo_record_id=42,
+        prereserved_doi="",
+        record_url="https://zenodo.org/records/42",
+        data_filenames=["cc.unicycler.json"],  # the file IS being uploaded
         files_base_url="https://zenodo.org/records/42/files",
-        title="t", description="d",
+        title="t",
+        description="d",
     )
     plan = next(n for n in doc["@graph"] if "prov:Plan" in (n.get("@type") or []))
     dist = plan["dcat:distribution"][0]

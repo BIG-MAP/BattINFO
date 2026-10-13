@@ -192,9 +192,7 @@ def _content_seed(entity: Any, *, workspace_root: Path | None = None) -> str:
     return json.dumps(_seed_view(data, workspace_root), sort_keys=True, ensure_ascii=False)
 
 
-def _disambiguate_entity_ids(
-    entities: Sequence[Any], entity_type: str, *, workspace_root: Path | None = None
-) -> None:
+def _disambiguate_entity_ids(entities: Sequence[Any], entity_type: str, *, workspace_root: Path | None = None) -> None:
     """Ensure auto-minted IRIs are unique across distinct authored entities.
 
     Deterministic IRIs are seeded from a record's identity fields, so two
@@ -232,9 +230,7 @@ def _disambiguate_entity_ids(
         group = by_id.get(current)
         if group is not None and len(group) > 1:
             # Distinct entities sharing an IRI: re-seed from content (order-independent).
-            current = _entity_iri(
-                entity_type, f"{current}::{_content_seed(entity, workspace_root=workspace_root)}"
-            )
+            current = _entity_iri(entity_type, f"{current}::{_content_seed(entity, workspace_root=workspace_root)}")
         if current in seen:
             # Genuine full-content duplicate — keep both with a stable ordinal suffix.
             ordinal = 1
@@ -407,6 +403,7 @@ class Workspace:
 
     def add(self, *objects: Any) -> "Workspace":
         """Add one or more authoring objects to the workspace by type."""
+
         def _add(obj: Any) -> None:
             # The authoring model and the datasheet model are now one CellSpec
             # (a BatteryCellSpecification); add() routes it to the canonical cell-spec
@@ -436,6 +433,7 @@ class Workspace:
                 raise TypeError(
                     "Workspace.add() supports CellSpec, CellSpec, TestSpec, Cell/Cell, Test, and Dataset objects."
                 )
+
         for obj in objects:
             _add(obj)
         return self
@@ -517,7 +515,11 @@ class Workspace:
             protocol = source.model_copy(deep=True)
         else:
             payload = _load_json(_as_path(source)) if isinstance(source, (str, Path)) else dict(source)
-            if isinstance(payload.get("TestSpec"), dict) and "test_spec" not in payload and "test_protocol" not in payload:
+            if (
+                isinstance(payload.get("TestSpec"), dict)
+                and "test_spec" not in payload
+                and "test_protocol" not in payload
+            ):
                 payload = dict(payload)
                 payload["test_spec"] = dict(payload["TestSpec"])
             # accept both "test_spec" (current) and "test_protocol" (legacy) record key
@@ -570,7 +572,9 @@ class Workspace:
         manufacturer = payload.get("manufacturer")
         format_value = payload.get("format")
         chemistry = payload.get("chemistry")
-        if not all(isinstance(value, str) and value.strip() for value in (manufacturer, model, format_value, chemistry)):
+        if not all(
+            isinstance(value, str) and value.strip() for value in (manufacturer, model, format_value, chemistry)
+        ):
             raise ValueError(
                 "cell-spec authoring JSON requires non-empty string fields: manufacturer, model, format, chemistry."
             )
@@ -619,7 +623,11 @@ class Workspace:
             size_code=payload.get("size_code"),
             iec_code=iec_code if isinstance(iec_code, str) else None,
             country_of_origin=country_of_origin if isinstance(country_of_origin, str) else None,
-            year=year if isinstance(year, int) else int(year) if isinstance(year, str) and year.strip().isdigit() else None,
+            year=year
+            if isinstance(year, int)
+            else int(year)
+            if isinstance(year, str) and year.strip().isdigit()
+            else None,
             positive_electrode_basis=payload.get("positive_electrode_basis"),
             negative_electrode_basis=payload.get("negative_electrode_basis"),
             datasheet_revision=datasheet_revision,
@@ -807,7 +815,7 @@ class Workspace:
         chemistry: str,
         product_type: str | None = None,
         properties: Any = None,
-        specs: Any = None,   # quiet alias for properties=
+        specs: Any = None,  # quiet alias for properties=
         size_code: str | None = None,
         iec_code: str | None = None,
         country_of_origin: str | None = None,
@@ -826,6 +834,7 @@ class Workspace:
         comment: list[str] | None = None,
     ) -> CellSpec:
         from battinfo.bundle import CellConfiguration, CellProductType
+
         resolved_pt = CellProductType(product_type) if product_type is not None else None
         resolved_cfg = CellConfiguration(cell_configuration) if cell_configuration is not None else None
         cell_spec = CellSpec(
@@ -878,6 +887,7 @@ class Workspace:
         comment: list[str] | None = None,
     ) -> Cell:
         from battinfo.bundle import Conformance as _Conformance
+
         if isinstance(conformance, dict):
             conformance = _Conformance.from_record(conformance)
         cell = Cell(
@@ -908,10 +918,10 @@ class Workspace:
         *,
         name: str,
         type: str | None = None,
-        kind: str | None = None,   # backward-compat alias for type
+        kind: str | None = None,  # backward-compat alias for type
         description: str | None = None,
         experiment: list[str] | None = None,
-        steps: list[str] | None = None,   # alias for experiment (PyBaMM strings)
+        steps: list[str] | None = None,  # alias for experiment (PyBaMM strings)
         cycles: int | None = None,
         method: list[Any] | None = None,
         version: str | None = None,
@@ -970,7 +980,7 @@ class Workspace:
         cell: Cell,
         *,
         type: str | None = None,
-        kind: str | None = None,   # backward-compat alias for type
+        kind: str | None = None,  # backward-compat alias for type
         protocol_ref: TestSpec | None = None,
         name: str | None = None,
         description: str | None = None,
@@ -991,6 +1001,7 @@ class Workspace:
         comment: list[str] | None = None,
     ) -> Test:
         from battinfo.bundle import TestConformance as _TestConformance
+
         if isinstance(conformance, dict):
             conformance = _TestConformance.from_record(conformance)
         protocol_name = protocol or (protocol_ref.name if protocol_ref is not None else None)
@@ -1030,7 +1041,7 @@ class Workspace:
         cell: Cell,
         *,
         type: str | None = None,
-        kind: str | None = None,   # backward-compat alias for type
+        kind: str | None = None,  # backward-compat alias for type
         path: PathLike | None = None,
         name: str | None = None,
         title: str | None = None,
@@ -1138,10 +1149,20 @@ class Workspace:
         resolved_access_url = access_url
         if resolved_access_url is None and dataset_path_obj is not None:
             resolved_access_url = dataset_path_obj.resolve().as_uri()
-        resolved_format = format or _guess_media_type(download_url) or _guess_media_type(resolved_access_url) or _guess_media_type(dataset_path)
+        resolved_format = (
+            format
+            or _guess_media_type(download_url)
+            or _guess_media_type(resolved_access_url)
+            or _guess_media_type(dataset_path)
+        )
         resolved_checksum_algorithm = checksum_algorithm
         resolved_checksum_value = checksum_value
-        if dataset_path_obj is not None and dataset_path_obj.exists() and dataset_path_obj.is_file() and resolved_checksum_value is None:
+        if (
+            dataset_path_obj is not None
+            and dataset_path_obj.exists()
+            and dataset_path_obj.is_file()
+            and resolved_checksum_value is None
+        ):
             resolved_checksum_algorithm = resolved_checksum_algorithm or "sha256"
             if resolved_checksum_algorithm == "sha256":
                 resolved_checksum_value = _sha256(dataset_path_obj)
@@ -1772,7 +1793,9 @@ class Workspace:
     ) -> dict[str, Any]:
         target_library_root = _as_path(library_root) if library_root is not None else self.library_root
         target_package_root = _as_path(package_root) if package_root is not None else self.package_root
-        target_output_jsonld_dir = _as_path(output_jsonld_dir) if output_jsonld_dir is not None else self.library_rdf_root
+        target_output_jsonld_dir = (
+            _as_path(output_jsonld_dir) if output_jsonld_dir is not None else self.library_rdf_root
+        )
         target_aggregate_jsonld = (
             _as_path(aggregate_jsonld) if aggregate_jsonld is not None else self.library_aggregate_jsonld
         )
@@ -1821,9 +1844,18 @@ class Workspace:
         if normalized in {"cell_spec", "cell_specs"}:
             return query_api(type, **self._query_location(filters, dir_param="cell_specs_dir"))
         if normalized in {
-            "cell", "cells", "cell_instance", "cell_instances",
-            "test_spec", "test_specs", "test_protocol", "test_protocols",
-            "test", "tests", "dataset", "datasets",
+            "cell",
+            "cells",
+            "cell_instance",
+            "cell_instances",
+            "test_spec",
+            "test_specs",
+            "test_protocol",
+            "test_protocols",
+            "test",
+            "tests",
+            "dataset",
+            "datasets",
         }:
             return query_api(type, **self._query_location(filters))
         if normalized in {"description", "descriptions", "library_cell_spec", "library_cell_specs"}:
@@ -1855,7 +1887,9 @@ class Workspace:
 
     def _finalize(self) -> dict[str, list[Any]]:
         finalized_cell_specs = [self._finalize_cell_spec(item) for item in self.cell_specs]
-        cell_spec_map = {id(original): finalized for original, finalized in zip(self.cell_specs, finalized_cell_specs, strict=True)}
+        cell_spec_map = {
+            id(original): finalized for original, finalized in zip(self.cell_specs, finalized_cell_specs, strict=True)
+        }
         # Break cell-spec IRI collisions before cells link to them: distinct specs that
         # share identity fields must not overwrite each other on save, and each cell must
         # link to its own spec (cell_spec_map holds the same objects, so in-place
@@ -2012,7 +2046,9 @@ class Workspace:
         if resolved_cell is None:
             raise ValueError(f"Workspace.{action}() requires a Cell or a Dataset/Test linked to a Cell.")
 
-        resolved_cell_spec = cell_spec or resolved_cell.cell_spec or self._resolve_dataset_cell_spec(dataset, resolved_cell)
+        resolved_cell_spec = (
+            cell_spec or resolved_cell.cell_spec or self._resolve_dataset_cell_spec(dataset, resolved_cell)
+        )
         if resolved_cell_spec is None:
             raise ValueError(f"Workspace.{action}() requires a CellSpec or a linked Cell with cell_spec set.")
 
@@ -2078,9 +2114,7 @@ class Workspace:
             # available; the fallback keeps the pre-refactor anonymous seed
             # (colliding siblings are re-minted by _disambiguate_entity_ids).
             if seed is None:
-                seed = "::".join(
-                    [_with_default(finalized.cell_spec_id, "unknown-cell-spec"), "", "", "cell"]
-                )
+                seed = "::".join([_with_default(finalized.cell_spec_id, "unknown-cell-spec"), "", "", "cell"])
             finalized.id = _entity_iri("cell", seed)
         if finalized.source.type is None:
             finalized.source.type = "measurement"

@@ -175,8 +175,16 @@ def test_publish_requires_object_or_legacy_keywords() -> None:
 def test_publish_lists_its_parameters_as_keyword_only() -> None:
     parameters = inspect.signature(publish).parameters
     for name in (
-        "root", "force", "validation_policy", "registry_base_url", "api_key", "api_key_header",
-        "platform_base_url", "workspace_id", "publisher_id", "source_version",
+        "root",
+        "force",
+        "validation_policy",
+        "registry_base_url",
+        "api_key",
+        "api_key_header",
+        "platform_base_url",
+        "workspace_id",
+        "publisher_id",
+        "source_version",
     ):
         assert parameters[name].kind is inspect.Parameter.KEYWORD_ONLY, name
 
@@ -203,14 +211,24 @@ def test_legacy_publish_forwards_its_own_keywords_and_validation_policy(monkeypa
     monkeypatch.setattr(publish_module, "_legacy_publish", lambda **kwargs: calls.append(kwargs) or {"status": "ok"})
 
     publish(
-        cell_spec="cell-spec", cell_instance="cell-instance", test="test", dataset="dataset",
-        emit_html_page=True, validation_policy="strict",
+        cell_spec="cell-spec",
+        cell_instance="cell-instance",
+        test="test",
+        dataset="dataset",
+        emit_html_page=True,
+        validation_policy="strict",
     )
 
-    assert calls == [{
-        "cell_spec": "cell-spec", "cell_instance": "cell-instance", "test": "test", "dataset": "dataset",
-        "emit_html_page": True, "validation_policy": "strict",
-    }]
+    assert calls == [
+        {
+            "cell_spec": "cell-spec",
+            "cell_instance": "cell-instance",
+            "test": "test",
+            "dataset": "dataset",
+            "emit_html_page": True,
+            "validation_policy": "strict",
+        }
+    ]
 
 
 @pytest.mark.parametrize("extra", [{"root": "out"}, {"force": True}, {"api_key": "secret"}, {"bogus": 1}])
@@ -268,9 +286,12 @@ def test_publish_record_cell_spec_is_battery_cell_specification(tmp_path: Path) 
 def test_descriptor_instance_nodes_have_dual_type() -> None:
     """Cell instance nodes must carry both BatteryCell (EMMO) and schema:IndividualProduct (schema.org)."""
     from battinfo.transform.json_to_jsonld import _descriptor_instances_to_jsonld
-    nodes = _descriptor_instances_to_jsonld([
-        {"id": "https://w3id.org/battinfo/cell/test1", "name": "cell-1"},
-    ])
+
+    nodes = _descriptor_instances_to_jsonld(
+        [
+            {"id": "https://w3id.org/battinfo/cell/test1", "name": "cell-1"},
+        ]
+    )
     assert len(nodes) == 1
     types = nodes[0]["@type"]
     if isinstance(types, str):
@@ -322,6 +343,7 @@ def test_publish_record_test_protocol(tmp_path: Path) -> None:
 # ---------------------------------------------------------------------------
 # save_record() — dry-run and duplicate handling
 # ---------------------------------------------------------------------------
+
 
 def test_save_record_dry_run_does_not_write(tmp_path: Path) -> None:
     doc = json.loads(_EXAMPLE_CELL_TYPE.read_text(encoding="utf-8"))
@@ -456,12 +478,14 @@ class _ScriptBodies(HTMLParser):
 def test_the_publication_page_keeps_record_text_inside_its_script(tmp_path: Path) -> None:
     payload = {
         "@context": {"schema": "https://schema.org/"},
-        "@graph": [{
-            "@id": "https://w3id.org/battinfo/dataset/pge5-wer6-2q82-v9k0",
-            "@type": "schema:Dataset",
-            "schema:name": "Cycling <b>data</b> & more",
-            "schema:description": "</script><script>alert(document.domain)</script><!-- -->",
-        }],
+        "@graph": [
+            {
+                "@id": "https://w3id.org/battinfo/dataset/pge5-wer6-2q82-v9k0",
+                "@type": "schema:Dataset",
+                "schema:name": "Cycling <b>data</b> & more",
+                "schema:description": "</script><script>alert(document.domain)</script><!-- -->",
+            }
+        ],
     }
 
     page = save_publication_html(payload, tmp_path / "index.html").read_text(encoding="utf-8")

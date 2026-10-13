@@ -4,6 +4,7 @@ The CellSpec model is tolerant to construct (a half-filled spec is a valid draft
 what lets importers build it from arbitrary data and a GUI hold work-in-progress). Publish-readiness
 is a POLICY applied at finalize()/is_publishable(), not baked into the field types. These tests pin
 that separation, which is the foundation for folding the strict input DTOs onto the one model."""
+
 from __future__ import annotations
 
 import sys
@@ -37,8 +38,12 @@ def test_finalize_raises_listing_all_missing_fields() -> None:
 
 def test_complete_spec_is_publishable_and_finalize_returns_self() -> None:
     spec = CellSpec(
-        id="https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd", name="Acme X",
-        manufacturer="Acme", model="X", format="coin", chemistry="Li-ion",
+        id="https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd",
+        name="Acme X",
+        manufacturer="Acme",
+        model="X",
+        format="coin",
+        chemistry="Li-ion",
     )
     assert spec.is_publishable() is True
     assert spec.finalize() is spec  # chainable: spec.finalize().to_record()
@@ -49,8 +54,11 @@ def test_tolerant_import_is_serializable_but_flagged_unpublishable() -> None:
     # A record imported with an unknown chemistry (tolerant construction) must still serialize — so
     # import->save round-trips — while is_publishable() flags it for the author to complete.
     imported = CellSpec(
-        id="https://w3id.org/battinfo/spec/bbbb-cccc-dddd-eeee", name="Imported",
-        manufacturer="X", model="Y", format="coin",  # chemistry defaults to "unknown"
+        id="https://w3id.org/battinfo/spec/bbbb-cccc-dddd-eeee",
+        name="Imported",
+        manufacturer="X",
+        model="Y",
+        format="coin",  # chemistry defaults to "unknown"
     )
     assert "cell_spec" in imported.to_record()  # serialization does not require a known chemistry
     assert imported.is_publishable() is False

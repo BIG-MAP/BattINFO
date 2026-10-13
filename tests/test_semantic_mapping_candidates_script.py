@@ -87,6 +87,3 @@ ex:Kilogram a owl:Class ; rdfs:label "Kilogram" .
     report = report_path.read_text(encoding="utf-8")
     assert "Quantitative Property Mapping Candidate Report" in report
     assert "`energy`" in report
-
-
-

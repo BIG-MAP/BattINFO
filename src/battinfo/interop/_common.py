@@ -1,4 +1,5 @@
 """Shared helpers for the interop importers."""
+
 from __future__ import annotations
 
 import json
@@ -20,6 +21,4 @@ def load_json_source(path: str | Path) -> Any:
     try:
         return json.loads(text)
     except json.JSONDecodeError as exc:
-        raise ValueError(
-            f"{p} is not valid JSON (line {exc.lineno}, column {exc.colno}): {exc.msg}"
-        ) from exc
+        raise ValueError(f"{p} is not valid JSON (line {exc.lineno}, column {exc.colno}): {exc.msg}") from exc

@@ -7,6 +7,7 @@ published_at, a field the user never touched. created_at now defaults to
 published_at when only that is known, and modified_at then to the save time:
 the save is the modification, and the old publication time is not.
 """
+
 from __future__ import annotations
 
 import copy
@@ -31,27 +32,41 @@ PUBLISHED_RECORD = {
         "id": "https://w3id.org/battinfo/dataset/zbwt-812f-t4p4-ea49",
         "name": "Cycling data of Empa coin cell 000149",
         "access_url": FILE_URL,
-        "distributions": [{
-            "role": "processed",
-            "content_url": FILE_URL,
-            "name": "zbwt-812f-t4p4-ea49.bdf.parquet",
-            "encoding_format": "application/vnd.apache.parquet",
-            "content_size": "9059665",
-            "checksum": {"algorithm": "sha256",
-                         "value": "0165c2f6f93980902aeb3de54dbdbcf751211f99f18737f679654c11a44a90c3"},
-        }],
+        "distributions": [
+            {
+                "role": "processed",
+                "content_url": FILE_URL,
+                "name": "zbwt-812f-t4p4-ea49.bdf.parquet",
+                "encoding_format": "application/vnd.apache.parquet",
+                "content_size": "9059665",
+                "checksum": {
+                    "algorithm": "sha256",
+                    "value": "0165c2f6f93980902aeb3de54dbdbcf751211f99f18737f679654c11a44a90c3",
+                },
+            }
+        ],
         "license": "https://creativecommons.org/licenses/by/4.0/",
         "published_at": PUBLISHED,
         "about": [CELL, TEST],
     },
-    "provenance": {"source_type": "measurement", "retrieved_at": PUBLISHED,
-                   "source_url": "https://doi.org/10.5281/zenodo.15481956"},
+    "provenance": {
+        "source_type": "measurement",
+        "retrieved_at": PUBLISHED,
+        "source_url": "https://doi.org/10.5281/zenodo.15481956",
+    },
 }
 
 
 def _save(dataset: battinfo.Dataset, root: Path) -> dict:
-    saved = battinfo.save_dataset(dataset, source_root=root, mode="upsert", validation_policy="strict",
-                                  resolve_references=False, build_jsonld=False, build_html=False)
+    saved = battinfo.save_dataset(
+        dataset,
+        source_root=root,
+        mode="upsert",
+        validation_policy="strict",
+        resolve_references=False,
+        build_jsonld=False,
+        build_html=False,
+    )
     return json.loads(Path(saved["path"]).read_text(encoding="utf-8"))
 
 
@@ -77,8 +92,9 @@ def test_a_relinked_new_version_saves(tmp_path: Path) -> None:
 
 def test_the_workspace_engine_defaults_created_at_the_same_way(tmp_path: Path) -> None:
     engine = Workspace(root=tmp_path / "engine")
-    dataset = battinfo.Dataset(name="Cell 1 data", access_url=FILE_URL, published_at=PUBLISHED,
-                               cell_instance_id=CELL, test_id=TEST)
+    dataset = battinfo.Dataset(
+        name="Cell 1 data", access_url=FILE_URL, published_at=PUBLISHED, cell_instance_id=CELL, test_id=TEST
+    )
     before = int(time.time())
     finalized = engine._finalize_dataset(dataset, {}, {})
     assert finalized.created_at == PUBLISHED
@@ -87,8 +103,10 @@ def test_the_workspace_engine_defaults_created_at_the_same_way(tmp_path: Path) -
 
 def test_without_either_date_created_at_is_the_save_time(tmp_path: Path) -> None:
     before = int(time.time())
-    record = _save(battinfo.Dataset(name="Fresh data", access_url=FILE_URL, cell_instance_id=CELL,
-                                    source={"type": "measurement"}), tmp_path)
+    record = _save(
+        battinfo.Dataset(name="Fresh data", access_url=FILE_URL, cell_instance_id=CELL, source={"type": "measurement"}),
+        tmp_path,
+    )
     assert before <= record["dataset"]["created_at"] <= int(time.time()) + 1
     assert record["dataset"]["published_at"] == record["dataset"]["created_at"]
 
@@ -107,6 +125,15 @@ def test_a_stated_modified_at_is_kept(tmp_path: Path) -> None:
     assert _save(dataset, tmp_path)["dataset"]["modified_at"] == stated
     engine = Workspace(root=tmp_path / "engine")
     finalized = engine._finalize_dataset(
-        battinfo.Dataset(name="Cell 1 data", access_url=FILE_URL, published_at=PUBLISHED, modified_at=stated,
-                         cell_instance_id=CELL, test_id=TEST), {}, {})
+        battinfo.Dataset(
+            name="Cell 1 data",
+            access_url=FILE_URL,
+            published_at=PUBLISHED,
+            modified_at=stated,
+            cell_instance_id=CELL,
+            test_id=TEST,
+        ),
+        {},
+        {},
+    )
     assert finalized.modified_at == stated

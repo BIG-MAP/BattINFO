@@ -107,6 +107,7 @@ def _make_file_sets(
 
 # ── basic output presence ──────────────────────────────────────────────────────
 
+
 def test_single_dataset_files_created(tmp_path: Path) -> None:
     record = _make_record(1)
     staging = tmp_path / "staging"
@@ -160,6 +161,7 @@ def test_none_raw_file_skipped(tmp_path: Path) -> None:
 
 # ── battinfo.bundle.json ───────────────────────────────────────────────────────
 
+
 def test_bundle_json_is_valid_cell_record(tmp_path: Path) -> None:
     record = _make_record(2)
     staging = tmp_path / "staging"
@@ -175,6 +177,7 @@ def test_bundle_json_is_valid_cell_record(tmp_path: Path) -> None:
 
 
 # ── battinfo.publish.jsonld ────────────────────────────────────────────────────
+
 
 def test_publish_jsonld_has_graph(tmp_path: Path) -> None:
     record = _make_record(2)
@@ -223,8 +226,7 @@ def test_publish_jsonld_contains_dataset_distribution(tmp_path: Path) -> None:
     graph = payload["@graph"]
     # Gold-standard shape: each test result is a dcat:Dataset member carrying both a
     # dcat:distribution and a schema:distribution (DataDownload) mirror.
-    dataset_nodes = [n for n in graph
-                     if "dcat:Dataset" in (n.get("@type") or []) and "dcat:distribution" in n]
+    dataset_nodes = [n for n in graph if "dcat:Dataset" in (n.get("@type") or []) and "dcat:distribution" in n]
     assert len(dataset_nodes) == 1
     dist = dataset_nodes[0].get("schema:distribution", [])
     assert len(dist) >= 1
@@ -247,8 +249,9 @@ def test_publish_jsonld_bdf_distribution_conforms_to_table_schema(tmp_path: Path
     raw = [d for d in dists if ".bdf." not in d.get("schema:name", "")]
     assert bdf, "expected at least one BDF distribution"
     assert all(d.get("dcterms:conformsTo") == {"@id": BDF_TABLE_SCHEMA_IRI} for d in bdf)
-    assert all("dcterms:conformsTo" not in d for d in raw), \
+    assert all("dcterms:conformsTo" not in d for d in raw), (
         "raw instrument files must not claim BDF table-schema conformance"
+    )
     # The link must be the VERSIONED IRI (archival reproducibility), not floating.
     assert "/1.2.0/schema" in BDF_TABLE_SCHEMA_IRI
 
@@ -308,6 +311,7 @@ def test_publish_jsonld_uses_shared_gold_standard_builder(tmp_path: Path) -> Non
 
 # ── ro-crate-metadata.json ─────────────────────────────────────────────────────
 
+
 def test_ro_crate_structure(tmp_path: Path) -> None:
     record = _make_record(2)
     staging = tmp_path / "staging"
@@ -346,6 +350,7 @@ def test_ro_crate_checksums_present(tmp_path: Path) -> None:
 
 # ── file_url_map ───────────────────────────────────────────────────────────────
 
+
 def test_file_url_map_covers_all_files(tmp_path: Path) -> None:
     record = _make_record(2)
     staging = tmp_path / "staging"
@@ -365,6 +370,7 @@ def test_file_url_map_covers_all_files(tmp_path: Path) -> None:
 
 
 # ── error cases ────────────────────────────────────────────────────────────────
+
 
 def test_mismatched_file_sets_length_raises(tmp_path: Path) -> None:
     record = _make_record(2)

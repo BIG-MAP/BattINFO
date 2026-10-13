@@ -13,6 +13,7 @@ either "description-aware" (it handles the isDescriptionFor location) or an
 explicit external-document justification. A new touchpoint fails this test
 until it is reviewed and added.
 """
+
 from __future__ import annotations
 
 import re

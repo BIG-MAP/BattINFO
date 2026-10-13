@@ -47,14 +47,17 @@ def _placeholder_iri_report(doc: dict[str, Any], policy: ValidationPolicy) -> Va
     entity_id = body.get("id") if isinstance(body, dict) else None
     if kind is None or not is_placeholder_iri(entity_id):
         return ValidationReport(policy=policy)
-    fix = ("Remove id, short_id and identifier so the save mints the IRI, or set the IRI "
-           "this record was published under.")
+    fix = (
+        "Remove id, short_id and identifier so the save mints the IRI, or set the IRI this record was published under."
+    )
     issue = ValidationIssue(
         code="identity.placeholder_iri",
         severity="error",
         path=f"{kind.record_key}.id",
-        message=(f"{entity_id} is a template placeholder, not a real IRI: every record made "
-                 f"from an unedited template would claim it. {fix}"),
+        message=(
+            f"{entity_id} is a template placeholder, not a real IRI: every record made "
+            f"from an unedited template would claim it. {fix}"
+        ),
         validator="identity",
         resource_type=kind.entity_type,
     )

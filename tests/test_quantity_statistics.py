@@ -61,8 +61,11 @@ def _electrode(**property_overrides) -> dict:
     prop = {"loading": dict(LOADING)}
     prop.update(property_overrides)
     record = create_electrode(
-        validate=False, uid="k81p-5wxb-gaph-z6ee", name="LNMO-AQ-1 discs",
-        electrode_spec_id=ELECTRODE_SPEC_IRI, batch="LNMO-AQ-1",
+        validate=False,
+        uid="k81p-5wxb-gaph-z6ee",
+        name="LNMO-AQ-1 discs",
+        electrode_spec_id=ELECTRODE_SPEC_IRI,
+        batch="LNMO-AQ-1",
     )
     record["electrode"]["property"] = prop
     return record
@@ -88,6 +91,7 @@ def _qualifiers(node: dict) -> dict[str, dict]:
 
 # ── The record ────────────────────────────────────────────────────────────────
 
+
 def test_a_component_property_accepts_the_statistics() -> None:
     report = validate_record_report(_electrode())
     assert list(report.errors) == [], report.errors
@@ -96,10 +100,14 @@ def test_a_component_property_accepts_the_statistics() -> None:
 def test_a_cell_spec_property_accepts_the_statistics() -> None:
     """The SpecItem shape too, so a cell-level measured value can carry them."""
     spec = CellSpec(
-        id=CELL_SPEC_IRI, name="Demo", manufacturer="Lab", model="D-1",
-        format="coin", chemistry="li-ion", source=ProvenanceInfo(type="lab"),
-        properties={"mass": {"value": 2.31, "unit": "g",
-                             "standard_deviation": 0.04, "sample_count": 12}},
+        id=CELL_SPEC_IRI,
+        name="Demo",
+        manufacturer="Lab",
+        model="D-1",
+        format="coin",
+        chemistry="li-ion",
+        source=ProvenanceInfo(type="lab"),
+        properties={"mass": {"value": 2.31, "unit": "g", "standard_deviation": 0.04, "sample_count": 12}},
     )
     assert list(validate_record_report(spec.to_record()).errors) == []
 
@@ -133,6 +141,7 @@ def test_a_fractional_sample_count_is_refused() -> None:
 
 
 # ── Emission ──────────────────────────────────────────────────────────────────
+
 
 def test_the_statistics_ride_the_same_node_as_the_value() -> None:
     """One quantity, not three properties.
@@ -174,8 +183,7 @@ def test_a_zero_standard_deviation_is_published_not_dropped() -> None:
     row, so the spread is 0 by construction. Suppressing it would make a declared
     value indistinguishable from an unmeasured one.
     """
-    record = _electrode(dry_thickness={"value": 42.0, "unit": "um",
-                                       "standard_deviation": 0.0, "sample_count": 8})
+    record = _electrode(dry_thickness={"value": 42.0, "unit": "um", "standard_deviation": 0.0, "sample_count": 8})
     node = _electrode_property_nodes(record)["DryCoatingThickness"]
     assert _qualifiers(node)["standard_deviation"]["schema:value"] == 0.0
 
@@ -202,10 +210,14 @@ def test_a_percentage_spread_rescales_with_its_value() -> None:
     varies by more than it contains.
     """
     spec_record = create_electrode_spec(
-        validate=False, uid="d7qr-n581-74c3-7g7r", name="LNMO cathode", kind="lnmo",
-        coating={"component": {"active_material": [{"name": "LNMO"}]},
-                 "property": {"porosity": {"value": 4.3, "unit": "%",
-                                           "standard_deviation": 1.2, "sample_count": 8}}},
+        validate=False,
+        uid="d7qr-n581-74c3-7g7r",
+        name="LNMO cathode",
+        kind="lnmo",
+        coating={
+            "component": {"active_material": [{"name": "LNMO"}]},
+            "property": {"porosity": {"value": 4.3, "unit": "%", "standard_deviation": 1.2, "sample_count": 8}},
+        },
     )
     node = to_jsonld(spec_record, target="domain-battery")["@graph"][0]
     porosity = json.dumps(node)
@@ -215,10 +227,14 @@ def test_a_percentage_spread_rescales_with_its_value() -> None:
 
 def test_the_cell_spec_emitter_carries_them_too() -> None:
     spec = CellSpec(
-        id=CELL_SPEC_IRI, name="Demo", manufacturer="Lab", model="D-1",
-        format="coin", chemistry="li-ion", source=ProvenanceInfo(type="lab"),
-        properties={"mass": {"value": 2.31, "unit": "g",
-                             "standard_deviation": 0.04, "sample_count": 12}},
+        id=CELL_SPEC_IRI,
+        name="Demo",
+        manufacturer="Lab",
+        model="D-1",
+        format="coin",
+        chemistry="li-ion",
+        source=ProvenanceInfo(type="lab"),
+        properties={"mass": {"value": 2.31, "unit": "g", "standard_deviation": 0.04, "sample_count": 12}},
     )
     node = record_to_jsonld(spec.to_record(), "cell-spec")["isDescriptionFor"]
     properties = node["hasProperty"]
@@ -262,8 +278,7 @@ def test_the_qualifier_terms_resolve_offline() -> None:
     release drains.
     """
     v1 = json.loads(
-        (ROOT / "src" / "battinfo" / "data" / "context" / "records.context.v1.json")
-        .read_text(encoding="utf-8")
+        (ROOT / "src" / "battinfo" / "data" / "context" / "records.context.v1.json").read_text(encoding="utf-8")
     )["@context"]
     assert v1["schema"] == "https://schema.org/"
     for minted in ("StandardDeviation", "SampleCount"):
@@ -286,6 +301,7 @@ def test_no_emmo_uncertainty_class_is_claimed() -> None:
 
 
 # ── The prose form it replaces ────────────────────────────────────────────────
+
 
 def test_the_notes_workaround_remains_valid() -> None:
     """Published records that say it in prose are not invalidated.

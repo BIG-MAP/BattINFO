@@ -148,12 +148,12 @@ def run_demo_pipeline(
     target = _verification_target(submission_payload, response_payload)
     route_resource_type = str(target["resource_type"]).replace("_", "-")
 
-    registry_resource_url = (
-        registry_base_url.rstrip("/") + f"/resources/{route_resource_type}/{target['canonical_id']}"
-    )
+    registry_resource_url = registry_base_url.rstrip("/") + f"/resources/{route_resource_type}/{target['canonical_id']}"
     registry_page_model_url = registry_resource_url + "/page-model"
     resource_payload = _poll_json(registry_resource_url, timeout_sec=timeout_sec, poll_interval_sec=poll_interval_sec)
-    page_model_payload = _poll_json(registry_page_model_url, timeout_sec=timeout_sec, poll_interval_sec=poll_interval_sec)
+    page_model_payload = _poll_json(
+        registry_page_model_url, timeout_sec=timeout_sec, poll_interval_sec=poll_interval_sec
+    )
 
     platform_check: dict[str, Any] | None = None
     if platform_base_url is not None:

@@ -9,6 +9,7 @@ half-cell OCV dataset (battinfo-records#6 READINESS-REPORT.md):
   (``Step(mode="discharge")``, ``Conformance(status="non_conformant")``, ...),
   so the failure surfaced late at ``ws.save()`` instead of at construction.
 """
+
 from __future__ import annotations
 
 import json
@@ -50,6 +51,7 @@ SCHEMA_DIR = ROOT / "src" / "battinfo" / "data" / "schemas"
 
 # ── M2: str | list[str] must never explode into characters ────────────────────
 
+
 def _record_models() -> dict[type, object]:
     """A minimal, constructible instance of every model that owns list[str] fields."""
     return {
@@ -68,11 +70,7 @@ def _record_models() -> dict[type, object]:
 
 
 def _str_list_fields(model: type) -> list[str]:
-    return [
-        name
-        for name, field in model.model_fields.items()
-        if field.annotation == list[str]
-    ]
+    return [name for name, field in model.model_fields.items() if field.annotation == list[str]]
 
 
 def test_every_str_list_field_wraps_a_bare_string_on_assignment() -> None:
@@ -85,9 +83,7 @@ def test_every_str_list_field_wraps_a_bare_string_on_assignment() -> None:
         for name in fields:
             setattr(obj, name, "R2032 coin cell")
             got = getattr(obj, name)
-            assert got == ["R2032 coin cell"], (
-                f"{model.__name__}.{name} exploded a bare string into {got!r}"
-            )
+            assert got == ["R2032 coin cell"], f"{model.__name__}.{name} exploded a bare string into {got!r}"
             swept.append(f"{model.__name__}.{name}")
     # Guard against a field silently dropping out of the sweep (17 today across
     # CellSpec, Cell, TestSpec, Test, Dataset, Artifact).
@@ -95,11 +91,14 @@ def test_every_str_list_field_wraps_a_bare_string_on_assignment() -> None:
 
 
 def test_str_list_field_wraps_a_bare_string_at_construction() -> None:
-    spec = CellSpec(id="https://w3id.org/battinfo/spec/a", name="a",
-                    specification_comment="single note")
+    spec = CellSpec(id="https://w3id.org/battinfo/spec/a", name="a", specification_comment="single note")
     assert spec.specification_comment == ["single note"]
-    ds = Dataset(id="https://w3id.org/battinfo/dataset/a", name="a",
-                 access_url="https://example.org", same_as="https://doi.org/10.5281/zenodo.1")
+    ds = Dataset(
+        id="https://w3id.org/battinfo/dataset/a",
+        name="a",
+        access_url="https://example.org",
+        same_as="https://doi.org/10.5281/zenodo.1",
+    )
     assert ds.same_as == ["https://doi.org/10.5281/zenodo.1"]
 
 
@@ -111,14 +110,14 @@ def test_specification_comment_does_not_explode_in_record() -> None:
 
 
 def test_dataset_same_as_does_not_explode_in_record() -> None:
-    ds = Dataset(id="https://w3id.org/battinfo/dataset/a", name="a",
-                 access_url="https://example.org")
+    ds = Dataset(id="https://w3id.org/battinfo/dataset/a", name="a", access_url="https://example.org")
     ds.same_as = "https://doi.org/10.5281/zenodo.1"
     record = ds.to_record()
     assert record["dataset"]["same_as"] == ["https://doi.org/10.5281/zenodo.1"]
 
 
 # ── Test.conditions: authorable end to end ────────────────────────────────────
+
 
 def test_test_conditions_round_trip_and_jsonld() -> None:
     test = Test(
@@ -148,13 +147,15 @@ def test_test_conditions_round_trip_and_jsonld() -> None:
 
 
 def test_test_conditions_default_empty_and_omitted() -> None:
-    test = Test(id="https://w3id.org/battinfo/test/a", name="a",
-                cell_id="https://w3id.org/battinfo/cell/a", kind="gitt")
+    test = Test(
+        id="https://w3id.org/battinfo/test/a", name="a", cell_id="https://w3id.org/battinfo/cell/a", kind="gitt"
+    )
     assert test.conditions == {}
     assert "conditions" not in test.to_record()["test"]
 
 
 # ── M1: model enums fail at construction, matching the save-time schema ────────
+
 
 def test_step_mode_rejected_at_construction() -> None:
     with pytest.raises(ValueError, match=r"Step\.mode must be one of"):
@@ -191,11 +192,23 @@ def test_deviation_category_rejected_at_construction() -> None:
 
 def test_test_status_rejected_at_construction() -> None:
     with pytest.raises(ValueError, match=r"Test\.status must be one of"):
-        Test(id="https://w3id.org/battinfo/test/a", name="a",
-             cell_id="https://w3id.org/battinfo/cell/a", kind="gitt", status="finished")
-    assert Test(id="https://w3id.org/battinfo/test/a", name="a",
-                cell_id="https://w3id.org/battinfo/cell/a", kind="gitt",
-                status="completed").status == "completed"
+        Test(
+            id="https://w3id.org/battinfo/test/a",
+            name="a",
+            cell_id="https://w3id.org/battinfo/cell/a",
+            kind="gitt",
+            status="finished",
+        )
+    assert (
+        Test(
+            id="https://w3id.org/battinfo/test/a",
+            name="a",
+            cell_id="https://w3id.org/battinfo/cell/a",
+            kind="gitt",
+            status="completed",
+        ).status
+        == "completed"
+    )
 
 
 def test_artifact_role_rejected_at_construction() -> None:
@@ -205,6 +218,7 @@ def test_artifact_role_rejected_at_construction() -> None:
 
 
 # ── The model enums must equal the save-time schema enums (no future drift) ────
+
 
 def _schema(name: str) -> dict:
     return json.loads((SCHEMA_DIR / name).read_text(encoding="utf-8"))

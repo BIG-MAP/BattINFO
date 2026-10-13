@@ -49,6 +49,7 @@ if TYPE_CHECKING:
 
 def _dict_to_spec_value(v: Mapping[str, Any]) -> "SpecValue":
     from battinfo.bundle_generated import SpecValue  # noqa: PLC0415
+
     return SpecValue(
         sv_value=v.get("value"),
         sv_unit=v.get("unit"),
@@ -89,6 +90,7 @@ def specs_to_specset(props: dict[str, Any]) -> "SpecSet | None":
     Unknown keys are stored as extras (ConfiguredBaseModel uses extra='allow').
     """
     from battinfo.bundle_generated import SpecSet  # noqa: PLC0415
+
     if not props:
         return None
     kwargs: dict[str, Any] = {}
@@ -109,6 +111,7 @@ def specset_to_specs(specset: "SpecSet | None") -> dict[str, Any]:
     if specset is None:
         return {}
     from battinfo.bundle_generated import SpecValue  # noqa: PLC0415
+
     out: dict[str, Any] = {}
     for key, raw in specset.model_dump(exclude_none=True).items():
         if key == "linkml_meta":
@@ -149,6 +152,7 @@ def cell_spec_to_schema(ct: "CellSpec") -> "GenCellSpecification":
     from battinfo.bundle_generated import (
         Organization,
     )
+
     return GenCellSpecification(
         id=ct.id or "urn:staging:unknown",
         ct_name=ct.name,
@@ -171,6 +175,7 @@ def cell_spec_to_schema(ct: "CellSpec") -> "GenCellSpecification":
 def cell_instance_to_schema(ci: "Cell") -> "GenCellInstance":
     """Convert a bundle.py Cell to a generated Cell."""
     from battinfo.bundle_generated import CellInstance as GenCellInstance  # noqa: PLC0415
+
     return GenCellInstance(
         ci_id=ci.id or "urn:staging:unknown",
         ci_type_id=ci.cell_spec_id or "",
@@ -193,6 +198,7 @@ def test_spec_to_schema(ts: "TestSpec") -> "GenTestSpec":
     from battinfo.bundle_generated import (
         TestSpec as GenTestSpec,
     )
+
     return GenTestSpec(
         ts_id=ts.id or "urn:staging:unknown",
         ts_name=ts.name or "",
@@ -202,7 +208,9 @@ def test_spec_to_schema(ts: "TestSpec") -> "GenTestSpec":
         ts_protocol=GenProtocolInfo(
             protocol_name=ts.protocol.name,
             protocol_url=ts.protocol.url,
-        ) if (ts.protocol.name or ts.protocol.url) else None,
+        )
+        if (ts.protocol.name or ts.protocol.url)
+        else None,
         ts_steps=ts.experiment or None,
         ts_cycles=None,
     )
@@ -216,6 +224,7 @@ def test_to_schema(t: "Test") -> "GenTest":
     from battinfo.bundle_generated import (
         Test as GenTest,
     )
+
     return GenTest(
         t_id=t.id or "urn:staging:unknown",
         t_name=t.name or "",
@@ -227,7 +236,9 @@ def test_to_schema(t: "Test") -> "GenTest":
         t_protocol=GenProtocolInfo(
             protocol_name=t.protocol.name,
             protocol_url=t.protocol.url,
-        ) if (t.protocol.name or t.protocol.url) else None,
+        )
+        if (t.protocol.name or t.protocol.url)
+        else None,
         t_instrument=t.instrument,
         t_started_at=t.started_at if isinstance(t.started_at, int) else None,
         t_ended_at=t.ended_at if isinstance(t.ended_at, int) else None,
@@ -246,6 +257,7 @@ def bundle_to_schema(obj: Any) -> Any:
         Test,
         TestSpec,
     )
+
     if isinstance(obj, CellSpec):
         return cell_spec_to_schema(obj)
     if isinstance(obj, Cell):
@@ -265,11 +277,7 @@ def schema_cell_spec_to_record_dict(ct_gen: "GenCellSpecification") -> dict[str,
 
     Useful when reading JSON-LD output back into the application layer.
     """
-    manufacturer_name = (
-        ct_gen.ct_manufacturer.org_name
-        if ct_gen.ct_manufacturer is not None
-        else "unknown"
-    )
+    manufacturer_name = ct_gen.ct_manufacturer.org_name if ct_gen.ct_manufacturer is not None else "unknown"
     product: dict[str, Any] = {
         "id": ct_gen.id,
         "model": ct_gen.ct_model,

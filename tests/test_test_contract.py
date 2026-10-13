@@ -40,7 +40,9 @@ def test_test_examples_validate_against_normative_schema() -> None:
 def test_test_schema_and_examples_are_synced_between_assets_and_package() -> None:
     assets_schema = ROOT / "assets" / "schemas" / "test.schema.json"
     package_schema = ROOT / "src" / "battinfo" / "data" / "schemas" / "test.schema.json"
-    assert json.loads(assets_schema.read_text(encoding="utf-8")) == json.loads(package_schema.read_text(encoding="utf-8"))
+    assert json.loads(assets_schema.read_text(encoding="utf-8")) == json.loads(
+        package_schema.read_text(encoding="utf-8")
+    )
 
     assets_examples = ROOT / "examples" / "test"
     package_examples = ROOT / "src" / "battinfo" / "data" / "examples" / "test"
@@ -59,8 +61,7 @@ def test_test_schema_and_examples_are_synced_between_assets_and_package() -> Non
 def test_test_examples_cover_hardening_kinds() -> None:
     examples_dir = ROOT / "examples" / "test"
     observed = {
-        json.loads(path.read_text(encoding="utf-8"))["test"]["kind"]
-        for path in sorted(examples_dir.glob("*.json"))
+        json.loads(path.read_text(encoding="utf-8"))["test"]["kind"] for path in sorted(examples_dir.glob("*.json"))
     }
     expected = {"cycling", "rate_capability", "formation", "hppc", "ici", "gitt", "dcir", "eis"}
     assert expected.issubset(observed)
@@ -76,7 +77,6 @@ def test_test_protocol_examples_cover_full_battery_test_type_enum() -> None:
     }
     expected = {kind.value for kind in BatteryTestType}
     assert observed == expected, f"missing: {expected - observed}; extra: {observed - expected}"
-
 
 
 def test_execution_inherits_identity_from_the_linked_protocol() -> None:

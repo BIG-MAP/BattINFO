@@ -78,10 +78,7 @@ _MEASURED = {
 
 
 def _example_cell_instance_record() -> dict:
-    path = (
-        ROOT / "src" / "battinfo" / "data" / "examples" / "cell-instance"
-        / "cell-3m6k-9t2p-7x4h-9nq8.json"
-    )
+    path = ROOT / "src" / "battinfo" / "data" / "examples" / "cell-instance" / "cell-3m6k-9t2p-7x4h-9nq8.json"
     return json.loads(path.read_text(encoding="utf-8"))
 
 
@@ -90,9 +87,7 @@ def test_measured_capacity_and_energy_pass_the_strict_save_gate() -> None:
 
     record = _example_cell_instance_record()
     record["measured"] = dict(_MEASURED)
-    report = validate_record_report(
-        record, policy=ValidationPolicy(name="strict", semantic="error")
-    )
+    report = validate_record_report(record, policy=ValidationPolicy(name="strict", semantic="error"))
     assert report.ok, [f"{i.code}: {i.message}" for i in report.issues]
 
 

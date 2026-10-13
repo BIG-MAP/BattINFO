@@ -2,6 +2,7 @@
 (manufactured_at / started_at / ended_at / created_at) are reproducible across machines,
 regardless of the authoring machine's local timezone; it must never raise, and it must
 reject values (bool, NaN, short digit strings) that only look like timestamps."""
+
 from __future__ import annotations
 
 import sys

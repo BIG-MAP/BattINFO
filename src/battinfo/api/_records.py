@@ -3,6 +3,7 @@
 Split from the former monolithic ``battinfo/api.py`` (beta-hardening 4.2);
 import the public surface from ``battinfo.api``, not from this module.
 """
+
 from __future__ import annotations
 
 import re
@@ -130,9 +131,16 @@ def _cell_spec_record_to_library_format(doc: dict[str, Any]) -> dict[str, Any]:
             specification[dst] = product[src]
     if "properties" in doc:
         specification["property"] = doc["properties"]
-    for field in ("construction", "positive_electrode", "negative_electrode",
-                  "working_electrode", "counter_electrode",
-                  "electrolyte", "separator", "housing"):
+    for field in (
+        "construction",
+        "positive_electrode",
+        "negative_electrode",
+        "working_electrode",
+        "counter_electrode",
+        "electrolyte",
+        "separator",
+        "housing",
+    ):
         if field in doc:
             specification[field] = doc[field]
     if "notes" in doc:
@@ -148,7 +156,7 @@ def _cell_spec_record_to_library_format(doc: dict[str, Any]) -> dict[str, Any]:
 def _sync_library_packaged_copy(source_path: Path, package_root: Path) -> Path:
     package_root.mkdir(parents=True, exist_ok=True)
     target_path = package_root / source_path.name
-    target_path.write_text(source_path.read_text(encoding='utf-8'), encoding='utf-8')
+    target_path.write_text(source_path.read_text(encoding="utf-8"), encoding="utf-8")
     return target_path
 
 
@@ -165,8 +173,16 @@ def _library_cell_spec_filename(manufacturer: str, model: str) -> str:
 # Specification fields carried through from a flat library-input dict. Unlike the retired
 # CellDatasheetInput, this accepts the FULL physical structure, not just construction/property.
 _LIBRARY_SPEC_OPTIONAL_FIELDS = (
-    "size_code", "construction", "property", "positive_electrode", "negative_electrode",
-    "working_electrode", "counter_electrode", "electrolyte", "separator", "housing",
+    "size_code",
+    "construction",
+    "property",
+    "positive_electrode",
+    "negative_electrode",
+    "working_electrode",
+    "counter_electrode",
+    "electrolyte",
+    "separator",
+    "housing",
 )
 
 
@@ -375,9 +391,7 @@ def query_cell_specs(
             cell_id = product.get("id")
             manufacturer_obj = product.get("manufacturer")
             manufacturer_name = (
-                manufacturer_obj.get("name")
-                if isinstance(manufacturer_obj, Mapping)
-                else manufacturer_obj
+                manufacturer_obj.get("name") if isinstance(manufacturer_obj, Mapping) else manufacturer_obj
             )
             model_name = product.get("model")
             format_name = product.get("cell_format") or product.get("cell_format")
@@ -497,9 +511,7 @@ def query_cell_instances(
         linked_dataset_ids: list[str] = []
         if isinstance(dataset_links, list):
             linked_dataset_ids = [
-                item["id"]
-                for item in dataset_links
-                if isinstance(item, Mapping) and isinstance(item.get("id"), str)
+                item["id"] for item in dataset_links if isinstance(item, Mapping) and isinstance(item.get("id"), str)
             ]
         elif isinstance(prov, Mapping):
             # Backward compatibility for legacy records that stored dataset links under provenance.
@@ -580,11 +592,7 @@ def query_datasets(
         related_cells: list[str] = []
         about = dataset.get("about")
         if isinstance(about, list):
-            related_cells = [
-                item
-                for item in about
-                if isinstance(item, str) and CELL_IRI_RE.fullmatch(item)
-            ]
+            related_cells = [item for item in about if isinstance(item, str) and CELL_IRI_RE.fullmatch(item)]
         elif isinstance(dataset.get("related_entities"), Mapping):
             related = dataset["related_entities"].get("cell_ids")
             if isinstance(related, list):
@@ -610,9 +618,9 @@ def query_datasets(
             "license": dataset.get("license"),
             "access_url": dataset.get("access_url") or dataset.get("url"),
             "related_cell_ids": related_cells,
-            "related_test_ids": [
-                item for item in about if isinstance(item, str) and TEST_IRI_RE.fullmatch(item)
-            ] if isinstance(about, list) else [],
+            "related_test_ids": [item for item in about if isinstance(item, str) and TEST_IRI_RE.fullmatch(item)]
+            if isinstance(about, list)
+            else [],
             "source_type": prov.get("source_type") if isinstance(prov, Mapping) else None,
             "origin": origin,
             "path": str(path),
@@ -778,18 +786,33 @@ def query_test_specs(
             continue
         if not _str_eq(rec.get("source_type"), source_type):
             continue
-        if not _matches_facets(rec.get("facets") or {}, mode=mode, direction=direction,
-                               tag=tag, c_rate=c_rate, has_cv_hold=has_cv_hold,
-                               has_rest=has_rest, has_eis=has_eis):
+        if not _matches_facets(
+            rec.get("facets") or {},
+            mode=mode,
+            direction=direction,
+            tag=tag,
+            c_rate=c_rate,
+            has_cv_hold=has_cv_hold,
+            has_rest=has_rest,
+            has_eis=has_eis,
+        ):
             continue
         filtered.append(rec)
 
     return _paginate(filtered, limit=limit, offset=offset)
 
 
-def _matches_facets(facets: Mapping[str, Any], *, mode: str | None, direction: str | None,
-                    tag: str | None, c_rate: float | None, has_cv_hold: bool | None,
-                    has_rest: bool | None, has_eis: bool | None) -> bool:
+def _matches_facets(
+    facets: Mapping[str, Any],
+    *,
+    mode: str | None,
+    direction: str | None,
+    tag: str | None,
+    c_rate: float | None,
+    has_cv_hold: bool | None,
+    has_rest: bool | None,
+    has_eis: bool | None,
+) -> bool:
     """True if the derived facets satisfy every supplied method-shape filter."""
     if mode is not None and mode not in (facets.get("modes") or []):
         return False
@@ -797,9 +820,7 @@ def _matches_facets(facets: Mapping[str, Any], *, mode: str | None, direction: s
         return False
     if tag is not None and tag not in (facets.get("tags") or []):
         return False
-    if c_rate is not None and not any(
-        abs(float(c) - float(c_rate)) < 1e-9 for c in (facets.get("c_rates") or [])
-    ):
+    if c_rate is not None and not any(abs(float(c) - float(c_rate)) < 1e-9 for c in (facets.get("c_rates") or [])):
         return False
     for flag, key in ((has_cv_hold, "has_cv_hold"), (has_rest, "has_rest"), (has_eis, "has_eis")):
         if flag is not None and bool(facets.get(key)) != bool(flag):
@@ -824,9 +845,7 @@ def query(kind: str, /, **filters: Any) -> list[dict[str, Any]]:
     if normalized in {"description", "descriptions", "library_cell_spec", "library_cell_specs"}:
         return query_library_cell_specs(**filters)
 
-    raise ValueError(
-        "kind must be one of: cell_specs, cells, test_specs, tests, datasets, descriptions."
-    )
+    raise ValueError("kind must be one of: cell_specs, cells, test_specs, tests, datasets, descriptions.")
 
 
 def resolve_cell_spec_id(
@@ -870,10 +889,7 @@ def resolve_cell_spec_id(
 
     if len(matches) > 1:
         ids = [str(m.get("id")) for m in matches[:5]]
-        raise ValueError(
-            "Multiple cell-spec matches found. Add more filters or pass cell_spec_id. "
-            f"Examples: {ids}"
-        )
+        raise ValueError(f"Multiple cell-spec matches found. Add more filters or pass cell_spec_id. Examples: {ids}")
     only = matches[0].get("id")
     if not isinstance(only, str):
         raise ValueError("Resolved match does not contain a valid id.")
@@ -950,9 +966,7 @@ def create_cell_instance(
         # and in the workspace — not a fresh random identity per surface.
         from battinfo.entities import cell_instance_identity_seed, stable_uid  # noqa: PLC0415
 
-        identity_seed = cell_instance_identity_seed(
-            cell_spec_id=resolved_cell_spec_id, serial_number=serial_number
-        )
+        identity_seed = cell_instance_identity_seed(cell_spec_id=resolved_cell_spec_id, serial_number=serial_number)
         dashed_uid = stable_uid(identity_seed) if identity_seed is not None else _normalized_dashed_uid(None)
     else:
         dashed_uid = _normalized_dashed_uid(uid)
@@ -965,10 +979,12 @@ def create_cell_instance(
             "cell_spec_id": resolved_cell_spec_id,
             "short_id": dashed_uid.replace("-", "")[:6],
         },
-        "provenance": stamp_provenance({
-            "source_type": source_type,
-            "retrieved_at": _now_unix(),
-        }),
+        "provenance": stamp_provenance(
+            {
+                "source_type": source_type,
+                "retrieved_at": _now_unix(),
+            }
+        ),
     }
     if serial_number:
         out["cell_instance"]["serial_number"] = serial_number
@@ -1214,9 +1230,7 @@ def _record_from_cell_instance(instance: Cell) -> dict[str, Any]:
         entity_id = instance.id
     else:
         dashed = (
-            _normalized_dashed_uid(instance.uid)
-            if instance.uid is not None
-            else _identity_minted_uid("cell", instance)
+            _normalized_dashed_uid(instance.uid) if instance.uid is not None else _identity_minted_uid("cell", instance)
         )
         entity_id = f"https://w3id.org/battinfo/cell/{dashed}"
     # Finalize a copy (mint the id, convert timestamps, apply save-time provenance defaults).
@@ -1234,8 +1248,12 @@ def _record_from_cell_instance(instance: Cell) -> dict[str, Any]:
 
 # Kinds whose canonical body carries an ``identifier`` derived from the id
 # ("<prefix>:<uid>"); a minted id gets the matching identifier.
-_DERIVED_IDENTIFIER_PREFIX = {"cell-spec": "cell-spec", "test-protocol": "test-protocol",
-                              "test": "test", "dataset": "dataset"}
+_DERIVED_IDENTIFIER_PREFIX = {
+    "cell-spec": "cell-spec",
+    "test-protocol": "test-protocol",
+    "test": "test",
+    "dataset": "dataset",
+}
 
 
 def _org_name(value: Any) -> Any:
@@ -1259,8 +1277,9 @@ _NATURAL_KEY_FIELDS = {
 }
 
 
-def _canonical_identity_uid(entity_type: str, body: Mapping[str, Any], *,
-                            workspace_root: PathLike | None) -> str | None:
+def _canonical_identity_uid(
+    entity_type: str, body: Mapping[str, Any], *, workspace_root: PathLike | None
+) -> str | None:
     """The uid a builder would mint for this canonical record body, from the same natural key.
 
     Each kind is seeded exactly as its ``create_*`` / ``_record_from_*`` builder
@@ -1277,25 +1296,45 @@ def _canonical_identity_uid(entity_type: str, body: Mapping[str, Any], *,
 
     seed: str | None = None
     if entity_type == "cell-spec":
-        seed = _identity_seed("cell-spec", SimpleNamespace(
-            manufacturer=_org_name(body.get("manufacturer")), model=body.get("model"),
-            format=body.get("cell_format") or body.get("format"), chemistry=body.get("chemistry"),
-            size_code=body.get("size_code"),
-        ))
+        seed = _identity_seed(
+            "cell-spec",
+            SimpleNamespace(
+                manufacturer=_org_name(body.get("manufacturer")),
+                model=body.get("model"),
+                format=body.get("cell_format") or body.get("format"),
+                chemistry=body.get("chemistry"),
+                size_code=body.get("size_code"),
+            ),
+        )
     elif entity_type == "cell":
-        seed = _identity_seed("cell", SimpleNamespace(
-            cell_spec_id=body.get("cell_spec_id"), serial_number=body.get("serial_number"),
-            batch_id=body.get("batch_id"), name=body.get("name"),
-        ))
+        seed = _identity_seed(
+            "cell",
+            SimpleNamespace(
+                cell_spec_id=body.get("cell_spec_id"),
+                serial_number=body.get("serial_number"),
+                batch_id=body.get("batch_id"),
+                name=body.get("name"),
+            ),
+        )
     elif entity_type == "test-protocol":
-        seed = _identity_seed("test-protocol", SimpleNamespace(
-            name=body.get("name"), version=body.get("version"), test_kind=body.get("kind"),
-        ))
+        seed = _identity_seed(
+            "test-protocol",
+            SimpleNamespace(
+                name=body.get("name"),
+                version=body.get("version"),
+                test_kind=body.get("kind"),
+            ),
+        )
     elif entity_type == "test":
-        seed = _identity_seed("test", SimpleNamespace(
-            name=body.get("name"), cell_instance_id=body.get("cell_id"), test_kind=body.get("kind"),
-            protocol=SimpleNamespace(name=body.get("protocol_name")),
-        ))
+        seed = _identity_seed(
+            "test",
+            SimpleNamespace(
+                name=body.get("name"),
+                cell_instance_id=body.get("cell_id"),
+                test_kind=body.get("kind"),
+                protocol=SimpleNamespace(name=body.get("protocol_name")),
+            ),
+        )
     elif entity_type == "dataset":
         # The about list does not say which cell and test are the dataset's primary
         # ones, and a template lists its cells and tests as related ones, which the
@@ -1303,33 +1342,52 @@ def _canonical_identity_uid(entity_type: str, body: Mapping[str, Any], *,
         # template gets the IRI the builder gives the same template inputs.
         distributions = body.get("distributions") or []
         first = distributions[0] if distributions and isinstance(distributions[0], Mapping) else {}
-        seed = _identity_seed("dataset", SimpleNamespace(
-            name=body.get("name"), access_url=body.get("access_url"),
-            download_url=first.get("content_url"), dataset_path=None,
-            cell_instance_id=None, test_id=None,
-        ), workspace_root=workspace_root)
+        seed = _identity_seed(
+            "dataset",
+            SimpleNamespace(
+                name=body.get("name"),
+                access_url=body.get("access_url"),
+                download_url=first.get("content_url"),
+                dataset_path=None,
+                cell_instance_id=None,
+                test_id=None,
+            ),
+            workspace_root=workspace_root,
+        )
     elif entity_type == "material-spec":
         from battinfo.api._components import _material_spec_identity_uid  # noqa: PLC0415
 
-        return _material_spec_identity_uid(SimpleNamespace(  # type: ignore[arg-type]
-            manufacturer=body.get("manufacturer"), product_id=body.get("product_id"),
-            name=body.get("name"), grade=body.get("grade"),
-        ), body.get("kind"))
+        return _material_spec_identity_uid(
+            SimpleNamespace(  # type: ignore[arg-type]
+                manufacturer=body.get("manufacturer"),
+                product_id=body.get("product_id"),
+                name=body.get("name"),
+                grade=body.get("grade"),
+            ),
+            body.get("kind"),
+        )
     elif entity_type == "material":
         lot = body.get("lot_id") or body.get("batch_id") or body.get("name") or ""
         seed = "::".join(["material", str(body.get("material_spec_id") or "").strip(), str(lot).strip()])
     elif entity_type == "electrode-spec":
         from battinfo.api._components import _electrode_spec_identity_uid  # noqa: PLC0415
 
-        return _electrode_spec_identity_uid(SimpleNamespace(  # type: ignore[arg-type]
-            manufacturer=body.get("manufacturer"), processing=body.get("processing"),
-            product_id=body.get("product_id"), name=body.get("name"), grade=body.get("grade"),
-        ), body.get("active_material_kind") or body.get("kind"))
+        return _electrode_spec_identity_uid(
+            SimpleNamespace(  # type: ignore[arg-type]
+                manufacturer=body.get("manufacturer"),
+                processing=body.get("processing"),
+                product_id=body.get("product_id"),
+                name=body.get("name"),
+                grade=body.get("grade"),
+            ),
+            body.get("active_material_kind") or body.get("kind"),
+        )
     elif entity_type == "electrode":
         seed = electrode_identity_seed(
             electrode_spec_id=body.get("electrode_spec_id"),
             batch=body.get("batch_id") or body.get("lot_id") or body.get("name") or "",
-            parent_id=body.get("parent_id"), piece_id=body.get("piece_id"),
+            parent_id=body.get("parent_id"),
+            piece_id=body.get("piece_id"),
         )
     elif entity_type == "parameter-set":
         # One recipe for both flavours, shared with the builder (IDENTIFIER_POLICY 6.3).
@@ -1342,7 +1400,12 @@ def _canonical_identity_uid(entity_type: str, body: Mapping[str, Any], *,
             seed = f"organization:{name.strip().lower()}"
     elif entity_type == "channel":
         equipment_id, index = body.get("equipment_id"), body.get("index")
-        if isinstance(equipment_id, str) and "/" in equipment_id and isinstance(index, int) and not isinstance(index, bool):
+        if (
+            isinstance(equipment_id, str)
+            and "/" in equipment_id
+            and isinstance(index, int)
+            and not isinstance(index, bool)
+        ):
             seed = f"channel:{_iri_tail(equipment_id)[1]}:{index}"
     return stable_uid(seed) if seed is not None else None
 
@@ -1432,14 +1495,10 @@ def _record_from_dataset(dataset: Dataset, *, workspace_root: PathLike | None = 
     # save is then a modification: without its own modified_at it takes the save time,
     # not the old publication time.
     published = (
-        _resolved_time("published_at", finalized.published_at, 0)
-        if finalized.published_at is not None
-        else None
+        _resolved_time("published_at", finalized.published_at, 0) if finalized.published_at is not None else None
     )
     created_from_published = finalized.created_at is None and published is not None
-    created = _resolved_time(
-        "created_at", finalized.created_at, published if published is not None else _now_unix()
-    )
+    created = _resolved_time("created_at", finalized.created_at, published if published is not None else _now_unix())
     finalized.created_at = created
     finalized.modified_at = _resolved_time(
         "modified_at", finalized.modified_at, _now_unix() if created_from_published else created
@@ -1488,9 +1547,7 @@ def _record_from_test_protocol(spec: TestSpec) -> dict[str, Any]:
         entity_id = spec.id
     else:
         dashed = (
-            _normalized_dashed_uid(spec.uid)
-            if spec.uid is not None
-            else _identity_minted_uid("test-protocol", spec)
+            _normalized_dashed_uid(spec.uid) if spec.uid is not None else _identity_minted_uid("test-protocol", spec)
         )
         entity_id = f"https://w3id.org/battinfo/spec/{dashed}"
 
@@ -1630,8 +1687,7 @@ def save_record(
                 "published": False,
             }
         raise ValueError(
-            f"Resource already exists at {existing_path}. "
-            "Use mode='upsert' or duplicate_policy='return_existing'."
+            f"Resource already exists at {existing_path}. Use mode='upsert' or duplicate_policy='return_existing'."
         )
 
     operation = "updated" if existing_path is not None else "created"
@@ -2175,9 +2231,7 @@ def build_cell_spec_library_rdf(
             path.unlink()
 
     descriptor_paths = sorted(
-        path
-        for path in input_dir_path.glob(glob)
-        if path.is_file() and path.name.lower() != "readme.md"
+        path for path in input_dir_path.glob(glob) if path.is_file() and path.name.lower() != "readme.md"
     )
 
     manifest_entries: list[dict[str, Any]] = []

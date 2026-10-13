@@ -45,8 +45,7 @@ UNIT_ALIASES: dict[str, list[str]] = {
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Generate first-pass ontology-backed mapping candidates for BattINFO "
-            "quantitative property keys and units."
+            "Generate first-pass ontology-backed mapping candidates for BattINFO quantitative property keys and units."
         )
     )
     parser.add_argument(
@@ -269,7 +268,8 @@ def _best_unit_match(symbol: str, entries: list[dict[str, Any]], threshold: floa
                 best_score = score
                 best = {
                     "class_iri": entry["iri"],
-                    "class_pref_label": entry.get("pref_label") or (entry.get("labels") or [entry.get("local_name")])[0],
+                    "class_pref_label": entry.get("pref_label")
+                    or (entry.get("labels") or [entry.get("local_name")])[0],
                     "class_label": (entry.get("labels") or [entry.get("local_name")])[0],  # backward-compatible alias
                     "confidence": round(score, 3),
                 }
@@ -452,4 +452,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

@@ -13,6 +13,7 @@ INCHIKEY_RE = re.compile(r"^[A-Z]{14}-[A-Z]{10}-[A-Z]$")
 
 # ── resolution: the everyday cases ──────────────────────────────────────────────
 
+
 def test_unique_symbol_resolves_without_slot():
     sub = resolve("LiPF6")
     assert sub is not None
@@ -43,6 +44,7 @@ def test_unique_symbol_resolves_regardless_of_slot():
 
 # ── collisions: EC is the canonical case ────────────────────────────────────────
 
+
 def test_colliding_symbol_needs_slot():
     with pytest.raises(AmbiguousSubstanceError):
         resolve("EC")
@@ -66,6 +68,7 @@ def test_ambiguity_error_names_the_candidates():
 
 # ── misses: honest None plus suggestions, never auto-accept ─────────────────────
 
+
 def test_unknown_name_returns_none():
     assert resolve("definitely-not-a-substance") is None
     assert resolve("") is None
@@ -79,6 +82,7 @@ def test_typo_gets_a_suggestion_but_not_a_result():
 
 
 # ── identity stamping ───────────────────────────────────────────────────────────
+
 
 def test_identity_fields_contain_only_known_values():
     fields = resolve("LiTFSI").identity_fields()
@@ -103,6 +107,7 @@ def test_salt_ion_decomposition_resolves_within_vocabulary():
 
 # ── vocabulary integrity ────────────────────────────────────────────────────────
 
+
 def test_every_structure_entry_has_a_valid_inchikey():
     for sub in substances._vocab():
         if sub.identity_basis == "structure":
@@ -125,14 +130,13 @@ def test_colliding_symbols_have_disjoint_roles():
         if len(group) > 1:
             role_sets = [set(g.roles) for g in group]
             for i, a in enumerate(role_sets):
-                for b in role_sets[i + 1:]:
+                for b in role_sets[i + 1 :]:
                     assert a and b and not (a & b), f"{symbol}: colliding entries need disjoint roles"
 
 
 def test_oedb_core_coverage():
     # the OEDB crosswalk that seeded the vocabulary stays resolvable
-    for symbol in ("AN", "DMC", "DEC", "EMC", "PC", "GBL", "FEC",
-                   "PF6-", "TFSI-", "FSI-", "BF4-", "Li+", "Na+", "K+"):
+    for symbol in ("AN", "DMC", "DEC", "EMC", "PC", "GBL", "FEC", "PF6-", "TFSI-", "FSI-", "BF4-", "Li+", "Na+", "K+"):
         assert resolve(symbol, slot="solvent") is not None, symbol
 
 

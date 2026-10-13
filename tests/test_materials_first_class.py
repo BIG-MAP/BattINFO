@@ -3,6 +3,7 @@
 Regression tests for the three-level materials model. Each maps to a readiness
 finding (battinfo-records#6 READINESS-REPORT.md) the model fixes.
 """
+
 from __future__ import annotations
 
 import json
@@ -16,10 +17,10 @@ from battinfo.materials import resolve_material_kind
 
 # ── H1: deterministic, content-derived ids (was: random id every call) ──────────
 
+
 def test_h1_material_spec_is_deterministic_and_dedupes() -> None:
     ids = [
-        api.create_material_spec(name="Graphite", formula="C", validate=False)["material_spec"]["id"]
-        for _ in range(3)
+        api.create_material_spec(name="Graphite", formula="C", validate=False)["material_spec"]["id"] for _ in range(3)
     ]
     assert len(set(ids)) == 1  # identical create calls -> one id (H1 dead)
     assert ids[0].startswith("https://w3id.org/battinfo/spec/")
@@ -47,8 +48,14 @@ def test_h1_resave_is_unchanged(tmp_path: Path) -> None:
 
     def author():
         ws = battinfo.workspace(str(ws_root))
-        ws.add("material_spec", name="LFP", kind="lfp", manufacturer="Canrud", grade="std",
-               property={"specific_capacity": {"value": 160, "unit": "mAh/g"}})
+        ws.add(
+            "material_spec",
+            name="LFP",
+            kind="lfp",
+            manufacturer="Canrud",
+            grade="std",
+            property={"specific_capacity": {"value": 160, "unit": "mAh/g"}},
+        )
         return ws.save()
 
     first = author()
@@ -60,6 +67,7 @@ def test_h1_resave_is_unchanged(tmp_path: Path) -> None:
 
 
 # ── H2: attribution allowed on the schema and stamped by ws.save ────────────────
+
 
 def test_h2_attribution_stamped_on_both_material_types(tmp_path: Path) -> None:
     ws = battinfo.workspace(str(tmp_path))
@@ -89,6 +97,7 @@ def test_h2_material_spec_schema_permits_attribution() -> None:
 
 
 # ── M6 / M5: JSON-LD emitted for both material types ────────────────────────────
+
 
 def test_m6_jsonld_emitted_for_spec_and_instance() -> None:
     from battinfo.jsonld import record_to_jsonld
@@ -120,12 +129,11 @@ def test_m6_kind_without_emmo_class_uses_labeled_fallback() -> None:
     doc = record_to_jsonld(spec, "material-spec")
     ld = doc["isDescriptionFor"]
     assert ld["@type"] == "schema:ChemicalSubstance"  # labeled fallback, not invented term
-    assert doc["schema:sameAs"]["@id"].startswith(
-        "https://w3id.org/emmo/domain/chemical-substance#"
-    )
+    assert doc["schema:sameAs"]["@id"].startswith("https://w3id.org/emmo/domain/chemical-substance#")
 
 
 # ── kind vocabulary + validation ────────────────────────────────────────────────
+
 
 def test_kind_alias_resolution() -> None:
     assert resolve_material_kind("NMC 811") == "nmc811"
@@ -156,17 +164,34 @@ def test_missing_kind_blocks_strict_save_only(tmp_path: Path) -> None:
 def test_kinds_carry_chemsub_or_are_flagged_gaps() -> None:
     kinds = battinfo.material_kinds()["kinds"]
     # the full seed set the model requires is present
-    required = {"graphite", "silicon", "silicon_graphite", "hard_carbon", "lto",
-                "lnmo", "lfp", "lmo", "nmc111", "nmc532", "nmc622", "nmc811",
-                "lithium_metal", "pvdf", "carbon_black", "lipf6", "litfsi",
-                "lifsi", "nmp"}
+    required = {
+        "graphite",
+        "silicon",
+        "silicon_graphite",
+        "hard_carbon",
+        "lto",
+        "lnmo",
+        "lfp",
+        "lmo",
+        "nmc111",
+        "nmc532",
+        "nmc622",
+        "nmc811",
+        "lithium_metal",
+        "pvdf",
+        "carbon_black",
+        "lipf6",
+        "litfsi",
+        "lifsi",
+        "nmp",
+    }
     assert required.issubset(kinds)
     # every chemsub anchor is a chemical-substance class IRI; none is invented
     for key, entry in kinds.items():
         chemsub = entry.get("chemsub")
-        assert chemsub is None or chemsub.startswith(
-            "https://w3id.org/emmo/domain/chemical-substance#substance_"
-        ), f"{key} carries a non-chemical-substance anchor"
+        assert chemsub is None or chemsub.startswith("https://w3id.org/emmo/domain/chemical-substance#substance_"), (
+            f"{key} carries a non-chemical-substance anchor"
+        )
     # silicon_graphite was the seed's ontology gap; chemical-substance 0.15.0
     # published SiliconGraphite, so it now anchors like the rest
     assert kinds["silicon_graphite"]["emmo"] == "SiliconGraphite"
@@ -221,8 +246,17 @@ def test_anchor_fields_stay_inside_the_declared_set() -> None:
     """A typo'd anchor key would silently emit nothing; pin the field names."""
     from battinfo.materials import EXTERNAL_ID_FIELDS, EXTERNAL_ID_IRI_TEMPLATES
 
-    known = {"label", "roles", "roles_note", "formula", "chemsub", "emmo",
-             "aliases", "reference_properties", *EXTERNAL_ID_FIELDS}
+    known = {
+        "label",
+        "roles",
+        "roles_note",
+        "formula",
+        "chemsub",
+        "emmo",
+        "aliases",
+        "reference_properties",
+        *EXTERNAL_ID_FIELDS,
+    }
     for key, entry in battinfo.material_kinds()["kinds"].items():
         unexpected = set(entry) - known
         assert not unexpected, f"{key} carries unrecognised fields {unexpected}"

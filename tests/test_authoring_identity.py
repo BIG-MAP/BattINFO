@@ -7,6 +7,7 @@ is reported (content_changed) rather than overwriting silently.
 A-3 — a registry 409 is detected by its status code, not by matching the string "409" anywhere in
 an error body, and the version bump it triggers is surfaced (printed + version_bumped) instead of
 silently proliferating -vN copies."""
+
 from __future__ import annotations
 
 import json
@@ -81,8 +82,11 @@ def test_save_record_create_only_guard_is_reachable(tmp_path: Path) -> None:
 
 # ── A-3: 409 conflict handling ────────────────────────────────────────────────
 def _ok_result(iri: str = "iri-x") -> dict:
-    return {"status": "ok", "status_code": 200,
-            "response": {"status": "validated", "resources": [{"canonical_iri": iri}]}}
+    return {
+        "status": "ok",
+        "status_code": 200,
+        "response": {"status": "validated", "resources": [{"canonical_iri": iri}]},
+    }
 
 
 def _payload() -> dict:
@@ -102,8 +106,7 @@ def test_conflict_bumps_version_and_surfaces_it(monkeypatch: pytest.MonkeyPatch)
         state["n"] += 1
         seen.append(payload.get("source_version"))
         if state["n"] == 1:
-            raise RegistryClientError("Registry submission failed with HTTP 409: conflict",
-                                      status_code=409)
+            raise RegistryClientError("Registry submission failed with HTTP 409: conflict", status_code=409)
         return _ok_result()
 
     out = _run_do_submit(monkeypatch, behavior)
@@ -131,8 +134,7 @@ def test_non_conflict_error_does_not_bump(monkeypatch: pytest.MonkeyPatch) -> No
 
     def behavior(payload, **kw):  # noqa: ANN001
         state["n"] += 1
-        raise RegistryClientError("Registry submission failed with HTTP 422: invalid",
-                                  status_code=422)
+        raise RegistryClientError("Registry submission failed with HTTP 422: invalid", status_code=422)
 
     out = _run_do_submit(monkeypatch, behavior)
     assert out["ok"] is False

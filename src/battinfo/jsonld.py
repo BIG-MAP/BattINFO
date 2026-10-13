@@ -15,6 +15,7 @@ Usage::
     raw = json.loads(Path("cell-spec-xyz.json").read_text())
     ld  = record_to_jsonld(raw, "cell-spec")
 """
+
 from __future__ import annotations
 
 import json
@@ -33,7 +34,7 @@ _DATA = Path(__file__).parent / "data"
 # so both load the same versioned file — never the flat assembled context,
 # whose stale copies have emitted retired or non-existent IRIs.
 _CONTEXT_PATH = _DATA / "context" / "records.context.v1.json"
-_CONTEXT_URL  = "https://w3id.org/battinfo/context/records/v1.json"
+_CONTEXT_URL = "https://w3id.org/battinfo/context/records/v1.json"
 
 # Inline context dict — loaded once so files are self-contained and parseable
 # without network access.
@@ -41,15 +42,16 @@ _CONTEXT_INLINE: dict = json.loads(_CONTEXT_PATH.read_text(encoding="utf-8"))["@
 
 # ── Mapping tables (loaded once at module import) ─────────────────────────────
 
+
 def _load_property_map() -> dict[str, str]:
     path = _DATA / "mappings" / "domain-battery" / "property_map.curated.json"
-    raw  = json.loads(path.read_text(encoding="utf-8"))
+    raw = json.loads(path.read_text(encoding="utf-8"))
     return {m["key"]: m["class_iri"] for m in raw["mappings"]}
 
 
 def _load_unit_map() -> dict[str, str]:
     path = _DATA / "mappings" / "domain-battery" / "unit_map.curated.json"
-    raw  = json.loads(path.read_text(encoding="utf-8"))
+    raw = json.loads(path.read_text(encoding="utf-8"))
     return {m["symbol"]: m["unit_iri"] for m in raw["mappings"]}
 
 
@@ -61,14 +63,14 @@ def _load_entity_type_map() -> dict:
 def _load_test_method_vocab() -> dict:
     base = _DATA / "vocab" / "test-method"
     return {
-        "step_modes":  json.loads((base / "step-modes.json").read_text(encoding="utf-8"))["modes"],
-        "quantities":  json.loads((base / "quantities.json").read_text(encoding="utf-8")),
+        "step_modes": json.loads((base / "step-modes.json").read_text(encoding="utf-8"))["modes"],
+        "quantities": json.loads((base / "quantities.json").read_text(encoding="utf-8")),
         "termination": json.loads((base / "termination.json").read_text(encoding="utf-8"))["terminations"],
     }
 
 
-_PROP_MAP   = _load_property_map()
-_UNIT_MAP   = _load_unit_map()
+_PROP_MAP = _load_property_map()
+_UNIT_MAP = _load_unit_map()
 _ENTITY_MAP = _load_entity_type_map()
 _METHOD_VOCAB = _load_test_method_vocab()
 
@@ -79,29 +81,60 @@ def _load_test_method_context_terms() -> dict:
     JSON-LD resolves offline without hand-maintaining their IRIs here."""
     db = json.loads((_DATA / "context" / "domain-battery.context.json").read_text(encoding="utf-8"))["@context"]
     wanted = (
-        "hasTask", "NumberOfIterations", "hasControlParameter", "hasTerminationParameter", "hasProperty",
-        "ConstantCurrentCharging", "ConstantCurrentDischarging",
-        "ConstantCurrentConstantVoltageCharging", "ConstantCurrentConstantVoltageDischarging",
-        "ConstantPowerCharging", "ConstantPowerDischarging",
-        "VoltageHold", "OpenCircuitHold", "IterativeWorkflow",
-        "ElectrochemicalImpedanceSpectroscopy", "LinearScanVoltammetry",
-        "LowerVoltageLimit", "UpperVoltageLimit", "TerminationQuantity",
+        "hasTask",
+        "NumberOfIterations",
+        "hasControlParameter",
+        "hasTerminationParameter",
+        "hasProperty",
+        "ConstantCurrentCharging",
+        "ConstantCurrentDischarging",
+        "ConstantCurrentConstantVoltageCharging",
+        "ConstantCurrentConstantVoltageDischarging",
+        "ConstantPowerCharging",
+        "ConstantPowerDischarging",
+        "VoltageHold",
+        "OpenCircuitHold",
+        "IterativeWorkflow",
+        "ElectrochemicalImpedanceSpectroscopy",
+        "LinearScanVoltammetry",
+        "LowerVoltageLimit",
+        "UpperVoltageLimit",
+        "TerminationQuantity",
         "StateOfCharge",  # SOC-based termination (the UCP/HPPC seam)
-        "CRate", "ElectricCurrent", "Voltage", "Power", "ElectricalResistance",
+        "CRate",
+        "ElectricCurrent",
+        "Voltage",
+        "Power",
+        "ElectricalResistance",
         # Current densities: coin-cell protocols state their currents per area
         # (0.1 mA/cm2), as setpoints and as cutoffs.
-        "ElectricCurrentDensity", "LowerCurrentDensityLimit", "UpperCurrentDensityLimit",
-        "Duration", "ConventionalProperty",
+        "ElectricCurrentDensity",
+        "LowerCurrentDensityLimit",
+        "UpperCurrentDensityLimit",
+        "Duration",
+        "ConventionalProperty",
         # Measurement-provenance subtree (as-run conditions emit typed
         # hasMeasurementParameter nodes on the test node itself) and the
         # metrological references the voltage_reference datum resolves to.
-        "hasMeasurementParameter", "isOutputOf", "BatteryMeasurement",
-        "hasStringValue", "hasMetrologicalReference", "MetrologicalReference",
-        "ReferenceElectrode", "LithiumElectrode", "SodiumBasedElectrode",
-        "StandardHydrogenElectrode", "NormalHydrogenElectrode",
-        "ReversibleHydrogenElectrode", "SaturatedCalomelElectrode",
-        "SilverChlorideElectrode", "ZincElectrode",
-        "RealData", "CelsiusTemperature", "MeasuredProperty", "NominalProperty",
+        "hasMeasurementParameter",
+        "isOutputOf",
+        "BatteryMeasurement",
+        "hasStringValue",
+        "hasMetrologicalReference",
+        "MetrologicalReference",
+        "ReferenceElectrode",
+        "LithiumElectrode",
+        "SodiumBasedElectrode",
+        "StandardHydrogenElectrode",
+        "NormalHydrogenElectrode",
+        "ReversibleHydrogenElectrode",
+        "SaturatedCalomelElectrode",
+        "SilverChlorideElectrode",
+        "ZincElectrode",
+        "RealData",
+        "CelsiusTemperature",
+        "MeasuredProperty",
+        "NominalProperty",
         # Material-spec property classes the descriptor path can emit
         # (specific_capacity mapped but its class was missing from the
         # records context, so it silently dropped at expansion).
@@ -122,16 +155,16 @@ def _load_test_method_context_terms() -> dict:
 # Every prefLabel below is verified against domain-electrochemistry 0.39.0 (which
 # imports chameo) and resolves in the bundled domain-battery context.
 TEST_METHOD_CLASS: dict[str, str] = {
-    "gitt":            "GalvanostaticIntermittentTitrationTechnique",
-    "quasi_ocv":       "PseudoOpenCircuitVoltageMethod",
+    "gitt": "GalvanostaticIntermittentTitrationTechnique",
+    "quasi_ocv": "PseudoOpenCircuitVoltageMethod",
     "cyclic_voltammetry": "CyclicVoltammetry",
-    "eis":             "ElectrochemicalImpedanceSpectroscopy",
-    "impedance":       "ElectrochemicalImpedanceSpectroscopy",
-    "hppc":            "HPPC",
-    "cycling":         "CyclingTest",
+    "eis": "ElectrochemicalImpedanceSpectroscopy",
+    "impedance": "ElectrochemicalImpedanceSpectroscopy",
+    "hppc": "HPPC",
+    "cycling": "CyclingTest",
     "rate_capability": "CRateTest",
-    "capacity_check":  "CapacityTest",
-    "formation":       "FormationCycling",
+    "capacity_check": "CapacityTest",
+    "formation": "FormationCycling",
 }
 
 
@@ -185,6 +218,7 @@ def termination_emmo_class(quantity: str, direction: str | None) -> str | None:
         return terms["below"]["emmo_class"]
     return None
 
+
 # ── Test-protocol condition vocabulary (EMMO domain-battery) ──────────────────
 # A test protocol's structured conditions are modelled the way the EMMO
 # electrochemistry ontology models a test process: controlled inputs via
@@ -197,31 +231,31 @@ def termination_emmo_class(quantity: str, direction: str | None) -> str | None:
 #
 # Authoring group → EMMO relation predicate.
 TEST_CONDITION_GROUP_RELATION: dict[str, str] = {
-    "setpoints":            "hasControlParameter",
+    "setpoints": "hasControlParameter",
     "termination_criteria": "hasTerminationParameter",
-    "conditions":           "hasProperty",
+    "conditions": "hasProperty",
 }
 TEST_CONDITION_GROUPS = tuple(TEST_CONDITION_GROUP_RELATION)
 # Authoring condition key → EMMO quantity-class prefLabel (resolved by the context).
 # Temperature has no dedicated quantity class, so it is a generic ConventionalProperty
 # (an assigned-by-convention value, e.g. "room temperature" = 20 degC) carrying a label.
 TEST_CONDITION_CLASS: dict[str, str] = {
-    "c_rate":                     "CRate",
-    "crate":                      "CRate",
-    "current":                    "ElectricCurrent",
-    "discharging_current":        "ElectricCurrent",
-    "charging_current":           "ElectricCurrent",
-    "voltage":                    "Voltage",
+    "c_rate": "CRate",
+    "crate": "CRate",
+    "current": "ElectricCurrent",
+    "discharging_current": "ElectricCurrent",
+    "charging_current": "ElectricCurrent",
+    "voltage": "Voltage",
     "discharging_cutoff_voltage": "LowerVoltageLimit",
-    "lower_voltage_limit":        "LowerVoltageLimit",
-    "charging_cutoff_voltage":    "UpperVoltageLimit",
-    "upper_voltage_limit":        "UpperVoltageLimit",
-    "duration":                   "Duration",
-    "number_of_iterations":       "NumberOfIterations",
-    "cycles":                     "NumberOfIterations",
-    "temperature":                "ConventionalProperty",
-    "ambient_temperature":        "ConventionalProperty",
-    "room_temperature":           "ConventionalProperty",
+    "lower_voltage_limit": "LowerVoltageLimit",
+    "charging_cutoff_voltage": "UpperVoltageLimit",
+    "upper_voltage_limit": "UpperVoltageLimit",
+    "duration": "Duration",
+    "number_of_iterations": "NumberOfIterations",
+    "cycles": "NumberOfIterations",
+    "temperature": "ConventionalProperty",
+    "ambient_temperature": "ConventionalProperty",
+    "room_temperature": "ConventionalProperty",
 }
 # Quantity classes whose @type is generic and so should carry a human rdfs:label.
 TEST_CONDITION_GENERIC_CLASSES = frozenset({"ConventionalProperty"})
@@ -241,47 +275,47 @@ TEST_CONDITION_GENERIC_CLASSES = frozenset({"ConventionalProperty"})
 #   2. ws.py adds slash-free EMMO prefLabel aliases (WattHourPerKilogram, …) to the
 #      embedded context from unit_map.curated.json.
 CONTEXT_UNIT_SYMBOLS: dict[str, str] = {
-    "V":      "emmo:Volt",
-    "mV":     "emmo:MilliVolt",
-    "kV":     "emmo:KiloVolt",
-    "Ah":     "emmo:AmpereHour",
-    "mAh":    "emmo:MilliAmpereHour",
-    "A":      "emmo:Ampere",
-    "mA":     "emmo:MilliAmpere",
-    "W":      "emmo:Watt",
-    "kW":     "emmo:KiloWatt",
-    "Wh":     "emmo:Watthour",
-    "kWh":    "emmo:KiloWatthour",
-    "MWh":    "emmo:MegaWattHour",
-    "Ohm":    "emmo:Ohm",
-    "mOhm":   "emmo:MilliOhm",
-    "mohm":   "emmo:MilliOhm",
-    "degC":   "emmo:DegreeCelsius",
-    "K":      "emmo:Kelvin",
-    "g":      "emmo:Gram",
-    "kg":     "emmo:Kilogram",
-    "mg":     "emmo:MilliGram",
-    "mm":     "emmo:MilliMetre",
-    "cm":     "emmo:CentiMetre",
-    "m":      "emmo:Metre",
-    "L":      "emmo:Litre",
-    "mL":     "emmo:MilliLitre",
-    "cm3":    "emmo:CubicCentiMetre",
-    "h":      "emmo:Hour",
-    "min":    "emmo:Minute",
-    "s":      "emmo:Second",
+    "V": "emmo:Volt",
+    "mV": "emmo:MilliVolt",
+    "kV": "emmo:KiloVolt",
+    "Ah": "emmo:AmpereHour",
+    "mAh": "emmo:MilliAmpereHour",
+    "A": "emmo:Ampere",
+    "mA": "emmo:MilliAmpere",
+    "W": "emmo:Watt",
+    "kW": "emmo:KiloWatt",
+    "Wh": "emmo:Watthour",
+    "kWh": "emmo:KiloWatthour",
+    "MWh": "emmo:MegaWattHour",
+    "Ohm": "emmo:Ohm",
+    "mOhm": "emmo:MilliOhm",
+    "mohm": "emmo:MilliOhm",
+    "degC": "emmo:DegreeCelsius",
+    "K": "emmo:Kelvin",
+    "g": "emmo:Gram",
+    "kg": "emmo:Kilogram",
+    "mg": "emmo:MilliGram",
+    "mm": "emmo:MilliMetre",
+    "cm": "emmo:CentiMetre",
+    "m": "emmo:Metre",
+    "L": "emmo:Litre",
+    "mL": "emmo:MilliLitre",
+    "cm3": "emmo:CubicCentiMetre",
+    "h": "emmo:Hour",
+    "min": "emmo:Minute",
+    "s": "emmo:Second",
     # No "C" entry. In real records the bare symbol "C" is only ever a C-rate,
     # and resolve_unit_iri() consults this context before the test-condition
     # table, so a "C" -> Coulomb term here silently shadows the correct
     # electrochemistry:AmperePerAmpereHour mapping (commit 41b7db3).
-    "1":      "emmo:EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
-    "%":      "emmo:Percent",
+    "1": "emmo:EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
+    "%": "emmo:Percent",
 }
 # Extra unit symbols not in the records context (CRate is current-per-capacity).
 TEST_CONDITION_UNIT_IRI: dict[str, str] = {
-    "A/Ah":  "electrochemistry:AmperePerAmpereHour",
+    "A/Ah": "electrochemistry:AmperePerAmpereHour",
     "Ah/Ah": "electrochemistry:AmperePerAmpereHour",
-    "C":     "electrochemistry:AmperePerAmpereHour",
+    "C": "electrochemistry:AmperePerAmpereHour",
 }
 # Context terms the test-protocol model needs that the records context lacks.
 # Relations are @id-typed; classes/units map a prefLabel to a compact IRI.
@@ -294,14 +328,14 @@ TEST_PROTOCOL_CONTEXT_TERMS: dict[str, Any] = {
         "@id": "electrochemistry:electrochemistry_e6a7d617_a581_4782_8374_37d3305e0258",
         "@type": "@id",
     },
-    "ControlProperty":      "electrochemistry:electrochemistry_33e6986c_b35a_4cae_9a94_acb23248065c",
+    "ControlProperty": "electrochemistry:electrochemistry_33e6986c_b35a_4cae_9a94_acb23248065c",
     "ConventionalProperty": "emmo:EMMO_d8aa8e1f_b650_416d_88a0_5118de945456",
-    "CRate":                "electrochemistry:electrochemistry_e1fd84eb_acdb_4b2c_b90c_e899d552a3ee",
-    "Voltage":              "emmo:EMMO_17b031fb_4695_49b6_bb69_189ec63df3ee",
-    "ElectricCurrent":      "emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88",
-    "Duration":             "emmo:EMMO_0adabf6f_7404_44cb_9f65_32d83d8101a3",
-    "NumberOfIterations":   "electrochemistry:electrochemistry_88dd2bce_fb17_4705_905d_892681812290",
-    "AmperePerAmpereHour":  "electrochemistry:AmperePerAmpereHour",
+    "CRate": "electrochemistry:electrochemistry_e1fd84eb_acdb_4b2c_b90c_e899d552a3ee",
+    "Voltage": "emmo:EMMO_17b031fb_4695_49b6_bb69_189ec63df3ee",
+    "ElectricCurrent": "emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88",
+    "Duration": "emmo:EMMO_0adabf6f_7404_44cb_9f65_32d83d8101a3",
+    "NumberOfIterations": "electrochemistry:electrochemistry_88dd2bce_fb17_4705_905d_892681812290",
+    "AmperePerAmpereHour": "electrochemistry:AmperePerAmpereHour",
 }
 
 
@@ -446,7 +480,7 @@ def method_step_node(step: Mapping[str, Any]) -> dict:
     if controls:
         node["hasControlParameter"] = controls
     terminations: list = []
-    for term in (step.get("termination") or []):
+    for term in step.get("termination") or []:
         if not isinstance(term, Mapping):
             continue
         tcls = _termination_class(term)
@@ -493,12 +527,27 @@ def protocol_property_value(name: str, value: Any, group: str = "") -> dict:
 # algorithms SPDX actually defines get an IRI. Anything else (the dataset
 # schema's "other" escape hatch) keeps its name as a plain literal rather than
 # inventing an SPDX term that does not exist.
-_SPDX_CHECKSUM_ALGORITHMS: frozenset[str] = frozenset({
-    "adler32", "blake2b256", "blake2b384", "blake2b512", "blake3",
-    "md2", "md4", "md5", "md6",
-    "sha1", "sha224", "sha256", "sha384", "sha512",
-    "sha3_256", "sha3_384", "sha3_512",
-})
+_SPDX_CHECKSUM_ALGORITHMS: frozenset[str] = frozenset(
+    {
+        "adler32",
+        "blake2b256",
+        "blake2b384",
+        "blake2b512",
+        "blake3",
+        "md2",
+        "md4",
+        "md5",
+        "md6",
+        "sha1",
+        "sha224",
+        "sha256",
+        "sha384",
+        "sha512",
+        "sha3_256",
+        "sha3_384",
+        "sha3_512",
+    }
+)
 
 
 def _checksum_parts(checksum: Any) -> tuple[str, str] | None:
@@ -658,16 +707,12 @@ def artifact_distribution_node(art: Mapping[str, Any], *, locator_url: Callable[
         if locator_url is not None:
             node["dcat:downloadURL"] = locator_url(str(loc))
         else:
-            node["dcat:downloadURL"] = (
-                {"@id": str(loc)} if str(loc).startswith(("http://", "https://")) else str(loc)
-            )
+            node["dcat:downloadURL"] = {"@id": str(loc)} if str(loc).startswith(("http://", "https://")) else str(loc)
     if art.get("media_type"):
         node["dcat:mediaType"] = art["media_type"]
     ct = art.get("conforms_to")
     if ct:
-        node["dcterms:conformsTo"] = (
-            {"@id": ct} if str(ct).startswith(("http://", "https://")) else ct
-        )
+        node["dcterms:conformsTo"] = {"@id": ct} if str(ct).startswith(("http://", "https://")) else ct
     if isinstance(art.get("byte_size"), int):
         node["dcat:byteSize"] = art["byte_size"]
     # Standard vocabulary (no custom battinfo: terms): the artifact role is a
@@ -784,19 +829,20 @@ def test_protocol_to_jsonld(record: dict) -> dict:
 
 # EMMO battery-type IRIs (from domain-battery.context.json)
 _BATTERY_TYPE_IRIS: dict[str, str] = {
-    "BatteryCell":         "https://w3id.org/emmo/domain/battery#battery_68ed592a_7924_45d0_a108_94d6275d57f0",
-    "CylindricalBattery":  "https://w3id.org/emmo/domain/battery#battery_ac604ecd_cc60_4b98_b57c_74cd5d3ccd40",
+    "BatteryCell": "https://w3id.org/emmo/domain/battery#battery_68ed592a_7924_45d0_a108_94d6275d57f0",
+    "CylindricalBattery": "https://w3id.org/emmo/domain/battery#battery_ac604ecd_cc60_4b98_b57c_74cd5d3ccd40",
     # Underscore-named twin minted in domain-battery 0.20.2; the hyphen-named
     # original is deprecated upstream (dcterms:isReplacedBy, issue #73).
-    "PrismaticBattery":    "https://w3id.org/emmo/domain/battery#battery_86c9ca80_de6f_417f_afdc_a7e52fa6322d",
-    "PouchCell":           "https://w3id.org/emmo/domain/battery#battery_392b3f47_d62a_4bd4_a819_b58b09b8843a",
-    "CoinCell":            "https://w3id.org/emmo/domain/battery#battery_b7fdab58_6e91_4c84_b097_b06eff86a124",
-    "LithiumIonBattery":   "https://w3id.org/emmo/domain/battery#battery_96addc62_ea04_449a_8237_4cd541dd8e5f",
+    "PrismaticBattery": "https://w3id.org/emmo/domain/battery#battery_86c9ca80_de6f_417f_afdc_a7e52fa6322d",
+    "PouchCell": "https://w3id.org/emmo/domain/battery#battery_392b3f47_d62a_4bd4_a819_b58b09b8843a",
+    "CoinCell": "https://w3id.org/emmo/domain/battery#battery_b7fdab58_6e91_4c84_b097_b06eff86a124",
+    "LithiumIonBattery": "https://w3id.org/emmo/domain/battery#battery_96addc62_ea04_449a_8237_4cd541dd8e5f",
     "LithiumMetalBattery": "https://w3id.org/emmo/domain/battery#battery_ada13509_4eed_4e40_a7b1_4cc488144154",
-    "SodiumIonBattery":    "https://w3id.org/emmo/domain/battery#battery_42329a95_03fe_4ec1_83cb_b7e8ed52f68a",
+    "SodiumIonBattery": "https://w3id.org/emmo/domain/battery#battery_42329a95_03fe_4ec1_83cb_b7e8ed52f68a",
 }
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
+
 
 def _compact_iri(iri: str) -> str:
     """Return a compact IRI string (prefix:local) where known, else the full IRI."""
@@ -807,7 +853,7 @@ def _compact_iri(iri: str) -> str:
     }
     for base, prefix in prefixes.items():
         if iri.startswith(base):
-            return prefix + iri[len(base):]
+            return prefix + iri[len(base) :]
     return iri
 
 
@@ -851,6 +897,7 @@ def _rdf_types_for(cell_format: str, chemistry: str) -> list[str]:
 
 
 # ── Per-type transformers ─────────────────────────────────────────────────────
+
 
 def cell_spec_to_jsonld(record: dict) -> dict:
     """Transform a cell-spec record dict to JSON-LD (canonical spec-node shape).
@@ -926,8 +973,11 @@ def _role_context_terms() -> dict:
 
     table = label_to_compact()
     wanted = (
-        "hasWorkingElectrode", "hasCounterElectrode",
-        "WorkingElectrode", "CounterElectrode", "ReferenceElectrode",
+        "hasWorkingElectrode",
+        "hasCounterElectrode",
+        "WorkingElectrode",
+        "CounterElectrode",
+        "ReferenceElectrode",
     )
     return {term: table[term] for term in wanted if term in table}
 
@@ -948,7 +998,7 @@ def cell_instance_to_jsonld(record: dict, *, cell_spec: Mapping | None = None) -
     Pass *cell_spec* (the spec's body) to let a half cell's counter electrode
     also type as its reference; see :func:`electrode_role_links`.
     """
-    ci   = record.get("cell_instance") or {}
+    ci = record.get("cell_instance") or {}
     prov = record.get("provenance") or {}
     datasets = record.get("datasets") or []
 
@@ -957,8 +1007,8 @@ def cell_instance_to_jsonld(record: dict, *, cell_spec: Mapping | None = None) -
 
     node: dict = {
         "@context": context,
-        "@type":    ["BatteryCell", "schema:IndividualProduct"],
-        "@id":      ci.get("id", ""),
+        "@type": ["BatteryCell", "schema:IndividualProduct"],
+        "@id": ci.get("id", ""),
         "schema:serialNumber": ci.get("serial_number"),
     }
     if ci.get("cell_spec_id"):
@@ -1000,8 +1050,8 @@ def test_to_jsonld(record: dict) -> dict:
 
     node: dict = {
         "@context": _CONTEXT_INLINE,
-        "@type":    ["BatteryTest", "schema:Action", "prov:Activity"],
-        "@id":      test.get("id", ""),
+        "@type": ["BatteryTest", "schema:Action", "prov:Activity"],
+        "@id": test.get("id", ""),
         "schema:name": test.get("name"),
         "schema:additionalType": test.get("kind"),
         "schema:instrument": test.get("instrument_name"),
@@ -1079,9 +1129,7 @@ def test_to_jsonld(record: dict) -> dict:
                 quantity = {"value": value}
             else:
                 continue
-            pnode = _descriptor_quantity_node(
-                name, quantity, term=_MEASUREMENT_PARAMETER_TERMS.get(name)
-            )
+            pnode = _descriptor_quantity_node(name, quantity, term=_MEASUREMENT_PARAMETER_TERMS.get(name))
             if pnode is not None:
                 pnode["skos:prefLabel"] = name
                 params.append(pnode)
@@ -1176,13 +1224,13 @@ def dataset_to_jsonld(record: dict) -> dict:
     name a field, both are emitted — the same twinning the publication graph
     already does — so neither kind of consumer has to guess.
     """
-    ds   = record.get("dataset") or {}
+    ds = record.get("dataset") or {}
     prov = record.get("provenance") or {}
 
     node: dict = {
         "@context": _CONTEXT_INLINE,
-        "@type":    "http://www.w3.org/ns/dcat#Dataset",
-        "@id":      ds.get("id", ""),
+        "@type": "http://www.w3.org/ns/dcat#Dataset",
+        "@id": ds.get("id", ""),
         "dcterms:title": ds.get("name"),
     }
     if is_dataset_series(ds.get("additional_type")):
@@ -1340,10 +1388,7 @@ def add_handle_identifier(node: dict, handle: Any) -> dict:
         values = list(existing)
     else:
         values = [existing]
-    if any(
-        isinstance(value, Mapping) and value.get("schema:propertyID") == HANDLE_PROPERTY_ID
-        for value in values
-    ):
+    if any(isinstance(value, Mapping) and value.get("schema:propertyID") == HANDLE_PROPERTY_ID for value in values):
         return node
     values.append(entry)
     node["schema:identifier"] = values[0] if len(values) == 1 else values
@@ -1590,9 +1635,7 @@ def _equipment_spec_to_jsonld(record: dict) -> dict:
     if spec.get("product_id"):
         node["schema:productID"] = spec["product_id"]
 
-    class_seed = " ".join(
-        str(v) for v in (spec.get("equipment_class"), spec.get("name"), spec.get("model")) if v
-    )
+    class_seed = " ".join(str(v) for v in (spec.get("equipment_class"), spec.get("name"), spec.get("model")) if v)
     described: dict = {"@type": [_instrument_emmo_type(class_seed), "schema:Product"]}
     witness = described_iri(spec.get("id"))
     if witness:
@@ -1601,28 +1644,33 @@ def _equipment_spec_to_jsonld(record: dict) -> dict:
         described["skos:prefLabel"] = spec["name"]
     extra_properties = _property_value_nodes(spec.get("property"))
     if spec.get("equipment_class"):
-        extra_properties.insert(0, {
-            "@type": "schema:PropertyValue",
-            "schema:name": "equipment_class",
-            "schema:value": spec["equipment_class"],
-        })
+        extra_properties.insert(
+            0,
+            {
+                "@type": "schema:PropertyValue",
+                "schema:name": "equipment_class",
+                "schema:value": spec["equipment_class"],
+            },
+        )
     if spec.get("channel_count") is not None:
-        extra_properties.append({
-            "@type": "schema:PropertyValue",
-            "schema:name": "channel_count",
-            "schema:value": spec["channel_count"],
-        })
+        extra_properties.append(
+            {
+                "@type": "schema:PropertyValue",
+                "schema:name": "channel_count",
+                "schema:value": spec["channel_count"],
+            }
+        )
     chems = spec.get("supported_chemistries")
     if isinstance(chems, list) and chems:
-        extra_properties.append({
-            "@type": "schema:PropertyValue",
-            "schema:name": "supported_chemistries",
-            "schema:value": list(chems),
-        })
-    if extra_properties:
-        described["schema:additionalProperty"] = (
-            extra_properties[0] if len(extra_properties) == 1 else extra_properties
+        extra_properties.append(
+            {
+                "@type": "schema:PropertyValue",
+                "schema:name": "supported_chemistries",
+                "schema:value": list(chems),
+            }
         )
+    if extra_properties:
+        described["schema:additionalProperty"] = extra_properties[0] if len(extra_properties) == 1 else extra_properties
     node["isDescriptionFor"] = described
     if spec.get("comment"):
         node["schema:description"] = spec["comment"]
@@ -1656,14 +1704,16 @@ def _equipment_to_jsonld(record: dict) -> dict:
         node["schema:isVariantOf"] = {"@id": body["equipment_spec_id"]}
     extra_properties = _property_value_nodes(body.get("property"))
     if body.get("status"):
-        extra_properties.insert(0, {
-            "@type": "schema:PropertyValue", "schema:name": "status",
-            "schema:value": body["status"],
-        })
-    if extra_properties:
-        node["schema:additionalProperty"] = (
-            extra_properties[0] if len(extra_properties) == 1 else extra_properties
+        extra_properties.insert(
+            0,
+            {
+                "@type": "schema:PropertyValue",
+                "schema:name": "status",
+                "schema:value": body["status"],
+            },
         )
+    if extra_properties:
+        node["schema:additionalProperty"] = extra_properties[0] if len(extra_properties) == 1 else extra_properties
     if body.get("comment"):
         node["schema:description"] = body["comment"]
     if prov:
@@ -1681,9 +1731,7 @@ def _channel_to_jsonld(record: dict) -> dict:
     }
     if body.get("id"):
         node["@id"] = body["id"]
-    label = body.get("label") or (
-        f"CH{body['index']}" if isinstance(body.get("index"), int) else None
-    )
+    label = body.get("label") or (f"CH{body['index']}" if isinstance(body.get("index"), int) else None)
     if label:
         node["schema:name"] = label
     if isinstance(body.get("index"), int):
@@ -1692,7 +1740,8 @@ def _channel_to_jsonld(record: dict) -> dict:
         node["schema:isPartOf"] = {"@id": body["equipment_id"]}
     if body.get("status"):
         node["schema:additionalProperty"] = {
-            "@type": "schema:PropertyValue", "schema:name": "status",
+            "@type": "schema:PropertyValue",
+            "schema:name": "status",
             "schema:value": body["status"],
         }
     if body.get("comment"):
@@ -1705,35 +1754,35 @@ def _channel_to_jsonld(record: dict) -> dict:
 # ── Public dispatcher ─────────────────────────────────────────────────────────
 
 _TRANSFORMERS = {
-    "cell-spec":      cell_spec_to_jsonld,
-    "cell_spec":      cell_spec_to_jsonld,
-    "cell-instance":  cell_instance_to_jsonld,
-    "cell_instance":  cell_instance_to_jsonld,
-    "test":           test_to_jsonld,
-    "test-protocol":  test_protocol_to_jsonld,
-    "test_protocol":  test_protocol_to_jsonld,
-    "test-spec":      test_protocol_to_jsonld,
-    "test_spec":      test_protocol_to_jsonld,
-    "dataset":        dataset_to_jsonld,
-    "material-spec":  _material_to_jsonld,
-    "material_spec":  _material_to_jsonld,
-    "material":       _material_to_jsonld,
+    "cell-spec": cell_spec_to_jsonld,
+    "cell_spec": cell_spec_to_jsonld,
+    "cell-instance": cell_instance_to_jsonld,
+    "cell_instance": cell_instance_to_jsonld,
+    "test": test_to_jsonld,
+    "test-protocol": test_protocol_to_jsonld,
+    "test_protocol": test_protocol_to_jsonld,
+    "test-spec": test_protocol_to_jsonld,
+    "test_spec": test_protocol_to_jsonld,
+    "dataset": dataset_to_jsonld,
+    "material-spec": _material_to_jsonld,
+    "material_spec": _material_to_jsonld,
+    "material": _material_to_jsonld,
     "electrode-spec": _component_to_jsonld,
     "electrode_spec": _component_to_jsonld,
-    "electrode":      _component_to_jsonld,
+    "electrode": _component_to_jsonld,
     "separator-spec": _component_to_jsonld,
     "separator_spec": _component_to_jsonld,
-    "separator":      _component_to_jsonld,
+    "separator": _component_to_jsonld,
     "current-collector-spec": _component_to_jsonld,
     "current_collector_spec": _component_to_jsonld,
-    "current-collector":      _component_to_jsonld,
-    "current_collector":      _component_to_jsonld,
+    "current-collector": _component_to_jsonld,
+    "current_collector": _component_to_jsonld,
     "electrolyte-spec": _component_to_jsonld,
     "electrolyte_spec": _component_to_jsonld,
-    "electrolyte":      _component_to_jsonld,
+    "electrolyte": _component_to_jsonld,
     "housing-spec": _component_to_jsonld,
     "housing_spec": _component_to_jsonld,
-    "housing":      _component_to_jsonld,
+    "housing": _component_to_jsonld,
     "parameter-set": _parameter_set_to_jsonld,
     "parameter_set": _parameter_set_to_jsonld,
     "organization": _organization_to_jsonld,
@@ -1754,11 +1803,7 @@ def _epoch_to_iso(value):
         return value
     import datetime as _dt
 
-    return (
-        _dt.datetime.fromtimestamp(value, tz=_dt.timezone.utc)
-        .isoformat(timespec="seconds")
-        .replace("+00:00", "Z")
-    )
+    return _dt.datetime.fromtimestamp(value, tz=_dt.timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
 
 
 def record_to_jsonld(record: dict, record_type: str, *, context: str = "url") -> dict:
@@ -1798,11 +1843,10 @@ def record_to_jsonld(record: dict, record_type: str, *, context: str = "url") ->
         print(json.dumps(ld, indent=2))
     """
     key = record_type.lower().replace(" ", "-")
-    fn  = _TRANSFORMERS.get(key)
+    fn = _TRANSFORMERS.get(key)
     if fn is None:
         raise ValueError(
-            f"Unknown record_type {record_type!r}. "
-            f"Supported: {sorted({k.replace('_','-') for k in _TRANSFORMERS})}."
+            f"Unknown record_type {record_type!r}. Supported: {sorted({k.replace('_', '-') for k in _TRANSFORMERS})}."
         )
     node = fn(record)
     # Handle (display slug, unique within a registry workspace) → one more
@@ -1896,9 +1940,7 @@ def _bare_terms_used(node: Any) -> set[str]:
 @lru_cache(maxsize=1)
 def _context_prefixes() -> dict:
     return {
-        term: value
-        for term, value in _CONTEXT_INLINE.items()
-        if isinstance(value, str) and value.endswith(("#", "/"))
+        term: value for term, value in _CONTEXT_INLINE.items() if isinstance(value, str) and value.endswith(("#", "/"))
     }
 
 

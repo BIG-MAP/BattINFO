@@ -4,6 +4,7 @@ Covers every exported function in authoring.py:
   properties, construction, source, material, bom,
   electrode, electrolyte_recipe, separator_spec, cell_description
 """
+
 from __future__ import annotations
 
 import sys
@@ -42,6 +43,7 @@ from battinfo.bundle import (
 # properties()
 # ---------------------------------------------------------------------------
 
+
 class TestProperties:
     def test_returns_property_set(self):
         ps = properties(nominal_capacity={"value": 2.5, "unit": "Ah"})
@@ -64,6 +66,7 @@ class TestProperties:
 # ---------------------------------------------------------------------------
 # construction()
 # ---------------------------------------------------------------------------
+
 
 class TestConstruction:
     def test_returns_cell_construction(self):
@@ -92,6 +95,7 @@ class TestConstruction:
 # ---------------------------------------------------------------------------
 # source()
 # ---------------------------------------------------------------------------
+
 
 class TestSource:
     def test_returns_provenance_info(self):
@@ -133,6 +137,7 @@ class TestSource:
 # material()
 # ---------------------------------------------------------------------------
 
+
 class TestMaterial:
     def test_returns_material_component(self):
         m = material("LFP")
@@ -164,6 +169,7 @@ class TestMaterial:
 # ---------------------------------------------------------------------------
 # bom()
 # ---------------------------------------------------------------------------
+
 
 class TestBom:
     def test_returns_bill_of_materials(self):
@@ -204,6 +210,7 @@ class TestBom:
 # ---------------------------------------------------------------------------
 # electrode()
 # ---------------------------------------------------------------------------
+
 
 class TestElectrode:
     def _lfp_bom(self) -> BillOfMaterials:
@@ -257,6 +264,7 @@ class TestElectrode:
 # ---------------------------------------------------------------------------
 # electrolyte_recipe()
 # ---------------------------------------------------------------------------
+
 
 class TestElectrolyteRecipe:
     def test_returns_electrolyte(self):
@@ -324,6 +332,7 @@ class TestElectrolyteRecipe:
 # ---------------------------------------------------------------------------
 # separator_spec()
 # ---------------------------------------------------------------------------
+
 
 class TestSeparatorSpec:
     def test_returns_separator(self):
@@ -411,31 +420,44 @@ class TestCellDescription:
 
     def test_size_code(self):
         spec = cell_description(
-            id=_CELL_ID, manufacturer="A", model="B", format="cylindrical",
-            chemistry="li-ion", size_code="R18650",
+            id=_CELL_ID,
+            manufacturer="A",
+            model="B",
+            format="cylindrical",
+            chemistry="li-ion",
+            size_code="R18650",
         )
         assert spec.size_code == "R18650"
 
     def test_string_comment_becomes_list(self):
         spec = cell_description(
-            id=_CELL_ID, manufacturer="A", model="B",
-            format="coin", chemistry="li-primary",
+            id=_CELL_ID,
+            manufacturer="A",
+            model="B",
+            format="coin",
+            chemistry="li-primary",
             comment="Research cell",
         )
         assert spec.comment == ["Research cell"]
 
     def test_list_comment_preserved(self):
         spec = cell_description(
-            id=_CELL_ID, manufacturer="A", model="B",
-            format="coin", chemistry="li-primary",
+            id=_CELL_ID,
+            manufacturer="A",
+            model="B",
+            format="coin",
+            chemistry="li-primary",
             comment=["Note 1", "Note 2"],
         )
         assert spec.comment == ["Note 1", "Note 2"]
 
     def test_string_specification_comment_becomes_list(self):
         spec = cell_description(
-            id=_CELL_ID, manufacturer="A", model="B",
-            format="coin", chemistry="li-primary",
+            id=_CELL_ID,
+            manufacturer="A",
+            model="B",
+            format="coin",
+            chemistry="li-primary",
             specification_comment="Spec note",
         )
         assert spec.specification_comment == ["Spec note"]
@@ -469,6 +491,4 @@ class TestCellDescription:
 
     def test_missing_required_id_raises(self):
         with pytest.raises(TypeError):
-            cell_description(
-                manufacturer="A", model="B", format="coin", chemistry="li-primary"
-            )  # type: ignore[call-arg]
+            cell_description(manufacturer="A", model="B", format="coin", chemistry="li-primary")  # type: ignore[call-arg]

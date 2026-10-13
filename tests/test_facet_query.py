@@ -1,5 +1,6 @@
 """Tests for facet-based test-spec querying (Phase 4): finding protocols by what
 their method does (step modes, C-rates, CV holds, tags), not just identity."""
+
 from __future__ import annotations
 
 import json
@@ -15,25 +16,30 @@ from battinfo.bundle import TestSpec  # noqa: E402
 UID = "aaaa-bbbb-cccc"
 
 
-def _write_spec(directory: Path, tail: str, name: str, kind: str,
-                experiment: list[str], cycles=None) -> None:
+def _write_spec(directory: Path, tail: str, name: str, kind: str, experiment: list[str], cycles=None) -> None:
     spec = TestSpec(
-        id=f"https://w3id.org/battinfo/spec/{UID}-{tail}", name=name, test_kind=kind,
-        experiment=experiment, cycles=cycles,
+        id=f"https://w3id.org/battinfo/spec/{UID}-{tail}",
+        name=name,
+        test_kind=kind,
+        experiment=experiment,
+        cycles=cycles,
         source={"type": "manual", "retrieved_at": 1781589239},
     )
-    (directory / f"test-protocol-{UID}-{tail}.json").write_text(
-        json.dumps(spec.to_record()), encoding="utf-8")
+    (directory / f"test-protocol-{UID}-{tail}.json").write_text(json.dumps(spec.to_record()), encoding="utf-8")
 
 
 def _make_dir(tmp_path: Path) -> Path:
     d = tmp_path / "test-protocol"
     d.mkdir()
-    _write_spec(d, "1n5v", "Formation CCCV", "formation",
-                ["Charge at 1 C until 4.2 V", "Hold at 4.2 V until C/50",
-                 "Discharge at 1 C until 2.5 V"], cycles=3)
-    _write_spec(d, "2n5v", "Simple CC discharge", "capacity_check",
-                ["Discharge at 0.5 C until 2.5 V"])
+    _write_spec(
+        d,
+        "1n5v",
+        "Formation CCCV",
+        "formation",
+        ["Charge at 1 C until 4.2 V", "Hold at 4.2 V until C/50", "Discharge at 1 C until 2.5 V"],
+        cycles=3,
+    )
+    _write_spec(d, "2n5v", "Simple CC discharge", "capacity_check", ["Discharge at 0.5 C until 2.5 V"])
     return d
 
 

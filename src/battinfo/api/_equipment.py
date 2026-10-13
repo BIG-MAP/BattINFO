@@ -16,6 +16,7 @@ Design rules (ratified — see IDENTIFIER_POLICY.md section 6.1):
 
 Import the public surface from ``battinfo.api``, not from this module.
 """
+
 from __future__ import annotations
 
 from typing import Any

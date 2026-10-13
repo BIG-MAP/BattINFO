@@ -3,6 +3,7 @@
 Split from the former monolithic ``battinfo/api.py`` (beta-hardening 4.2);
 import the public surface from ``battinfo.api``, not from this module.
 """
+
 from __future__ import annotations
 
 from typing import Any, Literal
@@ -125,6 +126,7 @@ def _draft_specs_for_format(
     cell_format: str,
 ) -> dict[str, Any]:
     """Return example specs pre-filled with realistic placeholders for the given cell format."""
+
     def qty(value: float, unit: str) -> dict[str, Any]:
         return {"value": value, "unit": unit}
 
@@ -169,8 +171,9 @@ def template_cell_instance(
         uid=uid,
         cell_spec_id=cell_spec_id or TEMPLATE_CELL_SPEC_ID,  # build scaffold, removed below
         source_type=source_type,
-        notes=["Template-generated record. Set cell_spec_id/serial_number/datasets before saving; "
-               "saving mints the IRI."],
+        notes=[
+            "Template-generated record. Set cell_spec_id/serial_number/datasets before saving; saving mints the IRI."
+        ],
     )
     record = _record_from_cell_instance(draft)
     if cell_spec_id is None:

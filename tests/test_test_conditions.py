@@ -5,6 +5,7 @@ domain-battery model (hasControlParameter / hasTerminationParameter / hasPropert
 each a typed quantity), with a schema:PropertyValue fallback + a non-blocking
 warning for names outside the controlled vocabulary.
 """
+
 from __future__ import annotations
 
 import sys
@@ -23,8 +24,11 @@ SPEC_ID = "https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd"
 def _assemble(test_protocol_record: dict) -> dict:
     return AuthoringWorkspace._assemble_zenodo_jsonld(
         {
-            "cell-spec": [], "cell-instance": [], "test": [],
-            "test-protocol": [test_protocol_record], "dataset": [],
+            "cell-spec": [],
+            "cell-instance": [],
+            "test": [],
+            "test-protocol": [test_protocol_record],
+            "dataset": [],
         },
         zenodo_record_id=0,
         prereserved_doi="",
@@ -40,17 +44,20 @@ def _howto(doc: dict) -> dict:
 
 
 def test_method_emits_emmo_process_graph() -> None:
-    doc = _assemble({
-        "test_spec": {"id": SPEC_ID, "name": "CC discharge", "kind": "capacity_check"},
-        "method": [
-            {
-                "mode": "cc", "direction": "discharge",
-                "setpoints": {"c_rate": {"value": 0.05, "unit": "A/Ah"}},
-                "termination": [{"quantity": "voltage", "direction": "below", "value": 0.9, "unit": "V"}],
-            }
-        ],
-        "conditions": {"temperature": {"value": 20, "unit": "degC"}},
-    })
+    doc = _assemble(
+        {
+            "test_spec": {"id": SPEC_ID, "name": "CC discharge", "kind": "capacity_check"},
+            "method": [
+                {
+                    "mode": "cc",
+                    "direction": "discharge",
+                    "setpoints": {"c_rate": {"value": 0.05, "unit": "A/Ah"}},
+                    "termination": [{"quantity": "voltage", "direction": "below", "value": 0.9, "unit": "V"}],
+                }
+            ],
+            "conditions": {"temperature": {"value": 20, "unit": "degC"}},
+        }
+    )
     node = _howto(doc)
 
     # The method is an ordered EMMO task chain; the single step is a CC discharge.
@@ -71,35 +78,51 @@ def test_method_emits_emmo_process_graph() -> None:
     prop = node["hasProperty"]
     assert prop[0]["@type"] == "ConventionalProperty"
     assert prop[0]["hasNumericalPart"]["hasNumberValue"] == 20
-    assert prop[0]["rdfs:label"] == "temperature"          # generic class → human label
-    assert "@id" in prop[0]["hasMeasurementUnit"]          # degC resolves
+    assert prop[0]["rdfs:label"] == "temperature"  # generic class → human label
+    assert "@id" in prop[0]["hasMeasurementUnit"]  # degC resolves
 
     # The method vocabulary must resolve in the document's own (inlined) context.
     ctx = doc["@context"]
-    for term_name in ("hasTask", "hasControlParameter", "hasTerminationParameter",
-                      "CRate", "LowerVoltageLimit", "ConstantCurrentDischarging", "ConventionalProperty"):
+    for term_name in (
+        "hasTask",
+        "hasControlParameter",
+        "hasTerminationParameter",
+        "CRate",
+        "LowerVoltageLimit",
+        "ConstantCurrentDischarging",
+        "ConventionalProperty",
+    ):
         assert term_name in ctx
     # Mapped conditions are NOT duplicated as schema:PropertyValue.
     assert "schema:additionalProperty" not in node
 
 
 def test_group_emits_iterative_workflow() -> None:
-    doc = _assemble({
-        "test_spec": {"id": SPEC_ID, "name": "Cycling", "kind": "cycling"},
-        "method": [
-            {
-                "mode": "group", "count": 3,
-                "steps": [
-                    {"mode": "cc", "direction": "charge",
-                     "setpoints": {"c_rate": {"value": 1.0, "unit": "A/Ah"}},
-                     "termination": [{"quantity": "voltage", "direction": "above", "value": 4.2, "unit": "V"}]},
-                    {"mode": "cc", "direction": "discharge",
-                     "setpoints": {"c_rate": {"value": 1.0, "unit": "A/Ah"}},
-                     "termination": [{"quantity": "voltage", "direction": "below", "value": 2.5, "unit": "V"}]},
-                ],
-            }
-        ],
-    })
+    doc = _assemble(
+        {
+            "test_spec": {"id": SPEC_ID, "name": "Cycling", "kind": "cycling"},
+            "method": [
+                {
+                    "mode": "group",
+                    "count": 3,
+                    "steps": [
+                        {
+                            "mode": "cc",
+                            "direction": "charge",
+                            "setpoints": {"c_rate": {"value": 1.0, "unit": "A/Ah"}},
+                            "termination": [{"quantity": "voltage", "direction": "above", "value": 4.2, "unit": "V"}],
+                        },
+                        {
+                            "mode": "cc",
+                            "direction": "discharge",
+                            "setpoints": {"c_rate": {"value": 1.0, "unit": "A/Ah"}},
+                            "termination": [{"quantity": "voltage", "direction": "below", "value": 2.5, "unit": "V"}],
+                        },
+                    ],
+                }
+            ],
+        }
+    )
     group = _howto(doc)["hasTask"][0]
     assert group["@type"] == "IterativeWorkflow"
     assert group["NumberOfIterations"]["hasNumericalPart"]["hasNumberValue"] == 3
@@ -108,10 +131,12 @@ def test_group_emits_iterative_workflow() -> None:
 
 
 def test_unmapped_condition_falls_back_and_warns() -> None:
-    doc = _assemble({
-        "test_spec": {"id": SPEC_ID, "name": "CC discharge", "kind": "capacity_check"},
-        "conditions": {"relative_humidity": {"value": 50, "unit": "%"}},
-    })
+    doc = _assemble(
+        {
+            "test_spec": {"id": SPEC_ID, "name": "CC discharge", "kind": "capacity_check"},
+            "conditions": {"relative_humidity": {"value": 50, "unit": "%"}},
+        }
+    )
     node = _howto(doc)
     # Unmapped name → schema:PropertyValue fallback, not an EMMO quantity.
     extra = node["schema:additionalProperty"]

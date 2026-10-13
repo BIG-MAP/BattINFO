@@ -13,6 +13,7 @@ Tests that point the guard at a home, working or filesystem-root folder replace
 ``shutil.rmtree`` with a function that fails, so a broken guard cannot delete
 anything real.
 """
+
 from __future__ import annotations
 
 import ast
@@ -66,10 +67,13 @@ def _make_evidence(tmp_path: Path) -> Path:
     # Short names: a workspace kept inside this folder nests deeply, and
     # Windows refuses paths over 260 characters.
     evidence = tmp_path / "ev"
-    _write_tree(evidence, {
-        "image/photo/IMG_0001.jpg": "fake-jpeg",
-        "timeseries/raw/lab__c1__2026-04-09__rate__25degC.csv": "time_s,voltage_v\n0,4.20\n",
-    })
+    _write_tree(
+        evidence,
+        {
+            "image/photo/IMG_0001.jpg": "fake-jpeg",
+            "timeseries/raw/lab__c1__2026-04-09__rate__25degC.csv": "time_s,voltage_v\n0,4.20\n",
+        },
+    )
     return evidence
 
 
@@ -114,7 +118,9 @@ def test_an_empty_folder_a_marked_folder_and_a_missing_one_are_fine(tmp_path: Pa
 @pytest.mark.parametrize(
     "layout",
     [
-        pytest.param({"index.json": "{}", "examples/cell-spec/cell-spec-czgb-525v-rz6q-2xfd.json": "{}"}, id="publish-root"),
+        pytest.param(
+            {"index.json": "{}", "examples/cell-spec/cell-spec-czgb-525v-rz6q-2xfd.json": "{}"}, id="publish-root"
+        ),
         pytest.param(
             {
                 "index.json": "{}",
@@ -213,12 +219,22 @@ def test_every_root_this_version_builds_is_recognised_without_its_marker(
         "battinfo._publish.submit_publication_package", lambda payload, **kwargs: {"status": "ok", "response": {}}
     )
     publish(_spec(), destination="local", root=tmp_path / "pub")
-    publish(_spec(), destination="registry", root=tmp_path / "pub-registry", registry_base_url="https://registry.invalid",
-            api_key="key", workspace_id="guard-demo", publisher_id="demo-lab")
+    publish(
+        _spec(),
+        destination="registry",
+        root=tmp_path / "pub-registry",
+        registry_base_url="https://registry.invalid",
+        api_key="key",
+        workspace_id="guard-demo",
+        publisher_id="demo-lab",
+    )
     setup_demo_environment(tmp_path / "demo")
     build_ingest_workspace(
-        _make_evidence(tmp_path), type_record=EXAMPLE_CELL_TYPE, workspace_root=tmp_path / "ing",
-        workspace_id="guard-demo", publisher_id="demo-lab",
+        _make_evidence(tmp_path),
+        type_record=EXAMPLE_CELL_TYPE,
+        workspace_root=tmp_path / "ing",
+        workspace_id="guard-demo",
+        publisher_id="demo-lab",
     )
     local = LocalWorkspace.init(tmp_path / "lw")
     local.validate(write_report=True)
@@ -229,13 +245,17 @@ def test_every_root_this_version_builds_is_recognised_without_its_marker(
     engine = Workspace(root=tmp_path / "eng", name="guard-demo", publisher="demo-lab")
     _write_tree(tmp_path, {"data/cycle-life.csv": "cycle,capacity_ah\n0,2.50\n"})
     cell_spec = engine.cell_spec(
-        manufacturer="A123", model="ANR26650M1-B", format="cylindrical", chemistry="Li-ion",
+        manufacturer="A123",
+        model="ANR26650M1-B",
+        format="cylindrical",
+        chemistry="Li-ion",
         specs={"nominal_voltage": quantity(3.3, "V")},
     )
     cell = engine.cell(cell_spec, serial_number="guard-001", source_type="lab")
     test = engine.test(cell, kind="cycling", protocol="1C / 1C", status="completed")
-    dataset = engine.dataset(cell, title="Guard dataset", test=test, path=tmp_path / "data" / "cycle-life.csv",
-                             license="CC-BY-4.0")
+    dataset = engine.dataset(
+        cell, title="Guard dataset", test=test, path=tmp_path / "data" / "cycle-life.csv", license="CC-BY-4.0"
+    )
     engine.save()
     engine.build_submission_package(dataset, registry="digibatt/hello-world")
     engine.build_publication_package(dataset, emit_html_page=True, emit_bundle_dir=True)
@@ -309,7 +329,8 @@ def test_the_folder_where_a_workspace_keeps_its_records_is_refused(
     [
         pytest.param({"inputs/raw_cycler_run.csv": "t,v\n0,4.2\n"}, "inputs/raw_cycler_run.csv", id="inputs"),
         pytest.param(
-            {"inputs/cycle-life.csv": "1", "inputs/notes.txt": "mine"}, "inputs/notes.txt",
+            {"inputs/cycle-life.csv": "1", "inputs/notes.txt": "mine"},
+            "inputs/notes.txt",
             id="inputs-beside-the-demo-file",
         ),
         pytest.param({"publication/main.tex": "x"}, "publication/main.tex", id="publication-file"),
@@ -324,7 +345,8 @@ def test_the_folder_where_a_workspace_keeps_its_records_is_refused(
         pytest.param({"ontology/my-lab-terms.jsonld": "{}"}, "ontology/my-lab-terms.jsonld", id="ontology-jsonld"),
         pytest.param({"release/notes.md": "x"}, "release", id="release"),
         pytest.param(
-            {f"release/{MARKER_FILENAME}": "x", "release/.battinfo/records/cell-spec/x.json": "{}"}, "release/.battinfo",
+            {f"release/{MARKER_FILENAME}": "x", "release/.battinfo/records/cell-spec/x.json": "{}"},
+            "release/.battinfo",
             id="release-holding-a-workspace-store",
         ),
         pytest.param({"examples/analysis.ipynb": "{}"}, "examples/analysis.ipynb", id="examples"),
@@ -339,7 +361,9 @@ def test_a_common_folder_name_counts_only_with_the_content_battinfo_writes_there
     root = tmp_path / "a_project"
     _write_tree(root, {"index.json": "{}", "examples/cell-spec/cell-spec-x.json": "{}", **own})
 
-    with pytest.raises(UnsafeDeleteError, match=re.escape(f"it holds {Path(in_the_way)}, which is not BattINFO output")):
+    with pytest.raises(
+        UnsafeDeleteError, match=re.escape(f"it holds {Path(in_the_way)}, which is not BattINFO output")
+    ):
         remove_tree(root)
 
     assert all((root / relative).exists() for relative in own)
@@ -350,19 +374,27 @@ def test_a_common_folder_name_counts_only_with_the_content_battinfo_writes_there
     [
         pytest.param(
             {"battinfo-authoring-workspace.json": "{}", "records/cell-spec/7d9k2m.json": "{}"},
-            {"records/notes/plan.json": "{}"}, "records/notes", id="ingest-records",
+            {"records/notes/plan.json": "{}"},
+            "records/notes",
+            id="ingest-records",
         ),
         pytest.param(
             {"battinfo-authoring-workspace.json": "{}", "dist/submission-package.json": "{}"},
-            {"dist/normalized/cell-spec/summary.csv": "x"}, "dist/normalized/cell-spec/summary.csv", id="ingest-dist",
+            {"dist/normalized/cell-spec/summary.csv": "x"},
+            "dist/normalized/cell-spec/summary.csv",
+            id="ingest-dist",
         ),
         pytest.param(
             {"battinfo-workspace.json": "{}", "resources/cell.json": "{}"},
-            {"resources/drafts/cell.json": "{}"}, "resources/drafts", id="local-workspace-resources",
+            {"resources/drafts/cell.json": "{}"},
+            "resources/drafts",
+            id="local-workspace-resources",
         ),
         pytest.param(
             {"battinfo-workspace.json": "{}", "dist/registry-intake.json": "{}"},
-            {"dist/analysis.json": "{}"}, "dist/analysis.json", id="local-workspace-dist",
+            {"dist/analysis.json": "{}"},
+            "dist/analysis.json",
+            id="local-workspace-dist",
         ),
     ],
 )
@@ -372,7 +404,9 @@ def test_a_records_or_reports_folder_holds_only_the_names_battinfo_gives(
     root = tmp_path / "root"
     _write_tree(root, {**layout, **own})
 
-    with pytest.raises(UnsafeDeleteError, match=re.escape(f"it holds {Path(in_the_way)}, which is not BattINFO output")):
+    with pytest.raises(
+        UnsafeDeleteError, match=re.escape(f"it holds {Path(in_the_way)}, which is not BattINFO output")
+    ):
         remove_tree(root)
 
     assert all((root / relative).exists() for relative in own)
@@ -380,11 +414,14 @@ def test_a_records_or_reports_folder_holds_only_the_names_battinfo_gives(
 
 def test_the_refusal_names_the_file_in_the_way_not_the_battinfo_folder(tmp_path: Path) -> None:
     root = tmp_path / "r1"
-    _write_tree(root, {
-        "index.json": "{}",
-        "examples/cell-spec/cell-spec-x.json": "{}",
-        "examples/cell-spec/notes.md": "mine",
-    })
+    _write_tree(
+        root,
+        {
+            "index.json": "{}",
+            "examples/cell-spec/cell-spec-x.json": "{}",
+            "examples/cell-spec/notes.md": "mine",
+        },
+    )
 
     with pytest.raises(UnsafeDeleteError) as refused:
         publish(_spec(), destination="local", root=root, force=True)
@@ -410,12 +447,15 @@ def test_the_refusal_names_five_things_in_the_way_and_counts_the_rest(tmp_path: 
 def test_what_battinfo_leaves_part_way_through_a_write_counts_as_its_own(tmp_path: Path) -> None:
     """A crash can leave _jsonio's temporary file, or the folders workspace_state swaps in and out."""
     root = tmp_path / "root"
-    _write_tree(root, {
-        "index.json": "{}",
-        "examples/cell-spec/cell-spec-x.json": "{}",
-        "battinfo-authoring-workspace.json": "{}",
-        "records/cell-spec/7d9k2m.json": "{}",
-    })
+    _write_tree(
+        root,
+        {
+            "index.json": "{}",
+            "examples/cell-spec/cell-spec-x.json": "{}",
+            "battinfo-authoring-workspace.json": "{}",
+            "records/cell-spec/7d9k2m.json": "{}",
+        },
+    )
     # Named as _jsonio.atomic_write_text and workspace_state._swap_dir name them.
     handle, _ = tempfile.mkstemp(dir=root / "examples" / "cell-spec", prefix=".cell-spec-y.json.", suffix=".tmp")
     os.close(handle)
@@ -440,12 +480,15 @@ def test_a_temporary_file_counts_only_where_the_file_it_stands_in_for_would(tmp_
 
 def test_an_old_layout_that_also_holds_other_files_is_refused(tmp_path: Path) -> None:
     root = tmp_path / "root"
-    _write_tree(root, {
-        "index.json": "{}",
-        "examples/cell-spec/cell-spec-x.json": "{}",
-        "data/precious.csv": "1",
-        "analysis.ipynb": "{}",
-    })
+    _write_tree(
+        root,
+        {
+            "index.json": "{}",
+            "examples/cell-spec/cell-spec-x.json": "{}",
+            "data/precious.csv": "1",
+            "analysis.ipynb": "{}",
+        },
+    )
 
     with pytest.raises(UnsafeDeleteError, match=r"it holds analysis\.ipynb, data, which are not BattINFO output"):
         remove_tree(root)
@@ -548,8 +591,10 @@ def test_only_the_guard_module_calls_rmtree() -> None:
         for node in ast.walk(ast.parse(source, filename=str(path))):
             if isinstance(node, ast.Attribute) and node.attr == "rmtree":
                 offenders.add(f"{where}:{node.lineno}")
-            elif isinstance(node, ast.ImportFrom) and node.module == "shutil" and any(
-                alias.name in {"rmtree", "*"} for alias in node.names
+            elif (
+                isinstance(node, ast.ImportFrom)
+                and node.module == "shutil"
+                and any(alias.name in {"rmtree", "*"} for alias in node.names)
             ):
                 offenders.add(f"{where}:{node.lineno}")
     assert not offenders, (
@@ -576,11 +621,26 @@ def test_publish_cli_force_rebuilds_a_root_built_by_0_8_0(tmp_path: Path) -> Non
     root = tmp_path / "publish-root"
     _write_tree(root, {"index.json": "{}", "examples/cell-spec/cell-spec-stale.json": "{}"})
 
-    result = CliRunner().invoke(app, [
-        "publish", "cell-spec",
-        "--manufacturer", "Google", "--model", "G20M7", "--cell-format", "pouch", "--chemistry", "Li-ion",
-        "--root", str(root), "--force", "--format", "json",
-    ])
+    result = CliRunner().invoke(
+        app,
+        [
+            "publish",
+            "cell-spec",
+            "--manufacturer",
+            "Google",
+            "--model",
+            "G20M7",
+            "--cell-format",
+            "pouch",
+            "--chemistry",
+            "Li-ion",
+            "--root",
+            str(root),
+            "--force",
+            "--format",
+            "json",
+        ],
+    )
 
     assert result.exit_code == 0, result.stdout
     assert not (root / "examples" / "cell-spec" / "cell-spec-stale.json").exists()
@@ -592,12 +652,23 @@ def test_publish_cli_force_refuses_a_root_that_holds_the_input_file(tmp_path: Pa
     root = tmp_path / "publish-root"
     _write_tree(root, {MARKER_FILENAME: "x"})
     draft = root / "draft.json"
-    draft.write_text(json.dumps({"manufacturer": "Google", "model": "G20M7", "format": "pouch",
-                                 "chemistry": "Li-ion"}), encoding="utf-8")
+    draft.write_text(
+        json.dumps({"manufacturer": "Google", "model": "G20M7", "format": "pouch", "chemistry": "Li-ion"}),
+        encoding="utf-8",
+    )
 
-    result = CliRunner().invoke(app, [
-        "publish", "cell-spec", "--input", str(draft), "--root", str(root), "--force",
-    ])
+    result = CliRunner().invoke(
+        app,
+        [
+            "publish",
+            "cell-spec",
+            "--input",
+            str(draft),
+            "--root",
+            str(root),
+            "--force",
+        ],
+    )
 
     assert result.exit_code == 1
     assert "Refusing to delete" in result.stdout
@@ -653,11 +724,24 @@ def test_publish_cli_force_refuses_the_folder_where_a_workspace_keeps_its_record
     store = tmp_path / "lab" / ".battinfo"
     saved = sorted(store.rglob("*.json"))
 
-    result = CliRunner().invoke(app, [
-        "publish", "cell-spec",
-        "--manufacturer", "Google", "--model", "G20M7", "--cell-format", "pouch", "--chemistry", "Li-ion",
-        "--root", str(store), "--force",
-    ])
+    result = CliRunner().invoke(
+        app,
+        [
+            "publish",
+            "cell-spec",
+            "--manufacturer",
+            "Google",
+            "--model",
+            "G20M7",
+            "--cell-format",
+            "pouch",
+            "--chemistry",
+            "Li-ion",
+            "--root",
+            str(store),
+            "--force",
+        ],
+    )
 
     assert result.exit_code == 1
     assert "keeps a project's records there" in result.stdout
@@ -669,11 +753,20 @@ def test_publish_cli_force_refuses_the_folder_where_a_workspace_keeps_its_record
 
 def _ingest_args(evidence: Path, root: Path) -> list[str]:
     return [
-        "ingest", "build", str(evidence),
-        "--type-record", str(EXAMPLE_CELL_TYPE),
-        "--workspace-root", str(root),
-        "--workspace-id", "guard-demo", "--publisher-id", "demo-lab",
-        "--force", "--format", "json",
+        "ingest",
+        "build",
+        str(evidence),
+        "--type-record",
+        str(EXAMPLE_CELL_TYPE),
+        "--workspace-root",
+        str(root),
+        "--workspace-id",
+        "guard-demo",
+        "--publisher-id",
+        "demo-lab",
+        "--force",
+        "--format",
+        "json",
     ]
 
 
@@ -691,12 +784,15 @@ def test_ingest_build_refuses_the_evidence_folder_as_its_workspace_root(tmp_path
 def test_ingest_build_force_rebuilds_a_root_built_by_0_8_0(tmp_path: Path) -> None:
     evidence = _make_evidence(tmp_path)
     root = tmp_path / "ingest-workspace"
-    _write_tree(root, {
-        "battinfo-authoring-workspace.json": "{}",
-        "records/cell-spec/stale.json": "{}",
-        "artifacts/dataset/stale/run.csv": "1",
-        "dist/registry-intake.json": "{}",
-    })
+    _write_tree(
+        root,
+        {
+            "battinfo-authoring-workspace.json": "{}",
+            "records/cell-spec/stale.json": "{}",
+            "artifacts/dataset/stale/run.csv": "1",
+            "dist/registry-intake.json": "{}",
+        },
+    )
 
     result = CliRunner().invoke(app, _ingest_args(evidence, root))
 
@@ -757,12 +853,15 @@ def test_a_manifest_dist_dir_outside_the_workspace_is_refused(tmp_path: Path) ->
 def test_clone_force_replaces_a_release_root_built_by_0_8_0(tmp_path: Path) -> None:
     source = LocalWorkspace.init(tmp_path / "source")
     target = tmp_path / "target"
-    _write_tree(target, {
-        "battinfo-workspace.json": "{}",
-        "resources/cell.json": "{}",
-        "artifacts/stale.csv": "1",
-        "dist/registry-intake.json": "{}",
-    })
+    _write_tree(
+        target,
+        {
+            "battinfo-workspace.json": "{}",
+            "resources/cell.json": "{}",
+            "artifacts/stale.csv": "1",
+            "dist/registry-intake.json": "{}",
+        },
+    )
 
     clone = source.clone(target, force=True)
 
@@ -777,7 +876,10 @@ def test_export_force_refuses_a_release_root_that_holds_the_dataset_file(tmp_pat
     data_file = release / "cycle-life.csv"
     _write_tree(release, {MARKER_FILENAME: "x", "cycle-life.csv": "cycle,capacity_ah\n0,2.50\n"})
     cell_spec = engine.cell_spec(
-        manufacturer="A123", model="ANR26650M1-B", format="cylindrical", chemistry="Li-ion",
+        manufacturer="A123",
+        model="ANR26650M1-B",
+        format="cylindrical",
+        chemistry="Li-ion",
         specs={"nominal_voltage": quantity(3.3, "V")},
     )
     cell = engine.cell(cell_spec, serial_number="guard-001", source_type="lab")
@@ -793,16 +895,34 @@ def test_export_force_refuses_a_release_root_that_holds_the_dataset_file(tmp_pat
 # ── Paths a workspace manifest names ────────────────────────────────────────
 
 
-@pytest.mark.parametrize("value", [
-    "../x", r"..\x", "dist/../../x", "dist/..", "/tmp/x", r"\x", r"C:\x", "C:x",
-    r"\\host\share\x", "//host/share/x", "", ".", "./", "...", " ",
-])
+@pytest.mark.parametrize(
+    "value",
+    [
+        "../x",
+        r"..\x",
+        "dist/../../x",
+        "dist/..",
+        "/tmp/x",
+        r"\x",
+        r"C:\x",
+        "C:x",
+        r"\\host\share\x",
+        "//host/share/x",
+        "",
+        ".",
+        "./",
+        "...",
+        " ",
+    ],
+)
 def test_a_manifest_path_that_leaves_the_folder_or_names_it_is_refused(value: str) -> None:
     with pytest.raises(ValueError, match="dist_dir"):
         check_relative_path(value, field="dist_dir")
 
 
-@pytest.mark.parametrize("value", ["dist", "out/dist", r"out\dist", "./dist", "records/cell-spec", "resources/cell.json"])
+@pytest.mark.parametrize(
+    "value", ["dist", "out/dist", r"out\dist", "./dist", "records/cell-spec", "resources/cell.json"]
+)
 def test_a_relative_manifest_path_inside_the_folder_is_kept(value: str) -> None:
     assert check_relative_path(value, field="dist_dir") == value
 
@@ -858,7 +978,14 @@ def test_update_release_rewrites_no_file_outside_the_workspace(tmp_path: Path) -
 
 @pytest.mark.parametrize(
     "keys",
-    [("dist_dir",), ("artifacts_dir",), ("paths", "cell_specs"), ("paths", "cells"), ("paths", "tests"), ("paths", "datasets")],
+    [
+        ("dist_dir",),
+        ("artifacts_dir",),
+        ("paths", "cell_specs"),
+        ("paths", "cells"),
+        ("paths", "tests"),
+        ("paths", "datasets"),
+    ],
     ids=".".join,
 )
 def test_an_authoring_workspace_manifest_path_outside_the_workspace_is_refused(keys: tuple[str, ...]) -> None:
@@ -878,8 +1005,12 @@ def test_reopening_copies_no_dataset_artifact_from_outside_the_workspace(tmp_pat
     _write_tree(tmp_path, {"inputs/a.csv": "cycle,capacity_ah\n0,2.50\n", "secret/notes.txt": "private"})
     engine = Workspace(root, name="guard", title="Guard", tenant="digibatt", publisher="demo-lab", version="0.1.0")
     cell_spec = engine.cell_spec(
-        manufacturer="A123", model="ANR26650M1-B", format="cylindrical", chemistry="Li-ion",
-        specs={"nominal_voltage": quantity(3.3, "V")}, source_file="a123.manual.json",
+        manufacturer="A123",
+        model="ANR26650M1-B",
+        format="cylindrical",
+        chemistry="Li-ion",
+        specs={"nominal_voltage": quantity(3.3, "V")},
+        source_file="a123.manual.json",
     )
     cell = engine.cell(cell_spec, serial_number="guard-001", source_type="lab")
     test = engine.test(cell, kind="cycling", protocol="1C / 1C", status="completed")

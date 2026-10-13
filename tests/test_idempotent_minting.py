@@ -6,6 +6,7 @@ so both authoring paths mint the same IRI for the same identity. Records with
 no distinguishing identity fall back to random minting — two anonymous but
 physically distinct records must never silently dedup.
 """
+
 from __future__ import annotations
 
 import sys
@@ -135,9 +136,7 @@ def test_every_cell_surface_mints_one_iri_for_one_serial(tmp_path: Path) -> None
         {"cell_spec_id": spec["id"], "serial_number": "LAB-0002", "name": "Cell B"},
         source_root=root,
     )
-    created = api.create_cell_instance(
-        cell_spec_id=spec["id"], serial_number="LAB-0002", source_root=root
-    )
+    created = api.create_cell_instance(cell_spec_id=spec["id"], serial_number="LAB-0002", source_root=root)
     assert created["cell_instance"]["id"] == saved["id"]
 
 
@@ -149,8 +148,10 @@ def test_workspace_rename_with_a_serial_keeps_the_iri(tmp_path: Path) -> None:
     def minted(folder: str, name: str) -> str:
         ws = battinfo.workspace(tmp_path / folder, registry_url=None)
         spec = battinfo.CellSpec(
-            manufacturer="Example Lab", model="R2032 graphite half cell",
-            format="coin", chemistry="li-ion",
+            manufacturer="Example Lab",
+            model="R2032 graphite half cell",
+            format="coin",
+            chemistry="li-ion",
         )
         ws.add("cell", spec=spec, names=[name], serial_numbers=["C01"])
         ws.save()

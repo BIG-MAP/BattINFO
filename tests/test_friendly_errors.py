@@ -5,6 +5,7 @@ paths. Now: every error in one message, canonical paths translated back to the a
 vocabulary (cell_spec.cell_format → format=), quantity-shape errors carry a
 copy-pasteable example, and unknown-kwarg typos get a did-you-mean.
 """
+
 from __future__ import annotations
 
 import sys
@@ -30,11 +31,11 @@ def _bad_cell_spec_doc() -> dict:
             "name": "X",
             "manufacturer": {"type": "Organization", "name": "Acme"},
             "model": "X1",
-            "cell_format": "not-a-real-format",   # enum error
+            "cell_format": "not-a-real-format",  # enum error
             "chemistry": "LFP",
         },
-        "properties": {"nominal_capacity": 2.5},   # bare number, not a quantity object
-        "provenance": {},                           # missing required source_type
+        "properties": {"nominal_capacity": 2.5},  # bare number, not a quantity object
+        "provenance": {},  # missing required source_type
     }
 
 
@@ -53,8 +54,8 @@ def test_canonical_paths_translate_to_authoring_kwargs() -> None:
     with pytest.raises(ValueError) as exc:
         _validate_canonical_record(_bad_cell_spec_doc())
     message = str(exc.value)
-    assert "authoring field: format=" in message          # cell_spec.cell_format
-    assert "authoring field: source_type=" in message     # provenance.'source_type' required
+    assert "authoring field: format=" in message  # cell_spec.cell_format
+    assert "authoring field: source_type=" in message  # provenance.'source_type' required
 
 
 def test_quantity_shape_error_shows_example_and_command() -> None:
@@ -84,7 +85,10 @@ def test_kwarg_typo_gets_a_did_you_mean() -> None:
 def test_spec_property_typo_gets_a_did_you_mean() -> None:
     with pytest.raises(TypeError, match=r"did you mean nominal_capacity=\?"):
         CellSpec(
-            manufacturer="Acme", model_name="X", chemistry="LFP", format="cylindrical",
+            manufacturer="Acme",
+            model_name="X",
+            chemistry="LFP",
+            format="cylindrical",
             nominal_capacit={"value": 2.0, "unit": "Ah"},
         )
 
@@ -94,7 +98,10 @@ def test_absorbed_authoring_aliases_still_accepted() -> None:
     # custom __init__s absorb (kind=, cell_id=, title=, notes=, source_type=, ...).
     test = Test(
         cell_id="https://w3id.org/battinfo/cell/bbbb-bbbb-bbbb-bbbb",
-        name="T", kind="cycling", notes=["n"], source_type="lab",
+        name="T",
+        kind="cycling",
+        notes=["n"],
+        source_type="lab",
     )
     assert test.test_type.value == "cycling"
     dataset = Dataset(title="D", access_url="https://x.example/d", source_type="other")

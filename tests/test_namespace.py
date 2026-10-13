@@ -1,4 +1,5 @@
 """The curated top-level namespace stays curated (R2-B / beta-hardening 4.1)."""
+
 from __future__ import annotations
 
 import sys

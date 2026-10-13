@@ -4,6 +4,7 @@ These guard against silent JSON-LD corruption / crashes from hand-built or
 externally-imported records whose fields drift from the canonical list[str] /
 Mapping shapes (audit theme C).
 """
+
 from __future__ import annotations
 
 import json
@@ -52,8 +53,13 @@ def test_dataset_checksum_as_string_does_not_crash() -> None:
 
 def test_dataset_checksum_as_mapping_is_emitted() -> None:
     out = record_to_jsonld(
-        {"dataset": {"id": "d1", "name": "DS", "distributions": [
-            {"content_url": "http://x", "checksum": {"algorithm": "sha256", "value": "ab"}}]}},
+        {
+            "dataset": {
+                "id": "d1",
+                "name": "DS",
+                "distributions": [{"content_url": "http://x", "checksum": {"algorithm": "sha256", "value": "ab"}}],
+            }
+        },
         "dataset",
     )
     assert out["dcat:distribution"][0]["spdx:checksum"]["spdx:checksumValue"] == "ab"
@@ -143,9 +149,15 @@ def test_housing_spec_case_type_is_accepted_for_every_format(cell_format: str) -
     raised instead of returning a document."""
     from battinfo.validate.jsonld import validate_jsonld_report
 
-    record = {"schema_version": "0.2.0", "housing_spec": {
-        "id": "https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd", "name": "PTFE cell",
-        "cell_format": cell_format, "case": {"material": "PTFE"}}}
+    record = {
+        "schema_version": "0.2.0",
+        "housing_spec": {
+            "id": "https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd",
+            "name": "PTFE cell",
+            "cell_format": cell_format,
+            "case": {"material": "PTFE"},
+        },
+    }
     out = record_to_jsonld(record, "housing-spec")
     case_type = out["isDescriptionFor"]["hasConstituent"]["@type"]
     if cell_format in ("other", "unknown"):
@@ -158,8 +170,14 @@ def test_dcterms_dates_are_iso_datetime_not_epoch_ints() -> None:
     """DCMI terms expect date literals; raw epoch ints typed xsd:integer
     poisoned DCAT harvesters (red-team W3.4)."""
     out = record_to_jsonld(
-        {"dataset": {"id": "https://w3id.org/battinfo/dataset/0rp6-kncv-cyem-qwcd",
-                     "name": "DS", "created_at": 1771718400, "modified_at": 1771718500}},
+        {
+            "dataset": {
+                "id": "https://w3id.org/battinfo/dataset/0rp6-kncv-cyem-qwcd",
+                "name": "DS",
+                "created_at": 1771718400,
+                "modified_at": 1771718500,
+            }
+        },
         "dataset",
     )
     assert out["dcterms:created"] == "2026-02-22T00:00:00Z"
@@ -176,8 +194,7 @@ def test_inline_context_is_the_versioned_hosted_context() -> None:
     from battinfo.jsonld import _CONTEXT_INLINE, _CONTEXT_URL
 
     hosted = json.loads(
-        (ROOT / "src" / "battinfo" / "data" / "context" / "records.context.v1.json")
-        .read_text(encoding="utf-8")
+        (ROOT / "src" / "battinfo" / "data" / "context" / "records.context.v1.json").read_text(encoding="utf-8")
     )["@context"]
     assert _CONTEXT_INLINE == hosted
     assert _CONTEXT_URL.endswith("/records/v1.json")

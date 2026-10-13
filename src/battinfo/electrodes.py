@@ -105,9 +105,7 @@ def electrode_role_types(role: str, configuration: Any = None) -> list[str]:
         # cell there is no third electrode - the counter carries the class.
         return ["ReferenceElectrode"]
     if role != "counter":
-        raise ValueError(
-            f"Unknown electrode role {role!r}. Known roles: {sorted(ELECTRODE_ROLE_RELATIONS)}."
-        )
+        raise ValueError(f"Unknown electrode role {role!r}. Known roles: {sorted(ELECTRODE_ROLE_RELATIONS)}.")
     if normalize_cell_configuration(configuration) in _HALF_CELL_CONFIGURATIONS:
         return ["CounterElectrode", "ReferenceElectrode"]
     return ["CounterElectrode"]
@@ -136,9 +134,7 @@ def electrode_kind_keys() -> list[str]:
     from battinfo.materials import material_kinds
 
     kinds = material_kinds().get("kinds", {})
-    return sorted(
-        key for key, entry in kinds.items() if ACTIVE_MATERIAL_ROLE in (entry.get("roles") or ())
-    )
+    return sorted(key for key, entry in kinds.items() if ACTIVE_MATERIAL_ROLE in (entry.get("roles") or ()))
 
 
 def resolve_electrode_kind(value: Any) -> str | None:

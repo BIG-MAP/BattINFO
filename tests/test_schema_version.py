@@ -5,6 +5,7 @@ forked dataset records to "1.0.0". "0.2.0" deliberately supersedes both — this
 pins the constant and checks the model layer, the dict-builder layer, and an interop
 emitter all agree, so a future fork cannot happen silently again.
 """
+
 from __future__ import annotations
 
 import json
@@ -32,7 +33,9 @@ from battinfo.bundle import (
 from battinfo.validate.record import validate_record_report
 
 # A packaged cell spec that validates clean under the strict policy.
-_CELL_SPEC_EXAMPLE = ROOT / "src" / "battinfo" / "data" / "examples" / "cell-spec" / "cell-spec-0hpw-gkhk-gcg8-23x1.json"
+_CELL_SPEC_EXAMPLE = (
+    ROOT / "src" / "battinfo" / "data" / "examples" / "cell-spec" / "cell-spec-0hpw-gkhk-gcg8-23x1.json"
+)
 
 
 def test_schema_version_value() -> None:
@@ -74,6 +77,7 @@ def test_read_records_keep_their_stored_version() -> None:
 
 
 # ── Validation names a schema_version this release did not write ──────────────
+
 
 def _cell_spec_stamped(version: str) -> dict:
     record = json.loads(_CELL_SPEC_EXAMPLE.read_text(encoding="utf-8"))
@@ -163,7 +167,13 @@ def test_library_records_written_now_carry_the_current_version() -> None:
     from battinfo.api._records import _cell_spec_record_to_library_format, _library_record_from_input
 
     assert template_library_cell_spec()["schema_version"] == SCHEMA_VERSION
-    flat = {"uid": "1f8r-6v2k-9p4m-3t7x", "manufacturer": "Acme", "model": "X1", "format": "coin", "chemistry": "li-ion"}
+    flat = {
+        "uid": "1f8r-6v2k-9p4m-3t7x",
+        "manufacturer": "Acme",
+        "model": "X1",
+        "format": "coin",
+        "chemistry": "li-ion",
+    }
     assert _library_record_from_input(flat)["schema_version"] == SCHEMA_VERSION
 
     unstamped = json.loads(_CELL_SPEC_EXAMPLE.read_text(encoding="utf-8"))
@@ -225,10 +235,17 @@ def test_the_staging_loader_gives_an_unstamped_cell_spec_the_current_version() -
     assert spec.schema_version == SCHEMA_VERSION
 
 
-@pytest.mark.parametrize(("stated", "expected"), [
-    ("1.0.0", "1.0.0"), ("0.1.0", "0.1.0"), ("9.9.9", "9.9.9"),
-    (None, SCHEMA_VERSION), ("", SCHEMA_VERSION), ("  ", SCHEMA_VERSION),
-])
+@pytest.mark.parametrize(
+    ("stated", "expected"),
+    [
+        ("1.0.0", "1.0.0"),
+        ("0.1.0", "0.1.0"),
+        ("9.9.9", "9.9.9"),
+        (None, SCHEMA_VERSION),
+        ("", SCHEMA_VERSION),
+        ("  ", SCHEMA_VERSION),
+    ],
+)
 def test_a_stored_version_is_kept_and_a_missing_one_is_the_current(stated: object, expected: str) -> None:
     record = {} if stated is None else {"schema_version": stated}
     assert _stored_schema_version(record) == expected

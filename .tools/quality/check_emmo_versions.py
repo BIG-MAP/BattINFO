@@ -34,9 +34,7 @@ TRACKED_DEPS: dict[str, tuple[re.Pattern[str], str]] = {
         "emmo-repo/domain-electrochemistry",
     ),
     "domain-chemical-substance": (
-        re.compile(
-            r"owl:imports\s+<https://w3id\.org/emmo/domain/chemical-substance/([^/]+)/chemical-substance>"
-        ),
+        re.compile(r"owl:imports\s+<https://w3id\.org/emmo/domain/chemical-substance/([^/]+)/chemical-substance>"),
         "emmo-repo/domain-chemical-substance",
     ),
 }
@@ -81,8 +79,10 @@ def _latest_release(repo: str) -> str | None:
 
 def _compare_versions(declared: str, latest: str) -> int:
     """Return -1/0/1 like cmp, comparing semver strings numerically."""
+
     def parts(v: str) -> tuple[int, ...]:
         return tuple(int(x) for x in re.split(r"[.-]", v) if x.isdigit())
+
     dec, lat = parts(declared), parts(latest)
     return (dec > lat) - (dec < lat)
 
@@ -126,7 +126,9 @@ def main(argv: list[str] | None = None) -> int:
             )
             any_behind = True
 
-        results.append({"dependency": name, "repo": repo, "declared": declared, "latest": latest, "status": status, "message": msg})
+        results.append(
+            {"dependency": name, "repo": repo, "declared": declared, "latest": latest, "status": status, "message": msg}
+        )
 
     if args.json:
         print(json.dumps({"status": "ok" if not any_behind else "outdated", "dependencies": results}, indent=2))

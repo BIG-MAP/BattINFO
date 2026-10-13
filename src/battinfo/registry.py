@@ -22,6 +22,7 @@ verify the checksum and keep a local copy so a file is fetched once.
 Provisional in 0.8: the method names are expected to stay, the catalog columns
 may grow.
 """
+
 from __future__ import annotations
 
 import builtins
@@ -206,6 +207,7 @@ def bdf_column_names(df: Any) -> Any:
 
 # ── Record helpers ────────────────────────────────────────────────────────────
 
+
 def _record_ref(record: Any) -> tuple[str | None, str]:
     """Split a record reference into ``(type_segment, uid)``.
 
@@ -274,16 +276,18 @@ def _files_of(record: dict) -> list[RegistryFile]:
             size = int(raw_size) if raw_size is not None else None
         except (TypeError, ValueError):
             size = None
-        files.append(RegistryFile(
-            name=name or extra.get("name") or url.rsplit("/", 1)[-1],
-            url=url,
-            role=role or extra.get("role"),
-            media_type=media_type or extra.get("encoding_format"),
-            sha256=value if _hash_name(algorithm) == "sha256" else None,
-            size=size,
-            checksum_algorithm=algorithm,
-            checksum_value=value,
-        ))
+        files.append(
+            RegistryFile(
+                name=name or extra.get("name") or url.rsplit("/", 1)[-1],
+                url=url,
+                role=role or extra.get("role"),
+                media_type=media_type or extra.get("encoding_format"),
+                sha256=value if _hash_name(algorithm) == "sha256" else None,
+                size=size,
+                checksum_algorithm=algorithm,
+                checksum_value=value,
+            )
+        )
 
     for dist in record.get("distributions") or []:
         add(dist.get("access_url"), dist.get("title"), dist.get("role"), dist.get("media_type"))
@@ -320,6 +324,7 @@ def _default_cache_dir() -> Path:
 
 
 # ── The client ────────────────────────────────────────────────────────────────
+
 
 class Registry:
     """Read-only client for one BattINFO registry.
@@ -461,7 +466,11 @@ class Registry:
         The measurement data has role ``"processed"``; ``"raw"`` is the
         original instrument file where the publisher included it.
         """
-        full = dataset if isinstance(dataset, dict) and "distributions" in dataset else self.get(dataset, record_type="dataset")
+        full = (
+            dataset
+            if isinstance(dataset, dict) and "distributions" in dataset
+            else self.get(dataset, record_type="dataset")
+        )
         found = _files_of(full)
         return [f for f in found if f.role == role] if role else found
 
@@ -525,8 +534,10 @@ class Registry:
             return
         self._warned_unverified.add(file.url)
         if file.checksum_algorithm and file.checksum_value:
-            reason = (f"its record gives the checksum algorithm as {file.checksum_algorithm!r}, "
-                      "which this Python's hashlib does not provide")
+            reason = (
+                f"its record gives the checksum algorithm as {file.checksum_algorithm!r}, "
+                "which this Python's hashlib does not provide"
+            )
         else:
             reason = "its record states no checksum"
         warnings.warn(
@@ -600,8 +611,7 @@ class Registry:
         rows = self._build_catalog(workers)
         try:
             cache.parent.mkdir(parents=True, exist_ok=True)
-            cache.write_text(json.dumps({"stamp": stamp, "columns": _CATALOG_COLUMNS, "rows": rows}),
-                             encoding="utf-8")
+            cache.write_text(json.dumps({"stamp": stamp, "columns": _CATALOG_COLUMNS, "rows": rows}), encoding="utf-8")
         except OSError:
             pass  # a read-only cache directory must not fail the call
         return pd.DataFrame(rows, columns=_CATALOG_COLUMNS)
@@ -654,9 +664,15 @@ class Registry:
                 processed = [f for f in _files_of(detail) if f.role == "processed"]
                 if processed:
                     first = processed[0]
-                    row.update(file_url=first.url, file_name=first.name, sha256=first.sha256,
-                               checksum_algorithm=first.checksum_algorithm, checksum_value=first.checksum_value,
-                               size_bytes=first.size, media_type=first.media_type or row["media_type"])
+                    row.update(
+                        file_url=first.url,
+                        file_name=first.name,
+                        sha256=first.sha256,
+                        checksum_algorithm=first.checksum_algorithm,
+                        checksum_value=first.checksum_value,
+                        size_bytes=first.size,
+                        media_type=first.media_type or row["media_type"],
+                    )
                 test_id = next(iter(links.get("test", [])), None)
                 cell_id = next(iter(links.get("cell", [])), None)
                 row.update(test_id=test_id, cell_id=cell_id)
@@ -687,15 +703,31 @@ class Registry:
 
 
 _CATALOG_COLUMNS = [
-    "dataset_id", "title", "license", "doi",
-    "file_url", "file_name", "media_type", "sha256", "size_bytes",
-    "test_id", "test_kind",
-    "cell_id", "cell_name", "cell_spec_id",
-    "manufacturer", "model", "format", "chemistry",
-    "positive_electrode_basis", "negative_electrode_basis",
-    "nominal_capacity_ah", "nominal_capacity_source",
+    "dataset_id",
+    "title",
+    "license",
+    "doi",
+    "file_url",
+    "file_name",
+    "media_type",
+    "sha256",
+    "size_bytes",
+    "test_id",
+    "test_kind",
+    "cell_id",
+    "cell_name",
+    "cell_spec_id",
+    "manufacturer",
+    "model",
+    "format",
+    "chemistry",
+    "positive_electrode_basis",
+    "negative_electrode_basis",
+    "nominal_capacity_ah",
+    "nominal_capacity_source",
     # Added after 0.8 began: appended so the documented column order stays put.
-    "checksum_algorithm", "checksum_value",
+    "checksum_algorithm",
+    "checksum_value",
 ]
 
 

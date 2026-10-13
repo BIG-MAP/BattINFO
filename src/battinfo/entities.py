@@ -282,32 +282,59 @@ ENTITY_KINDS: tuple[EntityKind, ...] = (
     ),
     EntityKind("separator-spec", "separator_spec", "separator-spec.schema.json", "separator-spec", "spec"),
     EntityKind(
-        "separator", "separator", "separator.schema.json", "separator", "separator",
-        spec_ref_field="separator_spec_id", spec_entity_type="separator-spec",
+        "separator",
+        "separator",
+        "separator.schema.json",
+        "separator",
+        "separator",
+        spec_ref_field="separator_spec_id",
+        spec_entity_type="separator-spec",
     ),
     EntityKind(
-        "current-collector-spec", "current_collector_spec", "current-collector-spec.schema.json",
-        "current-collector-spec", "spec",
+        "current-collector-spec",
+        "current_collector_spec",
+        "current-collector-spec.schema.json",
+        "current-collector-spec",
+        "spec",
     ),
     EntityKind(
-        "current-collector", "current_collector", "current-collector.schema.json",
-        "current-collector", "current-collector",
-        spec_ref_field="current_collector_spec_id", spec_entity_type="current-collector-spec",
+        "current-collector",
+        "current_collector",
+        "current-collector.schema.json",
+        "current-collector",
+        "current-collector",
+        spec_ref_field="current_collector_spec_id",
+        spec_entity_type="current-collector-spec",
     ),
     EntityKind("electrolyte-spec", "electrolyte_spec", "electrolyte-spec.schema.json", "electrolyte-spec", "spec"),
     EntityKind(
-        "electrolyte", "electrolyte", "electrolyte.schema.json", "electrolyte", "electrolyte",
-        spec_ref_field="electrolyte_spec_id", spec_entity_type="electrolyte-spec",
+        "electrolyte",
+        "electrolyte",
+        "electrolyte.schema.json",
+        "electrolyte",
+        "electrolyte",
+        spec_ref_field="electrolyte_spec_id",
+        spec_entity_type="electrolyte-spec",
     ),
     EntityKind("housing-spec", "housing_spec", "housing-spec.schema.json", "housing-spec", "spec"),
     EntityKind(
-        "housing", "housing", "housing.schema.json", "housing", "housing",
-        spec_ref_field="housing_spec_id", spec_entity_type="housing-spec",
+        "housing",
+        "housing",
+        "housing.schema.json",
+        "housing",
+        "housing",
+        spec_ref_field="housing_spec_id",
+        spec_entity_type="housing-spec",
     ),
     EntityKind("equipment-spec", "equipment_spec", "equipment-spec.schema.json", "equipment-spec", "spec"),
     EntityKind(
-        "equipment", "equipment", "equipment.schema.json", "equipment", "equipment",
-        spec_ref_field="equipment_spec_id", spec_entity_type="equipment-spec",
+        "equipment",
+        "equipment",
+        "equipment.schema.json",
+        "equipment",
+        "equipment",
+        spec_ref_field="equipment_spec_id",
+        spec_entity_type="equipment-spec",
     ),
     # Channels are instance-only (no channel-spec kind): flat IRIs, parent link
     # ``equipment_id`` lives in the record body, uid minted deterministically
@@ -322,7 +349,11 @@ ENTITY_KINDS: tuple[EntityKind, ...] = (
     # parameter file's from its parameters_sha256. Parameter sets minted
     # before 2026-10-11 keep their spec/ IRIs (they are superseded, not moved).
     EntityKind(
-        "parameter-set", "parameter_set", "parameter-set.schema.json", "parameter-set", "dataset",
+        "parameter-set",
+        "parameter_set",
+        "parameter-set.schema.json",
+        "parameter-set",
+        "dataset",
         legacy_iri_namespaces=("spec",),
         files_named_by_uid=True,
     ),
@@ -373,10 +404,23 @@ def record_set_dirs() -> tuple[str, ...]:
 
 
 RESERVED_NAMESPACE_SEGMENTS = frozenset(
-    {"id", "ontology", "vocab", "doc", "context", "resolver", "twin", "w3id",
-     # Claimed by the ontology block in the upstream w3id.org .htaccess —
-     # requests to these paths can never reach the record resolver.
-     "raw", "inferred", "turtle", "latest", "source"}
+    {
+        "id",
+        "ontology",
+        "vocab",
+        "doc",
+        "context",
+        "resolver",
+        "twin",
+        "w3id",
+        # Claimed by the ontology block in the upstream w3id.org .htaccess —
+        # requests to these paths can never reach the record resolver.
+        "raw",
+        "inferred",
+        "turtle",
+        "latest",
+        "source",
+    }
 )
 _reserved_clash = RESERVED_NAMESPACE_SEGMENTS & {k.iri_namespace for k in ENTITY_KINDS}
 if _reserved_clash:  # fail at import: a reserved segment can never become an entity namespace

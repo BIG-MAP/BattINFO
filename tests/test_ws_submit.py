@@ -11,6 +11,7 @@ Pins the curated-index submission contract:
 
 All offline: the registry is mocked at battinfo.api.submit_publication_package.
 """
+
 from __future__ import annotations
 
 import copy
@@ -34,6 +35,7 @@ _CREDS = dict(registry_url="https://registry.example", api_key="k", workspace_id
 
 
 # ── helpers ───────────────────────────────────────────────────────────────────
+
 
 class _FakeRegistry:
     """Stand-in for api.submit_publication_package; records payloads, scripts results."""
@@ -91,6 +93,7 @@ def _patch_registry(monkeypatch, behavior) -> _FakeRegistry:
 
 # ── Phase 1: staged-by-default ────────────────────────────────────────────────
 
+
 def test_submit_defaults_to_staged_mode(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     ws = _saved_ws(tmp_path)
     fake = _patch_registry(monkeypatch, lambda p: _result("validated"))
@@ -109,6 +112,7 @@ def test_submit_immediate_mode_when_requested(tmp_path: Path, monkeypatch: pytes
 
 # ── Phase 2: fail-closed & observable ─────────────────────────────────────────
 
+
 def test_submit_raises_on_record_failure(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     ws = _saved_ws(tmp_path)
 
@@ -121,9 +125,7 @@ def test_submit_raises_on_record_failure(tmp_path: Path, monkeypatch: pytest.Mon
     assert exc_info.value.failed and len(exc_info.value.failed) == 1
 
 
-def test_submit_allow_partial_returns_failures_without_raising(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_submit_allow_partial_returns_failures_without_raising(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     ws = _saved_ws(tmp_path, n=2)
 
     def half(payload):
@@ -139,9 +141,7 @@ def test_submit_allow_partial_returns_failures_without_raising(
     assert len(failed) == 1 and len(staged) == 1  # no raise; both surfaced
 
 
-def test_submit_all_failed_is_distinct_from_no_records(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_submit_all_failed_is_distinct_from_no_records(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     # All-failed raises (loud), whereas an empty workspace returns [] (quiet no-op).
     ws = _saved_ws(tmp_path)
     _patch_registry(monkeypatch, lambda p: (_ for _ in ()).throw(RuntimeError("HTTP 503")))
@@ -181,9 +181,7 @@ def test_submit_fails_closed_on_corrupt_sibling(tmp_path: Path, monkeypatch: pyt
     assert fake.calls == 0
 
 
-def test_submit_allow_partial_tolerates_corrupt_sibling(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_submit_allow_partial_tolerates_corrupt_sibling(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     ws = _saved_ws(tmp_path, n=1)
     ds_dir = ws._ws.source_root / "dataset"
     ds_dir.mkdir(parents=True, exist_ok=True)
@@ -194,9 +192,7 @@ def test_submit_allow_partial_tolerates_corrupt_sibling(
     assert fake.calls == 1
 
 
-def test_submit_reads_bom_sibling_instead_of_dropping_it(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_submit_reads_bom_sibling_instead_of_dropping_it(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     # R-10: a BOM-prefixed (Excel/Windows norm) but otherwise valid sibling must be read, not
     # treated as corrupt and dropped/aborted.
     ws = _saved_ws(tmp_path, n=1)
@@ -236,25 +232,27 @@ def test_submit_without_save_refuses_leftovers(tmp_path: Path, monkeypatch: pyte
 
 # ── single-source-of-truth mode override + every record kind + publish() ──────
 
+
 def _author_full_chain(ws: AuthoringWorkspace, tmp_path: Path) -> None:
     data_file = tmp_path / "inputs" / "cap.csv"
     data_file.parent.mkdir(parents=True, exist_ok=True)
     data_file.write_text("time_s,voltage_v\n0,3.0\n60,2.95\n", encoding="utf-8")
     spec = ws._ws.cell_spec(
-        manufacturer="Acme", model="CR2032", format="coin", chemistry="Li-primary",
-        specs={"nominal_voltage": quantity(3.0, "V"), "diameter": quantity(20.0, "mm"),
-               "height": quantity(3.2, "mm")},
+        manufacturer="Acme",
+        model="CR2032",
+        format="coin",
+        chemistry="Li-primary",
+        specs={"nominal_voltage": quantity(3.0, "V"), "diameter": quantity(20.0, "mm"), "height": quantity(3.2, "mm")},
         source_file="acme-cr2032.manual.json",
     )
     cell = ws._ws.cell(spec, serial_number="cr2032-001", source_type="lab")
-    test = ws._ws.test(cell, kind="capacity_check", protocol="0.2 mA CC discharge",
-                       instrument="VSP-300", status="completed")
+    test = ws._ws.test(
+        cell, kind="capacity_check", protocol="0.2 mA CC discharge", instrument="VSP-300", status="completed"
+    )
     ws._ws.dataset(cell, title="cap", description="d", test=test, path=data_file, license="CC-BY-4.0")
 
 
-def test_submit_stamps_staged_mode_on_all_record_kinds(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_submit_stamps_staged_mode_on_all_record_kinds(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
     _author_full_chain(ws, tmp_path)
     ws.save(validation_policy="strict")
@@ -281,19 +279,22 @@ def test_do_submit_overrides_publication_intent_mode(monkeypatch: pytest.MonkeyP
 
     ws_module._do_submit(
         {"publication_intent": {"mode": "WRONG"}, "source_version": "v1", "resource": {"source_version": "v1"}},
-        "https://r", "k", "T",
+        "https://r",
+        "k",
+        "T",
     )
     assert captured["mode"] == STAGED_PUBLICATION_MODE  # default flips WRONG -> staged
     ws_module._do_submit(
         {"publication_intent": {"mode": "WRONG"}, "source_version": "v1", "resource": {"source_version": "v1"}},
-        "https://r", "k", "T", publication_mode=CANONICAL_PUBLICATION_MODE,
+        "https://r",
+        "k",
+        "T",
+        publication_mode=CANONICAL_PUBLICATION_MODE,
     )
     assert captured["mode"] == CANONICAL_PUBLICATION_MODE
 
 
-def test_publish_defaults_to_staged_and_forwards_mode(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_publish_defaults_to_staged_and_forwards_mode(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("BATTINFO_REGISTRY_URL", "https://registry.example")
     monkeypatch.setenv("BATTINFO_API_KEY", "k")
     monkeypatch.setenv("BATTINFO_WORKSPACE_ID", "w")
@@ -343,6 +344,7 @@ def test_submit_error_partitions_outcomes(tmp_path: Path, monkeypatch: pytest.Mo
 
 # ── C-6: validate at submit (no validation lie) ───────────────────────────────
 
+
 def test_submit_fails_closed_on_unrecognised_record(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     ws = _saved_ws(tmp_path)
     spec_file = sorted((ws._ws.source_root / "cell-spec").glob("*.json"))[0]
@@ -378,9 +380,7 @@ def test_submit_payload_carries_real_validation_block(tmp_path: Path, monkeypatc
 
 
 @pytest.mark.parametrize("body", ["[1, 2, 3]", "5", "true", "null", '"hello"'])
-def test_submit_fails_closed_on_non_object_record(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, body: str
-) -> None:
+def test_submit_fails_closed_on_non_object_record(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, body: str) -> None:
     # A hand-edited record that is valid JSON but NOT an object (array/number/bool/null/
     # string) must fail closed with a clean SubmitError, not crash submit() with a raw
     # TypeError from validate_record.
@@ -395,6 +395,7 @@ def test_submit_fails_closed_on_non_object_record(
 
 # ── Resumable submit journal (3.5) ────────────────────────────────────────────
 
+
 def test_successful_submit_writes_the_journal(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     ws = _saved_ws(tmp_path, n=2)
     _patch_registry(monkeypatch, lambda p: _result("validated"))
@@ -406,6 +407,7 @@ def test_successful_submit_writes_the_journal(tmp_path: Path, monkeypatch: pytes
     assert len(lines) == 2
 
     import json as _json
+
     entries = [_json.loads(ln) for ln in lines]
     assert all(e["ok"] and e["payload_hash"] and e["source_local_id"] for e in entries)
 
@@ -430,9 +432,7 @@ def test_resume_false_bypasses_the_journal(tmp_path: Path, monkeypatch: pytest.M
     assert fake.calls == 2
 
 
-def test_failed_outcomes_are_journaled_but_retried_on_resume(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_failed_outcomes_are_journaled_but_retried_on_resume(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     ws = _saved_ws(tmp_path, n=2)
     state = {"count": 0}
 
@@ -453,9 +453,7 @@ def test_failed_outcomes_are_journaled_but_retried_on_resume(
     assert statuses == ["skipped_journal", "validated"]
 
 
-def test_journal_counts_a_success_only_at_the_same_registry(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_journal_counts_a_success_only_at_the_same_registry(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """The Empa evaluation's E-10: a workspace rehearsed against one registry skipped
     every record as "already submitted" when pointed at another, because the journal
     did not record where a record went."""
@@ -480,9 +478,7 @@ def test_journal_counts_a_success_only_at_the_same_registry(
     assert [e["registry_url"] for e in entries] == ["http://127.0.0.1:8012"] * 2 + ["http://localhost:8012"] * 2
 
 
-def test_journal_entries_without_a_registry_match_none(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_journal_entries_without_a_registry_match_none(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     import json
 
     ws = _saved_ws(tmp_path)
@@ -499,14 +495,17 @@ def test_journal_entries_without_a_registry_match_none(
     assert [o["status"] for o in outcomes] == ["validated"]
 
 
-@pytest.mark.parametrize(("url", "expected"), [
-    ("https://registry.example", "https://registry.example"),
-    ("HTTPS://Registry.Example:443/", "https://registry.example"),
-    ("http://localhost:80/api/v1/", "http://localhost/api/v1"),
-    ("http://127.0.0.1:8012", "http://127.0.0.1:8012"),
-    ("https://user:secret@registry.example/", "https://registry.example"),
-    ("http://[::1]:8012/", "http://[::1]:8012"),
-])
+@pytest.mark.parametrize(
+    ("url", "expected"),
+    [
+        ("https://registry.example", "https://registry.example"),
+        ("HTTPS://Registry.Example:443/", "https://registry.example"),
+        ("http://localhost:80/api/v1/", "http://localhost/api/v1"),
+        ("http://127.0.0.1:8012", "http://127.0.0.1:8012"),
+        ("https://user:secret@registry.example/", "https://registry.example"),
+        ("http://[::1]:8012/", "http://[::1]:8012"),
+    ],
+)
 def test_journal_records_a_registry_url_in_one_spelling(url: str, expected: str) -> None:
     from battinfo.ws import _normalize_registry_url
 
@@ -520,6 +519,7 @@ def test_changed_content_is_resubmitted(tmp_path: Path, monkeypatch: pytest.Monk
 
     spec_file = sorted((ws._ws.source_root / "cell-spec").glob("*.json"))[0]
     import json as _json
+
     doc = _json.loads(spec_file.read_text(encoding="utf-8"))
     doc["cell_spec"]["model"] = "X0-revised"
     spec_file.write_text(_json.dumps(doc), encoding="utf-8")
@@ -535,8 +535,7 @@ def test_changed_content_is_resubmitted(tmp_path: Path, monkeypatch: pytest.Monk
 # equipment-only workspace published nothing, silently.
 
 _EQUIPMENT_SPEC_EXAMPLE = (
-    ROOT / "src" / "battinfo" / "data" / "examples" / "equipment-spec"
-    / "rchb-csx8-3vp8-ekcs.json"
+    ROOT / "src" / "battinfo" / "data" / "examples" / "equipment-spec" / "rchb-csx8-3vp8-ekcs.json"
 )
 
 
@@ -544,8 +543,9 @@ def test_add_equipment_then_submit_sends_spec_unit_and_channels(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
-    ws.add("equipment", spec=str(_EQUIPMENT_SPEC_EXAMPLE),
-           serial_number="AA:BB:CC:DD:EE:FF", name="Bench unit", channels=2)
+    ws.add(
+        "equipment", spec=str(_EQUIPMENT_SPEC_EXAMPLE), serial_number="AA:BB:CC:DD:EE:FF", name="Bench unit", channels=2
+    )
     fake = _patch_registry(monkeypatch, lambda p: _result("validated"))
 
     # No ws.save() call: the add()-written records themselves are the session.
@@ -567,15 +567,15 @@ def test_add_equipment_then_submit_sends_spec_unit_and_channels(
         ch_links = ch_payload["resource"].get("related_resources") or []
         assert [ln["relationship"] for ln in ch_links] == ["channelOf"]
         assert ch_links[0]["resource_type"] == "equipment"
-        assert ch_links[0]["canonical_iri"] == eq_payload["resource"]["semantic_payload"]["battinfo_records"]["equipment"]["equipment"]["id"]
+        assert (
+            ch_links[0]["canonical_iri"]
+            == eq_payload["resource"]["semantic_payload"]["battinfo_records"]["equipment"]["equipment"]["id"]
+        )
 
 
-def test_only_equipment_filters_the_sweep(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_only_equipment_filters_the_sweep(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
-    ws.add("equipment", spec=str(_EQUIPMENT_SPEC_EXAMPLE),
-           serial_number="AA:BB:CC:DD:EE:FF", channels=1)
+    ws.add("equipment", spec=str(_EQUIPMENT_SPEC_EXAMPLE), serial_number="AA:BB:CC:DD:EE:FF", channels=1)
     fake = _patch_registry(monkeypatch, lambda p: _result("validated"))
     ws.submit(only=["equipment_spec", "channel"], **_CREDS)
     assert [p["resource"]["resource_type"] for p in fake.payloads] == ["equipment_spec", "channel"]
@@ -592,8 +592,9 @@ _SESSION_RECORD_TYPES = ["equipment_spec", "equipment", "channel", "channel", "c
 def _author_equipment_cell_and_test(ws: AuthoringWorkspace) -> None:
     from battinfo import CellSpec
 
-    ws.add("equipment", spec=str(_EQUIPMENT_SPEC_EXAMPLE),
-           serial_number="AA:BB:CC:DD:EE:FF", name="Bench unit", channels=2)
+    ws.add(
+        "equipment", spec=str(_EQUIPMENT_SPEC_EXAMPLE), serial_number="AA:BB:CC:DD:EE:FF", name="Bench unit", channels=2
+    )
     spec = CellSpec(manufacturer="Acme", model="X-1", format="cylindrical", chemistry="Li-ion")
     ws.add("cell", spec=spec, serial_numbers=["CELL-001"])
     ws.add("test", type="cycling", cell="CELL-001", channel="Bench unit/CH2")
@@ -615,8 +616,7 @@ def _saved_iris(ws: AuthoringWorkspace) -> set[str | None]:
     from battinfo.entities import entity_id_from_doc
 
     return {
-        entity_id_from_doc(json.loads(path.read_text(encoding="utf-8")))
-        for path in ws._ws.source_root.glob("*/*.json")
+        entity_id_from_doc(json.loads(path.read_text(encoding="utf-8"))) for path in ws._ws.source_root.glob("*/*.json")
     }
 
 
@@ -658,9 +658,7 @@ def _set_registry_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("BATTINFO_PUBLISHER_ID", "p")
 
 
-def test_publish_sends_the_equipment_records_add_wrote(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_publish_sends_the_equipment_records_add_wrote(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     _set_registry_env(monkeypatch)
     ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
     _author_equipment_cell_and_test(ws)
@@ -673,15 +671,14 @@ def test_publish_sends_the_equipment_records_add_wrote(
     assert _sent_iris(fake) == _saved_iris(ws)
 
 
-def test_publish_of_an_equipment_only_session_sends_it(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_publish_of_an_equipment_only_session_sends_it(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     # publish() saves first, and that save left nothing for submit() to select,
     # which then refused with "No records were saved in this session".
     _set_registry_env(monkeypatch)
     ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
-    ws.add("equipment", spec=str(_EQUIPMENT_SPEC_EXAMPLE),
-           serial_number="AA:BB:CC:DD:EE:FF", name="Bench unit", channels=1)
+    ws.add(
+        "equipment", spec=str(_EQUIPMENT_SPEC_EXAMPLE), serial_number="AA:BB:CC:DD:EE:FF", name="Bench unit", channels=1
+    )
     fake = _patch_registry(monkeypatch, lambda p: _result("validated"))
 
     ws.publish()
@@ -689,14 +686,13 @@ def test_publish_of_an_equipment_only_session_sends_it(
     assert [p["resource"]["resource_type"] for p in fake.payloads] == ["equipment_spec", "equipment", "channel"]
 
 
-def test_clear_drops_equipment_records_from_the_next_submit(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_clear_drops_equipment_records_from_the_next_submit(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     # After ws.clear() the unit belongs to an earlier session: it stays on disk,
     # and the next submit() leaves it out like any record an earlier session wrote.
     ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
-    ws.add("equipment", spec=str(_EQUIPMENT_SPEC_EXAMPLE),
-           serial_number="AA:BB:CC:DD:EE:FF", name="Bench unit", channels=1)
+    ws.add(
+        "equipment", spec=str(_EQUIPMENT_SPEC_EXAMPLE), serial_number="AA:BB:CC:DD:EE:FF", name="Bench unit", channels=1
+    )
     ws.clear()
     _author_specs(ws, 1)
     ws.save(validation_policy="strict")
@@ -713,17 +709,21 @@ def test_unknown_only_token_lists_the_new_types(tmp_path: Path) -> None:
         ws.submit(only="gadget", **_CREDS)
 
 
-def test_parameter_set_submits_with_about_link(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_parameter_set_submits_with_about_link(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     ws = _saved_ws(tmp_path)
     spec_file = sorted((ws._ws.source_root / "cell-spec").glob("*.json"))[0]
     import json as _json
+
     spec_iri = _json.loads(spec_file.read_text(encoding="utf-8"))["cell_spec"]["id"]
 
-    ws.add("parameter_set", name="Acme fit v1", cell_spec_id=spec_iri,
-           citation_doi="10.1000/example", default_provenance_class="fitted",
-           claims=[{"parameter": "nominal_voltage", "quantity": {"value": 3.0, "unit": "V"}}])
+    ws.add(
+        "parameter_set",
+        name="Acme fit v1",
+        cell_spec_id=spec_iri,
+        citation_doi="10.1000/example",
+        default_provenance_class="fitted",
+        claims=[{"parameter": "nominal_voltage", "quantity": {"value": 3.0, "unit": "V"}}],
+    )
     ws.save(validation_policy="strict")
     fake = _patch_registry(monkeypatch, lambda p: _result("validated"))
 
@@ -753,6 +753,7 @@ def test_component_family_records_warn_instead_of_vanishing(
 
 # ── A collection (dcat:DatasetSeries) has no files of its own ─────────────────
 
+
 def test_submit_sends_a_collection_without_an_empty_distributions_list(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -774,8 +775,7 @@ def test_submit_sends_a_collection_without_an_empty_distributions_list(
         name="Half-cell OCV collection",
         access_url="https://doi.org/10.5281/zenodo.20086298",
         additional_type=["DatasetSeries"],
-        source=ProvenanceInfo(type="catalog", url="https://doi.org/10.5281/zenodo.20086298",
-                              retrieved_at=1755648000),
+        source=ProvenanceInfo(type="catalog", url="https://doi.org/10.5281/zenodo.20086298", retrieved_at=1755648000),
     ).to_record()
     assert "distributions" not in collection["dataset"]
     dataset_dir = next(p.parent for p in ws._session_paths if p.parent.name == "dataset")

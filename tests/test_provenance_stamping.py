@@ -6,6 +6,7 @@ model path, ``stamp_provenance`` for the direct api.py builders); an existing
 value is never overwritten, so re-serialising another build's record does not
 falsify its origin.
 """
+
 from __future__ import annotations
 
 import sys
@@ -62,9 +63,7 @@ def test_stamped_record_is_schema_valid() -> None:
 
     record = _spec().to_record()
     report = validate_record_report(record)
-    assert not [i for i in report.issues if i.severity == "error"], [
-        f"{i.path}: {i.message}" for i in report.issues
-    ]
+    assert not [i for i in report.issues if i.severity == "error"], [f"{i.path}: {i.message}" for i in report.issues]
 
 
 def test_component_builder_records_are_stamped_and_valid() -> None:

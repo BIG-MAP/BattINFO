@@ -10,6 +10,7 @@ copies. Offline, an unresolved reference stays an error that says so.
 
 The registry is mocked (sockets are disabled in the test suite).
 """
+
 from __future__ import annotations
 
 import copy
@@ -32,13 +33,21 @@ PROTOCOL_IRI = "https://w3id.org/battinfo/spec/v4sk-j357-5jda-jreq"
 SERIAL = "empa__ccid000149"
 _CREDS = dict(registry_url=REGISTRY, api_key="k", workspace_id="w", publisher_id="p")
 
-CELL_RECORD = battinfo.Cell(id=CELL_IRI, cell_spec_id=SPEC_IRI, serial_number=SERIAL,
-                            source_type="measurement", retrieved_at=1750032000).to_record()
-SPEC_RECORD = battinfo.CellSpec(id=SPEC_IRI, manufacturer="Duracell", model="MN2400", format="cylindrical",
-                                chemistry="zn-mno2", source_type="datasheet",
-                                retrieved_at=1750032000).to_record()
-PROTOCOL_RECORD = battinfo.TestSpec(id=PROTOCOL_IRI, name="Svaluto-Ferro 2025 formation", kind="cycling",
-                                    source_type="manual", retrieved_at=1750032000).to_record()
+CELL_RECORD = battinfo.Cell(
+    id=CELL_IRI, cell_spec_id=SPEC_IRI, serial_number=SERIAL, source_type="measurement", retrieved_at=1750032000
+).to_record()
+SPEC_RECORD = battinfo.CellSpec(
+    id=SPEC_IRI,
+    manufacturer="Duracell",
+    model="MN2400",
+    format="cylindrical",
+    chemistry="zn-mno2",
+    source_type="datasheet",
+    retrieved_at=1750032000,
+).to_record()
+PROTOCOL_RECORD = battinfo.TestSpec(
+    id=PROTOCOL_IRI, name="Svaluto-Ferro 2025 formation", kind="cycling", source_type="manual", retrieved_at=1750032000
+).to_record()
 
 
 def _uid(iri: str) -> str:
@@ -64,11 +73,24 @@ class FakeRegistry:
             f"test_spec/{_uid(PROTOCOL_IRI)}": ("test_spec", PROTOCOL_IRI, PROTOCOL_RECORD),
         }
         self.listings = {
-            "cell": [{"canonical_iri": CELL_IRI, "canonical_id": _uid(CELL_IRI), "resource_type": "cell",
-                      "title": SERIAL, "metadata": {"name": SERIAL, "serial_number": SERIAL,
-                                                    "cell_spec_id": SPEC_IRI}}],
-            "cell_spec": [{"canonical_iri": SPEC_IRI, "canonical_id": _uid(SPEC_IRI), "resource_type": "cell_spec",
-                           "title": "Duracell MN2400", "metadata": {"manufacturer": "Duracell", "model": "MN2400"}}],
+            "cell": [
+                {
+                    "canonical_iri": CELL_IRI,
+                    "canonical_id": _uid(CELL_IRI),
+                    "resource_type": "cell",
+                    "title": SERIAL,
+                    "metadata": {"name": SERIAL, "serial_number": SERIAL, "cell_spec_id": SPEC_IRI},
+                }
+            ],
+            "cell_spec": [
+                {
+                    "canonical_iri": SPEC_IRI,
+                    "canonical_id": _uid(SPEC_IRI),
+                    "resource_type": "cell_spec",
+                    "title": "Duracell MN2400",
+                    "metadata": {"manufacturer": "Duracell", "model": "MN2400"},
+                }
+            ],
         }
 
     def __call__(self, request, timeout=None):  # noqa: ANN001
@@ -82,8 +104,12 @@ class FakeRegistry:
         key = parsed.path.removeprefix("/resources/")
         if key in self.envelopes:
             resource_type, iri, record = self.envelopes[key]
-            envelope = {"canonical_iri": iri, "canonical_id": _uid(iri), "resource_type": resource_type,
-                        "semantic_payload": {"battinfo_records": {resource_type: copy.deepcopy(record)}}}
+            envelope = {
+                "canonical_iri": iri,
+                "canonical_id": _uid(iri),
+                "resource_type": resource_type,
+                "semantic_payload": {"battinfo_records": {resource_type: copy.deepcopy(record)}},
+            }
             return _Response(json.dumps(envelope).encode("utf-8"))
         raise urllib.error.HTTPError(url, 404, "Not Found", None, None)  # type: ignore[arg-type]
 
@@ -124,11 +150,19 @@ def test_search_hit_is_looked_up_and_counts_as_resolved(tmp_path: Path, registry
 
     # The relinked dataset of the reproduction saves under the strict policy too.
     saved = battinfo.save_dataset(
-        battinfo.Dataset(name="Cycling data of Empa coin cell 000149", cell_instance_id=CELL_IRI,
-                         test_id=test.id, access_url="https://doi.org/10.5281/zenodo.15481956",
-                         published_at=1750032000, source={"type": "measurement"}),
-        source_root=tmp_path / ".battinfo" / "records", mode="upsert", validation_policy="strict",
-        build_jsonld=False, build_html=False,
+        battinfo.Dataset(
+            name="Cycling data of Empa coin cell 000149",
+            cell_instance_id=CELL_IRI,
+            test_id=test.id,
+            access_url="https://doi.org/10.5281/zenodo.15481956",
+            published_at=1750032000,
+            source={"type": "measurement"},
+        ),
+        source_root=tmp_path / ".battinfo" / "records",
+        mode="upsert",
+        validation_policy="strict",
+        build_jsonld=False,
+        build_html=False,
     )
     assert saved["status"] == "created"
 
@@ -326,12 +360,16 @@ def test_a_registry_only_cell_is_a_defined_elsewhere_node_of_the_deposit(
     nodes = {node["@id"]: node for node in graph["@graph"]}
 
     assert nodes[CELL_IRI] == {
-        "@id": CELL_IRI, "@type": "BatteryCell", "schema:name": SERIAL,
+        "@id": CELL_IRI,
+        "@type": "BatteryCell",
+        "schema:name": SERIAL,
         "rdfs:isDefinedBy": {"@id": CELL_IRI},
     }
     assert nodes[PROTOCOL_IRI] == {
-        "@id": PROTOCOL_IRI, "@type": ["prov:Plan", "schema:HowTo"],
-        "schema:name": "Svaluto-Ferro 2025 formation", "rdfs:isDefinedBy": {"@id": PROTOCOL_IRI},
+        "@id": PROTOCOL_IRI,
+        "@type": ["prov:Plan", "schema:HowTo"],
+        "schema:name": "Svaluto-Ferro 2025 formation",
+        "rdfs:isDefinedBy": {"@id": PROTOCOL_IRI},
     }
     test = next(node for node in graph["@graph"] if "BatteryTest" in node["@type"])
     assert test["schema:name"] == f"cycling — {SERIAL}"  # was "cycling": the cell part was lost
@@ -363,15 +401,21 @@ def test_importing_tests_on_a_stub_cell_reports_them_as_skipped(
 
     reason = "cell defined elsewhere"
     assert counts == {
-        "properties": 0, "instances": 0, "tests": 0, "datasets": 0,
+        "properties": 0,
+        "instances": 0,
+        "tests": 0,
+        "datasets": 0,
         "skipped": {
             "tests": [{"test": test_iri, "cell": CELL_IRI, "reason": reason}],
             "datasets": [{"dataset": dataset_iri, "test": test_iri, "cell": CELL_IRI, "reason": reason}],
         },
     }
     assert fresh._ws.tests == [] and fresh._ws.datasets == []
-    assert f"Skipped 1 test(s) and 1 dataset(s) on 1 cell(s) defined in the registry, not in this deposit: {CELL_IRI}" in out
-    assert "ws.load(ws.search(type=\"cell\", serial=...)[0])" in out
+    assert (
+        f"Skipped 1 test(s) and 1 dataset(s) on 1 cell(s) defined in the registry, not in this deposit: {CELL_IRI}"
+        in out
+    )
+    assert 'ws.load(ws.search(type="cell", serial=...)[0])' in out
 
 
 def test_without_a_copy_the_reference_stays_an_error_that_says_how_to_fetch_it(
@@ -476,21 +520,28 @@ def test_the_check_before_the_deposit_gives_the_deposited_graph_verdict(
     changes what the publication check reports.
     """
     ws = _workspace_on_registry_cell(tmp_path, registry_url)
-    common = {"data_filenames": ["run.bdf.csv"], "title": "NEW-1", "creators": CREATORS,
-              "license": "cc-by-4.0"}
+    common = {"data_filenames": ["run.bdf.csv"], "title": "NEW-1", "creators": CREATORS, "license": "cc-by-4.0"}
     before = ws._build_zenodo_jsonld(
-        zenodo_record_id=0, prereserved_doi="10.5281/zenodo.RECORD_ID",
-        record_url="https://zenodo.org/records/RECORD_ID", **common,
+        zenodo_record_id=0,
+        prereserved_doi="10.5281/zenodo.RECORD_ID",
+        record_url="https://zenodo.org/records/RECORD_ID",
+        **common,
     )
     record_url = "https://zenodo.org/records/4242"
     deposited = ws._build_zenodo_jsonld(
-        zenodo_record_id=4242, prereserved_doi="10.5281/zenodo.4242", record_url=record_url,
-        is_version_of="https://zenodo.org/records/4241", **common,
+        zenodo_record_id=4242,
+        prereserved_doi="10.5281/zenodo.4242",
+        record_url=record_url,
+        is_version_of="https://zenodo.org/records/4241",
+        **common,
     )
     assert ws._apply_zenodo_file_urls(record_url, {"run.bdf.csv"}) == 1
     rebuilt = ws._build_zenodo_jsonld(
-        zenodo_record_id=4242, prereserved_doi="10.5281/zenodo.4242", record_url=record_url,
-        is_version_of="https://zenodo.org/records/4241", **common,
+        zenodo_record_id=4242,
+        prereserved_doi="10.5281/zenodo.4242",
+        record_url=record_url,
+        is_version_of="https://zenodo.org/records/4241",
+        **common,
     )
     for policy in ("publisher", "strict"):
         for severity in ("error", "warning"):

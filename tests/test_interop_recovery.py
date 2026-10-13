@@ -18,9 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def _load_gen():
-    spec = importlib.util.spec_from_file_location(
-        "gen_interop_recovery", ROOT / "scripts" / "gen_interop_recovery.py"
-    )
+    spec = importlib.util.spec_from_file_location("gen_interop_recovery", ROOT / "scripts" / "gen_interop_recovery.py")
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module  # dataclasses needs the module registered
@@ -78,6 +76,5 @@ def test_discovery_family_recovers_quantities(scores):
 def test_scorecard_page_is_in_sync():
     committed = gen.OUT.read_text(encoding="utf-8")
     assert committed == gen.build(), (
-        "docs/pages/interop-recovery.md is stale — regenerate with "
-        "`uv run python scripts/gen_interop_recovery.py`"
+        "docs/pages/interop-recovery.md is stale — regenerate with `uv run python scripts/gen_interop_recovery.py`"
     )

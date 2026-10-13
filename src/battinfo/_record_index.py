@@ -10,6 +10,7 @@ The session assumes it is the only writer under ``source_root`` for its
 lifetime (the normal shape of a bulk ingest). Files changed by OTHER processes
 during the session are not re-read.
 """
+
 from __future__ import annotations
 
 import os

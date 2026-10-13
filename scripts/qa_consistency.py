@@ -7,6 +7,7 @@ plausibility, and JSON-LD emission. Prints a grouped report; exits 1 on ERROR.
 
     uv run python scripts/qa_consistency.py
 """
+
 from __future__ import annotations
 
 import json
@@ -16,10 +17,26 @@ from pathlib import Path
 from battinfo.transform.json_to_jsonld import to_jsonld
 
 EXAMPLES = Path("examples")
-RECORD_KEYS = ("cell_spec", "cell_instance", "test", "test_spec", "dataset", "material_spec",
-               "material", "electrode_spec", "electrode", "separator_spec", "separator",
-               "current_collector_spec", "current_collector", "electrolyte_spec", "electrolyte",
-               "housing_spec", "housing", "organization")
+RECORD_KEYS = (
+    "cell_spec",
+    "cell_instance",
+    "test",
+    "test_spec",
+    "dataset",
+    "material_spec",
+    "material",
+    "electrode_spec",
+    "electrode",
+    "separator_spec",
+    "separator",
+    "current_collector_spec",
+    "current_collector",
+    "electrolyte_spec",
+    "electrolyte",
+    "housing_spec",
+    "housing",
+    "organization",
+)
 
 errors: list[str] = []
 warnings: list[str] = []
@@ -48,14 +65,23 @@ def ns_of(iri: str) -> str:
 
 # namespace -> the record key(s) it should resolve to
 NS_KEYS = {
-    "material-spec": {"material_spec"}, "material": {"material"},
-    "electrode-spec": {"electrode_spec"}, "electrode": {"electrode"},
-    "electrolyte-spec": {"electrolyte_spec"}, "electrolyte": {"electrolyte"},
-    "separator-spec": {"separator_spec"}, "separator": {"separator"},
-    "current-collector-spec": {"current_collector_spec"}, "current-collector": {"current_collector"},
-    "housing-spec": {"housing_spec"}, "housing": {"housing"},
-    "spec": {"cell_spec", "test_spec"}, "cell": {"cell_instance"}, "test": {"test"},
-    "dataset": {"dataset"}, "organization": {"organization"},
+    "material-spec": {"material_spec"},
+    "material": {"material"},
+    "electrode-spec": {"electrode_spec"},
+    "electrode": {"electrode"},
+    "electrolyte-spec": {"electrolyte_spec"},
+    "electrolyte": {"electrolyte"},
+    "separator-spec": {"separator_spec"},
+    "separator": {"separator"},
+    "current-collector-spec": {"current_collector_spec"},
+    "current-collector": {"current_collector"},
+    "housing-spec": {"housing_spec"},
+    "housing": {"housing"},
+    "spec": {"cell_spec", "test_spec"},
+    "cell": {"cell_instance"},
+    "test": {"test"},
+    "dataset": {"dataset"},
+    "organization": {"organization"},
 }
 
 
@@ -74,10 +100,26 @@ def check_ref(iri, ctx, expect_ns=None):
 
 
 # ---- per-chemistry plausibility bands ----
-V_BANDS = {"LFP": (3.0, 3.4), "NMC811": (3.5, 3.95), "NMC622": (3.5, 3.95), "LCO": (3.6, 4.0),
-           "LMFP": (3.5, 4.0), "LNMO": (4.4, 4.95), "MnO2": (1.2, 1.7)}
-CAP_BANDS = {"Graphite": (300, 375), "LFP": (140, 175), "NMC811": (180, 215), "NMC622": (160, 195),
-             "LCO": (135, 165), "LMFP": (140, 165), "LNMO": (125, 150), "Zinc": (750, 850), "MnO2": (260, 320)}
+V_BANDS = {
+    "LFP": (3.0, 3.4),
+    "NMC811": (3.5, 3.95),
+    "NMC622": (3.5, 3.95),
+    "LCO": (3.6, 4.0),
+    "LMFP": (3.5, 4.0),
+    "LNMO": (4.4, 4.95),
+    "MnO2": (1.2, 1.7),
+}
+CAP_BANDS = {
+    "Graphite": (300, 375),
+    "LFP": (140, 175),
+    "NMC811": (180, 215),
+    "NMC622": (160, 195),
+    "LCO": (135, 165),
+    "LMFP": (140, 165),
+    "LNMO": (125, 150),
+    "Zinc": (750, 850),
+    "MnO2": (260, 320),
+}
 
 
 def active_material(electrode_spec_doc):
@@ -105,11 +147,13 @@ for key, doc, f in records:
     if key == "cell_spec":
         cs = body
         model = cs.get("model", f.name)
-        for fld, ns in (("positive_electrode_spec_id", "electrode-spec"),
-                        ("negative_electrode_spec_id", "electrode-spec"),
-                        ("electrolyte_spec_id", "electrolyte-spec"),
-                        ("separator_spec_id", "separator-spec"),
-                        ("housing_spec_id", "housing-spec")):
+        for fld, ns in (
+            ("positive_electrode_spec_id", "electrode-spec"),
+            ("negative_electrode_spec_id", "electrode-spec"),
+            ("electrolyte_spec_id", "electrolyte-spec"),
+            ("separator_spec_id", "separator-spec"),
+            ("housing_spec_id", "housing-spec"),
+        ):
             ref = doc.get(fld)
             if ref:
                 check_ref(ref, f"{model}.{fld}", ns)
@@ -129,7 +173,9 @@ for key, doc, f in records:
             if am_mat in by_iri:
                 mname = by_iri[am_mat][1].get("material_spec", {}).get("name", "")
                 if am_name and mname and am_name.strip().lower() != mname.strip().lower():
-                    warnings.append(f"ACTIVE-MATERIAL-MISMATCH {model}: cathode active '{am_name}' != material-spec '{mname}'")
+                    warnings.append(
+                        f"ACTIVE-MATERIAL-MISMATCH {model}: cathode active '{am_name}' != material-spec '{mname}'"
+                    )
 
         # cell format <-> housing format
         hs_ref = doc.get("housing_spec_id")
@@ -158,8 +204,15 @@ for key, doc, f in records:
                 warnings.append(f"PLAUSIBILITY {model}: nominal_voltage {volt} V outside {pos_basis} band [{lo},{hi}]")
 
     # instance -> spec refs + electrode coating material refs
-    for fld in ("material_spec_id", "electrode_spec_id", "electrolyte_spec_id", "separator_spec_id",
-                "current_collector_spec_id", "housing_spec_id", "cell_spec_id"):
+    for fld in (
+        "material_spec_id",
+        "electrode_spec_id",
+        "electrolyte_spec_id",
+        "separator_spec_id",
+        "current_collector_spec_id",
+        "housing_spec_id",
+        "cell_spec_id",
+    ):
         if isinstance(body, dict) and body.get(fld):
             check_ref(body[fld], f"{f.name}.{fld}")
             referenced.add(body[fld])
@@ -182,7 +235,7 @@ for key, doc, f in records:
     if key.endswith("_spec") and isinstance(body, dict):
         iri = body.get("id")
         if iri and iri not in referenced:
-            info.append(f"UNREFERENCED {key} {body.get('name','?')} ({f.name})")
+            info.append(f"UNREFERENCED {key} {body.get('name', '?')} ({f.name})")
 
 print("=" * 72)
 print(f"QA CONSISTENCY — {len(records)} records, {len(by_iri)} unique IRIs")

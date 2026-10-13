@@ -9,6 +9,7 @@ allow_local_files=True lifts the check for a local test registry.
 
 All offline: the registry is mocked.
 """
+
 from __future__ import annotations
 
 import copy
@@ -33,19 +34,25 @@ class _FakeRegistry:
     def __call__(self, payload, *, registry_base_url, api_key, **kw):  # noqa: ANN001
         self.payloads.append(copy.deepcopy(payload))
         self.kwargs.append(dict(kw))
-        return {"status": "ok", "status_code": 200,
-                "response": {"status": "validated", "resources": [{"canonical_iri": "iri"}]}}
+        return {
+            "status": "ok",
+            "status_code": 200,
+            "response": {"status": "validated", "resources": [{"canonical_iri": "iri"}]},
+        }
 
 
-def _workspace_with_local_data(
-    root: Path, *, registry_url: str | None = None, save: bool = True
-) -> AuthoringWorkspace:
+def _workspace_with_local_data(root: Path, *, registry_url: str | None = None, save: bool = True) -> AuthoringWorkspace:
     """The evaluation's shape: a test whose dataset is a local converted file."""
     (root / "bdf").mkdir(parents=True, exist_ok=True)
     (root / "bdf" / "C1.bdf.csv").write_text(CSV, encoding="utf-8")
     ws = AuthoringWorkspace(root=root, registry_url=registry_url)
-    ws.add("cell", spec=battinfo.CellSpec(manufacturer="Example Lab", model="R03 test cell",
-                                          format="cylindrical", chemistry="zn-mno2"), names=["C1"])
+    ws.add(
+        "cell",
+        spec=battinfo.CellSpec(
+            manufacturer="Example Lab", model="R03 test cell", format="cylindrical", chemistry="zn-mno2"
+        ),
+        names=["C1"],
+    )
     ws.add("test", type="capacity_check", cell="C1", data="bdf/C1.bdf.csv")
     if save:
         ws.save()
@@ -99,8 +106,7 @@ def test_submit_allow_partial_sends_the_records_without_local_files(tmp_path: Pa
 def test_publish_registry_half_refuses_local_paths(
     tmp_path: Path, fake: _FakeRegistry, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    for name, value in (("BATTINFO_API_KEY", "k"), ("BATTINFO_WORKSPACE_ID", "w"),
-                        ("BATTINFO_PUBLISHER_ID", "p")):
+    for name, value in (("BATTINFO_API_KEY", "k"), ("BATTINFO_WORKSPACE_ID", "w"), ("BATTINFO_PUBLISHER_ID", "p")):
         monkeypatch.setenv(name, value)
     ws = _workspace_with_local_data(tmp_path / "ws", registry_url="https://registry.example", save=False)
     with pytest.raises(SubmitError, match="point at files on this computer"):
@@ -126,6 +132,7 @@ def test_a_zenodo_deposit_points_every_location_at_https(tmp_path: Path, fake: _
 
 # ── The low-level client every registry path goes through ────────────────────
 
+
 def _envelope(url: str) -> dict:
     return {
         "kind": "BattinfoSubmission",
@@ -133,10 +140,14 @@ def _envelope(url: str) -> dict:
             "resource_type": "dataset",
             "title": "C1 data",
             "source_local_id": "ds-1",
-            "semantic_payload": {"battinfo_records": {"dataset": {
-                "dataset": {"id": "https://w3id.org/battinfo/dataset/aaaa-bbbb-cccc-dddd", "access_url": url},
-                "provenance": {"source_type": "measurement", "source_url": url},
-            }}},
+            "semantic_payload": {
+                "battinfo_records": {
+                    "dataset": {
+                        "dataset": {"id": "https://w3id.org/battinfo/dataset/aaaa-bbbb-cccc-dddd", "access_url": url},
+                        "provenance": {"source_type": "measurement", "source_url": url},
+                    }
+                }
+            },
             "distributions": [{"title": "C1.bdf.csv", "access_url": url, "role": "processed"}],
         },
     }
@@ -159,12 +170,15 @@ class _Resp:
         return None
 
 
-@pytest.mark.parametrize("url", [
-    "file:///C:/Users/someone/project/bdf/C1.bdf.csv",
-    "file:///home/someone/project/bdf/C1.bdf.csv",
-    "C:\\Users\\someone\\project\\bdf\\C1.bdf.csv",
-    "bdf/C1.bdf.csv",
-])
+@pytest.mark.parametrize(
+    "url",
+    [
+        "file:///C:/Users/someone/project/bdf/C1.bdf.csv",
+        "file:///home/someone/project/bdf/C1.bdf.csv",
+        "C:\\Users\\someone\\project\\bdf\\C1.bdf.csv",
+        "bdf/C1.bdf.csv",
+    ],
+)
 def test_submit_publication_package_refuses_local_paths(url: str, monkeypatch: pytest.MonkeyPatch) -> None:
     calls: list[object] = []
     monkeypatch.setattr("battinfo.api.urlopen", lambda request, timeout=None: calls.append(request))
@@ -187,12 +201,15 @@ def test_submit_publication_package_override_and_https(monkeypatch: pytest.Monke
 
     monkeypatch.setattr("battinfo.api.urlopen", fake_urlopen)
     result = submit_publication_package(
-        _envelope("file:///C:/data/C1.bdf.csv"), registry_base_url="https://r.example", api_key="k",
+        _envelope("file:///C:/data/C1.bdf.csv"),
+        registry_base_url="https://r.example",
+        api_key="k",
         allow_local_files=True,
     )
     assert result["status"] == "ok" and len(sent) == 1
     submit_publication_package(
-        _envelope("https://zenodo.org/records/1/files/C1.bdf.csv"), registry_base_url="https://r.example",
+        _envelope("https://zenodo.org/records/1/files/C1.bdf.csv"),
+        registry_base_url="https://r.example",
         api_key="k",
     )
     assert len(sent) == 2
@@ -210,9 +227,14 @@ def test_submission_packages_do_not_name_the_local_workspace_folder(tmp_path: Pa
 
     (tmp_path / "a.csv").write_text("cycle,capacity_ah\n0,2.50\n", encoding="utf-8")
     authoring = Workspace(tmp_path / "authoring", name="w", title="W", tenant="t", publisher="p", version="1.0.0")
-    cell_spec = authoring.cell_spec(manufacturer="A123", model="ANR26650M1-B", format="cylindrical",
-                                    chemistry="Li-ion", specs={"nominal_voltage": quantity(3.3, "V")},
-                                    source_file="a123.manual.json")
+    cell_spec = authoring.cell_spec(
+        manufacturer="A123",
+        model="ANR26650M1-B",
+        format="cylindrical",
+        chemistry="Li-ion",
+        specs={"nominal_voltage": quantity(3.3, "V")},
+        source_file="a123.manual.json",
+    )
     cell = authoring.cell(cell_spec, serial_number="root-001", source_type="lab")
     test = authoring.test(cell, kind="cycling", protocol="1C / 1C", status="completed")
     authoring.dataset(cell, title="Root dataset", test=test, path=tmp_path / "a.csv", license="CC-BY-4.0")
@@ -231,8 +253,11 @@ def test_submit_publication_package_leaves_out_a_workspace_root(monkeypatch: pyt
 
     monkeypatch.setattr("battinfo.api.urlopen", fake_urlopen)
     envelope = _envelope("https://zenodo.org/records/1/files/C1.bdf.csv")
-    envelope["workspace"] = {"workspace_id": "w", "root": "C:\\Users\\someone\\release",
-                             "registry": {"tenant": "t", "workspace": "w"}}
+    envelope["workspace"] = {
+        "workspace_id": "w",
+        "root": "C:\\Users\\someone\\release",
+        "registry": {"tenant": "t", "workspace": "w"},
+    }
 
     submit_publication_package(envelope, registry_base_url="https://r.example", api_key="k")
 
@@ -246,8 +271,9 @@ def test_demo_pipeline_refuses_its_local_file_by_default(tmp_path: Path, monkeyp
     calls: list[object] = []
     monkeypatch.setattr("battinfo.api.urlopen", lambda request, timeout=None: calls.append(request))
     with pytest.raises(ValueError, match="allow_local_files=True"):
-        run_demo_pipeline(tmp_path / "demo", registry_base_url="https://registry.example.org",
-                          api_key="secret", force=True)
+        run_demo_pipeline(
+            tmp_path / "demo", registry_base_url="https://registry.example.org", api_key="secret", force=True
+        )
     assert calls == []
 
 
@@ -268,16 +294,20 @@ def _protocol_record(value: str) -> dict:
     }
 
 
-@pytest.mark.parametrize("value", [
-    r"C:\Users\someone\protocols\cc.json",
-    "/home/someone/protocols/cc.json",
-    "file:///C:/Users/someone/protocols/cc.json",
-])
+@pytest.mark.parametrize(
+    "value",
+    [
+        r"C:\Users\someone\protocols\cc.json",
+        "/home/someone/protocols/cc.json",
+        "file:///C:/Users/someone/protocols/cc.json",
+    ],
+)
 def test_an_absolute_source_file_or_locator_is_a_local_reference(value: str) -> None:
     from battinfo._util import local_file_references
 
     assert dict(local_file_references(_protocol_record(value))) == {
-        "artifacts[0].locator": value, "provenance.source_file": value,
+        "artifacts[0].locator": value,
+        "provenance.source_file": value,
     }
 
 
@@ -291,10 +321,15 @@ def test_a_file_name_or_relative_path_is_not(value: str) -> None:
 def test_submit_publication_package_refuses_an_absolute_artifact_locator(monkeypatch: pytest.MonkeyPatch) -> None:
     calls: list[object] = []
     monkeypatch.setattr("battinfo.api.urlopen", lambda request, timeout=None: calls.append(request))
-    envelope = {"kind": "BattinfoSubmission", "resource": {
-        "resource_type": "test_spec", "title": "CC discharge", "source_local_id": "ts-1",
-        "semantic_payload": {"battinfo_records": {"test_spec": _protocol_record("/home/someone/cc.json")}},
-    }}
+    envelope = {
+        "kind": "BattinfoSubmission",
+        "resource": {
+            "resource_type": "test_spec",
+            "title": "CC discharge",
+            "source_local_id": "ts-1",
+            "semantic_payload": {"battinfo_records": {"test_spec": _protocol_record("/home/someone/cc.json")}},
+        },
+    }
     with pytest.raises(ValueError) as excinfo:
         submit_publication_package(envelope, registry_base_url="https://r.example", api_key="k")
     assert calls == []
@@ -318,8 +353,9 @@ def test_protocol_import_stores_no_absolute_path(tmp_path: Path, monkeypatch: py
     elsewhere.mkdir()
     monkeypatch.chdir(elsewhere)
     out = tmp_path / "record.json"
-    result = CliRunner().invoke(app, ["import-protocol", str(source.resolve()), "--format", "aurora",
-                                      "--out", str(out)])
+    result = CliRunner().invoke(
+        app, ["import-protocol", str(source.resolve()), "--format", "aurora", "--out", str(out)]
+    )
     assert result.exit_code == 0, result.output
     record = json.loads(out.read_text(encoding="utf-8"))
     assert record["artifacts"][0]["locator"] == "cc.json"
@@ -345,8 +381,7 @@ def _workspace_with_two_files(root: Path) -> AuthoringWorkspace:
 
 @pytest.fixture()
 def no_r2(monkeypatch: pytest.MonkeyPatch) -> None:
-    for name, value in (("BATTINFO_API_KEY", "k"), ("BATTINFO_WORKSPACE_ID", "w"),
-                        ("BATTINFO_PUBLISHER_ID", "p")):
+    for name, value in (("BATTINFO_API_KEY", "k"), ("BATTINFO_WORKSPACE_ID", "w"), ("BATTINFO_PUBLISHER_ID", "p")):
         monkeypatch.setenv(name, value)
     monkeypatch.delenv("R2_ENDPOINT", raising=False)
     monkeypatch.setattr("battinfo.ws._ZENODO_ZIP_THRESHOLD", 1)  # two files would be zipped

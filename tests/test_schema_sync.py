@@ -27,17 +27,21 @@ import pytest
 
 # ── helpers ───────────────────────────────────────────────────────────────────
 
+
 def _bundle_enum_values(name: str) -> set[str]:
     import battinfo.bundle as bun
+
     return {v.value for v in getattr(bun, name)}
 
 
 def _gen_enum_values(name: str) -> set[str]:
     import battinfo.bundle_generated as gen
+
     return {v.value for v in getattr(gen, name)}
 
 
 # ── ENUM SYNC — hard failures ─────────────────────────────────────────────────
+
 
 def test_battery_test_type_values_match() -> None:
     bundle_vals = _bundle_enum_values("BatteryTestType")
@@ -59,12 +63,8 @@ def test_cell_product_type_values_match() -> None:
     gen_vals = _gen_enum_values("CellProductType")
     only_in_bundle = bundle_vals - gen_vals
     only_in_schema = gen_vals - bundle_vals
-    assert not only_in_bundle, (
-        f"CellProductType values in bundle.py but not schema: {only_in_bundle}"
-    )
-    assert not only_in_schema, (
-        f"CellProductType values in schema but not bundle.py: {only_in_schema}"
-    )
+    assert not only_in_bundle, f"CellProductType values in bundle.py but not schema: {only_in_bundle}"
+    assert not only_in_schema, f"CellProductType values in schema but not bundle.py: {only_in_schema}"
 
 
 def test_cell_format_values_covered_by_bundle() -> None:
@@ -82,43 +82,45 @@ def test_cell_format_values_covered_by_bundle() -> None:
 # Regulation properties or derived metrics not yet exposed in the authoring API.
 # Add to this set when you deliberately choose not to expose a schema field in
 # bundle.py's CELL_TYPE_AUTHORING_PROPERTY_FIELDS.
-_KNOWN_SCHEMA_ONLY_SPEC_FIELDS: frozenset[str] = frozenset({
-    "typical_capacity",
-    "certified_usable_energy",
-    "power_capability",
-    "maximum_power",
-    "maximum_pulse_charging_current",
-    "maximum_pulse_discharging_current",
-    "dc_internal_resistance",
-    "ac_internal_resistance",
-    "round_trip_energy_efficiency",
-    "round_trip_energy_efficiency_50pct",
-    "initial_coulombic_efficiency",
-    "volume",
-    "operating_temperature_min",
-    "operating_temperature_max",
-    "cycle_life_c_rate",
-    "calendar_life",
-    "capacity_fade",
-    "capacity_threshold_exhaustion",
-    "charging_time",
-    "self_discharge_rate",
-    "state_of_health",
-    "power_energy_ratio",
-    # voltage aliases — schema has both the canonical and a synonym
-    "charging_cutoff_voltage",
-    "upper_voltage_limit",
-    # energy synonym — schema splits rated/nominal/typical; bundle uses typical/rated
-    "nominal_energy",
-    # measured-instance keys — direction-qualified measured values for a cell
-    # instance's `measured` block; deliberately NOT spec-authoring properties,
-    # because on a spec record capacity/energy statements are manufacturer
-    # declarations (nominal_/rated_/typical_).
-    "discharging_capacity",
-    "charging_capacity",
-    "discharging_energy",
-    "charging_energy",
-})
+_KNOWN_SCHEMA_ONLY_SPEC_FIELDS: frozenset[str] = frozenset(
+    {
+        "typical_capacity",
+        "certified_usable_energy",
+        "power_capability",
+        "maximum_power",
+        "maximum_pulse_charging_current",
+        "maximum_pulse_discharging_current",
+        "dc_internal_resistance",
+        "ac_internal_resistance",
+        "round_trip_energy_efficiency",
+        "round_trip_energy_efficiency_50pct",
+        "initial_coulombic_efficiency",
+        "volume",
+        "operating_temperature_min",
+        "operating_temperature_max",
+        "cycle_life_c_rate",
+        "calendar_life",
+        "capacity_fade",
+        "capacity_threshold_exhaustion",
+        "charging_time",
+        "self_discharge_rate",
+        "state_of_health",
+        "power_energy_ratio",
+        # voltage aliases — schema has both the canonical and a synonym
+        "charging_cutoff_voltage",
+        "upper_voltage_limit",
+        # energy synonym — schema splits rated/nominal/typical; bundle uses typical/rated
+        "nominal_energy",
+        # measured-instance keys — direction-qualified measured values for a cell
+        # instance's `measured` block; deliberately NOT spec-authoring properties,
+        # because on a spec record capacity/energy statements are manufacturer
+        # declarations (nominal_/rated_/typical_).
+        "discharging_capacity",
+        "charging_capacity",
+        "discharging_energy",
+        "charging_energy",
+    }
+)
 
 
 def test_specset_fields_all_known() -> None:
@@ -134,9 +136,7 @@ def test_specset_fields_all_known() -> None:
     from battinfo.bundle_generated import SpecSet
 
     authoring_fields = frozenset(CELL_TYPE_AUTHORING_PROPERTY_FIELDS)
-    schema_fields = frozenset(
-        k for k in SpecSet.model_fields if k != "linkml_meta"
-    )
+    schema_fields = frozenset(k for k in SpecSet.model_fields if k != "linkml_meta")
 
     unexpected = schema_fields - authoring_fields - _KNOWN_SCHEMA_ONLY_SPEC_FIELDS
     assert not unexpected, (
@@ -157,9 +157,7 @@ def test_bundle_authoring_fields_report_schema_gaps() -> None:
     from battinfo.bundle_generated import SpecSet
 
     schema_fields = frozenset(k for k in SpecSet.model_fields if k != "linkml_meta")
-    only_in_bundle = sorted(
-        f for f in CELL_TYPE_AUTHORING_PROPERTY_FIELDS if f not in schema_fields
-    )
+    only_in_bundle = sorted(f for f in CELL_TYPE_AUTHORING_PROPERTY_FIELDS if f not in schema_fields)
     if only_in_bundle:
         warnings.warn(
             f"bundle.py authoring fields with no direct SpecSet equivalent "
@@ -169,6 +167,7 @@ def test_bundle_authoring_fields_report_schema_gaps() -> None:
 
 
 # ── ADAPTER ROUNDTRIP ─────────────────────────────────────────────────────────
+
 
 def test_adapter_cell_spec_to_schema_basic() -> None:
     from battinfo.bundle import CellSpec
@@ -305,5 +304,6 @@ def test_adapter_bundle_to_schema_dispatcher() -> None:
 
 def test_adapter_unknown_type_raises() -> None:
     from battinfo.bundle_adapter import bundle_to_schema
+
     with pytest.raises(TypeError, match="No schema adapter"):
         bundle_to_schema(object())

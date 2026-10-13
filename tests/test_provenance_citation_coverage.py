@@ -36,4 +36,6 @@ def test_records_with_source_url_have_citation() -> None:
             if isinstance(source_url, str) and source_url and not isinstance(citation, str):
                 offenders.append(str(path.relative_to(ROOT)))
 
-    assert offenders == [], "Missing provenance.citation for records with provenance.source_url:\n" + "\n".join(offenders)
+    assert offenders == [], "Missing provenance.citation for records with provenance.source_url:\n" + "\n".join(
+        offenders
+    )

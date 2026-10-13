@@ -3,6 +3,7 @@
 Split from the former monolithic ``battinfo/api.py`` (beta-hardening 4.2);
 import the public surface from ``battinfo.api``, not from this module.
 """
+
 from __future__ import annotations
 
 import html
@@ -148,11 +149,7 @@ def _schema_distribution_value(value: Any, *, part_of_id: str) -> dict[str, Any]
     content_url = value.get("content_url")
     encoding_format = value.get("encoding_format")
     checksum = value.get("checksum")
-    if (
-        not isinstance(content_url, str)
-        and not isinstance(encoding_format, str)
-        and not isinstance(checksum, Mapping)
-    ):
+    if not isinstance(content_url, str) and not isinstance(encoding_format, str) and not isinstance(checksum, Mapping):
         return None
     out: dict[str, Any] = {"@type": "schema:DataDownload"}
     if isinstance(value.get("name"), str):
@@ -286,13 +283,14 @@ def _schema_main_entity_value(value: Any) -> dict[str, Any] | None:
     return None
 
 
-
-
 _PYBAMM_STEP_EMMO_PATTERNS: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"^\s*(discharge|rest|charge|hold)\s+at\s+\S+\s+[acwv]", re.I), ""),  # router
     (re.compile(r"^\s*discharge\s+at\s+\S+\s+[cw]", re.I), "ConstantCurrentDischarging"),
     (re.compile(r"^\s*discharge\s+at\s+\S+\s+a\b", re.I), "ConstantCurrentDischarging"),
-    (re.compile(r"^\s*charge\s+at\s+\S+\s+[caw]\s+until\s+\S+\s+[va]\b", re.I), "ConstantCurrentConstantVoltageCharging"),
+    (
+        re.compile(r"^\s*charge\s+at\s+\S+\s+[caw]\s+until\s+\S+\s+[va]\b", re.I),
+        "ConstantCurrentConstantVoltageCharging",
+    ),
     (re.compile(r"^\s*charge\s+at\s+\S+\s+[cw]", re.I), "ConstantCurrentCharging"),
     (re.compile(r"^\s*charge\s+at\s+\S+\s+a\b", re.I), "ConstantCurrentCharging"),
     (re.compile(r"^\s*hold\s+at\s+\S+\s+v\b", re.I), "ConstantVoltageCharging"),
@@ -325,9 +323,7 @@ def _pybamm_step_to_jsonld(step_text: str, position: int) -> dict[str, Any]:
     determined unambiguously from the step text.
     """
     emmo_type = _pybamm_step_emmo_type(step_text)
-    node_type: str | list[str] = (
-        ["schema:HowToStep", emmo_type] if emmo_type else "schema:HowToStep"
-    )
+    node_type: str | list[str] = ["schema:HowToStep", emmo_type] if emmo_type else "schema:HowToStep"
     return {
         "@type": node_type,
         "schema:position": position,
@@ -400,10 +396,7 @@ def _resolver_jsonld(doc: dict[str, Any]) -> dict[str, Any]:
             out["schema:version"] = protocol.get("version")
         steps = protocol.get("steps")
         if isinstance(steps, list) and steps:
-            step_nodes = [
-                _pybamm_step_to_jsonld(step_text, position=i + 1)
-                for i, step_text in enumerate(steps)
-            ]
+            step_nodes = [_pybamm_step_to_jsonld(step_text, position=i + 1) for i, step_text in enumerate(steps)]
             out["schema:step"] = step_nodes
         cycles = protocol.get("cycles")
         if isinstance(cycles, int) and cycles > 1:
@@ -440,11 +433,15 @@ def _resolver_jsonld(doc: dict[str, Any]) -> dict[str, Any]:
                 # instrument is a resolvable entity, not an anonymous label.
                 equip_node["@id"] = equipment_id
             out["hasTestEquipment"] = equip_node
-            out["schema:instrument"] = [out.get("schema:instrument"), equip_node] if "schema:instrument" in out else equip_node
+            out["schema:instrument"] = (
+                [out.get("schema:instrument"), equip_node] if "schema:instrument" in out else equip_node
+            )
         elif isinstance(equipment_id, str) and equipment_id:
             equip_node = {"@id": equipment_id}
             out["hasTestEquipment"] = equip_node
-            out["schema:instrument"] = [out.get("schema:instrument"), equip_node] if "schema:instrument" in out else equip_node
+            out["schema:instrument"] = (
+                [out.get("schema:instrument"), equip_node] if "schema:instrument" in out else equip_node
+            )
         channel_id = test.get("channel_id")
         if isinstance(channel_id, str) and channel_id:
             # The channel the test ran on: the activity used that equipment part.
@@ -536,7 +533,11 @@ def _resolver_jsonld(doc: dict[str, Any]) -> dict[str, Any]:
             if values:
                 out["schema:measurementMethod"] = values
         if isinstance(dataset.get("variable_measured"), list):
-            values = [node for item in dataset["variable_measured"] if (node := _schema_variable_measured_value(item)) is not None]
+            values = [
+                node
+                for item in dataset["variable_measured"]
+                if (node := _schema_variable_measured_value(item)) is not None
+            ]
             if values:
                 out["schema:variableMeasured"] = values
         if isinstance(dataset.get("is_accessible_for_free"), bool):
@@ -583,7 +584,11 @@ def _resolver_jsonld(doc: dict[str, Any]) -> dict[str, Any]:
                 out["schema:mainEntity"] = value
         about = dataset.get("about")
         if isinstance(about, list):
-            about_nodes = [{"@id": item} for item in about if isinstance(item, str) and (CELL_IRI_RE.fullmatch(item) or TEST_IRI_RE.fullmatch(item))]
+            about_nodes = [
+                {"@id": item}
+                for item in about
+                if isinstance(item, str) and (CELL_IRI_RE.fullmatch(item) or TEST_IRI_RE.fullmatch(item))
+            ]
             if about_nodes:
                 out["schema:about"] = about_nodes
         else:
@@ -607,11 +612,11 @@ def _resolver_html(doc: dict[str, Any]) -> str:
     iri_escaped = html.escape(entity_iri)
     return (
         "<!doctype html>\n"
-        "<html lang=\"en\">\n"
+        '<html lang="en">\n'
         "<head>\n"
-        "  <meta charset=\"utf-8\" />\n"
+        '  <meta charset="utf-8" />\n'
         f"  <title>{title}</title>\n"
-        "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n"
+        '  <meta name="viewport" content="width=device-width, initial-scale=1" />\n'
         "  <style>body{font-family:Arial,sans-serif;max-width:1000px;margin:2rem auto;padding:0 1rem;line-height:1.5}"
         "code,pre{background:#f6f8fa;border-radius:4px}pre{padding:1rem;overflow:auto}"
         "a{color:#0b5fff;text-decoration:none}a:hover{text-decoration:underline}</style>\n"
@@ -620,8 +625,8 @@ def _resolver_html(doc: dict[str, Any]) -> str:
         f"  <h1>{title}</h1>\n"
         f"  <p><strong>Canonical IRI:</strong> <code>{iri_escaped}</code></p>\n"
         "  <p>\n"
-        "    <a href=\"index.json\">JSON</a> |\n"
-        "    <a href=\"index.jsonld\">JSON-LD</a>\n"
+        '    <a href="index.json">JSON</a> |\n'
+        '    <a href="index.jsonld">JSON-LD</a>\n'
         "  </p>\n"
         "  <h2>Metadata</h2>\n"
         f"  <pre>{pretty}</pre>\n"

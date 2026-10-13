@@ -33,57 +33,57 @@ OUT_PATH = REPO_ROOT / "src" / "battinfo" / "data" / "context" / "records.contex
 # ── Namespace prefixes emitted verbatim into @context ─────────────────────────
 # https://schema.org/ (not http) — we deliberately override linkml's built-in.
 PREFIXES: dict[str, str] = {
-    "battery":          "https://w3id.org/emmo/domain/battery#",
+    "battery": "https://w3id.org/emmo/domain/battery#",
     "electrochemistry": "https://w3id.org/emmo/domain/electrochemistry#",
-    "emmo":             "https://w3id.org/emmo#",
-    "battinfo":         "https://w3id.org/battinfo/",
-    "schema":           "https://schema.org/",
-    "dcterms":          "http://purl.org/dc/terms/",
-    "prov":             "http://www.w3.org/ns/prov#",
-    "dcat":             "http://www.w3.org/ns/dcat#",
-    "dqv":              "http://www.w3.org/ns/dqv#",
-    "oa":               "http://www.w3.org/ns/oa#",
-    "earl":             "http://www.w3.org/ns/earl#",
+    "emmo": "https://w3id.org/emmo#",
+    "battinfo": "https://w3id.org/battinfo/",
+    "schema": "https://schema.org/",
+    "dcterms": "http://purl.org/dc/terms/",
+    "prov": "http://www.w3.org/ns/prov#",
+    "dcat": "http://www.w3.org/ns/dcat#",
+    "dqv": "http://www.w3.org/ns/dqv#",
+    "oa": "http://www.w3.org/ns/oa#",
+    "earl": "http://www.w3.org/ns/earl#",
     # bibo/pav each back exactly one term (citation_doi, workflow_version); skos
     # backs none, but the emitters write skos:prefLabel directly as an expanded
     # key on nodes carrying this context, and JSON-LD silently discards a key
     # whose prefix it cannot resolve. Prefixes serve emitted CURIEs as well as
     # context terms, so never prune this table by scanning term values.
-    "bibo":             "http://purl.org/ontology/bibo/",
-    "pav":              "http://purl.org/pav/",
-    "skos":             "http://www.w3.org/2004/02/skos/core#",
+    "bibo": "http://purl.org/ontology/bibo/",
+    "pav": "http://purl.org/pav/",
+    "skos": "http://www.w3.org/2004/02/skos/core#",
     # No QUDT prefixes: quantities use ONE EMMO serialization
     # (hasNumericalPart/hasNumericalValue/hasMeasurementUnit) in both the published
     # battinfo.json and the SHACL validation view. The few compound-unit IRIs sourced
     # from QUDT are emitted as full URLs, not via a prefix.
-    "spdx":             "http://spdx.org/rdf/terms#",
-    "rdfs":             "http://www.w3.org/2000/01/rdf-schema#",
-    "xsd":              "http://www.w3.org/2001/XMLSchema#",
+    "spdx": "http://spdx.org/rdf/terms#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
     # Backs the CSVW main-entity emission (a dataset's own table schema:
     # csvw:Table / csvw:tableSchema / csvw:Column on schema:mainEntity).
-    "csvw":             "http://www.w3.org/ns/csvw#",
+    "csvw": "http://www.w3.org/ns/csvw#",
 }
 
 # ── EMMO battery class types ───────────────────────────────────────────────────
 CLASS_TYPES: dict[str, str] = {
-    "BatteryCell":                         "battery:battery_68ed592a_7924_45d0_a108_94d6275d57f0",
-    "BatteryCellSpecification":            "battery:battery_1cfbba6c_8824_4932_a23e_2141483acef7",
-    "CylindricalBattery":                  "battery:battery_ac604ecd_cc60_4b98_b57c_74cd5d3ccd40",
+    "BatteryCell": "battery:battery_68ed592a_7924_45d0_a108_94d6275d57f0",
+    "BatteryCellSpecification": "battery:battery_1cfbba6c_8824_4932_a23e_2141483acef7",
+    "CylindricalBattery": "battery:battery_ac604ecd_cc60_4b98_b57c_74cd5d3ccd40",
     # Upstream minted an underscore-named twin in domain-battery 0.20.2 and
     # deprecated the hyphen-named original (dcterms:isReplacedBy, issue #73).
     # Emit the twin; the validator still accepts the hyphen form so already
     # published records keep validating.
-    "PrismaticBattery":                    "battery:battery_86c9ca80_de6f_417f_afdc_a7e52fa6322d",
-    "PouchCell":                           "battery:battery_392b3f47_d62a_4bd4_a819_b58b09b8843a",
-    "CoinCell":                            "battery:battery_b7fdab58_6e91_4c84_b097_b06eff86a124",
-    "LithiumIonBattery":                   "battery:battery_96addc62_ea04_449a_8237_4cd541dd8e5f",
-    "LithiumMetalBattery":                 "battery:battery_ada13509_4eed_4e40_a7b1_4cc488144154",
-    "SodiumIonBattery":                    "battery:battery_42329a95_03fe_4ec1_83cb_b7e8ed52f68a",
+    "PrismaticBattery": "battery:battery_86c9ca80_de6f_417f_afdc_a7e52fa6322d",
+    "PouchCell": "battery:battery_392b3f47_d62a_4bd4_a819_b58b09b8843a",
+    "CoinCell": "battery:battery_b7fdab58_6e91_4c84_b097_b06eff86a124",
+    "LithiumIonBattery": "battery:battery_96addc62_ea04_449a_8237_4cd541dd8e5f",
+    "LithiumMetalBattery": "battery:battery_ada13509_4eed_4e40_a7b1_4cc488144154",
+    "SodiumIonBattery": "battery:battery_42329a95_03fe_4ec1_83cb_b7e8ed52f68a",
     "AlkalineZincManganeseDioxideBattery": "battery:battery_b572826a_b4e4_4986_b57d_f7b945061f8b",
-    "AlkalineCell":                        "battery:battery_50b911f7_c903_4700_9764_c308d8a95470",
-    "PrimaryBattery":                      "battery:battery_3b0b0d6e_8b0e_4491_885e_8421d3eb3b69",
-    "SecondaryBattery":                    "battery:battery_efc38420_ecbb_42e4_bb3f_208e7c417098",
-    "BatteryTest":                         "battery:battery_dca7729a_421a_4921_90cf_9692bb9eb081",
+    "AlkalineCell": "battery:battery_50b911f7_c903_4700_9764_c308d8a95470",
+    "PrimaryBattery": "battery:battery_3b0b0d6e_8b0e_4491_885e_8421d3eb3b69",
+    "SecondaryBattery": "battery:battery_efc38420_ecbb_42e4_bb3f_208e7c417098",
+    "BatteryTest": "battery:battery_dca7729a_421a_4921_90cf_9692bb9eb081",
 }
 
 # ── EMMO object properties (IRIs verified against EMMO release used in ws.py) ─
@@ -91,11 +91,11 @@ CLASS_TYPES: dict[str, str] = {
 # treat their values as IRI references rather than plain strings.
 EMMO_OBJECT_PROPERTIES: dict[str, object] = {
     "hasProperty": {
-        "@id":   "emmo:EMMO_e1097637_70d2_4895_973f_2396f04fa204",
+        "@id": "emmo:EMMO_e1097637_70d2_4895_973f_2396f04fa204",
         "@type": "@id",
     },
     "hasNumericalPart": {
-        "@id":   "emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0",
+        "@id": "emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0",
         "@type": "@id",
     },
     # hasNumberValue is EMMO's canonical prefLabel (and what bmgen emits); we emit it.
@@ -104,35 +104,35 @@ EMMO_OBJECT_PROPERTIES: dict[str, object] = {
     "hasNumberValue": "emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4",
     "hasNumericalValue": "emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4",
     "hasMeasurementUnit": {
-        "@id":   "emmo:EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569",
+        "@id": "emmo:EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569",
         "@type": "@id",
     },
     "isDescriptionFor": {
-        "@id":   "emmo:EMMO_f702bad4_fc77_41f0_a26d_79f6444fd4f3",
+        "@id": "emmo:EMMO_f702bad4_fc77_41f0_a26d_79f6444fd4f3",
         "@type": "@id",
     },
     "hasDescription": {
-        "@id":   "emmo:EMMO_c58c799e_cc6c_4310_a3f1_78da70705b2a",
+        "@id": "emmo:EMMO_c58c799e_cc6c_4310_a3f1_78da70705b2a",
         "@type": "@id",
     },
     "hasTestObject": {
-        "@id":   "battery:battery_da3b3f28_aaad_4d67_b674_df47e109fb8b",
+        "@id": "battery:battery_da3b3f28_aaad_4d67_b674_df47e109fb8b",
         "@type": "@id",
     },
     "hasTestEquipment": {
-        "@id":   "battery:battery_df4ff8f1_2cf2_444a_9498_23f533bd295c",
+        "@id": "battery:battery_df4ff8f1_2cf2_444a_9498_23f533bd295c",
         "@type": "@id",
     },
     "hasOutput": {
-        "@id":   "emmo:EMMO_c4bace1d_4db0_4cd3_87e9_18122bae2840",
+        "@id": "emmo:EMMO_c4bace1d_4db0_4cd3_87e9_18122bae2840",
         "@type": "@id",
     },
 }
 
 # ── Schema.org common property aliases ────────────────────────────────────────
 COMMON_PROPERTY_ALIASES: dict[str, object] = {
-    "name":         "schema:name",
-    "model":        "schema:model",
+    "name": "schema:name",
+    "model": "schema:model",
     "manufacturer": "schema:manufacturer",
 }
 
@@ -158,179 +158,188 @@ CANONICAL_RECORD_TERMS: dict[str, object] = {
     # enclosing node rather than hanging off wrapper predicates. Same for the
     # quantity/setpoint property bags (flat keys attach to their carrier).
     "battinfo_records": "@nest",
-    "cell":             "@nest",
-    "cell_spec":        "@nest",
-    "cell_instance":    "@nest",
-    "dataset":          "@nest",
-    "test":             "@nest",
-    "test_spec":        "@nest",
-    "material":         "@nest",
-    "material_spec":    "@nest",
-    "electrode":        "@nest",
-    "electrode_spec":   "@nest",
-    "organization":     "@nest",
-    "properties":       "@nest",
-    "property":         "@nest",
-    "setpoints":        "@nest",
-    "provenance":       "@nest",
+    "cell": "@nest",
+    "cell_spec": "@nest",
+    "cell_instance": "@nest",
+    "dataset": "@nest",
+    "test": "@nest",
+    "test_spec": "@nest",
+    "material": "@nest",
+    "material_spec": "@nest",
+    "electrode": "@nest",
+    "electrode_spec": "@nest",
+    "organization": "@nest",
+    "properties": "@nest",
+    "property": "@nest",
+    "setpoints": "@nest",
+    "provenance": "@nest",
     # Node-type discriminator: canonical bodies write "type": "Person" etc.
     "type": "@type",
-    "Person":       "schema:Person",
+    "Person": "schema:Person",
     "Organization": "schema:Organization",
-    "Grant":        "schema:Grant",
+    "Grant": "schema:Grant",
     "DataDownload": "schema:DataDownload",
-    "Dataset":      "dcat:Dataset",
+    "Dataset": "dcat:Dataset",
     # Registry envelope @type spellings for the record types themselves —
     # every spelling the registry's payload envelopes or its resource_class
     # fallback map can stamp, so no served @type is a relative-IRI dead end.
-    "CellInstance":      "battery:battery_68ed592a_7924_45d0_a108_94d6275d57f0",
-    "Cell":              "battery:battery_68ed592a_7924_45d0_a108_94d6275d57f0",
-    "CellSpec":          "battery:battery_1cfbba6c_8824_4932_a23e_2141483acef7",
+    "CellInstance": "battery:battery_68ed592a_7924_45d0_a108_94d6275d57f0",
+    "Cell": "battery:battery_68ed592a_7924_45d0_a108_94d6275d57f0",
+    "CellSpec": "battery:battery_1cfbba6c_8824_4932_a23e_2141483acef7",
     "CellSpecification": "battery:battery_1cfbba6c_8824_4932_a23e_2141483acef7",
-    "Test":              "battery:battery_dca7729a_421a_4921_90cf_9692bb9eb081",
-    "MaterialSpec":   "battinfo:MaterialSpec",
-    "Material":       "battinfo:Material",
-    "ElectrodeSpec":  "battinfo:ElectrodeSpec",
-    "TestSpec":       "battinfo:TestSpec",
-    "EquipmentSpec":  "battinfo:EquipmentSpec",
-    "Equipment":      "battinfo:Equipment",
-    "Channel":        "battinfo:Channel",
-    "ParameterSet":   "battinfo:ParameterSet",
+    "Test": "battery:battery_dca7729a_421a_4921_90cf_9692bb9eb081",
+    "MaterialSpec": "battinfo:MaterialSpec",
+    "Material": "battinfo:Material",
+    "ElectrodeSpec": "battinfo:ElectrodeSpec",
+    "TestSpec": "battinfo:TestSpec",
+    "EquipmentSpec": "battinfo:EquipmentSpec",
+    "Equipment": "battinfo:Equipment",
+    "Channel": "battinfo:Channel",
+    "ParameterSet": "battinfo:ParameterSet",
     # Attribution / bibliography (schema-curated spellings).
-    "same_as":      {"@id": "schema:sameAs", "@type": "@id"},
-    "affiliation":  "schema:affiliation",
-    "contributor":  "dcterms:contributor",
-    "description":  "dcterms:description",
+    "same_as": {"@id": "schema:sameAs", "@type": "@id"},
+    "affiliation": "schema:affiliation",
+    "contributor": "dcterms:contributor",
+    "description": "dcterms:description",
     # Grant nodes carry a CORDIS IRI under "id"; the scoped "@id" keeps it a
     # node identifier instead of the context's product-id reading of bare id.
-    "funding":      {"@id": "schema:funding", "@context": {"id": "@id"}},
-    "funder":       "schema:funder",
-    "acronym":      "schema:alternateName",
-    "program":      "battinfo:fundingProgramme",
-    "doi":          "bibo:doi",
-    "citations":    "schema:citation",
-    "url":          {"@id": "schema:url", "@type": "@id"},
+    "funding": {"@id": "schema:funding", "@context": {"id": "@id"}},
+    "funder": "schema:funder",
+    "acronym": "schema:alternateName",
+    "program": "battinfo:fundingProgramme",
+    "doi": "bibo:doi",
+    "citations": "schema:citation",
+    "url": {"@id": "schema:url", "@type": "@id"},
     # Dataset / distribution facts (schema-curated spellings).
-    "about":                  {"@id": "dcterms:subject", "@type": "@id"},
-    "keywords":               "schema:keywords",
-    "is_based_on":            {"@id": "schema:isBasedOn", "@type": "@id"},
-    "variable_measured":      "schema:variableMeasured",
+    "about": {"@id": "dcterms:subject", "@type": "@id"},
+    "keywords": "schema:keywords",
+    "is_based_on": {"@id": "schema:isBasedOn", "@type": "@id"},
+    "variable_measured": "schema:variableMeasured",
     "measurement_techniques": "schema:measurementTechnique",
-    "published_at":           "schema:datePublished",
-    "access_level":           "dcterms:accessRights",
-    "distributions":          "dcat:distribution",
-    "access_url":             {"@id": "dcat:accessURL", "@type": "@id"},
-    "media_type":             "dcat:mediaType",
-    "encoding_format":        "dcat:mediaType",
-    "byte_size":              "dcat:byteSize",
-    "content_url":            {"@id": "dcat:downloadURL", "@type": "@id"},
-    "content_size":           "schema:contentSize",
+    "published_at": "schema:datePublished",
+    "access_level": "dcterms:accessRights",
+    "distributions": "dcat:distribution",
+    "access_url": {"@id": "dcat:accessURL", "@type": "@id"},
+    "media_type": "dcat:mediaType",
+    "encoding_format": "dcat:mediaType",
+    "byte_size": "dcat:byteSize",
+    "content_url": {"@id": "dcat:downloadURL", "@type": "@id"},
+    "content_size": "schema:contentSize",
     # Checksum nodes: the scoped context restates the cs_* slot curation and
     # keeps the global quantity reading of "value" out of checksum nodes.
     "checksum": {
         "@id": "spdx:checksum",
         "@context": {
             "algorithm": "spdx:checksumAlgorithm",
-            "value":     "spdx:checksumValue",
+            "value": "spdx:checksumValue",
         },
     },
     # Quantity-node structure (the flat schema.org quantity pattern the
     # transform uses for non-EMMO quantities; the EMMO serialization keeps
     # hasNumberValue/hasMeasurementUnit and never writes these bare keys).
-    "value":     "schema:value",
-    "unit":      "schema:unitText",
+    "value": "schema:value",
+    "unit": "schema:unitText",
     "unit_text": "schema:unitText",
     "min_value": "schema:minValue",
     "max_value": "schema:maxValue",
     # Population statistics: deliberately no EMMO term (a batch statistic is
     # not a measurand) — placeholders matching the standing upstream ask.
     "standard_deviation": "battinfo:standardDeviation",
-    "sample_count":       "battinfo:sampleCount",
+    "sample_count": "battinfo:sampleCount",
     # Quantity keys: EMMO class as predicate, per the transform's term tables.
-    "loading":              "electrochemistry:electrochemistry_c955c089_6ee1_41a2_95fc_d534c5cfd3d5",
-    "dry_thickness":        "electrochemistry:electrochemistry_d10b3c03_8d4c_4aa2_882f_5d8f680a85ed",
-    "areal_capacity":       "electrochemistry:electrochemistry_bcb33f7e_5573_4bc2_b636_4ea313a9dd3a",
-    "mass_fraction":        "emmo:EMMO_7c055d65_2929_40e1_af4f_4bf10995ad50",
+    "loading": "electrochemistry:electrochemistry_c955c089_6ee1_41a2_95fc_d534c5cfd3d5",
+    "dry_thickness": "electrochemistry:electrochemistry_d10b3c03_8d4c_4aa2_882f_5d8f680a85ed",
+    "areal_capacity": "electrochemistry:electrochemistry_bcb33f7e_5573_4bc2_b636_4ea313a9dd3a",
+    "mass_fraction": "emmo:EMMO_7c055d65_2929_40e1_af4f_4bf10995ad50",
     "theoretical_capacity": "electrochemistry:electrochemistry_372c89d0_adab_4585_9662_33c912acef23",
-    "duration":             "emmo:EMMO_0adabf6f_7404_44cb_9f65_32d83d8101a3",
-    "c_rate":               "electrochemistry:electrochemistry_e1fd84eb_acdb_4b2c_b90c_e899d552a3ee",
-    "count":                "emmo:EMMO_41efdf5d_0c9c_4ea0_bb65_f8236e663be5",
-    "formula":              "emmo:EMMO_9236d0aa_cb39_43a1_bbdd_6a2a714951c8",
-    "solvent":              "https://w3id.org/emmo/domain/chemical-substance#substance_0f2f65a7_5cc4_4c86_a4d0_676771c646f1",
+    "duration": "emmo:EMMO_0adabf6f_7404_44cb_9f65_32d83d8101a3",
+    "c_rate": "electrochemistry:electrochemistry_e1fd84eb_acdb_4b2c_b90c_e899d552a3ee",
+    "count": "emmo:EMMO_41efdf5d_0c9c_4ea0_bb65_f8236e663be5",
+    "formula": "emmo:EMMO_9236d0aa_cb39_43a1_bbdd_6a2a714951c8",
+    "solvent": "https://w3id.org/emmo/domain/chemical-substance#substance_0f2f65a7_5cc4_4c86_a4d0_676771c646f1",
     # Component structure: EMMO classes/relations from the bundled
     # domain-battery context.
-    "coating":             "electrochemistry:electrochemistry_09a7f560_9ddf_4c32_b067_b213eca5b0a1",
-    "active_material":     "electrochemistry:electrochemistry_79d1b273_58cd_4be6_a250_434817f7c261",
-    "binder":              "electrochemistry:electrochemistry_68eb5e35_5bd8_47b1_9b7f_f67224fa291e",
-    "additive":            "electrochemistry:electrochemistry_0a399f3f_b873_41f5_be1f_9b6df75cc30a",
-    "component":           "@nest",
-    "working_electrode":   "electrochemistry:electrochemistry_fb988878_ee54_4350_9ee9_228c00c3ad35",
-    "counter_electrode":   "electrochemistry:electrochemistry_871bc4a4_2d17_4b88_9b0f_7ab85f14afea",
+    "coating": "electrochemistry:electrochemistry_09a7f560_9ddf_4c32_b067_b213eca5b0a1",
+    "active_material": "electrochemistry:electrochemistry_79d1b273_58cd_4be6_a250_434817f7c261",
+    "binder": "electrochemistry:electrochemistry_68eb5e35_5bd8_47b1_9b7f_f67224fa291e",
+    "additive": "electrochemistry:electrochemistry_0a399f3f_b873_41f5_be1f_9b6df75cc30a",
+    "component": "@nest",
+    "working_electrode": "electrochemistry:electrochemistry_fb988878_ee54_4350_9ee9_228c00c3ad35",
+    "counter_electrode": "electrochemistry:electrochemistry_871bc4a4_2d17_4b88_9b0f_7ab85f14afea",
     "reference_electrode": "electrochemistry:electrochemistry_7729c34e_1ae9_403d_b933_1765885e7f29",
     # Record-to-record links. Instance -> spec is the emitter's isVariantOf
     # seam; the electrode/test-object relations restate the emitter's tables.
-    "cell_spec_id":              {"@id": "schema:isVariantOf", "@type": "@id"},
-    "material_spec_id":          {"@id": "schema:isVariantOf", "@type": "@id"},
-    "electrode_spec_id":         {"@id": "schema:isVariantOf", "@type": "@id"},
-    "cell_id":                   {"@id": "battery:battery_da3b3f28_aaad_4d67_b674_df47e109fb8b", "@type": "@id"},
-    "protocol_id":               {"@id": "prov:used", "@type": "@id"},
-    "working_electrode_id":      {"@id": "electrochemistry:electrochemistry_c76dbfeb_f3d9_44d4_9cbe_0946924f311f", "@type": "@id"},
-    "working_electrode_spec_id": {"@id": "electrochemistry:electrochemistry_c76dbfeb_f3d9_44d4_9cbe_0946924f311f", "@type": "@id"},
-    "active_material_spec_id":   {"@id": "electrochemistry:electrochemistry_79d1b273_58cd_4be6_a250_434817f7c261", "@type": "@id"},
-    "batch_id":                  "battinfo:batchId",
-    "lot_id":                    "battinfo:lotId",
+    "cell_spec_id": {"@id": "schema:isVariantOf", "@type": "@id"},
+    "material_spec_id": {"@id": "schema:isVariantOf", "@type": "@id"},
+    "electrode_spec_id": {"@id": "schema:isVariantOf", "@type": "@id"},
+    "cell_id": {"@id": "battery:battery_da3b3f28_aaad_4d67_b674_df47e109fb8b", "@type": "@id"},
+    "protocol_id": {"@id": "prov:used", "@type": "@id"},
+    "working_electrode_id": {
+        "@id": "electrochemistry:electrochemistry_c76dbfeb_f3d9_44d4_9cbe_0946924f311f",
+        "@type": "@id",
+    },
+    "working_electrode_spec_id": {
+        "@id": "electrochemistry:electrochemistry_c76dbfeb_f3d9_44d4_9cbe_0946924f311f",
+        "@type": "@id",
+    },
+    "active_material_spec_id": {
+        "@id": "electrochemistry:electrochemistry_79d1b273_58cd_4be6_a250_434817f7c261",
+        "@type": "@id",
+    },
+    "batch_id": "battinfo:batchId",
+    "lot_id": "battinfo:lotId",
     # Processing provenance: the activity that made the coated electrode.
     "processing": "prov:wasGeneratedBy",
-    "route":      "dcterms:type",
+    "route": "dcterms:type",
     # Cell/material identity (schema-curated placeholder spellings).
-    "chemistry":          "battinfo:chemistry",
-    "cell_format":        "battinfo:cellFormat",
-    "size_code":          "battinfo:sizeCode",
-    "rechargeable":       "battinfo:rechargeable",
+    "chemistry": "battinfo:chemistry",
+    "cell_format": "battinfo:cellFormat",
+    "size_code": "battinfo:sizeCode",
+    "rechargeable": "battinfo:rechargeable",
     "cell_configuration": "battinfo:cellConfiguration",
-    "chemistry_family":   "battinfo:chemistryFamily",
-    "material_class":     "battinfo:materialClass",
-    "supplier":           "schema:provider",
-    "serial_number":      "schema:serialNumber",
-    "manufactured_at":    "schema:productionDate",
+    "chemistry_family": "battinfo:chemistryFamily",
+    "material_class": "battinfo:materialClass",
+    "supplier": "schema:provider",
+    "serial_number": "schema:serialNumber",
+    "manufactured_at": "schema:productionDate",
     # Test structure (schema-curated spellings; conformance restates the tc_*
     # slots in a scoped context so "status" keeps its test reading elsewhere).
-    "kind":       "dcterms:type",
-    "status":     "battinfo:testStatus",
+    "kind": "dcterms:type",
+    "status": "battinfo:testStatus",
     "started_at": "prov:startedAtTime",
     "conditions": "battinfo:conditions",
-    "steps":      "battinfo:steps",
-    "method":     "battinfo:method",
-    "mode":       "battinfo:stepMode",
-    "direction":  "battinfo:stepDirection",
+    "steps": "battinfo:steps",
+    "method": "battinfo:method",
+    "mode": "battinfo:stepMode",
+    "direction": "battinfo:stepDirection",
     "conformance": {
         "@id": "battinfo:testConformance",
         "@context": {
-            "status":     "battinfo:conformanceStatus",
-            "note":       "schema:description",
+            "status": "battinfo:conformanceStatus",
+            "note": "schema:description",
             "deviations": "battinfo:deviation",
         },
     },
     "ambient_temperature": "battinfo:ambientTemperature",
-    "voltage_reference":   "battinfo:voltageReference",
+    "voltage_reference": "battinfo:voltageReference",
     # Free-text annotations.
-    "note":                  "schema:description",
-    "notes":                 "rdfs:comment",
-    "comment":               "rdfs:comment",
+    "note": "schema:description",
+    "notes": "rdfs:comment",
+    "comment": "rdfs:comment",
     "specification_comment": "rdfs:comment",
-    "detail":                "rdfs:comment",
-    "category":              "dcterms:type",
+    "detail": "rdfs:comment",
+    "category": "dcterms:type",
     # Record plumbing with an exact schema.org term.
     "schema_version": "schema:schemaVersion",
     # Production-corpus identity keys surfaced by the registry honesty check.
-    "product_id":         "schema:productID",
-    "grade":              "battinfo:grade",
+    "product_id": "schema:productID",
+    "grade": "battinfo:grade",
     "electrode_polarity": "electrochemistry:electrochemistry_16a5de33_a2ca_4563_80d4_6caeb08d97ca",
     # Full-cell electrode sections (published v1-era cell specs carry them;
     # the basis keys are literals until the emitter's defined-class mapping
     # applies, so they stay placeholders in the flat layer).
-    "positive_electrode":       "electrochemistry:electrochemistry_aff732a9_238a_4734_977c_b2ba202af126",
-    "negative_electrode":       "electrochemistry:electrochemistry_c94c041b_8ea6_43e7_85cc_d2bce7785b4c",
+    "positive_electrode": "electrochemistry:electrochemistry_aff732a9_238a_4734_977c_b2ba202af126",
+    "negative_electrode": "electrochemistry:electrochemistry_c94c041b_8ea6_43e7_85cc_d2bce7785b4c",
     "positive_electrode_basis": "battinfo:positiveElectrodeBasis",
     "negative_electrode_basis": "battinfo:negativeElectrodeBasis",
 }
@@ -349,9 +358,9 @@ from battinfo.jsonld import CONTEXT_UNIT_SYMBOLS as UNIT_SYMBOLS  # noqa: E402
 # record. Declaring xsd:integer here republishes raw epochs to DCMI/DCAT
 # harvesters as malformed dates (commit 4774c4d).
 TYPED_TERMS: dict[str, object] = {
-    "license":        {"@id": "dcterms:license",   "@type": "@id"},
-    "created_at":     {"@id": "dcterms:created",   "@type": "xsd:dateTime"},
-    "modified_at":    {"@id": "dcterms:modified",  "@type": "xsd:dateTime"},
+    "license": {"@id": "dcterms:license", "@type": "@id"},
+    "created_at": {"@id": "dcterms:created", "@type": "xsd:dateTime"},
+    "modified_at": {"@id": "dcterms:modified", "@type": "xsd:dateTime"},
     # Note: cell production/expiry are emitted directly as typed schema:productionDate
     # / schema:expires values (xsd:gYearMonth), so no extra aliases are declared here.
 }
@@ -364,7 +373,7 @@ TYPED_TERMS: dict[str, object] = {
 # non-schema-sourced terms.
 DCAT_SERIES_TERMS: dict[str, object] = {
     "DatasetSeries": "dcat:DatasetSeries",
-    "inSeries":      {"@id": "dcat:inSeries", "@type": "@id"},
+    "inSeries": {"@id": "dcat:inSeries", "@type": "@id"},
 }
 
 # ── Slots whose value is an IRI reference, not a literal ──────────────────────
@@ -379,7 +388,7 @@ def _compact_iri(raw_uri: str, prefixes: dict[str, str]) -> str:
     """Convert a full IRI to a compact prefix:local form, or return as-is."""
     for prefix, base in sorted(prefixes.items(), key=lambda kv: -len(kv[1])):
         if raw_uri.startswith(base):
-            return f"{prefix}:{raw_uri[len(base):]}"
+            return f"{prefix}:{raw_uri[len(base) :]}"
     return raw_uri
 
 
@@ -465,15 +474,23 @@ def build_context(schema_dir: Path) -> dict:
     # We keep all snake_case slots that have an EMMO/external IRI.
     keep = {}
     skip_prefixes = {
-        "sv_", "ci_", "ct_", "ts_", "t_", "tc_", "dev_",
-        "ds_", "dd_", "cs_", "poo_", "org_",
+        "sv_",
+        "ci_",
+        "ct_",
+        "ts_",
+        "t_",
+        "tc_",
+        "dev_",
+        "ds_",
+        "dd_",
+        "cs_",
+        "poo_",
+        "org_",
     }
     for slot_name, iri in slot_iris.items():
         if any(slot_name.startswith(p) for p in skip_prefixes):
             continue
-        keep[slot_name] = (
-            {"@id": iri, "@type": "@id"} if slot_name in IRI_VALUED_SLOTS else iri
-        )
+        keep[slot_name] = {"@id": iri, "@type": "@id"} if slot_name in IRI_VALUED_SLOTS else iri
 
     ctx: dict = {"@version": 1.1}
     ctx.update(PREFIXES)
@@ -490,12 +507,7 @@ def build_context(schema_dir: Path) -> dict:
     # its own definition under JSON-LD 1.1, otherwise a strict processor rejects the
     # whole context. None of our terms do, so forbid such keys outright. Namespace
     # prefixes (whose value is the base IRI) are exempt — they are the definition.
-    offenders = [
-        k for k, v in ctx.items()
-        if not k.startswith("@")
-        and k not in PREFIXES
-        and ("/" in k or ":" in k)
-    ]
+    offenders = [k for k, v in ctx.items() if not k.startswith("@") and k not in PREFIXES and ("/" in k or ":" in k)]
     if offenders:
         raise ValueError(
             "JSON-LD 1.1 forbids term keys in the form of an IRI "

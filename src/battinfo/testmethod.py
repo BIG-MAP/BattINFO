@@ -115,14 +115,11 @@ def _check_prefix(prefix: str, letter: str, allowed: Any, unit: str) -> None:
     prefix on a lower-case unit letter ("Ma": mega-ampere, or a mistyped mA?)."""
     if letter.islower() and prefix != prefix.lower():
         raise ExperimentSyntaxError(
-            f"Ambiguous unit '{unit}': write it in SI case, for example 'mA' for milliampere "
-            "or 'MA' for megaampere."
+            f"Ambiguous unit '{unit}': write it in SI case, for example 'mA' for milliampere or 'MA' for megaampere."
         )
     if prefix not in allowed:
         known = ", ".join(repr(p) for p in sorted(allowed) if p) or "none"
-        raise ExperimentSyntaxError(
-            f"Unsupported prefix '{prefix}' in unit '{unit}' (prefixes read here: {known})."
-        )
+        raise ExperimentSyntaxError(f"Unsupported prefix '{prefix}' in unit '{unit}' (prefixes read here: {known}).")
 
 
 def _current_density_unit(unit: Any) -> tuple[str, Fraction] | None:
@@ -140,9 +137,7 @@ def _current_density_unit(unit: Any) -> tuple[str, Fraction] | None:
     prefix, area = match.group("prefix"), match.group("per") or match.group("times") or ""
     _check_prefix(prefix, match.group("ampere"), _SI_PREFIX, unit)
     if area not in _AREA_CM2:
-        raise ExperimentSyntaxError(
-            f"Unsupported area unit '{area}m2' in '{unit}' (read here: m2, cm2, mm2)."
-        )
+        raise ExperimentSyntaxError(f"Unsupported area unit '{area}m2' in '{unit}' (read here: m2, cm2, mm2).")
     area_symbol, area_factor = _AREA_CM2[area]
     # Factor to mA/cm2: the prefix factor in A, times 1000 mA per A, per area in cm2.
     return f"{_CURRENT_SYMBOL[prefix]}/{area_symbol}", _SI_PREFIX[prefix] * 1000 / area_factor
@@ -354,12 +349,9 @@ def parse_termination(text: str) -> Termination:
         kind, qty = _parse_value(rhs)
         if kind not in _SHORTHAND_VALUE_KINDS.get(lhs, frozenset({quantity})):
             named = "current density" if default_unit == "mA/cm2" else quantity
-            raise ExperimentSyntaxError(
-                f"Termination '{text}' names {named} but its value parses as {kind}."
-            ) from None
+            raise ExperimentSyntaxError(f"Termination '{text}' names {named} but its value parses as {kind}.") from None
         value, unit = _require_value(qty, f"Termination '{text}'"), qty.unit
-    term = Termination(quantity=quantity, value=value, unit=unit,
-                       direction="below" if op == "<" else "above")
+    term = Termination(quantity=quantity, value=value, unit=unit, direction="below" if op == "<" else "above")
     _refuse_foreign_current_units([term], text)
     return term
 
@@ -418,8 +410,9 @@ class Step(BaseModel):
             for term in step.termination:
                 problem = _foreign_current_unit(term)
                 if problem:
-                    warnings.warn(f"Step {_step_name(step)} has {problem} It is kept as written.",
-                                  UserWarning, stacklevel=2)
+                    warnings.warn(
+                        f"Step {_step_name(step)} has {problem} It is kept as written.", UserWarning, stacklevel=2
+                    )
         return step
 
 
@@ -467,6 +460,7 @@ def _unit_factor(unit: str, text: str) -> tuple[str, str, Fraction]:
     kind, canonical, allowed = base
     _check_prefix(prefix, letter, allowed, unit)
     return kind, canonical, _SI_PREFIX[prefix]
+
 
 _TIME_TABLE: dict[str, float] = {
     "s": 1.0,

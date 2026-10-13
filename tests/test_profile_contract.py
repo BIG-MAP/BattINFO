@@ -77,4 +77,3 @@ def test_profile_references_current_mapping_assets() -> None:
 
     for field, expected in expected_paths.items():
         assert bindings[field]["binding_source"] == expected
-

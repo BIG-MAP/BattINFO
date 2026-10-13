@@ -6,6 +6,7 @@ was only in summary["index"]["failures"]. Such a record is now listed as
 failed with its error, and the closing line counts the failures and says what
 to do.
 """
+
 from __future__ import annotations
 
 from pathlib import Path

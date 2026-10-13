@@ -15,6 +15,7 @@ Each test reproduces one finding and pins its fix:
 - a file is parsed strictly (F8), errors say what to do (F9), and the
   parser's warnings are kept whole (F10).
 """
+
 from __future__ import annotations
 
 import ast
@@ -170,8 +171,9 @@ def test_upgrade_adds_the_state_values_the_bpx_migration_adds() -> None:
     # Nothing is invented for the electrolyte concentration.
     no_electrolyte = _doc()
     del no_electrolyte["Parameterisation"]["Electrolyte"]["Initial concentration [mol.m-3]"]
-    assert "Initial electrolyte concentration [mol.m-3]" not in (
-        upgrade_bpx(no_electrolyte).document["State"]["Initial conditions"]
+    assert (
+        "Initial electrolyte concentration [mol.m-3]"
+        not in (upgrade_bpx(no_electrolyte).document["State"]["Initial conditions"])
     )
     # Without any temperature the bpx default, 298.15 K.
     bare = _doc()
@@ -234,9 +236,10 @@ def test_a_record_of_a_v0_layout_v1_file_exports_like_its_runnable_copy() -> Non
 def test_the_layout_is_the_one_the_file_uses() -> None:
     assert _record()["parameter_set"]["model_context"]["layout"] == "v1"
     legacy = to_bpx(_example("BPX NMC111 pouch")).bpx  # a 0.1.0 file
-    assert from_bpx_parameters(legacy).to_parameter_set(virtual_cell=True)["parameter_set"][
-        "model_context"
-    ]["layout"] == "v0"
+    assert (
+        from_bpx_parameters(legacy).to_parameter_set(virtual_cell=True)["parameter_set"]["model_context"]["layout"]
+        == "v0"
+    )
     # The field decides the export, not the version: the same record told
     # "v1" writes its State as it holds it, with nothing added.
     record = from_bpx_parameters(FIXTURE).to_parameter_set(virtual_cell=True)
@@ -279,28 +282,71 @@ def _record() -> dict:
 def test_a_curve_x_axis_is_converted_or_refused() -> None:
     concentrations = [0.0, 0.5, 1.0, 2.0]
     conductivity = [0.0, 0.8, 1.0, 0.7]
-    mol_per_litre = _with_claim(_record(), "electrolyte", "ionic_conductivity", {"curve": {
-        "x_quantity": "concentration", "x_unit": "mol/L", "x": concentrations, "y": conductivity, "y_unit": "S/m",
-    }})
+    mol_per_litre = _with_claim(
+        _record(),
+        "electrolyte",
+        "ionic_conductivity",
+        {
+            "curve": {
+                "x_quantity": "concentration",
+                "x_unit": "mol/L",
+                "x": concentrations,
+                "y": conductivity,
+                "y_unit": "S/m",
+            }
+        },
+    )
     table = to_bpx(mol_per_litre, bpx_version="1.1.0").bpx["Parameterisation"]["Electrolyte"]["Conductivity [S.m-1]"]
     assert table == {"x": [0.0, 500.0, 1000.0, 2000.0], "y": conductivity}
 
-    unknown = _with_claim(_record(), "electrolyte", "ionic_conductivity", {"curve": {
-        "x_quantity": "concentration", "x_unit": "furlongs", "x": concentrations, "y": conductivity, "y_unit": "S/m",
-    }})
+    unknown = _with_claim(
+        _record(),
+        "electrolyte",
+        "ionic_conductivity",
+        {
+            "curve": {
+                "x_quantity": "concentration",
+                "x_unit": "furlongs",
+                "x": concentrations,
+                "y": conductivity,
+                "y_unit": "S/m",
+            }
+        },
+    )
     with pytest.raises(ValueError, match="claim 'ionic_conductivity' \\(electrolyte\\) x axis is in 'furlongs'"):
         to_bpx(unknown, bpx_version="1.1.0")
-    unstated = _with_claim(_record(), "electrolyte", "ionic_conductivity", {"curve": {
-        "x_quantity": "concentration", "x": concentrations, "y": conductivity, "y_unit": "S/m",
-    }})
+    unstated = _with_claim(
+        _record(),
+        "electrolyte",
+        "ionic_conductivity",
+        {
+            "curve": {
+                "x_quantity": "concentration",
+                "x": concentrations,
+                "y": conductivity,
+                "y_unit": "S/m",
+            }
+        },
+    )
     with pytest.raises(ValueError, match="no x_unit"):
         to_bpx(unstated, bpx_version="1.1.0")
 
 
 def test_a_curve_against_another_quantity_is_refused() -> None:
-    record = _with_claim(_record(), "negative_material", "solid_diffusivity", {"curve": {
-        "x_quantity": "temperature", "x_unit": "K", "x": [273.0, 298.0], "y": [1e-15, 3e-15], "y_unit": "m2/s",
-    }})
+    record = _with_claim(
+        _record(),
+        "negative_material",
+        "solid_diffusivity",
+        {
+            "curve": {
+                "x_quantity": "temperature",
+                "x_unit": "K",
+                "x": [273.0, 298.0],
+                "y": [1e-15, 3e-15],
+                "y_unit": "m2/s",
+            }
+        },
+    )
     with pytest.raises(ValueError, match="against 'temperature'.*tabulates against 'stoichiometry'"):
         to_bpx(record, bpx_version="1.1.0")
 
@@ -308,11 +354,35 @@ def test_a_curve_against_another_quantity_is_refused() -> None:
 @pytest.mark.parametrize(
     ("part", "parameter", "quantity", "field", "expected"),
     [
-        ("state", "initial_temperature", {"value": 25, "unit": "degC"}, ("State", "Initial conditions", "Initial temperature [K]"), 298.15),
-        ("negative_electrode", "porosity", {"value": 33, "unit": "%"}, ("Parameterisation", "Negative electrode", "Porosity"), 0.33),
+        (
+            "state",
+            "initial_temperature",
+            {"value": 25, "unit": "degC"},
+            ("State", "Initial conditions", "Initial temperature [K]"),
+            298.15,
+        ),
+        (
+            "negative_electrode",
+            "porosity",
+            {"value": 33, "unit": "%"},
+            ("Parameterisation", "Negative electrode", "Porosity"),
+            0.33,
+        ),
         ("cell", "density", {"value": 1.847}, ("Parameterisation", "Cell", "Density [kg.m-3]"), 1847.0),
-        ("cell", "nominal_capacity", {"value": 12500, "unit": "mAh"}, ("Parameterisation", "Cell", "Nominal cell capacity [A.h]"), 12.5),
-        ("state", "initial_concentration", {"value": 1.0, "unit": "mol/L"}, ("State", "Initial conditions", "Initial electrolyte concentration [mol.m-3]"), 1000.0),
+        (
+            "cell",
+            "nominal_capacity",
+            {"value": 12500, "unit": "mAh"},
+            ("Parameterisation", "Cell", "Nominal cell capacity [A.h]"),
+            12.5,
+        ),
+        (
+            "state",
+            "initial_concentration",
+            {"value": 1.0, "unit": "mol/L"},
+            ("State", "Initial conditions", "Initial electrolyte concentration [mol.m-3]"),
+            1000.0,
+        ),
     ],
 )
 def test_a_quantity_is_converted_to_the_bpx_unit(part, parameter, quantity, field, expected) -> None:
@@ -370,8 +440,11 @@ def test_hysteresis_values_are_claims_and_the_rest_is_recorded() -> None:
     negative = _parts(record)["negative_material"]
     branches = sorted(c["curve"].get("branch", "") for c in negative if c["parameter"] == "ocp")
     assert branches == ["", "delithiation", "lithiation"]
-    assert {"parameter": "ocp_hysteresis_decay_constant", "quantity": {"value": 0.1, "unit": "1"},
-            "provenance_class": "fitted"} in negative
+    assert {
+        "parameter": "ocp_hysteresis_decay_constant",
+        "quantity": {"value": 0.1, "unit": "1"},
+        "provenance_class": "fitted",
+    } in negative
     assert record["parameter_set"]["not_imported"] == [
         "State/Initial conditions/Initial hysteresis state: Negative electrode",
         "State/Degradation",
@@ -478,7 +551,12 @@ def test_an_iri_its_fingerprint_does_not_give_is_an_error(policy: str) -> None:
 def test_file_rules_are_errors_under_every_policy(policy: str) -> None:
     record = _file_record()
     source = record["parameter_set"]["distributions"][0]
-    mirror = {**source, "role": "mirror", "content_url": MIRROR_URL, "checksum": {"algorithm": "sha256", "value": "f" * 64}}
+    mirror = {
+        **source,
+        "role": "mirror",
+        "content_url": MIRROR_URL,
+        "checksum": {"algorithm": "sha256", "value": "f" * 64},
+    }
     bad_mirror = copy.deepcopy(record)
     bad_mirror["parameter_set"]["distributions"].append(mirror)
     assert "semantic.parameter_file_mirror_checksum_differs" in {
@@ -543,7 +621,9 @@ def test_a_corrected_file_names_the_record_it_supersedes() -> None:
     assert validate_record_report(newer).ok
     # Claim batches carry supersedes too (IDENTIFIER_POLICY 6.3).
     batch = create_parameter_set(
-        name="Chen 2020 - graphite", material_kind="graphite", supersedes=OLD_IRI,
+        name="Chen 2020 - graphite",
+        material_kind="graphite",
+        supersedes=OLD_IRI,
         claims=[{"parameter": "particle_radius", "quantity": {"value": 5.86e-6, "unit": "m"}}],
     )
     assert batch["parameter_set"]["supersedes"] == OLD_IRI
@@ -562,18 +642,24 @@ def test_the_workspace_takes_a_ready_built_record(tmp_path: Path) -> None:
     draft = result.to_parameter_set(virtual_cell=True)
     ws.add("parameter_set", record=draft)
     batch = create_parameter_set(
-        name="Chen 2020 - graphite", material_kind="graphite",
+        name="Chen 2020 - graphite",
+        material_kind="graphite",
         claims=[{"parameter": "particle_radius", "quantity": {"value": 5.86e-6, "unit": "m"}}],
     )
     ws.add("parameter_set", record=batch)
     saved = ws.save()
     assert {item["id"] for item in saved["parameter_sets"]} == {
-        draft["parameter_set"]["id"], batch["parameter_set"]["id"],
+        draft["parameter_set"]["id"],
+        batch["parameter_set"]["id"],
     }
     # ws.submit validates under the publisher policy before it sends
     # anything: a parameter file without its source file is refused.
-    credentials = {"registry_url": "https://registry.example.org", "api_key": "k",
-                   "workspace_id": "w", "publisher_id": "p"}
+    credentials = {
+        "registry_url": "https://registry.example.org",
+        "api_key": "k",
+        "workspace_id": "w",
+        "publisher_id": "p",
+    }
     with pytest.raises(SubmitError) as caught:
         ws.submit(**credentials)
     assert [f["status"] for f in caught.value.failed] == ["invalid"]
@@ -582,9 +668,9 @@ def test_the_workspace_takes_a_ready_built_record(tmp_path: Path) -> None:
     source = bpx_file_distribution(FIXTURE, content_url=SOURCE_URL)
     ws.add("parameter_set", record=result.to_parameter_set(virtual_cell=True, distributions=[source]))
     ws.save()
-    stored = json.loads(next((tmp_path / "lab").rglob(f"*{draft['parameter_set']['id'][-19:]}.json")).read_text(
-        encoding="utf-8"
-    ))
+    stored = json.loads(
+        next((tmp_path / "lab").rglob(f"*{draft['parameter_set']['id'][-19:]}.json")).read_text(encoding="utf-8")
+    )
     assert stored["parameter_set"]["distributions"][0]["role"] == "source"
     assert validate_record_report(stored, policy="publisher").ok
 
@@ -627,8 +713,12 @@ def test_a_byte_order_mark_is_read_and_still_checksummed() -> None:
 def test_numbers_beyond_a_double_and_nan_are_refused_in_words() -> None:
     text = FIXTURE.read_text(encoding="utf-8")
     key = '"Electrode area [m2]":'
-    for literal, words in (("1E400", "too large for a JSON number"), ("1" + "0" * 400, "too large"),
-                           ("NaN", "not JSON"), ("-Infinity", "not JSON")):
+    for literal, words in (
+        ("1E400", "too large for a JSON number"),
+        ("1" + "0" * 400, "too large"),
+        ("NaN", "not JSON"),
+        ("-Infinity", "not JSON"),
+    ):
         bad = text.replace(key, f'"X [m]": {literal}, {key}', 1).encode("utf-8")
         with pytest.raises(ValueError, match=words) as caught:
             from_bpx_parameters(bad)
@@ -641,9 +731,17 @@ def test_numbers_beyond_a_double_and_nan_are_refused_in_words() -> None:
 def test_naming_the_material_of_a_blended_electrode_says_so() -> None:
     doc = _v1_doc()
     negative = doc["Parameterisation"]["Negative electrode"]
-    material_fields = ["Minimum stoichiometry", "Maximum stoichiometry", "Maximum concentration [mol.m-3]",
-                       "Particle radius [m]", "Diffusivity [m2.s-1]", "Diffusivity activation energy [J.mol-1]",
-                       "OCP [V]", "Entropic change coefficient [V.K-1]", "Reaction rate constant [mol.m-2.s-1]"]
+    material_fields = [
+        "Minimum stoichiometry",
+        "Maximum stoichiometry",
+        "Maximum concentration [mol.m-3]",
+        "Particle radius [m]",
+        "Diffusivity [m2.s-1]",
+        "Diffusivity activation energy [J.mol-1]",
+        "OCP [V]",
+        "Entropic change coefficient [V.K-1]",
+        "Reaction rate constant [mol.m-2.s-1]",
+    ]
     negative["Particle"] = {"Graphite": {f: negative.pop(f) for f in material_fields}}
     res = from_bpx_parameters(doc)
     with pytest.raises(ValueError, match="negative electrode is blended \\(Graphite\\)"):
@@ -660,7 +758,9 @@ def test_only_a_material_part_has_a_phase() -> None:
     body = record["parameter_set"]
     with pytest.raises(ValueError, match="only a material part"):
         create_parameter_set(
-            name="x", virtual_cell=True, parameters_sha256=body["parameters_sha256"],
+            name="x",
+            virtual_cell=True,
+            parameters_sha256=body["parameters_sha256"],
             parts=[{**body["parts"][0], "phase": "Primary"}],
         )
     phased = copy.deepcopy(record)

@@ -5,6 +5,7 @@ Records written on an ASCII keyboard use um, mg/cm^2, mOhm or degC; before this
 normalisation those fell through to schema:unitText and lost the unit link. The
 normaliser must accept those spellings on both emitter paths (domain-battery IRIs and
 converter-compatible tokens) without rewriting canonical input."""
+
 from __future__ import annotations
 
 import json
@@ -169,9 +170,7 @@ def _electrode_spec(unit: str) -> dict:
             "polarity": "positive",
             "coating": {
                 "component": {
-                    "active_material": [
-                        {"name": "LFP", "property": {"mass_fraction": {"value": 0.94, "unit": "1"}}}
-                    ]
+                    "active_material": [{"name": "LFP", "property": {"mass_fraction": {"value": 0.94, "unit": "1"}}}]
                 },
                 "property": {"thickness": {"value": 60, "unit": unit}},
             },

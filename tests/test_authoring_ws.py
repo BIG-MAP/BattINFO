@@ -28,12 +28,18 @@ from battinfo.ws import (  # noqa: E402
 @pytest.fixture(autouse=True)
 def _clean_battinfo_env(monkeypatch: pytest.MonkeyPatch) -> None:
     """Isolate BATTINFO_* env vars so login() tests don't leak identity across tests."""
-    for var in ("BATTINFO_API_KEY", "BATTINFO_WORKSPACE_ID", "BATTINFO_PUBLISHER_ID",
-                "BATTINFO_REGISTRY_URL", "BATTINFO_ADMIN_TOKEN"):
+    for var in (
+        "BATTINFO_API_KEY",
+        "BATTINFO_WORKSPACE_ID",
+        "BATTINFO_PUBLISHER_ID",
+        "BATTINFO_REGISTRY_URL",
+        "BATTINFO_ADMIN_TOKEN",
+    ):
         monkeypatch.delenv(var, raising=False)
 
 
 # ── test-kind validation (T1.3) ───────────────────────────────────────────────
+
 
 def test_normalize_test_kind_canonical() -> None:
     assert _normalize_test_kind("cycling") == "cycling"
@@ -47,7 +53,7 @@ def test_normalize_test_kind_separators() -> None:
 
 
 def test_normalize_test_kind_aliases() -> None:
-    assert _normalize_test_kind("calendar_aging") == "calendar_ageing"   # American
+    assert _normalize_test_kind("calendar_aging") == "calendar_ageing"  # American
     assert _normalize_test_kind("rate") == "rate_capability"
     assert _normalize_test_kind("cycle") == "cycling"
 
@@ -63,6 +69,7 @@ def test_normalize_test_kind_invalid_lists_values() -> None:
 
 def test_test_kind_values_match_enum() -> None:
     from battinfo.bundle import BatteryTestType
+
     assert set(_test_kind_values()) == {m.value for m in BatteryTestType}
 
 
@@ -87,6 +94,7 @@ def test_add_test_without_type_or_spec_raises(tmp_path: Path) -> None:
 
 # ── credentials + login (T1.1) ────────────────────────────────────────────────
 
+
 def test_setup_creates_credentials_and_gitignore(tmp_path: Path) -> None:
     ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
     cred = ws.setup()
@@ -101,10 +109,13 @@ def test_set_credentials_merges_without_clobbering(tmp_path: Path) -> None:
     ws.setup()
     # Pre-seed an unrelated credential the merge must preserve.
     cred = ws._credentials_path()
-    cred.write_text(cred.read_text(encoding="utf-8").replace(
-        "R2_BUCKET              = battinfo-public",
-        "R2_BUCKET              = my-private-bucket",
-    ), encoding="utf-8")
+    cred.write_text(
+        cred.read_text(encoding="utf-8").replace(
+            "R2_BUCKET              = battinfo-public",
+            "R2_BUCKET              = my-private-bucket",
+        ),
+        encoding="utf-8",
+    )
 
     ws._set_credentials({"BATTINFO_API_KEY": "secret-key-123"})
     text = cred.read_text(encoding="utf-8")
@@ -135,11 +146,13 @@ def test_login_uses_registry_profile(tmp_path: Path, monkeypatch: pytest.MonkeyP
     monkeypatch.setattr(
         urllib.request,
         "urlopen",
-        _fake_urlopen_returning({
-            "publisher_id": "alice-lab",
-            "workspace_id": "alice-workspace",
-            "display_name": "Alice Researcher",
-        }),
+        _fake_urlopen_returning(
+            {
+                "publisher_id": "alice-lab",
+                "workspace_id": "alice-workspace",
+                "display_name": "Alice Researcher",
+            }
+        ),
     )
     ws = AuthoringWorkspace(root=tmp_path, registry_url="https://registry.example")
     result = ws.login(api_key="key-abc")
@@ -149,9 +162,7 @@ def test_login_uses_registry_profile(tmp_path: Path, monkeypatch: pytest.MonkeyP
     assert "alice-workspace" in cred and "key-abc" in cred
 
 
-def test_login_degrades_gracefully_without_me_endpoint(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_login_degrades_gracefully_without_me_endpoint(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     import urllib.request
 
     def _boom(req, timeout=0):  # noqa: ARG001
@@ -174,9 +185,8 @@ def test_login_rejects_empty_key(tmp_path: Path) -> None:
 
 # ── login() must not leak identity through process-global state (3.7) ─────────
 
-def test_login_does_not_mutate_process_environment(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+
+def test_login_does_not_mutate_process_environment(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     import os
     import urllib.request
 
@@ -195,9 +205,7 @@ def test_login_does_not_mutate_process_environment(
     assert ws._credential("BATTINFO_WORKSPACE_ID") == "alice-workspace"
 
 
-def test_login_identity_is_instance_scoped(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_login_identity_is_instance_scoped(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     import urllib.request
 
     monkeypatch.setattr(
@@ -215,9 +223,7 @@ def test_login_identity_is_instance_scoped(
     assert ws_b.whoami() == {}
 
 
-def test_credential_session_wins_over_environment(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_credential_session_wins_over_environment(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     import urllib.request
 
     monkeypatch.setenv("BATTINFO_WORKSPACE_ID", "env-workspace")
@@ -255,6 +261,7 @@ def test_login_identity_survives_into_a_new_session_via_credentials_file(
 
 # ── discovery helpers (T5.2/T5.3) — must not raise ─────────────────────────────
 
+
 def test_commands_runs(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
     ws.commands()
@@ -277,6 +284,7 @@ def test_bdf_columns_lists_canonical_names(tmp_path: Path) -> None:
 
 # ── convert() guidance path (T1.2) ─────────────────────────────────────────────
 
+
 def test_convert_no_files_prints_help(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     pytest.importorskip("bdf")
     ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
@@ -297,6 +305,7 @@ def test_convert_flags_unsupported_arbin(tmp_path: Path, capsys: pytest.CaptureF
 
 # ── convert_csv() (T4.2) ───────────────────────────────────────────────────────
 
+
 def test_convert_csv_remaps_columns(tmp_path: Path) -> None:
     pd = pytest.importorskip("pandas")
     src = tmp_path / "maccor.csv"
@@ -314,6 +323,7 @@ def test_convert_csv_remaps_columns(tmp_path: Path) -> None:
 
 
 # ── submit() _glob ordering regression (latent NameError) ──────────────────────
+
 
 def test_submit_does_not_crash_on_cell_spec_glob(tmp_path: Path) -> None:
     """Regression: `_glob` was referenced in the cell-spec loop before its
@@ -401,13 +411,14 @@ def test_add_cell_names_vs_serials_are_distinct(tmp_path: Path) -> None:
 
 def test_cell_name_persists_in_record_without_serial(tmp_path: Path) -> None:
     import json as _json
+
     ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
     spec = _write_spec(ws, tmp_path)
     ws.add("cell", spec=spec, names=["lab-tpejqj"])
     ws.save()
-    rec = _json.loads(
-        next((ws._ws.source_root / "cell-instance").glob("*.json")).read_text(encoding="utf-8")
-    )["cell_instance"]
+    rec = _json.loads(next((ws._ws.source_root / "cell-instance").glob("*.json")).read_text(encoding="utf-8"))[
+        "cell_instance"
+    ]
     assert rec.get("name") == "lab-tpejqj"
     assert "serial_number" not in rec, "no serial should be persisted when none was given"
 
@@ -437,22 +448,18 @@ def test_records_context_has_no_iri_form_term_keys() -> None:
     """Regression: a term key containing '/' or ':' makes the whole context invalid
     under JSON-LD 1.1 ('term in form of IRI must expand to definition')."""
     ctx = json.loads(
-        (ROOT / "src" / "battinfo" / "data" / "context" / "records.context.json")
-        .read_text(encoding="utf-8")
+        (ROOT / "src" / "battinfo" / "data" / "context" / "records.context.json").read_text(encoding="utf-8")
     )["@context"]
     prefixes = {k for k, v in ctx.items() if isinstance(v, str) and v.endswith(("#", "/"))}
-    offenders = [
-        k for k in ctx
-        if not k.startswith("@") and k not in prefixes and ("/" in k or ":" in k)
-    ]
+    offenders = [k for k in ctx if not k.startswith("@") and k not in prefixes and ("/" in k or ":" in k)]
     assert not offenders, f"IRI-form term keys break JSON-LD 1.1: {offenders}"
 
 
 def test_validate_jsonld_rejects_iri_form_term() -> None:
     from battinfo import validate_jsonld
+
     with pytest.raises(ValueError, match="not valid JSON-LD"):
-        validate_jsonld({"@context": {"@version": 1.1, "Wh/kg": "https://w3id.org/emmo#X"},
-                         "@graph": []})
+        validate_jsonld({"@context": {"@version": 1.1, "Wh/kg": "https://w3id.org/emmo#X"}, "@graph": []})
 
 
 def test_built_zenodo_jsonld_is_valid_and_carries_raw_provenance(tmp_path: Path) -> None:
@@ -463,14 +470,11 @@ def test_built_zenodo_jsonld_is_valid_and_carries_raw_provenance(tmp_path: Path)
     ws.add("cell", spec=spec, names=["c1"])
     (tmp_path / "c1.bdf.csv").write_text("a,b\n0,1\n", encoding="utf-8")
     (tmp_path / "c1.ndax").write_bytes(b"RAW-INSTRUMENT-BYTES")  # original source
-    ws.add("test", type="capacity_check", cell="c1",
-           data="c1.bdf.csv", raw="c1.ndax")
+    ws.add("test", type="capacity_check", cell="c1", data="c1.bdf.csv", raw="c1.ndax")
     ws.save()
 
     # Dataset record carries both roles.
-    ds = json.loads(
-        next((ws._ws.source_root / "dataset").glob("*.json")).read_text(encoding="utf-8")
-    )["dataset"]
+    ds = json.loads(next((ws._ws.source_root / "dataset").glob("*.json")).read_text(encoding="utf-8"))["dataset"]
     roles = {d.get("role") for d in ds["distributions"]}
     assert roles == {"processed", "raw"}
 
@@ -499,8 +503,7 @@ def test_zenodo_jsonld_is_catalog_of_per_test_datasets(tmp_path: Path) -> None:
     for c in ("c1", "c2"):
         (tmp_path / f"{c}.bdf.csv").write_text("a,b\n0,1\n", encoding="utf-8")
         (tmp_path / f"{c}.ndax").write_bytes(b"RAW")
-        ws.add("test", type="capacity_check", cell=c,
-               data=f"{c}.bdf.csv", raw=f"{c}.ndax")
+        ws.add("test", type="capacity_check", cell=c, data=f"{c}.bdf.csv", raw=f"{c}.ndax")
     ws.save()
 
     doc = ws._build_zenodo_jsonld(
@@ -519,8 +522,7 @@ def test_zenodo_jsonld_is_catalog_of_per_test_datasets(tmp_path: Path) -> None:
     assert "dcat:distribution" not in catalog
 
     # Two member datasets, each with exactly its own two distributions.
-    ds_nodes = [n for n in graph
-                if "dcat:Dataset" in n.get("@type", []) and "dcat:distribution" in n]
+    ds_nodes = [n for n in graph if "dcat:Dataset" in n.get("@type", []) and "dcat:distribution" in n]
     assert {n["@id"] for n in ds_nodes} == members
     for n in ds_nodes:
         names = {d["schema:name"] for d in n["dcat:distribution"]}
@@ -543,6 +545,7 @@ def test_zenodo_jsonld_is_catalog_of_per_test_datasets(tmp_path: Path) -> None:
 # resolves to nothing. These operationalise the gold-standard goal as executable
 # regression guards.
 
+
 def _build_doc(tmp_path: Path) -> dict:
     ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
     spec = _write_spec(ws, tmp_path)
@@ -556,7 +559,8 @@ def _build_doc(tmp_path: Path) -> dict:
         prereserved_doi="10.5281/zenodo.1",
         record_url="https://sandbox.zenodo.org/records/1",
         data_filenames=["c1.bdf.csv", "c1.ndax"],
-        title="t", description="d",
+        title="t",
+        description="d",
         creators=[{"name": "A", "affiliation": "Org"}],
         license="CC-BY-4.0",
     )
@@ -608,11 +612,10 @@ def test_prov_graph_is_self_complete(tmp_path: Path) -> None:
     """A PROV-only consumer reaches the cell, spec and output dataset of every test."""
     graph = _build_doc(tmp_path)["@graph"]
     node_ids = {n["@id"] for n in graph if "@id" in n}
-    tests = [n for n in graph if "prov:Activity" in n.get("@type", [])
-             and "BatteryTest" in n.get("@type", [])]
+    tests = [n for n in graph if "prov:Activity" in n.get("@type", []) and "BatteryTest" in n.get("@type", [])]
     assert tests
     for t in tests:
-        used = {u["@id"] for u in t["prov:used"]}            # cell (+ spec if any)
+        used = {u["@id"] for u in t["prov:used"]}  # cell (+ spec if any)
         generated = {g["@id"] for g in t["prov:generated"]}  # output dataset(s)
         # The cell (also under hasTestObject) is always reachable via prov:used,
         # and the output dataset(s) via prov:generated — so PROV alone is complete.
@@ -626,38 +629,93 @@ def test_prov_graph_is_self_complete(tmp_path: Path) -> None:
 def test_tier3_richness_structured_conditions_versioning_keywords_ror() -> None:
     """Structured test conditions, versioning, auto keywords, and ROR org ids."""
     rs = {
-        "cell-spec": [{"cell_spec": {"id": "https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd",
-                                    "name": "X", "model": "M", "manufacturer": {"name": "SINTEF"},
-                                    "cell_format": "cylindrical", "chemistry": "nmc"}, "properties": {}}],
-        "cell-instance": [{"cell_instance": {"id": "https://w3id.org/battinfo/cell/c1",
-                                             "cell_spec_id": "https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd",
-                                             "name": "c1"}}],
-        "test": [{"test": {"id": "https://w3id.org/battinfo/test/t1",
-                           "cell_id": "https://w3id.org/battinfo/cell/c1", "kind": "capacity_check",
-                           "protocol_name": "CC", "dataset_ids": ["https://w3id.org/battinfo/dataset/d1"],
-                           "protocol_id": "https://w3id.org/battinfo/spec/qhkt"}}],
-        "test-protocol": [{"test_spec": {"id": "https://w3id.org/battinfo/spec/qhkt", "name": "CC",
-                                         "kind": "capacity_check"},
-                           "method": [{"mode": "group", "count": 50, "steps": [
-                               {"mode": "cc", "direction": "discharge",
+        "cell-spec": [
+            {
+                "cell_spec": {
+                    "id": "https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd",
+                    "name": "X",
+                    "model": "M",
+                    "manufacturer": {"name": "SINTEF"},
+                    "cell_format": "cylindrical",
+                    "chemistry": "nmc",
+                },
+                "properties": {},
+            }
+        ],
+        "cell-instance": [
+            {
+                "cell_instance": {
+                    "id": "https://w3id.org/battinfo/cell/c1",
+                    "cell_spec_id": "https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd",
+                    "name": "c1",
+                }
+            }
+        ],
+        "test": [
+            {
+                "test": {
+                    "id": "https://w3id.org/battinfo/test/t1",
+                    "cell_id": "https://w3id.org/battinfo/cell/c1",
+                    "kind": "capacity_check",
+                    "protocol_name": "CC",
+                    "dataset_ids": ["https://w3id.org/battinfo/dataset/d1"],
+                    "protocol_id": "https://w3id.org/battinfo/spec/qhkt",
+                }
+            }
+        ],
+        "test-protocol": [
+            {
+                "test_spec": {"id": "https://w3id.org/battinfo/spec/qhkt", "name": "CC", "kind": "capacity_check"},
+                "method": [
+                    {
+                        "mode": "group",
+                        "count": 50,
+                        "steps": [
+                            {
+                                "mode": "cc",
+                                "direction": "discharge",
                                 "setpoints": {"c_rate": {"value": 0.05, "unit": "A/Ah"}},
-                                "termination": [{"quantity": "voltage", "direction": "below",
-                                                 "value": 0.9, "unit": "V"}]}]}],
-                           "conditions": {"temperature": {"value": 25, "unit": "degC"}}}],
-        "dataset": [{"dataset": {"id": "https://w3id.org/battinfo/dataset/d1", "name": "d1",
-                                 "distributions": [{"content_url": "f.csv", "encoding_format": "text/csv",
-                                                    "role": "processed", "checksum": {"value": "a" * 64}}]}}],
+                                "termination": [
+                                    {"quantity": "voltage", "direction": "below", "value": 0.9, "unit": "V"}
+                                ],
+                            }
+                        ],
+                    }
+                ],
+                "conditions": {"temperature": {"value": 25, "unit": "degC"}},
+            }
+        ],
+        "dataset": [
+            {
+                "dataset": {
+                    "id": "https://w3id.org/battinfo/dataset/d1",
+                    "name": "d1",
+                    "distributions": [
+                        {
+                            "content_url": "f.csv",
+                            "encoding_format": "text/csv",
+                            "role": "processed",
+                            "checksum": {"value": "a" * 64},
+                        }
+                    ],
+                }
+            }
+        ],
     }
     doc = AuthoringWorkspace._assemble_zenodo_jsonld(
-        rs, zenodo_record_id=0, prereserved_doi="10.5281/zenodo.1",
-        record_url="https://zenodo.org/records/1", data_filenames=["f.csv"], title="T",
+        rs,
+        zenodo_record_id=0,
+        prereserved_doi="10.5281/zenodo.1",
+        record_url="https://zenodo.org/records/1",
+        data_filenames=["f.csv"],
+        title="T",
         creators=[{"name": "A", "affiliation": "SINTEF", "affiliation_ror": "01f677e56"}],
-        version="2", is_version_of="https://zenodo.org/records/concept",
+        version="2",
+        is_version_of="https://zenodo.org/records/concept",
     )
     plan = next(n for n in doc["@graph"] if "prov:Plan" in (n.get("@type") or []))
     cat = next(n for n in doc["@graph"] if "dcat:Catalog" in (n.get("@type") or []))
-    prov = next(n for n in doc["@graph"]
-                if {"prov:Agent", "schema:Organization"} <= set(n.get("@type") or []))
+    prov = next(n for n in doc["@graph"] if {"prov:Agent", "schema:Organization"} <= set(n.get("@type") or []))
 
     # The method is an EMMO process graph: a 50× IterativeWorkflow wrapping the CC step.
     group = plan["hasTask"][0]
@@ -673,7 +731,7 @@ def test_tier3_richness_structured_conditions_versioning_keywords_ror() -> None:
     assert prop["@type"] == "ConventionalProperty"
     assert prop["hasNumericalPart"]["hasNumberValue"] == 25
     assert prop["rdfs:label"] == "temperature"
-    assert "schema:additionalProperty" not in plan   # all names mapped → no fallback
+    assert "schema:additionalProperty" not in plan  # all names mapped → no fallback
     assert {"battery", "capacity_check", "cylindrical", "nmc", "SINTEF"} <= set(cat["schema:keywords"])
     assert cat["schema:version"] == "2"
     assert cat["dcterms:isVersionOf"]["@id"] == "https://zenodo.org/records/concept"
@@ -686,28 +744,76 @@ def test_dcat_richness_dcterms_bytesize_derivation_mediatype() -> None:
     provenance (processed file derived from the raw instrument file)."""
     ds_id = "https://w3id.org/battinfo/dataset/d1"
     rs = {
-        "cell-spec": [{"cell_spec": {"id": "https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd",
-                                    "name": "X", "model": "M", "manufacturer": {"name": "SINTEF"},
-                                    "cell_format": "cylindrical", "chemistry": "nmc"}, "properties": {}}],
-        "cell-instance": [{"cell_instance": {"id": "https://w3id.org/battinfo/cell/c1",
-                                             "cell_spec_id": "https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd",
-                                             "name": "c1"}}],
-        "test": [{"test": {"id": "https://w3id.org/battinfo/test/t1",
-                           "cell_id": "https://w3id.org/battinfo/cell/c1", "kind": "capacity_check",
-                           "protocol_name": "CC", "dataset_ids": [ds_id]}}],
+        "cell-spec": [
+            {
+                "cell_spec": {
+                    "id": "https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd",
+                    "name": "X",
+                    "model": "M",
+                    "manufacturer": {"name": "SINTEF"},
+                    "cell_format": "cylindrical",
+                    "chemistry": "nmc",
+                },
+                "properties": {},
+            }
+        ],
+        "cell-instance": [
+            {
+                "cell_instance": {
+                    "id": "https://w3id.org/battinfo/cell/c1",
+                    "cell_spec_id": "https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd",
+                    "name": "c1",
+                }
+            }
+        ],
+        "test": [
+            {
+                "test": {
+                    "id": "https://w3id.org/battinfo/test/t1",
+                    "cell_id": "https://w3id.org/battinfo/cell/c1",
+                    "kind": "capacity_check",
+                    "protocol_name": "CC",
+                    "dataset_ids": [ds_id],
+                }
+            }
+        ],
         "test-protocol": [],
-        "dataset": [{"dataset": {"id": ds_id, "name": "d1", "distributions": [
-            {"name": "f.bdf.csv", "content_url": "f.bdf.csv", "encoding_format": "text/csv",
-             "role": "processed", "checksum": {"value": "a" * 64}, "content_size": "12345"},
-            {"name": "f.ndax", "content_url": "f.ndax", "encoding_format": "application/octet-stream",
-             "role": "raw", "checksum": {"value": "b" * 64}, "content_size": "999",
-             "description": "Original instrument data file (pre-conversion source for f.bdf.csv)."},
-        ]}}],
+        "dataset": [
+            {
+                "dataset": {
+                    "id": ds_id,
+                    "name": "d1",
+                    "distributions": [
+                        {
+                            "name": "f.bdf.csv",
+                            "content_url": "f.bdf.csv",
+                            "encoding_format": "text/csv",
+                            "role": "processed",
+                            "checksum": {"value": "a" * 64},
+                            "content_size": "12345",
+                        },
+                        {
+                            "name": "f.ndax",
+                            "content_url": "f.ndax",
+                            "encoding_format": "application/octet-stream",
+                            "role": "raw",
+                            "checksum": {"value": "b" * 64},
+                            "content_size": "999",
+                            "description": "Original instrument data file (pre-conversion source for f.bdf.csv).",
+                        },
+                    ],
+                }
+            }
+        ],
     }
     doc = AuthoringWorkspace._assemble_zenodo_jsonld(
-        rs, zenodo_record_id=0, prereserved_doi="10.5281/zenodo.1",
+        rs,
+        zenodo_record_id=0,
+        prereserved_doi="10.5281/zenodo.1",
         record_url="https://zenodo.org/records/1",
-        data_filenames=["f.bdf.csv", "f.ndax"], title="My title", description="desc",
+        data_filenames=["f.bdf.csv", "f.ndax"],
+        title="My title",
+        description="desc",
         creators=[{"name": "A", "affiliation": "SINTEF", "affiliation_ror": "01f677e56"}],
         license="cc-by-4.0",
     )
@@ -738,38 +844,79 @@ def test_timing_doi_and_top_level_distribution() -> None:
     datePublished), DOI sameAs on the catalog, and downloads surfaced at the top level."""
     ds_id = "https://w3id.org/battinfo/dataset/d1"
     rs = {
-        "cell-spec": [{"cell_spec": {"id": "https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd",
-                                    "name": "X", "model": "M", "manufacturer": {"name": "SINTEF"},
-                                    "cell_format": "cylindrical", "chemistry": "nmc"}, "properties": {}}],
-        "cell-instance": [{"cell_instance": {"id": "https://w3id.org/battinfo/cell/c1",
-                                             "cell_spec_id": "https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd",
-                                             "name": "c1"}}],
-        "test": [{"test": {"id": "https://w3id.org/battinfo/test/t1",
-                           "cell_id": "https://w3id.org/battinfo/cell/c1", "kind": "capacity_check",
-                           "protocol_name": "CC", "dataset_ids": [ds_id],
-                           "started_at": 1700000000, "ended_at": 1700086400}}],
+        "cell-spec": [
+            {
+                "cell_spec": {
+                    "id": "https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd",
+                    "name": "X",
+                    "model": "M",
+                    "manufacturer": {"name": "SINTEF"},
+                    "cell_format": "cylindrical",
+                    "chemistry": "nmc",
+                },
+                "properties": {},
+            }
+        ],
+        "cell-instance": [
+            {
+                "cell_instance": {
+                    "id": "https://w3id.org/battinfo/cell/c1",
+                    "cell_spec_id": "https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd",
+                    "name": "c1",
+                }
+            }
+        ],
+        "test": [
+            {
+                "test": {
+                    "id": "https://w3id.org/battinfo/test/t1",
+                    "cell_id": "https://w3id.org/battinfo/cell/c1",
+                    "kind": "capacity_check",
+                    "protocol_name": "CC",
+                    "dataset_ids": [ds_id],
+                    "started_at": 1700000000,
+                    "ended_at": 1700086400,
+                }
+            }
+        ],
         "test-protocol": [],
-        "dataset": [{"dataset": {"id": ds_id, "name": "d1",
-                                 "temporal_coverage": "2023-11-14T22:13:20Z/2023-11-15T22:13:20Z",
-                                 "published_at": 1781525115,  # assembly-time: must NOT surface
-                                 "distributions": [
-                                     {"name": "f.bdf.csv", "content_url": "f.bdf.csv",
-                                      "encoding_format": "text/csv", "role": "processed",
-                                      "checksum": {"value": "a" * 64}}]}}],
+        "dataset": [
+            {
+                "dataset": {
+                    "id": ds_id,
+                    "name": "d1",
+                    "temporal_coverage": "2023-11-14T22:13:20Z/2023-11-15T22:13:20Z",
+                    "published_at": 1781525115,  # assembly-time: must NOT surface
+                    "distributions": [
+                        {
+                            "name": "f.bdf.csv",
+                            "content_url": "f.bdf.csv",
+                            "encoding_format": "text/csv",
+                            "role": "processed",
+                            "checksum": {"value": "a" * 64},
+                        }
+                    ],
+                }
+            }
+        ],
     }
     doc = AuthoringWorkspace._assemble_zenodo_jsonld(
-        rs, zenodo_record_id=0, prereserved_doi="10.5281/zenodo.99",
-        record_url="https://zenodo.org/records/99", data_filenames=["f.bdf.csv"], title="T",
+        rs,
+        zenodo_record_id=0,
+        prereserved_doi="10.5281/zenodo.99",
+        record_url="https://zenodo.org/records/99",
+        data_filenames=["f.bdf.csv"],
+        title="T",
     )
     cat = next(n for n in doc["@graph"] if "dcat:Catalog" in (n.get("@type") or []))
     assert cat["schema:sameAs"] == {"@id": "https://doi.org/10.5281/zenodo.99"}
     assert cat["dcterms:identifier"] == "10.5281/zenodo.99"
     assert cat["schema:temporalCoverage"].startswith("2023-11-14")
-    assert len(cat["schema:distribution"]) == 1   # download surfaced at top level
+    assert len(cat["schema:distribution"]) == 1  # download surfaced at top level
 
     member = next(n for n in doc["@graph"] if n.get("@id") == ds_id)
     assert member["schema:temporalCoverage"].startswith("2023-11-14")
-    assert "schema:datePublished" not in member    # misleading assembly-time date dropped
+    assert "schema:datePublished" not in member  # misleading assembly-time date dropped
 
     test = next(n for n in doc["@graph"] if "BatteryTest" in (n.get("@type") or []))
     assert test["prov:startedAtTime"] == "2023-11-14T22:13:20Z"
@@ -779,6 +926,7 @@ def test_timing_doi_and_top_level_distribution() -> None:
 
 def test_bdf_measurement_period(tmp_path: Path) -> None:
     from battinfo.ws import _bdf_measurement_period
+
     csv = tmp_path / "x.bdf.csv"
     csv.write_text(
         "test_time_second,voltage_volt,unix_time_second\n"
@@ -814,8 +962,7 @@ def test_publication_shacl_catches_broken_provenance(tmp_path: Path) -> None:
             node.pop("prov:used", None)
             break
     report = validate_publication_report(doc, policy="publisher")
-    assert any(i.code == "publication.shacl_constraint" and i.severity == "error"
-               for i in report.issues)
+    assert any(i.code == "publication.shacl_constraint" and i.severity == "error" for i in report.issues)
 
 
 def test_schema_org_consumer_reaches_every_download(tmp_path: Path) -> None:
@@ -848,22 +995,29 @@ def test_resolve_raw_source_uses_convert_manifest(tmp_path: Path) -> None:
 
 def test_add_test_conformance_flag(tmp_path: Path) -> None:
     import json as _json
+
     ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
     spec = _write_spec(ws, tmp_path)
     proto = ws._ws.test_spec(name="CC discharge", type="capacity_check")
     ws.add("cell", spec=spec, names=["c1"])
     (tmp_path / "c1.csv").write_text("a,b\n0,1\n", encoding="utf-8")
     tests = ws.add(
-        "test", type="capacity_check", cell="c1", data="c1.csv", spec=proto,
-        conformance={"status": "non-conformant", "note": "current 2x setpoint",
-                     "deviations": [{"category": "setpoint_deviation",
-                                     "type": "discharge current", "description": "500 vs 250 mA"}]},
+        "test",
+        type="capacity_check",
+        cell="c1",
+        data="c1.csv",
+        spec=proto,
+        conformance={
+            "status": "non-conformant",
+            "note": "current 2x setpoint",
+            "deviations": [
+                {"category": "setpoint_deviation", "type": "discharge current", "description": "500 vs 250 mA"}
+            ],
+        },
     )
     assert tests[0].conformance.status == "non-conformant"
     ws.save()
-    rec = _json.loads(
-        next((ws._ws.source_root / "test").glob("*.json")).read_text(encoding="utf-8")
-    )["test"]
+    rec = _json.loads(next((ws._ws.source_root / "test").glob("*.json")).read_text(encoding="utf-8"))["test"]
     assert rec["conformance"]["status"] == "non-conformant"
     dev = rec["conformance"]["deviations"][0]
     assert dev["category"] == "setpoint_deviation" and dev["type"] == "discharge current"
@@ -873,14 +1027,24 @@ def test_add_test_conformance_flag(tmp_path: Path) -> None:
 def test_add_cell_conformance(tmp_path: Path) -> None:
     """Conformance is general: a cell can be (non-)conformant vs its cell-spec."""
     import json as _json
+
     ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
     spec = _write_spec(ws, tmp_path)
     # single value broadcast + per-cell list both supported
     ws.add("cell", spec=spec, names=["c-ok"], conformance="conformant")
-    ws.add("cell", spec=spec, names=["c-a", "c-b"],
-           conformance=["conformant",
-                        {"status": "non-conformant", "note": "capacity low",
-                         "deviations": [{"category": "out_of_tolerance", "type": "capacity 10% below spec"}]}])
+    ws.add(
+        "cell",
+        spec=spec,
+        names=["c-a", "c-b"],
+        conformance=[
+            "conformant",
+            {
+                "status": "non-conformant",
+                "note": "capacity low",
+                "deviations": [{"category": "out_of_tolerance", "type": "capacity 10% below spec"}],
+            },
+        ],
+    )
     ws.save()
     by_name = {}
     for p in (ws._ws.source_root / "cell-instance").glob("*.json"):
@@ -901,6 +1065,7 @@ def test_add_cell_conformance_list_length_mismatch_raises(tmp_path: Path) -> Non
 
 def test_deviation_category_back_compat_and_new_form() -> None:
     from battinfo import Deviation
+
     legacy = Deviation.from_record({"type": "parameter_drift", "description": "x"})
     assert legacy.category == "parameter_drift" and legacy.type is None
     new = Deviation.from_record({"category": "setpoint_deviation", "type": "current mismatch"})
@@ -910,6 +1075,7 @@ def test_deviation_category_back_compat_and_new_form() -> None:
 
 def test_conformance_is_general_alias() -> None:
     from battinfo import Conformance, TestConformance
+
     assert Conformance is TestConformance
 
 
@@ -924,6 +1090,7 @@ def test_add_test_invalid_conformance_status_raises(tmp_path: Path) -> None:
 
 def test_canon_type_mapping():
     from battinfo.ws import _canon_type
+
     assert _canon_type("cell-spec") == "cell_spec"
     assert _canon_type("cell") == "cell"
     assert _canon_type("test-spec") == "test_protocol"
@@ -955,9 +1122,10 @@ def test_search_cell_returns_registry_matches(tmp_path: Path, monkeypatch: pytes
 
 def test_serial_matches_short_id_and_full():
     from battinfo.ws import _serial_matches
+
     full = "duracell-mn2400-2026-02-tpejqj"
-    assert _serial_matches("tpejqj", full)        # short id -> full serial
-    assert _serial_matches(full, full)            # exact
+    assert _serial_matches("tpejqj", full)  # short id -> full serial
+    assert _serial_matches(full, full)  # exact
     assert _serial_matches(full, "x-y-z-tpejqj")  # shared short id
     assert not _serial_matches("zzzzzz", full)
 
@@ -972,7 +1140,7 @@ def test_load_then_add_test_links_existing_cell_without_duplicating(
 
     cell = ws.load(ws.search(type="cell", serial="tpejqj")[0])
     assert cell.id == _REG_CELL["id"]
-    assert ws._ws.cells == []   # referenced, not queued for save
+    assert ws._ws.cells == []  # referenced, not queued for save
 
     (tmp_path / "data.csv").write_text("a,b\n0,1\n", encoding="utf-8")
     ws.add("test", type="capacity_check", cell="tpejqj", data="data.csv")
@@ -986,9 +1154,7 @@ def test_load_then_add_test_links_existing_cell_without_duplicating(
     assert _REG_CELL["id"] in rec_text, "the test must link to the existing registry IRI"
 
 
-def test_add_test_cell_arg_resolves_from_registry(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_add_test_cell_arg_resolves_from_registry(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """cell= resolves an existing instance straight from the registry — no explicit load."""
     ws = AuthoringWorkspace(root=tmp_path, registry_url="https://registry.example")
     monkeypatch.setattr(ws, "_query_registry_cells", lambda **kw: [dict(_REG_CELL)])
@@ -1000,6 +1166,7 @@ def test_add_test_cell_arg_resolves_from_registry(
 
 
 # -- workspace layout (W5.3): user records live under records/, not examples/ --
+
 
 def _author_one_spec(ws: AuthoringWorkspace) -> None:
     from battinfo import quantity
@@ -1032,9 +1199,7 @@ def test_fresh_workspace_saves_records_under_records_not_examples(tmp_path: Path
     assert ws._ws.index_path == tmp_path / ".battinfo" / "index.json"
 
 
-def test_legacy_examples_layout_is_detected_and_reused(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_legacy_examples_layout_is_detected_and_reused(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     # Pre-seed a pre-0.8 workspace: records under .battinfo/records/examples/
     legacy = tmp_path / ".battinfo" / "records" / "examples" / "cell-spec"
     legacy.mkdir(parents=True)
@@ -1055,8 +1220,13 @@ def test_cell_spec_draft_name_is_kept_and_does_not_move_the_iri(tmp_path: Path) 
     """A cell-spec draft's "name" is its title; without one the title is manufacturer + model."""
     import json
 
-    draft = {"manufacturer": "SINTEF", "model": "Graphite R2032 half-cell (intelligent)",
-             "format": "coin", "chemistry": "li-metal", "size_code": "R2032"}
+    draft = {
+        "manufacturer": "SINTEF",
+        "model": "Graphite R2032 half-cell (intelligent)",
+        "format": "coin",
+        "chemistry": "li-metal",
+        "size_code": "R2032",
+    }
     plain_ws = AuthoringWorkspace(root=tmp_path / "plain", registry_url=None)
     (tmp_path / "plain.cell-spec.json").write_text(json.dumps(draft), encoding="utf-8")
     plain = plain_ws.load(tmp_path / "plain.cell-spec.json")

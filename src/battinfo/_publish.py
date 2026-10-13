@@ -39,21 +39,23 @@ class PublishResult(BaseModel):
 # publish(cell_spec=..., cell_instance=..., test=..., dataset=...) form passes on.
 # validation_policy is a parameter of both forms.
 _LEGACY_CORE_KEYWORDS = frozenset({"cell_spec", "cell_instance", "test", "dataset"})
-_LEGACY_KEYWORDS = _LEGACY_CORE_KEYWORDS | frozenset({
-    "cell_specification",
-    "datasheet_path",
-    "publish_filename",
-    "html_filename",
-    "dataset_glob",
-    "emit_bundle_dir",
-    "emit_html_page",
-    "emit_ro_crate_metadata",
-    "emit_datacite_metadata",
-    "emit_dcat_export",
-    "ro_crate_filename",
-    "datacite_filename",
-    "dcat_filename",
-})
+_LEGACY_KEYWORDS = _LEGACY_CORE_KEYWORDS | frozenset(
+    {
+        "cell_specification",
+        "datasheet_path",
+        "publish_filename",
+        "html_filename",
+        "dataset_glob",
+        "emit_bundle_dir",
+        "emit_html_page",
+        "emit_ro_crate_metadata",
+        "emit_datacite_metadata",
+        "emit_dcat_export",
+        "ro_crate_filename",
+        "datacite_filename",
+        "dcat_filename",
+    }
+)
 
 
 def publish(

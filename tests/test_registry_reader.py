@@ -26,11 +26,7 @@ TEST = "https://w3id.org/battinfo/test/eeee-ffff-gggg-hhhh"
 CELL = "https://w3id.org/battinfo/cell/jjjj-kkkk-mmmm-nnnn"
 SPEC = "https://w3id.org/battinfo/spec/pppp-qqqq-rrrr-ssss"
 
-CSV_BYTES = (
-    b"Test Time / s,Voltage / V,Current / A,Cycle Count / 1,Step Index / 1\n"
-    b"0,3.0,1.0,1,1\n"
-    b"1,3.1,1.0,1,1\n"
-)
+CSV_BYTES = b"Test Time / s,Voltage / V,Current / A,Cycle Count / 1,Step Index / 1\n0,3.0,1.0,1,1\n1,3.1,1.0,1,1\n"
 CSV_SHA = hashlib.sha256(CSV_BYTES).hexdigest()
 CSV_MD5 = hashlib.md5(CSV_BYTES).hexdigest()
 # Another cell's file: valid data, so only a checksum can tell it apart.
@@ -62,45 +58,102 @@ class FakeRegistry:
         self.revision = 1
         self.file_bytes = CSV_BYTES
         self.summaries: dict[str, list[dict]] = {
-            "dataset": [self._summary(DATASET, "dataset", "Cell 1 cycling data", {
-                "license": "cc-by-4.0", "media_type": "text/csv", "record_url": f"{FILES}/cell1.bdf.csv",
-            })],
+            "dataset": [
+                self._summary(
+                    DATASET,
+                    "dataset",
+                    "Cell 1 cycling data",
+                    {
+                        "license": "cc-by-4.0",
+                        "media_type": "text/csv",
+                        "record_url": f"{FILES}/cell1.bdf.csv",
+                    },
+                )
+            ],
             "test": [self._summary(TEST, "test", "Cycling", {"kind": "cycling"})],
-            "cell": [self._summary(CELL, "cell", "Cell 1", {
-                "name": "Cell 1", "cell_spec_id": SPEC, "manufacturer": "Acme", "model": "A1",
-                "format": "coin", "chemistry": "Li-ion", "positive_electrode_basis": "NMC",
-                "negative_electrode_basis": "graphite", "properties": {},
-            })],
-            "cell_spec": [self._summary(SPEC, "cell_spec", "Acme A1", {"format": "coin"}, benchmark={
-                "properties": {"rated_capacity": {"value": 2500, "unit": "mAh"}},
-            })],
+            "cell": [
+                self._summary(
+                    CELL,
+                    "cell",
+                    "Cell 1",
+                    {
+                        "name": "Cell 1",
+                        "cell_spec_id": SPEC,
+                        "manufacturer": "Acme",
+                        "model": "A1",
+                        "format": "coin",
+                        "chemistry": "Li-ion",
+                        "positive_electrode_basis": "NMC",
+                        "negative_electrode_basis": "graphite",
+                        "properties": {},
+                    },
+                )
+            ],
+            "cell_spec": [
+                self._summary(
+                    SPEC,
+                    "cell_spec",
+                    "Acme A1",
+                    {"format": "coin"},
+                    benchmark={
+                        "properties": {"rated_capacity": {"value": 2500, "unit": "mAh"}},
+                    },
+                )
+            ],
         }
         self.details: dict[str, dict] = {
             "dataset/aaaa-bbbb-cccc-dddd": {
                 "canonical_iri": DATASET,
                 "resource_type": "dataset",
-                "semantic_payload": {"battinfo_records": {"dataset": {"dataset": {"distributions": [{
-                    "role": "processed", "content_url": f"{FILES}/cell1.bdf.csv", "name": "cell1.bdf.csv",
-                    "encoding_format": "text/csv", "content_size": str(len(CSV_BYTES)),
-                    "checksum": {"algorithm": "sha256", "value": CSV_SHA},
-                }]}}}},
+                "semantic_payload": {
+                    "battinfo_records": {
+                        "dataset": {
+                            "dataset": {
+                                "distributions": [
+                                    {
+                                        "role": "processed",
+                                        "content_url": f"{FILES}/cell1.bdf.csv",
+                                        "name": "cell1.bdf.csv",
+                                        "encoding_format": "text/csv",
+                                        "content_size": str(len(CSV_BYTES)),
+                                        "checksum": {"algorithm": "sha256", "value": CSV_SHA},
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
                 "related_resources": [
                     {"relationship": "aboutCell", "resource_type": "cell", "canonical_iri": CELL},
                     {"relationship": "generatedByTest", "resource_type": "test", "canonical_iri": TEST},
                 ],
                 "distributions": [
-                    {"title": "cell1.bdf.csv", "access_url": f"{FILES}/cell1.bdf.csv", "role": "processed",
-                     "media_type": "text/csv"},
-                    {"title": "cell1.png", "access_url": f"{FILES}/cell1.png", "role": "plot_static",
-                     "media_type": "image/png"},
+                    {
+                        "title": "cell1.bdf.csv",
+                        "access_url": f"{FILES}/cell1.bdf.csv",
+                        "role": "processed",
+                        "media_type": "text/csv",
+                    },
+                    {
+                        "title": "cell1.png",
+                        "access_url": f"{FILES}/cell1.png",
+                        "role": "plot_static",
+                        "media_type": "image/png",
+                    },
                 ],
             },
         }
 
     @staticmethod
     def _summary(iri: str, rtype: str, title: str, metadata: dict, **extra: object) -> dict:
-        return {"canonical_iri": iri, "canonical_id": iri.rsplit("/", 1)[1], "resource_type": rtype,
-                "title": title, "metadata": metadata, **extra}
+        return {
+            "canonical_iri": iri,
+            "canonical_id": iri.rsplit("/", 1)[1],
+            "resource_type": rtype,
+            "title": title,
+            "metadata": metadata,
+            **extra,
+        }
 
     def open(self, url: str, *, retries: int = 2) -> _Response:  # noqa: ARG002
         self.calls.append(url)
@@ -115,7 +168,7 @@ class FakeRegistry:
             if "kind" in query:
                 rows = [r for r in rows if r["metadata"].get("kind") == query["kind"][0]]
             limit, offset = int(query["limit"][0]), int(query.get("offset", ["0"])[0])
-            body = json.dumps(rows[offset:offset + limit]).encode()
+            body = json.dumps(rows[offset : offset + limit]).encode()
             return _Response(body, {"X-Total-Count": str(len(rows))})
         key = parsed.path.removeprefix("/resources/")
         if key in self.details:
@@ -136,6 +189,7 @@ def reg(fake: FakeRegistry, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> 
 
 
 # ── Record references ─────────────────────────────────────────────────────────
+
 
 @pytest.mark.parametrize(
     ("ref", "expected"),
@@ -165,6 +219,7 @@ def test_get_needs_a_type_for_a_bare_id(reg: Registry) -> None:
 
 # ── Listing and links ─────────────────────────────────────────────────────────
 
+
 def test_list_pages_until_the_corpus_is_exhausted(reg: Registry, fake: FakeRegistry) -> None:
     fake.summaries["test"] = [
         fake._summary(f"https://w3id.org/battinfo/test/{i:04d}-0000-0000-0000", "test", f"t{i}", {"kind": "cycling"})
@@ -188,12 +243,18 @@ def test_links_group_targets_by_type(reg: Registry) -> None:
 
 # ── Files ─────────────────────────────────────────────────────────────────────
 
+
 def test_files_merge_checksum_and_size_from_the_record_body(reg: Registry) -> None:
     files = reg.files(DATASET)
     assert files[0] == RegistryFile(
-        name="cell1.bdf.csv", url=f"{FILES}/cell1.bdf.csv", role="processed",
-        media_type="text/csv", sha256=CSV_SHA, size=len(CSV_BYTES),
-        checksum_algorithm="sha256", checksum_value=CSV_SHA,
+        name="cell1.bdf.csv",
+        url=f"{FILES}/cell1.bdf.csv",
+        role="processed",
+        media_type="text/csv",
+        sha256=CSV_SHA,
+        size=len(CSV_BYTES),
+        checksum_algorithm="sha256",
+        checksum_value=CSV_SHA,
     )
     assert [f.role for f in files] == ["processed", "plot_static"]
     assert [f.name for f in reg.files(DATASET, role="processed")] == ["cell1.bdf.csv"]
@@ -250,6 +311,7 @@ def test_a_file_name_that_names_no_file_is_kept_as_data(tmp_path: Path, name: st
 
 # ── Checksums in any algorithm ────────────────────────────────────────────────
 
+
 def _state_checksum(fake: FakeRegistry, algorithm: str | None, value: str | None = None) -> None:
     """Make the record state *algorithm* and *value* for its file, or no checksum at all."""
     body = fake.details["dataset/aaaa-bbbb-cccc-dddd"]["semantic_payload"]["battinfo_records"]["dataset"]["dataset"]
@@ -279,11 +341,20 @@ def test_read_refetches_a_cached_md5_file_replaced_by_another(reg: Registry, fak
     assert path.read_bytes() == CSV_BYTES
 
 
-@pytest.mark.parametrize(("algorithm", "hashlib_name"), [
-    ("md5", "md5"), ("sha512", "sha512"), ("sha256", "sha256"), ("SHA-256", "sha256"),
-])
+@pytest.mark.parametrize(
+    ("algorithm", "hashlib_name"),
+    [
+        ("md5", "md5"),
+        ("sha512", "sha512"),
+        ("sha256", "sha256"),
+        ("SHA-256", "sha256"),
+    ],
+)
 def test_download_rejects_bytes_that_do_not_match_the_stated_algorithm(
-    reg: Registry, fake: FakeRegistry, algorithm: str, hashlib_name: str,
+    reg: Registry,
+    fake: FakeRegistry,
+    algorithm: str,
+    hashlib_name: str,
 ) -> None:
     _state_checksum(fake, algorithm, hashlib.new(hashlib_name, CSV_BYTES).hexdigest())
     fake.file_bytes = CSV_BYTES + b"tampered\n"
@@ -296,7 +367,9 @@ def test_download_rejects_bytes_that_do_not_match_the_stated_algorithm(
 
 @pytest.mark.parametrize("stated", [CSV_MD5.upper(), f"md5:{CSV_MD5}"], ids=["upper-case", "zenodo-prefix"])
 def test_download_reads_the_stated_digest_in_either_spelling(
-    reg: Registry, fake: FakeRegistry, stated: str,
+    reg: Registry,
+    fake: FakeRegistry,
+    stated: str,
 ) -> None:
     _state_checksum(fake, "md5", stated)
     assert reg.download(DATASET).read_bytes() == CSV_BYTES
@@ -334,6 +407,7 @@ def test_download_without_verify_does_not_warn(reg: Registry, fake: FakeRegistry
 
 # ── Reading ───────────────────────────────────────────────────────────────────
 
+
 def test_read_returns_machine_readable_column_names(reg: Registry) -> None:
     pytest.importorskip("pandas")
     df = reg.read(DATASET)
@@ -345,12 +419,14 @@ def test_read_returns_machine_readable_column_names(reg: Registry) -> None:
 
 def test_bdf_column_names_converts_unit_variants() -> None:
     pd = pytest.importorskip("pandas")
-    df = pd.DataFrame({
-        "test_time_millisecond": [0, 1500],
-        "cycle_dimensionless": [0, 1],
-        "voltage_volt": [3.0, 3.1],
-        "my_lab_column": [1, 2],
-    })
+    df = pd.DataFrame(
+        {
+            "test_time_millisecond": [0, 1500],
+            "cycle_dimensionless": [0, 1],
+            "voltage_volt": [3.0, 3.1],
+            "my_lab_column": [1, 2],
+        }
+    )
     out = bdf_column_names(df)
     assert list(out.columns) == ["test_time_second", "cycle_count", "voltage_volt", "my_lab_column"]
     assert out["test_time_second"].tolist() == [0.0, 1.5]
@@ -366,6 +442,7 @@ def test_bdf_column_names_never_overwrites_an_existing_column() -> None:
 
 
 # ── Catalog ───────────────────────────────────────────────────────────────────
+
 
 def test_catalog_joins_dataset_test_cell_and_spec(reg: Registry) -> None:
     pytest.importorskip("pandas")

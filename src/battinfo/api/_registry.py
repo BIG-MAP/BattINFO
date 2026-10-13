@@ -3,6 +3,7 @@
 Split from the former monolithic ``battinfo/api.py`` (beta-hardening 4.2);
 import the public surface from ``battinfo.api``, not from this module.
 """
+
 from __future__ import annotations
 
 import json
@@ -209,7 +210,7 @@ def submit_publication_package(
         # Reached only on a transient failure: back off, then the loop retries
         # unless the attempt budget is exhausted.
         if attempt + 1 < max_attempts and backoff_sec > 0:
-            time.sleep(backoff_sec * (2 ** attempt))
+            time.sleep(backoff_sec * (2**attempt))
     # Only reachable via the transient path. Use an explicit raise (not assert,
     # which `python -O` strips) since this is load-bearing control flow.
     if last_transient is None:  # pragma: no cover - defensive; max_attempts >= 1

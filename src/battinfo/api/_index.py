@@ -3,6 +3,7 @@
 Split from the former monolithic ``battinfo/api.py`` (beta-hardening 4.2);
 import the public surface from ``battinfo.api``, not from this module.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -72,9 +73,7 @@ def build_index(
                 raise ValueError("missing product.id")
             manufacturer_obj = entity.get("manufacturer")
             manufacturer_name = (
-                manufacturer_obj.get("name")
-                if isinstance(manufacturer_obj, Mapping)
-                else manufacturer_obj
+                manufacturer_obj.get("name") if isinstance(manufacturer_obj, Mapping) else manufacturer_obj
             )
             cell_specs.append(
                 {
@@ -167,7 +166,9 @@ def build_index(
                     "kind": test.get("kind"),
                     "protocol_id": test.get("protocol_id"),
                     "source_type": prov.get("source_type") if isinstance(prov, Mapping) else None,
-                    "dataset_ids": [item for item in dataset_ids if isinstance(item, str)] if isinstance(dataset_ids, list) else [],
+                    "dataset_ids": [item for item in dataset_ids if isinstance(item, str)]
+                    if isinstance(dataset_ids, list)
+                    else [],
                     "path": _relative_or_absolute(path, src_root),
                 }
             )
@@ -186,9 +187,7 @@ def build_index(
             related_cell_ids: list[str] = []
             about = dataset.get("about")
             if isinstance(about, list):
-                related_cell_ids = [
-                    item for item in about if isinstance(item, str) and CELL_IRI_RE.fullmatch(item)
-                ]
+                related_cell_ids = [item for item in about if isinstance(item, str) and CELL_IRI_RE.fullmatch(item)]
             elif isinstance(dataset.get("related_entities"), Mapping):
                 related = dataset["related_entities"].get("cell_ids")
                 if isinstance(related, list):
@@ -266,9 +265,7 @@ def build_index(
     # being folded into the generic component bucket. The row carries the fields a
     # reader filters on — kind and polarity for a design, its spec and batch for a
     # built batch.
-    def _index_electrodes(
-        subdir: str, record_key: str, fields: tuple[str, ...]
-    ) -> list[dict[str, Any]]:
+    def _index_electrodes(subdir: str, record_key: str, fields: tuple[str, ...]) -> list[dict[str, Any]]:
         directory = src_root / subdir
         rows: list[dict[str, Any]] = []
         for path in sorted(directory.glob(glob)) if directory.exists() else []:
@@ -297,9 +294,7 @@ def build_index(
         # `kind` kept beside its replacement so pre-rename records still index.
         ("active_material_kind", "kind", "polarity", "active_material_spec_id"),
     )
-    electrodes = _index_electrodes(
-        "electrode", "electrode", ("electrode_spec_id", "batch_id", "lot_id")
-    )
+    electrodes = _index_electrodes("electrode", "electrode", ("electrode_spec_id", "batch_id", "lot_id"))
 
     # Component families (separator/electrolyte/…): one generic indexer per family.
     component_index: dict[str, list[dict[str, Any]]] = {}
@@ -391,47 +386,65 @@ def index_stats(index: dict[str, Any] | PathLike) -> dict[str, Any]:
     cell_spec_count = (
         int(doc["cell_spec_count"])
         if isinstance(doc.get("cell_spec_count"), int)
-        else len(doc.get("cell_specs", [])) if isinstance(doc.get("cell_specs"), list) else 0
+        else len(doc.get("cell_specs", []))
+        if isinstance(doc.get("cell_specs"), list)
+        else 0
     )
     cell_instance_count = (
         int(doc["cell_instance_count"])
         if isinstance(doc.get("cell_instance_count"), int)
-        else len(doc.get("cell_instances", [])) if isinstance(doc.get("cell_instances"), list) else 0
+        else len(doc.get("cell_instances", []))
+        if isinstance(doc.get("cell_instances"), list)
+        else 0
     )
     test_count = (
         int(doc["test_count"])
         if isinstance(doc.get("test_count"), int)
-        else len(doc.get("tests", [])) if isinstance(doc.get("tests"), list) else 0
+        else len(doc.get("tests", []))
+        if isinstance(doc.get("tests"), list)
+        else 0
     )
     test_spec_count = (
         int(doc["test_spec_count"])
         if isinstance(doc.get("test_spec_count"), int)
-        else len(doc.get("test_specs", [])) if isinstance(doc.get("test_specs"), list) else 0
+        else len(doc.get("test_specs", []))
+        if isinstance(doc.get("test_specs"), list)
+        else 0
     )
     dataset_count = (
         int(doc["dataset_count"])
         if isinstance(doc.get("dataset_count"), int)
-        else len(doc.get("datasets", [])) if isinstance(doc.get("datasets"), list) else 0
+        else len(doc.get("datasets", []))
+        if isinstance(doc.get("datasets"), list)
+        else 0
     )
     material_spec_count = (
         int(doc["material_spec_count"])
         if isinstance(doc.get("material_spec_count"), int)
-        else len(doc.get("material_specs", [])) if isinstance(doc.get("material_specs"), list) else 0
+        else len(doc.get("material_specs", []))
+        if isinstance(doc.get("material_specs"), list)
+        else 0
     )
     material_count = (
         int(doc["material_count"])
         if isinstance(doc.get("material_count"), int)
-        else len(doc.get("materials", [])) if isinstance(doc.get("materials"), list) else 0
+        else len(doc.get("materials", []))
+        if isinstance(doc.get("materials"), list)
+        else 0
     )
     electrode_spec_count = (
         int(doc["electrode_spec_count"])
         if isinstance(doc.get("electrode_spec_count"), int)
-        else len(doc.get("electrode_specs", [])) if isinstance(doc.get("electrode_specs"), list) else 0
+        else len(doc.get("electrode_specs", []))
+        if isinstance(doc.get("electrode_specs"), list)
+        else 0
     )
     electrode_count = (
         int(doc["electrode_count"])
         if isinstance(doc.get("electrode_count"), int)
-        else len(doc.get("electrodes", [])) if isinstance(doc.get("electrodes"), list) else 0
+        else len(doc.get("electrodes", []))
+        if isinstance(doc.get("electrodes"), list)
+        else 0
     )
     total_count = (
         int(doc["total_count"])

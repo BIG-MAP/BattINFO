@@ -157,9 +157,13 @@ def _first(value: Any) -> str | None:
 def _encoding_format(url: str) -> str:
     """Best-effort MIME type for a download URL (BDC links are mostly archives)."""
     lower = url.lower()
-    for suffix, mime in ((".zip", "application/zip"), (".csv", "text/csv"),
-                         (".json", "application/json"), (".h5", "application/x-hdf5"),
-                         (".parquet", "application/vnd.apache.parquet")):
+    for suffix, mime in (
+        (".zip", "application/zip"),
+        (".csv", "text/csv"),
+        (".json", "application/json"),
+        (".h5", "application/x-hdf5"),
+        (".parquet", "application/vnd.apache.parquet"),
+    ):
         if lower.endswith(suffix):
             return mime
     return "application/octet-stream"
@@ -168,8 +172,9 @@ def _encoding_format(url: str) -> str:
 # ── BDC → BattINFO ──────────────────────────────────────────────────────────
 
 
-def import_bdc_record(record: Mapping[str, Any], *, validate: bool = True,
-                      _materials: dict[str, dict[str, Any]] | None = None) -> BdcRecordImport | None:
+def import_bdc_record(
+    record: Mapping[str, Any], *, validate: bool = True, _materials: dict[str, dict[str, Any]] | None = None
+) -> BdcRecordImport | None:
     """Map one BDC canonical record into a BattINFO record chain.
 
     Returns ``None`` for software-tool records (no cell). ``_materials`` is a
@@ -194,8 +199,9 @@ def import_bdc_record(record: Mapping[str, Any], *, validate: bool = True,
     _reported = record.get("reported_values")
     reported = _reported if isinstance(_reported, Mapping) else {}
     source_meta = record.get("source_metadata") or {}
-    citation = _first([p.get("url") for p in (record.get("publications") or []) if isinstance(p, Mapping)]) \
-        or _first(record.get("source_urls"))
+    citation = _first([p.get("url") for p in (record.get("publications") or []) if isinstance(p, Mapping)]) or _first(
+        record.get("source_urls")
+    )
 
     def _check(rec: dict[str, Any]) -> dict[str, Any]:
         if validate:
@@ -208,10 +214,13 @@ def import_bdc_record(record: Mapping[str, Any], *, validate: bool = True,
             return None
         if clean not in materials:
             materials[clean] = create_material_spec(
-                validate=validate, uid=_uid("bdc", "material", clean), name=clean,
+                validate=validate,
+                uid=_uid("bdc", "material", clean),
+                name=clean,
                 material_class="active_material",
                 emmo_type=clean if _looks_emmo(clean) else None,
-                source_type="literature", citation=citation,
+                source_type="literature",
+                citation=citation,
             )
         return materials[clean]["material_spec"]["id"]
 
@@ -239,31 +248,39 @@ def import_bdc_record(record: Mapping[str, Any], *, validate: bool = True,
     if source_meta.get("owner"):
         notes.append(f"dataset owner: {source_meta['owner']}")
 
-    cell_spec = _check(_record_from_cell_spec(CellSpec(
-        uid=_uid("bdc", "cell-spec", bdc_id),
-        model_name=_clean(overview.get("battery_model")) or bdc_id,
-        manufacturer={"type": "Organization", "name": _clean(overview.get("manufacturer")) or "Unknown"},
-        format=cell_format,  # type: ignore[arg-type]
-        chemistry=chemistry,
-        positive_electrode_basis=(pos if pos not in _UNKNOWN_MATERIAL else None),
-        negative_electrode_basis=(neg if neg not in _UNKNOWN_MATERIAL else None),
-        size_code=size_code,
-        iec_code=_clean(overview.get("iec_battery_code")),
-        specs=specs,
-        source_type="catalog",
-        source_file=f"{bdc_id}.json",
-        citation=citation,
-        notes=notes,
-    )))
+    cell_spec = _check(
+        _record_from_cell_spec(
+            CellSpec(
+                uid=_uid("bdc", "cell-spec", bdc_id),
+                model_name=_clean(overview.get("battery_model")) or bdc_id,
+                manufacturer={"type": "Organization", "name": _clean(overview.get("manufacturer")) or "Unknown"},
+                format=cell_format,  # type: ignore[arg-type]
+                chemistry=chemistry,
+                positive_electrode_basis=(pos if pos not in _UNKNOWN_MATERIAL else None),
+                negative_electrode_basis=(neg if neg not in _UNKNOWN_MATERIAL else None),
+                size_code=size_code,
+                iec_code=_clean(overview.get("iec_battery_code")),
+                specs=specs,
+                source_type="catalog",
+                source_file=f"{bdc_id}.json",
+                citation=citation,
+                notes=notes,
+            )
+        )
+    )
     cell_spec_id = cell_spec["cell_spec"]["id"]
 
-    cell_instance = _check(_record_from_cell_instance(Cell(
-        uid=_uid("bdc", "cell-instance", bdc_id),
-        cell_spec_id=cell_spec_id,
-        serial_number=bdc_id,
-        source_type="lab",
-        citation=citation,
-    )))
+    cell_instance = _check(
+        _record_from_cell_instance(
+            Cell(
+                uid=_uid("bdc", "cell-instance", bdc_id),
+                cell_spec_id=cell_spec_id,
+                serial_number=bdc_id,
+                source_type="lab",
+                citation=citation,
+            )
+        )
+    )
     cell_uid = cell_instance["cell_instance"]["id"]
 
     tests: list[dict[str, Any]] = []
@@ -271,19 +288,29 @@ def import_bdc_record(record: Mapping[str, Any], *, validate: bool = True,
     for flag, (kind, label) in _MEASUREMENT_KIND.items():
         if (record.get("available_measurements") or {}).get(flag):
             techniques.append(label)
-            tests.append(_check(_record_from_test(Test(
-                uid=_uid("bdc", "test", bdc_id, flag),
-                cell_id=cell_uid,
-                name=label,
-                kind=BatteryTestType(kind),  # type: ignore[arg-type]
-                description=f"{label} reported by Battery Data Commons record {bdc_id}.",
-                status="completed",
-                source_type="lab",
-                citation=citation,
-            ))))
+            tests.append(
+                _check(
+                    _record_from_test(
+                        Test(
+                            uid=_uid("bdc", "test", bdc_id, flag),
+                            cell_id=cell_uid,
+                            name=label,
+                            kind=BatteryTestType(kind),  # type: ignore[arg-type]
+                            description=f"{label} reported by Battery Data Commons record {bdc_id}.",
+                            status="completed",
+                            source_type="lab",
+                            citation=citation,
+                        )
+                    )
+                )
+            )
 
-    title = _clean(record.get("title")) or _clean(overview.get("feature")) \
-        or _clean(record.get("comment")) or f"Battery dataset {bdc_id}"
+    title = (
+        _clean(record.get("title"))
+        or _clean(overview.get("feature"))
+        or _clean(record.get("comment"))
+        or f"Battery dataset {bdc_id}"
+    )
     licence = record.get("license") or {}
     # access_url must reference something real: prefer the record's source URLs, then its
     # download URLs; a record carrying no URL at all keeps a truthful catalog URN (the
@@ -292,32 +319,36 @@ def import_bdc_record(record: Mapping[str, Any], *, validate: bool = True,
     if access_url is None:
         access_url = f"urn:battery-data-commons:record:{bdc_id}"
         warnings.append(
-            f"record {bdc_id} has no source or download URL; dataset access_url set to "
-            f"its catalog URN ({access_url})."
+            f"record {bdc_id} has no source or download URL; dataset access_url set to its catalog URN ({access_url})."
         )
-    dataset = _check(_record_from_dataset(Dataset(
-        uid=_uid("bdc", "dataset", bdc_id),
-        title=title,
-        description=_clean(source_meta.get("purpose")),
-        license=_clean(licence.get("url")) or _clean(record.get("license_url")),
-        keywords=categories,
-        same_as=[str(u) for u in (record.get("source_urls") or []) if u],
-        measurement_techniques=techniques,
-        access_url=access_url,
-        distribution=[{"type": "DataDownload", "content_url": str(u),
-                       "encoding_format": _encoding_format(str(u))}
-                      for u in (record.get("download_urls") or []) if u],
-        related_cell_ids=[cell_uid],
-        related_test_ids=[t["test"]["id"] for t in tests],
-        source_type="catalog",
-        citation=citation,
-    )))
+    dataset = _check(
+        _record_from_dataset(
+            Dataset(
+                uid=_uid("bdc", "dataset", bdc_id),
+                title=title,
+                description=_clean(source_meta.get("purpose")),
+                license=_clean(licence.get("url")) or _clean(record.get("license_url")),
+                keywords=categories,
+                same_as=[str(u) for u in (record.get("source_urls") or []) if u],
+                measurement_techniques=techniques,
+                access_url=access_url,
+                distribution=[
+                    {"type": "DataDownload", "content_url": str(u), "encoding_format": _encoding_format(str(u))}
+                    for u in (record.get("download_urls") or [])
+                    if u
+                ],
+                related_cell_ids=[cell_uid],
+                related_test_ids=[t["test"]["id"] for t in tests],
+                source_type="catalog",
+                citation=citation,
+            )
+        )
+    )
 
     return BdcRecordImport(bdc_id, dataset, cell_spec, cell_instance, tests, warnings=warnings)
 
 
-def batch_import_bdc(source: PathLike, *, limit: int | None = None,
-                     validate: bool = True) -> BdcImportPackage:
+def batch_import_bdc(source: PathLike, *, limit: int | None = None, validate: bool = True) -> BdcImportPackage:
     """Import every canonical BDC dataset record under *source*.
 
     *source* may be the BDC repository root, its ``canonical/datasets``
@@ -357,8 +388,9 @@ def batch_import_bdc(source: PathLike, *, limit: int | None = None,
 # ── BattINFO → BDC ──────────────────────────────────────────────────────────
 
 
-def to_bdc_record(cell_spec: Mapping[str, Any], *, dataset: Mapping[str, Any] | None = None,
-                  bdc_id: str | None = None) -> dict[str, Any]:
+def to_bdc_record(
+    cell_spec: Mapping[str, Any], *, dataset: Mapping[str, Any] | None = None, bdc_id: str | None = None
+) -> dict[str, Any]:
     """Render a BattINFO cell-spec (+ optional dataset) as a BDC canonical dict.
 
     A partial inverse of :func:`import_bdc_record`: enough to contribute a
@@ -395,10 +427,12 @@ def to_bdc_record(cell_spec: Mapping[str, Any], *, dataset: Mapping[str, Any] | 
         "categories": ["performance"],
         "overview": {k: v for k, v in overview.items() if v is not None},
         "electrodes": {
-            k: v for k, v in (
+            k: v
+            for k, v in (
                 ("positive", cs.get("positive_electrode_basis")),
                 ("negative", cs.get("negative_electrode_basis")),
-            ) if v is not None
+            )
+            if v is not None
         },
         "reported_values": {},
         "source_metadata": {"data_modality": "TimeSeriesDataSet"},
@@ -414,7 +448,11 @@ def to_bdc_record(cell_spec: Mapping[str, Any], *, dataset: Mapping[str, Any] | 
         ds = dataset.get("dataset", dataset)
         if ds.get("same_as") or ds.get("access_url"):
             record["source_urls"] = list(ds.get("same_as") or []) or [ds["access_url"]]
-        dist = [d.get("content_url") for d in (ds.get("distributions") or ds.get("distribution") or []) if isinstance(d, Mapping)]
+        dist = [
+            d.get("content_url")
+            for d in (ds.get("distributions") or ds.get("distribution") or [])
+            if isinstance(d, Mapping)
+        ]
         if dist:
             record["download_urls"] = [u for u in dist if u]
         if ds.get("license"):

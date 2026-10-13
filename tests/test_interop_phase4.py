@@ -25,25 +25,30 @@ from battinfo.interop.bpx import BpxImportResult, from_bpx
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
 
+
 def _make_cycling_df() -> pd.DataFrame:
     """Minimal BDF-format DataFrame for a cycling test."""
-    return pd.DataFrame({
-        "test_time_second": [0.0, 10.0, 20.0, 30.0],
-        "unix_time_second": [1_700_000_000, 1_700_000_010, 1_700_000_020, 1_700_000_030],
-        "voltage_volt":     [3.30, 3.45, 3.50, 3.28],
-        "current_ampere":   [2.5, 2.5, -2.5, -2.5],
-        "cycle_count":      [0, 0, 0, 1],
-    })
+    return pd.DataFrame(
+        {
+            "test_time_second": [0.0, 10.0, 20.0, 30.0],
+            "unix_time_second": [1_700_000_000, 1_700_000_010, 1_700_000_020, 1_700_000_030],
+            "voltage_volt": [3.30, 3.45, 3.50, 3.28],
+            "current_ampere": [2.5, 2.5, -2.5, -2.5],
+            "cycle_count": [0, 0, 0, 1],
+        }
+    )
 
 
 def _make_eis_df() -> pd.DataFrame:
     """Minimal BDF-format DataFrame that looks like EIS data."""
-    return pd.DataFrame({
-        "freq":            [1e4, 1e3, 1e2, 10.0, 1.0],
-        "re_z":            [0.01, 0.015, 0.02, 0.025, 0.03],
-        "im_z":            [-0.005, -0.008, -0.012, -0.018, -0.025],
-        "voltage_volt":    [3.5, 3.5, 3.5, 3.5, 3.5],
-    })
+    return pd.DataFrame(
+        {
+            "freq": [1e4, 1e3, 1e2, 10.0, 1.0],
+            "re_z": [0.01, 0.015, 0.02, 0.025, 0.03],
+            "im_z": [-0.005, -0.008, -0.012, -0.018, -0.025],
+            "voltage_volt": [3.5, 3.5, 3.5, 3.5, 3.5],
+        }
+    )
 
 
 def _make_bpx_dict() -> dict:
@@ -91,6 +96,7 @@ CELL_ID = "urn:staging:test-cell-001"
 
 # ── _infer_kind ────────────────────────────────────────────────────────────────
 
+
 def test_infer_kind_cycling() -> None:
     df = _make_cycling_df()
     assert _infer_kind(df) == "cycling"
@@ -108,6 +114,7 @@ def test_infer_kind_returns_none_for_unknown() -> None:
 
 # ── _extract_timestamps ────────────────────────────────────────────────────────
 
+
 def test_extract_timestamps_present() -> None:
     df = _make_cycling_df()
     started, ended = _extract_timestamps(df)
@@ -123,6 +130,7 @@ def test_extract_timestamps_missing_column() -> None:
 
 
 # ── _to_variable_measured ──────────────────────────────────────────────────────
+
 
 def test_to_variable_measured_maps_known_columns() -> None:
     df = _make_cycling_df()
@@ -140,6 +148,7 @@ def test_to_variable_measured_skips_unknown_columns() -> None:
 
 
 # ── from_battdat — DataFrame input ────────────────────────────────────────────
+
 
 def test_from_battdat_dataframe_produces_test_record() -> None:
     df = _make_cycling_df()
@@ -191,6 +200,7 @@ def test_from_battdat_inferred_kind_attribute() -> None:
 
 # ── from_battdat — file path input ────────────────────────────────────────────
 
+
 def test_from_battdat_csv_path_produces_dataset_record(tmp_path: Path) -> None:
     csv_file = tmp_path / "2024-01-01__cycling__25degC.csv"
     df = _make_cycling_df()
@@ -234,21 +244,22 @@ def test_from_battdat_csv_measurement_techniques(tmp_path: Path) -> None:
 def test_from_battdat_license_propagated(tmp_path: Path) -> None:
     csv_file = tmp_path / "cycling.csv"
     _make_cycling_df().to_csv(csv_file, index=False)
-    result = from_battdat(
-        csv_file, cell_id=CELL_ID, license="https://creativecommons.org/licenses/by/4.0/"
-    )
+    result = from_battdat(csv_file, cell_id=CELL_ID, license="https://creativecommons.org/licenses/by/4.0/")
     assert result.dataset_record["dataset"]["license"].startswith("https://")
 
 
 # ── from_battdat — top-level import ──────────────────────────────────────────
 
+
 def test_from_battdat_accessible_from_battinfo() -> None:
     import battinfo
+
     assert callable(battinfo.from_battdat)
     assert battinfo.BattdatImportResult is BattdatImportResult
 
 
 # ── from_bpx — spec extraction ────────────────────────────────────────────────
+
 
 def test_from_bpx_dict_extracts_capacity() -> None:
     result = from_bpx(_make_bpx_dict())
@@ -327,11 +338,13 @@ def test_from_bpx_to_cell_spec_kwargs() -> None:
 
 def test_from_bpx_accessible_from_battinfo() -> None:
     import battinfo
+
     assert callable(battinfo.from_bpx)
     assert battinfo.BpxImportResult is BpxImportResult
 
 
 # ── Workspace integration ─────────────────────────────────────────────────────
+
 
 def test_workspace_from_battdat_returns_test(tmp_path: Path) -> None:
     from battinfo._workspace import Workspace

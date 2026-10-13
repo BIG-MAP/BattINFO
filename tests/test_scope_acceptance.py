@@ -104,7 +104,9 @@ def test_scope_examples_cover_simple_cell_tests_and_dataset_links(tmp_path: Path
     assert len(instance_rows) == 1
     assert instance_rows[0]["id"] == cell_instance_doc["cell_instance"]["id"]
 
-    observed_kinds = {row["kind"] for row in query_tests(source_root=source_root, cell_id=cell_instance_doc["cell_instance"]["id"])}
+    observed_kinds = {
+        row["kind"] for row in query_tests(source_root=source_root, cell_id=cell_instance_doc["cell_instance"]["id"])
+    }
     assert expected_kinds.issubset(observed_kinds)
 
     hppc_rows = query_tests(source_root=source_root, kind="hppc", dataset_id=dataset_doc["dataset"]["id"])
@@ -118,6 +120,3 @@ def test_scope_examples_cover_simple_cell_tests_and_dataset_links(tmp_path: Path
     )
     assert len(dataset_rows) == 1
     assert dataset_rows[0]["id"] == dataset_doc["dataset"]["id"]
-
-
-

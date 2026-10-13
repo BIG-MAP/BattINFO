@@ -5,6 +5,7 @@ referenced, and findable as records saved without one. The session only changes
 where lookups read from (an in-memory map kept current by each save) and skips
 the per-file fsync (the batch is re-runnable, so power-loss repair is a re-run).
 """
+
 from __future__ import annotations
 
 import sys
@@ -49,10 +50,7 @@ def test_session_saves_match_unsessioned_saves(tmp_path: Path) -> None:
     session_root = tmp_path / "session" / "examples"
 
     spec_plain = api.save_cell_spec(_spec_draft(), source_root=plain_root)
-    plain = [
-        api.save_cell_instance(_instance_draft(spec_plain["id"], i), source_root=plain_root)
-        for i in range(10)
-    ]
+    plain = [api.save_cell_instance(_instance_draft(spec_plain["id"], i), source_root=plain_root) for i in range(10)]
 
     with bulk_save_session(session_root):
         spec_sessioned = api.save_cell_spec(_spec_draft(), source_root=session_root)
@@ -105,9 +103,7 @@ def test_preexisting_records_are_found_by_the_session_scan(tmp_path: Path) -> No
     spec = api.save_cell_spec(_spec_draft(), source_root=root)  # before the session
     with bulk_save_session(root):
         result = api.save_cell_instance(_instance_draft(spec["id"], 3), source_root=root)
-        duplicate = api.save_cell_spec(
-            _spec_draft(), source_root=root, duplicate_policy="return_existing"
-        )
+        duplicate = api.save_cell_spec(_spec_draft(), source_root=root, duplicate_policy="return_existing")
     assert result["status"] == "created"
     assert duplicate["status"] == "exists"
 
