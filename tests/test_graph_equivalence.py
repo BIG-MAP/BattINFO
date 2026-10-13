@@ -32,6 +32,8 @@ sys.path.insert(0, str(ROOT / "src"))
 from battinfo.jsonld import record_to_jsonld  # noqa: E402
 
 EXAMPLES = ROOT / "src" / "battinfo" / "data" / "examples"
+# A test fixture, not a packaged example: its claim values are not curated.
+CLAIM_BATCH_FIXTURE = ROOT / "tests" / "fixtures" / "parameter-set" / "parameter-set-xm4e-fr60-10y6-ajqh.json"
 BASE = "https://battinfo.invalid/base/"
 
 _V1 = json.loads(
@@ -245,8 +247,15 @@ def test_nominal_capacity_is_a_conventional_property_with_the_records_value(
 def test_parameter_claims_expose_their_provenance_class(corpus_graph) -> None:
     """Q3 (claims epistemics): a consumer can ask 'on what basis is this
     parameter claimed?' — provenance_class annotations are retrievable per
-    claim, and the corpus distinguishes more than one epistemic basis."""
-    rows = list(corpus_graph.query(
+    claim, and claims on different epistemic bases stay apart. The packaged
+    parameter sets are BPX files, whose classed claims are all fitted, so the
+    claim-batch fixture adds a measured one."""
+    graph = rdflib.Graph()
+    graph += corpus_graph
+    fixture = json.loads(CLAIM_BATCH_FIXTURE.read_text(encoding="utf-8"))
+    doc = record_to_jsonld(fixture, "parameter-set", context="url")
+    graph.parse(data=json.dumps(_substituted(doc)), format="json-ld", base=BASE)
+    rows = list(graph.query(
         """
         SELECT ?claim ?basis WHERE {
             ?claim <https://schema.org/additionalProperty> ?ann .

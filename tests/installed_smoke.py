@@ -13,7 +13,7 @@ def main() -> None:
     import battinfo
     from battinfo.cli import app
 
-    assert battinfo.__version__ == "0.7.0"
+    assert battinfo.__version__ == "0.8.0"
     runner = CliRunner()
     result = runner.invoke(
         app,
@@ -28,7 +28,9 @@ def main() -> None:
         raise RuntimeError(result.stdout)
     validation_payload = json.loads(result.stdout)
     assert validation_payload["ok"] is True
-    assert validation_payload["issue_count"] == 0
+    # A core install reports the shacl.unavailable warning (pyshacl is not a core
+    # dependency), so the smoke asserts no errors rather than no issues at all.
+    assert validation_payload["error_count"] == 0, validation_payload
 
     with tempfile.TemporaryDirectory() as tmp_dir:
         tmp_root = Path(tmp_dir)

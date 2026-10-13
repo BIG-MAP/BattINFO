@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-title: "BattINFO: The semantic data layer for battery science"
+title: "BattINFO: The semantic data layer for battery technology"
 message: "If you use this software, please cite it using the metadata from this file."
 type: software
 # Zenodo concept DOI: resolves to the latest archived release.
@@ -14,9 +14,14 @@ authors:
   - given-names: "Francesca"
     family-names: "Lønstad Bleken"
     orcid: "https://orcid.org/0000-0001-8869-3718"
+  - given-names: "Casper Welzel"
+    family-names: "Andersen"
+    orcid: "https://orcid.org/0000-0002-2547-155X"
   - given-names: "Eibar"
     family-names: "Flores"
     orcid: "https://orcid.org/0000-0003-2954-1233"
+  - given-names: "Hendrik"
+    family-names: "Snijder"
   - given-names: "Simon"
     family-names: "Stier"
     orcid: "https://orcid.org/0009-0008-6968-1998"
@@ -29,7 +34,7 @@ authors:
 repository-code: "https://github.com/BIG-MAP/BattINFO"
 url: "https://github.com/BIG-MAP/BattINFO"
 abstract: >-
-  BattINFO is the semantic data layer for battery science. It provides a Python
+  BattINFO is the semantic data layer for battery technology. It provides a Python
   library, CLI, and canonical asset suite (JSON Schemas, ontology mappings, and
   examples) for creating, validating, and publishing battery metadata as
   machine-readable Linked Data, typed against the EMMO domain-battery ontology
@@ -44,5 +49,6 @@ keywords:
   - Battery Pass
   - semantic web
 license: Apache-2.0
-version: 0.7.0
-# date-released: 2026-XX-XX   # set on the first tagged release
+version: 0.8.0
+# Set to the day the v0.8.0 tag is pushed.
+date-released: 2026-10-13

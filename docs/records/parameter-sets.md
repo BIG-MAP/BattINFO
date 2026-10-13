@@ -61,7 +61,7 @@ record = create_parameter_set(
   "provenance": {
     "source_type": "literature",
     "retrieved_at": 1750000000,
-    "battinfo_version": "0.7.0"
+    "battinfo_version": "0.8.0"
   }
 }
 ```
@@ -113,6 +113,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 What to notice:
 
 - The claim batch emits as one `schema:Dataset` node: scalar claims as EMMO-typed quantities, the target on `schema:about`.
+- No claim batch ships among the packaged examples, which are all BPX files. Build one with `create_parameter_set`, as above, or in a workspace with `ws.add("parameter_set", name=..., material=..., claims=[...])`.
 
 
 ### One BPX file as one record
@@ -245,7 +246,7 @@ record = result.to_parameter_set(
   "provenance": {
     "source_type": "literature",
     "retrieved_at": 1750000000,
-    "battinfo_version": "0.7.0"
+    "battinfo_version": "0.8.0"
   }
 }
 ```
@@ -445,188 +446,6 @@ What to notice:
 ## Common examples
 
 A selection of real, validated records from the packaged examples corpus — each one click away, included from its single source under `examples/`. The full, living library is the registry: [browse it there](https://www.battery-genome.org/explore).
-
-::::::{dropdown} Chen 2020 - graphite (parameter-set)
-:::::{tab-set}
-
-::::{tab-item} Python
-The record ships in the installed wheel — load it as a starting point:
-
-```python
-import json
-from importlib import resources
-
-record = json.loads(
-    resources.files("battinfo")
-    .joinpath("data/examples/parameter-set/parameter-set-xm4e-fr60-10y6-ajqh.json")
-    .read_text(encoding="utf-8")
-)
-```
-::::
-
-::::{tab-item} Canonical record
-```{literalinclude} ../../examples/parameter-set/parameter-set-xm4e-fr60-10y6-ajqh.json
-:language: json
-```
-::::
-
-::::{tab-item} JSON-LD
-Emitted by `record_to_jsonld`, hosted-context mode.
-
-```json
-{
-  "@context": "https://w3id.org/battinfo/context/records/v1.json",
-  "@id": "https://w3id.org/battinfo/dataset/xm4e-fr60-10y6-ajqh",
-  "@type": "schema:Dataset",
-  "schema:name": "Chen 2020 - graphite",
-  "schema:description": "Subset of the Chen et al. 2020 LG M50 parameterization for the graphite negative electrode material, as a worked example of parameter claims.",
-  "schema:about": {
-    "@type": "Graphite",
-    "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_d53259a7_0d9c_48b9_a6c1_4418169df303",
-    "schema:name": "Graphite"
-  },
-  "schema:additionalProperty": [
-    {
-      "@type": "schema:PropertyValue",
-      "schema:name": "scope",
-      "schema:value": "material"
-    },
-    {
-      "@type": "schema:PropertyValue",
-      "schema:name": "source_model",
-      "schema:value": "DFN"
-    },
-    {
-      "@type": "schema:PropertyValue",
-      "schema:name": "source_name",
-      "schema:value": "Chen2020"
-    },
-    {
-      "@type": "schema:PropertyValue",
-      "schema:name": "source_tool",
-      "schema:value": "BPX"
-    }
-  ],
-  "hasProperty": [
-    {
-      "@type": [
-        "ParticleRadius",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "ParticleRadius",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 5.86e-06
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#Metre",
-      "schema:propertyID": "particle_radius",
-      "schema:additionalProperty": {
-        "@type": "schema:PropertyValue",
-        "schema:name": "provenance_class",
-        "schema:value": "fitted"
-      }
-    },
-    {
-      "@type": [
-        "MaximumConcentration",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "MaximumConcentration",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 33133.0
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#MolePerCubicMetre",
-      "schema:propertyID": "max_concentration",
-      "schema:additionalProperty": {
-        "@type": "schema:PropertyValue",
-        "schema:name": "provenance_class",
-        "schema:value": "fitted"
-      }
-    },
-    {
-      "@type": [
-        "ReactionRateConstant",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "ReactionRateConstant",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 6.716e-06
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#MolePerSquareMetrePerSecond",
-      "schema:propertyID": "reaction_rate_constant",
-      "schema:additionalProperty": {
-        "@type": "schema:PropertyValue",
-        "schema:name": "provenance_class",
-        "schema:value": "fitted"
-      }
-    },
-    {
-      "@type": [
-        "MinimumStoichiometricCoefficient",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "MinimumStoichiometricCoefficient",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 0.0279
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
-      "schema:propertyID": "stoichiometry_min",
-      "schema:additionalProperty": {
-        "@type": "schema:PropertyValue",
-        "schema:name": "provenance_class",
-        "schema:value": "fitted"
-      }
-    },
-    {
-      "@type": [
-        "MaximumStoichiometricCoefficient",
-        "ConventionalProperty"
-      ],
-      "skos:prefLabel": "MaximumStoichiometricCoefficient",
-      "hasNumericalPart": {
-        "@type": "RealData",
-        "hasNumberValue": 0.9014
-      },
-      "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
-      "schema:propertyID": "stoichiometry_max",
-      "schema:additionalProperty": {
-        "@type": "schema:PropertyValue",
-        "schema:name": "provenance_class",
-        "schema:value": "fitted"
-      }
-    }
-  ],
-  "schema:variableMeasured": {
-    "@type": "schema:PropertyValue",
-    "schema:name": "ocp",
-    "schema:propertyID": "ocp",
-    "schema:description": "tabulated curve vs stoichiometry, 8 points, average branch",
-    "schema:unitText": "V",
-    "schema:unitCode": {
-      "@id": "https://w3id.org/emmo#Volt"
-    },
-    "schema:measurementTechnique": "GITT",
-    "schema:additionalProperty": {
-      "@type": "schema:PropertyValue",
-      "schema:name": "provenance_class",
-      "schema:value": "measured"
-    }
-  },
-  "schema:citation": {
-    "@id": "https://doi.org/10.1149/1945-7111/ab9050",
-    "@type": "schema:CreativeWork",
-    "bibo:doi": "10.1149/1945-7111/ab9050"
-  },
-  "schema:comment": "Worked example generated by scripts in the parameter-claims change; values from the cited source."
-}
-```
-::::
-
-:::::
-::::::
 
 ::::::{dropdown} BPX NMC111 pouch (parameter-set)
 :::::{tab-set}

@@ -17,10 +17,9 @@ export const site = {
   reference: "https://big-map.github.io/BattINFO/dev",
   github: "https://github.com/BIG-MAP/BattINFO",
   pypi: "https://pypi.org/project/battinfo/",
-  // The package is not on PyPI until the 0.8 release train publishes it
-  // (user decision: release LAST, once everything is in shape). The badge,
-  // footer link, and install copy stay hidden until this flips.
-  pypiLive: false,
+  // battinfo is on PyPI from 0.8.0 (release.yml publishes each v* tag). Set
+  // to false to hide the PyPI badge again.
+  pypiLive: true,
   genome: "https://www.battery-genome.org",
   ciBadge: "https://github.com/BIG-MAP/BattINFO/actions/workflows/ci.yml/badge.svg?branch=main",
   ciRuns: "https://github.com/BIG-MAP/BattINFO/actions/workflows/ci.yml",

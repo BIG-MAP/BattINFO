@@ -113,14 +113,61 @@ Keep the `dataset_id` with anything you derive. It is the persistent identifier 
 <!-- doc-snippet: skip -->
 ```python
 tests = reg.list("test", kind="cycling")          # summaries, all pages
-record = reg.get(tests[0])                        # the registry's entry for the test
-reg.links(record)                                 # e.g. {'cell': ['https://w3id.org/battinfo/cell/...']}
+entry = reg.get(tests[0])                         # the registry's entry for the test
+reg.links(entry)                                  # e.g. {'cell': ['https://w3id.org/battinfo/cell/...']}
 reg.files("https://w3id.org/battinfo/dataset/xt2a-nsda-njps-9n50")
 ```
 
 `list` accepts any record type (`dataset`, `test`, `cell`, `cell_spec`, `test_spec`, ...). `get` takes an IRI, or a summary returned by `list`.
 
-`links` groups the IRIs a record points at by the type of the record they name, as the registry indexed them. Which keys appear depends on the record: a test has `cell`, plus `test_spec` only when it names its test spec; a dataset has `cell` and `test`; a cell has `cell_spec`, `test` and `dataset`. A type the record has no link to is left out rather than given an empty list, so read it with `reg.links(record).get("test_spec", [])`.
+`links` groups the IRIs a record points at by the type of the record they name, as the registry indexed them. Which keys appear depends on the record: a test has `cell`, plus `test_spec` only when it names its test spec; a dataset has `cell` and `test`; a cell has `cell_spec`, `test` and `dataset`. A type the record has no link to is left out rather than given an empty list, so read it with `reg.links(entry).get("test_spec", [])`.
+
+## Get the record out of an entry
+
+The entry that `get` returns is the registry's view of a record: its IRI, title and status, the links and files the registry indexed, and the record as it was published. The entry itself is not a BattINFO record, so `Dataset.from_record` and the other `from_record` methods cannot take it. The record sits inside it, under the entry's `resource_type`:
+
+<!-- doc-snippet: skip -->
+```python
+entry = reg.get("https://w3id.org/battinfo/dataset/xt2a-nsda-njps-9n50")
+record = entry["semantic_payload"]["battinfo_records"][entry["resource_type"]]
+```
+
+The same line works for every record type. A cell's entry keeps its record under `"cell"` (the body inside is `cell_instance`) and a copy of the cell's spec under `"cell_spec"`.
+
+## Make a new version of a published dataset
+
+To change a published dataset, for example to link it to a different test, rebuild it from its record, change what needs changing, save it and submit it. The registry keeps it as a new version of the same IRI.
+
+The curve preview the registry shows for a dataset does not come along by itself. Its two files, a Plotly figure (`.plot.json`, role `plot_data`) and an image (`.png`, role `plot_static`), are listed in the entry's `distributions` but not in the record, so a version made from the record alone is published without them, and nothing warns you. Copy them across before you save:
+
+<!-- doc-snippet: skip -->
+```python
+import battinfo
+
+files = list(record["dataset"].get("distributions", []))
+names = {f.get("name") for f in files}
+for f in entry["distributions"]:
+    if f.get("role") in ("plot_data", "plot_static") and f["title"] not in names:
+        files.append({"name": f["title"], "content_url": f["access_url"], "encoding_format": f.get("media_type")})
+
+dataset = battinfo.Dataset.from_record(record)
+dataset.test_id = new_test_iri            # the change this version makes
+dataset.distributions = files
+battinfo.save_dataset(dataset, source_root="lab/.battinfo/records", validation_policy="strict")
+```
+
+`ws.submit()` recognises the copied files by their names and lists them as `plot_data` and `plot_static` again, with the image as the preview. The record keeps only the measurement files, as the published one does.
+
+`save_dataset` checks that the cell and test the dataset is about are known in the workspace. A cell the workspace has looked up in the registry counts, for example one given by IRI to `ws.add("test", cell=...)` when you make the new test. A cell or test that exists only in the registry and was never looked up does not, so for a version that keeps its published links, pass `resolve_references=False`.
+
+Once `ws.save()` has run in a session, `ws.submit()` sends only what that save wrote, even with `submit_all=True`, and a dataset written by `save_dataset` is not part of it. Submit the dataset from a new workspace object:
+
+<!-- doc-snippet: skip -->
+```python
+ws = battinfo.workspace("lab")
+ws.login(api_key="...")
+ws.submit(only="dataset", submit_all=True)
+```
 
 ## Where things are kept
 

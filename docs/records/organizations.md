@@ -59,7 +59,7 @@ record = create_organization(
   "provenance": {
     "source_type": "manual",
     "retrieved_at": 1750000000,
-    "battinfo_version": "0.7.0",
+    "battinfo_version": "0.8.0",
     "source_url": "https://www.example-instruments.test"
   }
 }

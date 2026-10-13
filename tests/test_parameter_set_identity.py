@@ -3,7 +3,7 @@
 Rules under test:
 - one seed per flavour, minted in one place: a record saved without an id
   lands on the IRI the builder gives the same fields, for every packaged
-  example and for a filled-in template;
+  example, the claim-batch fixture and a filled-in template;
 - parameter sets minted under spec/ before 2026-10-11 stay readable: they
   validate with ``semantic.parameter_set_legacy_namespace`` (a warning, an
   error under the publisher policy), local lookups find them by their spec/
@@ -45,7 +45,8 @@ from battinfo.validate import validate_record_report
 from battinfo.validate.references import _find_record
 
 EXAMPLES = sorted((EXAMPLES_ROOT / "parameter-set").glob("parameter-set-*.json"))
-CLAIM_BATCH_EXAMPLE = EXAMPLES_ROOT / "parameter-set" / "parameter-set-xm4e-fr60-10y6-ajqh.json"
+# A test fixture, not a packaged example: its claim values are not curated.
+CLAIM_BATCH_FIXTURE = Path(__file__).parent / "fixtures" / "parameter-set" / "parameter-set-xm4e-fr60-10y6-ajqh.json"
 PARAMETER_FILE_EXAMPLE = EXAMPLES_ROOT / "parameter-set" / "parameter-set-rnc6-edv8-m43x-ebnq.json"
 LEGACY_CODE = "semantic.parameter_set_legacy_namespace"
 
@@ -104,7 +105,7 @@ def test_a_saved_template_lands_on_the_builders_iri(tmp_path: Path) -> None:
     assert saved["id"] == built["parameter_set"]["id"]
 
 
-@pytest.mark.parametrize("path", EXAMPLES, ids=lambda p: p.stem)
+@pytest.mark.parametrize("path", [*EXAMPLES, CLAIM_BATCH_FIXTURE], ids=lambda p: p.stem)
 def test_a_packaged_example_saved_without_its_id_gets_it_back(path: Path, tmp_path: Path) -> None:
     record = _load(path)
     saved = save_parameter_set(_stripped(record), source_root=tmp_path)
@@ -112,20 +113,20 @@ def test_a_packaged_example_saved_without_its_id_gets_it_back(path: Path, tmp_pa
 
 
 def test_a_stripped_legacy_claim_batch_saved_with_supersedes_gets_a_new_uid(tmp_path: Path) -> None:
-    legacy = _legacy(CLAIM_BATCH_EXAMPLE)
+    legacy = _legacy(CLAIM_BATCH_FIXTURE)
     old = legacy["parameter_set"]["id"]
     draft = _stripped(legacy)
     draft["parameter_set"]["supersedes"] = old
     saved = save_parameter_set(draft, source_root=tmp_path)
     assert saved["id"].startswith("https://w3id.org/battinfo/dataset/")
     assert saved["id"].rsplit("/", 1)[-1] != old.rsplit("/", 1)[-1]
-    assert saved["id"] == _load(CLAIM_BATCH_EXAMPLE)["parameter_set"]["id"]
+    assert saved["id"] == _load(CLAIM_BATCH_FIXTURE)["parameter_set"]["id"]
 
 
 # ── legacy spec/ ids are read, never minted ─────────────────────────────────
 
 
-@pytest.mark.parametrize("path", [CLAIM_BATCH_EXAMPLE, PARAMETER_FILE_EXAMPLE], ids=["claims", "file"])
+@pytest.mark.parametrize("path", [CLAIM_BATCH_FIXTURE, PARAMETER_FILE_EXAMPLE], ids=["claims", "file"])
 @pytest.mark.parametrize("policy", ["default", "strict", "ingest"])
 def test_a_legacy_record_validates_with_the_legacy_warning(path: Path, policy: str) -> None:
     # Exactly one issue more than the same record under its dataset/ IRI has.
@@ -138,7 +139,7 @@ def test_a_legacy_record_validates_with_the_legacy_warning(path: Path, policy: s
     assert _load(path)["parameter_set"]["id"] in message  # the IRI its replacement mints
 
 
-@pytest.mark.parametrize("path", [CLAIM_BATCH_EXAMPLE, PARAMETER_FILE_EXAMPLE], ids=["claims", "file"])
+@pytest.mark.parametrize("path", [CLAIM_BATCH_FIXTURE, PARAMETER_FILE_EXAMPLE], ids=["claims", "file"])
 def test_a_legacy_record_is_refused_under_the_publisher_policy(path: Path) -> None:
     assert validate_record_report(_load(path), policy="publisher").ok
     report = validate_record_report(_legacy(path), policy="publisher")
@@ -158,7 +159,7 @@ def test_a_legacy_parameter_file_stays_bound_to_its_fingerprint() -> None:
 
 
 def test_an_id_in_neither_namespace_says_which_are_accepted() -> None:
-    record = _load(CLAIM_BATCH_EXAMPLE)
+    record = _load(CLAIM_BATCH_FIXTURE)
     record["parameter_set"]["id"] = "https://w3id.org/battinfo/cell/aaaa-bbbb-cccc-dddd"
     report = validate_record_report(record)
     error = next(issue for issue in report.errors if issue.path == "parameter_set.id")
@@ -166,7 +167,7 @@ def test_an_id_in_neither_namespace_says_which_are_accepted() -> None:
 
 
 def test_the_builders_never_mint_under_spec() -> None:
-    legacy = _legacy(CLAIM_BATCH_EXAMPLE)["parameter_set"]
+    legacy = _legacy(CLAIM_BATCH_FIXTURE)["parameter_set"]
     with pytest.raises(ValueError, match=r"IDENTIFIER_POLICY 6\.3.*supersede_parameter_set"):
         create_parameter_set(
             id=legacy["id"], name=legacy["name"], material_kind="graphite", claims=legacy["claims"]
@@ -181,7 +182,7 @@ def test_the_builders_never_mint_under_spec() -> None:
 
 
 def test_a_legacy_record_is_found_by_its_spec_iri(tmp_path: Path) -> None:
-    legacy = _legacy(CLAIM_BATCH_EXAMPLE)
+    legacy = _legacy(CLAIM_BATCH_FIXTURE)
     saved = save_parameter_set(legacy, source_root=tmp_path)
     assert saved["status"] == "created"
     path = _find_record_path_by_id(legacy["parameter_set"]["id"], tmp_path)
@@ -204,7 +205,7 @@ def test_a_lookup_opens_only_the_parameter_set_file_named_by_the_uid(
     import battinfo.api._records as records_module
     import battinfo.validate.references as references_module
 
-    current = Path(save_parameter_set(_load(CLAIM_BATCH_EXAMPLE), source_root=tmp_path)["path"])
+    current = Path(save_parameter_set(_load(CLAIM_BATCH_FIXTURE), source_root=tmp_path)["path"])
     legacy = _legacy(PARAMETER_FILE_EXAMPLE)
     save_parameter_set(legacy, source_root=tmp_path)
     opened: list[Path] = []
@@ -219,7 +220,7 @@ def test_a_lookup_opens_only_the_parameter_set_file_named_by_the_uid(
         assert _find_record(iri, tmp_path) is None
     assert not [path for path in opened if path.parent.name == "parameter-set"]
 
-    assert _find_record_path_by_id(_load(CLAIM_BATCH_EXAMPLE)["parameter_set"]["id"], tmp_path) == current
+    assert _find_record_path_by_id(_load(CLAIM_BATCH_FIXTURE)["parameter_set"]["id"], tmp_path) == current
     assert _find_record(legacy["parameter_set"]["id"], tmp_path) is not None
     assert [path.name for path in opened if path.parent.name == "parameter-set"] == [
         current.name, f"parameter-set-{legacy['parameter_set']['id'].rsplit('/', 1)[-1]}.json",
@@ -228,7 +229,7 @@ def test_a_lookup_opens_only_the_parameter_set_file_named_by_the_uid(
 
 def _migrated(tmp_path: Path) -> tuple[dict, dict]:
     """A legacy claim batch and its dataset/ replacement, both saved, as after a migration."""
-    legacy = _legacy(CLAIM_BATCH_EXAMPLE)
+    legacy = _legacy(CLAIM_BATCH_FIXTURE)
     save_parameter_set(legacy, source_root=tmp_path)
     replacement = _stripped(legacy)
     replacement["parameter_set"]["supersedes"] = legacy["parameter_set"]["id"]
@@ -280,7 +281,7 @@ def test_a_workspace_saves_a_legacy_record_and_refuses_to_submit_it(tmp_path: Pa
 
     ws = battinfo.workspace(str(tmp_path / "ws"), registry_url=None)
     ws.license("cc-by-4.0")
-    ws.add("parameter_set", record=_legacy(CLAIM_BATCH_EXAMPLE))
+    ws.add("parameter_set", record=_legacy(CLAIM_BATCH_FIXTURE))
     ws.save()
     saved = sorted((tmp_path / "ws").rglob("parameter-set-*.json"))
     assert [p.name for p in saved] == ["parameter-set-8qqs-rh43-wt8d-172n.json"]
@@ -301,8 +302,8 @@ def _no_zenodo(*args: object, **kwargs: object) -> None:
 
 
 @pytest.mark.parametrize("record,code", [
-    (_legacy(CLAIM_BATCH_EXAMPLE), LEGACY_CODE),
-    (_moved(CLAIM_BATCH_EXAMPLE), "semantic.parameter_set_uid_reused"),
+    (_legacy(CLAIM_BATCH_FIXTURE), LEGACY_CODE),
+    (_moved(CLAIM_BATCH_FIXTURE), "semantic.parameter_set_uid_reused"),
 ], ids=["spec-iri", "spec-uid-under-dataset"])
 def test_ws_zenodo_refuses_a_parameter_set_ws_submit_refuses(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, record: dict, code: str
@@ -330,7 +331,7 @@ def test_ws_zenodo_deposits_a_dataset_parameter_set(tmp_path: Path, monkeypatch:
     monkeypatch.setattr("battinfo.zenodo.ZenodoClient", _no_zenodo)
     ws = battinfo.workspace(str(tmp_path / "ws"), registry_url=None)
     ws.license("cc-by-4.0")
-    ws.add("parameter_set", record=_load(CLAIM_BATCH_EXAMPLE))
+    ws.add("parameter_set", record=_load(CLAIM_BATCH_FIXTURE))
     ws.save()
     with pytest.raises(_ZenodoReached):
         ws.zenodo(token="placeholder")
@@ -341,14 +342,14 @@ def test_ws_zenodo_deposits_a_dataset_parameter_set(tmp_path: Path, monkeypatch:
 
 @pytest.mark.parametrize("policy", ["default", "strict", "ingest", "publisher"])
 def test_a_record_that_supersedes_itself_is_an_error_under_every_policy(policy: str) -> None:
-    record = _load(CLAIM_BATCH_EXAMPLE)
+    record = _load(CLAIM_BATCH_FIXTURE)
     record["parameter_set"]["supersedes"] = record["parameter_set"]["id"]
     assert "semantic.parameter_set_supersedes_itself" in _codes(
         validate_record_report(record, policy=policy), "error"
     )
 
 
-@pytest.mark.parametrize("path", [CLAIM_BATCH_EXAMPLE, PARAMETER_FILE_EXAMPLE], ids=["claims", "file"])
+@pytest.mark.parametrize("path", [CLAIM_BATCH_FIXTURE, PARAMETER_FILE_EXAMPLE], ids=["claims", "file"])
 @pytest.mark.parametrize("policy", ["default", "strict", "ingest", "publisher"])
 def test_keeping_the_uid_of_the_superseded_record_is_an_error_under_every_policy(
     path: Path, policy: str
@@ -362,7 +363,7 @@ def test_keeping_the_uid_of_the_superseded_record_is_an_error_under_every_policy
 
 
 def test_the_builder_refuses_to_reuse_the_superseded_uid() -> None:
-    legacy = _legacy(CLAIM_BATCH_EXAMPLE)["parameter_set"]
+    legacy = _legacy(CLAIM_BATCH_FIXTURE)["parameter_set"]
     with pytest.raises(ValueError, match="never reused"):
         create_parameter_set(
             uid=legacy["id"].rsplit("/", 1)[-1], supersedes=legacy["id"],
@@ -370,7 +371,7 @@ def test_the_builder_refuses_to_reuse_the_superseded_uid() -> None:
         )
 
 
-@pytest.mark.parametrize("path", [CLAIM_BATCH_EXAMPLE, PARAMETER_FILE_EXAMPLE], ids=["claims", "file"])
+@pytest.mark.parametrize("path", [CLAIM_BATCH_FIXTURE, PARAMETER_FILE_EXAMPLE], ids=["claims", "file"])
 @pytest.mark.parametrize("policy", ["default", "strict", "ingest", "publisher"])
 def test_a_dataset_record_that_keeps_its_spec_uid_is_an_error_under_every_policy(path: Path, policy: str) -> None:
     # Naming no supersedes does not make the uid free: the seeds of the time give it back.
@@ -385,7 +386,7 @@ def test_a_dataset_record_that_keeps_its_spec_uid_is_an_error_under_every_policy
 def test_the_chen_claim_batch_saved_under_its_spec_uid_is_refused(tmp_path: Path) -> None:
     # The reproduction: the Chen 2020 graphite claim batch, saved as dataset/8qqs-rh43-wt8d-172n
     # without supersedes, passed the publisher policy.
-    record = _moved(CLAIM_BATCH_EXAMPLE)
+    record = _moved(CLAIM_BATCH_FIXTURE)
     assert record["parameter_set"]["id"] == "https://w3id.org/battinfo/dataset/8qqs-rh43-wt8d-172n"
     assert record["parameter_set"]["name"] == "Chen 2020 - graphite"
     assert not validate_record_report(record, policy="publisher").ok
@@ -395,7 +396,7 @@ def test_the_chen_claim_batch_saved_under_its_spec_uid_is_refused(tmp_path: Path
 
 
 def test_the_builders_refuse_a_uid_minted_under_spec() -> None:
-    legacy = _legacy(CLAIM_BATCH_EXAMPLE)["parameter_set"]
+    legacy = _legacy(CLAIM_BATCH_FIXTURE)["parameter_set"]
     legacy_uid = legacy["id"].rsplit("/", 1)[-1]
     for pin in ({"uid": legacy_uid}, {"id": f"https://w3id.org/battinfo/dataset/{legacy_uid}"}):
         with pytest.raises(ValueError, match="never reused") as excinfo:
@@ -415,7 +416,7 @@ def test_the_legacy_warning_names_the_replacement_iri() -> None:
     # spec/27fw-rh2c-t82v-t96q and republished as dataset/3zge-ge5d-cdn7-vzfy.
     record = create_parameter_set(
         validate=False, name="Ai2020 (PyBaMM) - graphite", material_kind="graphite",
-        claims=_load(CLAIM_BATCH_EXAMPLE)["parameter_set"]["claims"],
+        claims=_load(CLAIM_BATCH_FIXTURE)["parameter_set"]["claims"],
     )
     record["parameter_set"]["id"] = "https://w3id.org/battinfo/spec/27fw-rh2c-t82v-t96q"
     record["parameter_set"]["short_id"] = "27fwrh"
@@ -444,7 +445,7 @@ def test_a_parameter_set_never_overwrites_a_dataset_at_the_same_iri(
     before = Path(saved["path"]).read_text(encoding="utf-8")
     clash = create_parameter_set(
         validate=False, id=saved["id"], name="Chen 2020 - graphite", material_kind="graphite",
-        claims=_load(CLAIM_BATCH_EXAMPLE)["parameter_set"]["claims"],
+        claims=_load(CLAIM_BATCH_FIXTURE)["parameter_set"]["claims"],
     )
     with pytest.raises(ValueError, match="already the IRI of the dataset record") as excinfo:
         save_parameter_set(clash, source_root=tmp_path, mode=mode, duplicate_policy=policy)
@@ -461,7 +462,7 @@ def test_the_kind_check_holds_inside_a_bulk_session(tmp_path: Path) -> None:
         saved = save_dataset(dataset, source_root=tmp_path)
         clash = create_parameter_set(
             validate=False, id=saved["id"], name="Chen 2020 - graphite", material_kind="graphite",
-            claims=_load(CLAIM_BATCH_EXAMPLE)["parameter_set"]["claims"],
+            claims=_load(CLAIM_BATCH_FIXTURE)["parameter_set"]["claims"],
         )
         with pytest.raises(ValueError, match="already the IRI of the dataset record"):
             save_parameter_set(clash, source_root=tmp_path, mode="upsert")
@@ -470,7 +471,7 @@ def test_the_kind_check_holds_inside_a_bulk_session(tmp_path: Path) -> None:
 # ── the migration helper ─────────────────────────────────────────────────────
 
 
-@pytest.mark.parametrize("path", [CLAIM_BATCH_EXAMPLE, PARAMETER_FILE_EXAMPLE], ids=["claims", "file"])
+@pytest.mark.parametrize("path", [CLAIM_BATCH_FIXTURE, PARAMETER_FILE_EXAMPLE], ids=["claims", "file"])
 def test_supersede_parameter_set_mints_the_replacement_from_the_current_seeds(path: Path) -> None:
     legacy = _legacy(path)
     replacement = supersede_parameter_set(legacy)
@@ -491,7 +492,7 @@ def test_supersede_parameter_set_mints_the_replacement_from_the_current_seeds(pa
 
 def test_supersede_parameter_set_refuses_a_record_already_under_dataset() -> None:
     with pytest.raises(ValueError, match="already under dataset/"):
-        supersede_parameter_set(_load(CLAIM_BATCH_EXAMPLE))
+        supersede_parameter_set(_load(CLAIM_BATCH_FIXTURE))
     with pytest.raises(TypeError, match="parameter-set record"):
         supersede_parameter_set({"dataset": {"id": "https://w3id.org/battinfo/dataset/aaaa-bbbb-cccc-dddd"}})
 
@@ -518,10 +519,10 @@ def test_a_save_never_replaces_another_record_held_under_the_same_uid(tmp_path: 
     # Files are named by uid alone. A dataset/ record that keeps a legacy
     # record's uid under an edited name (so the uid-reuse finding, which
     # recomputes the seed from the name, stays quiet) replaced the legacy file.
-    legacy = _legacy(CLAIM_BATCH_EXAMPLE)
+    legacy = _legacy(CLAIM_BATCH_FIXTURE)
     saved = save_parameter_set(legacy, source_root=tmp_path)
     before = Path(saved["path"]).read_text(encoding="utf-8")
-    clash = _moved(CLAIM_BATCH_EXAMPLE)
+    clash = _moved(CLAIM_BATCH_FIXTURE)
     clash["parameter_set"]["name"] = "Chen 2020 - graphite (copy)"
     with pytest.raises(ValueError, match="never reused across namespaces") as excinfo:
         save_parameter_set(clash, source_root=tmp_path, mode=mode)
@@ -539,7 +540,7 @@ def test_ws_zenodo_leaves_out_a_legacy_record_its_replacement_supersedes(
     monkeypatch.setattr("battinfo.zenodo.ZenodoClient", _no_zenodo)
     ws = battinfo.workspace(str(tmp_path / "ws"), registry_url=None)
     ws.license("cc-by-4.0")
-    legacy = _legacy(CLAIM_BATCH_EXAMPLE)
+    legacy = _legacy(CLAIM_BATCH_FIXTURE)
     ws.add("parameter_set", record=legacy)
     ws.save()
     replacement = supersede_parameter_set(legacy)
@@ -570,7 +571,7 @@ def test_ws_zenodo_leaves_out_a_legacy_record_its_replacement_supersedes(
 def test_a_parameter_set_id_of_another_shape_does_not_break_a_query(tmp_path: Path, bad_id: object) -> None:
     from battinfo.parameters import collate_claims
 
-    record = _load(CLAIM_BATCH_EXAMPLE)
+    record = _load(CLAIM_BATCH_FIXTURE)
     record["parameter_set"]["id"] = bad_id
     claim_count = len(record["parameter_set"]["claims"])
     for include in (False, True):

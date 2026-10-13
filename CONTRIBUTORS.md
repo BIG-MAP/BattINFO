@@ -11,15 +11,13 @@ who have made substantial, sustained contributions to BattINFO:
 - Simon Clark — [0000-0002-8758-6109](https://orcid.org/0000-0002-8758-6109)
 - Jesper Friis — [0000-0002-1560-809X](https://orcid.org/0000-0002-1560-809X)
 - Francesca Lønstad Bleken — [0000-0001-8869-3718](https://orcid.org/0000-0001-8869-3718)
+- Casper Welzel Andersen — [0000-0002-2547-155X](https://orcid.org/0000-0002-2547-155X)
 - Eibar Flores — [0000-0003-2954-1233](https://orcid.org/0000-0003-2954-1233)
+- Hendrik Snijder
 - Simon Stier — [0009-0008-6968-1998](https://orcid.org/0009-0008-6968-1998)
 - Corsin Battaglia — [0000-0002-5003-1134](https://orcid.org/0000-0002-5003-1134)
 
 ## Community contributors
-
-With thanks to:
-
-- Casper Andersen — [0000-0002-2547-155X](https://orcid.org/0000-0002-2547-155X)
 
 Many others have contributed code, mappings, examples, documentation, bug
 reports, and review. The full, up-to-date list is on the
