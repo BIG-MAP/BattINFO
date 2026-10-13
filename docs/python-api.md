@@ -91,7 +91,7 @@ registry_result = publish(
 - `destination="local"` writes the canonical BattINFO record and returns its path in `debug_paths`.
 - `destination="registry"` also generates the submission package and submits it to `battinfo-registry`.
 - `destination="battery-genome"` additionally returns the expected Battery Genome page URL when `platform_base_url` is configured.
-- `root=` is the folder the record is built in, by default `.battinfo/publish/<manufacturer>-<model>` under the current folder. `force=True` deletes that folder first and builds it again. It deletes only a folder BattINFO created, which holds a `.battinfo-generated` file, or one built by an earlier version that holds nothing but BattINFO output. For any other folder, for the `.battinfo` folder where `battinfo.workspace()` keeps a project's records, and for the home or working folder, it raises a `ValueError` (`UnsafeDeleteError`) and deletes nothing.
+- `root=` is the folder the record is built in, by default `.battinfo/publish/<manufacturer>-<model>` under the current folder. `force=True` deletes that folder first and builds it again. It deletes only a folder BattINFO created, which holds a `.battinfo-generated` file, or one built by an earlier version that holds only what BattINFO writes there, down to the file names in `examples/`, `dist/` and its other record and report folders. For any other folder, such as one that also holds a file of yours (a JSON file included), for the `.battinfo` folder where `battinfo.workspace()` keeps a project's records, and for the home or working folder, it raises a `ValueError` (`UnsafeDeleteError`) and deletes nothing. The error names what is in the way.
 
 ## Publication package (record-classes path)
 

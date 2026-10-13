@@ -4,10 +4,10 @@
 with everything in it. These tests pin what the guard refuses, among it the
 folder where ``battinfo.workspace()`` keeps a project's records, that roots
 built by 0.8.0 (which carry no marker) still rebuild with ``--force`` while a
-project folder BattINFO wrote into keeps its own files, that the refusal
-names the files in the way, and that no other module calls ``shutil.rmtree``.
-The last section pins that the paths a workspace manifest names stay inside
-the workspace.
+project folder BattINFO wrote into keeps its own files, JSON files included,
+that the refusal names the files in the way, and that no other module calls
+``shutil.rmtree``. The last section pins that the paths a workspace manifest
+names stay inside the workspace.
 
 Tests that point the guard at a home, working or filesystem-root folder replace
 ``shutil.rmtree`` with a function that fails, so a broken guard cannot delete
@@ -114,13 +114,28 @@ def test_an_empty_folder_a_marked_folder_and_a_missing_one_are_fine(tmp_path: Pa
 @pytest.mark.parametrize(
     "layout",
     [
-        pytest.param({"index.json": "{}", "examples/cell-spec/cell-spec-x.json": "{}"}, id="publish-root"),
+        pytest.param({"index.json": "{}", "examples/cell-spec/cell-spec-czgb-525v-rz6q-2xfd.json": "{}"}, id="publish-root"),
+        pytest.param(
+            {
+                "index.json": "{}",
+                "examples/cell-spec/cell-spec-czgb-525v-rz6q-2xfd.json": "{}",
+                "dist/submission-package.cell_spec.czgb-525v-rz6q-2xfd.json": "{}",
+            },
+            id="publish-root-of-a-registry-publish",
+        ),
         pytest.param(
             {
                 "battinfo-authoring-workspace.json": "{}",
-                "records/cell-spec/x.json": "{}",
-                "artifacts/dataset/x/run.csv": "1",
+                "records/cell-spec/7d9k2m.json": "{}",
+                "records/cell-instance/q93yzr.json": "{}",
+                "records/tests/8d9ft1.json": "{}",
+                "records/dataset/hqr8qr.json": "{}",
+                "artifacts/dataset/hqr8qr/run.csv": "1",
                 "dist/submission-package.json": "{}",
+                "dist/registry-intake.json": "{}",
+                "dist/registry-intake.zenodo.json": "{}",
+                "dist/validation-report.json": "{}",
+                "dist/normalized/test/8d9ft1.json": "{}",
             },
             id="ingest-root",
         ),
@@ -128,30 +143,47 @@ def test_an_empty_folder_a_marked_folder_and_a_missing_one_are_fine(tmp_path: Pa
             {
                 "battinfo-workspace.json": "{}",
                 "resources/cell.json": "{}",
+                "resources/test.json": "{}",
+                "resources/dataset.json": "{}",
                 "artifacts/cycling.csv": "1",
                 "dist/registry-intake.json": "{}",
+                "dist/zenodo-metadata.json": "{}",
+                "dist/normalized/cell-instance/cell.json": "{}",
             },
             id="local-workspace",
         ),
-        pytest.param({"index.json": "{}", "examples/x.json": "{}", "inputs/cycle-life.csv": "1"}, id="demo-workspace"),
         pytest.param(
             {
                 "index.json": "{}",
-                "examples/cell-spec/x.json": "{}",
-                "library/cell-spec/x.json": "{}",
+                "examples/cell-spec/cell-spec-8re2-t25g-mv5p-zap2.json": "{}",
+                "examples/cell-instance/cell-1kxx-22c8-jex0-aht8.json": "{}",
+                "examples/test/test-c6fd-nzsp-peec-yjfx.json": "{}",
+                "examples/dataset/dataset-2r0z-jk62-qsz9-ksct.json": "{}",
+                "inputs/cycle-life.csv": "1",
+            },
+            id="demo-workspace",
+        ),
+        pytest.param(
+            {
+                "index.json": "{}",
+                "examples/cell-spec/cell-spec-jk86-b096-m8pk-6cgf.json": "{}",
+                "library/cell-spec/Google__G20M7.json": "{}",
                 "library-rdf/cell-spec.index.json": "{}",
-                "library-rdf/cell-spec/x.jsonld": "{}",
+                "library-rdf/cell-spec/Google__G20M7.jsonld": "{}",
                 "ontology/library/cell-spec.jsonld": "{}",
-                "package/cell-spec/x.json": "{}",
+                "package/cell-spec/Google__G20M7.json": "{}",
                 "publication/cycle-life/battinfo.publish.jsonld": "{}",
                 "publication/cycle-life/cycle-life.csv": "1",
+                "publication/cycle-life/index.html": "<html></html>",
                 "release/battinfo-workspace.json": "{}",
                 "release/artifacts/cycle-life.csv": "1",
                 "release/dist/registry-intake.json": "{}",
                 "battinfo-authoring-workspace.json": "{}",
-                "records/tests/x.json": "{}",
-                "artifacts/dataset/x/cycle-life.csv": "1",
+                "records/tests/r312xy.json": "{}",
+                "artifacts/dataset/vdegr2/cycle-life.csv": "1",
                 "dist/validation-report.json": "{}",
+                "dist/submission-package.dataset.vdegr2.json": "{}",
+                "dist/registry-intake.dataset.vdegr2.json": "{}",
             },
             id="engine-root",
         ),
@@ -173,11 +205,16 @@ def test_every_root_this_version_builds_is_recognised_without_its_marker(
 
     Each root is built as this version builds it, and its markers are then
     removed, as in a root built by 0.8.0. A new kind of entry at the top of a
-    root, or a new type of file in a record or report folder, fails here until
+    root, or a new file name in a record or report folder, fails here until
     the layouts in ``battinfo._fs_guard`` include it.
     """
     monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(
+        "battinfo._publish.submit_publication_package", lambda payload, **kwargs: {"status": "ok", "response": {}}
+    )
     publish(_spec(), destination="local", root=tmp_path / "pub")
+    publish(_spec(), destination="registry", root=tmp_path / "pub-registry", registry_base_url="https://registry.invalid",
+            api_key="key", workspace_id="guard-demo", publisher_id="demo-lab")
     setup_demo_environment(tmp_path / "demo")
     build_ingest_workspace(
         _make_evidence(tmp_path), type_record=EXAMPLE_CELL_TYPE, workspace_root=tmp_path / "ing",
@@ -189,7 +226,7 @@ def test_every_root_this_version_builds_is_recognised_without_its_marker(
     local.clone(tmp_path / "lw-clone")
     local.new_version(tmp_path / "lw-v2", version="2.0.0")
 
-    engine = Workspace(root=tmp_path / "eng")
+    engine = Workspace(root=tmp_path / "eng", name="guard-demo", publisher="demo-lab")
     _write_tree(tmp_path, {"data/cycle-life.csv": "cycle,capacity_ah\n0,2.50\n"})
     cell_spec = engine.cell_spec(
         manufacturer="A123", model="ANR26650M1-B", format="cylindrical", chemistry="Li-ion",
@@ -206,8 +243,10 @@ def test_every_root_this_version_builds_is_recognised_without_its_marker(
     engine.save_descriptions(mode="upsert")
     engine.save_workspace()
     engine.check_workspace(write_report=True)
+    engine.bundle_workspace()
+    engine.bundle_workspace(dataset)
 
-    roots = ["pub", "demo/workspace", "demo/release", "ing", "lw", "lw-clone", "lw-v2", "eng"]
+    roots = ["pub", "pub-registry", "demo/workspace", "demo/release", "ing", "lw", "lw-clone", "lw-v2", "eng"]
     for name in roots:
         root = tmp_path / name
         for marker in root.rglob(MARKER_FILENAME):
@@ -215,6 +254,8 @@ def test_every_root_this_version_builds_is_recognised_without_its_marker(
         assert any(root.iterdir()), name
         check_remove(root)
     assert {"library", "publication", "release", "records"} <= {entry.name for entry in (tmp_path / "eng").iterdir()}
+    assert list((tmp_path / "pub-registry" / "dist").glob("submission-package.cell_spec.*.json"))
+    assert list((tmp_path / "eng" / "dist").glob("submission-package.dataset.*.json"))
 
 
 def test_index_json_next_to_records_is_not_a_root_battinfo_built(tmp_path: Path) -> None:
@@ -274,13 +315,21 @@ def test_the_folder_where_a_workspace_keeps_its_records_is_refused(
         pytest.param({"publication/main.tex": "x"}, "publication/main.tex", id="publication-file"),
         pytest.param({"publication/figures/plot.png": "x"}, "publication/figures", id="publication-folder"),
         pytest.param({"dist/mypkg-1.0-py3-none-any.whl": "x"}, "dist/mypkg-1.0-py3-none-any.whl", id="dist"),
+        pytest.param({"dist/results-summary.json": "{}"}, "dist/results-summary.json", id="dist-json"),
+        pytest.param({"dist/assets/app.js": "x", "dist/assets/manifest.json": "{}"}, "dist/assets", id="dist-folder"),
         pytest.param({"library/paper.pdf": "x"}, "library/paper.pdf", id="library"),
+        pytest.param({"library/datasheets.json": "{}"}, "library/datasheets.json", id="library-json"),
+        pytest.param({"package/package.json": "{}"}, "package/package.json", id="package-json"),
+        pytest.param({"library-rdf/terms.jsonld": "{}"}, "library-rdf/terms.jsonld", id="library-rdf-jsonld"),
+        pytest.param({"ontology/my-lab-terms.jsonld": "{}"}, "ontology/my-lab-terms.jsonld", id="ontology-jsonld"),
         pytest.param({"release/notes.md": "x"}, "release", id="release"),
         pytest.param(
             {f"release/{MARKER_FILENAME}": "x", "release/.battinfo/records/cell-spec/x.json": "{}"}, "release/.battinfo",
             id="release-holding-a-workspace-store",
         ),
         pytest.param({"examples/analysis.ipynb": "{}"}, "examples/analysis.ipynb", id="examples"),
+        pytest.param({"examples/request.json": "{}"}, "examples/request.json", id="examples-json"),
+        pytest.param({"examples/cell-spec/my-cell.json": "{}"}, "examples/cell-spec/my-cell.json", id="examples-name"),
         pytest.param({"artifacts/run.csv": "1"}, "artifacts", id="artifacts"),
     ],
 )
@@ -289,6 +338,39 @@ def test_a_common_folder_name_counts_only_with_the_content_battinfo_writes_there
 ) -> None:
     root = tmp_path / "a_project"
     _write_tree(root, {"index.json": "{}", "examples/cell-spec/cell-spec-x.json": "{}", **own})
+
+    with pytest.raises(UnsafeDeleteError, match=re.escape(f"it holds {Path(in_the_way)}, which is not BattINFO output")):
+        remove_tree(root)
+
+    assert all((root / relative).exists() for relative in own)
+
+
+@pytest.mark.parametrize(
+    ("layout", "own", "in_the_way"),
+    [
+        pytest.param(
+            {"battinfo-authoring-workspace.json": "{}", "records/cell-spec/7d9k2m.json": "{}"},
+            {"records/notes/plan.json": "{}"}, "records/notes", id="ingest-records",
+        ),
+        pytest.param(
+            {"battinfo-authoring-workspace.json": "{}", "dist/submission-package.json": "{}"},
+            {"dist/normalized/cell-spec/summary.csv": "x"}, "dist/normalized/cell-spec/summary.csv", id="ingest-dist",
+        ),
+        pytest.param(
+            {"battinfo-workspace.json": "{}", "resources/cell.json": "{}"},
+            {"resources/drafts/cell.json": "{}"}, "resources/drafts", id="local-workspace-resources",
+        ),
+        pytest.param(
+            {"battinfo-workspace.json": "{}", "dist/registry-intake.json": "{}"},
+            {"dist/analysis.json": "{}"}, "dist/analysis.json", id="local-workspace-dist",
+        ),
+    ],
+)
+def test_a_records_or_reports_folder_holds_only_the_names_battinfo_gives(
+    tmp_path: Path, layout: dict[str, str], own: dict[str, str], in_the_way: str
+) -> None:
+    root = tmp_path / "root"
+    _write_tree(root, {**layout, **own})
 
     with pytest.raises(UnsafeDeleteError, match=re.escape(f"it holds {Path(in_the_way)}, which is not BattINFO output")):
         remove_tree(root)
@@ -360,12 +442,12 @@ def test_an_old_layout_that_also_holds_other_files_is_refused(tmp_path: Path) ->
     root = tmp_path / "root"
     _write_tree(root, {
         "index.json": "{}",
-        "examples/x.json": "{}",
+        "examples/cell-spec/cell-spec-x.json": "{}",
         "data/precious.csv": "1",
         "analysis.ipynb": "{}",
     })
 
-    with pytest.raises(UnsafeDeleteError, match=r"analysis\.ipynb, data"):
+    with pytest.raises(UnsafeDeleteError, match=r"it holds analysis\.ipynb, data, which are not BattINFO output"):
         remove_tree(root)
 
     assert (root / "data" / "precious.csv").exists()
@@ -538,6 +620,8 @@ def test_new_output_roots_carry_the_marker_and_a_marked_root_rebuilds(tmp_path: 
     [
         ("data/run.csv", "data"),
         ("inputs/raw_cycler_run.csv", "inputs/raw_cycler_run.csv"),
+        ("ontology/my-lab-terms.jsonld", "ontology/my-lab-terms.jsonld"),
+        ("dist/results-summary.json", "dist/results-summary.json"),
     ],
 )
 def test_a_folder_battinfo_writes_into_is_not_marked(tmp_path: Path, own: str, in_the_way: str) -> None:

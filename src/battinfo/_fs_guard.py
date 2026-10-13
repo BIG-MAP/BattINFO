@@ -33,8 +33,12 @@ BattINFO writes :data:`MARKER_FILENAME` into each output root it creates
 Roots made by 0.7 and 0.8 carry no marker. They are recognised by their layout
 instead, and only when everything in them is what BattINFO writes there: a
 folder with a common name such as ``inputs/``, ``release/`` or ``dist/`` counts
-only when its content matches. A file or folder that BattINFO left part way
-through a write counts as the one it stands in for. The ``.battinfo`` folder
+only when its content matches, and a records or reports folder may hold only
+files under the names BattINFO gives them, so someone else's JSON file there
+stops the delete. A file or folder that BattINFO left part way through a write
+counts as the one it stands in for. ``artifacts/`` and a dataset's folder in
+``publication/`` hold copies of the datasets' files, which cannot be told from
+other files, so what else they hold is not checked. The ``.battinfo`` folder
 where ``battinfo.workspace()`` keeps a project's records is never deleted,
 marker or not, and neither is a folder that holds one.
 """
@@ -44,9 +48,12 @@ from __future__ import annotations
 import os
 import re
 import shutil
-from collections.abc import Callable, Iterable, Iterator, Mapping
+from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
+from fnmatch import fnmatchcase
 from pathlib import Path, PureWindowsPath
 from typing import NamedTuple
+
+from battinfo.entities import ENTITY_KINDS
 
 PathLike = str | Path
 
@@ -64,7 +71,6 @@ _AUTHORING_STORE = ".battinfo"
 
 # Files an operating system leaves in a folder someone has browsed.
 _SYSTEM_FILES = frozenset({".DS_Store", "Thumbs.db", "desktop.ini"})
-_JSON_SUFFIXES = (".json", ".jsonld")
 
 # What BattINFO leaves when it stops part way: the temporary file of
 # _jsonio.atomic_write_text (".<name>.<8 characters>.tmp"), the folder
@@ -243,16 +249,38 @@ def _a_folder(path: Path) -> Iterator[Path]:
         yield path
 
 
-def _json_files(path: Path) -> Iterator[Path]:
-    """A folder of records, indexes or reports: JSON and JSON-LD files only, at any depth."""
-    if _is_link(path) or not path.is_dir():
-        yield path
-        return
-    for item in sorted(_visible(path)):
-        if item.is_dir() or _is_link(item):
-            yield from _json_files(item)
-        elif not _real_name(item.name).endswith(_JSON_SUFFIXES):
+def _strays(folder: Path, patterns: Sequence[tuple[str, ...]]) -> Iterator[Path]:
+    """What in ``folder`` none of ``patterns`` names; a folder that no pattern reaches into comes whole.
+
+    A pattern holds a name pattern for each level below ``folder``:
+    ``("cell-spec", "*.json")`` names the JSON files in its ``cell-spec`` folder.
+    """
+    for item in sorted(_visible(folder)):
+        name = _real_name(item.name)
+        fitting = [pattern[1:] for pattern in patterns if fnmatchcase(name, pattern[0])]
+        if _is_link(item):
             yield item
+        elif item.is_dir():
+            deeper = [rest for rest in fitting if rest]
+            if deeper:
+                yield from _strays(item, deeper)
+            else:
+                yield item
+        elif () not in fitting:
+            yield item
+
+
+def _named(*patterns: str) -> _Check:
+    """A folder of records or reports, which holds only the files ``patterns`` name, with ``/`` between levels."""
+    split = [tuple(pattern.split("/")) for pattern in patterns]
+
+    def check(path: Path) -> Iterator[Path]:
+        if _is_link(path) or not path.is_dir():
+            yield path
+        else:
+            yield from _strays(path, split)
+
+    return check
 
 
 def _publications(path: Path) -> Iterator[Path]:
@@ -269,16 +297,6 @@ def _publications(path: Path) -> Iterator[Path]:
             yield item
 
 
-def _demo_inputs(path: Path) -> Iterator[Path]:
-    """The demo's ``inputs/``, which holds its ``cycle-life.csv`` and nothing else."""
-    if _is_link(path) or not path.is_dir():
-        yield path
-        return
-    for item in sorted(_visible(path)):
-        if item.name != "cycle-life.csv":
-            yield item
-
-
 def _release(path: Path) -> Iterator[Path]:
     """The ``release/`` folder an export writes, which is a LocalWorkspace root."""
     strays = None if _is_link(path) or not path.is_dir() else _layout_strays(path, (_LOCAL_WORKSPACE,))
@@ -289,6 +307,21 @@ def _release(path: Path) -> Iterator[Path]:
     if store.is_dir() and store not in strays:
         yield store  # marker or not, as at the top of a root
     yield from strays
+
+
+# The files of a records folder: <kind folder>/<kind>-<uid>.json, as save_entity_path names them.
+_RECORDS = _named(*(f"{kind.subdir}/{kind.entity_type}-*.json" for kind in ENTITY_KINDS))
+# The reports and packages that validation and bundling write into dist/.
+_REPORTS = _named(
+    "validation-report.json",
+    "submission-package.json",
+    "submission-package.*.json",
+    "registry-intake.json",
+    "registry-intake.*.json",
+    "zenodo-metadata.json",
+    *(f"normalized/{group}/*.json" for group in ("cell-spec", "cell-instance", "test", "dataset")),
+)
+_CELL_SPEC_LIBRARY = _named("cell-spec/*.json")
 
 
 class _Layout(NamedTuple):
@@ -305,9 +338,9 @@ _LOCAL_WORKSPACE = _Layout(
     folders=(),
     entries={
         "battinfo-workspace.json": _a_file,
-        "resources": _json_files,
+        "resources": _named("*.json"),
         "artifacts": _a_folder,  # copies of the dataset's files
-        "dist": _json_files,
+        "dist": _REPORTS,
     },
 )
 _AUTHORING_WORKSPACE = _Layout(
@@ -316,9 +349,9 @@ _AUTHORING_WORKSPACE = _Layout(
     folders=(),
     entries={
         "battinfo-authoring-workspace.json": _a_file,
-        "records": _json_files,
+        "records": _named("cell-spec/*.json", "cell-instance/*.json", "tests/*.json", "dataset/*.json"),
         "artifacts": _a_folder,  # copies of the datasets' files
-        "dist": _json_files,
+        "dist": _REPORTS,
     },
 )
 _ENGINE = _Layout(
@@ -327,15 +360,15 @@ _ENGINE = _Layout(
     folders=("examples",),
     entries={
         "index.json": _a_file,
-        "examples": _json_files,
-        "library": _json_files,
-        "library-rdf": _json_files,
-        "ontology": _json_files,
-        "package": _json_files,
-        "dist": _json_files,
+        "examples": _RECORDS,
+        "library": _CELL_SPEC_LIBRARY,
+        "library-rdf": _named("cell-spec.index.json", "cell-spec/*.jsonld"),
+        "ontology": _named("library/cell-spec.jsonld"),
+        "package": _CELL_SPEC_LIBRARY,
+        "dist": _REPORTS,
         "publication": _publications,
         "release": _release,
-        "inputs": _demo_inputs,
+        "inputs": _named("cycle-life.csv"),  # the demo's data file
     },
 )
 _LAYOUTS = (_LOCAL_WORKSPACE, _AUTHORING_WORKSPACE, _ENGINE)
@@ -377,8 +410,8 @@ def _not_ours(path: Path) -> str | None:
     A marker-less root counts as BattINFO's when a layout recognises it and
     everything in it is what BattINFO writes there. A project folder that
     BattINFO once wrote ``index.json`` and ``examples/`` into keeps its own
-    ``inputs/``, ``publication/`` or ``dist/``. The reason names what is in the
-    way.
+    ``inputs/``, ``publication/`` or ``dist/``, and its own JSON files in a
+    folder with one of BattINFO's names. The reason names what is in the way.
     """
     reason = _authoring_store(path)
     if reason is not None:
