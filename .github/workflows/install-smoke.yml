@@ -111,7 +111,8 @@ jobs:
 
       # What a PyPI user gets: the built wheel, stock pip, an empty environment,
       # a working directory outside the checkout. The core install runs the
-      # first Quickstart step; a second environment installs the wheel with the
+      # first Quickstart step and checks that the SHACL shapes ran (pyshacl is
+      # a core dependency); a second environment installs the wheel with the
       # processing extra and converts a small CSV.
       - name: wheel in an empty environment, outside the checkout
         shell: bash
@@ -133,7 +134,7 @@ jobs:
           import pathlib
 
           import battinfo
-          from battinfo import CellSpec, publish, validate_record
+          from battinfo import CellSpec, publish, validate_record, validate_record_report
 
           assert "site-packages" in pathlib.Path(battinfo.__file__).as_posix(), battinfo.__file__
           cell_spec = CellSpec(
@@ -150,6 +151,8 @@ jobs:
           assert result.canonical_iri.startswith("https://w3id.org/battinfo/spec/"), result.canonical_iri
           record = json.loads(pathlib.Path(result.debug_paths["canonical_record_path"]).read_text())
           validate_record(record)
+          codes = [issue.code for issue in validate_record_report(record).issues]
+          assert "shacl.unavailable" not in codes, codes
           print("wheel ok", battinfo.__version__, result.canonical_iri)
           PY
           "$py" quickstart.py

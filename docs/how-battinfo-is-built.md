@@ -85,7 +85,7 @@ lands on the same files instead of duplicating them.
 The canonical JSON Schemas (draft 2020-12) live in
 `src/battinfo/data/schemas/` and are enforced in three places, each with a CI
 drift gate: this package (`validate/` — schema, then semantic rules,
-cross-record references, and optional SHACL), the registry's publish gate
+cross-record references, and SHACL), the registry's publish gate
 (vendored copy), and the browser validator at battinfo.org/validate (vendored
 copy compiled with Ajv). Same record, same verdict, everywhere. Details in
 [the infrastructure contract](guarantees.md#the-infrastructure-contract).

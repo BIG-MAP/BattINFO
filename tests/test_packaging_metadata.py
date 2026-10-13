@@ -10,8 +10,11 @@ still recorded the old one.
 from __future__ import annotations
 
 import re
+import subprocess
+import sys
 import tomllib
 from collections import Counter
+from collections.abc import Iterable
 from pathlib import Path
 
 from packaging.requirements import Requirement
@@ -45,17 +48,43 @@ def test_pydantic_floor_is_a_release_battinfo_imports_on() -> None:
     assert _floor(_core()["pydantic"]) >= Version("2.11")
 
 
-def _requirement_key(name: str, extras: object, specifier: str, group: str | None) -> tuple:
+def test_pyshacl_is_a_core_dependency() -> None:
+    # The check ws.zenodo() runs before it mints a DOI includes the SHACL
+    # publication shapes, so a plain install has to be able to run them.
+    core = _core()
+    assert "pyshacl" in core
+    assert _floor(core["pyshacl"]) >= Version("0.40.1")
+    for extra, requirements in _pyproject()["project"]["optional-dependencies"].items():
+        names = {canonicalize_name(Requirement(raw).name) for raw in requirements}
+        assert "pyshacl" not in names, f"pyshacl is a core dependency; the [{extra}] extra lists it again"
+
+
+def test_rdflib_floor_is_one_pyshacl_can_use() -> None:
+    # pyshacl 0.40.1 needs owlrl 7.6.2, which requires rdflib>=7.6.0, so an
+    # older rdflib can never be installed next to it.
+    assert _floor(_core()["rdflib"]) >= Version("7.6")
+
+
+def test_import_battinfo_does_not_load_pyshacl() -> None:
+    # pyshacl is imported only when a SHACL check runs, so making it a core
+    # dependency adds nothing to the time import battinfo takes.
+    code = "import sys, battinfo, battinfo.validate; print('pyshacl' in sys.modules)"
+    proc = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, cwd=ROOT, check=False)
+    assert proc.returncode == 0, proc.stderr
+    assert proc.stdout.strip() == "False"
+
+
+def _requirement_key(name: str, extras: Iterable[str] | None, specifier: str, group: str) -> tuple:
     return (canonicalize_name(name), tuple(sorted(extras or ())), str(SpecifierSet(specifier)), group)
 
 
 def _declared_requirements() -> Counter:
     pyproject = _pyproject()
     project = pyproject["project"]
-    declared: Counter = Counter()
-    groups: list[tuple[str | None, list[str]]] = [(None, project["dependencies"])]
+    groups: list[tuple[str, list[str]]] = [("core", project["dependencies"])]
     groups += [(f"extra:{extra}", reqs) for extra, reqs in project["optional-dependencies"].items()]
     groups += [(f"group:{group}", reqs) for group, reqs in pyproject.get("dependency-groups", {}).items()]
+    declared: Counter = Counter()
     for group, requirements in groups:
         for raw in requirements:
             req = Requirement(raw)
@@ -70,7 +99,7 @@ def _locked_requirements() -> tuple[Counter, dict]:
     locked: Counter = Counter()
     for entry in metadata.get("requires-dist", []):
         extra = re.search(r"extra == '([^']+)'", entry.get("marker", ""))
-        group = f"extra:{extra.group(1)}" if extra else None
+        group = f"extra:{extra.group(1)}" if extra else "core"
         locked[_requirement_key(entry["name"], entry.get("extras"), entry.get("specifier", ""), group)] += 1
     for group, entries in metadata.get("requires-dev", {}).items():
         for entry in entries:

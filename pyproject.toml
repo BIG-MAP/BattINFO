@@ -50,7 +50,12 @@ dependencies = [
   "typer>=0.27.0",
   "rich>=13.7",
   "jsonschema>=4.21",
-  "rdflib>=7.0",
+  # pyshacl runs the SHACL shapes, among them the publication shapes checked
+  # before a Zenodo DOI is minted. It is pure Python and loads only when a check
+  # runs. Its owlrl requires rdflib>=7.6.0, and pyshacl 0.40.1 requires rdflib
+  # below 8, so battinfo stays on rdflib 7 until a pyshacl release allows 8.
+  "rdflib>=7.6",
+  "pyshacl>=0.40.1",
   "pyld>=3.1.0",
   # The CLI batch path (battinfo push / batch / dataset, contribution.py) and
   # ~/.battinfo/config.yaml need it. 6.0.1 is the first release with Python
@@ -96,7 +101,6 @@ dev = [
   "nbformat>=5.9",
   "nbmake>=1.5",      # execute guide notebooks in CI (pytest --nbmake docs/guides)
   "ipykernel>=6.29",  # kernel for nbmake execution
-  "pyshacl>=0.40.1",
   "ruff>=0.16.0",
   "pytest>=9.1.1",
   "pytest-cov>=5.0",

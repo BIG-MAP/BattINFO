@@ -116,7 +116,7 @@ Policy semantics:
 
 - `default`: schema and references are errors; semantic issues default to warnings.
 - `strict`: schema, references, and semantic issues are errors.
-- `publisher`: publisher-oriented validation with semantic and publication checks as errors.
+- `publisher`: publisher-oriented validation with semantic and publication checks as errors. A deposit graph that the SHACL publication shapes could not check is an error too, so it is never published unchecked.
 - `ingest`: schema remains strict while semantic and reference issues can remain warnings during staged cleanup.
 
 ### Issue Model
@@ -154,6 +154,7 @@ Representative issue codes:
 - `semantic.schema_version_superseded` and `semantic.schema_version_unknown` (warnings under every policy: the record's `schema_version` is one an earlier release wrote, `0.1.0` or `1.0.0`, or one this release does not know at all; the current version is `0.2.0`)
 - `publication.distribution_url_invalid`
 - `publication.jsonld_parse_error`
+- `publication.shacl_unavailable`, `publication.shapes_not_found` and `publication.shacl_runtime_error` (the SHACL publication shapes could not check a deposit graph because pyshacl could not be imported, the shapes file is missing or pyshacl failed: an error under the `publisher` policy, which `ws.zenodo()` applies before it mints a DOI, and a warning under the others)
 
 ### CLI Contract
 
