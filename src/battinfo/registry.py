@@ -274,7 +274,8 @@ def _files_of(record: dict) -> list[RegistryFile]:
         except (TypeError, ValueError):
             size = None
         files.append(RegistryFile(
-            name=name or extra.get("name") or url.rsplit("/", 1)[-1],
+            # A file URL carries its name percent-encoded; the name is the decoded one.
+            name=name or extra.get("name") or urllib.parse.unquote(url.rsplit("/", 1)[-1]),
             url=url,
             role=role or extra.get("role"),
             media_type=media_type or extra.get("encoding_format"),

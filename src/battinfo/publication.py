@@ -15,7 +15,15 @@ from urllib.parse import unquote, urlparse
 from battinfo._emmo_instruments import _instrument_node
 from battinfo._jsonio import read_record_json as _load_json
 from battinfo._jsonio import write_json as _write_json
-from battinfo._util import _as_path, _citation_doi_from_url, _now_iso, _now_unix, _sha256, is_dataset_series
+from battinfo._util import (
+    _as_path,
+    _citation_doi_from_url,
+    _now_iso,
+    _now_unix,
+    _sha256,
+    is_dataset_series,
+    url_segment,
+)
 from battinfo.bundle import (
     ZENODO_CELL_RECORD_FILENAME,
     BattinfoBundle,
@@ -2040,7 +2048,7 @@ def _zenodo_distribution_entry(path: Path, files_base_url: str) -> dict[str, Any
     return {
         "@type": "schema:DataDownload",
         "schema:name": path.name,
-        "schema:contentUrl": f"{files_base_url}/{path.name}",
+        "schema:contentUrl": f"{files_base_url}/{url_segment(path.name)}",
         "schema:encodingFormat": guessed_format,
         "schema:contentSize": str(path.stat().st_size),
         "schema:sha256": _sha256(path),
@@ -2156,8 +2164,8 @@ def _zenodo_ro_crate(
 
     meta_filenames = [publish_filename, bundle_filename]
     has_part = (
-        [{"@id": f.name} for f in all_data_files]
-        + [{"@id": fname} for fname in meta_filenames]
+        [{"@id": url_segment(f.name)} for f in all_data_files]
+        + [{"@id": url_segment(fname)} for fname in meta_filenames]
     )
 
     root_dataset: dict[str, Any] = _without_none({
@@ -2183,13 +2191,13 @@ def _zenodo_ro_crate(
     for path in all_data_files:
         guessed_format = mimetypes.guess_type(path.name)[0] or "application/octet-stream"
         graph.append({
-            "@id": path.name,
+            "@id": url_segment(path.name),
             "@type": "File",
             "name": path.name,
             "encodingFormat": guessed_format,
             "contentSize": path.stat().st_size,
             "sha256": _sha256(path),
-            "url": f"{files_base_url}/{path.name}",
+            "url": f"{files_base_url}/{url_segment(path.name)}",
         })
 
     for fname, media_type in (
@@ -2199,13 +2207,13 @@ def _zenodo_ro_crate(
         fpath = staging_dir / fname
         if fpath.exists():
             graph.append({
-                "@id": fname,
+                "@id": url_segment(fname),
                 "@type": "File",
                 "name": fname,
                 "encodingFormat": media_type,
                 "contentSize": fpath.stat().st_size,
                 "sha256": _sha256(fpath),
-                "url": f"{files_base_url}/{fname}",
+                "url": f"{files_base_url}/{url_segment(fname)}",
             })
 
     return {"@context": RO_CRATE_CONTEXT_URL, "@graph": graph}
@@ -2304,9 +2312,9 @@ def build_zenodo_package(
         ro_crate_filename=ro_crate_filename,
     ))
 
-    file_url_map: dict[str, str] = {f.name: f"{files_base_url}/{f.name}" for f in all_data_files}
+    file_url_map: dict[str, str] = {f.name: f"{files_base_url}/{url_segment(f.name)}" for f in all_data_files}
     for fname in (publish_filename, ZENODO_CELL_RECORD_FILENAME, ro_crate_filename):
-        file_url_map[fname] = f"{files_base_url}/{fname}"
+        file_url_map[fname] = f"{files_base_url}/{url_segment(fname)}"
 
     return {
         "status": "ok",

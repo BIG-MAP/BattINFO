@@ -3,8 +3,9 @@
 Single home for the tiny helpers that were previously copy-pasted across
 modules (``api``, ``bundle``, ``publication``, ``local_workspace``,
 ``workspace_state``, ``_workspace``, ``ingest``, ``runtime``, ``ws``,
-``interop.battdat``, ``transform.json_to_jsonld``): path coercion, UTC
-timestamps, file hashing, and citation/DOI normalization.
+``interop.battdat``, ``transform.json_to_jsonld``): path coercion, file
+URIs and URL segments, UTC timestamps, file hashing, and citation/DOI
+normalization.
 """
 from __future__ import annotations
 
@@ -12,7 +13,7 @@ import hashlib
 import re
 from datetime import datetime, timezone
 from pathlib import Path, PureWindowsPath
-from urllib.parse import unquote, urlparse
+from urllib.parse import quote, unquote, urlparse
 
 PathLike = str | Path
 
@@ -71,6 +72,40 @@ def is_local_location(value: object) -> bool:
     if _WINDOWS_PATH_RE.match(text) or text.startswith("\\\\"):
         return True
     return urlparse(text).scheme.lower() in ("", "file")
+
+
+def file_uri_to_path(url: str) -> Path:
+    """Convert a file:// URI (or plain path string) to a local Path.
+
+    The old inline ``.replace("file:///", "")`` pattern silently turned POSIX
+    URIs into RELATIVE paths (file:///tmp/x -> tmp/x), so downstream
+    existence checks failed on Linux while passing on Windows (/C:/... keeps
+    its drive). urllib handles both platforms and percent-encoding.
+    """
+    if url.startswith("file:"):
+        from urllib.request import url2pathname
+
+        return Path(url2pathname(urlparse(url).path))
+    return Path(url)
+
+
+#: Characters a URL path segment may carry as they are, besides letters,
+#: digits and ``-._~`` (RFC 3986 ``pchar``). ``/`` is escaped so that a name
+#: stays one segment, and so is ``:``, so that a relative reference such as
+#: an RO-Crate ``@id`` cannot be read as a URL scheme.
+_URL_SEGMENT_SAFE = "!$&'()*+,;=@"
+
+
+def url_segment(name: str) -> str:
+    """*name* percent-encoded as one URL path segment.
+
+    Every file name that goes into a URL goes through here, so a space, ``#``,
+    ``?``, ``%``, ``/``, ``:`` and every non-ASCII character (as UTF-8) are
+    escaped: ``Cell 01 #3.csv`` becomes ``Cell%2001%20%233.csv``. Zenodo
+    decodes the path and stores the name itself, so the raw name is the one to
+    match files by and to show.
+    """
+    return quote(name, safe=_URL_SEGMENT_SAFE)
 
 
 def local_path(value: object) -> Path | None:

@@ -547,7 +547,7 @@ class TestZenodoOnlyPublicPath:
         rec_path.write_text(json.dumps(record), encoding="utf-8")
 
         n = ws._apply_zenodo_file_urls(
-            "https://zenodo.org/records/12345", {"run1.csv"}
+            "https://zenodo.org/records/12345", ws._deposit_file_plan(ws._ws.source_root)
         )
         assert n == 1
         patched = json.loads(rec_path.read_text(encoding="utf-8"))["dataset"]
@@ -557,8 +557,10 @@ class TestZenodoOnlyPublicPath:
 
     def test_files_not_in_deposit_are_untouched(self, tmp_path: Path) -> None:
         from battinfo import workspace
+        from battinfo._deposit_files import build_deposit_file_plan
 
         ws = workspace(root=tmp_path)
+        (tmp_path / "run1.csv").write_text("cycle,cap\n1,4.9\n", encoding="utf-8")
         ds_dir = ws._ws.source_root / "dataset"
         ds_dir.mkdir(parents=True)
         record = {
@@ -569,7 +571,8 @@ class TestZenodoOnlyPublicPath:
             },
         }
         (ds_dir / "d.json").write_text(json.dumps(record), encoding="utf-8")
-        assert ws._apply_zenodo_file_urls("https://zenodo.org/records/1", {"run1.csv"}) == 0
+        plan = build_deposit_file_plan([((tmp_path / "run1.csv").as_uri(), "other")], root=tmp_path)
+        assert ws._apply_zenodo_file_urls("https://zenodo.org/records/1", plan) == 0
 
     def test_r2_configured_reads_env(self, tmp_path: Path, monkeypatch) -> None:
         from battinfo import workspace

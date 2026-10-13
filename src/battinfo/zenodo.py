@@ -8,6 +8,7 @@ References:
 """
 from __future__ import annotations
 
+import http.client
 import json
 import os
 import time
@@ -17,6 +18,7 @@ from pathlib import Path
 from typing import Any
 
 from battinfo._jsonio import write_json
+from battinfo._util import url_segment
 from battinfo.bundle import ZENODO_CELL_RECORD_FILENAME, ZenodoCellRecord
 
 PathLike = str | Path
@@ -215,10 +217,16 @@ class ZenodoClient:
 
         Args:
             deposit_id: The deposit ID.
-            files: Mapping of {local_path: zenodo_filename}.
+            files: Mapping of {local_path: zenodo_filename}. The name goes into
+                the bucket URL percent-encoded, so a space, ``#``, ``?``, ``%``
+                or a non-ASCII character reaches Zenodo as part of the name; a
+                ``/`` in a relative key still separates its folders.
 
         Returns:
             Mapping of {local_path: zenodo_download_url} for each uploaded file.
+
+        Raises:
+            ZenodoError: naming the file, when an upload fails.
         """
         deposit = self.get_deposit(deposit_id)
         bucket_url = deposit.get("links", {}).get("bucket")
@@ -230,7 +238,8 @@ class ZenodoClient:
             local_path = Path(local_path)
             if not local_path.is_file():
                 continue
-            upload_url = f"{bucket_url}/{zenodo_name}"
+            key_path = "/".join(url_segment(part) for part in zenodo_name.split("/"))
+            upload_url = f"{bucket_url}/{key_path}"
             # Zenodo's S3-compatible bucket endpoint requires application/octet-stream
             # regardless of actual file type — it rejects other Content-Type values.
             data = local_path.read_bytes()
@@ -263,6 +272,10 @@ class ZenodoClient:
                             f"Upload of {zenodo_name} failed after {retries} attempts: {exc}"
                         ) from exc
                     time.sleep(min(30.0, 5.0 * attempt))
+                except (http.client.HTTPException, UnicodeError) as exc:
+                    # A URL or header the HTTP layer will not send, or a reply it
+                    # cannot read: the same on every attempt, so not retried.
+                    raise ZenodoError(f"Upload of {zenodo_name!r} failed: {exc}") from exc
 
             download_url = (
                 file_record.get("links", {}).get("download")

@@ -432,8 +432,8 @@ def test_the_check_before_the_deposit_gives_the_deposited_graph_verdict(
     changes what the publication check reports.
     """
     ws = _workspace_on_registry_cell(tmp_path, registry_url)
-    common = {"data_filenames": ["run.bdf.csv"], "title": "NEW-1", "creators": CREATORS,
-              "license": "cc-by-4.0"}
+    plan = ws._deposit_file_plan(ws._ws.source_root)
+    common = {"file_plan": plan, "title": "NEW-1", "creators": CREATORS, "license": "cc-by-4.0"}
     before = ws._build_zenodo_jsonld(
         zenodo_record_id=0, prereserved_doi="10.5281/zenodo.RECORD_ID",
         record_url="https://zenodo.org/records/RECORD_ID", **common,
@@ -443,7 +443,7 @@ def test_the_check_before_the_deposit_gives_the_deposited_graph_verdict(
         zenodo_record_id=4242, prereserved_doi="10.5281/zenodo.4242", record_url=record_url,
         is_version_of="https://zenodo.org/records/4241", **common,
     )
-    assert ws._apply_zenodo_file_urls(record_url, {"run.bdf.csv"}) == 1
+    assert ws._apply_zenodo_file_urls(record_url, plan) == 1
     rebuilt = ws._build_zenodo_jsonld(
         zenodo_record_id=4242, prereserved_doi="10.5281/zenodo.4242", record_url=record_url,
         is_version_of="https://zenodo.org/records/4241", **common,

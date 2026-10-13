@@ -32,9 +32,18 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from battinfo._workspace import Workspace
 
+from battinfo._deposit_files import (
+    DepositFile,
+    DepositFilePlan,
+    build_deposit_file_plan,
+    location_key,
+    measured_file,
+    path_key,
+)
 from battinfo._jsonio import atomic_write_text as _atomic_write_text
 from battinfo._jsonio import read_json as _read_json
-from battinfo._util import _now_iso, is_dataset_series, local_file_references
+from battinfo._util import _now_iso, is_dataset_series, local_file_references, url_segment
+from battinfo._util import file_uri_to_path as _file_uri_to_path
 from battinfo._util import local_files_message as _local_files_message
 from battinfo.entities import entity_id_from_doc, kind_for_type, record_set_dirs, save_entity_path
 
@@ -333,6 +342,8 @@ _UNIX_EPOCH = "1970-01-01T00:00:00Z"
 BATTINFO_LD_FILENAME = "battinfo.json"
 # Legacy name in records published before the switch — still accepted on import.
 BATTINFO_LD_FILENAME_LEGACY = "battinfo.jsonld"
+# The RO-Crate metadata file a workspace deposit carries next to it.
+_ROCRATE_FILENAME = "ro-crate-metadata.json"
 
 # Battery Data Format (BDF) CSVW table schema. A BDF data file declares
 # conformance to this so a consumer can resolve every column name, type and unit
@@ -463,20 +474,17 @@ def _bdf_measurement_period(csv_path: "str | Path") -> tuple[int, int] | None:
         return None
 
 
-def _file_uri_to_path(url: str) -> Path:
-    """Convert a file:// URI (or plain path string) to a local Path.
+def _distribution_file_name(url: str) -> str:
+    """The file name a distribution URL ends in, decoded, for display.
 
-    The old inline ``.replace("file:///", "")`` pattern silently turned POSIX
-    URIs into RELATIVE paths (file:///tmp/x -> tmp/x), so downstream
-    existence checks failed on Linux while passing on Windows (/C:/... keeps
-    its drive). urllib handles both platforms and percent-encoding.
+    A hosted URL carries its file name percent-encoded (``cell%2001.csv``);
+    the name shown in the graph is the decoded one (``cell 01.csv``).
     """
-    if url.startswith("file:"):
-        from urllib.parse import urlparse
-        from urllib.request import url2pathname
+    if url.startswith(("http://", "https://")):
+        from urllib.parse import unquote, urlparse  # noqa: PLC0415
 
-        return Path(url2pathname(urlparse(url).path))
-    return Path(url)
+        return unquote(urlparse(url).path.rsplit("/", 1)[-1])
+    return _file_uri_to_path(url).name
 
 
 # dcat:mediaType is written as the IANA media-type IRI under this base
@@ -4271,7 +4279,7 @@ class AuthoringWorkspace:
                 dl_url = dist.get("dcat:downloadURL", "")
                 cs     = (dist.get("spdx:checksum") or {})
                 fmt    = _media_type_from_jsonld(dist.get("dcat:mediaType"))
-                fname  = dist.get("schema:name", dl_url.split("/")[-1])
+                fname  = dist.get("schema:name") or _distribution_file_name(dl_url)
 
                 self._ws.record_test(
                     test_cell,
@@ -5199,22 +5207,29 @@ class AuthoringWorkspace:
         """True when R2 object storage is configured (env or credentials file)."""
         return bool(os.environ.get("R2_ENDPOINT") or self._credential("R2_ENDPOINT"))
 
-    def _apply_zenodo_file_urls(self, record_url: str, uploaded_names: set) -> int:
+    def _apply_zenodo_file_urls(self, record_url: str, plan: DepositFilePlan) -> int:
         """Point dataset records at the Zenodo-hosted copies of their files.
 
         Mirrors what :meth:`upload` does for R2, without any extra storage:
-        each distribution whose filename was deposited gets
-        ``{record_url}/files/{name}`` as its ``content_url`` (plus a sha256
-        checksum if the local file is readable), the primary distribution
-        sets the dataset ``access_url``, and a ``provenance.source_url`` naming
-        a deposited local file follows it. Returns the number of records updated.
+        each distribution whose local file the deposit carries as itself (not
+        inside a zip archive) gets ``{record_url}/files/{name}``, with the
+        deposit name percent-encoded, as its ``content_url`` (plus the file's
+        sha256 when it has no checksum), the primary distribution sets the
+        dataset ``access_url``, and a ``provenance.source_url`` naming a
+        deposited local file follows it. A record's file is found in *plan*
+        by its resolved path, so two files that share a name each get their
+        own URL. Returns the number of records updated.
         """
-        import hashlib
-
         ds_dir = self._ws.source_root / "dataset"
         if not ds_dir.is_dir():
             return 0
-        public_by_name = {name: f"{record_url}/files/{name}" for name in uploaded_names}
+
+        def _public_url(location: object) -> str | None:
+            entry = plan.entry_for(location)
+            if entry is None or entry.archive:
+                return None
+            return f"{record_url}/files/{entry.segment}"
+
         patched = 0
         for record_path in sorted(ds_dir.glob("*.json")):
             raw = json.loads(record_path.read_text(encoding="utf-8"))
@@ -5227,27 +5242,21 @@ class AuthoringWorkspace:
             changed = False
             for dist in dists:
                 local_url = dist.get("content_url") or ds.get("access_url") or ""
-                local_file = _file_uri_to_path(local_url)
-                if not local_file.is_absolute():
-                    local_file = self._root / local_file
-                name = local_file.name
-                if name not in uploaded_names:
+                entry = plan.entry_for(local_url)
+                if entry is None or entry.archive:
                     new_dists.append(dist)
                     continue
-                public_url = f"{record_url}/files/{name}"
+                public_url = f"{record_url}/files/{entry.segment}"
                 dist = {**dist, "content_url": public_url}
-                if local_file.is_file() and not dist.get("checksum"):
-                    dist["checksum"] = {
-                        "algorithm": "sha256",
-                        "value": hashlib.sha256(local_file.read_bytes()).hexdigest(),
-                    }
+                if entry.sha256 and not dist.get("checksum"):
+                    dist["checksum"] = {"algorithm": "sha256", "value": entry.sha256}
                 changed = True
                 new_dists.append(dist)
                 if primary_url is None and dist.get("role") != "raw":
                     primary_url = public_url
             # The provenance source of a workspace dataset is its own data file;
             # point it at the deposited copy too, so no local path is left to publish.
-            if _point_source_url_at_public_copy(raw, public_by_name):
+            if _point_source_url_at_public_copy(raw, _public_url):
                 changed = True
             if not changed:
                 continue
@@ -5356,7 +5365,7 @@ class AuthoringWorkspace:
             # file in the dataset gets a resolvable public URL, not just the first.
             new_dists: list[dict] = []
             primary_url: str | None = None
-            public_by_name: dict[str, str] = {}
+            public_by_path: dict[str, str] = {}
             for dist in dists:
                 local_url = dist.get("content_url") or ds.get("access_url") or ""
                 local_file = _file_uri_to_path(local_url)
@@ -5371,9 +5380,13 @@ class AuthoringWorkspace:
                 # Compute SHA-256 of local file
                 sha256 = hashlib.sha256(local_file.read_bytes()).hexdigest()
 
-                # R2 key: datasets/{short_id}/{filename}
+                # R2 key: datasets/{short_id}/{filename}; the public URL carries
+                # each part of it percent-encoded.
                 r2_key = f"datasets/{short_id}/{local_file.name}"
-                public_url = f"{public_base}/{r2_key}" if public_base else f"s3://{bucket_name}/{r2_key}"
+                public_url = (
+                    f"{public_base}/{'/'.join(url_segment(part) for part in r2_key.split('/'))}"
+                    if public_base else f"s3://{bucket_name}/{r2_key}"
+                )
 
                 if dry_run:
                     print(f"  [dry-run] would upload {local_file.name} -> {r2_key}")
@@ -5418,7 +5431,7 @@ class AuthoringWorkspace:
                 dist = {**dist, "content_url": public_url,
                         "checksum": {"algorithm": "sha256", "value": sha256}}
                 new_dists.append(dist)
-                public_by_name[local_file.name] = public_url
+                public_by_path[path_key(local_file)] = public_url
                 # The primary (processed) distribution sets the dataset access_url.
                 if primary_url is None and dist.get("role") != "raw":
                     primary_url = public_url
@@ -5428,7 +5441,12 @@ class AuthoringWorkspace:
             urls.append(primary_url or new_dists[0]["content_url"])
             raw["dataset"]["access_url"] = primary_url or new_dists[0]["content_url"]
             raw["dataset"]["distributions"] = new_dists
-            _point_source_url_at_public_copy(raw, public_by_name)
+
+            def _r2_public_url(location: object) -> str | None:
+                key = location_key(location, self._root) if isinstance(location, str) else None
+                return public_by_path.get(key) if key is not None else None
+
+            _point_source_url_at_public_copy(raw, _r2_public_url)
             _atomic_write_text(record_path, json.dumps(raw, indent=2, ensure_ascii=False))
 
             # Keep session paths in sync so submit() picks up the updated record
@@ -5465,6 +5483,14 @@ class AuthoringWorkspace:
         brand-new record. Default ``publish=False`` leaves a reviewable draft, so a new
         version is never published (and no DOI minted) without an explicit ``publish=True``
         or a click on Zenodo.
+
+        Each local data file is deposited once, under its own name, however many
+        distributions name it. Names are compared as Windows and macOS compare
+        them, ignoring case and Unicode normalisation: a file whose name another
+        file of the deposit already has gets a short hash of its path in the
+        workspace in front (``3f2a9c1d-cycling.csv``), and the first file keeps
+        its name. URLs carry the names percent-encoded.
+        A deposit of more than 90 data files is zipped, one archive per test kind.
 
         Credentials are read from ``.battinfo/credentials`` or env vars:
         ``ZENODO_API_TOKEN`` (production) / ``ZENODO_SANDBOX_TOKEN`` (sandbox).
@@ -5560,13 +5586,17 @@ class AuthoringWorkspace:
         title = self._deposit_title(title)
         domain = "sandbox.zenodo.org" if sandbox else "zenodo.org"
 
-        # ── Build staging directory ────────────────────────────────────────────
-        # The data files do not depend on the deposit, so they are staged before
-        # one exists, and with publish=True the graph is checked before too.
+        # ── Plan and stage the data files ──────────────────────────────────────
+        # The data files do not depend on the deposit, so they are planned (one
+        # entry per local file, with its deposit name and digests) and staged
+        # before one exists, and with publish=True the graph is checked before
+        # too. Everything below takes file names and URLs from the plan.
+        plan = self._deposit_file_plan(records_dir)
         tmpdir = Path(tempfile.mkdtemp(prefix="battinfo-zenodo-"))
         try:
-            # Bundle data files (zip by test kind if >90 files)
-            data_filenames = self._bundle_data_files(tmpdir, records_dir)
+            # The files to upload: the data files themselves, or one zip per
+            # test kind when there are more than _ZENODO_ZIP_THRESHOLD.
+            data_files = self._bundle_data_files(tmpdir, plan)
 
             if publish:
                 # Refuse before anything reaches Zenodo, so a refused publish leaves no
@@ -5582,7 +5612,7 @@ class AuthoringWorkspace:
                         zenodo_record_id=0,
                         prereserved_doi="10.5281/zenodo.RECORD_ID",
                         record_url=f"https://{domain}/records/RECORD_ID",
-                        data_filenames=data_filenames,
+                        file_plan=plan,
                         title=title,
                         description=description or "",
                         creators=creators or [],
@@ -5631,7 +5661,7 @@ class AuthoringWorkspace:
                 zenodo_record_id=zenodo_record_id,
                 prereserved_doi=prereserved_doi,
                 record_url=record_url,
-                data_filenames=data_filenames,
+                file_plan=plan,
                 title=title,
                 description=description or "",
                 creators=creators or [],
@@ -5652,7 +5682,7 @@ class AuthoringWorkspace:
             # RO-Crate metadata for EOSC portal compliance
             self._build_rocrate(
                 tmpdir,
-                data_filenames,
+                data_files,
                 title=title,
                 description=description or "",
                 creators=creators or [],
@@ -5663,8 +5693,13 @@ class AuthoringWorkspace:
                 sandbox=sandbox,
             )
 
-
-            upload_map = {f: f.name for f in sorted(tmpdir.iterdir()) if f.is_file()}
+            # Each file under its deposit name, the data files from where they are.
+            # The map is built from the plan, not from a folder listing, which on
+            # macOS can hand names back in another Unicode form.
+            uploads = [(f.path, f.name) for f in data_files] + [
+                (tmpdir / name, name) for name in (BATTINFO_LD_FILENAME, _ROCRATE_FILENAME)
+            ]
+            upload_map = {path: name for path, name in sorted(uploads, key=lambda item: item[1])}
             # Incremental sync: only files whose content changed are uploaded; unchanged
             # files already on the deposit (e.g. inherited data on a new version) are kept.
             sync = client.sync_files(deposit_id, upload_map)
@@ -5677,7 +5712,7 @@ class AuthoringWorkspace:
             # Zenodo now hosts these files: point the dataset records at the
             # public record URLs so ws.submit() sends resolvable links even
             # when no R2 object storage is configured (the public path).
-            patched = self._apply_zenodo_file_urls(record_url, set(upload_map.values()))
+            patched = self._apply_zenodo_file_urls(record_url, plan)
             if patched:
                 print(f"  Dataset records updated with Zenodo file URLs: {patched}")
 
@@ -5814,20 +5849,21 @@ class AuthoringWorkspace:
         if not records_dir.exists():
             raise RuntimeError("No records found — run ws.save() first.")
 
+        plan = self._deposit_file_plan(records_dir)
         tmpdir = Path(tempfile.mkdtemp(prefix="battinfo-rocrate-"))
         try:
-            data_filenames = self._bundle_data_files(tmpdir, records_dir)
+            data_files = self._bundle_data_files(tmpdir, plan)
             # Write a placeholder linked-data file so contentSize is available
             placeholder = tmpdir / BATTINFO_LD_FILENAME
             placeholder.write_text("{}", encoding="utf-8")
             self._build_rocrate(
-                tmpdir, data_filenames,
+                tmpdir, data_files,
                 title=title, description=description,
                 creators=creators or [], contributors=contributors or [],
                 license=license,
                 zenodo_record_id=0, prereserved_doi="10.5281/zenodo.RECORD_ID",
             )
-            src = tmpdir / "ro-crate-metadata.json"
+            src = tmpdir / _ROCRATE_FILENAME
             out = Path(output) if output else self._root / "ro-crate-metadata.preview.json"
             shutil.copy2(src, out)
         finally:
@@ -5874,9 +5910,6 @@ class AuthoringWorkspace:
             ws.save()
             ws.preview_jsonld()   # writes battinfo.preview.jsonld
         """
-        import shutil
-        import tempfile
-
         records_dir = self._ws.source_root
         if not records_dir.exists():
             raise RuntimeError("No records found — run ws.save() first.")
@@ -5887,18 +5920,15 @@ class AuthoringWorkspace:
         if not license:
             license = self._get_license() or ""
 
-        # Collect data filenames using same logic as the real upload (dry run)
-        tmpdir = Path(tempfile.mkdtemp(prefix="battinfo-preview-"))
-        try:
-            data_filenames = self._bundle_data_files(tmpdir, records_dir)
-        finally:
-            shutil.rmtree(tmpdir, ignore_errors=True)
+        # The data files and their deposit names, planned as ws.zenodo() plans
+        # them. The graph needs only the names, so the files are not read.
+        plan = self._deposit_file_plan(records_dir, measure=False)
 
         jsonld = self._build_zenodo_jsonld(
             zenodo_record_id=0,
             prereserved_doi="10.5281/zenodo.RECORD_ID",
             record_url="https://zenodo.org/records/RECORD_ID",
-            data_filenames=data_filenames,
+            file_plan=plan,
             title=self._deposit_title(title),
             description=description or "",
             creators=creators or [],
@@ -5945,16 +5975,16 @@ class AuthoringWorkspace:
         out.write_text(json.dumps(jsonld, indent=2, ensure_ascii=False), encoding="utf-8")
         print(f"  Written: {out}")
         print(f"  Graph nodes: {len(jsonld.get('@graph', []))}")
-        print(f"  Data files:  {len(data_filenames)}")
+        print(f"  Data files:  {len(plan.deposited_names())}")
         return out
 
     def _assert_publishable(self, jsonld: dict, *, nothing_sent: bool = False) -> None:
         """Fail closed before minting an irreversible DOI: refuse to publish a record that has
         validation errors, or a distribution whose data file is missing from the deposit (R-7).
 
-        Missing data files are checked from the most recent :meth:`_bundle_data_files` run.
-        ``nothing_sent`` says in the refusal that no deposit was made (the check
-        :meth:`zenodo` runs before it contacts Zenodo)."""
+        Missing data files are checked from the most recent deposit file plan
+        (:meth:`_deposit_file_plan`). ``nothing_sent`` says in the refusal that no
+        deposit was made (the check :meth:`zenodo` runs before it contacts Zenodo)."""
         sent_note = " Nothing was sent to Zenodo." if nothing_sent else ""
         missing = getattr(self, "_missing_data_files", [])
         if missing:
@@ -5979,40 +6009,55 @@ class AuthoringWorkspace:
                 + sent_note
             )
 
-    def _bundle_data_files(self, tmpdir: Path, records_dir: Path) -> builtins.list[str]:
-        """Copy data files into *tmpdir*, zipping by test kind when >90 files."""
-        import shutil
+    def _bundle_data_files(self, tmpdir: Path, plan: DepositFilePlan) -> builtins.list[DepositFile]:
+        """The data files to upload, each under its deposit name in *plan*.
+
+        A file is uploaded from where it is. When the deposit is zipped (more
+        than ``_ZENODO_ZIP_THRESHOLD`` files), the files of each test kind are
+        packed into one archive in *tmpdir*, each under its deposit name, so no
+        two members share a name, and the archives are uploaded instead.
+        """
         import zipfile
 
-        unique = self._deposit_data_files(records_dir)
-        filenames: list[str] = []
-        if len(unique) <= _ZENODO_ZIP_THRESHOLD:
-            for lp, _ in unique:
-                shutil.copy2(lp, tmpdir / lp.name)
-                filenames.append(lp.name)
-        else:
-            # Group by test kind → one zip per kind
-            by_kind: dict[str, list[Path]] = {}
-            for lp, kind in unique:
-                by_kind.setdefault(kind, []).append(lp)
-            for kind, paths in sorted(by_kind.items()):
-                zip_name = f"{kind}.zip"
-                with zipfile.ZipFile(tmpdir / zip_name, "w", zipfile.ZIP_DEFLATED) as zf:
-                    for lp in sorted(paths):
-                        zf.write(lp, lp.name)
-                filenames.append(zip_name)
-                print(f"  Bundled {len(paths)} files -> {zip_name}")
+        if not plan.zipped:
+            return list(plan.files)
+        archives: list[DepositFile] = []
+        for archive, members in plan.archives().items():
+            target = tmpdir / archive
+            with zipfile.ZipFile(target, "w", zipfile.ZIP_DEFLATED) as zf:
+                for entry in sorted(members, key=lambda member: member.name):
+                    zf.write(entry.path, entry.name)
+            archives.append(measured_file(target, archive, kind=members[0].kind))
+            print(f"  Bundled {len(members)} files -> {archive}")
+        return archives
 
-        return filenames
+    def _recorded_deposit_names(self) -> dict[str, str]:
+        """The deposit names earlier deposits of this workspace gave its files.
 
-    def _deposit_data_files(
-        self, records_dir: Path, *, report: bool = True
-    ) -> builtins.list[tuple[Path, str]]:
-        """The ``(local file, test kind)`` pairs a Zenodo deposit uploads, one per file name.
+        Keyed by the file's resolved local path (``_deposit_files.path_key``).
+        The deposit file plan gives each such file its recorded name before it
+        names any other file, so a file keeps its public URL from one version
+        to the next even when a new file with the same name comes first. The
+        workspace keeps no record of deposited names yet, so this is empty.
+        """
+        return {}
+
+    def _deposit_file_plan(
+        self, records_dir: Path, *, report: bool = True, measure: bool = True
+    ) -> DepositFilePlan:
+        """The local files a Zenodo deposit of this workspace carries, planned before anything is sent.
+
+        Collects every ``file:`` distribution of the dataset records and the
+        artifacts placed in the workspace, then plans them (see
+        :func:`battinfo._deposit_files.build_deposit_file_plan`): one entry per
+        resolved local file, each with its deposit name, percent-encoded URL
+        segment, size, md5 and sha256. Staging, the deposit graph, the RO-Crate
+        and the record rewrite read their names from the result.
 
         With *report* the missing data files and the artifact warnings are printed
         and kept for zenodo() and publish to act on; without it the files are only
-        counted (the up-front check in publish()).
+        planned (the up-front count in publish()). Without *measure* the files are
+        not read.
         """
         # Map dataset IRI → test kind via test records (test.dataset_ids), with the
         # dataset's own about naming its test as the fallback, the same links the
@@ -6033,9 +6078,10 @@ class AuthoringWorkspace:
                 except Exception:
                     continue
 
-        # Collect local data file paths
-        collected: list[tuple[Path, str]] = []  # (local_path, kind)
-        missing: list[str] = []  # file-scheme distributions whose local file is absent
+        # The local data file locations, as the records give them, in record order.
+        # Nothing here touches a data file: the plan reads each location as text
+        # before it asks the file system about it.
+        locations: list[tuple[str, str]] = []  # (content_url, kind)
         ds_dir = records_dir / "dataset"
         if ds_dir.exists():
             for ds_file in sorted(ds_dir.glob("*.json")):
@@ -6049,31 +6095,10 @@ class AuthoringWorkspace:
                     )
                     for dist in (ds.get("distributions") or []):
                         url = dist.get("content_url") or ""
-                        if not url.startswith("file://"):
-                            continue
-                        lp = _file_uri_to_path(url)
-                        if lp.exists():
-                            collected.append((lp, kind))
-                        else:
-                            # Do NOT silently drop a distribution whose data file is missing: the
-                            # deposit would be published incomplete (a distribution pointing at a
-                            # file that was never uploaded). Warn now; block publish later (R-7).
-                            missing.append(str(lp))
-                            if report:
-                                print(f"  WARNING: data file for a distribution is missing (not uploaded): {lp}")
+                        if url.startswith("file://"):
+                            locations.append((url, kind))
                 except Exception:
                     continue
-        if report:
-            # Surfaced to zenodo()/publish so publishing can fail closed on an incomplete deposit.
-            self._missing_data_files = missing
-
-        # Deduplicate (a file may appear in multiple distributions)
-        seen: set[str] = set()
-        unique: list[tuple[Path, str]] = []
-        for lp, kind in collected:
-            if lp.name not in seen:
-                seen.add(lp.name)
-                unique.append((lp, kind))
 
         # ── Actionable artifacts (Layer B) ─────────────────────────────────────
         # Only files the user has explicitly placed in the workspace are published;
@@ -6090,15 +6115,30 @@ class AuthoringWorkspace:
                     except Exception:
                         continue
         artifact_files, artifact_warnings = plan_artifact_inclusion(artifact_records, self._root)
+
+        plan = build_deposit_file_plan(
+            locations,
+            root=self._root,
+            artifacts=artifact_files,
+            artifact_warnings=artifact_warnings,
+            recorded_names=self._recorded_deposit_names(),
+            # A data file never takes the name of the deposit's own metadata files.
+            reserved_names=(BATTINFO_LD_FILENAME, _ROCRATE_FILENAME),
+            zip_threshold=_ZENODO_ZIP_THRESHOLD,
+            measure=measure,
+        )
         if report:
-            self._artifact_warnings = artifact_warnings
-            for warning in artifact_warnings:
+            # Do NOT silently drop a distribution whose data file is missing: the
+            # deposit would be published incomplete (a distribution pointing at a
+            # file that was never uploaded). Warn now; block publish later (R-7).
+            for path in plan.missing:
+                print(f"  WARNING: data file for a distribution is missing (not uploaded): {path}")
+            # Surfaced to zenodo()/publish so publishing can fail closed on an incomplete deposit.
+            self._missing_data_files = list(plan.missing)
+            self._artifact_warnings = list(plan.artifact_warnings)
+            for warning in plan.artifact_warnings:
                 print(f"  WARNING: {warning}")
-        for lp in artifact_files:
-            if lp.name not in seen:
-                seen.add(lp.name)
-                unique.append((lp, "protocol"))
-        return unique
+        return plan
 
     def _refuse_a_zipped_deposit(self) -> None:
         """Refuse publish(zenodo=True) before any deposit exists when its files would be zipped.
@@ -6108,7 +6148,7 @@ class AuthoringWorkspace:
         archive: the records would keep their local file paths, and the registry
         half would refuse them only after the DOI was minted.
         """
-        count = len(self._deposit_data_files(self._ws.source_root, report=False))
+        count = len(self._deposit_file_plan(self._ws.source_root, report=False, measure=False).files)
         if count > _ZENODO_ZIP_THRESHOLD:
             raise ValueError(
                 f"Refusing to publish: this workspace has {count} data files, and a Zenodo deposit "
@@ -6126,7 +6166,7 @@ class AuthoringWorkspace:
         zenodo_record_id: int,
         prereserved_doi: str,
         record_url: str,
-        data_filenames: builtins.list[str],
+        data_filenames: builtins.list[str] | None = None,
         title: str = "",
         description: str = "",
         creators: builtins.list[dict] | None = None,
@@ -6137,6 +6177,7 @@ class AuthoringWorkspace:
         version: str = "",
         is_version_of: str = "",
         referenced_records: dict[str, builtins.list[dict]] | None = None,
+        file_plan: DepositFilePlan | None = None,
     ) -> dict:
         """Assemble the consolidated battinfo JSON-LD from canonical record dicts.
 
@@ -6147,6 +6188,14 @@ class AuthoringWorkspace:
         interactive authoring flow (:meth:`_build_zenodo_jsonld`) and the
         programmatic contribution flow (``publication.build_zenodo_package``) emit
         byte-identical graphs.
+
+        A local file's download URL is ``{files_base_url}/{name}`` with the name
+        percent-encoded. With ``file_plan`` (a workspace deposit) a distribution
+        or artifact finds its file in the plan by resolved path, and takes the
+        file's deposit name and, in a zipped deposit, its archive.
+        ``data_filenames`` serves the package builders, whose staged files have
+        unique names: a local file whose name is among them is deposited under
+        that name, and otherwise its ``<kind>.zip`` when that is among them.
 
         ``referenced_records`` holds copies of published records the deposit
         points at but does not carry, in the same shape (a workspace keeps
@@ -6214,19 +6263,25 @@ class AuthoringWorkspace:
             label_to_compact,
         )
 
+        named_files = list(data_filenames or [])
+        files_base = files_base_url or f"{record_url}/files"
+
         def _artifact_download_url(loc: str) -> Any:
             """Resolve an artifact locator to its download URL. An http(s) locator is
             already hosted; a workspace file that is being uploaded resolves to its
-            hosted URL (like data files); an un-uploaded local locator is kept as the
-            relative literal (no hosted copy exists)."""
+            hosted URL (like data files, the archive holding it in a zipped deposit);
+            an un-uploaded local locator is kept as the relative literal (no hosted
+            copy exists)."""
             text = str(loc)
             if text.startswith(("http://", "https://")):
                 return {"@id": text}
+            if file_plan is not None:
+                entry = file_plan.entry_for(text)
+                return {"@id": entry.url(files_base)} if entry is not None else text
             raw = text[len("file://"):] if text.startswith("file://") else text
             fname = Path(raw).name
-            if fname in data_filenames:
-                base = files_base_url or f"{record_url}/files"
-                return {"@id": f"{base}/{fname}"}
+            if fname in named_files:
+                return {"@id": f"{files_base}/{url_segment(fname)}"}
             return text
 
         def _artifact_distribution(art: dict) -> dict:
@@ -6588,7 +6643,9 @@ class AuthoringWorkspace:
                     dists = []
                     for dist in (ds.get("distributions") or []):
                         url   = dist.get("content_url") or ""
-                        fname = _file_uri_to_path(url).name
+                        # A deposited file is named as the deposit names it.
+                        _entry = file_plan.entry_for(url) if file_plan is not None else None
+                        fname = _entry.name if _entry is not None else _distribution_file_name(url)
                         dists.append({
                             "filename":     fname,
                             "content_url":  url,
@@ -6640,15 +6697,19 @@ class AuthoringWorkspace:
         _cov_ends: list[str] = []
 
         def _download_url(dist: dict, kind: str) -> str:
-            fname = dist["filename"]
-            _files_base = files_base_url or f"{record_url}/files"
             cu = dist.get("content_url") or ""
             if cu.startswith(("http://", "https://")):
                 return cu                       # already a hosted file — use verbatim
-            if fname in data_filenames:
-                return f"{_files_base}/{fname}"
+            if file_plan is not None:
+                # The deposit file that holds this file, found by resolved path:
+                # the file itself, or its archive in a zipped deposit.
+                entry = file_plan.entry_for(cu)
+                return entry.url(files_base) if entry is not None else ""
+            fname = dist["filename"]
+            if fname in named_files:
+                return f"{files_base}/{url_segment(fname)}"
             kind_zip = f"{kind}.zip"
-            return f"{_files_base}/{kind_zip}" if kind_zip in data_filenames else ""
+            return f"{files_base}/{url_segment(kind_zip)}" if kind_zip in named_files else ""
 
         for ds_id, meta in sorted(ds_meta.items()):
             dists = []
@@ -7110,7 +7171,7 @@ class AuthoringWorkspace:
         zenodo_record_id: int,
         prereserved_doi: str,
         record_url: str,
-        data_filenames: builtins.list[str],
+        data_filenames: builtins.list[str] | None = None,
         title: str = "",
         description: str = "",
         creators: builtins.list[dict] | None = None,
@@ -7119,6 +7180,7 @@ class AuthoringWorkspace:
         keywords: builtins.list[str] | None = None,
         version: str = "",
         is_version_of: str = "",
+        file_plan: DepositFilePlan | None = None,
     ) -> dict:
         """Read this workspace's saved records and assemble the deposit JSON-LD.
 
@@ -7126,6 +7188,8 @@ class AuthoringWorkspace:
         it only sources the canonical record dicts from the workspace directory,
         and the copies of published records it references from
         ``.battinfo/references/`` (read for stub nodes, never deposited).
+        :meth:`zenodo` and :meth:`preview_jsonld` pass the deposit's ``file_plan``
+        (:meth:`_deposit_file_plan`), which names every local file.
         """
         record_sets, _replaced = _read_deposit_record_sets(self._ws.source_root)
         return self._assemble_zenodo_jsonld(
@@ -7135,6 +7199,7 @@ class AuthoringWorkspace:
             prereserved_doi=prereserved_doi,
             record_url=record_url,
             data_filenames=data_filenames,
+            file_plan=file_plan,
             title=title,
             description=description,
             creators=creators,
@@ -7148,7 +7213,7 @@ class AuthoringWorkspace:
     def _build_rocrate(
         self,
         tmpdir: Path,
-        data_filenames: builtins.list[str],
+        data_files: builtins.list[DepositFile],
         *,
         title: str,
         description: str,
@@ -7165,9 +7230,11 @@ class AuthoringWorkspace:
         - Lists ``battinfo.json`` and all data files as ``hasPart``
         - References the Zenodo record URL and DOI
         - Is processable by any RO-Crate-aware tool (EOSC portals, WorkflowHub, etc.)
-        """
-        import hashlib
 
+        *data_files* are the files the deposit holds (:meth:`_bundle_data_files`).
+        A file's ``@id`` is its deposit name percent-encoded, a relative URL, and
+        its ``name`` the name itself; size and sha256 come from the plan.
+        """
         domain    = "sandbox.zenodo.org" if sandbox else "zenodo.org"
         record_url = f"https://{domain}/records/{zenodo_record_id}"
 
@@ -7189,7 +7256,7 @@ class AuthoringWorkspace:
         contributor_nodes = [_contributor_node(c) for c in contributors] if contributors else []
 
         # Root Dataset
-        parts = [{"@id": BATTINFO_LD_FILENAME}] + [{"@id": fn} for fn in data_filenames]
+        parts = [{"@id": BATTINFO_LD_FILENAME}] + [{"@id": f.segment} for f in data_files]
         root: dict = {
             "@type":         "Dataset",
             "@id":           "./",
@@ -7221,11 +7288,11 @@ class AuthoringWorkspace:
 
         # Data file entities
         file_entities: list[dict] = []
-        for fn in data_filenames:
-            fp = tmpdir / fn
+        for data_file in data_files:
+            fn = data_file.name
             entity: dict = {
                 "@type": "File",
-                "@id":   fn,
+                "@id":   data_file.segment,
                 "name":  fn,
                 "encodingFormat": (
                     "application/x-parquet" if fn.endswith(".parquet")
@@ -7234,17 +7301,16 @@ class AuthoringWorkspace:
                     else "application/octet-stream"
                 ),
             }
-            if fp.exists():
-                entity["contentSize"] = str(fp.stat().st_size)
-                sha = hashlib.sha256(fp.read_bytes()).hexdigest()
-                entity["sha256"] = sha
+            if data_file.sha256:
+                entity["contentSize"] = str(data_file.size)
+                entity["sha256"] = data_file.sha256
             file_entities.append(entity)
 
         graph = [
             # Required self-reference node
             {
                 "@type":      "CreativeWork",
-                "@id":        "ro-crate-metadata.json",
+                "@id":        _ROCRATE_FILENAME,
                 "conformsTo": {"@id": "https://w3id.org/ro/crate/1.1"},
                 "about":      {"@id": "./"},
             },
@@ -7257,7 +7323,7 @@ class AuthoringWorkspace:
             "@context": "https://w3id.org/ro/crate/1.1/context",
             "@graph":   graph,
         }
-        (tmpdir / "ro-crate-metadata.json").write_text(
+        (tmpdir / _ROCRATE_FILENAME).write_text(
             json.dumps(crate, indent=2, ensure_ascii=False),
             encoding="utf-8",
         )
@@ -9455,19 +9521,20 @@ def _cell_spec_submission_payload(
     )
 
 
-def _point_source_url_at_public_copy(record: dict, public_by_name: Mapping[str, str]) -> bool:
+def _point_source_url_at_public_copy(
+    record: dict, public_url_for: Callable[[object], str | None]
+) -> bool:
     """Replace a local ``provenance.source_url`` with the public URL of the same file.
 
-    *public_by_name* maps a deposited file's name to its public URL. Returns
-    True when the record changed.
+    *public_url_for* maps a location (a ``file:`` URI or a path) to the public
+    URL of the file it names, found by resolved path, or to ``None`` when that
+    file has no public copy; a file that merely shares the name of an uploaded
+    one is not taken for it. Returns True when the record changed.
     """
-    from battinfo._util import local_path, path_name  # noqa: PLC0415
-
     provenance = record.get("provenance")
     if not isinstance(provenance, dict):
         return False
-    source = local_path(provenance.get("source_url"))
-    public = public_by_name.get(path_name(source)) if source is not None else None
+    public = public_url_for(provenance.get("source_url"))
     if not public:
         return False
     provenance["source_url"] = public

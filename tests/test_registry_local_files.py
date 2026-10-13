@@ -111,7 +111,8 @@ def test_publish_registry_half_refuses_local_paths(
 def test_a_zenodo_deposit_points_every_location_at_https(tmp_path: Path, fake: _FakeRegistry) -> None:
     """After the deposit patches the records, the registry route accepts them."""
     ws = _workspace_with_local_data(tmp_path / "ws")
-    patched = ws._apply_zenodo_file_urls("https://zenodo.org/records/123", {"C1.bdf.csv"})
+    plan = ws._deposit_file_plan(ws._ws.source_root)
+    patched = ws._apply_zenodo_file_urls("https://zenodo.org/records/123", plan)
     assert patched == 1
     record_path = next((tmp_path / "ws" / ".battinfo" / "records" / "dataset").glob("*.json"))
     record = json.loads(record_path.read_text(encoding="utf-8"))
