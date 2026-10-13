@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=83.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "battinfo"
+version = "0.0.1"
+description = "Placeholder that reserves the name. Install BattINFO from GitHub until 0.8.0, its first working release on PyPI."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+authors = [
+  { name = "Simon Clark" },
+  { name = "Jesper Friis" },
+  { name = "Francesca Lønstad Bleken" },
+  { name = "Casper Welzel Andersen" },
+  { name = "Eibar Flores" },
+  { name = "Hendrik Snijder" },
+  { name = "Simon Stier" },
+  { name = "Corsin Battaglia" },
+]
+maintainers = [
+  { name = "Simon Clark", email = "j.simon.clark@gmail.com" },
+]
+keywords = ["batteries", "ontology", "EMMO", "linked data", "JSON-LD", "FAIR data"]
+classifiers = [
+  "Development Status :: 1 - Planning",
+  "Intended Audience :: Science/Research",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://battinfo.org"
+Source = "https://github.com/BIG-MAP/BattINFO"
+Documentation = "https://big-map.github.io/BattINFO/dev"
+
+[tool.setuptools.packages.find]
+where = ["src"]

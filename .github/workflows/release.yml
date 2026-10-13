@@ -1,0 +1,74 @@
+name: Release
+
+# Publishes the battinfo 0.0.1 placeholder to PyPI with trusted publishing
+# (OIDC), which reserves the name until 0.8.0. This file lives only on the
+# orphan branch pypi-placeholder. The real release workflow is
+# .github/workflows/release.yml on main; both match the trusted publisher
+# (owner BIG-MAP, repository BattINFO, workflow release.yml, environment pypi).
+#
+# Runs only for the tag v0.0.1, which points at this branch.
+
+on:
+  push:
+    tags: ["v0.0.1"]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build and check the placeholder
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Build sdist and wheel
+        run: uv build
+
+      - name: Check metadata
+        run: uvx twine check --strict dist/*
+
+      - name: Check the tag matches the version
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          built="$(ls dist/*.whl | sed -E 's/.*battinfo-([^-]+)-py3.*/\1/')"
+          echo "tag=$tag built=$built"
+          test "$tag" = "$built"
+
+      - name: Check the wheel installs and explains itself on import
+        run: |
+          uv venv smoke
+          uv pip install --python smoke dist/*.whl
+          smoke/bin/python -c "import importlib.metadata as m; assert m.version('battinfo') == '0.0.1'"
+          if smoke/bin/python -c "import battinfo" 2> err.txt; then
+            echo "::error::import battinfo should raise ImportError"
+            exit 1
+          fi
+          grep -q "git+https://github.com/BIG-MAP/BattINFO.git" err.txt
+
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: dist
+          path: dist/
+
+  publish-pypi:
+    name: Publish to PyPI
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/battinfo
+    permissions:
+      id-token: write   # trusted publishing
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist/
+      - name: Publish
+        uses: pypa/gh-action-pypi-publish@release/v1
