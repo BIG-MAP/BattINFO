@@ -65,9 +65,9 @@
     {
       "symbol": "°C",
       "status": "candidate",
-      "unit_iri": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc",
-      "unit_pref_label": "C",
-      "unit_label": "C",
+      "unit_iri": "https://w3id.org/emmo#DegreeCelsius",
+      "unit_pref_label": "DegreeCelsius",
+      "unit_label": "DegreeCelsius",
       "confidence": 1.0
     }
   ]

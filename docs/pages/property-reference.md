@@ -9,7 +9,7 @@ unit IRI, by the curated mapping tables under
 `assets/mappings/domain-battery/` — the single source of truth for the
 semantics of emitted JSON-LD. This page is generated from those tables.
 
-## Properties (106)
+## Properties (107)
 
 The keys of quantities in `properties={...}` on a cell spec and in the
 `property` blocks of material and component records, and the EMMO class
@@ -52,7 +52,7 @@ each becomes in JSON-LD:
 | `electrolyte_diffusivity` | [ChargeCarrierDiffusivityInElectrolyte](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_4c274506_af5b_4ef1_8217_829ffd459f28) |
 | `electronic_conductivity` | [ElectronicConductivity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_ce74d2dc_d496_4116_b2fb_3e83d88bc744) |
 | `energy_density` | [EnergyDensity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_4aa1b96e_44a0_4b1a_a0ac_723d0223d80b) |
-| `entropic_coefficient` | [TemperatureCoefficientOfTheOpenCircuitVoltage](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_3b938708_e7e4_4ac0_a959_9c04306302e7) |
+| `entropic_coefficient` | [TemperatureCoefficientOfTheOpenCircuitPotential](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_9b44a651_afa9_4889_ae07_9ac49ede8ac1) |
 | `external_surface_area` | [Area](https://w3id.org/emmo#EMMO_96f39f77_44dc_491b_8fa7_30d887fe0890) |
 | `foil_thickness` | [Thickness](https://w3id.org/emmo#EMMO_43003c86_9d15_433b_9789_ee2940920656) |
 | `height` | [Height](https://w3id.org/emmo#EMMO_08bcf1d6_e719_46c8_bb21_24bc9bf34dba) |
@@ -81,7 +81,7 @@ each becomes in JSON-LD:
 | `nominal_capacity` | [NominalCapacity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_8abde9d0_84f6_4b4f_a87e_86028a397100) |
 | `nominal_energy` | [NominalEnergy](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d) |
 | `nominal_voltage` | [NominalVoltage](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_639b844a_e801_436b_985d_28926129ead6) |
-| `ocp` | [OpenCircuitVoltage](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_9c657fdc_b9d3_4964_907c_f9a6e8c5f52b) |
+| `ocp` | [OpenCircuitPotential](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_e272f229_7b45_4436_9b0b_30391ee4e5be) |
 | `operating_temperature_max` | [MaximumOperatingTemperature](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_e999bd7d_93ad_47fb_8d8d_dd667e4ef553) |
 | `operating_temperature_min` | [MinimumOperatingTemperature](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_08a73f4b_3242_4356_af24_68ba0bf66d51) |
 | `particle_d50` | [D50ParticleSize](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_3cfdfc10_a5cb_4e3e_b1a1_281010d1465c) |
@@ -102,7 +102,7 @@ each becomes in JSON-LD:
 | `round_trip_energy_efficiency` | [RoundTripEnergyEfficiency](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c413d29a_b814_4d88_8db0_0fd0171cff11) |
 | `self_discharge_rate` | [SelfDischargeRate](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c3e97d58_1854_4c23_bb42_d2972172865e) |
 | `single_side_loading` | [MassLoading](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c955c089_6ee1_41a2_95fc_d534c5cfd3d5) |
-| `solid_diffusivity` | [Diffusivity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_37b24a94_cae0_4d7a_9519_9f7692dec607) |
+| `solid_diffusivity` | [GuestDiffusivity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_fed4582e_0de4_43e1_b51a_e3496697c25d) |
 | `specific_capacity` | [SpecificCapacity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_1e3dc60d_dd6b_47d6_8161_70004fc5ee30) |
 | `specific_energy` | [SpecificEnergy](https://w3id.org/emmo#EMMO_e218c625_6a39_47a9_8d08_a2ef41c152a9) |
 | `specific_power` | [SpecificPower](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_c762a928_5a74_46fd_9929_4ac2d7a3a8d7) |
@@ -116,6 +116,7 @@ each becomes in JSON-LD:
 | `thickness` | [Thickness](https://w3id.org/emmo#EMMO_43003c86_9d15_433b_9789_ee2940920656) |
 | `tortuosity` | [Tortuosity](https://w3id.org/emmo#EMMO_c413d96f_c57b_4c70_9ac1_312db6c009a8) |
 | `transference_number` | [ChargeCarrierTransportNumber](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_e3e78df2_d568_4ab7_8c0d_d3a2ee3ae282) |
+| `transport_efficiency` | [TransportEfficiency](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_3605456a_e952_4093_98b6_d8c24c37c19e) |
 | `typical_capacity` | [TypicalCapacity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_34d6cdd9_d3a7_4302_a54d_9dbd8a3b5e68) |
 | `typical_energy` | [NominalEnergy](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d) |
 | `upper_voltage_limit` | [UpperVoltageLimit](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_6dcd5baf_58cd_43f5_a692_51508e036c88) |
@@ -135,7 +136,7 @@ validation warns `semantic.property_unmapped`.
 | Key | Unit | EMMO class |
 |---|---|---|
 | `ambient_temperature` | `K` | none yet |
-| `electrode_pair_count` | `1` | [NumberOfEntities](https://w3id.org/emmo#EMMO_41efdf5d_0c9c_4ea0_bb65_f8236e663be5) |
+| `electrode_pair_count` | `1` | [NumberOfElectrodePairs](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_f7a81b04_6600_4bbf_a70e_5ebbed911069) |
 | `heat_transfer_coefficient` | `W/(m2.K)` | [SurfaceCoefficientOfHeatTransfer](https://w3id.org/emmo#EMMO_0b3295fa_f4bf_4f83_a603_9d98c03da5bb) |
 | `initial_soc` | `1` | [StateOfCharge](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_8b2aaa50_bbe1_45da_8778_8898326246a2) |
 | `initial_temperature` | `K` | [ThermodynamicTemperature](https://w3id.org/emmo#EMMO_affe07e4_e9bc_4852_86c6_69e26182a17f) |

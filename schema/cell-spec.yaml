@@ -4,7 +4,7 @@ description: >-
   Schema for CellSpecification (product specification) records.  Covers product identity
   fields, regulatory metadata, and the full SpecSet of quantitative properties.
   Property IRIs are taken from the domain-battery and domain-electrochemistry
-  EMMO modules (pinned to battery 0.20.2 / electrochemistry 0.37.2).
+  EMMO modules (pinned to battery 0.21.0 / electrochemistry 0.39.0).
 
 prefixes:
   linkml:           https://w3id.org/linkml/

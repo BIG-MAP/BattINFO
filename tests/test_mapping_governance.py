@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any
+
+import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
@@ -194,12 +197,12 @@ def test_battinfo_application_ontology_imports_are_pinned() -> None:
     ontology_path = ROOT / "battinfo.ttl"
     content = ontology_path.read_text(encoding="utf-8")
     # Versioned IRI must be present; floating (unversioned) import is not acceptable.
-    assert "owl:imports <https://w3id.org/emmo/domain/battery/0.20.2/battery>" in content, (
+    assert "owl:imports <https://w3id.org/emmo/domain/battery/0.21.0/battery>" in content, (
         "battinfo.ttl must import domain-battery at a pinned version IRI. "
         "Update the import and this assertion together when upgrading."
     )
     # domain-electrochemistry must also be declared explicitly.
-    assert "owl:imports <https://w3id.org/emmo/domain/electrochemistry/0.37.2/electrochemistry>" in content, (
+    assert "owl:imports <https://w3id.org/emmo/domain/electrochemistry/0.39.0/electrochemistry>" in content, (
         "battinfo.ttl must explicitly import domain-electrochemistry at a pinned version IRI."
     )
     # domain-chemical-substance carries the material vocabulary material_map.json uses.
@@ -301,3 +304,301 @@ def test_every_property_mapping_names_a_class_the_ontology_publishes() -> None:
             if iri and iri not in published:
                 unknown.append(f"{name}: {entry['key']} -> {iri}")
     assert unknown == []
+
+
+# ── The pinned EMMO closure (domain-battery 0.21.0, domain-electrochemistry 0.39.0) ──
+
+_MAPPING_DIR = ROOT / "src" / "battinfo" / "data" / "mappings" / "domain-battery"
+_CONTEXT_DIR = ROOT / "src" / "battinfo" / "data" / "context"
+_CLOSURE_TERMS = ROOT / "tests" / "fixtures" / "emmo" / "closure-terms.json"
+_ELECTROCHEMISTRY = "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_"
+OPEN_CIRCUIT_POTENTIAL = _ELECTROCHEMISTRY + "e272f229_7b45_4436_9b0b_30391ee4e5be"
+OPEN_CIRCUIT_VOLTAGE = _ELECTROCHEMISTRY + "9c657fdc_b9d3_4964_907c_f9a6e8c5f52b"
+
+# Deprecated upstream and still emitted, each with its reason. The set may only
+# shrink: a test below fails once an entry is no longer deprecated.
+_DEPRECATED_IN_USE = {
+    # LithiumNickelManganeseOxideElectrode, the electrode node of
+    # positive_electrode_basis "lnmo". Deprecated since before 0.37.2 with no
+    # replacement, while its siblings were restored as defined classes; the
+    # upstream ask is in docs/internal/ontology-additions-needed.md.
+    _ELECTROCHEMISTRY + "41ddf723_245f_4ce8_b9b1_7d9b3b9eea7d",
+}
+
+
+def _parameter_scopes() -> dict[str, set[str]]:
+    vocab = _load_json(ROOT / "src" / "battinfo" / "data" / "vocab" / "parameters.json")["parameters"]
+    return {key: set(entry.get("scopes", [])) for key, entry in vocab.items()}
+
+
+def _curated_property_map() -> dict[str, dict[str, Any]]:
+    return {m["key"]: m for m in _load_json(_MAPPING_DIR / "property_map.curated.json")["mappings"]}
+
+
+def _expand_with(context: dict[str, Any], value: Any) -> Any:
+    """Expand a context term value (compact IRI or ``{"@id": ...}``) with the context's own prefixes."""
+    if isinstance(value, dict):
+        value = value.get("@id")
+    if isinstance(value, str) and ":" in value and not value.startswith(("http://", "https://")):
+        prefix, local = value.split(":", 1)
+        base = context.get(prefix)
+        if isinstance(base, str) and base.endswith(("#", "/")):
+            return base + local
+    return value
+
+
+def _emitted_emmo_iris() -> dict[str, list[str]]:
+    """Every EMMO-family IRI the emitters can write, with where each comes from."""
+    from battinfo.jsonld import TEST_METHOD_CONTEXT_TERMS
+    from battinfo.transform.cell_spec_node import _COMPACT_PREFIXES, label_to_compact
+
+    def expand(value: Any) -> Any:
+        if isinstance(value, dict):
+            value = value.get("@id")
+        for prefix, base in _COMPACT_PREFIXES:
+            if isinstance(value, str) and value.startswith(prefix):
+                return base + value[len(prefix):]
+        return value
+
+    found: dict[str, list[str]] = {}
+
+    def add(iri: Any, source: str) -> None:
+        if isinstance(iri, str) and iri.startswith("https://w3id.org/emmo"):
+            found.setdefault(iri, []).append(source)
+
+    for key, entry in _curated_property_map().items():
+        add(entry.get("class_iri"), f"property_map:{key}")
+    for entry in _load_json(_MAPPING_DIR / "unit_map.curated.json")["mappings"]:
+        add(entry.get("unit_iri"), f"unit_map:{entry['symbol']}")
+    for label, value in label_to_compact().items():
+        add(expand(value), f"label_to_compact:{label}")
+    for label, value in TEST_METHOD_CONTEXT_TERMS.items():
+        add(expand(value), f"test_method:{label}")
+    material_kinds = _load_json(ROOT / "src" / "battinfo" / "data" / "vocab" / "material_kinds.json")["kinds"]
+    for kind, entry in material_kinds.items():
+        add(entry.get("chemsub"), f"material_kinds:{kind}")
+    for name in ("records.context.json", "records.context.v1.json"):
+        context = _load_json(_CONTEXT_DIR / name)["@context"]
+        for term, value in context.items():
+            add(_expand_with(context, value), f"{name}:{term}")
+    return found
+
+
+def test_closure_terms_fixture_matches_the_pinned_imports() -> None:
+    """The deprecation and unit lists were read from the closure battinfo.ttl imports.
+
+    Moving a pin without regenerating them (.tools/quality/emmo_closure_terms.py)
+    would let the checks below pass against the old release.
+    """
+    closure = _load_json(_CLOSURE_TERMS)["closure"]
+    ttl = (ROOT / "battinfo.ttl").read_text(encoding="utf-8")
+    pins = re.findall(r"owl:imports\s+<https://w3id\.org/emmo/domain/([a-z-]+)/([^/]+)/", ttl)
+    assert len(pins) == 3, pins
+    for domain, version in pins:
+        assert closure[f"domain-{domain}"] == [version], (domain, closure)
+
+
+def test_no_emitted_emmo_iri_is_deprecated_in_the_pinned_closure() -> None:
+    deprecated = {entry["iri"]: entry for entry in _load_json(_CLOSURE_TERMS)["deprecated"]}
+    emitted = _emitted_emmo_iris()
+    assert len(emitted) > 300, "the inventory of emitted IRIs looks broken"
+    hits = {
+        f"{deprecated[iri]['pref_label']} <{iri}> replaced by {deprecated[iri]['replaced_by']}": sources
+        for iri, sources in emitted.items()
+        if iri in deprecated and iri not in _DEPRECATED_IN_USE
+    }
+    assert not hits, hits
+    assert _DEPRECATED_IN_USE <= set(deprecated), "an allowed deprecated term was restored upstream: drop it"
+
+
+def test_curated_property_classes_agree_with_the_bundled_context() -> None:
+    """A curated entry's IRI is the one its own class label names in the pinned context.
+
+    entropic_coefficient once paired TemperatureCoefficientOfTheOpenCircuitVoltage
+    with the CoatingThickness IRI, so its claims were typed as a coating thickness.
+    """
+    context = _load_json(_CONTEXT_DIR / "domain-battery.context.json")["@context"]
+    wrong = {}
+    for key, entry in _curated_property_map().items():
+        named = _expand_with(context, context.get(entry["class_pref_label"]))
+        if named != entry["class_iri"]:
+            wrong[key] = (entry["class_pref_label"], entry["class_iri"], named)
+    assert not wrong, wrong
+
+
+def test_electrode_open_circuit_potential_is_not_typed_as_a_cell_voltage() -> None:
+    """domain-electrochemistry 0.39.0 split the two quantities.
+
+    OpenCircuitVoltage is the voltage between a cell's terminals at zero current,
+    OpenCircuitPotential the potential of one electrode against a reference. A key
+    scoped to a material or an electrode never types as the cell-level class, and
+    a key typed with the electrode class is scoped to nothing else.
+    """
+    scopes = _parameter_scopes()
+    curated = _curated_property_map()
+    electrode_level = {"material", "electrode"}
+    assert curated["ocp"]["class_iri"] == OPEN_CIRCUIT_POTENTIAL
+    assert scopes["ocp"] <= electrode_level
+    for key, entry in curated.items():
+        if entry["class_iri"] == OPEN_CIRCUIT_VOLTAGE:
+            assert not scopes.get(key, set()) & electrode_level, key
+        if entry["class_iri"] == OPEN_CIRCUIT_POTENTIAL:
+            assert scopes.get(key, set()) <= electrode_level, key
+
+
+def test_open_circuit_terms_keep_their_meaning_in_the_v1_context() -> None:
+    context = _load_json(_CONTEXT_DIR / "records.context.v1.json")["@context"]
+    assert _expand_with(context, context["OpenCircuitVoltage"]) == OPEN_CIRCUIT_VOLTAGE
+    assert _expand_with(context, context["OpenCircuitPotential"]) == OPEN_CIRCUIT_POTENTIAL
+
+
+def test_an_electrode_ocp_claim_types_as_open_circuit_potential() -> None:
+    from battinfo.api import create_parameter_set
+    from battinfo.jsonld import record_to_jsonld
+
+    record = create_parameter_set(
+        name="Example graphite OCP at half lithiation",
+        material_kind="graphite",
+        claims=[{"parameter": "ocp", "quantity": {"value": 0.13, "unit": "V"}, "provenance_class": "measured"}],
+    )
+    claim = record_to_jsonld(record, "parameter-set")["hasProperty"]
+    assert claim["@type"] == ["OpenCircuitPotential", "ConventionalProperty"]
+    assert claim["schema:propertyID"] == "ocp"
+    context = _load_json(_CONTEXT_DIR / "records.context.v1.json")["@context"]
+    assert _expand_with(context, context[claim["@type"][0]]) == OPEN_CIRCUIT_POTENTIAL
+
+
+@pytest.mark.parametrize(
+    ("key", "label", "uuid"),
+    [
+        ("ocp", "OpenCircuitPotential", "e272f229_7b45_4436_9b0b_30391ee4e5be"),
+        ("entropic_coefficient", "TemperatureCoefficientOfTheOpenCircuitPotential", "9b44a651_afa9_4889_ae07_9ac49ede8ac1"),
+        ("solid_diffusivity", "GuestDiffusivity", "fed4582e_0de4_43e1_b51a_e3496697c25d"),
+        ("electrode_pair_count", "NumberOfElectrodePairs", "f7a81b04_6600_4bbf_a70e_5ebbed911069"),
+        ("transport_efficiency", "TransportEfficiency", "3605456a_e952_4093_98b6_d8c24c37c19e"),
+    ],
+)
+def test_parameter_keys_type_as_their_electrochemistry_0_39_classes(key: str, label: str, uuid: str) -> None:
+    from battinfo.transform.json_to_jsonld import _descriptor_quantity_node
+
+    entry = _curated_property_map()[key]
+    assert (entry["class_pref_label"], entry["class_iri"]) == (label, _ELECTROCHEMISTRY + uuid)
+    node = _descriptor_quantity_node(key, {"value": 1.0, "unit": "1"})
+    assert node is not None and node["@type"][0] == label
+
+
+# ── Measurement units ──────────────────────────────────────────────────────────
+
+DEGREE_CELSIUS = "https://w3id.org/emmo#DegreeCelsius"
+# EMMO's class for the programming language C (a CompiledLanguage), which
+# BattINFO wrote as the unit of every Celsius temperature before 0.8.0.
+PROGRAMMING_LANGUAGE_C = "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
+
+# Written as a unit although the pinned closure does not make it one, each with
+# its reason. The set may only shrink: a test below fails once an entry is a unit.
+_NOT_A_UNIT_IN_USE = {
+    # A real EMMO unit, but EMMO 1.0.2 gives it no named superclass (only
+    # restrictions), so it does not classify as a MeasurementUnit without a reasoner.
+    "https://w3id.org/emmo#MilliAmpereHour",
+    # The `%` term of the records contexts. EMMO declares it in
+    # disciplines/units/specialunits, which the pinned chain does not import.
+    "https://w3id.org/emmo#Percent",
+    # WeightPercent and VolumePercent, the curated IRIs for `%` and `vol%`, are
+    # PercentQuantity classes in domain-electrochemistry, quantities rather than units.
+    _ELECTROCHEMISTRY + "2c0e66c8_d58d_44b2_b0ce_ba55194bd505",
+    _ELECTROCHEMISTRY + "db37b358_b2f0_4e06_b6ae_8c56c8fbb6ba",
+}
+
+
+def _written_unit_iris() -> dict[str, list[str]]:
+    """Every EMMO-family IRI BattINFO writes as a unit, with where each comes from."""
+    from battinfo.jsonld import _UNIT_MAP, CONTEXT_UNIT_SYMBOLS
+    from battinfo.transform.json_to_jsonld import _unit_type_map
+    from battinfo.validate.jsonld import _context_unit_terms
+
+    found: dict[str, list[str]] = {}
+
+    def add(iri: Any, source: str) -> None:
+        if isinstance(iri, str) and iri.startswith("https://w3id.org/emmo"):
+            found.setdefault(iri, []).append(source)
+
+    for symbol, iri in _unit_type_map().items():
+        add(iri, f"emitter:{symbol}")
+    for symbol, iri in _UNIT_MAP.items():
+        add(iri, f"publication:{symbol}")
+    for name in ("unit_map.curated.json", "unit_map.candidates.json"):
+        for entry in _load_json(_MAPPING_DIR / name)["mappings"]:
+            add(entry.get("unit_iri"), f"{name}:{entry['symbol']}")
+    for name in ("records.context.json", "records.context.v1.json"):
+        context = _load_json(_CONTEXT_DIR / name)["@context"]
+        for term in _context_unit_terms(context):
+            add(_expand_with(context, context[term]), f"{name}:{term}")
+        for symbol, value in CONTEXT_UNIT_SYMBOLS.items():
+            add(_expand_with(context, value), f"CONTEXT_UNIT_SYMBOLS:{symbol}")
+    return found
+
+
+def test_every_unit_iri_written_is_a_unit_of_the_pinned_closure() -> None:
+    """A unit IRI has to name a measurement unit. EMMO_36a9bf69_... was written for
+    every Celsius temperature and is the programming language C."""
+    units = set(_load_json(_CLOSURE_TERMS)["measurement_units"])
+    assert DEGREE_CELSIUS in units and PROGRAMMING_LANGUAGE_C not in units
+    written = _written_unit_iris()
+    assert len(written) > 50, "the inventory of unit IRIs looks broken"
+    not_units = {iri: sources for iri, sources in written.items() if iri not in units and iri not in _NOT_A_UNIT_IN_USE}
+    assert not not_units, not_units
+    assert not _NOT_A_UNIT_IN_USE & units, "an allowed non-unit is a unit now: drop it"
+
+
+@pytest.mark.parametrize("symbol", ["degC", "°C"])
+def test_celsius_temperatures_carry_the_degree_celsius_unit(symbol: str) -> None:
+    from battinfo.jsonld import CONTEXT_UNIT_SYMBOLS
+    from battinfo.transform.json_to_jsonld import _descriptor_quantity_node, _unit_iri
+
+    assert _unit_iri(symbol) == DEGREE_CELSIUS
+    node = _descriptor_quantity_node("maximum_charging_temperature", {"value": 45, "unit": symbol})
+    assert node is not None
+    unit = node["hasMeasurementUnit"]
+    assert (unit.get("@id") if isinstance(unit, dict) else unit) == DEGREE_CELSIUS
+    assert CONTEXT_UNIT_SYMBOLS["degC"] == "emmo:DegreeCelsius"
+    for name in ("records.context.json", "records.context.v1.json"):
+        context = _load_json(_CONTEXT_DIR / name)["@context"]
+        assert _expand_with(context, context["degC"]) == DEGREE_CELSIUS, name
+        assert PROGRAMMING_LANGUAGE_C not in json.dumps(context), name
+
+
+def test_a_curated_unit_beats_a_candidate_and_a_hand_kept_alias(monkeypatch: pytest.MonkeyPatch) -> None:
+    from battinfo.transform import json_to_jsonld
+
+    tables = {
+        "unit_map.curated.json": {"mappings": [{"symbol": "Xq", "unit_iri": "https://example.org/curated"}]},
+        "unit_map.candidates.json": {"mappings": [
+            {"symbol": "Xq", "unit_iri": "https://example.org/candidate"},
+            {"symbol": "Yq", "unit_iri": "https://example.org/candidate-only"},
+        ]},
+    }
+    monkeypatch.setattr(json_to_jsonld, "_load_mapping_file", lambda name: tables[name])
+    monkeypatch.setattr(json_to_jsonld, "MANUAL_UNIT_TYPES", {"Xq": "https://example.org/manual"})
+    json_to_jsonld._unit_type_map.cache_clear()
+    try:
+        table = json_to_jsonld._unit_type_map()
+        assert table["Xq"] == "https://example.org/curated"
+        assert table["Yq"] == "https://example.org/candidate-only"
+    finally:
+        json_to_jsonld._unit_type_map.cache_clear()
+
+
+def test_every_curated_unit_wins_in_the_emitter_table() -> None:
+    from battinfo.transform.json_to_jsonld import _unit_type_map
+
+    table = _unit_type_map()
+    for entry in _load_json(_MAPPING_DIR / "unit_map.curated.json")["mappings"]:
+        if entry.get("unit_iri"):
+            assert table[entry["symbol"]] == entry["unit_iri"], entry["symbol"]
+
+
+def test_the_programming_language_c_is_read_back_but_never_written() -> None:
+    from battinfo.transform.json_to_jsonld import LEGACY_UNIT_IRIS, _unit_type_map
+
+    assert LEGACY_UNIT_IRIS == {PROGRAMMING_LANGUAGE_C: "°C"}
+    assert PROGRAMMING_LANGUAGE_C not in _unit_type_map().values()

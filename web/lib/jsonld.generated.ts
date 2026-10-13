@@ -347,7 +347,7 @@ export const jsonldGallery: {
               "@type": "RealData",
               "hasNumberValue": -30
             },
-            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
+            "hasMeasurementUnit": "https://w3id.org/emmo#DegreeCelsius"
           },
           {
             "@type": [
@@ -359,7 +359,7 @@ export const jsonldGallery: {
               "@type": "RealData",
               "hasNumberValue": 55
             },
-            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
+            "hasMeasurementUnit": "https://w3id.org/emmo#DegreeCelsius"
           },
           {
             "@type": [
@@ -371,7 +371,7 @@ export const jsonldGallery: {
               "@type": "RealData",
               "hasNumberValue": -40
             },
-            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
+            "hasMeasurementUnit": "https://w3id.org/emmo#DegreeCelsius"
           },
           {
             "@type": [
@@ -383,7 +383,7 @@ export const jsonldGallery: {
               "@type": "RealData",
               "hasNumberValue": 60
             },
-            "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
+            "hasMeasurementUnit": "https://w3id.org/emmo#DegreeCelsius"
           },
           {
             "@type": [

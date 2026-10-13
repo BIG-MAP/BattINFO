@@ -640,10 +640,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         },
         {
           "@type": [
-            "NumberOfEntities",
+            "NumberOfElectrodePairs",
             "ConventionalProperty"
           ],
-          "skos:prefLabel": "NumberOfEntities",
+          "skos:prefLabel": "NumberOfElectrodePairs",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 34
@@ -713,10 +713,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         },
         {
           "@type": [
-            "Diffusivity",
+            "GuestDiffusivity",
             "ConventionalProperty"
           ],
-          "skos:prefLabel": "Diffusivity",
+          "skos:prefLabel": "GuestDiffusivity",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 2.728e-14
@@ -947,9 +947,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         },
         {
           "@type": [
+            "TransportEfficiency",
             "ConventionalProperty"
           ],
-          "skos:prefLabel": "transport_efficiency",
+          "skos:prefLabel": "TransportEfficiency",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.128
@@ -998,10 +999,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         },
         {
           "@type": [
-            "Diffusivity",
+            "GuestDiffusivity",
             "ConventionalProperty"
           ],
-          "skos:prefLabel": "Diffusivity",
+          "skos:prefLabel": "GuestDiffusivity",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 3.2e-14
@@ -1016,10 +1017,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         },
         {
           "@type": [
-            "TemperatureCoefficientOfTheOpenCircuitVoltage",
+            "TemperatureCoefficientOfTheOpenCircuitPotential",
             "ConventionalProperty"
           ],
-          "skos:prefLabel": "TemperatureCoefficientOfTheOpenCircuitVoltage",
+          "skos:prefLabel": "TemperatureCoefficientOfTheOpenCircuitPotential",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": -0.0001
@@ -1236,9 +1237,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         },
         {
           "@type": [
+            "TransportEfficiency",
             "ConventionalProperty"
           ],
-          "skos:prefLabel": "transport_efficiency",
+          "skos:prefLabel": "TransportEfficiency",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.1462
@@ -1299,9 +1301,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         },
         {
           "@type": [
+            "TransportEfficiency",
             "ConventionalProperty"
           ],
-          "skos:prefLabel": "transport_efficiency",
+          "skos:prefLabel": "TransportEfficiency",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.3222
@@ -1679,10 +1682,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         },
         {
           "@type": [
-            "NumberOfEntities",
+            "NumberOfElectrodePairs",
             "ConventionalProperty"
           ],
-          "skos:prefLabel": "NumberOfEntities",
+          "skos:prefLabel": "NumberOfElectrodePairs",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 1
@@ -1752,10 +1755,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         },
         {
           "@type": [
-            "Diffusivity",
+            "GuestDiffusivity",
             "ConventionalProperty"
           ],
-          "skos:prefLabel": "Diffusivity",
+          "skos:prefLabel": "GuestDiffusivity",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 9.6e-15
@@ -1986,9 +1989,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         },
         {
           "@type": [
+            "TransportEfficiency",
             "ConventionalProperty"
           ],
-          "skos:prefLabel": "transport_efficiency",
+          "skos:prefLabel": "TransportEfficiency",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.09395
@@ -2037,10 +2041,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         },
         {
           "@type": [
-            "Diffusivity",
+            "GuestDiffusivity",
             "ConventionalProperty"
           ],
-          "skos:prefLabel": "Diffusivity",
+          "skos:prefLabel": "GuestDiffusivity",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 6.873e-17
@@ -2274,9 +2278,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         },
         {
           "@type": [
+            "TransportEfficiency",
             "ConventionalProperty"
           ],
-          "skos:prefLabel": "transport_efficiency",
+          "skos:prefLabel": "TransportEfficiency",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.09186
@@ -2337,9 +2342,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         },
         {
           "@type": [
+            "TransportEfficiency",
             "ConventionalProperty"
           ],
-          "skos:prefLabel": "transport_efficiency",
+          "skos:prefLabel": "TransportEfficiency",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.3222
@@ -2723,10 +2729,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         },
         {
           "@type": [
-            "NumberOfEntities",
+            "NumberOfElectrodePairs",
             "ConventionalProperty"
           ],
-          "skos:prefLabel": "NumberOfEntities",
+          "skos:prefLabel": "NumberOfElectrodePairs",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 34
@@ -2796,10 +2802,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         },
         {
           "@type": [
-            "Diffusivity",
+            "GuestDiffusivity",
             "ConventionalProperty"
           ],
-          "skos:prefLabel": "Diffusivity",
+          "skos:prefLabel": "GuestDiffusivity",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 2.728e-14
@@ -3029,10 +3035,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         },
         {
           "@type": [
-            "Diffusivity",
+            "GuestDiffusivity",
             "ConventionalProperty"
           ],
-          "skos:prefLabel": "Diffusivity",
+          "skos:prefLabel": "GuestDiffusivity",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 3.2e-14
@@ -3047,10 +3053,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         },
         {
           "@type": [
-            "TemperatureCoefficientOfTheOpenCircuitVoltage",
+            "TemperatureCoefficientOfTheOpenCircuitPotential",
             "ConventionalProperty"
           ],
-          "skos:prefLabel": "TemperatureCoefficientOfTheOpenCircuitVoltage",
+          "skos:prefLabel": "TemperatureCoefficientOfTheOpenCircuitPotential",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": -0.0001
@@ -3496,10 +3502,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         },
         {
           "@type": [
-            "NumberOfEntities",
+            "NumberOfElectrodePairs",
             "ConventionalProperty"
           ],
-          "skos:prefLabel": "NumberOfEntities",
+          "skos:prefLabel": "NumberOfElectrodePairs",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 34
@@ -3569,10 +3575,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         },
         {
           "@type": [
-            "Diffusivity",
+            "GuestDiffusivity",
             "ConventionalProperty"
           ],
-          "skos:prefLabel": "Diffusivity",
+          "skos:prefLabel": "GuestDiffusivity",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 2.728e-14
@@ -3803,9 +3809,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         },
         {
           "@type": [
+            "TransportEfficiency",
             "ConventionalProperty"
           ],
-          "skos:prefLabel": "transport_efficiency",
+          "skos:prefLabel": "TransportEfficiency",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.128
@@ -3884,9 +3891,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         },
         {
           "@type": [
+            "TransportEfficiency",
             "ConventionalProperty"
           ],
-          "skos:prefLabel": "transport_efficiency",
+          "skos:prefLabel": "TransportEfficiency",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.1462
@@ -3947,9 +3955,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         },
         {
           "@type": [
+            "TransportEfficiency",
             "ConventionalProperty"
           ],
-          "skos:prefLabel": "transport_efficiency",
+          "skos:prefLabel": "TransportEfficiency",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.3222
@@ -4335,10 +4344,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         },
         {
           "@type": [
-            "NumberOfEntities",
+            "NumberOfElectrodePairs",
             "ConventionalProperty"
           ],
-          "skos:prefLabel": "NumberOfEntities",
+          "skos:prefLabel": "NumberOfElectrodePairs",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 34
@@ -4408,10 +4417,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         },
         {
           "@type": [
-            "Diffusivity",
+            "GuestDiffusivity",
             "ConventionalProperty"
           ],
-          "skos:prefLabel": "Diffusivity",
+          "skos:prefLabel": "GuestDiffusivity",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 2.728e-14
@@ -4426,10 +4435,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         },
         {
           "@type": [
-            "OpenCircuitVoltage",
+            "OpenCircuitPotential",
             "ConventionalProperty"
           ],
-          "skos:prefLabel": "OpenCircuitVoltage",
+          "skos:prefLabel": "OpenCircuitPotential",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0
@@ -4646,9 +4655,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         },
         {
           "@type": [
+            "TransportEfficiency",
             "ConventionalProperty"
           ],
-          "skos:prefLabel": "transport_efficiency",
+          "skos:prefLabel": "TransportEfficiency",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.128
@@ -4697,10 +4707,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         },
         {
           "@type": [
-            "Diffusivity",
+            "GuestDiffusivity",
             "ConventionalProperty"
           ],
-          "skos:prefLabel": "Diffusivity",
+          "skos:prefLabel": "GuestDiffusivity",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 3.2e-14
@@ -4715,10 +4725,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         },
         {
           "@type": [
-            "TemperatureCoefficientOfTheOpenCircuitVoltage",
+            "TemperatureCoefficientOfTheOpenCircuitPotential",
             "ConventionalProperty"
           ],
-          "skos:prefLabel": "TemperatureCoefficientOfTheOpenCircuitVoltage",
+          "skos:prefLabel": "TemperatureCoefficientOfTheOpenCircuitPotential",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": -0.0001
@@ -4935,9 +4945,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         },
         {
           "@type": [
+            "TransportEfficiency",
             "ConventionalProperty"
           ],
-          "skos:prefLabel": "transport_efficiency",
+          "skos:prefLabel": "TransportEfficiency",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.1462
@@ -4998,9 +5009,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         },
         {
           "@type": [
+            "TransportEfficiency",
             "ConventionalProperty"
           ],
-          "skos:prefLabel": "transport_efficiency",
+          "skos:prefLabel": "TransportEfficiency",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.3222

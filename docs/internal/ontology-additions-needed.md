@@ -10,7 +10,7 @@ Policy (2026-07-07): battinfo never mints domain semantics. Missing terms are ad
 EMMO domain-battery / domain-electrochemistry / domain-chemical-substance upstream (we
 control them), not here.
 
-Currently pinned: domain-battery 0.20.2, domain-electrochemistry 0.37.2,
+Currently pinned: domain-battery 0.21.0, domain-electrochemistry 0.39.0,
 domain-chemical-substance 0.15.0, EMMO 1.0.2.
 
 ## 1. Property-nature qualifier (coin-cell initiative)
@@ -78,7 +78,7 @@ A quantity may now state the spread of the sample it summarises — `standard_de
 | **`SampleCount`** | Class | dimensionless quantity | How many members the summary was computed over. `CountingUnit` exists for the unit; the quantity does not. |
 | **`hasSampleStatistic`** | Object property | on a `Property` | Attach the above to the property they qualify, the way `hasMeasurementParameter` attaches a condition. |
 
-Searched and absent from the 0.20.2 / 0.37.2 / 1.0.2 closure: `StandardDeviation`, `StandardUncertainty`, `Variance`, `ArithmeticMean`, `Median`, `SampleCount`, `SampleSize`, `StatisticalQuantity`, `hasStandardDeviation`. The `Mean*` classes present (`MeanFreePath`, `MeanPoreSize`, …) are physics quantities, not statistics.
+Searched and absent from the 0.20.2 / 0.37.2 / 1.0.2 closure, and again from the 0.21.0 / 0.39.0 / 1.0.2 one (2026-10-12): `StandardDeviation`, `StandardUncertainty`, `Variance`, `ArithmeticMean`, `Median`, `SampleCount`, `SampleSize`, `StatisticalQuantity`, `hasStandardDeviation`. The `Mean*` classes present (`MeanFreePath`, `MeanPoreSize`, …) are physics quantities, not statistics.
 
 `MetrologicalUncertainty` (`EMMO_847724b7_…`) and `hasMetrologicalUncertainty` (`EMMO_662c64e7_…`) **are** in the closure and were deliberately not used. Per VIM, measurement uncertainty characterises the dispersion of values attributable to one measurand; a sample standard deviation over eight electrode discs characterises a population of distinct physical objects. Reusing the class would be a category claim of the same kind as the `CapacityFade` mapping fixed in 0.37.1, so the emitter says what it has instead: `schema:valueReference` → a named `schema:PropertyValue`.
 
@@ -186,21 +186,21 @@ the curated map at it. The second turned out to be published already (see its ro
 
 | Wanted term | Existing polarity pair | Parameter key |
 |---|---|---|
-| **`GuestDiffusivity`** | `GuestDiffusivityIn{Negative,Positive}ElectrodeActiveMaterial` | `solid_diffusivity` — diffusivity of the intercalated (guest) species in its host; the host context is implicit in "guest", so no `InActiveMaterial` suffix. Interim since 2026-10-11: wired to the published generic `Diffusivity`. |
-| ~~`EntropicChangeCoefficient`~~ | `{Negative,Positive}ElectrodeEntropicChangeCoefficient` | `entropic_coefficient` — dU/dT. No longer needed: the pair's published parent `TemperatureCoefficientOfTheOpenCircuitVoltage` (domain-electrochemistry 0.37.2) is this polarity-free quantity, and the key is wired to it since 2026-10-11. |
+| ~~`GuestDiffusivity`~~ | `GuestDiffusivityIn{Negative,Positive}ElectrodeActiveMaterial` | `solid_diffusivity`. Published in domain-electrochemistry 0.39.0 as the defined class `Diffusivity and isPropertyFor some ActiveMaterial`, with the polarity pair deprecated in its favour, and wired since 2026-10-12 (it was the generic `Diffusivity` from 2026-10-11). |
+| ~~`EntropicChangeCoefficient`~~ | `{Negative,Positive}ElectrodeEntropicChangeCoefficient` | `entropic_coefficient` — dU/dT. Published in domain-electrochemistry 0.39.0 as `TemperatureCoefficientOfTheOpenCircuitPotential` (altLabel `EntropicChangeCoefficient`), the electrode-level quantity that replaces the deprecated pair, and wired since 2026-10-12. From 2026-10-11 the key pointed at `TemperatureCoefficientOfTheOpenCircuitVoltage`, the cell-level quantity, and the curated entry paired that label with the `CoatingThickness` IRI. |
 
 ### 10b. Battery-general quantities missing entirely (domain-battery)
 
 | Wanted term | Parameter key | Notes |
 |---|---|---|
-| **`FirstCycleCoulombicEfficiency`** | `first_cycle_efficiency` | `CoulombicEfficiency` exists; the first-cycle (formation) form — the number every anode paper reports — does not. |
+| **`FirstCycleCoulombicEfficiency`** | `first_cycle_efficiency` | `CoulombicEfficiency` exists; the first-cycle (formation) form — the number every anode paper reports — does not. Check before asking: `FirstCycleCoulombicEfficiency` is an altLabel of `InitialCoulombicEfficiency` (`electrochemistry_469b9516_…`, already mapped for `initial_coulombic_efficiency`), in 0.37.2 as in 0.39.0, so the key may only need curating. |
 | **`TheoreticalSpecificCapacity`** | `theoretical_specific_capacity` | `TheoreticalCapacity` exists but is a capacity, not a specific capacity; the gravimetric form anchors every BotE estimate. |
 
 ### 10c. BPX application ontology (meaning fixed by the BPX standard, not physics)
 
 | Wanted term | Parameter key | Notes |
 |---|---|---|
-| **`TransportEfficiency`** | `transport_efficiency` | Until it exists, the key is typed by its value basis only. BPX defines it operationally as ε^p (porosity to the Bruggeman exponent). `BruggemanCoefficient` exists upstream but is the *exponent* — a different quantity. Because the definition is BPX's convention, the BPX application ontology is the honest home; a domain-battery `EffectiveTransportRatio` would also serve if preferred. |
+| ~~`TransportEfficiency`~~ | `transport_efficiency` | Published in domain-electrochemistry 0.39.0 (altLabel `InverseMacMullinNumber`): the ratio of an effective transport coefficient in a porous medium to its bulk value, with the Bruggeman form (porosity to the Bruggeman coefficient) in a comment and `BruggemanCoefficient` kept as the exponent. It landed in the domain ontology, defined without reference to BPX, rather than in the BPX application ontology this row proposed. Wired since 2026-10-12. |
 | *(optional)* **`InitialConcentration`** | `initial_concentration` | An initial condition of the simulation (BPX ≥ 1.0 State family: initial temperature, initial SOC, initial concentrations), not a property of any material. Model-state quantities belong with the model standard. Interim since 2026-10-11: wired to the published `InitialChargeCarrierConcentrationInElectrolyte`, since the key is always the electrolyte's salt concentration (the parameter vocabulary scopes it to electrolyte and state). |
 | **`OCPHysteresisDecayConstant`** | `ocp_hysteresis_decay_constant` | BPX 1.x's 'OCP hysteresis decay constant': the dimensionless rate at which the hysteresis state of a single-state OCP hysteresis model moves between the delithiation and lithiation branches. A parameter of that model as BPX defines it, so the BPX application ontology is its home. Until it exists, the key is typed by its value basis only. |
 | *(optional)* BPX-normalized `ReactionRateConstant` subclass | `reaction_rate_constant` | BPX's rate constant carries mol·m⁻²·s⁻¹ — a normalization convention of the standard. The generic `ReactionRateConstant` elucidation is dimensionally uncommitted, so the interim curated mapping to it (wired 2026-09-20) is defensible; a BPX-scoped subclass would make the convention explicit. |
@@ -338,6 +338,28 @@ Still unmapped, with no upstream class: `cycle_life_c_rate`,
 `round_trip_energy_efficiency_50pct` (measurement qualifiers upstream does not name) and
 the two `nominal_continuous_*_current` keys from section 4.
 
+### domain-electrochemistry 0.38.0 / 0.39.0 (domain-battery 0.21.0)
+
+Adopted 2026-10-12. Every EMMO IRI in the curated maps, the static label tables, both records contexts, the generated labels file and the JSON-LD of the packaged examples was checked against the new import closure: each exists, and none is deprecated except `LithiumNickelManganeseOxideElectrode`, which was already deprecated in 0.37.2 (see the defects list).
+
+| Key | Was | Now |
+|---|---|---|
+| `ocp` | `OpenCircuitVoltage` (`electrochemistry_9c657fdc_…`) | `OpenCircuitPotential` (`electrochemistry_e272f229_…`) |
+| `entropic_coefficient` | the label `TemperatureCoefficientOfTheOpenCircuitVoltage` on the `CoatingThickness` IRI (`electrochemistry_3b938708_…`) | `TemperatureCoefficientOfTheOpenCircuitPotential` (`electrochemistry_9b44a651_…`) |
+| `solid_diffusivity` | `Diffusivity` (`electrochemistry_37b24a94_…`) | `GuestDiffusivity` (`electrochemistry_fed4582e_…`) |
+| `electrode_pair_count` | `NumberOfEntities` (`EMMO_41efdf5d_…`) | `NumberOfElectrodePairs` (`electrochemistry_f7a81b04_…`), a subclass of the former |
+| `transport_efficiency` | value basis only | `TransportEfficiency` (`electrochemistry_3605456a_…`) |
+
+0.39.0 makes `OpenCircuitVoltage` strictly the cell-level quantity, the voltage between the terminals at zero current (IEV 482-03-32), and adds `OpenCircuitPotential` for a single electrode against a reference. The `ocp` key is a half-cell potential of an electrode material (material scope in the parameter vocabulary, BPX `OCP [V]` per electrode), so it moves. No key BattINFO emits holds a cell-level open-circuit voltage today, so nothing emits `OpenCircuitVoltage` any more; the term stays in the v1 context with its cell-level IRI. OCP curves and expressions are `schema:PropertyValue` nodes with no EMMO class, as before; the new branch classes (`AnodicBranchOpenCircuitPotential`, `CathodicBranchOpenCircuitPotential`) are not used for them.
+
+The 28 polarity-qualified anchor quantities deprecated in 0.38.0 and the six corrected prefLabel spellings (`InitialThermodynamicTemperature`, `MinimumTemperature`, `MinimumConcentration`, `CarbonDioxideElectrode`, `LithiumNickelManganeseCobaltOxideLithiumManganeseOxideElectrode`, `PositiveElectrodeActivationEnergyOfReaction`) are used nowhere in BattINFO. `initial_temperature` stays on the generic `ThermodynamicTemperature`: the misspelling was one of the two reasons for that, the depth rule is the other, so the choice is open for the maintainer.
+
+The SI-accepted units 0.38.0 brings into the closure (it imports EMMO's `siacceptedunits` module) are the EMMO IRIs `unit_map.curated.json` already used: `AmpereHour`, `MilliAmpereHour`, `Watthour`, `KiloWatthour`, `MegaWattHour`, `MilliLitre`, `MolePerLitre`, `WattHourPerKilogram` and `WattHourPerLitre` were referenced before but declared in no module of the 0.37.2 closure, and are declared now. No unit IRI changed.
+
+`records.context.v1.json` gains the five new class terms. Two of its terms were wrong and were corrected in place (owner ruling 2026-10-13, `PRE_RELEASE_CORRECTIONS` in `scripts/gen_context.py`): `TemperatureCoefficientOfTheOpenCircuitVoltage` expanded to the `CoatingThickness` IRI, a mistake made when `entropic_coefficient` was wired on 2026-10-11, and now expands to `electrochemistry_3bb5ae23_…`; `degC` expanded to `EMMO_36a9bf69_…`, EMMO's class for the programming language C, and now expands to `emmo:DegreeCelsius`, the IRI EMMO 1.0.2 declares for the unit in `disciplines/units/siunits`.
+
+Every unit IRI BattINFO writes is now checked against the measurement-unit classes of the closure. Four are not units there and are allowed by name in `tests/test_mapping_governance.py`: `MilliAmpereHour` and `emmo:Percent` (both in the defects list), and `WeightPercent` and `VolumePercent`, which `unit_map.curated.json` gives the symbols `%` and `vol%` but which domain-electrochemistry declares as `PercentQuantity` classes, quantities rather than units. Whether those two symbols should move to UnitOne with rescaling, or wait for `emmo:Percent` to enter the closure, is open.
+
 ### Test-protocol method classes (chameo, via domain-electrochemistry 0.36.0)
 
 `record_to_jsonld` emits test-protocol records as of the vocabulary top-up, and types the
@@ -370,6 +392,8 @@ charging / discharging temperature limits, and the electrode chemistry classes
 Found while re-verifying every emitted IRI against the 0.20.2 / 0.37.2 / 0.15.0 / 1.0.2
 closure. None is caused by this repo; each is worked around locally.
 
+Rechecked against the 0.21.0 / 0.39.0 / 0.15.0 / 1.0.2 closure on 2026-10-12: every item below is still open except the `Postive` typo, which moved to the resolved list. Three were added in that pass and the next (`LithiumNickelManganeseOxideElectrode`, `MilliAmpereHour` and `Percent`).
+
 - **`Watthour` / `KiloWatthour` spelling.** EMMO's local names carry a lower-case "h"
   while the prefLabels read `WattHour` / `KiloWattHour`. `unit_map.curated.json` now
   follows the IRI and keeps the prefLabel as the label.
@@ -387,9 +411,9 @@ closure. None is caused by this repo; each is worked around locally.
 - **Duplicate `CapacityLoss`.** `electrochemistry_652b94f1_…` has it as prefLabel while
   `electrochemistry_e3d3d21c_…` (`CapacityFade`) carries it as an altLabel, so the string
   resolves to two classes. battinfo maps neither by key; the label is allowlisted only.
-- **`PostiveElectrodeActivationEnergyOfReaction` typo (domain-battery).** The prefLabel
-  is missing the first "i" in "Positive". Found during the 2026-09-20 parameter sweep;
-  fix alongside the polarity-free parents in section 10a.
+- **`LithiumNickelManganeseOxideElectrode` is deprecated with no replacement.** `electrochemistry_41ddf723_…` carries `owl:deprecated true` in 0.37.2 and 0.39.0 with no `dcterms:isReplacedBy` and no dated comment, while 0.37.2 un-deprecated its seven chemistry siblings as defined classes. battinfo emits it as the electrode node of `positive_electrode_basis: lnmo` (`entity_type_map.json`). Ask upstream to un-deprecate it like the siblings (it already has the `hasActiveMaterial some LithiumNickelManganeseOxide` restriction) or to name a replacement.
+- **`MilliAmpereHour` has no named superclass.** In EMMO 1.0.2 `disciplines/units/siacceptedunits`, `emmo:MilliAmpereHour` is defined by two restrictions only, while `AmpereHour` and `MilliAmpereHourPerGram` subclass their unit classes, so without a reasoner it does not classify as a `MeasurementUnit`. battinfo writes it for `mAh`, and the unit check allows it by name. Ask EMMO to give it the parents `AmpereHour` has (`ElectricChargeUnit`, `SIAcceptedDerivedUnit`).
+- **`Percent` is outside the import closure.** The records contexts map `%` to `emmo:Percent`, which EMMO 1.0.2 declares in `disciplines/units/specialunits`, a module the pinned chain does not import (domain-electrochemistry 0.38.0 added `siacceptedunits` for the hour and litre units, not this one). The curated unit map gives `%` the electrochemistry `WeightPercent` IRI for emitted quantities, so the context term (`CONTEXT_UNIT_SYMBOLS` in `jsonld.py`, frozen in v1) is the only place `emmo:Percent` appears.
 - **`NominalBatteryProperty` contradicts its own parent (red-team review, 2026-09-15).**
   `battery_fb9baf9b_680e_493e_a755_da9bb1fc9fae` is elucidated "a battery property
   defined by the manufacturer and determined under some specified conditions" - a
@@ -407,7 +431,7 @@ closure. None is caused by this repo; each is worked around locally.
   still emits `LR6` (the designation typing is correct); the false chemistry
   entailment is upstream's to fix.
 - **Five context terms resolve to IRIs outside the import closure.** The published
-  domain-battery 0.20.2 context maps `ChemicalMaterial`, `ElementalMaterial`,
+  domain-battery 0.20.2 context (unchanged in 0.21.0) maps `ChemicalMaterial`, `ElementalMaterial`,
   `ChemicallyDefinedMaterial`, `hasORCID` and `AngularWaveNumber` to
   `https://w3id.org/emmo#EMMO_{8a41ed1b…, a086af15…, a96e2152…, e117f976…, e4791212…}`,
   none of which is defined in EMMO 1.0.2 or in any imported module. Likely left over from
@@ -416,6 +440,7 @@ closure. None is caused by this repo; each is worked around locally.
 
 ### Resolved upstream
 
+- **`PostiveElectrodeActivationEnergyOfReaction` typo.** Corrected to `PositiveElectrodeActivationEnergyOfReaction` in domain-electrochemistry 0.38.0, with the old spelling kept as a `formerLabel`; the same release deprecated the class in favour of `ActivationEnergy`. battinfo never mapped it.
 - **`PrismaticBattery` local name used hyphens.** Fixed in domain-battery 0.20.2:
   upstream minted the underscore-named twin `battery_86c9ca80_de6f_417f_afdc_a7e52fa6322d`
   and deprecated the hyphenated original with `dcterms:isReplacedBy`

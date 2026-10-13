@@ -4,7 +4,7 @@
   "notes": [
     "Curated unit mappings promoted from decisions in interactive review.",
     "These entries are treated as authoritative for JSON->RDF conversion.",
-    "IRIs verified against EMMO 1.0.2, domain-battery 0.20.2, domain-electrochemistry 0.37.2 and domain-chemical-substance 0.15.0.",
+    "IRIs verified against EMMO 1.0.2, domain-battery 0.21.0, domain-electrochemistry 0.39.0 and domain-chemical-substance 0.15.0. From domain-electrochemistry 0.38.0 the closure imports EMMO's siacceptedunits module, so the hour- and litre-based units (AmpereHour, MilliAmpereHour, Watthour, KiloWatthour, MolePerLitre, WattHourPerKilogram, WattHourPerLitre, MilliLitre) are declared in it under the same EMMO IRIs this map already used.",
     "All candidates with confidence 1.0 promoted. MANUAL_UNIT_TYPES entries consolidated here.",
     "Wh/kg and Wh/L use EMMO IRIs (confirmed present). W/kg uses QUDT (not in EMMO core).",
     "Wh and kWh: EMMO spells the local names Watthour / KiloWatthour (lower-case h) while the prefLabels read WattHour / KiloWattHour; the IRIs follow EMMO, the labels follow the prefLabel.",
@@ -274,7 +274,7 @@
       "unit_pref_label": "WattPerLitre",
       "unit_label": "W/L",
       "confidence": 0.9,
-      "notes": "Power density; not in EMMO core, QUDT fallback (mirrors W/kg). QUDT code W-PER-L pending dereference verification."
+      "notes": "Power density, on the QUDT IRI. EMMO declares WattPerLitre in its siacceptedunits module, which the pinned closure imports from domain-electrochemistry 0.38.0 on, but the v1 records context already publishes the WattPerLitre term with this QUDT IRI, so the entry is unchanged; moving it is a maintainer decision. QUDT code W-PER-L pending dereference verification."
     },
     {
       "symbol": "%",
