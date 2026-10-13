@@ -21,6 +21,7 @@ Keep the Zenodo integration switched on for the repository. Its webhook archives
 ## Cutting a release
 
 1. On a branch `release/X.Y.Z`, set the version: `__version__` in `src/battinfo/__init__.py` (the build reads it from there), `owl:versionIRI` and `owl:versionInfo` in `battinfo.ttl`, `version` and `date-released` in `CITATION.cff`, the table in `SECURITY.md` and the pin in `tests/installed_smoke.py`. Then regenerate the files that embed it, at least `scripts/gen_reference_records.py` and `scripts/gen_web_examples.py`; AGENTS.md lists every generator.
+   Until the first PyPI release (0.8.0), the install lines point at GitHub: `README.md` (which also drops the PyPI badge), `QUICKSTART.md`, `docs/pages/getting-started.rst`, `docs/howto/read-registry-data.md` and `installSnippet` in `web/lib/examples.ts`, with `pypiLive: false` in `web/lib/site.ts`. The 0.8.0 release commit restores `pip install battinfo`, the badge and `pypiLive: true`.
 2. In `CHANGELOG.md`, move the `[Unreleased]` entries under `## [X.Y.Z] - <date>` and leave an empty `[Unreleased]` above.
 3. Remove what has warned for a full release (`_DEPRECATED_ALIASES` and `_LAZY_EXPORTS` in `src/battinfo/__init__.py`, policy in CONTRIBUTING.md). Deprecations added in this release keep their shims for one more.
 4. Run the checks listed in AGENTS.md, then build and check the distribution:
