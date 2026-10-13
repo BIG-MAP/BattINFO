@@ -149,7 +149,8 @@ src/battinfo/
 └── bundle_generated.py + bundle_adapter.py   EMMO-annotated schema layer (generated)
 ```
 
-Supporting cast: `_jsonio.py` (atomic JSON file I/O), `_record_index.py`
+Supporting cast: `_jsonio.py` (atomic JSON file I/O), `_fs_guard.py` (the
+one place that deletes folders, the checks it makes first, and the check on the paths a workspace manifest names), `_record_index.py`
 (the bulk-save id→path cache), `_deposit_files.py` (the data files of a
 Zenodo deposit: which locations it may read, names, URLs and checksums, what
 a deposit would leave out, and the check of its files before a publish),

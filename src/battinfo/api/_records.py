@@ -11,6 +11,8 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
+from battinfo._fs_guard import require_apart
+from battinfo._jsonio import read_json as _read_json
 from battinfo._jsonio import read_record_json as _load_json
 from battinfo._jsonio import write_json as _write_json
 from battinfo._record_index import active_record_cache, bulk_save_session
@@ -2168,6 +2170,31 @@ def save_test_spec(
     )
 
 
+def _previous_library_outputs(manifest_json: Path, output_dir: Path) -> list[Path]:
+    """The JSON-LD files the previous library build wrote into ``output_dir``, as its manifest lists them.
+
+    A listed file counts only when it is a ``.jsonld`` file directly inside
+    ``output_dir``. A manifest that is missing or unreadable lists nothing.
+    """
+    try:
+        previous = _read_json(manifest_json)
+    except (OSError, ValueError):
+        return []
+    entries = previous.get("entries") if isinstance(previous, dict) else None
+    if not isinstance(entries, list):
+        return []
+    folder = output_dir.resolve()
+    listed: list[Path] = []
+    for entry in entries:
+        value = entry.get("output_jsonld") if isinstance(entry, dict) else None
+        if not isinstance(value, str):
+            continue
+        path = Path(value)
+        if path.suffix == ".jsonld" and path.is_file() and path.resolve().parent == folder:
+            listed.append(path)
+    return listed
+
+
 def build_cell_spec_library_rdf(
     *,
     input_dir: PathLike = DEFAULT_LIBRARY_CELL_TYPES_DIR,
@@ -2177,7 +2204,14 @@ def build_cell_spec_library_rdf(
     glob: str = "*.json",
     clean_output: bool = False,
 ) -> dict[str, Any]:
-    """Validate reusable cell-spec specifications and build domain-battery JSON-LD artifacts."""
+    """Validate reusable cell-spec specifications and build domain-battery JSON-LD artifacts.
+
+    ``clean_output=True`` first deletes the JSON-LD files that the previous
+    build listed in ``manifest_json``, so the output of a specification that
+    has since been removed does not linger. It deletes nothing else, and it is
+    refused (``UnsafeDeleteError``, a ``ValueError``) when
+    ``output_jsonld_dir`` is, holds or lies inside ``input_dir``.
+    """
     input_dir_path = _as_path(input_dir)
     output_jsonld_dir_path = _as_path(output_jsonld_dir)
     aggregate_jsonld_path = _as_path(aggregate_jsonld)
@@ -2185,15 +2219,15 @@ def build_cell_spec_library_rdf(
 
     if not input_dir_path.exists():
         raise FileNotFoundError(f"input_dir does not exist: {input_dir_path}")
+    if clean_output:
+        require_apart(output_jsonld_dir_path, [input_dir_path], action="clean")
 
     output_jsonld_dir_path.mkdir(parents=True, exist_ok=True)
     aggregate_jsonld_path.parent.mkdir(parents=True, exist_ok=True)
     manifest_json_path.parent.mkdir(parents=True, exist_ok=True)
 
     if clean_output:
-        for path in sorted(output_jsonld_dir_path.glob("*.jsonld")):
-            path.unlink()
-        for path in sorted(output_jsonld_dir_path.glob("*.json")):
+        for path in _previous_library_outputs(manifest_json_path, output_jsonld_dir_path):
             path.unlink()
 
     descriptor_paths = sorted(

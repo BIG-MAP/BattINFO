@@ -7,7 +7,7 @@ A registry is an index. It stores records and the links between them, and each d
 Listing and looking up records needs only the core install. Loading files and building the catalog return pandas objects:
 
 ```bash
-pip install "battinfo[tabular]"
+pip install "battinfo[tabular] @ git+https://github.com/BIG-MAP/BattINFO.git"
 ```
 
 ## Start from the catalog
@@ -160,7 +160,7 @@ battinfo.save_dataset(dataset, source_root="lab/.battinfo/records", validation_p
 
 `save_dataset` checks that the cell and test the dataset is about are known in the workspace. A cell the workspace has looked up in the registry counts, for example one given by IRI to `ws.add("test", cell=...)` when you make the new test. A cell or test that exists only in the registry and was never looked up does not, so for a version that keeps its published links, pass `resolve_references=False`.
 
-Once `ws.save()` has run in a session, `ws.submit()` sends only what that save wrote, even with `submit_all=True`, and a dataset written by `save_dataset` is not part of it. Submit the dataset from a new workspace object:
+Once `ws.save()` or `ws.add("equipment")` has written records in a session, `ws.submit()` sends only those, even with `submit_all=True`, and a dataset written by `save_dataset` is not one of them. Submit the dataset from a new workspace object:
 
 <!-- doc-snippet: skip -->
 ```python

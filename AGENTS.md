@@ -21,6 +21,7 @@ These are the commands CI runs (`.github/workflows/ci.yml` and `docs.yml`). Run 
 
 ```bash
 uv run ruff check src tests scripts .tools
+uv run ruff format --check src tests scripts .tools
 uv run mypy
 uv run pytest -q tests --cov=battinfo
 uv run python .tools/quality/lint_identifier_policy.py
@@ -77,7 +78,8 @@ The JSON Schema is the save-time contract and the pydantic models in `src/battin
 - `ws.save()` validates under the strict policy by default and writes each record to `<root>/.battinfo/records/<folder>/`.
 - Set funding, ORCID and licence once with `ws.project(...)`, `ws.contributor(...)` and `ws.license(...)`; `ws.save()` stamps them onto every record.
 - `ws.preview_jsonld()` writes the JSON-LD graph a Zenodo deposit would carry and prints the publication checks. `ws.zenodo()` makes the deposit and leaves a draft unless you pass `publish=True`.
-- `ws.submit()` sends what the last `ws.save()` wrote to the registry review queue. `ws.publish()` does save and submit in one call, with a Zenodo deposit first when `zenodo=True`.
+- `ws.submit()` sends this session's records to the registry review queue: what the last `ws.save()` wrote, and the equipment records `ws.add("equipment")` saved when it was called. `ws.publish()` does save and submit in one call, with a Zenodo deposit first when `zenodo=True`.
+- `ws.login(api_key=...)` stores the registry key in the workspace's own `.battinfo/credentials`. `ws.credentials_status()` and `ws.has_credential(name)` say which credentials a workspace has and where each comes from, without the values.
 - `ws.import_(...)` rebuilds a workspace from a published `battinfo.json`, and `ws.export(fmt)` writes the saved records as RDF.
 
 `help(ws.add)` and `ws.commands()` list the rest. A minimal offline session:
@@ -97,7 +99,9 @@ ws.save()            # lab/.battinfo/records/<folder>/*.json
 ws.preview_jsonld()  # lab/battinfo.preview.jsonld, then the publication checks
 ```
 
-The default `registry_url` points at the production registry; pass `registry_url=None` whenever a session must stay offline.
+Left out, `registry_url` is `BATTINFO_REGISTRY_URL` from the environment, then from the workspace's `.battinfo/credentials`, else the production registry, looked up each time it is used; pass `registry_url=None` whenever a session must stay offline.
+
+Credentials belong to their workspace. Each one is looked up in one order (an argument passed to the call, a value `ws.login()` set in this session, an environment variable, the workspace's `.battinfo/credentials`, then the default) by `AuthoringWorkspace._credential()`, and nothing writes them to `os.environ`. New code that needs a credential goes through that method, and code that checks for one asks `ws.has_credential(name)`, not `os.environ`. A file that holds secrets is written with `battinfo._jsonio.write_private_text`, which writes it atomically and readable by its owner only.
 
 A few record types are written outside the workspace. Separators, current collectors, electrolytes and housings go through `battinfo.api.create_component_spec` and `save_component_spec` (and the `*_component_instance` pair), as in `docs/howto/build-a-cell-from-components.md`. Organizations have `battinfo.api.create_organization` and `save_organization`. Datasets that describe files already archived elsewhere, collection members among them, use the `battinfo.Dataset` model with `battinfo.save_dataset`.
 
@@ -160,11 +164,13 @@ The record-type pages under `docs/records/` run each authoring snippet against t
 
 Transient output goes under `.battinfo/` (gitignored) or a test's temporary directory. Do not edit `src/battinfo/data/` by hand except to copy in a changed schema or mapping table, and edit `examples/` only when the task is about the examples themselves. Keep work logs and planning notes out of commits; `WORK_LOG.md` and `CLAUDE.md` are already in `.gitignore`.
 
+Package code deletes folders through `battinfo._fs_guard`: `remove_tree` for a folder a caller named or read from a manifest, passing the operation's inputs, and `remove_temp_tree` for a temporary folder the code made itself. Code that deletes files in a folder but not the folder checks it with `require_apart` against what it reads. An output root BattINFO creates gets the marker from `write_marker`; a new kind of entry at the top of such a root, or a new file name in one of its record or report folders, also needs a place in the layouts in `_fs_guard.py`, which recognise roots made before the marker. `tests/test_fs_guard.py` fails if any other module calls `shutil.rmtree`, or if a root this version builds is not recognised without its marker. A path field in a workspace manifest model goes through `check_relative_path` from the same module, and a file named after a record goes through `entities.save_entity_path`, which takes only a dashed uid (`is_dashed_uid`).
+
 ## Key source files
 
 | Path | What it holds |
 |---|---|
-| `src/battinfo/entities.py` | the entity-kind registry and the uid minting primitive |
+| `src/battinfo/entities.py` | the entity-kind registry, the uid minting primitive and the uid grammar |
 | `src/battinfo/ws.py` | `battinfo.workspace()` and `AuthoringWorkspace` |
 | `src/battinfo/bundle.py` | the record models and `SCHEMA_VERSION` |
 | `src/battinfo/api/` | create, save, query, template and resolver-publish functions |

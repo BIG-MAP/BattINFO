@@ -8,8 +8,25 @@ from datetime import date
 from pathlib import Path
 from typing import Any, Mapping
 
-from pydantic import AliasChoices, BaseModel, ConfigDict, Field, ValidationError, model_validator
+from pydantic import (
+    AliasChoices,
+    BaseModel,
+    ConfigDict,
+    Field,
+    ValidationError,
+    ValidationInfo,
+    field_validator,
+    model_validator,
+)
 
+from battinfo._fs_guard import (
+    check_relative_path,
+    is_empty_or_missing,
+    is_within,
+    remove_tree,
+    require_within,
+    write_marker,
+)
 from battinfo._jsonio import read_json as _read_json
 from battinfo._jsonio import write_json as _write_json
 from battinfo._util import _as_path, _now_iso, _sha256
@@ -89,6 +106,11 @@ class WorkspaceResourcePaths(BaseModel):
     test: str = DEFAULT_TEST_RESOURCE_PATH
     dataset: str = DEFAULT_DATASET_RESOURCE_PATH
 
+    @field_validator("cell", "test", "dataset")
+    @classmethod
+    def _inside_the_workspace(cls, value: str, info: ValidationInfo) -> str:
+        return check_relative_path(value, field=f"resources.{info.field_name}")
+
 
 class RegistryTarget(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -145,6 +167,11 @@ class WorkspaceManifest(BaseModel):
     registry: RegistryTarget
     release: ReleaseInfo = Field(default_factory=ReleaseInfo)
     comment: list[str] = Field(default_factory=list)
+
+    @field_validator("artifacts_dir", "dist_dir")
+    @classmethod
+    def _inside_the_workspace(cls, value: str, info: ValidationInfo) -> str:
+        return check_relative_path(value, field=str(info.field_name))
 
 
 class SubmissionRelatedResource(BaseModel):
@@ -387,6 +414,18 @@ class LocalWorkspace:
         self.root = _as_path(root)
         self.manifest_path = self.root / WORKSPACE_FILENAME
 
+    def _make_root(self) -> None:
+        """Create the root folder, marking it when this call creates it.
+
+        The marker lets a later ``clone(..., force=True)`` or an export with
+        ``force=True`` delete the folder. A folder that already held files is
+        not marked.
+        """
+        creates_root = is_empty_or_missing(self.root)
+        self.root.mkdir(parents=True, exist_ok=True)
+        if creates_root:
+            write_marker(self.root)
+
     @classmethod
     def init(cls, root: PathLike, *, force: bool = False) -> "LocalWorkspace":
         workspace = cls(root)
@@ -401,7 +440,7 @@ class LocalWorkspace:
         if self.root.exists() and any(self.root.iterdir()) and not force:
             raise ValueError(f"workspace directory is not empty: {self.root}")
 
-        self.root.mkdir(parents=True, exist_ok=True)
+        self._make_root()
         manifest = WorkspaceManifest(
             workspace_id="digibatt-cr2032-release",
             title="DigiBatt CR2032 baseline release",
@@ -529,17 +568,35 @@ class LocalWorkspace:
         return target
 
     def clone(self, root: PathLike, *, force: bool = False, include_dist: bool = False) -> "LocalWorkspace":
+        """Copy this workspace to ``root`` and return the copy.
+
+        ``root`` may not be this workspace, hold it or lie inside it. A ``root``
+        that is not empty is refused unless ``force=True``, which deletes it
+        first; that delete is refused for a folder BattINFO did not create.
+        Without ``include_dist`` the copy leaves out the manifest's
+        ``dist_dir``, which has to lie inside the workspace.
+        """
         target = _as_path(root)
+        if is_within(target, self.root) or is_within(self.root, target):
+            raise ValueError(
+                f"Cannot clone {self.root} into {target}: one of the two folders holds the other. "
+                "Choose a folder outside the workspace."
+            )
+        dist_dir = None
+        if not include_dist:
+            manifest = WorkspaceManifest.model_validate(_read_json(self.manifest_path))
+            dist_dir = target / manifest.dist_dir
+            require_within(dist_dir, target)
         if target.exists():
             if any(target.iterdir()) and not force:
                 raise ValueError(f"workspace directory is not empty: {target}")
             if force:
-                shutil.rmtree(target)
+                remove_tree(target, inputs=(self.root,))
         shutil.copytree(self.root, target)
-        cloned = LocalWorkspace(target)
-        if not include_dist and cloned.dist_dir.exists():
-            shutil.rmtree(cloned.dist_dir)
-        return cloned
+        write_marker(target)
+        if dist_dir is not None:
+            remove_tree(dist_dir, within=target)
+        return LocalWorkspace(target)
 
     def capture(
         self,
@@ -652,6 +709,7 @@ class LocalWorkspace:
         resolved_release = _coerce_release_info(release)
         resolved_zenodo = _coerce_zenodo_metadata(zenodo)
         resolved_comment = list(comment or [])
+        self._make_root()
         artifact_relpath, access_url, download_url = self._resolve_distribution(
             dataset,
             capture_artifact=capture_artifact,
@@ -731,7 +789,6 @@ class LocalWorkspace:
                 comment=list(dataset.comment),
             )
         )
-        self.root.mkdir(parents=True, exist_ok=True)
         _write_json(self.manifest_path, manifest.model_dump(mode="json", exclude_none=True))
         _write_json(self.root / manifest.resources.cell, cell_doc.model_dump(mode="json", exclude_none=True))
         _write_json(self.root / manifest.resources.test, test_doc.model_dump(mode="json", exclude_none=True))
@@ -1181,8 +1238,9 @@ class LocalWorkspace:
             target_path = artifact_root / source_path.name
             if source_path.resolve() != target_path.resolve():
                 if source_path.is_dir():
-                    if target_path.exists():
-                        shutil.rmtree(target_path)
+                    # The folder name comes from the record, so the old copy
+                    # must lie inside artifacts/ and apart from the source.
+                    remove_tree(target_path, within=artifact_root, inputs=(source_path,))
                     shutil.copytree(source_path, target_path)
                 else:
                     shutil.copy2(source_path, target_path)
@@ -1577,11 +1635,12 @@ class LocalWorkspace:
                 generated_at=_now_iso(),
             ),
             release=dataset_doc.dataset.release.model_dump(mode="json", exclude_none=True),
+            # No local path: the package goes to the registry, and the
+            # workspace folder (with the user name in it) stays here.
             workspace={
                 "workspace_id": manifest.workspace_id,
                 "title": manifest.title,
                 "description": manifest.description,
-                "root": str(self.root),
                 "registry": manifest.registry.model_dump(mode="json"),
             },
             resources=[

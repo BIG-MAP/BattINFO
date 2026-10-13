@@ -5,11 +5,13 @@ import os
 import shutil
 import tempfile
 import time
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator
 
+from battinfo._fs_guard import check_relative_path, is_within, remove_temp_tree, remove_tree, require_within
 from battinfo._jsonio import read_json as _read_json
 from battinfo._jsonio import write_json as _write_json
 from battinfo._util import _as_path, _now_iso, _sha256, file_uri_to_path, is_file_uri
@@ -97,15 +99,16 @@ def _swap_dir(staging: Path, target: Path) -> None:
     Renames the existing ``target`` aside, moves ``staging`` into place, then
     removes the old copy. Both moves are atomic renames; on failure the original
     ``target`` is restored. This never destroys a live directory before its
-    replacement is durably in place (cf. ``shutil.rmtree`` then re-write, which
-    loses the whole group if interrupted in between). Each rename waits out a
-    file that another process holds open for a moment (``_replace_dir``).
+    replacement is durably in place (deleting first and then writing loses the
+    whole group if interrupted in between). Each rename waits out a file that
+    another process holds open for a moment (``_replace_dir``). The old copy is
+    named after the staging folder, so it is this call's own temporary folder.
     """
     backup: Path | None = None
     if target.exists():
         backup = target.with_name(staging.name + ".bak")
         if backup.exists():
-            shutil.rmtree(backup, ignore_errors=True)
+            remove_temp_tree(backup)
         _replace_dir(target, backup)
     try:
         _replace_dir(staging, target)
@@ -114,7 +117,7 @@ def _swap_dir(staging: Path, target: Path) -> None:
             _replace_dir(backup, target)  # roll back to the original
         raise
     if backup is not None:
-        shutil.rmtree(backup, ignore_errors=True)
+        remove_temp_tree(backup)
 
 
 def _guess_media_type(path: str | None) -> str | None:
@@ -147,12 +150,24 @@ class WorkspacePaths(BaseModel):
     tests: str = "records/tests"
     datasets: str = "records/dataset"
 
+    @field_validator("cell_specs", "cells", "tests", "datasets")
+    @classmethod
+    def _inside_the_workspace(cls, value: str, info: ValidationInfo) -> str:
+        return check_relative_path(value, field=f"paths.{info.field_name}")
+
 
 class WorkspaceArtifact(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     dataset_id: str
+    # Read back as the dataset's file, which the next save copies into the
+    # workspace, so it must lie inside the workspace too.
     path: str
+
+    @field_validator("path")
+    @classmethod
+    def _inside_the_workspace(cls, value: str) -> str:
+        return check_relative_path(value, field="dataset_artifacts path")
 
 
 class WorkspaceStateManifest(BaseModel):
@@ -172,6 +187,11 @@ class WorkspaceStateManifest(BaseModel):
     dist_dir: str = "dist"
     dataset_artifacts: list[WorkspaceArtifact] = Field(default_factory=list)
 
+    @field_validator("artifacts_dir", "dist_dir")
+    @classmethod
+    def _inside_the_workspace(cls, value: str, info: ValidationInfo) -> str:
+        return check_relative_path(value, field=str(info.field_name))
+
 
 class WorkspaceStateStore:
     """Internal persistence and bundle helper for `Workspace`."""
@@ -188,6 +208,7 @@ class WorkspaceStateStore:
         version: str | None = None,
         comment: list[str] | None = None,
         clean: bool = False,
+        inputs: Sequence[PathLike | None] = (),
     ) -> None:
         self.workspace = Workspace(
             root=root,
@@ -199,6 +220,7 @@ class WorkspaceStateStore:
             version=version,
             comment=comment,
             clean=clean,
+            inputs=inputs,
         )
         self.name = name
         self.title = title
@@ -466,11 +488,12 @@ class WorkspaceStateStore:
                 generated_at=_now_iso(),
             ),
             release={"version": manifest.version} if manifest.version is not None else {},
+            # No local path: the package goes to the registry, and the
+            # workspace folder (with the user name in it) stays here.
             workspace={
                 "workspace_id": manifest.workspace_id,
                 "title": manifest.title,
                 "description": manifest.description,
-                "root": str(self.root),
                 "registry": {
                     key: value
                     for key, value in {"tenant": manifest.tenant, "workspace": manifest.workspace_id}.items()
@@ -619,9 +642,13 @@ class WorkspaceStateStore:
             "datasets": self.root / manifest.paths.datasets,
         }
         # Stage each record group into a fresh sibling directory and atomically
-        # swap it into place. We never rmtree a live record directory *before* its
+        # swap it into place. We never delete a live record directory *before* its
         # replacement is durably written — a crash/Ctrl-C mid-write would otherwise
-        # wipe the entire group with no recovery.
+        # wipe the entire group with no recovery. The swap replaces each group
+        # folder, and their paths come from the manifest, so each must lie inside
+        # the workspace.
+        for root in roots.values():
+            require_within(root, self.root)
         staging_dirs: dict[str, Path] = {}
         try:
             for key, root in roots.items():
@@ -638,14 +665,15 @@ class WorkspaceStateStore:
             # Swapped staging dirs are already consumed (renamed); un-swapped ones
             # are cleaned up here so an error path never leaks a staging directory.
             for staging in staging_dirs.values():
-                shutil.rmtree(staging, ignore_errors=True)
+                remove_temp_tree(staging)
 
         dataset_by_id = {dataset.id: dataset for dataset in self.datasets if dataset.id is not None}
         artifacts_root = self.root / manifest.artifacts_dir / "dataset"
         source_paths, staged_roots = self._stage_dataset_sources(dataset_by_id, artifacts_root)
         try:
-            if artifacts_root.exists():
-                shutil.rmtree(artifacts_root)
+            # Sources inside artifacts_root were staged out above; one that holds
+            # it is refused rather than deleted.
+            remove_tree(artifacts_root, within=self.root, inputs=source_paths.values())
             artifacts_root.mkdir(parents=True, exist_ok=True)
 
             dataset_artifacts: list[WorkspaceArtifact] = []
@@ -675,7 +703,7 @@ class WorkspaceStateStore:
                     artifact_map[dataset_id] = None
         finally:
             for staged_root in staged_roots:
-                shutil.rmtree(staged_root, ignore_errors=True)
+                remove_temp_tree(staged_root)
 
         manifest.dataset_artifacts = dataset_artifacts
         _write_json(self.manifest_path, manifest.model_dump(mode="json", exclude_none=True))
@@ -693,9 +721,7 @@ class WorkspaceStateStore:
             if source_path is None or not source_path.exists():
                 staged[dataset_id] = None
                 continue
-            try:
-                source_path.relative_to(artifacts_root)
-            except ValueError:
+            if not is_within(source_path, artifacts_root):
                 staged[dataset_id] = source_path
                 continue
 
@@ -762,7 +788,7 @@ class WorkspaceStateStore:
                 _swap_dir(staging_dirs[key], path)
         finally:
             for staging in staging_dirs.values():
-                shutil.rmtree(staging, ignore_errors=True)
+                remove_temp_tree(staging)
 
     @staticmethod
     def _load_records(directory: Path) -> list[dict[str, Any]]:

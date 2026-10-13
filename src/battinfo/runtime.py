@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import os
-import shutil
 from pathlib import Path
 from typing import Any
 
+from battinfo._fs_guard import remove_tree
 from battinfo._util import _as_path
 
 PathLike = str | Path
@@ -105,7 +105,7 @@ def recover_notebook_runtime(
     local_runtime_root = root / ".jupyter-runtime-test"
     if clear_local_runtime and local_runtime_root.exists():
         if local_runtime_root.is_dir():
-            shutil.rmtree(local_runtime_root)
+            remove_tree(local_runtime_root, within=root)
         else:
             local_runtime_root.unlink()
         cleared_runtime_paths.append(str(local_runtime_root))

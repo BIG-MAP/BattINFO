@@ -6,7 +6,9 @@ from typing import Any
 
 import typer
 
+from battinfo._fs_guard import check_remove
 from battinfo._jsonio import write_json as _write_json_file
+from battinfo._publish import default_publish_root
 from battinfo._publish import publish as publish_object
 from battinfo.api import (
     build_cell_spec_library_rdf as api_build_cell_spec_library_rdf,
@@ -538,7 +540,11 @@ def demo_setup(
     registry: str = typer.Option("digibatt/hello-world", help="Registry tenant/workspace slug."),
     publisher_id: str = typer.Option("demo-lab", help="Publisher id used for the generated submission package."),
     version: str = typer.Option("1.0.0", help="Release version and submission source_version."),
-    force: bool = typer.Option(False, "--force", help="Replace the existing demo root before regenerating it."),
+    force: bool = typer.Option(
+        False,
+        "--force",
+        help="Delete ROOT/workspace and ROOT/release and build them again. Only folders BattINFO created are deleted.",
+    ),
     output_format: str = typer.Option("json", "--format", help="Output format: json|text."),
 ) -> None:
     """Author a BattINFO demo environment from Python objects and write a submission package."""
@@ -585,7 +591,11 @@ def demo_verify(
     poll_interval_sec: float = typer.Option(
         1.0, "--poll-interval-sec", help="Polling interval while waiting for responses."
     ),
-    force: bool = typer.Option(False, "--force", help="Replace the existing demo root before regenerating it."),
+    force: bool = typer.Option(
+        False,
+        "--force",
+        help="Delete ROOT/workspace and ROOT/release and build them again. Only folders BattINFO created are deleted.",
+    ),
     allow_local_files: bool = typer.Option(
         False,
         "--allow-local-files",
@@ -734,7 +744,11 @@ def ingest_build(
     artifact_base_url: str | None = typer.Option(
         None, "--artifact-base-url", help="Optional public base URL for packaged artifact files."
     ),
-    clean: bool = typer.Option(False, "--force", help="Replace the existing workspace root before regenerating it."),
+    clean: bool = typer.Option(
+        False,
+        "--force",
+        help="Delete the workspace root and build it again. Only a folder BattINFO created is deleted, never one that holds the evidence files.",
+    ),
     bundle: bool = typer.Option(
         True, "--bundle/--no-bundle", help="Also build the submission package after authoring the workspace."
     ),
@@ -806,7 +820,11 @@ def ingest_publish(
     platform_url: str | None = typer.Option(None, "--platform-url", help="Optional Battery Genome base URL."),
     api_key_header: str = typer.Option("X-Battinfo-API-Key", "--api-key-header", help="Registry API key header."),
     timeout_sec: float = typer.Option(300.0, "--timeout-sec", help="Registry submission timeout in seconds."),
-    clean: bool = typer.Option(False, "--force", help="Replace the existing workspace root before regenerating it."),
+    clean: bool = typer.Option(
+        False,
+        "--force",
+        help="Delete the workspace root and build it again. Only a folder BattINFO created is deleted, never one that holds the evidence files.",
+    ),
     validation_policy: str = typer.Option("strict", "--validation-policy", help="Validation policy: strict|set|quick."),
     process_artifacts: bool = typer.Option(
         False,
@@ -1465,7 +1483,9 @@ def library_save_cell_spec(
         help="Path for the generated library manifest JSON.",
     ),
     clean_output: bool = typer.Option(
-        False, "--clean-output", help="Clean existing JSON-LD outputs before rebuilding."
+        False,
+        "--clean-output",
+        help="Before rebuilding with --build-rdf, delete the JSON-LD files the previous build listed in its manifest.",
     ),
     dry_run: bool = typer.Option(False, "--dry-run", help="Preview save without writing files."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
@@ -1554,7 +1574,11 @@ def library_build_rdf(
         help="Path for the generated library manifest JSON.",
     ),
     glob: str = typer.Option("*.json", help="File glob used to select library cell specifications."),
-    clean_output: bool = typer.Option(False, "--clean-output", help="Remove existing JSON-LD outputs before writing."),
+    clean_output: bool = typer.Option(
+        False,
+        "--clean-output",
+        help="Delete the JSON-LD files the previous build listed in its manifest before rebuilding.",
+    ),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
     """Build domain-battery JSON-LD artifacts for the reusable cell-spec library."""
@@ -2822,7 +2846,11 @@ def publish_cell_spec(
         "local", help="Publish destination: local|registry|battery-genome|staging|production."
     ),
     root: Path | None = typer.Option(None, "--root", help="Optional workspace root for generated artifacts."),
-    force: bool = typer.Option(False, "--force", help="Replace an existing generated workspace root."),
+    force: bool = typer.Option(
+        False,
+        "--force",
+        help="Delete the workspace root and build it again. Only a folder BattINFO created is deleted, never one that holds the --input file.",
+    ),
     validation_policy: str = typer.Option(
         "strict", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."
     ),
@@ -2860,6 +2888,9 @@ def publish_cell_spec(
                 source={"type": source_type, "file": source_file},
             )
 
+        if force and input_path is not None:
+            # Refuse before publishing when --force would delete the input file.
+            check_remove(root if root is not None else default_publish_root(cell_spec), inputs=[input_path])
         result = publish_object(
             cell_spec,
             destination=destination,
@@ -3105,6 +3136,14 @@ def registry_bootstrap(
     import urllib.error
     import urllib.request
 
+    from battinfo._jsonio import write_private_text
+
+    # Checked before the registry is asked: a new publisher's key is returned
+    # once. "table", the only plain-text value accepted before, still works.
+    fmt = output_format.lower().strip()
+    if fmt not in {"text", "table", "json"}:
+        raise typer.BadParameter("--format must be 'text' or 'json'.")
+
     resolved_url = registry_url or os.environ.get("BATTINFO_REGISTRY_URL", "").strip()
     if not resolved_url:
         typer.echo("Registry URL is required. Pass --registry-url or set BATTINFO_REGISTRY_URL.")
@@ -3176,10 +3215,9 @@ def registry_bootstrap(
     api_key: str | None = body.get("api_key") if s in (200, 201) else None
 
     if api_key and resolved_key_file:
-        resolved_key_file.write_text(api_key, encoding="utf-8")
+        write_private_text(resolved_key_file, api_key)
         results["api_key_file"] = str(resolved_key_file)
 
-    fmt = _check_output_format(output_format)
     if fmt == "json":
         _emit_json({**results, "api_key": api_key})
         return
@@ -3327,7 +3365,11 @@ def _process_single_cell(
 @dataset_app.command("process")
 def dataset_process(
     folder: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True),
-    clean: bool = typer.Option(False, "--force", help="Rebuild from scratch."),
+    clean: bool = typer.Option(
+        False,
+        "--force",
+        help="Delete the generated workspace (.battinfo/ingest/ in the current folder) and build it again. Only a folder BattINFO created is deleted.",
+    ),
     validation_policy: str = typer.Option("strict", "--validation-policy", help="strict|set|quick"),
     json_output: bool = typer.Option(False, "--json", help="Emit machine-readable JSON to stdout."),
 ) -> None:
@@ -3815,9 +3857,10 @@ def batch_package(
     After packaging, upload with:
       battinfo batch upload <staging-dir> --token $ZENODO_TOKEN --sandbox
     """
-    from battinfo.config import load_user_config, resolve_creators
+    from battinfo.config import resolve_creators
     from battinfo.contribution import package_batch
 
+    cfg = _user_config_or_exit(json_output=json_output)
     creators = resolve_creators(creator)
     if not creators:
         typer.echo(
@@ -3827,7 +3870,6 @@ def batch_package(
         )
         raise typer.Exit(code=1)
 
-    cfg = load_user_config()
     effective_community = None if no_community else (community or cfg.get("community", "battinfo-reference"))
 
     try:
@@ -3918,9 +3960,10 @@ def batch_upload(
     The deposit URL is printed at the end -- open it to review and publish.
     """
 
-    from battinfo.config import load_user_config, resolve_creators, resolve_zenodo_token
+    from battinfo.config import resolve_creators, resolve_zenodo_token
     from battinfo.zenodo import upload_zenodo_package
 
+    cfg = _user_config_or_exit(json_output=json_output)
     resolved_token = resolve_zenodo_token(token)
     if not resolved_token:
         typer.echo(
@@ -3939,7 +3982,6 @@ def batch_upload(
         )
         raise typer.Exit(code=1)
 
-    cfg = load_user_config()
     effective_community = None if no_community else (community or cfg.get("community", "battinfo-reference"))
 
     if not sandbox:
@@ -4059,11 +4101,11 @@ def push(
     """
     from rich.console import Console
 
-    from battinfo.config import load_user_config, resolve_creators, resolve_zenodo_token
+    from battinfo.config import resolve_creators, resolve_zenodo_token
     from battinfo.contribution import BATCH_MANIFEST, _group_files_by_cell, push_batch
 
     console = Console(highlight=False)
-    cfg = load_user_config()
+    cfg = _user_config_or_exit(json_output=json_output)
 
     def _err(msg: str) -> None:
         if json_output:
@@ -4184,6 +4226,24 @@ def push(
 # ── Config commands ────────────────────────────────────────────────────────────
 
 
+def _user_config_or_exit(*, json_output: bool = False) -> dict[str, Any]:
+    """The values in ~/.battinfo/config.yaml, or exit with an error naming it when it cannot be read.
+
+    For the commands that take defaults (creator, Zenodo token, community) from
+    the file: without them they would build or deposit the wrong package.
+    """
+    from battinfo.config import UserConfigError, load_user_config
+
+    try:
+        return load_user_config(strict=True)
+    except UserConfigError as exc:
+        if json_output:
+            typer.echo(json.dumps({"ok": False, "error": str(exc)}))
+        else:
+            typer.echo(f"Error: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
+
+
 @config_app.command("set")
 def config_set(
     key: str = typer.Argument(..., help="Config key: creator, license, community, zenodo_token."),
@@ -4197,31 +4257,48 @@ def config_set(
       battinfo config set creator "Clark, Simon; SINTEF | Smith, Jane; NTNU"
       battinfo config set license CC-BY-4.0
       battinfo config set community battinfo-reference
+
+    A secret, such as zenodo_token, is echoed with only its last four
+    characters shown, or fully hidden when it is shorter than 12 characters.
+    A config file that is not valid YAML is left as it is: fix it by hand first.
     """
-    from battinfo.config import USER_CONFIG_PATH, set_user_config_value
+    from battinfo.config import USER_CONFIG_PATH, _is_secret_key, _masked, set_user_config_value
 
     try:
         set_user_config_value(key, value)
-        typer.echo(f"Set {key} = {value!r}  (saved to {USER_CONFIG_PATH})")
     except ValueError as exc:
         typer.echo(f"Error: {exc}", err=True)
         raise typer.Exit(code=1) from exc
+    except OSError as exc:
+        typer.echo(f"Error: could not write {USER_CONFIG_PATH}: {exc.strerror or exc}", err=True)
+        raise typer.Exit(code=1) from exc
+    shown = _masked(value) if _is_secret_key(key) else repr(value)
+    typer.echo(f"Set {key} = {shown}  (saved to {USER_CONFIG_PATH})")
 
 
 @config_app.command("show")
 def config_show() -> None:
-    """Show current user preferences."""
-    from battinfo.config import USER_CONFIG_PATH, load_user_config
+    """Show current user preferences.
 
-    cfg = load_user_config()
-    if not cfg:
+    Secrets, such as zenodo_token, show only their last four characters, or
+    nothing when they are shorter than 12 characters.
+    """
+    from battinfo.config import USER_CONFIG_PATH, _shown_value
+
+    if not USER_CONFIG_PATH.exists():
         typer.echo(f"No config file at {USER_CONFIG_PATH}")
         typer.echo('Set defaults with: battinfo config set creator "Family, Given; Institution"')
         return
+    cfg = _user_config_or_exit()
     typer.echo(f"Config file: {USER_CONFIG_PATH}")
     typer.echo()
-    for k, v in sorted(cfg.items()):
-        typer.echo(f"  {k}: {v}")
+    if not cfg:
+        typer.echo("  (no values set)")
+        typer.echo()
+        typer.echo('Set defaults with: battinfo config set creator "Family, Given; Institution"')
+        return
+    for k, v in sorted(cfg.items(), key=lambda item: str(item[0])):
+        typer.echo(f"  {k}: {_shown_value(k, v)}")
 
 
 # ---------------------------------------------------------------------------

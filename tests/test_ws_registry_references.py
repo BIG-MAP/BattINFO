@@ -237,6 +237,50 @@ def test_a_reference_the_registry_does_not_hold_stays_an_error(
     assert "Referenced cell not found" in summary["tests"][0]["error"]
 
 
+# ── A copy is named after a uid, never after what else an IRI ends in ────────
+#
+# The copy's file name ends in the uid that ends the record's IRI. A registry
+# that returned an IRI ending in "..\..\victim\planted" made Windows write the
+# copy outside the workspace.
+
+HOSTILE_TAIL = "\\".join([".."] * 6 + ["victim", "planted"])
+
+
+def _files_outside(root: Path, top: Path) -> list[Path]:
+    return [path for path in top.rglob("*") if path.is_file() and not path.is_relative_to(root)]
+
+
+def test_a_search_hit_whose_iri_does_not_end_in_a_uid_is_not_copied(tmp_path: Path, registry: FakeRegistry) -> None:
+    hostile_iri = f"https://w3id.org/battinfo/spec/{HOSTILE_TAIL}"
+    record = copy.deepcopy(SPEC_RECORD)
+    record["cell_spec"]["id"] = hostile_iri
+    registry.envelopes[f"cell_spec/{_uid(SPEC_IRI)}"] = ("cell_spec", hostile_iri, record)
+    registry.listings["cell_spec"][0]["canonical_iri"] = hostile_iri
+    root = tmp_path / "a" / "b" / "c" / "ws"  # the six '..' stay inside tmp_path
+    ws = AuthoringWorkspace(root=root, registry_url=REGISTRY)
+
+    with pytest.raises(ValueError, match="does not end in a record uid"):
+        ws.load(ws.search("duracell mn2400")[0])
+
+    assert _files_outside(root, tmp_path) == []
+    assert not list(tmp_path.rglob("*planted*"))
+
+
+def test_a_cell_iri_that_does_not_end_in_a_uid_is_not_copied(tmp_path: Path, registry: FakeRegistry) -> None:
+    hostile_iri = f"https://w3id.org/battinfo/cell/{HOSTILE_TAIL}"
+    record = copy.deepcopy(CELL_RECORD)
+    record["cell_instance"]["id"] = hostile_iri
+    registry.envelopes[f"cell/{HOSTILE_TAIL}"] = ("cell", hostile_iri, record)
+    root = tmp_path / "a" / "b" / "c" / "ws"
+    ws = AuthoringWorkspace(root=root, registry_url=REGISTRY)
+
+    with pytest.raises(ValueError, match="does not end in a record uid"):
+        ws.add("test", type="cycling", cell=hostile_iri, name="hostile cell")
+
+    assert _files_outside(root, tmp_path) == []
+    assert not list(tmp_path.rglob("*planted*"))
+
+
 # ── A lookup is asked once per session, and gives up quickly ─────────────────
 
 

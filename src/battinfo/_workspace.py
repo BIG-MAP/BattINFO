@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from battinfo.local_workspace import LocalWorkspace
 
+from battinfo._fs_guard import is_empty_or_missing, remove_tree, write_marker
 from battinfo._jsonio import read_record_json as _load_json
 from battinfo._util import (
     LOCATION_FIELDS,
@@ -306,10 +307,24 @@ class Workspace:
         version: str | None = None,
         comment: list[str] | None = None,
         clean: bool = False,
+        inputs: Sequence[PathLike | None] = (),
+        generated: bool = False,
     ) -> None:
+        """Open or create the workspace at ``root``.
+
+        ``clean=True`` deletes ``root`` first and builds it again. The delete is
+        refused (``UnsafeDeleteError``) for a folder BattINFO did not create,
+        for the home or working folder, and for a folder that is, holds or lies
+        inside one of ``inputs``: the files and folders the caller's operation
+        reads. ``generated=True`` says ``root`` is BattINFO output, so a root
+        this call creates gets the marker that lets a later ``clean=True``
+        delete it.
+        """
         self.root = _as_path(root)
-        if clean and self.root.exists():
-            shutil.rmtree(self.root)
+        creates_root = is_empty_or_missing(self.root)
+        if clean:
+            remove_tree(self.root, inputs=inputs)
+            creates_root = True
         self.source_root = self.root / source_dir_name
         # The folder a data file's path is taken relative to when it seeds a
         # dataset IRI: the project folder of a battinfo.workspace(), else this root.
@@ -321,6 +336,8 @@ class Workspace:
         self.library_aggregate_jsonld = self.root / "ontology" / "library" / "cell-spec.jsonld"
         self.library_manifest_json = self.root / "library-rdf" / "cell-spec.index.json"
         self.root.mkdir(parents=True, exist_ok=True)
+        if generated and creates_root:
+            write_marker(self.root)
         self.name = name
         self.title = title
         self.description = description
@@ -1511,7 +1528,13 @@ class Workspace:
         capture_artifact: bool = True,
         force: bool = False,
     ) -> "LocalWorkspace":
-        """Export one linked dataset chain to a disk-backed submission workspace."""
+        """Export one linked dataset chain to a disk-backed submission workspace.
+
+        ``root`` defaults to ``<workspace>/release``. A ``root`` that is not
+        empty is refused unless ``force=True``, which deletes it first. That
+        delete is refused for a folder BattINFO did not create, and for one
+        that holds the dataset's file or this workspace's records.
+        """
 
         from battinfo.local_workspace import LocalWorkspace
 
@@ -1529,7 +1552,8 @@ class Workspace:
             if any(release_root.iterdir()):
                 if not force:
                     raise ValueError(f"workspace directory is not empty: {release_root}")
-                shutil.rmtree(release_root)
+                # The release is built from the dataset's file and this workspace's records.
+                remove_tree(release_root, inputs=(self._dataset_local_path(dataset), self.source_root))
         release_workspace = LocalWorkspace(release_root)
         release_workspace.capture(
             resolved_cell_spec,
