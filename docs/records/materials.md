@@ -26,7 +26,7 @@ from battinfo.api import create_material_spec
 record = create_material_spec(
     uid="7d9k-2m4p-8t3x-6nq5",
     name="NMC811 cathode powder",
-    kind="nmc811",                     # Level-1 key from the curated vocabulary
+    kind="nmc811",  # Level-1 key from the curated vocabulary
     property={
         "specific_capacity": {"value": 200, "unit": "mAh/g"},
         "d50_particle_size": {"value": 10, "unit": "um"},

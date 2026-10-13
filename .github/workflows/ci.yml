@@ -34,6 +34,8 @@ jobs:
         run: uv sync --all-extras --frozen --python 3.12
       - name: Ruff
         run: uv run --no-sync ruff check src tests scripts .tools
+      - name: Ruff format
+        run: uv run --no-sync ruff format --check src tests scripts .tools
       - name: Mypy
         run: uv run --no-sync mypy
 

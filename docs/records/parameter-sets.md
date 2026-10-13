@@ -127,24 +127,30 @@ import json
 from battinfo.interop import bpx_file_distribution, from_bpx_parameters
 
 # A BPX file's bytes (a small partial file here; read yours from disk).
-raw = json.dumps({
-    "Header": {"BPX": "1.1.0", "Title": "Example pouch cell", "Model": "Partial"},
-    "Parameterisation": {
-        "Cell": {"Nominal cell capacity [A.h]": 5.0, "Electrode area [m2]": 0.1},
-        "Negative electrode": {"Particle radius [m]": 5.86e-6, "Thickness [m]": 8.52e-5},
+raw = json.dumps(
+    {
+        "Header": {"BPX": "1.1.0", "Title": "Example pouch cell", "Model": "Partial"},
+        "Parameterisation": {
+            "Cell": {"Nominal cell capacity [A.h]": 5.0, "Electrode area [m2]": 0.1},
+            "Negative electrode": {"Particle radius [m]": 5.86e-6, "Thickness [m]": 8.52e-5},
+        },
+        "State": {"Initial conditions": {"Initial state-of-charge": 1.0}},
     },
-    "State": {"Initial conditions": {"Initial state-of-charge": 1.0}},
-}, indent=2).encode("utf-8")
+    indent=2,
+).encode("utf-8")
 
 # One file, one record: its IRI derives from the file's parameters.
 result = from_bpx_parameters(raw)
 record = result.to_parameter_set(
-    virtual_cell=True,                    # or cell_spec_id= / cell_instance_id=
-    materials={"negative": "graphite"},   # BPX does not name its materials
-    distributions=[bpx_file_distribution(
-        raw, name="example-cell.bpx.json",
-        content_url="https://files.example.org/parameter-sets/example-cell.bpx.json",
-    )],
+    virtual_cell=True,  # or cell_spec_id= / cell_instance_id=
+    materials={"negative": "graphite"},  # BPX does not name its materials
+    distributions=[
+        bpx_file_distribution(
+            raw,
+            name="example-cell.bpx.json",
+            content_url="https://files.example.org/parameter-sets/example-cell.bpx.json",
+        )
+    ],
     retrieved_at=1750000000,
 )
 ```

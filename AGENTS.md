@@ -21,6 +21,7 @@ These are the commands CI runs (`.github/workflows/ci.yml` and `docs.yml`). Run 
 
 ```bash
 uv run ruff check src tests scripts .tools
+uv run ruff format --check src tests scripts .tools
 uv run mypy
 uv run pytest -q tests --cov=battinfo
 uv run python .tools/quality/lint_identifier_policy.py

@@ -7,7 +7,7 @@ A registry is an index. It stores records and the links between them, and each d
 Listing and looking up records needs only the core install. Loading files and building the catalog return pandas objects:
 
 ```bash
-pip install "battinfo[tabular]"
+pip install "battinfo[tabular] @ git+https://github.com/BIG-MAP/BattINFO.git"
 ```
 
 ## Start from the catalog

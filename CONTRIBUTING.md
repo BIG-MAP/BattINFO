@@ -36,8 +36,9 @@ Linux and Windows ([CI](.github/workflows/ci.yml)). Run them locally before
 pushing:
 
 ```powershell
-# Lint
-uv run ruff check src tests
+# Lint and formatting
+uv run ruff check src tests scripts .tools
+uv run ruff format --check src tests scripts .tools
 
 # Type check
 uv run mypy
