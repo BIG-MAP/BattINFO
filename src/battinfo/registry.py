@@ -42,6 +42,7 @@ from pathlib import Path
 from typing import Any
 
 from battinfo import __version__
+from battinfo.entities import is_dashed_uid
 
 __all__ = ["Registry", "RegistryFile", "bdf_column_names"]
 
@@ -301,8 +302,12 @@ def _cache_file(folder: Path, name: str) -> Path:
     Published file names can run past a hundred characters, and Windows
     refuses paths longer than about 260. A name that would push the full path
     over that is replaced by a short digest of itself, keeping the extension.
+    A name that names no file (``..``, or only dots and spaces, which Windows
+    reads as the folder itself) is kept as ``data``.
     """
-    name = Path(name).name or "data"
+    name = Path(name).name
+    if not name.strip(". "):
+        name = "data"
     target = folder / name
     if len(str(target)) + len(".part") <= 240:
         return target
@@ -485,13 +490,19 @@ class Registry:
         them), and a cached copy that no longer matches is fetched again. A file
         whose record states no checksum that can be checked is used as it is,
         with a warning the first time. ``verify=False`` skips the check.
+
+        The cache folder is named after the dataset's uid, so an entry whose
+        id is not a record uid (one with ``..`` or a slash in it) raises
+        ``ValueError`` before anything is fetched.
         """
+        uid = _record_ref(dataset)[1]
+        if not is_dashed_uid(uid):
+            raise ValueError(f"not a record uid: {uid!r}")
         candidates = self.files(dataset, role=role)
         tabular = [f for f in candidates if f.url.lower().split("?")[0].endswith(_TABULAR_SUFFIXES)]
         if not (tabular or candidates):
-            raise FileNotFoundError(f"dataset {_record_ref(dataset)[1]} has no file with role {role!r}")
+            raise FileNotFoundError(f"dataset {uid} has no file with role {role!r}")
         chosen = (tabular or candidates)[0]
-        uid = _record_ref(dataset)[1]
         folder = Path(dest) if dest else self.cache_dir / "files" / uid
         target = _cache_file(folder, chosen.name)
         expected = _stated_digest(chosen)

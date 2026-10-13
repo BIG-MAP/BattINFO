@@ -47,3 +47,5 @@ ws.save()
 The saved test record now contains the channel's `equipment_id` and
 `channel_id`, so "which slot of which cycler produced this data" survives into
 the published record.
+
+`ws.add("equipment", ...)` saved the spec, the unit and its channels straight away. `ws.submit()` or `ws.publish()` sends them together with the cell and the test that `ws.save()` wrote.

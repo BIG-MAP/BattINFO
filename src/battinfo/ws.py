@@ -33,13 +33,14 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from battinfo._workspace import Workspace
 
+from battinfo._fs_guard import remove_temp_tree
 from battinfo._jsonio import atomic_write_text as _atomic_write_text
 from battinfo._jsonio import chmod_owner_only as _chmod_owner_only
 from battinfo._jsonio import read_json as _read_json
 from battinfo._jsonio import write_private_text as _write_private_text
 from battinfo._util import _now_iso, is_dataset_series, local_file_references
 from battinfo._util import local_files_message as _local_files_message
-from battinfo.entities import entity_id_from_doc, kind_for_type, record_set_dirs, save_entity_path
+from battinfo.entities import entity_id_from_doc, is_dashed_uid, kind_for_type, record_set_dirs, save_entity_path
 
 # Short-name pattern: 6 lowercase alphanumeric characters at the end of a
 # dash-delimited name component (e.g. "666h1s" in "duracell-mn2400-2026-02-666h1s").
@@ -1959,9 +1960,15 @@ class AuthoringWorkspace:
         self._search_cache_registry: str | None = None
         # converted-file → original-source mapping (lazy-loaded from manifest)
         self._conversion_sources: dict[str, Any] | None = None
-        # paths written by the most recent ws.save() — submit() uses this to
-        # avoid re-submitting records from previous sessions in the same directory
+        # Record files this session wrote: by the most recent ws.save(), by
+        # ws.add() (see _added_paths), and by ws.upload() or ws.zenodo(), which
+        # rewrite dataset records. submit() sends only these, so records left in
+        # the same directory by earlier sessions are not sent again.
         self._session_paths: set[Path] = set()
+        # Record files ws.add() wrote itself (an equipment unit, its spec and its
+        # channels). ws.save() does not write them, so it starts the session set
+        # from this one instead of discarding them.
+        self._added_paths: set[Path] = set()
         # First-class material queues (Level 2 spec / Level 3 instance). Materials
         # are not engine model objects, so the AuthoringWorkspace holds their
         # canonical records and writes them in ws.save() through the SAME stamp
@@ -3736,9 +3743,10 @@ class AuthoringWorkspace:
         the index rejects under ``validation_policy`` (a reference that does not
         resolve, for example) is still written, but is listed as ``[failed]``
         with its error, and its summary item carries ``failed`` and ``error``.
-        Only the records saved in this call will be submitted by the next
-        ``ws.submit()`` — records left over from previous sessions in the
-        same directory are ignored.
+        The next ``ws.submit()`` sends the records saved in this call and the
+        equipment records that ``ws.add("equipment", ...)`` wrote in this
+        session. Records left over from previous sessions in the same
+        directory are ignored.
 
         ``mode`` controls how an existing on-disk record with the same IRI is
         treated. The default ``"upsert"`` updates it in place (the normal
@@ -3774,7 +3782,8 @@ class AuthoringWorkspace:
                     if isinstance(item, dict) and (item.get("status") == "created" or item.get("content_changed")):
                         stamped += 1
         # Track the exact files written so submit() only sends this session's work.
-        self._session_paths = set()
+        # ws.add("equipment") wrote its records itself, so they start the set.
+        self._session_paths = set(self._added_paths)
         for key in _STAMPED_KEYS:
             for item in result.get(key, []):
                 p = item.get("path") if isinstance(item, dict) else str(item)
@@ -4801,6 +4810,7 @@ class AuthoringWorkspace:
         self._cells_by_short_id = {}
         self._ambiguous_cell_keys = set()
         self._session_paths = set()
+        self._added_paths = set()
         print("Workspace cleared.")
 
     def submit(
@@ -5012,7 +5022,8 @@ class AuthoringWorkspace:
 
         # ── Select which files to submit (R-9: never silently submit leftovers) ─
         if self._session_paths:
-            # Only what the most recent ws.save() wrote this session.
+            # Only what this session wrote: the most recent ws.save(), and the
+            # records ws.add("equipment") wrote itself.
             selected = {s: [f for f in _all_in(s) if f in self._session_paths] for s in wanted}
         elif submit_all:
             selected = {s: _all_in(s) for s in wanted}
@@ -6158,7 +6169,6 @@ class AuthoringWorkspace:
         deposit; otherwise the workspace default (``ws.license(...)``) is used; if
         neither is set, ``cc-by-4.0`` is applied (Zenodo requires a license).
         """
-        import shutil
         import tempfile
 
         from battinfo.zenodo import ZenodoClient
@@ -6333,7 +6343,7 @@ class AuthoringWorkspace:
                 print(f"  Dataset records updated with Zenodo file URLs: {patched}")
 
         finally:
-            shutil.rmtree(tmpdir, ignore_errors=True)
+            remove_temp_tree(tmpdir)
 
         # ── Set metadata ───────────────────────────────────────────────────────
         metadata = self._build_zenodo_metadata(
@@ -6440,7 +6450,7 @@ class AuthoringWorkspace:
             print(f"  Validation failed: {exc}")
             return False
         finally:
-            shutil.rmtree(tmpdir, ignore_errors=True)
+            remove_temp_tree(tmpdir)
 
     def preview_rocrate(
         self,
@@ -6488,7 +6498,7 @@ class AuthoringWorkspace:
             out = Path(output) if output else self._root / "ro-crate-metadata.preview.json"
             shutil.copy2(src, out)
         finally:
-            shutil.rmtree(tmpdir, ignore_errors=True)
+            remove_temp_tree(tmpdir)
 
         print(f"  Written: {out}")
         return out
@@ -6531,7 +6541,6 @@ class AuthoringWorkspace:
             ws.save()
             ws.preview_jsonld()   # writes battinfo.preview.jsonld
         """
-        import shutil
         import tempfile
 
         records_dir = self._ws.source_root
@@ -6549,7 +6558,7 @@ class AuthoringWorkspace:
         try:
             data_filenames = self._bundle_data_files(tmpdir, records_dir)
         finally:
-            shutil.rmtree(tmpdir, ignore_errors=True)
+            remove_temp_tree(tmpdir)
 
         jsonld = self._build_zenodo_jsonld(
             zenodo_record_id=0,
@@ -8459,6 +8468,8 @@ class AuthoringWorkspace:
         if any(getattr(obj, "id", None) == iri for obj in sessions.get(entity_type, [])):
             return True
         uid = iri.rstrip("/").rsplit("/", 1)[-1]
+        if not is_dashed_uid(uid):
+            return False  # no file is named after it
         for root in (self._ws.source_root, self._references_root):
             path = save_entity_path(entity_type, uid, root)
             try:
@@ -8495,8 +8506,19 @@ class AuthoringWorkspace:
         return record, "found"
 
     def _keep_reference_copy(self, record: dict, entity_type: str) -> Path:
-        """Write a read-only copy of a published record to ``.battinfo/references/<kind>/``."""
-        uid = (entity_id_from_doc(record) or "").rstrip("/").rsplit("/", 1)[-1]
+        """Write a read-only copy of a published record to ``.battinfo/references/<kind>/``.
+
+        The file is named after the uid that ends the record's IRI. The record
+        comes from a registry, so an IRI that does not end in a uid raises
+        ``ValueError`` and nothing is written.
+        """
+        iri = entity_id_from_doc(record) or ""
+        uid = iri.rstrip("/").rsplit("/", 1)[-1]
+        if not is_dashed_uid(uid):
+            raise ValueError(
+                f"The registry returned a {entity_type} record whose IRI {iri!r} does not end in a "
+                "record uid (such as pge5-wer6-2q82-v9k0), so it is not copied into this workspace."
+            )
         path = save_entity_path(entity_type, uid, self._references_root)
         path.parent.mkdir(parents=True, exist_ok=True)
         _atomic_write_text(path, json.dumps(record, indent=2, ensure_ascii=False))
@@ -8512,7 +8534,8 @@ class AuthoringWorkspace:
         ``offline``, ``not_found``, ``unreachable`` or ``unreadable``. Each record
         is looked up at most once per registry in a session: a later reference to
         it reuses the outcome, so a registry that is down costs one timeout, not
-        one per test.
+        one per test. A record found under an IRI that does not end in a uid
+        raises ``ValueError`` (see ``_keep_reference_copy``).
         """
         if self._knows_record(iri, entity_type):
             return "local"
@@ -9062,12 +9085,14 @@ class AuthoringWorkspace:
         source_root = self._ws.source_root
 
         def _track(result: dict) -> dict:
-            # Equipment records are written at add()-time, not by ws.save(), so
-            # register them in the session set here — otherwise a subsequent
-            # ws.submit()/publish() in the same session would not select them.
+            # Equipment records are written at add() time, not by ws.save(), so
+            # register them in the session set here, and in _added_paths, which
+            # ws.save() starts the session set from. Otherwise a later
+            # ws.submit() or ws.publish() in the same session would not select them.
             path = result.get("path")
             if path:
                 self._session_paths.add(Path(path))
+                self._added_paths.add(Path(path))
             return result
 
         spec_result = _track(save_record(spec_record, source_root=source_root, mode="upsert"))

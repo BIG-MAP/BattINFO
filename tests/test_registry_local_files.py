@@ -215,6 +215,56 @@ def test_submit_publication_package_override_and_https(monkeypatch: pytest.Monke
     assert len(sent) == 2
 
 
+def test_submission_packages_do_not_name_the_local_workspace_folder(tmp_path: Path) -> None:
+    """The envelope's workspace block used to carry the absolute path, user name included."""
+    from battinfo._workspace import Workspace, quantity
+    from battinfo.local_workspace import LocalWorkspace
+
+    release = LocalWorkspace.init(tmp_path / "release")
+    release.build_submission_package()
+    package = json.loads((release.root / "dist" / "submission-package.json").read_text(encoding="utf-8"))
+    assert "root" not in package["workspace"]
+
+    (tmp_path / "a.csv").write_text("cycle,capacity_ah\n0,2.50\n", encoding="utf-8")
+    authoring = Workspace(tmp_path / "authoring", name="w", title="W", tenant="t", publisher="p", version="1.0.0")
+    cell_spec = authoring.cell_spec(
+        manufacturer="A123",
+        model="ANR26650M1-B",
+        format="cylindrical",
+        chemistry="Li-ion",
+        specs={"nominal_voltage": quantity(3.3, "V")},
+        source_file="a123.manual.json",
+    )
+    cell = authoring.cell(cell_spec, serial_number="root-001", source_type="lab")
+    test = authoring.test(cell, kind="cycling", protocol="1C / 1C", status="completed")
+    authoring.dataset(cell, title="Root dataset", test=test, path=tmp_path / "a.csv", license="CC-BY-4.0")
+    bundle = authoring.bundle_workspace()
+    package = json.loads(Path(bundle["submission_package_path"]).read_text(encoding="utf-8"))
+    assert "root" not in package["workspace"]
+
+
+def test_submit_publication_package_leaves_out_a_workspace_root(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A package built before the envelope dropped the field still reaches the registry without it."""
+    sent: list[dict] = []
+
+    def fake_urlopen(request, timeout=None):  # noqa: ANN001
+        sent.append(json.loads(request.data.decode("utf-8")))
+        return _Resp({"status": "validated"})
+
+    monkeypatch.setattr("battinfo.api.urlopen", fake_urlopen)
+    envelope = _envelope("https://zenodo.org/records/1/files/C1.bdf.csv")
+    envelope["workspace"] = {
+        "workspace_id": "w",
+        "root": "C:\\Users\\someone\\release",
+        "registry": {"tenant": "t", "workspace": "w"},
+    }
+
+    submit_publication_package(envelope, registry_base_url="https://r.example", api_key="k")
+
+    assert sent[0]["workspace"] == {"workspace_id": "w", "registry": {"tenant": "t", "workspace": "w"}}
+    assert envelope["workspace"]["root"] == "C:\\Users\\someone\\release"  # the caller's package is unchanged
+
+
 def test_demo_pipeline_refuses_its_local_file_by_default(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     from battinfo.demo import run_demo_pipeline
 

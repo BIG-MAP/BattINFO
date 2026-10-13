@@ -123,6 +123,9 @@ def submit_publication_package(
     which nobody else can follow. Deposit the files first so the records carry
     https URLs. ``allow_local_files=True`` lifts the check, for a local test
     registry only.
+
+    The local workspace folder (``workspace.root``), which packages built by
+    earlier versions carry, is left out of what is sent.
     """
     if max_attempts < 1:
         raise ValueError("max_attempts must be >= 1")
@@ -132,6 +135,10 @@ def submit_publication_package(
             raise ValueError(local_files_message(offenders))
     request_url = registry_base_url.rstrip("/") + "/publication-packages"
     request_payload = dict(payload)
+    workspace = request_payload.get("workspace")
+    if isinstance(workspace, Mapping) and "root" in workspace:
+        # A package built by an earlier version names the local workspace folder.
+        request_payload["workspace"] = {key: value for key, value in workspace.items() if key != "root"}
     request_body = json.dumps(request_payload, ensure_ascii=False).encode("utf-8")
     headers = {"Content-Type": "application/json", api_key_header: api_key}
 

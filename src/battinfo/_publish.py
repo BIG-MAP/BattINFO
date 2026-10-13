@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import re
 import warnings
+from collections.abc import Iterable
 from datetime import date
 from pathlib import Path
 from typing import Any
@@ -34,36 +35,142 @@ class PublishResult(BaseModel):
     submission_response: dict[str, Any] | None = None
 
 
-def publish(obj: Any = None, destination: str | None = None, **kwargs: Any) -> PublishResult | dict[str, Any]:
+# The keywords of battinfo.publication.publish(), which the deprecated
+# publish(cell_spec=..., cell_instance=..., test=..., dataset=...) form passes on.
+# validation_policy is a parameter of both forms.
+_LEGACY_CORE_KEYWORDS = frozenset({"cell_spec", "cell_instance", "test", "dataset"})
+_LEGACY_KEYWORDS = _LEGACY_CORE_KEYWORDS | frozenset(
+    {
+        "cell_specification",
+        "datasheet_path",
+        "publish_filename",
+        "html_filename",
+        "dataset_glob",
+        "emit_bundle_dir",
+        "emit_html_page",
+        "emit_ro_crate_metadata",
+        "emit_datacite_metadata",
+        "emit_dcat_export",
+        "ro_crate_filename",
+        "datacite_filename",
+        "dcat_filename",
+    }
+)
+
+
+def publish(
+    obj: Any = None,
+    destination: str | None = None,
+    *,
+    root: PathLike | None = None,
+    force: bool = False,
+    validation_policy: str | None = None,
+    registry_base_url: str | None = None,
+    api_key: str | None = None,
+    api_key_header: str | None = None,
+    platform_base_url: str | None = None,
+    workspace_id: str | None = None,
+    publisher_id: str | None = None,
+    source_version: str | None = None,
+    **legacy: Any,
+) -> PublishResult | dict[str, Any]:
     """Publish a BattINFO object to a named destination.
 
-    The new product surface is `publish(obj, destination=...)`.
-    The legacy publication-package call shape is still accepted for backwards
-    compatibility and delegated to `battinfo.publication.publish(...)`.
+    ``publish(cell_spec, destination="local")`` saves the record in a
+    workspace folder; ``"registry"``, ``"battery-genome"``, ``"staging"`` and
+    ``"production"`` also submit it. Only ``CellSpec`` objects are supported.
+
+    Parameters
+    ----------
+    root:
+        The workspace folder. Defaults to
+        ``.battinfo/publish/<manufacturer>-<model>`` in the current folder.
+    force:
+        Delete ``root`` first and build it again. Refused (``UnsafeDeleteError``,
+        a ``ValueError``) for a folder BattINFO did not create, for the
+        ``.battinfo`` folder where ``battinfo.workspace()`` keeps a project's
+        records, and for the home or working folder.
+    validation_policy:
+        Validation policy for the saved record. Defaults to ``"strict"``.
+    registry_base_url, api_key, api_key_header, platform_base_url, workspace_id, publisher_id, source_version:
+        Override the destination's configured values.
+
+    Notes
+    -----
+    The deprecated form ``publish(cell_spec=..., cell_instance=..., test=...,
+    dataset=...)`` still builds a dataset publication package, with a
+    ``DeprecationWarning``, and accepts only the keywords of
+    ``battinfo.publish_publication_package()``. It will be removed in 0.9.0.
     """
 
-    if _looks_like_legacy_publication_call(obj, destination, kwargs):
+    if obj is None and destination is None and _LEGACY_CORE_KEYWORDS & legacy.keys():
+        new_form = {
+            "root": root,
+            "force": force or None,
+            "registry_base_url": registry_base_url,
+            "api_key": api_key,
+            "api_key_header": api_key_header,
+            "platform_base_url": platform_base_url,
+            "workspace_id": workspace_id,
+            "publisher_id": publisher_id,
+            "source_version": source_version,
+        }
+        _refuse_keywords(
+            [name for name, value in new_form.items() if value is not None]
+            + [name for name in legacy if name not in _LEGACY_KEYWORDS],
+            "publish(cell_spec=..., cell_instance=..., test=..., dataset=...)",
+            " That form takes the keywords of battinfo.publish_publication_package() only.",
+        )
         warnings.warn(
             "Calling battinfo.publish(cell_spec=..., cell_instance=..., test=..., dataset=...) "
             "relies on implicit keyword sniffing; call battinfo.publish_publication_package(...) "
             "(the same operation, explicitly) instead. The implicit dispatch will be removed "
-            "one release after 0.8.",
+            "in 0.9.0.",
             DeprecationWarning,
             stacklevel=2,
         )
-        return _legacy_publish(**kwargs)
+        if validation_policy is not None:
+            legacy["validation_policy"] = validation_policy
+        return _legacy_publish(**legacy)
+    _refuse_keywords(legacy, "publish()")
 
     if obj is None:
         raise TypeError("publish() requires a BattINFO object or the legacy publication-package keyword arguments.")
 
     resolved_destination = destination or "local"
     if isinstance(obj, CellSpec):
-        return _publish_cell_spec(obj, destination=resolved_destination, **kwargs)
+        return _publish_cell_spec(
+            obj,
+            destination=resolved_destination,
+            root=root,
+            force=force,
+            validation_policy=validation_policy or "strict",
+            registry_base_url=registry_base_url,
+            api_key=api_key,
+            api_key_header=api_key_header,
+            platform_base_url=platform_base_url,
+            workspace_id=workspace_id,
+            publisher_id=publisher_id,
+            source_version=source_version,
+        )
 
     raise TypeError(
         "publish(obj, destination=...) currently supports CellSpec objects. "
-        "Use the legacy keyword form for dataset publication packages."
+        "Use battinfo.publish_publication_package(...) for dataset publication packages."
     )
+
+
+def _refuse_keywords(names: Iterable[str], call: str, hint: str = "") -> None:
+    unexpected = sorted(names)
+    if unexpected:
+        listed = ", ".join(repr(name) for name in unexpected)
+        plural = "s" if len(unexpected) > 1 else ""
+        raise TypeError(f"{call} got unexpected keyword argument{plural} {listed}.{hint}")
+
+
+def default_publish_root(cell_spec: CellSpec) -> Path:
+    """The folder ``publish(cell_spec)`` builds in when no ``root`` is given."""
+    return Path(".battinfo/publish") / _cell_spec_slug(cell_spec)
 
 
 def _publish_cell_spec(
@@ -92,8 +199,8 @@ def _publish_cell_spec(
         source_version=source_version,
     )
 
-    workspace_root = Path(root) if root is not None else Path(".battinfo/publish") / _cell_spec_slug(cell_spec)
-    workspace = Workspace(root=workspace_root, clean=force)
+    workspace_root = Path(root) if root is not None else default_publish_root(cell_spec)
+    workspace = Workspace(root=workspace_root, clean=force, generated=True)
     workspace.add(cell_spec)
     workspace.save(validation_policy=validation_policy)
 
@@ -188,13 +295,6 @@ def _publish_cell_spec(
         debug_paths=debug_paths,
         submission_response=response_payload if isinstance(response_payload, dict) else None,
     )
-
-
-def _looks_like_legacy_publication_call(obj: Any, destination: str | None, kwargs: dict[str, Any]) -> bool:
-    if obj is not None or destination is not None:
-        return False
-    legacy_keys = {"cell_spec", "cell_instance", "test", "dataset"}
-    return any(key in kwargs for key in legacy_keys)
 
 
 def _cell_spec_slug(cell_spec: CellSpec) -> str:

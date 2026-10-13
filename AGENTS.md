@@ -78,7 +78,7 @@ The JSON Schema is the save-time contract and the pydantic models in `src/battin
 - `ws.save()` validates under the strict policy by default and writes each record to `<root>/.battinfo/records/<folder>/`.
 - Set funding, ORCID and licence once with `ws.project(...)`, `ws.contributor(...)` and `ws.license(...)`; `ws.save()` stamps them onto every record.
 - `ws.preview_jsonld()` writes the JSON-LD graph a Zenodo deposit would carry and prints the publication checks. `ws.zenodo()` makes the deposit and leaves a draft unless you pass `publish=True`.
-- `ws.submit()` sends what the last `ws.save()` wrote to the registry review queue. `ws.publish()` does save and submit in one call, with a Zenodo deposit first when `zenodo=True`.
+- `ws.submit()` sends this session's records to the registry review queue: what the last `ws.save()` wrote, and the equipment records `ws.add("equipment")` saved when it was called. `ws.publish()` does save and submit in one call, with a Zenodo deposit first when `zenodo=True`.
 - `ws.login(api_key=...)` stores the registry key in the workspace's own `.battinfo/credentials`. `ws.credentials_status()` and `ws.has_credential(name)` say which credentials a workspace has and where each comes from, without the values.
 - `ws.import_(...)` rebuilds a workspace from a published `battinfo.json`, and `ws.export(fmt)` writes the saved records as RDF.
 
@@ -164,11 +164,13 @@ The record-type pages under `docs/records/` run each authoring snippet against t
 
 Transient output goes under `.battinfo/` (gitignored) or a test's temporary directory. Do not edit `src/battinfo/data/` by hand except to copy in a changed schema or mapping table, and edit `examples/` only when the task is about the examples themselves. Keep work logs and planning notes out of commits; `WORK_LOG.md` and `CLAUDE.md` are already in `.gitignore`.
 
+Package code deletes folders through `battinfo._fs_guard`: `remove_tree` for a folder a caller named or read from a manifest, passing the operation's inputs, and `remove_temp_tree` for a temporary folder the code made itself. Code that deletes files in a folder but not the folder checks it with `require_apart` against what it reads. An output root BattINFO creates gets the marker from `write_marker`; a new kind of entry at the top of such a root, or a new file name in one of its record or report folders, also needs a place in the layouts in `_fs_guard.py`, which recognise roots made before the marker. `tests/test_fs_guard.py` fails if any other module calls `shutil.rmtree`, or if a root this version builds is not recognised without its marker. A path field in a workspace manifest model goes through `check_relative_path` from the same module, and a file named after a record goes through `entities.save_entity_path`, which takes only a dashed uid (`is_dashed_uid`).
+
 ## Key source files
 
 | Path | What it holds |
 |---|---|
-| `src/battinfo/entities.py` | the entity-kind registry and the uid minting primitive |
+| `src/battinfo/entities.py` | the entity-kind registry, the uid minting primitive and the uid grammar |
 | `src/battinfo/ws.py` | `battinfo.workspace()` and `AuthoringWorkspace` |
 | `src/battinfo/bundle.py` | the record models and `SCHEMA_VERSION` |
 | `src/battinfo/api/` | create, save, query, template and resolver-publish functions |

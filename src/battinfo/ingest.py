@@ -544,6 +544,12 @@ def build_ingest_workspace(
     validation_policy: str = "strict",
     bundle: bool = True,
 ) -> dict[str, Any]:
+    """Build the linked ingest workspace for one evidence folder.
+
+    ``clean=True`` deletes ``workspace_root`` first and builds it again. The
+    delete is refused for a folder BattINFO did not create, and for one that
+    holds the evidence files, the type record or the ingest manifest.
+    """
     inspection = inspect_ingest_root(
         ingest_root,
         manifest_path=manifest_path,
@@ -569,6 +575,15 @@ def build_ingest_workspace(
     resolved_source_version = str(inspection["source_version"] or datetime.now(timezone.utc).date().isoformat())
     resolved_publisher_id = inspection["publisher_id"]
     resolved_workspace_id = inspection["workspace_id"]
+    # What the build reads. clean=True refuses a workspace root that holds one
+    # of these, such as the evidence folder itself. A root inside the evidence
+    # folder but apart from its files (./.battinfo/ingest/... when run from
+    # there) can still be rebuilt.
+    build_inputs = [
+        inspection["type_record"],
+        inspection["manifest_path"],
+        *(item["path"] for item in inspection["datasets"]),
+    ]
 
     workspace = Workspace(
         root=resolved_workspace_root,
@@ -579,6 +594,8 @@ def build_ingest_workspace(
         publisher=resolved_publisher_id,
         version=resolved_source_version,
         clean=clean,
+        inputs=build_inputs,
+        generated=True,
     )
 
     if resolved_resource_type != "cell-instance":

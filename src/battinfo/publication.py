@@ -698,6 +698,9 @@ def _schema_main_entity_node(value: Mapping[str, Any]) -> dict[str, Any] | None:
     return None
 
 
+_SCRIPT_JSON_ESCAPES = {ord("<"): "\\u003c", ord(">"): "\\u003e", ord("&"): "\\u0026"}
+
+
 def _publication_html(payload: Mapping[str, Any], *, title: str | None = None) -> str:
     graph = payload.get("@graph")
     if isinstance(graph, list):
@@ -722,7 +725,10 @@ def _publication_html(payload: Mapping[str, Any], *, title: str | None = None) -
             doc_title = name
     if doc_title is None:
         doc_title = "BattINFO Publication"
-    payload_json = json.dumps(payload, ensure_ascii=False, indent=2)
+    # The JSON sits inside a <script> element, which ends at the first
+    # "</script" in any record text. Writing <, > and & as JSON escapes leaves
+    # every value the same for a JSON-LD reader and no markup in the page.
+    payload_json = json.dumps(payload, ensure_ascii=False, indent=2).translate(_SCRIPT_JSON_ESCAPES)
     return (
         "<!doctype html>\n"
         '<html lang="en">\n'

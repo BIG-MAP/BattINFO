@@ -26,6 +26,7 @@ from battinfo.entities import (
     iter_entity_files,
     kind_for_doc,
 )
+from battinfo.entities import UID_DASHED_RE as UID_DASHED_RE  # battinfo.api re-exports it
 from battinfo.validate.core import DEFAULT_POLICY, ValidationPolicy
 from battinfo.validate.friendly import format_report_errors
 from battinfo.validate.publication import validate_publication_report
@@ -36,7 +37,6 @@ PathLike = str | Path
 TestKind = BatteryTestType
 
 UID_UNDASHED_RE = re.compile(r"^[0-9a-hjkmnp-tv-z]{16}$")
-UID_DASHED_RE = re.compile(r"^[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$")
 UID_ALPHABET = "0123456789abcdefghjkmnpqrstvwxyz"
 
 SPEC_IRI_RE = re.compile(r"^https://w3id\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$")

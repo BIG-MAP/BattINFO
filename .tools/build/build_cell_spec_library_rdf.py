@@ -23,7 +23,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--clean-output",
         action="store_true",
-        help="Remove existing JSON-LD outputs before writing rebuilt artifacts.",
+        help="Delete the JSON-LD files the previous build listed in its manifest before rebuilding.",
     )
     return parser.parse_args()
 
