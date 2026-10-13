@@ -250,14 +250,29 @@ def test_number_from_text_reads_plain_decimal_numbers(text: str, number: float) 
     assert type(result) is type(number)
 
 
-@pytest.mark.parametrize("text", ["", " ", "2.5 V", "n/a", "2,5", "1_000", "0x10", "nan", "inf", "1e400", ">1000"])
+@pytest.mark.parametrize(
+    "text",
+    ["", " ", "2.5 V", "n/a", "2,5", "1_000", "0x10", "nan", "inf", "1e400", ">1000", "٣", "２.５"],
+)
 def test_number_from_text_leaves_text_alone(text: str) -> None:
     assert number_from_text(text) is None
 
 
 def test_is_real_number() -> None:
     assert all(is_real_number(v) for v in (0, 2, 2.5, -1e-9, 10**400))
-    assert not any(is_real_number(v) for v in (True, False, None, "2.5", math.nan, math.inf, -math.inf, [1]))
+    assert not any(is_real_number(v) for v in (True, False, None, "2.5", math.nan, math.inf, -math.inf, [1], 1j))
+
+
+def test_numpy_numbers_are_real_numbers_as_validation_counts_them() -> None:
+    """JSON Schema's number type takes any real number, numpy scalars included,
+    so the emitters write them as numbers too."""
+    np = pytest.importorskip("numpy")
+    from battinfo.transform.json_to_jsonld import _descriptor_quantity_node
+
+    assert all(is_real_number(v) for v in (np.int64(5), np.float32(2.5), np.float64(2.5)))
+    assert not any(is_real_number(v) for v in (np.bool_(True), np.float32("nan"), np.float64("inf")))
+    node = _descriptor_quantity_node("nominal_capacity", {"value": np.float32(2.5), "unit": "Ah"})
+    assert node is not None and _numbers(node) == [np.float32(2.5)]
 
 
 def test_migrate_quantity_values_turns_numbers_into_numbers_and_moves_text() -> None:

@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import hashlib
 import math
+import numbers
 import re
 from datetime import datetime, timezone
 from pathlib import Path, PureWindowsPath
@@ -219,21 +220,23 @@ def _now_unix() -> int:
 
 
 def is_real_number(value: object) -> bool:
-    """True for an int or float that is finite and not a bool.
+    """True for a finite real number that is not a bool.
 
+    Python ints and floats count, and so does any other ``numbers.Real``
+    (numpy scalars among them), as JSON Schema's number type counts them.
     These are the only values a quantity's ``value`` holds, and the only ones
     the emitters write as ``hasNumberValue``. Text belongs in ``value_text``.
     """
-    if isinstance(value, bool):
+    if isinstance(value, bool) or not isinstance(value, numbers.Real):
         return False
-    if isinstance(value, int):
-        return True
-    return isinstance(value, float) and math.isfinite(value)
+    if isinstance(value, numbers.Integral):
+        return True  # math.isfinite() overflows on an int too large for a float
+    return math.isfinite(value)
 
 
-# Plain decimal notation, as JSON writes numbers, with an optional sign and
-# surrounding spaces. "2,5", "1_000", "0x10", "nan" and "inf" are text.
-_NUMBER_TEXT_RE = re.compile(r"[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?")
+# Plain decimal notation with ASCII digits, as JSON writes numbers, with an
+# optional sign and surrounding spaces. "2,5", "1_000", "0x10", "nan" and "inf" are text.
+_NUMBER_TEXT_RE = re.compile(r"[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?", re.ASCII)
 
 
 def number_from_text(text: str) -> int | float | None:
