@@ -4,8 +4,9 @@ failed write keeps the old file, and secrets stay out of the CLI output.
 `battinfo config set` used to read a config file that was not valid YAML as
 empty and write the one value it was setting over it, so the stored Zenodo
 token, creator and community were lost, and `battinfo config show` said there
-was no config file at all. Every test points the config path at a temporary
-folder, so the real home folder is never read or written.
+was no config file at all. A value PyYAML cannot build, such as the date
+2026-02-30, makes a file unreadable too. Every test points the config path at a
+temporary folder, so the real home folder is never read or written.
 """
 from __future__ import annotations
 
@@ -37,6 +38,11 @@ GOOD = (
 )
 # The fourth line is not valid YAML: a plain value cannot hold ": ".
 CORRUPT = GOOD + "license: CC-BY-4.0: oops\n"
+# The fourth line is valid YAML syntax, but the date does not exist, and PyYAML
+# raises a plain ValueError for it rather than a YAML error.
+IMPOSSIBLE_DATE = GOOD + "embargo_until: 2026-02-30\n"
+# A test marked with this runs on both kinds of file that cannot be read.
+unreadable = pytest.mark.parametrize("content", [CORRUPT, IMPOSSIBLE_DATE], ids=["syntax-error", "impossible-date"])
 
 
 @pytest.fixture(autouse=True)
@@ -81,8 +87,9 @@ def test_a_valid_config_file_reads_as_its_values(config_path: Path) -> None:
     }
 
 
-def test_a_corrupt_config_file_gives_a_warning_that_names_it(config_path: Path) -> None:
-    _write(config_path, CORRUPT)
+@unreadable
+def test_a_corrupt_config_file_gives_a_warning_that_names_it(config_path: Path, content: str) -> None:
+    _write(config_path, content)
     with pytest.warns(UserWarning) as caught:
         assert config.load_user_config() == {}
     message = str(caught[0].message)
@@ -92,8 +99,9 @@ def test_a_corrupt_config_file_gives_a_warning_that_names_it(config_path: Path) 
     assert "battinfo config set" in message  # says how to fix it
 
 
-def test_strict_loading_of_a_corrupt_config_file_raises_and_names_it(config_path: Path) -> None:
-    _write(config_path, CORRUPT)
+@unreadable
+def test_strict_loading_of_a_corrupt_config_file_raises_and_names_it(config_path: Path, content: str) -> None:
+    _write(config_path, content)
     with pytest.raises(config.UserConfigError) as caught:
         config.load_user_config(strict=True)
     assert str(config_path) in str(caught.value)
@@ -108,8 +116,11 @@ def test_strict_loading_of_a_corrupt_config_file_raises_and_names_it(config_path
         (b"just one value\n", "holds a single value"),
         (b"creator: Lovelace\nlicense: CC\xff0\n", "not UTF-8 text"),
         (b"creator: Lovelace\n---\nlicense: CC0-1.0\n", "not valid YAML"),
+        (b"creator: Lovelace\nembargo_until: 2026-02-30\n", r"not valid YAML \(day is out of range for month, line 2"),
+        (b"creator: Lovelace\nopen: !!bool maybe\n", r"not valid YAML \(cannot read the value as !!bool, line 2"),
+        (b"creator: " + b"[" * 2000 + b"]" * 2000 + b"\n", "not valid YAML"),
     ],
-    ids=["list", "scalar", "not-utf8", "two-documents"],
+    ids=["list", "scalar", "not-utf8", "two-documents", "impossible-date", "value-against-its-tag", "nested-too-deep"],
 )
 def test_a_config_file_that_is_not_key_value_pairs_is_reported(
     config_path: Path, content: bytes, problem: str
@@ -120,16 +131,18 @@ def test_a_config_file_that_is_not_key_value_pairs_is_reported(
         config.load_user_config(strict=True)
 
 
-def test_the_creator_fallback_warns_about_a_corrupt_config_file(config_path: Path) -> None:
-    _write(config_path, CORRUPT)
+@unreadable
+def test_the_creator_fallback_warns_about_a_corrupt_config_file(config_path: Path, content: str) -> None:
+    _write(config_path, content)
     with pytest.warns(UserWarning, match="not valid YAML"):
         assert config.resolve_creators(None) == []
 
 
+@unreadable
 def test_the_token_fallback_warns_and_still_reads_the_environment(
-    config_path: Path, monkeypatch: pytest.MonkeyPatch
+    config_path: Path, monkeypatch: pytest.MonkeyPatch, content: str
 ) -> None:
-    _write(config_path, CORRUPT)
+    _write(config_path, content)
     monkeypatch.setenv("ZENODO_API_TOKEN", "zt_from_the_environment")
     with pytest.warns(UserWarning, match="not valid YAML"):
         assert config.resolve_zenodo_token(None) == "zt_from_the_environment"
@@ -138,8 +151,9 @@ def test_the_token_fallback_warns_and_still_reads_the_environment(
 # ── Writing ──────────────────────────────────────────────────────────────────
 
 
-def test_save_refuses_to_overwrite_a_corrupt_config_file(config_path: Path) -> None:
-    _write(config_path, CORRUPT)
+@unreadable
+def test_save_refuses_to_overwrite_a_corrupt_config_file(config_path: Path, content: str) -> None:
+    _write(config_path, content)
     before = config_path.read_bytes()
     with pytest.raises(config.UserConfigError) as caught:
         config.save_user_config({"license": "CC0-1.0"})
@@ -147,8 +161,9 @@ def test_save_refuses_to_overwrite_a_corrupt_config_file(config_path: Path) -> N
     assert config_path.read_bytes() == before
 
 
-def test_set_value_refuses_to_overwrite_a_corrupt_config_file(config_path: Path) -> None:
-    _write(config_path, CORRUPT)
+@unreadable
+def test_set_value_refuses_to_overwrite_a_corrupt_config_file(config_path: Path, content: str) -> None:
+    _write(config_path, content)
     before = config_path.read_bytes()
     with pytest.raises(config.UserConfigError, match="license was not saved"):
         config.set_user_config_value("license", "CC0-1.0")
@@ -231,8 +246,9 @@ def test_a_masked_secret_shows_only_its_last_four_characters() -> None:
 # ── CLI ──────────────────────────────────────────────────────────────────────
 
 
-def test_config_set_on_a_corrupt_file_fails_and_keeps_the_file(config_path: Path) -> None:
-    _write(config_path, CORRUPT)
+@unreadable
+def test_config_set_on_a_corrupt_file_fails_and_keeps_the_file(config_path: Path, content: str) -> None:
+    _write(config_path, content)
     before = config_path.read_bytes()
     result = runner.invoke(app, ["config", "set", "community", "my-community"])
     assert result.exit_code == 1, result.output
@@ -241,8 +257,9 @@ def test_config_set_on_a_corrupt_file_fails_and_keeps_the_file(config_path: Path
     assert config_path.read_bytes() == before
 
 
-def test_config_show_reports_a_corrupt_file(config_path: Path) -> None:
-    _write(config_path, CORRUPT)
+@unreadable
+def test_config_show_reports_a_corrupt_file(config_path: Path, content: str) -> None:
+    _write(config_path, content)
     result = runner.invoke(app, ["config", "show"])
     assert result.exit_code == 1, result.output
     assert str(config_path) in result.stderr
@@ -300,8 +317,9 @@ def test_config_show_lists_keys_of_mixed_types(config_path: Path) -> None:
     ],
     ids=["batch-package", "batch-upload", "push"],
 )
+@unreadable
 def test_commands_that_read_config_defaults_stop_on_a_corrupt_file(
-    config_path: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, args: list[str]
+    config_path: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, args: list[str], content: str
 ) -> None:
     import battinfo.contribution
     import battinfo.zenodo
@@ -312,7 +330,7 @@ def test_commands_that_read_config_defaults_stop_on_a_corrupt_file(
     monkeypatch.setattr(battinfo.contribution, "package_batch", must_not_run)
     monkeypatch.setattr(battinfo.contribution, "push_batch", must_not_run)
     monkeypatch.setattr(battinfo.zenodo, "upload_zenodo_package", must_not_run)
-    _write(config_path, CORRUPT)
+    _write(config_path, content)
     folder = tmp_path / "data"
     folder.mkdir()
     result = runner.invoke(app, [arg.format(folder=folder) for arg in args])
@@ -321,8 +339,9 @@ def test_commands_that_read_config_defaults_stop_on_a_corrupt_file(
     assert "not valid YAML" in result.stderr
 
 
-def test_push_reports_a_corrupt_config_file_as_json(config_path: Path, tmp_path: Path) -> None:
-    _write(config_path, CORRUPT)
+@unreadable
+def test_push_reports_a_corrupt_config_file_as_json(config_path: Path, tmp_path: Path, content: str) -> None:
+    _write(config_path, content)
     folder = tmp_path / "data"
     folder.mkdir()
     result = runner.invoke(

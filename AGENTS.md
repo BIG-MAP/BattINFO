@@ -98,7 +98,7 @@ ws.save()            # lab/.battinfo/records/<folder>/*.json
 ws.preview_jsonld()  # lab/battinfo.preview.jsonld, then the publication checks
 ```
 
-Left out, `registry_url` is `BATTINFO_REGISTRY_URL` from the environment, then from the workspace's `.battinfo/credentials`, else the production registry; pass `registry_url=None` whenever a session must stay offline.
+Left out, `registry_url` is `BATTINFO_REGISTRY_URL` from the environment, then from the workspace's `.battinfo/credentials`, else the production registry, looked up each time it is used; pass `registry_url=None` whenever a session must stay offline.
 
 Credentials belong to their workspace. Each one is looked up in one order (an argument passed to the call, a value `ws.login()` set in this session, an environment variable, the workspace's `.battinfo/credentials`, then the default) by `AuthoringWorkspace._credential()`, and nothing writes them to `os.environ`. New code that needs a credential goes through that method, and code that checks for one asks `ws.has_credential(name)`, not `os.environ`. A file that holds secrets is written with `battinfo._jsonio.write_private_text`, which writes it atomically and readable by its owner only.
 

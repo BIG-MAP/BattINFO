@@ -578,6 +578,65 @@ def test_workspace_reads_the_registry_url_from_its_credentials_file(tmp_path: Pa
     assert production.credentials_status()["BATTINFO_REGISTRY_URL"] == {"set": True, "source": "default"}
 
 
+def test_a_registry_url_written_into_the_template_is_used_without_reopening(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    ws = battinfo.workspace(tmp_path)
+    path = ws.setup()
+    template = path.read_text(encoding="utf-8")
+    assert "BATTINFO_REGISTRY_URL  =\n" in template
+    path.write_text(template.replace("BATTINFO_REGISTRY_URL  =\n",
+                                     "BATTINFO_REGISTRY_URL  = https://staging.example\n"), encoding="utf-8")
+    http = _registry_http(monkeypatch, {"workspace_id": "ws-1", "publisher_id": "pub-1"})
+
+    assert ws.credentials_status()["BATTINFO_REGISTRY_URL"] == {"set": True, "source": "credentials_file"}
+    ws.login(api_key="bk_staging_key_123")
+
+    assert http.urls == ["https://staging.example/me"]  # the key never went to production
+    assert "Registry:    https://staging.example  (from .battinfo/credentials)" in capsys.readouterr().out
+    assert ws._registry_url == "https://staging.example"  # lookups use it too
+
+
+def test_the_registry_follows_the_variable_while_the_workspace_is_open(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    ws = battinfo.workspace(tmp_path)
+    explicit = battinfo.workspace(tmp_path, registry_url="https://explicit.example")
+    offline = battinfo.workspace(tmp_path, registry_url=None)
+    assert ws._registry_url == _DEFAULT_REGISTRY_URL
+
+    _write_credentials(tmp_path, BATTINFO_REGISTRY_URL="https://file.example")
+    assert ws._registry_url == "https://file.example"
+    monkeypatch.setenv("BATTINFO_REGISTRY_URL", "https://staging.example")
+    assert ws._registry_url == "https://staging.example"
+    assert ws.credentials_status()["BATTINFO_REGISTRY_URL"] == {"set": True, "source": "environment"}
+    monkeypatch.delenv("BATTINFO_REGISTRY_URL")
+    assert ws._registry_url == "https://file.example"
+
+    # A registry_url given when the workspace was opened stays as given.
+    assert explicit._registry_url == "https://explicit.example"
+    assert offline._registry_url is None
+
+
+def test_answers_from_one_registry_are_not_reused_for_another(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    cell = "https://w3id.org/battinfo/cell/epb7-1s8v-p342-469z"
+    ws = battinfo.workspace(tmp_path)
+    http = _registry_http(monkeypatch, urllib.error.URLError("registry down"))
+
+    for name in ("first", "second"):  # the second search and lookup reuse the first answers
+        ws.search("example r2032")
+        ws.add("test", type="cycling", cell=cell, name=name)
+    _write_credentials(tmp_path, BATTINFO_REGISTRY_URL="https://staging.example")
+    ws.search("example r2032")
+    ws.add("test", type="cycling", cell=cell, name="third")
+
+    searches = [url.split("/resources?")[0] for url in http.urls if "resource_type=cell_spec" in url]
+    lookups = [url.split("/resources/")[0] for url in http.urls if url.endswith("/resources/cell/epb7-1s8v-p342-469z")]
+    assert searches == lookups == [_DEFAULT_REGISTRY_URL, "https://staging.example"]
+
+
 def test_status_and_whoami_ask_the_registry_the_workspace_was_given(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

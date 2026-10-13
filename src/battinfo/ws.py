@@ -249,6 +249,8 @@ _CREDENTIALS_TEMPLATE = """\
 #   5. the default, for the few names that have one
 # The values here belong to this workspace. They are not copied into the
 # environment, so other workspaces in the same Python session never see them.
+# The workspace reads this file again when it changes, so an edit takes effect
+# without reopening the workspace.
 # A name set on more than one line takes the value of the last one.
 # ws.credentials_status() shows which names are set and where each one comes
 # from, without the values.
@@ -327,7 +329,8 @@ class _Unset:
 
 # battinfo.workspace(registry_url=...) left out: BATTINFO_REGISTRY_URL from the
 # environment, then from the workspace's .battinfo/credentials, then the
-# production registry. Typed Any so it can stand as the default of a str | None.
+# production registry, looked up at each use. Typed Any so it can stand as the
+# default of a str | None.
 _UNSET: Any = _Unset()
 
 
@@ -1854,16 +1857,14 @@ class AuthoringWorkspace:
         # Credentials established by login() in THIS instance; the same rule
         # applies. _credential() resolves every name through both.
         self._session_credentials: dict[str, str] = {}
-        # The registry for lookups, and where its URL came from. When the caller
-        # of battinfo.workspace() leaves registry_url out, it is
-        # BATTINFO_REGISTRY_URL from the environment or this workspace's
-        # credentials file, else production; None turns registry lookups off.
-        if registry_url is _UNSET:
-            registry_url, source = self._resolve_credential("BATTINFO_REGISTRY_URL", _DEFAULT_REGISTRY_URL)
-        else:
-            source = "argument" if registry_url else None
-        self._registry_url = registry_url.rstrip("/") if registry_url else None
-        self._registry_url_source: str | None = source if self._registry_url else None
+        # The registry for lookups (see _workspace_registry). A URL passed in is
+        # kept, and None turns registry lookups off. Left out, as
+        # battinfo.workspace() leaves it, it is looked up at each use, like the
+        # credentials: BATTINFO_REGISTRY_URL from the environment or this
+        # workspace's credentials file, else production.
+        if registry_url is not _UNSET:
+            registry_url = registry_url.rstrip("/") if registry_url else None
+        self._registry_url_given: str | None = registry_url
         # name -> Cell, keyed by short_id for test matching
         self._cells_by_short_id: dict[str, Any] = {}
         # Lookup keys that two or more DIFFERENT cells answer to. A display name
@@ -1875,18 +1876,20 @@ class AuthoringWorkspace:
         # loaded from .battinfo/records/cell-instance/ into the index above, so a
         # fresh process can still resolve a cell by serial (day-2 rehydration).
         self._cells_rehydrated = False
-        # (entity type, IRI) -> outcome of looking a referenced record up in the
-        # registry this session ("copied", "not_found", "unreachable", ...), so a
-        # record is asked for once, and a failed lookup is not retried on every
-        # ws.add() that references it.
-        self._reference_lookups: dict[tuple[str, str], str] = {}
+        # (registry, entity type, IRI) -> outcome of looking a referenced record
+        # up in that registry this session ("copied", "not_found",
+        # "unreachable", ...), so a record is asked for once per registry, and a
+        # failed lookup is not retried on every ws.add() that references it.
+        self._reference_lookups: dict[tuple[str, str, str], str] = {}
         # channel reference -> (equipment_id, channel_id) for test attachment.
         # Keys: the channel IRI, the channel label, and "unit/CHn" for the
         # unit's name and serial number. Populated by ws.add("equipment", ...)
         # and lazily from channel records already saved in the workspace.
         self._channels_by_ref: dict[str, tuple[str, str]] = {}
-        # in-memory search cache; populated lazily from registry API or local index
+        # in-memory search cache; populated lazily from registry API or local index,
+        # and built again when the workspace's registry changes
         self._search_cache: list[dict] | None = None
+        self._search_cache_registry: str | None = None
         # converted-file → original-source mapping (lazy-loaded from manifest)
         self._conversion_sources: dict[str, Any] | None = None
         # paths written by the most recent ws.save() — submit() uses this to
@@ -2102,6 +2105,27 @@ class AuthoringWorkspace:
         """The value of the credential *key* in the order of :meth:`_resolve_credential`."""
         return self._resolve_credential(key, default, explicit=explicit)[0]
 
+    @property
+    def _registry_url(self) -> str | None:
+        """The registry this workspace looks records up in; None when lookups are off."""
+        return self._workspace_registry()[0]
+
+    def _workspace_registry(self) -> tuple[str | None, str | None]:
+        """Return ``(url, source)`` of this workspace's registry; ``(None, None)`` when it has none.
+
+        A ``registry_url`` given when the workspace was opened is kept. Left
+        out, it is looked up at each use in the order of
+        :meth:`_resolve_credential`, with the production registry as the
+        default, so a change to ``BATTINFO_REGISTRY_URL`` in the environment or
+        in this workspace's credentials file takes effect without reopening the
+        workspace.
+        """
+        if self._registry_url_given is not _UNSET:
+            return (self._registry_url_given, "argument") if self._registry_url_given else (None, None)
+        url, source = self._resolve_credential("BATTINFO_REGISTRY_URL", _DEFAULT_REGISTRY_URL)
+        url = (url or "").rstrip("/")
+        return (url, source) if url else (None, None)
+
     def _registry_base(self, registry_url: str | None = None) -> tuple[str | None, str | None]:
         """Return ``(url, source)`` of the registry a call talks to; ``(None, None)`` when none.
 
@@ -2113,8 +2137,9 @@ class AuthoringWorkspace:
         """
         if registry_url:
             return registry_url.rstrip("/"), "argument"
-        if self._registry_url:
-            return self._registry_url, self._registry_url_source
+        url, source = self._workspace_registry()
+        if url:
+            return url, source
         url, source = self._resolve_credential("BATTINFO_REGISTRY_URL")
         return (url.rstrip("/"), source) if url else (None, None)
 
@@ -2212,7 +2237,8 @@ class AuthoringWorkspace:
 
         The registry is *registry_url*, else the workspace's. A workspace opened
         with ``registry_url=None`` needs one passed here or set as
-        ``BATTINFO_REGISTRY_URL``.
+        ``BATTINFO_REGISTRY_URL``. The registry asked is printed with where
+        its URL came from.
 
         Example::
 
@@ -2230,6 +2256,7 @@ class AuthoringWorkspace:
                 "https://www.battery-genome.org, or your team's registry admin)."
             )
         url = self._require_registry(registry_url, "ws.login()")
+        url_source = self._registry_base(registry_url)[1]
 
         profile: dict = {}
         try:
@@ -2287,6 +2314,7 @@ class AuthoringWorkspace:
                 if source == "environment":
                     print(f"  ({key} is taken from the environment and not saved; "
                           f".battinfo/credentials has {self._file_credential_values().get(key)!r}.)")
+        print(f"  Registry:    {url}  ({_CREDENTIAL_SOURCE_TEXT[url_source or 'default']})")
         print(f"  Credentials: {path}")
         return {"workspace_id": wid, "publisher_id": pid, "display_name": name, "registry_url": url}
 
@@ -4148,12 +4176,13 @@ class AuthoringWorkspace:
         import urllib.parse
         import urllib.request
 
+        base = self._registry_url  # once, so every page comes from the same registry
         rows: list[dict] = []
         prev_page: list | None = None
         offset = 0
         while True:
             query = dict(params, limit=self._RESOURCES_PAGE_LIMIT, offset=offset)
-            url = f"{self._registry_url}/resources?" + urllib.parse.urlencode(query)
+            url = f"{base}/resources?" + urllib.parse.urlencode(query)
             req = urllib.request.Request(url, headers={"User-Agent": "battinfo-client/1.0"})
             with urllib.request.urlopen(req, timeout=timeout) as resp:  # noqa: S310
                 page = json.loads(resp.read().decode())
@@ -7900,10 +7929,16 @@ class AuthoringWorkspace:
     _INDEX_FILE = ".search-index.json"
 
     def _get_search_cache(self) -> builtins.list[dict]:
-        """Return the search index: registry API first, local clone as fallback."""
-        if self._search_cache is not None:
+        """Return the search index: registry API first, local clone as fallback.
+
+        The index is kept for the session, and built again when the workspace's
+        registry changes (a new ``BATTINFO_REGISTRY_URL``).
+        """
+        registry = self._registry_url
+        if self._search_cache is not None and self._search_cache_registry == registry:
             return self._search_cache
-        if self._registry_url:
+        self._search_cache_registry = registry
+        if registry:
             try:
                 self._search_cache = self._build_api_cache()
                 return self._search_cache
@@ -8149,27 +8184,29 @@ class AuthoringWorkspace:
         copy kept under ``.battinfo/references/``; offline, the reference cannot
         be checked and ws.save() reports it. Returns ``local``, ``copied``,
         ``offline``, ``not_found``, ``unreachable`` or ``unreadable``. Each record
-        is looked up at most once per session: a later reference to it reuses the
-        outcome, so a registry that is down costs one timeout, not one per test.
+        is looked up at most once per registry in a session: a later reference to
+        it reuses the outcome, so a registry that is down costs one timeout, not
+        one per test.
         """
         if self._knows_record(iri, entity_type):
             return "local"
-        if not self._registry_url:
+        registry = self._registry_url
+        if not registry:
             print(f"  note: {iri} is not in this workspace and could not be checked offline "
                   "(registry_url=None).")
             return "offline"
-        remembered = self._reference_lookups.get((entity_type, iri))
+        remembered = self._reference_lookups.get((registry, entity_type, iri))
         if remembered is not None:
             return remembered
         record, outcome = self._fetch_registry_record(iri, entity_type)
         if record is not None:
             self._keep_reference_copy(record, entity_type)
-            self._reference_lookups[(entity_type, iri)] = "copied"
+            self._reference_lookups[(registry, entity_type, iri)] = "copied"
             return "copied"
-        self._reference_lookups[(entity_type, iri)] = outcome
+        self._reference_lookups[(registry, entity_type, iri)] = outcome
         reason = {
-            "not_found": f"was not found in the registry at {self._registry_url}",
-            "unreachable": f"could not be looked up in the registry at {self._registry_url}",
+            "not_found": f"was not found in the registry at {registry}",
+            "unreachable": f"could not be looked up in the registry at {registry}",
             "unreadable": "has no canonical record in its registry entry",
         }[outcome]
         print(f"  WARNING: {iri} {reason}; ws.save() will report the reference as unresolved.")
@@ -10390,8 +10427,9 @@ def workspace(
     """Open (or create) a BattINFO workspace for authoring records.
 
     Opening a workspace reads ``{root}/.battinfo/credentials`` into the
-    workspace object. Nothing is copied into ``os.environ``, so two workspaces
-    open in one Python session each use their own credentials; check them with
+    workspace object, and the workspace reads it again when it changes.
+    Nothing is copied into ``os.environ``, so two workspaces open in one Python
+    session each use their own credentials; check them with
     ``ws.credentials_status()`` or ``ws.has_credential(name)``.
 
     Parameters
@@ -10403,7 +10441,9 @@ def workspace(
         Base URL of the battinfo-registry API.  Left out, it is
         ``BATTINFO_REGISTRY_URL`` from the environment, then from
         ``{root}/.battinfo/credentials``, then the canonical production
-        registry, the same default ``battinfo.registry.Registry()`` uses.  Pass
+        registry, the same default ``battinfo.registry.Registry()`` uses.  It
+        is looked up at each use, so a change to either takes effect without
+        reopening the workspace.  Pass
         ``None`` to force offline/local-clone mode: no registry lookups, and
         no registry for :meth:`~AuthoringWorkspace.login`,
         :meth:`~AuthoringWorkspace.submit` or

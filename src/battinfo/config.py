@@ -39,13 +39,37 @@ def _yaml_problem(exc: Exception) -> str:
     return f"{problem}, line {mark.line + 1}, column {mark.column + 1}"
 
 
+def _load_yaml(text: str) -> Any:
+    """``yaml.safe_load(text)``, with a value PyYAML cannot build reported where it is.
+
+    PyYAML raises a plain ``ValueError`` for a date that does not exist, such as
+    ``2026-02-30``, and ``KeyError`` or ``AttributeError`` for a value that does
+    not fit its explicit tag, such as ``!!bool maybe``. Here they become a YAML
+    error that gives the line and column of the value, as a syntax error does.
+    """
+    import yaml  # type: ignore[import-untyped]
+
+    class Loader(yaml.SafeLoader):
+        def construct_object(self, node: Any, deep: bool = False) -> Any:
+            try:
+                return super().construct_object(node, deep=deep)
+            except yaml.YAMLError:
+                raise
+            except Exception as exc:
+                if isinstance(exc, ValueError) and str(exc):
+                    problem = str(exc)
+                else:
+                    problem = "cannot read the value as " + str(node.tag).replace("tag:yaml.org,2002:", "!!")
+                raise yaml.constructor.ConstructorError(None, None, problem, node.start_mark) from exc
+
+    return yaml.load(text, Loader=Loader)  # noqa: S506 - a SafeLoader subclass
+
+
 def _parse_user_config(path: Path) -> tuple[dict[str, Any], str | None]:
     """Read ``path``: its values, and why it cannot be used (``None`` when it can).
 
     A file that is empty or holds only comments has no values and no problem.
     """
-    import yaml  # type: ignore[import-untyped]
-
     try:
         text = path.read_text(encoding="utf-8-sig")
     except UnicodeDecodeError:
@@ -53,8 +77,8 @@ def _parse_user_config(path: Path) -> tuple[dict[str, Any], str | None]:
     except OSError as exc:
         return {}, f"cannot be read ({exc.strerror or type(exc).__name__})"
     try:
-        data = yaml.safe_load(text)
-    except yaml.YAMLError as exc:
+        data = _load_yaml(text)
+    except Exception as exc:  # a YAML error, or RecursionError on very deep nesting
         return {}, f"is not valid YAML ({_yaml_problem(exc)})"
     if data is None:
         return {}, None
