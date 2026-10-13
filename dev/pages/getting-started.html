@@ -547,11 +547,11 @@
 <p>Working at the bench? The <a class="reference internal" href="howto.html"><span class="doc">how-to guides</span></a> map lab tasks, such as registering materials, building a cell from components, labelling cells and publishing, to short runnable recipes, and the <a class="reference internal" href="glossary.html"><span class="doc">glossary</span></a> decodes the vocabulary in plain language.</p>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Link to this heading">#</a></h2>
-<p>BattINFO requires Python 3.11 or later. Install it from PyPI. The optional extras add features as you need them, and a feature whose dependency is missing raises an error that names the extra to install:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>battinfo<span class="w">                  </span><span class="c1"># core</span>
-pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;battinfo[processing]&quot;</span><span class="w">    </span><span class="c1"># cycler-file conversion (ws.convert) + plotting</span>
-pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;battinfo[tabular]&quot;</span><span class="w">       </span><span class="c1"># CSV/Parquet/XLSX readers</span>
-pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;battinfo[publish]&quot;</span><span class="w">       </span><span class="c1"># RO-Crate validation for publishing</span>
+<p>BattINFO requires Python 3.11 or later. Until 0.8.0, its first working release on PyPI, install it from GitHub. The optional extras add features as you need them, and a feature whose dependency is missing raises an error that names the extra to install:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;battinfo @ git+https://github.com/BIG-MAP/BattINFO.git&quot;</span><span class="w">              </span><span class="c1"># core</span>
+pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;battinfo[processing] @ git+https://github.com/BIG-MAP/BattINFO.git&quot;</span><span class="w">  </span><span class="c1"># cycler-file conversion (ws.convert) + plotting</span>
+pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;battinfo[tabular] @ git+https://github.com/BIG-MAP/BattINFO.git&quot;</span><span class="w">     </span><span class="c1"># CSV/Parquet/XLSX readers</span>
+pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;battinfo[publish] @ git+https://github.com/BIG-MAP/BattINFO.git&quot;</span><span class="w">     </span><span class="c1"># RO-Crate validation for publishing</span>
 </pre></div>
 </div>
 <div class="admonition note">

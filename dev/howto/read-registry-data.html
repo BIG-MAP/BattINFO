@@ -561,7 +561,7 @@
 <p>The workspace is for describing and publishing. <code class="docutils literal notranslate"><span class="pre">battinfo.registry.Registry</span></code> goes the other way: it finds what a registry holds and loads the measurement files for analysis. Use it when you want to build a data pipeline on published datasets.</p>
 <p>A registry is an index. It stores records and the links between them, and each dataset record points at its files with a URL, a size and a checksum. The files themselves live wherever the publisher put them.</p>
 <p>Listing and looking up records needs only the core install. Loading files and building the catalog return pandas objects:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;battinfo[tabular]&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;battinfo[tabular] @ git+https://github.com/BIG-MAP/BattINFO.git&quot;</span>
 </pre></div>
 </div>
 <section id="start-from-the-catalog">
