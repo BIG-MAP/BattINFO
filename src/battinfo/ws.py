@@ -40,6 +40,7 @@ from battinfo._jsonio import read_json as _read_json
 from battinfo._jsonio import write_private_text as _write_private_text
 from battinfo._util import _now_iso, is_dataset_series, local_file_references
 from battinfo._util import local_files_message as _local_files_message
+from battinfo.canonical_aliases import migrate_quantity_values
 from battinfo.entities import entity_id_from_doc, is_dashed_uid, kind_for_type, record_set_dirs, save_entity_path
 
 # Short-name pattern: 6 lowercase alphanumeric characters at the end of a
@@ -604,6 +605,26 @@ def _media_type_from_jsonld(value: Any) -> str:
 def _jsonld_literal(value: Any) -> Any:
     """The value of a typed JSON-LD literal (``{"@value": ..., "@type": ...}``), else *value*."""
     return value.get("@value") if isinstance(value, Mapping) else value
+
+
+def _jsonld_text(value: Any) -> str | None:
+    """The text of a JSON-LD string value (plain, typed, or a list of them, joined by '; ')."""
+    items = value if isinstance(value, list) else [value]
+    texts = [text for item in items if isinstance(text := _jsonld_literal(item), str) and text.strip()]
+    return "; ".join(texts) or None
+
+
+def _warn_text_moved(source: str, notes: Iterable[str]) -> None:
+    """Warn that text read from a quantity's ``value`` moved to ``value_text``.
+
+    *notes* come from ``migrate_quantity_values``; nothing is said when it is empty.
+    """
+    lines = list(notes)
+    if lines:
+        warnings.warn(
+            f"{source} held text in a quantity's value, which takes a number only from 0.8.0 on: {'; '.join(lines)}.",
+            stacklevel=3,
+        )
 
 
 def _typed_date(value: "str | int | float") -> dict:
@@ -3553,6 +3574,11 @@ class AuthoringWorkspace:
         A relative draft path resolves against the workspace root, not the
         current directory.
 
+        A quantity's ``value`` holds a number only. A cell-spec or
+        equipment-spec draft, or a found cell spec, written before 0.8.0 may
+        hold text there: a numeric string (``"2.5"``) is read as the number,
+        and other text moves to ``value_text`` with a warning.
+
         Example::
 
             spec = ws.load("duracell.cell-spec.json")               # author new
@@ -4378,7 +4404,10 @@ class AuthoringWorkspace:
         Parses the JSON-LD `@graph`, reconstructs cell specs, cell instances,
         tests, and datasets, then populates this workspace ready for
         ``ws.save()`` and ``ws.submit()``.  All canonical IRIs from the source
-        document are preserved — no new IRIs are minted.
+        document are preserved — no new IRIs are minted. A deposit written
+        before 0.8.0 may carry text as a quantity's number: a numeric string
+        (``"2.5"``) is read as the number, and other text moves to
+        ``value_text`` with a warning.
 
         Parameters
         ----------
@@ -4501,15 +4530,26 @@ class AuthoringWorkspace:
                 d.update(info)
             return d
 
-        def _specs_from_property_nodes(nodes: list) -> dict:
+        def _specs_from_property_nodes(nodes: list, where: str) -> dict:
             """Reverse EMMO hasProperty nodes → {key: {value, unit}}.
 
             Accepts both quantity-node generations: the legacy single-string
             ``@type`` with a ``{"@id": ...}`` unit reference, and the canonical
             shape (list ``@type`` of ``[PropertyClass, co-type]`` with the unit
-            as a bare IRI string)."""
+            as a bare IRI string). A unit without an IRI is read from
+            ``schema:unitText``.
+
+            A deposit written before 0.8.0 may carry text in
+            ``hasNumberValue``: a numeric string comes back as the number, and
+            other text moves to ``value_text`` with a warning, so a strict
+            ``ws.save()`` accepts the record. A ``hasStringValue`` beside a
+            number comes back as ``value_text``; a property stated as text
+            alone is not read back."""
             specs: dict = {}
-            for node in nodes:
+            moved: builtins.list[str] = []
+            for node in nodes if isinstance(nodes, list) else [nodes]:
+                if not isinstance(node, Mapping):
+                    continue
                 type_raw = node.get("@type", "")
                 type_terms = (
                     [type_raw]
@@ -4524,9 +4564,14 @@ class AuthoringWorkspace:
                 )
                 if not prop_key:
                     continue
-                value = (node.get("hasNumericalPart") or {}).get(
-                    "hasNumberValue", (node.get("hasNumericalPart") or {}).get("hasNumericalValue")
-                )
+                numerical = node.get("hasNumericalPart")
+                numerical = numerical if isinstance(numerical, Mapping) else {}
+                value = _jsonld_literal(numerical.get("hasNumberValue", numerical.get("hasNumericalValue")))
+                if value is None:
+                    continue
+                quantity: dict[str, Any] = {"value": value}
+                if text := _jsonld_text(node.get("hasStringValue")):
+                    quantity["value_text"] = text
                 unit_raw = node.get("hasMeasurementUnit")
                 if isinstance(unit_raw, str):
                     unit_term = unit_raw
@@ -4534,10 +4579,13 @@ class AuthoringWorkspace:
                     unit_term = unit_raw.get("@id", "")
                 else:
                     unit_term = ""
-                unit_iri = _expand(unit_term)
-                unit_sym = rev_unit.get(unit_iri, unit_term.split(":")[-1])
-                if value is not None:
-                    specs[prop_key] = {"value": value, "unit": unit_sym}
+                if unit_term:
+                    quantity["unit"] = rev_unit.get(_expand(unit_term), unit_term.split(":")[-1])
+                elif text_unit := _jsonld_text(node.get("schema:unitText")):
+                    quantity["unit"] = text_unit
+                moved.extend(migrate_quantity_values(quantity, f"properties.{prop_key}"))
+                specs[prop_key] = quantity
+            _warn_text_moved(where, moved)
             return specs
 
         # ── 4. Index graph nodes by type ───────────────────────────────────────
@@ -4601,7 +4649,9 @@ class AuthoringWorkspace:
             # Canonical shape: the physical payload (hasProperty, composition)
             # rides the described battery; older packages carried it on the
             # spec node - read both, described side first.
-            specs = _specs_from_property_nodes(phys.get("hasProperty") or node.get("hasProperty", []))
+            specs = _specs_from_property_nodes(
+                phys.get("hasProperty") or node.get("hasProperty") or [], f"cell spec {iri}"
+            )
 
             # size_code: the canonical shape emits it as schema:size; older
             # packages used schema:identifier. In the canonical shape
@@ -8390,6 +8440,9 @@ class AuthoringWorkspace:
         # CellSpec(nominal_voltage=...) reads it (it wins over both).
         flat = {key: fields.pop(key) for key in [key for key in fields if key in flat_names]}
         quantities = {**(fields.pop("specs", None) or {}), **(fields.pop("properties", None) or {}), **flat}
+        # A draft written before 0.8.0 may hold text in a quantity's value: a
+        # numeric string becomes the number, other text moves to value_text.
+        _warn_text_moved(path.name, migrate_quantity_values(quantities, "properties"))
         fields["properties"] = _filled_quantities(quantities, path)
         _merge_draft_alias(fields, "model_name", "model", path)
         comment = [*_draft_text_list(fields.pop("comment", None)), *_draft_text_list(fields.pop("notes", None))]
@@ -8566,8 +8619,19 @@ class AuthoringWorkspace:
 
         record = self._fetch_cell_spec_record(result) if result.get("source") == "api" else result.get("_record", {})
         product = record.get("cell_spec", {}) or {}
-        specs_raw = record.get("properties", {}) or {}
-        specs = {k: v for k, v in specs_raw.items() if isinstance(v, dict) and v.get("value") is not None}
+        # A copy, so the reference copy kept below stays as published. A spec
+        # saved before 0.8.0 may hold text in a quantity's value: it is read
+        # into value_text (a numeric string into the number).
+        specs_raw = copy.deepcopy(record.get("properties", {}) or {})
+        _warn_text_moved(
+            f"cell spec {result.get('id') or product.get('id') or ''}".strip(),
+            migrate_quantity_values(specs_raw, "properties"),
+        )
+        specs = {
+            k: v
+            for k, v in specs_raw.items()
+            if isinstance(v, dict) and any(v.get(field) is not None for field in _QUANTITY_VALUE_KEYS)
+        }
         mfr = product.get("manufacturer") or {}
         mfr_name = mfr.get("name", "") if isinstance(mfr, dict) else str(mfr)
         ct = CellSpec(
@@ -8951,6 +9015,9 @@ class AuthoringWorkspace:
             )
         pinned = _draft_spec_iri(raw.get("id"), raw.get("uid"), path.name)
         uid = None if pinned else stable_uid("::".join(["equipment-spec", manufacturer or "", model or "", name]))
+        # A draft written before 0.8.0 may hold text in a quantity's value: a
+        # numeric string becomes the number, other text moves to value_text.
+        _warn_text_moved(path.name, migrate_quantity_values(raw.get("property"), "property"))
         # Drop template placeholders (null quantity fields) so the record stays valid.
         props: dict[str, dict] = {}
         for key, value in (raw.get("property") or {}).items():

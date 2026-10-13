@@ -6,6 +6,7 @@ import the public surface from ``battinfo.api``, not from this module.
 
 from __future__ import annotations
 
+import copy
 import re
 from collections.abc import Callable
 from pathlib import Path
@@ -68,6 +69,7 @@ from battinfo.bundle import (
     TestSpec,
     stamp_provenance,
 )
+from battinfo.canonical_aliases import migrate_quantity_values
 from battinfo.entities import (
     dataset_locator_seed,
     entity_files_for_uid,
@@ -1577,19 +1579,36 @@ def _resolve_references_for_save(doc: dict[str, Any], source_root: Path) -> None
     raise ValueError(format_report_errors(report, prefix="Reference validation failed"))
 
 
-def _record_content_differs(existing_path: PathLike, new_doc: Mapping[str, Any]) -> bool:
-    """True if the record already on disk differs from *new_doc* in a meaningful way.
+def _compare_with_saved(existing_path: PathLike, new_doc: Mapping[str, Any]) -> tuple[bool, bool]:
+    """``(content_changed, saved_copy_outdated)`` for an upsert over the record at *existing_path*.
 
-    Volatile timestamps and identity scaffolding (see ``_strip_volatile``) are ignored, so an
-    idempotent re-save of unchanged content reports False and a real edit reports True. A
-    missing or unreadable existing file is treated as "differs" (the write is not a no-op)."""
+    The saved record is read back the way 0.8.0 reads an older record: text in a
+    quantity's ``value`` moves to ``value_text`` and a numeric string becomes the
+    number (``migrate_quantity_values``) before the comparison, so a record saved
+    with ``"2.5"`` and saved again with ``2.5`` compares as unchanged.
+    ``saved_copy_outdated`` is True when that changed the saved copy, which then
+    has to be rewritten although its content did not change. Volatile timestamps
+    and identity scaffolding (see ``_strip_volatile``) are ignored. A missing or
+    unreadable file differs."""
     from battinfo._workspace import _strip_volatile
 
     try:
         existing = _load_json(_as_path(existing_path))
     except (OSError, ValueError):
-        return True
-    return _strip_volatile(existing) != _strip_volatile(dict(new_doc))
+        return True, False
+    migrated = copy.deepcopy(existing)
+    migrate_quantity_values(migrated)
+    return _strip_volatile(migrated) != _strip_volatile(dict(new_doc)), migrated != existing
+
+
+def _record_content_differs(existing_path: PathLike, new_doc: Mapping[str, Any]) -> bool:
+    """True if the record already on disk differs from *new_doc* in a meaningful way.
+
+    Volatile timestamps and identity scaffolding (see ``_strip_volatile``) are ignored, so an
+    idempotent re-save of unchanged content reports False and a real edit reports True. The
+    saved record is read the way 0.8.0 reads an older one (see ``_compare_with_saved``). A
+    missing or unreadable existing file is treated as "differs" (the write is not a no-op)."""
+    return _compare_with_saved(existing_path, new_doc)[0]
 
 
 def save_record(
@@ -1695,8 +1714,9 @@ def save_record(
     # volatile timestamps) is reported explicitly, so a same-IRI overwrite is never silent —
     # the caller can surface it or choose mode='create_only' to refuse it. (A-4)
     content_changed = False
+    saved_copy_outdated = False
     if existing_path is not None and mode_normalized == REGISTER_MODE_UPSERT:
-        content_changed = _record_content_differs(existing_path, doc)
+        content_changed, saved_copy_outdated = _compare_with_saved(existing_path, doc)
     payload: dict[str, Any] = {
         "status": "dry-run" if dry_run else operation,
         "id": entity_id,
@@ -1718,8 +1738,11 @@ def save_record(
     # An in-place upsert whose content did not change (ignoring volatile
     # timestamps) is a genuine no-op: leave the file — and its mtime — untouched
     # rather than churning identical bytes on every save. The record is still
-    # registered with the bulk cache so the index is rebuilt as usual.
-    if not (existing_path is not None and mode_normalized == REGISTER_MODE_UPSERT and not content_changed):
+    # registered with the bulk cache so the index is rebuilt as usual. A saved
+    # copy that still holds text in a quantity's value is rewritten all the
+    # same, so the file on disk validates.
+    unchanged_upsert = existing_path is not None and mode_normalized == REGISTER_MODE_UPSERT and not content_changed
+    if not unchanged_upsert or saved_copy_outdated:
         _write_json(target_path, doc, durable=cache is None)
     if cache is not None:
         cache.record_saved(entity_id, target_path, entity_type)
@@ -1957,7 +1980,9 @@ def save_dataset(
       ``False``; it only describes a record that was already there.
     - ``"updated"`` (``mode="upsert"`` over a saved record):
       ``content_changed`` is ``True`` when the record differs from the saved
-      one and ``False`` when it does not, in which case nothing is rewritten.
+      one and ``False`` when it does not, in which case nothing is rewritten
+      unless the saved copy holds text in a quantity's ``value``, which is
+      read as ``value_text`` for the comparison and then rewritten.
       The comparison ignores ``id``, ``uid`` and the ``created_at``,
       ``modified_at``, ``retrieved_at``, ``generated_at`` and ``imported_at``
       timestamps, but not ``published_at``: a ``Dataset`` saved without one

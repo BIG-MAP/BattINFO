@@ -10,6 +10,7 @@ timestamps, file hashing, and citation/DOI normalization.
 from __future__ import annotations
 
 import hashlib
+import math
 import re
 from datetime import datetime, timezone
 from pathlib import Path, PureWindowsPath
@@ -215,6 +216,43 @@ def _now_iso() -> str:
 
 def _now_unix() -> int:
     return int(datetime.now(timezone.utc).timestamp())
+
+
+def is_real_number(value: object) -> bool:
+    """True for an int or float that is finite and not a bool.
+
+    These are the only values a quantity's ``value`` holds, and the only ones
+    the emitters write as ``hasNumberValue``. Text belongs in ``value_text``.
+    """
+    if isinstance(value, bool):
+        return False
+    if isinstance(value, int):
+        return True
+    return isinstance(value, float) and math.isfinite(value)
+
+
+# Plain decimal notation, as JSON writes numbers, with an optional sign and
+# surrounding spaces. "2,5", "1_000", "0x10", "nan" and "inf" are text.
+_NUMBER_TEXT_RE = re.compile(r"[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?")
+
+
+def number_from_text(text: str) -> int | float | None:
+    """The number a numeric string spells, or None when the string is text.
+
+    ``"2.5"`` gives 2.5, ``" 3 "`` gives 3 (an int when there is no decimal
+    point or exponent) and ``"1e-3"`` gives 0.001. ``"2.5 V"``, ``"n/a"``,
+    ``"2,5"`` and a number too large for a float give None.
+    """
+    stripped = text.strip()
+    if not _NUMBER_TEXT_RE.fullmatch(stripped):
+        return None
+    try:
+        if not any(mark in stripped for mark in ".eE"):
+            return int(stripped)
+        number = float(stripped)
+    except ValueError:  # more digits than int() reads
+        return None
+    return number if math.isfinite(number) else None
 
 
 def is_dataset_series(additional_type: object) -> bool:

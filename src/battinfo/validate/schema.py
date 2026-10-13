@@ -223,6 +223,11 @@ def _enhance_message(error: ValidationError) -> str:
         )
     if error.validator == "additionalProperties" and list(error.path) == ["properties"]:
         msg += " Run 'battinfo properties list' to see all valid property names."
+    if error.validator == "type" and error.validator_value == "number" and isinstance(error.instance, str):
+        # A quantity's value took text before 0.8.0; say where the text goes now.
+        description = error.schema.get("description", "") if isinstance(error.schema, dict) else ""
+        msg = msg.rstrip(".") + ". Write the number without quotes"
+        msg += "; text that is not a number belongs in value_text." if "value_text" in description else "."
     if error.validator in ("pattern", "maxLength") and list(error.path)[-1:] == ["handle"]:
         msg += (
             " A handle is lowercase ASCII segments joined by '/', each made of letters and"

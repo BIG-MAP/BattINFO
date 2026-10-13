@@ -24,6 +24,8 @@ spec = battinfo.CellSpec(
 print(spec.nominal_capacity)
 ```
 
+The value itself is a number, so write `2.5`, not `"2.5"`. Text that is not a number, such as a cycle life of `>1000`, goes in `value_text`: `cycle_life={"value_text": ">1000", "unit": "count"}`.
+
 **3. An invalid test kind**
 
 ```python

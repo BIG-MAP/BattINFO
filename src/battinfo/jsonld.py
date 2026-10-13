@@ -25,7 +25,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any, Callable
 
-from battinfo._util import is_dataset_series
+from battinfo._util import is_dataset_series, is_real_number
 from battinfo.entities import kind_for_doc
 from battinfo.testmethod import _is_current_density_unit
 
@@ -406,14 +406,28 @@ def _attach_unit(node: dict, unit_symbol: Any) -> None:
         node["schema:unitText"] = str(unit_symbol)
 
 
+def _value_part(value: Any) -> dict:
+    """The value of a quantity node: ``hasNumericalPart`` for a finite real
+    number, ``hasStringValue`` for text, and nothing for anything else. Text
+    only gets here in a dict that skipped validation; it stays text and is
+    never coerced to a number."""
+    if is_real_number(value):
+        return {"hasNumericalPart": {"hasNumberValue": value}}
+    if isinstance(value, str) and value.strip():
+        return {"hasStringValue": value}
+    return {}
+
+
 def condition_quantity_node(key: str, value: Any, unit_symbol: str) -> dict | None:
     """A test condition -> EMMO quantity node (the ``@type`` comes from the
-    controlled vocabulary), or ``None`` if the key is unmapped — the caller then
-    falls back to ``schema:PropertyValue``."""
+    controlled vocabulary), or ``None`` if the key is unmapped or the value is
+    neither a number nor text — the caller then falls back to
+    ``schema:PropertyValue``."""
     cls = TEST_CONDITION_CLASS.get(str(key).lower())
-    if not cls:
+    part = _value_part(value)
+    if not cls or not part:
         return None
-    node: dict = {"@type": cls, "hasNumericalPart": {"hasNumberValue": value}}
+    node: dict = {"@type": cls, **part}
     # A generic class (e.g. ConventionalProperty for temperature) needs a human
     # label to say *which* property it is.
     if cls in TEST_CONDITION_GENERIC_CLASSES:
@@ -428,7 +442,7 @@ def condition_quantity_node(key: str, value: Any, unit_symbol: str) -> dict | No
 
 def typed_quantity_node(emmo_class: str, value: Any, unit_symbol: str) -> dict:
     """An EMMO quantity node with an explicit ``@type`` (used for method steps)."""
-    node: dict = {"@type": emmo_class, "hasNumericalPart": {"hasNumberValue": value}}
+    node: dict = {"@type": emmo_class, **_value_part(value)}
     _attach_unit(node, unit_symbol)
     return node
 
@@ -462,7 +476,7 @@ def method_step_node(step: Mapping[str, Any]) -> dict:
     if mode == "group":
         gnode: dict = {"@type": step_emmo_class("group", None) or "IterativeWorkflow"}
         count = step.get("count")
-        if isinstance(count, int):
+        if isinstance(count, int) and is_real_number(count):
             gnode["NumberOfIterations"] = {"hasNumericalPart": {"hasNumberValue": count}}
         gnode["hasTask"] = [method_step_node(s) for s in (step.get("steps") or []) if isinstance(s, Mapping)]
         return gnode
@@ -862,9 +876,10 @@ def _quantity(value: Any, unit: str) -> dict:
 
     Uses the same EMMO ``hasNumericalPart``/``hasNumberValue``/``hasMeasurementUnit``
     encoding as the published builder (ws.py) — a single, shared quantity serialization
-    across publication and validation (no parallel QUDT form).
+    across publication and validation (no parallel QUDT form). Text goes to
+    ``hasStringValue``, as in every emitter.
     """
-    node: dict = {"hasNumericalPart": {"hasNumberValue": value}}
+    node: dict = dict(_value_part(value))
     unit_iri = _UNIT_MAP.get(unit)
     if unit_iri:
         node["hasMeasurementUnit"] = {"@id": unit_iri}

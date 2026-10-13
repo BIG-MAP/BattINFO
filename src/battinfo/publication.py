@@ -15,7 +15,15 @@ from urllib.parse import unquote, urlparse
 from battinfo._emmo_instruments import _instrument_node
 from battinfo._jsonio import read_record_json as _load_json
 from battinfo._jsonio import write_json as _write_json
-from battinfo._util import _as_path, _citation_doi_from_url, _now_iso, _now_unix, _sha256, is_dataset_series
+from battinfo._util import (
+    _as_path,
+    _citation_doi_from_url,
+    _now_iso,
+    _now_unix,
+    _sha256,
+    is_dataset_series,
+    is_real_number,
+)
 from battinfo.bundle import (
     ZENODO_CELL_RECORD_FILENAME,
     BattinfoBundle,
@@ -1229,10 +1237,14 @@ def _cell_spec_property_node(name: str, quantity: Any) -> dict[str, Any] | None:
     unit = quantity.get("unit")
     if value is None or not isinstance(unit, str):
         return None
-    node: dict[str, Any] = {
-        "@type": type_name,
-        "hasNumericalPart": {"@type": "RealData", "hasNumberValue": value},
-    }
+    node: dict[str, Any] = {"@type": type_name}
+    # hasNumberValue carries a finite real number only; text stays text.
+    if is_real_number(value):
+        node["hasNumericalPart"] = {"@type": "RealData", "hasNumberValue": value}
+    elif isinstance(value, str) and value.strip():
+        node["hasStringValue"] = value
+    else:
+        return None
     unit_iri = UNIT_IRI_MAP.get(unit)
     if unit_iri:
         node["hasMeasurementUnit"] = unit_iri
