@@ -333,6 +333,9 @@ def __dir__() -> list[str]:
     from battinfo import api as _api
 
     return sorted(
-        set(__all__) | set(_LAZY_EXPORTS) | set(_DEPRECATED_ALIASES)
-        | set(_api._COMPONENT_WRAPPER_NAMES) | {"Workspace"}
+        set(__all__)
+        | set(_LAZY_EXPORTS)
+        | set(_DEPRECATED_ALIASES)
+        | set(_api._COMPONENT_WRAPPER_NAMES)
+        | {"Workspace"}
     )

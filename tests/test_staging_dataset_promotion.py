@@ -5,6 +5,7 @@ Validation is monkeypatched so these tests exercise the promotion mechanics
 (record-id resolution, curated path, citation pass-through, dry-run) without
 depending on the full dataset schema being satisfied.
 """
+
 from __future__ import annotations
 
 import json

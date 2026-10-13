@@ -140,18 +140,38 @@ save_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Save ca
 template_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Generate starter templates.")
 library_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Manage reusable BattINFO library records.")
 library_query_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Query reusable library records.")
-library_save_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Save reusable BattINFO library records locally.")
-library_template_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Generate reusable library templates.")
-editorial_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Validate and promote battinfo-records style staging drafts.")
+library_save_app = typer.Typer(
+    add_completion=False, no_args_is_help=True, help="Save reusable BattINFO library records locally."
+)
+library_template_app = typer.Typer(
+    add_completion=False, no_args_is_help=True, help="Generate reusable library templates."
+)
+editorial_app = typer.Typer(
+    add_completion=False, no_args_is_help=True, help="Validate and promote battinfo-records style staging drafts."
+)
 workspace_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Author BattINFO workspaces on disk.")
 notebook_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Notebook runtime recovery helpers.")
-demo_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Scaffold and verify end-to-end BattINFO demos.")
-ingest_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Register typed resource instances from folder-based evidence.")
-registry_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Manage registry tenants, workspaces, and publishers.")
-dataset_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Contribute measurement datasets: init -> process -> publish.")
-batch_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Scaffold and manage multi-cell batch contributions.")
-config_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Manage user preferences (creator, license, community).")
-specs_app = typer.Typer(add_completion=False, no_args_is_help=True, help="Browse valid spec property names and their accepted units.")
+demo_app = typer.Typer(
+    add_completion=False, no_args_is_help=True, help="Scaffold and verify end-to-end BattINFO demos."
+)
+ingest_app = typer.Typer(
+    add_completion=False, no_args_is_help=True, help="Register typed resource instances from folder-based evidence."
+)
+registry_app = typer.Typer(
+    add_completion=False, no_args_is_help=True, help="Manage registry tenants, workspaces, and publishers."
+)
+dataset_app = typer.Typer(
+    add_completion=False, no_args_is_help=True, help="Contribute measurement datasets: init -> process -> publish."
+)
+batch_app = typer.Typer(
+    add_completion=False, no_args_is_help=True, help="Scaffold and manage multi-cell batch contributions."
+)
+config_app = typer.Typer(
+    add_completion=False, no_args_is_help=True, help="Manage user preferences (creator, license, community)."
+)
+specs_app = typer.Typer(
+    add_completion=False, no_args_is_help=True, help="Browse valid spec property names and their accepted units."
+)
 
 app.add_typer(query_app, name="query")
 app.add_typer(create_app, name="create")
@@ -349,10 +369,11 @@ def _render_validation_issue(issue: Any) -> str:
 def _safe_echo(text: str) -> None:
     """typer.echo with a fallback for terminals that cannot encode all Unicode characters."""
     import sys  # noqa: PLC0415
+
     try:
         typer.echo(text)
     except UnicodeEncodeError:
-        enc = (getattr(sys.stdout, "encoding", None) or "ascii")
+        enc = getattr(sys.stdout, "encoding", None) or "ascii"
         safe = text.encode(enc, errors="replace").decode(enc, errors="replace")
         sys.stdout.write(safe + "\n")
         sys.stdout.flush()
@@ -381,7 +402,9 @@ def validate(
         readable=True,
         help="Canonical source root for cross-reference validation.",
     ),
-    shacl: bool = typer.Option(True, "--shacl/--no-shacl", help="Run SHACL shapes validation (cell-spec records only)."),
+    shacl: bool = typer.Option(
+        True, "--shacl/--no-shacl", help="Run SHACL shapes validation (cell-spec records only)."
+    ),
 ) -> None:
     """Validate a BattINFO record (JSON Schema + semantic + SHACL) or a raw JSON profile document."""
     data = json.loads(input_path.read_text(encoding="utf-8"))
@@ -394,6 +417,7 @@ def validate(
         if not shacl:
             # Strip any SHACL issues if disabled.
             from battinfo.validate.core import ValidationReport  # noqa: PLC0415
+
             report = ValidationReport(
                 issues=tuple(i for i in report.issues if i.validator != "shacl"),
                 policy=report.policy,
@@ -542,7 +566,9 @@ def demo_setup(
 @demo_app.command("verify")
 def demo_verify(
     root: Path = typer.Argument(Path(".battinfo/demo-e2e")),
-    registry_url: str = typer.Option(..., "--registry-url", help="Registry base URL, for example http://127.0.0.1:8000."),
+    registry_url: str = typer.Option(
+        ..., "--registry-url", help="Registry base URL, for example http://127.0.0.1:8000."
+    ),
     api_key: str = typer.Option(..., "--api-key", help="Registry submission API key."),
     platform_url: str | None = typer.Option(
         None,
@@ -552,11 +578,19 @@ def demo_verify(
     registry: str = typer.Option("digibatt/hello-world", help="Registry tenant/workspace slug."),
     publisher_id: str = typer.Option("demo-lab", help="Publisher id used for the generated submission package."),
     version: str = typer.Option("1.0.0", help="Release version and submission source_version."),
-    api_key_header: str = typer.Option("X-Battinfo-API-Key", "--api-key-header", help="Registry submission API key header."),
+    api_key_header: str = typer.Option(
+        "X-Battinfo-API-Key", "--api-key-header", help="Registry submission API key header."
+    ),
     timeout_sec: float = typer.Option(30.0, "--timeout-sec", help="Timeout window for registry and platform checks."),
-    poll_interval_sec: float = typer.Option(1.0, "--poll-interval-sec", help="Polling interval while waiting for responses."),
+    poll_interval_sec: float = typer.Option(
+        1.0, "--poll-interval-sec", help="Polling interval while waiting for responses."
+    ),
     force: bool = typer.Option(False, "--force", help="Replace the existing demo root before regenerating it."),
-    allow_local_files: bool = typer.Option(False, "--allow-local-files", help="Send the demo dataset although its file is a local path. Only for a local test registry."),
+    allow_local_files: bool = typer.Option(
+        False,
+        "--allow-local-files",
+        help="Send the demo dataset although its file is a local path. Only for a local test registry.",
+    ),
     output_format: str = typer.Option("json", "--format", help="Output format: json|text."),
 ) -> None:
     """Run the BattINFO demo pipeline through registry publication and optional platform verification."""
@@ -593,7 +627,9 @@ def demo_verify(
 @ingest_app.command("inspect")
 def ingest_inspect(
     ingest_root: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True, readable=True),
-    resource_type: str = typer.Option("cell-instance", "--resource-type", help="Typed ingest subject. Today: cell-instance."),
+    resource_type: str = typer.Option(
+        "cell-instance", "--resource-type", help="Typed ingest subject. Today: cell-instance."
+    ),
     type_record: Path | None = typer.Option(None, "--type-record", help="Curated type record path."),
     manifest: Path | None = typer.Option(None, "--manifest", help="Optional battinfo.ingest.json path."),
     resource_iri: str | None = typer.Option(None, "--resource-iri", help="Existing BattINFO resource IRI to preserve."),
@@ -638,7 +674,9 @@ def ingest_inspect(
 @ingest_app.command("init")
 def ingest_init(
     ingest_root: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True, readable=True),
-    resource_type: str = typer.Option("cell-instance", "--resource-type", help="Typed ingest subject. Today: cell-instance."),
+    resource_type: str = typer.Option(
+        "cell-instance", "--resource-type", help="Typed ingest subject. Today: cell-instance."
+    ),
     type_record: Path | None = typer.Option(None, "--type-record", help="Curated type record path."),
     manifest: Path | None = typer.Option(None, "--manifest", help="Where to write battinfo.ingest.json."),
     resource_iri: str | None = typer.Option(None, "--resource-iri", help="Existing BattINFO resource IRI to preserve."),
@@ -680,7 +718,9 @@ def ingest_init(
 @ingest_app.command("build")
 def ingest_build(
     ingest_root: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True, readable=True),
-    resource_type: str = typer.Option("cell-instance", "--resource-type", help="Typed ingest subject. Today: cell-instance."),
+    resource_type: str = typer.Option(
+        "cell-instance", "--resource-type", help="Typed ingest subject. Today: cell-instance."
+    ),
     type_record: Path | None = typer.Option(None, "--type-record", help="Curated type record path."),
     manifest: Path | None = typer.Option(None, "--manifest", help="Optional battinfo.ingest.json path."),
     workspace_root: Path | None = typer.Option(None, "--workspace-root", help="Where to write the authored workspace."),
@@ -691,9 +731,13 @@ def ingest_build(
     publisher_id: str | None = typer.Option(None, "--publisher-id", help="Publisher id used for bundling/publication."),
     source_version: str | None = typer.Option(None, "--source-version", help="Submission source version."),
     license: str | None = typer.Option(None, "--license", help="Dataset license to apply."),
-    artifact_base_url: str | None = typer.Option(None, "--artifact-base-url", help="Optional public base URL for packaged artifact files."),
+    artifact_base_url: str | None = typer.Option(
+        None, "--artifact-base-url", help="Optional public base URL for packaged artifact files."
+    ),
     clean: bool = typer.Option(False, "--force", help="Replace the existing workspace root before regenerating it."),
-    bundle: bool = typer.Option(True, "--bundle/--no-bundle", help="Also build the submission package after authoring the workspace."),
+    bundle: bool = typer.Option(
+        True, "--bundle/--no-bundle", help="Also build the submission package after authoring the workspace."
+    ),
     validation_policy: str = typer.Option("strict", "--validation-policy", help="Validation policy: strict|set|quick."),
     output_format: str = typer.Option("json", "--format", help="Output format: json|text."),
 ) -> None:
@@ -737,9 +781,13 @@ def ingest_build(
 @ingest_app.command("publish")
 def ingest_publish(
     ingest_root: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True, readable=True),
-    registry_url: str | None = typer.Option(None, "--registry-url", help="Registry base URL. Env: BATTINFO_REGISTRY_URL."),
+    registry_url: str | None = typer.Option(
+        None, "--registry-url", help="Registry base URL. Env: BATTINFO_REGISTRY_URL."
+    ),
     api_key: str | None = typer.Option(None, "--api-key", help="Registry submission API key. Env: BATTINFO_API_KEY."),
-    resource_type: str = typer.Option("cell-instance", "--resource-type", help="Typed ingest subject. Today: cell-instance."),
+    resource_type: str = typer.Option(
+        "cell-instance", "--resource-type", help="Typed ingest subject. Today: cell-instance."
+    ),
     type_record: Path | None = typer.Option(None, "--type-record", help="Curated type record path."),
     manifest: Path | None = typer.Option(None, "--manifest", help="Optional battinfo.ingest.json path."),
     workspace_root: Path | None = typer.Option(None, "--workspace-root", help="Where to write the authored workspace."),
@@ -750,14 +798,24 @@ def ingest_publish(
     publisher_id: str | None = typer.Option(None, "--publisher-id", help="Publisher id used for publication."),
     source_version: str | None = typer.Option(None, "--source-version", help="Submission source version."),
     license: str | None = typer.Option(None, "--license", help="Dataset license to apply."),
-    artifact_base_url: str | None = typer.Option(None, "--artifact-base-url", help="Public base URL for packaged artifact files. Env: BATTINFO_STORAGE_PUBLIC_BASE_URL."),
+    artifact_base_url: str | None = typer.Option(
+        None,
+        "--artifact-base-url",
+        help="Public base URL for packaged artifact files. Env: BATTINFO_STORAGE_PUBLIC_BASE_URL.",
+    ),
     platform_url: str | None = typer.Option(None, "--platform-url", help="Optional Battery Genome base URL."),
     api_key_header: str = typer.Option("X-Battinfo-API-Key", "--api-key-header", help="Registry API key header."),
     timeout_sec: float = typer.Option(300.0, "--timeout-sec", help="Registry submission timeout in seconds."),
     clean: bool = typer.Option(False, "--force", help="Replace the existing workspace root before regenerating it."),
     validation_policy: str = typer.Option("strict", "--validation-policy", help="Validation policy: strict|set|quick."),
-    process_artifacts: bool = typer.Option(False, "--process-artifacts", help="Convert timeseries CSVs to BDF and generate static/interactive plots. Requires battinfo[processing]."),
-    allow_local_files: bool = typer.Option(False, "--allow-local-files", help="Send records whose files are local paths. Only for a local test registry."),
+    process_artifacts: bool = typer.Option(
+        False,
+        "--process-artifacts",
+        help="Convert timeseries CSVs to BDF and generate static/interactive plots. Requires battinfo[processing].",
+    ),
+    allow_local_files: bool = typer.Option(
+        False, "--allow-local-files", help="Send records whose files are local paths. Only for a local test registry."
+    ),
     output_format: str = typer.Option("json", "--format", help="Output format: json|text."),
 ) -> None:
     """Build and publish one ingest workspace in a single command.
@@ -787,7 +845,9 @@ def ingest_publish(
         raise typer.Exit(code=1)
 
     # Resolve artifact_base_url from env if not passed
-    resolved_artifact_base_url = artifact_base_url or os.environ.get("BATTINFO_STORAGE_PUBLIC_BASE_URL", "").strip() or None
+    resolved_artifact_base_url = (
+        artifact_base_url or os.environ.get("BATTINFO_STORAGE_PUBLIC_BASE_URL", "").strip() or None
+    )
 
     # Wire artifact uploader from env when storage is configured
     uploader = build_uploader_from_env()
@@ -797,13 +857,13 @@ def ingest_publish(
     if process_artifacts:
         try:
             from battinfo.processing import process_timeseries_csv
+
             processor = process_timeseries_csv
         except ImportError:
             from battinfo._util import CONVERTER_INSTALL_HINT
 
             typer.echo(
-                "Warning: --process-artifacts needs the BDF converter and plotting "
-                f"libraries. {CONVERTER_INSTALL_HINT}"
+                f"Warning: --process-artifacts needs the BDF converter and plotting libraries. {CONVERTER_INSTALL_HINT}"
             )
 
     fmt = _check_workspace_output_format(output_format)
@@ -971,7 +1031,9 @@ def template_cell_spec_draft(
     cell_format: str = typer.Option("unknown", "--cell-format", help="Cell format placeholder."),
     size_code: str | None = typer.Option(None, help="Optional size code placeholder."),
     iec_code: str | None = typer.Option(None, help="Optional IEC code placeholder."),
-    country_of_origin: str | None = typer.Option(None, "--country-of-origin", help="Optional country of origin placeholder."),
+    country_of_origin: str | None = typer.Option(
+        None, "--country-of-origin", help="Optional country of origin placeholder."
+    ),
     year: int | None = typer.Option(None, help="Optional model or release year placeholder."),
     positive_electrode_basis: str | None = typer.Option(None, help="Optional positive electrode basis placeholder."),
     negative_electrode_basis: str | None = typer.Option(None, help="Optional negative electrode basis placeholder."),
@@ -1022,7 +1084,8 @@ def template_cell_spec_draft(
 @template_app.command("cell-instance")
 def template_cell_instance(
     cell_spec_id: str | None = typer.Option(
-        None, help="Canonical cell-spec IRI. Left out of the template when not given.",
+        None,
+        help="Canonical cell-spec IRI. Left out of the template when not given.",
     ),
     source_type: str = typer.Option("measurement", help="Source type: measurement|lab|bms|other."),
     uid: str | None = typer.Option(None, help=_TEMPLATE_UID_HELP),
@@ -1173,7 +1236,8 @@ def template_test_spec(
 @template_app.command("test")
 def template_test(
     cell_id: str | None = typer.Option(
-        None, help="Canonical cell-instance IRI under test. Left out of the template when not given.",
+        None,
+        help="Canonical cell-instance IRI under test. Left out of the template when not given.",
     ),
     name: str = typer.Option("Example Test", help="Human-readable test name."),
     kind: str = typer.Option("other", help="Test kind."),
@@ -1292,7 +1356,9 @@ def library_query_cell_specs(
     nominal_capacity_max: float | None = typer.Option(None, help="Filter maximum nominal capacity."),
     nominal_voltage_min: float | None = typer.Option(None, help="Filter minimum nominal voltage."),
     nominal_voltage_max: float | None = typer.Option(None, help="Filter maximum nominal voltage."),
-    library_dir: Path = typer.Option(Path(".battinfo/library/cell-spec"), help="Reusable library cell-specification directory."),
+    library_dir: Path = typer.Option(
+        Path(".battinfo/library/cell-spec"), help="Reusable library cell-specification directory."
+    ),
     limit: int = typer.Option(50, min=1, help="Maximum rows."),
     offset: int = typer.Option(0, min=0, help="Start offset."),
     output_format: str = typer.Option("table", "--format", help="Output format: table|json."),
@@ -1335,7 +1401,13 @@ def library_query_cell_specs(
 @library_save_app.command("cell-spec")
 def library_save_cell_spec(
     input_path: Path | None = typer.Option(
-        None, "--input", exists=True, file_okay=True, dir_okay=False, readable=True, help="Draft or canonical cell-specification JSON."
+        None,
+        "--input",
+        exists=True,
+        file_okay=True,
+        dir_okay=False,
+        readable=True,
+        help="Draft or canonical cell-specification JSON.",
     ),
     manufacturer: str | None = typer.Option(None, help="Manufacturer name (required when --input omitted)."),
     model: str | None = typer.Option(None, help="Model name (required when --input omitted)."),
@@ -1362,7 +1434,9 @@ def library_save_cell_spec(
         readable=True,
         help="Optional JSON object for cell-specification specification.property.",
     ),
-    library_dir: Path = typer.Option(Path(".battinfo/library/cell-spec"), help="Reusable library cell-specification directory."),
+    library_dir: Path = typer.Option(
+        Path(".battinfo/library/cell-spec"), help="Reusable library cell-specification directory."
+    ),
     packaged_dir: Path = typer.Option(
         Path("src/battinfo/data/library/cell-spec"),
         help="Packaged reusable library cell-specification directory.",
@@ -1371,9 +1445,13 @@ def library_save_cell_spec(
     duplicate_policy: str = typer.Option("error", help="Duplicate handling: error|return_existing."),
     validate: bool = typer.Option(True, "--validate/--no-validate", help="Validate cell specification before saving."),
     sync_packaged_copy: bool = typer.Option(
-        True, "--sync-packaged-copy/--no-sync-packaged-copy", help="Sync the saved cell specification into package data."
+        True,
+        "--sync-packaged-copy/--no-sync-packaged-copy",
+        help="Sync the saved cell specification into package data.",
     ),
-    build_rdf: bool = typer.Option(False, "--build-rdf/--no-build-rdf", help="Build JSON-LD library artifacts after saving."),
+    build_rdf: bool = typer.Option(
+        False, "--build-rdf/--no-build-rdf", help="Build JSON-LD library artifacts after saving."
+    ),
     output_jsonld_dir: Path = typer.Option(
         Path(".battinfo/library-rdf/cell-spec"),
         help="Directory for per-record domain-battery JSON-LD artifacts.",
@@ -1386,7 +1464,9 @@ def library_save_cell_spec(
         Path(".battinfo/library-rdf/cell-spec.index.json"),
         help="Path for the generated library manifest JSON.",
     ),
-    clean_output: bool = typer.Option(False, "--clean-output", help="Clean existing JSON-LD outputs before rebuilding."),
+    clean_output: bool = typer.Option(
+        False, "--clean-output", help="Clean existing JSON-LD outputs before rebuilding."
+    ),
     dry_run: bool = typer.Option(False, "--dry-run", help="Preview save without writing files."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
@@ -1725,7 +1805,11 @@ def query_tests(
 def create_cell_instance(
     cell_spec_id: str | None = typer.Option(None, help="Canonical cell-spec IRI."),
     cell_spec: Path | None = typer.Option(
-        None, help="Path to cell-spec JSON (alternative to --cell-spec-id).", exists=True, file_okay=True, dir_okay=False
+        None,
+        help="Path to cell-spec JSON (alternative to --cell-spec-id).",
+        exists=True,
+        file_okay=True,
+        dir_okay=False,
     ),
     model_name: str | None = typer.Option(None, help="Resolve type by model name."),
     manufacturer: str | None = typer.Option(None, help="Resolve type by manufacturer."),
@@ -1739,7 +1823,8 @@ def create_cell_instance(
         None, help="Records root for metadata type resolution (default: ./examples)."
     ),
     include_packaged_examples: bool = typer.Option(
-        False, "--include-packaged-examples",
+        False,
+        "--include-packaged-examples",
         help="Also match BattINFO's bundled example records during type resolution.",
     ),
     out: Path | None = typer.Option(None, help="Optional output JSON path."),
@@ -1800,7 +1885,9 @@ def save_record(
     build_jsonld: bool = typer.Option(True, "--build-jsonld/--no-build-jsonld", help="Publish JSON-LD artifact."),
     build_html: bool = typer.Option(True, "--build-html/--no-build-html", help="Publish HTML artifact."),
     validate: bool = typer.Option(True, "--validate/--no-validate", help="Validate record before saving."),
-    validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
+    validation_policy: str = typer.Option(
+        "default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."
+    ),
     dry_run: bool = typer.Option(False, "--dry-run", help="Preview save without writing files."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
@@ -1861,7 +1948,9 @@ def save_batch(
     build_jsonld: bool = typer.Option(True, "--build-jsonld/--no-build-jsonld", help="Publish JSON-LD artifact."),
     build_html: bool = typer.Option(True, "--build-html/--no-build-html", help="Publish HTML artifact."),
     validate: bool = typer.Option(True, "--validate/--no-validate", help="Validate records before saving."),
-    validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
+    validation_policy: str = typer.Option(
+        "default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."
+    ),
     dry_run: bool = typer.Option(False, "--dry-run", help="Preview save without writing files."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
@@ -1917,7 +2006,9 @@ def save_cell_spec(
     publish: bool = typer.Option(False, "--publish/--no-publish", help="Publish resolver artifacts after saving."),
     publish_root: Path = typer.Option(Path(".battinfo/resolver-site"), help="Resolver artifact root."),
     validate: bool = typer.Option(True, "--validate/--no-validate", help="Validate record before saving."),
-    validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
+    validation_policy: str = typer.Option(
+        "default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."
+    ),
     dry_run: bool = typer.Option(False, "--dry-run", help="Preview save without writing files."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
@@ -1991,7 +2082,9 @@ def save_cell_instance(
     publish: bool = typer.Option(False, "--publish/--no-publish", help="Publish resolver artifacts after saving."),
     publish_root: Path = typer.Option(Path(".battinfo/resolver-site"), help="Resolver artifact root."),
     validate: bool = typer.Option(True, "--validate/--no-validate", help="Validate record before saving."),
-    validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
+    validation_policy: str = typer.Option(
+        "default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."
+    ),
     dry_run: bool = typer.Option(False, "--dry-run", help="Preview save without writing files."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
@@ -2059,7 +2152,9 @@ def save_dataset(
     publish: bool = typer.Option(False, "--publish/--no-publish", help="Publish resolver artifacts after saving."),
     publish_root: Path = typer.Option(Path(".battinfo/resolver-site"), help="Resolver artifact root."),
     validate: bool = typer.Option(True, "--validate/--no-validate", help="Validate record before saving."),
-    validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
+    validation_policy: str = typer.Option(
+        "default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."
+    ),
     dry_run: bool = typer.Option(False, "--dry-run", help="Preview save without writing files."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
@@ -2132,7 +2227,9 @@ def save_test_spec(
     publish: bool = typer.Option(False, "--publish/--no-publish", help="Publish resolver artifacts after saving."),
     publish_root: Path = typer.Option(Path(".battinfo/resolver-site"), help="Resolver artifact root."),
     validate: bool = typer.Option(True, "--validate/--no-validate", help="Validate record before saving."),
-    validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
+    validation_policy: str = typer.Option(
+        "default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."
+    ),
     dry_run: bool = typer.Option(False, "--dry-run", help="Preview save without writing files."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
@@ -2202,7 +2299,9 @@ def save_test(
     publish: bool = typer.Option(False, "--publish/--no-publish", help="Publish resolver artifacts after saving."),
     publish_root: Path = typer.Option(Path(".battinfo/resolver-site"), help="Resolver artifact root."),
     validate: bool = typer.Option(True, "--validate/--no-validate", help="Validate record before saving."),
-    validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
+    validation_policy: str = typer.Option(
+        "default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."
+    ),
     dry_run: bool = typer.Option(False, "--dry-run", help="Preview save without writing files."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
@@ -2253,8 +2352,12 @@ def save_test(
 
 @editorial_app.command("validate-staging-cell-spec")
 def validate_staging_cell_spec(
-    input_path: Path = typer.Option(..., "--input", exists=True, file_okay=True, dir_okay=False, readable=True, help="Staging JSON draft."),
-    validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
+    input_path: Path = typer.Option(
+        ..., "--input", exists=True, file_okay=True, dir_okay=False, readable=True, help="Staging JSON draft."
+    ),
+    validation_policy: str = typer.Option(
+        "default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."
+    ),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
     """Validate one single-file staging cell-spec draft and preview its canonical record."""
@@ -2273,9 +2376,19 @@ def validate_staging_cell_spec(
 
 @editorial_app.command("validate-staging-cell-spec-batch")
 def validate_staging_cell_specs(
-    input_dir: Path = typer.Option(..., "--input-dir", exists=True, file_okay=False, dir_okay=True, readable=True, help="Directory of staging JSON drafts."),
+    input_dir: Path = typer.Option(
+        ...,
+        "--input-dir",
+        exists=True,
+        file_okay=False,
+        dir_okay=True,
+        readable=True,
+        help="Directory of staging JSON drafts.",
+    ),
     glob: str = typer.Option("*.json", help="Glob for staging drafts."),
-    validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
+    validation_policy: str = typer.Option(
+        "default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."
+    ),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
     """Validate all staging cell-spec drafts in a directory."""
@@ -2305,10 +2418,14 @@ def validate_staging_cell_specs(
 
 @editorial_app.command("promote-staging-cell-spec")
 def promote_staging_cell_spec(
-    input_path: Path = typer.Option(..., "--input", exists=True, file_okay=True, dir_okay=False, readable=True, help="Staging JSON draft."),
+    input_path: Path = typer.Option(
+        ..., "--input", exists=True, file_okay=True, dir_okay=False, readable=True, help="Staging JSON draft."
+    ),
     curated_root: Path = typer.Option(Path("records/cell-spec"), help="Curated cell-spec root."),
     record_id: str | None = typer.Option(None, "--record-id", help="Override the curated record id."),
-    validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
+    validation_policy: str = typer.Option(
+        "default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."
+    ),
     dry_run: bool = typer.Option(False, "--dry-run", help="Preview promotion without writing files."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
@@ -2334,10 +2451,20 @@ def promote_staging_cell_spec(
 
 @editorial_app.command("promote-staging-cell-spec-batch")
 def promote_staging_cell_specs(
-    input_dir: Path = typer.Option(..., "--input-dir", exists=True, file_okay=False, dir_okay=True, readable=True, help="Directory of staging JSON drafts."),
+    input_dir: Path = typer.Option(
+        ...,
+        "--input-dir",
+        exists=True,
+        file_okay=False,
+        dir_okay=True,
+        readable=True,
+        help="Directory of staging JSON drafts.",
+    ),
     curated_root: Path = typer.Option(Path("records/cell-spec"), help="Curated cell-spec root."),
     glob: str = typer.Option("*.json", help="Glob for staging drafts."),
-    validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
+    validation_policy: str = typer.Option(
+        "default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."
+    ),
     dry_run: bool = typer.Option(False, "--dry-run", help="Preview promotion without writing files."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
@@ -2370,8 +2497,12 @@ def promote_staging_cell_specs(
 
 @editorial_app.command("validate-staging-dataset")
 def validate_staging_dataset(
-    input_path: Path = typer.Option(..., "--input", exists=True, file_okay=True, dir_okay=False, readable=True, help="Staging dataset JSON record."),
-    validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
+    input_path: Path = typer.Option(
+        ..., "--input", exists=True, file_okay=True, dir_okay=False, readable=True, help="Staging dataset JSON record."
+    ),
+    validation_policy: str = typer.Option(
+        "default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."
+    ),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
     """Validate one staging dataset record and preview its curated record id."""
@@ -2390,9 +2521,19 @@ def validate_staging_dataset(
 
 @editorial_app.command("validate-staging-dataset-batch")
 def validate_staging_datasets(
-    input_dir: Path = typer.Option(..., "--input-dir", exists=True, file_okay=False, dir_okay=True, readable=True, help="Directory of staging dataset records."),
+    input_dir: Path = typer.Option(
+        ...,
+        "--input-dir",
+        exists=True,
+        file_okay=False,
+        dir_okay=True,
+        readable=True,
+        help="Directory of staging dataset records.",
+    ),
     glob: str = typer.Option("*.json", help="Glob for staging records."),
-    validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
+    validation_policy: str = typer.Option(
+        "default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."
+    ),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
     """Validate all staging dataset records in a directory."""
@@ -2422,10 +2563,14 @@ def validate_staging_datasets(
 
 @editorial_app.command("promote-staging-dataset")
 def promote_staging_dataset(
-    input_path: Path = typer.Option(..., "--input", exists=True, file_okay=True, dir_okay=False, readable=True, help="Staging dataset JSON record."),
+    input_path: Path = typer.Option(
+        ..., "--input", exists=True, file_okay=True, dir_okay=False, readable=True, help="Staging dataset JSON record."
+    ),
     curated_root: Path = typer.Option(Path("records/dataset"), help="Curated dataset root."),
     record_id: str | None = typer.Option(None, "--record-id", help="Override the curated record id."),
-    validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
+    validation_policy: str = typer.Option(
+        "default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."
+    ),
     dry_run: bool = typer.Option(False, "--dry-run", help="Preview promotion without writing files."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
@@ -2451,10 +2596,20 @@ def promote_staging_dataset(
 
 @editorial_app.command("promote-staging-dataset-batch")
 def promote_staging_datasets(
-    input_dir: Path = typer.Option(..., "--input-dir", exists=True, file_okay=False, dir_okay=True, readable=True, help="Directory of staging dataset records."),
+    input_dir: Path = typer.Option(
+        ...,
+        "--input-dir",
+        exists=True,
+        file_okay=False,
+        dir_okay=True,
+        readable=True,
+        help="Directory of staging dataset records.",
+    ),
     curated_root: Path = typer.Option(Path("records/dataset"), help="Curated dataset root."),
     glob: str = typer.Option("*.json", help="Glob for staging records."),
-    validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
+    validation_policy: str = typer.Option(
+        "default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."
+    ),
     dry_run: bool = typer.Option(False, "--dry-run", help="Preview promotion without writing files."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
@@ -2487,17 +2642,31 @@ def promote_staging_datasets(
 
 @editorial_app.command("build-curated-cell-spec-submission")
 def build_curated_cell_spec_submission(
-    input_path: Path = typer.Option(..., "--input", exists=True, file_okay=True, dir_okay=False, readable=True, help="Curated cell-spec record.json or equivalent canonical JSON."),
+    input_path: Path = typer.Option(
+        ...,
+        "--input",
+        exists=True,
+        file_okay=True,
+        dir_okay=False,
+        readable=True,
+        help="Curated cell-spec record.json or equivalent canonical JSON.",
+    ),
     workspace_id: str = typer.Option(..., "--workspace-id", help="Registry workspace id."),
     publisher_id: str = typer.Option(..., help="Registry publisher id."),
     source_version: str = typer.Option(..., help="Registry source_version for this publication run."),
-    source_local_id: str | None = typer.Option(None, help="Override source_local_id; defaults to the curated record id inferred from the path."),
+    source_local_id: str | None = typer.Option(
+        None, help="Override source_local_id; defaults to the curated record id inferred from the path."
+    ),
     title: str | None = typer.Option(None, help="Override submission title."),
     publication_mode: str = typer.Option("canonical-publication", help="Publication intent mode."),
     source_system: str = typer.Option("battinfo-records", help="Submission provenance source_system."),
     workflow_name: str = typer.Option("curated-cell-spec-publication", help="Submission provenance workflow_name."),
-    validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
-    out_path: Path | None = typer.Option(None, "--out", help="Optional path to write the generated submission package JSON."),
+    validation_policy: str = typer.Option(
+        "default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."
+    ),
+    out_path: Path | None = typer.Option(
+        None, "--out", help="Optional path to write the generated submission package JSON."
+    ),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
     """Build a registry publication package for one curated cell-spec record."""
@@ -2533,26 +2702,46 @@ def build_curated_cell_spec_submission(
         "source_local_id": resource.get("source_local_id") if isinstance(resource, dict) else None,
         "out_path": str(out_path) if out_path is not None else "",
     }
-    _emit_table([summary], ["workspace_id", "publisher_id", "source_version", "resource_type", "source_local_id", "out_path"])
+    _emit_table(
+        [summary], ["workspace_id", "publisher_id", "source_version", "resource_type", "source_local_id", "out_path"]
+    )
 
 
 @editorial_app.command("publish-curated-cell-spec")
 def publish_curated_cell_spec(
-    input_path: Path = typer.Option(..., "--input", exists=True, file_okay=True, dir_okay=False, readable=True, help="Curated cell-spec record.json or equivalent canonical JSON."),
+    input_path: Path = typer.Option(
+        ...,
+        "--input",
+        exists=True,
+        file_okay=True,
+        dir_okay=False,
+        readable=True,
+        help="Curated cell-spec record.json or equivalent canonical JSON.",
+    ),
     workspace_id: str = typer.Option(..., "--workspace-id", help="Registry workspace id."),
     publisher_id: str = typer.Option(..., help="Registry publisher id."),
     source_version: str = typer.Option(..., help="Registry source_version for this publication run."),
-    registry_url: str = typer.Option(..., "--registry-url", help="Registry base URL, for example http://127.0.0.1:8000."),
+    registry_url: str = typer.Option(
+        ..., "--registry-url", help="Registry base URL, for example http://127.0.0.1:8000."
+    ),
     api_key: str = typer.Option(..., "--api-key", help="Registry submission API key."),
-    api_key_header: str = typer.Option("X-Battinfo-API-Key", "--api-key-header", help="Registry submission API key header."),
-    source_local_id: str | None = typer.Option(None, help="Override source_local_id; defaults to the curated record id inferred from the path."),
+    api_key_header: str = typer.Option(
+        "X-Battinfo-API-Key", "--api-key-header", help="Registry submission API key header."
+    ),
+    source_local_id: str | None = typer.Option(
+        None, help="Override source_local_id; defaults to the curated record id inferred from the path."
+    ),
     title: str | None = typer.Option(None, help="Override submission title."),
     publication_mode: str = typer.Option("canonical-publication", help="Publication intent mode."),
     source_system: str = typer.Option("battinfo-records", help="Submission provenance source_system."),
     workflow_name: str = typer.Option("curated-cell-spec-publication", help="Submission provenance workflow_name."),
-    validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
+    validation_policy: str = typer.Option(
+        "default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."
+    ),
     timeout_sec: float = typer.Option(30.0, "--timeout-sec", help="HTTP timeout in seconds."),
-    out_path: Path | None = typer.Option(None, "--out", help="Optional path to write the generated submission package JSON before posting."),
+    out_path: Path | None = typer.Option(
+        None, "--out", help="Optional path to write the generated submission package JSON before posting."
+    ),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
     """Publish one curated cell-spec record to battinfo-registry."""
@@ -2618,7 +2807,9 @@ def publish_cell_spec(
     ),
     manufacturer: str | None = typer.Option(None, help="Cell manufacturer."),
     model: str | None = typer.Option(None, help="Cell model."),
-    cell_format: str | None = typer.Option(None, "--cell-format", help="Cell format, for example cylindrical or pouch."),
+    cell_format: str | None = typer.Option(
+        None, "--cell-format", help="Cell format, for example cylindrical or pouch."
+    ),
     chemistry: str | None = typer.Option(None, help="Cell chemistry."),
     name: str | None = typer.Option(None, help="Optional display name."),
     size_code: str | None = typer.Option(None, "--size-code", help="Optional size code."),
@@ -2627,10 +2818,14 @@ def publish_cell_spec(
     year: int | None = typer.Option(None, help="Optional release or production year."),
     source_type: str | None = typer.Option(None, "--source-type", help="Optional provenance source type."),
     source_file: str | None = typer.Option(None, "--source-file", help="Optional provenance source file."),
-    destination: str = typer.Option("local", help="Publish destination: local|registry|battery-genome|staging|production."),
+    destination: str = typer.Option(
+        "local", help="Publish destination: local|registry|battery-genome|staging|production."
+    ),
     root: Path | None = typer.Option(None, "--root", help="Optional workspace root for generated artifacts."),
     force: bool = typer.Option(False, "--force", help="Replace an existing generated workspace root."),
-    validation_policy: str = typer.Option("strict", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
+    validation_policy: str = typer.Option(
+        "strict", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."
+    ),
     registry_url: str | None = typer.Option(None, "--registry-url", help="Optional registry base URL override."),
     api_key: str | None = typer.Option(None, "--api-key", help="Optional registry API key override."),
     api_key_header: str | None = typer.Option(None, "--api-key-header", help="Optional registry API key header."),
@@ -2646,7 +2841,9 @@ def publish_cell_spec(
         if input_path is not None:
             cell_spec = _load_cell_spec_input(input_path)
         else:
-            if not all(isinstance(value, str) and value.strip() for value in (manufacturer, model, cell_format, chemistry)):
+            if not all(
+                isinstance(value, str) and value.strip() for value in (manufacturer, model, cell_format, chemistry)
+            ):
                 raise typer.BadParameter(
                     "Provide --input or all of --manufacturer, --model, --cell-format, and --chemistry."
                 )
@@ -2704,7 +2901,9 @@ def publish_record(
     build_jsonld: bool = typer.Option(True, "--build-jsonld/--no-build-jsonld", help="Generate JSON-LD output."),
     build_html: bool = typer.Option(True, "--build-html/--no-build-html", help="Generate HTML output."),
     validate: bool = typer.Option(True, "--validate/--no-validate", help="Validate records before publishing."),
-    validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
+    validation_policy: str = typer.Option(
+        "default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."
+    ),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
     """Publish one record into resolver artifacts."""
@@ -2744,7 +2943,9 @@ def publish_batch(
     build_jsonld: bool = typer.Option(True, "--build-jsonld/--no-build-jsonld", help="Generate JSON-LD output."),
     build_html: bool = typer.Option(True, "--build-html/--no-build-html", help="Generate HTML output."),
     validate: bool = typer.Option(True, "--validate/--no-validate", help="Validate records before publishing."),
-    validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
+    validation_policy: str = typer.Option(
+        "default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."
+    ),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
     """Publish a deterministic batch of records into resolver artifacts."""
@@ -2781,7 +2982,9 @@ def index_build(
     out: Path = typer.Option(Path(".battinfo/index.json"), help="Output index JSON path."),
     glob: str = typer.Option("*.json", help="File glob to include in index build."),
     validate: bool = typer.Option(False, "--validate/--no-validate", help="Validate records while indexing."),
-    validation_policy: str = typer.Option("default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."),
+    validation_policy: str = typer.Option(
+        "default", "--validation-policy", help="Validation policy: default|strict|publisher|ingest."
+    ),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
     """Build an index from canonical example resources."""
@@ -2848,23 +3051,42 @@ def index_stats(
         return
     _emit_table(
         [payload],
-        ["cell_spec_count", "cell_instance_count", "test_count", "dataset_count", "total_count", "failed", "build_timestamp"],
+        [
+            "cell_spec_count",
+            "cell_instance_count",
+            "test_count",
+            "dataset_count",
+            "total_count",
+            "failed",
+            "build_timestamp",
+        ],
     )
 
 
 # ── registry commands ─────────────────────────────────────────────────────────
+
 
 @registry_app.command("bootstrap")
 def registry_bootstrap(
     tenant_id: str = typer.Option("battinfo", "--tenant-id", help="Tenant id to create or verify."),
     tenant_name: str = typer.Option("BattINFO", "--tenant-name", help="Tenant display name."),
     workspace_id: str = typer.Option(..., "--workspace-id", help="Workspace id to create or verify."),
-    workspace_name: str | None = typer.Option(None, "--workspace-name", help="Workspace display name (defaults to workspace-id)."),
+    workspace_name: str | None = typer.Option(
+        None, "--workspace-name", help="Workspace display name (defaults to workspace-id)."
+    ),
     publisher_id: str = typer.Option(..., "--publisher-id", help="Publisher id to create or verify."),
-    publisher_name: str | None = typer.Option(None, "--publisher-name", help="Publisher display name (defaults to publisher-id)."),
-    api_key_file: Path | None = typer.Option(None, "--api-key-file", help="File to write the publisher API key to. Env: BATTINFO_API_KEY_FILE."),
-    registry_url: str | None = typer.Option(None, "--registry-url", help="Registry base URL. Env: BATTINFO_REGISTRY_URL."),
-    admin_token: str | None = typer.Option(None, "--admin-token", help="Registry admin token. Env: BATTINFO_ADMIN_TOKEN."),
+    publisher_name: str | None = typer.Option(
+        None, "--publisher-name", help="Publisher display name (defaults to publisher-id)."
+    ),
+    api_key_file: Path | None = typer.Option(
+        None, "--api-key-file", help="File to write the publisher API key to. Env: BATTINFO_API_KEY_FILE."
+    ),
+    registry_url: str | None = typer.Option(
+        None, "--registry-url", help="Registry base URL. Env: BATTINFO_REGISTRY_URL."
+    ),
+    admin_token: str | None = typer.Option(
+        None, "--admin-token", help="Registry admin token. Env: BATTINFO_ADMIN_TOKEN."
+    ),
     output_format: str = typer.Option("text", "--format", help="Output format: json|text."),
 ) -> None:
     """Idempotently create a tenant, workspace, and publisher on the registry.
@@ -2930,22 +3152,30 @@ def registry_bootstrap(
         raise typer.Exit(code=1)
 
     # Workspace
-    s, _ = _api("POST", "/workspaces", {
-        "workspace_id": workspace_id,
-        "tenant_id": tenant_id,
-        "display_name": workspace_name or workspace_id,
-    })
+    s, _ = _api(
+        "POST",
+        "/workspaces",
+        {
+            "workspace_id": workspace_id,
+            "tenant_id": tenant_id,
+            "display_name": workspace_name or workspace_id,
+        },
+    )
     results["workspace"] = "created" if s in (200, 201) else "exists" if s == 409 else f"error-{s}"
     if s not in (200, 201, 409):
         typer.echo(f"Workspace creation failed [{s}]")
         raise typer.Exit(code=1)
 
     # Publisher
-    s, body = _api("POST", "/publishers", {
-        "publisher_id": publisher_id,
-        "workspace_id": workspace_id,
-        "display_name": publisher_name or publisher_id,
-    })
+    s, body = _api(
+        "POST",
+        "/publishers",
+        {
+            "publisher_id": publisher_id,
+            "workspace_id": workspace_id,
+            "display_name": publisher_name or publisher_id,
+        },
+    )
     results["publisher"] = "created" if s in (200, 201) else "exists" if s == 409 else f"error-{s}"
     if s not in (200, 201, 409):
         typer.echo(f"Publisher creation failed [{s}]")
@@ -2973,10 +3203,13 @@ def registry_bootstrap(
 
 # ── Dataset contribution commands ─────────────────────────────────────────────
 
+
 @dataset_app.command("init")
 def dataset_init(
     output: Path = typer.Argument(..., help="Path for the new contribution folder."),
-    cell_name: str | None = typer.Option(None, "--cell-name", "-n", help="Short label for this cell (e.g. serial number)."),
+    cell_name: str | None = typer.Option(
+        None, "--cell-name", "-n", help="Short label for this cell (e.g. serial number)."
+    ),
     cell_spec_iri: str | None = typer.Option(None, "--cell-spec-iri", help="BattINFO cell-spec IRI."),
     lab: str | None = typer.Option(None, "--lab", help="Your institution or lab name."),
     license: str = typer.Option("CC-BY-4.0", "--license", help="Data licence identifier."),
@@ -3029,7 +3262,10 @@ def _process_single_cell(
 
     try:
         result = process_contribution(
-            folder, clean=clean, validation_policy=validation_policy, bundle=bundle,
+            folder,
+            clean=clean,
+            validation_policy=validation_policy,
+            bundle=bundle,
         )
     except FileNotFoundError as exc:
         console.print(f"  [red]Error:[/red] {exc}")
@@ -3049,8 +3285,7 @@ def _process_single_cell(
     if not files:
         console.print("  [yellow]Warning:[/yellow] No data files found in data/")
     else:
-        table = Table(box=box.SIMPLE, show_header=True, header_style="bold",
-                      show_edge=False, pad_edge=True)
+        table = Table(box=box.SIMPLE, show_header=True, header_style="bold", show_edge=False, pad_edge=True)
         table.add_column("File")
         table.add_column("Test type")
         table.add_column("Temp")
@@ -3089,11 +3324,7 @@ def _process_single_cell(
         return True, result
     if build:
         counts = build.get("counts", {})
-        console.print(
-            f"  [green]OK[/green]  "
-            f"{counts.get('datasets', 0)} dataset(s), "
-            f"{counts.get('tests', 0)} test(s)"
-        )
+        console.print(f"  [green]OK[/green]  {counts.get('datasets', 0)} dataset(s), {counts.get('tests', 0)} test(s)")
         return True, result
     else:
         console.print("  [red]Build did not complete.[/red]")
@@ -3121,10 +3352,7 @@ def dataset_process(
 
     # ── Batch directory: iterate all cell sub-folders ──────────────────────────
     if (folder / BATCH_MANIFEST).exists():
-        cell_dirs = sorted(
-            d for d in folder.iterdir()
-            if d.is_dir() and (d / CONTRIBUTION_MANIFEST).exists()
-        )
+        cell_dirs = sorted(d for d in folder.iterdir() if d.is_dir() and (d / CONTRIBUTION_MANIFEST).exists())
         if not cell_dirs:
             if json_output:
                 typer.echo(json.dumps({"ok": True, "cells": [], "ok_count": 0, "fail_count": 0}))
@@ -3145,18 +3373,23 @@ def dataset_process(
             if not json_output:
                 console.print(f"[bold][{i}/{len(cell_dirs)}][/bold] {cell_dir.name}")
             success, cell_result = _process_single_cell(
-                cell_dir, clean=clean, validation_policy=validation_policy,
-                console=console, bundle=False,
+                cell_dir,
+                clean=clean,
+                validation_policy=validation_policy,
+                console=console,
+                bundle=False,
             )
             if json_output:
-                cell_results.append({
-                    "folder": cell_dir.name,
-                    "ok": success,
-                    "files": len(cell_result.get("files", [])),
-                    "needs_review": cell_result.get("needs_review", False),
-                    "errors": cell_result.get("errors", []),
-                    "conversions": {k: bool(v) for k, v in cell_result.get("conversions", {}).items()},
-                })
+                cell_results.append(
+                    {
+                        "folder": cell_dir.name,
+                        "ok": success,
+                        "files": len(cell_result.get("files", [])),
+                        "needs_review": cell_result.get("needs_review", False),
+                        "errors": cell_result.get("errors", []),
+                        "conversions": {k: bool(v) for k, v in cell_result.get("conversions", {}).items()},
+                    }
+                )
             if success:
                 ok_count += 1
             else:
@@ -3165,22 +3398,25 @@ def dataset_process(
                 console.print()
 
         if json_output:
-            typer.echo(json.dumps({
-                "ok": fail_count == 0,
-                "ok_count": ok_count,
-                "fail_count": fail_count,
-                "cells": cell_results,
-            }))
+            typer.echo(
+                json.dumps(
+                    {
+                        "ok": fail_count == 0,
+                        "ok_count": ok_count,
+                        "fail_count": fail_count,
+                        "cells": cell_results,
+                    }
+                )
+            )
         else:
             if fail_count == 0:
                 console.print(f"[green]All {ok_count} cell(s) processed successfully.[/green]")
                 console.print()
                 console.print("Build Zenodo package with:")
-                console.print(f"  [bold]battinfo batch package {folder} --creator \"Name; Institution\"[/bold]")
+                console.print(f'  [bold]battinfo batch package {folder} --creator "Name; Institution"[/bold]')
             else:
                 console.print(
-                    f"[green]{ok_count} ok[/green]  [red]{fail_count} failed[/red] -- "
-                    "fix the errors above and re-run."
+                    f"[green]{ok_count} ok[/green]  [red]{fail_count} failed[/red] -- fix the errors above and re-run."
                 )
 
         if fail_count > 0:
@@ -3204,16 +3440,22 @@ def dataset_process(
         console.print("[bold]BattINFO Dataset Processor[/bold]")
         console.print()
 
-    success, cell_result = _process_single_cell(folder, clean=clean, validation_policy=validation_policy, console=console)
+    success, cell_result = _process_single_cell(
+        folder, clean=clean, validation_policy=validation_policy, console=console
+    )
 
     if json_output:
-        typer.echo(json.dumps({
-            "ok": success,
-            "folder": str(folder),
-            "files": len(cell_result.get("files", [])),
-            "needs_review": cell_result.get("needs_review", False),
-            "errors": cell_result.get("errors", []),
-        }))
+        typer.echo(
+            json.dumps(
+                {
+                    "ok": success,
+                    "folder": str(folder),
+                    "files": len(cell_result.get("files", [])),
+                    "needs_review": cell_result.get("needs_review", False),
+                    "errors": cell_result.get("errors", []),
+                }
+            )
+        )
     else:
         if not success:
             raise typer.Exit(code=1)
@@ -3230,7 +3472,9 @@ def dataset_publish(
     folder: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True),
     zenodo: bool = typer.Option(False, "--zenodo", help="Publish to Zenodo (creates a draft deposit)."),
     sandbox: bool = typer.Option(False, "--sandbox", help="Use the Zenodo sandbox (for testing)."),
-    token: str | None = typer.Option(None, "--token", help="Zenodo API token. Env: ZENODO_API_TOKEN (or legacy ZENODO_TOKEN)."),
+    token: str | None = typer.Option(
+        None, "--token", help="Zenodo API token. Env: ZENODO_API_TOKEN (or legacy ZENODO_TOKEN)."
+    ),
     community: str = typer.Option("battery-genome", "--community", help="Zenodo community identifier."),
     no_community: bool = typer.Option(False, "--no-community", help="Skip community submission."),
 ) -> None:
@@ -3259,7 +3503,9 @@ def dataset_publish(
         console.print("[yellow]Nothing to do.[/yellow] Pass --zenodo to upload to Zenodo.")
         raise typer.Exit(code=0)
 
-    resolved_token = token or os.environ.get("ZENODO_API_TOKEN", "").strip() or os.environ.get("ZENODO_TOKEN", "").strip()
+    resolved_token = (
+        token or os.environ.get("ZENODO_API_TOKEN", "").strip() or os.environ.get("ZENODO_TOKEN", "").strip()
+    )
     if not resolved_token:
         console.print("[red]Error:[/red] Zenodo token required. Pass --token or set ZENODO_API_TOKEN.")
         raise typer.Exit(code=1)
@@ -3296,10 +3542,16 @@ def dataset_publish(
 
 # ── batch commands ─────────────────────────────────────────────────────────────
 
+
 @batch_app.command("init")
 def batch_init(
     output_dir: Path = typer.Argument(..., help="Directory to create for this batch."),
-    cell_spec: str = typer.Option(..., "--cell-spec", "-t", help='Cell spec: its IRI (https://w3id.org/battinfo/spec/...) or its manufacturer and model, e.g. "Energizer CR2032".'),
+    cell_spec: str = typer.Option(
+        ...,
+        "--cell-spec",
+        "-t",
+        help='Cell spec: its IRI (https://w3id.org/battinfo/spec/...) or its manufacturer and model, e.g. "Energizer CR2032".',
+    ),
     count: int = typer.Option(..., "--count", "-n", help="Number of cells received."),
     batch_id: str | None = typer.Option(None, "--batch-id", help="Batch / lot identifier."),
     lab: str | None = typer.Option(None, "--lab", help="Institution or lab name."),
@@ -3372,7 +3624,9 @@ def batch_init(
 
 @batch_app.command("add")
 def batch_add(
-    batch_dir: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True, help="Existing batch directory."),
+    batch_dir: Path = typer.Argument(
+        ..., exists=True, file_okay=False, dir_okay=True, help="Existing batch directory."
+    ),
     count: int = typer.Option(..., "--count", "-n", help="Number of additional cells to add."),
     batch_id: str | None = typer.Option(None, "--batch-id", help="Override batch / lot ID for the new cells."),
     lab: str | None = typer.Option(None, "--lab", help="Override lab name for the new cells."),
@@ -3465,10 +3719,7 @@ def batch_status(
         raise typer.Exit(code=1)
 
     manifest = load_batch_manifest(batch_dir)
-    cell_dirs = sorted(
-        d for d in batch_dir.iterdir()
-        if d.is_dir() and (d / CONTRIBUTION_MANIFEST).exists()
-    )
+    cell_dirs = sorted(d for d in batch_dir.iterdir() if d.is_dir() and (d / CONTRIBUTION_MANIFEST).exists())
     total = len(cell_dirs)
 
     _DATE_RE = _re.compile(r"(?P<date>\d{4}-\d{2}-\d{2})")
@@ -3497,18 +3748,22 @@ def batch_status(
         next_cmd = f"battinfo batch upload {batch_dir / 'staging'} --token $ZENODO_TOKEN --sandbox"
 
     if json_output:
-        typer.echo(json.dumps({
-            "batch_dir": str(batch_dir),
-            "cell_spec": manifest.get("cell_spec_name", manifest.get("cell_spec_iri")),
-            "total_cells": total,
-            "cells_with_data": has_data,
-            "needs_annotation": needs_annotation,
-            "bdf_pending": bdf_pending,
-            "staged": staging_exists,
-            "ok": True,
-            "ready": has_data == total and needs_annotation == 0 and staging_exists,
-            "next_command": next_cmd,
-        }))
+        typer.echo(
+            json.dumps(
+                {
+                    "batch_dir": str(batch_dir),
+                    "cell_spec": manifest.get("cell_spec_name", manifest.get("cell_spec_iri")),
+                    "total_cells": total,
+                    "cells_with_data": has_data,
+                    "needs_annotation": needs_annotation,
+                    "bdf_pending": bdf_pending,
+                    "staged": staging_exists,
+                    "ok": True,
+                    "ready": has_data == total and needs_annotation == 0 and staging_exists,
+                    "next_command": next_cmd,
+                }
+            )
+        )
         return
 
     def _status(ok: bool) -> str:
@@ -3530,17 +3785,25 @@ def batch_status(
 
 @batch_app.command("package")
 def batch_package(
-    batch_dir: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True, help="Batch directory created by `batch init`."),
-    staging_dir: Path | None = typer.Option(None, "--staging", "-s", help="Output directory for the Zenodo package. Default: <batch-dir>/staging/."),
+    batch_dir: Path = typer.Argument(
+        ..., exists=True, file_okay=False, dir_okay=True, help="Batch directory created by `batch init`."
+    ),
+    staging_dir: Path | None = typer.Option(
+        None, "--staging", "-s", help="Output directory for the Zenodo package. Default: <batch-dir>/staging/."
+    ),
     creator: list[str] | None = typer.Option(
         None,
         "--creator",
         "-c",
         help='Creator: "Family, Given; Affiliation". Repeat for multiple. Falls back to `battinfo config set creator`.',
     ),
-    community: str | None = typer.Option(None, "--community", help="Zenodo community. Default: value from config or battinfo-reference."),
+    community: str | None = typer.Option(
+        None, "--community", help="Zenodo community. Default: value from config or battinfo-reference."
+    ),
     no_community: bool = typer.Option(False, "--no-community", help="Skip community submission."),
-    placeholder: str = typer.Option("ZENODO_RECORD_ID", "--placeholder", help="Placeholder token for Zenodo record ID in URLs."),
+    placeholder: str = typer.Option(
+        "ZENODO_RECORD_ID", "--placeholder", help="Placeholder token for Zenodo record ID in URLs."
+    ),
     json_output: bool = typer.Option(False, "--json", help="Emit machine-readable JSON to stdout."),
 ) -> None:
     """Build a flat Zenodo upload package from a batch of cells.
@@ -3567,7 +3830,7 @@ def batch_package(
     if not creators:
         typer.echo(
             "Error: no creator specified. Pass --creator or run:\n"
-            "  battinfo config set creator \"Family, Given; Institution\"",
+            '  battinfo config set creator "Family, Given; Institution"',
             err=True,
         )
         raise typer.Exit(code=1)
@@ -3591,14 +3854,18 @@ def batch_package(
 
     staging = result["staging_dir"]
     if json_output:
-        typer.echo(json.dumps({
-            "ok": True,
-            "staging_dir": staging,
-            "cell_count": result["cell_count"],
-            "entry_count": result["entry_count"],
-            "file_count": len(result["staged_data_files"]),
-            "files": [Path(staging, f).name for f in result["staged_data_files"]],
-        }))
+        typer.echo(
+            json.dumps(
+                {
+                    "ok": True,
+                    "staging_dir": staging,
+                    "cell_count": result["cell_count"],
+                    "entry_count": result["entry_count"],
+                    "file_count": len(result["staged_data_files"]),
+                    "files": [Path(staging, f).name for f in result["staged_data_files"]],
+                }
+            )
+        )
         return
 
     typer.echo(f"Package built: {staging}")
@@ -3616,10 +3883,14 @@ def batch_package(
 
 @batch_app.command("upload")
 def batch_upload(
-    staging_dir: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True, help="Staging directory produced by `batch package`."),
+    staging_dir: Path = typer.Argument(
+        ..., exists=True, file_okay=False, dir_okay=True, help="Staging directory produced by `batch package`."
+    ),
     token: str | None = typer.Option(None, "--token", help="Zenodo API token. Env: ZENODO_API_TOKEN."),
     sandbox: bool = typer.Option(False, "--sandbox", help="Use Zenodo sandbox (sandbox.zenodo.org)."),
-    community: str | None = typer.Option(None, "--community", help="Zenodo community. Default: value from config or battinfo-reference."),
+    community: str | None = typer.Option(
+        None, "--community", help="Zenodo community. Default: value from config or battinfo-reference."
+    ),
     no_community: bool = typer.Option(False, "--no-community", help="Skip community submission."),
     creator: list[str] | None = typer.Option(
         None,
@@ -3662,7 +3933,7 @@ def batch_upload(
     if not creators:
         typer.echo(
             "Error: no creator specified. Pass --creator or run:\n"
-            "  battinfo config set creator \"Family, Given; Institution\"",
+            '  battinfo config set creator "Family, Given; Institution"',
             err=True,
         )
         raise typer.Exit(code=1)
@@ -3691,14 +3962,18 @@ def batch_upload(
         raise typer.Exit(code=1) from exc
 
     if json_output:
-        typer.echo(json.dumps({
-            "ok": True,
-            "record_id": result.get("record_id"),
-            "doi": result.get("doi"),
-            "deposit_url": result.get("deposit_url"),
-            "files": len(result.get("uploaded_files", [])),
-            "published": result.get("published", False),
-        }))
+        typer.echo(
+            json.dumps(
+                {
+                    "ok": True,
+                    "record_id": result.get("record_id"),
+                    "doi": result.get("doi"),
+                    "deposit_url": result.get("deposit_url"),
+                    "files": len(result.get("uploaded_files", [])),
+                    "published": result.get("published", False),
+                }
+            )
+        )
         return
 
     typer.echo()
@@ -3717,20 +3992,30 @@ def batch_upload(
 
 # ── Push (end-to-end single command) ──────────────────────────────────────────
 
+
 @app.command("push")
 def push(
-    folder: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True,
-                                  help="Folder containing raw data files or an existing batch."),
-    cell_spec: str | None = typer.Option(None, "--cell-spec", "-t",
-                                         help="Cell spec: its IRI (https://w3id.org/battinfo/spec/...) or its manufacturer and model, e.g. 'Energizer CR2032'. Required for unstructured folders."),
-    cells: int | None = typer.Option(None, "--cells", "-n",
-                                     help="Number of cells (auto-detected from filenames if omitted)."),
+    folder: Path = typer.Argument(
+        ..., exists=True, file_okay=False, dir_okay=True, help="Folder containing raw data files or an existing batch."
+    ),
+    cell_spec: str | None = typer.Option(
+        None,
+        "--cell-spec",
+        "-t",
+        help="Cell spec: its IRI (https://w3id.org/battinfo/spec/...) or its manufacturer and model, e.g. 'Energizer CR2032'. Required for unstructured folders.",
+    ),
+    cells: int | None = typer.Option(
+        None, "--cells", "-n", help="Number of cells (auto-detected from filenames if omitted)."
+    ),
     batch_id: str | None = typer.Option(None, "--batch-id", help="Batch / lot identifier."),
     lab: str | None = typer.Option(None, "--lab", help="Lab name."),
     operator: str | None = typer.Option(None, "--operator", help="Operator name."),
-    creator: list[str] | None = typer.Option(None, "--creator", "-c",
-                                              help='Creator: "Family, Given; Affiliation". Falls back to config.'),
-    token: str | None = typer.Option(None, "--token", help="Zenodo API token. Falls back to config / ZENODO_API_TOKEN."),
+    creator: list[str] | None = typer.Option(
+        None, "--creator", "-c", help='Creator: "Family, Given; Affiliation". Falls back to config.'
+    ),
+    token: str | None = typer.Option(
+        None, "--token", help="Zenodo API token. Falls back to config / ZENODO_API_TOKEN."
+    ),
     sandbox: bool = typer.Option(False, "--sandbox", help="Upload to sandbox.zenodo.org instead of production."),
     community: str | None = typer.Option(None, "--community", help="Zenodo community. Default: from config."),
     no_community: bool = typer.Option(False, "--no-community", help="Skip community submission."),
@@ -3798,8 +4083,9 @@ def push(
                 file_count = sum(len(v) for v in groups.values())
                 console.print(f"  Cells     : {len(groups)} (detected from {file_count} file(s))")
                 for key, files in list(groups.items())[:4]:
-                    console.print(f"    Cell {key}: {', '.join(f.name for f in files[:3])}" +
-                                   ("..." if len(files) > 3 else ""))
+                    console.print(
+                        f"    Cell {key}: {', '.join(f.name for f in files[:3])}" + ("..." if len(files) > 3 else "")
+                    )
                 if len(groups) > 4:
                     console.print(f"    ... and {len(groups) - 4} more cells")
         creator_str = ", ".join(c["name"] for c in creators)
@@ -3810,6 +4096,7 @@ def push(
 
     # Skip confirm when --json, --yes, dry-run, or non-interactive (piped/agent)
     import sys as _sys
+
     non_interactive = json_output or yes or dry_run or not _sys.stdin.isatty()
     if not non_interactive:
         confirm = typer.confirm("Proceed?", default=False)
@@ -3842,14 +4129,18 @@ def push(
         raise typer.Exit(code=1) from exc
 
     if json_output:
-        typer.echo(json.dumps({
-            "ok": True,
-            "status": result.get("status"),
-            "cells": result.get("cells"),
-            "files": result.get("files"),
-            "staging_dir": result.get("staging_dir"),
-            "zenodo_url": result.get("zenodo_url"),
-        }))
+        typer.echo(
+            json.dumps(
+                {
+                    "ok": True,
+                    "status": result.get("status"),
+                    "cells": result.get("cells"),
+                    "files": result.get("files"),
+                    "staging_dir": result.get("staging_dir"),
+                    "zenodo_url": result.get("zenodo_url"),
+                }
+            )
+        )
         return
 
     console.print(f"[green]Done.[/green]  {result['cells']} cell(s), {result['files']} dataset(s)")
@@ -3866,6 +4157,7 @@ def push(
 
 
 # ── Config commands ────────────────────────────────────────────────────────────
+
 
 def _user_config_or_exit(*, json_output: bool = False) -> dict[str, Any]:
     """The values in ~/.battinfo/config.yaml, or exit with an error naming it when it cannot be read.
@@ -3904,6 +4196,7 @@ def config_set(
     A config file that is not valid YAML is left as it is: fix it by hand first.
     """
     from battinfo.config import USER_CONFIG_PATH, _is_secret_key, _masked, set_user_config_value
+
     try:
         set_user_config_value(key, value)
     except ValueError as exc:
@@ -3924,9 +4217,10 @@ def config_show() -> None:
     nothing when they are shorter than 12 characters.
     """
     from battinfo.config import USER_CONFIG_PATH, _shown_value
+
     if not USER_CONFIG_PATH.exists():
         typer.echo(f"No config file at {USER_CONFIG_PATH}")
-        typer.echo("Set defaults with: battinfo config set creator \"Family, Given; Institution\"")
+        typer.echo('Set defaults with: battinfo config set creator "Family, Given; Institution"')
         return
     cfg = _user_config_or_exit()
     typer.echo(f"Config file: {USER_CONFIG_PATH}")
@@ -3934,7 +4228,7 @@ def config_show() -> None:
     if not cfg:
         typer.echo("  (no values set)")
         typer.echo()
-        typer.echo("Set defaults with: battinfo config set creator \"Family, Given; Institution\"")
+        typer.echo('Set defaults with: battinfo config set creator "Family, Given; Institution"')
         return
     for k, v in sorted(cfg.items(), key=lambda item: str(item[0])):
         typer.echo(f"  {k}: {_shown_value(k, v)}")
@@ -4013,11 +4307,13 @@ def _all_specs_data() -> list[dict[str, Any]]:
             display_units = ", ".join(ascii_units) if ascii_units else ", ".join(sorted(units))
         else:
             display_units = "any"
-        rows.append({
-            "name": name,
-            "category": _SPEC_CATEGORIES.get(name, "other"),
-            "valid_units": display_units,
-        })
+        rows.append(
+            {
+                "name": name,
+                "category": _SPEC_CATEGORIES.get(name, "other"),
+                "valid_units": display_units,
+            }
+        )
     return rows
 
 
@@ -4076,19 +4372,26 @@ def specs_show(
 
 @app.command("import-protocol")
 def import_protocol(
-    input_path: Path = typer.Argument(..., exists=True, readable=True, dir_okay=False,
-                                      help="Executable protocol file: UCP YAML, aurora-unicycler "
-                                           "JSON, PyBaMM experiment (text or to_config JSON), or "
-                                           "bmgen EMMO JSON-LD."),
+    input_path: Path = typer.Argument(
+        ...,
+        exists=True,
+        readable=True,
+        dir_okay=False,
+        help="Executable protocol file: UCP YAML, aurora-unicycler "
+        "JSON, PyBaMM experiment (text or to_config JSON), or "
+        "bmgen EMMO JSON-LD.",
+    ),
     protocol_format: str = typer.Option(
-        "auto", "--format",
-        help="Source format: auto|ucp|aurora|pybamm|bmgen (auto sniffs extension + content)."),
+        "auto", "--format", help="Source format: auto|ucp|aurora|pybamm|bmgen (auto sniffs extension + content)."
+    ),
     name: str | None = typer.Option(None, help="Protocol name (default: derived from the source)."),
     kind: str | None = typer.Option(None, help="Test kind (e.g. cycling, gitt; default: inferred)."),
-    uid: str | None = typer.Option(None, help="Canonical uid (xxxx-xxxx-xxxx-xxxx); default: "
-                                              "derived deterministically from the file's sha256."),
-    out: Path | None = typer.Option(None, "--out", help="Write the canonical test-protocol record "
-                                                        "here (default: stdout)."),
+    uid: str | None = typer.Option(
+        None, help="Canonical uid (xxxx-xxxx-xxxx-xxxx); default: derived deterministically from the file's sha256."
+    ),
+    out: Path | None = typer.Option(
+        None, "--out", help="Write the canonical test-protocol record here (default: stdout)."
+    ),
 ) -> None:
     """One-liner protocol import: executable file in, canonical record out.
 
@@ -4140,16 +4443,18 @@ def import_protocol(
     }
     importer = importers.get(fmt)
     if importer is None:
-        typer.secho(f"Unknown --format '{protocol_format}'. Choose from: auto, "
-                    + ", ".join(sorted(importers)) + ".", fg=typer.colors.RED, err=True)
+        typer.secho(
+            f"Unknown --format '{protocol_format}'. Choose from: auto, " + ", ".join(sorted(importers)) + ".",
+            fg=typer.colors.RED,
+            err=True,
+        )
         raise typer.Exit(code=2)
 
     if fmt == "pybamm" and not text.lstrip().startswith(("{", "[")):
         source: object = [line.strip() for line in text.splitlines() if line.strip()]
     else:
         source = text
-    spec = importer(source, name=name, kind=kind,
-                    source_locator=str(input_path), source_sha256=sha256)
+    spec = importer(source, name=name, kind=kind, source_locator=str(input_path), source_sha256=sha256)
 
     # Deterministic identity: the same file imports to the same IRI.
     dashed = uid or stable_uid(f"test-protocol-import::{sha256}")
@@ -4159,8 +4464,10 @@ def import_protocol(
     for note in spec.comment or []:
         typer.secho(f"note: {note}", fg=typer.colors.YELLOW, err=True)
     step_count = len(spec.method or [])
-    typer.secho(f"Imported {fmt} protocol: kind={spec.test_kind}, {step_count} top-level steps, "
-                f"artifact sha256={sha256[:12]}…", err=True)
+    typer.secho(
+        f"Imported {fmt} protocol: kind={spec.test_kind}, {step_count} top-level steps, artifact sha256={sha256[:12]}…",
+        err=True,
+    )
 
     payload = json.dumps(record, indent=2, ensure_ascii=False)
     if out is not None:

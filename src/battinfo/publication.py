@@ -70,7 +70,7 @@ def plan_artifact_inclusion(
             text = str(loc)
             if text.startswith(("http://", "https://")):
                 continue  # already hosted elsewhere — nothing to upload
-            raw = text[len("file://"):] if text.startswith("file://") else text
+            raw = text[len("file://") :] if text.startswith("file://") else text
             raw = unquote(raw)
             candidate = Path(raw)
             resolved = candidate if candidate.is_absolute() else (root / candidate)
@@ -95,8 +95,7 @@ _ARTIFACT_IMPORTERS: dict[str, str] = {
     "bmgen-jsonld": "import_bmgen_jsonld",
 }
 # Facet keys compared when checking the descriptive method against its artifact.
-_CONFORMANCE_FACETS = ("modes", "directions", "c_rates", "voltage_window_V",
-                       "has_cv_hold", "has_rest", "has_eis")
+_CONFORMANCE_FACETS = ("modes", "directions", "c_rates", "voltage_window_V", "has_cv_hold", "has_rest", "has_eis")
 
 
 def check_artifact_conformance(
@@ -120,7 +119,7 @@ def check_artifact_conformance(
         loc = art.get("locator")
         if not importer_name or not loc or str(loc).startswith(("http://", "https://")):
             continue
-        raw = str(loc)[len("file://"):] if str(loc).startswith("file://") else str(loc)
+        raw = str(loc)[len("file://") :] if str(loc).startswith("file://") else str(loc)
         resolved = Path(unquote(raw))
         if not resolved.is_absolute():
             resolved = root / resolved
@@ -132,8 +131,11 @@ def check_artifact_conformance(
         except Exception as exc:  # importer failure must not block publication
             out.append(f"Artifact {loc!r} could not be parsed for conformance check: {exc}.")
             continue
-        diverged = [k for k in _CONFORMANCE_FACETS
-                    if spec_facets.get(k) not in (None, [], {}) and spec_facets.get(k) != artifact_facets.get(k)]
+        diverged = [
+            k
+            for k in _CONFORMANCE_FACETS
+            if spec_facets.get(k) not in (None, [], {}) and spec_facets.get(k) != artifact_facets.get(k)
+        ]
         if diverged:
             out.append(
                 f"Descriptive method diverges from linked artifact {loc!r} on "
@@ -141,6 +143,7 @@ def check_artifact_conformance(
                 f"regenerate the method from it or reconcile the difference."
             )
     return out
+
 
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_CR2032_DATASHEET = Path("ENERGIZER__CR2032.pdf")
@@ -619,7 +622,11 @@ def _schema_table_schema_node(value: Any) -> dict[str, Any] | str | None:
     columns = value.get("columns")
     if not isinstance(columns, list):
         return None
-    column_nodes = [column for item in columns if isinstance(item, Mapping) and (column := _schema_table_column_node(item)) is not None]
+    column_nodes = [
+        column
+        for item in columns
+        if isinstance(item, Mapping) and (column := _schema_table_column_node(item)) is not None
+    ]
     if not column_nodes:
         return None
     node: dict[str, Any] = {
@@ -668,7 +675,11 @@ def _schema_main_entity_node(value: Mapping[str, Any]) -> dict[str, Any] | None:
         table_items = value.get("tables") or value.get("table")
         if not isinstance(table_items, list):
             return None
-        tables = [table for item in table_items if isinstance(item, Mapping) and (table := _schema_main_entity_node(item)) is not None]
+        tables = [
+            table
+            for item in table_items
+            if isinstance(item, Mapping) and (table := _schema_main_entity_node(item)) is not None
+        ]
         if not tables:
             return None
         node = {
@@ -694,7 +705,8 @@ def _publication_html(payload: Mapping[str, Any], *, title: str | None = None) -
             (
                 node
                 for node in graph
-                if isinstance(node, Mapping) and (
+                if isinstance(node, Mapping)
+                and (
                     node.get("@type") == "schema:Dataset"
                     or (isinstance(node.get("@type"), list) and "schema:Dataset" in node.get("@type"))
                 )
@@ -713,12 +725,12 @@ def _publication_html(payload: Mapping[str, Any], *, title: str | None = None) -
     payload_json = json.dumps(payload, ensure_ascii=False, indent=2)
     return (
         "<!doctype html>\n"
-        "<html lang=\"en\">\n"
+        '<html lang="en">\n'
         "<head>\n"
-        "  <meta charset=\"utf-8\" />\n"
+        '  <meta charset="utf-8" />\n'
         f"  <title>{html.escape(doc_title)}</title>\n"
-        "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n"
-        "  <script type=\"application/ld+json\">\n"
+        '  <meta name="viewport" content="width=device-width, initial-scale=1" />\n'
+        '  <script type="application/ld+json">\n'
         f"{payload_json}\n"
         "  </script>\n"
         "</head>\n"
@@ -846,7 +858,9 @@ def _datacite_metadata(dataset: Dataset, *, dataset_dir: Path) -> dict[str, Any]
     return metadata
 
 
-def _publication_file_nodes(dataset_dir: Path, *, publish_filename: str, datacite_filename: str, dcat_filename: str | None) -> list[dict[str, Any]]:
+def _publication_file_nodes(
+    dataset_dir: Path, *, publish_filename: str, datacite_filename: str, dcat_filename: str | None
+) -> list[dict[str, Any]]:
     nodes: list[dict[str, Any]] = []
     for filename, media_type in (
         (publish_filename, "application/ld+json"),
@@ -882,7 +896,15 @@ def _ro_crate_metadata(
     dcat_filename: str | None = None,
 ) -> dict[str, Any]:
     has_part = [{"@id": path.relative_to(dataset_dir).as_posix()} for path in dataset_files]
-    has_part.extend({"@id": node["@id"]} for node in _publication_file_nodes(dataset_dir, publish_filename=publish_filename, datacite_filename=datacite_filename, dcat_filename=dcat_filename))
+    has_part.extend(
+        {"@id": node["@id"]}
+        for node in _publication_file_nodes(
+            dataset_dir,
+            publish_filename=publish_filename,
+            datacite_filename=datacite_filename,
+            dcat_filename=dcat_filename,
+        )
+    )
     root_dataset: dict[str, Any] = {
         "@id": "./",
         "@type": "Dataset",
@@ -923,7 +945,14 @@ def _ro_crate_metadata(
                 "sha256": _sha256(path),
             }
         )
-    graph.extend(_publication_file_nodes(dataset_dir, publish_filename=publish_filename, datacite_filename=datacite_filename, dcat_filename=dcat_filename))
+    graph.extend(
+        _publication_file_nodes(
+            dataset_dir,
+            publish_filename=publish_filename,
+            datacite_filename=datacite_filename,
+            dcat_filename=dcat_filename,
+        )
+    )
     return {
         "@context": RO_CRATE_CONTEXT_URL,
         "@graph": graph,
@@ -969,7 +998,9 @@ def _dcat_export(dataset: Dataset, *, dataset_dir: Path, dataset_files: list[Pat
     if dataset.description is not None:
         dataset_node["dct:description"] = dataset.description
     if dataset.license is not None:
-        dataset_node["dct:license"] = {"@id": dataset.license} if dataset.license.startswith(("http://", "https://")) else dataset.license
+        dataset_node["dct:license"] = (
+            {"@id": dataset.license} if dataset.license.startswith(("http://", "https://")) else dataset.license
+        )
     if dataset.keywords:
         dataset_node["dcat:keyword"] = list(dataset.keywords)
     if dataset.created_at is not None:
@@ -1011,7 +1042,9 @@ def _dataset_jsonld_node(
         "schema:description": dataset.description,
         "schema:url": url_override or dataset.access_url or dataset_dir.resolve().as_uri(),
         "schema:about": about_refs,
-        "schema:distribution": distribution_entries if distribution_entries is not None else _publication_distribution_entries(dataset, dataset_dir, files),
+        "schema:distribution": distribution_entries
+        if distribution_entries is not None
+        else _publication_distribution_entries(dataset, dataset_dir, files),
     }
     if dataset.license is not None:
         node["schema:license"] = dataset.license
@@ -1116,7 +1149,9 @@ def _test_jsonld_node(test_record: Mapping[str, Any], dataset_id: str) -> dict[s
     return _without_none(node)
 
 
-def _cell_instance_summary_node(cell_instance_record: Mapping[str, Any], label: str, cell_spec: CellSpec) -> dict[str, Any]:
+def _cell_instance_summary_node(
+    cell_instance_record: Mapping[str, Any], label: str, cell_spec: CellSpec
+) -> dict[str, Any]:
     inst = cell_instance_record["cell_instance"]
     type_list = ["BatteryCell", "schema:IndividualProduct"]
     subclass_term = CELL_SUBCLASS_MAP.get(cell_spec.format)
@@ -1135,9 +1170,7 @@ def _cell_instance_summary_node(cell_instance_record: Mapping[str, Any], label: 
         node["schema:serialNumber"] = inst["serial_number"]
     # The electrodes built into this cell. The spec is an argument here, so the
     # half-cell reading (counter electrode is also the reference) is available.
-    node.update(
-        electrode_role_links(inst, {"cell_configuration": cell_spec.cell_configuration})
-    )
+    node.update(electrode_role_links(inst, {"cell_configuration": cell_spec.cell_configuration}))
     return _without_none(node)
 
 
@@ -1259,12 +1292,14 @@ def _publication_graph(
             checksum = hashlib.sha256(f.read_bytes()).hexdigest()
         except OSError:
             checksum = ""
-        discovered.append({
-            "content_url":     f.name,
-            "encoding_format": fmt,
-            "role":            "processed" if ".bdf." in f.name else "raw",
-            "checksum":        {"algorithm": "sha256", "value": checksum} if checksum else {},
-        })
+        discovered.append(
+            {
+                "content_url": f.name,
+                "encoding_format": fmt,
+                "role": "processed" if ".bdf." in f.name else "raw",
+                "checksum": {"algorithm": "sha256", "value": checksum} if checksum else {},
+            }
+        )
     all_dists = declared + discovered
     ds_inner["distributions"] = all_dists
     # The dataset's access URL for a local directory publication is the directory itself.
@@ -1283,20 +1318,20 @@ def _publication_graph(
     test_record.setdefault("test", {})["dataset_ids"] = [ds_inner.get("id")]
 
     record_sets = {
-        "cell-spec":     [ct_record],
+        "cell-spec": [ct_record],
         "cell-instance": [cell_instance_record],
-        "test":          [test_record],
+        "test": [test_record],
         "test-protocol": [],
-        "dataset":       [dataset_record],
+        "dataset": [dataset_record],
     }
 
     base_uri = dataset_dir.resolve().as_uri()
     doc = AuthoringWorkspace._assemble_zenodo_jsonld(
         record_sets,
         zenodo_record_id=0,
-        prereserved_doi="",          # local directory publication carries no DOI
+        prereserved_doi="",  # local directory publication carries no DOI
         record_url=base_uri,
-        files_base_url=base_uri,     # files live directly in the dataset directory
+        files_base_url=base_uri,  # files live directly in the dataset directory
         data_filenames=data_filenames,
         title=dataset.name or instance_label,
         description=dataset.description or "",
@@ -1307,9 +1342,7 @@ def _publication_graph(
     # variableMeasured, CSVW mainEntity, …). These are shaped by the existing
     # _dataset_jsonld_node helper and merged in (without overwriting what the shared
     # builder already set), so no shaping logic is duplicated.
-    member_node = next(
-        (n for n in doc["@graph"] if n.get("@id") == ds_inner.get("id")), None
-    )
+    member_node = next((n for n in doc["@graph"] if n.get("@id") == ds_inner.get("id")), None)
     if member_node is not None:
         # Local directory publication: the member's access URL is the directory itself
         # (a file:// URL is appropriate here, unlike the hosted Zenodo paths).
@@ -1320,16 +1353,30 @@ def _publication_graph(
             dataset_dir=dataset_dir,
             test_id=test_record["test"]["id"],
             cell_id=cell_instance_record["cell_instance"]["id"],
-            distribution_entries=[],   # distributions already emitted by the shared builder
+            distribution_entries=[],  # distributions already emitted by the shared builder
         )
         for key in (
-            "schema:license", "schema:keywords", "schema:version", "schema:sameAs",
-            "schema:additionalType", "schema:creator", "schema:publisher",
-            "schema:funder", "schema:citation", "schema:measurementTechnique",
-            "schema:measurementMethod", "schema:variableMeasured",
-            "schema:isAccessibleForFree", "schema:conditionsOfAccess", "schema:inLanguage",
-            "schema:dateCreated", "schema:dateModified", "schema:datePublished",
-            "schema:temporalCoverage", "schema:spatialCoverage", "schema:isBasedOn",
+            "schema:license",
+            "schema:keywords",
+            "schema:version",
+            "schema:sameAs",
+            "schema:additionalType",
+            "schema:creator",
+            "schema:publisher",
+            "schema:funder",
+            "schema:citation",
+            "schema:measurementTechnique",
+            "schema:measurementMethod",
+            "schema:variableMeasured",
+            "schema:isAccessibleForFree",
+            "schema:conditionsOfAccess",
+            "schema:inLanguage",
+            "schema:dateCreated",
+            "schema:dateModified",
+            "schema:datePublished",
+            "schema:temporalCoverage",
+            "schema:spatialCoverage",
+            "schema:isBasedOn",
             "schema:includedInDataCatalog",
         ):
             if key in rich and key not in member_node:
@@ -1337,10 +1384,7 @@ def _publication_graph(
 
         # CSVW tabular schema (a local-publication feature), declaring the csvw prefix.
         if dataset.main_entity:
-            main_entity = [
-                node for item in dataset.main_entity
-                if (node := _schema_main_entity_node(item)) is not None
-            ]
+            main_entity = [node for item in dataset.main_entity if (node := _schema_main_entity_node(item)) is not None]
             if main_entity:
                 ctx = doc.get("@context")
                 if isinstance(ctx, dict):
@@ -1664,7 +1708,9 @@ def publish(
         and cell_spec.id is not None
         and cell_spec.id != _cell_spec_iri(normalized_cell_specification.id)
     ):
-        raise ValueError("cell_spec.id must match the class IRI derived from cell_specification.id when both are provided.")
+        raise ValueError(
+            "cell_spec.id must match the class IRI derived from cell_specification.id when both are provided."
+        )
 
     bundle, dataset_dir = _finalize_publication_bundle(
         cell_spec=cell_spec,
@@ -1856,8 +1902,12 @@ def publish_dataset_metadata(
         normalized_cell_spec,
         cell_specification=normalized_cell_specification,
     )
-    if normalized_cell_specification is not None and normalized_cell_spec.id != _cell_spec_iri(normalized_cell_specification.id):
-        raise ValueError("cell_spec.id must match the class IRI derived from cell_specification.id when both are provided.")
+    if normalized_cell_specification is not None and normalized_cell_spec.id != _cell_spec_iri(
+        normalized_cell_specification.id
+    ):
+        raise ValueError(
+            "cell_spec.id must match the class IRI derived from cell_specification.id when both are provided."
+        )
 
     report_path = staging_root / report_filename
     shared_root = staging_root / "shared"
@@ -1957,7 +2007,9 @@ def publish_dataset_metadata(
                 }
             )
             if normalized_cell_specification is not None:
-                result_entry["cell_specification_path"] = str(Path(publish_result["bundle_dir"]) / "cell-specification.json")
+                result_entry["cell_specification_path"] = str(
+                    Path(publish_result["bundle_dir"]) / "cell-specification.json"
+                )
         dataset_results.append(result_entry)
 
     report = {
@@ -2035,6 +2087,7 @@ def load_publication_package(path: PathLike) -> BattinfoBundle:
 
 # ── Zenodo package builder ─────────────────────────────────────────────────────
 
+
 def _zenodo_distribution_entry(path: Path, files_base_url: str) -> dict[str, Any]:
     guessed_format = mimetypes.guess_type(path.name)[0] or "application/octet-stream"
     return {
@@ -2076,8 +2129,11 @@ def _record_sets_from_zenodo_record(
         ct_record["properties"] = specs
 
     record_sets: dict[str, list[dict]] = {
-        "cell-spec": [ct_record], "cell-instance": [], "test": [],
-        "test-protocol": [], "dataset": [],
+        "cell-spec": [ct_record],
+        "cell-instance": [],
+        "test": [],
+        "test-protocol": [],
+        "dataset": [],
     }
     data_filenames: list[str] = []
 
@@ -2101,13 +2157,14 @@ def _record_sets_from_zenodo_record(
             fmt = mimetypes.guess_type(f.name)[0] or (
                 "application/x-parquet" if f.suffix == ".parquet" else "application/octet-stream"
             )
-            dists.append({
-                "content_url":     f.name,
-                "encoding_format": fmt,
-                "role":            "processed" if ".bdf." in f.name else "raw",
-                "checksum":        {"algorithm": "sha256",
-                                    "value": hashlib.sha256(f.read_bytes()).hexdigest()},
-            })
+            dists.append(
+                {
+                    "content_url": f.name,
+                    "encoding_format": fmt,
+                    "role": "processed" if ".bdf." in f.name else "raw",
+                    "checksum": {"algorithm": "sha256", "value": hashlib.sha256(f.read_bytes()).hexdigest()},
+                }
+            )
             data_filenames.append(f.name)
         dataset_record.setdefault("dataset", {})["distributions"] = dists
         record_sets["dataset"].append(dataset_record)
@@ -2155,18 +2212,17 @@ def _zenodo_ro_crate(
     files_base_url = f"{zenodo_record_url}/files"
 
     meta_filenames = [publish_filename, bundle_filename]
-    has_part = (
-        [{"@id": f.name} for f in all_data_files]
-        + [{"@id": fname} for fname in meta_filenames]
-    )
+    has_part = [{"@id": f.name} for f in all_data_files] + [{"@id": fname} for fname in meta_filenames]
 
-    root_dataset: dict[str, Any] = _without_none({
-        "@id": "./",
-        "@type": "Dataset",
-        "name": _cell_record_deposit_title(record),
-        "url": zenodo_record_url,
-        "hasPart": has_part,
-    })
+    root_dataset: dict[str, Any] = _without_none(
+        {
+            "@id": "./",
+            "@type": "Dataset",
+            "name": _cell_record_deposit_title(record),
+            "url": zenodo_record_url,
+            "hasPart": has_part,
+        }
+    )
     if record.cell_spec.manufacturer:
         root_dataset["publisher"] = {"@type": "Organization", "name": record.cell_spec.manufacturer}
 
@@ -2182,15 +2238,17 @@ def _zenodo_ro_crate(
 
     for path in all_data_files:
         guessed_format = mimetypes.guess_type(path.name)[0] or "application/octet-stream"
-        graph.append({
-            "@id": path.name,
-            "@type": "File",
-            "name": path.name,
-            "encodingFormat": guessed_format,
-            "contentSize": path.stat().st_size,
-            "sha256": _sha256(path),
-            "url": f"{files_base_url}/{path.name}",
-        })
+        graph.append(
+            {
+                "@id": path.name,
+                "@type": "File",
+                "name": path.name,
+                "encodingFormat": guessed_format,
+                "contentSize": path.stat().st_size,
+                "sha256": _sha256(path),
+                "url": f"{files_base_url}/{path.name}",
+            }
+        )
 
     for fname, media_type in (
         (publish_filename, "application/ld+json"),
@@ -2198,15 +2256,17 @@ def _zenodo_ro_crate(
     ):
         fpath = staging_dir / fname
         if fpath.exists():
-            graph.append({
-                "@id": fname,
-                "@type": "File",
-                "name": fname,
-                "encodingFormat": media_type,
-                "contentSize": fpath.stat().st_size,
-                "sha256": _sha256(fpath),
-                "url": f"{files_base_url}/{fname}",
-            })
+            graph.append(
+                {
+                    "@id": fname,
+                    "@type": "File",
+                    "name": fname,
+                    "encodingFormat": media_type,
+                    "contentSize": fpath.stat().st_size,
+                    "sha256": _sha256(fpath),
+                    "url": f"{files_base_url}/{fname}",
+                }
+            )
 
     return {"@context": RO_CRATE_CONTEXT_URL, "@graph": graph}
 
@@ -2244,8 +2304,7 @@ def build_zenodo_package(
     """
     if len(file_sets) != len(record.datasets):
         raise ValueError(
-            f"file_sets length ({len(file_sets)}) must match record.datasets "
-            f"length ({len(record.datasets)})."
+            f"file_sets length ({len(file_sets)}) must match record.datasets length ({len(record.datasets)})."
         )
 
     # Fail closed if two distinct records minted the same test/dataset IRI: writing both
@@ -2294,15 +2353,18 @@ def build_zenodo_package(
     _write_json(publish_path, publish_payload)
 
     ro_crate_path = staging / ro_crate_filename
-    _write_json(ro_crate_path, _zenodo_ro_crate(
-        record,
-        all_data_files,
-        staging,
-        zenodo_record_url,
-        publish_filename=publish_filename,
-        bundle_filename=ZENODO_CELL_RECORD_FILENAME,
-        ro_crate_filename=ro_crate_filename,
-    ))
+    _write_json(
+        ro_crate_path,
+        _zenodo_ro_crate(
+            record,
+            all_data_files,
+            staging,
+            zenodo_record_url,
+            publish_filename=publish_filename,
+            bundle_filename=ZENODO_CELL_RECORD_FILENAME,
+            ro_crate_filename=ro_crate_filename,
+        ),
+    )
 
     file_url_map: dict[str, str] = {f.name: f"{files_base_url}/{f.name}" for f in all_data_files}
     for fname in (publish_filename, ZENODO_CELL_RECORD_FILENAME, ro_crate_filename):
@@ -2344,4 +2406,3 @@ __all__ = [
     "publish_dataset_metadata",
     "save_publication_html",
 ]
-

@@ -15,6 +15,7 @@ loader), canonicalize, and compare/query the actual graphs:
   context, the way a third-party consumer would, and expected values are read
   from the plain records, not from the emitter.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -37,12 +38,10 @@ CLAIM_BATCH_FIXTURE = ROOT / "tests" / "fixtures" / "parameter-set" / "parameter
 BASE = "https://battinfo.invalid/base/"
 
 _V1 = json.loads(
-    (ROOT / "src" / "battinfo" / "data" / "context" / "records.context.v1.json")
-    .read_text(encoding="utf-8")
+    (ROOT / "src" / "battinfo" / "data" / "context" / "records.context.v1.json").read_text(encoding="utf-8")
 )["@context"]
 _DOMAIN_BATTERY = json.loads(
-    (ROOT / "src" / "battinfo" / "data" / "context" / "domain-battery.context.json")
-    .read_text(encoding="utf-8")
+    (ROOT / "src" / "battinfo" / "data" / "context" / "domain-battery.context.json").read_text(encoding="utf-8")
 )["@context"]
 
 # Every context URL an emitted document may name, mapped to the vendored copy.
@@ -100,6 +99,7 @@ def _graph_signature(g: rdflib.Graph) -> Counter:
     practice. Two identical sibling nodes hash equal — the multiset keeps them
     both.
     """
+
     def atom(term) -> str:
         return term.n3()
 
@@ -109,8 +109,7 @@ def _graph_signature(g: rdflib.Graph) -> Counter:
         new_labels = {}
         for b in bnodes:
             outgoing = sorted(
-                (atom(p), labels[o] if isinstance(o, rdflib.BNode) else atom(o))
-                for p, o in g.predicate_objects(b)
+                (atom(p), labels[o] if isinstance(o, rdflib.BNode) else atom(o)) for p, o in g.predicate_objects(b)
             )
             new_labels[b] = hashlib.sha256(repr(outgoing).encode()).hexdigest()
         if new_labels == labels:
@@ -162,9 +161,9 @@ def test_no_emitted_term_falls_back_to_the_document_base() -> None:
             g = _graph(record_to_jsonld(record, kind, context=mode))
             for _s, p, o in g:
                 if str(p).startswith(BASE):
-                    offenders.add(f"{kind}/{path.name}: predicate {str(p)[len(BASE):]}")
+                    offenders.add(f"{kind}/{path.name}: predicate {str(p)[len(BASE) :]}")
                 if p == rdflib.RDF.type and str(o).startswith(BASE):
-                    offenders.add(f"{kind}/{path.name}: class {str(o)[len(BASE):]}")
+                    offenders.add(f"{kind}/{path.name}: class {str(o)[len(BASE) :]}")
     assert not offenders, "terms with no context definition:\n" + "\n".join(sorted(offenders))
 
 
@@ -197,19 +196,19 @@ def test_cell_instances_state_their_spec_conformance(corpus_graph) -> None:
     """Q1: 'which spec does this physical cell conform to?' — every cell
     instance carries dcterms:conformsTo, and every target is a spec IRI that
     the corpus actually describes."""
-    rows = list(corpus_graph.query(
-        """
+    rows = list(
+        corpus_graph.query(
+            """
         SELECT ?cell ?spec WHERE {
             ?cell <http://purl.org/dc/terms/conformsTo> ?spec .
             FILTER(isIRI(?spec))  # a parameter file's "BPX 1.0" conformsTo is a literal
         }
         """
-    ))
+        )
+    )
     cell_instances = len(list((EXAMPLES / "cell-instance").glob("*.json")))
     assert cell_instances > 0
-    assert len(rows) >= cell_instances, (
-        f"{cell_instances} cell instances but only {len(rows)} conformsTo edges"
-    )
+    assert len(rows) >= cell_instances, f"{cell_instances} cell instances but only {len(rows)} conformsTo edges"
     subjects = {str(s) for s in corpus_graph.subjects()}
     for _cell, spec in rows:
         assert str(spec).startswith("https://w3id.org/battinfo/spec/"), str(spec)
@@ -223,14 +222,13 @@ def test_nominal_capacity_is_a_conventional_property_with_the_records_value(
     capacity is retrievable by CLASS (NominalCapacity), is explicitly typed as
     a ConventionalProperty (a declared datasheet value, not a measurement),
     and carries the number the plain record states."""
-    record = json.loads(
-        (EXAMPLES / "cell-spec" / "A123__ANR26650M1-B.json").read_text(encoding="utf-8")
-    )
+    record = json.loads((EXAMPLES / "cell-spec" / "A123__ANR26650M1-B.json").read_text(encoding="utf-8"))
     expected = record["properties"]["nominal_capacity"]["value"]  # independent source
     spec_iri = record["cell_spec"]["id"]
 
-    rows = list(corpus_graph.query(
-        f"""
+    rows = list(
+        corpus_graph.query(
+            f"""
         SELECT ?value WHERE {{
             <{spec_iri}> <{_term_iri("isDescriptionFor")}> ?described .
             ?described <{_term_iri("hasProperty")}> ?prop .
@@ -239,7 +237,8 @@ def test_nominal_capacity_is_a_conventional_property_with_the_records_value(
             ?num <{_term_iri("hasNumberValue")}> ?value .
         }}
         """
-    ))
+        )
+    )
     assert len(rows) == 1, f"expected exactly one nominal-capacity node, got {len(rows)}"
     assert float(rows[0][0]) == pytest.approx(expected)
 
@@ -255,15 +254,17 @@ def test_parameter_claims_expose_their_provenance_class(corpus_graph) -> None:
     fixture = json.loads(CLAIM_BATCH_FIXTURE.read_text(encoding="utf-8"))
     doc = record_to_jsonld(fixture, "parameter-set", context="url")
     graph.parse(data=json.dumps(_substituted(doc)), format="json-ld", base=BASE)
-    rows = list(graph.query(
-        """
+    rows = list(
+        graph.query(
+            """
         SELECT ?claim ?basis WHERE {
             ?claim <https://schema.org/additionalProperty> ?ann .
             ?ann <https://schema.org/name> "provenance_class" .
             ?ann <https://schema.org/value> ?basis .
         }
         """
-    ))
+        )
+    )
     assert len(rows) > 50, f"expected a claims corpus, found {len(rows)} annotated claims"
     bases = {str(b) for _c, b in rows}
     assert len(bases) >= 2, f"corpus should distinguish epistemic bases, found only {bases}"

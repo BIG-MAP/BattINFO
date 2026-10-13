@@ -15,6 +15,7 @@ dependency. Point ``--converter-root`` at a checkout and run::
 The chosen templates span the tool's history and, critically, both component
 holders: ``hasConstituent`` (<= v1.1.11) and ``hasComponent`` (>= v1.1.15).
 """
+
 from __future__ import annotations
 
 import argparse
@@ -37,8 +38,7 @@ OUT_DIR = Path(__file__).resolve().parents[1] / "tests" / "fixtures" / "interop"
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--converter-root", required=True, type=Path,
-                        help="Path to a BattInfoConverter checkout.")
+    parser.add_argument("--converter-root", required=True, type=Path, help="Path to a BattInfoConverter checkout.")
     args = parser.parse_args()
 
     src = args.converter_root / "src"

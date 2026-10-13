@@ -3,6 +3,7 @@
 Split from the former monolithic ``battinfo/api.py`` (beta-hardening 4.2);
 import the public surface from ``battinfo.api``, not from this module.
 """
+
 from __future__ import annotations
 
 import functools
@@ -73,7 +74,9 @@ class MaterialSpecInput(BaseModel):
     composition: dict[str, Any] | None = None
     property: dict[str, Any] = Field(default_factory=dict)
     description: str | None = None
-    source_type: Literal["datasheet", "manufacturer", "measurement", "lab", "literature", "manual", "other"] = "datasheet"
+    source_type: Literal["datasheet", "manufacturer", "measurement", "lab", "literature", "manual", "other"] = (
+        "datasheet"
+    )
     source_url: str | None = None
     citation: str | None = Field(default=None, validation_alias=AliasChoices("citation", "citation_doi"))
     retrieved_at: int | str | None = None
@@ -88,9 +91,7 @@ class MaterialInput(BaseModel):
     schema_version: str = SCHEMA_VERSION
     id: str | None = None
     uid: str | None = None
-    material_spec_id: str = Field(
-        validation_alias=AliasChoices("material_spec_id", "spec_id")
-    )
+    material_spec_id: str = Field(validation_alias=AliasChoices("material_spec_id", "spec_id"))
     name: str | None = None
     handle: str | None = None
     lot_id: str | None = Field(default=None, validation_alias=AliasChoices("lot_id", "lot"))
@@ -161,7 +162,9 @@ class ElectrodeSpecInput(BaseModel):
     # Accepted for continuity with the generic component API this family
     # graduated from: a raw holder body merged under the explicit fields.
     body: dict[str, Any] | None = None
-    source_type: Literal["datasheet", "manufacturer", "measurement", "lab", "literature", "manual", "other"] = "datasheet"
+    source_type: Literal["datasheet", "manufacturer", "measurement", "lab", "literature", "manual", "other"] = (
+        "datasheet"
+    )
     source_url: str | None = None
     citation: str | None = Field(default=None, validation_alias=AliasChoices("citation", "citation_doi"))
     retrieved_at: int | str | None = None
@@ -180,9 +183,7 @@ class ElectrodeInput(BaseModel):
     schema_version: str = SCHEMA_VERSION
     id: str | None = None
     uid: str | None = None
-    electrode_spec_id: str = Field(
-        validation_alias=AliasChoices("electrode_spec_id", "spec_id")
-    )
+    electrode_spec_id: str = Field(validation_alias=AliasChoices("electrode_spec_id", "spec_id"))
     name: str | None = None
     handle: str | None = None
     batch_id: str | None = Field(default=None, validation_alias=AliasChoices("batch_id", "batch"))
@@ -292,9 +293,7 @@ def _record_from_material_spec(draft: MaterialSpecInput) -> dict[str, Any]:
         # Deterministic identity: an explicit uid is honored; otherwise the uid is
         # derived from the spec's content so a re-run lands on the same IRI.
         dashed_uid = (
-            _normalized_dashed_uid(draft.uid)
-            if draft.uid is not None
-            else _material_spec_identity_uid(draft, kind_key)
+            _normalized_dashed_uid(draft.uid) if draft.uid is not None else _material_spec_identity_uid(draft, kind_key)
         )
         entity_id = f"https://w3id.org/battinfo/spec/{dashed_uid}"
 
@@ -333,10 +332,12 @@ def _record_from_material_spec(draft: MaterialSpecInput) -> dict[str, Any]:
     record: dict[str, Any] = {
         "schema_version": draft.schema_version,
         "material_spec": spec,
-        "provenance": stamp_provenance({
-            "source_type": draft.source_type,
-            "retrieved_at": _resolved_retrieved_at(draft.retrieved_at),
-        }),
+        "provenance": stamp_provenance(
+            {
+                "source_type": draft.source_type,
+                "retrieved_at": _resolved_retrieved_at(draft.retrieved_at),
+            }
+        ),
     }
     if draft.source_url is not None:
         record["provenance"]["source_url"] = draft.source_url
@@ -367,9 +368,7 @@ def _record_from_material(draft: MaterialInput) -> dict[str, Any]:
             from battinfo.entities import stable_uid
 
             lot = draft.lot_id or draft.batch_id or draft.name or ""
-            dashed_uid = stable_uid(
-                "::".join(["material", draft.material_spec_id.strip(), lot.strip()])
-            )
+            dashed_uid = stable_uid("::".join(["material", draft.material_spec_id.strip(), lot.strip()]))
         entity_id = f"https://w3id.org/battinfo/material/{dashed_uid}"
 
     material: dict[str, Any] = {
@@ -404,10 +403,12 @@ def _record_from_material(draft: MaterialInput) -> dict[str, Any]:
     record: dict[str, Any] = {
         "schema_version": draft.schema_version,
         "material": material,
-        "provenance": stamp_provenance({
-            "source_type": draft.source_type,
-            "retrieved_at": _resolved_retrieved_at(draft.retrieved_at),
-        }),
+        "provenance": stamp_provenance(
+            {
+                "source_type": draft.source_type,
+                "retrieved_at": _resolved_retrieved_at(draft.retrieved_at),
+            }
+        ),
     }
     if draft.source_url is not None:
         record["provenance"]["source_url"] = draft.source_url
@@ -466,8 +467,7 @@ def _composition_component(entry: Any, *, default_name: str | None) -> dict[str,
         name = entry.get("name") or default_name
         if isinstance(name, str) and name.strip():
             holder["name"] = name.strip()
-        for key in ("material_spec_id", "manufacturer", "supplier", "product_id",
-                    "molecular_formula", "comment"):
+        for key in ("material_spec_id", "manufacturer", "supplier", "product_id", "molecular_formula", "comment"):
             if entry.get(key) is not None:
                 holder[key] = entry[key]
         prop = dict(entry.get("property") or {})
@@ -483,9 +483,7 @@ def _composition_component(entry: Any, *, default_name: str | None) -> dict[str,
     return None
 
 
-def _coating_from_composition(
-    composition: Mapping[str, Any], *, active_name: str | None
-) -> dict[str, Any]:
+def _coating_from_composition(composition: Mapping[str, Any], *, active_name: str | None) -> dict[str, Any]:
     """Expand the ``composition=`` shorthand into the canonical coating shape.
 
     The shape is the one a cell-spec's inline electrode coating already uses
@@ -498,13 +496,13 @@ def _coating_from_composition(
         role = _COMPOSITION_ROLES.get(str(key).strip().lower())
         if role is None:
             raise ValueError(
-                f"composition: unknown role {key!r}. Valid roles: "
-                f"{', '.join(sorted(set(_COMPOSITION_ROLES)))}."
+                f"composition: unknown role {key!r}. Valid roles: {', '.join(sorted(set(_COMPOSITION_ROLES)))}."
             )
         entries = value if isinstance(value, list) else [value]
         default_name = active_name if role == "active_material" else None
         built = [
-            holder for item in entries
+            holder
+            for item in entries
             if (holder := _composition_component(item, default_name=default_name)) is not None
         ]
         if built:
@@ -585,9 +583,7 @@ def _electrode_spec_identity_uid(draft: ElectrodeSpecInput, kind_key: str | None
 
 def _record_from_electrode_spec(draft: ElectrodeSpecInput) -> dict[str, Any]:
 
-    kind_key = _resolve_electrode_kind_or_raise(
-        draft.active_material_kind, draft.name, draft.product_id
-    )
+    kind_key = _resolve_electrode_kind_or_raise(draft.active_material_kind, draft.name, draft.product_id)
     if draft.id is not None:
         if not _spec_iri_re("electrode-spec").fullmatch(draft.id):
             raise ValueError("electrode spec id must match https://w3id.org/battinfo/spec/{uid}.")
@@ -603,12 +599,8 @@ def _record_from_electrode_spec(draft: ElectrodeSpecInput) -> dict[str, Any]:
         )
         entity_id = f"https://w3id.org/battinfo/spec/{dashed_uid}"
 
-    if draft.active_material_spec_id is not None and not MATERIAL_SPEC_IRI_RE.fullmatch(
-        draft.active_material_spec_id
-    ):
-        raise ValueError(
-            "active_material_spec_id must match https://w3id.org/battinfo/spec/{uid}."
-        )
+    if draft.active_material_spec_id is not None and not MATERIAL_SPEC_IRI_RE.fullmatch(draft.active_material_spec_id):
+        raise ValueError("active_material_spec_id must match https://w3id.org/battinfo/spec/{uid}.")
 
     spec: dict[str, Any] = {
         "id": entity_id,
@@ -668,10 +660,12 @@ def _record_from_electrode_spec(draft: ElectrodeSpecInput) -> dict[str, Any]:
     record: dict[str, Any] = {
         "schema_version": draft.schema_version,
         "electrode_spec": spec,
-        "provenance": stamp_provenance({
-            "source_type": draft.source_type,
-            "retrieved_at": _resolved_retrieved_at(draft.retrieved_at),
-        }),
+        "provenance": stamp_provenance(
+            {
+                "source_type": draft.source_type,
+                "retrieved_at": _resolved_retrieved_at(draft.retrieved_at),
+            }
+        ),
     }
     if draft.source_url is not None:
         record["provenance"]["source_url"] = draft.source_url
@@ -686,9 +680,7 @@ def _record_from_electrode_spec(draft: ElectrodeSpecInput) -> dict[str, Any]:
 def _record_from_electrode(draft: ElectrodeInput) -> dict[str, Any]:
     if not _spec_iri_re("electrode-spec").fullmatch(draft.electrode_spec_id):
         raise ValueError("electrode_spec_id must match https://w3id.org/battinfo/spec/{uid}.")
-    if draft.parent_id is not None and not _component_iri_re("electrode").fullmatch(
-        draft.parent_id
-    ):
+    if draft.parent_id is not None and not _component_iri_re("electrode").fullmatch(draft.parent_id):
         raise ValueError("parent_id must match https://w3id.org/battinfo/electrode/{uid}.")
     if draft.id is not None:
         if not _component_iri_re("electrode").fullmatch(draft.id):
@@ -747,10 +739,12 @@ def _record_from_electrode(draft: ElectrodeInput) -> dict[str, Any]:
     record: dict[str, Any] = {
         "schema_version": draft.schema_version,
         "electrode": electrode,
-        "provenance": stamp_provenance({
-            "source_type": draft.source_type,
-            "retrieved_at": _resolved_retrieved_at(draft.retrieved_at),
-        }),
+        "provenance": stamp_provenance(
+            {
+                "source_type": draft.source_type,
+                "retrieved_at": _resolved_retrieved_at(draft.retrieved_at),
+            }
+        ),
     }
     if draft.source_url is not None:
         record["provenance"]["source_url"] = draft.source_url
@@ -794,9 +788,14 @@ def save_electrode_spec(
     if isinstance(draft, (str, Path)):
         return save_electrode_spec(
             _load_json(_as_path(draft)),
-            source_root=source_root, mode=mode, duplicate_policy=duplicate_policy,
-            resolve_references=resolve_references, validate=validate,
-            validation_policy=validation_policy, dry_run=dry_run, stamp=stamp,
+            source_root=source_root,
+            mode=mode,
+            duplicate_policy=duplicate_policy,
+            resolve_references=resolve_references,
+            validate=validate,
+            validation_policy=validation_policy,
+            dry_run=dry_run,
+            stamp=stamp,
         )
     if isinstance(draft, ElectrodeSpecInput):
         record = _record_from_electrode_spec(draft)
@@ -806,9 +805,16 @@ def save_electrode_spec(
         record = _record_from_electrode_spec(ElectrodeSpecInput.model_validate(draft))
     return save_record(
         record,
-        source_root=source_root, mode=mode, duplicate_policy=duplicate_policy,
-        resolve_references=resolve_references, build_jsonld=False, build_html=False,
-        validate=validate, validation_policy=validation_policy, dry_run=dry_run, stamp=stamp,
+        source_root=source_root,
+        mode=mode,
+        duplicate_policy=duplicate_policy,
+        resolve_references=resolve_references,
+        build_jsonld=False,
+        build_html=False,
+        validate=validate,
+        validation_policy=validation_policy,
+        dry_run=dry_run,
+        stamp=stamp,
     )
 
 
@@ -828,9 +834,14 @@ def save_electrode(
     if isinstance(draft, (str, Path)):
         return save_electrode(
             _load_json(_as_path(draft)),
-            source_root=source_root, mode=mode, duplicate_policy=duplicate_policy,
-            resolve_references=resolve_references, validate=validate,
-            validation_policy=validation_policy, dry_run=dry_run, stamp=stamp,
+            source_root=source_root,
+            mode=mode,
+            duplicate_policy=duplicate_policy,
+            resolve_references=resolve_references,
+            validate=validate,
+            validation_policy=validation_policy,
+            dry_run=dry_run,
+            stamp=stamp,
         )
     if isinstance(draft, ElectrodeInput):
         record = _record_from_electrode(draft)
@@ -840,9 +851,16 @@ def save_electrode(
         record = _record_from_electrode(ElectrodeInput.model_validate(draft))
     return save_record(
         record,
-        source_root=source_root, mode=mode, duplicate_policy=duplicate_policy,
-        resolve_references=resolve_references, build_jsonld=False, build_html=False,
-        validate=validate, validation_policy=validation_policy, dry_run=dry_run, stamp=stamp,
+        source_root=source_root,
+        mode=mode,
+        duplicate_policy=duplicate_policy,
+        resolve_references=resolve_references,
+        build_jsonld=False,
+        build_html=False,
+        validate=validate,
+        validation_policy=validation_policy,
+        dry_run=dry_run,
+        stamp=stamp,
     )
 
 
@@ -873,26 +891,29 @@ def query_electrode_specs(
     records: list[dict[str, Any]] = []
     for path, origin in _query_record_files(
         "electrode-spec",
-        source_root=source_root, directory=directory,
+        source_root=source_root,
+        directory=directory,
         include_packaged_examples=include_packaged_examples,
     ):
         doc = _load_json(path)
         spec = doc.get("electrode_spec", {})
         if not isinstance(spec, Mapping):
             continue
-        records.append({
-            "id": spec.get("id"),
-            "short_id": spec.get("short_id"),
-            "name": spec.get("name"),
-            # Old records may still carry the deprecated `kind` spelling.
-            "active_material_kind": spec.get("active_material_kind", spec.get("kind")),
-            "kind": spec.get("active_material_kind", spec.get("kind")),
-            "polarity": spec.get("polarity"),
-            "manufacturer": spec.get("manufacturer"),
-            "origin": origin,
-            "path": str(path),
-            "record": doc,
-        })
+        records.append(
+            {
+                "id": spec.get("id"),
+                "short_id": spec.get("short_id"),
+                "name": spec.get("name"),
+                # Old records may still carry the deprecated `kind` spelling.
+                "active_material_kind": spec.get("active_material_kind", spec.get("kind")),
+                "kind": spec.get("active_material_kind", spec.get("kind")),
+                "polarity": spec.get("polarity"),
+                "manufacturer": spec.get("manufacturer"),
+                "origin": origin,
+                "path": str(path),
+                "record": doc,
+            }
+        )
 
     filtered: list[dict[str, Any]] = []
     for rec in records:
@@ -933,24 +954,27 @@ def query_electrodes(
     records: list[dict[str, Any]] = []
     for path, origin in _query_record_files(
         "electrode",
-        source_root=source_root, directory=directory,
+        source_root=source_root,
+        directory=directory,
         include_packaged_examples=include_packaged_examples,
     ):
         doc = _load_json(path)
         body = doc.get("electrode", {})
         if not isinstance(body, Mapping):
             continue
-        records.append({
-            "id": body.get("id"),
-            "electrode_spec_id": body.get("electrode_spec_id"),
-            "short_id": body.get("short_id"),
-            "name": body.get("name"),
-            "batch_id": body.get("batch_id"),
-            "lot_id": body.get("lot_id"),
-            "origin": origin,
-            "path": str(path),
-            "record": doc,
-        })
+        records.append(
+            {
+                "id": body.get("id"),
+                "electrode_spec_id": body.get("electrode_spec_id"),
+                "short_id": body.get("short_id"),
+                "name": body.get("name"),
+                "batch_id": body.get("batch_id"),
+                "lot_id": body.get("lot_id"),
+                "origin": origin,
+                "path": str(path),
+                "record": doc,
+            }
+        )
 
     filtered: list[dict[str, Any]] = []
     for rec in records:
@@ -968,9 +992,7 @@ def query_electrodes(
     return _paginate(filtered, limit=limit, offset=offset)
 
 
-def template_electrode_spec(
-    *, name: str = "Example Electrode", uid: str | None = None
-) -> dict[str, Any]:
+def template_electrode_spec(*, name: str = "Example Electrode", uid: str | None = None) -> dict[str, Any]:
     """Build a starter canonical electrode-spec document for save workflows.
 
     The document has no ``id`` unless *uid* is given; saving it mints the IRI.
@@ -1341,7 +1363,9 @@ def _record_from_component_spec(
     record: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
         f"{component_family}_spec": spec,
-        "provenance": stamp_provenance({"source_type": source_type, "retrieved_at": _resolved_retrieved_at(retrieved_at)}),
+        "provenance": stamp_provenance(
+            {"source_type": source_type, "retrieved_at": _resolved_retrieved_at(retrieved_at)}
+        ),
     }
     if source_url is not None:
         record["provenance"]["source_url"] = source_url
@@ -1410,7 +1434,9 @@ def _record_from_component_instance(
     record: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
         component_family: instance,
-        "provenance": stamp_provenance({"source_type": source_type, "retrieved_at": _resolved_retrieved_at(retrieved_at)}),
+        "provenance": stamp_provenance(
+            {"source_type": source_type, "retrieved_at": _resolved_retrieved_at(retrieved_at)}
+        ),
     }
     if source_url is not None:
         record["provenance"]["source_url"] = source_url
@@ -1552,8 +1578,15 @@ def query_component_specs(
         include_packaged_examples=include_packaged_examples,
     )
     return _query_component(
-        f"{family}_spec", files, id=id, name=name, short_id_prefix=short_id_prefix,
-        spec_ref_field=None, spec_id=None, limit=limit, offset=offset,
+        f"{family}_spec",
+        files,
+        id=id,
+        name=name,
+        short_id_prefix=short_id_prefix,
+        spec_ref_field=None,
+        spec_id=None,
+        limit=limit,
+        offset=offset,
     )
 
 
@@ -1583,8 +1616,15 @@ def query_component_instances(
         include_packaged_examples=include_packaged_examples,
     )
     return _query_component(
-        family, files, id=id, name=name, short_id_prefix=short_id_prefix,
-        spec_ref_field=f"{family}_spec_id", spec_id=spec_id, limit=limit, offset=offset,
+        family,
+        files,
+        id=id,
+        name=name,
+        short_id_prefix=short_id_prefix,
+        spec_ref_field=f"{family}_spec_id",
+        spec_id=spec_id,
+        limit=limit,
+        offset=offset,
     )
 
 
@@ -1597,7 +1637,9 @@ def template_component_spec(family: str, *, name: str | None = None, uid: str | 
     turn every re-run into a duplicate.
     """
     record = _record_from_component_spec(
-        family, name=name or f"Example {family}", uid=uid,
+        family,
+        name=name or f"Example {family}",
+        uid=uid,
         notes=[f"Template-generated {family}-spec. Fill in the holder body before saving."],
     )
     return record if uid is not None else _without_minted_identity(record)
@@ -1616,7 +1658,9 @@ def template_component_instance(
     pass *uid* for a record you will save: a save without an id is refused.
     """
     record = _record_from_component_instance(
-        family, spec_id=spec_id or _TEMPLATE_SPEC_ID, uid=uid,  # build scaffold, removed below
+        family,
+        spec_id=spec_id or _TEMPLATE_SPEC_ID,
+        uid=uid,  # build scaffold, removed below
         notes=[f"Template-generated {family} instance. Set {family}_spec_id before saving."],
     )
     if spec_id is None:

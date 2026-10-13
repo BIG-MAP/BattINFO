@@ -8,6 +8,7 @@ Design rules under test:
   registration is idempotent;
 - equipment category is data (equipment_class), never a namespace segment.
 """
+
 from __future__ import annotations
 
 import json
@@ -79,9 +80,7 @@ def test_channel_uid_is_deterministic_from_equipment_and_index() -> None:
     first = create_channel(equipment_id=equipment_id, index=2)
     again = create_channel(equipment_id=equipment_id, index=2, label="CH2")
     other_index = create_channel(equipment_id=equipment_id, index=3)
-    other_unit = create_channel(
-        equipment_id="https://w3id.org/battinfo/equipment/ab12-cd34-ef56-gh78", index=2
-    )
+    other_unit = create_channel(equipment_id="https://w3id.org/battinfo/equipment/ab12-cd34-ef56-gh78", index=2)
 
     assert CHANNEL_IRI.fullmatch(first["channel"]["id"])
     assert first["channel"]["id"] == again["channel"]["id"], "same (equipment, index) must mint the same IRI"
@@ -98,9 +97,7 @@ def test_channel_requires_equipment_id_and_valid_index() -> None:
     with pytest.raises(ValueError, match="equipment"):
         create_channel(equipment_id="https://w3id.org/battinfo/spec/0000-0000-0000-0000", index=1)
     with pytest.raises(ValueError, match="index"):
-        create_channel(
-            equipment_id="https://w3id.org/battinfo/equipment/cy01-7r4d-2j9m-5w8e", index=0
-        )
+        create_channel(equipment_id="https://w3id.org/battinfo/equipment/cy01-7r4d-2j9m-5w8e", index=0)
 
 
 @pytest.mark.parametrize("subdir", ["equipment-spec", "equipment", "channel"])

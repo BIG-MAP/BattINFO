@@ -19,6 +19,7 @@ The contract pinned here (IDENTIFIER_POLICY 6.3, parameter files):
 The fixture is the synthetic structural twin of the Schmitt et al. 2026 BattMo
 export (the v0.x layout declared as BPX 1.0, Validation section included).
 """
+
 from __future__ import annotations
 
 import copy
@@ -181,8 +182,10 @@ def test_numpy_values_in_a_dict_import_like_their_json() -> None:
     assert res.file_uid() == from_bpx_parameters(FIXTURE).file_uid()
     # The record holds plain numbers, so it serialises.
     record = res.to_parameter_set(virtual_cell=True)
-    assert record["parameter_set"]["parts"] == _record(virtual_cell=True, cell_spec_id=None,
-                                                         materials=None)["parameter_set"]["parts"]
+    assert (
+        record["parameter_set"]["parts"]
+        == _record(virtual_cell=True, cell_spec_id=None, materials=None)["parameter_set"]["parts"]
+    )
     json.dumps(record)
 
     # A float32 holds a different double from the decimal it was made from;
@@ -224,15 +227,16 @@ def test_the_builder_refuses_an_iri_the_fingerprint_does_not_give() -> None:
     body = _record()["parameter_set"]
     with pytest.raises(ValueError, match="derives from its parameters_sha256"):
         create_parameter_set(
-            name="x", parts=body["parts"], parameters_sha256=body["parameters_sha256"],
-            virtual_cell=True, uid="0000-0000-0000-0000",
+            name="x",
+            parts=body["parts"],
+            parameters_sha256=body["parameters_sha256"],
+            virtual_cell=True,
+            uid="0000-0000-0000-0000",
         )
 
 
 def test_the_one_call_form_returns_the_record() -> None:
-    record = import_bpx_parameters(
-        FIXTURE, cell_spec_id=CELL_SPEC_IRI, materials=MATERIALS, retrieved_at=1789900000
-    )
+    record = import_bpx_parameters(FIXTURE, cell_spec_id=CELL_SPEC_IRI, materials=MATERIALS, retrieved_at=1789900000)
     assert record == _record(retrieved_at=1789900000)
 
 
@@ -341,8 +345,10 @@ def test_cross_entry_rules_hold() -> None:
     record = _record(distributions=[source])
     body = record["parameter_set"]
     base = {
-        "name": body["name"], "parts": body["parts"],
-        "parameters_sha256": body["parameters_sha256"], "virtual_cell": True,
+        "name": body["name"],
+        "parts": body["parts"],
+        "parameters_sha256": body["parameters_sha256"],
+        "virtual_cell": True,
     }
     wrong_runnable = {**_runnable(source), "derived_from": "sha256:" + "0" * 64}
     with pytest.raises(ValueError, match="must name the source"):
@@ -401,7 +407,10 @@ def test_a_part_appears_once() -> None:
     parts = body["parts"] + [copy.deepcopy(body["parts"][0])]
     with pytest.raises(ValueError, match="appears twice"):
         create_parameter_set(
-            name="x", parts=parts, parameters_sha256=body["parameters_sha256"], virtual_cell=True,
+            name="x",
+            parts=parts,
+            parameters_sha256=body["parameters_sha256"],
+            virtual_cell=True,
         )
     record = _record()
     record["parameter_set"]["parts"].append(copy.deepcopy(record["parameter_set"]["parts"][0]))
@@ -409,8 +418,7 @@ def test_a_part_appears_once() -> None:
     assert "semantic.parameter_file_part_repeated" in {i.code for i in report.errors}
     # A phase names another part of the same kind (reserved for blends).
     phased = [*body["parts"], {**copy.deepcopy(body["parts"][1]), "phase": "Secondary"}]
-    create_parameter_set(name="x", parts=phased, parameters_sha256=body["parameters_sha256"],
-                         virtual_cell=True)
+    create_parameter_set(name="x", parts=phased, parameters_sha256=body["parameters_sha256"], virtual_cell=True)
 
 
 # ── Layout upgrade and checks ────────────────────────────────────────────────
@@ -571,7 +579,8 @@ def test_a_claim_batch_is_not_a_file() -> None:
     from battinfo.api import create_parameter_set
 
     batch = create_parameter_set(
-        name="Chen 2020 - graphite", material_kind="graphite",
+        name="Chen 2020 - graphite",
+        material_kind="graphite",
         claims=[{"parameter": "particle_radius", "quantity": {"value": 5.86e-6, "unit": "m"}}],
     )
     with pytest.raises(ValueError, match="claim batch"):
@@ -709,8 +718,7 @@ def test_jsonld_parts_are_datasets_with_their_claims() -> None:
     variables = variables if isinstance(variables, list) else [variables]
     assert any(v["schema:name"] == "ocp" for v in variables)
     cell_types = {
-        t for prop in by_part["cell"]["hasProperty"] for t in prop["@type"]
-        if isinstance(prop["@type"], list)
+        t for prop in by_part["cell"]["hasProperty"] for t in prop["@type"] if isinstance(prop["@type"], list)
     }
     assert {"NominalCapacity", "Area", "NumberOfElectrodePairs"} <= cell_types
     assert "schema:about" not in by_part["separator"]
@@ -724,8 +732,10 @@ def test_jsonld_validates_for_every_cell_link(link: str, context: str) -> None:
 
     kwargs = {
         "cell_spec_id": {"cell_spec_id": CELL_SPEC_IRI},
-        "cell_instance_id": {"cell_spec_id": None,
-                             "cell_instance_id": "https://w3id.org/battinfo/cell/0000-0000-0000-0001"},
+        "cell_instance_id": {
+            "cell_spec_id": None,
+            "cell_instance_id": "https://w3id.org/battinfo/cell/0000-0000-0000-0001",
+        },
         "virtual_cell": {"cell_spec_id": None, "virtual_cell": True},
     }[link]
     record = _record(distributions=[_source()], **kwargs)

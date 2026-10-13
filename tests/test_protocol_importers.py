@@ -1,5 +1,6 @@
 """Tests for the executable-protocol importers (Phase 3): aurora-unicycler,
 PyBaMM experiments, and bmgen EMMO JSON-LD -> structured TestSpec.method."""
+
 from __future__ import annotations
 
 import sys
@@ -22,8 +23,14 @@ AURORA = {
     "unicycler": {"version": "0.3.2"},
     "sample": {"name": "cell-1", "capacity_mAh": "123"},
     "record": {"current_mA": "0.1", "voltage_V": "0.1", "time_s": "10"},
-    "safety": {"max_voltage_V": "5", "min_voltage_V": "-0.1", "max_current_mA": "10",
-               "min_current_mA": "-10", "max_capacity_mAh": None, "delay_s": "10"},
+    "safety": {
+        "max_voltage_V": "5",
+        "min_voltage_V": "-0.1",
+        "max_current_mA": "10",
+        "min_current_mA": "-10",
+        "max_capacity_mAh": None,
+        "delay_s": "10",
+    },
     "method": [
         {"step": "open_circuit_voltage", "until_time_s": "3600"},
         {"step": "constant_current", "rate_C": "0.1", "until_voltage_V": "4.2"},
@@ -35,8 +42,7 @@ AURORA = {
 
 
 def test_import_aurora_unicycler_method_safety_record_loop() -> None:
-    spec = import_aurora_unicycler(AURORA, source_locator="files/cc.unicycler.json",
-                                   source_sha256="a" * 64)
+    spec = import_aurora_unicycler(AURORA, source_locator="files/cc.unicycler.json", source_sha256="a" * 64)
     # OCV rest, then a 3× group of [CC charge, CV hold, CC discharge].
     assert [s.mode for s in spec.method] == ["rest", "group"]
     group = spec.method[1]
@@ -53,12 +59,12 @@ def test_import_aurora_unicycler_method_safety_record_loop() -> None:
     assert hold.termination[0].quantity == "c_rate" and hold.termination[0].value == 0.05
 
     discharge = group.steps[2]
-    assert discharge.direction == "discharge"      # negative rate_C
+    assert discharge.direction == "discharge"  # negative rate_C
     assert discharge.termination[0].direction == "below" and discharge.termination[0].value == 2.5
 
     assert spec.record == {"current_mA": 0.1, "voltage_V": 0.1, "time_s": 10}
     assert spec.safety["max_voltage_V"] == 5
-    assert spec.test_type.value == "cycling"       # inferred from the loop
+    assert spec.test_type.value == "cycling"  # inferred from the loop
     assert spec.artifacts[0].format == "aurora-unicycler-json"
 
     spec.id = SPEC_ID
@@ -67,8 +73,7 @@ def test_import_aurora_unicycler_method_safety_record_loop() -> None:
 
 def test_import_pybamm_experiment_folds_repeated_cycles() -> None:
     spec = import_pybamm_experiment(
-        [("Charge at 1 C until 4.2 V", "Discharge at 1 C until 2.5 V")] * 3
-        + ["Rest for 1 hour"],
+        [("Charge at 1 C until 4.2 V", "Discharge at 1 C until 2.5 V")] * 3 + ["Rest for 1 hour"],
         source_locator="files/exp.py",
     )
     assert [s.mode for s in spec.method] == ["group", "rest"]
@@ -82,12 +87,24 @@ def test_import_pybamm_experiment_folds_repeated_cycles() -> None:
 
 def test_import_pybamm_to_config_via_description() -> None:
     # to_config() form: a single cycle with steps carrying their PyBaMM string.
-    config = {"cycles": [[
-        {"type": "CurrentStep", "value": "1C", "termination": ["4.2 V"],
-         "description": "Charge at 1 C until 4.2 V"},
-        {"type": "CurrentStep", "value": "-1C", "termination": ["2.5 V"],
-         "description": "Discharge at 1 C until 2.5 V"},
-    ]]}
+    config = {
+        "cycles": [
+            [
+                {
+                    "type": "CurrentStep",
+                    "value": "1C",
+                    "termination": ["4.2 V"],
+                    "description": "Charge at 1 C until 4.2 V",
+                },
+                {
+                    "type": "CurrentStep",
+                    "value": "-1C",
+                    "termination": ["2.5 V"],
+                    "description": "Discharge at 1 C until 2.5 V",
+                },
+            ]
+        ]
+    }
     spec = import_pybamm_experiment(config, source_locator="files/exp.json")
     # Single cycle flattens (no group).
     assert [s.mode for s in spec.method] == ["cc", "cc"]
@@ -119,15 +136,21 @@ def test_import_pybamm_to_config_structural_fallback_and_cycles() -> None:
 BMGEN = {
     "@context": {"@context": "https://w3id.org/emmo/domain/battery/context"},
     "@graph": [
-        {"@type": "ConstantCurrentConstantVoltageCharging", "hasProcessParameter": [
-            {"@type": "ChargingCurrent", "hasNumericalPart": {"hasNumberValue": 2.0}},
-            {"@type": "ChargingVoltage", "hasNumericalPart": {"hasNumberValue": 4.2}},
-            {"@type": "TerminationQuantity", "hasNumericalPart": {"hasNumberValue": 0.1}},
-        ]},
-        {"@type": "ConstantCurrentDischarging", "hasProcessParameter": [
-            {"@type": "DischargingCurrent", "hasNumericalPart": {"hasNumberValue": 1.0}},
-            {"@type": "LowerVoltageLimit", "hasNumericalPart": {"hasNumberValue": 3.0}},
-        ]},
+        {
+            "@type": "ConstantCurrentConstantVoltageCharging",
+            "hasProcessParameter": [
+                {"@type": "ChargingCurrent", "hasNumericalPart": {"hasNumberValue": 2.0}},
+                {"@type": "ChargingVoltage", "hasNumericalPart": {"hasNumberValue": 4.2}},
+                {"@type": "TerminationQuantity", "hasNumericalPart": {"hasNumberValue": 0.1}},
+            ],
+        },
+        {
+            "@type": "ConstantCurrentDischarging",
+            "hasProcessParameter": [
+                {"@type": "DischargingCurrent", "hasNumericalPart": {"hasNumberValue": 1.0}},
+                {"@type": "LowerVoltageLimit", "hasNumericalPart": {"hasNumberValue": 3.0}},
+            ],
+        },
     ],
 }
 
@@ -224,13 +247,16 @@ def test_import_ucp_maps_globals_steps_and_repeats() -> None:
 
 def test_import_ucp_keeps_expressions_as_notes_never_silently_drops() -> None:
     doc = {
-        "global": {"initial_state_type": "soc_percentage",
-                   "initial_state_value": 'input["Initial SOC [%]"]'},
+        "global": {"initial_state_type": "soc_percentage", "initial_state_value": 'input["Initial SOC [%]"]'},
         "steps": [
-            {"Discharge": {"mode": "C-rate", "value": 'input["C-rate"]',
-                           "ends": [{"Voltage < ifelse(VAR_IS_CHARGE == 1, 4.2, 1e9)": {"goto": "End"}}]}},
-            {"Pulse Block": {"repeat": 'input["N"]',
-                             "steps": [{"Rest": {"duration": 60}}]}},
+            {
+                "Discharge": {
+                    "mode": "C-rate",
+                    "value": 'input["C-rate"]',
+                    "ends": [{"Voltage < ifelse(VAR_IS_CHARGE == 1, 4.2, 1e9)": {"goto": "End"}}],
+                }
+            },
+            {"Pulse Block": {"repeat": 'input["N"]', "steps": [{"Rest": {"duration": 60}}]}},
         ],
     }
     spec = import_ucp(doc)

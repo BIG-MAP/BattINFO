@@ -25,9 +25,9 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "docs" / "pages" / "interop-recovery.md"
 
 # --- ratings ------------------------------------------------------------------
-PASS = "pass"       # green  — fully recovered
+PASS = "pass"  # green  — fully recovered
 PARTIAL = "partial"  # yellow — recovered, but lossy or folded
-FAIL = "fail"       # red    — not recovered
+FAIL = "fail"  # red    — not recovered
 
 GLYPH = {PASS: "🟢", PARTIAL: "🟡", FAIL: "🔴"}
 WORD = {PASS: "full", PARTIAL: "partial", FAIL: "none"}
@@ -42,13 +42,27 @@ DIMENSIONS: list[tuple[str, str]] = [
 ]
 
 COMPONENT_KINDS = {
-    "material_spec", "electrode_spec", "electrolyte_spec",
-    "separator_spec", "current_collector_spec", "housing_spec",
+    "material_spec",
+    "electrode_spec",
+    "electrolyte_spec",
+    "separator_spec",
+    "current_collector_spec",
+    "housing_spec",
 }
 KIND_KEYS = COMPONENT_KINDS | {
-    "cell_spec", "cell_instance", "test", "test_spec", "dataset",
-    "material", "electrode", "electrolyte", "separator",
-    "current_collector", "housing", "equipment", "channel",
+    "cell_spec",
+    "cell_instance",
+    "test",
+    "test_spec",
+    "dataset",
+    "material",
+    "electrode",
+    "electrolyte",
+    "separator",
+    "current_collector",
+    "housing",
+    "equipment",
+    "channel",
 }
 
 
@@ -185,12 +199,15 @@ def _cell_spec_record(records: list[dict[str, Any]]) -> dict[str, Any] | None:
 # --- source-vs-canonical comparison (the per-source "before/after") -----------
 # Non-canonical unit tokens seen in these sources → the canonical unit text.
 _UNIT_DISPLAY = {
-    "PERCENT": "%", "Percent": "%",
-    "MilliGramPerSquareCentiMetre": "mg/cm2", "MilliGM-PER-CentiM2": "mg/cm2",
+    "PERCENT": "%",
+    "Percent": "%",
+    "MilliGramPerSquareCentiMetre": "mg/cm2",
+    "MilliGM-PER-CentiM2": "mg/cm2",
     "MicroMetre": "um",
     "GramPerCubicCentiMetre": "g/cm3",
     "MilliGram": "mg",
-    "CoulombPerKilogram": "mAh/g", "CoulombPerSquareCentiMetre": "mAh/cm2",
+    "CoulombPerKilogram": "mAh/g",
+    "CoulombPerSquareCentiMetre": "mAh/cm2",
 }
 _PROP_CONTAINERS = ("hasProperty", "hasMeasuredProperty", "hasConventionalProperty")
 
@@ -233,8 +250,15 @@ def _kind_summary(records: list[dict[str, Any]]) -> str:
 
     counts = Counter(_kind_of(r) or "?" for r in records)
     order = [
-        "cell_spec", "cell_instance", "electrode_spec", "material_spec",
-        "electrolyte_spec", "separator_spec", "test", "test_spec", "dataset",
+        "cell_spec",
+        "cell_instance",
+        "electrode_spec",
+        "material_spec",
+        "electrolyte_spec",
+        "separator_spec",
+        "test",
+        "test_spec",
+        "dataset",
     ]
     parts = [f"{counts[k]}× {k}" for k in order if counts.get(k)]
     parts += [f"{c}× {k}" for k, c in counts.items() if k not in order]
@@ -328,7 +352,9 @@ def _prop_here(node: dict[str, Any] | None, emmo_types: set[str]) -> tuple[Any, 
     return None
 
 
-def _canonical_positive(records: list[dict[str, Any]], cell_record: dict[str, Any] | None) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
+def _canonical_positive(
+    records: list[dict[str, Any]], cell_record: dict[str, Any] | None
+) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
     # The electrode/electrolyte references sit at the record top level, beside
     # the cell_spec body — not inside it.
     pe_id = (cell_record or {}).get("positive_electrode_spec_id")
@@ -389,7 +415,14 @@ def _canonical_quantity(records: list[dict[str, Any]], key: str) -> tuple[Any, s
     return found[0] if found else None
 
 
-def _comparison(raw: dict[str, Any], records: list[dict[str, Any]], cell_record: dict[str, Any] | None, cs: dict[str, Any], fmt: str | None, quant: int) -> list[tuple[str, str, str]]:
+def _comparison(
+    raw: dict[str, Any],
+    records: list[dict[str, Any]],
+    cell_record: dict[str, Any] | None,
+    cs: dict[str, Any],
+    fmt: str | None,
+    quant: int,
+) -> list[tuple[str, str, str]]:
     graph = raw.get("@graph")
     source_records = f"{len(graph)}-node crate" if isinstance(graph, list) else "1 document"
     rows: list[tuple[str, str, str]] = []
@@ -435,8 +468,11 @@ def _score(src: dict[str, Any]) -> SourceScore:
     loader: Callable[[Path], tuple[dict[str, Any], list[dict[str, Any]], bool]] = src["loader"]
     path = ROOT / src["fixture"]
     score = SourceScore(
-        key=src["key"], label=src["label"], family=src["family"],
-        shape="?", fixture=src["fixture"],
+        key=src["key"],
+        label=src["label"],
+        family=src["family"],
+        shape="?",
+        fixture=src["fixture"],
     )
 
     # Ingest (R1) — parse tolerating emitter quirks.
@@ -525,8 +561,12 @@ def _score(src: dict[str, Any]) -> SourceScore:
         score.dims["canonical"] = (FAIL, "no record validated or emitted JSON-LD")
 
     score.metrics = {
-        "records": n_records, "quantities": quant, "component_specs": comp_specs,
-        "cell_format": fmt, "validate": f"{n_valid}/{n_records}", "jsonld": f"{n_jsonld}/{n_records}",
+        "records": n_records,
+        "quantities": quant,
+        "component_specs": comp_specs,
+        "cell_format": fmt,
+        "validate": f"{n_valid}/{n_records}",
+        "jsonld": f"{n_jsonld}/{n_records}",
     }
     score.comparison = _comparison(raw, records, cell, cs, fmt, quant)
     return score
@@ -624,7 +664,9 @@ def build() -> str:
         lines.append(f":::{{dropdown}} {_summary_glyphs(s)}  {s.label}")
         lines.append(f"**Fixture:** `{s.fixture}`  ")
         lines.append(f"**Importer:** `{IMPORTER.get(s.family, s.family)}`  ")
-        lines.append(f"**Shape in:** `{s.shape}`" + (f" · **records out:** {s.metrics.get('records')}" if s.metrics else ""))
+        lines.append(
+            f"**Shape in:** `{s.shape}`" + (f" · **records out:** {s.metrics.get('records')}" if s.metrics else "")
+        )
         lines.append("")
         if s.error:
             lines.append(f"Failed before scoring: `{s.error}`")

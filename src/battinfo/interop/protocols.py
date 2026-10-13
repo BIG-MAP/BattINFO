@@ -13,6 +13,7 @@ directory, or as the bare file name when the file lies outside it, never as an
 absolute path: a registry refuses records that name files on the importer's
 computer.
 """
+
 from __future__ import annotations
 
 import json
@@ -44,6 +45,7 @@ __all__ = [
 
 
 # ── helpers ─────────────────────────────────────────────────────────────────
+
 
 def _load(source: Any) -> Any:
     """Accept a parsed object, a JSON string, or a path to a JSON file."""
@@ -102,13 +104,11 @@ def _portable_locator(locator: str | None) -> str | None:
         return path_name(path)
 
 
-def _source_artifact(fmt: str, locator: str | None, sha256: str | None,
-                     conforms_to: str | None) -> list[Artifact]:
+def _source_artifact(fmt: str, locator: str | None, sha256: str | None, conforms_to: str | None) -> list[Artifact]:
     locator = _portable_locator(locator)
     if not locator:
         return []
-    return [Artifact(role="source_protocol", format=fmt, locator=locator,
-                     sha256=sha256, conforms_to=conforms_to)]
+    return [Artifact(role="source_protocol", format=fmt, locator=locator, sha256=sha256, conforms_to=conforms_to)]
 
 
 def _provenance(source_file: str | None) -> ProvenanceInfo:
@@ -131,9 +131,7 @@ def _num_field(s: dict, key: str, warnings: list[str]) -> float | None:
     value = _num(raw)
     if value is None:
         context = f"step '{s['step']}': " if s.get("step") else ""
-        warnings.append(
-            f"aurora-unicycler: {context}{key}={raw!r} is not a finite number; ignored."
-        )
+        warnings.append(f"aurora-unicycler: {context}{key}={raw!r} is not a finite number; ignored.")
     return value
 
 
@@ -160,8 +158,11 @@ def _aurora_leaf(s: dict, warnings: list[str]) -> Step | None:
         terms: list[Termination] = []
         until_v = _num_field(s, "until_voltage_V", warnings)
         if until_v is not None:
-            terms.append(Termination(quantity="voltage", value=until_v, unit="V",
-                                     direction="above" if direction == "charge" else "below"))
+            terms.append(
+                Termination(
+                    quantity="voltage", value=until_v, unit="V", direction="above" if direction == "charge" else "below"
+                )
+            )
         duration = _num_field(s, "until_time_s", warnings)
         if duration is not None:
             st.duration = _q(duration, "s")
@@ -177,12 +178,10 @@ def _aurora_leaf(s: dict, warnings: list[str]) -> Step | None:
         terms = []
         until_rate = _num_field(s, "until_rate_C", warnings)
         if until_rate is not None:
-            terms.append(Termination(quantity="c_rate", value=abs(until_rate),
-                                     unit="A/Ah", direction="below"))
+            terms.append(Termination(quantity="c_rate", value=abs(until_rate), unit="A/Ah", direction="below"))
         until_cur = _num_field(s, "until_current_mA", warnings)
         if until_cur is not None:
-            terms.append(Termination(quantity="current", value=abs(until_cur) / 1000.0,
-                                     unit="A", direction="below"))
+            terms.append(Termination(quantity="current", value=abs(until_cur) / 1000.0, unit="A", direction="below"))
         duration = _num_field(s, "until_time_s", warnings)
         if duration is not None:
             st.duration = _q(duration, "s")
@@ -191,8 +190,12 @@ def _aurora_leaf(s: dict, warnings: list[str]) -> Step | None:
 
     if kind == "impedance_spectroscopy":
         setpoints = {}
-        for key, unit in (("start_frequency_Hz", "Hz"), ("end_frequency_Hz", "Hz"),
-                          ("amplitude_V", "V"), ("amplitude_mA", "mA")):
+        for key, unit in (
+            ("start_frequency_Hz", "Hz"),
+            ("end_frequency_Hz", "Hz"),
+            ("amplitude_V", "V"),
+            ("amplitude_mA", "mA"),
+        ):
             value = _num_field(s, key, warnings)
             if value is not None:
                 setpoints[key.rsplit("_", 1)[0]] = _q(value, unit)
@@ -200,8 +203,7 @@ def _aurora_leaf(s: dict, warnings: list[str]) -> Step | None:
 
     if kind == "voltage_scan":
         setpoints = {}
-        for key, unit in (("start_voltage_V", "V"), ("end_voltage_V", "V"),
-                          ("scan_rate_mV_per_s", "mV/s")):
+        for key, unit in (("start_voltage_V", "V"), ("end_voltage_V", "V"), ("scan_rate_mV_per_s", "mV/s")):
             value = _num_field(s, key, warnings)
             if value is not None:
                 setpoints[key.rsplit("_", 1)[0] if key.endswith("_V") else key] = _q(value, unit)
@@ -224,8 +226,9 @@ def _fold_aurora_method(method: list[dict]) -> tuple[list[Step], list[str]]:
         if kind == "loop":
             loop_to = s.get("loop_to", 1)
             count = int(_num(s.get("cycle_count")) or 1)
-            start = tag_pos[loop_to] if isinstance(loop_to, str) and loop_to in tag_pos else (
-                int(_num(loop_to) or 1) - 1)
+            start = (
+                tag_pos[loop_to] if isinstance(loop_to, str) and loop_to in tag_pos else (int(_num(loop_to) or 1) - 1)
+            )
             body = [f["step"] for f in flat if f["orig"] >= start]
             flat = [f for f in flat if f["orig"] < start]
             if body:
@@ -239,8 +242,14 @@ def _fold_aurora_method(method: list[dict]) -> tuple[list[Step], list[str]]:
     return [f["step"] for f in flat], warnings
 
 
-def import_aurora_unicycler(source: Any, *, name: str | None = None, kind: str | None = None,
-                            source_locator: str | None = None, source_sha256: str | None = None) -> TestSpec:
+def import_aurora_unicycler(
+    source: Any,
+    *,
+    name: str | None = None,
+    kind: str | None = None,
+    source_locator: str | None = None,
+    source_sha256: str | None = None,
+) -> TestSpec:
     """Import an aurora-unicycler protocol (dict | JSON string | path) into a TestSpec."""
     doc = _load(source)
     method = doc.get("method") or []
@@ -254,8 +263,7 @@ def import_aurora_unicycler(source: Any, *, name: str | None = None, kind: str |
             record[key] = v
     safety: dict[str, Any] = {}
     _safety_block = doc.get("safety") or {}
-    for key in ("max_voltage_V", "min_voltage_V", "max_current_mA", "min_current_mA",
-                "max_capacity_mAh", "delay_s"):
+    for key in ("max_voltage_V", "min_voltage_V", "max_current_mA", "min_current_mA", "max_capacity_mAh", "delay_s"):
         v = _num_field(_safety_block, key, warnings)
         if v is not None:
             safety[key] = v
@@ -405,9 +413,14 @@ def _pybamm_config_to_method(config: dict) -> list[Step]:
     return method
 
 
-def import_pybamm_experiment(source: Any, *, name: str | None = None, kind: str | None = None,
-                             source_locator: str | None = None,
-                             source_sha256: str | None = None) -> TestSpec:
+def import_pybamm_experiment(
+    source: Any,
+    *,
+    name: str | None = None,
+    kind: str | None = None,
+    source_locator: str | None = None,
+    source_sha256: str | None = None,
+) -> TestSpec:
     """Import a PyBaMM experiment definition into a TestSpec.
 
     Accepts either the list passed to ``pybamm.Experiment`` (strings for single
@@ -415,8 +428,9 @@ def import_pybamm_experiment(source: Any, *, name: str | None = None, kind: str 
     dict ``{"cycles": [[step_dict, ...], ...]}`` (or a JSON string / path to one).
     Consecutive identical cycles fold into one repeated group."""
     data = source
-    if isinstance(source, (str, Path)) and (_looks_like_path(source)
-                                            or (isinstance(source, str) and source.lstrip().startswith("{"))):
+    if isinstance(source, (str, Path)) and (
+        _looks_like_path(source) or (isinstance(source, str) and source.lstrip().startswith("{"))
+    ):
         data = _load(source)
 
     method: list[Step]
@@ -504,9 +518,14 @@ def _bmgen_step(node: dict) -> Step | None:
     return step
 
 
-def import_bmgen_jsonld(source: Any, *, name: str | None = None, kind: str | None = None,
-                        source_locator: str | None = None,
-                        source_sha256: str | None = None) -> TestSpec:
+def import_bmgen_jsonld(
+    source: Any,
+    *,
+    name: str | None = None,
+    kind: str | None = None,
+    source_locator: str | None = None,
+    source_sha256: str | None = None,
+) -> TestSpec:
     """Import a bmgen EMMO/BattINFO JSON-LD program into a TestSpec."""
     doc = _load(source)
     graph = doc.get("@graph", doc) if isinstance(doc, dict) else doc
@@ -600,14 +619,13 @@ def _ucp_terminations(ends: Any, warnings: list[str]) -> list[Termination]:
             if "expression" in raw:
                 expr, extras = raw.get("expression"), raw
             elif len(raw) == 1:
-                (expr, extras), = raw.items()
+                ((expr, extras),) = raw.items()
         match = _UCP_END_RE.match(expr) if isinstance(expr, str) else None
         info = _UCP_END_QUANTITY.get(match.group(1).lower()) if match else None
         if match and info:
             quantity, unit = info
             direction = None if quantity == "duration" else ("below" if match.group(2) == "<" else "above")
-            out.append(Termination(quantity=quantity, value=float(match.group(3)), unit=unit,
-                                   direction=direction))
+            out.append(Termination(quantity=quantity, value=float(match.group(3)), unit=unit, direction=direction))
             if isinstance(extras, dict) and extras.get("goto"):
                 warnings.append(f"UCP end action goto={extras['goto']!r} not imported (artifact behaviour).")
         else:
@@ -660,7 +678,7 @@ def _ucp_steps_to_method(items: Any, warnings: list[str]) -> list[Step]:
         if not isinstance(item, dict) or len(item) != 1:
             warnings.append(f"UCP step not understood: {item!r}")
             continue
-        (key, params), = item.items()
+        ((key, params),) = item.items()
         if isinstance(params, list):
             # A named block given directly as a step list ("Final Rest Block").
             sub = _ucp_steps_to_method(params, warnings)
@@ -673,11 +691,9 @@ def _ucp_steps_to_method(items: Any, warnings: list[str]) -> list[Step]:
             sub = _ucp_steps_to_method(params.get("steps"), warnings)
             repeat = _num(params.get("repeat"))
             if repeat is None and params.get("repeat") is not None:
-                warnings.append(
-                    f"UCP repeat count is an expression ({params.get('repeat')!r}); imported as 1.")
+                warnings.append(f"UCP repeat count is an expression ({params.get('repeat')!r}); imported as 1.")
             if sub:
-                out.append(Step(mode="group", count=int(repeat) if repeat else 1,
-                                steps=sub, description=key))
+                out.append(Step(mode="group", count=int(repeat) if repeat else 1, steps=sub, description=key))
             continue
         leaf = _ucp_leaf(key, params, warnings)
         if leaf is not None:
@@ -685,8 +701,14 @@ def _ucp_steps_to_method(items: Any, warnings: list[str]) -> list[Step]:
     return out
 
 
-def import_ucp(source: Any, *, name: str | None = None, kind: str | None = None,
-               source_locator: str | None = None, source_sha256: str | None = None) -> TestSpec:
+def import_ucp(
+    source: Any,
+    *,
+    name: str | None = None,
+    kind: str | None = None,
+    source_locator: str | None = None,
+    source_sha256: str | None = None,
+) -> TestSpec:
     """Import an ionworks Universal Cycler Protocol (dict | YAML/JSON string | path).
 
     The ``global`` block maps onto the blessed protocol conventions:
@@ -710,8 +732,7 @@ def import_ucp(source: Any, *, name: str | None = None, kind: str | None = None,
     if state_type == "soc_percentage" and state_value is not None:
         conditions["initial_state_of_charge"] = {"value": state_value / 100.0, "unit": "1"}
     elif state_type and global_block.get("initial_state_value") is not None:
-        warnings.append(
-            f"UCP initial state ({state_type!r}={global_block.get('initial_state_value')!r}) not imported.")
+        warnings.append(f"UCP initial state ({state_type!r}={global_block.get('initial_state_value')!r}) not imported.")
 
     record: dict[str, Any] = {}
     resolution = global_block.get("resolution") or {}
@@ -726,8 +747,10 @@ def import_ucp(source: Any, *, name: str | None = None, kind: str | None = None,
         record["current_mA"] = current_a * 1000.0
 
     inferred_kind = kind or (
-        "eis" if any(s.mode == "eis" for s in steps)
-        else "cycling" if any(s.mode == "group" for s in steps)
+        "eis"
+        if any(s.mode == "eis" for s in steps)
+        else "cycling"
+        if any(s.mode == "group" for s in steps)
         else "other"
     )
     return TestSpec(

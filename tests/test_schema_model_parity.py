@@ -90,22 +90,29 @@ KNOWN_GAPS: dict[tuple[str, str], str] = {
             "record envelope stamped by the workspace at save time "
             "(ws.license / ws.project / ws.contributor), not authored on the model"
         )
-        for entity_type in ("cell-spec", "cell", "test-protocol", "test", "dataset",
-                            "material-spec", "material", "electrode-spec", "electrode",
-                            "parameter-set")
+        for entity_type in (
+            "cell-spec",
+            "cell",
+            "test-protocol",
+            "test",
+            "dataset",
+            "material-spec",
+            "material",
+            "electrode-spec",
+            "electrode",
+            "parameter-set",
+        )
         for prop in ("license", "funding", "contributor")
         # dataset carries its license on the dataset body, which IS modeled;
         # create_parameter_set takes license= (an imported file keeps its own)
         if (entity_type, prop) not in {("dataset", "license"), ("parameter-set", "license")}
     },
-
     # Open defect, tracked as readiness finding M4.
     ("test-protocol", "conditions"): (
         "M4: TestSpec.conditions is typed dict[str, Quantity], so the textual "
         "conditions the schema permits ('room temperature') cannot be expressed. "
         "Same bug family as Test.conditions (#329); fix by widening the value type"
     ),
-
     # EU Battery Regulation fields on the cell-spec. The schema carries them so a
     # digital product passport can round-trip through a record; nothing authors
     # them through CellSpec yet (see the audit note on the model).
@@ -117,36 +124,44 @@ KNOWN_GAPS: dict[tuple[str, str], str] = {
     ("cell", "dpp_status"): "digital product passport status; no authoring path yet",
     ("cell", "service_start_date"): "EU Battery Regulation in-service date; no authoring path yet",
     ("cell", "supersedes"): "digital product passport lineage link; no authoring path yet",
-
     # schema.org descriptive fields the schema permits on a product record.
     ("cell-spec", "brand"): "schema:brand object; datasheets use manufacturer + model instead",
-    ("material-spec", "electrode_polarity"): "deprecated: polarity is an electrode property; schema accepts it for back-compat only, no authoring path",
+    (
+        "material-spec",
+        "electrode_polarity",
+    ): "deprecated: polarity is an electrode property; schema accepts it for back-compat only, no authoring path",
     ("cell-spec", "category"): "schema:category; the emitter derives a category from battery_category/chemistry",
     ("cell-spec", "url"): "schema:url for the product page; datasheet_url/provenance.source_url carry this today",
-    ("cell-spec", "additional_type"): "schema:additionalType; the emitter derives the EMMO type from format + chemistry",
+    (
+        "cell-spec",
+        "additional_type",
+    ): "schema:additionalType; the emitter derives the EMMO type from format + chemistry",
     ("cell-spec", "manufacturing_place"): "schema:manufacturingPlace; country_of_origin carries this today",
     ("cell-spec", "editorial"): "internal curation metadata; deliberately not part of the published model",
     ("organization", "editorial"): "internal curation metadata; deliberately not part of the published model",
     ("dataset", "about"): "schema:about link to the entity studied; main_entity is the modeled equivalent",
-
     # Instance links whose modeled form is a list of IRIs, not the record's
     # {id, role} link objects.
-    ("cell", "datasets"): "modeled as Cell.dataset_ids (list of IRIs); the record's {id, role} link shape is built at save",
+    (
+        "cell",
+        "datasets",
+    ): "modeled as Cell.dataset_ids (list of IRIs); the record's {id, role} link shape is built at save",
     ("material", "datasets"): "MaterialInput has no dataset link field; save_material takes dataset_ids separately",
-
     # Free-text notes on the two material inputs.
     ("material-spec", "comment"): "MaterialSpecInput exposes description=; comment is the record-level notes slot",
     ("material", "comment"): "MaterialInput has no comment field; notes= lands at the record top level",
-
     # Electrode link/collection shapes whose modeled form differs from the record's.
-    ("electrode", "datasets"): "ElectrodeInput has no dataset link field; dataset_ids= builds the {id, role} link shape",
-
+    (
+        "electrode",
+        "datasets",
+    ): "ElectrodeInput has no dataset link field; dataset_ids= builds the {id, role} link shape",
     # Faceted query metadata, written by the indexer rather than the author.
     ("test-protocol", "facets"): "derived query facets written by the record indexer, not authored",
 }
 
 
 # ── Builders: one callable per entity kind, returning a canonical record ───────
+
 
 def _model_builder(model: type, base: dict[str, Any]) -> Callable[..., dict]:
     def build(**kwargs: Any) -> dict:
@@ -170,37 +185,73 @@ def _builders() -> dict[str, Callable[..., dict]]:
         "cell-spec": _model_builder(CellSpec, {"id": SPEC_IRI, "name": "probe"}),
         "cell": _model_builder(Cell, {"id": CELL_IRI, "name": "probe", "cell_spec_id": SPEC_IRI}),
         "test-protocol": _model_builder(TestSpec, {"id": SPEC_IRI, "name": "probe"}),
-        "test": _model_builder(Test, {
-            "id": f"https://w3id.org/battinfo/test/{UID}", "name": "probe",
-            "cell_id": CELL_IRI, "kind": "cycling",
-        }),
-        "dataset": _model_builder(Dataset, {
-            "id": f"https://w3id.org/battinfo/dataset/{UID}", "name": "probe",
-            "access_url": "https://example.org/dataset",
-        }),
+        "test": _model_builder(
+            Test,
+            {
+                "id": f"https://w3id.org/battinfo/test/{UID}",
+                "name": "probe",
+                "cell_id": CELL_IRI,
+                "kind": "cycling",
+            },
+        ),
+        "dataset": _model_builder(
+            Dataset,
+            {
+                "id": f"https://w3id.org/battinfo/dataset/{UID}",
+                "name": "probe",
+                "access_url": "https://example.org/dataset",
+            },
+        ),
         "material-spec": _api_builder(create_material_spec, {"uid": UID, "name": "probe"}),
-        "material": _api_builder(create_material, {
-            "uid": UID, "name": "probe", "material_spec_id": SPEC_IRI,
-        }),
+        "material": _api_builder(
+            create_material,
+            {
+                "uid": UID,
+                "name": "probe",
+                "material_spec_id": SPEC_IRI,
+            },
+        ),
         "electrode-spec": _api_builder(create_electrode_spec, {"uid": UID, "name": "probe"}),
-        "electrode": _api_builder(create_electrode, {
-            "uid": UID, "name": "probe", "electrode_spec_id": SPEC_IRI,
-        }),
+        "electrode": _api_builder(
+            create_electrode,
+            {
+                "uid": UID,
+                "name": "probe",
+                "electrode_spec_id": SPEC_IRI,
+            },
+        ),
         "equipment-spec": _api_builder(create_equipment_spec, {"uid": UID, "name": "probe"}),
-        "equipment": _api_builder(create_equipment, {
-            "uid": UID, "equipment_spec_id": SPEC_IRI, "serial_number": "S1",
-        }),
-        "channel": _api_builder(create_channel, {
-            "uid": UID, "equipment_id": f"https://w3id.org/battinfo/equipment/{UID}", "index": 1,
-        }),
-        "parameter-set": _api_builder(create_parameter_set, {
-            "uid": UID, "name": "probe", "material_kind": "graphite",
-            "claims": [{
-                "parameter": "density",
-                "quantity": {"value": 2.26, "unit": "g/cm3"},
-                "provenance_class": "literature",
-            }],
-        }),
+        "equipment": _api_builder(
+            create_equipment,
+            {
+                "uid": UID,
+                "equipment_spec_id": SPEC_IRI,
+                "serial_number": "S1",
+            },
+        ),
+        "channel": _api_builder(
+            create_channel,
+            {
+                "uid": UID,
+                "equipment_id": f"https://w3id.org/battinfo/equipment/{UID}",
+                "index": 1,
+            },
+        ),
+        "parameter-set": _api_builder(
+            create_parameter_set,
+            {
+                "uid": UID,
+                "name": "probe",
+                "material_kind": "graphite",
+                "claims": [
+                    {
+                        "parameter": "density",
+                        "quantity": {"value": 2.26, "unit": "g/cm3"},
+                        "provenance_class": "literature",
+                    }
+                ],
+            },
+        ),
         "organization": _api_builder(create_organization, {"uid": UID, "name": "probe"}),
     }
     for family in COMPONENT_FAMILIES:
@@ -346,6 +397,7 @@ def _is_scalar(schema: dict, root: dict, base: str) -> bool:
 
 # ── The sweep ─────────────────────────────────────────────────────────────────
 
+
 def _unknown_property_error(exc: Exception, prop: str) -> bool:
     """True when *exc* says the property is not modeled (vs. a wrong sample shape).
 
@@ -354,8 +406,7 @@ def _unknown_property_error(exc: Exception, prop: str) -> bool:
     """
     if isinstance(exc, ValidationError):
         return any(
-            error["type"] in {"extra_forbidden", "unexpected_keyword_argument"}
-            and tuple(error["loc"]) == (prop,)
+            error["type"] in {"extra_forbidden", "unexpected_keyword_argument"} and tuple(error["loc"]) == (prop,)
             for error in exc.errors()
         )
     if isinstance(exc, TypeError):
@@ -375,7 +426,7 @@ def _unknown_nested_error(exc: Exception, path: tuple[str, ...]) -> bool:
         return False
     return any(
         error["type"] in {"extra_forbidden", "unexpected_keyword_argument"}
-        and tuple(str(part) for part in error["loc"])[-len(path):] == path
+        and tuple(str(part) for part in error["loc"])[-len(path) :] == path
         for error in exc.errors()
     )
 
@@ -389,10 +440,9 @@ def _schema_properties(kind: Any) -> list[tuple[str, str, dict]]:
         for name, subschema in root["properties"].items()
         if name not in {"schema_version", kind.record_key}
     }
-    return (
-        [("body", name, subschema) for name, subschema in body.items()]
-        + [("top", name, subschema) for name, subschema in siblings.items()]
-    )
+    return [("body", name, subschema) for name, subschema in body.items()] + [
+        ("top", name, subschema) for name, subschema in siblings.items()
+    ]
 
 
 def _sweep() -> tuple[list[str], list[str], int]:
@@ -495,9 +545,15 @@ def _nested_sweep() -> tuple[list[str], list[str], int]:
         baseline = build()
 
         def walk(
-            subschema: dict, sub_root: dict, base: str,
-            path: tuple[str, ...], record_path: tuple[str, ...], depth: int,
-            *, _entity_type: str = entity_type, _build: Any = build,
+            subschema: dict,
+            sub_root: dict,
+            base: str,
+            path: tuple[str, ...],
+            record_path: tuple[str, ...],
+            depth: int,
+            *,
+            _entity_type: str = entity_type,
+            _build: Any = build,
         ) -> None:
             nonlocal exercised
             opened = _closed_object(subschema, sub_root, base)
@@ -562,18 +618,15 @@ def test_every_nested_component_property_is_reachable() -> None:
 def test_no_nested_property_is_dropped_between_the_model_and_the_record() -> None:
     """A nested value the model accepts must reach the record."""
     _, dropped, _ = _nested_sweep()
-    assert not dropped, (
-        "nested values accepted by the model but missing from the built record:\n  "
-        + "\n  ".join(sorted(dropped))
+    assert not dropped, "nested values accepted by the model but missing from the built record:\n  " + "\n  ".join(
+        sorted(dropped)
     )
 
 
 def test_nested_sweep_actually_exercises_the_corpus() -> None:
     """The sweep that would have caught E1 must keep opening holders."""
     _, _, exercised = _nested_sweep()
-    assert exercised >= 800, (
-        f"only {exercised} nested properties round-tripped a value; the nested sweep is degrading"
-    )
+    assert exercised >= 800, f"only {exercised} nested properties round-tripped a value; the nested sweep is degrading"
 
 
 def test_known_nested_gaps_all_carry_a_reason() -> None:
@@ -581,8 +634,9 @@ def test_known_nested_gaps_all_carry_a_reason() -> None:
     assert not empty, f"KNOWN_NESTED_GAPS entries without a reason: {empty}"
 
 
-@pytest.mark.parametrize("holder", ["positive_electrode", "negative_electrode",
-                                    "working_electrode", "counter_electrode"])
+@pytest.mark.parametrize(
+    "holder", ["positive_electrode", "negative_electrode", "working_electrode", "counter_electrode"]
+)
 def test_electrode_holder_models_both_spec_seams(holder: str) -> None:
     """E1 by name, on every electrode holder, through the blessed authoring path.
 
@@ -613,9 +667,8 @@ def test_every_schema_property_is_reachable_through_a_model() -> None:
 def test_no_property_is_dropped_between_the_model_and_the_record() -> None:
     """A value the model accepts must reach the record (the reference_electrode bug)."""
     _, dropped, _ = _sweep()
-    assert not dropped, (
-        "values accepted by the model but missing from the built record:\n  "
-        + "\n  ".join(sorted(dropped))
+    assert not dropped, "values accepted by the model but missing from the built record:\n  " + "\n  ".join(
+        sorted(dropped)
     )
 
 
@@ -645,9 +698,7 @@ def test_known_gaps_are_still_gaps(entity_type: str, prop: str) -> None:
     )
 
     build = BUILDERS[entity_type]
-    value = SAMPLE_OVERRIDES.get(
-        (entity_type, prop), sample_value(subschema, root, prop, kind.schema_file)
-    )
+    value = SAMPLE_OVERRIDES.get((entity_type, prop), sample_value(subschema, root, prop, kind.schema_file))
     if value is None:
         return
     try:
@@ -656,9 +707,7 @@ def test_known_gaps_are_still_gaps(entity_type: str, prop: str) -> None:
         if _unknown_property_error(exc, ALIASES.get((entity_type, prop), prop)):
             return
     else:
-        pytest.fail(
-            f"{entity_type}.{prop} is now reachable through the model; remove it from KNOWN_GAPS"
-        )
+        pytest.fail(f"{entity_type}.{prop} is now reachable through the model; remove it from KNOWN_GAPS")
 
 
 def test_known_gaps_all_carry_a_reason() -> None:

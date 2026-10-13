@@ -8,6 +8,7 @@ was no config file at all. A value PyYAML cannot build, such as the date
 2026-02-30, makes a file unreadable too. Every test points the config path at a
 temporary folder, so the real home folder is never read or written.
 """
+
 from __future__ import annotations
 
 import errno
@@ -31,11 +32,7 @@ runner = CliRunner()
 
 TOKEN = "zt_live_8f3a91c2d4e5b6a7"
 API_KEY = "bk_live_c0ffee1234567890"
-GOOD = (
-    "community: battery-lab\n"
-    "creator: Lovelace, Ada; Analytical Engines\n"
-    f"zenodo_token: {TOKEN}\n"
-)
+GOOD = f"community: battery-lab\ncreator: Lovelace, Ada; Analytical Engines\nzenodo_token: {TOKEN}\n"
 # The fourth line is not valid YAML: a plain value cannot hold ": ".
 CORRUPT = GOOD + "license: CC-BY-4.0: oops\n"
 # The fourth line is valid YAML syntax, but the date does not exist, and PyYAML
@@ -122,9 +119,7 @@ def test_strict_loading_of_a_corrupt_config_file_raises_and_names_it(config_path
     ],
     ids=["list", "scalar", "not-utf8", "two-documents", "impossible-date", "value-against-its-tag", "nested-too-deep"],
 )
-def test_a_config_file_that_is_not_key_value_pairs_is_reported(
-    config_path: Path, content: bytes, problem: str
-) -> None:
+def test_a_config_file_that_is_not_key_value_pairs_is_reported(config_path: Path, content: bytes, problem: str) -> None:
     config_path.parent.mkdir(parents=True)
     config_path.write_bytes(content)
     with pytest.raises(config.UserConfigError, match=problem):

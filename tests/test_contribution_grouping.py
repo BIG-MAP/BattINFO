@@ -1,6 +1,7 @@
 """D-7: _group_files_by_cell must not silently collapse ungroupable multi-file folders into one
 synthetic cell (which mis-attributes every file); it raises unless the caller confirms n_cells=1.
 """
+
 from __future__ import annotations
 
 import sys

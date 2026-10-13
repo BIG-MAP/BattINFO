@@ -5,6 +5,7 @@ The same holds for every file that keeps a secret: the .battinfo/credentials fil
 ws.setup() creates or ws.login() updates, ~/.battinfo/config.yaml, which can hold a
 Zenodo token, and the publisher API key that `battinfo registry bootstrap --api-key-file`
 writes."""
+
 from __future__ import annotations
 
 import json
@@ -136,9 +137,7 @@ class _Created:
         return self._body
 
 
-def test_registry_bootstrap_writes_the_new_api_key_owner_only(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_registry_bootstrap_writes_the_new_api_key_owner_only(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     from typer.testing import CliRunner
 
     from battinfo.cli import app
@@ -160,11 +159,23 @@ def test_registry_bootstrap_writes_the_new_api_key_owner_only(
     key_file = tmp_path / "publisher.key"
 
     # The default --format, text, used to be refused once the publisher existed.
-    result = CliRunner().invoke(app, [
-        "registry", "bootstrap", "--workspace-id", "lab", "--publisher-id", "lab",
-        "--registry-url", "https://registry.example", "--admin-token", "admin-token",
-        "--api-key-file", str(key_file),
-    ])
+    result = CliRunner().invoke(
+        app,
+        [
+            "registry",
+            "bootstrap",
+            "--workspace-id",
+            "lab",
+            "--publisher-id",
+            "lab",
+            "--registry-url",
+            "https://registry.example",
+            "--admin-token",
+            "admin-token",
+            "--api-key-file",
+            str(key_file),
+        ],
+    )
 
     assert result.exit_code == 0, result.output
     assert "Saved to:" in result.output
@@ -189,11 +200,23 @@ def test_registry_bootstrap_checks_the_format_before_asking_the_registry(
         return _Created({})
 
     monkeypatch.setattr(urllib.request, "urlopen", fake_registry)
-    result = CliRunner().invoke(app, [
-        "registry", "bootstrap", "--workspace-id", "lab", "--publisher-id", "lab",
-        "--registry-url", "https://registry.example", "--admin-token", "admin-token",
-        "--format", output_format,
-    ])
+    result = CliRunner().invoke(
+        app,
+        [
+            "registry",
+            "bootstrap",
+            "--workspace-id",
+            "lab",
+            "--publisher-id",
+            "lab",
+            "--registry-url",
+            "https://registry.example",
+            "--admin-token",
+            "admin-token",
+            "--format",
+            output_format,
+        ],
+    )
 
     assert result.exit_code == exit_code, result.output
     assert bool(urls) == asked

@@ -15,6 +15,7 @@ must carry the composition a lab engineer authors:
   a real equipment node (IRI, name, serial number) plus the channel reference,
   not a nameless ``schema:Thing``.
 """
+
 from __future__ import annotations
 
 import json
@@ -71,9 +72,7 @@ def _inline_composition() -> dict:
                             "property": {"mass_fraction": {"value": 96, "unit": "%"}},
                         }
                     ],
-                    "binder": [
-                        {"name": "PVDF", "property": {"mass_fraction": {"value": 2, "unit": "%"}}}
-                    ],
+                    "binder": [{"name": "PVDF", "property": {"mass_fraction": {"value": 2, "unit": "%"}}}],
                     "additive": [
                         {
                             "name": "Carbon black",
@@ -88,9 +87,7 @@ def _inline_composition() -> dict:
         "negative_electrode": {
             "coating": {
                 "component": {
-                    "active_material": [
-                        {"name": "Graphite", "property": {"mass_fraction": {"value": 96, "unit": "%"}}}
-                    ]
+                    "active_material": [{"name": "Graphite", "property": {"mass_fraction": {"value": 96, "unit": "%"}}}]
                 }
             },
             "current_collector": {"name": "Copper foil"},
@@ -224,10 +221,7 @@ def test_record_to_jsonld_composition_terms_resolve_in_hosted_context() -> None:
     # The default emission references the hosted context by URL; every bare
     # term the document carries must therefore resolve in the hosted v1 file.
     doc = record_to_jsonld(_composed_record(), "cell-spec")  # default: "url"
-    v1_path = (
-        Path(__file__).resolve().parents[1]
-        / "src" / "battinfo" / "data" / "context" / "records.context.v1.json"
-    )
+    v1_path = Path(__file__).resolve().parents[1] / "src" / "battinfo" / "data" / "context" / "records.context.v1.json"
     hosted = json.loads(v1_path.read_text(encoding="utf-8"))["@context"]
     terms: set[str] = set()
     _collect_bare_terms({k: v for k, v in doc.items() if k != "@context"}, terms)
@@ -300,9 +294,7 @@ def _find_spec_node(graph: list[dict]) -> dict:
     return next(
         n
         for n in graph
-        if "BatteryCellSpecification" in (
-            n["@type"] if isinstance(n.get("@type"), list) else [n.get("@type")]
-        )
+        if "BatteryCellSpecification" in (n["@type"] if isinstance(n.get("@type"), list) else [n.get("@type")])
         and "hasPositiveElectrode" in n.get("isDescriptionFor", {})
     )
 
@@ -368,9 +360,7 @@ def _tested_workspace(tmp_path: Path):
     )
     equipment_id = records[0]["equipment"]["id"]
     channel_id = records[2]["channel"]["id"]  # CH2
-    spec = battinfo.CellSpec(
-        manufacturer="Acme", model="X-1", format="cylindrical", chemistry="Li-ion"
-    )
+    spec = battinfo.CellSpec(manufacturer="Acme", model="X-1", format="cylindrical", chemistry="Li-ion")
     ws.add("cell", spec=spec, serial_numbers=["CELL-001"])
     ws.add("test", type="cycling", cell="CELL-001", channel="Cycler 1/CH2")
     ws.save()
@@ -451,9 +441,16 @@ def test_nothing_physical_remains_on_the_spec_node() -> None:
     artifact and catalogue facts."""
     doc = build_cell_spec_node(_composed_record(inline=True, refs=True))
     physical = {
-        "hasProperty", "hasPositiveElectrode", "hasNegativeElectrode",
-        "hasWorkingElectrode", "hasCounterElectrode", "hasReferenceElectrode",
-        "hasElectrolyte", "hasSeparator", "hasCase", "hasConstituent",
+        "hasProperty",
+        "hasPositiveElectrode",
+        "hasNegativeElectrode",
+        "hasWorkingElectrode",
+        "hasCounterElectrode",
+        "hasReferenceElectrode",
+        "hasElectrolyte",
+        "hasSeparator",
+        "hasCase",
+        "hasConstituent",
     }
     assert not physical & set(doc), physical & set(doc)
     assert doc["@type"] == ["BatteryCellSpecification", "schema:ProductModel", "schema:CreativeWork"]

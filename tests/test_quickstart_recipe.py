@@ -8,6 +8,7 @@ taught sequence runnable: convert → search → add cell → add test → save.
 Registry-dependent steps (login/publish/status) are exercised elsewhere with a
 mocked registry.
 """
+
 from __future__ import annotations
 
 import sys
@@ -107,9 +108,7 @@ def test_add_with_string_spec_teaches_the_fix(ws: AuthoringWorkspace) -> None:
 
 
 def test_add_still_accepts_a_cell_specification(ws: AuthoringWorkspace) -> None:
-    spec = battinfo.CellSpec(
-        manufacturer="Acme", model="QS-1", format="coin", chemistry="Li-ion"
-    )
+    spec = battinfo.CellSpec(manufacturer="Acme", model="QS-1", format="coin", chemistry="Li-ion")
     cells = ws.add("cell", spec=spec, serial_numbers=["ACME-1"])
     assert cells and cells[0].cell_spec is spec
 
@@ -133,17 +132,13 @@ def test_user_facing_prints_are_console_safe() -> None:
             depth += line.count("(") - line.count(")")
             if depth <= 0:
                 printing = False
-    assert not offenders, "non-ASCII in printed strings crashes legacy Windows consoles:\n" + "\n".join(
-        offenders
-    )
+    assert not offenders, "non-ASCII in printed strings crashes legacy Windows consoles:\n" + "\n".join(offenders)
 
 
 def test_new_spec_passed_to_add_joins_the_save_set(ws: AuthoringWorkspace, tmp_path: Path) -> None:
     # A CellSpec without an id handed to add() must be saved and
     # minted with the instances — not left as an orphan that fails at save.
-    spec = battinfo.CellSpec(
-        manufacturer="Molicel", model="INR21700-P45B", format="cylindrical", chemistry="Li-ion"
-    )
+    spec = battinfo.CellSpec(manufacturer="Molicel", model="INR21700-P45B", format="cylindrical", chemistry="Li-ion")
     cells = ws.add("cell", spec=spec, serial_numbers=["NEW-1"])
     ws.save()
     examples = tmp_path / ".battinfo" / "records"

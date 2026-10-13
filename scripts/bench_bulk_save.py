@@ -7,6 +7,7 @@ N=400 (baseline before the bulk-save session: 15-20/s).
 Usage:
     uv run python scripts/bench_bulk_save.py [N] [--no-session]
 """
+
 from __future__ import annotations
 
 import sys

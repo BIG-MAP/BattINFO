@@ -39,11 +39,12 @@ def _read_one(ws: AuthoringWorkspace, subdir: str) -> dict:
 
 # ── API: setter / getter / persistence / validation ────────────────────────────
 
+
 def test_license_setter_persists_and_getter_returns(tmp_path: Path) -> None:
     ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
-    assert ws.license() is None                      # unset getter
-    assert ws.license("cc-by-4.0") == "cc-by-4.0"    # setter returns normalized
-    assert ws.license() == "cc-by-4.0"               # getter reflects it
+    assert ws.license() is None  # unset getter
+    assert ws.license("cc-by-4.0") == "cc-by-4.0"  # setter returns normalized
+    assert ws.license() == "cc-by-4.0"  # getter reflects it
     state = json.loads((tmp_path / ".battinfo" / "workspace.json").read_text(encoding="utf-8"))
     assert state["license"] == "cc-by-4.0"
     # A fresh instance loads it from disk.
@@ -60,7 +61,7 @@ def test_license_unknown_id_kept_verbatim_with_warning(tmp_path: Path) -> None:
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")
         result = ws.license("My-Custom-License-1.2")
-    assert result == "My-Custom-License-1.2"                 # verbatim, not rejected
+    assert result == "My-Custom-License-1.2"  # verbatim, not rejected
     assert any("not a recognised SPDX" in str(w.message) for w in caught)
 
 
@@ -84,6 +85,7 @@ def test_license_clear(tmp_path: Path) -> None:
 
 # ── Stamping: license lands in every saved record ──────────────────────────────
 
+
 def test_license_stamped_on_every_saved_record(tmp_path: Path) -> None:
     ws = _ws_with_cell(tmp_path)
     ws.add("test", type="capacity_check", cell="SN-1", data="f.csv")
@@ -103,8 +105,12 @@ def test_license_stamped_into_record_to_jsonld(tmp_path: Path) -> None:
     ws.license("cc-by-4.0")
     ws.save()
 
-    for sub, rt in (("cell-spec", "cell-spec"), ("cell-instance", "cell-instance"),
-                    ("test", "test"), ("dataset", "dataset")):
+    for sub, rt in (
+        ("cell-spec", "cell-spec"),
+        ("cell-instance", "cell-instance"),
+        ("test", "test"),
+        ("dataset", "dataset"),
+    ):
         ld = record_to_jsonld(_read_one(ws, sub), rt)
         assert ld.get("dcterms:license") == {"@id": "https://spdx.org/licenses/CC-BY-4.0.html"}, sub
 
@@ -118,9 +124,10 @@ def test_no_license_means_no_stamp(tmp_path: Path) -> None:
 
 # ── Precedence: explicit ws.add(license=) > workspace default ───────────────────
 
+
 def test_explicit_add_license_overrides_workspace_default(tmp_path: Path) -> None:
     ws = _ws_with_cell(tmp_path)
-    ws.license("cc-by-4.0")                           # workspace default
+    ws.license("cc-by-4.0")  # workspace default
     ws.add("test", type="capacity_check", cell="SN-1", data="f.csv", license="mit")
     ws.save()
     # The dataset keeps the explicit per-record license; the workspace default
@@ -131,6 +138,7 @@ def test_explicit_add_license_overrides_workspace_default(tmp_path: Path) -> Non
 
 
 # ── Emission: preview bundle carries the license; ws.zenodo default resolution ──
+
 
 def test_preview_bundle_carries_workspace_license(tmp_path: Path) -> None:
     ws = _ws_with_cell(tmp_path)
@@ -163,11 +171,14 @@ def _member_node(record_license: str | None, catalog_license: str = "") -> dict:
     return next(node for node in doc["@graph"] if node.get("@id") == _MEMBER_IRI)
 
 
-@pytest.mark.parametrize(("record_license", "iri"), [
-    ("cc-by-4.0", "https://spdx.org/licenses/CC-BY-4.0.html"),
-    ("odbl-1.0", "https://spdx.org/licenses/ODbL-1.0.html"),
-    ("https://creativecommons.org/licenses/by/4.0/", "https://creativecommons.org/licenses/by/4.0/"),
-])
+@pytest.mark.parametrize(
+    ("record_license", "iri"),
+    [
+        ("cc-by-4.0", "https://spdx.org/licenses/CC-BY-4.0.html"),
+        ("odbl-1.0", "https://spdx.org/licenses/ODbL-1.0.html"),
+        ("https://creativecommons.org/licenses/by/4.0/", "https://creativecommons.org/licenses/by/4.0/"),
+    ],
+)
 def test_deposit_member_states_its_license_as_an_iri(record_license: str, iri: str) -> None:
     """A dataset's own licence was copied into its member node as given, so an
     SPDX id came out as a bare string. It is now the SPDX page, spelled the way
@@ -258,6 +269,7 @@ def test_zenodo_explicit_license_overrides_workspace_default(monkeypatch, tmp_pa
 
 # ── Gold-standard panel: a licenseless publication warns (not errors) ───────────
 
+
 def test_missing_license_produces_a_warning_nudge(tmp_path: Path) -> None:
     from battinfo.validate import validate_publication_report
 
@@ -320,18 +332,21 @@ def test_every_accepted_license_id_has_its_spdx_page() -> None:
         assert iri != f"https://spdx.org/licenses/{slug}.html", slug
 
 
-@pytest.mark.parametrize(("stored", "emitted"), [
-    # The lower-case pages earlier versions wrote, all 404s on spdx.org.
-    ("https://spdx.org/licenses/cc-by-4.0.html", "https://spdx.org/licenses/CC-BY-4.0.html"),
-    ("https://spdx.org/licenses/odbl-1.0.html", "https://spdx.org/licenses/ODbL-1.0.html"),
-    ("https://spdx.org/licenses/gpl-3.0.html", "https://spdx.org/licenses/GPL-3.0-only.html"),
-    # Already in SPDX's spelling, an spdx.org page the table does not know, and
-    # any other licence URL: kept as given.
-    ("https://spdx.org/licenses/CC-BY-4.0.html", "https://spdx.org/licenses/CC-BY-4.0.html"),
-    ("https://spdx.org/licenses/GPL-3.0.html", "https://spdx.org/licenses/GPL-3.0.html"),
-    ("https://spdx.org/licenses/Lab-Terms-1.0.html", "https://spdx.org/licenses/Lab-Terms-1.0.html"),
-    ("https://creativecommons.org/licenses/by/4.0/", "https://creativecommons.org/licenses/by/4.0/"),
-])
+@pytest.mark.parametrize(
+    ("stored", "emitted"),
+    [
+        # The lower-case pages earlier versions wrote, all 404s on spdx.org.
+        ("https://spdx.org/licenses/cc-by-4.0.html", "https://spdx.org/licenses/CC-BY-4.0.html"),
+        ("https://spdx.org/licenses/odbl-1.0.html", "https://spdx.org/licenses/ODbL-1.0.html"),
+        ("https://spdx.org/licenses/gpl-3.0.html", "https://spdx.org/licenses/GPL-3.0-only.html"),
+        # Already in SPDX's spelling, an spdx.org page the table does not know, and
+        # any other licence URL: kept as given.
+        ("https://spdx.org/licenses/CC-BY-4.0.html", "https://spdx.org/licenses/CC-BY-4.0.html"),
+        ("https://spdx.org/licenses/GPL-3.0.html", "https://spdx.org/licenses/GPL-3.0.html"),
+        ("https://spdx.org/licenses/Lab-Terms-1.0.html", "https://spdx.org/licenses/Lab-Terms-1.0.html"),
+        ("https://creativecommons.org/licenses/by/4.0/", "https://creativecommons.org/licenses/by/4.0/"),
+    ],
+)
 def test_a_stored_spdx_link_is_emitted_in_spdx_spelling(stored: str, emitted: str) -> None:
     from battinfo.jsonld import license_node
 

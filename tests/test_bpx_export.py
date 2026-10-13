@@ -54,19 +54,14 @@ def test_reports_unfillable_required_parameters(a123_record):
     result = to_bpx(a123_record)
     # A spec gives capacity but not electrode area / electrode-pair count.
     assert "Cell.Electrode area [m2]" in result.missing_required
-    assert (
-        "Cell.Number of electrode pairs connected in parallel to make a cell"
-        in result.missing_required
-    )
+    assert "Cell.Number of electrode pairs connected in parallel to make a cell" in result.missing_required
     # The A123 datasheet carries no explicit voltage cut-offs.
     assert "Cell.Upper voltage cut-off [V]" in result.missing_required
     assert any("physics parameters" in w for w in result.warnings)
 
 
 def test_reference_temperature_default_and_opt_out(a123_record):
-    assert to_bpx(a123_record).bpx["Parameterisation"]["Cell"][
-        "Reference temperature [K]"
-    ] == pytest.approx(298.15)
+    assert to_bpx(a123_record).bpx["Parameterisation"]["Cell"]["Reference temperature [K]"] == pytest.approx(298.15)
     cell = to_bpx(a123_record, reference_temperature_k=None).bpx["Parameterisation"]["Cell"]
     assert "Reference temperature [K]" not in cell
 

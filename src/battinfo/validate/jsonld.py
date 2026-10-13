@@ -30,6 +30,7 @@ def _pyld_module() -> Any:
         return None
     return pyld_jsonld
 
+
 # Canonical URL for the EMMO domain-battery JSON-LD context.  A bundled copy lives at
 # src/battinfo/data/context/domain-battery.context.json and is served as a local
 # fallback so that JSON-LD processing works without network access.  Run

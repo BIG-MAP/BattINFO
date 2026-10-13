@@ -117,7 +117,9 @@ class DiscoveryImportPackage:
     def records(self) -> list[dict[str, Any]]:
         """All records, specs first (so references resolve in file order)."""
         out: list[dict[str, Any]] = [
-            *self.material_specs, *self.electrode_specs, *self.electrolyte_specs,
+            *self.material_specs,
+            *self.electrode_specs,
+            *self.electrolyte_specs,
         ]
         for cell in self.cells:
             out.append(cell.cell_spec)
@@ -203,8 +205,8 @@ class _Builder:
         self.source = source
         self.source_file = source_file
         self.validate = validate
-        self._materials: dict[str, dict[str, Any]] = {}     # name → record
-        self._electrodes: dict[str, dict[str, Any]] = {}    # key → record
+        self._materials: dict[str, dict[str, Any]] = {}  # name → record
+        self._electrodes: dict[str, dict[str, Any]] = {}  # key → record
         self._electrolytes: dict[str, dict[str, Any]] = {}  # name → record
         self.cells: list[DiscoveryCell] = []
         self.warnings: list[str] = []
@@ -215,8 +217,15 @@ class _Builder:
         return record
 
     # -- specs (deduped) --
-    def material_spec(self, name: str, *, polarity: str, emmo_type: str | None,
-                      citation: str | None, specific_capacity: dict[str, Any] | None = None) -> str:
+    def material_spec(
+        self,
+        name: str,
+        *,
+        polarity: str,
+        emmo_type: str | None,
+        citation: str | None,
+        specific_capacity: dict[str, Any] | None = None,
+    ) -> str:
         if name not in self._materials:
             family = _EMMO_MATERIAL_FAMILY.get(emmo_type or "", None)
             # Specific capacity is a property of the active material, not the
@@ -236,11 +245,21 @@ class _Builder:
             self._materials[name] = rec
         return self._materials[name]["material_spec"]["id"]
 
-    def electrode_spec(self, key: str, *, name: str, polarity: str, active_name: str,
-                       active_id: str, loading: dict[str, Any] | None,
-                       mass_fraction: float | None, citation: str | None,
-                       notes: list[str], density: dict[str, Any] | None = None,
-                       areal_capacity: dict[str, Any] | None = None) -> str:
+    def electrode_spec(
+        self,
+        key: str,
+        *,
+        name: str,
+        polarity: str,
+        active_name: str,
+        active_id: str,
+        loading: dict[str, Any] | None,
+        mass_fraction: float | None,
+        citation: str | None,
+        notes: list[str],
+        density: dict[str, Any] | None = None,
+        areal_capacity: dict[str, Any] | None = None,
+    ) -> str:
         if key not in self._electrodes:
             active: dict[str, Any] = {"name": active_name, "material_spec_id": active_id}
             if mass_fraction is not None:
@@ -259,9 +278,13 @@ class _Builder:
             if areal_capacity is not None:
                 body["property"] = {"rated_areal_discharge_capacity": areal_capacity}
             rec = create_component_spec(
-                "electrode", validate=self.validate,
+                "electrode",
+                validate=self.validate,
                 uid=_uid("discovery", "electrode", key),
-                name=name, body=body, source_type="lab", citation=citation,
+                name=name,
+                body=body,
+                source_type="lab",
+                citation=citation,
                 notes=notes or None,
             )
             self._electrodes[key] = rec
@@ -285,86 +308,117 @@ class _Builder:
                     comps.append(comp)
                 body["solvent_mixture"] = {"component": comps}
             rec = create_component_spec(
-                "electrolyte", validate=self.validate,
+                "electrolyte",
+                validate=self.validate,
                 uid=_uid("discovery", "electrolyte", name),
-                name=name, body=body, supplier=supplier, source_type="datasheet",
+                name=name,
+                body=body,
+                supplier=supplier,
+                source_type="datasheet",
                 citation=citation,
             )
             self._electrolytes[name] = rec
         return self._electrolytes[name]["electrolyte_spec"]["id"]
 
     # -- per-cell chain --
-    def add_cell(self, *, cell_id: str, refcode: str | None, model_name: str,
-                 chemistry: str, positive_basis: str, negative_basis: str,
-                 manufacturer: str, citation: str | None, notes: list[str],
-                 positive_electrode_spec_id: str | None = None,
-                 negative_electrode_spec_id: str | None = None,
-                 electrolyte_spec_id: str | None = None,
-                 cell_properties: dict[str, Any] | None = None,
-                 test_name: str | None = None, test_description: str | None = None,
-                 dataset_file: str | None = None) -> DiscoveryCell:
+    def add_cell(
+        self,
+        *,
+        cell_id: str,
+        refcode: str | None,
+        model_name: str,
+        chemistry: str,
+        positive_basis: str,
+        negative_basis: str,
+        manufacturer: str,
+        citation: str | None,
+        notes: list[str],
+        positive_electrode_spec_id: str | None = None,
+        negative_electrode_spec_id: str | None = None,
+        electrolyte_spec_id: str | None = None,
+        cell_properties: dict[str, Any] | None = None,
+        test_name: str | None = None,
+        test_description: str | None = None,
+        dataset_file: str | None = None,
+    ) -> DiscoveryCell:
         seed = refcode or cell_id
-        cell_record = _record_from_cell_spec(CellSpec(
-            uid=_uid("discovery", "cell-spec", seed),
-            model_name=model_name,
-            manufacturer={"type": "Organization", "name": manufacturer},
-            format="coin",
-            chemistry=chemistry,
-            positive_electrode_basis=positive_basis,
-            negative_electrode_basis=negative_basis,
-            positive_electrode_spec_id=positive_electrode_spec_id,
-            negative_electrode_spec_id=negative_electrode_spec_id,
-            electrolyte_spec_id=electrolyte_spec_id,
-            source_type="other",
-            source_file=self.source_file,
-            citation=citation,
-            notes=notes,
-        ))
+        cell_record = _record_from_cell_spec(
+            CellSpec(
+                uid=_uid("discovery", "cell-spec", seed),
+                model_name=model_name,
+                manufacturer={"type": "Organization", "name": manufacturer},
+                format="coin",
+                chemistry=chemistry,
+                positive_electrode_basis=positive_basis,
+                negative_electrode_basis=negative_basis,
+                positive_electrode_spec_id=positive_electrode_spec_id,
+                negative_electrode_spec_id=negative_electrode_spec_id,
+                electrolyte_spec_id=electrolyte_spec_id,
+                source_type="other",
+                source_file=self.source_file,
+                citation=citation,
+                notes=notes,
+            )
+        )
         if cell_properties:
             cell_record["properties"] = {**cell_record.get("properties", {}), **cell_properties}
         cell_spec = self._check(cell_record)
         cell_spec_id = cell_spec["cell_spec"]["id"]
 
-        cell_instance = self._check(_record_from_cell_instance(Cell(
-            uid=_uid("discovery", "cell-instance", seed),
-            cell_spec_id=cell_spec_id,
-            serial_number=cell_id,
-            source_type="lab",
-            citation=citation,
-        )))
+        cell_instance = self._check(
+            _record_from_cell_instance(
+                Cell(
+                    uid=_uid("discovery", "cell-instance", seed),
+                    cell_spec_id=cell_spec_id,
+                    serial_number=cell_id,
+                    source_type="lab",
+                    citation=citation,
+                )
+            )
+        )
         cell_uid = cell_instance["cell_instance"]["id"]
 
         test: dict[str, Any] | None = None
         dataset: dict[str, Any] | None = None
         if test_name is not None:
-            test = self._check(_record_from_test(Test(
-                uid=_uid("discovery", "test", seed),
-                cell_id=cell_uid,
-                name=test_name,
-                kind=BatteryTestType.CYCLING,  # type: ignore[arg-type]
-                description=test_description,
-                status="completed",
-                source_type="lab",
-                citation=citation,
-            )))
+            test = self._check(
+                _record_from_test(
+                    Test(
+                        uid=_uid("discovery", "test", seed),
+                        cell_id=cell_uid,
+                        name=test_name,
+                        kind=BatteryTestType.CYCLING,  # type: ignore[arg-type]
+                        description=test_description,
+                        status="completed",
+                        source_type="lab",
+                        citation=citation,
+                    )
+                )
+            )
             test_id = test["test"]["id"]
             if dataset_file is not None:
-                dataset = self._check(_record_from_dataset(Dataset(
-                    uid=_uid("discovery", "dataset", seed),
-                    title=f"{model_name} cycling data",
-                    source_type="measurement",
-                    access_url=dataset_file,
-                    related_cell_ids=[cell_uid],
-                    related_test_ids=[test_id],
-                    distribution=[{
-                        "type": "DataDownload",
-                        "content_url": dataset_file,
-                        "encoding_format": (
-                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                        ),
-                    }],
-                    citation=citation,
-                )))
+                dataset = self._check(
+                    _record_from_dataset(
+                        Dataset(
+                            uid=_uid("discovery", "dataset", seed),
+                            title=f"{model_name} cycling data",
+                            source_type="measurement",
+                            access_url=dataset_file,
+                            related_cell_ids=[cell_uid],
+                            related_test_ids=[test_id],
+                            distribution=[
+                                {
+                                    "type": "DataDownload",
+                                    "content_url": dataset_file,
+                                    "encoding_format": (
+                                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                                    ),
+                                }
+                            ],
+                            citation=citation,
+                        )
+                    )
+                )
 
         cell = DiscoveryCell(cell_id, refcode, cell_spec, cell_instance, test, dataset)
         self.cells.append(cell)
@@ -374,9 +428,7 @@ class _Builder:
         if not self.cells:
             # An empty result from a real source is worth a word: silence reads as
             # "imported everything" when nothing matched.
-            self.warnings.append(
-                f"{self.source_file}: no cells found — 0 records imported."
-            )
+            self.warnings.append(f"{self.source_file}: no cells found — 0 records imported.")
         return DiscoveryImportPackage(
             source=self.source,
             material_specs=list(self._materials.values()),
@@ -475,16 +527,13 @@ def import_discovery_eln(
         with zipfile.ZipFile(path) as archive:
             candidates = [n for n in archive.namelist() if n.endswith("ro-crate-metadata.json")]
             if not candidates:
-                raise ValueError(
-                    f"{path} contains no ro-crate-metadata.json — not an RO-Crate .eln archive."
-                )
+                raise ValueError(f"{path} contains no ro-crate-metadata.json — not an RO-Crate .eln archive.")
             candidates.sort(key=lambda n: n.count("/"))  # shallowest crate wins
             try:
                 graph = json.loads(archive.read(candidates[0]).decode("utf-8")).get("@graph", [])
             except json.JSONDecodeError as exc:
                 raise ValueError(
-                    f"{path} ({candidates[0]}) is not valid JSON "
-                    f"(line {exc.lineno}, column {exc.colno}): {exc.msg}"
+                    f"{path} ({candidates[0]}) is not valid JSON (line {exc.lineno}, column {exc.colno}): {exc.msg}"
                 ) from exc
         source_name = path.name
     else:
@@ -492,9 +541,7 @@ def import_discovery_eln(
         loaded = load_json_source(crate)
         graph = loaded.get("@graph", []) if isinstance(loaded, Mapping) else []
         source_name = crate.name
-    index: dict[str, Mapping[str, Any]] = {
-        n["@id"]: n for n in graph if isinstance(n, Mapping) and "@id" in n
-    }
+    index: dict[str, Mapping[str, Any]] = {n["@id"]: n for n in graph if isinstance(n, Mapping) and "@id" in n}
     builder = _Builder("eln", source_name, validate)
 
     cells = [n for n in graph if isinstance(n, Mapping) and "CoinCell" in _node_types(n)]
@@ -523,7 +570,10 @@ def import_discovery_eln(
             # Specific capacity is an active-material property → onto the material spec.
             specific = _find_capacity(eld, "SpecificCapacity")
             mat_id = builder.material_spec(
-                grade, polarity=polarity, emmo_type=emmo_type, citation=url,
+                grade,
+                polarity=polarity,
+                emmo_type=emmo_type,
+                citation=url,
                 specific_capacity=specific,
             )
             loading = _find_property(eld, "MassLoading")
@@ -532,11 +582,17 @@ def import_discovery_eln(
             # Areal (areic) capacity is an electrode property → onto the electrode spec.
             areal = _find_capacity(eld, "AreicCapacity")
             spec_id = builder.electrode_spec(
-                eld.get("@id", grade), name=ename, polarity=polarity,
-                active_name=grade, active_id=mat_id, loading=loading,
-                mass_fraction=(mass_fraction or {}).get("value"), citation=url,
-                notes=[f"Discovery electrode {eld.get('@id','').strip('./')}"],
-                density=density, areal_capacity=areal,
+                eld.get("@id", grade),
+                name=ename,
+                polarity=polarity,
+                active_name=grade,
+                active_id=mat_id,
+                loading=loading,
+                mass_fraction=(mass_fraction or {}).get("value"),
+                citation=url,
+                notes=[f"Discovery electrode {eld.get('@id', '').strip('./')}"],
+                density=density,
+                areal_capacity=areal,
             )
             return spec_id, grade
 
@@ -571,17 +627,21 @@ def import_discovery_eln(
                 break
 
         builder.add_cell(
-            cell_id=cell_id, refcode=refcode,
+            cell_id=cell_id,
+            refcode=refcode,
             model_name=node.get("name", cell_id),
             chemistry=" | ".join(p for p in (cathode, anode) if p) or "unknown",
-            positive_basis=cathode or "unknown", negative_basis=anode or "unknown",
+            positive_basis=cathode or "unknown",
+            negative_basis=anode or "unknown",
             manufacturer="DIGIBAT Discovery-Benchmark",
-            citation=url, notes=notes,
+            citation=url,
+            notes=notes,
             positive_electrode_spec_id=pos_spec_id,
             negative_electrode_spec_id=neg_spec_id,
             electrolyte_spec_id=ely_spec_id,
             cell_properties=cell_properties or None,
-            test_name="Galvanostatic cycling", test_description="Rate-performance galvanostatic cycling.",
+            test_name="Galvanostatic cycling",
+            test_description="Rate-performance galvanostatic cycling.",
             dataset_file=dataset_file,
         )
 
@@ -629,15 +689,24 @@ def import_discovery_xlsx(
         return None
 
     ix = {
-        "id": col("ID"), "name": col("Cell name"), "cathode": col("Cathode"),
-        "cathode_supplier": col("Cathode supplier"), "anode": col("Anode"),
-        "anode_supplier": col("Anode supplier"), "np": col("N/P Ratio"),
-        "separator": col("Separator_Type"), "electrolyte": col("Electrolyte"),
+        "id": col("ID"),
+        "name": col("Cell name"),
+        "cathode": col("Cathode"),
+        "cathode_supplier": col("Cathode supplier"),
+        "anode": col("Anode"),
+        "anode_supplier": col("Anode supplier"),
+        "np": col("N/P Ratio"),
+        "separator": col("Separator_Type"),
+        "electrolyte": col("Electrolyte"),
         "electrolyte_supplier": col("Electrolyte supplier"),
-        "electrolyte_volume": col("Electrolyte_Volume_uL"), "spacer": col("Spacer_mm"),
-        "procedure": col("Testing procedure"), "assembler": col("Assembler"),
-        "cathode_active": col("Active material", 0), "cathode_capacity": col("Capacity mAh"),
-        "anode_active": col("Active material", 1), "anode_capacity": col("Capacity"),
+        "electrolyte_volume": col("Electrolyte_Volume_uL"),
+        "spacer": col("Spacer_mm"),
+        "procedure": col("Testing procedure"),
+        "assembler": col("Assembler"),
+        "cathode_active": col("Active material", 0),
+        "cathode_capacity": col("Capacity mAh"),
+        "anode_active": col("Active material", 1),
+        "anode_capacity": col("Capacity"),
     }
     builder = _Builder("xlsx", path.name, validate)
 
@@ -656,11 +725,9 @@ def import_discovery_xlsx(
         cell_id = str(cell_id)
 
         if cathode:
-            builder.material_spec(cathode, polarity="positive",
-                                  emmo_type=_GRADE_EMMO.get(cathode), citation=None)
+            builder.material_spec(cathode, polarity="positive", emmo_type=_GRADE_EMMO.get(cathode), citation=None)
         if anode:
-            builder.material_spec(anode, polarity="negative",
-                                  emmo_type=_GRADE_EMMO.get(anode), citation=None)
+            builder.material_spec(anode, polarity="negative", emmo_type=_GRADE_EMMO.get(anode), citation=None)
         ely_name = cell_val(row, "electrolyte")
         ely_spec_id = None
         if ely_name:
@@ -670,10 +737,14 @@ def import_discovery_xlsx(
 
         notes = ["Imported from Discovery-Benchmark workbook (Automated cells)."]
         for label, key, unit in (
-            ("N/P ratio", "np", ""), ("separator", "separator", ""),
-            ("electrolyte volume", "electrolyte_volume", " uL"), ("spacer", "spacer", " mm"),
-            ("cathode active mass", "cathode_active", " mg"), ("cathode capacity", "cathode_capacity", " mAh"),
-            ("anode active mass", "anode_active", " mg"), ("anode capacity", "anode_capacity", " mAh"),
+            ("N/P ratio", "np", ""),
+            ("separator", "separator", ""),
+            ("electrolyte volume", "electrolyte_volume", " uL"),
+            ("spacer", "spacer", " mm"),
+            ("cathode active mass", "cathode_active", " mg"),
+            ("cathode capacity", "cathode_capacity", " mAh"),
+            ("anode active mass", "anode_active", " mg"),
+            ("anode capacity", "anode_capacity", " mAh"),
             ("assembler", "assembler", ""),
         ):
             v = cell_val(row, key)
@@ -682,12 +753,15 @@ def import_discovery_xlsx(
 
         procedure = cell_val(row, "procedure")
         builder.add_cell(
-            cell_id=cell_id, refcode=cell_id,
+            cell_id=cell_id,
+            refcode=cell_id,
             model_name=str(cell_val(row, "name") or cell_id),
             chemistry=" | ".join(p for p in (cathode, anode) if p) or "unknown",
-            positive_basis=cathode or "unknown", negative_basis=anode or "unknown",
+            positive_basis=cathode or "unknown",
+            negative_basis=anode or "unknown",
             manufacturer=str(cell_val(row, "assembler") or "DIGIBAT Discovery-Benchmark"),
-            citation=None, notes=notes,
+            citation=None,
+            notes=notes,
             electrolyte_spec_id=ely_spec_id,
             test_name=f"Galvanostatic cycling ({procedure})" if procedure else "Galvanostatic cycling",
             test_description=f"{procedure} test." if procedure else None,

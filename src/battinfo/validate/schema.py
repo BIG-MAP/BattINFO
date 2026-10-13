@@ -118,7 +118,12 @@ def _validator_code(error: ValidationError) -> str:
 
 # Parameter-set fields that belong to one flavour only (supersedes belongs to both).
 _PARAMETER_FILE_ONLY = (
-    "parts", "parameters_sha256", "virtual_cell", "cell_instance_id", "distributions", "not_imported",
+    "parts",
+    "parameters_sha256",
+    "virtual_cell",
+    "cell_instance_id",
+    "distributions",
+    "not_imported",
 )
 _CLAIM_BATCH_ONLY = ("material_kind", "material_spec_id", "scope", "electrode_polarity")
 _CELL_LINKS = ("cell_spec_id", "cell_instance_id", "virtual_cell")
@@ -164,9 +169,7 @@ def _parameter_set_flavour_message(body: Any) -> str | None:
     elif "claims" in body:
         targets = [f for f in _CLAIM_BATCH_TARGETS if f in body]
         if not targets:
-            problems.append(
-                "it names no target: give exactly one of material_kind, material_spec_id, cell_spec_id"
-            )
+            problems.append("it names no target: give exactly one of material_kind, material_spec_id, cell_spec_id")
         elif len(targets) > 1:
             problems.append(f"it names more than one target ({', '.join(targets)}): keep exactly one")
         stray = [f for f in _PARAMETER_FILE_ONLY if f in body]
@@ -191,11 +194,7 @@ def _contains_message(error: ValidationError) -> str | None:
     """A ``contains`` count error on a role-tagged array, naming the role and the count found."""
     schema = error.schema if isinstance(error.schema, dict) else {}
     contains = schema.get("contains")
-    role = (
-        contains.get("properties", {}).get("role", {}).get("const")
-        if isinstance(contains, dict)
-        else None
-    )
+    role = contains.get("properties", {}).get("role", {}).get("const") if isinstance(contains, dict) else None
     if not isinstance(role, str) or not isinstance(error.instance, list):
         return None
     found = sum(1 for item in error.instance if isinstance(item, dict) and item.get("role") == role)
@@ -212,9 +211,7 @@ def _enhance_message(error: ValidationError) -> str:
     if error.validator in ("contains", "minContains", "maxContains"):
         msg = _contains_message(error) or msg
     if error.validator == "oneOf" and isinstance(error.schema, dict):
-        titles = {
-            branch.get("title") for branch in error.schema.get("oneOf") or [] if isinstance(branch, dict)
-        }
+        titles = {branch.get("title") for branch in error.schema.get("oneOf") or [] if isinstance(branch, dict)}
         if titles == {"Claim batch", "Parameter file"}:
             msg = _parameter_set_flavour_message(error.instance) or msg
     if error.validator == "anyOf" and list(error.path) == ["parameter_set", "id"]:
@@ -286,4 +283,3 @@ def validate_profile(
         )
         return ValidationReport(issues=(issue,), policy=policy)
     return validate_schema_data(data, schema_for_profile(profile), profile=profile, policy=policy)
-

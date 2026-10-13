@@ -46,34 +46,34 @@ def test_plausibility_accepts_valid_record() -> None:
     "spec_key, bad_value, unit",
     [
         # Voltage decimal-shift errors
-        ("nominal_voltage",             33.0,   "V"),    # 33V instead of 3.3V
-        ("nominal_voltage",             0.01,   "V"),    # impossibly low
-        ("charging_voltage",            55.0,   "V"),    # way too high
-        ("discharging_cutoff_voltage",  -2.0,   "V"),    # negative cutoff
-        ("charging_cutoff_voltage",     7.0,    "V"),    # above 6V limit
+        ("nominal_voltage", 33.0, "V"),  # 33V instead of 3.3V
+        ("nominal_voltage", 0.01, "V"),  # impossibly low
+        ("charging_voltage", 55.0, "V"),  # way too high
+        ("discharging_cutoff_voltage", -2.0, "V"),  # negative cutoff
+        ("charging_cutoff_voltage", 7.0, "V"),  # above 6V limit
         # Capacity magnitude errors
-        ("nominal_capacity",            5000.0, "Ah"),   # 5000 Ah for a single cell
-        ("nominal_capacity",            0.0,    "Ah"),   # zero is not positive
-        ("rated_capacity",             -1.0,   "Ah"),    # negative
+        ("nominal_capacity", 5000.0, "Ah"),  # 5000 Ah for a single cell
+        ("nominal_capacity", 0.0, "Ah"),  # zero is not positive
+        ("rated_capacity", -1.0, "Ah"),  # negative
         # Energy
-        ("nominal_energy",             -0.5,   "Wh"),    # negative
+        ("nominal_energy", -0.5, "Wh"),  # negative
         # Specific energy out of physical range
-        ("specific_energy",             1500.0, "Wh/kg"),# > theoretical Li-metal limit
-        ("specific_energy",             0.5,    "Wh/kg"),# < 1 Wh/kg impossibly low
+        ("specific_energy", 1500.0, "Wh/kg"),  # > theoretical Li-metal limit
+        ("specific_energy", 0.5, "Wh/kg"),  # < 1 Wh/kg impossibly low
         # Energy density out of range
-        ("energy_density",              3000.0, "Wh/L"), # > physical limit
+        ("energy_density", 3000.0, "Wh/L"),  # > physical limit
         # Mass magnitude errors
-        ("mass",                        0.01,   "g"),    # <0.05 g (below coin cell)
-        ("mass",                        100000.0,"g"),   # 100 kg single cell (above large-industrial-cell ceiling)
+        ("mass", 0.01, "g"),  # <0.05 g (below coin cell)
+        ("mass", 100000.0, "g"),  # 100 kg single cell (above large-industrial-cell ceiling)
         # Dimension errors
-        ("diameter",                    600.0,  "mm"),   # 60 cm diameter
-        ("height",                      2500.0, "mm"),   # 2.5 m height
-        ("thickness",                   250.0,  "mm"),   # 25 cm thick
+        ("diameter", 600.0, "mm"),  # 60 cm diameter
+        ("height", 2500.0, "mm"),  # 2.5 m height
+        ("thickness", 250.0, "mm"),  # 25 cm thick
         # Efficiency out of 0-100%
-        ("round_trip_energy_efficiency", 105.0, "%"),    # > 100%
-        ("capacity_fade",               -5.0,   "%"),    # negative fade
+        ("round_trip_energy_efficiency", 105.0, "%"),  # > 100%
+        ("capacity_fade", -5.0, "%"),  # negative fade
         # Cycle life typo
-        ("cycle_life",                  200000,"cycles"),# 200k cycles
+        ("cycle_life", 200000, "cycles"),  # 200k cycles
     ],
 )
 def test_plausibility_rejects_bad_spec_value(spec_key: str, bad_value: float, unit: str) -> None:
@@ -171,8 +171,11 @@ class TestTimestampPlausibility:
     def test_1970_started_at_warns(self) -> None:
         record = {
             "schema_version": "0.2.0",
-            "test": {"id": "https://w3id.org/battinfo/test/7d9k-2m4p-8t3x-6nq5",
-                     "started_at": 1772442, "ended_at": 1772443},
+            "test": {
+                "id": "https://w3id.org/battinfo/test/7d9k-2m4p-8t3x-6nq5",
+                "started_at": 1772442,
+                "ended_at": 1772443,
+            },
         }
         report = validate_semantic_report(record)
         codes = [i.code for i in report.issues]
@@ -184,8 +187,11 @@ class TestTimestampPlausibility:
     def test_plausible_and_zero_epochs_are_silent(self) -> None:
         record = {
             "schema_version": "0.2.0",
-            "test": {"id": "https://w3id.org/battinfo/test/7d9k-2m4p-8t3x-6nq5",
-                     "started_at": 1772442000, "ended_at": 1772442600},
+            "test": {
+                "id": "https://w3id.org/battinfo/test/7d9k-2m4p-8t3x-6nq5",
+                "started_at": 1772442000,
+                "ended_at": 1772442600,
+            },
             "provenance": {"retrieved_at": 1772442000},
         }
         report = validate_semantic_report(record)
@@ -224,26 +230,26 @@ class TestPropertyMappability:
         assert "candidate class 'ChargingCurrent'" in issues[0].message
 
     def test_value_text_only_warns(self) -> None:
-        report = validate_semantic_report(
-            self._record({"cycle_life": {"value_text": ">1000", "unit": "count"}})
-        )
+        report = validate_semantic_report(self._record({"cycle_life": {"value_text": ">1000", "unit": "count"}}))
         assert [i.code for i in report.issues if "value_text" in i.code] == ["semantic.value_text_only"]
 
     def test_alias_collision_warns(self) -> None:
         report = validate_semantic_report(
-            self._record({
-                "nominal_energy": {"value": 18.0, "unit": "Wh"},
-                "rated_energy": {"value": 18.2, "unit": "Wh"},
-            })
+            self._record(
+                {
+                    "nominal_energy": {"value": 18.0, "unit": "Wh"},
+                    "rated_energy": {"value": 18.2, "unit": "Wh"},
+                }
+            )
         )
         codes = [i.code for i in report.issues]
         assert "semantic.property_alias_collision" in codes
 
     def test_mapped_numeric_property_is_silent(self) -> None:
-        report = validate_semantic_report(
-            self._record({"nominal_capacity": {"value": 2.5, "unit": "Ah"}})
-        )
-        noisy = [i for i in report.issues if i.code.startswith("semantic.property_") or i.code == "semantic.value_text_only"]
+        report = validate_semantic_report(self._record({"nominal_capacity": {"value": 2.5, "unit": "Ah"}}))
+        noisy = [
+            i for i in report.issues if i.code.startswith("semantic.property_") or i.code == "semantic.value_text_only"
+        ]
         assert noisy == []
 
 
@@ -263,22 +269,28 @@ def test_specset_keys_are_mapped_or_consciously_deferred() -> None:
     # 50%-SOC keys are measurement qualifiers upstream does not name.
     KNOWN_UNMAPPED = {
         "cycle_life_c_rate",
-        "nominal_continuous_charging_current", "nominal_continuous_discharging_current",
+        "nominal_continuous_charging_current",
+        "nominal_continuous_discharging_current",
         "round_trip_energy_efficiency_50pct",
     }
-    spec_set = set(_json.loads(
-        (ROOT / "src" / "battinfo" / "data" / "schemas" / "cell-canonical.schema.json")
-        .read_text(encoding="utf-8")
-    )["$defs"]["SpecSet"]["properties"])
-    curated = set(_json.loads(
-        (ROOT / "assets" / "mappings" / "domain-battery" / "property_map.curated.json")
-        .read_text(encoding="utf-8")
-    )["mappings"] and {
-        m["key"] for m in _json.loads(
-            (ROOT / "assets" / "mappings" / "domain-battery" / "property_map.curated.json")
-            .read_text(encoding="utf-8")
+    spec_set = set(
+        _json.loads(
+            (ROOT / "src" / "battinfo" / "data" / "schemas" / "cell-canonical.schema.json").read_text(encoding="utf-8")
+        )["$defs"]["SpecSet"]["properties"]
+    )
+    curated = set(
+        _json.loads(
+            (ROOT / "assets" / "mappings" / "domain-battery" / "property_map.curated.json").read_text(encoding="utf-8")
         )["mappings"]
-    })
+        and {
+            m["key"]
+            for m in _json.loads(
+                (ROOT / "assets" / "mappings" / "domain-battery" / "property_map.curated.json").read_text(
+                    encoding="utf-8"
+                )
+            )["mappings"]
+        }
+    )
     unmapped = spec_set - curated
     new_drops = unmapped - KNOWN_UNMAPPED
     assert not new_drops, f"new schema keys without EMMO mapping (silent JSON-LD drops): {sorted(new_drops)}"

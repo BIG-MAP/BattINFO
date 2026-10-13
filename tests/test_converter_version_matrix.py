@@ -12,6 +12,7 @@ Fixtures are committed JSON-LD (small, one coin cell each), so this test needs
 no BattInfoConverter dependency — see PROVENANCE.md and
 scripts/generate_converter_version_fixtures.py to regenerate them.
 """
+
 from __future__ import annotations
 
 import json

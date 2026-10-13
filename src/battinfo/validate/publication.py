@@ -40,9 +40,8 @@ def _shacl_publication_report(data: dict[str, Any], policy: ValidationPolicy) ->
     if not isinstance(graph, list):
         return ValidationReport(policy=policy)
     is_gold_standard = any(
-        isinstance(n, dict) and "dcat:Catalog" in (
-            n.get("@type") if isinstance(n.get("@type"), list) else [n.get("@type")]
-        )
+        isinstance(n, dict)
+        and "dcat:Catalog" in (n.get("@type") if isinstance(n.get("@type"), list) else [n.get("@type")])
         for n in graph
     )
     if not is_gold_standard:
@@ -331,9 +330,7 @@ def _shape_issues(data: dict[str, Any], policy: ValidationPolicy) -> ValidationR
             seen_ids[node_id] = path or "@root"
 
     node_ids = set(seen_ids)
-    types_by_id = {
-        node.get("@id"): _type_values(node) for _path, node in nodes if isinstance(node.get("@id"), str)
-    }
+    types_by_id = {node.get("@id"): _type_values(node) for _path, node in nodes if isinstance(node.get("@id"), str)}
     for path, node in nodes:
         node_types = _type_values(node)
         _series_issues(issues, path, node, severity, has_graph, node_ids, types_by_id)
@@ -483,6 +480,7 @@ def _shape_issues(data: dict[str, Any], policy: ValidationPolicy) -> ValidationR
                     )
 
     return ValidationReport(issues=tuple(issues), policy=policy)
+
 
 def validate_publication_report(
     data: dict[str, Any],

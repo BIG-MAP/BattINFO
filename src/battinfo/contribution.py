@@ -4,6 +4,7 @@ High-level contributor workflow: init → process → publish.
 This module wraps the lower-level ingest pipeline with a user-facing interface
 designed for researchers who want to share measurement data.
 """
+
 from __future__ import annotations
 
 import json
@@ -55,6 +56,7 @@ CONTRIBUTION_PHOTO_GLOBS = ["photos/*.jpg", "photos/*.jpeg", "photos/*.png"]
 
 # ── Init ──────────────────────────────────────────────────────────────────────
 
+
 def init_contribution(
     output_path: Path,
     *,
@@ -69,9 +71,7 @@ def init_contribution(
 
     output_path = Path(output_path)
     if output_path.exists() and not overwrite:
-        raise FileExistsError(
-            f"{output_path} already exists. Pass overwrite=True or choose a different name."
-        )
+        raise FileExistsError(f"{output_path} already exists. Pass overwrite=True or choose a different name.")
 
     shutil.copytree(TEMPLATE_DIR, output_path, dirs_exist_ok=overwrite)
 
@@ -102,6 +102,7 @@ def init_contribution(
 
 # ── Load / validate manifest ───────────────────────────────────────────────────
 
+
 def _write_yaml(path: Path, data: dict) -> None:
     path.write_text(
         yaml.dump(data, default_flow_style=False, allow_unicode=True, sort_keys=False),
@@ -113,8 +114,7 @@ def load_contribution_manifest(root: Path) -> dict[str, Any]:
     manifest_path = root / CONTRIBUTION_MANIFEST
     if not manifest_path.exists():
         raise FileNotFoundError(
-            f"No {CONTRIBUTION_MANIFEST} found in {root}. "
-            f"Run `battinfo dataset init` to create one."
+            f"No {CONTRIBUTION_MANIFEST} found in {root}. Run `battinfo dataset init` to create one."
         )
     return yaml.safe_load(manifest_path.read_text(encoding="utf-8")) or {}
 
@@ -123,10 +123,7 @@ def validate_contribution_manifest(manifest: dict) -> list[str]:
     """Return a list of human-readable error strings (empty = valid)."""
     errors = []
     if not manifest.get("cell_spec_iri"):
-        errors.append(
-            "cell_spec_iri is required. Find the IRI at "
-            "https://www.battery-genome.org/registry/cell-spec"
-        )
+        errors.append("cell_spec_iri is required. Find the IRI at https://www.battery-genome.org/registry/cell-spec")
     if not manifest.get("cell_name"):
         errors.append("cell_name is required (e.g. a serial number or lab label).")
     if not manifest.get("lab"):
@@ -180,6 +177,7 @@ def _write_ingest_manifest(root: Path, manifest: dict) -> Path:
 
 # ── Process ───────────────────────────────────────────────────────────────────
 
+
 def _is_battinfo_internal(path: Path, root: Path) -> bool:
     """True if path is inside a battinfo-managed folder that should not be scanned."""
     try:
@@ -191,10 +189,9 @@ def _is_battinfo_internal(path: Path, root: Path) -> bool:
 
 def _scan_data_files(root: Path) -> list[Path]:
     return sorted(
-        p for p in root.rglob("*")
-        if p.is_file()
-        and p.suffix.lower() in _RAW_EXTENSIONS
-        and not _is_battinfo_internal(p, root)
+        p
+        for p in root.rglob("*")
+        if p.is_file() and p.suffix.lower() in _RAW_EXTENSIONS and not _is_battinfo_internal(p, root)
     )
 
 
@@ -216,6 +213,7 @@ def _describe_data_file(path: Path) -> dict[str, str | None]:
 
 # ── Annotation sidecar ────────────────────────────────────────────────────────
 
+
 def _load_annotations(root: Path) -> dict[str, dict]:
     """Return existing annotation entries keyed by filename."""
     path = root / ANNOTATIONS_MANIFEST
@@ -223,6 +221,7 @@ def _load_annotations(root: Path) -> dict[str, dict]:
         return {}
     try:
         import yaml  # type: ignore[import-untyped]
+
         doc = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
         entries = {}
         for e in doc.get("files", []):
@@ -341,6 +340,7 @@ def process_contribution(
     if not errors:
         try:
             from battinfo.processing import convert_raw_to_bdf
+
             for raw in raw_files:
                 bdf_path, inferred_type = convert_raw_to_bdf(raw)
                 conversions[raw.name] = str(bdf_path) if bdf_path else None
@@ -349,9 +349,7 @@ def process_contribution(
             pass
 
     # Generate / update annotation sidecar; BDF types fill any '?' entries
-    annotations_path, needs_review = _write_annotations(
-        root, file_descriptions, bdf_test_types=bdf_test_types or None
-    )
+    annotations_path, needs_review = _write_annotations(root, file_descriptions, bdf_test_types=bdf_test_types or None)
     file_descriptions = _apply_annotations(file_descriptions, root)
     warnings = [d["name"] for d in file_descriptions if not d["recognised"]]
 
@@ -390,6 +388,7 @@ def process_contribution(
 
 # ── Zenodo publish ─────────────────────────────────────────────────────────────
 
+
 def publish_to_zenodo(
     root: Path,
     *,
@@ -405,9 +404,7 @@ def publish_to_zenodo(
     intake_path = dist / "registry-intake.json"
 
     if not intake_path.exists():
-        raise FileNotFoundError(
-            f"No processed workspace found. Run `battinfo dataset process {root}` first."
-        )
+        raise FileNotFoundError(f"No processed workspace found. Run `battinfo dataset process {root}` first.")
 
     manifest = load_contribution_manifest(root)
     intake = json.loads(intake_path.read_text(encoding="utf-8"))
@@ -504,6 +501,7 @@ def _collect_upload_files(dist: Path) -> dict[Path, str]:
 def _patch_intake_urls(intake: dict, file_map: dict[Path, str], dist: Path) -> dict:
     """Replace local distribution access_urls with Zenodo file links."""
     import copy
+
     patched = copy.deepcopy(intake)
     url_map = {str(local): zenodo_url for local, zenodo_url in file_map.items()}
 
@@ -571,17 +569,11 @@ def _resolve_cell_spec_for_batch(cell_spec: str) -> tuple[str, str, str, str]:
             break
 
     if not results:
-        raise ValueError(
-            f"No cell spec found matching {cell_spec!r}. "
-            "Check the library or pass the IRI directly."
-        )
+        raise ValueError(f"No cell spec found matching {cell_spec!r}. Check the library or pass the IRI directly.")
     if len(results) > 1:
-        options = "\n".join(
-            f"  {r['manufacturer']} {r['model']}  ({r['id']})" for r in results[:5]
-        )
+        options = "\n".join(f"  {r['manufacturer']} {r['model']}  ({r['id']})" for r in results[:5])
         raise ValueError(
-            f"Multiple cell specs match {cell_spec!r}. "
-            f"Be more specific or pass the IRI directly.\n{options}"
+            f"Multiple cell specs match {cell_spec!r}. Be more specific or pass the IRI directly.\n{options}"
         )
 
     r = results[0]
@@ -591,6 +583,7 @@ def _resolve_cell_spec_for_batch(cell_spec: str) -> tuple[str, str, str, str]:
 def _slugify(text: str) -> str:
     """Lower-case, spaces → hyphens, strip non-alphanumeric."""
     import re
+
     return re.sub(r"[^a-z0-9-]", "", re.sub(r"\s+", "-", text.lower().strip()))
 
 
@@ -632,6 +625,7 @@ def _generate_cell_iri(
     produces the same IRI, so re-running init on an existing batch is safe.
     """
     from battinfo.publication import _entity_iri
+
     seed_parts = [cell_spec_iri, batch_id or "batch"]
     if serial_number:
         seed_parts.append(serial_number)
@@ -708,20 +702,14 @@ def init_batch(
     output_dir = Path(output_dir).resolve()
 
     if cell_iris is not None and len(cell_iris) != count:
-        raise ValueError(
-            f"cell_iris length ({len(cell_iris)}) must equal count ({count})."
-        )
+        raise ValueError(f"cell_iris length ({len(cell_iris)}) must equal count ({count}).")
     if serial_numbers is not None and len(serial_numbers) != count:
-        raise ValueError(
-            f"serial_numbers length ({len(serial_numbers)}) must equal count ({count})."
-        )
+        raise ValueError(f"serial_numbers length ({len(serial_numbers)}) must equal count ({count}).")
 
     cell_spec_iri, cell_spec_name, manufacturer, model = _resolve_cell_spec_for_batch(cell_spec)
 
     if output_dir.exists() and not overwrite:
-        raise FileExistsError(
-            f"{output_dir} already exists. Pass overwrite=True or choose a different path."
-        )
+        raise FileExistsError(f"{output_dir} already exists. Pass overwrite=True or choose a different path.")
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # ── batch.yaml ─────────────────────────────────────────────────────────────
@@ -744,11 +732,7 @@ def init_batch(
     seen_folders: dict[str, str] = {}
     for i in range(count):
         sn = serial_numbers[i].strip() if serial_numbers else None
-        cell_iri = (
-            cell_iris[i]
-            if cell_iris
-            else _generate_cell_iri(cell_spec_iri, batch_id, i, sn)
-        )
+        cell_iri = cell_iris[i] if cell_iris else _generate_cell_iri(cell_spec_iri, batch_id, i, sn)
         folder_name = _cell_folder_name(cell_iri, manufacturer, model, sn)
         # Fail closed on a within-batch folder collision: two cells that slug to the same
         # folder (e.g. duplicate serials) would otherwise reuse the dir (mkdir exist_ok)
@@ -780,11 +764,13 @@ def init_batch(
         )
         (cell_dir / CONTRIBUTION_MANIFEST).write_text(manifest_text, encoding="utf-8")
 
-        cells.append({
-            "folder": folder_name,
-            "cell_name": cell_name,
-            "cell_iri": cell_iri,
-        })
+        cells.append(
+            {
+                "folder": folder_name,
+                "cell_name": cell_name,
+                "cell_iri": cell_iri,
+            }
+        )
 
     return {
         "output_dir": str(output_dir),
@@ -799,10 +785,7 @@ def load_batch_manifest(batch_dir: Path) -> dict[str, Any]:
     """Load and return the batch.yaml manifest from *batch_dir*."""
     manifest_path = Path(batch_dir) / BATCH_MANIFEST
     if not manifest_path.exists():
-        raise FileNotFoundError(
-            f"No {BATCH_MANIFEST} found in {batch_dir}. "
-            "Run `battinfo batch init` first."
-        )
+        raise FileNotFoundError(f"No {BATCH_MANIFEST} found in {batch_dir}. Run `battinfo batch init` first.")
     return yaml.safe_load(manifest_path.read_text(encoding="utf-8")) or {}
 
 
@@ -847,13 +830,9 @@ def add_to_batch(
     batch_dir = Path(batch_dir).resolve()
 
     if cell_iris is not None and len(cell_iris) != count:
-        raise ValueError(
-            f"cell_iris length ({len(cell_iris)}) must equal count ({count})."
-        )
+        raise ValueError(f"cell_iris length ({len(cell_iris)}) must equal count ({count}).")
     if serial_numbers is not None and len(serial_numbers) != count:
-        raise ValueError(
-            f"serial_numbers length ({len(serial_numbers)}) must equal count ({count})."
-        )
+        raise ValueError(f"serial_numbers length ({len(serial_numbers)}) must equal count ({count}).")
 
     manifest = load_batch_manifest(batch_dir)
 
@@ -873,19 +852,14 @@ def add_to_batch(
     for i in range(count):
         sn = serial_numbers[i].strip() if serial_numbers else None
         cell_iri = (
-            cell_iris[i]
-            if cell_iris
-            else _generate_cell_iri(cell_spec_iri, effective_batch_id, existing_count + i, sn)
+            cell_iris[i] if cell_iris else _generate_cell_iri(cell_spec_iri, effective_batch_id, existing_count + i, sn)
         )
         folder_name = _cell_folder_name(cell_iri, manufacturer, model, sn)
         cell_name = sn or folder_name
 
         cell_dir = batch_dir / folder_name
         if cell_dir.exists():
-            raise FileExistsError(
-                f"{cell_dir} already exists. "
-                "Remove it or choose different serial numbers."
-            )
+            raise FileExistsError(f"{cell_dir} already exists. Remove it or choose different serial numbers.")
         cell_dir.mkdir()
         cell_dir.mkdir(parents=True, exist_ok=True)
         (cell_dir / "photos").mkdir()
@@ -939,10 +913,9 @@ def _group_files_by_cell(folder: Path, n_cells: int | None = None) -> dict[str, 
     import re
 
     raw = [
-        f for f in sorted(folder.iterdir())
-        if f.is_file()
-        and f.suffix.lower() in _RAW_EXTENSIONS
-        and not _is_battinfo_internal(f, folder)
+        f
+        for f in sorted(folder.iterdir())
+        if f.is_file() and f.suffix.lower() in _RAW_EXTENSIONS and not _is_battinfo_internal(f, folder)
     ]
     if not raw:
         return {}
@@ -953,11 +926,11 @@ def _group_files_by_cell(folder: Path, n_cells: int | None = None) -> dict[str, 
     # more than one group is used.
     _CELL_PATTERNS = [
         # Named prefix: Channel_1, CH-2, Cell3, Unit_04, ch1
-        r'(?:channel|ch|cell|unit|c)[-_]?0*(\d+)',
+        r"(?:channel|ch|cell|unit|c)[-_]?0*(\d+)",
         # Trailing number before extension: test_C01.csv → 1, run003.nda → 3
-        r'[-_]0*(\d+)$',
+        r"[-_]0*(\d+)$",
         # Leading number: 1_test.csv, 01_run.nda
-        r'^0*(\d+)[-_]',
+        r"^0*(\d+)[-_]",
         # Any isolated number: test_1_25degC.csv → position matters below
     ]
 
@@ -978,7 +951,7 @@ def _group_files_by_cell(folder: Path, n_cells: int | None = None) -> dict[str, 
     # files while keeping all other tokens constant.
     tokens_per_file = []
     for f in raw:
-        tokens_per_file.append(re.findall(r'\d+', f.stem))
+        tokens_per_file.append(re.findall(r"\d+", f.stem))
 
     if tokens_per_file:
         n_tokens = min(len(t) for t in tokens_per_file)
@@ -1117,14 +1090,10 @@ def package_batch(
     cell_spec = _finalize_cell_spec(raw_cell_spec, cell_specification=cell_spec)
 
     # Discover cell sub-folders: any directory with a battinfo.yaml
-    cell_dirs = sorted(
-        d for d in batch_dir.iterdir()
-        if d.is_dir() and (d / CONTRIBUTION_MANIFEST).exists()
-    )
+    cell_dirs = sorted(d for d in batch_dir.iterdir() if d.is_dir() and (d / CONTRIBUTION_MANIFEST).exists())
     if not cell_dirs:
         raise ValueError(
-            f"No cell folders with {CONTRIBUTION_MANIFEST!r} found in {batch_dir}. "
-            "Run `battinfo batch init` first."
+            f"No cell folders with {CONTRIBUTION_MANIFEST!r} found in {batch_dir}. Run `battinfo batch init` first."
         )
 
     entries: list[ZenodoDatasetEntry] = []
@@ -1137,9 +1106,7 @@ def package_batch(
     seen_cell_iris: dict[str, str] = {}
 
     for cell_dir in cell_dirs:
-        cell_manifest = yaml.safe_load(
-            (cell_dir / CONTRIBUTION_MANIFEST).read_text(encoding="utf-8")
-        ) or {}
+        cell_manifest = yaml.safe_load((cell_dir / CONTRIBUTION_MANIFEST).read_text(encoding="utf-8")) or {}
 
         raw_ci = Cell(
             id=cell_manifest.get("cell_iri") or None,
@@ -1193,18 +1160,17 @@ def package_batch(
             )
             ds = _finalize_dataset(raw_ds, cell_instance=ci, test=test, dataset_dir=cell_dir)
 
-            entries.append(ZenodoDatasetEntry(
-                cell_instances=[ci],
-                test=test,
-                dataset=ds,
-            ))
+            entries.append(
+                ZenodoDatasetEntry(
+                    cell_instances=[ci],
+                    test=test,
+                    dataset=ds,
+                )
+            )
             file_sets.append((raw_path, bdf_path))
 
     if not entries:
-        raise ValueError(
-            "No raw data files found. "
-            "Add data files to the data/ folder in each cell folder."
-        )
+        raise ValueError("No raw data files found. Add data files to the data/ folder in each cell folder.")
 
     record = ZenodoCellRecord(
         cell_spec=cell_spec,
@@ -1227,6 +1193,7 @@ def package_batch(
 
 
 # ── Push (end-to-end) ─────────────────────────────────────────────────────────
+
 
 def push_batch(
     folder: Path,
@@ -1266,9 +1233,7 @@ def push_batch(
     # ── Detect layout ──────────────────────────────────────────────────────────
     is_batch = (folder / BATCH_MANIFEST).exists()
     has_cell_subdirs = not is_batch and any(
-        (d / CONTRIBUTION_MANIFEST).exists()
-        for d in folder.iterdir()
-        if d.is_dir()
+        (d / CONTRIBUTION_MANIFEST).exists() for d in folder.iterdir() if d.is_dir()
     )
 
     if not is_batch and not has_cell_subdirs:
@@ -1281,7 +1246,8 @@ def push_batch(
 
         # Check if sub-directories contain raw files (sub-folder layout)
         subdirs_with_files = [
-            d for d in sorted(folder.iterdir())
+            d
+            for d in sorted(folder.iterdir())
             if d.is_dir()
             and not _is_battinfo_internal(d, folder)
             and any(f.suffix.lower() in _RAW_EXTENSIONS for f in d.iterdir() if f.is_file())
@@ -1289,10 +1255,10 @@ def push_batch(
 
         if subdirs_with_files:
             # Sub-folder layout: each subdir becomes a cell
-            groups = {d.name: list(sorted(
-                f for f in d.iterdir()
-                if f.is_file() and f.suffix.lower() in _RAW_EXTENSIONS
-            )) for d in subdirs_with_files}
+            groups = {
+                d.name: list(sorted(f for f in d.iterdir() if f.is_file() and f.suffix.lower() in _RAW_EXTENSIONS))
+                for d in subdirs_with_files
+            }
         else:
             # Flat layout: group by filename pattern then move
             groups = _group_files_by_cell(folder, n_cells=n_cells)
@@ -1339,10 +1305,7 @@ def push_batch(
             is_batch = True
 
     # ── Process all cells ──────────────────────────────────────────────────────
-    cell_dirs = sorted(
-        d for d in folder.iterdir()
-        if d.is_dir() and (d / CONTRIBUTION_MANIFEST).exists()
-    )
+    cell_dirs = sorted(d for d in folder.iterdir() if d.is_dir() and (d / CONTRIBUTION_MANIFEST).exists())
     for cell_dir in cell_dirs:
         process_contribution(cell_dir, bundle=False)
 

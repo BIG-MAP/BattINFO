@@ -197,7 +197,8 @@ def test_soc_termination_is_first_class() -> None:
     from battinfo.testmethod import Step, Termination
 
     step = Step(
-        mode="cc", direction="discharge",
+        mode="cc",
+        direction="discharge",
         setpoints={"c_rate": {"value": 0.333, "unit": "A/Ah"}},
         termination=[Termination(quantity="soc", value=0.9, unit="1", direction="below")],
         description="Discharge at C/3 to 90% SOC",
@@ -212,7 +213,8 @@ def test_termination_comparison_string_shorthand() -> None:
     from battinfo.testmethod import Step, parse_termination
 
     step = Step(
-        mode="cc", direction="discharge",
+        mode="cc",
+        direction="discharge",
         setpoints={"c_rate": {"value": 0.333, "unit": "A/Ah"}},
         termination=["Voltage < 2.5", "C-rate < C/50", "SOC < 0.05", "Time > 30 min"],
     )
@@ -231,6 +233,7 @@ def test_termination_comparison_string_shorthand() -> None:
     import pytest
 
     from battinfo.testmethod import ExperimentSyntaxError
+
     with pytest.raises(ExperimentSyntaxError, match="Unknown termination quantity"):
         parse_termination("Frobnitz > 3")
     with pytest.raises(ExperimentSyntaxError, match="names voltage but"):

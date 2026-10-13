@@ -106,5 +106,3 @@ def test_core_workflow_end_to_end(tmp_path: Path) -> None:
     assert published_dataset.exists()
     payload = json.loads(published_dataset.read_text(encoding="utf-8"))
     assert "@id" in payload or "@graph" in payload
-
-

@@ -21,6 +21,7 @@ from battinfo.ws import AuthoringWorkspace  # noqa: E402
 
 # ── shared authoring helpers ───────────────────────────────────────────────────
 
+
 def _new_ws(tmp_path: Path) -> AuthoringWorkspace:
     ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
     (tmp_path / "d.cell-spec.json").write_text(
@@ -49,6 +50,7 @@ def _read_one(ws: AuthoringWorkspace, subdir: str) -> dict:
 
 
 # ── Item 1: ws.add("test", spec=...) never silently drops the protocol ──────────
+
 
 def test_add_test_with_testspec_object_saves_protocol_and_links(tmp_path: Path) -> None:
     ws = _new_ws(tmp_path)
@@ -93,10 +95,7 @@ def test_add_test_with_protocol_iri_references_existing(tmp_path: Path) -> None:
     assert result["test_specs"] == []
     assert len(list((ws._ws.source_root / "test-protocol").glob("*.json"))) == n_protocols
     # ... but the run still links to the referenced protocol IRI.
-    linked = [
-        json.loads(p.read_text(encoding="utf-8"))["test"]
-        for p in (ws2._ws.source_root / "test").glob("*.json")
-    ]
+    linked = [json.loads(p.read_text(encoding="utf-8"))["test"] for p in (ws2._ws.source_root / "test").glob("*.json")]
     assert any(t["protocol_id"] == proto_id for t in linked)
 
 
@@ -110,10 +109,7 @@ def test_add_test_iri_reference_resolves_kind_from_saved_record(tmp_path: Path) 
     # No explicit type= — the kind must be resolved from the referenced record.
     ws2.add("test", cell="SN-2", data="f.csv", spec=proto_id)
     ws2.save()
-    linked = [
-        json.loads(p.read_text(encoding="utf-8"))["test"]
-        for p in (ws2._ws.source_root / "test").glob("*.json")
-    ]
+    linked = [json.loads(p.read_text(encoding="utf-8"))["test"] for p in (ws2._ws.source_root / "test").glob("*.json")]
     ref = next(t for t in linked if t["protocol_id"] == proto_id)
     assert ref["kind"] == "cycling"
 
@@ -184,8 +180,7 @@ def test_legacy_scalar_contributor_upgraded_on_load(tmp_path: Path) -> None:
     battinfo_dir = tmp_path / ".battinfo"
     battinfo_dir.mkdir(parents=True, exist_ok=True)
     (battinfo_dir / "workspace.json").write_text(
-        json.dumps({"schema_version": "0.1.0",
-                    "contributor": {"orcid": ORCID_A, "name": "Jane Researcher"}}),
+        json.dumps({"schema_version": "0.1.0", "contributor": {"orcid": ORCID_A, "name": "Jane Researcher"}}),
         encoding="utf-8",
     )
     ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
@@ -197,6 +192,7 @@ def test_legacy_scalar_contributor_upgraded_on_load(tmp_path: Path) -> None:
 
 
 # ── Item 3: contributors reach the publication/preview bundle ───────────────────
+
 
 def _person_ids(graph: dict) -> set[str]:
     ids: set[str] = set()
@@ -234,6 +230,7 @@ def test_contributors_appear_in_preview_bundle_without_recreators(tmp_path: Path
 
 # ── Item 4: the unmapped-property walker reaches every property holder ──────────
 
+
 def test_unmapped_property_warns_at_every_nested_holder() -> None:
     from battinfo.validate.semantic import validate_semantic_report
 
@@ -269,13 +266,18 @@ def test_unmapped_property_warns_at_every_nested_holder() -> None:
 
 # ── Item 5: out-of-vocabulary hardware part keeps its label ─────────────────────
 
+
 def test_unknown_hardware_part_preserves_label_and_warns() -> None:
     import warnings
 
     from battinfo.transform.json_to_jsonld import _descriptor_housing_to_jsonld
 
-    housing = {"parts": [{"type": "pressure relief disc", "material": "Al"},
-                         {"type": "anti-vibration pad", "material": "rubber"}]}
+    housing = {
+        "parts": [
+            {"type": "pressure relief disc", "material": "Al"},
+            {"type": "anti-vibration pad", "material": "rubber"},
+        ]
+    }
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")
         relations = _descriptor_housing_to_jsonld(housing, "cylindrical")
@@ -297,27 +299,24 @@ def test_housing_parts_landed_in_electrochemistry_0_36_are_typed() -> None:
 
     from battinfo.transform.json_to_jsonld import _descriptor_housing_to_jsonld
 
-    housing = {"parts": [{"type": part} for part in
-                         ("seal", "gasket", "vent", "cid", "insulator ring", "wave spring")]}
+    housing = {"parts": [{"type": part} for part in ("seal", "gasket", "vent", "cid", "insulator ring", "wave spring")]}
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")
         relations = _descriptor_housing_to_jsonld(housing, "cylindrical")
 
     blob = json.dumps(relations)
-    for term in ("Seal", "Gasket", "SafetyVent", "CurrentInterruptDevice",
-                 "InsulatorRing", "WaveSpring"):
+    for term in ("Seal", "Gasket", "SafetyVent", "CurrentInterruptDevice", "InsulatorRing", "WaveSpring"):
         assert f'"{term}"' in blob, f"{term} not emitted: {blob}"
     assert not [w for w in caught if "hardware_part_unmapped" in str(w.message)]
 
 
 # ── Item 6: close the audited silent drops ──────────────────────────────────────
 
+
 def test_separator_manufacturer_and_product_id_are_emitted() -> None:
     from battinfo.transform.json_to_jsonld import _descriptor_separator_to_jsonld
 
-    node = _descriptor_separator_to_jsonld(
-        {"material": "PE", "manufacturer": "Celgard", "product_id": "2500"}
-    )
+    node = _descriptor_separator_to_jsonld({"material": "PE", "manufacturer": "Celgard", "product_id": "2500"})
     blob = json.dumps(node)
     assert "Celgard" in blob  # supplier traceability, previously dropped
     assert node["schema:productID"] == "2500"
@@ -336,8 +335,12 @@ def test_record_notes_reach_publication_graph(tmp_path: Path) -> None:
     spec_path.write_text(json.dumps(rec), encoding="utf-8")
 
     jsonld = ws._build_zenodo_jsonld(
-        zenodo_record_id=0, prereserved_doi="10.5281/zenodo.X",
-        record_url="https://zenodo.org/records/X", data_filenames=[], title="t", description="d",
+        zenodo_record_id=0,
+        prereserved_doi="10.5281/zenodo.X",
+        record_url="https://zenodo.org/records/X",
+        data_filenames=[],
+        title="t",
+        description="d",
     )
     node = next(n for n in jsonld["@graph"] if n.get("@id") == spec_id)
     assert node["schema:comment"] == ["handled in a dry room", "second note"]
@@ -345,14 +348,23 @@ def test_record_notes_reach_publication_graph(tmp_path: Path) -> None:
 
 def test_protocol_safety_reaches_publication_graph(tmp_path: Path) -> None:
     ws = _new_ws(tmp_path)
-    tp = TestSpec(name="CCCV", kind="cycling", experiment=["Charge at 0.5C until 4.2V"],
-                  cycles=10, safety={"max_voltage_V": 4.3, "max_temperature_degC": 60})
+    tp = TestSpec(
+        name="CCCV",
+        kind="cycling",
+        experiment=["Charge at 0.5C until 4.2V"],
+        cycles=10,
+        safety={"max_voltage_V": 4.3, "max_temperature_degC": 60},
+    )
     ws.add("test", cell="SN-1", data="f.csv", spec=tp)
     ws.save()
 
     jsonld = ws._build_zenodo_jsonld(
-        zenodo_record_id=0, prereserved_doi="10.5281/zenodo.X",
-        record_url="https://zenodo.org/records/X", data_filenames=[], title="t", description="d",
+        zenodo_record_id=0,
+        prereserved_doi="10.5281/zenodo.X",
+        record_url="https://zenodo.org/records/X",
+        data_filenames=[],
+        title="t",
+        description="d",
     )
     proto = next(n for n in jsonld["@graph"] if "prov:Plan" in (n.get("@type") or []))
     safety = {
@@ -373,9 +385,11 @@ def test_conformance_deviation_step_is_preserved(tmp_path: Path) -> None:
     # End-to-end through ws.add(..., conformance=...): the step survives the save.
     ws = _new_ws(tmp_path)
     ws.add(
-        "test", type="cycling", cell="SN-1", data="f.csv",
-        conformance={"status": "non-conformant",
-                     "deviations": [{"category": "operator_intervention", "step": 3}]},
+        "test",
+        type="cycling",
+        cell="SN-1",
+        data="f.csv",
+        conformance={"status": "non-conformant", "deviations": [{"category": "operator_intervention", "step": 3}]},
     )
     ws.save()
     test = _read_one(ws, "test")["test"]
@@ -387,8 +401,7 @@ def test_test_protocol_safety_schema_accepts_temperature() -> None:
     import jsonschema
 
     schema = json.loads(
-        (ROOT / "src" / "battinfo" / "data" / "schemas" / "test-protocol.schema.json")
-        .read_text(encoding="utf-8")
+        (ROOT / "src" / "battinfo" / "data" / "schemas" / "test-protocol.schema.json").read_text(encoding="utf-8")
     )
     safety_props = schema["properties"]["safety"]["properties"]
     assert "max_temperature_degC" in safety_props
@@ -398,6 +411,7 @@ def test_test_protocol_safety_schema_accepts_temperature() -> None:
 
 
 # ── Item 7: an identical re-save reads as [unchanged], not [updated] ─────────────
+
 
 def test_identical_resave_reports_unchanged(tmp_path: Path, capsys) -> None:
     ws = _new_ws(tmp_path)
@@ -503,6 +517,7 @@ def test_changing_workspace_license_reports_updated(tmp_path: Path, capsys) -> N
 
 # ── Item 8: error-text fixes (phantom command + key-request URL) ────────────────
 
+
 def test_save_gate_message_uses_real_command() -> None:
     from jsonschema import ValidationError
 
@@ -520,17 +535,12 @@ def test_save_gate_message_uses_real_command() -> None:
 
 def test_no_phantom_specs_list_command_in_source() -> None:
     src = ROOT / "src" / "battinfo"
-    offenders = [
-        p
-        for p in src.rglob("*.py")
-        if "battinfo specs list" in p.read_text(encoding="utf-8")
-    ]
+    offenders = [p for p in src.rglob("*.py") if "battinfo specs list" in p.read_text(encoding="utf-8")]
     assert not offenders, f"phantom command 'battinfo specs list' still referenced in {offenders}"
 
 
 def test_publish_no_key_error_points_at_battinfo_publish(tmp_path: Path, monkeypatch) -> None:
-    for var in ("BATTINFO_API_KEY", "BATTINFO_WORKSPACE_ID", "BATTINFO_PUBLISHER_ID",
-                "BATTINFO_REGISTRY_URL"):
+    for var in ("BATTINFO_API_KEY", "BATTINFO_WORKSPACE_ID", "BATTINFO_PUBLISHER_ID", "BATTINFO_REGISTRY_URL"):
         monkeypatch.delenv(var, raising=False)
     ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
     with pytest.raises(RuntimeError) as exc:
@@ -542,12 +552,21 @@ def test_publish_no_key_error_points_at_battinfo_publish(tmp_path: Path, monkeyp
 
 # ── Item 9: registry conflict is detected from the structured 409, not a string ─
 
+
 def test_registry_conflict_detail_parses_status_and_body() -> None:
     from battinfo.api._registry import RegistryClientError
     from battinfo.ws import _registry_conflict_detail
 
-    body = json.dumps({"detail": {"keys": {"model": "Y"}, "existing_id": "spec/abc",
-                                  "existing_status": "validated", "context": "cell_spec"}})
+    body = json.dumps(
+        {
+            "detail": {
+                "keys": {"model": "Y"},
+                "existing_id": "spec/abc",
+                "existing_status": "validated",
+                "context": "cell_spec",
+            }
+        }
+    )
     exc = RegistryClientError("Registry returned HTTP 409", status_code=409, response_body=body)
     detail = _registry_conflict_detail(exc)
     assert detail is not None
@@ -577,15 +596,16 @@ def test_do_submit_retries_on_structured_409(monkeypatch) -> None:
             raise RegistryClientError(
                 "Registry returned HTTP 409",
                 status_code=409,
-                response_body=json.dumps({"detail": {"existing_id": "spec/abc",
-                                                      "existing_status": "validated"}}),
+                response_body=json.dumps({"detail": {"existing_id": "spec/abc", "existing_status": "validated"}}),
             )
         return {"response": {"status": "validated", "resources": [{"canonical_iri": "spec/xyz"}]}}
 
     monkeypatch.setattr("battinfo.api.submit_publication_package", fake)
     outcome = ws_module._do_submit(
         {"source_version": "v1", "resource": {"source_version": "v1"}},
-        "https://r", "k", "T",
+        "https://r",
+        "k",
+        "T",
     )
     assert attempts["n"] == 2  # retried after the structured 409
     assert outcome["ok"] and outcome["version_bumped"] == "v1-v2"

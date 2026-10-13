@@ -5,6 +5,7 @@ electrolyte, separator, housing, construction) — the "electrode-drop" data-los
 rich cell spec and saving it silently discarded the structure on disk. These tests pin that
 to_record()/from_record() now round-trip the full structure and that the emitted record still
 validates against the canonical schema."""
+
 from __future__ import annotations
 
 import json
@@ -29,9 +30,7 @@ def test_canonical_roundtrip_is_lossless_and_valid(path: Path) -> None:
     rec1 = spec.to_record()
 
     # Every structure component the spec carries must survive serialization (not be dropped).
-    present = [k for k in _STRUCTURE if getattr(spec, k) is not None] + (
-        ["construction"] if spec.construction else []
-    )
+    present = [k for k in _STRUCTURE if getattr(spec, k) is not None] + (["construction"] if spec.construction else [])
     for key in present:
         assert key in rec1, f"{path.name}: to_record dropped {key!r}"
 
@@ -47,9 +46,7 @@ def test_canonical_roundtrip_is_lossless_and_valid(path: Path) -> None:
 def test_detailed_fixtures_actually_carry_structure() -> None:
     # Guard against the round-trip test passing vacuously because no fixture has structure.
     assert _DETAILED, "no detailed example fixtures found"
-    any_structure = any(
-        any(k in json.loads(p.read_text(encoding="utf-8")) for k in _STRUCTURE) for p in _DETAILED
-    )
+    any_structure = any(any(k in json.loads(p.read_text(encoding="utf-8")) for k in _STRUCTURE) for p in _DETAILED)
     assert any_structure, "no detailed fixture carries datasheet structure"
 
 
@@ -78,13 +75,21 @@ def test_manufacturer_id_provenance_and_component_refs_round_trip() -> None:
 
     spec = CellSpec(
         id="https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd",
-        name="Acme X", manufacturer="Acme", model="X", format="coin", chemistry="Li-ion",
+        name="Acme X",
+        manufacturer="Acme",
+        model="X",
+        format="coin",
+        chemistry="Li-ion",
         size_code="R2032",
         manufacturer_id="https://w3id.org/battinfo/organization/1111-2222-3333-4444",
         positive_electrode_spec_id="https://w3id.org/battinfo/spec/5555-6666-7777-8888",
         electrolyte_spec_id="https://w3id.org/battinfo/spec/9999-aaaa-bbbb-cccc",
-        source=ProvenanceInfo(type="converter-jsonld", name="BattINFO Converter",
-                              workflow_version="app=1.1.17", comment="blended salt note"),
+        source=ProvenanceInfo(
+            type="converter-jsonld",
+            name="BattINFO Converter",
+            workflow_version="app=1.1.17",
+            comment="blended salt note",
+        ),
     )
     rec = spec.to_record()
 
@@ -105,15 +110,16 @@ def test_manufacturer_id_provenance_and_component_refs_round_trip() -> None:
     assert back.positive_electrode_spec_id == spec.positive_electrode_spec_id
     assert back.electrolyte_spec_id == spec.electrolyte_spec_id
     assert (back.source.name, back.source.workflow_version, back.source.comment) == (
-        "BattINFO Converter", "app=1.1.17", "blended salt note")
+        "BattINFO Converter",
+        "app=1.1.17",
+        "blended salt note",
+    )
     assert back.to_record() == rec  # fully idempotent
 
 
 def test_electrode_drop_regression() -> None:
     # The specific bug: a spec with electrodes must not lose them through canonical serialization.
-    rich = next(
-        p for p in _DETAILED if "positive_electrode" in json.loads(p.read_text(encoding="utf-8"))
-    )
+    rich = next(p for p in _DETAILED if "positive_electrode" in json.loads(p.read_text(encoding="utf-8")))
     spec = CellSpec.from_path(rich)
     assert spec.positive_electrode is not None and spec.electrolyte is not None  # fixture sanity
 

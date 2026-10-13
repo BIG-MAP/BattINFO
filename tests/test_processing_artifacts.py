@@ -1,6 +1,7 @@
 """C-4/C-5/R-8: processing must not reuse stale/garbage plot artifacts, must not produce a
 "successful" preview from degenerate input, and must not swallow (and leave) a corrupt parquet
 cache. The plotting/bdf extras are assumed installed (they are in CI)."""
+
 from __future__ import annotations
 
 import sys

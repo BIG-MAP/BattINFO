@@ -12,4 +12,3 @@ def run_validation(data: dict[str, Any], profile: str = "cell-spec") -> Validati
 
 def run_record_validation(data: dict[str, Any], source_root: str | None = None) -> ValidationResult:
     return validate_record(data, source_root=source_root)
-

@@ -9,6 +9,7 @@ Two entry points over the same ~259 cells:
 Fixtures are trimmed samples (5 cells each, spanning NMC811/NMC622/LFP/LCO/LMFP)
 — see tests/fixtures/interop/discovery/PROVENANCE.md.
 """
+
 from __future__ import annotations
 
 import copy
@@ -63,11 +64,9 @@ def test_electrolyte_parser_dedupes_solvents() -> None:
 def test_find_property_drops_non_finite_value() -> None:
     from battinfo.interop.discovery import _find_property
 
-    nan_node = {"hasProperty": [{"@type": "MassLoading",
-                                 "hasNumericalPart": {"hasNumericalValue": "NaN"}}]}
+    nan_node = {"hasProperty": [{"@type": "MassLoading", "hasNumericalPart": {"hasNumericalValue": "NaN"}}]}
     assert _find_property(nan_node, "MassLoading") is None, "a NaN value must be dropped, never coerced"
-    ok_node = {"hasProperty": [{"@type": "MassLoading",
-                                "hasNumericalPart": {"hasNumericalValue": "2.5"}}]}
+    ok_node = {"hasProperty": [{"@type": "MassLoading", "hasNumericalPart": {"hasNumericalValue": "2.5"}}]}
     prop = _find_property(ok_node, "MassLoading")
     assert prop is not None and prop["value"] == 2.5
 
@@ -172,20 +171,26 @@ def test_xlsx_carries_rich_notes() -> None:
 # ── shared guarantees (both sources) ─────────────────────────────────────────
 
 
-@pytest.mark.parametrize("loader,src", [(import_discovery_eln, ELN), (import_discovery_xlsx, XLSX)], ids=["eln", "xlsx"])
+@pytest.mark.parametrize(
+    "loader,src", [(import_discovery_eln, ELN), (import_discovery_xlsx, XLSX)], ids=["eln", "xlsx"]
+)
 def test_every_record_validates_and_emits_jsonld(loader, src) -> None:
     for record in loader(src, validate=False).records():
         assert validate_record(record).ok, record
         to_jsonld(record, target="domain-battery")  # raises on unmapped @type
 
 
-@pytest.mark.parametrize("loader,src", [(import_discovery_eln, ELN), (import_discovery_xlsx, XLSX)], ids=["eln", "xlsx"])
+@pytest.mark.parametrize(
+    "loader,src", [(import_discovery_eln, ELN), (import_discovery_xlsx, XLSX)], ids=["eln", "xlsx"]
+)
 def test_iris_unique(loader, src) -> None:
     iris = _iris(loader(src, validate=False).records())
     assert len(iris) == len(set(iris))
 
 
-@pytest.mark.parametrize("loader,src", [(import_discovery_eln, ELN), (import_discovery_xlsx, XLSX)], ids=["eln", "xlsx"])
+@pytest.mark.parametrize(
+    "loader,src", [(import_discovery_eln, ELN), (import_discovery_xlsx, XLSX)], ids=["eln", "xlsx"]
+)
 def test_import_is_idempotent(loader, src) -> None:
     """Re-import yields identical IRIs and identical records (modulo retrieval time)."""
     a, b = loader(src, validate=False).records(), loader(src, validate=False).records()
@@ -201,7 +206,12 @@ def test_eln_covers_all_five_chemistries() -> None:
 
 def test_shared_electrolyte_iri_matches_across_sources() -> None:
     """Same electrolyte name → same minted IRI whether imported from .eln or .xlsx."""
-    eln = {r["electrolyte_spec"]["name"]: r["electrolyte_spec"]["id"] for r in import_discovery_eln(ELN).electrolyte_specs}
-    xlsx = {r["electrolyte_spec"]["name"]: r["electrolyte_spec"]["id"] for r in import_discovery_xlsx(XLSX).electrolyte_specs}
+    eln = {
+        r["electrolyte_spec"]["name"]: r["electrolyte_spec"]["id"] for r in import_discovery_eln(ELN).electrolyte_specs
+    }
+    xlsx = {
+        r["electrolyte_spec"]["name"]: r["electrolyte_spec"]["id"]
+        for r in import_discovery_xlsx(XLSX).electrolyte_specs
+    }
     shared = set(eln) & set(xlsx)
     assert shared and all(eln[k] == xlsx[k] for k in shared)

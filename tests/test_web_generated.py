@@ -5,6 +5,7 @@ using the real Python transform and committed (the Vercel build cannot run
 Python). This test regenerates in memory and fails on drift — change the
 transform and the gallery must be regenerated in the same PR.
 """
+
 from __future__ import annotations
 
 import importlib.util
@@ -38,8 +39,7 @@ def test_gallery_shows_type_stacking() -> None:
     assert doc.get("@type") == ["BatteryCellSpecification", "schema:ProductModel", "schema:CreativeWork"]
     physical = doc.get("isDescriptionFor", {}).get("@type")
     assert isinstance(physical, list) and len(physical) >= 3, (
-        "the flagship cell-spec JSON-LD should stack multiple EMMO types under "
-        f"isDescriptionFor — got {physical!r}"
+        f"the flagship cell-spec JSON-LD should stack multiple EMMO types under isDescriptionFor — got {physical!r}"
     )
 
 
@@ -48,9 +48,7 @@ def test_public_jsonld_files_match_the_transform() -> None:
     for name, expected in gen.render_public(entries).items():
         raw = (gen.PUBLIC_DIR / name).read_text(encoding="utf-8")
         actual = raw.replace(chr(13) + chr(10), chr(10))
-        assert actual == expected, (
-            f"web/public/jsonld/{name} drifts — run scripts/gen_web_jsonld.py"
-        )
+        assert actual == expected, f"web/public/jsonld/{name} drifts — run scripts/gen_web_jsonld.py"
 
 
 _spec2 = importlib.util.spec_from_file_location("gen_web_examples", ROOT / "scripts" / "gen_web_examples.py")
@@ -64,8 +62,7 @@ def test_showcase_matches_the_current_library() -> None:
     expected = gen_showcase.render(gen_showcase.build_entries())
     actual = (ROOT / "web" / "lib" / "showcase.generated.ts").read_text(encoding="utf-8")
     assert actual == expected, (
-        "web/lib/showcase.generated.ts is stale - regenerate with "
-        "`uv run python scripts/gen_web_examples.py`"
+        "web/lib/showcase.generated.ts is stale - regenerate with `uv run python scripts/gen_web_examples.py`"
     )
 
 

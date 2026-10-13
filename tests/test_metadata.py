@@ -96,7 +96,9 @@ def test_dataset_with_tabular_data_populates_variables_and_csvw() -> None:
         id="https://w3id.org/battinfo/dataset/1f8r-6v2k-9p4m-3t7x",
         name="Tabular dataset",
         description="Dataset with inferred tabular metadata.",
-        distributions=[{"type": "DataDownload", "contentUrl": "https://example.org/data.csv", "encodingFormat": "text/csv"}],
+        distributions=[
+            {"type": "DataDownload", "contentUrl": "https://example.org/data.csv", "encodingFormat": "text/csv"}
+        ],
         test=test,
     )
 

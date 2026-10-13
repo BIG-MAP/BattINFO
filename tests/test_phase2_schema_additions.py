@@ -5,6 +5,7 @@ inline separator fields, typed housing/tab, construction module, current-collect
 material/form, Terminal.type) and the two sanctioned tightenings (FlexDate pattern,
 test.conditions as quantities).
 """
+
 from __future__ import annotations
 
 import json
@@ -98,17 +99,26 @@ def test_spec_item_accepts_value_basis_and_conditions() -> None:
     assert _errors("cell-spec.schema.json", bad)
 
     # Condition entries must themselves be quantities (value + unit).
-    bad = _cell_spec_record(properties={"nominal_capacity": {"value": 1, "unit": "Ah", "conditions": {"temperature": {"value": 25}}}})
+    bad = _cell_spec_record(
+        properties={"nominal_capacity": {"value": 1, "unit": "Ah", "conditions": {"temperature": {"value": 25}}}}
+    )
     assert _errors("cell-spec.schema.json", bad)
 
 
 def test_cell_property_co_type_and_conditions_reach_jsonld() -> None:
     spec = cell_description(
-        id=SPEC_IRI, manufacturer="Acme", model="A1", format="prismatic", chemistry="li-ion",
-        positive_electrode_basis="lfp", negative_electrode_basis="graphite",
+        id=SPEC_IRI,
+        manufacturer="Acme",
+        model="A1",
+        format="prismatic",
+        chemistry="li-ion",
+        positive_electrode_basis="lfp",
+        negative_electrode_basis="graphite",
         properties=properties(
             nominal_capacity={
-                "value": 100, "unit": "Ah", "co_type": "Measured",
+                "value": 100,
+                "unit": "Ah",
+                "co_type": "Measured",
                 "conditions": {"discharging_c_rate": {"value": 0.2, "unit": "C"}},
             },
             rated_capacity={"value": 98, "unit": "Ah", "co_type": "Rated"},
@@ -135,7 +145,12 @@ def test_cell_property_co_type_and_conditions_reach_jsonld() -> None:
 
 
 def test_spec_value_model_round_trips_value_basis_and_conditions() -> None:
-    payload = {"value": 3.2, "unit": "V", "value_basis": "Nominal", "conditions": {"temperature": {"value": 25, "unit": "degC"}}}
+    payload = {
+        "value": 3.2,
+        "unit": "V",
+        "value_basis": "Nominal",
+        "conditions": {"temperature": {"value": 25, "unit": "degC"}},
+    }
     sv = _dict_to_spec_value(payload)
     assert isinstance(sv, SpecValue)
     assert _spec_value_to_dict(sv) == payload
@@ -154,8 +169,13 @@ def test_spec_value_model_round_trips_value_basis_and_conditions() -> None:
 
 def test_conductive_additive_and_other_additive_emit_like_additive() -> None:
     spec = cell_description(
-        id=SPEC_IRI, manufacturer="Acme", model="A1", format="pouch", chemistry="li-ion",
-        positive_electrode_basis="nmc811", negative_electrode_basis="graphite",
+        id=SPEC_IRI,
+        manufacturer="Acme",
+        model="A1",
+        format="pouch",
+        chemistry="li-ion",
+        positive_electrode_basis="nmc811",
+        negative_electrode_basis="graphite",
         positive_electrode=electrode(
             bom=bom(active_material="NMC811", binder="PVDF", conductive_additive="Carbon black", other_additive="CMC"),
         ),
@@ -185,16 +205,25 @@ def test_conductive_additive_and_other_additive_emit_like_additive() -> None:
 
 def test_legacy_additive_and_conductive_additive_accumulate() -> None:
     spec = cell_description(
-        id=SPEC_IRI, manufacturer="Acme", model="A1", format="pouch", chemistry="li-ion",
-        positive_electrode_basis="nmc811", negative_electrode_basis="graphite",
-        positive_electrode=electrode(bom=bom(active_material="NMC811", additive="Carbon black", conductive_additive="CNT")),
+        id=SPEC_IRI,
+        manufacturer="Acme",
+        model="A1",
+        format="pouch",
+        chemistry="li-ion",
+        positive_electrode_basis="nmc811",
+        negative_electrode_basis="graphite",
+        positive_electrode=electrode(
+            bom=bom(active_material="NMC811", additive="Carbon black", conductive_additive="CNT")
+        ),
     )
     coating = _battery_node(spec)["hasPositiveElectrode"]["hasCoating"]
     assert sorted(n["schema:name"] for n in _as_list(coating["hasConductiveAdditive"])) == ["CNT", "Carbon black"]
 
 
 def test_material_class_accepts_thickener_and_dispersant() -> None:
-    enum = json.loads((SCHEMAS / "material-spec.schema.json").read_text(encoding="utf-8"))["properties"]["material_spec"]["properties"]["material_class"]["enum"]
+    enum = json.loads((SCHEMAS / "material-spec.schema.json").read_text(encoding="utf-8"))["properties"][
+        "material_spec"
+    ]["properties"]["material_class"]["enum"]
     assert {"thickener", "dispersant", "conductive_additive"} <= set(enum)
 
 
@@ -205,7 +234,10 @@ def test_material_class_accepts_thickener_and_dispersant() -> None:
 
 def test_inline_separator_carries_spec_fields() -> None:
     sep = separator_spec(
-        material="polypropylene", name="Celgard 2400", structure="monolayer", coating="Al2O3",
+        material="polypropylene",
+        name="Celgard 2400",
+        structure="monolayer",
+        coating="Al2O3",
         material_spec_id="https://w3id.org/battinfo/material-spec/0123-4567-89ab-cdef",
         thickness={"value": 25, "unit": "um"},
     )
@@ -219,7 +251,9 @@ def test_inline_separator_carries_spec_fields() -> None:
 def test_typed_housing_validates_and_rejects_unknown_keys() -> None:
     hsg = housing(
         case=case(material="Aluminium", size_code="173x115x45", wall_thickness={"value": 0.8, "unit": "mm"}),
-        terminals=[terminal(polarity="positive", type="threaded_post", material="Aluminium", width={"value": 50, "unit": "mm"})],
+        terminals=[
+            terminal(polarity="positive", type="threaded_post", material="Aluminium", width={"value": 50, "unit": "mm"})
+        ],
     )
     record = _cell_spec_record(housing=hsg.to_mapping())
     assert _errors("cell-spec.schema.json", record) == []
@@ -241,17 +275,26 @@ def test_typed_housing_validates_and_rejects_unknown_keys() -> None:
 
 
 def test_typed_tab_validates_property_map_only() -> None:
-    tab = {"material": "Aluminium", "property": {"width": {"value": 50, "unit": "mm"}, "weld_width": {"value": 8, "unit": "mm"}}}
-    record = _cell_spec_record(positive_electrode={"current_collector": {"name": "Al foil", "material": "Al", "form": "foil"}, "tab": tab})
+    tab = {
+        "material": "Aluminium",
+        "property": {"width": {"value": 50, "unit": "mm"}, "weld_width": {"value": 8, "unit": "mm"}},
+    }
+    record = _cell_spec_record(
+        positive_electrode={"current_collector": {"name": "Al foil", "material": "Al", "form": "foil"}, "tab": tab}
+    )
     assert _errors("cell-spec.schema.json", record) == []
-    bad = _cell_spec_record(positive_electrode={"current_collector": {"name": "Al foil"}, "tab": {"width": {"value": 50, "unit": "mm"}}})
+    bad = _cell_spec_record(
+        positive_electrode={"current_collector": {"name": "Al foil"}, "tab": {"width": {"value": 50, "unit": "mm"}}}
+    )
     assert _errors("cell-spec.schema.json", bad)
     bad = _cell_spec_record(positive_electrode={"current_collector": {"name": "Al foil", "form": "ribbon"}})
     assert _errors("cell-spec.schema.json", bad)
 
 
 def test_construction_module_types_quantities() -> None:
-    ok = _cell_spec_record(construction={"assembly_type": "wound", "winding_turns": 20, "electrode_length": {"value": 1.55, "unit": "m"}})
+    ok = _cell_spec_record(
+        construction={"assembly_type": "wound", "winding_turns": 20, "electrode_length": {"value": 1.55, "unit": "m"}}
+    )
     assert _errors("cell-spec.schema.json", ok) == []
     bad = _cell_spec_record(construction={"electrode_length": {"length": 1.55}})
     assert _errors("cell-spec.schema.json", bad)
@@ -270,10 +313,19 @@ def test_specification_module_aligns_with_cell_spec_identity() -> None:
 # --------------------------------------------------------------------------- #
 
 
-@pytest.mark.parametrize("value,valid", [
-    ("2024", True), ("2024-03", True), ("2024-03-15", True), (1700000000, True),
-    ("2024-3-5", False), ("15/03/2024", False), ("yesterday", False), ("2024-03-15T10:00:00Z", False),
-])
+@pytest.mark.parametrize(
+    "value,valid",
+    [
+        ("2024", True),
+        ("2024-03", True),
+        ("2024-03-15", True),
+        (1700000000, True),
+        ("2024-3-5", False),
+        ("15/03/2024", False),
+        ("yesterday", False),
+        ("2024-03-15T10:00:00Z", False),
+    ],
+)
 def test_flexdate_pattern(value, valid) -> None:
     record = {
         "schema_version": "0.7.0",

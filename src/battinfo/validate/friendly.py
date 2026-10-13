@@ -6,6 +6,7 @@ match what the author actually typed (``format=``). This module turns a report i
 actionable message: all errors at once, canonical paths translated back to authoring
 kwargs, and quantity-shape errors carrying a copy-pasteable example.
 """
+
 from __future__ import annotations
 
 import json

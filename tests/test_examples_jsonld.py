@@ -4,6 +4,7 @@ The per-family contract tests only emit the first example of each kind, so a bad
 @type in a later example (e.g. an unmapped current-collector material) could slip
 through. This emits JSON-LD for the whole corpus and fails on any invalid @type.
 """
+
 from __future__ import annotations
 
 import json
@@ -18,10 +19,23 @@ EXAMPLES = ROOT / "examples"
 
 # record top-level keys that have a domain-battery JSON-LD emitter
 EMITTING_KEYS = {
-    "cell_spec", "cell_instance", "test", "test_spec", "dataset",
-    "material_spec", "material", "electrode_spec", "electrode",
-    "electrolyte_spec", "electrolyte", "separator_spec", "separator",
-    "current_collector_spec", "current_collector", "housing_spec", "housing",
+    "cell_spec",
+    "cell_instance",
+    "test",
+    "test_spec",
+    "dataset",
+    "material_spec",
+    "material",
+    "electrode_spec",
+    "electrode",
+    "electrolyte_spec",
+    "electrolyte",
+    "separator_spec",
+    "separator",
+    "current_collector_spec",
+    "current_collector",
+    "housing_spec",
+    "housing",
 }
 
 

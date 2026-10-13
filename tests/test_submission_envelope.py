@@ -6,6 +6,7 @@ payload shape) without anyone noticing. Both now delegate to
 api.build_submission_envelope — this test pins that the two paths differ ONLY
 in the fields that should differ.
 """
+
 from __future__ import annotations
 
 import json
@@ -33,12 +34,20 @@ def test_authoring_and_curated_envelopes_share_one_shape() -> None:
     record = json.loads(RECORD_FILE.read_text(encoding="utf-8"))
 
     authoring = _cell_spec_submission_payload(
-        record, wid="w", pid="p", ver="v1",
-        source_local_id="a123-anr26650m1-b", title="A123 ANR26650M1-B",
+        record,
+        wid="w",
+        pid="p",
+        ver="v1",
+        source_local_id="a123-anr26650m1-b",
+        title="A123 ANR26650M1-B",
     )
     curated = build_curated_cell_spec_submission(
-        RECORD_FILE, workspace_id="w", publisher_id="p", source_version="v1",
-        source_local_id="a123-anr26650m1-b", title="A123 ANR26650M1-B",
+        RECORD_FILE,
+        workspace_id="w",
+        publisher_id="p",
+        source_version="v1",
+        source_local_id="a123-anr26650m1-b",
+        title="A123 ANR26650M1-B",
     )
 
     assert set(authoring) == set(curated), "envelope key sets forked"
@@ -56,7 +65,12 @@ def test_authoring_and_curated_envelopes_share_one_shape() -> None:
 def test_envelope_version_is_the_single_constant() -> None:
     record = json.loads(RECORD_FILE.read_text(encoding="utf-8"))
     payload = _cell_spec_submission_payload(
-        record, wid="w", pid="p", ver="v1", source_local_id="x", title="t",
+        record,
+        wid="w",
+        pid="p",
+        ver="v1",
+        source_local_id="x",
+        title="t",
     )
     assert payload["schema_version"] == SCHEMA_VERSION, (
         "the authoring envelope hardcoded 0.1.0 for months — it must track SCHEMA_VERSION"

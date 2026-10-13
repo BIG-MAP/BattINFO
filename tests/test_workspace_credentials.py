@@ -12,6 +12,7 @@ used to ignore, what ws.login() writes to the file, and the bucket a private
 ws.upload() goes to. Everything runs offline: the registry, Zenodo and R2 are
 fakes.
 """
+
 from __future__ import annotations
 
 import json
@@ -37,11 +38,20 @@ CREATORS = [{"name": "Lovelace, Ada"}]
 REGISTRY = "https://registry.example"
 # Every name the workspace reads, in the order ws.credentials_status() lists them.
 NAMES = (
-    "BATTINFO_API_KEY", "BATTINFO_WORKSPACE_ID", "BATTINFO_PUBLISHER_ID", "BATTINFO_ADMIN_TOKEN",
+    "BATTINFO_API_KEY",
+    "BATTINFO_WORKSPACE_ID",
+    "BATTINFO_PUBLISHER_ID",
+    "BATTINFO_ADMIN_TOKEN",
     "BATTINFO_REGISTRY_URL",
-    "R2_ENDPOINT", "R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY", "R2_BUCKET", "R2_BUCKET_PUBLIC",
-    "R2_BUCKET_PRIVATE", "R2_PUBLIC_BASE_URL",
-    "ZENODO_API_TOKEN", "ZENODO_SANDBOX_TOKEN",
+    "R2_ENDPOINT",
+    "R2_ACCESS_KEY_ID",
+    "R2_SECRET_ACCESS_KEY",
+    "R2_BUCKET",
+    "R2_BUCKET_PUBLIC",
+    "R2_BUCKET_PRIVATE",
+    "R2_PUBLIC_BASE_URL",
+    "ZENODO_API_TOKEN",
+    "ZENODO_SANDBOX_TOKEN",
 )
 
 
@@ -63,8 +73,11 @@ def _write_credentials(root: Path, **values: str) -> Path:
 
 def _saved_workspace(root: Path) -> AuthoringWorkspace:
     ws = battinfo.workspace(root, registry_url=None)
-    ws.add("cell", spec=CellSpec(manufacturer="Example Lab", model="R2032", format="coin",
-                                 chemistry="li-ion"), serial_numbers=["C01"])
+    ws.add(
+        "cell",
+        spec=CellSpec(manufacturer="Example Lab", model="R2032", format="coin", chemistry="li-ion"),
+        serial_numbers=["C01"],
+    )
     ws.save()
     return ws
 
@@ -140,10 +153,12 @@ def _registry_http(monkeypatch: pytest.MonkeyPatch, answer: object = None) -> _F
 
 
 def test_each_workspace_reads_only_its_own_credentials_file(tmp_path: Path) -> None:
-    _write_credentials(tmp_path / "lab-a", BATTINFO_API_KEY="KEY-OF-LAB-A",
-                       BATTINFO_WORKSPACE_ID="ws-lab-a", ZENODO_API_TOKEN="ZTOK-A")
-    _write_credentials(tmp_path / "lab-b", BATTINFO_API_KEY="KEY-OF-LAB-B",
-                       BATTINFO_WORKSPACE_ID="ws-lab-b", ZENODO_API_TOKEN="ZTOK-B")
+    _write_credentials(
+        tmp_path / "lab-a", BATTINFO_API_KEY="KEY-OF-LAB-A", BATTINFO_WORKSPACE_ID="ws-lab-a", ZENODO_API_TOKEN="ZTOK-A"
+    )
+    _write_credentials(
+        tmp_path / "lab-b", BATTINFO_API_KEY="KEY-OF-LAB-B", BATTINFO_WORKSPACE_ID="ws-lab-b", ZENODO_API_TOKEN="ZTOK-B"
+    )
     (tmp_path / "lab-c").mkdir()
     environment = dict(os.environ)
 
@@ -167,8 +182,13 @@ def test_each_workspace_reads_only_its_own_credentials_file(tmp_path: Path) -> N
 
 
 def test_opening_a_workspace_with_the_default_registry_leaves_the_environment_alone(tmp_path: Path) -> None:
-    _write_credentials(tmp_path, BATTINFO_API_KEY="bk_test_key", BATTINFO_REGISTRY_URL="https://file.example",
-                       R2_ENDPOINT="https://r2.example", ZENODO_SANDBOX_TOKEN="sandbox-token")
+    _write_credentials(
+        tmp_path,
+        BATTINFO_API_KEY="bk_test_key",
+        BATTINFO_REGISTRY_URL="https://file.example",
+        R2_ENDPOINT="https://r2.example",
+        ZENODO_SANDBOX_TOKEN="sandbox-token",
+    )
     environment = dict(os.environ)
     ws = battinfo.workspace(tmp_path)
     assert dict(os.environ) == environment
@@ -235,19 +255,31 @@ def test_submit_resolves_each_credential_in_the_documented_order(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     _write_credentials(
-        tmp_path, BATTINFO_REGISTRY_URL="https://file.example", BATTINFO_API_KEY="key-from-the-file",
-        BATTINFO_WORKSPACE_ID="ws-from-the-file", BATTINFO_PUBLISHER_ID="pub-from-the-file",
+        tmp_path,
+        BATTINFO_REGISTRY_URL="https://file.example",
+        BATTINFO_API_KEY="key-from-the-file",
+        BATTINFO_WORKSPACE_ID="ws-from-the-file",
+        BATTINFO_PUBLISHER_ID="pub-from-the-file",
     )
     monkeypatch.setenv("BATTINFO_API_KEY", "key-from-the-environment")
     ws = battinfo.workspace(tmp_path)  # the registry comes from the file
-    ws.add("cell", spec=CellSpec(manufacturer="Example Lab", model="R2032", format="coin",
-                                 chemistry="li-ion"), serial_numbers=["C01"])
+    ws.add(
+        "cell",
+        spec=CellSpec(manufacturer="Example Lab", model="R2032", format="coin", chemistry="li-ion"),
+        serial_numbers=["C01"],
+    )
     ws.save()
     sent: list[dict] = []
 
     def fake_submit(payload: dict, *, registry_base_url: str, api_key: str, **kw: object) -> dict:
-        sent.append({"url": registry_base_url, "key": api_key,
-                     "workspace": payload["workspace_id"], "publisher": payload["publisher_id"]})
+        sent.append(
+            {
+                "url": registry_base_url,
+                "key": api_key,
+                "workspace": payload["workspace_id"],
+                "publisher": payload["publisher_id"],
+            }
+        )
         return {"status": "ok", "response": {"status": "validated", "resources": [{"canonical_iri": "x"}]}}
 
     monkeypatch.setattr("battinfo.api.submit_publication_package", fake_submit)
@@ -258,8 +290,7 @@ def test_submit_resolves_each_credential_in_the_documented_order(
     }
 
     sent.clear()
-    ws.submit(registry_url="https://passed.example", api_key="key-passed-in", workspace_id="ws-passed-in",
-              resume=False)
+    ws.submit(registry_url="https://passed.example", api_key="key-passed-in", workspace_id="ws-passed-in", resume=False)
     assert {(s["url"], s["key"], s["workspace"], s["publisher"]) for s in sent} == {
         ("https://passed.example", "key-passed-in", "ws-passed-in", "pub-from-the-file")
     }
@@ -303,8 +334,13 @@ def test_approve_and_the_registry_reads_use_this_workspaces_admin_token(
 
 def test_upload_reads_r2_settings_from_this_workspaces_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     boto3 = pytest.importorskip("boto3")
-    _write_credentials(tmp_path / "with-r2", R2_ENDPOINT="https://r2.example", R2_ACCESS_KEY_ID="r2-id",
-                       R2_SECRET_ACCESS_KEY="r2-secret", R2_BUCKET="lab-bucket")
+    _write_credentials(
+        tmp_path / "with-r2",
+        R2_ENDPOINT="https://r2.example",
+        R2_ACCESS_KEY_ID="r2-id",
+        R2_SECRET_ACCESS_KEY="r2-secret",
+        R2_BUCKET="lab-bucket",
+    )
     with_r2 = battinfo.workspace(tmp_path / "with-r2", registry_url=None)
     without_r2 = battinfo.workspace(tmp_path / "without-r2", registry_url=None)
     assert with_r2._r2_configured() and not without_r2._r2_configured()
@@ -321,8 +357,11 @@ def test_upload_reads_r2_settings_from_this_workspaces_file(tmp_path: Path, monk
     monkeypatch.setattr(boto3, "client", fake_client)
     with pytest.raises(_Stop):
         with_r2.upload(dry_run=True)
-    assert seen == {"endpoint_url": "https://r2.example", "aws_access_key_id": "r2-id",
-                    "aws_secret_access_key": "r2-secret"}
+    assert seen == {
+        "endpoint_url": "https://r2.example",
+        "aws_access_key_id": "r2-id",
+        "aws_secret_access_key": "r2-secret",
+    }
     with pytest.raises(RuntimeError, match="R2_ENDPOINT"):
         without_r2.upload(dry_run=True)
 
@@ -356,9 +395,18 @@ def _dataset_with_a_local_file(ws: AuthoringWorkspace) -> Path:
     data.write_text("time_second,voltage_volt\n0,3.7\n", encoding="utf-8")
     record = ws._ws.source_root / "dataset" / "ds-1.json"
     record.parent.mkdir(parents=True, exist_ok=True)
-    record.write_text(json.dumps({"dataset": {"short_id": "ds-1", "access_url": "data/cycling.csv",
-                                              "distributions": [{"content_url": "data/cycling.csv"}]}}),
-                      encoding="utf-8")
+    record.write_text(
+        json.dumps(
+            {
+                "dataset": {
+                    "short_id": "ds-1",
+                    "access_url": "data/cycling.csv",
+                    "distributions": [{"content_url": "data/cycling.csv"}],
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
     return record
 
 
@@ -366,8 +414,14 @@ def test_a_private_upload_never_goes_to_the_public_bucket(tmp_path: Path, monkey
     boto3 = pytest.importorskip("boto3")
     ws = battinfo.workspace(tmp_path, registry_url=None)
     ws.setup()  # the template sets R2_BUCKET = battinfo-public
-    ws._set_credentials({"R2_ENDPOINT": "https://r2.example", "R2_ACCESS_KEY_ID": "r2-id",
-                         "R2_SECRET_ACCESS_KEY": "r2-secret", "R2_PUBLIC_BASE_URL": "https://pub.example"})
+    ws._set_credentials(
+        {
+            "R2_ENDPOINT": "https://r2.example",
+            "R2_ACCESS_KEY_ID": "r2-id",
+            "R2_SECRET_ACCESS_KEY": "r2-secret",
+            "R2_PUBLIC_BASE_URL": "https://pub.example",
+        }
+    )
     record = _dataset_with_a_local_file(ws)
     r2 = _FakeR2()
     monkeypatch.setattr(boto3, "client", lambda service, **kwargs: r2)
@@ -396,13 +450,20 @@ def test_a_private_upload_never_goes_to_the_public_bucket(tmp_path: Path, monkey
 
 def _credential_lines(path: Path, name: str) -> list[str]:
     """The lines of a credentials file that set *name*, comments left out."""
-    return [line for line in path.read_text(encoding="utf-8").splitlines()
-            if not line.lstrip().startswith("#") and line.split("=", 1)[0].strip() == name]
+    return [
+        line
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if not line.lstrip().startswith("#") and line.split("=", 1)[0].strip() == name
+    ]
 
 
 def test_login_does_not_save_another_workspaces_identity(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    _write_credentials(tmp_path / "lab-a", BATTINFO_API_KEY="KEY-OF-LAB-A",
-                       BATTINFO_WORKSPACE_ID="ws-lab-a", BATTINFO_PUBLISHER_ID="pub-lab-a")
+    _write_credentials(
+        tmp_path / "lab-a",
+        BATTINFO_API_KEY="KEY-OF-LAB-A",
+        BATTINFO_WORKSPACE_ID="ws-lab-a",
+        BATTINFO_PUBLISHER_ID="pub-lab-a",
+    )
     # Opening lab A first used to put its ids where lab B's login() picked them up and saved them.
     battinfo.workspace(tmp_path / "lab-a", registry_url=REGISTRY)
     lab_b = battinfo.workspace(tmp_path / "lab-b", registry_url=REGISTRY)
@@ -471,8 +532,11 @@ def test_login_without_the_registry_saves_the_default_ids_a_hand_made_file_lacks
     http = _registry_http(monkeypatch, [])
     reopened.status()
     assert http.urls == [f"{REGISTRY}/workspaces/battinfo-records/submissions"]
-    reopened.add("cell", spec=CellSpec(manufacturer="Example Lab", model="R2032", format="coin",
-                                       chemistry="li-ion"), serial_numbers=["C01"])
+    reopened.add(
+        "cell",
+        spec=CellSpec(manufacturer="Example Lab", model="R2032", format="coin", chemistry="li-ion"),
+        serial_numbers=["C01"],
+    )
     reopened.save()
     sent: list[tuple[str, str, str]] = []
 
@@ -514,10 +578,10 @@ def test_login_leaves_one_line_for_each_name_it_saves(tmp_path: Path, monkeypatc
     # last line with a value wins when the file is read, so a login() that
     # rewrote only the first line would be undone by the next session.
     with path.open("a", encoding="utf-8") as handle:
-        handle.write("BATTINFO_API_KEY = bk_old_appended_by_hand\n"
-                     "BATTINFO_WORKSPACE_ID = ws-old-appended-by-hand\n")
+        handle.write("BATTINFO_API_KEY = bk_old_appended_by_hand\nBATTINFO_WORKSPACE_ID = ws-old-appended-by-hand\n")
     assert battinfo.workspace(tmp_path, registry_url=REGISTRY)._credential("BATTINFO_API_KEY") == (
-        "bk_old_appended_by_hand")
+        "bk_old_appended_by_hand"
+    )
     _registry_http(monkeypatch, {"workspace_id": "ws-from-the-registry", "publisher_id": "pub-from-the-registry"})
 
     ws.login(api_key="bk_new_rotated")
@@ -585,8 +649,10 @@ def test_a_registry_url_written_into_the_template_is_used_without_reopening(
     path = ws.setup()
     template = path.read_text(encoding="utf-8")
     assert "BATTINFO_REGISTRY_URL  =\n" in template
-    path.write_text(template.replace("BATTINFO_REGISTRY_URL  =\n",
-                                     "BATTINFO_REGISTRY_URL  = https://staging.example\n"), encoding="utf-8")
+    path.write_text(
+        template.replace("BATTINFO_REGISTRY_URL  =\n", "BATTINFO_REGISTRY_URL  = https://staging.example\n"),
+        encoding="utf-8",
+    )
     http = _registry_http(monkeypatch, {"workspace_id": "ws-1", "publisher_id": "pub-1"})
 
     assert ws.credentials_status()["BATTINFO_REGISTRY_URL"] == {"set": True, "source": "credentials_file"}
@@ -618,9 +684,7 @@ def test_the_registry_follows_the_variable_while_the_workspace_is_open(
     assert offline._registry_url is None
 
 
-def test_answers_from_one_registry_are_not_reused_for_another(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_answers_from_one_registry_are_not_reused_for_another(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     cell = "https://w3id.org/battinfo/cell/epb7-1s8v-p342-469z"
     ws = battinfo.workspace(tmp_path)
     http = _registry_http(monkeypatch, urllib.error.URLError("registry down"))
@@ -680,9 +744,7 @@ def test_a_workspace_without_a_registry_never_falls_back_to_production(
 # ── the public checks ────────────────────────────────────────────────────────
 
 
-def test_credentials_status_reports_sources_and_never_values(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_credentials_status_reports_sources_and_never_values(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     secrets = {
         "BATTINFO_API_KEY": "bk_live_file_secret_1",
         "R2_SECRET_ACCESS_KEY": "r2-file-secret-2",
@@ -698,8 +760,14 @@ def test_credentials_status_reports_sources_and_never_values(
     status = ws.credentials_status()
 
     shown = json.dumps(status) + repr(status) + str(status)
-    for value in [*secrets.values(), "zenodo-env-secret-5", "ws-session-6", "pub-session-7",
-                  "bk_live_login_secret_8", REGISTRY]:
+    for value in [
+        *secrets.values(),
+        "zenodo-env-secret-5",
+        "ws-session-6",
+        "pub-session-7",
+        "bk_live_login_secret_8",
+        REGISTRY,
+    ]:
         assert value not in shown
     assert tuple(status) == NAMES
     assert all(set(entry) == {"set", "source"} for entry in status.values())
@@ -731,8 +799,10 @@ def test_whoami_says_where_each_credential_came_from(
     profile = ws.whoami()
 
     out = capsys.readouterr().out
-    assert profile["credential_sources"] == {"BATTINFO_API_KEY": "credentials_file",
-                                             "BATTINFO_REGISTRY_URL": "argument"}
+    assert profile["credential_sources"] == {
+        "BATTINFO_API_KEY": "credentials_file",
+        "BATTINFO_REGISTRY_URL": "argument",
+    }
     assert ".battinfo/credentials" in out and "bk_live_file_key" not in out
 
     monkeypatch.setenv("BATTINFO_API_KEY", "bk_live_env_key")
@@ -752,8 +822,10 @@ def test_whoami_without_the_registry_names_the_source_of_each_id(
     assert result["workspace_id"] == "ws-from-the-file"
     assert result["publisher_id"] == "battinfo-authoring"
     assert result["credential_sources"] == {
-        "BATTINFO_API_KEY": "credentials_file", "BATTINFO_REGISTRY_URL": "argument",
-        "BATTINFO_WORKSPACE_ID": "credentials_file", "BATTINFO_PUBLISHER_ID": "default",
+        "BATTINFO_API_KEY": "credentials_file",
+        "BATTINFO_REGISTRY_URL": "argument",
+        "BATTINFO_WORKSPACE_ID": "credentials_file",
+        "BATTINFO_PUBLISHER_ID": "default",
     }
     out = capsys.readouterr().out
     assert "registry profile unavailable" in out and "bk_live_file_key" not in out
@@ -762,8 +834,13 @@ def test_whoami_without_the_registry_names_the_source_of_each_id(
 def test_setup_template_documents_the_lookup_order(tmp_path: Path) -> None:
     ws = battinfo.workspace(tmp_path, registry_url=None)
     text = ws.setup().read_text(encoding="utf-8")
-    order = ["1. an argument", "2. a value ws.login() set", "3. an environment variable", "4. this file",
-             "5. the default"]
+    order = [
+        "1. an argument",
+        "2. a value ws.login() set",
+        "3. an environment variable",
+        "4. this file",
+        "5. the default",
+    ]
     positions = [text.find(step) for step in order]
     assert -1 not in positions and positions == sorted(positions), positions
     assert "ws.credentials_status()" in text
