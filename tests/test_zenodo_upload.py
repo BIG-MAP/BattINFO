@@ -5,6 +5,7 @@ Network calls are never made: ZenodoClient._request is monkey-patched or
 upload_zenodo_package is tested via patch_zenodo_urls + metadata-building
 only (no live deposits).
 """
+
 from __future__ import annotations
 
 import json
@@ -71,23 +72,23 @@ class TestSyncFiles:
 
         c = ZenodoClient(token="t", sandbox=True)
         existing = [
-            {"id": "f1", "filename": "data.csv", "checksum": _file_md5(keep)},   # unchanged
-            {"id": "f2", "filename": "battinfo.json", "checksum": "deadbeef"},    # changed
-            {"id": "f3", "filename": "old.txt", "checksum": "whatever"},          # removed
+            {"id": "f1", "filename": "data.csv", "checksum": _file_md5(keep)},  # unchanged
+            {"id": "f2", "filename": "battinfo.json", "checksum": "deadbeef"},  # changed
+            {"id": "f3", "filename": "old.txt", "checksum": "whatever"},  # removed
         ]
         deleted: list[str] = []
         uploaded: dict = {}
-        c.list_files = lambda dep: existing                       # type: ignore[assignment]
-        c.delete_file = lambda dep, fid: deleted.append(fid)      # type: ignore[assignment]
+        c.list_files = lambda dep: existing  # type: ignore[assignment]
+        c.delete_file = lambda dep, fid: deleted.append(fid)  # type: ignore[assignment]
         c.upload_files = lambda dep, mp: (uploaded.update(mp), {})[1]  # type: ignore[assignment]
 
         out = c.sync_files(1, files)
 
-        assert out["kept"] == ["data.csv"]                        # unchanged → not uploaded
+        assert out["kept"] == ["data.csv"]  # unchanged → not uploaded
         assert set(out["uploaded"]) == {"battinfo.json", "ro-crate-metadata.json"}
         assert out["removed"] == ["old.txt"]
-        assert "f1" not in deleted                                # kept file never deleted
-        assert "f2" in deleted and "f3" in deleted                # changed + removed deleted
+        assert "f1" not in deleted  # kept file never deleted
+        assert "f2" in deleted and "f3" in deleted  # changed + removed deleted
         assert set(uploaded.values()) == {"battinfo.json", "ro-crate-metadata.json"}
 
 
@@ -137,12 +138,27 @@ def _make_record(n: int = 2) -> ZenodoCellRecord:
         ci_id = f"https://w3id.org/battinfo/cell/ci-{idx}"
         test_id = f"https://w3id.org/battinfo/test/t-{idx}"
         ds_id = f"https://w3id.org/battinfo/dataset/d-{idx}"
-        ci = Cell(id=ci_id, name=f"sn-{idx}", cell_spec_id=CELL_TYPE_ID,
-                          serial_number=f"sn-{idx}", source=ProvenanceInfo(type="measurement"))
-        test = Test(id=test_id, name=f"test {idx}", test_kind="capacity_check",
-                    cell_instance_id=ci_id, source=ProvenanceInfo(type="measurement"))
-        ds = Dataset(id=ds_id, name=f"dataset {idx}", cell_instance_id=ci_id,
-                     test_id=test_id, source=ProvenanceInfo(type="measurement"))
+        ci = Cell(
+            id=ci_id,
+            name=f"sn-{idx}",
+            cell_spec_id=CELL_TYPE_ID,
+            serial_number=f"sn-{idx}",
+            source=ProvenanceInfo(type="measurement"),
+        )
+        test = Test(
+            id=test_id,
+            name=f"test {idx}",
+            test_kind="capacity_check",
+            cell_instance_id=ci_id,
+            source=ProvenanceInfo(type="measurement"),
+        )
+        ds = Dataset(
+            id=ds_id,
+            name=f"dataset {idx}",
+            cell_instance_id=ci_id,
+            test_id=test_id,
+            source=ProvenanceInfo(type="measurement"),
+        )
         datasets.append(ZenodoDatasetEntry(cell_instances=[ci], test=test, dataset=ds))
     return ZenodoCellRecord(cell_spec=ct, datasets=datasets)
 
@@ -165,6 +181,7 @@ def _staged_package(tmp_path: Path, n: int = 2) -> Path:
 
 
 # ── patch_zenodo_urls ─────────────────────────────────────────────────────────
+
 
 class TestPatchZenodoUrls:
     def test_replaces_placeholder_in_all_files(self, tmp_path: Path) -> None:
@@ -208,7 +225,9 @@ class TestPatchZenodoUrls:
         raw.write_text("t,V\n", encoding="utf-8")
         staging = tmp_path / "staging"
         build_zenodo_package(
-            record, staging, [(raw, None)],
+            record,
+            staging,
+            [(raw, None)],
             zenodo_record_id_placeholder="MY_PLACEHOLDER",
         )
         patch_zenodo_urls(staging, "12345", placeholder="MY_PLACEHOLDER")
@@ -218,6 +237,7 @@ class TestPatchZenodoUrls:
 
 
 # ── _build_zenodo_metadata ────────────────────────────────────────────────────
+
 
 class TestBuildZenodoMetadata:
     def _meta(self, **kwargs) -> dict:
@@ -308,7 +328,7 @@ class TestBuildZenodoMetadata:
         )
         rels = m["related_identifiers"]
         dois = [r["identifier"] for r in rels]
-        assert "10.5281/zenodo.123" not in dois            # self-citation excluded
+        assert "10.5281/zenodo.123" not in dois  # self-citation excluded
         assert dois.count("10.1038/s41467-020-15235-7") == 1  # deduped across datasets
         assert "10.1016/j.ijepes.2018.12.016" in dois
         assert all(r["relation"] == "isSupplementTo" and r["scheme"] == "doi" for r in rels)
@@ -316,6 +336,7 @@ class TestBuildZenodoMetadata:
 
 
 # ── ZenodoClient ──────────────────────────────────────────────────────────────
+
 
 class TestZenodoClient:
     def _client(self) -> ZenodoClient:
@@ -346,8 +367,7 @@ class TestZenodoClient:
         deposit_resp = {"links": {"bucket": "https://sandbox.zenodo.org/api/files/abc123"}}
         file_resp = json.dumps({"links": {"download": "https://sandbox.zenodo.org/api/files/abc123/data.csv"}}).encode()
 
-        with patch.object(c, "get_deposit", return_value=deposit_resp), \
-             patch("urllib.request.urlopen") as mock_open:
+        with patch.object(c, "get_deposit", return_value=deposit_resp), patch("urllib.request.urlopen") as mock_open:
             mock_cm = MagicMock()
             mock_cm.__enter__ = MagicMock(return_value=MagicMock(read=MagicMock(return_value=file_resp)))
             mock_cm.__exit__ = MagicMock(return_value=False)
@@ -377,9 +397,11 @@ class TestZenodoClient:
             request_call_count += 1
             return original_request(*args, **kwargs)
 
-        with patch.object(c, "get_deposit", return_value=deposit_resp), \
-             patch.object(c, "_request", side_effect=counting_request), \
-             patch("urllib.request.urlopen") as mock_open:
+        with (
+            patch.object(c, "get_deposit", return_value=deposit_resp),
+            patch.object(c, "_request", side_effect=counting_request),
+            patch("urllib.request.urlopen") as mock_open,
+        ):
             mock_cm = MagicMock()
             mock_cm.__enter__ = MagicMock(return_value=MagicMock(read=MagicMock(return_value=file_resp)))
             mock_cm.__exit__ = MagicMock(return_value=False)
@@ -391,6 +413,7 @@ class TestZenodoClient:
 
 
 # ── upload_zenodo_package (mocked network) ────────────────────────────────────
+
 
 class TestUploadZenodoPackage:
     def _mock_client(self, record_id: int = 12345) -> MagicMock:
@@ -408,8 +431,10 @@ class TestUploadZenodoPackage:
         staging = _staged_package(tmp_path)
         mock_client = self._mock_client(12345)
 
-        with patch("battinfo.zenodo.ZenodoClient", return_value=mock_client), \
-             patch("battinfo.zenodo._resolve_token", return_value="tok"):
+        with (
+            patch("battinfo.zenodo.ZenodoClient", return_value=mock_client),
+            patch("battinfo.zenodo._resolve_token", return_value="tok"),
+        ):
             result = upload_zenodo_package(staging, CREATORS, token="tok", sandbox=True)
 
         assert result["deposit_id"] == 99999
@@ -426,8 +451,10 @@ class TestUploadZenodoPackage:
         staging = _staged_package(tmp_path)
         mock_client = self._mock_client()
 
-        with patch("battinfo.zenodo.ZenodoClient", return_value=mock_client), \
-             patch("battinfo.zenodo._resolve_token", return_value="tok"):
+        with (
+            patch("battinfo.zenodo.ZenodoClient", return_value=mock_client),
+            patch("battinfo.zenodo._resolve_token", return_value="tok"),
+        ):
             result = upload_zenodo_package(staging, CREATORS, token="tok", sandbox=True, publish=True)
 
         assert result["published"] is True
@@ -437,8 +464,10 @@ class TestUploadZenodoPackage:
         staging = _staged_package(tmp_path)
         mock_client = self._mock_client(record_id=88888)
 
-        with patch("battinfo.zenodo.ZenodoClient", return_value=mock_client), \
-             patch("battinfo.zenodo._resolve_token", return_value="tok"):
+        with (
+            patch("battinfo.zenodo.ZenodoClient", return_value=mock_client),
+            patch("battinfo.zenodo._resolve_token", return_value="tok"),
+        ):
             upload_zenodo_package(staging, CREATORS, token="tok", sandbox=True)
 
         text = (staging / DEFAULT_PUBLISH_FILENAME).read_text(encoding="utf-8")
@@ -459,6 +488,7 @@ class TestUploadZenodoPackage:
     def test_no_token_raises(self, tmp_path: Path) -> None:
         staging = _staged_package(tmp_path)
         import os
+
         with patch.dict(os.environ, {}, clear=True):
             os.environ.pop("ZENODO_API_TOKEN", None)
             with pytest.raises(ZenodoError, match="token"):
@@ -468,8 +498,10 @@ class TestUploadZenodoPackage:
         staging = _staged_package(tmp_path)
         mock_client = self._mock_client()
 
-        with patch("battinfo.zenodo.ZenodoClient", return_value=mock_client) as MockCls, \
-             patch("battinfo.zenodo._resolve_token", return_value="tok"):
+        with (
+            patch("battinfo.zenodo.ZenodoClient", return_value=mock_client) as MockCls,
+            patch("battinfo.zenodo._resolve_token", return_value="tok"),
+        ):
             result = upload_zenodo_package(staging, CREATORS, token="tok", sandbox=True)
 
         MockCls.assert_called_once_with(token="tok", sandbox=True)
@@ -481,8 +513,10 @@ class TestUploadZenodoPackage:
         staging = _staged_package(tmp_path)
         before = {f.name: f.read_bytes() for f in staging.iterdir()}
 
-        with patch("battinfo.zenodo.ZenodoClient") as MockCls, \
-             patch("urllib.request.urlopen", side_effect=AssertionError("no request may be made")) as mock_open:
+        with (
+            patch("battinfo.zenodo.ZenodoClient") as MockCls,
+            patch("urllib.request.urlopen", side_effect=AssertionError("no request may be made")) as mock_open,
+        ):
             with pytest.raises(ValueError, match="only to the Zenodo sandbox") as excinfo:
                 upload_zenodo_package(staging, CREATORS, token="tok", **kwargs)
 
@@ -503,8 +537,10 @@ class TestUploadZenodoPackage:
 
         mock_client.upload_files.side_effect = capture_upload
 
-        with patch("battinfo.zenodo.ZenodoClient", return_value=mock_client), \
-             patch("battinfo.zenodo._resolve_token", return_value="tok"):
+        with (
+            patch("battinfo.zenodo.ZenodoClient", return_value=mock_client),
+            patch("battinfo.zenodo._resolve_token", return_value="tok"),
+        ):
             upload_zenodo_package(staging, CREATORS, token="tok", sandbox=True)
 
         uploaded_names = {p.name for p in captured_files}
@@ -555,17 +591,13 @@ class TestZenodoOnlyPublicPath:
                 "id": "https://w3id.org/battinfo/dataset/7d9k-2m4p-8t3x-6nq5",
                 "short_id": "7d9k2m",
                 "access_url": data.as_uri(),
-                "distributions": [
-                    {"type": "DataDownload", "content_url": data.as_uri()}
-                ],
+                "distributions": [{"type": "DataDownload", "content_url": data.as_uri()}],
             },
         }
         rec_path = ds_dir / "dataset-7d9k.json"
         rec_path.write_text(json.dumps(record), encoding="utf-8")
 
-        n = ws._apply_zenodo_file_urls(
-            "https://zenodo.org/records/12345", ws._deposit_file_plan(ws._ws.source_root)
-        )
+        n = ws._apply_zenodo_file_urls("https://zenodo.org/records/12345", ws._deposit_file_plan(ws._ws.source_root))
         assert n == 1
         patched = json.loads(rec_path.read_text(encoding="utf-8"))["dataset"]
         assert patched["access_url"] == "https://zenodo.org/records/12345/files/run1.csv"
@@ -698,9 +730,12 @@ class TestDepositTitle:
 
         # The empty title the graph used to get is what the check refused.
         untitled = ws._build_zenodo_jsonld(
-            zenodo_record_id=7, prereserved_doi="10.5281/zenodo.7",
-            record_url="https://zenodo.org/records/7", data_filenames=["run.bdf.csv"],
-            creators=CREATORS, license="cc-by-4.0",
+            zenodo_record_id=7,
+            prereserved_doi="10.5281/zenodo.7",
+            record_url="https://zenodo.org/records/7",
+            data_filenames=["run.bdf.csv"],
+            creators=CREATORS,
+            license="cc-by-4.0",
         )
         assert "Catalog must carry a schema:name (human title)." in _publisher_errors(untitled)
 
@@ -735,8 +770,12 @@ class TestDepositTitle:
         ws = _titleless_workspace(tmp_path)
         graph = json.loads(ws.preview_jsonld(creators=CREATORS).read_text(encoding="utf-8"))
         metadata = ws._build_zenodo_metadata(
-            title=None, description=None, creators=CREATORS, license="cc-by-4.0",
-            community=None, extra_keywords=None,
+            title=None,
+            description=None,
+            creators=CREATORS,
+            license="cc-by-4.0",
+            community=None,
+            extra_keywords=None,
         )
         assert _catalog(graph)["schema:name"] == metadata["title"] == AUTO_TITLE
 
@@ -754,8 +793,13 @@ class TestDepositTitle:
         staging = _staged_package(tmp_path)
         record = ZenodoCellRecord.from_path(staging / ZENODO_CELL_RECORD_FILENAME)
         metadata = _build_zenodo_metadata(
-            record, creators=CREATORS, title=None, description=None, license="cc-by-4.0",
-            community=None, extra_keywords=None,
+            record,
+            creators=CREATORS,
+            title=None,
+            description=None,
+            license="cc-by-4.0",
+            community=None,
+            extra_keywords=None,
         )
         graph = json.loads((staging / DEFAULT_PUBLISH_FILENAME).read_text(encoding="utf-8"))
         crate = json.loads((staging / DEFAULT_RO_CRATE_METADATA_FILENAME).read_text(encoding="utf-8"))
@@ -769,7 +813,9 @@ class TestDepositTitle:
         staging = _staged_package(tmp_path)
         client = MagicMock(spec=ZenodoClient)
         client.create_empty_deposit.return_value = {
-            "id": 9, "record_id": 9, "metadata": {"prereserve_doi": {"doi": "10.5281/zenodo.9"}},
+            "id": 9,
+            "record_id": 9,
+            "metadata": {"prereserve_doi": {"doi": "10.5281/zenodo.9"}},
         }
         with patch("battinfo.zenodo.ZenodoClient", return_value=client):
             upload_zenodo_package(staging, CREATORS, token="tok", sandbox=True, title=title)

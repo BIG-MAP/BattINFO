@@ -25,6 +25,7 @@ Usage::
     python scripts/migrate_electrode_ids.py --source-root path/to/records --write \\
         --map-out electrode-id-map.json
 """
+
 from __future__ import annotations
 
 import argparse
@@ -201,12 +202,14 @@ def _remap_refs(node: object, id_map: dict[str, str]) -> bool:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--source-root", required=True, type=Path,
-                        help="Records root (containing electrode-spec/, electrode/, cell-spec/).")
-    parser.add_argument("--write", action="store_true",
-                        help="Rewrite record files in place (default: dry run).")
-    parser.add_argument("--map-out", type=Path, default=None,
-                        help="Write the old-id -> new-id map to this JSON file.")
+    parser.add_argument(
+        "--source-root",
+        required=True,
+        type=Path,
+        help="Records root (containing electrode-spec/, electrode/, cell-spec/).",
+    )
+    parser.add_argument("--write", action="store_true", help="Rewrite record files in place (default: dry run).")
+    parser.add_argument("--map-out", type=Path, default=None, help="Write the old-id -> new-id map to this JSON file.")
     args = parser.parse_args(argv)
 
     if not args.source_root.exists():

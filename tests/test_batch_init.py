@@ -27,6 +27,7 @@ ENERGIZER_IRI = "https://w3id.org/battinfo/spec/7r2m-4q8v-k6nt-c3pj"
 
 # ── _resolve_cell_spec_for_batch ───────────────────────────────────────────────
 
+
 class TestResolveCellSpecification:
     def test_direct_iri_passthrough(self) -> None:
         iri, name, mfr, model = _resolve_cell_spec_for_batch(ENERGIZER_IRI)
@@ -56,6 +57,7 @@ class TestResolveCellSpecification:
 
 
 # ── init_batch ─────────────────────────────────────────────────────────────────
+
 
 def _first_cell(result: dict, batch_dir: Path) -> Path:
     """Return the Path to the first cell folder from an init_batch result."""
@@ -128,7 +130,9 @@ class TestInitBatch:
 
     def test_serial_numbers_as_folder_names(self, tmp_path: Path) -> None:
         init_batch(
-            tmp_path / "batch", "Energizer CR2032", 2,
+            tmp_path / "batch",
+            "Energizer CR2032",
+            2,
             serial_numbers=["SN-A01", "SN-A02"],
         )
         assert (tmp_path / "batch" / "sn-a01").is_dir()
@@ -136,7 +140,9 @@ class TestInitBatch:
 
     def test_serial_numbers_in_manifest(self, tmp_path: Path) -> None:
         result = init_batch(
-            tmp_path / "batch", "Energizer CR2032", 2,
+            tmp_path / "batch",
+            "Energizer CR2032",
+            2,
             serial_numbers=["SN-001", "SN-002"],
         )
         folder = result["cells"][0]["folder"]
@@ -146,7 +152,9 @@ class TestInitBatch:
     def test_pre_assigned_iris(self, tmp_path: Path) -> None:
         ci_iri = "https://w3id.org/battinfo/cell/aaaa-bbbb-cccc-dddd"
         result = init_batch(
-            tmp_path / "batch", "Energizer CR2032", 1,
+            tmp_path / "batch",
+            "Energizer CR2032",
+            1,
             cell_iris=[ci_iri],
         )
         cell = _first_cell(result, tmp_path / "batch")
@@ -154,8 +162,11 @@ class TestInitBatch:
 
     def test_operator_in_manifest(self, tmp_path: Path) -> None:
         result = init_batch(
-            tmp_path / "batch", "Energizer CR2032", 1,
-            lab="SINTEF", operator="Ada Lovelace",
+            tmp_path / "batch",
+            "Energizer CR2032",
+            1,
+            lab="SINTEF",
+            operator="Ada Lovelace",
         )
         text = _first_cell(result, tmp_path / "batch") / CONTRIBUTION_MANIFEST
         content = text.read_text(encoding="utf-8")
@@ -165,7 +176,9 @@ class TestInitBatch:
 
     def test_project_in_manifest(self, tmp_path: Path) -> None:
         result = init_batch(
-            tmp_path / "batch", "Energizer CR2032", 1,
+            tmp_path / "batch",
+            "Energizer CR2032",
+            1,
             project="SolidBat-2025",
         )
         text = (_first_cell(result, tmp_path / "batch") / CONTRIBUTION_MANIFEST).read_text(encoding="utf-8")
@@ -198,14 +211,18 @@ class TestInitBatch:
     def test_iris_length_mismatch_raises(self, tmp_path: Path) -> None:
         with pytest.raises(ValueError, match="cell_iris length"):
             init_batch(
-                tmp_path / "batch", "Energizer CR2032", 2,
+                tmp_path / "batch",
+                "Energizer CR2032",
+                2,
                 cell_iris=["https://w3id.org/battinfo/cell/aaaa-bbbb-cccc-dddd"],
             )
 
     def test_serials_length_mismatch_raises(self, tmp_path: Path) -> None:
         with pytest.raises(ValueError, match="serial_numbers length"):
             init_batch(
-                tmp_path / "batch", "Energizer CR2032", 3,
+                tmp_path / "batch",
+                "Energizer CR2032",
+                3,
                 serial_numbers=["SN-1", "SN-2"],
             )
 
@@ -219,6 +236,7 @@ class TestInitBatch:
 
 # ── CLI ────────────────────────────────────────────────────────────────────────
 
+
 def _first_cell_dir(tmp_path: Path) -> Path:
     """Find the first cell directory (not batch.yaml) in a batch root."""
     batch = tmp_path / "batch"
@@ -227,12 +245,18 @@ def _first_cell_dir(tmp_path: Path) -> Path:
 
 class TestBatchInitCli:
     def test_basic_invocation(self, tmp_path: Path) -> None:
-        result = runner.invoke(app, [
-            "batch", "init",
-            str(tmp_path / "batch"),
-            "--cell-spec", "Energizer CR2032",
-            "--count", "2",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "batch",
+                "init",
+                str(tmp_path / "batch"),
+                "--cell-spec",
+                "Energizer CR2032",
+                "--count",
+                "2",
+            ],
+        )
         assert result.exit_code == 0, result.output
         assert "Initialised batch" in result.output
         cell_dirs = [d for d in (tmp_path / "batch").iterdir() if d.is_dir()]
@@ -240,16 +264,26 @@ class TestBatchInitCli:
         assert all("energizer" in d.name for d in cell_dirs)
 
     def test_with_batch_id_and_lab(self, tmp_path: Path) -> None:
-        result = runner.invoke(app, [
-            "batch", "init",
-            str(tmp_path / "batch"),
-            "--cell-spec", "Energizer CR2032",
-            "--count", "3",
-            "--batch-id", "B2025-06",
-            "--lab", "SINTEF",
-            "--operator", "Test User",
-            "--project", "SolidBat-2025",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "batch",
+                "init",
+                str(tmp_path / "batch"),
+                "--cell-spec",
+                "Energizer CR2032",
+                "--count",
+                "3",
+                "--batch-id",
+                "B2025-06",
+                "--lab",
+                "SINTEF",
+                "--operator",
+                "Test User",
+                "--project",
+                "SolidBat-2025",
+            ],
+        )
         assert result.exit_code == 0, result.output
         cell = _first_cell_dir(tmp_path)
         text = (cell / CONTRIBUTION_MANIFEST).read_text(encoding="utf-8")
@@ -259,22 +293,37 @@ class TestBatchInitCli:
         assert "SolidBat-2025" in text
 
     def test_cell_folder_via_cli(self, tmp_path: Path) -> None:
-        runner.invoke(app, [
-            "batch", "init", str(tmp_path / "batch"),
-            "--cell-spec", "Energizer CR2032", "--count", "1",
-        ])
+        runner.invoke(
+            app,
+            [
+                "batch",
+                "init",
+                str(tmp_path / "batch"),
+                "--cell-spec",
+                "Energizer CR2032",
+                "--count",
+                "1",
+            ],
+        )
         cell = _first_cell_dir(tmp_path)
         assert cell.is_dir()
         assert (cell / "battinfo.yaml").is_file()
 
     def test_with_serials(self, tmp_path: Path) -> None:
-        result = runner.invoke(app, [
-            "batch", "init",
-            str(tmp_path / "batch"),
-            "--cell-spec", "Energizer CR2032",
-            "--count", "2",
-            "--serials", "SN-01,SN-02",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "batch",
+                "init",
+                str(tmp_path / "batch"),
+                "--cell-spec",
+                "Energizer CR2032",
+                "--count",
+                "2",
+                "--serials",
+                "SN-01,SN-02",
+            ],
+        )
         assert result.exit_code == 0, result.output
         assert (tmp_path / "batch" / "sn-01").is_dir()
         assert (tmp_path / "batch" / "sn-02").is_dir()
@@ -282,13 +331,20 @@ class TestBatchInitCli:
     def test_with_pre_assigned_iris(self, tmp_path: Path) -> None:
         ci1 = "https://w3id.org/battinfo/cell/aaaa-bbbb-cccc-dddd"
         ci2 = "https://w3id.org/battinfo/cell/1111-2222-3333-4444"
-        result = runner.invoke(app, [
-            "batch", "init",
-            str(tmp_path / "batch"),
-            "--cell-spec", "Energizer CR2032",
-            "--count", "2",
-            "--iris", f"{ci1},{ci2}",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "batch",
+                "init",
+                str(tmp_path / "batch"),
+                "--cell-spec",
+                "Energizer CR2032",
+                "--count",
+                "2",
+                "--iris",
+                f"{ci1},{ci2}",
+            ],
+        )
         assert result.exit_code == 0, result.output
         # Find the folder whose short_id matches ci1's short_id
         ci1_short = ci1.rstrip("/").split("/")[-1].replace("-", "")[:6]
@@ -296,35 +352,58 @@ class TestBatchInitCli:
         assert ci1 in (ci1_dir / CONTRIBUTION_MANIFEST).read_text(encoding="utf-8")
 
     def test_unknown_cell_spec_exits_with_error(self, tmp_path: Path) -> None:
-        result = runner.invoke(app, [
-            "batch", "init",
-            str(tmp_path / "batch"),
-            "--cell-spec", "NoSuchBrand XYZ999",
-            "--count", "1",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "batch",
+                "init",
+                str(tmp_path / "batch"),
+                "--cell-spec",
+                "NoSuchBrand XYZ999",
+                "--count",
+                "1",
+            ],
+        )
         assert result.exit_code != 0
 
     def test_existing_dir_exits_with_error(self, tmp_path: Path) -> None:
         dest = tmp_path / "batch"
         dest.mkdir()
-        result = runner.invoke(app, [
-            "batch", "init", str(dest),
-            "--cell-spec", "Energizer CR2032", "--count", "1",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "batch",
+                "init",
+                str(dest),
+                "--cell-spec",
+                "Energizer CR2032",
+                "--count",
+                "1",
+            ],
+        )
         assert result.exit_code != 0
 
     def test_force_flag_overwrites(self, tmp_path: Path) -> None:
         dest = tmp_path / "batch"
         dest.mkdir()
-        result = runner.invoke(app, [
-            "batch", "init", str(dest),
-            "--cell-spec", "Energizer CR2032", "--count", "1",
-            "--force",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "batch",
+                "init",
+                str(dest),
+                "--cell-spec",
+                "Energizer CR2032",
+                "--count",
+                "1",
+                "--force",
+            ],
+        )
         assert result.exit_code == 0, result.output
 
 
 # ── add_to_batch ───────────────────────────────────────────────────────────────
+
 
 def _cell_dirs(batch_dir: Path) -> list[Path]:
     """Return sorted list of cell directories (excludes files like batch.yaml)."""
@@ -448,22 +527,38 @@ class TestAddToBatch:
 
 # ── batch add CLI ──────────────────────────────────────────────────────────────
 
+
 class TestBatchAddCli:
     def _init(self, tmp_path: Path, count: int = 2) -> Path:
         batch_dir = tmp_path / "batch"
-        runner.invoke(app, [
-            "batch", "init", str(batch_dir),
-            "--cell-spec", "Energizer CR2032",
-            "--count", str(count),
-            "--lab", "SINTEF",
-        ])
+        runner.invoke(
+            app,
+            [
+                "batch",
+                "init",
+                str(batch_dir),
+                "--cell-spec",
+                "Energizer CR2032",
+                "--count",
+                str(count),
+                "--lab",
+                "SINTEF",
+            ],
+        )
         return batch_dir
 
     def test_basic_add(self, tmp_path: Path) -> None:
         d = self._init(tmp_path, 2)
-        result = runner.invoke(app, [
-            "batch", "add", str(d), "--count", "3",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "batch",
+                "add",
+                str(d),
+                "--count",
+                "3",
+            ],
+        )
         assert result.exit_code == 0, result.output
         assert "Added 3 cell(s)" in result.output
         assert "New total  : 5" in result.output
@@ -472,10 +567,18 @@ class TestBatchAddCli:
     def test_add_with_override_operator(self, tmp_path: Path) -> None:
         d = self._init(tmp_path, 1)
         before = {c.name for c in _cell_dirs(d)}
-        result = runner.invoke(app, [
-            "batch", "add", str(d), "--count", "1",
-            "--operator", "Bob",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "batch",
+                "add",
+                str(d),
+                "--count",
+                "1",
+                "--operator",
+                "Bob",
+            ],
+        )
         assert result.exit_code == 0, result.output
         new_cells = [c for c in _cell_dirs(d) if c.name not in before]
         assert len(new_cells) == 1
@@ -483,10 +586,18 @@ class TestBatchAddCli:
 
     def test_add_with_serials(self, tmp_path: Path) -> None:
         d = self._init(tmp_path, 1)
-        result = runner.invoke(app, [
-            "batch", "add", str(d), "--count", "2",
-            "--serials", "SN-X01,SN-X02",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "batch",
+                "add",
+                str(d),
+                "--count",
+                "2",
+                "--serials",
+                "SN-X01,SN-X02",
+            ],
+        )
         assert result.exit_code == 0, result.output
         assert (d / "sn-x01").is_dir()
         assert (d / "sn-x02").is_dir()
@@ -498,7 +609,14 @@ class TestBatchAddCli:
         assert manifest["count"] == 5
 
     def test_nonexistent_dir_fails(self, tmp_path: Path) -> None:
-        result = runner.invoke(app, [
-            "batch", "add", str(tmp_path / "nonexistent"), "--count", "1",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "batch",
+                "add",
+                str(tmp_path / "nonexistent"),
+                "--count",
+                "1",
+            ],
+        )
         assert result.exit_code != 0

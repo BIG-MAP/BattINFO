@@ -56,8 +56,13 @@ def _record_sets(*, tests_list_datasets: bool, with_series: bool = True) -> dict
     sets: dict[str, list[dict]] = {
         "cell-spec": [
             CellSpec(
-                id=CELL_SPEC_IRI, name="Demo coin cell", manufacturer="Demo Co", model="DEMO-1",
-                format="coin", chemistry="lithium_ion", source=ProvenanceInfo(type="datasheet"),
+                id=CELL_SPEC_IRI,
+                name="Demo coin cell",
+                manufacturer="Demo Co",
+                model="DEMO-1",
+                format="coin",
+                chemistry="lithium_ion",
+                source=ProvenanceInfo(type="datasheet"),
             ).to_record()
         ],
         "cell-instance": [],
@@ -67,21 +72,29 @@ def _record_sets(*, tests_list_datasets: bool, with_series: bool = True) -> dict
     for n in (1, 2):
         sets["cell-instance"].append(
             Cell(
-                id=_cell(n), name=f"cell-{n}", cell_spec_id=CELL_SPEC_IRI, serial_number=f"SN-{n}",
+                id=_cell(n),
+                name=f"cell-{n}",
+                cell_spec_id=CELL_SPEC_IRI,
+                serial_number=f"SN-{n}",
                 source=ProvenanceInfo(type="measurement"),
             ).to_record()
         )
         sets["test"].append(
             Test(
-                id=_test(n), name=f"pOCV run {n}", kind="cycling", cell_id=_cell(n),
+                id=_test(n),
+                name=f"pOCV run {n}",
+                kind="cycling",
+                cell_id=_cell(n),
                 dataset_ids=[_dataset(n)] if tests_list_datasets else [],
                 source=ProvenanceInfo(type="measurement"),
             ).to_record()
         )
         sets["dataset"].append(
             Dataset(
-                id=_dataset(n), name=f"pOCV curves, cell {n}",
-                cell_instance_id=_cell(n), test_id=_test(n),
+                id=_dataset(n),
+                name=f"pOCV curves, cell {n}",
+                cell_instance_id=_cell(n),
+                test_id=_test(n),
                 series_id=SERIES_IRI if with_series else None,
                 access_url=f"https://example.org/data/cell-{n}",
                 distributions=[
@@ -97,8 +110,11 @@ def _record_sets(*, tests_list_datasets: bool, with_series: bool = True) -> dict
     if with_series:
         sets["dataset"].append(
             Dataset(
-                id=SERIES_IRI, name="pOCV collection", additional_type=["DatasetSeries"],
-                access_url="https://example.org/data", source=ProvenanceInfo(type="measurement"),
+                id=SERIES_IRI,
+                name="pOCV collection",
+                additional_type=["DatasetSeries"],
+                access_url="https://example.org/data",
+                source=ProvenanceInfo(type="measurement"),
             ).to_record()
         )
     return sets

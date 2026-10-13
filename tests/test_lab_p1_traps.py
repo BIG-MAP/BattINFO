@@ -12,6 +12,7 @@ return:
 6. ws.template("test-spec") round-trips through ws.load(), and a voltage
    window is expressible in the Quantity model + schema.
 """
+
 from __future__ import annotations
 
 import json
@@ -32,9 +33,8 @@ from battinfo.ws import AuthoringWorkspace
 
 # ── Fix 1: convert must report unmapped/dropped source columns ────────────────
 
-def test_convert_reports_unmapped_source_columns(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
+
+def test_convert_reports_unmapped_source_columns(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     """A conversion that discards source columns (the Digatron-via-wrong-plugin
     red-team case: AhStep[Ah]/Step/Mode gone behind a success message) must
     print a loud per-file report naming every dropped column and pointing at
@@ -67,9 +67,7 @@ def test_convert_reports_unmapped_source_columns(
     assert ws._resolve_raw_source(written[0]) == src.resolve()
 
 
-def test_convert_clean_file_has_no_loss_warning(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_convert_clean_file_has_no_loss_warning(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     pytest.importorskip("bdf")
     ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
     (tmp_path / "clean.csv").write_text(
@@ -88,9 +86,7 @@ def test_convert_clean_file_has_no_loss_warning(
 _NEWARE_SAMPLE = ROOT / "docs" / "guides" / "data" / "neware-sample.csv"
 
 
-def test_convert_does_not_call_a_row_counter_data_loss(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_convert_does_not_call_a_row_counter_data_loss(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     """Neware's ``Record`` column only numbers the rows (1, 2, 3, ...). The converted
     file keeps the row order, so leaving it out loses nothing: the conversion says
     so, without the DATA-LOSS warning, and records no loss in the manifest."""
@@ -153,14 +149,10 @@ def test_convert_does_not_judge_a_short_file_a_row_counter(
     assert manifest[str(written[0].resolve())]["unmapped_columns"] == ["Record"]
 
 
-def test_convert_csv_warns_on_non_canonical_columns(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_convert_csv_warns_on_non_canonical_columns(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     pd = pytest.importorskip("pandas")
     src = tmp_path / "maccor.csv"
-    pd.DataFrame({"Cycle": [1, 2], "Voltage(V)": [3.7, 3.6], "Weird Col": [0, 1]}).to_csv(
-        src, index=False
-    )
+    pd.DataFrame({"Cycle": [1, 2], "Voltage(V)": [3.7, 3.6], "Weird Col": [0, 1]}).to_csv(src, index=False)
     ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
     ws.convert_csv(src, hints={"Cycle": "cycle_count", "Voltage(V)": "voltage_volt"}, validate=False)
     out = capsys.readouterr().out
@@ -180,13 +172,12 @@ def test_resolve_raw_source_accepts_legacy_manifest_entries(tmp_path: Path) -> N
     out.write_text("a\n1\n", encoding="utf-8")
     manifest_path = tmp_path / ".battinfo" / "conversions.json"
     manifest_path.parent.mkdir(parents=True, exist_ok=True)
-    manifest_path.write_text(
-        json.dumps({str(out.resolve()): str(src.resolve())}), encoding="utf-8"
-    )
+    manifest_path.write_text(json.dumps({str(out.resolve()): str(src.resolve())}), encoding="utf-8")
     assert ws._resolve_raw_source(out) == src.resolve()
 
 
 # ── Fix 2: dangling *_spec_id references fail save by default ─────────────────
+
 
 def test_save_cell_spec_rejects_dangling_component_reference(tmp_path: Path) -> None:
     spec = CellSpec(
@@ -208,9 +199,7 @@ def test_save_cell_spec_rejects_dangling_component_reference(tmp_path: Path) -> 
 
 def test_save_cell_spec_accepts_existing_component_reference(tmp_path: Path) -> None:
     saved = api.save_electrolyte_spec(
-        api.create_electrolyte_spec(
-            name="1M LiPF6 EC:DMC", uid="2222222222222222", body={"family": "organic"}
-        ),
+        api.create_electrolyte_spec(name="1M LiPF6 EC:DMC", uid="2222222222222222", body={"family": "organic"}),
         source_root=tmp_path,
     )
     electrolyte_id = saved["id"]
@@ -241,9 +230,8 @@ def test_save_material_rejects_dangling_material_spec_reference(tmp_path: Path) 
 
 # ── Fix 3: query_* never silently searches the wheel's bundled examples ───────
 
-def test_query_defaults_do_not_return_packaged_examples(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+
+def test_query_defaults_do_not_return_packaged_examples(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """query_material_specs() (and siblings) in an empty directory must return
     nothing — not present BattINFO's shipped example fleet as the user's lab."""
     monkeypatch.chdir(tmp_path)
@@ -294,6 +282,7 @@ def test_query_directory_alias_is_deprecated_but_works(tmp_path: Path) -> None:
 
 # ── Fix 4: deterministic instance IRIs across every minting surface ───────────
 
+
 def test_cell_instance_iri_is_deterministic_across_surfaces(tmp_path: Path) -> None:
     """The same (spec IRI, serial) must mint the SAME cell IRI via the
     workspace, save_cell_instance, and create_cell_instance — one identity, not
@@ -327,9 +316,7 @@ def test_cell_instance_iri_is_deterministic_across_surfaces(tmp_path: Path) -> N
         source_root=api_root,
     )
     assert saved_spec["id"] == spec_iri  # spec identity converges too
-    saved = api.save_cell_instance(
-        Cell(cell_spec_id=saved_spec["id"], serial_number="SN-42"), source_root=api_root
-    )
+    saved = api.save_cell_instance(Cell(cell_spec_id=saved_spec["id"], serial_number="SN-42"), source_root=api_root)
     assert saved["id"] == ws_iri
 
     # Surface 3: create_cell_instance (previously minted a fresh random uid).
@@ -350,6 +337,7 @@ def test_anonymous_cell_instances_never_dedup(tmp_path: Path) -> None:
 
 
 # ── Fix 5: no fabricated measurements on ws.add("cell") ───────────────────────
+
 
 def test_ws_add_cell_does_not_copy_spec_ratings_into_measured(tmp_path: Path) -> None:
     """Rated/nominal spec values are not measurements. The instance record must
@@ -387,6 +375,7 @@ def test_ws_cell_still_accepts_genuine_measured_values(tmp_path: Path) -> None:
 
 # ── Fix 6: template <-> load round-trip + Quantity windows ────────────────────
 
+
 def test_test_spec_template_round_trips_through_load(tmp_path: Path) -> None:
     """ws.load(ws.template('test-spec', ...)) must work with only the user
     filling values — no scalar/min-max shape rejections, no null-placeholder
@@ -422,16 +411,10 @@ def test_voltage_window_survives_save_and_validates(tmp_path: Path) -> None:
     """Acceptance: a 2.5-4.2 V voltage window is expressible and the saved
     record passes schema validation (model and schema agree on min/max names)."""
     ws = battinfo.workspace(str(tmp_path))
-    path = ws.template(
-        "test-spec", name="Window", type="cycling", voltage_window_volt=(2.5, 4.2)
-    )
+    path = ws.template("test-spec", name="Window", type="cycling", voltage_window_volt=(2.5, 4.2))
     ws.load(path)
     ws.save()
-    docs = [
-        json.loads(p.read_text(encoding="utf-8"))
-        for p in tmp_path.rglob("*.json")
-        if "test-protocol" in p.name
-    ]
+    docs = [json.loads(p.read_text(encoding="utf-8")) for p in tmp_path.rglob("*.json") if "test-protocol" in p.name]
     docs = [d for d in docs if isinstance(d.get("test_spec"), dict)]
     assert docs
     record = docs[0]
@@ -515,6 +498,7 @@ def test_template_empty_name_writes_sane_filenames(tmp_path: Path) -> None:
 
 # ── batterydf 0.2 compatibility: metadata shape, column labels, required time ──
 
+
 def test_reader_plugin_id_reads_both_metadata_shapes() -> None:
     """batterydf 0.1 returned a dict with a top-level "source"; 0.2 returns a
     Metadata model with the plugin at ``.bdf.source``. The unmapped-column
@@ -549,18 +533,14 @@ def test_convert_writes_machine_readable_column_names(tmp_path: Path) -> None:
     assert header == ["test_time_second", "voltage_volt", "current_ampere"]
 
 
-def test_convert_refuses_file_without_test_time(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_convert_refuses_file_without_test_time(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     """A source whose time column cannot be mapped must fail loudly and write
     nothing, not produce a BDF file with no time axis. In a Neware export
     "Time(s)" is the per-step clock, so it does not count as test time."""
     pytest.importorskip("bdf")
     ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
     (tmp_path / "no-test-time.csv").write_text(
-        "Cycle,Step,Time(s),Voltage(V),Current(mA),Capacity(mAh)\n"
-        "1,CC_Chg,0,3.02,4500,0\n"
-        "1,CC_Chg,60,3.45,4500,75\n",
+        "Cycle,Step,Time(s),Voltage(V),Current(mA),Capacity(mAh)\n1,CC_Chg,0,3.02,4500,0\n1,CC_Chg,60,3.45,4500,75\n",
         encoding="utf-8",
     )
 

@@ -121,4 +121,3 @@ def test_semantic_mapping_gate_passes_with_relaxed_thresholds(tmp_path: Path) ->
     assert result.returncode == 0, result.stderr
     text = report.read_text(encoding="utf-8")
     assert "Result: `PASS`" in text
-

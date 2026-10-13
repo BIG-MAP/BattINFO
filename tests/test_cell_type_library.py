@@ -60,7 +60,3 @@ def test_build_cell_spec_library_rdf_from_descriptor(tmp_path: Path) -> None:
     assert manifest_payload["entries"][0]["id"] == expected_id
     assert manifest_payload["entries"][0]["manufacturer"] == expected_manufacturer
     assert manifest_payload["entries"][0]["model"] == expected_model
-
-
-
-

@@ -1,5 +1,6 @@
 """A-6: the credentials file must be owner-only, and a registry response body embedded in an
 error message must not leak the api_key (defence in depth against a registry that echoes it)."""
+
 from __future__ import annotations
 
 import os

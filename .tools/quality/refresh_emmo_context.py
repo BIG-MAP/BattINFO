@@ -25,9 +25,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 # Keep in step with the owl:imports pin in battinfo.ttl.
 PINNED_VERSION = "0.21.0"
-CONTEXT_URL = (
-    f"https://raw.githubusercontent.com/emmo-repo/domain-battery/{PINNED_VERSION}/context/context.json"
-)
+CONTEXT_URL = f"https://raw.githubusercontent.com/emmo-repo/domain-battery/{PINNED_VERSION}/context/context.json"
 LATEST_CONTEXT_URL = "https://w3id.org/emmo/domain/battery/context"
 CONTEXT_PATH = ROOT / "src" / "battinfo" / "data" / "context" / "domain-battery.context.json"
 TIMEOUT = 20

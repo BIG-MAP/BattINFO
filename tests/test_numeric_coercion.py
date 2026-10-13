@@ -6,6 +6,7 @@ Interop readers commonly receive JSON-LD / CSV / spreadsheet numbers as strings
 non-numeric placeholders) so a string never reaches arithmetic or a quantity
 .value.
 """
+
 from __future__ import annotations
 
 import sys
@@ -20,12 +21,16 @@ from battinfo.transform.json_to_jsonld import to_jsonld  # noqa: E402
 
 
 def test_discovery_find_property_coerces_string_number_to_float() -> None:
-    node = {"hasProperty": [{
-        "@type": ["Volume"],
-        "name": "Electrolyte volume",
-        "hasNumericalPart": {"hasNumericalValue": "6e-05"},
-        "hasMeasurementUnit": "",
-    }]}
+    node = {
+        "hasProperty": [
+            {
+                "@type": ["Volume"],
+                "name": "Electrolyte volume",
+                "hasNumericalPart": {"hasNumericalValue": "6e-05"},
+                "hasMeasurementUnit": "",
+            }
+        ]
+    }
     res = _find_property(node, "Volume", "Electrolyte volume")
     assert res is not None
     assert res["value"] == 6e-05
@@ -33,12 +38,16 @@ def test_discovery_find_property_coerces_string_number_to_float() -> None:
 
 
 def test_discovery_find_property_skips_non_numeric_value() -> None:
-    node = {"hasProperty": [{
-        "@type": ["Volume"],
-        "name": "Electrolyte volume",
-        "hasNumericalPart": {"hasNumericalValue": "not-a-number"},
-        "hasMeasurementUnit": "",
-    }]}
+    node = {
+        "hasProperty": [
+            {
+                "@type": ["Volume"],
+                "name": "Electrolyte volume",
+                "hasNumericalPart": {"hasNumericalValue": "not-a-number"},
+                "hasMeasurementUnit": "",
+            }
+        ]
+    }
     assert _find_property(node, "Volume", "Electrolyte volume") is None
 
 
@@ -54,10 +63,17 @@ def test_json_to_jsonld_string_percent_fraction_does_not_crash() -> None:
     record = {
         "schema_version": "1.0",
         "specification": {
-            "id": "c1", "format": "pouch",
-            "positive_electrode": {"coating": {"component": {"active_material": [
-                {"name": "NMC", "property": {"mass_fraction": {"value": "95", "unit": "%"}}}
-            ]}}},
+            "id": "c1",
+            "format": "pouch",
+            "positive_electrode": {
+                "coating": {
+                    "component": {
+                        "active_material": [
+                            {"name": "NMC", "property": {"mass_fraction": {"value": "95", "unit": "%"}}}
+                        ]
+                    }
+                }
+            },
         },
     }
     # Must not raise TypeError on `value / 100`; "95" % -> 0.95 fraction.

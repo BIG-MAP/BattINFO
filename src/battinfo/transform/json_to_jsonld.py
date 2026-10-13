@@ -65,25 +65,28 @@ LEGACY_UNIT_IRIS: dict[str, str] = {
     # EMMO's class for the programming language C, written for degree Celsius.
     "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc": "°C",
 }
-CONVERTER_LABEL_TO_TYPE = {label: type_name for type_name, label in {
-    "Aluminium": "Aluminium",
-    "CarbonBlack": "Carbon black",
-    "Copper": "Copper",
-    "EthylMethylCarbonate": "EMC",
-    "EthyleneCarbonate": "EC",
-    "FluoroethyleneCarbonate": "FEC",
-    "Graphite": "Graphite",
-    "LithiumBisfluorosulfonylimide": "LiFSI",
-    "LithiumElectrode": "Li-metal",
-    "LithiumHexafluorophosphate": "LiPF6",
-    "LithiumIronPhosphate": "LFP",
-    "LithiumNickelManganeseCobaltOxide": "NMC",
-    "Polypropylene": "PP",
-    "PolyvinylideneFluoride": "PVDF",
-    "StainlessSteel": "Stainless steel",
-    "TrisTrimethylsilyPhosphite": "TMSPi",
-    "VinyleneCarbonate": "VC",
-}.items()}
+CONVERTER_LABEL_TO_TYPE = {
+    label: type_name
+    for type_name, label in {
+        "Aluminium": "Aluminium",
+        "CarbonBlack": "Carbon black",
+        "Copper": "Copper",
+        "EthylMethylCarbonate": "EMC",
+        "EthyleneCarbonate": "EC",
+        "FluoroethyleneCarbonate": "FEC",
+        "Graphite": "Graphite",
+        "LithiumBisfluorosulfonylimide": "LiFSI",
+        "LithiumElectrode": "Li-metal",
+        "LithiumHexafluorophosphate": "LiPF6",
+        "LithiumIronPhosphate": "LFP",
+        "LithiumNickelManganeseCobaltOxide": "NMC",
+        "Polypropylene": "PP",
+        "PolyvinylideneFluoride": "PVDF",
+        "StainlessSteel": "Stainless steel",
+        "TrisTrimethylsilyPhosphite": "TMSPi",
+        "VinyleneCarbonate": "VC",
+    }.items()
+}
 CONVERTER_UNIT_TEXT_TO_TOKEN = {
     "1": "emmo:UnitOne",
     "C": "emmo:CelsiusTemperature",
@@ -139,6 +142,7 @@ CONVERTER_FORMAT_TYPES = {
 DOI_URL_RE = re.compile(r"^https?://(?:dx\.)?doi\.org/(10\.\S+)$", re.IGNORECASE)
 DOI_LITERAL_RE = re.compile(r"^(10\.\d{4,9}/[-._;()/:A-Za-z0-9]+)$")
 
+
 def _citation_url_value(provenance: dict[str, Any] | None) -> str | None:
     if not isinstance(provenance, dict):
         return None
@@ -176,7 +180,6 @@ def _citation_to_jsonld(provenance: dict[str, Any] | None) -> dict[str, Any] | N
     if citation_doi is not None:
         node["bibo:doi"] = citation_doi
     return node
-
 
 
 def _normalize_term(value: Any) -> str | None:
@@ -549,7 +552,6 @@ def _epoch_to_iso8601(value: Any) -> str | None:
     return datetime.fromtimestamp(value, tz=timezone.utc).isoformat()
 
 
-
 def _profile_binding_target(path: str, default: str) -> str:
     bindings = _descriptor_profile().get("field_bindings", {})
     binding = bindings.get(path, {})
@@ -623,6 +625,7 @@ def schema_dimension_nodes(properties: Any) -> dict[str, Any]:
             break
     return out
 
+
 # Measurement-parameter (condition) key -> EMMO class, for hasMeasurementParameter.
 # Keys without a resolvable class fall through to a generic node; every
 # parameter node carries the condition key as its skos:prefLabel.
@@ -680,7 +683,7 @@ def _voltage_reference_node(raw_value: Any) -> dict[str, Any] | None:
     key = text.lower()
     for prefix in ("vs. ", "vs ", "versus "):
         if key.startswith(prefix):
-            key = key[len(prefix):].strip()
+            key = key[len(prefix) :].strip()
             break
     classes = _VOLTAGE_REFERENCE_COUPLES.get(key)
     if classes:
@@ -701,9 +704,7 @@ _SAMPLE_STATISTIC_TERMS: tuple[tuple[str, bool], ...] = (
 )
 
 
-def _apply_sample_statistics(
-    node: dict[str, Any], quantity: Mapping[str, Any], unit: Any = None
-) -> None:
+def _apply_sample_statistics(node: dict[str, Any], quantity: Mapping[str, Any], unit: Any = None) -> None:
     """Attach ``standard_deviation`` / ``sample_count`` to a quantity node.
 
     Emitted as ``schema:valueReference`` qualifiers on the SAME property node —
@@ -772,9 +773,7 @@ def _condition_qualifier(ckey: str, cqty: Mapping[str, Any]) -> dict[str, Any] |
     return qualifier
 
 
-def _descriptor_quantity_node(
-    name: str, quantity: dict[str, Any], *, term: str | None = None
-) -> dict[str, Any] | None:
+def _descriptor_quantity_node(name: str, quantity: dict[str, Any], *, term: str | None = None) -> dict[str, Any] | None:
     if not isinstance(quantity, dict):
         return None
 
@@ -913,9 +912,7 @@ _ELECTRODE_PROPERTY_TERMS: dict[str, str] = {
 # emitter maps — the drift that shipped ``areal_capacity`` warnings.
 
 
-def _descriptor_property_nodes(
-    prop: Any, *, term_overrides: dict[str, str] | None = None
-) -> list[dict[str, Any]]:
+def _descriptor_property_nodes(prop: Any, *, term_overrides: dict[str, str] | None = None) -> list[dict[str, Any]]:
     """Emit ``hasProperty`` nodes for an arbitrary holder property dict.
 
     Every numeric quantity becomes a ``[EMMOClass, co-type]`` node via the curated
@@ -1314,7 +1311,9 @@ def _converter_measured_properties(
         return []
     out: list[dict[str, Any]] = []
     for name, quantity in sorted(properties.items()):
-        node = _converter_quantity_node(name, quantity if isinstance(quantity, dict) else None, property_types=property_types)
+        node = _converter_quantity_node(
+            name, quantity if isinstance(quantity, dict) else None, property_types=property_types
+        )
         if node is not None:
             out.append(node)
     return out
@@ -1401,13 +1400,17 @@ def _converter_electrode_node(electrode: dict[str, Any] | None) -> dict[str, Any
             for role_key in ("additive", "conductive_additive"):
                 if isinstance(component_groups.get(role_key), list):
                     conductive_items.extend(
-                        _converter_named_node(item, wrapper_type="ConductiveAdditive", property_types=CONVERTER_PROPERTY_TYPES)
+                        _converter_named_node(
+                            item, wrapper_type="ConductiveAdditive", property_types=CONVERTER_PROPERTY_TYPES
+                        )
                         for item in component_groups[role_key]
                         if isinstance(item, dict)
                     )
             conductive_items = [item for item in conductive_items if item]
             if conductive_items:
-                coating_node["hasConductiveAdditive"] = conductive_items[0] if len(conductive_items) == 1 else conductive_items
+                coating_node["hasConductiveAdditive"] = (
+                    conductive_items[0] if len(conductive_items) == 1 else conductive_items
+                )
             if isinstance(component_groups.get("other_additive"), list):
                 items = [
                     _converter_named_node(item, wrapper_type="Additive", property_types=CONVERTER_PROPERTY_TYPES)
@@ -1417,7 +1420,9 @@ def _converter_electrode_node(electrode: dict[str, Any] | None) -> dict[str, Any
                 items = [item for item in items if item]
                 if items:
                     coating_node["hasAdditive"] = items[0] if len(items) == 1 else items
-        measured = _converter_measured_properties(coating.get("property"), property_types=CONVERTER_COATING_PROPERTY_TYPES)
+        measured = _converter_measured_properties(
+            coating.get("property"), property_types=CONVERTER_COATING_PROPERTY_TYPES
+        )
         if measured:
             coating_node["hasMeasuredProperty"] = measured[0] if len(measured) == 1 else measured
         node["hasCoating"] = coating_node
@@ -1441,7 +1446,10 @@ def _converter_electrolyte_node(electrolyte: dict[str, Any] | None) -> dict[str,
         ]
         constituents = [item for item in constituents if item]
         if constituents:
-            solvent_node: dict[str, Any] = {"@type": "Solvent", "hasConstituent": constituents[0] if len(constituents) == 1 else constituents}
+            solvent_node: dict[str, Any] = {
+                "@type": "Solvent",
+                "hasConstituent": constituents[0] if len(constituents) == 1 else constituents,
+            }
             _converter_component_metadata(solvent_node, solvent_mixture)
             node["hasSolvent"] = solvent_node
     solute_node: dict[str, Any] | None = None
@@ -1486,7 +1494,9 @@ def _converter_separator_node(separator: dict[str, Any] | None) -> dict[str, Any
     return node
 
 
-def _converter_coin_hardware_nodes(coin_hardware: dict[str, Any] | None) -> tuple[dict[str, Any] | None, list[dict[str, Any]]]:
+def _converter_coin_hardware_nodes(
+    coin_hardware: dict[str, Any] | None,
+) -> tuple[dict[str, Any] | None, list[dict[str, Any]]]:
     if not isinstance(coin_hardware, dict):
         return None, []
     case_node = None
@@ -1498,7 +1508,9 @@ def _converter_coin_hardware_nodes(coin_hardware: dict[str, Any] | None) -> tupl
         material_type = CONVERTER_LABEL_TO_TYPE.get(str(case.get("material") or ""), None)
         if material_type is not None:
             type_values.append(material_type)
-        case_node = {"@type": type_values if len(type_values) > 1 else (type_values[0] if type_values else "schema:Thing")}
+        case_node = {
+            "@type": type_values if len(type_values) > 1 else (type_values[0] if type_values else "schema:Thing")
+        }
         if not material_type and case.get("material"):
             case_node["schema:material"] = case["material"]
         _converter_component_metadata(case_node, case)
@@ -1521,7 +1533,9 @@ def _converter_coin_hardware_nodes(coin_hardware: dict[str, Any] | None) -> tupl
                 elif component.get("material"):
                     node["schema:material"] = component["material"]
                 _converter_component_metadata(node, component)
-                measured = _converter_measured_properties(component.get("property"), property_types=CONVERTER_PROPERTY_TYPES)
+                measured = _converter_measured_properties(
+                    component.get("property"), property_types=CONVERTER_PROPERTY_TYPES
+                )
                 if measured:
                     node["hasMeasuredProperty"] = measured[0] if len(measured) == 1 else measured
                 coating = component.get("coating")
@@ -1635,11 +1649,11 @@ _ELECTROLYTE_FAMILY_TYPES: dict[str, str] = {
 # ``conductive_additive`` the explicit role; both emit hasConductiveAdditive.
 # ``other_additive`` holds non-conductive functional additives (thickener, dispersant, ...).
 _ELECTRODE_ROLE_MAP: dict[str, dict[str, str]] = {
-    "active_material":     {"relation": "hasActiveMaterial",     "role_class": "ActiveMaterial"},
-    "binder":              {"relation": "hasBinder",             "role_class": "Binder"},
-    "additive":            {"relation": "hasConductiveAdditive", "role_class": "ConductiveAdditive"},
+    "active_material": {"relation": "hasActiveMaterial", "role_class": "ActiveMaterial"},
+    "binder": {"relation": "hasBinder", "role_class": "Binder"},
+    "additive": {"relation": "hasConductiveAdditive", "role_class": "ConductiveAdditive"},
     "conductive_additive": {"relation": "hasConductiveAdditive", "role_class": "ConductiveAdditive"},
-    "other_additive":      {"relation": "hasAdditive",           "role_class": "Additive"},
+    "other_additive": {"relation": "hasAdditive", "role_class": "Additive"},
 }
 
 # UnitOne IRI — used for dimensionless fraction quantities (MassFraction, VolumeFraction, Porosity).
@@ -1831,7 +1845,8 @@ def _descriptor_electrode_coating_to_jsonld(coating: dict[str, Any] | None) -> d
             if not isinstance(mats, list):
                 mats = [mats] if mats else []
             role_nodes = [
-                c for mat in mats
+                c
+                for mat in mats
                 if (c := _typed_constituent_node(mat, role_cfg["role_class"], "MassFraction")) is not None
             ]
             if role_nodes:
@@ -1840,9 +1855,7 @@ def _descriptor_electrode_coating_to_jsonld(coating: dict[str, Any] | None) -> d
         for relation, role_nodes in nodes_by_relation.items():
             node[relation] = role_nodes[0] if len(role_nodes) == 1 else role_nodes
 
-    prop_nodes = _descriptor_property_nodes(
-        coating.get("property"), term_overrides=_DESCRIPTOR_COATING_PROPERTY_TERMS
-    )
+    prop_nodes = _descriptor_property_nodes(coating.get("property"), term_overrides=_DESCRIPTOR_COATING_PROPERTY_TERMS)
     if prop_nodes:
         node["hasProperty"] = prop_nodes[0] if len(prop_nodes) == 1 else prop_nodes
 
@@ -1915,23 +1928,19 @@ def _descriptor_electrolyte_to_jsonld(electrolyte: dict[str, Any] | None) -> dic
     if not isinstance(solvents, list):
         solvent_mixture = electrolyte.get("solvent_mixture", {})
         solvents = solvent_mixture.get("component", []) if isinstance(solvent_mixture, dict) else []
-    solvent_nodes = [
-        c for s in solvents
-        if (c := _typed_constituent_node(s, "Solvent", "VolumeFraction")) is not None
-    ]
+    solvent_nodes = [c for s in solvents if (c := _typed_constituent_node(s, "Solvent", "VolumeFraction")) is not None]
     if solvent_nodes:
         node["hasSolvent"] = solvent_nodes[0] if len(solvent_nodes) == 1 else solvent_nodes
 
     additive_nodes = [
-        c for a in (electrolyte.get("additive") or [])
+        c
+        for a in (electrolyte.get("additive") or [])
         if (c := _typed_constituent_node(a, "ElectrolyteAdditive", "MassFraction")) is not None
     ]
     if additive_nodes:
         node["hasAdditive"] = additive_nodes[0] if len(additive_nodes) == 1 else additive_nodes
 
-    prop_nodes = _descriptor_property_nodes(
-        electrolyte.get("property"), term_overrides=_DESCRIPTOR_PROPERTY_TERMS
-    )
+    prop_nodes = _descriptor_property_nodes(electrolyte.get("property"), term_overrides=_DESCRIPTOR_PROPERTY_TERMS)
     if prop_nodes:
         node["hasProperty"] = prop_nodes[0] if len(prop_nodes) == 1 else prop_nodes
 
@@ -2000,9 +2009,7 @@ def _electrode_holder_body(electrode_data: Any) -> dict[str, Any]:
             tab_node["hasProperty"] = tab_props[0] if len(tab_props) == 1 else tab_props
         if len(tab_node) > 1:
             node["hasCurrentCollectorTab"] = tab_node
-    prop_nodes = _descriptor_property_nodes(
-        electrode_data.get("property"), term_overrides=_ELECTRODE_PROPERTY_TERMS
-    )
+    prop_nodes = _descriptor_property_nodes(electrode_data.get("property"), term_overrides=_ELECTRODE_PROPERTY_TERMS)
     if prop_nodes:
         node["hasProperty"] = prop_nodes[0] if len(prop_nodes) == 1 else prop_nodes
     # An inline holder may cite the standalone electrode-spec it realizes, the
@@ -2037,9 +2044,7 @@ def _apply_specification_composition(battery: dict[str, Any], specification: dic
     """
     configuration = _cell_configuration_key(specification)
     roleless = configuration in {"half-cell", "three-electrode", "three-electrode-cell"}
-    roles_authored = any(
-        isinstance(specification.get(key), dict) for key, _, _ in _ROLE_ELECTRODE_HOLDERS
-    )
+    roles_authored = any(isinstance(specification.get(key), dict) for key, _, _ in _ROLE_ELECTRODE_HOLDERS)
 
     for basis_field, data_key, default_relation in (
         ("positive_electrode_basis", "positive_electrode", "hasPositiveElectrode"),
@@ -2119,7 +2124,9 @@ def _apply_specification_structure_and_refs(battery: dict[str, Any], specificati
     """
     construction_nodes = _descriptor_construction_to_jsonld(specification.get("construction"))
     if construction_nodes:
-        battery["schema:additionalProperty"] = construction_nodes[0] if len(construction_nodes) == 1 else construction_nodes
+        battery["schema:additionalProperty"] = (
+            construction_nodes[0] if len(construction_nodes) == 1 else construction_nodes
+        )
 
     # Format-neutral housing for ALL formats: case (format-typed: CoinCase/PrismaticCase/…),
     # terminals, seals, cap, and lid/can/spring/spacer parts (coin lid/can nest under the case).
@@ -2205,7 +2212,9 @@ def _descriptor_specification_to_jsonld(specification: dict[str, Any]) -> dict[s
         battery_type_list.extend(negative_electrode.get("battery_types", []))
 
     battery_types_deduped = list(dict.fromkeys(battery_type_list))
-    physical_type: str | list[str] = battery_types_deduped[0] if len(battery_types_deduped) == 1 else battery_types_deduped
+    physical_type: str | list[str] = (
+        battery_types_deduped[0] if len(battery_types_deduped) == 1 else battery_types_deduped
+    )
 
     # Three personas on one node (docs/records/cells.md): information
     # artifact + schema.org ProductModel + record. Physical relations and
@@ -2349,9 +2358,7 @@ def _base_context(
     if include_has_measurement:
         # Human-layer alias for the EMMO hasProperty relation — the label stays
         # readable, the identifier is the EMMO term (no battinfo: mint).
-        context_entry["hasMeasurement"] = {
-            "@id": "https://w3id.org/emmo#EMMO_e1097637_70d2_4895_973f_2396f04fa204"
-        }
+        context_entry["hasMeasurement"] = {"@id": "https://w3id.org/emmo#EMMO_e1097637_70d2_4895_973f_2396f04fa204"}
     if include_has_battery:
         # Human-layer alias for EMMO isDescriptionFor: the metadata record is a
         # description of the battery it points at (no battinfo: mint).
@@ -2715,9 +2722,7 @@ def _parameter_claim_variable_node(claim: dict[str, Any]) -> dict[str, Any] | No
         if isinstance(expression.get("text"), str):
             node["schema:value"] = expression["text"]
         language = expression.get("language")
-        node["schema:description"] = (
-            f"expression ({language})" if isinstance(language, str) else "expression"
-        )
+        node["schema:description"] = f"expression ({language})" if isinstance(language, str) else "expression"
     else:
         return None
     node.update(_parameter_claim_annotations(claim))
@@ -2781,9 +2786,7 @@ def _parameter_part_node(part: dict[str, Any], record_name: Any) -> dict[str, An
     label = _PARAMETER_PART_LABELS.get(name, name.replace("_", " "))
     node: dict[str, Any] = {"@type": "schema:Dataset"}
     node["schema:name"] = f"{record_name} - {label}" if isinstance(record_name, str) and record_name else label
-    about = _parameter_target_node(
-        {key: part[key] for key in ("material_kind", "material_spec_id") if part.get(key)}
-    )
+    about = _parameter_target_node({key: part[key] for key in ("material_kind", "material_spec_id") if part.get(key)})
     if about is not None:
         node["schema:about"] = about
     facets = [{"@type": "schema:PropertyValue", "schema:name": "part", "schema:value": name}]
@@ -2846,9 +2849,7 @@ def _to_domain_battery_jsonld_parameter_set(data: dict[str, Any]) -> dict[str, A
         if isinstance(body.get(key), str) and body[key]
     ]
     if body.get("virtual_cell") is True:
-        scope_values.append(
-            {"@type": "schema:PropertyValue", "schema:name": "virtual_cell", "schema:value": True}
-        )
+        scope_values.append({"@type": "schema:PropertyValue", "schema:name": "virtual_cell", "schema:value": True})
     model_context = body.get("model_context")
     if isinstance(model_context, dict):
         scope_values.extend(
@@ -2864,32 +2865,33 @@ def _to_domain_battery_jsonld_parameter_set(data: dict[str, Any]) -> dict[str, A
     if not_imported:
         description = "Values of the source file that this record does not hold, by their path in the file"
         if any(
-            isinstance(entry, Mapping) and entry.get("role") == "source"
-            for entry in body.get("distributions") or []
+            isinstance(entry, Mapping) and entry.get("role") == "source" for entry in body.get("distributions") or []
         ):
             description += "; the source file under schema:distribution is the complete copy"
-        scope_values.append({
-            "@type": "schema:PropertyValue",
-            "schema:name": "not_imported",
-            "schema:value": not_imported[0] if len(not_imported) == 1 else not_imported,
-            "schema:description": description + ".",
-        })
+        scope_values.append(
+            {
+                "@type": "schema:PropertyValue",
+                "schema:name": "not_imported",
+                "schema:value": not_imported[0] if len(not_imported) == 1 else not_imported,
+                "schema:description": description + ".",
+            }
+        )
     annex = body.get("annex")
     if isinstance(annex, dict) and annex:
         annex_keys = [str(key) for key in annex]
-        scope_values.append({
-            "@type": "schema:PropertyValue",
-            "schema:name": "annex",
-            "schema:value": annex_keys[0] if len(annex_keys) == 1 else annex_keys,
-            "schema:description": (
-                "Entries of the source file's extension block (BPX User-defined), held verbatim "
-                "in the record file and not as claims."
-            ),
-        })
-    if scope_values:
-        node["schema:additionalProperty"] = (
-            scope_values[0] if len(scope_values) == 1 else scope_values
+        scope_values.append(
+            {
+                "@type": "schema:PropertyValue",
+                "schema:name": "annex",
+                "schema:value": annex_keys[0] if len(annex_keys) == 1 else annex_keys,
+                "schema:description": (
+                    "Entries of the source file's extension block (BPX User-defined), held verbatim "
+                    "in the record file and not as claims."
+                ),
+            }
         )
+    if scope_values:
+        node["schema:additionalProperty"] = scope_values[0] if len(scope_values) == 1 else scope_values
 
     node.update(_parameter_claim_nodes(body.get("claims")))
     part_nodes = [
@@ -2903,9 +2905,7 @@ def _to_domain_battery_jsonld_parameter_set(data: dict[str, Any]) -> dict[str, A
     # The parameter file itself: what a solver reads. Claims above are the
     # index; these are the bytes, addressed by checksum.
     file_nodes = [
-        file_node
-        for item in body.get("distributions") or []
-        if (file_node := _parameter_file_node(item)) is not None
+        file_node for item in body.get("distributions") or [] if (file_node := _parameter_file_node(item)) is not None
     ]
     if file_nodes:
         if isinstance(body.get("id"), str) and body["id"]:
@@ -2973,9 +2973,7 @@ def _parameter_file_node(item: Any) -> dict[str, Any] | None:
     conforms_to = item.get("conforms_to")
     if isinstance(conforms_to, str) and conforms_to:
         out["dcterms:conformsTo"] = (
-            {"@id": conforms_to}
-            if conforms_to.startswith(("http://", "https://"))
-            else conforms_to
+            {"@id": conforms_to} if conforms_to.startswith(("http://", "https://")) else conforms_to
         )
     if isinstance(item.get("byte_size"), int):
         out["dcat:byteSize"] = item["byte_size"]
@@ -2993,9 +2991,7 @@ def _parameter_file_node(item: Any) -> dict[str, Any] | None:
         }
     requirements = [r for r in item.get("software_requirements") or [] if isinstance(r, str) and r]
     if requirements:
-        out["schema:softwareRequirements"] = (
-            requirements[0] if len(requirements) == 1 else requirements
-        )
+        out["schema:softwareRequirements"] = requirements[0] if len(requirements) == 1 else requirements
     checks: list[dict[str, Any]] = []
     for check in item.get("checks") or []:
         if not isinstance(check, Mapping) or not isinstance(check.get("check"), str):
@@ -3005,9 +3001,7 @@ def _parameter_file_node(item: Any) -> dict[str, Any] | None:
             "schema:name": check["check"],
             "schema:value": bool(check.get("passed")),
         }
-        detail = " ".join(
-            str(part) for part in (check.get("tool"), check.get("detail")) if part
-        )
+        detail = " ".join(str(part) for part in (check.get("tool"), check.get("detail")) if part)
         if detail:
             check_node["schema:description"] = detail
         if isinstance(check.get("checked_at"), str):
@@ -3053,12 +3047,11 @@ def _to_domain_battery_jsonld_material(data: dict[str, Any]) -> dict[str, Any]:
             if anchor in described:
                 node[anchor] = described.pop(anchor)
         manufacturer = body.get("manufacturer")
-        manufacturer_name = (
-            manufacturer.get("name") if isinstance(manufacturer, Mapping) else manufacturer
-        )
+        manufacturer_name = manufacturer.get("name") if isinstance(manufacturer, Mapping) else manufacturer
         if isinstance(manufacturer_name, str) and manufacturer_name:
             node["schema:manufacturer"] = {
-                "@type": "schema:Organization", "schema:name": manufacturer_name,
+                "@type": "schema:Organization",
+                "schema:name": manufacturer_name,
             }
         if isinstance(body.get("product_id"), str) and body["product_id"]:
             node["schema:productID"] = body["product_id"]
@@ -3128,9 +3121,7 @@ def _electrode_types(kind: Any, polarity: Any) -> str | list[str]:
     return types[0] if len(types) == 1 else types
 
 
-def _electrode_holder_node(
-    body: dict[str, Any], *, kind: Any = None, polarity: Any = None
-) -> dict[str, Any]:
+def _electrode_holder_node(body: dict[str, Any], *, kind: Any = None, polarity: Any = None) -> dict[str, Any]:
     """The shared electrode node: type, coating, current collector, tab, properties.
 
     Used for a standalone electrode-spec/electrode record and for an inline
@@ -3160,9 +3151,7 @@ def _electrode_holder_node(
             tab_node["hasProperty"] = tab_props[0] if len(tab_props) == 1 else tab_props
         if len(tab_node) > 1:
             node["hasCurrentCollectorTab"] = tab_node
-    prop_nodes = _descriptor_property_nodes(
-        body.get("property"), term_overrides=_ELECTRODE_PROPERTY_TERMS
-    )
+    prop_nodes = _descriptor_property_nodes(body.get("property"), term_overrides=_ELECTRODE_PROPERTY_TERMS)
     if prop_nodes:
         node["hasProperty"] = prop_nodes[0] if len(prop_nodes) == 1 else prop_nodes
     return node
@@ -3367,11 +3356,11 @@ def _to_domain_battery_jsonld(data: dict[str, Any]) -> dict[str, Any]:
     # A first-class electrode record. Checked before the cell-spec branch would
     # ever see it, and gated on schema_version so a cell descriptor carrying an
     # inline `electrode` holder is never mistaken for an electrode record.
-    if (
-        isinstance(data.get("electrode_spec"), dict)
-        or (isinstance(data.get("electrode"), dict) and data.get("schema_version") is not None
-            and not isinstance(data.get("cell_spec"), dict)
-            and not isinstance(data.get("specification"), dict))
+    if isinstance(data.get("electrode_spec"), dict) or (
+        isinstance(data.get("electrode"), dict)
+        and data.get("schema_version") is not None
+        and not isinstance(data.get("cell_spec"), dict)
+        and not isinstance(data.get("specification"), dict)
     ):
         return _to_domain_battery_jsonld_electrode(data)
     # Record-level classification wins over component-family sniffing: a cell_spec
@@ -3380,9 +3369,8 @@ def _to_domain_battery_jsonld(data: dict[str, Any]) -> dict[str, Any]:
     # component families. Route by the record's own primary key first, and fall to
     # component classification only for a genuinely standalone component record.
     is_record_level = (
-        (isinstance(data.get("specification"), dict) or isinstance(data.get("cell_spec"), dict))
-        and data.get("schema_version") is not None
-    )
+        isinstance(data.get("specification"), dict) or isinstance(data.get("cell_spec"), dict)
+    ) and data.get("schema_version") is not None
     if not is_record_level and _component_family_of(data) is not None:
         return _to_domain_battery_jsonld_component(data)
     if isinstance(data.get("specification"), dict) and data.get("schema_version") is not None:
@@ -3407,12 +3395,23 @@ def _to_domain_battery_jsonld(data: dict[str, Any]) -> dict[str, Any]:
         for body_field in ("cell_configuration", "reference_electrode"):
             if body_field in product:
                 specification[body_field] = product[body_field]
-        for field in ("construction", "positive_electrode", "negative_electrode",
-                      "working_electrode", "counter_electrode",
-                      "electrolyte", "separator", "housing",
-                      "positive_electrode_spec_id", "negative_electrode_spec_id",
-                      "working_electrode_spec_id", "counter_electrode_spec_id",
-                      "electrolyte_spec_id", "separator_spec_id", "housing_spec_id"):
+        for field in (
+            "construction",
+            "positive_electrode",
+            "negative_electrode",
+            "working_electrode",
+            "counter_electrode",
+            "electrolyte",
+            "separator",
+            "housing",
+            "positive_electrode_spec_id",
+            "negative_electrode_spec_id",
+            "working_electrode_spec_id",
+            "counter_electrode_spec_id",
+            "electrolyte_spec_id",
+            "separator_spec_id",
+            "housing_spec_id",
+        ):
             if field in data:
                 specification[field] = data[field]
         if "properties" in data:
@@ -3432,7 +3431,9 @@ def _to_domain_battery_jsonld(data: dict[str, Any]) -> dict[str, Any]:
 def _to_converter_compatible_jsonld(data: dict[str, Any]) -> dict[str, Any]:
     specification = data.get("specification")
     if not isinstance(specification, dict):
-        raise ValueError("converter-compatible export currently supports BattINFO detailed cell descriptor records only.")
+        raise ValueError(
+            "converter-compatible export currently supports BattINFO detailed cell descriptor records only."
+        )
 
     root_type = CONVERTER_FORMAT_TYPES.get(str(specification.get("format")), "CoinCell")
     doc: dict[str, Any] = {
@@ -3533,4 +3534,3 @@ def to_jsonld(data: dict[str, Any], target: str = "domain-battery") -> dict[str,
     if not validation.ok:
         raise ValueError(f"json-ld validation failed: {'; '.join(validation.errors)}")
     return doc
-

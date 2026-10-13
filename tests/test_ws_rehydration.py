@@ -42,12 +42,9 @@ def _run_cold(root: Path, body: str) -> subprocess.CompletedProcess[str]:
         "from pathlib import Path\n"
         "from battinfo import workspace\n"
         f"root = Path(r{str(root)!r})\n"
-        "ws = workspace(root=root, registry_url=None)\n"
-        + body + "\n"
+        "ws = workspace(root=root, registry_url=None)\n" + body + "\n"
     )
-    return subprocess.run(
-        [sys.executable, "-c", code], capture_output=True, text=True, cwd=str(root)
-    )
+    return subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, cwd=str(root))
 
 
 def test_cell_serial_resolves_in_a_fresh_process(tmp_path: Path) -> None:
@@ -55,8 +52,7 @@ def test_cell_serial_resolves_in_a_fresh_process(tmp_path: Path) -> None:
     # Session B: a brand-new interpreter, nothing in memory from session A.
     proc = _run_cold(
         tmp_path,
-        'ws.add("test", type="capacity_check", cell="S1", data="x.csv")\n'
-        'print("RESOLVED")',
+        'ws.add("test", type="capacity_check", cell="S1", data="x.csv")\nprint("RESOLVED")',
     )
     assert proc.returncode == 0, proc.stderr
     assert "RESOLVED" in proc.stdout
@@ -100,9 +96,7 @@ def test_protocol_reference_resolves_in_a_fresh_process(tmp_path: Path) -> None:
     proto = TestSpec(name="500-cycle CCCV", kind="cycling", cycles=500)
     ws_a.add("test", cell="S1", data="x.csv", spec=proto)
     ws_a.save()
-    proto_iri = next(
-        (ws_a._ws.source_root / "test-protocol").glob("*.json")
-    )
+    proto_iri = next((ws_a._ws.source_root / "test-protocol").glob("*.json"))
     import json
 
     proto_id = json.loads(proto_iri.read_text(encoding="utf-8"))["test_spec"]["id"]

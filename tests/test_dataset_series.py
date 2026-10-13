@@ -108,9 +108,7 @@ def test_series_without_cell_link_is_exempt_but_plain_dataset_is_not() -> None:
     assert any(issue.code == "semantic.dataset_missing_cell_link" for issue in report.issues)
 
     series_report = validate_record_report(_series().to_record(), policy="strict")
-    assert not any(
-        issue.code == "semantic.dataset_missing_cell_link" for issue in series_report.issues
-    )
+    assert not any(issue.code == "semantic.dataset_missing_cell_link" for issue in series_report.issues)
 
 
 def test_schema_rejects_a_non_dataset_series_iri() -> None:
@@ -121,15 +119,11 @@ def test_schema_rejects_a_non_dataset_series_iri() -> None:
 
 
 def test_publication_node_emits_series_edges_and_type(tmp_path: Path) -> None:
-    node = _dataset_jsonld_node(
-        _member(), [], tmp_path, TEST_IRI, CELL_IRI, distribution_entries=[]
-    )
+    node = _dataset_jsonld_node(_member(), [], tmp_path, TEST_IRI, CELL_IRI, distribution_entries=[])
     assert node["dcat:inSeries"] == {"@id": SERIES_IRI}
     assert node["schema:isPartOf"] == {"@id": SERIES_IRI}
 
-    series_node = _dataset_jsonld_node(
-        _series(), [], tmp_path, TEST_IRI, CELL_IRI, distribution_entries=[]
-    )
+    series_node = _dataset_jsonld_node(_series(), [], tmp_path, TEST_IRI, CELL_IRI, distribution_entries=[])
     assert "dcat:DatasetSeries" in series_node["@type"]
     assert "dcat:inSeries" not in series_node
 
@@ -171,6 +165,7 @@ def test_data_catalog_membership_reaches_the_record_emitter() -> None:
 
 # ── Members authored with ws.add("test", data=..., series_id=...) ──────────────
 
+
 def _workspace_with_cell(root: Path) -> AuthoringWorkspace:
     root.mkdir(parents=True, exist_ok=True)
     draft = {"manufacturer": "Flores Lab", "model": "Gr half cell", "format": "coin", "chemistry": "li-ion"}
@@ -209,8 +204,11 @@ def test_ws_add_members_are_in_series_in_the_deposit_graph(tmp_path: Path) -> No
             access_url="https://doi.org/10.5281/zenodo.20086298",
             source=_PROVENANCE,
         ),
-        source_root=tmp_path / ".battinfo" / "records", mode="upsert",
-        validation_policy="strict", build_jsonld=False, build_html=False,
+        source_root=tmp_path / ".battinfo" / "records",
+        mode="upsert",
+        validation_policy="strict",
+        build_jsonld=False,
+        build_html=False,
     )
     ws.add("test", type="quasi_ocv", cell="C01", data="C01-a.csv", series_id=collection["id"])
     ws.save()
@@ -223,16 +221,17 @@ def test_ws_add_members_are_in_series_in_the_deposit_graph(tmp_path: Path) -> No
     assert "dcat:DatasetSeries" in nodes[collection["id"]]["@type"]
 
 
-@pytest.mark.parametrize(("kwargs", "message"), [
-    ({"cell": "C01", "data": "C01-a.csv", "series_id": TEST_IRI}, "not a dataset IRI"),
-    ({"cell": "C01", "data": "C01-a.csv", "series_id": "aaaa-bbbb-cccc-dddd"}, "not a dataset IRI"),
-    ({"cell": "C01", "data": "C01-a.csv", "series_id": f"{SERIES_IRI}/"}, "not a dataset IRI"),
-    ({"cell": "C01", "series_id": SERIES_IRI}, "data="),
-    ({"datasets": "*.csv", "series_id": SERIES_IRI}, "data="),
-])
-def test_ws_add_refuses_a_bad_series_id_before_anything_is_created(
-    tmp_path: Path, kwargs: dict, message: str
-) -> None:
+@pytest.mark.parametrize(
+    ("kwargs", "message"),
+    [
+        ({"cell": "C01", "data": "C01-a.csv", "series_id": TEST_IRI}, "not a dataset IRI"),
+        ({"cell": "C01", "data": "C01-a.csv", "series_id": "aaaa-bbbb-cccc-dddd"}, "not a dataset IRI"),
+        ({"cell": "C01", "data": "C01-a.csv", "series_id": f"{SERIES_IRI}/"}, "not a dataset IRI"),
+        ({"cell": "C01", "series_id": SERIES_IRI}, "data="),
+        ({"datasets": "*.csv", "series_id": SERIES_IRI}, "data="),
+    ],
+)
+def test_ws_add_refuses_a_bad_series_id_before_anything_is_created(tmp_path: Path, kwargs: dict, message: str) -> None:
     ws = _workspace_with_cell(tmp_path)
     with pytest.raises(ValueError, match=message):
         ws.add("test", type="quasi_ocv", **kwargs)
@@ -249,9 +248,11 @@ def test_series_id_does_not_move_the_test_or_dataset_iris(tmp_path: Path) -> Non
         ws = _workspace_with_cell(tmp_path)
         ws.add("test", type="quasi_ocv", cell="C01", data=["C01-a.csv", "C01-b.csv"], series_id=series_id)
         ws.save()
-        minted.append((
-            [test["test"]["id"] for test in _saved(tmp_path, "test")],
-            [dataset["dataset"]["id"] for dataset in _saved(tmp_path, "dataset")],
-        ))
+        minted.append(
+            (
+                [test["test"]["id"] for test in _saved(tmp_path, "test")],
+                [dataset["dataset"]["id"] for dataset in _saved(tmp_path, "dataset")],
+            )
+        )
     assert minted[0] == minted[1]
     assert len(minted[0][1]) == 2

@@ -30,8 +30,8 @@ def test_validate_record_report_accepts_canonical_cell_spec_example() -> None:
     # (red-team W3.3) truthfully flag what the JSON-LD path would drop:
     # unmapped keys, text-only values, and alias pairs collapsing to one node.
     expected_warnings = {
-        "semantic.property_unmapped",       # specific_power, power_density, nominal_continuous_*
-        "semantic.value_text_only",         # cycle_life ">1000"
+        "semantic.property_unmapped",  # specific_power, power_density, nominal_continuous_*
+        "semantic.value_text_only",  # cycle_life ">1000"
         "semantic.property_alias_collision",  # typical_energy + rated_energy
     }
     assert {i.code for i in report.issues} <= expected_warnings
@@ -59,7 +59,8 @@ def test_validate_record_report_accepts_cell_spec_with_bibliography() -> None:
     assert report.ok
     # Only the truthful mappability warnings the base example carries.
     assert {i.code for i in report.issues} <= {
-        "semantic.property_unmapped", "semantic.value_text_only",
+        "semantic.property_unmapped",
+        "semantic.value_text_only",
     }
 
 
@@ -145,7 +146,6 @@ def test_validate_record_report_rejects_invalid_size_code_shape() -> None:
     assert "semantic.size_code_invalid" in codes
 
 
-
 def test_string_number_value_fails_loud() -> None:
     """'2.5' (string) used to pass strict validation and emit an untyped
     string literal into RDF (red-team W3.4). The schema now requires number;
@@ -163,9 +163,7 @@ def test_validate_record_report_checks_equipment_and_channel_references() -> Non
     doc = _load_json("src/battinfo/data/examples/test/test-5p7v-2n8k-4m3t-6q9r.json")
     doc["test"]["equipment_id"] = "https://w3id.org/battinfo/spec/0000-0000-0000-0001"
     doc["test"]["channel_id"] = "https://w3id.org/battinfo/spec/0000-0000-0000-0002"
-    report = validate_record_report(
-        doc, source_root=ROOT / "src" / "battinfo" / "data" / "examples", policy=STRICT
-    )
+    report = validate_record_report(doc, source_root=ROOT / "src" / "battinfo" / "data" / "examples", policy=STRICT)
     assert not report.ok
     missing = {i.path for i in report.errors if i.code == "reference.missing"}
     assert "test.equipment_id" in missing
@@ -178,14 +176,9 @@ def test_validate_record_report_flags_equipment_reference_of_wrong_kind() -> Non
     doc = _load_json("src/battinfo/data/examples/test/test-5p7v-2n8k-4m3t-6q9r.json")
     # A real record id — but a cell spec, not equipment.
     doc["test"]["equipment_id"] = "https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0"
-    report = validate_record_report(
-        doc, source_root=ROOT / "src" / "battinfo" / "data" / "examples", policy=STRICT
-    )
+    report = validate_record_report(doc, source_root=ROOT / "src" / "battinfo" / "data" / "examples", policy=STRICT)
     assert not report.ok
-    assert any(
-        i.code == "reference.type_mismatch" and i.path == "test.equipment_id"
-        for i in report.errors
-    )
+    assert any(i.code == "reference.type_mismatch" and i.path == "test.equipment_id" for i in report.errors)
 
 
 def test_validate_record_report_checks_reference_electrode_spec_reference() -> None:
@@ -194,49 +187,34 @@ def test_validate_record_report_checks_reference_electrode_spec_reference() -> N
     doc = _load_json("src/battinfo/data/examples/cell-spec/A123__ANR26650M1-B.json")
     # Link fields ride the record top level (cell-spec.schema.json), beside
     # working/counter_electrode_spec_id.
-    doc["reference_electrode_spec_id"] = (
-        "https://w3id.org/battinfo/spec/0000-0000-0000-0003"
-    )
-    report = validate_record_report(
-        doc, source_root=ROOT / "src" / "battinfo" / "data" / "examples", policy=STRICT
-    )
+    doc["reference_electrode_spec_id"] = "https://w3id.org/battinfo/spec/0000-0000-0000-0003"
+    report = validate_record_report(doc, source_root=ROOT / "src" / "battinfo" / "data" / "examples", policy=STRICT)
     assert not report.ok
-    assert any(
-        i.code == "reference.missing" and i.path == "reference_electrode_spec_id"
-        for i in report.errors
-    )
+    assert any(i.code == "reference.missing" and i.path == "reference_electrode_spec_id" for i in report.errors)
 
 
 def test_validate_record_report_checks_active_material_spec_reference() -> None:
     """electrode_spec.active_material_spec_id joins the validated links
     (found by the schema-link inventory gate, 0.8.0 review F6 family)."""
     import glob as _glob
+
     path = sorted(_glob.glob(str(ROOT / "src/battinfo/data/examples/electrode-spec/*.json")))[0]
     doc = json.loads(Path(path).read_text(encoding="utf-8"))
-    doc["electrode_spec"]["active_material_spec_id"] = (
-        "https://w3id.org/battinfo/spec/0000-0000-0000-0004"
-    )
-    report = validate_record_report(
-        doc, source_root=ROOT / "src" / "battinfo" / "data" / "examples", policy=STRICT
-    )
+    doc["electrode_spec"]["active_material_spec_id"] = "https://w3id.org/battinfo/spec/0000-0000-0000-0004"
+    report = validate_record_report(doc, source_root=ROOT / "src" / "battinfo" / "data" / "examples", policy=STRICT)
     assert not report.ok
     assert any(
-        i.code == "reference.missing" and i.path == "electrode_spec.active_material_spec_id"
-        for i in report.errors
+        i.code == "reference.missing" and i.path == "electrode_spec.active_material_spec_id" for i in report.errors
     )
 
 
 def test_validate_record_report_checks_channel_equipment_reference() -> None:
     """channel.equipment_id joins the validated links (F6 family)."""
     import glob as _glob
+
     path = sorted(_glob.glob(str(ROOT / "src/battinfo/data/examples/channel/*.json")))[0]
     doc = json.loads(Path(path).read_text(encoding="utf-8"))
     doc["channel"]["equipment_id"] = "https://w3id.org/battinfo/spec/0000-0000-0000-0005"
-    report = validate_record_report(
-        doc, source_root=ROOT / "src" / "battinfo" / "data" / "examples", policy=STRICT
-    )
+    report = validate_record_report(doc, source_root=ROOT / "src" / "battinfo" / "data" / "examples", policy=STRICT)
     assert not report.ok
-    assert any(
-        i.code == "reference.missing" and i.path == "channel.equipment_id"
-        for i in report.errors
-    )
+    assert any(i.code == "reference.missing" and i.path == "channel.equipment_id" for i in report.errors)

@@ -101,10 +101,14 @@ def test_example_ids_are_content_derived() -> None:
 
 def test_electrode_spec_and_batch_roundtrip(tmp_path: Path) -> None:
     spec = api.create_electrode_spec(
-        name="NMC811 cathode", kind="nmc811", manufacturer="Canrud",
-        composition={"active": 0.96,
-                     "binder": {"name": "PVDF", "fraction": 0.02},
-                     "additive": {"name": "Carbon black", "fraction": 0.02}},
+        name="NMC811 cathode",
+        kind="nmc811",
+        manufacturer="Canrud",
+        composition={
+            "active": 0.96,
+            "binder": {"name": "PVDF", "fraction": 0.02},
+            "additive": {"name": "Carbon black", "fraction": 0.02},
+        },
         processing={"route": "nmp", "solvent": "NMP"},
         current_collector={"name": "Aluminium foil", "thickness": {"value": 15, "unit": "um"}},
         property={"loading": {"value": 21, "unit": "mg/cm2"}},
@@ -135,7 +139,8 @@ def test_electrode_missing_spec_reference_is_flagged(tmp_path: Path) -> None:
 
     batch = api.create_electrode(
         electrode_spec_id="https://w3id.org/battinfo/spec/0000-0000-0000-0000",
-        batch="ORPHAN", validate=False,
+        batch="ORPHAN",
+        validate=False,
     )
     result = validate_record(batch, source_root=tmp_path)
     assert not result.ok
@@ -147,15 +152,16 @@ def test_electrode_spec_material_references_are_checked(tmp_path: Path) -> None:
     from battinfo.validate.record import validate_record
 
     spec = api.create_electrode_spec(
-        name="Graphite anode", kind="graphite",
+        name="Graphite anode",
+        kind="graphite",
         active_material_spec_id="https://w3id.org/battinfo/spec/0000-0000-0000-0000",
-        composition={"active": 0.95}, validate=False,
+        composition={"active": 0.95},
+        validate=False,
     )
     result = validate_record(spec, source_root=tmp_path)
     assert any(i.code == "reference.missing" for i in result.issues)
 
 
 def test_electrode_manufacturer_coerced_to_organization() -> None:
-    spec = api.create_electrode_spec(uid="abcd23456789abcd", name="LFP cathode", kind="lfp",
-                                     manufacturer="Canrud")
+    spec = api.create_electrode_spec(uid="abcd23456789abcd", name="LFP cathode", kind="lfp", manufacturer="Canrud")
     assert spec["electrode_spec"]["manufacturer"] == {"type": "Organization", "name": "Canrud"}

@@ -30,11 +30,11 @@ CREATORS = [{"name": "Clark, Simon", "affiliation": "SINTEF"}]
 
 # ── fixtures ───────────────────────────────────────────────────────────────────
 
+
 def _make_batch(tmp_path: Path, n_cells: int = 2, n_files_per_cell: int = 2) -> Path:
     """Init a batch and populate each cell with real-looking data files."""
     batch_dir = tmp_path / "batch"
-    result = init_batch(batch_dir, "Energizer CR2032", n_cells,
-                        batch_id="LOT-2025", lab="SINTEF", operator="Ada")
+    result = init_batch(batch_dir, "Energizer CR2032", n_cells, batch_id="LOT-2025", lab="SINTEF", operator="Ada")
 
     for cell_info in result["cells"]:
         cell = batch_dir / cell_info["folder"]
@@ -42,11 +42,9 @@ def _make_batch(tmp_path: Path, n_cells: int = 2, n_files_per_cell: int = 2) -> 
             kinds = ["capacity_check", "cycling"]
             kind = kinds[(j - 1) % len(kinds)]
             (cell / f"2025-06-0{j}__{kind}__25degC.csv").write_text(
-                f"time,voltage\n0,3.0\n1,{2.9 + 0.01*j}\n", encoding="utf-8"
+                f"time,voltage\n0,3.0\n1,{2.9 + 0.01 * j}\n", encoding="utf-8"
             )
-        (cell / "2025-06-01__eis__25degC.csv").write_text(
-            "freq,Re,Im\n1000,10,5\n", encoding="utf-8"
-        )
+        (cell / "2025-06-01__eis__25degC.csv").write_text("freq,Re,Im\n1000,10,5\n", encoding="utf-8")
     return batch_dir
 
 
@@ -58,6 +56,7 @@ def test_init_batch_rejects_duplicate_serials(tmp_path: Path) -> None:
 
 
 # ── _collect_data_files ────────────────────────────────────────────────────────
+
 
 class TestCollectDataFiles:
     def test_empty_cell_returns_empty(self, tmp_path: Path) -> None:
@@ -116,24 +115,29 @@ class TestCollectDataFiles:
 
 # ── _test_kind_from_path ───────────────────────────────────────────────────────
 
+
 class TestTestKindFromPath:
-    @pytest.mark.parametrize("filename,subdir,expected", [
-        ("2025-06-01__capacity_check__25degC.csv", "timeseries", "capacity_check"),
-        ("cycle_life_test.nda", "timeseries", "cycling"),
-        ("cycling_001.csv", "timeseries", "cycling"),
-        ("rate_capability.csv", "timeseries", "rate_capability"),
-        ("ici_test.csv", "timeseries", "ici"),
-        ("hppc.csv", "timeseries", "hppc"),
-        ("formation_001.csv", "timeseries", "formation"),
-        ("any_file.csv", "eis", "eis"),          # subdir override
-        ("eis_spectrum.csv", "timeseries", "eis"),
-        ("unknown.ccs", "timeseries", "other"),
-    ])
+    @pytest.mark.parametrize(
+        "filename,subdir,expected",
+        [
+            ("2025-06-01__capacity_check__25degC.csv", "timeseries", "capacity_check"),
+            ("cycle_life_test.nda", "timeseries", "cycling"),
+            ("cycling_001.csv", "timeseries", "cycling"),
+            ("rate_capability.csv", "timeseries", "rate_capability"),
+            ("ici_test.csv", "timeseries", "ici"),
+            ("hppc.csv", "timeseries", "hppc"),
+            ("formation_001.csv", "timeseries", "formation"),
+            ("any_file.csv", "eis", "eis"),  # subdir override
+            ("eis_spectrum.csv", "timeseries", "eis"),
+            ("unknown.ccs", "timeseries", "other"),
+        ],
+    )
     def test_kind_inference(self, filename: str, subdir: str, expected: str) -> None:
         assert _test_kind_from_path(Path(filename), subdir) == expected
 
 
 # ── package_batch ──────────────────────────────────────────────────────────────
+
 
 class TestPackageBatch:
     def test_produces_staging_dir(self, tmp_path: Path) -> None:
@@ -169,9 +173,7 @@ class TestPackageBatch:
         from battinfo.contribution import CONTRIBUTION_MANIFEST
 
         batch = _make_batch(tmp_path, n_cells=2)
-        cell_dirs = sorted(
-            d for d in batch.iterdir() if d.is_dir() and (d / CONTRIBUTION_MANIFEST).exists()
-        )
+        cell_dirs = sorted(d for d in batch.iterdir() if d.is_dir() and (d / CONTRIBUTION_MANIFEST).exists())
         assert len(cell_dirs) == 2
         m0 = yaml.safe_load((cell_dirs[0] / CONTRIBUTION_MANIFEST).read_text(encoding="utf-8"))
         m1_path = cell_dirs[1] / CONTRIBUTION_MANIFEST
@@ -241,9 +243,7 @@ class TestPackageBatch:
     def test_test_kinds_inferred(self, tmp_path: Path) -> None:
         batch = _make_batch(tmp_path, n_cells=1, n_files_per_cell=2)
         result = package_batch(batch, creators=CREATORS)
-        record = ZenodoCellRecord.from_path(
-            Path(result["staging_dir"]) / ZENODO_CELL_RECORD_FILENAME
-        )
+        record = ZenodoCellRecord.from_path(Path(result["staging_dir"]) / ZENODO_CELL_RECORD_FILENAME)
         kinds = {e.test.test_type for e in record.datasets}
         assert "capacity_check" in kinds
         assert "eis" in kinds
@@ -251,9 +251,7 @@ class TestPackageBatch:
     def test_cell_instances_populated(self, tmp_path: Path) -> None:
         batch = _make_batch(tmp_path, n_cells=2, n_files_per_cell=1)
         result = package_batch(batch, creators=CREATORS)
-        record = ZenodoCellRecord.from_path(
-            Path(result["staging_dir"]) / ZENODO_CELL_RECORD_FILENAME
-        )
+        record = ZenodoCellRecord.from_path(Path(result["staging_dir"]) / ZENODO_CELL_RECORD_FILENAME)
         for entry in record.datasets:
             assert len(entry.cell_instances) == 1
             assert entry.cell_instances[0].id is not None
@@ -285,7 +283,11 @@ class TestPackageBatch:
         batch = _make_batch(tmp_path)
         result = package_batch(batch, creators=CREATORS)
         staging = Path(result["staging_dir"])
-        local = {form for path in (batch, batch.resolve()) for form in (str(path), path.as_posix(), json.dumps(str(path))[1:-1])}
+        local = {
+            form
+            for path in (batch, batch.resolve())
+            for form in (str(path), path.as_posix(), json.dumps(str(path))[1:-1])
+        }
         texts = {
             name: (staging / name).read_text(encoding="utf-8")
             for name in (ZENODO_CELL_RECORD_FILENAME, DEFAULT_PUBLISH_FILENAME, DEFAULT_RO_CRATE_METADATA_FILENAME)
@@ -322,6 +324,7 @@ class TestPackageBatch:
 
 # ── CLI: batch package ─────────────────────────────────────────────────────────
 
+
 class TestBatchPackageCli:
     def _make_batch(self, tmp_path: Path) -> Path:
         batch = _make_batch(tmp_path, n_cells=2, n_files_per_cell=1)
@@ -329,61 +332,100 @@ class TestBatchPackageCli:
 
     def test_basic_invocation(self, tmp_path: Path) -> None:
         batch = _make_batch(tmp_path)
-        result = runner.invoke(app, [
-            "batch", "package", str(batch),
-            "--creator", "Clark, Simon",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "batch",
+                "package",
+                str(batch),
+                "--creator",
+                "Clark, Simon",
+            ],
+        )
         assert result.exit_code == 0, result.output
         assert "Package built" in result.output
         assert (batch / "staging").is_dir()
 
     def test_creator_with_affiliation(self, tmp_path: Path) -> None:
         batch = _make_batch(tmp_path)
-        result = runner.invoke(app, [
-            "batch", "package", str(batch),
-            "--creator", "Clark, Simon; SINTEF",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "batch",
+                "package",
+                str(batch),
+                "--creator",
+                "Clark, Simon; SINTEF",
+            ],
+        )
         assert result.exit_code == 0, result.output
 
     def test_multiple_creators(self, tmp_path: Path) -> None:
         batch = _make_batch(tmp_path)
-        result = runner.invoke(app, [
-            "batch", "package", str(batch),
-            "--creator", "Clark, Simon",
-            "--creator", "Smith, Jane",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "batch",
+                "package",
+                str(batch),
+                "--creator",
+                "Clark, Simon",
+                "--creator",
+                "Smith, Jane",
+            ],
+        )
         assert result.exit_code == 0, result.output
 
     def test_custom_staging_dir(self, tmp_path: Path) -> None:
         batch = _make_batch(tmp_path)
         out = tmp_path / "output"
-        result = runner.invoke(app, [
-            "batch", "package", str(batch),
-            "--staging", str(out),
-            "--creator", "Clark, Simon",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "batch",
+                "package",
+                str(batch),
+                "--staging",
+                str(out),
+                "--creator",
+                "Clark, Simon",
+            ],
+        )
         assert result.exit_code == 0, result.output
         assert out.is_dir()
 
     def test_no_data_fails(self, tmp_path: Path) -> None:
         batch = tmp_path / "batch"
         init_batch(batch, "Energizer CR2032", 1)
-        result = runner.invoke(app, [
-            "batch", "package", str(batch),
-            "--creator", "Clark, Simon",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "batch",
+                "package",
+                str(batch),
+                "--creator",
+                "Clark, Simon",
+            ],
+        )
         assert result.exit_code != 0
 
     def test_shows_upload_hint(self, tmp_path: Path) -> None:
         batch = _make_batch(tmp_path)
-        result = runner.invoke(app, [
-            "batch", "package", str(batch),
-            "--creator", "Clark, Simon",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "batch",
+                "package",
+                str(batch),
+                "--creator",
+                "Clark, Simon",
+            ],
+        )
         assert "batch upload" in result.output
 
 
 # ── Uploads go only to the Zenodo sandbox in this release ──────────────────────
+
 
 def _one_line(text: str) -> str:
     return " ".join(text.split())
@@ -393,11 +435,18 @@ class TestSandboxOnlyUploads:
     def test_batch_upload_refuses_zenodo_org(self, tmp_path: Path) -> None:
         staging = Path(package_batch(_make_batch(tmp_path), creators=CREATORS)["staging_dir"])
         with patch("battinfo.zenodo.ZenodoClient") as client:
-            result = runner.invoke(app, [
-                "batch", "upload", str(staging),
-                "--token", "tok",
-                "--creator", "Clark, Simon",
-            ])
+            result = runner.invoke(
+                app,
+                [
+                    "batch",
+                    "upload",
+                    str(staging),
+                    "--token",
+                    "tok",
+                    "--creator",
+                    "Clark, Simon",
+                ],
+            )
         assert result.exit_code == 1
         assert "only to the Zenodo sandbox" in _one_line(result.output)
         client.assert_not_called()
@@ -410,13 +459,20 @@ class TestSandboxOnlyUploads:
             (folder / f"cell{n}_cycling.csv").write_text("time,voltage\n0,3.0\n", encoding="utf-8")
         before = sorted(p.relative_to(folder).as_posix() for p in folder.rglob("*"))
         with patch("battinfo.zenodo.ZenodoClient") as client:
-            result = runner.invoke(app, [
-                "push", str(folder),
-                "--cell-spec", "Energizer CR2032",
-                "--creator", "Clark, Simon",
-                "--token", "tok",
-                "--yes",
-            ])
+            result = runner.invoke(
+                app,
+                [
+                    "push",
+                    str(folder),
+                    "--cell-spec",
+                    "Energizer CR2032",
+                    "--creator",
+                    "Clark, Simon",
+                    "--token",
+                    "tok",
+                    "--yes",
+                ],
+            )
         assert result.exit_code == 1
         assert "only to the Zenodo sandbox" in _one_line(result.output)
         client.assert_not_called()

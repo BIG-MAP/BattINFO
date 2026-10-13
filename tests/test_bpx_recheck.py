@@ -15,6 +15,7 @@ Each test reproduces one finding of the re-check and pins its fix:
   misspelt keywords (B-16), the from_bpx docstring (B-15) and ASCII interop
   docstrings (B-20).
 """
+
 from __future__ import annotations
 
 import json
@@ -85,8 +86,12 @@ def test_cell_and_state_claims_carry_no_provenance_class() -> None:
         facets = {f["schema:name"]: f["schema:value"] for f in _as_list(part_node["schema:additionalProperty"])}
         annotated = [
             claim_node
-            for claim_node in _as_list(part_node.get("hasProperty")) + _as_list(part_node.get("schema:variableMeasured"))
-            if any(a.get("schema:name") == "provenance_class" for a in _as_list(claim_node.get("schema:additionalProperty")))
+            for claim_node in _as_list(part_node.get("hasProperty"))
+            + _as_list(part_node.get("schema:variableMeasured"))
+            if any(
+                a.get("schema:name") == "provenance_class"
+                for a in _as_list(claim_node.get("schema:additionalProperty"))
+            )
         ]
         if facets["part"] in ("cell", "state"):
             assert not annotated, facets["part"]
@@ -121,7 +126,6 @@ def test_the_provenance_class_does_not_change_the_export() -> None:
     assert to_bpx(plain).bpx == to_bpx(classed).bpx
 
 
-
 def test_the_packaged_bpx_examples_state_no_class_bpx_does_not_give() -> None:
     examples = ROOT / "src" / "battinfo" / "data" / "examples" / "parameter-set"
     files = 0
@@ -134,6 +138,7 @@ def test_the_packaged_bpx_examples_state_no_class_bpx_does_not_give() -> None:
             if part["part"] in ("cell", "state"):
                 assert all("provenance_class" not in claim for claim in part["claims"]), (path.name, part["part"])
     assert files == 5
+
 
 @pytest.mark.parametrize(
     ("kwargs", "error", "match"),
@@ -160,11 +165,13 @@ def _graphite_batch() -> dict:
     return create_parameter_set(
         name="Example 2020 - graphite",
         material_kind="graphite",
-        claims=[{
-            "parameter": "particle_radius",
-            "quantity": {"value": 5.86e-6, "unit": "m"},
-            "provenance_class": "literature",
-        }],
+        claims=[
+            {
+                "parameter": "particle_radius",
+                "quantity": {"value": 5.86e-6, "unit": "m"},
+                "provenance_class": "literature",
+            }
+        ],
     )
 
 
@@ -178,7 +185,8 @@ def test_collate_by_material_keeps_only_that_material() -> None:
     for spelling in ("graphite", "MCMB"):  # a kind key or an alias
         graphite = collate_claims([file_record, batch], material_kind=spelling)
         assert [claim["source"].get("part") for claim in graphite["particle_radius"]] == [
-            "negative_material", None,
+            "negative_material",
+            None,
         ]
         assert all(c["source"]["material_kind"] == "graphite" for claims in graphite.values() for c in claims)
         assert "electrode_area" not in graphite  # a cell claim
@@ -225,7 +233,9 @@ def test_zero_transport_values_are_named_and_kept() -> None:
 
     # Kept as the file states them, so the export gives the file back.
     record = result.to_parameter_set(virtual_cell=True)
-    values = {claim["parameter"]: claim["quantity"]["value"] for claim in _parts(record)["electrolyte"] if "quantity" in claim}
+    values = {
+        claim["parameter"]: claim["quantity"]["value"] for claim in _parts(record)["electrolyte"] if "quantity" in claim
+    }
     assert values["ionic_conductivity"] == 0
     assert values["transference_number"] == 0
     exported = to_bpx(record).bpx["Parameterisation"]
@@ -285,7 +295,8 @@ def test_a_transport_placeholder_gets_no_provenance_class() -> None:
 def test_record_validation_warns_on_a_transport_placeholder(policy: str) -> None:
     record = from_bpx_parameters(_placeholder_doc()).to_parameter_set(virtual_cell=True)
     issues = [
-        issue for issue in validate_record_report(record, policy=policy).issues
+        issue
+        for issue in validate_record_report(record, policy=policy).issues
         if issue.code == "semantic.parameter_transport_not_positive"
     ]
     assert len(issues) == 3
@@ -294,8 +305,7 @@ def test_record_validation_warns_on_a_transport_placeholder(policy: str) -> None
     for key in PLACEHOLDERS:
         assert f"claim '{key}'" in named, key
     assert all(
-        issue.path.startswith("parameter_set.parts[") and issue.path.endswith(".quantity.value")
-        for issue in issues
+        issue.path.startswith("parameter_set.parts[") and issue.path.endswith(".quantity.value") for issue in issues
     )
 
     # A claim batch gets the same warning, and a positive value none.
@@ -303,11 +313,13 @@ def test_record_validation_warns_on_a_transport_placeholder(policy: str) -> None
         batch = create_parameter_set(
             name="Example 2020 - graphite",
             material_kind="graphite",
-            claims=[{
-                "parameter": "solid_diffusivity",
-                "quantity": {"value": value, "unit": "m2/s"},
-                "provenance_class": "literature",
-            }],
+            claims=[
+                {
+                    "parameter": "solid_diffusivity",
+                    "quantity": {"value": value, "unit": "m2/s"},
+                    "provenance_class": "literature",
+                }
+            ],
         )
         codes = [issue.code for issue in validate_record_report(batch, policy=policy).issues]
         assert codes.count("semantic.parameter_transport_not_positive") == expected, value
@@ -358,9 +370,7 @@ def test_the_bpx_units_are_published_emmo_units() -> None:
     data = ROOT / "src" / "battinfo" / "data"
     context = json.loads((data / "context" / "domain-battery.context.json").read_text(encoding="utf-8"))["@context"]
     published = {value if isinstance(value, str) else value.get("@id") for value in context.values()}
-    unit_map = json.loads(
-        (data / "mappings" / "domain-battery" / "unit_map.curated.json").read_text(encoding="utf-8")
-    )
+    unit_map = json.loads((data / "mappings" / "domain-battery" / "unit_map.curated.json").read_text(encoding="utf-8"))
     entries = {entry["symbol"]: entry for entry in unit_map["mappings"]}
     assert unit_map["version"] == "0.5.2"
     (note,) = [note for note in unit_map["notes"] if note.startswith("0.5.2:")]
@@ -402,10 +412,14 @@ def test_the_jsonld_says_what_the_record_does_not_hold() -> None:
     assert body["not_imported"] == ["Validation"]
     assert body["annex"]
 
-    graph = Graph().parse(data=json.dumps(record_to_jsonld(record, "parameter-set", context="inline")), format="json-ld")
+    graph = Graph().parse(
+        data=json.dumps(record_to_jsonld(record, "parameter-set", context="inline")), format="json-ld"
+    )
     stated: dict[str, list[str]] = {}
     for value_node in graph.objects(URIRef(body["id"]), schema.additionalProperty):
-        stated[str(graph.value(value_node, schema.name))] = sorted(str(v) for v in graph.objects(value_node, schema.value))
+        stated[str(graph.value(value_node, schema.name))] = sorted(
+            str(v) for v in graph.objects(value_node, schema.value)
+        )
     assert stated["not_imported"] == ["Validation"]
     assert stated["annex"] == sorted(body["annex"])
 
@@ -464,10 +478,18 @@ def test_a_deposit_with_a_bpx_record_passes_the_shape_checks(tmp_path: Path) -> 
     root = tmp_path / "ws"
     ws = battinfo.workspace(str(root), registry_url=None)
     ws.license("cc-by-4.0")
-    (root / "example.cell-spec.json").write_text(json.dumps({
-        "name": "Example Lab EX-1", "manufacturer": "Example Lab", "model": "EX-1",
-        "format": "pouch", "chemistry": "li-ion",
-    }), encoding="utf-8")
+    (root / "example.cell-spec.json").write_text(
+        json.dumps(
+            {
+                "name": "Example Lab EX-1",
+                "manufacturer": "Example Lab",
+                "model": "EX-1",
+                "format": "pouch",
+                "chemistry": "li-ion",
+            }
+        ),
+        encoding="utf-8",
+    )
     spec = ws.load("example.cell-spec.json")
     ws.save()
     record = from_bpx_parameters(FIXTURE).to_parameter_set(
@@ -478,12 +500,24 @@ def test_a_deposit_with_a_bpx_record_passes_the_shape_checks(tmp_path: Path) -> 
     ws.add("parameter_set", record=record)
     ws.save()
     graph = ws._build_zenodo_jsonld(
-        zenodo_record_id=0, prereserved_doi="10.5281/zenodo.RECORD_ID",
-        record_url="https://zenodo.org/records/RECORD_ID", data_filenames=[], title="t",
-        description="d", creators=[{"name": "Doe, Jane"}], contributors=[], license="cc-by-4.0",
-        keywords=[], version="", is_version_of="",
+        zenodo_record_id=0,
+        prereserved_doi="10.5281/zenodo.RECORD_ID",
+        record_url="https://zenodo.org/records/RECORD_ID",
+        data_filenames=[],
+        title="t",
+        description="d",
+        creators=[{"name": "Doe, Jane"}],
+        contributors=[],
+        license="cc-by-4.0",
+        keywords=[],
+        version="",
+        is_version_of="",
     )
-    paths = {f"@graph[{i}]": node for i, node in enumerate(graph["@graph"]) if node.get("@id") == record["parameter_set"]["id"]}
+    paths = {
+        f"@graph[{i}]": node
+        for i, node in enumerate(graph["@graph"])
+        if node.get("@id") == record["parameter_set"]["id"]
+    }
     assert len(paths) == 1
     (node,) = paths.values()
     # One cell and one file: both are single objects, which the checks must take.
@@ -534,9 +568,7 @@ def test_missing_required_names_the_fields_the_parser_reports() -> None:
 )
 def test_a_url_that_names_a_branch_is_warned(url: str, warned: bool) -> None:
     result = from_bpx_parameters(FIXTURE)
-    record = result.to_parameter_set(
-        virtual_cell=True, distributions=[bpx_file_distribution(FIXTURE, content_url=url)]
-    )
+    record = result.to_parameter_set(virtual_cell=True, distributions=[bpx_file_distribution(FIXTURE, content_url=url)])
     assert any("pin the URL to a commit" in w for w in result.warnings) is warned
     codes = {issue.code for issue in validate_record_report(record, policy="publisher").issues}
     assert ("semantic.parameter_file_content_url_unpinned" in codes) is warned
@@ -548,8 +580,12 @@ def test_a_runnable_copy_that_changes_nothing_is_warned() -> None:
     runnable_bytes = upgrade_bpx(source_bytes).to_json().encode("utf-8")
     source = bpx_file_distribution(source_bytes, name="source.bpx.json", content_url=SOURCE_URL)
     runnable = bpx_file_distribution(
-        runnable_bytes, name="runnable.bpx.json", content_url=RUNNABLE_URL, role="runnable",
-        derived_from=source["checksum"]["value"], conversion="layout only",
+        runnable_bytes,
+        name="runnable.bpx.json",
+        content_url=RUNNABLE_URL,
+        role="runnable",
+        derived_from=source["checksum"]["value"],
+        conversion="layout only",
     )
     result = from_bpx_parameters(source_bytes)
     result.to_parameter_set(virtual_cell=True, distributions=[source, runnable], runnable_file=runnable_bytes)
@@ -560,8 +596,12 @@ def test_a_runnable_copy_that_changes_nothing_is_warned() -> None:
     converted = upgrade_bpx(raw).to_json().encode("utf-8")
     source = bpx_file_distribution(raw, name="source.bpx.json", content_url=SOURCE_URL)
     runnable = bpx_file_distribution(
-        converted, name="runnable.bpx.json", content_url=RUNNABLE_URL, role="runnable",
-        derived_from=source["checksum"]["value"], conversion="layout only",
+        converted,
+        name="runnable.bpx.json",
+        content_url=RUNNABLE_URL,
+        role="runnable",
+        derived_from=source["checksum"]["value"],
+        conversion="layout only",
     )
     result = from_bpx_parameters(raw)
     result.to_parameter_set(virtual_cell=True, distributions=[source, runnable], runnable_file=converted)
@@ -593,7 +633,10 @@ def test_from_bpx_does_what_its_docstring_says() -> None:
     assert any("extras" in w for w in result.warnings)
     assert not any("extras" in w for w in from_bpx(FIXTURE, extra_warnings=False).warnings)
     spec = battinfo.CellSpec(
-        manufacturer="Example Lab", model="EX-1", format="pouch", chemistry="li-ion",
+        manufacturer="Example Lab",
+        model="EX-1",
+        format="pouch",
+        chemistry="li-ion",
         **result.to_cell_spec_kwargs(),
     )
     assert spec.properties["nominal_capacity"] == {"value": 1.0, "unit": "Ah"}
@@ -604,4 +647,3 @@ def test_interop_help_renders_on_a_cp1252_console() -> None:
     text.encode("cp1252")  # raised UnicodeEncodeError on an arrow before
     for obj in (from_bpx, from_bpx_parameters, to_bpx, BpxImportResult, BpxImportResult.to_cell_spec_kwargs):
         assert (obj.__doc__ or "").isascii(), obj
-

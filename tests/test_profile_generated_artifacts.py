@@ -78,4 +78,3 @@ def test_generated_quantitative_properties_fragment_matches_schema() -> None:
     comparable = {key: fragment[key] for key in ("type", "patternProperties", "additionalProperties")}
     expected = {key: schema[key] for key in ("type", "patternProperties", "additionalProperties")}
     assert comparable == expected
-

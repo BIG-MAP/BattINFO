@@ -6,6 +6,7 @@ Supports both production (zenodo.org) and sandbox (sandbox.zenodo.org).
 References:
     https://developers.zenodo.org/
 """
+
 from __future__ import annotations
 
 import http.client
@@ -32,6 +33,7 @@ _DEFAULT_RO_CRATE_FILENAME = "ro-crate-metadata.json"
 def _file_md5(path: Path) -> str:
     """MD5 hex digest of a file (Zenodo identifies file content by MD5)."""
     import hashlib
+
     h = hashlib.md5()
     with open(path, "rb") as fh:
         for chunk in iter(lambda: fh.read(1 << 20), b""):
@@ -116,11 +118,7 @@ def _metadata_errors(reply: Any) -> list[str]:
 class ZenodoClient:
     def __init__(self, *, token: str, sandbox: bool = False) -> None:
         self._token = token
-        self._base = (
-            "https://sandbox.zenodo.org/api"
-            if sandbox
-            else "https://zenodo.org/api"
-        )
+        self._base = "https://sandbox.zenodo.org/api" if sandbox else "https://zenodo.org/api"
         self._sandbox = sandbox
 
     # ── Internal helpers ───────────────────────────────────────────────────────
@@ -158,7 +156,7 @@ class ZenodoClient:
                 # Retry idempotent reads on transient server states (cold start / rate limit).
                 if idempotent and exc.code in (429, 500, 502, 503, 504) and attempt < attempts - 1:
                     last_exc = exc
-                    time.sleep(0.5 * (2 ** attempt))
+                    time.sleep(0.5 * (2**attempt))
                     continue
                 raise ZenodoError(f"Zenodo {exc.code} on {method} {url}: {body[:400]}", status=exc.code) from exc
             except (urllib.error.URLError, TimeoutError, OSError) as exc:
@@ -166,7 +164,7 @@ class ZenodoClient:
                 # Retry idempotent reads; otherwise surface as a clean ZenodoError.
                 if idempotent and attempt < attempts - 1:
                     last_exc = exc
-                    time.sleep(0.5 * (2 ** attempt))
+                    time.sleep(0.5 * (2**attempt))
                     continue
                 raise ZenodoError(f"Zenodo request failed ({method} {url}): {exc}") from exc
         raise ZenodoError(  # pragma: no cover — loop always returns or raises above
@@ -210,9 +208,7 @@ class ZenodoClient:
         )
         problems = _metadata_errors(reply)
         if problems:
-            raise ZenodoError(
-                f"Zenodo did not accept the metadata of deposit {deposit_id}: " + "; ".join(problems)
-            )
+            raise ZenodoError(f"Zenodo did not accept the metadata of deposit {deposit_id}: " + "; ".join(problems))
         return reply
 
     def get_deposit(self, deposit_id: int | str) -> dict:
@@ -301,9 +297,7 @@ class ZenodoClient:
         """
         absent = [f"{name} ({path})" for path, name in files.items() if not Path(path).is_file()]
         if absent:
-            raise FileNotFoundError(
-                f"Not uploaded to deposit {deposit_id}: no local file for {'; '.join(absent)}."
-            )
+            raise FileNotFoundError(f"Not uploaded to deposit {deposit_id}: no local file for {'; '.join(absent)}.")
         if not files:
             return {}
         deposit = self.get_deposit(deposit_id)
@@ -346,9 +340,7 @@ class ZenodoClient:
                     ) from exc
                 except (urllib.error.URLError, TimeoutError, OSError) as exc:
                     if attempt >= retries:
-                        raise ZenodoError(
-                            f"Upload of {zenodo_name} failed after {retries} attempts: {exc}"
-                        ) from exc
+                        raise ZenodoError(f"Upload of {zenodo_name} failed after {retries} attempts: {exc}") from exc
                     time.sleep(min(30.0, 5.0 * attempt))
                 except (http.client.HTTPException, UnicodeError) as exc:
                     # A URL or header the HTTP layer will not send, or a reply it
@@ -356,9 +348,7 @@ class ZenodoClient:
                     raise ZenodoError(f"Upload of {zenodo_name!r} failed: {exc}") from exc
 
             download_url = (
-                file_record.get("links", {}).get("download")
-                or file_record.get("links", {}).get("self")
-                or upload_url
+                file_record.get("links", {}).get("download") or file_record.get("links", {}).get("self") or upload_url
             )
             result[local_path] = download_url
 
@@ -402,9 +392,7 @@ class ZenodoClient:
         """
         absent = [f"{name} ({path})" for path, name in files.items() if not Path(path).is_file()]
         if absent:
-            raise FileNotFoundError(
-                f"Not uploaded to deposit {deposit_id}: no local file for {'; '.join(absent)}."
-            )
+            raise FileNotFoundError(f"Not uploaded to deposit {deposit_id}: no local file for {'; '.join(absent)}.")
         listing = self.list_files(deposit_id)
         existing = {(f.get("filename") or f.get("key")): f for f in listing}
         desired = {name: Path(path) for path, name in files.items()}
@@ -450,6 +438,7 @@ class ZenodoClient:
 
 
 # ── Module-level utilities ─────────────────────────────────────────────────────
+
 
 def _resolve_token(token: str | None) -> str:
     if token is not None:
@@ -659,9 +648,7 @@ def patch_zenodo_urls(
     return results
 
 
-def _apply_deposit_title(
-    staging: Path, title: str, *, publish_filename: str, ro_crate_filename: str
-) -> list[str]:
+def _apply_deposit_title(staging: Path, title: str, *, publish_filename: str, ro_crate_filename: str) -> list[str]:
     """Name the staged graph's catalog node and the RO-Crate root *title*.
 
     ``build_zenodo_package`` names both with the automatic title; a title
@@ -790,9 +777,7 @@ def upload_zenodo_package(
     deposit_id: int = deposit["id"]
     record_id: int = deposit["record_id"]
     prereserved_doi: str = (
-        deposit.get("metadata", {})
-        .get("prereserve_doi", {})
-        .get("doi", f"10.5281/zenodo.{record_id}")
+        deposit.get("metadata", {}).get("prereserve_doi", {}).get("doi", f"10.5281/zenodo.{record_id}")
     )
 
     patch_counts = patch_zenodo_urls(
@@ -805,8 +790,10 @@ def upload_zenodo_package(
         bundle_filename=bundle_filename,
     )
     _apply_deposit_title(
-        staging, _cell_record_deposit_title(record, title),
-        publish_filename=publish_filename, ro_crate_filename=ro_crate_filename,
+        staging,
+        _cell_record_deposit_title(record, title),
+        publish_filename=publish_filename,
+        ro_crate_filename=ro_crate_filename,
     )
 
     all_files: list[Path] = sorted(f for f in staging.iterdir() if f.is_file())

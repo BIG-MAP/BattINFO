@@ -10,6 +10,7 @@ regenerates in memory and fails on drift.
 Usage:
     uv run python scripts/gen_web_examples.py
 """
+
 from __future__ import annotations
 
 import inspect
@@ -28,6 +29,7 @@ NL = chr(10)
 
 
 # ── Snippets: the code shown on the page IS the code that ran ────────────────
+
 
 def snippet_material():
     from battinfo.authoring import material
@@ -127,7 +129,7 @@ def snippet_cell():
     )
     cell = Cell(
         id="https://w3id.org/battinfo/cell/y9xy-kr0v-y5tn-dfj7",
-        cell_spec=spec,                    # every cell links to its spec
+        cell_spec=spec,  # every cell links to its spec
         serial_number="LAB-2026-0001",
         manufactured_at="2026-01-15",
     )
@@ -142,7 +144,7 @@ def snippet_test_spec():
         id="https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
         name="1C cycle life at 25 °C",
         kind="cycling",
-        experiment=[                       # PyBaMM syntax — runnable as-is
+        experiment=[  # PyBaMM syntax — runnable as-is
             "Charge at 1C until 4.2 V",
             "Hold at 4.2 V until C/20",
             "Discharge at 1C until 2.5 V",
@@ -163,7 +165,7 @@ def snippet_equipment():
         name="SkyRC MC3000",
         manufacturer="SkyRC",
         model="MC3000",
-        equipment_class="cycler",          # category is data, never a namespace
+        equipment_class="cycler",  # category is data, never a namespace
         channel_count=4,
         supported_chemistries=["NiMH", "Li-ion", "LiFePO4", "Na-ion"],
     )
@@ -175,10 +177,8 @@ def snippet_equipment():
         location="Lab B",
         status="active",
     )
-    channels = [                           # uid deterministic from (unit, index)
-        create_channel(equipment_id=unit["equipment"]["id"], index=i,
-                       label=f"MC3000-A/CH{i}")
-        for i in (1, 2, 3, 4)
+    channels = [  # uid deterministic from (unit, index)
+        create_channel(equipment_id=unit["equipment"]["id"], index=i, label=f"MC3000-A/CH{i}") for i in (1, 2, 3, 4)
     ]
     record = {
         "equipment_spec": spec["equipment_spec"],
@@ -195,8 +195,10 @@ def snippet_test():
         id="https://w3id.org/battinfo/cell/y9xy-kr0v-y5tn-dfj7",
         cell_spec=CellSpec(
             id="https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
-            manufacturer="Samsung SDI", model="INR21700-50E",
-            format="cylindrical", chemistry="Li-ion",
+            manufacturer="Samsung SDI",
+            model="INR21700-50E",
+            format="cylindrical",
+            chemistry="Li-ion",
         ),
         serial_number="LAB-2026-0001",
     )
@@ -205,7 +207,7 @@ def snippet_test():
         # resolves. Its archived payload predates this emission dialect; the
         # showcase body below is the current gold-standard form.
         id="https://w3id.org/battinfo/test/ygnc-b2j3-bc55-rbn1",
-        cell=cell,                         # what you did, to which cell
+        cell=cell,  # what you did, to which cell
         kind="capacity_check",
         protocol="C/10 constant-current discharge",
         instrument="Biologic VMP-300",
@@ -222,21 +224,25 @@ def snippet_dataset():
         id="https://w3id.org/battinfo/cell/y9xy-kr0v-y5tn-dfj7",
         cell_spec=CellSpec(
             id="https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
-            manufacturer="Samsung SDI", model="INR21700-50E",
-            format="cylindrical", chemistry="Li-ion",
+            manufacturer="Samsung SDI",
+            model="INR21700-50E",
+            format="cylindrical",
+            chemistry="Li-ion",
         ),
         serial_number="LAB-2026-0001",
     )
     test = Test(
         id="https://w3id.org/battinfo/test/6nec-h262-tthy-4rnt",
-        cell=cell, kind="cycling", status="completed",
+        cell=cell,
+        kind="cycling",
+        status="completed",
     )
     dataset = Dataset(
         # A live IRI: dereference it (Accept: application/ld+json) and it
         # resolves. Its archived payload predates this emission dialect; the
         # showcase body below is the current gold-standard form.
         id="https://w3id.org/battinfo/dataset/yssz-kccw-16g6-s21q",
-        path="data/cycle-life-run",        # the folder with your measured files
+        path="data/cycle-life-run",  # the folder with your measured files
         cell=cell,
         test=test,
         name="INR21700-50E cycle-life dataset",
@@ -325,14 +331,28 @@ SHOWCASE = [
 
 UID_RE = re.compile(r"[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}")
 PLACEHOLDER_UIDS = [
-    "7d9k-2m4p-8t3x-6nq5", "y9xy-kr0v-y5tn-dfj7", "3w87-0ddf-ryjg-evxe",
-    "kxwy-5f5f-f682-hhch", "6nec-h262-tthy-4rnt", "0rp6-kncv-cyem-qwcd",
-    "me0t-k16f-eh5y-rq0k", "xcv1-hpy1-b0bw-z5s2", "s6y8-5mne-94gx-e5ve",
-    "fm9p-sqkk-tbx3-rr66", "t4wz-ff8s-6vp6-af48", "7p3d-2e22-7yae-spyb",
+    "7d9k-2m4p-8t3x-6nq5",
+    "y9xy-kr0v-y5tn-dfj7",
+    "3w87-0ddf-ryjg-evxe",
+    "kxwy-5f5f-f682-hhch",
+    "6nec-h262-tthy-4rnt",
+    "0rp6-kncv-cyem-qwcd",
+    "me0t-k16f-eh5y-rq0k",
+    "xcv1-hpy1-b0bw-z5s2",
+    "s6y8-5mne-94gx-e5ve",
+    "fm9p-sqkk-tbx3-rr66",
+    "t4wz-ff8s-6vp6-af48",
+    "7p3d-2e22-7yae-spyb",
 ]
 TIME_KEYS = {
-    "created_at", "modified_at", "published_at", "retrieved_at",
-    "started_at", "ended_at", "issued_at", "saved_at",
+    "created_at",
+    "modified_at",
+    "published_at",
+    "retrieved_at",
+    "started_at",
+    "ended_at",
+    "issued_at",
+    "saved_at",
 }
 FIXED_TIME = 1750000000
 
@@ -342,9 +362,9 @@ FIXED_TIME = 1750000000
 # too; their archived payloads predate the current emission dialect, but the
 # showcase bodies remain the gold-standard form.
 KEEP_UIDS = {
-    "pge5-wer6-2q82-v9k0",   # flagship cell-spec
-    "ygnc-b2j3-bc55-rbn1",   # showcase-test @id
-    "yssz-kccw-16g6-s21q",   # showcase-dataset @id
+    "pge5-wer6-2q82-v9k0",  # flagship cell-spec
+    "ygnc-b2j3-bc55-rbn1",  # showcase-test @id
+    "yssz-kccw-16g6-s21q",  # showcase-dataset @id
 }
 
 
@@ -411,9 +431,7 @@ def build_entries() -> list[dict]:
     entries = []
     for item in SHOWCASE:
         record = normalize(item["fn"]())
-        jsonld = (
-            record_to_jsonld(record, item["recordType"]) if item["recordType"] else None
-        )
+        jsonld = record_to_jsonld(record, item["recordType"]) if item["recordType"] else None
         entries.append(
             {
                 "slug": item["slug"],
@@ -430,21 +448,37 @@ def build_entries() -> list[dict]:
 
 def render(entries: list[dict]) -> str:
     banner = (
-        "// GENERATED by scripts/gen_web_examples.py — do not edit." + NL
-        + "// Each entry's `code` is the literal source of a snippet function in that" + NL
-        + "// script, and `record` is what executing it produced (IRIs/timestamps" + NL
-        + "// normalized). tests/test_web_generated.py fails when this file drifts." + NL + NL
+        "// GENERATED by scripts/gen_web_examples.py — do not edit."
+        + NL
+        + "// Each entry's `code` is the literal source of a snippet function in that"
+        + NL
+        + "// script, and `record` is what executing it produced (IRIs/timestamps"
+        + NL
+        + "// normalized). tests/test_web_generated.py fails when this file drifts."
+        + NL
+        + NL
     )
     body = (
-        "export const showcase: {" + NL
-        + "  slug: string;" + NL
-        + "  title: string;" + NL
-        + "  tagline: string;" + NL
-        + "  recordType: string | null;" + NL
-        + "  code: string;" + NL
-        + "  record: Record<string, unknown>;" + NL
-        + "  jsonld: Record<string, unknown> | null;" + NL
-        + "}[] = " + json.dumps(entries, indent=2, ensure_ascii=False) + ";" + NL
+        "export const showcase: {"
+        + NL
+        + "  slug: string;"
+        + NL
+        + "  title: string;"
+        + NL
+        + "  tagline: string;"
+        + NL
+        + "  recordType: string | null;"
+        + NL
+        + "  code: string;"
+        + NL
+        + "  record: Record<string, unknown>;"
+        + NL
+        + "  jsonld: Record<string, unknown> | null;"
+        + NL
+        + "}[] = "
+        + json.dumps(entries, indent=2, ensure_ascii=False)
+        + ";"
+        + NL
     )
     return banner + body
 

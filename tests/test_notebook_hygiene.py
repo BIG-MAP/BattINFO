@@ -1,4 +1,5 @@
 """Committed guide notebooks must not leak the executing machine's paths."""
+
 from __future__ import annotations
 
 import json

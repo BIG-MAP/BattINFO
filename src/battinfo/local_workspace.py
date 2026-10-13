@@ -574,7 +574,9 @@ class LocalWorkspace:
             or (existing_manifest.workspace_id if existing_manifest is not None else None)
             or (parsed_registry.workspace if parsed_registry is not None else None)
         )
-        resolved_publisher_id = publisher_id or (existing_manifest.publisher_id if existing_manifest is not None else None) or "demo-lab"
+        resolved_publisher_id = (
+            publisher_id or (existing_manifest.publisher_id if existing_manifest is not None else None) or "demo-lab"
+        )
         if resolved_workspace_id is None:
             raise ValueError("workspace_id is required when capturing a new workspace.")
         if parsed_registry is None:
@@ -585,9 +587,21 @@ class LocalWorkspace:
             or dataset.name
             or _humanize_slug(resolved_workspace_id)
         )
-        resolved_description = description if description is not None else (existing_manifest.description if existing_manifest is not None else None)
-        resolved_comment = comment if comment is not None else (list(existing_manifest.comment) if existing_manifest is not None else None)
-        resolved_version = version if version is not None else (existing_manifest.release.version if existing_manifest is not None else None)
+        resolved_description = (
+            description
+            if description is not None
+            else (existing_manifest.description if existing_manifest is not None else None)
+        )
+        resolved_comment = (
+            comment
+            if comment is not None
+            else (list(existing_manifest.comment) if existing_manifest is not None else None)
+        )
+        resolved_version = (
+            version
+            if version is not None
+            else (existing_manifest.release.version if existing_manifest is not None else None)
+        )
         resolved_community = (
             community
             if community is not None
@@ -703,7 +717,9 @@ class LocalWorkspace:
                 created_at=dataset.created_at,
                 distribution=DistributionAuthoring(
                     path=artifact_relpath,
-                    media_type=dataset.data_format or _guess_media_type(artifact_relpath) or _guess_media_type(download_url),
+                    media_type=dataset.data_format
+                    or _guess_media_type(artifact_relpath)
+                    or _guess_media_type(download_url),
                     access_url=access_url,
                     download_url=download_url,
                     checksum_algorithm=dataset.checksum.algorithm,
@@ -878,7 +894,9 @@ class LocalWorkspace:
         return {
             "manifest": manifest,
             "release": dataset_doc.dataset.release.model_copy(deep=True),
-            "zenodo": dataset_doc.dataset.zenodo.model_copy(deep=True) if dataset_doc.dataset.zenodo is not None else None,
+            "zenodo": dataset_doc.dataset.zenodo.model_copy(deep=True)
+            if dataset_doc.dataset.zenodo is not None
+            else None,
             "cell_design": cell_design,
             "cell": cell,
             "test": test,
@@ -957,7 +975,9 @@ class LocalWorkspace:
         cell_spec_payload = cls._resource_semantic_payload(cell_spec_resource).get("battinfo_records", {})
         cell_spec_record = cell_spec_payload.get("cell_spec") or cell_payload.get("cell_spec")
         if not isinstance(cell_spec_record, Mapping):
-            raise ValueError("Submission bundle must include a cell_spec record, either as a resource or nested in the cell resource.")
+            raise ValueError(
+                "Submission bundle must include a cell_spec record, either as a resource or nested in the cell resource."
+            )
         return BattinfoBundle(
             bundle_name=bundle_name,
             cell_spec=CellSpec.from_record(dict(cell_spec_record)),
@@ -1005,7 +1025,11 @@ class LocalWorkspace:
             release = payload.get("release", {})
             resources = payload.get("resources", {})
             resource_payloads = (
-                {str(item.get("resource_type")): item for item in resources if isinstance(item, Mapping) and isinstance(item.get("resource_type"), str)}
+                {
+                    str(item.get("resource_type")): item
+                    for item in resources
+                    if isinstance(item, Mapping) and isinstance(item.get("resource_type"), str)
+                }
                 if isinstance(resources, list)
                 else resources
             )
@@ -1441,13 +1465,16 @@ class LocalWorkspace:
     def _submission_source_local_id(self, manifest: WorkspaceManifest, resource_type: str) -> str:
         return f"{manifest.workspace_id}:{resource_type}"
 
-    def _cell_submission_payload(self, manifest: WorkspaceManifest, records: dict[str, dict[str, Any]]) -> SubmissionResource:
+    def _cell_submission_payload(
+        self, manifest: WorkspaceManifest, records: dict[str, dict[str, Any]]
+    ) -> SubmissionResource:
         cell_record = records["cell"]["cell_instance"]
         cell_spec_record = records["cell_spec"]["cell_spec"]
         return SubmissionResource(
             resource_type="cell",
             source_local_id=self._submission_source_local_id(manifest, "cell"),
-            title=cell_record.get("name") or f"{cell_spec_record.get('manufacturer', 'Battery')} {cell_spec_record.get('model', 'Cell')}",
+            title=cell_record.get("name")
+            or f"{cell_spec_record.get('manufacturer', 'Battery')} {cell_spec_record.get('model', 'Cell')}",
             semantic_payload={
                 "@type": "BatteryCell",
                 "battinfo_records": {
@@ -1457,7 +1484,9 @@ class LocalWorkspace:
             },
         )
 
-    def _test_submission_payload(self, manifest: WorkspaceManifest, records: dict[str, dict[str, Any]]) -> SubmissionResource:
+    def _test_submission_payload(
+        self, manifest: WorkspaceManifest, records: dict[str, dict[str, Any]]
+    ) -> SubmissionResource:
         test_record = records["test"]["test"]
         return SubmissionResource(
             resource_type="test",
@@ -1493,7 +1522,9 @@ class LocalWorkspace:
                     access_url=access_url,
                     media_type=distribution.media_type,
                     package_path=distribution.path,
-                    checksum_sha256=distribution.checksum_value if distribution.checksum_algorithm == "sha256" else None,
+                    checksum_sha256=distribution.checksum_value
+                    if distribution.checksum_algorithm == "sha256"
+                    else None,
                     immutable=dataset_doc.dataset.release.record_url is not None,
                 )
             )
@@ -1662,4 +1693,3 @@ __all__ = [
     "WorkspaceManifest",
     "WORKSPACE_FILENAME",
 ]
-

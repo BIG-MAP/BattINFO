@@ -12,6 +12,7 @@ Configure via environment variables::
     BATTINFO_STORAGE_SECRET_ACCESS_KEY
     BATTINFO_STORAGE_PUBLIC_BASE_URL  # public CDN base URL (no trailing slash)
 """
+
 from __future__ import annotations
 
 import mimetypes
@@ -41,8 +42,7 @@ class S3ArtifactUploader:
             import boto3
         except ImportError as exc:
             raise ImportError(
-                "boto3 is required for S3 artifact upload. "
-                'Install it with: pip install "battinfo[storage]"'
+                'boto3 is required for S3 artifact upload. Install it with: pip install "battinfo[storage]"'
             ) from exc
 
         self._bucket = bucket
@@ -81,6 +81,7 @@ class S3ArtifactUploader:
 
     def _exists(self, key: str) -> bool:
         from botocore.exceptions import ClientError
+
         try:
             self._client.head_object(Bucket=self._bucket, Key=key)
             return True

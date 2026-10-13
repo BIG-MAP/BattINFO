@@ -9,6 +9,7 @@ unless a uid is given, and saving the filled-in record mints it. Validation
 still rejects a record whose own IRI has the all-zero uid, under every policy,
 as the backstop for drafts made from older templates.
 """
+
 from __future__ import annotations
 
 import json
@@ -38,9 +39,16 @@ def test_template_save_validate_mints_a_real_iri(tmp_path: Path) -> None:
     """The reproduction from the evaluation: template, save, validate."""
     root = tmp_path / "examples"
     spec = save_cell_spec(
-        CellSpec(manufacturer="Energizer", model="CR2032", format="coin", chemistry="li-metal",
-                 properties={"nominal_capacity": {"value": 0.235, "unit": "Ah"}}),
-        source_root=root, build_jsonld=False, build_html=False,
+        CellSpec(
+            manufacturer="Energizer",
+            model="CR2032",
+            format="coin",
+            chemistry="li-metal",
+            properties={"nominal_capacity": {"value": 0.235, "unit": "Ah"}},
+        ),
+        source_root=root,
+        build_jsonld=False,
+        build_html=False,
     )
     draft = tmp_path / "draft.json"
     _cli("template", "cell-instance", "--cell-spec-id", spec["id"], "--out", str(draft))
@@ -57,14 +65,14 @@ def test_template_save_validate_mints_a_real_iri(tmp_path: Path) -> None:
     assert CELL_IRI.fullmatch(saved["id"]) and saved["id"] != PLACEHOLDER_CELL
 
     for policy in ("strict", "publisher"):
-        report = _cli("validate", saved["path"], "--source-root", str(root), "--policy", policy,
-                      "--format", "json")
+        report = _cli("validate", saved["path"], "--source-root", str(root), "--policy", policy, "--format", "json")
         assert report["ok"] is True, report
 
 
 def test_template_still_pins_an_explicit_uid() -> None:
-    record = template_cell_instance(cell_spec_id="https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0",
-                                    uid="1f8r6v2k9p4m3t7x")
+    record = template_cell_instance(
+        cell_spec_id="https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0", uid="1f8r6v2k9p4m3t7x"
+    )
     assert record["cell_instance"]["id"] == "https://w3id.org/battinfo/cell/1f8r-6v2k-9p4m-3t7x"
     assert "id" not in template_cell_instance()["cell_instance"]
 
@@ -94,9 +102,14 @@ def test_validation_rejects_the_placeholder_uid_under_every_policy(policy: str) 
 def test_placeholder_spec_iri_is_rejected_too() -> None:
     record = {
         "schema_version": "0.2.0",
-        "cell_spec": {"id": "https://w3id.org/battinfo/spec/0000-0000-0000-0000", "name": "X Y",
-                      "manufacturer": {"type": "Organization", "name": "X"}, "model": "Y",
-                      "cell_format": "coin", "chemistry": "li-ion"},
+        "cell_spec": {
+            "id": "https://w3id.org/battinfo/spec/0000-0000-0000-0000",
+            "name": "X Y",
+            "manufacturer": {"type": "Organization", "name": "X"},
+            "model": "Y",
+            "cell_format": "coin",
+            "chemistry": "li-ion",
+        },
         "provenance": {"source_type": "manual", "retrieved_at": 1791730794},
     }
     report = validate_record_report(record, policy="ingest")
@@ -105,8 +118,13 @@ def test_placeholder_spec_iri_is_rejected_too() -> None:
 
 def test_save_and_cli_validate_refuse_the_placeholder(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="template placeholder"):
-        save_record(_placeholder_cell_record(), source_root=tmp_path, resolve_references=False,
-                    build_jsonld=False, build_html=False)
+        save_record(
+            _placeholder_cell_record(),
+            source_root=tmp_path,
+            resolve_references=False,
+            build_jsonld=False,
+            build_html=False,
+        )
     path = tmp_path / "cell-0000-0000-0000-0000.json"
     path.write_text(json.dumps(_placeholder_cell_record()), encoding="utf-8")
     result = CliRunner().invoke(app, ["validate", str(path), "--policy", "ingest", "--format", "json"])
@@ -157,31 +175,51 @@ def test_filled_templates_save_with_the_iri_their_fields_mint(tmp_path: Path) ->
     """Saving a filled-in template mints the IRI the same record gets from its builder."""
     root = tmp_path / "records"
     built_root = tmp_path / "built"
-    spec_template = api.template_cell_spec(manufacturer="Energizer", model_name="CR2032",
-                                           chemistry="li-metal", format="coin")
+    spec_template = api.template_cell_spec(
+        manufacturer="Energizer", model_name="CR2032", chemistry="li-metal", format="coin"
+    )
     spec_saved = api.save_cell_spec(spec_template, source_root=root, build_jsonld=False, build_html=False)
-    spec_built = api.save_cell_spec(CellSpec(manufacturer="Energizer", model="CR2032", format="coin",
-                                             chemistry="li-metal"),
-                                    source_root=built_root, build_jsonld=False, build_html=False)
+    spec_built = api.save_cell_spec(
+        CellSpec(manufacturer="Energizer", model="CR2032", format="coin", chemistry="li-metal"),
+        source_root=built_root,
+        build_jsonld=False,
+        build_html=False,
+    )
     assert spec_saved["id"] == spec_built["id"]
 
-    protocol_saved = api.save_test_spec(api.template_test_spec(name="CC discharge", kind="capacity_check"),
-                                        source_root=root, build_jsonld=False, build_html=False)
-    protocol_built = api.save_test_spec(TestSpec(name="CC discharge", kind="capacity_check",
-                                                 experiment=["Discharge at C/10 until 2.5 V"]),
-                                        source_root=built_root, build_jsonld=False, build_html=False)
+    protocol_saved = api.save_test_spec(
+        api.template_test_spec(name="CC discharge", kind="capacity_check"),
+        source_root=root,
+        build_jsonld=False,
+        build_html=False,
+    )
+    protocol_built = api.save_test_spec(
+        TestSpec(name="CC discharge", kind="capacity_check", experiment=["Discharge at C/10 until 2.5 V"]),
+        source_root=built_root,
+        build_jsonld=False,
+        build_html=False,
+    )
     assert protocol_saved["id"] == protocol_built["id"]
 
     cell_template = api.template_cell_instance(cell_spec_id=spec_saved["id"])
     cell_template["cell_instance"]["serial_number"] = "S1"
     cell_saved = api.save_cell_instance(cell_template, source_root=root, build_jsonld=False, build_html=False)
-    test_saved = api.save_test(api.template_test(cell_id=cell_saved["id"], name="S1 discharge"),
-                               source_root=root, build_jsonld=False, build_html=False)
+    test_saved = api.save_test(
+        api.template_test(cell_id=cell_saved["id"], name="S1 discharge"),
+        source_root=root,
+        build_jsonld=False,
+        build_html=False,
+    )
     dataset_saved = api.save_dataset(
-        api.template_dataset(title="S1 data", related_cell_ids=[cell_saved["id"]],
-                             related_test_ids=[test_saved["id"]],
-                             access_url="https://zenodo.org/records/1/files/S1.csv"),
-        source_root=root, build_jsonld=False, build_html=False,
+        api.template_dataset(
+            title="S1 data",
+            related_cell_ids=[cell_saved["id"]],
+            related_test_ids=[test_saved["id"]],
+            access_url="https://zenodo.org/records/1/files/S1.csv",
+        ),
+        source_root=root,
+        build_jsonld=False,
+        build_html=False,
     )
     for saved in (cell_saved, test_saved, dataset_saved):
         assert saved["status"] == "created" and "0000-0000" not in saved["id"]
@@ -197,8 +235,7 @@ def test_filled_component_and_parameter_templates_mint_on_save(tmp_path: Path) -
     material_template = api.template_material(material_spec_id=material_spec["id"])
     material_template["material"]["lot_id"] = "LOT-1"
     material = api.save_material(material_template, source_root=root)
-    electrode_spec = api.save_electrode_spec(api.template_electrode_spec(name="Graphite anode sheet"),
-                                             source_root=root)
+    electrode_spec = api.save_electrode_spec(api.template_electrode_spec(name="Graphite anode sheet"), source_root=root)
     electrode_template = api.template_electrode(electrode_spec_id=electrode_spec["id"])
     electrode_template["electrode"]["batch_id"] = "B-1"
     electrode = api.save_electrode(electrode_template, source_root=root)
@@ -207,8 +244,7 @@ def test_filled_component_and_parameter_templates_mint_on_save(tmp_path: Path) -
         assert saved["status"] == "created" and "0000-0000" not in saved["id"]
     # Deterministic kinds land on the IRI their builders mint for the same fields.
     assert material_spec["id"] == api.create_material_spec(name="Graphite SLP30")["material_spec"]["id"]
-    assert material["id"] == api.create_material(material_spec_id=material_spec["id"],
-                                                 lot_id="LOT-1")["material"]["id"]
+    assert material["id"] == api.create_material(material_spec_id=material_spec["id"], lot_id="LOT-1")["material"]["id"]
     # Saving the same filled-in template again hits the same record, not a second one.
     with pytest.raises(ValueError, match="already exists"):
         api.save_material(material_template, source_root=root)
@@ -219,39 +255,46 @@ def test_component_templates_need_a_uid(tmp_path: Path) -> None:
     root = tmp_path / "records"
     with pytest.raises(ValueError, match=r"separator-spec records have no natural key.*give it a uid"):
         api.save_component_spec("separator", api.template_component_spec("separator"), source_root=root)
-    spec = api.save_component_spec("separator", api.template_component_spec("separator", uid="1f8r6v2k9p4m3t7x"),
-                                   source_root=root)
+    spec = api.save_component_spec(
+        "separator", api.template_component_spec("separator", uid="1f8r6v2k9p4m3t7x"), source_root=root
+    )
     assert spec["status"] == "created" and spec["id"].endswith("/1f8r-6v2k-9p4m-3t7x")
     with pytest.raises(ValueError, match="give it a uid"):
         api.save_component_instance(
-            "separator", api.template_component_instance("separator", spec_id=spec["id"]), source_root=root,
+            "separator",
+            api.template_component_instance("separator", spec_id=spec["id"]),
+            source_root=root,
         )
 
 
 def test_library_template_mints_on_save(tmp_path: Path) -> None:
-    record = api.template_library_cell_spec(manufacturer="Energizer", model="CR2032", chemistry="li-metal",
-                                            format="coin")
+    record = api.template_library_cell_spec(
+        manufacturer="Energizer", model="CR2032", chemistry="li-metal", format="coin"
+    )
     assert "id" not in record["specification"]
-    saved = api.save_library_cell_spec(record, library_root=tmp_path / "library",
-                                       package_root=tmp_path / "package")
+    saved = api.save_library_cell_spec(record, library_root=tmp_path / "library", package_root=tmp_path / "package")
     assert saved["status"] == "created" and "0000-0000" not in saved["id"]
 
 
 def test_library_save_refuses_an_old_placeholder_id(tmp_path: Path) -> None:
-    record = api.template_library_cell_spec(manufacturer="Energizer", model="CR2032", chemistry="li-metal",
-                                            format="coin", uid="0000000000000000")
+    record = api.template_library_cell_spec(
+        manufacturer="Energizer", model="CR2032", chemistry="li-metal", format="coin", uid="0000000000000000"
+    )
     with pytest.raises(ValueError, match="template placeholder"):
         api.save_library_cell_spec(record, library_root=tmp_path / "library", package_root=tmp_path / "package")
 
 
-@pytest.mark.parametrize(("command", "key"), [
-    (["template", "cell-spec"], "cell_spec"),
-    (["template", "cell-instance"], "cell_instance"),
-    (["template", "dataset"], "dataset"),
-    (["template", "test-spec"], "test_spec"),
-    (["template", "test"], "test"),
-    (["library", "template", "cell-spec"], "specification"),
-])
+@pytest.mark.parametrize(
+    ("command", "key"),
+    [
+        (["template", "cell-spec"], "cell_spec"),
+        (["template", "cell-instance"], "cell_instance"),
+        (["template", "dataset"], "dataset"),
+        (["template", "test-spec"], "test_spec"),
+        (["template", "test"], "test"),
+        (["library", "template", "cell-spec"], "specification"),
+    ],
+)
 def test_cli_templates_write_no_placeholder_iri(command: list[str], key: str) -> None:
     record = _cli(*command, "--format", "json")
     assert "0000-0000-0000-0000" not in json.dumps(record)
@@ -262,13 +305,26 @@ def test_cli_templates_write_no_placeholder_iri(command: list[str], key: str) ->
 
 def test_cli_cell_spec_template_saves_with_a_minted_iri(tmp_path: Path) -> None:
     draft = tmp_path / "spec.json"
-    _cli("template", "cell-spec", "--manufacturer", "Energizer", "--model-name", "CR2032",
-         "--chemistry", "li-metal", "--cell-format", "coin", "--out", str(draft))
+    _cli(
+        "template",
+        "cell-spec",
+        "--manufacturer",
+        "Energizer",
+        "--model-name",
+        "CR2032",
+        "--chemistry",
+        "li-metal",
+        "--cell-format",
+        "coin",
+        "--out",
+        str(draft),
+    )
     saved = _cli("save", "cell-spec", "--input", str(draft), "--source-root", str(tmp_path / "examples"))
     assert saved["status"] == "created" and "0000-0000" not in saved["id"]
 
 
 # ── Save-time minting: deterministic or refused ──────────────────────────────
+
 
 def test_a_saved_template_dataset_gets_the_builder_iri(tmp_path: Path) -> None:
     """template_dataset() lists its cells and tests as related ones, which the builder
@@ -280,12 +336,17 @@ def test_a_saved_template_dataset_gets_the_builder_iri(tmp_path: Path) -> None:
     url = "https://zenodo.org/records/1/files/S1.csv"
     saved = api.save_dataset(
         api.template_dataset(title="S1 data", related_cell_ids=[cell], related_test_ids=[test], access_url=url),
-        source_root=tmp_path / "template", resolve_references=False, build_jsonld=False, build_html=False,
+        source_root=tmp_path / "template",
+        resolve_references=False,
+        build_jsonld=False,
+        build_html=False,
     )
     built = api.save_dataset(
-        Dataset(name="S1 data", related_cell_ids=[cell], related_test_ids=[test], access_url=url,
-                source_type="other"),
-        source_root=tmp_path / "builder", resolve_references=False, build_jsonld=False, build_html=False,
+        Dataset(name="S1 data", related_cell_ids=[cell], related_test_ids=[test], access_url=url, source_type="other"),
+        source_root=tmp_path / "builder",
+        resolve_references=False,
+        build_jsonld=False,
+        build_html=False,
     )
     assert saved["id"] == built["id"]
 
@@ -306,8 +367,7 @@ def test_a_channel_without_an_id_gets_its_equipment_and_index_iri(tmp_path: Path
     record = create_channel(equipment_id="https://w3id.org/battinfo/equipment/1f8r-6v2k-9p4m-3t7x", index=3)
     expected = record["channel"].pop("id")
     record["channel"].pop("short_id")
-    saved = save_record(record, source_root=tmp_path, resolve_references=False, build_jsonld=False,
-                        build_html=False)
+    saved = save_record(record, source_root=tmp_path, resolve_references=False, build_jsonld=False, build_html=False)
     assert saved["id"] == expected
 
 
@@ -315,8 +375,11 @@ def test_a_channel_without_an_id_gets_its_equipment_and_index_iri(tmp_path: Path
 def test_equipment_without_an_id_is_refused(tmp_path: Path, kind: str) -> None:
     from battinfo.api import create_equipment, create_equipment_spec
 
-    record = (create_equipment_spec(name="SkyRC MC3000", model="MC3000") if kind == "equipment-spec"
-              else create_equipment(spec_id="https://w3id.org/battinfo/spec/1f8r-6v2k-9p4m-3t7x", serial_number="E1"))
+    record = (
+        create_equipment_spec(name="SkyRC MC3000", model="MC3000")
+        if kind == "equipment-spec"
+        else create_equipment(spec_id="https://w3id.org/battinfo/spec/1f8r-6v2k-9p4m-3t7x", serial_number="E1")
+    )
     body = record[kind.replace("-", "_")]
     body.pop("id")
     body.pop("short_id")
@@ -327,5 +390,4 @@ def test_equipment_without_an_id_is_refused(tmp_path: Path, kind: str) -> None:
 def test_a_cell_template_without_a_serial_is_refused(tmp_path: Path) -> None:
     template = template_cell_instance(cell_spec_id="https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0")
     with pytest.raises(ValueError, match="fill in its serial_number, batch_id or name"):
-        save_record(template, source_root=tmp_path, resolve_references=False, build_jsonld=False,
-                    build_html=False)
+        save_record(template, source_root=tmp_path, resolve_references=False, build_jsonld=False, build_html=False)

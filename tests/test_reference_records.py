@@ -9,6 +9,7 @@ regenerate the chapter in the same PR:
 
     uv run python scripts/gen_reference_records.py
 """
+
 from __future__ import annotations
 
 import importlib.util
@@ -18,9 +19,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-_spec = importlib.util.spec_from_file_location(
-    "gen_reference_records", ROOT / "scripts" / "gen_reference_records.py"
-)
+_spec = importlib.util.spec_from_file_location("gen_reference_records", ROOT / "scripts" / "gen_reference_records.py")
 assert _spec is not None and _spec.loader is not None
 gen = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(gen)

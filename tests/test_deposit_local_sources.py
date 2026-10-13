@@ -18,6 +18,7 @@
 
 All offline: Zenodo, R2 and the web are faked, and no network share is needed.
 """
+
 from __future__ import annotations
 
 import copy
@@ -227,7 +228,7 @@ def test_the_screen_refuses_a_path_that_goes_up_a_folder(tmp_path: Path, locatio
 
 def test_the_screen_lets_through_what_the_workspace_may_read(tmp_path: Path) -> None:
     outside = tmp_path.parent / "cycler-exports" / "C01.csv"
-    assert location_path(outside.as_uri(), tmp_path) == outside          # this computer, outside the folder
+    assert location_path(outside.as_uri(), tmp_path) == outside  # this computer, outside the folder
     assert location_path("bdf/C01.bdf.csv", tmp_path) == tmp_path / "bdf" / "C01.bdf.csv"
     assert location_path("https://zenodo.org/records/1/files/C01.csv", tmp_path) is None
     # A file on a lab share that ws.add() registered.
@@ -268,8 +269,11 @@ def test_a_workspace_on_a_network_share_deposits_its_own_files(monkeypatch: pyte
     import battinfo._deposit_files as deposit_files
 
     root = Path("//server/share/lab")
-    present = {lexical_key(root / "C01.csv"), lexical_key(root / "bdf" / "C02.bdf.csv"),
-               lexical_key(Path("//lab/exports/C03.csv"))}
+    present = {
+        lexical_key(root / "C01.csv"),
+        lexical_key(root / "bdf" / "C02.bdf.csv"),
+        lexical_key(Path("//lab/exports/C03.csv")),
+    }
     is_file = Path.is_file
 
     def fake_is_file(self: Path) -> bool:
@@ -284,8 +288,8 @@ def test_a_workspace_on_a_network_share_deposits_its_own_files(monkeypatch: pyte
         [
             ("file://server/share/lab/C01.csv", "cycling"),
             ("file://server/share/lab/bdf/C02.bdf.csv", "cycling"),
-            ("file://lab/exports/C03.csv", "cycling"),        # on another share, registered
-            ("file://server/share/elsewhere/C04.csv", "cycling"),   # on the same server, outside the folder
+            ("file://lab/exports/C03.csv", "cycling"),  # on another share, registered
+            ("file://server/share/elsewhere/C04.csv", "cycling"),  # on the same server, outside the folder
         ],
         root=root,
         measure=False,
@@ -355,9 +359,7 @@ def test_the_index_keeps_what_it_does_not_know(tmp_path: Path) -> None:
 
 
 @pytest.mark.parametrize("content", ["{not json", "[]", '{"sources": []}'], ids=["not-json", "list", "sources-list"])
-def test_an_index_that_cannot_be_read_is_never_written_over(
-    tmp_path: Path, zenodo: _FakeZenodo, content: str
-) -> None:
+def test_an_index_that_cannot_be_read_is_never_written_over(tmp_path: Path, zenodo: _FakeZenodo, content: str) -> None:
     ws = _workspace(tmp_path, {"C01": "C01.csv"})
     path = tmp_path / ".battinfo" / "deposit-files.json"
     path.write_text(content, encoding="utf-8")
@@ -366,7 +368,7 @@ def test_an_index_that_cannot_be_read_is_never_written_over(
     with pytest.raises(DepositIndexError, match="deposit-files.json cannot be read") as excinfo:
         ws.add("test", type="cycling", cell="C01", data="C01.csv")
     assert "it was left as it is" in str(excinfo.value)
-    assert len(ws._ws.tests) == tests_before   # refused before anything was made
+    assert len(ws._ws.tests) == tests_before  # refused before anything was made
     with pytest.raises(DepositIndexError):
         ws.zenodo(token="placeholder", creators=CREATORS)
     assert zenodo.calls == []
@@ -389,7 +391,9 @@ def test_a_record_that_names_a_file_on_another_computer_stops_the_deposit(
         ws.zenodo(token="placeholder", creators=CREATORS, publish=publish)
 
     message = str(excinfo.value)
-    assert message.startswith(f"Refusing to {'publish' if publish else 'deposit'}: 1 record(s) would go into the deposit incomplete: ")
+    assert message.startswith(
+        f"Refusing to {'publish' if publish else 'deposit'}: 1 record(s) would go into the deposit incomplete: "
+    )
     assert f"dataset {dataset_iri}: its data file {location} is on another computer ({HOST!r})" in message
     assert message.endswith("Nothing was sent to Zenodo.")
     assert zenodo.calls == [] and asked == []
@@ -437,9 +441,13 @@ def test_r2_upload_reads_no_file_the_screen_refuses(
     monkeypatch.setitem(sys.modules, "boto3", boto3)
     monkeypatch.setitem(sys.modules, "boto3.s3", types.ModuleType("boto3.s3"))
     monkeypatch.setitem(sys.modules, "boto3.s3.transfer", transfer)
-    for name, value in (("R2_ENDPOINT", "https://r2.example"), ("R2_ACCESS_KEY_ID", "k"),
-                        ("R2_SECRET_ACCESS_KEY", "s"), ("R2_BUCKET", "b"),
-                        ("R2_PUBLIC_BASE_URL", "https://pub.example")):
+    for name, value in (
+        ("R2_ENDPOINT", "https://r2.example"),
+        ("R2_ACCESS_KEY_ID", "k"),
+        ("R2_SECRET_ACCESS_KEY", "s"),
+        ("R2_BUCKET", "b"),
+        ("R2_PUBLIC_BASE_URL", "https://pub.example"),
+    ):
         monkeypatch.setenv(name, value)
     ws = _workspace(tmp_path, {"C01": "C01.csv", "C02": "C02.csv"})
     location = f"file://{HOST}/share/C01.csv"
@@ -449,7 +457,7 @@ def test_r2_upload_reads_no_file_the_screen_refuses(
     ws.upload()
 
     assert asked == []
-    assert len(uploaded) == 1   # the other dataset's own file
+    assert len(uploaded) == 1  # the other dataset's own file
     out = capsys.readouterr().out
     assert f"WARNING: dataset {dataset_iri}: its data file {location} is on another computer" in out
 
@@ -536,12 +544,16 @@ def test_artifact_locators_are_read_by_the_same_parser_and_screen(
     protocol = tmp_path / "protocols" / "cycling.json"
     protocol.parent.mkdir()
     protocol.write_text("{}", encoding="utf-8")
-    records = [{"artifacts": [
-        # A file: URI of a file in the workspace (on Windows its /C: used to be misread).
-        {"locator": protocol.as_uri(), "format": "aurora-unicycler-json"},
-        {"locator": f"file://{HOST}/share/protocol.json", "format": "aurora-unicycler-json"},
-        {"locator": "../protocol.json", "format": "aurora-unicycler-json"},
-    ]}]
+    records = [
+        {
+            "artifacts": [
+                # A file: URI of a file in the workspace (on Windows its /C: used to be misread).
+                {"locator": protocol.as_uri(), "format": "aurora-unicycler-json"},
+                {"locator": f"file://{HOST}/share/protocol.json", "format": "aurora-unicycler-json"},
+                {"locator": "../protocol.json", "format": "aurora-unicycler-json"},
+            ]
+        }
+    ]
     asked = _watch(monkeypatch)
 
     included, notes = plan_artifact_inclusion(records, tmp_path)
@@ -562,8 +574,12 @@ def deposit(tmp_path: Path) -> dict:
     """The deposit graph of a workspace with two cycling tests, each with one data file."""
     ws = _workspace(tmp_path / "source", {"C01": "C01.csv", "C02": "C02.csv"})
     return ws._build_zenodo_jsonld(
-        zenodo_record_id=1, prereserved_doi="10.5281/zenodo.1", record_url=RECORD_URL,
-        data_filenames=["C01.csv", "C02.csv"], title="Round trip", creators=CREATORS,
+        zenodo_record_id=1,
+        prereserved_doi="10.5281/zenodo.1",
+        record_url=RECORD_URL,
+        data_filenames=["C01.csv", "C02.csv"],
+        title="Round trip",
+        creators=CREATORS,
     )
 
 
@@ -615,7 +631,7 @@ def test_an_imported_deposit_brings_no_local_path_into_the_workspace(
     try:
         ws.zenodo(token="placeholder", creators=CREATORS)
     except RuntimeError:
-        pass   # a dataset without a file may fail the publication check; nothing is read either way
+        pass  # a dataset without a file may fail the publication check; nothing is read either way
     assert zenodo.data_names() == []
     assert asked == [] and asked_private == []
 
@@ -779,7 +795,14 @@ def test_the_token_is_not_sent_on_a_redirect(web: Callable, target: str) -> None
         ("https://sandbox.zenodo.org/records/7/files/battinfo.json", False),
         ("https://zenodo.org/records/7/files/battinfo.json", True),
     ],
-    ids=["plain-http", "another-host", "lookalike-host", "another-port", "sandbox-for-production", "production-for-sandbox"],
+    ids=[
+        "plain-http",
+        "another-host",
+        "lookalike-host",
+        "another-port",
+        "sandbox-for-production",
+        "production-for-sandbox",
+    ],
 )
 def test_a_url_gets_the_token_only_on_the_chosen_api_host(web: Callable, url: str, sandbox: bool) -> None:
     fake = web({url: (200, GRAPH)})

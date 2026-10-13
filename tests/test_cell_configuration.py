@@ -4,6 +4,7 @@ The emitter has typed half-cells from the ``reference_electrode`` marker since t
 domain-battery 0.20.1 import. That heuristic is a guess; ``cell_configuration`` is
 the statement. These tests pin both, and the precedence between them.
 """
+
 from __future__ import annotations
 
 import json
@@ -46,9 +47,7 @@ def test_reference_electrode_heuristic_still_applies_when_unstated() -> None:
 def test_explicit_full_cell_beats_the_reference_electrode_heuristic() -> None:
     """A three-electrode full cell records a reference electrode and is still a
     full cell — the stated configuration wins over the marker."""
-    types = physical_type_stack(
-        {**_BASE, "reference_electrode": "lithium", "cell_configuration": "full_cell"}
-    )
+    types = physical_type_stack({**_BASE, "reference_electrode": "lithium", "cell_configuration": "full_cell"})
     assert "BatteryHalfCell" not in types and "HalfCellDevice" not in types, types
 
 
@@ -90,8 +89,13 @@ def test_a_canonical_record_keeps_its_configuration_through_the_descriptor_path(
     from battinfo.transform.json_to_jsonld import to_jsonld
 
     record = CellSpec(
-        id="https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd", name="Probe",
-        manufacturer="Lab", model="P-1", format="coin", chemistry="li-ion", **body,
+        id="https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd",
+        name="Probe",
+        manufacturer="Lab",
+        model="P-1",
+        format="coin",
+        chemistry="li-ion",
+        **body,
     ).to_record()
 
     descriptor = to_jsonld(record, target="domain-battery")["@graph"][0]
@@ -101,14 +105,20 @@ def test_a_canonical_record_keeps_its_configuration_through_the_descriptor_path(
 
 # ── authoring + persistence ────────────────────────────────────────────────────
 
+
 def test_authoring_round_trips_through_save_and_emission(tmp_path: Path) -> None:
     ws = battinfo.workspace(str(tmp_path))
     draft = ws.template(
-        "cell-spec", manufacturer="Lab", model="HC-1", format="coin", chemistry="li-ion",
-        cell_configuration="half_cell", reference_electrode="lithium",
+        "cell-spec",
+        manufacturer="Lab",
+        model="HC-1",
+        format="coin",
+        chemistry="li-ion",
+        cell_configuration="half_cell",
+        reference_electrode="lithium",
     )
     ws.load(draft)
-    ws.save()   # strict validation: the save gate must accept the enum value
+    ws.save()  # strict validation: the save gate must accept the enum value
 
     written = next((tmp_path / ".battinfo" / "records" / "cell-spec").glob("*.json"))
     record = json.loads(written.read_text(encoding="utf-8"))

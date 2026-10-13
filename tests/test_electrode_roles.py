@@ -18,6 +18,7 @@ assigned at the cell level, by the holder an electrode sits in, so a graphite
 anode design can be the working electrode of a half cell without either
 statement contradicting the other.
 """
+
 from __future__ import annotations
 
 import json
@@ -34,8 +35,12 @@ SPEC_IRI = "https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd"
 DESIGN_IRI = "https://w3id.org/battinfo/spec/rkf4-xz0y-h8kz-rmxz"
 
 _IDENTITY = {
-    "id": SPEC_IRI, "name": "Graphite half cell", "manufacturer": "Lab",
-    "model": "HC-1", "format": "coin", "chemistry": "li-ion",
+    "id": SPEC_IRI,
+    "name": "Graphite half cell",
+    "manufacturer": "Lab",
+    "model": "HC-1",
+    "format": "coin",
+    "chemistry": "li-ion",
     "source_type": "manual",
 }
 
@@ -46,7 +51,8 @@ def _electrode(active: str) -> Electrode:
 
 def _half_cell(**overrides) -> CellSpec:
     return CellSpec(
-        **_IDENTITY, cell_configuration="half_cell",
+        **_IDENTITY,
+        cell_configuration="half_cell",
         working_electrode=_electrode("Graphite"),
         counter_electrode=_electrode("Lithium"),
         **overrides,
@@ -54,6 +60,7 @@ def _half_cell(**overrides) -> CellSpec:
 
 
 # ── Emission ──────────────────────────────────────────────────────────────────
+
 
 def test_half_cell_emits_role_relations_and_counter_is_also_the_reference() -> None:
     """The counter-as-reference statement: one electrode, both roles.
@@ -101,9 +108,7 @@ def test_three_electrode_cell_types_all_three_roles() -> None:
 def test_cell_typing_is_unchanged_by_the_role_holders() -> None:
     """BatteryHalfCell + HalfCellDevice still come from cell_configuration alone."""
     with_roles = record_to_jsonld(_half_cell().to_record(), "cell-spec")
-    without_roles = record_to_jsonld(
-        CellSpec(**_IDENTITY, cell_configuration="half_cell").to_record(), "cell-spec"
-    )
+    without_roles = record_to_jsonld(CellSpec(**_IDENTITY, cell_configuration="half_cell").to_record(), "cell-spec")
     assert with_roles["isDescriptionFor"]["@type"] == without_roles["isDescriptionFor"]["@type"]
     assert "BatteryHalfCell" in with_roles["isDescriptionFor"]["@type"]
     assert "HalfCellDevice" in with_roles["isDescriptionFor"]["@type"]
@@ -112,8 +117,10 @@ def test_cell_typing_is_unchanged_by_the_role_holders() -> None:
 def test_full_cell_emission_is_untouched() -> None:
     node = record_to_jsonld(
         CellSpec(
-            **_IDENTITY, cell_configuration="full_cell",
-            positive_electrode_basis="lfp", negative_electrode_basis="graphite",
+            **_IDENTITY,
+            cell_configuration="full_cell",
+            positive_electrode_basis="lfp",
+            negative_electrode_basis="graphite",
             positive_electrode=_electrode("LFP"),
             negative_electrode=_electrode("Graphite"),
         ).to_record(),
@@ -171,12 +178,19 @@ def test_every_emitted_role_term_resolves_in_the_published_context() -> None:
     with path.open("r", encoding="utf-8") as handle:
         context = json.load(handle)["@context"]
 
-    for term in ("hasWorkingElectrode", "hasCounterElectrode", "hasReferenceElectrode",
-                 "WorkingElectrode", "CounterElectrode", "ReferenceElectrode"):
+    for term in (
+        "hasWorkingElectrode",
+        "hasCounterElectrode",
+        "hasReferenceElectrode",
+        "WorkingElectrode",
+        "CounterElectrode",
+        "ReferenceElectrode",
+    ):
         assert term in context, f"{term} does not resolve in the v1 records context"
 
 
 # ── The electrode-spec seams ──────────────────────────────────────────────────
+
 
 def test_role_holders_carry_both_electrode_spec_seams() -> None:
     """The two reference styles the polarity holders have, on the role holders."""
@@ -198,8 +212,7 @@ def test_role_holders_carry_both_electrode_spec_seams() -> None:
 
 def test_a_role_spec_reference_without_an_inline_holder_emits_a_bare_reference() -> None:
     node = record_to_jsonld(
-        CellSpec(**_IDENTITY, cell_configuration="half_cell",
-                 working_electrode_spec_id=DESIGN_IRI).to_record(),
+        CellSpec(**_IDENTITY, cell_configuration="half_cell", working_electrode_spec_id=DESIGN_IRI).to_record(),
         "cell-spec",
     )["isDescriptionFor"]
     assert node["hasWorkingElectrode"] == {"@id": f"{DESIGN_IRI}#described"}
@@ -214,6 +227,7 @@ def test_role_spec_references_are_validated_at_the_input_boundary() -> None:
 
 
 # ── Round trip + persistence ──────────────────────────────────────────────────
+
 
 def test_round_trip_is_idempotent() -> None:
     record = _half_cell(working_electrode_spec_id=DESIGN_IRI).to_record()
@@ -237,6 +251,7 @@ def test_authoring_round_trips_through_save_and_emission(tmp_path: Path) -> None
 
 # ── The save-gate coherence warnings ──────────────────────────────────────────
 
+
 def _codes(spec: CellSpec) -> set[str]:
     report = validate_record_report(spec.to_record(), policy="strict")
     assert report.ok, f"coherence must never block a save: {report.render_errors()}"
@@ -244,22 +259,23 @@ def _codes(spec: CellSpec) -> set[str]:
 
 
 def test_polarity_holders_on_a_half_cell_warn() -> None:
-    spec = CellSpec(**_IDENTITY, cell_configuration="half_cell",
-                    positive_electrode=_electrode("Graphite"),
-                    negative_electrode=_electrode("Lithium"))
+    spec = CellSpec(
+        **_IDENTITY,
+        cell_configuration="half_cell",
+        positive_electrode=_electrode("Graphite"),
+        negative_electrode=_electrode("Lithium"),
+    )
     assert "semantic.electrode_role_expected" in _codes(spec)
 
 
 def test_polarity_holders_on_a_three_electrode_cell_warn() -> None:
-    spec = CellSpec(**_IDENTITY, cell_configuration="three_electrode_cell",
-                    positive_electrode=_electrode("NMC811"))
+    spec = CellSpec(**_IDENTITY, cell_configuration="three_electrode_cell", positive_electrode=_electrode("NMC811"))
     assert "semantic.electrode_role_expected" in _codes(spec)
 
 
 @pytest.mark.parametrize("configuration", ["full_cell", None])
 def test_role_holders_on_a_full_cell_warn(configuration: str | None) -> None:
-    spec = CellSpec(**_IDENTITY, cell_configuration=configuration,
-                    working_electrode=_electrode("Graphite"))
+    spec = CellSpec(**_IDENTITY, cell_configuration=configuration, working_electrode=_electrode("Graphite"))
     assert "semantic.electrode_polarity_expected" in _codes(spec)
 
 
@@ -274,9 +290,12 @@ def test_both_families_populated_warns_once_and_names_the_preferred_one() -> Non
 
 
 def test_both_families_on_a_full_cell_names_the_polarity_pair() -> None:
-    spec = CellSpec(**_IDENTITY, cell_configuration="full_cell",
-                    positive_electrode=_electrode("NMC811"),
-                    working_electrode=_electrode("NMC811"))
+    spec = CellSpec(
+        **_IDENTITY,
+        cell_configuration="full_cell",
+        positive_electrode=_electrode("NMC811"),
+        working_electrode=_electrode("NMC811"),
+    )
     report = validate_record_report(spec.to_record(), policy="strict")
     mixed = [i for i in report.warnings if i.code == "semantic.electrode_holders_mixed"]
     assert len(mixed) == 1
@@ -285,28 +304,30 @@ def test_both_families_on_a_full_cell_names_the_polarity_pair() -> None:
 
 def test_a_spec_id_reference_counts_as_a_populated_holder() -> None:
     """A reference places an electrode just as an inline holder does."""
-    spec = CellSpec(**_IDENTITY, cell_configuration="half_cell",
-                    positive_electrode_spec_id=DESIGN_IRI)
+    spec = CellSpec(**_IDENTITY, cell_configuration="half_cell", positive_electrode_spec_id=DESIGN_IRI)
     assert "semantic.electrode_role_expected" in _codes(spec)
 
 
 def test_the_reference_electrode_marker_is_read_as_a_half_cell() -> None:
     """The gate agrees with the emitter's own unstated-configuration fallback."""
-    spec = CellSpec(**_IDENTITY, reference_electrode="lithium",
-                    positive_electrode=_electrode("Graphite"))
+    spec = CellSpec(**_IDENTITY, reference_electrode="lithium", positive_electrode=_electrode("Graphite"))
     assert "semantic.electrode_role_expected" in _codes(spec)
 
 
-@pytest.mark.parametrize("spec", [
-    _half_cell(),
-    CellSpec(**_IDENTITY, cell_configuration="full_cell", positive_electrode=_electrode("NMC811")),
-    CellSpec(**_IDENTITY),
-])
+@pytest.mark.parametrize(
+    "spec",
+    [
+        _half_cell(),
+        CellSpec(**_IDENTITY, cell_configuration="full_cell", positive_electrode=_electrode("NMC811")),
+        CellSpec(**_IDENTITY),
+    ],
+)
 def test_a_coherent_record_warns_about_nothing(spec: CellSpec) -> None:
     assert not {code for code in _codes(spec) if code.startswith("semantic.electrode_")}
 
 
 # ── Parity with the polarity holders ──────────────────────────────────────────
+
 
 def test_role_holders_reach_the_component_lifting_bridge() -> None:
     """A role holder lifts to a standalone electrode-spec like a polarity one."""

@@ -55,7 +55,18 @@ PathLike = str | Path
 
 # Sentinels the sheet uses for "not reported" / "not applicable" / "none".
 _MISSING_TOKENS = {
-    "", "nr", "na", "n/a", "none", "none_s", "unknown", "unk", "-", "--", "?", "tbd",
+    "",
+    "nr",
+    "na",
+    "n/a",
+    "none",
+    "none_s",
+    "unknown",
+    "unk",
+    "-",
+    "--",
+    "?",
+    "tbd",
 }
 
 # Casing column (FC_Casing) → canonical cell_format enum value.
@@ -226,8 +237,9 @@ def from_solid_state_db_row(
     material_specs: list[dict[str, Any]] = []
     seen: set[tuple[str, str]] = set()
 
-    def add_material(name: str | None, role: str, material_class: str,
-                     polarity: str | None, family: str | None) -> None:
+    def add_material(
+        name: str | None, role: str, material_class: str, polarity: str | None, family: str | None
+    ) -> None:
         if name is None or (role, name) in seen:
             return
         seen.add((role, name))
@@ -244,10 +256,20 @@ def from_solid_state_db_row(
     # material_class is a coarse enum; "metal_electrode" fits Li-metal anodes,
     # "separator_material" the solid-electrolyte separator layer (electrolyte == separator).
     anode_class = "metal_electrode" if anode and "metal" in anode.lower() else "active_material"
-    add_material(cathode, "cathode", "active_material", "positive",
-                 _label(_clean(row.get("CAM_Type"))) or _label(_clean(row.get("CAM_Family"))))
-    add_material(anode, "anode", anode_class, "negative",
-                 _label(_clean(row.get("AAM_Type"))) or _label(_clean(row.get("AAM_Family"))))
+    add_material(
+        cathode,
+        "cathode",
+        "active_material",
+        "positive",
+        _label(_clean(row.get("CAM_Type"))) or _label(_clean(row.get("CAM_Family"))),
+    )
+    add_material(
+        anode,
+        "anode",
+        anode_class,
+        "negative",
+        _label(_clean(row.get("AAM_Type"))) or _label(_clean(row.get("AAM_Family"))),
+    )
     add_material(se_material, "electrolyte", "separator_material", None, se_type)
 
     # ── chemistry / format ───────────────────────────────────────────────────
@@ -276,28 +298,32 @@ def from_solid_state_db_row(
         notes.append(f"reported in {journal} ({_clean(row.get('Publication_date')) or 'n.d.'})")
 
     cell_uid = _uid_from_seed(seed, "cell-spec")
-    cell_spec = _record_from_cell_spec(CellSpec(
-        uid=cell_uid,
-        model_name=model_name,
-        manufacturer={"type": "Organization", "name": manufacturer},
-        format=cell_format,  # type: ignore[arg-type]
-        chemistry=chemistry,
-        positive_electrode_basis=cathode,
-        negative_electrode_basis=anode,
-        source_type="other",
-        source_file=source_file,
-        citation=citation,
-        notes=notes,
-    ))
+    cell_spec = _record_from_cell_spec(
+        CellSpec(
+            uid=cell_uid,
+            model_name=model_name,
+            manufacturer={"type": "Organization", "name": manufacturer},
+            format=cell_format,  # type: ignore[arg-type]
+            chemistry=chemistry,
+            positive_electrode_basis=cathode,
+            negative_electrode_basis=anode,
+            source_type="other",
+            source_file=source_file,
+            citation=citation,
+            notes=notes,
+        )
+    )
     cell_spec_id = cell_spec["cell_spec"]["id"]
 
-    cell_instance = _record_from_cell_instance(Cell(
-        uid=_uid_from_seed(seed, "cell-instance"),
-        cell_spec_id=cell_spec_id,
-        source_type="lab",
-        citation=citation,
-        notes=[f"Cell reported as {model_name}." + (f" Lead author: {author}." if author else "")],
-    ))
+    cell_instance = _record_from_cell_instance(
+        Cell(
+            uid=_uid_from_seed(seed, "cell-instance"),
+            cell_spec_id=cell_spec_id,
+            source_type="lab",
+            citation=citation,
+            notes=[f"Cell reported as {model_name}." + (f" Lead author: {author}." if author else "")],
+        )
+    )
     cell_id = cell_instance["cell_instance"]["id"]
 
     # ── cycling test (constant-current cycle life) ───────────────────────────
@@ -317,18 +343,20 @@ def from_solid_state_db_row(
             desc_parts.append(f"areal capacity {areal_cap} mAh/cm2")
         if cycle_life is not None:
             desc_parts.append(f"{int(cycle_life)} cycles")
-        test = _record_from_test(Test(
-            uid=_uid_from_seed(seed, "test", "clc"),
-            cell_id=cell_id,
-            name="Constant-current cycle-life test",
-            # mypy targets py3.10 where enum.StrEnum is unknown, so it sees the
-            # member as plain `str`; it is a BatteryTestType at runtime (py>=3.11).
-            kind=BatteryTestType.CYCLING,  # type: ignore[arg-type]
-            description="Galvanostatic cycling; " + ", ".join(desc_parts) + "." if desc_parts else None,
-            status="completed",
-            source_type="lab",
-            citation=citation,
-        ))
+        test = _record_from_test(
+            Test(
+                uid=_uid_from_seed(seed, "test", "clc"),
+                cell_id=cell_id,
+                name="Constant-current cycle-life test",
+                # mypy targets py3.10 where enum.StrEnum is unknown, so it sees the
+                # member as plain `str`; it is a BatteryTestType at runtime (py>=3.11).
+                kind=BatteryTestType.CYCLING,  # type: ignore[arg-type]
+                description="Galvanostatic cycling; " + ", ".join(desc_parts) + "." if desc_parts else None,
+                status="completed",
+                source_type="lab",
+                citation=citation,
+            )
+        )
 
     result = SolidStateImportResult(
         row_id=row_id,
@@ -409,9 +437,7 @@ def batch_import_solid_state_db(
         if _clean(row.get("CAM_Material")) is None and _clean(row.get("AAM_Material")) is None:
             continue
         try:
-            results.append(
-                from_solid_state_db_row(row, source_file=path.name, validate=validate)
-            )
+            results.append(from_solid_state_db_row(row, source_file=path.name, validate=validate))
         except Exception:
             if skip_errors:
                 continue

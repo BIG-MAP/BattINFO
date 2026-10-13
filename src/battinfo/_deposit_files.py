@@ -38,6 +38,7 @@ credentials, so a record must not make a deposit ask about one the workspace
 did not take in itself. Imported records carry no local location at all:
 ``ws.import_()`` keeps only http(s) URLs.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -230,7 +231,13 @@ def measured_file(path: Path, name: str, *, kind: str = "other") -> DepositFile:
     """A file deposited as *name*, measured now (an archive staged for a zipped deposit)."""
     size, md5, sha256 = _measure(path)
     return DepositFile(
-        path=path, name=name, segment=url_segment(name), size=size, md5=md5, sha256=sha256, kind=kind,
+        path=path,
+        name=name,
+        segment=url_segment(name),
+        size=size,
+        md5=md5,
+        sha256=sha256,
+        kind=kind,
     )
 
 
@@ -477,7 +484,7 @@ def dataset_distributions(dataset: Mapping[str, Any]) -> tuple[list[Mapping[str,
         problem = distribution_problem(entry, position)
         if problem is not None:
             problems.append(problem)
-        elif isinstance(entry, Mapping):   # always so once distribution_problem passes it
+        elif isinstance(entry, Mapping):  # always so once distribution_problem passes it
             usable.append(entry)
     return usable, problems
 
@@ -643,15 +650,15 @@ def build_deposit_file_plan(
     files are located and named but not read, which is enough to count them
     or to build the graph.
     """
-    found: list[tuple[str, Path, str]] = []   # (path key, resolved path, kind)
+    found: list[tuple[str, Path, str]] = []  # (path key, resolved path, kind)
     seen: set[str] = set()
     key_of_location: dict[str, str] = {}
     missing: list[str] = []
     left_out = list(omissions)
     refused: set[str] = set()
-    kept: dict[str, DepositFile] = {}          # name key -> the kept file
+    kept: dict[str, DepositFile] = {}  # name key -> the kept file
     kept_location: dict[str, DepositFile] = {}  # URL -> the kept file it names
-    url_names: dict[str, str] = {}             # path key -> the name in a record's URL
+    url_names: dict[str, str] = {}  # path key -> the name in a record's URL
     hosted: set[str] = set()
 
     def _add(key: str, path: Path, kind: str) -> None:
@@ -902,13 +909,13 @@ def deposit_file_problems(
             url = _url_of(dist.get("dcat:downloadURL"))
             label = str(dist.get("schema:name") or "a distribution")
             if url.startswith(prefix):
-                name = unquote(url[len(prefix):])
+                name = unquote(url[len(prefix) :])
                 if name not in on_deposit:
-                    if name not in sent and name not in (kept or {}):   # reported above
+                    if name not in sent and name not in (kept or {}):  # reported above
                         problems.append(f"{owner}: links to {name}, which is not on the deposit")
                     continue
                 if name != label:
-                    continue   # an archive that holds the file: its digests are the archive's
+                    continue  # an archive that holds the file: its digests are the archive's
                 stated = _stated_checksum(dist, "md5")
                 if stated and on_deposit[name] and stated != on_deposit[name]:
                     problems.append(
@@ -920,9 +927,7 @@ def deposit_file_problems(
                     continue
                 stated = _stated_checksum(dist, "sha256")
                 if stated and stated != entry.sha256:
-                    problems.append(
-                        f"{owner}: {name} has sha256 {entry.sha256}, but the record states sha256 {stated}"
-                    )
+                    problems.append(f"{owner}: {name} has sha256 {entry.sha256}, but the record states sha256 {stated}")
                 size = dist.get("dcat:byteSize")
                 if isinstance(size, int) and not isinstance(size, bool) and size != entry.size:
                     problems.append(f"{owner}: {name} is {entry.size} bytes, but the record states {size}")

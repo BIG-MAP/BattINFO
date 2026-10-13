@@ -5,6 +5,7 @@ quantity. A quantity node for an unmapped key carries only its value-basis
 class (ConventionalProperty, MeasuredProperty, ...) and the record key as its
 label, and validation warns ``semantic.property_unmapped``.
 """
+
 from __future__ import annotations
 
 import json
@@ -47,9 +48,7 @@ def test_unmapped_key_is_typed_by_its_value_basis_only() -> None:
     assert node["@type"] == ["ConventionalProperty"]
     assert node["skos:prefLabel"] == "frobnication_index"
 
-    measured = _descriptor_quantity_node(
-        "frobnication_index", {"value": 1.0, "unit": "1", "value_basis": "Measured"}
-    )
+    measured = _descriptor_quantity_node("frobnication_index", {"value": 1.0, "unit": "1", "value_basis": "Measured"})
     assert measured is not None
     assert measured["@type"] == ["MeasuredProperty"]
 
@@ -88,9 +87,7 @@ def test_no_packaged_example_emits_a_generated_battinfo_class() -> None:
         checked += 1
         types: set[str] = set()
         _collect_types(out, types)
-        generated.update(
-            f"{path.relative_to(examples).as_posix()}: {t}" for t in types if GENERATED_NAME.match(t)
-        )
+        generated.update(f"{path.relative_to(examples).as_posix()}: {t}" for t in types if GENERATED_NAME.match(t))
     assert checked > 100, f"corpus sweep looks broken (only {checked} records emitted)"
     assert not generated, sorted(generated)
 

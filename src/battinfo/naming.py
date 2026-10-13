@@ -69,30 +69,32 @@ _HANDLE_RE = re.compile(HANDLE_PATTERN)
 #: The kind word that ends a handle, one per entity kind (keys are the
 #: ``entity_type`` values of :data:`battinfo.entities.ENTITY_KINDS`). Titles use
 #: the same words with spaces for hyphens (``material-lot`` -> ``material lot``).
-KIND_WORDS: Mapping[str, str] = MappingProxyType({
-    "cell-spec": "cell-spec",
-    "cell": "cell",
-    "test-protocol": "test-spec",
-    "test": "test",
-    "dataset": "dataset",
-    "material-spec": "material-spec",
-    "material": "material-lot",
-    "electrode-spec": "electrode-spec",
-    "electrode": "electrode",
-    "separator-spec": "separator-spec",
-    "separator": "separator",
-    "current-collector-spec": "current-collector-spec",
-    "current-collector": "current-collector",
-    "electrolyte-spec": "electrolyte-spec",
-    "electrolyte": "electrolyte",
-    "housing-spec": "housing-spec",
-    "housing": "housing",
-    "equipment-spec": "equipment-spec",
-    "equipment": "equipment",
-    "channel": "channel",
-    "parameter-set": "parameter-set",
-    "organization": "organization",
-})
+KIND_WORDS: Mapping[str, str] = MappingProxyType(
+    {
+        "cell-spec": "cell-spec",
+        "cell": "cell",
+        "test-protocol": "test-spec",
+        "test": "test",
+        "dataset": "dataset",
+        "material-spec": "material-spec",
+        "material": "material-lot",
+        "electrode-spec": "electrode-spec",
+        "electrode": "electrode",
+        "separator-spec": "separator-spec",
+        "separator": "separator",
+        "current-collector-spec": "current-collector-spec",
+        "current-collector": "current-collector",
+        "electrolyte-spec": "electrolyte-spec",
+        "electrolyte": "electrolyte",
+        "housing-spec": "housing-spec",
+        "housing": "housing",
+        "equipment-spec": "equipment-spec",
+        "equipment": "equipment",
+        "channel": "channel",
+        "parameter-set": "parameter-set",
+        "organization": "organization",
+    }
+)
 
 #: The kind name for a dataset collection (a ``dataset`` record whose
 #: ``additional_type`` is ``DatasetSeries``). A collection's handle is the bare
@@ -101,9 +103,11 @@ COLLECTION = "collection"
 _COLLECTION_ALIASES = frozenset({"collection", "dataset-series", "series"})
 
 # Titles for subjects whose vocabulary label is too long for a title line.
-_SUBJECT_LABEL_OVERRIDES: Mapping[str, str] = MappingProxyType({
-    "silicon_graphite": "Silicon-graphite",
-})
+_SUBJECT_LABEL_OVERRIDES: Mapping[str, str] = MappingProxyType(
+    {
+        "silicon_graphite": "Silicon-graphite",
+    }
+)
 
 # Longest leading run of label tokens tried as a material prefix ("Si-Gr").
 _MAX_PREFIX_TOKENS = 3
@@ -160,11 +164,7 @@ def is_valid_handle(value: object) -> bool:
     >>> is_valid_handle("Flores OCV")
     False
     """
-    return (
-        isinstance(value, str)
-        and len(value) <= HANDLE_MAX_LENGTH
-        and _HANDLE_RE.fullmatch(value) is not None
-    )
+    return isinstance(value, str) and len(value) <= HANDLE_MAX_LENGTH and _HANDLE_RE.fullmatch(value) is not None
 
 
 # ── Normalisation ─────────────────────────────────────────────────────────────
@@ -178,11 +178,26 @@ def _text(value: object, what: str) -> str:
 
 # Letters that Unicode does not decompose into an ASCII base letter plus a mark,
 # spelled the way their languages transliterate them (Topsøe -> topsoe, not topse).
-_TRANSLITERATION = str.maketrans({
-    "ø": "o", "Ø": "O", "æ": "ae", "Æ": "AE", "œ": "oe", "Œ": "OE", "ß": "ss",
-    "ł": "l", "Ł": "L", "đ": "d", "Đ": "D", "ð": "d", "Ð": "D", "þ": "th", "Þ": "Th",
-    "ı": "i",
-})
+_TRANSLITERATION = str.maketrans(
+    {
+        "ø": "o",
+        "Ø": "O",
+        "æ": "ae",
+        "Æ": "AE",
+        "œ": "oe",
+        "Œ": "OE",
+        "ß": "ss",
+        "ł": "l",
+        "Ł": "L",
+        "đ": "d",
+        "Đ": "D",
+        "ð": "d",
+        "Ð": "D",
+        "þ": "th",
+        "Þ": "Th",
+        "ı": "i",
+    }
+)
 
 
 def _ascii(value: str) -> str:
@@ -287,16 +302,18 @@ def _kind_title_words(entity_type: str) -> str:
 #: Spec kinds a manufacturer or supplier makes. A product's handle is grouped by
 #: its manufacturer and its title is the manufacturer's name and the model,
 #: because that is how people search for and cite a product.
-PRODUCT_KINDS: frozenset[str] = frozenset({
-    "cell-spec",
-    "material-spec",
-    "electrode-spec",
-    "separator-spec",
-    "current-collector-spec",
-    "electrolyte-spec",
-    "housing-spec",
-    "equipment-spec",
-})
+PRODUCT_KINDS: frozenset[str] = frozenset(
+    {
+        "cell-spec",
+        "material-spec",
+        "electrode-spec",
+        "separator-spec",
+        "current-collector-spec",
+        "electrolyte-spec",
+        "housing-spec",
+        "equipment-spec",
+    }
+)
 
 
 def _organization_fields(manufacturer: object) -> tuple[str | None, str | None]:
@@ -335,7 +352,7 @@ def _model_without_maker(model: object, maker_name: str | None) -> str:
     if maker_name:
         maker = " ".join(maker_name.split())
         if text.lower().startswith(maker.lower() + " ") and len(text) > len(maker) + 1:
-            text = text[len(maker) + 1:].strip()
+            text = text[len(maker) + 1 :].strip()
     return text
 
 
@@ -421,12 +438,20 @@ def handle_for(
     resolved = _resolve_kind(kind)
 
     if manufacturer is not None or model is not None:
-        return _product_handle(resolved, manufacturer, model, group=group, subject=subject,
-                               variant=variant, sample=sample, method=method)
+        return _product_handle(
+            resolved, manufacturer, model, group=group, subject=subject, variant=variant, sample=sample, method=method
+        )
     if resolved == "organization":
-        extras = [name for name, value in (
-            ("subject", subject), ("variant", variant), ("sample", sample), ("method", method),
-        ) if value is not None]
+        extras = [
+            name
+            for name, value in (
+                ("subject", subject),
+                ("variant", variant),
+                ("sample", sample),
+                ("method", method),
+            )
+            if value is not None
+        ]
         if extras or group is None:
             raise ValueError("An organization's handle is one bare slug: use organization_handle(name).")
         return organization_handle(group)
@@ -434,13 +459,19 @@ def handle_for(
     group_slug = _group_slug(group) if group is not None else None
 
     if resolved == COLLECTION:
-        extras = [name for name, value in (
-            ("subject", subject), ("variant", variant), ("sample", sample), ("method", method),
-        ) if value is not None]
+        extras = [
+            name
+            for name, value in (
+                ("subject", subject),
+                ("variant", variant),
+                ("sample", sample),
+                ("method", method),
+            )
+            if value is not None
+        ]
         if extras:
             raise ValueError(
-                "A collection's handle is its bare group; drop "
-                + ", ".join(f"{name}=" for name in extras) + "."
+                "A collection's handle is its bare group; drop " + ", ".join(f"{name}=" for name in extras) + "."
             )
         if group_slug is None:
             raise ValueError("A collection's handle is its group: pass group=...")
@@ -462,9 +493,7 @@ def handle_for(
         handle = f"{group_slug}/{segment}" if group_slug else segment
 
     if len(handle) > HANDLE_MAX_LENGTH:
-        raise ValueError(
-            f"handle {handle!r} is {len(handle)} characters; the limit is {HANDLE_MAX_LENGTH}."
-        )
+        raise ValueError(f"handle {handle!r} is {len(handle)} characters; the limit is {HANDLE_MAX_LENGTH}.")
     if not is_valid_handle(handle):  # pragma: no cover - normalisation guarantees it
         raise ValueError(f"handle {handle!r} does not follow the handle grammar.")
     return handle
@@ -486,16 +515,13 @@ def _product_handle(
     extras = [name for name, value in others.items() if value is not None]
     if extras:
         raise ValueError(
-            "A product handle is <manufacturer>/<model>-<kind>; drop "
-            + ", ".join(f"{name}=" for name in extras) + "."
+            "A product handle is <manufacturer>/<model>-<kind>; drop " + ", ".join(f"{name}=" for name in extras) + "."
         )
     _, maker_name = _organization_fields(manufacturer)
     segment = f"{_slug(_model_without_maker(model, maker_name), 'model')}-{KIND_WORDS[resolved]}"
     handle = f"{organization_handle(manufacturer)}/{segment}"
     if len(handle) > HANDLE_MAX_LENGTH:
-        raise ValueError(
-            f"handle {handle!r} is {len(handle)} characters; the limit is {HANDLE_MAX_LENGTH}."
-        )
+        raise ValueError(f"handle {handle!r} is {len(handle)} characters; the limit is {HANDLE_MAX_LENGTH}.")
     return handle
 
 
@@ -587,18 +613,26 @@ def title_for(
 
     if manufacturer is not None or model is not None:
         if resolved not in PRODUCT_KINDS:
-            raise ValueError(
-                f"manufacturer=/model= build product titles, for {', '.join(sorted(PRODUCT_KINDS))}."
-            )
+            raise ValueError(f"manufacturer=/model= build product titles, for {', '.join(sorted(PRODUCT_KINDS))}.")
         if manufacturer is None or model is None:
             raise ValueError("A product title needs both manufacturer= and model=.")
-        extras = [name for name, value in (
-            ("subject", subject), ("variant", variant), ("sample", sample),
-            ("method", method), ("label", label),
-        ) if value is not None]
+        extras = [
+            name
+            for name, value in (
+                ("subject", subject),
+                ("variant", variant),
+                ("sample", sample),
+                ("method", method),
+                ("label", label),
+            )
+            if value is not None
+        ]
         if extras:
-            raise ValueError("A product title is the manufacturer and the model; drop "
-                             + ", ".join(f"{name}=" for name in extras) + ".")
+            raise ValueError(
+                "A product title is the manufacturer and the model; drop "
+                + ", ".join(f"{name}=" for name in extras)
+                + "."
+            )
         _, maker_name = _organization_fields(manufacturer)
         if not maker_name:
             raise ValueError("A product title needs the manufacturer's name, not only its handle.")

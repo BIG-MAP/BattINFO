@@ -15,6 +15,7 @@ finds its file by its resolved path, never by its name.
 
 All offline: Zenodo and R2 are faked.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -117,8 +118,7 @@ def _workspace(root: Path, files: dict[str, str]) -> AuthoringWorkspace:
 
 def _dataset_records(ws: AuthoringWorkspace) -> list[dict]:
     return [
-        json.loads(path.read_text(encoding="utf-8"))
-        for path in sorted((ws._ws.source_root / "dataset").glob("*.json"))
+        json.loads(path.read_text(encoding="utf-8")) for path in sorted((ws._ws.source_root / "dataset").glob("*.json"))
     ]
 
 
@@ -145,7 +145,7 @@ def _name_of(url: str, record_url: str = RECORD_URL) -> str:
     parsed = urlparse(url)
     assert url.startswith(f"{record_url}/files/"), url
     assert not parsed.query and not parsed.fragment, url
-    segment = url[len(f"{record_url}/files/"):]
+    segment = url[len(f"{record_url}/files/") :]
     assert _SEGMENT.fullmatch(segment), url
     return unquote(segment)
 
@@ -283,7 +283,8 @@ _NAMES_TO_ESCAPE = [
     pytest.param("cell#3.csv", id="hash"),
     pytest.param("100%.csv", id="percent"),
     pytest.param(
-        "cell?.csv", id="question-mark",
+        "cell?.csv",
+        id="question-mark",
         marks=pytest.mark.skipif(sys.platform == "win32", reason="a Windows file name cannot hold '?'"),
     ),
     pytest.param("Zelle_25°C.csv", id="non-ascii"),
@@ -322,28 +323,37 @@ def test_the_preview_names_the_files_as_the_deposit_does(tmp_path: Path, zenodo:
     preview = json.loads(ws.preview_jsonld(creators=CREATORS).read_text(encoding="utf-8"))
     placeholder = "https://zenodo.org/records/RECORD_ID"
     previewed = sorted(
-        _name_of(dist["dcat:downloadURL"], placeholder)
-        for dists in _distributions(preview).values()
-        for dist in dists
+        _name_of(dist["dcat:downloadURL"], placeholder) for dists in _distributions(preview).values() for dist in dists
     )
     ws.zenodo(token="placeholder", creators=CREATORS)
     assert previewed == zenodo.data_names()
 
 
-def test_an_artifact_in_the_workspace_is_linked_under_its_deposit_name(
-    tmp_path: Path, zenodo: _FakeZenodo
-) -> None:
+def test_an_artifact_in_the_workspace_is_linked_under_its_deposit_name(tmp_path: Path, zenodo: _FakeZenodo) -> None:
     ws = _workspace(tmp_path, {"C01": "C01/cycling.csv"})
     (tmp_path / "protocols").mkdir()
     (tmp_path / "protocols" / "cc protocol.json").write_text("{}", encoding="utf-8")
     protocol_dir = ws._ws.source_root / "test-protocol"
     protocol_dir.mkdir(exist_ok=True)
-    (protocol_dir / "test-protocol-aaaa-bbbb-cccc-dddd.json").write_text(json.dumps({
-        "test_spec": {"id": "https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd", "name": "CC",
-                      "kind": "capacity_check"},
-        "artifacts": [{"role": "source_protocol", "format": "aurora-unicycler-json",
-                       "locator": "protocols/cc protocol.json"}],
-    }), encoding="utf-8")
+    (protocol_dir / "test-protocol-aaaa-bbbb-cccc-dddd.json").write_text(
+        json.dumps(
+            {
+                "test_spec": {
+                    "id": "https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd",
+                    "name": "CC",
+                    "kind": "capacity_check",
+                },
+                "artifacts": [
+                    {
+                        "role": "source_protocol",
+                        "format": "aurora-unicycler-json",
+                        "locator": "protocols/cc protocol.json",
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
     ws.zenodo(token="placeholder", creators=CREATORS)
 
     assert zenodo.data_names() == ["cc protocol.json", "cycling.csv"]
@@ -358,7 +368,7 @@ def test_url_segment_escapes_what_one_path_segment_cannot_hold() -> None:
     assert url_segment("cycling.bdf.csv") == "cycling.bdf.csv"
     assert url_segment("Cell 01 #3?.csv") == "Cell%2001%20%233%3F.csv"
     assert url_segment("100%.csv") == "100%25.csv"
-    assert url_segment("a/b:c.csv") == "a%2Fb%3Ac.csv"   # one segment, never a scheme
+    assert url_segment("a/b:c.csv") == "a%2Fb%3Ac.csv"  # one segment, never a scheme
     assert url_segment("Zelle_25°C.csv") == "Zelle_25%C2%B0C.csv"
     assert url_segment(NFD_CAFE) == "cafe%CC%81.csv"
     assert url_segment("run (1)+x.csv") == "run%20(1)+x.csv"
@@ -516,9 +526,13 @@ def test_r2_urls_carry_the_name_percent_encoded(tmp_path: Path, monkeypatch: pyt
     monkeypatch.setitem(sys.modules, "boto3", boto3)
     monkeypatch.setitem(sys.modules, "boto3.s3", types.ModuleType("boto3.s3"))
     monkeypatch.setitem(sys.modules, "boto3.s3.transfer", transfer)
-    for name, value in (("R2_ENDPOINT", "https://r2.example"), ("R2_ACCESS_KEY_ID", "k"),
-                        ("R2_SECRET_ACCESS_KEY", "s"), ("R2_BUCKET", "b"),
-                        ("R2_PUBLIC_BASE_URL", "https://pub.example")):
+    for name, value in (
+        ("R2_ENDPOINT", "https://r2.example"),
+        ("R2_ACCESS_KEY_ID", "k"),
+        ("R2_SECRET_ACCESS_KEY", "s"),
+        ("R2_BUCKET", "b"),
+        ("R2_PUBLIC_BASE_URL", "https://pub.example"),
+    ):
         monkeypatch.setenv(name, value)
     ws = _workspace(tmp_path, {"C01": "C01/cell 01.csv", "C02": "C02/cell 01.csv"})
     ws.upload()

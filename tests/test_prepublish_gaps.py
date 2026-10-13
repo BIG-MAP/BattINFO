@@ -28,23 +28,26 @@ sys.path.insert(0, str(ROOT / "src"))
 from battinfo.jsonld import record_to_jsonld  # noqa: E402
 from battinfo.ws import AuthoringWorkspace  # noqa: E402
 
-MD5 = "7e779f63372291ad56b2e01de6639cc7"          # 32 hex chars, a real md5
+MD5 = "7e779f63372291ad56b2e01de6639cc7"  # 32 hex chars, a real md5
 SHA256 = "b" * 64
 
 
 # ── G6: the emitted checksum states the algorithm the record carries ───────────
+
 
 def _dataset_record(algorithm: str, value: str) -> dict:
     return {
         "dataset": {
             "id": "https://w3id.org/battinfo/dataset/d1",
             "name": "DS",
-            "distributions": [{
-                "name": "cell.parquet",
-                "content_url": "https://zenodo.org/api/records/1/files/cell.parquet/content",
-                "encoding_format": "application/vnd.apache.parquet",
-                "checksum": {"algorithm": algorithm, "value": value},
-            }],
+            "distributions": [
+                {
+                    "name": "cell.parquet",
+                    "content_url": "https://zenodo.org/api/records/1/files/cell.parquet/content",
+                    "encoding_format": "application/vnd.apache.parquet",
+                    "checksum": {"algorithm": algorithm, "value": value},
+                }
+            ],
         }
     }
 
@@ -84,27 +87,56 @@ def test_algorithm_outside_spdx_keeps_its_name_instead_of_inventing_a_term() -> 
 
 def _deposit_graph(algorithm: str, value: str) -> dict:
     record_sets = {
-        "cell-spec": [{"cell_spec": {
-            "id": "https://w3id.org/battinfo/spec/cs1", "name": "Half cell",
-            "manufacturer": "M", "model": "HC", "format": "coin", "chemistry": "li-metal"}}],
+        "cell-spec": [
+            {
+                "cell_spec": {
+                    "id": "https://w3id.org/battinfo/spec/cs1",
+                    "name": "Half cell",
+                    "manufacturer": "M",
+                    "model": "HC",
+                    "format": "coin",
+                    "chemistry": "li-metal",
+                }
+            }
+        ],
         # The body key is cell_instance; the graph builder refuses a record without one.
-        "cell-instance": [{"cell_instance": {
-            "id": "https://w3id.org/battinfo/cell/c1", "serial_number": "SN-001",
-            "cell_spec_id": "https://w3id.org/battinfo/spec/cs1"}}],
-        "test": [{"test": {
-            "id": "https://w3id.org/battinfo/test/t1", "kind": "ocv",
-            "cell_id": "https://w3id.org/battinfo/cell/c1",
-            "dataset_ids": ["https://w3id.org/battinfo/dataset/d1"]}}],
-        "dataset": [{"dataset": {
-            "id": "https://w3id.org/battinfo/dataset/d1", "name": "DS",
-            "about": ["https://w3id.org/battinfo/cell/c1"],
-            "distributions": [{
-                "name": "cell.parquet",
-                "content_url": "https://zenodo.org/api/records/1/files/cell.parquet/content",
-                "encoding_format": "application/vnd.apache.parquet",
-                "role": "processed",
-                "checksum": {"algorithm": algorithm, "value": value},
-            }]}}],
+        "cell-instance": [
+            {
+                "cell_instance": {
+                    "id": "https://w3id.org/battinfo/cell/c1",
+                    "serial_number": "SN-001",
+                    "cell_spec_id": "https://w3id.org/battinfo/spec/cs1",
+                }
+            }
+        ],
+        "test": [
+            {
+                "test": {
+                    "id": "https://w3id.org/battinfo/test/t1",
+                    "kind": "ocv",
+                    "cell_id": "https://w3id.org/battinfo/cell/c1",
+                    "dataset_ids": ["https://w3id.org/battinfo/dataset/d1"],
+                }
+            }
+        ],
+        "dataset": [
+            {
+                "dataset": {
+                    "id": "https://w3id.org/battinfo/dataset/d1",
+                    "name": "DS",
+                    "about": ["https://w3id.org/battinfo/cell/c1"],
+                    "distributions": [
+                        {
+                            "name": "cell.parquet",
+                            "content_url": "https://zenodo.org/api/records/1/files/cell.parquet/content",
+                            "encoding_format": "application/vnd.apache.parquet",
+                            "role": "processed",
+                            "checksum": {"algorithm": algorithm, "value": value},
+                        }
+                    ],
+                }
+            }
+        ],
     }
     return AuthoringWorkspace._assemble_zenodo_jsonld(
         record_sets,
@@ -168,8 +200,11 @@ def test_resolver_keeps_a_distribution_whose_checksum_is_not_sha256() -> None:
     from battinfo.api._resolver import _schema_distribution_value
 
     node = _schema_distribution_value(
-        {"content_url": "https://x/f.parquet", "encoding_format": "application/vnd.apache.parquet",
-         "checksum": {"algorithm": "md5", "value": MD5}},
+        {
+            "content_url": "https://x/f.parquet",
+            "encoding_format": "application/vnd.apache.parquet",
+            "checksum": {"algorithm": "md5", "value": MD5},
+        },
         part_of_id="https://w3id.org/battinfo/dataset/d1",
     )
     assert node is not None
@@ -191,6 +226,7 @@ def test_resolver_keeps_a_distribution_with_no_checksum_at_all() -> None:
 
 # ── G9: a cell instance is identified by its serial, not its display label ─────
 
+
 def _ws_with_spec(tmp_path: Path) -> tuple[AuthoringWorkspace, object]:
     ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
     (tmp_path / "d.cell-spec.json").write_text(
@@ -204,7 +240,8 @@ def test_batch_sharing_display_labels_creates_one_cell_per_serial(tmp_path: Path
     ws, spec = _ws_with_spec(tmp_path)
 
     cells = ws.add(
-        "cell", spec=spec,
+        "cell",
+        spec=spec,
         names=[f"L{i % 12}" for i in range(95)],
         serial_numbers=[f"SN-{i:03d}" for i in range(95)],
     )
@@ -276,9 +313,7 @@ def _material_record(processing: dict) -> dict:
 
 
 def test_nmp_processing_route_emits_the_chemical_substance_iri() -> None:
-    out = record_to_jsonld(
-        _material_record({"route": "nmp", "detail": "cast at 40 um wet thickness"}), "material"
-    )
+    out = record_to_jsonld(_material_record({"route": "nmp", "detail": "cast at 40 um wet thickness"}), "material")
     process = out["prov:wasGeneratedBy"]
 
     assert process["@type"] == "Manufacturing"
@@ -324,13 +359,15 @@ def test_dataset_discovery_fields_survive_emission() -> None:
             "measurement_methods": ["GITT"],
             "variable_measured": [{"name": "voltage", "unit_text": "V", "description": "cell voltage"}],
             "citations": [{"name": "Flores et al.", "doi": "10.1000/xyz", "url": "https://doi.org/10.1000/xyz"}],
-            "distributions": [{
-                "name": "cellA.parquet",
-                "content_url": "https://x/cellA.parquet",
-                "encoding_format": "application/vnd.apache.parquet",
-                "content_size": "10485760",
-                "description": "processed BDF table",
-            }],
+            "distributions": [
+                {
+                    "name": "cellA.parquet",
+                    "content_url": "https://x/cellA.parquet",
+                    "encoding_format": "application/vnd.apache.parquet",
+                    "content_size": "10485760",
+                    "description": "processed BDF table",
+                }
+            ],
         }
     }
     out = record_to_jsonld(record, "dataset")
@@ -356,8 +393,13 @@ def test_dataset_discovery_fields_survive_emission() -> None:
 
 def test_dataset_emission_tolerates_a_non_numeric_content_size() -> None:
     out = record_to_jsonld(
-        {"dataset": {"id": "d1", "name": "DS", "distributions": [
-            {"content_url": "https://x/f", "content_size": "10 MB"}]}},
+        {
+            "dataset": {
+                "id": "d1",
+                "name": "DS",
+                "distributions": [{"content_url": "https://x/f", "content_size": "10 MB"}],
+            }
+        },
         "dataset",
     )
     dist = out["dcat:distribution"][0]

@@ -50,8 +50,16 @@ def test_fleet_cells_emit_component_reference_nodes():
 
 def test_fleet_chemistry_coverage():
     chems = {d["cell_spec"]["model"] for d in _fleet_cells()}
-    expected = {"COIN-NMC811-D", "COIN-LFP-D", "COIN-LCO-D", "COIN-LMFP-D",
-                "COIN-NMC622-D", "PRISM-LFP-100AH", "COIN-ZNMNO2-ALK", "COIN-LNMO-D"}
+    expected = {
+        "COIN-NMC811-D",
+        "COIN-LFP-D",
+        "COIN-LCO-D",
+        "COIN-LMFP-D",
+        "COIN-NMC622-D",
+        "PRISM-LFP-100AH",
+        "COIN-ZNMNO2-ALK",
+        "COIN-LNMO-D",
+    }
     assert expected.issubset(chems), f"missing: {expected - chems}"
 
 
@@ -70,9 +78,17 @@ def test_nmc811_chain_resolves_end_to_end():
 
 def test_missing_component_reference_is_flagged(tmp_path):
     from battinfo import api
-    rec = api._record_from_cell_spec(CellSpec(
-        uid="cmiss123456789ab", model_name="X", manufacturer="Y", format="coin", chemistry="Li-ion",
-        electrolyte_spec_id="https://w3id.org/battinfo/spec/0000-0000-0000-0000"))
+
+    rec = api._record_from_cell_spec(
+        CellSpec(
+            uid="cmiss123456789ab",
+            model_name="X",
+            manufacturer="Y",
+            format="coin",
+            chemistry="Li-ion",
+            electrolyte_spec_id="https://w3id.org/battinfo/spec/0000-0000-0000-0000",
+        )
+    )
     result = validate_record(rec, source_root=tmp_path)
     assert any(i.code == "reference.missing" for i in result.issues)
 

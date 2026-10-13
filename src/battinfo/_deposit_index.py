@@ -71,6 +71,7 @@ The files are written atomically. One that cannot be read raises
 since it may hold what no run can rebuild. Keys of the index other than
 these are kept as they are when it is written.
 """
+
 from __future__ import annotations
 
 import json
@@ -501,7 +502,9 @@ def _state_shape_problem(state: object, environment_of_file: str) -> str | None:
         return "it is not a JSON object"
     for key in ("record_id", "deposit_id", "concept_record_id", "version_of"):
         value = state.get(key)
-        if value is not None and (isinstance(value, bool) or not isinstance(value, (str, int)) or not str(value).strip()):
+        if value is not None and (
+            isinstance(value, bool) or not isinstance(value, (str, int)) or not str(value).strip()
+        ):
             return f"its {key!r} is not a record id"
     if not state.get("record_id"):
         return "it names no 'record_id'"
@@ -511,7 +514,11 @@ def _state_shape_problem(state: object, environment_of_file: str) -> str | None:
     for key in ("published", "sandbox"):
         if key in state and not isinstance(state[key], bool):
             return f"its {key!r} is not true or false"
-    if environment is not None and isinstance(state.get("sandbox"), bool) and (environment == "sandbox") != state["sandbox"]:
+    if (
+        environment is not None
+        and isinstance(state.get("sandbox"), bool)
+        and (environment == "sandbox") != state["sandbox"]
+    ):
         return "its 'environment' and its 'sandbox' disagree"
     if environment_of_file == "sandbox" and (environment == "production" or state.get("sandbox") is False):
         return "it names a record on zenodo.org, but it is the file of the sandbox record"

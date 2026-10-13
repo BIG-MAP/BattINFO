@@ -39,7 +39,8 @@ chemistry space the canonical example corpus does not cover.
 
 ```python
 import csv
-src = r"DB Master Sheet - 245 Entries.csv"   # repo root
+
+src = r"DB Master Sheet - 245 Entries.csv"  # repo root
 with open(src, encoding="cp1252", newline="") as fh:
     rows = list(csv.reader(fh))
 keep = [rows[0]] + [rows[i] for i in (1, 2, 3, 50, 120, 200)]

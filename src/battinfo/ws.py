@@ -14,6 +14,7 @@ Usage::
            protocol="constant current discharge", instrument="NEWARE BTS82 cycler")
     ws.save()
 """
+
 from __future__ import annotations
 
 import builtins  # AuthoringWorkspace.list shadows the builtin in class-scope annotations
@@ -120,78 +121,79 @@ class SubmitError(RuntimeError):
         self.failed = failed if failed is not None else [o for o in self.outcomes if not o.get("ok")]
         self.submitted = [o for o in self.outcomes if o.get("ok")]
 
+
 # ── Template specs included for each cell format/chemistry ────────────────────
 # Values are {"value": null, "unit": "<SI unit>"} — user fills in value.
 _CYLINDRICAL_PRIMARY_SPECS: dict[str, dict] = {
-    "nominal_voltage":                        {"value": None, "unit": "V"},
-    "nominal_capacity":                       {"value": None, "unit": "Ah"},
-    "discharging_cutoff_voltage":             {"value": None, "unit": "V"},
-    "mass":                                   {"value": None, "unit": "g"},
-    "diameter":                               {"value": None, "unit": "mm"},
-    "height":                                 {"value": None, "unit": "mm"},
+    "nominal_voltage": {"value": None, "unit": "V"},
+    "nominal_capacity": {"value": None, "unit": "Ah"},
+    "discharging_cutoff_voltage": {"value": None, "unit": "V"},
+    "mass": {"value": None, "unit": "g"},
+    "diameter": {"value": None, "unit": "mm"},
+    "height": {"value": None, "unit": "mm"},
     "maximum_continuous_discharging_current": {"value": None, "unit": "A"},
-    "internal_resistance":                    {"value": None, "unit": "Ohm"},
-    "minimum_discharging_temperature":        {"value": None, "unit": "degC"},
-    "maximum_discharging_temperature":        {"value": None, "unit": "degC"},
-    "minimum_storage_temperature":            {"value": None, "unit": "degC"},
-    "maximum_storage_temperature":            {"value": None, "unit": "degC"},
+    "internal_resistance": {"value": None, "unit": "Ohm"},
+    "minimum_discharging_temperature": {"value": None, "unit": "degC"},
+    "maximum_discharging_temperature": {"value": None, "unit": "degC"},
+    "minimum_storage_temperature": {"value": None, "unit": "degC"},
+    "maximum_storage_temperature": {"value": None, "unit": "degC"},
 }
 
 # Coin cells: same shape as cylindrical (diameter + height), typically primary
 _COIN_PRIMARY_SPECS: dict[str, dict] = {
-    "nominal_voltage":                        {"value": None, "unit": "V"},
-    "nominal_capacity":                       {"value": None, "unit": "Ah"},
-    "discharging_cutoff_voltage":             {"value": None, "unit": "V"},
-    "mass":                                   {"value": None, "unit": "g"},
-    "diameter":                               {"value": None, "unit": "mm"},
-    "height":                                 {"value": None, "unit": "mm"},
+    "nominal_voltage": {"value": None, "unit": "V"},
+    "nominal_capacity": {"value": None, "unit": "Ah"},
+    "discharging_cutoff_voltage": {"value": None, "unit": "V"},
+    "mass": {"value": None, "unit": "g"},
+    "diameter": {"value": None, "unit": "mm"},
+    "height": {"value": None, "unit": "mm"},
     "maximum_continuous_discharging_current": {"value": None, "unit": "A"},
-    "internal_resistance":                    {"value": None, "unit": "Ohm"},
-    "minimum_discharging_temperature":        {"value": None, "unit": "degC"},
-    "maximum_discharging_temperature":        {"value": None, "unit": "degC"},
-    "minimum_storage_temperature":            {"value": None, "unit": "degC"},
-    "maximum_storage_temperature":            {"value": None, "unit": "degC"},
+    "internal_resistance": {"value": None, "unit": "Ohm"},
+    "minimum_discharging_temperature": {"value": None, "unit": "degC"},
+    "maximum_discharging_temperature": {"value": None, "unit": "degC"},
+    "minimum_storage_temperature": {"value": None, "unit": "degC"},
+    "maximum_storage_temperature": {"value": None, "unit": "degC"},
 }
 
 # Prismatic / pouch cells: height + width + thickness (no diameter)
 _PRISMATIC_SPECS: dict[str, dict] = {
-    "nominal_voltage":                        {"value": None, "unit": "V"},
-    "nominal_capacity":                       {"value": None, "unit": "Ah"},
-    "discharging_cutoff_voltage":             {"value": None, "unit": "V"},
-    "mass":                                   {"value": None, "unit": "g"},
-    "height":                                 {"value": None, "unit": "mm"},
-    "width":                                  {"value": None, "unit": "mm"},
-    "thickness":                              {"value": None, "unit": "mm"},
+    "nominal_voltage": {"value": None, "unit": "V"},
+    "nominal_capacity": {"value": None, "unit": "Ah"},
+    "discharging_cutoff_voltage": {"value": None, "unit": "V"},
+    "mass": {"value": None, "unit": "g"},
+    "height": {"value": None, "unit": "mm"},
+    "width": {"value": None, "unit": "mm"},
+    "thickness": {"value": None, "unit": "mm"},
     "maximum_continuous_discharging_current": {"value": None, "unit": "A"},
-    "internal_resistance":                    {"value": None, "unit": "Ohm"},
-    "minimum_discharging_temperature":        {"value": None, "unit": "degC"},
-    "maximum_discharging_temperature":        {"value": None, "unit": "degC"},
-    "minimum_storage_temperature":            {"value": None, "unit": "degC"},
-    "maximum_storage_temperature":            {"value": None, "unit": "degC"},
+    "internal_resistance": {"value": None, "unit": "Ohm"},
+    "minimum_discharging_temperature": {"value": None, "unit": "degC"},
+    "maximum_discharging_temperature": {"value": None, "unit": "degC"},
+    "minimum_storage_temperature": {"value": None, "unit": "degC"},
+    "maximum_storage_temperature": {"value": None, "unit": "degC"},
 }
 
 _CYLINDRICAL_SECONDARY_SPECS: dict[str, dict] = {
-    "nominal_voltage":                      {"value": None, "unit": "V"},
-    "nominal_capacity":                     {"value": None, "unit": "Ah"},
-    "charging_voltage":                     {"value": None, "unit": "V"},
-    "discharging_cutoff_voltage":           {"value": None, "unit": "V"},
-    "mass":                                 {"value": None, "unit": "g"},
-    "diameter":                             {"value": None, "unit": "mm"},
-    "height":                               {"value": None, "unit": "mm"},
-    "nominal_continuous_charging_current":  {"value": None, "unit": "A"},
-    "maximum_continuous_charging_current":  {"value": None, "unit": "A"},
+    "nominal_voltage": {"value": None, "unit": "V"},
+    "nominal_capacity": {"value": None, "unit": "Ah"},
+    "charging_voltage": {"value": None, "unit": "V"},
+    "discharging_cutoff_voltage": {"value": None, "unit": "V"},
+    "mass": {"value": None, "unit": "g"},
+    "diameter": {"value": None, "unit": "mm"},
+    "height": {"value": None, "unit": "mm"},
+    "nominal_continuous_charging_current": {"value": None, "unit": "A"},
+    "maximum_continuous_charging_current": {"value": None, "unit": "A"},
     "nominal_continuous_discharging_current": {"value": None, "unit": "A"},
     "maximum_continuous_discharging_current": {"value": None, "unit": "A"},
-    "specific_energy":                      {"value": None, "unit": "Wh/kg"},
-    "energy_density":                       {"value": None, "unit": "Wh/L"},
-    "cycle_life":                           {"value": None, "unit": "1"},
-    "internal_resistance":                  {"value": None, "unit": "Ohm"},
-    "minimum_charging_temperature":         {"value": None, "unit": "degC"},
-    "maximum_charging_temperature":         {"value": None, "unit": "degC"},
-    "minimum_discharging_temperature":      {"value": None, "unit": "degC"},
-    "maximum_discharging_temperature":      {"value": None, "unit": "degC"},
-    "minimum_storage_temperature":          {"value": None, "unit": "degC"},
-    "maximum_storage_temperature":          {"value": None, "unit": "degC"},
+    "specific_energy": {"value": None, "unit": "Wh/kg"},
+    "energy_density": {"value": None, "unit": "Wh/L"},
+    "cycle_life": {"value": None, "unit": "1"},
+    "internal_resistance": {"value": None, "unit": "Ohm"},
+    "minimum_charging_temperature": {"value": None, "unit": "degC"},
+    "maximum_charging_temperature": {"value": None, "unit": "degC"},
+    "minimum_discharging_temperature": {"value": None, "unit": "degC"},
+    "maximum_discharging_temperature": {"value": None, "unit": "degC"},
+    "minimum_storage_temperature": {"value": None, "unit": "degC"},
+    "maximum_storage_temperature": {"value": None, "unit": "degC"},
 }
 
 # Primary chemistries
@@ -199,7 +201,7 @@ _PRIMARY_CHEMISTRIES = {"zn-mno2", "li-primary", "znmno2", "alkaline", "zinc-car
 
 
 def _default_specs_for(format_: str, chemistry: str) -> dict[str, dict]:
-    fmt  = (format_  or "").lower()
+    fmt = (format_ or "").lower()
     chem = (chemistry or "").lower()
     if fmt in ("prismatic", "pouch"):
         return dict(_PRISMATIC_SPECS)
@@ -233,18 +235,29 @@ def _serial_matches(token: str, serial: str | None) -> bool:
 # User-facing `type=` values map to the registry's canonical resource_type. Users
 # speak "cell-spec"/"test-spec"; storage/IRIs keep cell_spec/test_protocol.
 _RESOURCE_TYPE_CANON: dict[str, str] = {
-    "cell-spec": "cell_spec", "cell_spec": "cell_spec", "cellspec": "cell_spec",
+    "cell-spec": "cell_spec",
+    "cell_spec": "cell_spec",
+    "cellspec": "cell_spec",
     "spec": "cell_spec",
-    "cell": "cell", "cell-instance": "cell", "cell_instance": "cell", "instance": "cell",
-    "test-spec": "test_protocol", "test_spec": "test_protocol",
-    "test-protocol": "test_protocol", "test_protocol": "test_protocol",
+    "cell": "cell",
+    "cell-instance": "cell",
+    "cell_instance": "cell",
+    "instance": "cell",
+    "test-spec": "test_protocol",
+    "test_spec": "test_protocol",
+    "test-protocol": "test_protocol",
+    "test_protocol": "test_protocol",
     "test": "test",
-    "dataset": "dataset", "datasets": "dataset",
+    "dataset": "dataset",
+    "datasets": "dataset",
 }
 # Canonical registry resource_type -> the user-facing label we surface in results.
 _RESOURCE_TYPE_DISPLAY: dict[str, str] = {
-    "cell_spec": "cell-spec", "cell": "cell",
-    "test_protocol": "test-spec", "test": "test", "dataset": "dataset",
+    "cell_spec": "cell-spec",
+    "cell": "cell",
+    "test_protocol": "test-spec",
+    "test": "test",
+    "dataset": "dataset",
 }
 
 
@@ -253,9 +266,7 @@ def _canon_type(value: str) -> str:
     key = str(value).strip().lower()
     if key in _RESOURCE_TYPE_CANON:
         return _RESOURCE_TYPE_CANON[key]
-    raise ValueError(
-        f"Unknown type {value!r}. Valid: cell-spec, cell, test-spec, test, dataset."
-    )
+    raise ValueError(f"Unknown type {value!r}. Valid: cell-spec, cell, test-spec, test, dataset.")
 
 
 def _make_batch_key(stem: str) -> str:
@@ -344,9 +355,9 @@ def _find_records_repo(root: Path) -> Path | None:
 # in the JSON-LD context). Boolean verdict: passed / failed; "unknown" = not
 # assessed (EARL cantTell), used as the fallback for any unrecognised status.
 _CONFORMANCE_IRI = {
-    "conformant":     "earl:passed",
+    "conformant": "earl:passed",
     "non-conformant": "earl:failed",
-    "unknown":        "earl:cantTell",
+    "unknown": "earl:cantTell",
 }
 
 
@@ -384,17 +395,14 @@ _ROCRATE_FILENAME = "ro-crate-metadata.json"
 # from one link instead of a per-record data dictionary. The VERSIONED IRI is
 # used deliberately: an archived deposit must keep pointing at the exact schema
 # version it was built against (the floating `.../schema` IRI tracks latest).
-BDF_TABLE_SCHEMA_IRI = (
-    "https://w3id.org/battery-data-alliance/ontology/battery-data-format/1.2.0/schema"
-)
+BDF_TABLE_SCHEMA_IRI = "https://w3id.org/battery-data-alliance/ontology/battery-data-format/1.2.0/schema"
 
 # Loaded once at import time; used as the base for all JSON-LD context dicts.
 # The versioned hosted context is the one authority — inline embedding must
 # expand identically to the published URL (the flat assembled context has
 # carried stale IRIs; see the 0.8.0 review, F4).
 _RECORDS_CONTEXT: dict = json.loads(
-    (Path(__file__).parent / "data" / "context" / "records.context.v1.json")
-    .read_text(encoding="utf-8")
+    (Path(__file__).parent / "data" / "context" / "records.context.v1.json").read_text(encoding="utf-8")
 )["@context"]
 
 
@@ -451,8 +459,7 @@ def _unix_to_iso(ts: int | float | str | None, *, what: str = "a timestamp") -> 
         moment = datetime.datetime(1970, 1, 1, tzinfo=datetime.timezone.utc) + datetime.timedelta(seconds=ts)
     except (OverflowError, ValueError):
         warnings.warn(
-            f"{what} = {ts!r} is out of range as a Unix time in seconds (is it in milliseconds?), "
-            "so it is left out.",
+            f"{what} = {ts!r} is out of range as a Unix time in seconds (is it in milliseconds?), so it is left out.",
             stacklevel=2,
         )
         return None
@@ -493,14 +500,22 @@ def _plan_zenodo_deposit(
     if record_id is not None or not existing_id:
         return record_id, None, None
     if existing_published:
-        return existing_id, None, (
-            f"This workspace already has a published Zenodo record ({existing_id}); "
-            f"creating a NEW VERSION. (Delete {recorded_in} to start a "
-            "brand-new record instead.)"
+        return (
+            existing_id,
+            None,
+            (
+                f"This workspace already has a published Zenodo record ({existing_id}); "
+                f"creating a NEW VERSION. (Delete {recorded_in} to start a "
+                "brand-new record instead.)"
+            ),
         )
-    return None, existing_id, (
-        f"This workspace already has an unpublished draft ({existing_id}); updating "
-        "that draft in place rather than creating a new record."
+    return (
+        None,
+        existing_id,
+        (
+            f"This workspace already has an unpublished draft ({existing_id}); updating "
+            "that draft in place rather than creating a new record."
+        ),
     )
 
 
@@ -559,8 +574,7 @@ def _kept_copies_refusal(
             if entry is None or not entry.kept or entry.name not in lacking:
                 continue
             lines.append(
-                f"dataset {body.get('id') or '(no id)'}: {dist['content_url']} "
-                f"({entry.name} {lacking[entry.name]})"
+                f"dataset {body.get('id') or '(no id)'}: {dist['content_url']} ({entry.name} {lacking[entry.name]})"
             )
             named.add(entry.name)
     lines += [f"{name} {problem}" for name, problem in lacking.items() if name not in named]
@@ -577,10 +591,7 @@ def _deposit_record_iris(record_sets: Mapping[str, list[dict]], graph: Mapping[s
     nodes = graph.get("@graph")
     node_ids = {node.get("@id") for node in nodes if isinstance(node, dict)} if isinstance(nodes, list) else set()
     iris = {
-        entity_id_from_doc(record)
-        for records in record_sets.values()
-        for record in records
-        if isinstance(record, dict)
+        entity_id_from_doc(record) for records in record_sets.values() for record in records if isinstance(record, dict)
     }
     return sorted(iri for iri in iris if iri and iri in node_ids)
 
@@ -688,7 +699,7 @@ def _media_type_from_jsonld(value: Any) -> str:
     if not isinstance(value, str):
         return ""
     if value.startswith(_IANA_MEDIA_TYPES):
-        return value[len(_IANA_MEDIA_TYPES):]
+        return value[len(_IANA_MEDIA_TYPES) :]
     return "" if value.startswith(("http://", "https://")) else value
 
 
@@ -857,8 +868,7 @@ def _normalize_orcid(value: str) -> str:
     token = token.upper()
     if not _ORCID_RE.match(token):
         raise ValueError(
-            f"invalid ORCID iD: {value!r}. Expected 0000-0002-1825-0097 "
-            "(or the full https://orcid.org/… URL)."
+            f"invalid ORCID iD: {value!r}. Expected 0000-0002-1825-0097 (or the full https://orcid.org/… URL)."
         )
     return token
 
@@ -904,14 +914,36 @@ def _deposit_agents(agents: Iterable[Any], role: str) -> list[dict]:
 # recognition list, not a hard allowlist: an unknown identifier is kept verbatim
 # with a warning (see _normalize_license) so a valid-but-unlisted SPDX id is
 # never rejected.
-_KNOWN_LICENSES: frozenset[str] = frozenset({
-    "cc-by-4.0", "cc-by-sa-4.0", "cc-by-nc-4.0", "cc-by-nc-sa-4.0",
-    "cc-by-nd-4.0", "cc-by-nc-nd-4.0", "cc-by-3.0", "cc-by-sa-3.0",
-    "cc0-1.0", "cc-pddc", "pddl-1.0", "odbl-1.0", "odc-by-1.0",
-    "mit", "apache-2.0", "bsd-2-clause", "bsd-3-clause",
-    "gpl-2.0", "gpl-2.0-only", "gpl-3.0", "gpl-3.0-only", "gpl-3.0-or-later",
-    "lgpl-2.1", "lgpl-3.0", "agpl-3.0", "mpl-2.0",
-})
+_KNOWN_LICENSES: frozenset[str] = frozenset(
+    {
+        "cc-by-4.0",
+        "cc-by-sa-4.0",
+        "cc-by-nc-4.0",
+        "cc-by-nc-sa-4.0",
+        "cc-by-nd-4.0",
+        "cc-by-nc-nd-4.0",
+        "cc-by-3.0",
+        "cc-by-sa-3.0",
+        "cc0-1.0",
+        "cc-pddc",
+        "pddl-1.0",
+        "odbl-1.0",
+        "odc-by-1.0",
+        "mit",
+        "apache-2.0",
+        "bsd-2-clause",
+        "bsd-3-clause",
+        "gpl-2.0",
+        "gpl-2.0-only",
+        "gpl-3.0",
+        "gpl-3.0-only",
+        "gpl-3.0-or-later",
+        "lgpl-2.1",
+        "lgpl-3.0",
+        "agpl-3.0",
+        "mpl-2.0",
+    }
+)
 
 
 def _normalize_license(value: str) -> tuple[str, bool]:
@@ -1130,10 +1162,14 @@ DEPOSIT_COVERAGE_EXEMPT: dict[str, str] = {
             "it, not yet promoted to a standalone deposit node"
         )
         for entity_type in (
-            "separator-spec", "separator",
-            "current-collector-spec", "current-collector",
-            "electrolyte-spec", "electrolyte",
-            "housing-spec", "housing",
+            "separator-spec",
+            "separator",
+            "current-collector-spec",
+            "current-collector",
+            "electrolyte-spec",
+            "electrolyte",
+            "housing-spec",
+            "housing",
         )
     },
     "organization": (
@@ -1163,9 +1199,7 @@ def _read_record_sets(source_root: Path) -> dict[str, list[dict]]:
                 except (OSError, ValueError) as exc:
                     # Fail closed: silently skipping a corrupt/BOM record would publish an
                     # incomplete Zenodo graph with records missing and no error (R-6, R-10).
-                    raise ValueError(
-                        f"Cannot assemble the record bundle: {f} is unreadable ({exc})."
-                    ) from exc
+                    raise ValueError(f"Cannot assemble the record bundle: {f} is unreadable ({exc}).") from exc
         record_sets[name] = recs
     return record_sets
 
@@ -1314,9 +1348,7 @@ def _reference_stub_sources(
             iri = entity_id_from_doc(record) if isinstance(record, dict) else None
             if not isinstance(iri, str) or not iri:
                 continue
-            body = next(
-                (v for v in record.values() if isinstance(v, dict) and v.get("id") == iri), {}
-            )
+            body = next((v for v in record.values() if isinstance(v, dict) and v.get("id") == iri), {})
             name = body.get("name")
             sources[iri] = (folder, stub_type, name.strip() if isinstance(name, str) else "")
     return sources
@@ -1362,7 +1394,7 @@ def _not_found_locally_note(iris: list[str]) -> str:
         f"Not found locally: {len(iris)} record(s) this deposit points at are neither saved in "
         "this workspace nor kept as a copy under .battinfo/references/ (looked up offline, or "
         f"never looked up): {shown}. Open the workspace with a registry_url and reference each "
-        "again, for a cell with ws.load(ws.search(type=\"cell\", serial=...)[0]); the workspace "
+        'again, for a cell with ws.load(ws.search(type="cell", serial=...)[0]); the workspace '
         "keeps a copy of the published record, and the deposit describes it from that copy."
     )
 
@@ -1382,7 +1414,8 @@ def _auto_deposit_title(specs: list[dict]) -> str:
         return "Battery Dataset — BattINFO"
     first = specs[0]
     subject = " ".join(
-        part for part in (_clean_deposit_text(first.get("manufacturer")), _clean_deposit_text(first.get("model")))
+        part
+        for part in (_clean_deposit_text(first.get("manufacturer")), _clean_deposit_text(first.get("model")))
         if part
     )
     return f"{subject or 'Battery'} — BattINFO Battery Dataset"
@@ -1451,8 +1484,7 @@ def _apply_conformance_jsonld(
                 _label = f"{_label}: {dev['type']}"
             dev_node: dict = {
                 "@type": "prov:Activity",
-                "rdfs:comment": _label
-                + (f" — {dev['description']}" if dev.get("description") else ""),
+                "rdfs:comment": _label + (f" — {dev['description']}" if dev.get("description") else ""),
             }
             # Standard vocabulary (no battinfo: mints): the deviation category is
             # a dcterms:type on the activity; the affected property is the
@@ -1477,9 +1509,7 @@ def _apply_conformance_jsonld(
             if duration_s is not None:
                 m, s = divmod(int(duration_s), 60)
                 h, m = divmod(m, 60)
-                dev_node["schema:duration"] = (
-                    f"PT{h}H{m}M{s}S" if h else (f"PT{m}M{s}S" if m else f"PT{s}S")
-                )
+                dev_node["schema:duration"] = f"PT{h}H{m}M{s}S" if h else (f"PT{m}M{s}S" if m else f"PT{s}S")
             influenced_by.append(dev_node)
         node["prov:wasInfluencedBy"] = influenced_by
 
@@ -1492,6 +1522,7 @@ def _coerce_conformance(value: Any) -> Any:
     if value is None:
         return None
     from battinfo.bundle import CONFORMANCE_STATUS_VALUES, Conformance  # noqa: PLC0415
+
     if isinstance(value, Conformance):
         return value
     if isinstance(value, str):
@@ -1500,8 +1531,7 @@ def _coerce_conformance(value: Any) -> Any:
         status = str(value.get("status", "unknown"))
         if status not in CONFORMANCE_STATUS_VALUES:
             raise ValueError(
-                f"conformance status {status!r} is not valid. "
-                f"Use one of: {', '.join(CONFORMANCE_STATUS_VALUES)}."
+                f"conformance status {status!r} is not valid. Use one of: {', '.join(CONFORMANCE_STATUS_VALUES)}."
             )
         return Conformance.from_record(value)
     raise TypeError("conformance must be a status string, a dict, or a Conformance.")
@@ -1513,10 +1543,10 @@ def _coerce_conformance(value: Any) -> Any:
 # auto-detected (too ambiguous) — pass an explicit pattern or use convert_csv().
 _CONVERT_AUTODETECT: dict[str, str] = {
     ".ndax": "NEWARE",
-    ".nda":  "NEWARE (legacy)",
-    ".mpt":  "Biologic (EC-Lab text export)",
+    ".nda": "NEWARE (legacy)",
+    ".mpt": "Biologic (EC-Lab text export)",
     ".xlsx": "Excel",
-    ".mat":  "MATLAB",
+    ".mat": "MATLAB",
 }
 
 # Readable by batterydf but ambiguous by extension — require an explicit pattern.
@@ -1528,9 +1558,9 @@ _CONVERT_EXPLICIT: dict[str, str] = {
 # Known instrument files with no batterydf reader — flagged with actionable help.
 _CONVERT_UNSUPPORTED: dict[str, str] = {
     ".res": "Arbin .res — export a CSV from Arbin MITS Pro, then run "
-            "ws.convert('*.csv') or ws.convert_csv(path, hints={...}).",
+    "ws.convert('*.csv') or ws.convert_csv(path, hints={...}).",
     ".mpr": "Biologic .mpr (binary) - export as text from EC-Lab "
-            "(Experiment > Export as Text -> .mpt), then run ws.convert().",
+    "(Experiment > Export as Text -> .mpt), then run ws.convert().",
 }
 
 # Result-key -> human label, in display order, for ws.save() confirmation output.
@@ -1550,7 +1580,11 @@ _SAVE_DISPLAY: list[tuple[str, str]] = [
 # Result keys written by the side-record path (records the engine does not model),
 # in write order: specs before instances so a reference resolves on disk.
 _SIDE_RECORD_KEYS: tuple[str, ...] = (
-    "material_specs", "materials", "electrode_specs", "electrodes", "parameter_sets",
+    "material_specs",
+    "materials",
+    "electrode_specs",
+    "electrodes",
+    "parameter_sets",
 )
 
 
@@ -1568,6 +1602,7 @@ def _dedupe_records_by_id(records: list[dict], candidate: dict, body_key: str) -
     out = [r for r in records if r.get(body_key, {}).get("id") != cand_id]
     out.append(candidate)
     return out
+
 
 # Canonical BDF column names — the targets for convert_csv() hints.  This is a
 # discovery aid for users; the authoritative mapping lives in interop/battdat.py.
@@ -1589,9 +1624,7 @@ _BDF_CANONICAL_COLUMNS: list[tuple[str, str]] = [
 ]
 
 
-def _unmapped_source_columns(
-    src: Path, plugin_id: str | None, out_columns: list[str]
-) -> list[str]:
+def _unmapped_source_columns(src: Path, plugin_id: str | None, out_columns: list[str]) -> list[str]:
     """Source columns that did not survive a BDF conversion (best-effort).
 
     Reads the raw column header of *src* through the resolved reader plugin and
@@ -1630,9 +1663,7 @@ def _unmapped_source_columns(
 _ROW_COUNTER_MIN_ROWS = 10
 
 
-def _row_counter_columns(
-    src: Path, plugin_id: str | None, columns: list[str], n_rows: int
-) -> list[str]:
+def _row_counter_columns(src: Path, plugin_id: str | None, columns: list[str], n_rows: int) -> list[str]:
     """The *columns* of *src* that only number its rows (best-effort).
 
     A column holding 0, 1, 2, ... or 1, 2, 3, ..., one value per row of the
@@ -1732,10 +1763,7 @@ def _clean_template_conditions(raw: Any) -> tuple[dict[str, dict] | None, list[s
             continue
         if not qty.get("unit"):
             if not default_unit:
-                raise ValueError(
-                    f"condition {key!r} needs a unit, e.g. "
-                    '{"value": 25, "unit": "degC"}.'
-                )
+                raise ValueError(f'condition {key!r} needs a unit, e.g. {{"value": 25, "unit": "degC"}}.')
             qty["unit"] = default_unit
         out[name] = qty
     return (out or None), notes
@@ -1778,9 +1806,15 @@ _NOT_DRAFT_KEYS = frozenset({"kind", "schema_version", "cell_specification_id"})
 # Flat provenance keys -> the field of the record's nested `source` they fill (the
 # spellings every record model's constructor takes).
 _DRAFT_PROVENANCE_KEYS = {
-    "source_type": "type", "source_name": "name", "source_file": "file", "source_url": "url",
-    "citation": "citation", "file_hash": "file_hash", "retrieved_at": "retrieved_at",
-    "workflow_version": "workflow_version", "curated_by": "curated_by",
+    "source_type": "type",
+    "source_name": "name",
+    "source_file": "file",
+    "source_url": "url",
+    "citation": "citation",
+    "file_hash": "file_hash",
+    "retrieved_at": "retrieved_at",
+    "workflow_version": "workflow_version",
+    "curated_by": "curated_by",
 }
 # Other spellings that are read: alias -> the key it stands for. `specs` is also
 # the cell-spec draft key used until June 2026.
@@ -1788,12 +1822,30 @@ _CELL_SPEC_DRAFT_ALIASES = {"specs": "properties", "model_name": "model", "notes
 _TEST_SPEC_DRAFT_ALIASES = {"notes": "comment"}
 # The equipment-spec record has no model class; its fields are the keyword
 # arguments of create_equipment_spec().
-_EQUIPMENT_SPEC_DRAFT_KEYS = frozenset({
-    "name", "handle", "equipment_class", "model", "channel_count", "supported_chemistries",
-    "property", "manufacturer", "supplier", "product_id", "comment", "uid", "id",
-    "source_type", "source_name", "source_file", "source_url", "citation", "retrieved_at",
-    "notes",
-})
+_EQUIPMENT_SPEC_DRAFT_KEYS = frozenset(
+    {
+        "name",
+        "handle",
+        "equipment_class",
+        "model",
+        "channel_count",
+        "supported_chemistries",
+        "property",
+        "manufacturer",
+        "supplier",
+        "product_id",
+        "comment",
+        "uid",
+        "id",
+        "source_type",
+        "source_name",
+        "source_file",
+        "source_url",
+        "citation",
+        "retrieved_at",
+        "notes",
+    }
+)
 # A SpecItem with any of these set carries a value; one with none is an unfilled
 # template placeholder.
 _QUANTITY_VALUE_KEYS = ("value", "min_value", "max_value", "typical_value", "value_text")
@@ -1816,8 +1868,17 @@ def _test_spec_draft_keys() -> frozenset[str]:
     # `test_type` or `test_kind`; `steps` or `experiment` (with `cycles`) are
     # PyBaMM-style strings parsed into the method; `instrument` and `atmosphere`
     # are kept as notes; `protocol_url` is the URL of the protocol followed.
-    own_keys = {"type", "kind", "test_kind", "steps", "experiment", "cycles",
-                "instrument", "atmosphere", "protocol_url"}
+    own_keys = {
+        "type",
+        "kind",
+        "test_kind",
+        "steps",
+        "experiment",
+        "cycles",
+        "instrument",
+        "atmosphere",
+        "protocol_url",
+    }
     return frozenset(({*TestSpec.model_fields, *_DRAFT_PROVENANCE_KEYS} - _NOT_DRAFT_KEYS) | own_keys)
 
 
@@ -1932,9 +1993,11 @@ def _check_draft_keys(
     stands for) and *quiet* keys are read too, but not listed.
     """
     aliases = aliases or {}
-    unknown = [key for key in raw
-               if not str(key).startswith("_") and key not in allowed and key not in aliases
-               and key not in quiet]
+    unknown = [
+        key
+        for key in raw
+        if not str(key).startswith("_") and key not in allowed and key not in aliases and key not in quiet
+    ]
     if not unknown:
         return
     candidates = sorted({*allowed, *aliases, *quiet})
@@ -1999,9 +2062,7 @@ class AuthoringWorkspace:
         self._records_root = self._root / ".battinfo" / "records"
         self._legacy_layout_announced = False
         self._ws = self._make_engine()
-        self._records_repo = (
-            Path(records_repo).resolve() if records_repo else _find_records_repo(self._root)
-        )
+        self._records_repo = Path(records_repo).resolve() if records_repo else _find_records_repo(self._root)
         self._registry_url = registry_url.rstrip("/") if registry_url else None
         _load_credentials(self._root / ".battinfo" / "credentials")
         # Credentials established by login() in THIS instance. login() must not
@@ -2158,6 +2219,7 @@ class AuthoringWorkspace:
         # Best-effort: a no-op on Windows and filesystems without POSIX permission bits.
         try:
             import os
+
             os.chmod(path, 0o600)
         except OSError:
             pass
@@ -2217,8 +2279,9 @@ class AuthoringWorkspace:
                 "request a key from the registry operator (Battery Genome - "
                 "https://www.battery-genome.org, or your team's registry admin)."
             )
-        url = (registry_url or self._registry_url or os.environ.get("BATTINFO_REGISTRY_URL")
-               or _DEFAULT_REGISTRY_URL).rstrip("/")
+        url = (
+            registry_url or self._registry_url or os.environ.get("BATTINFO_REGISTRY_URL") or _DEFAULT_REGISTRY_URL
+        ).rstrip("/")
 
         profile: dict = {}
         try:
@@ -2231,8 +2294,7 @@ class AuthoringWorkspace:
         except urllib.error.HTTPError as exc:
             if exc.code in (401, 403):
                 raise RuntimeError(
-                    "Registry rejected the API key (HTTP "
-                    f"{exc.code}). Check the key and try again."
+                    f"Registry rejected the API key (HTTP {exc.code}). Check the key and try again."
                 ) from None
             profile = {}  # 404 / older registry without /me — degrade gracefully
         except Exception:
@@ -2242,24 +2304,30 @@ class AuthoringWorkspace:
         pid = profile.get("publisher_id") or self._credential("BATTINFO_PUBLISHER_ID") or "battinfo-authoring"
         name = profile.get("display_name") or pid
 
-        self._session_credentials.update({
-            "BATTINFO_API_KEY": api_key,
-            "BATTINFO_WORKSPACE_ID": wid,
-            "BATTINFO_PUBLISHER_ID": pid,
-        })
+        self._session_credentials.update(
+            {
+                "BATTINFO_API_KEY": api_key,
+                "BATTINFO_WORKSPACE_ID": wid,
+                "BATTINFO_PUBLISHER_ID": pid,
+            }
+        )
         self._ensure_gitignore()
-        path = self._set_credentials({
-            "BATTINFO_API_KEY": api_key,
-            "BATTINFO_WORKSPACE_ID": wid,
-            "BATTINFO_PUBLISHER_ID": pid,
-        })
+        path = self._set_credentials(
+            {
+                "BATTINFO_API_KEY": api_key,
+                "BATTINFO_WORKSPACE_ID": wid,
+                "BATTINFO_PUBLISHER_ID": pid,
+            }
+        )
 
         if profile:
             print(f"Logged in as {name} (workspace: {wid}).")
         else:
             print(f"API key saved. Using workspace {wid!r}, publisher {pid!r}.")
-            print("  (Registry profile lookup unavailable - edit BATTINFO_WORKSPACE_ID "
-                  "in .battinfo/credentials if these defaults are wrong.)")
+            print(
+                "  (Registry profile lookup unavailable - edit BATTINFO_WORKSPACE_ID "
+                "in .battinfo/credentials if these defaults are wrong.)"
+            )
         print(f"  Credentials: {path}")
         return {"workspace_id": wid, "publisher_id": pid, "display_name": name, "registry_url": url}
 
@@ -2271,8 +2339,9 @@ class AuthoringWorkspace:
         if not key:
             print("Not logged in. Run ws.login(api_key='...').")
             return {}
-        url = (registry_url or self._registry_url or os.environ.get("BATTINFO_REGISTRY_URL")
-               or _DEFAULT_REGISTRY_URL).rstrip("/")
+        url = (
+            registry_url or self._registry_url or os.environ.get("BATTINFO_REGISTRY_URL") or _DEFAULT_REGISTRY_URL
+        ).rstrip("/")
         try:
             req = urllib.request.Request(
                 f"{url}/me",
@@ -2338,8 +2407,11 @@ class AuthoringWorkspace:
         overrides = {
             key: value
             for key, value in (
-                ("name", name), ("funder", funder), ("program", program),
-                ("acronym", acronym), ("id", id),
+                ("name", name),
+                ("funder", funder),
+                ("program", program),
+                ("acronym", acronym),
+                ("id", id),
             )
             if value is not None
         }
@@ -2348,13 +2420,11 @@ class AuthoringWorkspace:
         # Getter: no identifier supplied.
         if identifier is None:
             if current is None:
-                print('No project set. Tag this workspace with a grant, e.g.:\n'
-                      '    ws.project("101103997")')
+                print('No project set. Tag this workspace with a grant, e.g.:\n    ws.project("101103997")')
                 return None
             ref = current
             if overrides or refresh:
-                ref = self._resolve_and_store(current.identifier, overrides=overrides,
-                                              base=current, refresh=True)
+                ref = self._resolve_and_store(current.identifier, overrides=overrides, base=current, refresh=True)
             self._print_project(ref)
             return ref.funding_block()
 
@@ -2363,8 +2433,7 @@ class AuthoringWorkspace:
         if not identifier:
             raise ValueError("project identifier must be a non-empty string.")
         base = current if (current is not None and current.identifier == identifier) else None
-        ref = self._resolve_and_store(identifier, overrides=overrides, base=base,
-                                      refresh=refresh or base is None)
+        ref = self._resolve_and_store(identifier, overrides=overrides, base=base, refresh=refresh or base is None)
         self._print_project(ref)
         return ref.funding_block()
 
@@ -2388,11 +2457,13 @@ class AuthoringWorkspace:
         manual: set[str] = set()
         if base is not None:
             manual |= set(base.manual)
-            fields.update({
-                key: getattr(base, key)
-                for key in ("name", "funder", "program", "acronym", "id")
-                if getattr(base, key)
-            })
+            fields.update(
+                {
+                    key: getattr(base, key)
+                    for key in ("name", "funder", "program", "acronym", "id")
+                    if getattr(base, key)
+                }
+            )
         manual |= set(overrides)
         # Effective manual values = this call's overrides on top of remembered ones.
         manual_values = {key: fields[key] for key in manual if key in fields}
@@ -2406,8 +2477,7 @@ class AuthoringWorkspace:
                     fields[key] = value
             resolved = True
         fields.update(manual_values)
-        ref = ProjectRef(identifier=identifier, resolved=resolved,
-                         manual=sorted(manual), **fields)
+        ref = ProjectRef(identifier=identifier, resolved=resolved, manual=sorted(manual), **fields)
         if not ref.id:
             ref.id = ref.default_iri()
         self._set_project(ref)
@@ -2567,8 +2637,10 @@ class AuthoringWorkspace:
         # Getter (no ORCID supplied): optionally patch the most recent contributor.
         if orcid is None:
             if not contributors:
-                print('No contributor set. Tag this workspace with your ORCID, e.g.:\n'
-                      '    ws.contributor("0000-0002-1825-0097", name="Your Name")')
+                print(
+                    "No contributor set. Tag this workspace with your ORCID, e.g.:\n"
+                    '    ws.contributor("0000-0002-1825-0097", name="Your Name")'
+                )
                 return None
             if name is not None or affiliation is not None:
                 last = contributors[-1]
@@ -2584,9 +2656,7 @@ class AuthoringWorkspace:
         # Setter: ORCID supplied. A repeat ORCID updates in place (order preserved);
         # a new ORCID is appended. Unspecified fields are preserved on update.
         ref = ContributorRef(orcid=_normalize_orcid(orcid), name=name, affiliation=affiliation)
-        existing_ix = next(
-            (i for i, c in enumerate(contributors) if c.orcid == ref.orcid), None
-        )
+        existing_ix = next((i for i, c in enumerate(contributors) if c.orcid == ref.orcid), None)
         if existing_ix is not None:
             prev = contributors[existing_ix]
             if ref.name is None:
@@ -2595,8 +2665,7 @@ class AuthoringWorkspace:
                 ref.affiliation = prev.affiliation
         if not ref.name:
             raise ValueError(
-                'contributor name is required, e.g. '
-                'ws.contributor("0000-0002-1825-0097", name="Your Name").'
+                'contributor name is required, e.g. ws.contributor("0000-0002-1825-0097", name="Your Name").'
             )
         if existing_ix is not None:
             contributors[existing_ix] = ref
@@ -2620,9 +2689,7 @@ class AuthoringWorkspace:
                 entries = [raw]  # migrate a legacy scalar entry
             else:
                 entries = []
-            self._contributors = [
-                ContributorRef.from_dict(e) for e in entries if isinstance(e, dict)
-            ]
+            self._contributors = [ContributorRef.from_dict(e) for e in entries if isinstance(e, dict)]
             self._contributors_loaded = True
         return self._contributors
 
@@ -2692,8 +2759,7 @@ class AuthoringWorkspace:
         if license is None:
             current = self._get_license()
             if current is None:
-                print('No license set. Set a default license for every record, e.g.:\n'
-                      '    ws.license("cc-by-4.0")')
+                print('No license set. Set a default license for every record, e.g.:\n    ws.license("cc-by-4.0")')
                 return None
             print(f"Workspace license: {current}")
             print("  Saved to .battinfo/workspace.json; stamped onto records on ws.save().")
@@ -2703,6 +2769,7 @@ class AuthoringWorkspace:
         normalized, known = _normalize_license(license)
         if not known:
             import warnings  # noqa: PLC0415
+
             msg = (
                 f"license {normalized!r} is not a recognised SPDX identifier; keeping it "
                 "verbatim. If this is a typo, use a known id such as 'cc-by-4.0'."
@@ -2782,8 +2849,7 @@ class AuthoringWorkspace:
             from battinfo._util import CONVERTER_INSTALL_HINT
 
             raise ImportError(
-                "convert() needs the BDF converter (module 'bdf' from the batterydf "
-                f"package). {CONVERTER_INSTALL_HINT}"
+                f"convert() needs the BDF converter (module 'bdf' from the batterydf package). {CONVERTER_INSTALL_HINT}"
             )
 
         # ── Resolve input files ────────────────────────────────────────────
@@ -2802,9 +2868,7 @@ class AuthoringWorkspace:
             if not input_files:
                 self._print_convert_help()
                 return []
-            summary = ", ".join(
-                f"{n} x {_CONVERT_AUTODETECT[e]} {e}" for e, n in detected.items()
-            )
+            summary = ", ".join(f"{n} x {_CONVERT_AUTODETECT[e]} {e}" for e, n in detected.items())
             print(f"Found {len(input_files)} file(s): {summary}")
 
         bdf_dir = self._root / "bdf"
@@ -2849,31 +2913,42 @@ class AuthoringWorkspace:
             counters = _row_counter_columns(src, reader, unmapped, len(df))
             if counters:
                 unmapped = [col for col in unmapped if col not in counters]
-                print(f"  Left out {'a column' if len(counters) == 1 else 'columns'} that only "
-                      f"number{'s' if len(counters) == 1 else ''} the rows: {', '.join(counters)}. "
-                      f"The row order of {out.name} holds the same information.")
+                print(
+                    f"  Left out {'a column' if len(counters) == 1 else 'columns'} that only "
+                    f"number{'s' if len(counters) == 1 else ''} the rows: {', '.join(counters)}. "
+                    f"The row order of {out.name} holds the same information."
+                )
             if unmapped:
                 lossy.append((src.name, unmapped))
-                print(f"  WARNING: {len(unmapped)} source column(s) were NOT mapped to BDF "
-                      f"and are missing from {out.name}:")
+                print(
+                    f"  WARNING: {len(unmapped)} source column(s) were NOT mapped to BDF "
+                    f"and are missing from {out.name}:"
+                )
                 for col in unmapped:
                     print(f"    - {col}")
-                print(f"    (reader plugin: {reader or 'unknown'} -- if that looks wrong, the "
-                      "file was likely detected as the wrong instrument format)")
-                print("    Fix: ws.bdf_columns() lists the canonical names, then "
-                      f"ws.convert_csv({src.name!r}, hints={{'<source column>': '<bdf name>'}}).")
+                print(
+                    f"    (reader plugin: {reader or 'unknown'} -- if that looks wrong, the "
+                    "file was likely detected as the wrong instrument format)"
+                )
+                print(
+                    "    Fix: ws.bdf_columns() lists the canonical names, then "
+                    f"ws.convert_csv({src.name!r}, hints={{'<source column>': '<bdf name>'}})."
+                )
             # Remember the original so it can travel with the dataset as raw-source
             # provenance when the test is published (see ws.add('test', ...)).
             self._record_conversion(src, out, unmapped_columns=unmapped)
 
-        print(f"\nConverted {len(written)} file(s) -> {bdf_dir}"
-              + (f"  ({len(failed)} failed)" if failed else ""))
+        print(f"\nConverted {len(written)} file(s) -> {bdf_dir}" + (f"  ({len(failed)} failed)" if failed else ""))
         if lossy:
-            print(f"  DATA-LOSS WARNING: {len(lossy)} file(s) had unmapped source columns "
-                  "(details above) -- the converted files do NOT contain those columns.")
+            print(
+                f"  DATA-LOSS WARNING: {len(lossy)} file(s) had unmapped source columns "
+                "(details above) -- the converted files do NOT contain those columns."
+            )
         if failed:
-            print("  Failed files may be an unsupported variant -- try exporting a CSV "
-                  "and ws.convert('*.csv'), or ws.convert_csv(path, hints={...}).")
+            print(
+                "  Failed files may be an unsupported variant -- try exporting a CSV "
+                "and ws.convert('*.csv'), or ws.convert_csv(path, hints={...})."
+            )
         return written
 
     def _print_convert_help(self) -> None:
@@ -2894,9 +2969,11 @@ class AuthoringWorkspace:
         print("\n  Supported with an explicit pattern, e.g. ws.convert('*.csv'):")
         for ext, label in _CONVERT_EXPLICIT.items():
             print(f"    {ext:7} {label}")
-        print("\n  Arbin .res / Biologic .mpr / Maccor raw: export a CSV from the "
-              "instrument software, then ws.convert('*.csv') or "
-              "ws.convert_csv(path, hints={...}).")
+        print(
+            "\n  Arbin .res / Biologic .mpr / Maccor raw: export a CSV from the "
+            "instrument software, then ws.convert('*.csv') or "
+            "ws.convert_csv(path, hints={...})."
+        )
 
     def bdf_columns(self) -> builtins.list[str]:
         """Print the canonical BDF column names (the targets for convert_csv hints)."""
@@ -2968,6 +3045,7 @@ class AuthoringWorkspace:
         # Prefer bdf.io.save to keep the BDF round-trip honest; fall back to pandas.
         try:
             from battinfo.processing import _save_bdf
+
             _save_bdf(df, out)
         except Exception:
             if fmt == "parquet":
@@ -2978,6 +3056,7 @@ class AuthoringWorkspace:
         if validate:
             try:
                 import bdf as _bdf
+
                 report = _bdf.validate(df)
                 # batterydf >= 0.2 returns a dict report; older versions returned
                 # an object with an ``ok`` attribute.
@@ -2996,42 +3075,68 @@ class AuthoringWorkspace:
 
         mapped = ", ".join(sorted(set(hints.values()))) if hints else "(no remap)"
         print(f"  {src.name}  ->  {out.name}   mapped: {mapped}")
+
         # Columns that are still not BDF canonical names were kept as-is, but
         # downstream BDF tooling will not recognize them — say so out loud
         # instead of green-lighting a partially mapped file silently.
         def _is_canonical(column: str) -> bool:
             try:
                 from bdf.spec import COLUMN_ONTOLOGY  # noqa: PLC0415
+
                 return COLUMN_ONTOLOGY.get(column) is not None
             except Exception:  # noqa: BLE001 — fall back to the curated subset
                 return column in {name for name, _ in _BDF_CANONICAL_COLUMNS}
 
         unmapped = [c for c in df.columns if not _is_canonical(c)]
         if unmapped:
-            print(f"  WARNING: {len(unmapped)} column(s) are not BDF canonical names "
-                  "(kept unchanged, but BDF tooling will ignore them):")
+            print(
+                f"  WARNING: {len(unmapped)} column(s) are not BDF canonical names "
+                "(kept unchanged, but BDF tooling will ignore them):"
+            )
             for col in unmapped:
                 print(f"    - {col}")
-            print("    Fix: ws.bdf_columns() lists the canonical names; re-run "
-                  "ws.convert_csv(path, hints={'<source column>': '<bdf name>'}).")
+            print(
+                "    Fix: ws.bdf_columns() lists the canonical names; re-run "
+                "ws.convert_csv(path, hints={'<source column>': '<bdf name>'})."
+            )
         return out
 
     def commands(self) -> None:
         """Print the workspace commands, grouped by stage of the workflow."""
         groups = [
-            ("Set up",   ["setup()", "login(api_key=...)", "whoami()",
-                          "project('101103997')               # tag work with a grant"]),
-            ("Discover", ["search('duracell mn2400')           # cell-specs (fuzzy)",
-                          "search(type='cell', serial='...')   # existing instances",
-                          "template('cell-spec', ...)", "bdf_columns()"]),
-            ("Build",    ["convert()", "convert_csv(path, hints=...)", "load(src)",
-                          "add('cell', spec=spec, serial_numbers=[...])",
-                          "load(ws.search(type='cell', batch='...'))  # reference existing",
-                          "add('test', type='cycling', cell='SN-1', data='f.csv')"]),
-            ("Inspect",  ["list(verbose=True)", "status()"]),
-            ("Publish",  ["save()", "publish(note=...)", "zenodo()", "submit()"]),
-            ("Review",   ["pending()", "approve(id)"]),
-            ("Import",   ["import_(source)", "reload_cells()", "clear()"]),
+            (
+                "Set up",
+                [
+                    "setup()",
+                    "login(api_key=...)",
+                    "whoami()",
+                    "project('101103997')               # tag work with a grant",
+                ],
+            ),
+            (
+                "Discover",
+                [
+                    "search('duracell mn2400')           # cell-specs (fuzzy)",
+                    "search(type='cell', serial='...')   # existing instances",
+                    "template('cell-spec', ...)",
+                    "bdf_columns()",
+                ],
+            ),
+            (
+                "Build",
+                [
+                    "convert()",
+                    "convert_csv(path, hints=...)",
+                    "load(src)",
+                    "add('cell', spec=spec, serial_numbers=[...])",
+                    "load(ws.search(type='cell', batch='...'))  # reference existing",
+                    "add('test', type='cycling', cell='SN-1', data='f.csv')",
+                ],
+            ),
+            ("Inspect", ["list(verbose=True)", "status()"]),
+            ("Publish", ["save()", "publish(note=...)", "zenodo()", "submit()"]),
+            ("Review", ["pending()", "approve(id)"]),
+            ("Import", ["import_(source)", "reload_cells()", "clear()"]),
         ]
         print("BattINFO workspace commands (call as ws.<command>):\n")
         for title, cmds in groups:
@@ -3117,7 +3222,7 @@ class AuthoringWorkspace:
             if results:
                 print(f"Found {len(results)} cell-spec match(es):")
                 for r in results:
-                    print(f"  {r.get('manufacturer','')} {r.get('model','')}  {r['id']}")
+                    print(f"  {r.get('manufacturer', '')} {r.get('model', '')}  {r['id']}")
             else:
                 print(f"No cell-spec match for {query!r}.")
                 print("  Tip: ws.template('cell-spec', manufacturer='...', model='...')")
@@ -3188,7 +3293,7 @@ class AuthoringWorkspace:
                 "'equipment-spec'. Example: ws.template('cell-spec', manufacturer='...', model='...')"
             )
         rt = record_type.replace("_", "-")
-        if rt in ("test-spec", "test-protocol"):   # accept old name during transition
+        if rt in ("test-spec", "test-protocol"):  # accept old name during transition
             return self._template_test_spec(**kwargs)
         if rt == "equipment-spec":
             return self._template_equipment_spec(**kwargs)
@@ -3242,9 +3347,7 @@ class AuthoringWorkspace:
         test_type = kwargs.get("type", kwargs.get("kind", "")) or ""
         allowed_types = [t.value for t in BatteryTestType]
         if test_type and test_type not in allowed_types:
-            raise ValueError(
-                f"type must be one of: {', '.join(allowed_types)} (got {test_type!r})."
-            )
+            raise ValueError(f"type must be one of: {', '.join(allowed_types)} (got {test_type!r}).")
 
         def _scalar(value: Any, unit: str) -> dict:
             return {"value": value, "unit": unit}
@@ -3260,31 +3363,31 @@ class AuthoringWorkspace:
 
         steps = kwargs.get("steps", kwargs.get("experiment"))
         template = {
-            "name":        name,
-            "type":        test_type,
+            "name": name,
+            "type": test_type,
             "_allowed_types": allowed_types,
             "description": kwargs.get("description", None),
-            "instrument":  kwargs.get("instrument",  None),
-            "atmosphere":  kwargs.get("atmosphere",  None),
+            "instrument": kwargs.get("instrument", None),
+            "atmosphere": kwargs.get("atmosphere", None),
             # PyBaMM-style step strings; ws.load() parses them into the
             # structured method. Leave empty if the method comes later.
             "steps": list(steps) if steps else [],
             "_steps_help": "PyBaMM-style strings, e.g. 'Discharge at C/5 for 10 hours "
-                           "or until 2.5 V', 'Hold at 4.2 V until C/50', 'Rest for 30 minutes'. "
-                           "Currents per area work too: 'Charge at 0.1 mA/cm2 until 4.2 V', "
-                           "'Hold at 4.2 V until 0.05 mA/cm2'.",
+            "or until 2.5 V', 'Hold at 4.2 V until C/50', 'Rest for 30 minutes'. "
+            "Currents per area work too: 'Charge at 0.1 mA/cm2 until 4.2 V', "
+            "'Hold at 4.2 V until 0.05 mA/cm2'.",
             # Every condition is a quantity: {value, unit} or {min_value, max_value, unit}.
             # Fill in what applies and delete the rest; null placeholders are
             # ignored by ws.load(). Keys starting with '_' are comments.
             "conditions": {
-                "temperature":      _scalar(kwargs.get("temperature_degC"), "degC"),
+                "temperature": _scalar(kwargs.get("temperature_degC"), "degC"),
                 "applied_pressure": _scalar(kwargs.get("applied_pressure_kilopascal"), "kPa"),
-                "voltage_window":   _window(kwargs.get("voltage_window_volt"), "V"),
-                "soc_window":       _window(kwargs.get("soc_window"), "%"),
-                "c_rate":           _scalar(kwargs.get("c_rate"), "A/Ah"),
-                "d_rate":           _scalar(kwargs.get("d_rate"), "A/Ah"),
+                "voltage_window": _window(kwargs.get("voltage_window_volt"), "V"),
+                "soc_window": _window(kwargs.get("soc_window"), "%"),
+                "c_rate": _scalar(kwargs.get("c_rate"), "A/Ah"),
+                "d_rate": _scalar(kwargs.get("d_rate"), "A/Ah"),
             },
-            "citation":    kwargs.get("citation",    None),
+            "citation": kwargs.get("citation", None),
             "source_file": kwargs.get("source_file", None),
         }
         safe_name = re.sub(r"[^a-zA-Z0-9]", "-", name).strip("-") or "test-spec"
@@ -3299,23 +3402,26 @@ class AuthoringWorkspace:
     def _template_equipment_spec(self, **kwargs) -> Path:
         name = kwargs.get("name", "")
         template = {
-            "name":                  name,
-            "manufacturer":          kwargs.get("manufacturer", ""),
-            "model":                 kwargs.get("model", ""),
-            "equipment_class":       kwargs.get("equipment_class", "cycler"),
-            "channel_count":         kwargs.get("channel_count", None),
+            "name": name,
+            "manufacturer": kwargs.get("manufacturer", ""),
+            "model": kwargs.get("model", ""),
+            "equipment_class": kwargs.get("equipment_class", "cycler"),
+            "channel_count": kwargs.get("channel_count", None),
             "supported_chemistries": kwargs.get("supported_chemistries", []),
-            "product_id":            kwargs.get("product_id", None),
-            "comment":               kwargs.get("comment", None),
-            "source_url":            kwargs.get("source_url", None),
-            "citation":              kwargs.get("citation", None),
+            "product_id": kwargs.get("product_id", None),
+            "comment": kwargs.get("comment", None),
+            "source_url": kwargs.get("source_url", None),
+            "citation": kwargs.get("citation", None),
             # Datasheet quantities: value/min_value/max_value + unit (or
             # value_text for ranges that resist a clean unit).
-            "property": kwargs.get("property", {
-                "charge_current":    {"min_value": None, "max_value": None, "unit": "A"},
-                "discharge_current": {"min_value": None, "max_value": None, "unit": "A"},
-                "channel_voltage_max": {"value": None, "unit": "V"},
-            }),
+            "property": kwargs.get(
+                "property",
+                {
+                    "charge_current": {"min_value": None, "max_value": None, "unit": "A"},
+                    "discharge_current": {"min_value": None, "max_value": None, "unit": "A"},
+                    "channel_voltage_max": {"value": None, "unit": "V"},
+                },
+            ),
         }
         safe_name = re.sub(r"[^a-zA-Z0-9]", "-", name or "equipment-spec")
         out_path = self._root / f"{safe_name}.equipment-spec.json"
@@ -3490,20 +3596,23 @@ class AuthoringWorkspace:
                 return self._add_electrode_spec(**kwargs)
             if rt_key == "material":
                 linked = {"material_spec_id", "spec_id"}
-                accepted = [*_signature_keywords(self._add_material),
-                            *(k for k in _model_keywords(MaterialInput) if k not in linked)]
+                accepted = [
+                    *_signature_keywords(self._add_material),
+                    *(k for k in _model_keywords(MaterialInput) if k not in linked),
+                ]
                 _check_add_keywords("material", accepted, kwargs)
                 return self._add_material(**kwargs)
             linked = {"electrode_spec_id", "spec_id"}
-            accepted = [*_signature_keywords(self._add_electrode),
-                        *(k for k in _model_keywords(ElectrodeInput) if k not in linked)]
+            accepted = [
+                *_signature_keywords(self._add_electrode),
+                *(k for k in _model_keywords(ElectrodeInput) if k not in linked),
+            ]
             _check_add_keywords("electrode", accepted, kwargs)
             return self._add_electrode(**kwargs)
         if rt_key in ("parameter-set", "parameters"):
             from battinfo.api._parameters import _record_from_parameter_set  # noqa: PLC0415
 
-            accepted = [*_signature_keywords(self._add_parameter_set),
-                        *_signature_keywords(_record_from_parameter_set)]
+            accepted = [*_signature_keywords(self._add_parameter_set), *_signature_keywords(_record_from_parameter_set)]
             _check_add_keywords("parameter_set", accepted, kwargs)
             return self._add_parameter_set(**kwargs)
         try:
@@ -3556,9 +3665,7 @@ class AuthoringWorkspace:
         # Side records (materials, electrodes) are written first (same stamp path)
         # so the engine's index rebuild picks them up and an instance's spec
         # reference resolves on disk.
-        side_results = self._save_side_records(
-            mode=mode, validation_policy=validation_policy, stamp=stamp_fn
-        )
+        side_results = self._save_side_records(mode=mode, validation_policy=validation_policy, stamp=stamp_fn)
         result = self._ws.save(
             mode=mode,
             resolve_references=False,
@@ -3570,14 +3677,11 @@ class AuthoringWorkspace:
         # candidate is stamped, but only newly-created or genuinely-changed records
         # are written — an unchanged re-save reaches zero, so it prints nothing.
         stamped = 0
-        _STAMPED_KEYS = ("cell_specs", "cell_instances", "tests", "datasets", "test_specs",
-                         *_SIDE_RECORD_KEYS)
+        _STAMPED_KEYS = ("cell_specs", "cell_instances", "tests", "datasets", "test_specs", *_SIDE_RECORD_KEYS)
         if stamp_counts["funding"]:
             for key in _STAMPED_KEYS:
                 for item in result.get(key, []):
-                    if isinstance(item, dict) and (
-                        item.get("status") == "created" or item.get("content_changed")
-                    ):
+                    if isinstance(item, dict) and (item.get("status") == "created" or item.get("content_changed")):
                         stamped += 1
         # Track the exact files written so submit() only sends this session's work.
         self._session_paths = set()
@@ -3620,9 +3724,7 @@ class AuthoringWorkspace:
         for e in self._electrodes:
             body = e.get("electrode", {})
             if body.get("id"):
-                name_by_id[body["id"]] = (
-                    body.get("batch_id") or body.get("lot_id") or body.get("name") or "electrode"
-                )
+                name_by_id[body["id"]] = body.get("batch_id") or body.get("lot_id") or body.get("name") or "electrode"
         for ps in self._parameter_sets:
             body = ps.get("parameter_set", {})
             if body.get("id"):
@@ -3671,10 +3773,14 @@ class AuthoringWorkspace:
             label = ref.summary() if ref else "project"
             print(f"  funding:    {label} stamped onto {stamped} record(s)")
         if failed_count:
-            print(f"\n  {failed_count} record(s) failed validation under the {validation_policy} policy "
-                  "and are marked [failed] above.")
-            print("  They are written but not valid: fix the errors, then run ws.save() again "
-                  "before ws.publish() or ws.submit().")
+            print(
+                f"\n  {failed_count} record(s) failed validation under the {validation_policy} policy "
+                "and are marked [failed] above."
+            )
+            print(
+                "  They are written but not valid: fix the errors, then run ws.save() again "
+                "before ws.publish() or ws.submit()."
+            )
         elif not getattr(self, "_publishing", False):
             # Suppressed mid-publish: telling the user to run ws.publish()
             # from inside ws.publish() right before a credentials error reads
@@ -3702,9 +3808,7 @@ class AuthoringWorkspace:
             failures[_path_key(path)] = failure
         return failures
 
-    def _save_side_records(
-        self, *, mode: str, validation_policy: str, stamp: Any = None
-    ) -> dict:
+    def _save_side_records(self, *, mode: str, validation_policy: str, stamp: Any = None) -> dict:
         """Write queued material and electrode records through the shared stamp path.
 
         Materials and electrodes are not engine model objects, so they are
@@ -3730,8 +3834,12 @@ class AuthoringWorkspace:
         def _write(saver: Any, records: builtins.list[dict]) -> builtins.list[dict]:
             return [
                 saver(
-                    rec, source_root=source_root, mode=mode, resolve_references=False,
-                    validation_policy=validation_policy, stamp=stamp,
+                    rec,
+                    source_root=source_root,
+                    mode=mode,
+                    resolve_references=False,
+                    validation_policy=validation_policy,
+                    stamp=stamp,
                 )
                 for rec in records
             ]
@@ -3864,8 +3972,11 @@ class AuthoringWorkspace:
             # .battinfo/zenodo.json, and puts it on the records the deposit holds.
             self.zenodo(publish=True, sandbox=sandbox, creators=creators)
         return self.submit(
-            note=note, doi=doi, only=only,
-            publication_mode=publication_mode, allow_partial=allow_partial,
+            note=note,
+            doi=doi,
+            only=only,
+            publication_mode=publication_mode,
+            allow_partial=allow_partial,
             allow_local_files=allow_local_files,
         )
 
@@ -3885,8 +3996,7 @@ class AuthoringWorkspace:
         """
         import urllib.request
 
-        url = (registry_url or self._registry_url
-               or os.environ.get("BATTINFO_REGISTRY_URL") or _DEFAULT_REGISTRY_URL)
+        url = registry_url or self._registry_url or os.environ.get("BATTINFO_REGISTRY_URL") or _DEFAULT_REGISTRY_URL
         wid = workspace_id or self._credential("BATTINFO_WORKSPACE_ID")
         if not wid:
             raise RuntimeError(
@@ -3955,13 +4065,13 @@ class AuthoringWorkspace:
         summary: dict[str, list[dict]] = {}
 
         _TYPE_KEYS = {
-            "cell-spec":     ("cell_spec",       "name",          "id"),
-            "cell-instance": ("cell_instance",  "serial_number", "id"),
-            "test":          ("test",           "name",          "id"),
-            "dataset":       ("dataset",        "name",          "id"),
-            "test-protocol": ("test_spec",  "name",          "id"),
-            "material-spec": ("material_spec",  "name",          "id"),
-            "material":      ("material",       "name",          "id"),
+            "cell-spec": ("cell_spec", "name", "id"),
+            "cell-instance": ("cell_instance", "serial_number", "id"),
+            "test": ("test", "name", "id"),
+            "dataset": ("dataset", "name", "id"),
+            "test-protocol": ("test_spec", "name", "id"),
+            "material-spec": ("material_spec", "name", "id"),
+            "material": ("material", "name", "id"),
         }
 
         for subdir, (record_key, name_field, id_field) in _TYPE_KEYS.items():
@@ -3974,13 +4084,11 @@ class AuthoringWorkspace:
                     raw = json.loads(f.read_text(encoding="utf-8"))
                     inner = raw.get(record_key, {}) or {}
                     name = inner.get(name_field) or inner.get("model") or f.stem
-                    iri  = inner.get(id_field, "")
+                    iri = inner.get(id_field, "")
                     session = f in self._session_paths
-                    items.append({"name": name, "id": iri, "file": f.name,
-                                  "session": session})
+                    items.append({"name": name, "id": iri, "file": f.name, "session": session})
                 except Exception:
-                    items.append({"name": f.stem, "id": "", "file": f.name,
-                                  "session": f in self._session_paths})
+                    items.append({"name": f.stem, "id": "", "file": f.name, "session": f in self._session_paths})
             if items:
                 summary[subdir] = items
 
@@ -4084,8 +4192,7 @@ class AuthoringWorkspace:
                     working_electrode_id=ci.get("working_electrode_id"),
                     counter_electrode_id=ci.get("counter_electrode_id"),
                 )
-                self._index_cell(cell, ci.get("serial_number"), ci.get("name"),
-                                 ci.get("short_id") or None)
+                self._index_cell(cell, ci.get("serial_number"), ci.get("name"), ci.get("short_id") or None)
                 count += 1
             except Exception as exc:
                 print(f"  WARNING: could not load {src.name} -- {exc}")
@@ -4176,16 +4283,18 @@ class AuthoringWorkspace:
             elif wanted:
                 if not any(_serial_matches(t, name) or _serial_matches(t, serial) for t in wanted):
                     continue
-            out.append({
-                "id": r.get("canonical_iri", ""),
-                "name": name,
-                "serial_number": serial,
-                "batch_id": batch,
-                "cell_spec_id": meta.get("cell_spec_id"),
-                "manufacturer": meta.get("manufacturer"),
-                "model": meta.get("model"),
-                "title": r.get("title", ""),
-            })
+            out.append(
+                {
+                    "id": r.get("canonical_iri", ""),
+                    "name": name,
+                    "serial_number": serial,
+                    "batch_id": batch,
+                    "cell_spec_id": meta.get("cell_spec_id"),
+                    "manufacturer": meta.get("manufacturer"),
+                    "model": meta.get("model"),
+                    "title": r.get("title", ""),
+                }
+            )
         return out
 
     def import_(
@@ -4254,7 +4363,7 @@ class AuthoringWorkspace:
         raw_text = _import_resolve_source(source, sandbox=sandbox, token=token)
         doc = json.loads(raw_text)
         context = doc.get("@context", {})
-        graph   = doc.get("@graph", [])
+        graph = doc.get("@graph", [])
 
         # ── 2. Build IRI expander from inline context ──────────────────────────
         def _expand(term: str) -> str:
@@ -4284,7 +4393,7 @@ class AuthoringWorkspace:
             for m in json.loads(_prop_map_path.read_text(encoding="utf-8")).get("mappings", []):
                 iri = m.get("class_iri", "")
                 key = m.get("key", "")
-                if iri and key and iri not in rev_prop:   # first occurrence wins
+                if iri and key and iri not in rev_prop:  # first occurrence wins
                     rev_prop[iri] = key
 
         rev_unit: dict[str, str] = {v: k for k, v in _UNIT_MAP.items()}
@@ -4299,6 +4408,7 @@ class AuthoringWorkspace:
                         rev_unit.setdefault(m["unit_iri"], m["symbol"])
         from battinfo.transform.json_to_jsonld import LEGACY_UNIT_IRIS as _LEGACY_UNIT_IRIS
         from battinfo.transform.json_to_jsonld import MANUAL_UNIT_TYPES as _MANUAL_UNIT_TYPES
+
         for _sym, _iri in _MANUAL_UNIT_TYPES.items():
             rev_unit.setdefault(_iri, _sym)
         for _iri, _sym in _LEGACY_UNIT_IRIS.items():
@@ -4310,7 +4420,7 @@ class AuthoringWorkspace:
         _entity_path2 = Path(__file__).parent / "data" / "mappings" / "domain-battery" / "entity_type_map.json"
         if _entity_path2.exists():
             em2 = json.loads(_entity_path2.read_text(encoding="utf-8")).get("mappings", {})
-            for val in (em2.get("chemistry") or {}):
+            for val in em2.get("chemistry") or {}:
                 _chem_case[val.lower()] = val  # keep as-is from map (already lowercase)
 
         # entity_type_map reverse: class_name → {field, value}
@@ -4346,8 +4456,10 @@ class AuthoringWorkspace:
             for node in nodes:
                 type_raw = node.get("@type", "")
                 type_terms = (
-                    [type_raw] if isinstance(type_raw, str)
-                    else [t for t in type_raw if isinstance(t, str)] if isinstance(type_raw, list)
+                    [type_raw]
+                    if isinstance(type_raw, str)
+                    else [t for t in type_raw if isinstance(t, str)]
+                    if isinstance(type_raw, list)
                     else []
                 )
                 prop_key = next(
@@ -4356,7 +4468,9 @@ class AuthoringWorkspace:
                 )
                 if not prop_key:
                     continue
-                value = (node.get("hasNumericalPart") or {}).get("hasNumberValue", (node.get("hasNumericalPart") or {}).get("hasNumericalValue"))
+                value = (node.get("hasNumericalPart") or {}).get(
+                    "hasNumberValue", (node.get("hasNumericalPart") or {}).get("hasNumericalValue")
+                )
                 unit_raw = node.get("hasMeasurementUnit")
                 if isinstance(unit_raw, str):
                     unit_term = unit_raw
@@ -4364,8 +4478,8 @@ class AuthoringWorkspace:
                     unit_term = unit_raw.get("@id", "")
                 else:
                     unit_term = ""
-                unit_iri  = _expand(unit_term)
-                unit_sym  = rev_unit.get(unit_iri, unit_term.split(":")[-1])
+                unit_iri = _expand(unit_term)
+                unit_sym = rev_unit.get(unit_iri, unit_term.split(":")[-1])
                 if value is not None:
                     specs[prop_key] = {"value": value, "unit": unit_sym}
             return specs
@@ -4385,8 +4499,13 @@ class AuthoringWorkspace:
 
             if "BatteryCellSpecification" in types:
                 spec_nodes_by_iri[iri] = node
-            elif any(t in types for t in ("BatteryCell", "CylindricalBattery", "PouchCell", "CoinCell", "PrismaticBattery")) \
-                 and "BatteryCellSpecification" not in types:
+            elif (
+                any(
+                    t in types
+                    for t in ("BatteryCell", "CylindricalBattery", "PouchCell", "CoinCell", "PrismaticBattery")
+                )
+                and "BatteryCellSpecification" not in types
+            ):
                 defined_by = node.get("rdfs:isDefinedBy")
                 if isinstance(defined_by, dict) and defined_by.get("@id") == iri:
                     stub_cell_iris.add(iri)  # a published cell the package points at, described at its own IRI
@@ -4400,7 +4519,7 @@ class AuthoringWorkspace:
                 dataset_nodes.append(node)
 
         # ── 5. Import cell specs ───────────────────────────────────────────────
-        spec_objects: dict[str, Any] = {}   # IRI → CellSpec
+        spec_objects: dict[str, Any] = {}  # IRI → CellSpec
         for iri, node in sorted(spec_nodes_by_iri.items()):
             # Skip typed stubs for externally-defined specs (no descriptive body):
             # they only assert @type + a pointer to where the real spec lives, so
@@ -4422,13 +4541,11 @@ class AuthoringWorkspace:
             descriptors = _extract_descriptors(phys_types)
 
             mfr_node = node.get("schema:manufacturer", {})
-            mfr_name  = mfr_node.get("schema:name", "") if isinstance(mfr_node, dict) else str(mfr_node)
+            mfr_name = mfr_node.get("schema:name", "") if isinstance(mfr_node, dict) else str(mfr_node)
             # Canonical shape: the physical payload (hasProperty, composition)
             # rides the described battery; older packages carried it on the
             # spec node - read both, described side first.
-            specs = _specs_from_property_nodes(
-                phys.get("hasProperty") or node.get("hasProperty", [])
-            )
+            specs = _specs_from_property_nodes(phys.get("hasProperty") or node.get("hasProperty", []))
 
             # size_code: the canonical shape emits it as schema:size; older
             # packages used schema:identifier. In the canonical shape
@@ -4457,7 +4574,7 @@ class AuthoringWorkspace:
         imported_cells = 0
         for iri, node in sorted(cell_nodes_by_iri.items()):
             spec_iri = (node.get("dcterms:conformsTo") or {}).get("@id", "")
-            spec_obj  = spec_objects.get(spec_iri)
+            spec_obj = spec_objects.get(spec_iri)
             if spec_obj is None:
                 print(f"  WARNING: no spec found for cell {iri} -- skipping")
                 continue
@@ -4522,34 +4639,38 @@ class AuthoringWorkspace:
         for test_iri, tnode in sorted(test_nodes_by_iri.items()):
             # prov:used may now be a list (cell + spec); hasTestObject is preferred.
             cell_iri = _first_id(tnode.get("hasTestObject")) or _first_id(tnode.get("prov:used"))
-            test_cell = self._ws.cells[-1] if not cell_iri else next(
-                (c for c in self._ws.cells if c.id == cell_iri), None
+            test_cell = (
+                self._ws.cells[-1] if not cell_iri else next((c for c in self._ws.cells if c.id == cell_iri), None)
             )
             outputs = [o for o in (tnode.get("hasOutput") or []) if isinstance(o, dict)]
             if test_cell is None:
                 # Not attached here: a test on a stub cell (one published in the
                 # registry) would need that cell in this workspace first.
                 reason = (
-                    "cell defined elsewhere" if cell_iri in stub_cell_iris
-                    else "cell not imported" if cell_iri in cell_nodes_by_iri
+                    "cell defined elsewhere"
+                    if cell_iri in stub_cell_iris
+                    else "cell not imported"
+                    if cell_iri in cell_nodes_by_iri
                     else "cell not in the deposit"
                 )
                 if reason != "cell defined elsewhere":
                     print(f"  WARNING: no cell found for test {test_iri} -- skipping")
                 skipped_tests.append({"test": test_iri, "cell": cell_iri, "reason": reason})
                 skipped_datasets.extend(
-                    {"dataset": o.get("@id", ""), "test": test_iri, "cell": cell_iri, "reason": reason}
-                    for o in outputs
+                    {"dataset": o.get("@id", ""), "test": test_iri, "cell": cell_iri, "reason": reason} for o in outputs
                 )
                 continue
             if not outputs:
                 skipped_tests.append({"test": test_iri, "cell": cell_iri, "reason": "no dataset"})
                 continue
 
-            protocol  = tnode.get("schema:measurementTechnique", "")
+            protocol = tnode.get("schema:measurementTechnique", "")
             instr_node = tnode.get("hasTestEquipment", {})
-            instrument = instr_node.get("schema:name", "") if isinstance(instr_node, dict) \
-                         else tnode.get("schema:instrument", "")
+            instrument = (
+                instr_node.get("schema:name", "")
+                if isinstance(instr_node, dict)
+                else tnode.get("schema:instrument", "")
+            )
             # The emitter states the kind as schema:additionalType; a deposit
             # without it leaves the kind to be read from the technique.
             kind = tnode.get("schema:additionalType")
@@ -4568,21 +4689,22 @@ class AuthoringWorkspace:
                     # every file before the catalog shape), then its own first file,
                     # then a file whose URL carries the dataset uid. A dataset whose
                     # own files were all left out never borrows another's.
-                    dist = next((d for d in own if _generated_by(d, test_iri)), None) or next(
-                        (d for d in dist_by_url.values() if _generated_by(d, test_iri)), None
-                    ) or (own[0] if own else None)
+                    dist = (
+                        next((d for d in own if _generated_by(d, test_iri)), None)
+                        or next((d for d in dist_by_url.values() if _generated_by(d, test_iri)), None)
+                        or (own[0] if own else None)
+                    )
                     if dist is None:
                         dist = next(
-                            (d for d in dist_by_url.values()
-                             if ds_iri.split("/")[-1] in d.get("dcat:downloadURL", "")),
+                            (d for d in dist_by_url.values() if ds_iri.split("/")[-1] in d.get("dcat:downloadURL", "")),
                             None,
                         )
                 note = None
                 if dist is not None:
                     dl_url = dist["dcat:downloadURL"]
-                    cs     = (dist.get("spdx:checksum") or {})
-                    fmt    = _media_type_from_jsonld(dist.get("dcat:mediaType"))
-                    fname  = dist.get("schema:name") or _distribution_file_name(dl_url)
+                    cs = dist.get("spdx:checksum") or {}
+                    fmt = _media_type_from_jsonld(dist.get("dcat:mediaType"))
+                    fname = dist.get("schema:name") or _distribution_file_name(dl_url)
                 elif left_out:
                     # Every download URL the dataset had was left out. It is kept
                     # without a file, at the http(s) page the deposit gives it,
@@ -4592,10 +4714,14 @@ class AuthoringWorkspace:
                         ds_node.get("dcterms:isPartOf")
                     )
                     if not dl_url:
-                        skipped_datasets.append({
-                            "dataset": ds_iri, "test": test_iri, "cell": cell_iri,
-                            "reason": "no http(s) download URL",
-                        })
+                        skipped_datasets.append(
+                            {
+                                "dataset": ds_iri,
+                                "test": test_iri,
+                                "cell": cell_iri,
+                                "reason": "no http(s) download URL",
+                            }
+                        )
                         continue
                     cs, fmt = {}, ""
                     fname = f"{ds_node.get('schema:name') or ds_iri} (without its file)"
@@ -4603,8 +4729,8 @@ class AuthoringWorkspace:
                     note = (
                         f"Imported without a file: the deposit gave the download URL {listed}, which "
                         "ws.import_() does not keep, as it is not an http(s) URL."
-                        if len(left_out) == 1 else
-                        f"Imported without a file: the deposit gave the download URLs {listed}, which "
+                        if len(left_out) == 1
+                        else f"Imported without a file: the deposit gave the download URLs {listed}, which "
                         "ws.import_() does not keep, as they are not http(s) URLs."
                     )
                 else:
@@ -4642,9 +4768,9 @@ class AuthoringWorkspace:
 
         counts: dict[str, Any] = {
             "properties": len(spec_objects),
-            "instances":  imported_cells,
-            "tests":      imported_tests,
-            "datasets":   imported_datasets,
+            "instances": imported_cells,
+            "tests": imported_tests,
+            "datasets": imported_datasets,
         }
         print(f"\nImported: {counts}")
         counts["skipped"] = {"tests": skipped_tests, "datasets": skipped_datasets}
@@ -4657,12 +4783,12 @@ class AuthoringWorkspace:
                 f"Skipped {len(on_stubs)} test(s) and {n_ds} dataset(s) on {len(stub_cells)} cell(s) "
                 f"defined in the registry, not in this deposit: {shown}. ws.import_() does not attach "
                 "tests to a cell it does not hold; to bring one in, open a workspace with a registry_url, "
-                "reference the cell with ws.load(ws.search(type=\"cell\", serial=...)[0]) and add its "
-                "tests with ws.add(\"test\", cell=..., data=...)."
+                'reference the cell with ws.load(ws.search(type="cell", serial=...)[0]) and add its '
+                'tests with ws.add("test", cell=..., data=...).'
             )
         others = len(skipped_tests) - len(on_stubs)
         if others:
-            print(f"Skipped {others} other test(s); counts[\"skipped\"] lists each one and why.")
+            print(f'Skipped {others} other test(s); counts["skipped"] lists each one and why.')
         return counts
 
     def clear(self) -> None:
@@ -4783,9 +4909,9 @@ class AuthoringWorkspace:
         import datetime
 
         url = registry_url or self._registry_url or os.environ.get("BATTINFO_REGISTRY_URL")
-        key = api_key       or self._credential("BATTINFO_API_KEY")
-        wid = workspace_id  or self._credential("BATTINFO_WORKSPACE_ID")
-        pid = publisher_id  or self._credential("BATTINFO_PUBLISHER_ID")
+        key = api_key or self._credential("BATTINFO_API_KEY")
+        wid = workspace_id or self._credential("BATTINFO_WORKSPACE_ID")
+        pid = publisher_id or self._credential("BATTINFO_PUBLISHER_ID")
         ver = source_version or datetime.date.today().isoformat()
 
         # The schemas do not include a free-text provenance.comment field
@@ -4793,9 +4919,7 @@ class AuthoringWorkspace:
         # compatibility but not attached to provenance.
 
         if not url:
-            raise RuntimeError(
-                "registry_url is required. Pass it or set BATTINFO_REGISTRY_URL."
-            )
+            raise RuntimeError("registry_url is required. Pass it or set BATTINFO_REGISTRY_URL.")
         if not key:
             raise RuntimeError(
                 "api_key is required. Run ws.login(api_key=...) first, or set "
@@ -4803,14 +4927,9 @@ class AuthoringWorkspace:
                 "https://battinfo.org/publish for how to request one."
             )
         if not wid:
-            raise RuntimeError(
-                "workspace_id is required. Pass it or set BATTINFO_WORKSPACE_ID."
-            )
+            raise RuntimeError("workspace_id is required. Pass it or set BATTINFO_WORKSPACE_ID.")
         if not pid:
-            raise RuntimeError(
-                "publisher_id is required. Pass it or set BATTINFO_PUBLISHER_ID."
-            )
-
+            raise RuntimeError("publisher_id is required. Pass it or set BATTINFO_PUBLISHER_ID.")
 
         records_dir = self._ws.source_root
         if not records_dir.exists():
@@ -4821,16 +4940,25 @@ class AuthoringWorkspace:
 
         # ── Validate the `only` filter (fail loud on an unknown token) ──────────
         _ALIASES: dict[str, str] = {
-            "cell-spec": "cell-spec", "cell_spec": "cell-spec",
-            "cell-instance": "cell-instance", "cell_instance": "cell-instance",
-            "test-spec": "test-protocol", "test_spec": "test-protocol",
+            "cell-spec": "cell-spec",
+            "cell_spec": "cell-spec",
+            "cell-instance": "cell-instance",
+            "cell_instance": "cell-instance",
+            "test-spec": "test-protocol",
+            "test_spec": "test-protocol",
             "test-protocol": "test-protocol",
-            "test": "test", "dataset": "dataset",
-            "material-spec": "material-spec", "material": "material",
-            "electrode-spec": "electrode-spec", "electrode": "electrode",
-            "equipment-spec": "equipment-spec", "equipment": "equipment",
-            "channel": "channel", "channels": "channel",
-            "parameter-set": "parameter-set", "parameters": "parameter-set",
+            "test": "test",
+            "dataset": "dataset",
+            "material-spec": "material-spec",
+            "material": "material",
+            "electrode-spec": "electrode-spec",
+            "electrode": "electrode",
+            "equipment-spec": "equipment-spec",
+            "equipment": "equipment",
+            "channel": "channel",
+            "channels": "channel",
+            "parameter-set": "parameter-set",
+            "parameters": "parameter-set",
         }
         allowed: set[str] | None
         if only is not None:
@@ -4861,16 +4989,32 @@ class AuthoringWorkspace:
         # that reference them so the registry sees a resolvable target first
         # (channels after equipment, parameter-sets after the specs they target).
         _SUBDIRS = (
-            "material-spec", "material", "electrode-spec", "electrode",
-            "cell-spec", "cell-instance", "test-protocol", "test", "dataset",
-            "equipment-spec", "equipment", "channel", "parameter-set",
+            "material-spec",
+            "material",
+            "electrode-spec",
+            "electrode",
+            "cell-spec",
+            "cell-instance",
+            "test-protocol",
+            "test",
+            "dataset",
+            "equipment-spec",
+            "equipment",
+            "channel",
+            "parameter-set",
         )
         # Component-family records exist locally but the registry cannot register
         # their resource types yet (identifiers.py: "Component-spec resource types
         # are not registrable yet"). They are surfaced below, never silently skipped.
         _NOT_REGISTRABLE = (
-            "separator-spec", "separator", "current-collector-spec", "current-collector",
-            "electrolyte-spec", "electrolyte", "housing-spec", "housing",
+            "separator-spec",
+            "separator",
+            "current-collector-spec",
+            "current-collector",
+            "electrolyte-spec",
+            "electrolyte",
+            "housing-spec",
+            "housing",
         )
 
         def _all_in(subdir: str) -> list[Path]:
@@ -4898,9 +5042,7 @@ class AuthoringWorkspace:
         # registered yet, so say so instead of dropping them without a word.
         if self._session_paths or submit_all:
             unregistrable = {
-                s: [f for f in _all_in(s)
-                    if submit_all or f in self._session_paths]
-                for s in _NOT_REGISTRABLE
+                s: [f for f in _all_in(s) if submit_all or f in self._session_paths] for s in _NOT_REGISTRABLE
             }
             unregistrable = {s: fs for s, fs in unregistrable.items() if fs}
             if unregistrable:
@@ -4929,28 +5071,64 @@ class AuthoringWorkspace:
                     rec = json.loads(f.read_text(encoding="utf-8"))
                 except (json.JSONDecodeError, OSError, UnicodeDecodeError) as exc:
                     print(f"  ERROR: {f.name} -- unreadable/corrupt ({exc})")
-                    prefailed.append({"title": f.name, "source_local_id": f.stem, "ok": False,
-                                      "status": "unreadable", "error": str(exc), "iri": "", "result": None})
+                    prefailed.append(
+                        {
+                            "title": f.name,
+                            "source_local_id": f.stem,
+                            "ok": False,
+                            "status": "unreadable",
+                            "error": str(exc),
+                            "iri": "",
+                            "result": None,
+                        }
+                    )
                     continue
                 if not isinstance(rec, dict):
                     error = "not a JSON object record"
                     print(f"  ERROR: {f.name} -- {error}")
-                    prefailed.append({"title": f.name, "source_local_id": f.stem, "ok": False,
-                                      "status": "invalid", "error": error, "iri": "", "result": None})
+                    prefailed.append(
+                        {
+                            "title": f.name,
+                            "source_local_id": f.stem,
+                            "ok": False,
+                            "status": "invalid",
+                            "error": error,
+                            "iri": "",
+                            "result": None,
+                        }
+                    )
                     continue
                 try:
                     result = validate_record(rec, policy="publisher")
                 except (ValueError, TypeError) as exc:  # unrecognised / non-object record
                     error = f"not a recognised record ({exc})"
                     print(f"  ERROR: {f.name} -- {error}")
-                    prefailed.append({"title": f.name, "source_local_id": f.stem, "ok": False,
-                                      "status": "invalid", "error": error, "iri": "", "result": None})
+                    prefailed.append(
+                        {
+                            "title": f.name,
+                            "source_local_id": f.stem,
+                            "ok": False,
+                            "status": "invalid",
+                            "error": error,
+                            "iri": "",
+                            "result": None,
+                        }
+                    )
                     continue
                 if not result.ok:
                     error = "; ".join(result.errors)
                     print(f"  ERROR: {f.name} -- failed validation: {error}")
-                    prefailed.append({"title": f.name, "source_local_id": f.stem, "ok": False,
-                                      "status": "invalid", "error": error, "iri": "", "result": None})
+                    prefailed.append(
+                        {
+                            "title": f.name,
+                            "source_local_id": f.stem,
+                            "ok": False,
+                            "status": "invalid",
+                            "error": error,
+                            "iri": "",
+                            "result": None,
+                        }
+                    )
                     continue
                 if not allow_local_files:
                     found = _submission_local_files(rec, s, records_dir)
@@ -4963,18 +5141,22 @@ class AuthoringWorkspace:
             # Never publish a path on this computer as a download link: refuse the
             # records that carry one, before any network call.
             local_failures = [
-                {"title": f.name, "source_local_id": f.stem, "ok": False, "status": "local_files",
-                 "error": "; ".join(f"{field}: {value}" for field, value in found),
-                 "iri": entity_id_from_doc(rec) or "", "result": None}
+                {
+                    "title": f.name,
+                    "source_local_id": f.stem,
+                    "ok": False,
+                    "status": "local_files",
+                    "error": "; ".join(f"{field}: {value}" for field, value in found),
+                    "iri": entity_id_from_doc(rec) or "",
+                    "result": None,
+                }
                 for f, rec, found in local_offenders
             ]
             if not allow_partial:
-                message = _local_files_message([
-                    (f"{f.name} ({entity_id_from_doc(rec) or 'no id'})", found)
-                    for f, rec, found in local_offenders
-                ])
-                raise SubmitError(message, failed=local_failures + prefailed,
-                                  outcomes=local_failures + prefailed)
+                message = _local_files_message(
+                    [(f"{f.name} ({entity_id_from_doc(rec) or 'no id'})", found) for f, rec, found in local_offenders]
+                )
+                raise SubmitError(message, failed=local_failures + prefailed, outcomes=local_failures + prefailed)
             for failure in local_failures:
                 print(f"  ERROR: {failure['title']} -- points at local files: {failure['error']}")
             prefailed.extend(local_failures)
@@ -4982,7 +5164,8 @@ class AuthoringWorkspace:
             raise SubmitError(
                 f"{len(prefailed)} record(s) are unreadable or failed validation; aborting before "
                 "submitting (nothing was sent). Fix them, or pass allow_partial=True.",
-                failed=prefailed, outcomes=prefailed,
+                failed=prefailed,
+                outcomes=prefailed,
             )
 
         # The Zenodo DOI is recorded as provenance.citation_doi, a field the
@@ -5027,8 +5210,15 @@ class AuthoringWorkspace:
         _all_channels = _load_all("channel", "channel")
         if _corrupt_siblings and not allow_partial:
             failures = [
-                {"title": f.name, "source_local_id": f.stem, "ok": False, "status": "unreadable",
-                 "error": err, "iri": "", "result": None}
+                {
+                    "title": f.name,
+                    "source_local_id": f.stem,
+                    "ok": False,
+                    "status": "unreadable",
+                    "error": err,
+                    "iri": "",
+                    "result": None,
+                }
                 for f, err in _corrupt_siblings
             ]
             listing = "; ".join(f"{f.name} ({err})" for f, err in _corrupt_siblings)
@@ -5036,7 +5226,8 @@ class AuthoringWorkspace:
                 f"{len(_corrupt_siblings)} sibling record file(s) are unreadable and would silently "
                 f"drop cross-record relationships from the submission: {listing}. Fix them, or pass "
                 "allow_partial=True to submit without those relationships.",
-                failed=failures, outcomes=failures,
+                failed=failures,
+                outcomes=failures,
             )
 
         # cell IRI -> [dataset IRIs] / [test IRIs]; cell IRI -> preview png url;
@@ -5052,9 +5243,7 @@ class AuthoringWorkspace:
         for ch_iri, (_ch_rec, ch_inner) in _all_channels.items():
             eq_iri = ch_inner.get("equipment_id")
             if eq_iri:
-                equipment_channels.setdefault(eq_iri, []).append(
-                    (ch_iri, str(ch_inner.get("label") or ""))
-                )
+                equipment_channels.setdefault(eq_iri, []).append((ch_iri, str(ch_inner.get("label") or "")))
 
         for ds_iri, (_ds_rec, ds_inner) in _all_datasets.items():
             about = ds_inner.get("about") or []
@@ -5098,38 +5287,47 @@ class AuthoringWorkspace:
                 raw = parsed[src]
                 body = raw.get(record_key, {})
                 title = (
-                    body.get("name") or body.get("label") or body.get("serial_number")
-                    or body.get("batch_id") or body.get("lot_id")
-                    or body.get("short_id") or src.stem
+                    body.get("name")
+                    or body.get("label")
+                    or body.get("serial_number")
+                    or body.get("batch_id")
+                    or body.get("lot_id")
+                    or body.get("short_id")
+                    or src.stem
                 )
                 source_local_id = body.get("short_id") or src.stem
                 raw = _with_citation_doi(raw, doi_for(body.get("id")))
                 record_links = []
                 if spec_ref and isinstance(body.get(spec_ref), str):
-                    record_links.append({
-                        "relationship": "instanceOf",
-                        "resource_type": spec_resource_type,
-                        "canonical_iri": body[spec_ref],
-                    })
+                    record_links.append(
+                        {
+                            "relationship": "instanceOf",
+                            "resource_type": spec_resource_type,
+                            "canonical_iri": body[spec_ref],
+                        }
+                    )
                 if isinstance(body.get("active_material_spec_id"), str):
-                    record_links.append({
-                        "relationship": "hasActiveMaterial",
-                        "resource_type": "material_spec",
-                        "canonical_iri": body["active_material_spec_id"],
-                    })
+                    record_links.append(
+                        {
+                            "relationship": "hasActiveMaterial",
+                            "resource_type": "material_spec",
+                            "canonical_iri": body["active_material_spec_id"],
+                        }
+                    )
                 if record_key == "equipment":
                     for ch_iri, ch_label in equipment_channels.get(body.get("id", ""), []):
-                        link = {"relationship": "hasChannel", "resource_type": "channel",
-                                "canonical_iri": ch_iri}
+                        link = {"relationship": "hasChannel", "resource_type": "channel", "canonical_iri": ch_iri}
                         if ch_label:
                             link["title"] = ch_label
                         record_links.append(link)
                 if record_key == "channel" and isinstance(body.get("equipment_id"), str):
-                    record_links.append({
-                        "relationship": "channelOf",
-                        "resource_type": "equipment",
-                        "canonical_iri": body["equipment_id"],
-                    })
+                    record_links.append(
+                        {
+                            "relationship": "channelOf",
+                            "resource_type": "equipment",
+                            "canonical_iri": body["equipment_id"],
+                        }
+                    )
                 if record_key == "parameter_set":
                     # The claim batch's target, or the cell a parameter file
                     # describes, when it is a registered record (a
@@ -5140,22 +5338,38 @@ class AuthoringWorkspace:
                         ("cell_instance_id", "cell"),
                     ):
                         if isinstance(body.get(tgt_field), str):
-                            record_links.append({
-                                "relationship": "about",
-                                "resource_type": tgt_type,
-                                "canonical_iri": body[tgt_field],
-                            })
+                            record_links.append(
+                                {
+                                    "relationship": "about",
+                                    "resource_type": tgt_type,
+                                    "canonical_iri": body[tgt_field],
+                                }
+                            )
                 payload = _simple_submission_payload(
-                    raw, resource_type=resource_type, rdf_type=rdf_type,
-                    record_key=record_key, wid=wid, pid=pid, ver=ver,
-                    source_local_id=source_local_id, title=title,
+                    raw,
+                    resource_type=resource_type,
+                    rdf_type=rdf_type,
+                    record_key=record_key,
+                    wid=wid,
+                    pid=pid,
+                    ver=ver,
+                    source_local_id=source_local_id,
+                    title=title,
                     related_resources=record_links,
                 )
-                outcomes.append(_journaled_submit(journal, payload, url, key, title,
-                                                  source_local_id=source_local_id,
-                                                  publication_mode=publication_mode,
-                                                  validation=validations[src],
-                                                  allow_local_files=allow_local_files))
+                outcomes.append(
+                    _journaled_submit(
+                        journal,
+                        payload,
+                        url,
+                        key,
+                        title,
+                        source_local_id=source_local_id,
+                        publication_mode=publication_mode,
+                        validation=validations[src],
+                        allow_local_files=allow_local_files,
+                    )
+                )
 
         # ── Cell specs ────────────────────────────────────────────────────────
         for src in _selected("cell-spec"):
@@ -5164,23 +5378,36 @@ class AuthoringWorkspace:
             mfr = product.get("manufacturer", {})
             mfr_name = mfr.get("name", "") if isinstance(mfr, dict) else str(mfr)
             model = product.get("model", "")
-            year  = product.get("year") or datetime.date.today().year
+            year = product.get("year") or datetime.date.today().year
             # The record's own title wins; "<manufacturer> <model>" is the fallback for a
             # cell spec without one. Titles are display text: the registry identity is the
             # IRI and the source_local_id below, never the title.
             name = product.get("name")
-            title = (name.strip() if isinstance(name, str) and name.strip() else f"{mfr_name} {model}".strip())
+            title = name.strip() if isinstance(name, str) and name.strip() else f"{mfr_name} {model}".strip()
             source_local_id = _make_record_slug(mfr_name, model, year)
             raw = _with_citation_doi(raw, doi_for(product.get("id")))
 
             payload = _cell_spec_submission_payload(
-                raw, wid=wid, pid=pid, ver=ver,
-                source_local_id=source_local_id, title=title,
+                raw,
+                wid=wid,
+                pid=pid,
+                ver=ver,
+                source_local_id=source_local_id,
+                title=title,
             )
-            outcomes.append(_journaled_submit(journal, payload, url, key, title,
-                                              source_local_id=source_local_id, publication_mode=publication_mode,
-                                              validation=validations[src],
-                                              allow_local_files=allow_local_files))
+            outcomes.append(
+                _journaled_submit(
+                    journal,
+                    payload,
+                    url,
+                    key,
+                    title,
+                    source_local_id=source_local_id,
+                    publication_mode=publication_mode,
+                    validation=validations[src],
+                    allow_local_files=allow_local_files,
+                )
+            )
 
         # ── Cell instances ────────────────────────────────────────────────────
         cell_spec_dir = records_dir / "cell-spec"
@@ -5208,23 +5435,38 @@ class AuthoringWorkspace:
             preview = None
             png = cell_preview_png.get(self_iri)
             if png:
-                preview = {"image": {
-                    "src": png,
-                    "alt": f"{label} dataset preview",
-                    "caption": "Measurement preview from a linked dataset.",
-                }}
+                preview = {
+                    "image": {
+                        "src": png,
+                        "alt": f"{label} dataset preview",
+                        "caption": "Measurement preview from a linked dataset.",
+                    }
+                }
 
             payload = _cell_instance_submission_payload(
-                raw, wid=wid, pid=pid, ver=ver,
-                source_local_id=source_local_id, title=label,
+                raw,
+                wid=wid,
+                pid=pid,
+                ver=ver,
+                source_local_id=source_local_id,
+                title=label,
                 spec_record=spec_record,
                 related_resources=related,
                 preview=preview,
             )
-            outcomes.append(_journaled_submit(journal, payload, url, key, label,
-                                              source_local_id=source_local_id, publication_mode=publication_mode,
-                                              validation=validations[src],
-                                              allow_local_files=allow_local_files))
+            outcomes.append(
+                _journaled_submit(
+                    journal,
+                    payload,
+                    url,
+                    key,
+                    label,
+                    source_local_id=source_local_id,
+                    publication_mode=publication_mode,
+                    validation=validations[src],
+                    allow_local_files=allow_local_files,
+                )
+            )
 
         # ── Test specs (protocols) ────────────────────────────────────────────
         # Submitted as resource_type "test_spec"; stored in the spec/ IRI namespace
@@ -5244,15 +5486,30 @@ class AuthoringWorkspace:
             ]
 
             payload = _simple_submission_payload(
-                raw, resource_type="test_spec", rdf_type="TestSpec",
-                record_key="test_spec", wid=wid, pid=pid, ver=ver,
-                source_local_id=source_local_id, title=title,
+                raw,
+                resource_type="test_spec",
+                rdf_type="TestSpec",
+                record_key="test_spec",
+                wid=wid,
+                pid=pid,
+                ver=ver,
+                source_local_id=source_local_id,
+                title=title,
                 related_resources=related,
             )
-            outcomes.append(_journaled_submit(journal, payload, url, key, title,
-                                              source_local_id=source_local_id, publication_mode=publication_mode,
-                                              validation=validations[src],
-                                              allow_local_files=allow_local_files))
+            outcomes.append(
+                _journaled_submit(
+                    journal,
+                    payload,
+                    url,
+                    key,
+                    title,
+                    source_local_id=source_local_id,
+                    publication_mode=publication_mode,
+                    validation=validations[src],
+                    allow_local_files=allow_local_files,
+                )
+            )
 
         # ── Tests ─────────────────────────────────────────────────────────────
         for src in _selected("test"):
@@ -5267,18 +5524,35 @@ class AuthoringWorkspace:
             if test.get("cell_id"):
                 related.append({"relationship": "testsCell", "resource_type": "cell", "canonical_iri": test["cell_id"]})
             if test.get("protocol_id"):
-                related.append({"relationship": "conformsTo", "resource_type": "test_spec", "canonical_iri": test["protocol_id"]})
+                related.append(
+                    {"relationship": "conformsTo", "resource_type": "test_spec", "canonical_iri": test["protocol_id"]}
+                )
 
             payload = _simple_submission_payload(
-                raw, resource_type="test", rdf_type="BatteryTest",
-                record_key="test", wid=wid, pid=pid, ver=ver,
-                source_local_id=source_local_id, title=title,
+                raw,
+                resource_type="test",
+                rdf_type="BatteryTest",
+                record_key="test",
+                wid=wid,
+                pid=pid,
+                ver=ver,
+                source_local_id=source_local_id,
+                title=title,
                 related_resources=related,
             )
-            outcomes.append(_journaled_submit(journal, payload, url, key, title,
-                                              source_local_id=source_local_id, publication_mode=publication_mode,
-                                              validation=validations[src],
-                                              allow_local_files=allow_local_files))
+            outcomes.append(
+                _journaled_submit(
+                    journal,
+                    payload,
+                    url,
+                    key,
+                    title,
+                    source_local_id=source_local_id,
+                    publication_mode=publication_mode,
+                    validation=validations[src],
+                    allow_local_files=allow_local_files,
+                )
+            )
 
         # ── Datasets ──────────────────────────────────────────────────────────
         for src in _selected("dataset"):
@@ -5306,7 +5580,9 @@ class AuthoringWorkspace:
             if links.get("cell"):
                 related.append({"relationship": "aboutCell", "resource_type": "cell", "canonical_iri": links["cell"]})
             if links.get("test"):
-                related.append({"relationship": "generatedByTest", "resource_type": "test", "canonical_iri": links["test"]})
+                related.append(
+                    {"relationship": "generatedByTest", "resource_type": "test", "canonical_iri": links["test"]}
+                )
 
             # Preview image: this dataset's static plot PNG.
             preview = None
@@ -5315,17 +5591,32 @@ class AuthoringWorkspace:
                 preview = {"image": {"src": png_dist["access_url"], "alt": f"{title} preview"}}
 
             payload = _simple_submission_payload(
-                raw, resource_type="dataset", rdf_type="Dataset",
-                record_key="dataset", wid=wid, pid=pid, ver=ver,
-                source_local_id=source_local_id, title=title,
+                raw,
+                resource_type="dataset",
+                rdf_type="Dataset",
+                record_key="dataset",
+                wid=wid,
+                pid=pid,
+                ver=ver,
+                source_local_id=source_local_id,
+                title=title,
                 distributions=top_dists,
                 related_resources=related,
                 preview=preview,
             )
-            outcomes.append(_journaled_submit(journal, payload, url, key, title,
-                                              source_local_id=source_local_id, publication_mode=publication_mode,
-                                              validation=validations[src],
-                                              allow_local_files=allow_local_files))
+            outcomes.append(
+                _journaled_submit(
+                    journal,
+                    payload,
+                    url,
+                    key,
+                    title,
+                    source_local_id=source_local_id,
+                    publication_mode=publication_mode,
+                    validation=validations[src],
+                    allow_local_files=allow_local_files,
+                )
+            )
 
         if outcomes:
             self._search_cache = None
@@ -5333,20 +5624,25 @@ class AuthoringWorkspace:
             staged = [o for o in outcomes if o.get("status") == "validated"]
             skipped = [o for o in outcomes if o.get("status") == "skipped_journal"]
             failed = [o for o in outcomes if not o.get("ok")]
-            print(f"\nAttempted {len(outcomes)} record(s) to {url}: "
-                  f"{len(live)} live, {len(staged)} staged for review, {len(failed)} failed"
-                  + (f", {len(skipped)} already submitted (journal)" if skipped else ""))
+            print(
+                f"\nAttempted {len(outcomes)} record(s) to {url}: "
+                f"{len(live)} live, {len(staged)} staged for review, {len(failed)} failed"
+                + (f", {len(skipped)} already submitted (journal)" if skipped else "")
+            )
             if live:
                 print("  Live records are on the platform. Run ws.status() to see them.")
             if staged:
-                print("  Staged records await a registry admin's approval "
-                      "(ws.pending() to list, ws.approve(<id>) to promote).")
+                print(
+                    "  Staged records await a registry admin's approval "
+                    "(ws.pending() to list, ws.approve(<id>) to promote)."
+                )
             if failed:
                 print(f"  {len(failed)} record(s) did NOT publish -- see the ERROR lines above.")
                 if not allow_partial:
                     raise SubmitError(
                         f"{len(failed)} of {len(outcomes)} record(s) failed to submit.",
-                        failed=failed, outcomes=outcomes,
+                        failed=failed,
+                        outcomes=outcomes,
                     )
         return outcomes
 
@@ -5421,22 +5717,24 @@ class AuthoringWorkspace:
         """
         import urllib.request
 
-        url   = registry_url or self._registry_url or os.environ.get("BATTINFO_REGISTRY_URL")
+        url = registry_url or self._registry_url or os.environ.get("BATTINFO_REGISTRY_URL")
         token = admin_token or os.environ.get("BATTINFO_ADMIN_TOKEN")
         if not url:
             raise RuntimeError("registry_url required. Pass it or set BATTINFO_REGISTRY_URL.")
         if not token:
             raise RuntimeError("admin_token required. Pass it or set BATTINFO_ADMIN_TOKEN.")
 
-        body = json.dumps({
-            "reviewed_by":     reviewed_by or "",
-            "review_comment":  comment or "",
-        }).encode()
+        body = json.dumps(
+            {
+                "reviewed_by": reviewed_by or "",
+                "review_comment": comment or "",
+            }
+        ).encode()
         req = urllib.request.Request(
             f"{url.rstrip('/')}/submissions/{submission_id}/approve",
             data=body,
             headers={
-                "Content-Type":          "application/json",
+                "Content-Type": "application/json",
                 "X-Battinfo-Admin-Token": token,
             },
             method="POST",
@@ -5498,8 +5796,7 @@ class AuthoringWorkspace:
             try:
                 local = location_path(src_url, self._root, registered=registered)
             except UnsafeLocation as exc:
-                print(f"  WARNING: dataset {ds.get('id') or record_path.name}: {exc.refusal()}; "
-                      "skipping preview")
+                print(f"  WARNING: dataset {ds.get('id') or record_path.name}: {exc.refusal()}; skipping preview")
                 continue
             if local is None:
                 print(f"  WARNING: processed file is not on this computer, skipping preview: {src_url}")
@@ -5522,16 +5819,18 @@ class AuthoringWorkspace:
             for path, fmt in ((json_path, "application/json"), (png_path, "image/png")):
                 if path is None or path not in previews:
                     continue
-                dists.append({
-                    # Schema-safe inner role; ws.submit() promotes *.plot.json/*.png
-                    # to plot_data/plot_static in the page-model distributions.
-                    "role": "other",
-                    "content_url": path.resolve().as_uri(),
-                    "name": path.name,
-                    "encoding_format": fmt,
-                    "content_size": str(path.stat().st_size),
-                    "checksum": {"algorithm": "sha256", "value": hashlib.sha256(path.read_bytes()).hexdigest()},
-                })
+                dists.append(
+                    {
+                        # Schema-safe inner role; ws.submit() promotes *.plot.json/*.png
+                        # to plot_data/plot_static in the page-model distributions.
+                        "role": "other",
+                        "content_url": path.resolve().as_uri(),
+                        "name": path.name,
+                        "encoding_format": fmt,
+                        "content_size": str(path.stat().st_size),
+                        "checksum": {"algorithm": "sha256", "value": hashlib.sha256(path.read_bytes()).hexdigest()},
+                    }
+                )
                 written.append(path)
                 print(f"  preview: {path.name}  ->  {ds.get('name')}")
 
@@ -5583,9 +5882,9 @@ class AuthoringWorkspace:
 
         def _deposited(location: object) -> DepositFile | None:
             if isinstance(location, str) and location in plan.hosted:
-                return None   # the records keep pointing at a hosted copy
+                return None  # the records keep pointing at a hosted copy
             if local_only and not is_local_location(location) and not str(location).startswith(own_files):
-                return None   # a copy in another record moves when the draft is published
+                return None  # a copy in another record moves when the draft is published
             entry = plan.entry_for(location)
             return None if entry is None or entry.archive else entry
 
@@ -5719,17 +6018,15 @@ class AuthoringWorkspace:
             import boto3
             from boto3.s3.transfer import TransferConfig
         except ImportError:
-            raise ImportError(
-                "boto3 is required for ws.push_datasets(). "
-                "Install with: pip install boto3"
-            )
+            raise ImportError("boto3 is required for ws.push_datasets(). Install with: pip install boto3")
 
         endpoint = os.environ.get("R2_ENDPOINT")
         access_key = os.environ.get("R2_ACCESS_KEY_ID")
         secret_key = os.environ.get("R2_SECRET_ACCESS_KEY")
-        bucket_name = bucket or os.environ.get("R2_BUCKET") or (
-            os.environ.get("R2_BUCKET_PUBLIC") if public
-            else os.environ.get("R2_BUCKET_PRIVATE")
+        bucket_name = (
+            bucket
+            or os.environ.get("R2_BUCKET")
+            or (os.environ.get("R2_BUCKET_PUBLIC") if public else os.environ.get("R2_BUCKET_PRIVATE"))
         )
         public_base = (os.environ.get("R2_PUBLIC_BASE_URL") or "").rstrip("/")
 
@@ -5747,8 +6044,8 @@ class AuthoringWorkspace:
             aws_secret_access_key=secret_key,
         )
         transfer_cfg = TransferConfig(
-            multipart_threshold=50 * 1024 * 1024,   # 50 MB
-            multipart_chunksize=10 * 1024 * 1024,   # 10 MB
+            multipart_threshold=50 * 1024 * 1024,  # 50 MB
+            multipart_chunksize=10 * 1024 * 1024,  # 10 MB
             max_concurrency=4,
         )
 
@@ -5787,7 +6084,7 @@ class AuthoringWorkspace:
                     new_dists.append(dist)
                     continue
                 if local_file is None:
-                    new_dists.append(dist)   # already at a URL elsewhere
+                    new_dists.append(dist)  # already at a URL elsewhere
                     continue
 
                 if not local_file.exists():
@@ -5804,7 +6101,8 @@ class AuthoringWorkspace:
                 r2_key = f"datasets/{short_id}/{local_file.name}"
                 public_url = (
                     f"{public_base}/{'/'.join(url_segment(part) for part in r2_key.split('/'))}"
-                    if public_base else f"s3://{bucket_name}/{r2_key}"
+                    if public_base
+                    else f"s3://{bucket_name}/{r2_key}"
                 )
 
                 if dry_run:
@@ -5841,18 +6139,19 @@ class AuthoringWorkspace:
                         remote_sha = head.get("Metadata", {}).get("sha256", "")
                         if remote_sha != sha256:
                             raise RuntimeError(
-                                f"Checksum mismatch after upload for {r2_key}: "
-                                f"expected {sha256}, got {remote_sha}"
+                                f"Checksum mismatch after upload for {r2_key}: expected {sha256}, got {remote_sha}"
                             )
                         print(f"    -> {public_url}")
 
                 # Update this distribution with the R2 URL + checksum
-                dist = {**dist, "content_url": public_url,
-                        "checksum": {"algorithm": "sha256", "value": sha256}}
+                dist = {**dist, "content_url": public_url, "checksum": {"algorithm": "sha256", "value": sha256}}
                 new_dists.append(dist)
                 public_by_path[path_key(local_file)] = public_url
                 hosted[public_url] = IndexedFile(
-                    path=str(local_file.resolve()), size=measured.size, md5=measured.md5, sha256=sha256,
+                    path=str(local_file.resolve()),
+                    size=measured.size,
+                    md5=measured.md5,
+                    sha256=sha256,
                 )
                 # The primary (processed) distribution sets the dataset access_url.
                 if primary_url is None and dist.get("role") != "raw":
@@ -5865,10 +6164,7 @@ class AuthoringWorkspace:
             raw["dataset"]["distributions"] = new_dists
 
             def _r2_public_url(location: object) -> str | None:
-                key = (
-                    location_key(location, self._root, registered=registered)
-                    if isinstance(location, str) else None
-                )
+                key = location_key(location, self._root, registered=registered) if isinstance(location, str) else None
                 return public_by_path.get(key) if key is not None else None
 
             _point_source_url_at_public_copy(raw, _r2_public_url)
@@ -5897,9 +6193,7 @@ class AuthoringWorkspace:
             )
         return tok
 
-    def _deposit_creators(
-        self, creators: builtins.list[dict] | None, *, required: bool = True
-    ) -> builtins.list[dict]:
+    def _deposit_creators(self, creators: builtins.list[dict] | None, *, required: bool = True) -> builtins.list[dict]:
         """The creators of this workspace's Zenodo deposit, each ORCID a bare id.
 
         The first of these that names anyone: *creators*, the workspace
@@ -6210,7 +6504,9 @@ class AuthoringWorkspace:
         # recorded, or a link to someone else's record. Only Zenodo knows; ask
         # before anything is created or changed.
         self._refuse_unknown_zenodo_copies(
-            client, plan, context,
+            client,
+            plan,
+            context,
             continues=record_id or state.get("deposit_id") or state.get("record_id"),
             live_draft=live_draft,
         )
@@ -6219,13 +6515,18 @@ class AuthoringWorkspace:
         # published record forks a new version; an open draft is updated in place.
         stored_record = state.get("record_id")
         record_id, reuse_draft_id, _version_warning = _plan_zenodo_deposit(
-            stored_record, bool(state.get("published")), record_id, recorded_in=recorded_in,
+            stored_record,
+            bool(state.get("published")),
+            record_id,
+            recorded_in=recorded_in,
         )
         # A file with no local copy is kept as the record the deposit starts
         # from holds it; a copy that record lacks refuses the deposit before a
         # draft is made or changed.
         self._refuse_missing_kept_copies(
-            client, plan, deposit_records.get("dataset", []),
+            client,
+            plan,
+            deposit_records.get("dataset", []),
             starts_from=reuse_draft_id if reuse_draft_id is not None else record_id,
             updates_draft=reuse_draft_id is not None,
         )
@@ -6245,14 +6546,12 @@ class AuthoringWorkspace:
             elif record_id is not None:
                 deposit = client.create_new_version(record_id)  # fork from published
             else:
-                deposit = client.create_empty_deposit()         # brand-new record
+                deposit = client.create_empty_deposit()  # brand-new record
 
-            deposit_id: int     = deposit["id"]
+            deposit_id: int = deposit["id"]
             zenodo_record_id: int = deposit["record_id"]
             prereserved_doi: str = (
-                deposit.get("metadata", {})
-                .get("prereserve_doi", {})
-                .get("doi", f"10.5281/zenodo.{zenodo_record_id}")
+                deposit.get("metadata", {}).get("prereserve_doi", {}).get("doi", f"10.5281/zenodo.{zenodo_record_id}")
             )
             # The concept record groups the versions of one record. A run that
             # continues the stored record keeps the concept id stored with it.
@@ -6271,14 +6570,14 @@ class AuthoringWorkspace:
             # the draft be deleted on the website.
             made_from = state.get("version_of") if reuse_draft_id is not None else record_id
             state = {
-                "environment":       environment,
+                "environment": environment,
                 "concept_record_id": concept,
-                "record_id":         str(zenodo_record_id),
-                "deposit_id":        str(deposit_id),
-                "doi":               prereserved_doi,
-                "published":         False,
+                "record_id": str(zenodo_record_id),
+                "deposit_id": str(deposit_id),
+                "doi": prereserved_doi,
+                "published": False,
                 **({"version_of": str(made_from)} if made_from else {}),
-                "records":           held_records,
+                "records": held_records,
             }
             self._save_zenodo_state(state)
             # The records may point at files under this version, under the one it
@@ -6304,13 +6603,18 @@ class AuthoringWorkspace:
             # Metadata Zenodo does not accept raises a ZenodoError naming the
             # fields, so no file goes up to a deposit whose metadata was refused.
             try:
-                client.update_metadata(deposit_id, self._build_zenodo_metadata(
-                    title=title, description=description,
-                    creators=creators,
-                    contributors=contributors,
-                    license=license, community=community,
-                    extra_keywords=keywords,
-                ))
+                client.update_metadata(
+                    deposit_id,
+                    self._build_zenodo_metadata(
+                        title=title,
+                        description=description,
+                        creators=creators,
+                        contributors=contributors,
+                        license=license,
+                        community=community,
+                        extra_keywords=keywords,
+                    ),
+                )
             except ZenodoError as exc:
                 raise ZenodoError(
                     f"{exc} This run uploaded no file. The draft ({draft_url}) is recorded in "
@@ -6380,13 +6684,14 @@ class AuthoringWorkspace:
                 ) from exc
             except ZenodoError as exc:
                 raise ZenodoError(
-                    f"{exc} The draft ({draft_url}) is recorded in {recorded_in}, so the "
-                    "next ws.zenodo() updates it.",
+                    f"{exc} The draft ({draft_url}) is recorded in {recorded_in}, so the next ws.zenodo() updates it.",
                     status=exc.status,
                 ) from exc
-            print(f"  Files on deposit {deposit_id}: "
-                  f"{len(sync['uploaded'])} uploaded, {len(sync['kept'])} unchanged (kept), "
-                  f"{len(sync['removed'])} removed")
+            print(
+                f"  Files on deposit {deposit_id}: "
+                f"{len(sync['uploaded'])} uploaded, {len(sync['kept'])} unchanged (kept), "
+                f"{len(sync['removed'])} removed"
+            )
             for name in sync["uploaded"]:
                 print(f"    + {name}")
             # The local file behind each copy the draft holds, recorded before
@@ -6418,7 +6723,11 @@ class AuthoringWorkspace:
         try:
             listing: object = client.list_files(deposit_id)
             file_problems = deposit_file_problems(
-                jsonld, files_base=f"{record_url}/files", listing=listing, sent=sent, kept=keep,
+                jsonld,
+                files_base=f"{record_url}/files",
+                listing=listing,
+                sent=sent,
+                kept=keep,
                 planned={f.name: f for f in plan.files},
             )
         except ZenodoError as exc:
@@ -6442,8 +6751,8 @@ class AuthoringWorkspace:
                 print(f"    {problem}")
 
         # ── 11. and 12. Publish, and record the deposit as published ───────────
-        doi        = prereserved_doi
-        published  = False
+        doi = prereserved_doi
+        published = False
 
         if publish:
             self._assert_publishable(jsonld)  # fail closed BEFORE minting an irreversible DOI (R-7)
@@ -6460,7 +6769,7 @@ class AuthoringWorkspace:
         else:
             print(f"  Draft (not published): {draft_url}")
             print(f"  Pre-reserved DOI: {doi}")
-            print("  Review it, then click \"Publish\" on Zenodo -- or re-run with publish=True.")
+            print('  Review it, then click "Publish" on Zenodo -- or re-run with publish=True.')
 
         # ── 13. Point the dataset records at the deposited files ───────────────
         # Zenodo now hosts these files: ws.submit() then sends resolvable links
@@ -6509,9 +6818,7 @@ class AuthoringWorkspace:
         from battinfo._util import require_extra
 
         try:
-            ROCrate = require_extra(
-                "rocrate.rocrate", "publish", "validate_rocrate() checks RO-Crate metadata"
-            ).ROCrate
+            ROCrate = require_extra("rocrate.rocrate", "publish", "validate_rocrate() checks RO-Crate metadata").ROCrate
         except ImportError as exc:
             print(f"  {exc}")
             print("  Alternatively validate at: https://www.researchobject.org/ro-crate/")
@@ -6519,7 +6826,7 @@ class AuthoringWorkspace:
 
         p = Path(path) if path else self._root
         if p.is_file():
-            p = p.parent   # accept the metadata file itself, use its directory
+            p = p.parent  # accept the metadata file itself, use its directory
 
         metadata_path = p / "ro-crate-metadata.json"
         if not metadata_path.exists():
@@ -6583,11 +6890,15 @@ class AuthoringWorkspace:
             placeholder = tmpdir / BATTINFO_LD_FILENAME
             placeholder.write_text("{}", encoding="utf-8")
             self._build_rocrate(
-                tmpdir, data_files,
-                title=title, description=description,
-                creators=creators, contributors=contributors,
+                tmpdir,
+                data_files,
+                title=title,
+                description=description,
+                creators=creators,
+                contributors=contributors,
                 license=license,
-                zenodo_record_id=0, prereserved_doi="10.5281/zenodo.RECORD_ID",
+                zenodo_record_id=0,
+                prereserved_doi="10.5281/zenodo.RECORD_ID",
             )
             src = tmpdir / _ROCRATE_FILENAME
             out = Path(output) if output else self._root / "ro-crate-metadata.preview.json"
@@ -6687,13 +6998,13 @@ class AuthoringWorkspace:
         # counts here too.
         try:
             from battinfo.validate import validate_publication_report  # noqa: PLC0415
+
             report = validate_publication_report(jsonld, policy="publisher")
             deposit_records, replaced_legacy = _read_deposit_record_sets(records_dir)
             _print_replaced_legacy_parameter_sets(replaced_legacy)
             errors = [f"left out of the deposit: {omission}" for omission in dict.fromkeys(omissions)]
             errors += [i.message for i in report.issues if i.severity == "error"] + [
-                f"parameter set {problem}"
-                for problem in _parameter_set_publication_errors(deposit_records)
+                f"parameter set {problem}" for problem in _parameter_set_publication_errors(deposit_records)
             ]
             if not creators:
                 errors.append(f"no creators: ws.zenodo() refuses a deposit without them. {_CREATORS_HINT}")
@@ -6701,8 +7012,9 @@ class AuthoringWorkspace:
             if not errors and not warnings:
                 print("  Gold-standard: PASS (no validation issues)")
             else:
-                print(f"  Gold-standard: {len(errors)} error(s), {len(warnings)} warning(s) "
-                      "-- address before publishing:")
+                print(
+                    f"  Gold-standard: {len(errors)} error(s), {len(warnings)} warning(s) -- address before publishing:"
+                )
                 for message in errors:
                     print(f"    ERROR   {message}")
                 for i in warnings:
@@ -6759,6 +7071,7 @@ class AuthoringWorkspace:
             )
         try:
             from battinfo.validate import validate_publication_report  # noqa: PLC0415
+
             report = validate_publication_report(jsonld, policy="publisher")
         except Exception as exc:  # noqa: BLE001
             raise RuntimeError(f"Could not validate the record before {doing}: {exc}") from exc
@@ -6980,8 +7293,11 @@ class AuthoringWorkspace:
             short_id = ds["short_id"] if isinstance(ds.get("short_id"), str) else ""
             about = ds.get("about")
             kind = ds_to_kind.get(ds_id) or next(
-                (test_kind[a] for a in (about if isinstance(about, list) else [])
-                 if isinstance(a, str) and a in test_kind),
+                (
+                    test_kind[a]
+                    for a in (about if isinstance(about, list) else [])
+                    if isinstance(a, str) and a in test_kind
+                ),
                 "other",
             )
             usable, problems = dataset_distributions(ds)
@@ -7009,6 +7325,7 @@ class AuthoringWorkspace:
         # artifacts that live elsewhere are flagged (warn, never block) and left out
         # rather than auto-copied, so publication contains exactly what was opted in.
         from battinfo.publication import plan_artifact_inclusion  # noqa: PLC0415
+
         artifact_records = [raw for _path, raw in _saved("test-protocol")] + [raw for _path, raw in tests]
         artifact_files, artifact_warnings = plan_artifact_inclusion(artifact_records, self._root)
 
@@ -7156,9 +7473,7 @@ class AuthoringWorkspace:
         # any explicit contributors= (which win), deduped by ORCID then by name,
         # preserving order.
         contributors = list(contributors or [])
-        _contrib_present = {
-            (c.get("orcid") or c.get("name")) for c in contributors if isinstance(c, dict)
-        }
+        _contrib_present = {(c.get("orcid") or c.get("name")) for c in contributors if isinstance(c, dict)}
         for _recs in record_sets.values():
             for _rec in _recs:
                 if not isinstance(_rec, dict):
@@ -7225,7 +7540,8 @@ class AuthoringWorkspace:
             _omitted.append(omission)
             what = (
                 f"The {kind} record {record} could not be converted to JSON-LD and is left out"
-                if whole else f"Part of the {kind} record {record} is left out"
+                if whole
+                else f"Part of the {kind} record {record} is left out"
             )
             warnings.warn(f"{what} of the deposit graph: {omission.reason}", stacklevel=3)
 
@@ -7276,17 +7592,17 @@ class AuthoringWorkspace:
                 continue
             ci, iri = _found
             instances[iri] = {
-                "name":           ci.get("name", ""),
-                "serial_number":  ci.get("serial_number", ""),
-                "cell_spec_id":        ci.get("cell_spec_id", ""),
-                "grade":          ci.get("grade"),
+                "name": ci.get("name", ""),
+                "serial_number": ci.get("serial_number", ""),
+                "cell_spec_id": ci.get("cell_spec_id", ""),
+                "grade": ci.get("grade"),
                 "manufactured_at": ci.get("manufactured_at"),
-                "expires_at":      ci.get("expires_at"),
-                "batch_id":        ci.get("batch_id"),
-                "conformance":    ci.get("conformance"),
+                "expires_at": ci.get("expires_at"),
+                "batch_id": ci.get("batch_id"),
+                "conformance": ci.get("conformance"),
                 # The electrode records built into this cell, kept
                 # whole so the node builder can role-type them.
-                "cell_instance":  ci,
+                "cell_instance": ci,
             }
 
         # Published records this deposit may point at without carrying them:
@@ -7347,9 +7663,14 @@ class AuthoringWorkspace:
             body = equipment_by_id.get(eq_id, {})
             spec = equipment_spec_by_id.get(body.get("equipment_spec_id", ""), {})
             class_seed = " ".join(
-                str(v) for v in (
-                    spec.get("equipment_class"), spec.get("name"), spec.get("model"), instrument,
-                ) if v
+                str(v)
+                for v in (
+                    spec.get("equipment_class"),
+                    spec.get("name"),
+                    spec.get("model"),
+                    instrument,
+                )
+                if v
             )
             enode: dict = {
                 "@id": eq_id,
@@ -7371,9 +7692,7 @@ class AuthoringWorkspace:
         def _channel_graph_node(ch_id: str, eq_id: str) -> dict:
             body = channel_by_id.get(ch_id, {})
             cnode: dict = {"@id": ch_id, "@type": ["schema:Thing", "prov:Entity"]}
-            label = body.get("label") or (
-                f"CH{body['index']}" if isinstance(body.get("index"), int) else ""
-            )
+            label = body.get("label") or (f"CH{body['index']}" if isinstance(body.get("index"), int) else "")
             if label:
                 cnode["schema:name"] = label
                 cnode["rdfs:label"] = label
@@ -7422,7 +7741,7 @@ class AuthoringWorkspace:
 
         # ── Build test instance nodes + dataset→test mapping ──────────────────
         ds_to_test: dict[str, dict] = {}
-        test_info: dict[str, dict] = {}   # test IRI → the same fields, for about-derived links
+        test_info: dict[str, dict] = {}  # test IRI → the same fields, for about-derived links
         test_nodes: list[dict] = []
         _test_recs = record_sets.get("test", [])
         if _test_recs:
@@ -7432,28 +7751,28 @@ class AuthoringWorkspace:
                     continue
                 test, test_iri = _found
                 try:
-                    cell_id  = test.get("cell_id", "")
+                    cell_id = test.get("cell_id", "")
                     protocol = test.get("protocol_name", "")
                     instrument = test.get("instrument_name", "")
 
                     _tinfo = {
-                        "kind":       test.get("kind", ""),
-                        "cell_id":    cell_id,
-                        "protocol":   protocol,
-                        "test_iri":   test_iri,
+                        "kind": test.get("kind", ""),
+                        "cell_id": cell_id,
+                        "protocol": protocol,
+                        "test_iri": test_iri,
                     }
                     test_info[test_iri] = _tinfo
-                    for ds_id in (test.get("dataset_ids") or []):
+                    for ds_id in test.get("dataset_ids") or []:
                         ds_to_test[ds_id] = dict(_tinfo)
 
                     if cell_id:
                         tnode: dict = {
-                            "@type":         ["BatteryTest", "schema:Action", "prov:Activity"],
-                            "@id":           test_iri,
-                            "hasTestObject": {"@id": cell_id},   # domain-battery: physical object tested
+                            "@type": ["BatteryTest", "schema:Action", "prov:Activity"],
+                            "@id": test_iri,
+                            "hasTestObject": {"@id": cell_id},  # domain-battery: physical object tested
                             # PROV mirror of hasTestObject so a PROV-only consumer
                             # reaches the cell; the spec is appended in _apply below.
-                            "prov:used":     [{"@id": cell_id}],
+                            "prov:used": [{"@id": cell_id}],
                         }
                         # Human label so agents/consumers see more than an opaque IRI.
                         _cell_nm = _cell_name(cell_id)
@@ -7480,9 +7799,7 @@ class AuthoringWorkspace:
                             equipment_id = channel_by_id.get(channel_id, {}).get("equipment_id", "")
                         if equipment_id:
                             if equipment_id not in equipment_nodes:
-                                equipment_nodes[equipment_id] = _equipment_graph_node(
-                                    equipment_id, instrument
-                                )
+                                equipment_nodes[equipment_id] = _equipment_graph_node(equipment_id, instrument)
                             equip_ref: dict = {"@id": equipment_id}
                             # Keep the display name inline so the round-trip importer
                             # (which reads hasTestEquipment/schema:name) still sees it.
@@ -7492,14 +7809,12 @@ class AuthoringWorkspace:
                             tnode["hasTestEquipment"] = equip_ref
                         elif instrument:
                             tnode["hasTestEquipment"] = {
-                                "@type":       "schema:Thing",
+                                "@type": "schema:Thing",
                                 "schema:name": instrument,
                             }
                         if channel_id:
                             if channel_id not in channel_nodes:
-                                channel_nodes[channel_id] = _channel_graph_node(
-                                    channel_id, equipment_id
-                                )
+                                channel_nodes[channel_id] = _channel_graph_node(channel_id, equipment_id)
                             # The channel is the piece of equipment the activity used.
                             tnode["prov:used"].append({"@id": channel_id})
                         # hasOutput → the dataset IRIs produced by this test, mirrored
@@ -7508,10 +7823,12 @@ class AuthoringWorkspace:
                         # about names this test.
                         outputs = [
                             {"@id": ds_id}
-                            for ds_id in dict.fromkeys([
-                                *(test.get("dataset_ids") or []),
-                                *test_to_ds_from_about.get(test_iri, []),
-                            ])
+                            for ds_id in dict.fromkeys(
+                                [
+                                    *(test.get("dataset_ids") or []),
+                                    *test_to_ds_from_about.get(test_iri, []),
+                                ]
+                            )
                         ]
                         if outputs:
                             tnode["hasOutput"] = outputs
@@ -7576,7 +7893,7 @@ class AuthoringWorkspace:
             if _found is None:
                 continue
             ds, ds_id = _found
-            ti    = dict(ds_to_test.get(ds_id, {}))
+            ti = dict(ds_to_test.get(ds_id, {}))
             own_about = ds_about.get(ds_id, [])
             # No test lists this dataset: take the test and cell from the
             # dataset's own about (first entry of each kind is the primary,
@@ -7587,9 +7904,9 @@ class AuthoringWorkspace:
                     ti = {**test_info.get(_t, {}), **{k: v for k, v in ti.items() if v}}
                     ti["test_iri"] = _t
             if not ti.get("cell_id"):
-                ti["cell_id"] = next(
-                    (a for a in own_about if _about_kind(a) == "cell"), ""
-                ) or test_info.get(ti.get("test_iri", ""), {}).get("cell_id", "")
+                ti["cell_id"] = next((a for a in own_about if _about_kind(a) == "cell"), "") or test_info.get(
+                    ti.get("test_iri", ""), {}
+                ).get("cell_id", "")
             # An entry that is not an object with a content_url names no file:
             # it is left out and reported, the dataset's other files kept.
             _usable, _problems = dataset_distributions(ds)
@@ -7597,7 +7914,7 @@ class AuthoringWorkspace:
                 _omit("dataset", ds_id, _problem, whole=False)
             dists = []
             for dist in _usable:
-                url   = dist["content_url"]
+                url = dist["content_url"]
                 # A deposited file is named as the deposit names it.
                 _entry = file_plan.entry_for(url) if file_plan is not None else None
                 fname = _entry.name if _entry is not None else _distribution_file_name(url)
@@ -7612,28 +7929,28 @@ class AuthoringWorkspace:
                     # is stale once the file changed.
                     _checksum_block = {"algorithm": "sha256", "value": _entry.sha256}
                     _content_size = str(_entry.size)
-                dists.append({
-                    "filename":     fname,
-                    "content_url":  url,
-                    "format":       dist.get("encoding_format", ""),
-                    "checksum":     _checksum_block,
-                    "role":         dist.get("role", ""),
-                    "description":  dist.get("description", ""),
-                    "content_size": _content_size,
-                })
+                dists.append(
+                    {
+                        "filename": fname,
+                        "content_url": url,
+                        "format": dist.get("encoding_format", ""),
+                        "checksum": _checksum_block,
+                        "role": dist.get("role", ""),
+                        "description": dist.get("description", ""),
+                        "content_size": _content_size,
+                    }
+                )
             ds_meta[ds_id] = {
-                "name":      ds.get("name", ""),
-                "cell_id":   ti.get("cell_id", ""),
-                "test_iri":  ti.get("test_iri", ""),
-                "kind":      ti.get("kind", ""),
+                "name": ds.get("name", ""),
+                "cell_id": ti.get("cell_id", ""),
+                "test_iri": ti.get("test_iri", ""),
+                "kind": ti.get("kind", ""),
                 # schema:about: the record's own about first, then the cell
                 # the reverse (test.dataset_ids) mapping found.
-                "about":     list(dict.fromkeys(
-                    [*own_about, *([ti["cell_id"]] if ti.get("cell_id") else [])]
-                )),
+                "about": list(dict.fromkeys([*own_about, *([ti["cell_id"]] if ti.get("cell_id") else [])])),
                 "is_series": is_dataset_series(ds.get("additional_type")),
-                "dists":     dists,
-                "ds":        ds,   # full dataset record for discoverability fields
+                "dists": dists,
+                "ds": ds,  # full dataset record for discoverability fields
             }
 
         # ── Build member dataset nodes (one dcat:Dataset per test result) ──────
@@ -7668,7 +7985,7 @@ class AuthoringWorkspace:
                 if entry is not None:
                     return entry.url(files_base)
             if cu.startswith(("http://", "https://")):
-                return cu                       # already a hosted file — use verbatim
+                return cu  # already a hosted file — use verbatim
             if file_plan is not None:
                 return ""
             fname = dist["filename"]
@@ -7679,11 +7996,10 @@ class AuthoringWorkspace:
 
         for ds_id, meta in sorted(ds_meta.items()):
             dists = []
-            schema_dists = []   # schema.org mirror of dcat:distribution (generated)
+            schema_dists = []  # schema.org mirror of dcat:distribution (generated)
             # The hosted URL of the raw (pre-conversion) file, so each processed file
             # can declare prov:wasDerivedFrom it (the conversion provenance chain).
-            _raw_url = next((_download_url(d, meta["kind"])
-                             for d in meta["dists"] if d.get("role") == "raw"), "")
+            _raw_url = next((_download_url(d, meta["kind"]) for d in meta["dists"] if d.get("role") == "raw"), "")
             for dist in meta["dists"]:
                 fname = dist["filename"]
                 dl_url = _download_url(dist, meta["kind"])
@@ -7692,13 +8008,12 @@ class AuthoringWorkspace:
                 # DCAT-AP: dcat:mediaType should be the IANA media-type IRI, not a bare
                 # string. schema:encodingFormat (below) keeps the MIME string for
                 # schema.org consumers.
-                _iana_media = (f"{_IANA_MEDIA_TYPES}{media_type}"
-                               if "/" in media_type else None)
+                _iana_media = f"{_IANA_MEDIA_TYPES}{media_type}" if "/" in media_type else None
                 dnode: dict = {
-                    "@type":            "dcat:Distribution",
+                    "@type": "dcat:Distribution",
                     "dcat:downloadURL": dl_url,
-                    "dcat:mediaType":   {"@id": _iana_media} if _iana_media else media_type,
-                    "schema:name":      fname,
+                    "dcat:mediaType": {"@id": _iana_media} if _iana_media else media_type,
+                    "schema:name": fname,
                 }
                 # Identify the distribution by its download URL so it is referenceable
                 # (e.g. as the source of a derivation), not an anonymous blank node.
@@ -7739,11 +8054,11 @@ class AuthoringWorkspace:
                 # reach the file bytes (schema.org has no dcat:downloadURL). Generated
                 # from the same source in one pass, so it cannot drift from the DCAT form.
                 sdl: dict = {
-                    "@type":                "schema:DataDownload",
-                    "schema:contentUrl":    dl_url,
+                    "@type": "schema:DataDownload",
+                    "schema:contentUrl": dl_url,
                     "schema:encodingFormat": media_type,
-                    "schema:name":          fname,
-                    "schema:isPartOf":      {"@id": ds_id},
+                    "schema:name": fname,
+                    "schema:isPartOf": {"@id": ds_id},
                 }
                 # schema:sha256 names one algorithm, so it is reserved for a real
                 # sha256; anything else rides a named PropertyValue.
@@ -7757,16 +8072,14 @@ class AuthoringWorkspace:
                 schema_dists.append(sdl)
 
             cell_name = _cell_name(meta.get("cell_id", ""))
-            ds_name = meta.get("name") or (
-                f"{cell_name} {meta.get('kind', '')}".strip() or ds_id.split("/")[-1]
-            )
+            ds_name = meta.get("name") or (f"{cell_name} {meta.get('kind', '')}".strip() or ds_id.split("/")[-1])
             member: dict = {
-                "@type":             ["dcat:Dataset", "schema:Dataset"],
-                "@id":               ds_id,
-                "schema:name":       ds_name,
+                "@type": ["dcat:Dataset", "schema:Dataset"],
+                "@id": ds_id,
+                "schema:name": ds_name,
                 "dcat:distribution": dists,
                 "schema:distribution": schema_dists,
-                "dcterms:isPartOf":  {"@id": record_url},
+                "dcterms:isPartOf": {"@id": record_url},
             }
             if meta.get("is_series"):
                 # A collection (DCAT 3 dataset series) groups the member datasets
@@ -7800,12 +8113,10 @@ class AuthoringWorkspace:
             # creators. The dataset's own licence wins over the catalog's, and either
             # is stated as an IRI, expanded the same way as the catalog's.
             _own_license = _ds.get("license")
-            _member_license = (
-                _own_license if isinstance(_own_license, str) and _own_license.strip() else license
-            )
+            _member_license = _own_license if isinstance(_own_license, str) and _own_license.strip() else license
             if _member_license:
                 _lic_value = _license_value(_member_license)
-                member["schema:license"]  = _lic_value
+                member["schema:license"] = _lic_value
                 member["dcterms:license"] = _lic_value
             if creators:
                 # Full creator nodes (not @id refs) so a member is self-describing even
@@ -7850,7 +8161,7 @@ class AuthoringWorkspace:
         # Each instance is a physical battery whose type is described by its spec.
         instance_nodes: list[dict] = []
         for cell_iri, inst in sorted(instances.items()):
-            cell_spec_id   = inst.get("cell_spec_id", "")
+            cell_spec_id = inst.get("cell_spec_id", "")
             try:
                 spec_node = spec_nodes.get(cell_spec_id, {})
                 # Inherit the physical type from the spec's isDescriptionFor
@@ -7858,19 +8169,15 @@ class AuthoringWorkspace:
 
                 inode: dict = {
                     "@type": phys_type,
-                    "@id":   cell_iri,
-                    "dcterms:conformsTo":  {"@id": cell_spec_id},   # instance-of link
-                    "hasDescription":      {"@id": cell_spec_id},
-                    "schema:isVariantOf":  {"@id": cell_spec_id},   # ProductModel persona
+                    "@id": cell_iri,
+                    "dcterms:conformsTo": {"@id": cell_spec_id},  # instance-of link
+                    "hasDescription": {"@id": cell_spec_id},
+                    "schema:isVariantOf": {"@id": cell_spec_id},  # ProductModel persona
                 }
                 # The electrode records this cell was built from. The spec body is in
                 # hand here, so a half cell's counter electrode also carries
                 # ReferenceElectrode — the reading an instance cannot make alone.
-                inode.update(
-                    electrode_role_links(
-                        inst.get("cell_instance") or {}, cell_spec_bodies.get(cell_spec_id)
-                    )
-                )
+                inode.update(electrode_role_links(inst.get("cell_instance") or {}, cell_spec_bodies.get(cell_spec_id)))
                 if inst.get("name"):
                     inode["schema:name"] = inst["name"]
                 if inst.get("serial_number"):
@@ -7916,27 +8223,27 @@ class AuthoringWorkspace:
         # their own standalone nodes below: the catalog lists them as members
         # after the per-test datasets, so a deposit holding only parameter sets
         # still references a member dataset.
-        _parameter_set_iris = sorted({
-            _body["id"]
-            for _rec in record_sets.get("parameter-set", [])
-            if isinstance(_rec, dict)
-            and isinstance(_body := _rec.get("parameter_set"), dict)
-            and isinstance(_body.get("id"), str)
-            and _body["id"] not in ds_meta
-        })
-        member_refs = [{"@id": ds_id} for ds_id in sorted(ds_meta)] + [
-            {"@id": iri} for iri in _parameter_set_iris
-        ]
+        _parameter_set_iris = sorted(
+            {
+                _body["id"]
+                for _rec in record_sets.get("parameter-set", [])
+                if isinstance(_rec, dict)
+                and isinstance(_body := _rec.get("parameter_set"), dict)
+                and isinstance(_body.get("id"), str)
+                and _body["id"] not in ds_meta
+            }
+        )
+        member_refs = [{"@id": ds_id} for ds_id in sorted(ds_meta)] + [{"@id": iri} for iri in _parameter_set_iris]
         catalog_node: dict = {
             # dcat:Catalog + schema:DataCatalog so catalog-aware consumers in both
             # vocabularies recognise it; schema:Dataset is retained so generic
             # schema.org/Zenodo consumers still see a top-level dataset carrying the DOI.
-            "@type":             ["dcat:Catalog", "schema:DataCatalog", "schema:Dataset"],
-            "@id":               record_url,
-            "schema:url":        record_url,
-            "dcat:dataset":      member_refs,   # DCAT: catalog → member datasets
-            "schema:hasPart":    member_refs,   # schema.org equivalent
-            "rdfs:seeAlso":      {"@id": "https://www.battery-genome.org/registry"},
+            "@type": ["dcat:Catalog", "schema:DataCatalog", "schema:Dataset"],
+            "@id": record_url,
+            "schema:url": record_url,
+            "dcat:dataset": member_refs,  # DCAT: catalog → member datasets
+            "schema:hasPart": member_refs,  # schema.org equivalent
+            "rdfs:seeAlso": {"@id": "https://www.battery-genome.org/registry"},
         }
         if prereserved_doi:  # local publication packages have no DOI
             catalog_node["schema:identifier"] = prereserved_doi
@@ -7956,7 +8263,7 @@ class AuthoringWorkspace:
         # must carry its own licence and provenance, not rely on the hosting platform.
         if title:
             catalog_node["schema:name"] = title
-            catalog_node["dcterms:title"] = title          # DCAT consumers key on dcterms
+            catalog_node["dcterms:title"] = title  # DCAT consumers key on dcterms
         if description:
             catalog_node["schema:description"] = description
             catalog_node["dcterms:description"] = description
@@ -7968,7 +8275,7 @@ class AuthoringWorkspace:
             # so a consumer can resolve the exact terms. Matches the RO-Crate path.
             lic_value = _license_value(license)
             catalog_node["dcterms:license"] = lic_value
-            catalog_node["schema:license"]  = lic_value
+            catalog_node["schema:license"] = lic_value
         if _funding_grant is not None:
             # Deposit-level funding: the grant under which the whole collection was produced.
             catalog_node["schema:funding"] = _funding_grant
@@ -7983,12 +8290,12 @@ class AuthoringWorkspace:
         provider_name, provider_ror = _provider(creators, contributors)
         if provider_name:
             provider_node = {
-                "@type":       ["schema:Organization", "prov:Agent"],
-                "@id":         _ror_url(provider_ror) if provider_ror else f"{record_url}#provider",
+                "@type": ["schema:Organization", "prov:Agent"],
+                "@id": _ror_url(provider_ror) if provider_ror else f"{record_url}#provider",
                 "schema:name": provider_name,
             }
-            catalog_node["schema:publisher"]    = {"@id": provider_node["@id"]}
-            catalog_node["dcterms:publisher"]   = {"@id": provider_node["@id"]}  # DCAT mirror
+            catalog_node["schema:publisher"] = {"@id": provider_node["@id"]}
+            catalog_node["dcterms:publisher"] = {"@id": provider_node["@id"]}  # DCAT mirror
             catalog_node["prov:wasAttributedTo"] = {"@id": provider_node["@id"]}
         if spec_nodes:
             catalog_node["schema:about"] = [{"@id": iri} for iri in spec_nodes]
@@ -8011,12 +8318,12 @@ class AuthoringWorkspace:
         for _m in ds_meta.values():
             if _m.get("kind"):
                 _kw.add(str(_m["kind"]))
-        for _k in (keywords or []):
+        for _k in keywords or []:
             _kw.add(str(_k))
         _kw.discard("")
         if _kw:
             catalog_node["schema:keywords"] = sorted(_kw)
-            catalog_node["dcat:keyword"]    = sorted(_kw)   # DCAT mirror of schema:keywords
+            catalog_node["dcat:keyword"] = sorted(_kw)  # DCAT mirror of schema:keywords
 
         # Standalone material and electrode records (Level 2 spec / Level 3
         # instance) become first-class deposit nodes: the domain-battery emitter
@@ -8034,7 +8341,7 @@ class AuthoringWorkspace:
                     continue
                 from battinfo.transform.json_to_jsonld import to_jsonld  # noqa: PLC0415
 
-                _mg = (to_jsonld(_mrec, target="domain-battery").get("@graph") or [])
+                _mg = to_jsonld(_mrec, target="domain-battery").get("@graph") or []
                 if _mg:
                     standalone_nodes.append(dict(_mg[0]))
 
@@ -8083,10 +8390,13 @@ class AuthoringWorkspace:
         for _target_iri, _target_type in _parameter_set_target_refs(record_sets.get("parameter-set", [])):
             if _target_iri not in _present_ids:
                 _present_ids.add(_target_iri)
-                graph.append(_defined_elsewhere_stub(
-                    _target_iri, _target_type,
-                    _cell_name(_target_iri) if _target_type == "BatteryCell" else "",
-                ))
+                graph.append(
+                    _defined_elsewhere_stub(
+                        _target_iri,
+                        _target_type,
+                        _cell_name(_target_iri) if _target_type == "BatteryCell" else "",
+                    )
+                )
 
         # ── Record-level free-text notes → schema:comment ─────────────────────
         # Each record's top-level notes[] were dropped from the publication graph;
@@ -8123,6 +8433,7 @@ class AuthoringWorkspace:
             TEST_METHOD_CONTEXT_TERMS,
             TEST_PROTOCOL_CONTEXT_TERMS,
         )
+
         for _term, _val in TEST_PROTOCOL_CONTEXT_TERMS.items():
             context.setdefault(_term, _val)
         # EMMO process/quantity terms used by the descriptive method graph.
@@ -8221,7 +8532,7 @@ class AuthoringWorkspace:
         is its deposit name percent-encoded, a relative URL, and its ``name``
         the name itself; size and sha256 come from the plan.
         """
-        domain    = "sandbox.zenodo.org" if sandbox else "zenodo.org"
+        domain = "sandbox.zenodo.org" if sandbox else "zenodo.org"
         record_url = f"https://{domain}/records/{zenodo_record_id}"
 
         def _creator_node(c: dict) -> dict:
@@ -8238,21 +8549,21 @@ class AuthoringWorkspace:
                 node["roleName"] = c["type"]
             return node
 
-        creator_nodes     = [_creator_node(c) for c in creators] if creators else []
+        creator_nodes = [_creator_node(c) for c in creators] if creators else []
         contributor_nodes = [_contributor_node(c) for c in contributors] if contributors else []
 
         # Root Dataset
         parts = [{"@id": BATTINFO_LD_FILENAME}] + [{"@id": f.segment} for f in data_files]
         root: dict = {
-            "@type":         "Dataset",
-            "@id":           "./",
-            "name":          title,
-            "description":   description,
+            "@type": "Dataset",
+            "@id": "./",
+            "name": title,
+            "description": description,
             "datePublished": _now_iso()[:10],
-            "license":       _license_value(license),
-            "url":           record_url,
-            "identifier":    prereserved_doi,
-            "hasPart":       parts,
+            "license": _license_value(license),
+            "url": record_url,
+            "identifier": prereserved_doi,
+            "hasPart": parts,
         }
         if creator_nodes:
             root["creator"] = creator_nodes if len(creator_nodes) > 1 else creator_nodes[0]
@@ -8261,12 +8572,12 @@ class AuthoringWorkspace:
 
         # linked-data file entity
         jsonld_entity: dict = {
-            "@type":          ["File", "CreativeWork"],
-            "@id":            BATTINFO_LD_FILENAME,
-            "name":           "BattINFO linked data",
-            "description":    "Battery domain metadata using EMMO/domain-battery ontology terms.",
+            "@type": ["File", "CreativeWork"],
+            "@id": BATTINFO_LD_FILENAME,
+            "name": "BattINFO linked data",
+            "description": "Battery domain metadata using EMMO/domain-battery ontology terms.",
             "encodingFormat": "application/ld+json",
-            "conformsTo":     {"@id": "https://w3id.org/battinfo/"},
+            "conformsTo": {"@id": "https://w3id.org/battinfo/"},
         }
         jsonld_path = tmpdir / BATTINFO_LD_FILENAME
         if jsonld_path.exists():
@@ -8278,12 +8589,15 @@ class AuthoringWorkspace:
             fn = data_file.name
             entity: dict = {
                 "@type": "File",
-                "@id":   data_file.segment,
-                "name":  fn,
+                "@id": data_file.segment,
+                "name": fn,
                 "encodingFormat": (
-                    "application/x-parquet" if fn.endswith(".parquet")
-                    else "text/csv" if fn.endswith(".csv")
-                    else "application/zip" if fn.endswith(".zip")
+                    "application/x-parquet"
+                    if fn.endswith(".parquet")
+                    else "text/csv"
+                    if fn.endswith(".csv")
+                    else "application/zip"
+                    if fn.endswith(".zip")
                     else "application/octet-stream"
                 ),
             }
@@ -8295,10 +8609,10 @@ class AuthoringWorkspace:
         graph = [
             # Required self-reference node
             {
-                "@type":      "CreativeWork",
-                "@id":        _ROCRATE_FILENAME,
+                "@type": "CreativeWork",
+                "@id": _ROCRATE_FILENAME,
                 "conformsTo": {"@id": "https://w3id.org/ro/crate/1.1"},
-                "about":      {"@id": "./"},
+                "about": {"@id": "./"},
             },
             root,
             jsonld_entity,
@@ -8307,7 +8621,7 @@ class AuthoringWorkspace:
 
         crate = {
             "@context": "https://w3id.org/ro/crate/1.1/context",
-            "@graph":   graph,
+            "@graph": graph,
         }
         (tmpdir / _ROCRATE_FILENAME).write_text(
             json.dumps(crate, indent=2, ensure_ascii=False),
@@ -8321,16 +8635,18 @@ class AuthoringWorkspace:
         if ct_dir.exists():
             for f in sorted(ct_dir.glob("*.json")):
                 try:
-                    raw  = json.loads(f.read_text(encoding="utf-8"))
+                    raw = json.loads(f.read_text(encoding="utf-8"))
                     prod = raw.get("cell_spec", {})
-                    mfr  = prod.get("manufacturer", {})
-                    specs.append({
-                        "manufacturer": mfr.get("name", "") if isinstance(mfr, dict) else str(mfr),
-                        "model":       prod.get("model", ""),
-                        "chemistry":   prod.get("chemistry", ""),
-                        "format":      prod.get("cell_format", ""),
-                        "iec_code":    prod.get("iec_code", ""),
-                    })
+                    mfr = prod.get("manufacturer", {})
+                    specs.append(
+                        {
+                            "manufacturer": mfr.get("name", "") if isinstance(mfr, dict) else str(mfr),
+                            "model": prod.get("model", ""),
+                            "chemistry": prod.get("chemistry", ""),
+                            "format": prod.get("cell_format", ""),
+                            "iec_code": prod.get("iec_code", ""),
+                        }
+                    )
                 except Exception:
                     continue
         return specs
@@ -8384,25 +8700,22 @@ class AuthoringWorkspace:
                 cv = _clean_meta(v)
                 if cv and cv not in kw:
                     kw.append(cv)
-        for k in (extra_keywords or []):
+        for k in extra_keywords or []:
             if k not in kw:
                 kw.append(k)
 
         meta: dict = {
-            "upload_type":  "dataset",
-            "title":        self._deposit_title(title, specs),
-            "description":  description or auto_desc,
-            "creators":     creators,
+            "upload_type": "dataset",
+            "title": self._deposit_title(title, specs),
+            "description": description or auto_desc,
+            "creators": creators,
             "access_right": "open",
-            "license":      license,
-            "keywords":     kw,
+            "license": license,
+            "keywords": kw,
         }
         if contributors:
             # Zenodo requires a "type" on each contributor; default to "ProjectMember"
-            meta["contributors"] = [
-                {**c, "type": c.get("type", "ProjectMember")}
-                for c in contributors
-            ]
+            meta["contributors"] = [{**c, "type": c.get("type", "ProjectMember")} for c in contributors]
         if community:
             meta["communities"] = [{"identifier": community}]
         # Funding project (grant) → a related identifier pointing at the project's
@@ -8411,11 +8724,13 @@ class AuthoringWorkspace:
         # native `grants` field, which 400s on an id Zenodo doesn't recognise).
         ref = self._get_project()
         if ref is not None and ref.id:
-            meta.setdefault("related_identifiers", []).append({
-                "identifier": ref.id,
-                "relation": "isPartOf",
-                "scheme": "url",
-            })
+            meta.setdefault("related_identifiers", []).append(
+                {
+                    "identifier": ref.id,
+                    "relation": "isPartOf",
+                    "scheme": "url",
+                }
+            )
         return meta
 
     def _load_zenodo_state(self, environment: str = "production") -> dict:
@@ -8431,9 +8746,7 @@ class AuthoringWorkspace:
         """Write *state* to the state file of its environment, atomically."""
         save_deposit_state(self._root, state)
 
-    def _reconcile_zenodo_draft(
-        self, client: Any, state: dict, *, index: dict[str, Any] | None = None
-    ) -> dict | None:
+    def _reconcile_zenodo_draft(self, client: Any, state: dict, *, index: dict[str, Any] | None = None) -> dict | None:
         """Ask Zenodo whether the draft *state* records is still a draft.
 
         Returns the live draft when it is. When it was published since, on the
@@ -8456,19 +8769,21 @@ class AuthoringWorkspace:
             doi=str(doi or ""),
             record_id=str(deposit.get("record_id") or draft),
         )
-        state.pop("version_of", None)   # published, it is the version the next one is made from
+        state.pop("version_of", None)  # published, it is the version the next one is made from
         self._save_zenodo_state(state)
         environment = str(state.get("environment") or "production")
         if index is None:
             try:
                 index = load_deposit_index(self._root)
             except DepositIndexError:
-                index = None   # ws.zenodo() names the file when it reads it
+                index = None  # ws.zenodo() names the file when it reads it
         if index is not None:
             concept = state.get("concept_record_id") or concept_of_record(index, environment, draft)
             self._note_draft_published(index, environment, concept, draft)
-        print(f"  The Zenodo draft {state['record_id']} has been published since this workspace "
-              f"recorded it; {state_file(environment)} now says so.")
+        print(
+            f"  The Zenodo draft {state['record_id']} has been published since this workspace "
+            f"recorded it; {state_file(environment)} now says so."
+        )
         return None
 
     def _note_draft_published(
@@ -8540,7 +8855,7 @@ class AuthoringWorkspace:
                     found = client.get_deposit(record)
                 except ZenodoError as exc:
                     if exc.status in (403, 404, 410):
-                        continue   # not this account's record: a link elsewhere
+                        continue  # not this account's record: a link elsewhere
                     raise
                 if not deposit_is_published(found):
                     why = (
@@ -8553,7 +8868,7 @@ class AuthoringWorkspace:
                         concept = str(stored.get("conceptrecid") or "") or None
                         concept_known = True
                     if not concept or str(found.get("conceptrecid") or "") != concept:
-                        continue   # another published record of this account: a link
+                        continue  # another published record of this account: a link
                     why = (
                         f"is in the record {record}, a version of this workspace's own Zenodo record "
                         f"(concept {concept} on {host}) that the workspace never recorded, and the "
@@ -8603,19 +8918,18 @@ class AuthoringWorkspace:
             listing = client.list_files(starts_from)
         except ZenodoError as exc:
             raise ZenodoError(
-                f"{exc} (asked which data files the Zenodo record {starts_from} holds). "
-                "Nothing was created on Zenodo.",
+                f"{exc} (asked which data files the Zenodo record {starts_from} holds). Nothing was created on Zenodo.",
                 status=exc.status,
             ) from exc
         lacking = kept_copy_problems(listing, {entry.name: entry.md5 for entry in kept})
         if lacking:
             holder = (
-                f"the draft {starts_from} that this deposit updates" if updates_draft
+                f"the draft {starts_from} that this deposit updates"
+                if updates_draft
                 else f"the published record {starts_from} that this deposit makes a new version of"
             )
             raise RuntimeError(
-                _kept_copies_refusal(plan, datasets, lacking, holder)
-                + " Nothing was created or changed on Zenodo."
+                _kept_copies_refusal(plan, datasets, lacking, holder) + " Nothing was created or changed on Zenodo."
             )
 
     def _submission_doi(self, doi: str | None) -> Callable[[object], str | None]:
@@ -8634,8 +8948,10 @@ class AuthoringWorkspace:
             # No record on zenodo.org: a state file that is there names a sandbox
             # record (zenodo.json does so only as an earlier build wrote it).
             if any(state_path(self._root, environment).exists() for environment in ZENODO_HOSTS):
-                print(f"  NOTE: this workspace's Zenodo record is on the sandbox ({state_file('sandbox')}), "
-                      "and a sandbox DOI is never recorded on the records.")
+                print(
+                    f"  NOTE: this workspace's Zenodo record is on the sandbox ({state_file('sandbox')}), "
+                    "and a sandbox DOI is never recorded on the records."
+                )
             return lambda iri: None
         record = f"The Zenodo record {state['record_id']} in {state_file('production')}"
         checked = True
@@ -8643,14 +8959,18 @@ class AuthoringWorkspace:
             checked = self._check_zenodo_draft(state)
         if not state.get("published"):
             unchecked = "" if checked else " (it could not be checked whether it was published since)"
-            print(f"  NOTE: {record} is a draft{unchecked}, so its DOI is not recorded on the records. "
-                  "Publish it, then submit again.")
+            print(
+                f"  NOTE: {record} is a draft{unchecked}, so its DOI is not recorded on the records. "
+                "Publish it, then submit again."
+            )
             return lambda iri: None
         stored = str(state.get("doi") or "")
         if "records" not in state:
             hint = f"Pass doi={stored!r} to record it on every record." if stored else "Pass doi= to record one."
-            print(f"  NOTE: {record} does not list the records its deposit holds, so its DOI is not "
-                  f"recorded on them. {hint}")
+            print(
+                f"  NOTE: {record} does not list the records its deposit holds, so its DOI is not "
+                f"recorded on them. {hint}"
+            )
             return lambda iri: None
         held = frozenset(state["records"])
         return lambda iri: stored if stored and isinstance(iri, str) and iri in held else None
@@ -8682,14 +9002,10 @@ class AuthoringWorkspace:
         ``source`` + ``unmapped_columns`` (both paths absolute)."""
         if self._conversion_sources is None:
             p = self._conversions_path()
-            self._conversion_sources = (
-                json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
-            )
+            self._conversion_sources = json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
         return self._conversion_sources
 
-    def _record_conversion(
-        self, src: Path, out: Path, *, unmapped_columns: builtins.list[str] | None = None
-    ) -> None:
+    def _record_conversion(self, src: Path, out: Path, *, unmapped_columns: builtins.list[str] | None = None) -> None:
         """Remember that *out* was converted from *src*, for provenance at publish.
 
         When the conversion dropped source columns (see :meth:`convert`), their
@@ -8771,16 +9087,16 @@ class AuthoringWorkspace:
         from battinfo.jsonld import record_to_jsonld
 
         _FMT_MAP: dict[str, tuple[str, str]] = {
-            "json-ld":  ("json-ld", ".jsonld"),
-            "jsonld":   ("json-ld", ".jsonld"),
-            "json_ld":  ("json-ld", ".jsonld"),
-            "ttl":      ("turtle",  ".ttl"),
-            "turtle":   ("turtle",  ".ttl"),
-            "xml":      ("xml",     ".rdf"),
-            "rdf":      ("xml",     ".rdf"),
-            "nt":       ("nt",      ".nt"),
-            "ntriples": ("nt",      ".nt"),
-            "n3":       ("n3",      ".n3"),
+            "json-ld": ("json-ld", ".jsonld"),
+            "jsonld": ("json-ld", ".jsonld"),
+            "json_ld": ("json-ld", ".jsonld"),
+            "ttl": ("turtle", ".ttl"),
+            "turtle": ("turtle", ".ttl"),
+            "xml": ("xml", ".rdf"),
+            "rdf": ("xml", ".rdf"),
+            "nt": ("nt", ".nt"),
+            "ntriples": ("nt", ".nt"),
+            "n3": ("n3", ".n3"),
         }
         rdflib_fmt, ext = _FMT_MAP.get(fmt.lower(), (fmt.lower(), f".{fmt.lower()}"))
 
@@ -8793,11 +9109,11 @@ class AuthoringWorkspace:
         written: list[Path] = []
 
         _TYPE_MAP = {
-            "cell-spec":     "cell-spec",
+            "cell-spec": "cell-spec",
             "cell-instance": "cell-instance",
-            "test":          "test",
+            "test": "test",
             "test-protocol": "test-protocol",
-            "dataset":       "dataset",
+            "dataset": "dataset",
         }
 
         for record_type, jsonld_type in _TYPE_MAP.items():
@@ -8814,7 +9130,8 @@ class AuthoringWorkspace:
                     # default); RDF conversions must inline, or rdflib would
                     # fetch the context URL over the network at parse time.
                     doc = record_to_jsonld(
-                        raw, jsonld_type,
+                        raw,
+                        jsonld_type,
                         context="url" if rdflib_fmt == "json-ld" else "inline",
                     )
                     dst = dst_dir / src.with_suffix(ext).name
@@ -8827,14 +9144,12 @@ class AuthoringWorkspace:
                     else:
                         g = Graph()
                         g.parse(data=json.dumps(doc), format="json-ld")
-                        dst.write_text(g.serialize(format=rdflib_fmt),
-                                       encoding="utf-8")
+                        dst.write_text(g.serialize(format=rdflib_fmt), encoding="utf-8")
                     written.append(dst)
                 except Exception as exc:
                     print(f"  WARNING: {src.name} -- {exc}")
 
-        print(f"Exported {len(written)} file(s) [{fmt}] to "
-              f"{out_root or records_root}")
+        print(f"Exported {len(written)} file(s) [{fmt}] to {out_root or records_root}")
         return written
 
     # ── Internal helpers ────────────────────────────────────────────────────────
@@ -8843,19 +9158,23 @@ class AuthoringWorkspace:
         cache = self._get_search_cache()
         scored: list[tuple[float, dict]] = []
         for entry in cache:
-            score = _fuzzy_score(terms, entry["_mfr"], entry["_model"],
-                                 frozenset(entry.get("_size") or []))
+            score = _fuzzy_score(terms, entry["_mfr"], entry["_model"], frozenset(entry.get("_size") or []))
             if score < threshold:
                 continue
 
             if entry.get("source") == "api":
-                scored.append((score, {
-                    "id":            entry["id"],
-                    "_canonical_id": entry.get("_canonical_id", ""),
-                    "manufacturer":  entry["_mfr"],
-                    "model":         entry["_model"],
-                    "source":        "api",
-                }))
+                scored.append(
+                    (
+                        score,
+                        {
+                            "id": entry["id"],
+                            "_canonical_id": entry.get("_canonical_id", ""),
+                            "manufacturer": entry["_mfr"],
+                            "model": entry["_model"],
+                            "source": "api",
+                        },
+                    )
+                )
             else:
                 try:
                     data = json.loads(Path(entry["source"]).read_text(encoding="utf-8"))
@@ -8863,13 +9182,18 @@ class AuthoringWorkspace:
                     continue
                 product = data.get("cell_spec", {})
                 mfr = product.get("manufacturer", {})
-                scored.append((score, {
-                    "id":           entry["id"],
-                    "manufacturer": mfr.get("name", "") if isinstance(mfr, dict) else str(mfr),
-                    "model":        product.get("model", ""),
-                    "source":       entry["source"],
-                    "_record":      data,
-                }))
+                scored.append(
+                    (
+                        score,
+                        {
+                            "id": entry["id"],
+                            "manufacturer": mfr.get("name", "") if isinstance(mfr, dict) else str(mfr),
+                            "model": product.get("model", ""),
+                            "source": entry["source"],
+                            "_record": data,
+                        },
+                    )
+                )
         scored.sort(key=lambda x: -x[0])
         return [r for _, r in scored]
 
@@ -8897,30 +9221,32 @@ class AuthoringWorkspace:
 
         entries: list[dict] = []
         for r in data:
-            title    = r.get("title", "")
+            title = r.get("title", "")
             metadata = r.get("metadata") or {}
 
-            mfr   = str(metadata.get("manufacturer") or "").lower()
+            mfr = str(metadata.get("manufacturer") or "").lower()
             model = str(metadata.get("model") or "").lower()
             if not mfr:
                 # Fall back: parse first token of title as manufacturer
                 parts = title.split(None, 1)
-                mfr   = parts[0].lower() if parts else ""
+                mfr = parts[0].lower() if parts else ""
                 model = parts[1].lower() if len(parts) > 1 else ""
 
             size_code = str(metadata.get("size_code") or "")
-            iec_code  = str(metadata.get("iec_code")  or "")
-            size_exp  = _expand_size_codes(size_code, iec_code)
+            iec_code = str(metadata.get("iec_code") or "")
+            size_exp = _expand_size_codes(size_code, iec_code)
 
-            entries.append({
-                "id":            r.get("canonical_iri", ""),
-                "_canonical_id": r.get("canonical_id", ""),
-                "_mfr":          mfr,
-                "_model":        model,
-                "_size":         size_exp.split() if size_exp else [],
-                "_title":        title,
-                "source":        "api",
-            })
+            entries.append(
+                {
+                    "id": r.get("canonical_iri", ""),
+                    "_canonical_id": r.get("canonical_id", ""),
+                    "_mfr": mfr,
+                    "_model": model,
+                    "_size": size_exp.split() if size_exp else [],
+                    "_title": title,
+                    "source": "api",
+                }
+            )
         return entries
 
     def _load_or_build_index(self) -> builtins.list[dict]:
@@ -8931,9 +9257,7 @@ class AuthoringWorkspace:
         staging = self._records_repo / "records" / "_staging" / "cell-spec"
         index_path = self._records_repo / self._INDEX_FILE
 
-        current_count = (
-            sum(1 for _ in curated.glob("*/record.json")) if curated.exists() else 0
-        ) + (
+        current_count = (sum(1 for _ in curated.glob("*/record.json")) if curated.exists() else 0) + (
             sum(1 for _ in staging.glob("*.json")) if staging.exists() else 0
         )
 
@@ -8949,7 +9273,7 @@ class AuthoringWorkspace:
         entries: list[dict] = []
         for search_root, pattern in [
             (curated, "*/record.json"),
-            (staging,  "*.json"),
+            (staging, "*.json"),
         ]:
             if not search_root.exists():
                 continue
@@ -8962,15 +9286,17 @@ class AuthoringWorkspace:
                 mfr = product.get("manufacturer", {})
                 mfr_name = mfr.get("name", "") if isinstance(mfr, dict) else str(mfr)
                 size_code = str(product.get("size_code") or "")
-                iec_code  = str(product.get("iec_code")  or "")
-                size_exp  = _expand_size_codes(size_code, iec_code)
-                entries.append({
-                    "id":      product.get("id", ""),
-                    "_mfr":   mfr_name.lower(),
-                    "_model": str(product.get("model", "") or "").lower(),
-                    "_size":  size_exp.split() if size_exp else [],
-                    "source": str(f),
-                })
+                iec_code = str(product.get("iec_code") or "")
+                size_exp = _expand_size_codes(size_code, iec_code)
+                entries.append(
+                    {
+                        "id": product.get("id", ""),
+                        "_mfr": mfr_name.lower(),
+                        "_model": str(product.get("model", "") or "").lower(),
+                        "_size": size_exp.split() if size_exp else [],
+                        "source": str(f),
+                    }
+                )
 
         try:
             index_path.write_text(
@@ -8987,11 +9313,16 @@ class AuthoringWorkspace:
 
         raw = json.loads(path.read_text(encoding="utf-8"))
         flat_names = frozenset(CELL_TYPE_AUTHORING_PROPERTY_FIELDS)
-        _check_draft_keys(raw, _cell_spec_draft_keys(), draft="cell-spec", path=path,
-                          aliases=_CELL_SPEC_DRAFT_ALIASES, quiet=flat_names)
+        _check_draft_keys(
+            raw,
+            _cell_spec_draft_keys(),
+            draft="cell-spec",
+            path=path,
+            aliases=_CELL_SPEC_DRAFT_ALIASES,
+            quiet=flat_names,
+        )
         # A null is an unfilled template entry: the model default applies.
-        fields = {key: value for key, value in raw.items()
-                  if not str(key).startswith("_") and value is not None}
+        fields = {key: value for key, value in raw.items() if not str(key).startswith("_") and value is not None}
         # `specs` (the draft key until June 2026) is read as an alias of
         # `properties`, merged the way CellSpec(specs=...) merges it (properties
         # wins), and a flat property name ("nominal_voltage": {...}) the way
@@ -9012,8 +9343,7 @@ class AuthoringWorkspace:
         missing = [key for key in ("manufacturer", "model", "format", "chemistry") if key not in fields]
         if missing:
             raise ValueError(
-                f"{path.name}: fill in {', '.join(missing)} before loading a cell-spec draft. "
-                "Nothing was loaded."
+                f"{path.name}: fill in {', '.join(missing)} before loading a cell-spec draft. Nothing was loaded."
             )
         handle = fields.pop("handle", None)
         name = fields.pop("name", None)
@@ -9043,6 +9373,7 @@ class AuthoringWorkspace:
         as a read-only reference copy, so the strict save resolves it.
         """
         from battinfo.bundle import Cell  # noqa: PLC0415
+
         cell = Cell(
             id=result.get("id"),
             cell_spec_id=result.get("cell_spec_id"),
@@ -9069,7 +9400,9 @@ class AuthoringWorkspace:
     def _knows_record(self, iri: str, entity_type: str) -> bool:
         """True when *iri* is in this session, saved in this workspace, or kept as a copy."""
         sessions: dict[str, builtins.list[Any]] = {
-            "cell": self._ws.cells, "cell-spec": self._ws.cell_specs, "test-protocol": self._ws.test_specs,
+            "cell": self._ws.cells,
+            "cell-spec": self._ws.cell_specs,
+            "test-protocol": self._ws.test_specs,
         }
         if any(getattr(obj, "id", None) == iri for obj in sessions.get(entity_type, [])):
             return True
@@ -9131,8 +9464,7 @@ class AuthoringWorkspace:
         if self._knows_record(iri, entity_type):
             return "local"
         if not self._registry_url:
-            print(f"  note: {iri} is not in this workspace and could not be checked offline "
-                  "(registry_url=None).")
+            print(f"  note: {iri} is not in this workspace and could not be checked offline (registry_url=None).")
             return "offline"
         remembered = self._reference_lookups.get((entity_type, iri))
         if remembered is not None:
@@ -9154,6 +9486,7 @@ class AuthoringWorkspace:
     def _reference_spec(self, result: dict) -> Any:
         """Build a referenced CellSpec reusing its existing IRI (NOT queued to publish)."""
         from battinfo.bundle import CellSpec, ProvenanceInfo  # noqa: PLC0415
+
         record = self._fetch_cell_spec_record(result) if result.get("source") == "api" else result.get("_record", {})
         product = record.get("cell_spec", {}) or {}
         specs_raw = record.get("properties", {}) or {}
@@ -9188,6 +9521,7 @@ class AuthoringWorkspace:
     def _fetch_cell_spec_record(self, result: dict) -> dict:
         """Fetch the full cell-spec record from the registry API (empty dict on failure)."""
         import urllib.request  # noqa: PLC0415
+
         if not self._registry_url:
             return {}
         canonical_id = result.get("_canonical_id", "")
@@ -9284,8 +9618,7 @@ class AuthoringWorkspace:
             if names is not None and serial_numbers is not None:
                 if len(names) != len(serial_numbers):
                     raise ValueError(
-                        f"names and serial_numbers must have the same length "
-                        f"({len(names)} vs {len(serial_numbers)})."
+                        f"names and serial_numbers must have the same length ({len(names)} vs {len(serial_numbers)})."
                     )
                 pairs = list(zip(names, serial_numbers))
             elif names is not None:
@@ -9297,20 +9630,14 @@ class AuthoringWorkspace:
                 return []
 
             if iris is not None and len(iris) != len(pairs):
-                raise ValueError(
-                    f"iris must match the number of cells "
-                    f"({len(iris)} IRIs vs {len(pairs)} cells)."
-                )
+                raise ValueError(f"iris must match the number of cells ({len(iris)} IRIs vs {len(pairs)} cells).")
             if handles is not None and len(handles) != len(pairs):
                 raise ValueError(
-                    f"handles must match the number of cells "
-                    f"({len(handles)} handles vs {len(pairs)} cells)."
+                    f"handles must match the number of cells ({len(handles)} handles vs {len(pairs)} cells)."
                 )
             iri_list = builtins.list(iris) if iris is not None else [None] * len(pairs)
             handle_list = builtins.list(handles) if handles is not None else [None] * len(pairs)
-            entries = [
-                (n, s, iri, h) for (n, s), iri, h in zip(pairs, iri_list, handle_list)
-            ]
+            entries = [(n, s, iri, h) for (n, s), iri, h in zip(pairs, iri_list, handle_list)]
 
             # Drop cells already in this session, keyed on IDENTITY.
             #
@@ -9357,8 +9684,10 @@ class AuthoringWorkspace:
                     + "\n           Pass serial_numbers=[...] to author them as distinct cells."
                 )
             if already:
-                print(f"  WARNING: {len(already)} already in workspace -- skipping: {already[:5]}"
-                      + (" ..." if len(already) > 5 else ""))
+                print(
+                    f"  WARNING: {len(already)} already in workspace -- skipping: {already[:5]}"
+                    + (" ..." if len(already) > 5 else "")
+                )
             entries = deduped
 
         if not entries:
@@ -9377,8 +9706,7 @@ class AuthoringWorkspace:
         if isinstance(conformance, (list, tuple)):
             if len(conformance) != len(entries):
                 raise ValueError(
-                    f"conformance list must match the number of cells "
-                    f"({len(conformance)} vs {len(entries)})."
+                    f"conformance list must match the number of cells ({len(conformance)} vs {len(entries)})."
                 )
             confs = [_coerce_conformance(c) for c in conformance]
         else:
@@ -9390,10 +9718,7 @@ class AuthoringWorkspace:
         def _per_cell(value: Any, label: str) -> builtins.list[Any]:
             if isinstance(value, (builtins.list, tuple)):
                 if len(value) != len(entries):
-                    raise ValueError(
-                        f"{label} list must match the number of cells "
-                        f"({len(value)} vs {len(entries)})."
-                    )
+                    raise ValueError(f"{label} list must match the number of cells ({len(value)} vs {len(entries)}).")
                 return builtins.list(value)
             return [value] * len(entries)
 
@@ -9444,8 +9769,7 @@ class AuthoringWorkspace:
                 '"termination" on a "method" step: {"quantity": "voltage", "value": 0.9, '
                 '"unit": "V", "direction": "below"}. Nothing was loaded.'
             )
-        _check_draft_keys(raw, _test_spec_draft_keys(), draft="test-spec", path=path,
-                          aliases=_TEST_SPEC_DRAFT_ALIASES)
+        _check_draft_keys(raw, _test_spec_draft_keys(), draft="test-spec", path=path, aliases=_TEST_SPEC_DRAFT_ALIASES)
 
         allowed_types = [t.value for t in BatteryTestType]
         spellings = {key: raw[key] for key in ("type", "kind", "test_type", "test_kind") if raw.get(key)}
@@ -9456,15 +9780,9 @@ class AuthoringWorkspace:
             )
         test_type = next(iter(spellings.values()), "")
         if not test_type:
-            raise ValueError(
-                f"{path.name}: fill in 'type' before loading. "
-                f"Allowed values: {', '.join(allowed_types)}."
-            )
+            raise ValueError(f"{path.name}: fill in 'type' before loading. Allowed values: {', '.join(allowed_types)}.")
         if test_type not in allowed_types:
-            raise ValueError(
-                f"{path.name}: unknown type {test_type!r}. "
-                f"Allowed values: {', '.join(allowed_types)}."
-            )
+            raise ValueError(f"{path.name}: unknown type {test_type!r}. Allowed values: {', '.join(allowed_types)}.")
 
         conditions, condition_notes = _clean_template_conditions(raw.get("conditions"))
         steps = _clean_template_steps(raw.get("experiment") or raw.get("steps"))
@@ -9487,8 +9805,7 @@ class AuthoringWorkspace:
         if raw.get("protocol_url") is not None:
             if protocol_info.get("url") not in (None, raw["protocol_url"]):
                 raise ValueError(
-                    f"{path.name}: 'protocol_url' and 'protocol.url' disagree; keep one. "
-                    "Nothing was loaded."
+                    f"{path.name}: 'protocol_url' and 'protocol.url' disagree; keep one. Nothing was loaded."
                 )
             protocol_info["url"] = raw["protocol_url"]
 
@@ -9496,9 +9813,11 @@ class AuthoringWorkspace:
         # on a test spec are kept as notes rather than silently dropped (instrument
         # belongs on the test run; atmosphere has no numeric quantity form).
         notes = [*_draft_text_list(raw.get("comment")), *_draft_text_list(raw.get("notes"))]
-        for label, value in (("instrument", raw.get("instrument")),
-                             ("atmosphere", raw.get("atmosphere")),
-                             ("protocol", protocol_info.get("name"))):
+        for label, value in (
+            ("instrument", raw.get("instrument")),
+            ("atmosphere", raw.get("atmosphere")),
+            ("protocol", protocol_info.get("name")),
+        ):
             if isinstance(value, str) and value.strip():
                 notes.append(f"{label}: {value.strip()}")
         notes.extend(condition_notes)
@@ -9551,8 +9870,7 @@ class AuthoringWorkspace:
         model = raw.get("model") or None
         if not (name or manufacturer or model):
             raise ValueError(
-                f"{path.name} needs at least a name (or manufacturer/model) - "
-                "fill in the template before loading it."
+                f"{path.name} needs at least a name (or manufacturer/model) - fill in the template before loading it."
             )
         pinned = _draft_spec_iri(raw.get("id"), raw.get("uid"), path.name)
         uid = None if pinned else stable_uid("::".join(["equipment-spec", manufacturer or "", model or "", name]))
@@ -9794,9 +10112,7 @@ class AuthoringWorkspace:
                 f"Unknown material spec {spec!r}. Pass a material_spec IRI, the record "
                 "from ws.add('material_spec', ...), or a name added in this session."
             )
-        raise ValueError(
-            "ws.add('material', ...) needs spec=<material-spec record, IRI, or name>."
-        )
+        raise ValueError("ws.add('material', ...) needs spec=<material-spec record, IRI, or name>.")
 
     def _add_material(self, spec: Any = None, *, lot: str | None = None, **kwargs) -> builtins.list:
         """Author a first-class material instance (Level 3), queued for ws.save().
@@ -9899,9 +10215,7 @@ class AuthoringWorkspace:
             or body.get("cell_instance_id")
             or ("virtual cell" if body.get("virtual_cell") else "?")
         )
-        n_claims = len(body.get("claims", [])) + sum(
-            len(part.get("claims", [])) for part in body.get("parts", [])
-        )
+        n_claims = len(body.get("claims", [])) + sum(len(part.get("claims", [])) for part in body.get("parts", []))
         print(f"  param set:      {body.get('name', name)}  [{target}, {n_claims} claim(s)]  {body['id']}")
         return [record]
 
@@ -9931,9 +10245,7 @@ class AuthoringWorkspace:
                 "ws.add('electrode_spec', name='Graphite anode', kind='graphite')."
             )
         record = create_electrode_spec(validate=False, name=name, **kwargs)
-        self._electrode_specs = _dedupe_records_by_id(
-            self._electrode_specs, record, "electrode_spec"
-        )
+        self._electrode_specs = _dedupe_records_by_id(self._electrode_specs, record, "electrode_spec")
         body = record["electrode_spec"]
         self._register_electrode_spec_keys(body)
         kind = body.get("kind", "")
@@ -9969,9 +10281,7 @@ class AuthoringWorkspace:
                 f"Unknown electrode spec {spec!r}. Pass an electrode_spec IRI, the record "
                 "from ws.add('electrode_spec', ...), or a name added in this session."
             )
-        raise ValueError(
-            "ws.add('electrode', ...) needs spec=<electrode-spec record, IRI, or name>."
-        )
+        raise ValueError("ws.add('electrode', ...) needs spec=<electrode-spec record, IRI, or name>.")
 
     def _add_electrode(self, spec: Any = None, *, batch: str | None = None, **kwargs) -> builtins.list:
         """Author a first-class electrode batch (the coated web/discs), queued for ws.save().
@@ -9988,15 +10298,10 @@ class AuthoringWorkspace:
         from battinfo.api import create_electrode  # noqa: PLC0415
 
         spec_id = self._resolve_electrode_spec_arg(spec)
-        record = create_electrode(
-            validate=False, electrode_spec_id=spec_id, batch=batch, **kwargs
-        )
+        record = create_electrode(validate=False, electrode_spec_id=spec_id, batch=batch, **kwargs)
         self._electrodes = _dedupe_records_by_id(self._electrodes, record, "electrode")
         body = record["electrode"]
-        label = (
-            body.get("batch_id") or body.get("lot_id") or body.get("name")
-            or body["id"].rsplit("/", 1)[-1]
-        )
+        label = body.get("batch_id") or body.get("lot_id") or body.get("name") or body["id"].rsplit("/", 1)[-1]
         print(f"  electrode:      {label}  {body['id']}")
         return [record]
 
@@ -10065,14 +10370,8 @@ class AuthoringWorkspace:
             shown = ", ".join(known[:8]) + (" ..." if len(known) > 8 else "")
             hint = f"  Channels in this workspace: {shown}"
         else:
-            hint = (
-                "  No channels registered yet - run "
-                "ws.add('equipment', spec=..., serial_number=...) first."
-            )
-        raise ValueError(
-            f"Unknown channel {ref!r}. Pass a channel IRI, a channel label, "
-            "or 'unit/CHn'.\n" + hint
-        )
+            hint = "  No channels registered yet - run ws.add('equipment', spec=..., serial_number=...) first."
+        raise ValueError(f"Unknown channel {ref!r}. Pass a channel IRI, a channel label, or 'unit/CHn'.\n" + hint)
 
     def _register_test_spec(self, spec: Any) -> None:
         """Register a ``TestSpec`` object so its protocol record is saved and its
@@ -10099,9 +10398,7 @@ class AuthoringWorkspace:
             except (OSError, ValueError):
                 continue
             if body.get("id") == iri:
-                return body.get("name"), (
-                    body.get("kind") or body.get("test_kind") or body.get("test_type")
-                )
+                return body.get("name"), (body.get("kind") or body.get("test_kind") or body.get("test_type"))
         return None, None
 
     def _add_tests(
@@ -10112,9 +10409,9 @@ class AuthoringWorkspace:
         data: "str | Path | builtins.list[str | Path] | None" = None,
         raw: "str | Path | builtins.list[str | Path] | None" = None,
         datasets: "str | builtins.list[str | Path] | None" = None,
-        kind: str | None = None,                 # backward-compat alias for type
+        kind: str | None = None,  # backward-compat alias for type
         spec: Any = None,
-        protocol: Any = None,                    # backward-compat alias for spec
+        protocol: Any = None,  # backward-compat alias for spec
         conformance: Any = None,
         name: str | None = None,
         handle: str | None = None,
@@ -10212,6 +10509,7 @@ class AuthoringWorkspace:
                     )
             else:
                 from battinfo.bundle import TestSpec as _TestSpec  # noqa: PLC0415
+
                 if not isinstance(test_spec, _TestSpec):
                     # NB: the `type` parameter shadows the builtin here, so read the
                     # class name off the object rather than calling type().
@@ -10228,10 +10526,7 @@ class AuthoringWorkspace:
                 if spec_kind is not None and not test_type:
                     test_type = spec_kind.value if hasattr(spec_kind, "value") else str(spec_kind)
         if not test_type:
-            raise ValueError(
-                "ws.add('test', ...) requires type=... (or a spec that defines it). "
-                + _test_kind_hint()
-            )
+            raise ValueError("ws.add('test', ...) requires type=... (or a spec that defines it). " + _test_kind_hint())
         test_type = _normalize_test_kind(test_type)
         protocol_name = protocol_name or test_type.replace("_", " ")
 
@@ -10316,7 +10611,7 @@ class AuthoringWorkspace:
                 if src is not None:
                     n_raw += 1
                 _per = periods[i]
-                _tc = (f"{_unix_to_iso(_per[0])}/{_unix_to_iso(_per[1])}" if _per else None)
+                _tc = f"{_unix_to_iso(_per[0])}/{_unix_to_iso(_per[1])}" if _per else None
                 dataset_obj = self._ws.dataset(
                     resolved,
                     title=f"{name or label} data",
@@ -10332,12 +10627,14 @@ class AuthoringWorkspace:
                 if member_series_id is not None:
                     dataset_obj.series_id = member_series_id
             conf_status = conformance.status if conformance is not None else None
-            print(f"  test [{test_type}] on {label}"
-                  + (f"  +{len(files)} dataset(s)" if files else "")
-                  + (f"  (+{n_raw} raw source{'s' if n_raw != 1 else ''})" if n_raw else "")
-                  + (f"  channel: {channel}" if channel_id is not None else "")
-                  + (f"  conformance: {conf_status}" if conf_status else "")
-                  + (f"  collection: {member_series_id}" if member_series_id else ""))
+            print(
+                f"  test [{test_type}] on {label}"
+                + (f"  +{len(files)} dataset(s)" if files else "")
+                + (f"  (+{n_raw} raw source{'s' if n_raw != 1 else ''})" if n_raw else "")
+                + (f"  channel: {channel}" if channel_id is not None else "")
+                + (f"  conformance: {conf_status}" if conf_status else "")
+                + (f"  collection: {member_series_id}" if member_series_id else "")
+            )
             return [test]
 
         # ── Batch mode: match a glob of files to loaded cells by short ID ────────
@@ -10348,8 +10645,15 @@ class AuthoringWorkspace:
                     "ws.add('test', cell=..., conformance=...) to flag each test."
                 )
             tests = self._add_tests_by_filename(
-                test_type, datasets, protocol_name, protocol_url, protocol_ref,
-                instrument, license, description, status,
+                test_type,
+                datasets,
+                protocol_name,
+                protocol_url,
+                protocol_ref,
+                instrument,
+                license,
+                description,
+                status,
             )
             if protocol_id_ref is not None:
                 for t in tests:
@@ -10382,8 +10686,7 @@ class AuthoringWorkspace:
         if iri is not None:
             if not isinstance(iri, str) or not TEST_IRI_RE.fullmatch(iri.strip()):
                 raise ValueError(
-                    f"iri={iri!r} is not a test IRI; expected "
-                    "https://w3id.org/battinfo/test/xxxx-xxxx-xxxx-xxxx."
+                    f"iri={iri!r} is not a test IRI; expected https://w3id.org/battinfo/test/xxxx-xxxx-xxxx-xxxx."
                 )
             pinned = iri.strip()
         if uid is not None:
@@ -10408,8 +10711,7 @@ class AuthoringWorkspace:
         pinned = [str(item).strip() for item in dataset_iris]
         if len(pinned) != n_files:
             raise ValueError(
-                f"dataset_iris must match the number of data files "
-                f"({len(pinned)} IRIs vs {n_files} files)."
+                f"dataset_iris must match the number of data files ({len(pinned)} IRIs vs {n_files} files)."
             )
         bad = [item for item in pinned if not DATASET_IRI_RE.fullmatch(item)]
         if bad:
@@ -10420,9 +10722,7 @@ class AuthoringWorkspace:
         taken = {getattr(ds, "id", None) for ds in self._ws.datasets}
         clashes = [item for item in pinned if item in taken]
         if len(set(pinned)) != len(pinned) or clashes:
-            raise ValueError(
-                "dataset_iris must name distinct datasets not already used in this session."
-            )
+            raise ValueError("dataset_iris must name distinct datasets not already used in this session.")
         return pinned
 
     def _require_files(self, paths: builtins.list[Path], argument: str) -> None:
@@ -10481,6 +10781,7 @@ class AuthoringWorkspace:
         re-published).
         """
         from battinfo.bundle import Cell  # noqa: PLC0415
+
         if isinstance(ref, Cell):
             return ref
         if isinstance(ref, dict):  # a search result
@@ -10490,8 +10791,9 @@ class AuthoringWorkspace:
             if s.startswith("http"):  # an IRI
                 # A cell already found (by serial, a search hit or an earlier IRI) is
                 # reused, not referenced and looked up in the registry again.
-                known = next((cell for cell in self._cells_by_short_id.values()
-                              if getattr(cell, "id", None) == s), None)
+                known = next(
+                    (cell for cell in self._cells_by_short_id.values() if getattr(cell, "id", None) == s), None
+                )
                 if known is not None:
                     return known
                 return self._reference_cell({"id": s, "type": "cell"})
@@ -10523,9 +10825,7 @@ class AuthoringWorkspace:
             found = self._query_registry_cells(serials=[s])
             if found:
                 return self._reference_cell({**found[0], "type": "cell"})
-            searched = "this session, the records saved under {root}".format(
-                root=self._ws.source_root
-            )
+            searched = "this session, the records saved under {root}".format(root=self._ws.source_root)
             searched += ", or the registry" if self._registry_url else " (registry not configured)"
             raise ValueError(
                 f"Could not resolve cell {ref!r} in {searched}. "
@@ -10570,23 +10870,21 @@ class AuthoringWorkspace:
             )
 
         # Registered as the explicit form registers its files (see _register_sources).
-        self._register_sources(
-            [*matched_files, *(self._resolve_raw_source(f) for f in matched_files)], by="ws.add"
-        )
+        self._register_sources([*matched_files, *(self._resolve_raw_source(f) for f in matched_files)], by="ws.add")
         print(f"Matching {len(matched_files)} file(s) to cell instances...")
         unmatched: list[Path] = []
         tests = []
         for f in matched_files:
             sid = _short_id(f.stem)
-            ambiguous = next(
-                (k for k in (sid, f.stem) if k and k in self._ambiguous_cell_keys), None
-            )
+            ambiguous = next((k for k in (sid, f.stem) if k and k in self._ambiguous_cell_keys), None)
             if ambiguous is not None:
                 # Matching this file to "a" cell would attach the measurement to
                 # an arbitrary one of several. Skip it and say why.
                 unmatched.append(f)
-                print(f"  AMBIGUOUS {f.name} -- {ambiguous!r} matches more than one cell; "
-                      "name the file after the serial number")
+                print(
+                    f"  AMBIGUOUS {f.name} -- {ambiguous!r} matches more than one cell; "
+                    "name the file after the serial number"
+                )
                 continue
             if sid and sid in self._cells_by_short_id:
                 cell, how = self._cells_by_short_id[sid], f'short id "{sid}"'
@@ -10597,9 +10895,16 @@ class AuthoringWorkspace:
                 print(f"  NO MATCH  {f.name}")
                 continue
             test = self._ws.record_test(
-                cell, kind=test_type, path=f, protocol=protocol_name,
-                protocol_url=protocol_url, protocol_ref=protocol_ref, description=description,
-                instrument=instrument, status=status, license=license,
+                cell,
+                kind=test_type,
+                path=f,
+                protocol=protocol_name,
+                protocol_url=protocol_url,
+                protocol_ref=protocol_ref,
+                description=description,
+                instrument=instrument,
+                status=status,
+                license=license,
                 format=_guess_format(f),
                 source_path=self._resolve_raw_source(f),
             )
@@ -10607,10 +10912,13 @@ class AuthoringWorkspace:
             tests.append(test)
 
         if unmatched:
-            known = sorted({
-                (c.name or c.serial_number) for c in self._cells_by_short_id.values()
-                if getattr(c, "name", None) or getattr(c, "serial_number", None)
-            })
+            known = sorted(
+                {
+                    (c.name or c.serial_number)
+                    for c in self._cells_by_short_id.values()
+                    if getattr(c, "name", None) or getattr(c, "serial_number", None)
+                }
+            )
             print(f"\n  {len(unmatched)} file(s) had no matching cell instance:")
             for f in unmatched:
                 print(f"    {f.name}")
@@ -10622,8 +10930,9 @@ class AuthoringWorkspace:
                 shown = ", ".join(known[:8]) + (" ..." if len(known) > 8 else "")
                 print(f"  Cells currently in this workspace: {shown}")
 
-        print(f"\nCreated {len(tests)} test(s)"
-              + (f"; {len(unmatched)} unmatched file(s) skipped" if unmatched else ""))
+        print(
+            f"\nCreated {len(tests)} test(s)" + (f"; {len(unmatched)} unmatched file(s) skipped" if unmatched else "")
+        )
         return tests
 
 
@@ -10635,12 +10944,12 @@ def _norm(s: str) -> str:
 # Canonical size-code alias groups.  Every alias in a group expands to all others,
 # so searching any of them matches cells indexed under any of them.
 _SIZE_ALIAS_GROUPS: list[list[str]] = [
-    ["r03",   "lr03",  "fr03",  "aaa",   "tripleа"],
-    ["r6",    "lr6",   "fr6",   "aa",    "doublea"],
-    ["r14",   "lr14",  "c"],
-    ["r20",   "lr20",  "d"],
-    ["lr1",   "r1",    "n"],
-    ["6lr61", "6f22",  "9v"],
+    ["r03", "lr03", "fr03", "aaa", "tripleа"],
+    ["r6", "lr6", "fr6", "aa", "doublea"],
+    ["r14", "lr14", "c"],
+    ["r20", "lr20", "d"],
+    ["lr1", "r1", "n"],
+    ["6lr61", "6f22", "9v"],
     ["18650"],
     ["21700"],
     ["26650"],
@@ -10713,8 +11022,10 @@ def _fuzzy_score(
 
 def _make_record_slug(manufacturer: str, model: str, year: int | str) -> str:
     """Generate the battinfo-records directory slug: manufacturer--model--year."""
+
     def slugify(s: str) -> str:
         return re.sub(r"[^a-z0-9]+", "-", s.lower()).strip("-")
+
     return f"{slugify(manufacturer)}--{slugify(model)}--{year}"
 
 
@@ -10765,9 +11076,7 @@ def _cell_spec_submission_payload(
     )
 
 
-def _point_source_url_at_public_copy(
-    record: dict, public_url_for: Callable[[object], str | None]
-) -> bool:
+def _point_source_url_at_public_copy(record: dict, public_url_for: Callable[[object], str | None]) -> bool:
     """Replace a local ``provenance.source_url`` with the public URL of the same file.
 
     *public_url_for* maps a location (a ``file:`` URI or a path) to the public
@@ -10795,8 +11104,7 @@ def _submission_local_files(record: dict, subdir: str, records_dir: Path) -> lis
         spec_id = (record.get("cell_instance") or {}).get("cell_spec_id") or ""
         spec_record = _find_spec_record(records_dir / "cell-spec", spec_id) if spec_id else None
         if spec_record:
-            found += [(f"(its cell spec) {field}", value)
-                      for field, value in local_file_references(spec_record)]
+            found += [(f"(its cell spec) {field}", value) for field, value in local_file_references(spec_record)]
     return found
 
 
@@ -10833,11 +11141,13 @@ def _cell_instance_submission_payload(
         related = []
         cell_spec_id = ci.get("cell_spec_id")
         if cell_spec_id:
-            related.append({
-                "relationship": "instanceOf",
-                "resource_type": "cell_spec",
-                "canonical_iri": cell_spec_id,
-            })
+            related.append(
+                {
+                    "relationship": "instanceOf",
+                    "resource_type": "cell_spec",
+                    "canonical_iri": cell_spec_id,
+                }
+            )
 
     return _authoring_envelope(
         resource_type="cell",
@@ -10870,15 +11180,23 @@ def _build_dataset_distributions(ds: dict) -> tuple[list[dict], list[dict]]:
         url = d.get("content_url") or ds.get("access_url") or ""
         fmt = d.get("encoding_format")
         if name.endswith(".plot.json"):
-            top_level.append({"title": name, "access_url": url, "role": "plot_data",
-                              "media_type": fmt or "application/json"})
+            top_level.append(
+                {"title": name, "access_url": url, "role": "plot_data", "media_type": fmt or "application/json"}
+            )
         elif name.endswith(".png"):
-            top_level.append({"title": name, "access_url": url, "role": "plot_static",
-                              "media_type": fmt or "image/png"})
+            top_level.append(
+                {"title": name, "access_url": url, "role": "plot_static", "media_type": fmt or "image/png"}
+            )
         else:
             inner.append(d)
-            top_level.append({"title": name or d.get("role") or "data", "access_url": url,
-                              "role": d.get("role") or "processed", "media_type": fmt})
+            top_level.append(
+                {
+                    "title": name or d.get("role") or "data",
+                    "access_url": url,
+                    "role": d.get("role") or "processed",
+                    "media_type": fmt,
+                }
+            )
     return top_level, inner
 
 
@@ -10903,11 +11221,13 @@ def _simple_submission_payload(
     else:
         related = []
         if related_cell_id:
-            related.append({
-                "relationship": "about",
-                "resource_type": "cell",
-                "canonical_iri": related_cell_id,
-            })
+            related.append(
+                {
+                    "relationship": "about",
+                    "resource_type": "cell",
+                    "canonical_iri": related_cell_id,
+                }
+            )
     return _authoring_envelope(
         resource_type=resource_type,
         records={record_key: record},
@@ -11021,8 +11341,13 @@ class _SubmitJournal:
                 except ValueError:
                     continue  # a torn final line from a crash must not poison the journal
                 registry = entry.get("registry_url")
-                if (entry.get("ok") and isinstance(registry, str) and registry
-                        and entry.get("source_local_id") and entry.get("payload_hash")):
+                if (
+                    entry.get("ok")
+                    and isinstance(registry, str)
+                    and registry
+                    and entry.get("source_local_id")
+                    and entry.get("payload_hash")
+                ):
                     key = (_normalize_registry_url(registry), entry["source_local_id"], entry["payload_hash"])
                     self._succeeded[key] = entry
 
@@ -11063,20 +11388,40 @@ def _journaled_submit(
 ) -> dict:
     """Run one submission through the resume journal (no journal → plain submit)."""
     if journal is None:
-        return _do_submit(payload, url, key, title, source_local_id=source_local_id,
-                          publication_mode=publication_mode, validation=validation,
-                          allow_local_files=allow_local_files)
+        return _do_submit(
+            payload,
+            url,
+            key,
+            title,
+            source_local_id=source_local_id,
+            publication_mode=publication_mode,
+            validation=validation,
+            allow_local_files=allow_local_files,
+        )
     payload_hash = _journal_payload_hash(payload)
-    previous = (journal.previous_success(source_local_id, payload_hash, registry_url=url)
-                if source_local_id else None)
+    previous = journal.previous_success(source_local_id, payload_hash, registry_url=url) if source_local_id else None
     if previous is not None:
         print(f"  {title}  [already submitted -- skipped; pass resume=False to re-send]")
-        return {"title": title, "source_local_id": source_local_id, "ok": True,
-                "status": "skipped_journal", "iri": previous.get("iri", ""), "error": None,
-                "result": None, "version_bumped": None}
-    outcome = _do_submit(payload, url, key, title, source_local_id=source_local_id,
-                         publication_mode=publication_mode, validation=validation,
-                         allow_local_files=allow_local_files)
+        return {
+            "title": title,
+            "source_local_id": source_local_id,
+            "ok": True,
+            "status": "skipped_journal",
+            "iri": previous.get("iri", ""),
+            "error": None,
+            "result": None,
+            "version_bumped": None,
+        }
+    outcome = _do_submit(
+        payload,
+        url,
+        key,
+        title,
+        source_local_id=source_local_id,
+        publication_mode=publication_mode,
+        validation=validation,
+        allow_local_files=allow_local_files,
+    )
     journal.record(outcome, payload_hash, registry_url=url)
     return outcome
 
@@ -11108,8 +11453,7 @@ def _registry_conflict_detail(exc: Exception) -> dict | None:
             inner = parsed.get("detail")
             candidate = inner if isinstance(inner, dict) else parsed
             if isinstance(candidate, dict) and any(
-                candidate.get(k) is not None
-                for k in ("existing_id", "existing_status", "keys")
+                candidate.get(k) is not None for k in ("existing_id", "existing_status", "keys")
             ):
                 detail = candidate
     if status == 409:
@@ -11151,8 +11495,9 @@ def _do_submit(
     bumped_version: str | None = None
     for attempt in range(2):
         try:
-            result = submit_publication_package(payload, registry_base_url=url, api_key=key,
-                                                allow_local_files=allow_local_files)
+            result = submit_publication_package(
+                payload, registry_base_url=url, api_key=key, allow_local_files=allow_local_files
+            )
             raw_response = result.get("response")
             response = raw_response if isinstance(raw_response, dict) else {}
             status = response.get("status", "unknown")
@@ -11167,9 +11512,16 @@ def _do_submit(
             # log is flagged.)
             display_status = next((s for s in _DISPLAY_STATUSES if s == status), "unknown")
             print(f"  {title}  [{display_status}]")
-            return {"title": title, "source_local_id": source_local_id, "ok": ok,
-                    "status": status, "iri": iri, "error": None, "result": result,
-                    "version_bumped": bumped_version}
+            return {
+                "title": title,
+                "source_local_id": source_local_id,
+                "ok": ok,
+                "status": status,
+                "iri": iri,
+                "error": None,
+                "result": result,
+                "version_bumped": bumped_version,
+            }
         except RuntimeError as exc:
             # Parse the structured 409 (status code + JSON body) over matching the
             # string "409", which could appear anywhere in an error/response body.
@@ -11191,18 +11543,33 @@ def _do_submit(
                 print(f"  {title}  [conflict{_hint} -- retrying as version {bumped_version}]")
                 continue
             print(f"  ERROR: {title} -- {exc}")
-            return {"title": title, "source_local_id": source_local_id, "ok": False,
-                    "status": "error", "iri": "", "error": str(exc), "result": None,
-                    "version_bumped": bumped_version}
+            return {
+                "title": title,
+                "source_local_id": source_local_id,
+                "ok": False,
+                "status": "error",
+                "iri": "",
+                "error": str(exc),
+                "result": None,
+                "version_bumped": bumped_version,
+            }
     # Unreachable in practice (the loop returns on every path); defensive for mypy.
-    return {"title": title, "source_local_id": source_local_id, "ok": False,
-            "status": "error", "iri": "", "error": "submission failed after retry", "result": None,
-            "version_bumped": bumped_version}
+    return {
+        "title": title,
+        "source_local_id": source_local_id,
+        "ok": False,
+        "status": "error",
+        "iri": "",
+        "error": "submission failed after retry",
+        "result": None,
+        "version_bumped": bumped_version,
+    }
 
 
 def _bump_version(ver: str) -> str:
     """Increment a trailing counter on a version string: '2026-05-29' → '2026-05-29-v2'."""
     import re
+
     m = re.search(r"-v(\d+)$", ver)
     if m:
         return ver[: m.start()] + f"-v{int(m.group(1)) + 1}"
@@ -11241,8 +11608,11 @@ def _import_resolve_source(source: str, *, sandbox: bool = False, token: str | N
 
         # Find the linked-data document (current battinfo.json, or legacy battinfo.jsonld).
         entry = next(
-            (f for f in (files.get("entries") or [])
-             if f.get("key") in (BATTINFO_LD_FILENAME, BATTINFO_LD_FILENAME_LEGACY)),
+            (
+                f
+                for f in (files.get("entries") or [])
+                if f.get("key") in (BATTINFO_LD_FILENAME, BATTINFO_LD_FILENAME_LEGACY)
+            ),
             None,
         )
         if entry is None:
@@ -11265,10 +11635,7 @@ def _import_resolve_source(source: str, *, sandbox: bool = False, token: str | N
             f"Cannot import from {source!r}: ws.import_() reads only http and https URLs. "
             "Pass a Zenodo record ID, an http(s) URL, or the path of a local file."
         )
-    raise ValueError(
-        f"Cannot resolve import source {source!r}. "
-        "Pass a Zenodo record ID, a URL, or a local file path."
-    )
+    raise ValueError(f"Cannot resolve import source {source!r}. Pass a Zenodo record ID, a URL, or a local file path.")
 
 
 def _import_fetch(url: str, *, token: str | None, api_host: str, timeout: float) -> str:
@@ -11287,8 +11654,7 @@ def _import_fetch(url: str, *, token: str | None, api_host: str, timeout: float)
             request.add_unredirected_header("Authorization", f"Bearer {token}")
         else:
             warnings.warn(
-                f"The Zenodo token was not sent to {url}: ws.import_() sends it only over https "
-                f"to {api_host}.",
+                f"The Zenodo token was not sent to {url}: ws.import_() sends it only over https to {api_host}.",
                 stacklevel=4,
             )
     with urllib.request.urlopen(request, timeout=timeout) as resp:  # noqa: S310
@@ -11298,13 +11664,14 @@ def _import_fetch(url: str, *, token: str | None, api_host: str, timeout: float)
 def _test_kind_values() -> list[str]:
     """Return the canonical test-kind strings from the BatteryTestType enum."""
     from battinfo.bundle import BatteryTestType  # noqa: PLC0415
+
     return [m.value for m in BatteryTestType]
 
 
 # Common synonyms accepted as input and mapped to canonical BatteryTestType values.
 # Keeps the authoring API forgiving without polluting the canonical vocabulary.
 _TEST_KIND_ALIASES: dict[str, str] = {
-    "calendar_aging": "calendar_ageing",   # American spelling
+    "calendar_aging": "calendar_ageing",  # American spelling
     "calendar_age": "calendar_ageing",
     "aging": "calendar_ageing",
     "ageing": "calendar_ageing",
@@ -11369,7 +11736,8 @@ def _normalize_test_kind(kind: str) -> str:
             return v
     suggestion = _closest_kind(key, valid)
     raise ValueError(
-        f"{kind!r} is not a valid test kind. " + _test_kind_hint()
+        f"{kind!r} is not a valid test kind. "
+        + _test_kind_hint()
         + (f"  Did you mean {suggestion!r}?" if suggestion else "")
     )
 
@@ -11395,11 +11763,12 @@ def _import_test_kind_from_technique(technique: str) -> str:
 @dataclass
 class ZenodoResult:
     """Result of ``ws.zenodo()``."""
-    record_id:      str
-    doi:            str
-    record_url:     str
-    draft_url:      str
-    published:      bool
+
+    record_id: str
+    doi: str
+    record_url: str
+    draft_url: str
+    published: bool
     is_new_version: bool
 
 

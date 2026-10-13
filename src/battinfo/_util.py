@@ -7,6 +7,7 @@ modules (``api``, ``bundle``, ``publication``, ``local_workspace``,
 URIs and URL segments, UTC timestamps, file hashing, and citation/DOI
 normalization.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -37,9 +38,7 @@ def require_extra(module_name: str, extra: str, feature: str):
     try:
         return importlib.import_module(module_name)
     except ImportError as exc:
-        raise ImportError(
-            f"{feature} and needs the [{extra}] extra: pip install battinfo[{extra}]"
-        ) from exc
+        raise ImportError(f"{feature} and needs the [{extra}] extra: pip install battinfo[{extra}]") from exc
 
 
 # The processing extra brings the BDF converter (PyPI name ``batterydf``, import

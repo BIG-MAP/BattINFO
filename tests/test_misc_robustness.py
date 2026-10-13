@@ -1,6 +1,7 @@
 """Regression tests for assorted robustness defects from the adversarial audit
 (misc mediums M9/M10/M11/M14 + low L9).
 """
+
 from __future__ import annotations
 
 import sys
@@ -37,8 +38,11 @@ def test_bdc_roundtrip_does_not_fabricate_manufacturer_or_model() -> None:
 
 def test_bdc_roundtrip_preserves_real_manufacturer_and_model() -> None:
     imported = import_bdc_record(
-        {"id": "bdc_real", "overview": {"case": "CoinCase", "manufacturer": "Acme", "battery_model": "AC-18650"},
-         "electrodes": {"positive": "LFP"}},
+        {
+            "id": "bdc_real",
+            "overview": {"case": "CoinCase", "manufacturer": "Acme", "battery_model": "AC-18650"},
+            "electrodes": {"positive": "LFP"},
+        },
         validate=False,
     )
     overview = to_bdc_record(imported.cell_spec)["overview"]
@@ -49,8 +53,12 @@ def test_bdc_roundtrip_preserves_real_manufacturer_and_model() -> None:
 def test_bdc_null_categories_are_filtered_not_stringified() -> None:
     # M11: a JSON null category must not become the literal keyword 'None'.
     imported = import_bdc_record(
-        {"id": "bdc_cat", "overview": {"case": "CoinCase"}, "electrodes": {"positive": "LFP"},
-         "categories": [None, "performance", ""]},
+        {
+            "id": "bdc_cat",
+            "overview": {"case": "CoinCase"},
+            "electrodes": {"positive": "LFP"},
+            "categories": [None, "performance", ""],
+        },
         validate=True,
     )
     keywords = imported.dataset["dataset"].get("keywords")
@@ -58,12 +66,15 @@ def test_bdc_null_categories_are_filtered_not_stringified() -> None:
     assert "performance" in keywords
 
 
-@pytest.mark.parametrize("step", [
-    "Charge at 4.2.1 V",
-    "Rest for 1.2.3 hours",
-    "Discharge at C/1.2.3 until 4.2 V",
-    "Discharge at 1..2 C",
-])
+@pytest.mark.parametrize(
+    "step",
+    [
+        "Charge at 4.2.1 V",
+        "Rest for 1.2.3 hours",
+        "Discharge at C/1.2.3 until 4.2 V",
+        "Discharge at 1..2 C",
+    ],
+)
 def test_parse_step_multidot_raises_experiment_syntax_error(step: str) -> None:
     # M14: malformed numbers must raise the documented ExperimentSyntaxError, not a
     # bare ValueError (which callers' `except ExperimentSyntaxError` would miss).
@@ -84,6 +95,7 @@ def test_import_discovery_xlsx_empty_sheet_returns_empty_package(tmp_path: Path)
     from openpyxl import Workbook
 
     from battinfo import import_discovery_xlsx
+
     wb = Workbook()
     wb.active.title = "Automated cells"
     path = tmp_path / "empty.xlsx"
@@ -95,8 +107,12 @@ def test_import_discovery_xlsx_empty_sheet_returns_empty_package(tmp_path: Path)
 def test_bdc_bool_capacity_is_rejected() -> None:
     # L2: a boolean must not be accepted as a numeric capacity (bool is an int subclass).
     imp = import_bdc_record(
-        {"id": "b", "overview": {"case": "CoinCase"}, "electrodes": {"positive": "LFP"},
-         "reported_values": {"rated_capacity_Ah": True}},
+        {
+            "id": "b",
+            "overview": {"case": "CoinCase"},
+            "electrodes": {"positive": "LFP"},
+            "reported_values": {"rated_capacity_Ah": True},
+        },
         validate=False,
     )
     props = imp.cell_spec.get("cell_spec", {}).get("properties") or {}
@@ -111,11 +127,14 @@ def test_bdc_string_overview_does_not_crash() -> None:
 def test_checksum_algorithm_lookup_is_case_insensitive() -> None:
     # L5: an uppercase 'SHA256' must not bypass the hex/length checksum check.
     from battinfo.validate import validate_semantic
-    doc = {"dataset": {
-        "id": "https://w3id.org/battinfo/dataset/aaaa-bbbb-cccc-dddd",
-        "about": ["https://w3id.org/battinfo/cell/1111-2222-3333-4444"],
-        "distributions": [{"checksum": {"algorithm": "SHA256", "value": "nothex"}}],
-    }}
+
+    doc = {
+        "dataset": {
+            "id": "https://w3id.org/battinfo/dataset/aaaa-bbbb-cccc-dddd",
+            "about": ["https://w3id.org/battinfo/cell/1111-2222-3333-4444"],
+            "distributions": [{"checksum": {"algorithm": "SHA256", "value": "nothex"}}],
+        }
+    }
     res = validate_semantic(doc, policy="strict")
     assert any(i.code == "semantic.checksum_invalid" for i in res.issues)
 
@@ -124,6 +143,7 @@ def test_snake_alias_collision_prefers_canonical_deterministically() -> None:
     # L8: when both camelCase and snake_case keys are present, the snake_case value
     # must win regardless of dict order (no silent, order-dependent data loss).
     from battinfo.canonical_aliases import record_to_snake_aliases
+
     a = record_to_snake_aliases({"cell_spec": {"countryOfOrigin": "JP", "country_of_origin": "CN"}})
     b = record_to_snake_aliases({"cell_spec": {"country_of_origin": "CN", "countryOfOrigin": "JP"}})
     assert a["cell_spec"]["country_of_origin"] == "CN"
@@ -133,4 +153,5 @@ def test_snake_alias_collision_prefers_canonical_deterministically() -> None:
 def test_find_records_repo_tolerates_shallow_path() -> None:
     # ws.py: a shallow workspace path (few ancestors) must not raise IndexError.
     from battinfo.ws import _find_records_repo
+
     assert _find_records_repo(Path("c:/tmp/x")) is None or True  # just must not raise

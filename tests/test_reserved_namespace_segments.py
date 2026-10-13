@@ -5,6 +5,7 @@ infrastructure paths plus the segments claimed by the ontology block in the
 upstream w3id.org .htaccess (raw/inferred/turtle/latest/source), which can
 never reach the record resolver.
 """
+
 from __future__ import annotations
 
 import sys
@@ -19,9 +20,20 @@ from battinfo.entities import ENTITY_KINDS, RESERVED_NAMESPACE_SEGMENTS
 def test_reserved_segments_include_policy_set() -> None:
     expected = {
         # resolver / vocabulary infrastructure
-        "id", "ontology", "vocab", "doc", "context", "resolver", "twin", "w3id",
+        "id",
+        "ontology",
+        "vocab",
+        "doc",
+        "context",
+        "resolver",
+        "twin",
+        "w3id",
         # claimed by the ontology block in the upstream w3id .htaccess
-        "raw", "inferred", "turtle", "latest", "source",
+        "raw",
+        "inferred",
+        "turtle",
+        "latest",
+        "source",
     }
     assert expected <= RESERVED_NAMESPACE_SEGMENTS
 

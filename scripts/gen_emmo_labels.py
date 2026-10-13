@@ -18,6 +18,7 @@ tests/test_generated_reference.py regenerates in memory and fails on drift.
 Usage:
     uv run python scripts/gen_emmo_labels.py
 """
+
 from __future__ import annotations
 
 import sys
@@ -35,7 +36,7 @@ OUT = ROOT / "assets" / "vocab" / "emmo-labels.ttl"
 def _expand(compact: str) -> str:
     for prefix, base in _COMPACT_PREFIXES:
         if compact.startswith(prefix):
-            return base + compact[len(prefix):]
+            return base + compact[len(prefix) :]
     return compact
 
 

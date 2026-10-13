@@ -6,6 +6,7 @@ library renames a verb or reorders the taught sequence, ws.quickstart() changes
 — and these tests fail until the website is updated to match. Same guard
 philosophy as the executable docs funnel, applied to marketing.
 """
+
 from __future__ import annotations
 
 import io

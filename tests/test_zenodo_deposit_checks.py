@@ -14,6 +14,7 @@
 
 All offline: Zenodo's HTTP API is answered in memory, so the real client runs.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -36,7 +37,7 @@ BUCKET = f"{API}/files/bucket-7"
 RECORD_URL = "https://zenodo.org/records/7"
 CREATORS = [{"name": "Doe, Jane", "affiliation": "Example Lab"}]
 CSV = "test_time_second,voltage_volt,current_ampere\n0,3.0,0\n60,3.5,0.001\n"
-MS_START, MS_END = 1772442000000, 1772442600000   # 2 March 2026, in milliseconds
+MS_START, MS_END = 1772442000000, 1772442600000  # 2 March 2026, in milliseconds
 PUBLISH_REQUEST = "POST /deposit/depositions/7/actions/publish"
 
 
@@ -77,7 +78,8 @@ class _ZenodoAPI:
 
     def _deposit(self) -> dict:
         return {
-            "id": 7, "record_id": 7,
+            "id": 7,
+            "record_id": 7,
             "state": "done" if self.published else "unsubmitted",
             "submitted": self.published,
             "links": {"bucket": BUCKET},
@@ -87,13 +89,13 @@ class _ZenodoAPI:
     def urlopen(self, request, timeout: float | None = None) -> _Reply:  # noqa: ANN001
         method, url = request.get_method(), request.full_url
         assert url.startswith(f"{API}/"), url
-        path = url[len(API):]
+        path = url[len(API) :]
         line = f"{method} {path}"
         self.requests.append(line)
         if line in self.on:
             self.on[line]()
         if url.startswith(f"{BUCKET}/") and method == "PUT":
-            name = unquote(url[len(BUCKET) + 1:])
+            name = unquote(url[len(BUCKET) + 1 :])
             if name not in self.lose:
                 self.files[name] = request.data + (b"!" if name in self.corrupt else b"")
             return _Reply({"key": name, "links": {"self": url}})
@@ -102,9 +104,7 @@ class _ZenodoAPI:
         if line == "PUT /deposit/depositions/7":
             return _Reply({**self._deposit(), "metadata": json.loads(request.data)["metadata"]})
         if line == "GET /deposit/depositions/7/files":
-            return _Reply([
-                {"id": name, "filename": name, "checksum": _md5(data)} for name, data in self.files.items()
-            ])
+            return _Reply([{"id": name, "filename": name, "checksum": _md5(data)} for name, data in self.files.items()])
         if method == "DELETE" and path.startswith("/deposit/depositions/7/files/"):
             self.files.pop(unquote(path.rsplit("/", 1)[-1]), None)
             return _Reply(None)
@@ -181,7 +181,9 @@ def _edit_dataset(ws: AuthoringWorkspace, data_file: str, edit: Callable[[dict],
 
 
 def _content_urls(ws: AuthoringWorkspace) -> list[str]:
-    return [dist["content_url"] for _path, record in _saved(ws, "dataset") for dist in record["dataset"]["distributions"]]
+    return [
+        dist["content_url"] for _path, record in _saved(ws, "dataset") for dist in record["dataset"]["distributions"]
+    ]
 
 
 def _state(ws: AuthoringWorkspace) -> dict | None:
@@ -205,8 +207,10 @@ def test_a_record_the_graph_cannot_convert_is_refused_before_anything_is_sent(
     # left out of the deposit without a word: nothing else points at it.
     test_iri = _edit_test(ws, "capacity_check", conformance=["conformant"])
 
-    with pytest.warns(UserWarning, match=f"test record {test_iri} could not be converted"), \
-            pytest.raises(RuntimeError) as excinfo:
+    with (
+        pytest.warns(UserWarning, match=f"test record {test_iri} could not be converted"),
+        pytest.raises(RuntimeError) as excinfo,
+    ):
         ws.zenodo(token="placeholder", creators=CREATORS, publish=publish)
 
     message = str(excinfo.value)
@@ -225,9 +229,7 @@ def test_a_record_the_graph_cannot_convert_is_refused_before_anything_is_sent(
     ],
     ids=["text", "no-content-url", "number"],
 )
-def test_a_malformed_distribution_entry_is_refused(
-    tmp_path: Path, api: _ZenodoAPI, entry: object, reason: str
-) -> None:
+def test_a_malformed_distribution_entry_is_refused(tmp_path: Path, api: _ZenodoAPI, entry: object, reason: str) -> None:
     ws = _workspace(tmp_path, second_file=True)
     # The dataset used to leave the deposit graph, and its files the deposit,
     # without a word: the other dataset kept the graph valid.
@@ -243,9 +245,7 @@ def test_a_malformed_distribution_entry_is_refused(
     assert api.requests == []
 
 
-def test_the_preview_lists_what_the_deposit_would_leave_out(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_the_preview_lists_what_the_deposit_would_leave_out(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     ws = _workspace(tmp_path, second_file=True)
     # The cycling test's dataset points at it, so the graph has a reference to
     # a test it left out.
@@ -297,16 +297,42 @@ def test_the_zenodo_package_builder_refuses_a_record_it_cannot_convert(
     spec_id = "https://w3id.org/battinfo/spec/7r2m-4q8v-k6nt-c3pj"
     cell_id, test_id = "https://w3id.org/battinfo/cell/ci-001", "https://w3id.org/battinfo/test/t-001"
     record = ZenodoCellRecord(
-        cell_spec=CellSpec(id=spec_id, name="Energizer CR2032", manufacturer="Energizer", model="CR2032",
-                           format="coin", chemistry="Li-primary", source=ProvenanceInfo(type="datasheet")),
-        datasets=[ZenodoDatasetEntry(
-            cell_instances=[Cell(id=cell_id, name="sn-001", cell_spec_id=spec_id, serial_number="sn-001",
-                                 source=ProvenanceInfo(type="measurement"))],
-            test=Test(id=test_id, name="test 001", test_kind="capacity_check", cell_instance_id=cell_id,
-                      source=ProvenanceInfo(type="measurement")),
-            dataset=Dataset(id="https://w3id.org/battinfo/dataset/d-001", name="dataset 001",
-                            cell_instance_id=cell_id, test_id=test_id, source=ProvenanceInfo(type="measurement")),
-        )],
+        cell_spec=CellSpec(
+            id=spec_id,
+            name="Energizer CR2032",
+            manufacturer="Energizer",
+            model="CR2032",
+            format="coin",
+            chemistry="Li-primary",
+            source=ProvenanceInfo(type="datasheet"),
+        ),
+        datasets=[
+            ZenodoDatasetEntry(
+                cell_instances=[
+                    Cell(
+                        id=cell_id,
+                        name="sn-001",
+                        cell_spec_id=spec_id,
+                        serial_number="sn-001",
+                        source=ProvenanceInfo(type="measurement"),
+                    )
+                ],
+                test=Test(
+                    id=test_id,
+                    name="test 001",
+                    test_kind="capacity_check",
+                    cell_instance_id=cell_id,
+                    source=ProvenanceInfo(type="measurement"),
+                ),
+                dataset=Dataset(
+                    id="https://w3id.org/battinfo/dataset/d-001",
+                    name="dataset 001",
+                    cell_instance_id=cell_id,
+                    test_id=test_id,
+                    source=ProvenanceInfo(type="measurement"),
+                ),
+            )
+        ],
     )
     real = publication._record_sets_from_zenodo_record
 
@@ -342,11 +368,11 @@ def test_the_zenodo_package_builder_refuses_a_record_it_cannot_convert(
 )
 def test_unix_to_iso_reads_seconds_and_keeps_iso_strings(value: object, expected: str | None) -> None:
     with warnings.catch_warnings():
-        warnings.simplefilter("error")   # none of these warns
+        warnings.simplefilter("error")  # none of these warns
         assert _unix_to_iso(value) == expected  # type: ignore[arg-type]
 
 
-@pytest.mark.parametrize("value", [MS_START, float(MS_START), str(MS_START), float("inf"), -10**15])
+@pytest.mark.parametrize("value", [MS_START, float(MS_START), str(MS_START), float("inf"), -(10**15)])
 def test_unix_to_iso_leaves_out_a_time_no_date_can_hold(value: object) -> None:
     with pytest.warns(UserWarning, match=r"started_at of test X = .* is left out"):
         assert _unix_to_iso(value, what="started_at of test X") is None  # type: ignore[arg-type]
@@ -367,10 +393,14 @@ def test_a_test_timed_in_milliseconds_keeps_its_node(tmp_path: Path, api: _Zenod
 
 def test_an_iso_deviation_time_is_kept_as_it_is(tmp_path: Path) -> None:
     ws = _workspace(tmp_path)
-    test_iri = _edit_test(ws, "capacity_check", conformance={
-        "status": "non-conformant",
-        "deviations": [{"category": "power_outage", "occurred_at": "2026-03-01T10:00:00Z"}],
-    })
+    test_iri = _edit_test(
+        ws,
+        "capacity_check",
+        conformance={
+            "status": "non-conformant",
+            "deviations": [{"category": "power_outage", "occurred_at": "2026-03-01T10:00:00Z"}],
+        },
+    )
     graph = json.loads(ws.preview_jsonld(creators=CREATORS).read_text(encoding="utf-8"))
     node = _node(graph, test_iri)
     assert node is not None
@@ -381,16 +411,22 @@ def test_an_iso_deviation_time_is_kept_as_it_is(tmp_path: Path) -> None:
 def test_strict_validation_reports_a_time_no_date_can_hold() -> None:
     record = {
         "schema_version": "0.2.0",
-        "test": {"id": "https://w3id.org/battinfo/test/7d9k-2m4p-8t3x-6nq5",
-                 "started_at": MS_START, "ended_at": 1772442600},
+        "test": {
+            "id": "https://w3id.org/battinfo/test/7d9k-2m4p-8t3x-6nq5",
+            "started_at": MS_START,
+            "ended_at": 1772442600,
+        },
     }
     strict = validate_semantic_report(record, policy="strict")
     [issue] = [i for i in strict.issues if i.code.startswith("semantic.timestamp_")]
     assert (issue.code, issue.severity, issue.path) == ("semantic.timestamp_out_of_range", "error", "test.started_at")
     assert "milliseconds" in issue.message
     for policy in ("default", "ingest"):
-        [lenient] = [i for i in validate_semantic_report(record, policy=policy).issues
-                     if i.code.startswith("semantic.timestamp_")]
+        [lenient] = [
+            i
+            for i in validate_semantic_report(record, policy=policy).issues
+            if i.code.startswith("semantic.timestamp_")
+        ]
         assert (lenient.code, lenient.severity) == ("semantic.timestamp_out_of_range", "warning")
 
 
@@ -444,9 +480,13 @@ def test_a_draft_reports_what_the_deposit_lacks(
 def test_a_distribution_hosted_elsewhere_passes(tmp_path: Path, api: _ZenodoAPI) -> None:
     ws = _workspace(tmp_path)
     external = "https://data.example.org/C01/cycling%20raw.ndax"
-    _edit_dataset(ws, "cycling.csv", lambda ds: ds["distributions"].append(
-        {"content_url": external, "encoding_format": "application/octet-stream", "role": "raw"}
-    ))
+    _edit_dataset(
+        ws,
+        "cycling.csv",
+        lambda ds: ds["distributions"].append(
+            {"content_url": external, "encoding_format": "application/octet-stream", "role": "raw"}
+        ),
+    )
 
     result = ws.zenodo(token="placeholder", creators=CREATORS, publish=True)
 
@@ -454,7 +494,8 @@ def test_a_distribution_hosted_elsewhere_passes(tmp_path: Path, api: _ZenodoAPI)
     assert set(api.files) == {"cycling.csv", "battinfo.json", "ro-crate-metadata.json"}
     urls = [
         dist["dcat:downloadURL"]
-        for node in api.graph()["@graph"] if "dcat:Dataset" in (node.get("@type") or [])
+        for node in api.graph()["@graph"]
+        if "dcat:Dataset" in (node.get("@type") or [])
         for dist in node["dcat:distribution"]
     ]
     assert sorted(urls) == sorted([f"{RECORD_URL}/files/cycling.csv", external])
@@ -477,7 +518,9 @@ def test_a_draft_then_a_publish_keeps_the_data_file(tmp_path: Path, api: _Zenodo
 
     assert result.published and api.published
     assert api.files["cycling.csv"] == data
-    assert [line for line in api.requests if line.startswith("PUT /files/")].count("PUT /files/bucket-7/cycling.csv") == 1
+    assert [line for line in api.requests if line.startswith("PUT /files/")].count(
+        "PUT /files/bucket-7/cycling.csv"
+    ) == 1
     assert _content_urls(ws) == [f"{RECORD_URL}/files/cycling.csv"]
 
 
@@ -496,11 +539,16 @@ def _distribution(url: str, name: str, *, md5: str = "") -> dict:
 
 
 def _graph(*distributions: dict) -> dict:
-    return {"@graph": [
-        {"@id": RECORD_URL, "@type": ["dcat:Catalog", "schema:Dataset"]},
-        {"@id": "https://w3id.org/battinfo/dataset/d-001", "@type": ["dcat:Dataset", "schema:Dataset"],
-         "dcat:distribution": list(distributions)},
-    ]}
+    return {
+        "@graph": [
+            {"@id": RECORD_URL, "@type": ["dcat:Catalog", "schema:Dataset"]},
+            {
+                "@id": "https://w3id.org/battinfo/dataset/d-001",
+                "@type": ["dcat:Dataset", "schema:Dataset"],
+                "dcat:distribution": list(distributions),
+            },
+        ]
+    }
 
 
 def test_the_check_compares_names_and_md5s() -> None:
@@ -512,15 +560,17 @@ def test_the_check_compares_names_and_md5s() -> None:
     ]
     files = f"{RECORD_URL}/files"
     graph = _graph(
-        _distribution(f"{files}/cell%2001.csv", "cell 01.csv", md5=b),        # the record states another md5
-        _distribution(f"{files}/all.zip", "inside.csv", md5=a),               # in an archive: its md5 is not the archive's
-        _distribution(f"{files}/gone.csv", "gone.csv"),                       # not on the deposit
-        _distribution("https://data.example.org/raw.ndax", "raw.ndax"),       # elsewhere on the web
-        _distribution("", "empty.csv"),                                       # no download URL
-        _distribution("s3://bucket/key.csv", "key.csv"),                      # not a web address
+        _distribution(f"{files}/cell%2001.csv", "cell 01.csv", md5=b),  # the record states another md5
+        _distribution(f"{files}/all.zip", "inside.csv", md5=a),  # in an archive: its md5 is not the archive's
+        _distribution(f"{files}/gone.csv", "gone.csv"),  # not on the deposit
+        _distribution("https://data.example.org/raw.ndax", "raw.ndax"),  # elsewhere on the web
+        _distribution("", "empty.csv"),  # no download URL
+        _distribution("s3://bucket/key.csv", "key.csv"),  # not a web address
     )
     problems = deposit_file_problems(
-        graph, files_base=files, listing=listing,
+        graph,
+        files_base=files,
+        listing=listing,
         sent={"cell 01.csv": a, "all.zip": a, "battinfo.json": "3" * 32},
     )
     dataset = "dataset https://w3id.org/battinfo/dataset/d-001"
@@ -551,7 +601,10 @@ def test_the_check_compares_a_stated_sha256_and_size_with_the_file_planned(tmp_p
     listing = [{"filename": "cycling.csv", "checksum": f"md5:{entry.md5}"}]
 
     problems = deposit_file_problems(
-        _graph(stale), files_base=files, listing=listing, sent={"cycling.csv": entry.md5},
+        _graph(stale),
+        files_base=files,
+        listing=listing,
+        sent={"cycling.csv": entry.md5},
         planned={"cycling.csv": entry},
     )
 
@@ -562,10 +615,16 @@ def test_the_check_compares_a_stated_sha256_and_size_with_the_file_planned(tmp_p
     ]
     stale["spdx:checksum"]["spdx:checksumValue"] = entry.sha256
     stale["dcat:byteSize"] = entry.size
-    assert deposit_file_problems(
-        _graph(stale), files_base=files, listing=listing, sent={"cycling.csv": entry.md5},
-        planned={"cycling.csv": entry},
-    ) == []
+    assert (
+        deposit_file_problems(
+            _graph(stale),
+            files_base=files,
+            listing=listing,
+            sent={"cycling.csv": entry.md5},
+            planned={"cycling.csv": entry},
+        )
+        == []
+    )
 
 
 def test_the_check_passes_a_deposit_that_holds_what_it_sent() -> None:

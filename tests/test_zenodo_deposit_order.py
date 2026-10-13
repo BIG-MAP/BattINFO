@@ -16,6 +16,7 @@
 
 All offline: Zenodo's HTTP API is answered in memory, so the real client runs.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -36,7 +37,7 @@ BUCKET = f"{API}/files/bucket-7"
 CREATORS = [{"name": "Doe, Jane", "affiliation": "Example Lab"}]
 CSV = "test_time_second,voltage_volt,current_ampere\n0,3.0,0\n60,3.5,0.001\n"
 ORCID = "0000-0002-1825-0097"
-ORCID_X = "0000-0002-1694-233X"   # an ORCID whose check digit is X
+ORCID_X = "0000-0002-1694-233X"  # an ORCID whose check digit is X
 
 
 class _Reply:
@@ -71,7 +72,8 @@ class _ZenodoAPI:
 
     def _deposit(self) -> dict:
         return {
-            "id": 7, "record_id": 7,
+            "id": 7,
+            "record_id": 7,
             "state": "done" if self.published else "unsubmitted",
             "submitted": self.published,
             "links": {"bucket": BUCKET},
@@ -81,13 +83,13 @@ class _ZenodoAPI:
     def urlopen(self, request, timeout: float | None = None) -> _Reply:  # noqa: ANN001
         method, url = request.get_method(), request.full_url
         assert url.startswith(f"{API}/"), url
-        path = url[len(API):]
+        path = url[len(API) :]
         line = f"{method} {path}"
         self.requests.append(line)
         if line in self.on:
             self.on[line]()
         if url.startswith(f"{BUCKET}/") and method == "PUT":
-            name = unquote(url[len(BUCKET) + 1:])
+            name = unquote(url[len(BUCKET) + 1 :])
             self.files[name] = request.data
             return _Reply({"key": name, "links": {"self": url}})
         if line == "POST /deposit/depositions":
@@ -101,10 +103,12 @@ class _ZenodoAPI:
                 reply["errors"] = self.metadata_errors
             return _Reply(reply)
         if line == "GET /deposit/depositions/7/files":
-            return _Reply([
-                {"id": name, "filename": name, "checksum": hashlib.md5(data).hexdigest()}  # noqa: S324
-                for name, data in self.files.items()
-            ])
+            return _Reply(
+                [
+                    {"id": name, "filename": name, "checksum": hashlib.md5(data).hexdigest()}  # noqa: S324
+                    for name, data in self.files.items()
+                ]
+            )
         if method == "DELETE" and path.startswith("/deposit/depositions/7/files/"):
             self.files.pop(unquote(path.rsplit("/", 1)[-1]), None)
             return _Reply(None)
@@ -173,8 +177,12 @@ def _state(ws: AuthoringWorkspace) -> dict | None:
 def _deposit_state(*, published: bool) -> dict:
     """What .battinfo/zenodo.json says of deposit 7, but for the records it holds."""
     return {
-        "environment": "production", "concept_record_id": "7", "record_id": "7", "deposit_id": "7",
-        "doi": "10.5281/zenodo.7", "published": published,
+        "environment": "production",
+        "concept_record_id": "7",
+        "record_id": "7",
+        "deposit_id": "7",
+        "doi": "10.5281/zenodo.7",
+        "published": published,
     }
 
 
@@ -187,8 +195,11 @@ def _recorded(state: object) -> dict:
 def _record_iris(ws: AuthoringWorkspace) -> list[str]:
     """The IRI of every record the workspace saved, sorted."""
     return sorted(
-        next(body["id"] for body in json.loads(path.read_text(encoding="utf-8")).values()
-             if isinstance(body, dict) and "id" in body)
+        next(
+            body["id"]
+            for body in json.loads(path.read_text(encoding="utf-8")).values()
+            if isinstance(body, dict) and "id" in body
+        )
         for path in _saved_records(ws)
     )
 
@@ -279,9 +290,7 @@ def test_a_creator_needs_a_name(tmp_path: Path, api: _ZenodoAPI) -> None:
     assert api.requests == []
 
 
-def test_the_preview_credits_the_creators_the_deposit_would(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_the_preview_credits_the_creators_the_deposit_would(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     ws = _workspace(tmp_path)
     capsys.readouterr()
     ws.preview_jsonld()
@@ -325,9 +334,7 @@ def test_an_orcid_is_sent_as_a_bare_id_however_it_is_given(
     assert _ids(root["contributor"]) == [f"https://orcid.org/{ORCID_X}"]
 
     # The previews show the same identifiers.
-    preview = json.loads(
-        ws.preview_jsonld(creators=creators, contributors=contributors).read_text(encoding="utf-8")
-    )
+    preview = json.loads(ws.preview_jsonld(creators=creators, contributors=contributors).read_text(encoding="utf-8"))
     assert _ids(_catalog(preview)["schema:creator"]) == [f"https://orcid.org/{ORCID}"]
     assert _ids(_catalog(preview)["schema:contributor"]) == [f"https://orcid.org/{ORCID_X}"]
     crate = json.loads(ws.preview_rocrate(creators=creators, contributors=contributors).read_text(encoding="utf-8"))
@@ -370,13 +377,13 @@ def test_a_publish_sends_the_metadata_first_and_points_the_records_last(tmp_path
 
     assert api.requests == [
         "POST /deposit/depositions",
-        "PUT /deposit/depositions/7",                  # the metadata, before any file
+        "PUT /deposit/depositions/7",  # the metadata, before any file
         "GET /deposit/depositions/7/files",
         "GET /deposit/depositions/7",
-        "PUT /files/bucket-7/cycling.csv",             # the data first,
-        "PUT /files/bucket-7/battinfo.json",           # then the graph that links to it
+        "PUT /files/bucket-7/cycling.csv",  # the data first,
+        "PUT /files/bucket-7/battinfo.json",  # then the graph that links to it
         "PUT /files/bucket-7/ro-crate-metadata.json",
-        "GET /deposit/depositions/7/files",            # the deposit's files, checked
+        "GET /deposit/depositions/7/files",  # the deposit's files, checked
         "POST /deposit/depositions/7/actions/publish",
     ]
     # The draft was saved before its metadata went up, as unpublished.
@@ -390,9 +397,7 @@ def test_a_publish_sends_the_metadata_first_and_points_the_records_last(tmp_path
     assert result.published and result.doi == "10.5281/zenodo.7"
 
 
-def test_metadata_zenodo_does_not_accept_stops_the_deposit_before_any_file(
-    tmp_path: Path, api: _ZenodoAPI
-) -> None:
+def test_metadata_zenodo_does_not_accept_stops_the_deposit_before_any_file(tmp_path: Path, api: _ZenodoAPI) -> None:
     ws = _workspace(tmp_path)
     local_urls = _content_urls(ws)
     api.metadata_errors = [
@@ -427,7 +432,7 @@ def test_a_draft_with_a_graph_error_is_refused_before_the_deposit_exists(tmp_pat
     for path in (ws._ws.source_root / "cell-instance").glob("*.json"):
         path.unlink()
     with pytest.raises(RuntimeError) as excinfo:
-        ws.zenodo(token="placeholder", creators=CREATORS)   # a draft
+        ws.zenodo(token="placeholder", creators=CREATORS)  # a draft
     message = str(excinfo.value)
     assert message.startswith("Refusing to deposit: ")
     assert "validation error(s)" in message and "Not found locally" in message
@@ -441,9 +446,12 @@ def test_only_a_refusal_after_the_draft_exists_suggests_leaving_it_a_draft(tmp_p
     for path in (ws._ws.source_root / "cell-instance").glob("*.json"):
         path.unlink()
     graph = ws._build_zenodo_jsonld(
-        zenodo_record_id=7, prereserved_doi="10.5281/zenodo.7", record_url="https://zenodo.org/records/7",
+        zenodo_record_id=7,
+        prereserved_doi="10.5281/zenodo.7",
+        record_url="https://zenodo.org/records/7",
         file_plan=ws._deposit_file_plan(ws._ws.source_root, report=False, measure=False),
-        creators=CREATORS, license="cc-by-4.0",
+        creators=CREATORS,
+        license="cc-by-4.0",
     )
 
     # Before anything is sent, a draft is refused for the same errors: no such hint.

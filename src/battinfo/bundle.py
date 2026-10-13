@@ -301,17 +301,36 @@ def _year_value(value: Any) -> int | None:
 class ProvenanceInfo(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    type: str | None = Field(default=None, description="Origin category of the record (e.g. 'datasheet', 'measurement', 'catalog', 'manual'); schema-required, so save paths apply a documented category default when unset.")
-    name: str | None = Field(default=None, description="Human-readable label of the source (e.g. 'Acme datasheet portal').")
-    file: str | None = Field(default=None, description="Filename of the source document; absent unless a real source file exists.")
+    type: str | None = Field(
+        default=None,
+        description="Origin category of the record (e.g. 'datasheet', 'measurement', 'catalog', 'manual'); schema-required, so save paths apply a documented category default when unset.",
+    )
+    name: str | None = Field(
+        default=None, description="Human-readable label of the source (e.g. 'Acme datasheet portal')."
+    )
+    file: str | None = Field(
+        default=None, description="Filename of the source document; absent unless a real source file exists."
+    )
     url: str | None = Field(default=None, description="URL of the original source document.")
-    citation: str | None = Field(default=None, validation_alias=AliasChoices("citation", "citation_doi"), description="Citable reference URL (a DOI URL preferred).")
-    retrieved_at: int | str | None = Field(default=None, description="When the record was retrieved/ingested: Unix seconds, ISO 8601 string, or datetime/date (defaults to now at save).")
-    workflow_version: str | None = Field(default=None, description="Version of the ingestion workflow that created this record.")
+    citation: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("citation", "citation_doi"),
+        description="Citable reference URL (a DOI URL preferred).",
+    )
+    retrieved_at: int | str | None = Field(
+        default=None,
+        description="When the record was retrieved/ingested: Unix seconds, ISO 8601 string, or datetime/date (defaults to now at save).",
+    )
+    workflow_version: str | None = Field(
+        default=None, description="Version of the ingestion workflow that created this record."
+    )
     file_hash: str | None = Field(default=None, description="SHA-256 hex digest (64 chars) of the source file.")
     curated_by: str | None = Field(default=None, description="ORCID or name of the person who curated this record.")
     comment: str | None = Field(default=None, description="Free-text provenance note.")
-    battinfo_version: str | None = Field(default=None, description="Version of the battinfo library that wrote the record; stamped automatically at emission so records are forensically attributable to a build. Set explicitly only to reproduce another build's output.")
+    battinfo_version: str | None = Field(
+        default=None,
+        description="Version of the battinfo library that wrote the record; stamped automatically at emission so records are forensically attributable to a build. Set explicitly only to reproduce another build's output.",
+    )
 
 
 class ProtocolInfo(BaseModel):
@@ -324,8 +343,15 @@ class ProtocolInfo(BaseModel):
 # Flat provenance kwargs every record model absorbs into `source` (see the per-model
 # _flat_provenance maps); listed here so the unknown-kwarg check knows them as vocabulary.
 _FLAT_PROVENANCE_KEYS = (
-    "source_type", "source_name", "source_file", "source_url", "citation",
-    "file_hash", "retrieved_at", "workflow_version", "curated_by",
+    "source_type",
+    "source_name",
+    "source_file",
+    "source_url",
+    "citation",
+    "file_hash",
+    "retrieved_at",
+    "workflow_version",
+    "curated_by",
 )
 
 
@@ -355,7 +381,9 @@ def _unknown_keyword_parts(unknown: Iterable[str], accepted: Iterable[str]) -> s
     return ", ".join(parts)
 
 
-def _reject_unknown_kwargs(cls: type[BaseModel], data: Mapping[str, Any], *, extra_allowed: tuple[str, ...] = ()) -> None:
+def _reject_unknown_kwargs(
+    cls: type[BaseModel], data: Mapping[str, Any], *, extra_allowed: tuple[str, ...] = ()
+) -> None:
     """Raise a teaching TypeError for kwargs that match no field or alias.
 
     ``extra="forbid"`` would reject them anyway, but as a pydantic ValidationError that
@@ -492,6 +520,7 @@ def _coerce_spec_value(value: Any) -> Any:
         return value
     try:
         from battinfo.bundle_generated import SpecValue  # noqa: PLC0415
+
         if isinstance(value, SpecValue):
             out: dict[str, Any] = {}
             if value.sv_value is not None:
@@ -701,8 +730,15 @@ def _canonical_agent(value: Any) -> dict[str, Any] | None:
     elif any(
         key in value
         for key in (
-            "email", "schema:email", "affiliation", "schema:affiliation",
-            "orcid", "given_name", "schema:givenName", "family_name", "schema:familyName",
+            "email",
+            "schema:email",
+            "affiliation",
+            "schema:affiliation",
+            "orcid",
+            "given_name",
+            "schema:givenName",
+            "family_name",
+            "schema:familyName",
         )
     ):
         out["type"] = "Person"
@@ -863,7 +899,13 @@ def _canonical_table_column(value: Any) -> dict[str, Any] | None:
     unit_text = value.get("unit_text") or value.get("schema:unitText")
     if isinstance(unit_text, str):
         out["unit_text"] = unit_text
-    same_as = value.get("same_as") or value.get("sameAs") or value.get("schema:sameAs") or value.get("property_id") or value.get("schema:propertyID")
+    same_as = (
+        value.get("same_as")
+        or value.get("sameAs")
+        or value.get("schema:sameAs")
+        or value.get("property_id")
+        or value.get("schema:propertyID")
+    )
     if isinstance(same_as, str):
         out["same_as"] = same_as
     required = value.get("required") or value.get("csvw:required")
@@ -981,10 +1023,19 @@ class MaterialComponent(BaseModel):
     supplier: str | None = None
     product_id: str | None = None
     molecular_formula: str | None = None
-    label: str | None = Field(default=None, description="Preferred substance name stamped by the resolver (e.g. 'ethylene carbonate' for name 'EC').")
-    inchikey: str | None = Field(default=None, pattern=r"^[A-Z]{14}-[A-Z]{10}-[A-Z]$", description="Standard InChIKey — canonical chemical identity, stamped from the substances vocabulary.")
+    label: str | None = Field(
+        default=None,
+        description="Preferred substance name stamped by the resolver (e.g. 'ethylene carbonate' for name 'EC').",
+    )
+    inchikey: str | None = Field(
+        default=None,
+        pattern=r"^[A-Z]{14}-[A-Z]{10}-[A-Z]$",
+        description="Standard InChIKey — canonical chemical identity, stamped from the substances vocabulary.",
+    )
     pubchem_cid: int | None = Field(default=None, ge=1, description="PubChem Compound ID crosswalk.")
-    cas_number: str | None = Field(default=None, pattern=r"^\d{2,7}-\d{2}-\d$", description="CAS Registry Number crosswalk.")
+    cas_number: str | None = Field(
+        default=None, pattern=r"^\d{2,7}-\d{2}-\d$", description="CAS Registry Number crosswalk."
+    )
     smiles: str | None = Field(default=None, description="Connectivity SMILES payload; identity lives in inchikey.")
     property: dict[str, Any] = Field(default_factory=dict)
     comment: str | None = None
@@ -1032,7 +1083,10 @@ class CurrentCollector(BaseModel):
     name: str | None = None
     material: str | None = None  # substrate, e.g. "Al", "Cu", "carbon-coated Al"
     form: str | None = None  # foil | mesh | foam | perforated | other
-    material_spec_id: str | None = Field(default=None, description="Optional canonical IRI of a standalone material-spec for the foil material — the same MaterialSpec -> component reference seam MaterialComponent carries.")
+    material_spec_id: str | None = Field(
+        default=None,
+        description="Optional canonical IRI of a standalone material-spec for the foil material — the same MaterialSpec -> component reference seam MaterialComponent carries.",
+    )
     manufacturer: str | None = None
     supplier: str | None = None
     product_id: str | None = None
@@ -1091,7 +1145,10 @@ class Electrode(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    electrode_spec_id: str | None = Field(default=None, description="Optional canonical IRI of a standalone electrode-spec this inline holder realizes; emitted as schema:isVariantOf. Prefer the cell spec's matching *_electrode_spec_id sibling when the cell spec's electrode simply IS that design.")
+    electrode_spec_id: str | None = Field(
+        default=None,
+        description="Optional canonical IRI of a standalone electrode-spec this inline holder realizes; emitted as schema:isVariantOf. Prefer the cell spec's matching *_electrode_spec_id sibling when the cell spec's electrode simply IS that design.",
+    )
     coating: Coating | None = None
     # The electrode body as a single monolithic material - an uncoated metal
     # foil or disc (lithium metal counter, zinc foil). No coating, no separate
@@ -1131,17 +1188,31 @@ class Salt(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     name: str | None = None
-    material_spec_id: str | None = Field(default=None, description="Optional canonical IRI of a standalone material-spec for the salt — the same MaterialSpec -> Material link every other component material carries.")
+    material_spec_id: str | None = Field(
+        default=None,
+        description="Optional canonical IRI of a standalone material-spec for the salt — the same MaterialSpec -> Material link every other component material carries.",
+    )
     cation: str | None = None
     anion: str | None = None
     manufacturer: str | None = None
     supplier: str | None = None
     product_id: str | None = None
-    label: str | None = Field(default=None, description="Preferred substance name stamped by the resolver (e.g. 'lithium hexafluorophosphate' for name 'LiPF6').")
-    inchikey: str | None = Field(default=None, pattern=r"^[A-Z]{14}-[A-Z]{10}-[A-Z]$", description="Standard InChIKey — canonical chemical identity, stamped from the substances vocabulary.")
+    label: str | None = Field(
+        default=None,
+        description="Preferred substance name stamped by the resolver (e.g. 'lithium hexafluorophosphate' for name 'LiPF6').",
+    )
+    inchikey: str | None = Field(
+        default=None,
+        pattern=r"^[A-Z]{14}-[A-Z]{10}-[A-Z]$",
+        description="Standard InChIKey — canonical chemical identity, stamped from the substances vocabulary.",
+    )
     pubchem_cid: int | None = Field(default=None, ge=1, description="PubChem Compound ID crosswalk.")
-    cas_number: str | None = Field(default=None, pattern=r"^\d{2,7}-\d{2}-\d$", description="CAS Registry Number crosswalk.")
-    smiles: str | None = Field(default=None, description="Connectivity SMILES (dot-disconnected ionic form); identity lives in inchikey.")
+    cas_number: str | None = Field(
+        default=None, pattern=r"^\d{2,7}-\d{2}-\d$", description="CAS Registry Number crosswalk."
+    )
+    smiles: str | None = Field(
+        default=None, description="Connectivity SMILES (dot-disconnected ionic form); identity lives in inchikey."
+    )
     property: dict[str, Any] = Field(default_factory=dict)
     comment: str | None = None
 
@@ -1394,56 +1465,151 @@ class CellSpec(BundleJsonModel):
     default_filename: ClassVar[str] = CELL_SPEC_FILENAME
 
     kind: str = "CellSpec"
-    id: str | None = Field(default=None, description="Canonical IRI for this cell-spec record (https://w3id.org/battinfo/spec/{uid}); minted at save time when omitted.")
+    id: str | None = Field(
+        default=None,
+        description="Canonical IRI for this cell-spec record (https://w3id.org/battinfo/spec/{uid}); minted at save time when omitted.",
+    )
     # Transient short id used only to mint the canonical IRI when no id is given; never serialized.
-    uid: str | None = Field(default=None, exclude=True, repr=False, description="Transient 16-char Crockford Base32 uid used to mint the canonical IRI when no id is given; never serialized.")
-    name: str | None = Field(default=None, description="Full display name of the product; defaults to 'manufacturer model'.")
-    handle: str | None = Field(default=None, description="Short readable slug, unique within one registry workspace and shown as <workspace>/<handle> (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text only, never part of the identity; build one with battinfo.naming.handle_for().")
-    manufacturer: str = Field(default="", description="The company that manufactured this cell (plain name; use manufacturer_id for the org record link).")
+    uid: str | None = Field(
+        default=None,
+        exclude=True,
+        repr=False,
+        description="Transient 16-char Crockford Base32 uid used to mint the canonical IRI when no id is given; never serialized.",
+    )
+    name: str | None = Field(
+        default=None, description="Full display name of the product; defaults to 'manufacturer model'."
+    )
+    handle: str | None = Field(
+        default=None,
+        description="Short readable slug, unique within one registry workspace and shown as <workspace>/<handle> (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text only, never part of the identity; build one with battinfo.naming.handle_for().",
+    )
+    manufacturer: str = Field(
+        default="",
+        description="The company that manufactured this cell (plain name; use manufacturer_id for the org record link).",
+    )
     # The schema types manufacturer as an Organization object; keeping the name a plain string
     # preserves the fluent authoring API while this optional id carries the org link.
-    manufacturer_id: str | None = Field(default=None, description="Canonical IRI of the manufacturer's organization record.")
-    model: str = Field(default="", description="Manufacturer's product model number or name (authoring alias: model_name=).")
-    format: str = Field(default="unknown", description="Physical format (geometry) of the cell housing: cylindrical, prismatic, pouch, coin, other, or unknown.")
-    chemistry: str = Field(default="unknown", description="Overall cell chemistry label naming the electrochemical couple (e.g. 'Li-ion', 'Li-MnO2', 'Ni-MH').")
-    product_type: CellProductType | None = Field(default=None, description="Product maturity level (e.g. commercial, prototype, research).")
-    positive_electrode_basis: str | None = Field(default=None, description="Primary active material basis of the positive electrode (e.g. 'NMC811').")
-    negative_electrode_basis: str | None = Field(default=None, description="Primary active material basis of the negative electrode (e.g. 'graphite').")
+    manufacturer_id: str | None = Field(
+        default=None, description="Canonical IRI of the manufacturer's organization record."
+    )
+    model: str = Field(
+        default="", description="Manufacturer's product model number or name (authoring alias: model_name=)."
+    )
+    format: str = Field(
+        default="unknown",
+        description="Physical format (geometry) of the cell housing: cylindrical, prismatic, pouch, coin, other, or unknown.",
+    )
+    chemistry: str = Field(
+        default="unknown",
+        description="Overall cell chemistry label naming the electrochemical couple (e.g. 'Li-ion', 'Li-MnO2', 'Ni-MH').",
+    )
+    product_type: CellProductType | None = Field(
+        default=None, description="Product maturity level (e.g. commercial, prototype, research)."
+    )
+    positive_electrode_basis: str | None = Field(
+        default=None, description="Primary active material basis of the positive electrode (e.g. 'NMC811')."
+    )
+    negative_electrode_basis: str | None = Field(
+        default=None, description="Primary active material basis of the negative electrode (e.g. 'graphite')."
+    )
     size_code: str | None = Field(default=None, description="Standardised size code (e.g. '18650', '21700', 'AA').")
-    iec_code: str | None = Field(default=None, description="IEC 60086 or IEC 61960 code string (e.g. 'LR6', 'ICR18650').")
+    iec_code: str | None = Field(
+        default=None, description="IEC 60086 or IEC 61960 code string (e.g. 'LR6', 'ICR18650')."
+    )
     country_of_origin: str | None = Field(default=None, description="Country where the cell is manufactured.")
-    cell_configuration: CellConfiguration | None = Field(default=None, description="Electrode configuration as built: full_cell, half_cell, or three_electrode_cell. Absent means unstated; when stated it overrides the reference_electrode half-cell heuristic in the JSON-LD emitter.")
-    reference_electrode: Electrode | str | None = Field(default=None, description="The physical reference electrode of a three_electrode_cell build, as an inline electrode holder (a lithium ring or wire is a monolithic material=). The legacy string shorthand ('lithium', 'NHE') stays accepted. In a half_cell the counter IS the reference - state nothing here. Emitted as hasReferenceElectrode / @type ReferenceElectrode.")
-    rechargeable: bool | None = Field(default=None, description="True for secondary (rechargeable) cells; false for primary.")
+    cell_configuration: CellConfiguration | None = Field(
+        default=None,
+        description="Electrode configuration as built: full_cell, half_cell, or three_electrode_cell. Absent means unstated; when stated it overrides the reference_electrode half-cell heuristic in the JSON-LD emitter.",
+    )
+    reference_electrode: Electrode | str | None = Field(
+        default=None,
+        description="The physical reference electrode of a three_electrode_cell build, as an inline electrode holder (a lithium ring or wire is a monolithic material=). The legacy string shorthand ('lithium', 'NHE') stays accepted. In a half_cell the counter IS the reference - state nothing here. Emitted as hasReferenceElectrode / @type ReferenceElectrode.",
+    )
+    rechargeable: bool | None = Field(
+        default=None, description="True for secondary (rechargeable) cells; false for primary."
+    )
     year: int | None = Field(default=None, description="Year the product or its datasheet was released.")
-    datasheet_revision: str | None = Field(default=None, description="Revision label of the source datasheet this spec was taken from.")
-    cell_specification_id: str | None = Field(default=None, description="IRI of a linked library specification record carrying the detailed datasheet structure.")
-    properties: dict[str, Any] = Field(default_factory=dict, description="Quantitative spec properties as name -> {value, unit} quantity objects (authoring alias: specs=; run 'battinfo properties list' for valid names).")
+    datasheet_revision: str | None = Field(
+        default=None, description="Revision label of the source datasheet this spec was taken from."
+    )
+    cell_specification_id: str | None = Field(
+        default=None,
+        description="IRI of a linked library specification record carrying the detailed datasheet structure.",
+    )
+    properties: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Quantitative spec properties as name -> {value, unit} quantity objects (authoring alias: specs=; run 'battinfo properties list' for valid names).",
+    )
     # Datasheet structure (merged from the former CellSpec).
-    construction: dict[str, Any] = Field(default_factory=dict, description="As-designed construction details (assembly type, layering, stack geometry).")
-    positive_electrode: Electrode | None = Field(default=None, description="Inline positive-electrode datasheet structure (coating, current collector, composition). Polarity holder: for a full cell.")
-    negative_electrode: Electrode | None = Field(default=None, description="Inline negative-electrode datasheet structure (coating, current collector, composition). Polarity holder: for a full cell.")
+    construction: dict[str, Any] = Field(
+        default_factory=dict, description="As-designed construction details (assembly type, layering, stack geometry)."
+    )
+    positive_electrode: Electrode | None = Field(
+        default=None,
+        description="Inline positive-electrode datasheet structure (coating, current collector, composition). Polarity holder: for a full cell.",
+    )
+    negative_electrode: Electrode | None = Field(
+        default=None,
+        description="Inline negative-electrode datasheet structure (coating, current collector, composition). Polarity holder: for a full cell.",
+    )
     # Role holders. A half cell or a three-electrode cell has no positive/negative
     # polarity to assign, so its electrodes are named by the role they play.
-    working_electrode: Electrode | None = Field(default=None, description="Inline working-electrode structure. Role holder: use for cell_configuration half_cell or three_electrode_cell instead of the polarity holders. Emitted as hasWorkingElectrode / @type WorkingElectrode.")
-    counter_electrode: Electrode | None = Field(default=None, description="Inline counter-electrode structure. Role holder: use for cell_configuration half_cell or three_electrode_cell. In a half cell it also carries the reference role (@type CounterElectrode + ReferenceElectrode).")
-    electrolyte: Electrolyte | None = Field(default=None, description="Inline electrolyte description (solvents, salts, additives).")
-    separator: Separator | None = Field(default=None, description="Inline separator description (material, thickness, coating).")
-    housing: Housing | None = Field(default=None, description="Format-neutral housing description (case, seal, tabs; replaces the retired coin_hardware dict).")
+    working_electrode: Electrode | None = Field(
+        default=None,
+        description="Inline working-electrode structure. Role holder: use for cell_configuration half_cell or three_electrode_cell instead of the polarity holders. Emitted as hasWorkingElectrode / @type WorkingElectrode.",
+    )
+    counter_electrode: Electrode | None = Field(
+        default=None,
+        description="Inline counter-electrode structure. Role holder: use for cell_configuration half_cell or three_electrode_cell. In a half cell it also carries the reference role (@type CounterElectrode + ReferenceElectrode).",
+    )
+    electrolyte: Electrolyte | None = Field(
+        default=None, description="Inline electrolyte description (solvents, salts, additives)."
+    )
+    separator: Separator | None = Field(
+        default=None, description="Inline separator description (material, thickness, coating)."
+    )
+    housing: Housing | None = Field(
+        default=None,
+        description="Format-neutral housing description (case, seal, tabs; replaces the retired coin_hardware dict).",
+    )
     # Optional canonical IRIs of standalone component-spec records this cell-spec references (used
     # instead of, or alongside, the inline holders above).
-    positive_electrode_spec_id: str | None = Field(default=None, description="IRI of a standalone positive-electrode-spec record referenced instead of (or alongside) the inline structure.")
-    negative_electrode_spec_id: str | None = Field(default=None, description="IRI of a standalone negative-electrode-spec record.")
-    working_electrode_spec_id: str | None = Field(default=None, description="IRI of a standalone electrode-spec record for the working electrode (role holder sibling).")
-    counter_electrode_spec_id: str | None = Field(default=None, description="IRI of a standalone electrode-spec record for the counter electrode (role holder sibling).")
-    reference_electrode_spec_id: str | None = Field(default=None, description="IRI of a standalone electrode-spec record for the reference electrode of a three_electrode_cell build (role holder sibling).")
+    positive_electrode_spec_id: str | None = Field(
+        default=None,
+        description="IRI of a standalone positive-electrode-spec record referenced instead of (or alongside) the inline structure.",
+    )
+    negative_electrode_spec_id: str | None = Field(
+        default=None, description="IRI of a standalone negative-electrode-spec record."
+    )
+    working_electrode_spec_id: str | None = Field(
+        default=None,
+        description="IRI of a standalone electrode-spec record for the working electrode (role holder sibling).",
+    )
+    counter_electrode_spec_id: str | None = Field(
+        default=None,
+        description="IRI of a standalone electrode-spec record for the counter electrode (role holder sibling).",
+    )
+    reference_electrode_spec_id: str | None = Field(
+        default=None,
+        description="IRI of a standalone electrode-spec record for the reference electrode of a three_electrode_cell build (role holder sibling).",
+    )
     electrolyte_spec_id: str | None = Field(default=None, description="IRI of a standalone electrolyte-spec record.")
     separator_spec_id: str | None = Field(default=None, description="IRI of a standalone separator-spec record.")
     housing_spec_id: str | None = Field(default=None, description="IRI of a standalone housing-spec record.")
-    specification_comment: _StrList = Field(default_factory=list, description="Free-text notes attached to the library specification block (distinct from record-level comment).")
-    bibliography: dict[str, Any] = Field(default_factory=dict, description="Bibliographic links for this product (e.g. subject_of article references).")
-    source: ProvenanceInfo = Field(default_factory=ProvenanceInfo, description="Provenance of this record (flat authoring aliases: source_type=, source_url=, source_file=, citation=, retrieved_at=, ...).")
-    comment: _StrList = Field(default_factory=list, description="Free-text notes on the record (authoring alias: notes=).")
+    specification_comment: _StrList = Field(
+        default_factory=list,
+        description="Free-text notes attached to the library specification block (distinct from record-level comment).",
+    )
+    bibliography: dict[str, Any] = Field(
+        default_factory=dict, description="Bibliographic links for this product (e.g. subject_of article references)."
+    )
+    source: ProvenanceInfo = Field(
+        default_factory=ProvenanceInfo,
+        description="Provenance of this record (flat authoring aliases: source_type=, source_url=, source_file=, citation=, retrieved_at=, ...).",
+    )
+    comment: _StrList = Field(
+        default_factory=list, description="Free-text notes on the record (authoring alias: notes=)."
+    )
     # Audit note (model-as-source-of-truth): the cell-spec schema also permits `brand`,
     # `battery_category`, `category`, `url`, `additional_type`, `manufacturing_place`, `editorial`,
     # `hazardous_substances`, `critical_raw_materials`, `extinguishing_agent`, `funding`, and
@@ -1457,9 +1623,16 @@ class CellSpec(BundleJsonModel):
     def _coerce_mapping_fields(cls, value: Any) -> Any:
         return _mapping_from_object(value)
 
-    @field_validator("positive_electrode", "negative_electrode", "working_electrode",
-                     "counter_electrode", "reference_electrode", "electrolyte", "separator",
-                     mode="before")
+    @field_validator(
+        "positive_electrode",
+        "negative_electrode",
+        "working_electrode",
+        "counter_electrode",
+        "reference_electrode",
+        "electrolyte",
+        "separator",
+        mode="before",
+    )
     @classmethod
     def _coerce_component(cls, value: Any) -> Any:
         if isinstance(value, Mapping):
@@ -1480,9 +1653,15 @@ class CellSpec(BundleJsonModel):
                 data["manufacturer_id"] = _manufacturer["id"]
         # Flat provenance kwargs -> the nested source object.
         _flat_provenance = {
-            "source_type": "type", "source_name": "name", "source_file": "file", "source_url": "url",
-            "citation": "citation", "file_hash": "file_hash", "retrieved_at": "retrieved_at",
-            "workflow_version": "workflow_version", "curated_by": "curated_by",
+            "source_type": "type",
+            "source_name": "name",
+            "source_file": "file",
+            "source_url": "url",
+            "citation": "citation",
+            "file_hash": "file_hash",
+            "retrieved_at": "retrieved_at",
+            "workflow_version": "workflow_version",
+            "curated_by": "curated_by",
         }
         if any(key in data for key in _flat_provenance) and "source" not in data:
             data["source"] = {nested: data.pop(flat) for flat, nested in _flat_provenance.items() if flat in data}
@@ -1522,9 +1701,15 @@ class CellSpec(BundleJsonModel):
 
         data["properties"] = explicit_properties
         _reject_unknown_kwargs(
-            type(self), data,
-            extra_allowed=("specs", "notes", "coin_hardware",
-                           *CELL_TYPE_AUTHORING_PROPERTY_FIELDS, *_FLAT_PROVENANCE_KEYS),
+            type(self),
+            data,
+            extra_allowed=(
+                "specs",
+                "notes",
+                "coin_hardware",
+                *CELL_TYPE_AUTHORING_PROPERTY_FIELDS,
+                *_FLAT_PROVENANCE_KEYS,
+            ),
         )
         super().__init__(**data)
 
@@ -1598,7 +1783,11 @@ class CellSpec(BundleJsonModel):
         if not isinstance(notes, list):
             notes = []
         raw_pt = product.get("product_type")
-        product_type = CellProductType(raw_pt) if isinstance(raw_pt, str) and raw_pt in CellProductType._value2member_map_ else None
+        product_type = (
+            CellProductType(raw_pt)
+            if isinstance(raw_pt, str) and raw_pt in CellProductType._value2member_map_
+            else None
+        )
         raw_cfg = product.get("cell_configuration")
         cell_configuration = (
             CellConfiguration(raw_cfg)
@@ -1782,10 +1971,16 @@ class CellSpec(BundleJsonModel):
             record["cell_spec"]["datasheet_revision"] = self.datasheet_revision
         if self.manufacturer_id is not None:
             record["cell_spec"]["manufacturer"]["id"] = self.manufacturer_id
-        for _ref in ("positive_electrode_spec_id", "negative_electrode_spec_id",
-                     "working_electrode_spec_id", "counter_electrode_spec_id",
-                     "reference_electrode_spec_id",
-                     "electrolyte_spec_id", "separator_spec_id", "housing_spec_id"):
+        for _ref in (
+            "positive_electrode_spec_id",
+            "negative_electrode_spec_id",
+            "working_electrode_spec_id",
+            "counter_electrode_spec_id",
+            "reference_electrode_spec_id",
+            "electrolyte_spec_id",
+            "separator_spec_id",
+            "housing_spec_id",
+        ):
             _ref_value = getattr(self, _ref)
             if _ref_value is not None:
                 record[_ref] = _ref_value  # top-level sibling of cell_spec, per the schema
@@ -1851,7 +2046,11 @@ class CellSpec(BundleJsonModel):
         if not isinstance(comment, list):
             comment = []
         raw_pt = specification.get("product_type")
-        product_type = CellProductType(raw_pt) if isinstance(raw_pt, str) and raw_pt in CellProductType._value2member_map_ else None
+        product_type = (
+            CellProductType(raw_pt)
+            if isinstance(raw_pt, str) and raw_pt in CellProductType._value2member_map_
+            else None
+        )
         return cls(
             schema_version=schema_version,
             id=str(specification["id"]),
@@ -1866,7 +2065,9 @@ class CellSpec(BundleJsonModel):
             construction=copy.deepcopy(specification.get("construction", {}))
             if isinstance(specification.get("construction"), Mapping)
             else {},
-            properties=dict(specification.get("property", {})) if isinstance(specification.get("property"), Mapping) else {},
+            properties=dict(specification.get("property", {}))
+            if isinstance(specification.get("property"), Mapping)
+            else {},
             positive_electrode=copy.deepcopy(specification.get("positive_electrode")),
             negative_electrode=copy.deepcopy(specification.get("negative_electrode")),
             working_electrode=copy.deepcopy(specification.get("working_electrode")),
@@ -1930,30 +2131,73 @@ class CellSpec(BundleJsonModel):
         return out
 
 
-
 class Cell(BundleJsonModel):
     default_filename: ClassVar[str] = CELL_INSTANCE_FILENAME
 
     kind: str = "Cell"
-    id: str | None = Field(default=None, description="Canonical IRI for this physical cell (https://w3id.org/battinfo/cell/{uid}); minted at save time when omitted.")
+    id: str | None = Field(
+        default=None,
+        description="Canonical IRI for this physical cell (https://w3id.org/battinfo/cell/{uid}); minted at save time when omitted.",
+    )
     # Transient short id used only to mint the canonical IRI when no id is given; never serialized.
-    uid: str | None = Field(default=None, exclude=True, repr=False, description="Transient 16-char Crockford Base32 uid used to mint the canonical IRI when no id is given; never serialized.")
+    uid: str | None = Field(
+        default=None,
+        exclude=True,
+        repr=False,
+        description="Transient 16-char Crockford Base32 uid used to mint the canonical IRI when no id is given; never serialized.",
+    )
     name: str | None = Field(default=None, description="Display name; defaults to the serial number or batch id.")
-    handle: str | None = Field(default=None, description="Short readable slug, unique within one registry workspace and shown as <workspace>/<handle> (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text only, never part of the identity; build one with battinfo.naming.handle_for().")
-    cell_spec_id: str | None = Field(default=None, description="IRI of the cell spec this physical cell instantiates (required at save).")
-    cell_spec: CellSpec | None = Field(default=None, exclude=True, repr=False, description="Linked cell-spec object (alternative to cell_spec_id; may also be passed positionally).")
-    working_electrode_id: str | None = Field(default=None, description="IRI of the electrode record built into this cell as its working electrode (the physical disc/batch, not the design).")
-    counter_electrode_id: str | None = Field(default=None, description="IRI of the electrode record built into this cell as its counter electrode; in a half cell it is also the reference electrode.")
-    serial_number: str | None = Field(default=None, description="Manufacturer or lab serial number of this individual cell.")
+    handle: str | None = Field(
+        default=None,
+        description="Short readable slug, unique within one registry workspace and shown as <workspace>/<handle> (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text only, never part of the identity; build one with battinfo.naming.handle_for().",
+    )
+    cell_spec_id: str | None = Field(
+        default=None, description="IRI of the cell spec this physical cell instantiates (required at save)."
+    )
+    cell_spec: CellSpec | None = Field(
+        default=None,
+        exclude=True,
+        repr=False,
+        description="Linked cell-spec object (alternative to cell_spec_id; may also be passed positionally).",
+    )
+    working_electrode_id: str | None = Field(
+        default=None,
+        description="IRI of the electrode record built into this cell as its working electrode (the physical disc/batch, not the design).",
+    )
+    counter_electrode_id: str | None = Field(
+        default=None,
+        description="IRI of the electrode record built into this cell as its counter electrode; in a half cell it is also the reference electrode.",
+    )
+    serial_number: str | None = Field(
+        default=None, description="Manufacturer or lab serial number of this individual cell."
+    )
     batch_id: str | None = Field(default=None, description="Production or delivery batch identifier.")
     grade: str | None = Field(default=None, description="Sorting/binning grade assigned to this cell (e.g. 'A', 'B').")
-    manufactured_at: int | str | None = Field(default=None, description="When the cell was manufactured: Unix seconds, ISO 8601 string, or datetime/date.")
-    expires_at: int | str | None = Field(default=None, description="Use-by / expiry time: Unix seconds, ISO 8601 string, or datetime/date.")
-    measured: dict[str, Any] = Field(default_factory=dict, description="Per-cell measured values as name -> {value, unit} quantity objects (e.g. mass, initial capacity).")
-    conformance: Conformance | None = Field(default=None, description="Conformance verdict of this cell against its spec (EARL-mapped status plus deviations).")
-    dataset_ids: _StrList = Field(default_factory=list, description="IRIs of datasets recorded on this cell (authoring alias: dataset_id= for a single one).")
-    source: ProvenanceInfo = Field(default_factory=ProvenanceInfo, description="Provenance of this record (flat authoring aliases: source_type=, source_url=, retrieved_at=, ...).")
-    comment: _StrList = Field(default_factory=list, description="Free-text notes on the record (authoring alias: notes=).")
+    manufactured_at: int | str | None = Field(
+        default=None, description="When the cell was manufactured: Unix seconds, ISO 8601 string, or datetime/date."
+    )
+    expires_at: int | str | None = Field(
+        default=None, description="Use-by / expiry time: Unix seconds, ISO 8601 string, or datetime/date."
+    )
+    measured: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Per-cell measured values as name -> {value, unit} quantity objects (e.g. mass, initial capacity).",
+    )
+    conformance: Conformance | None = Field(
+        default=None,
+        description="Conformance verdict of this cell against its spec (EARL-mapped status plus deviations).",
+    )
+    dataset_ids: _StrList = Field(
+        default_factory=list,
+        description="IRIs of datasets recorded on this cell (authoring alias: dataset_id= for a single one).",
+    )
+    source: ProvenanceInfo = Field(
+        default_factory=ProvenanceInfo,
+        description="Provenance of this record (flat authoring aliases: source_type=, source_url=, retrieved_at=, ...).",
+    )
+    comment: _StrList = Field(
+        default_factory=list, description="Free-text notes on the record (authoring alias: notes=)."
+    )
 
     def __init__(self, cell_spec: CellSpec | None = None, /, **data: Any) -> None:
         # Absorb the flat authoring/input shape (formerly CellInstanceInput).
@@ -1963,17 +2207,21 @@ class Cell(BundleJsonModel):
         if _dataset_id is not None:
             data["dataset_ids"] = list(dict.fromkeys([*(data.get("dataset_ids") or []), _dataset_id]))
         _flat_provenance = {
-            "source_type": "type", "source_name": "name", "source_file": "file", "source_url": "url",
-            "citation": "citation", "file_hash": "file_hash", "retrieved_at": "retrieved_at",
-            "workflow_version": "workflow_version", "curated_by": "curated_by",
+            "source_type": "type",
+            "source_name": "name",
+            "source_file": "file",
+            "source_url": "url",
+            "citation": "citation",
+            "file_hash": "file_hash",
+            "retrieved_at": "retrieved_at",
+            "workflow_version": "workflow_version",
+            "curated_by": "curated_by",
         }
         if any(key in data for key in _flat_provenance) and "source" not in data:
             data["source"] = {nested: data.pop(flat) for flat, nested in _flat_provenance.items() if flat in data}
         if cell_spec is not None:
             if "cell_spec" in data and data["cell_spec"] is not cell_spec:
-                raise ValueError(
-                    "Pass the cell spec either positionally or as cell_spec=, not both."
-                )
+                raise ValueError("Pass the cell spec either positionally or as cell_spec=, not both.")
             # A positional object used to be silently DISCARDED when cell_spec_id= was
             # also given. Keep the object, but refuse a demonstrable identity conflict.
             _kwarg_id = data.get("cell_spec_id")
@@ -1984,9 +2232,7 @@ class Cell(BundleJsonModel):
                     "Pass one or the other."
                 )
             data["cell_spec"] = cell_spec
-        _reject_unknown_kwargs(
-            type(self), data, extra_allowed=("notes", "dataset_id", *_FLAT_PROVENANCE_KEYS)
-        )
+        _reject_unknown_kwargs(type(self), data, extra_allowed=("notes", "dataset_id", *_FLAT_PROVENANCE_KEYS))
         super().__init__(**data)
 
     @model_validator(mode="after")
@@ -2013,9 +2259,7 @@ class Cell(BundleJsonModel):
         dataset_ids: list[str] = []
         if isinstance(datasets, list):
             dataset_ids = [
-                str(item["id"])
-                for item in datasets
-                if isinstance(item, Mapping) and isinstance(item.get("id"), str)
+                str(item["id"]) for item in datasets if isinstance(item, Mapping) and isinstance(item.get("id"), str)
             ]
         elif isinstance(provenance.get("dataset_ids"), list):
             dataset_ids = [str(item) for item in provenance["dataset_ids"] if isinstance(item, str)]
@@ -2054,7 +2298,9 @@ class Cell(BundleJsonModel):
 
     def to_record(self) -> dict[str, Any]:
         if self.id is None:
-            raise ValueError("Cell.id is required before serialization. Use battinfo.build_publication_package(...) or battinfo.publish(...) to finalize IDs.")
+            raise ValueError(
+                "Cell.id is required before serialization. Use battinfo.build_publication_package(...) or battinfo.publish(...) to finalize IDs."
+            )
         if self.cell_spec_id is None:
             raise ValueError("Cell.cell_spec_id is required before serialization.")
         record: dict[str, Any] = {
@@ -2094,9 +2340,9 @@ CONFORMANCE_STATUS_VALUES = ("conformant", "non-conformant", "unknown")
 # is the not-yet-assessed default (EARL's cantTell), not a third verdict. Compact
 # CURIEs — the 'earl' prefix is declared in records.context.json.
 CONFORMANCE_STATUS_IRI: dict[str, str] = {
-    "conformant":     "earl:passed",
+    "conformant": "earl:passed",
     "non-conformant": "earl:failed",
-    "unknown":        "earl:cantTell",
+    "unknown": "earl:cantTell",
 }
 
 # Controlled vocabulary for a deviation's broad category. Covers both test executions
@@ -2140,9 +2386,7 @@ def _require_enum(value: Any, allowed: tuple[str, ...], field: str) -> Any:
     if value is None:
         return value
     if value not in allowed:
-        raise ValueError(
-            f"{field} must be one of {list(allowed)}; got {value!r}."
-        )
+        raise ValueError(f"{field} must be one of {list(allowed)}; got {value!r}.")
     return value
 
 
@@ -2229,11 +2473,7 @@ class Conformance(BaseModel):
 
     @classmethod
     def from_record(cls, data: Mapping[str, Any]) -> "Conformance":
-        deviations = [
-            Deviation.from_record(d)
-            for d in (data.get("deviations") or [])
-            if isinstance(d, Mapping)
-        ]
+        deviations = [Deviation.from_record(d) for d in (data.get("deviations") or []) if isinstance(d, Mapping)]
         return cls(
             status=str(data.get("status", "unknown")),
             note=data.get("note"),
@@ -2273,11 +2513,12 @@ class Artifact(BaseModel):
 
     BattINFO carries and references the file but does not interpret it as
     authority; ``conforms_to`` points downstream tooling at the format spec."""
+
     model_config = ConfigDict(extra="forbid", validate_assignment=True)
 
-    role: str                              # source_protocol | executed_protocol | vendor_export | simulation_input | other
-    format: str                            # key in data/vocab/test-method/artifact-formats.json
-    locator: str                           # dataset-relative path | URI | DOI
+    role: str  # source_protocol | executed_protocol | vendor_export | simulation_input | other
+    format: str  # key in data/vocab/test-method/artifact-formats.json
+    locator: str  # dataset-relative path | URI | DOI
     media_type: str | None = None
     sha256: str | None = None
     byte_size: int | None = None
@@ -2314,11 +2555,24 @@ class TestSpec(BundleJsonModel):
 
     kind: str = "TestSpec"
     __test__ = False
-    id: str | None = Field(default=None, description="Canonical IRI for this test spec (https://w3id.org/battinfo/spec/{uid}); minted at save time when omitted.")
+    id: str | None = Field(
+        default=None,
+        description="Canonical IRI for this test spec (https://w3id.org/battinfo/spec/{uid}); minted at save time when omitted.",
+    )
     # Transient short id used only to mint the canonical IRI when no id is given; never serialized.
-    uid: str | None = Field(default=None, exclude=True, repr=False, description="Transient 16-char Crockford Base32 uid used to mint the canonical IRI when no id is given; never serialized.")
-    name: str | None = Field(default=None, description="Human-readable name of the test procedure (e.g. 'CC cycling 25degC').")
-    handle: str | None = Field(default=None, description="Short readable slug, unique within one registry workspace and shown as <workspace>/<handle> (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text only, never part of the identity; build one with battinfo.naming.handle_for().")
+    uid: str | None = Field(
+        default=None,
+        exclude=True,
+        repr=False,
+        description="Transient 16-char Crockford Base32 uid used to mint the canonical IRI when no id is given; never serialized.",
+    )
+    name: str | None = Field(
+        default=None, description="Human-readable name of the test procedure (e.g. 'CC cycling 25degC')."
+    )
+    handle: str | None = Field(
+        default=None,
+        description="Short readable slug, unique within one registry workspace and shown as <workspace>/<handle> (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text only, never part of the identity; build one with battinfo.naming.handle_for().",
+    )
     test_type: BatteryTestType = Field(
         default=BatteryTestType.OTHER,
         validation_alias=AliasChoices("test_type", "test_kind", "kind"),
@@ -2326,16 +2580,34 @@ class TestSpec(BundleJsonModel):
     )
     description: str | None = Field(default=None, description="Free-text description of the procedure's intent.")
     version: str | None = Field(default=None, description="Version label of this procedure definition.")
-    protocol: ProtocolInfo = Field(default_factory=ProtocolInfo, description="Name and optional URL of the protocol standard followed (authoring alias: protocol_url=).")
+    protocol: ProtocolInfo = Field(
+        default_factory=ProtocolInfo,
+        description="Name and optional URL of the protocol standard followed (authoring alias: protocol_url=).",
+    )
     # Descriptive layer (canonical structured form of the procedure).
-    method: list[Step] = Field(default_factory=list, description="Canonical structured steps of the procedure (authoring aliases: experiment=/steps= PyBaMM-style strings plus cycles=).")
-    record: dict[str, Any] = Field(default_factory=dict, description="What is recorded during execution (signals, sampling).")
+    method: list[Step] = Field(
+        default_factory=list,
+        description="Canonical structured steps of the procedure (authoring aliases: experiment=/steps= PyBaMM-style strings plus cycles=).",
+    )
+    record: dict[str, Any] = Field(
+        default_factory=dict, description="What is recorded during execution (signals, sampling)."
+    )
     safety: dict[str, Any] = Field(default_factory=dict, description="Safety limits and abort criteria for execution.")
-    conditions: dict[str, Quantity] = Field(default_factory=dict, description="Ambient/boundary conditions as name -> quantity (e.g. temperature).")
+    conditions: dict[str, Quantity] = Field(
+        default_factory=dict, description="Ambient/boundary conditions as name -> quantity (e.g. temperature)."
+    )
     # Actionable layer.
-    artifacts: list[Artifact] = Field(default_factory=list, description="Machine-actionable protocol artifacts (e.g. cycler programs, PyBaMM experiments) attached to this spec.")
-    source: ProvenanceInfo = Field(default_factory=ProvenanceInfo, description="Provenance of this record (flat authoring aliases: source_type=, source_url=, retrieved_at=, ...).")
-    comment: _StrList = Field(default_factory=list, description="Free-text notes on the record (authoring alias: notes=).")
+    artifacts: list[Artifact] = Field(
+        default_factory=list,
+        description="Machine-actionable protocol artifacts (e.g. cycler programs, PyBaMM experiments) attached to this spec.",
+    )
+    source: ProvenanceInfo = Field(
+        default_factory=ProvenanceInfo,
+        description="Provenance of this record (flat authoring aliases: source_type=, source_url=, retrieved_at=, ...).",
+    )
+    comment: _StrList = Field(
+        default_factory=list, description="Free-text notes on the record (authoring alias: notes=)."
+    )
 
     def __init__(self, /, **data: Any) -> None:
         # Absorb the flat authoring/input shape (formerly TestSpecInput). The discriminator
@@ -2349,16 +2621,22 @@ class TestSpec(BundleJsonModel):
         if "notes" in data and "comment" not in data:
             data["comment"] = data.pop("notes")
         _flat_provenance = {
-            "source_type": "type", "source_name": "name", "source_file": "file", "source_url": "url",
-            "citation": "citation", "file_hash": "file_hash", "retrieved_at": "retrieved_at",
-            "workflow_version": "workflow_version", "curated_by": "curated_by",
+            "source_type": "type",
+            "source_name": "name",
+            "source_file": "file",
+            "source_url": "url",
+            "citation": "citation",
+            "file_hash": "file_hash",
+            "retrieved_at": "retrieved_at",
+            "workflow_version": "workflow_version",
+            "curated_by": "curated_by",
         }
         if any(key in data for key in _flat_provenance) and "source" not in data:
             data["source"] = {nested: data.pop(flat) for flat, nested in _flat_provenance.items() if flat in data}
         _reject_unknown_kwargs(
-            type(self), data,
-            extra_allowed=("kind", "protocol_url", "notes", "experiment", "steps", "cycles",
-                           *_FLAT_PROVENANCE_KEYS),
+            type(self),
+            data,
+            extra_allowed=("kind", "protocol_url", "notes", "experiment", "steps", "cycles", *_FLAT_PROVENANCE_KEYS),
         )
         super().__init__(**data)
 
@@ -2376,9 +2654,7 @@ class TestSpec(BundleJsonModel):
                 source = out.get("steps")
             if source and all(isinstance(s, str) for s in source):
                 cycles = out.get("cycles")
-                out["method"] = parse_experiment(
-                    list(source), cycles if isinstance(cycles, int) else None
-                )
+                out["method"] = parse_experiment(list(source), cycles if isinstance(cycles, int) else None)
         # Authoring-only keys are not model fields (extra="forbid").
         for key in ("experiment", "steps", "cycles"):
             out.pop(key, None)
@@ -2423,6 +2699,7 @@ class TestSpec(BundleJsonModel):
         can go straight to ``pybamm.Experiment``. A step the grammar cannot
         express renders as its description or a label, never as a wrong value."""
         from battinfo.testmethod import render_experiment
+
         return render_experiment(self.method)
 
     def facets(self) -> dict[str, Any]:
@@ -2501,8 +2778,7 @@ class TestSpec(BundleJsonModel):
             record["safety"] = copy.deepcopy(self.safety)
         if self.conditions:
             record["conditions"] = {
-                name: qty.model_dump(mode="json", exclude_none=True)
-                for name, qty in self.conditions.items()
+                name: qty.model_dump(mode="json", exclude_none=True) for name, qty in self.conditions.items()
             }
         if self.artifacts:
             record["artifacts"] = [a.to_record() for a in self.artifacts]
@@ -2528,34 +2804,84 @@ class Test(BundleJsonModel):
 
     kind: str = "Test"
     __test__ = False
-    id: str | None = Field(default=None, description="Canonical IRI for this test execution (https://w3id.org/battinfo/test/{uid}); minted at save time when omitted.")
+    id: str | None = Field(
+        default=None,
+        description="Canonical IRI for this test execution (https://w3id.org/battinfo/test/{uid}); minted at save time when omitted.",
+    )
     # Transient short id used only to mint the canonical IRI when no id is given; never serialized.
-    uid: str | None = Field(default=None, exclude=True, repr=False, description="Transient 16-char Crockford Base32 uid used to mint the canonical IRI when no id is given; never serialized.")
+    uid: str | None = Field(
+        default=None,
+        exclude=True,
+        repr=False,
+        description="Transient 16-char Crockford Base32 uid used to mint the canonical IRI when no id is given; never serialized.",
+    )
     name: str | None = Field(default=None, description="Display name; defaults to '<cell name> <protocol or kind>'.")
-    handle: str | None = Field(default=None, description="Short readable slug, unique within one registry workspace and shown as <workspace>/<handle> (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text only, never part of the identity; build one with battinfo.naming.handle_for().")
+    handle: str | None = Field(
+        default=None,
+        description="Short readable slug, unique within one registry workspace and shown as <workspace>/<handle> (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text only, never part of the identity; build one with battinfo.naming.handle_for().",
+    )
     test_type: BatteryTestType = Field(
         default=BatteryTestType.OTHER,
         validation_alias=AliasChoices("test_type", "test_kind", "kind"),
         description="Category of test (authoring alias: kind=; e.g. 'cycling', 'capacity_check', 'eis').",
     )
     protocol_id: str | None = Field(default=None, description="IRI of the test spec this execution followed.")
-    protocol_entity: TestSpec | None = Field(default=None, exclude=True, repr=False, description="Linked test-spec object (alternative to protocol_id).")
-    cell_instance_id: str | None = Field(default=None, description="IRI of the physical cell under test (authoring alias: cell_id=; required at save).")
-    cell: Cell | None = Field(default=None, exclude=True, repr=False, description="Linked cell-instance object (alternative to cell_instance_id; may also be passed positionally).")
+    protocol_entity: TestSpec | None = Field(
+        default=None, exclude=True, repr=False, description="Linked test-spec object (alternative to protocol_id)."
+    )
+    cell_instance_id: str | None = Field(
+        default=None, description="IRI of the physical cell under test (authoring alias: cell_id=; required at save)."
+    )
+    cell: Cell | None = Field(
+        default=None,
+        exclude=True,
+        repr=False,
+        description="Linked cell-instance object (alternative to cell_instance_id; may also be passed positionally).",
+    )
     description: str | None = Field(default=None, description="Free-text description of this execution.")
-    status: str | None = Field(default=None, description="Execution status: planned, running, completed, aborted, or other.")
-    conditions: dict[str, Any] = Field(default_factory=dict, description="Per-execution test conditions and parameters as open snake_case name -> value (e.g. temperature, voltage window, C-rate, frequency range); values may be scalars, strings, or {value, unit} quantities.")
-    protocol: ProtocolInfo = Field(default_factory=ProtocolInfo, description="Name and optional URL of the protocol followed (authoring aliases: protocol_name=, protocol_url=).")
-    instrument: str | None = Field(default=None, description="Instrument/cycler the test ran on (authoring alias: instrument_name=).")
-    equipment_id: str | None = Field(default=None, description="IRI of the equipment unit the test ran on (https://w3id.org/battinfo/equipment/{uid}).")
-    channel_id: str | None = Field(default=None, description="IRI of the equipment channel the test ran on (https://w3id.org/battinfo/channel/{uid}).")
-    started_at: int | str | None = Field(default=None, description="When the test started: Unix seconds, ISO 8601 string, or datetime/date.")
-    ended_at: int | str | None = Field(default=None, description="When the test ended: Unix seconds, ISO 8601 string, or datetime/date.")
+    status: str | None = Field(
+        default=None, description="Execution status: planned, running, completed, aborted, or other."
+    )
+    conditions: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Per-execution test conditions and parameters as open snake_case name -> value (e.g. temperature, voltage window, C-rate, frequency range); values may be scalars, strings, or {value, unit} quantities.",
+    )
+    protocol: ProtocolInfo = Field(
+        default_factory=ProtocolInfo,
+        description="Name and optional URL of the protocol followed (authoring aliases: protocol_name=, protocol_url=).",
+    )
+    instrument: str | None = Field(
+        default=None, description="Instrument/cycler the test ran on (authoring alias: instrument_name=)."
+    )
+    equipment_id: str | None = Field(
+        default=None,
+        description="IRI of the equipment unit the test ran on (https://w3id.org/battinfo/equipment/{uid}).",
+    )
+    channel_id: str | None = Field(
+        default=None,
+        description="IRI of the equipment channel the test ran on (https://w3id.org/battinfo/channel/{uid}).",
+    )
+    started_at: int | str | None = Field(
+        default=None, description="When the test started: Unix seconds, ISO 8601 string, or datetime/date."
+    )
+    ended_at: int | str | None = Field(
+        default=None, description="When the test ended: Unix seconds, ISO 8601 string, or datetime/date."
+    )
     dataset_ids: _StrList = Field(default_factory=list, description="IRIs of datasets produced by this test.")
-    conformance: TestConformance | None = Field(default=None, description="Conformance of the execution against its test spec (status plus deviations).")
-    artifacts: list[Artifact] = Field(default_factory=list, description="Machine-actionable artifacts used in this execution (e.g. the cycler program as run).")
-    source: ProvenanceInfo = Field(default_factory=ProvenanceInfo, description="Provenance of this record (flat authoring aliases: source_type=, source_url=, retrieved_at=, ...).")
-    comment: _StrList = Field(default_factory=list, description="Free-text notes on the record (authoring alias: notes=).")
+    conformance: TestConformance | None = Field(
+        default=None, description="Conformance of the execution against its test spec (status plus deviations)."
+    )
+    artifacts: list[Artifact] = Field(
+        default_factory=list,
+        description="Machine-actionable artifacts used in this execution (e.g. the cycler program as run).",
+    )
+    source: ProvenanceInfo = Field(
+        default_factory=ProvenanceInfo,
+        description="Provenance of this record (flat authoring aliases: source_type=, source_url=, retrieved_at=, ...).",
+    )
+    comment: _StrList = Field(
+        default_factory=list, description="Free-text notes on the record (authoring alias: notes=)."
+    )
 
     def __init__(self, cell: Cell | None = None, /, **data: Any) -> None:
         # Absorb the flat authoring/input shape (formerly TestInput).
@@ -2576,9 +2902,15 @@ class Test(BundleJsonModel):
         if "notes" in data and "comment" not in data:
             data["comment"] = data.pop("notes")
         _flat_provenance = {
-            "source_type": "type", "source_name": "name", "source_file": "file", "source_url": "url",
-            "citation": "citation", "file_hash": "file_hash", "retrieved_at": "retrieved_at",
-            "workflow_version": "workflow_version", "curated_by": "curated_by",
+            "source_type": "type",
+            "source_name": "name",
+            "source_file": "file",
+            "source_url": "url",
+            "citation": "citation",
+            "file_hash": "file_hash",
+            "retrieved_at": "retrieved_at",
+            "workflow_version": "workflow_version",
+            "curated_by": "curated_by",
         }
         if any(key in data for key in _flat_provenance) and "source" not in data:
             data["source"] = {nested: data.pop(flat) for flat, nested in _flat_provenance.items() if flat in data}
@@ -2596,9 +2928,17 @@ class Test(BundleJsonModel):
                 )
             data["cell"] = cell
         _reject_unknown_kwargs(
-            type(self), data,
-            extra_allowed=("cell_id", "kind", "instrument_name", "protocol_name",
-                           "protocol_url", "notes", *_FLAT_PROVENANCE_KEYS),
+            type(self),
+            data,
+            extra_allowed=(
+                "cell_id",
+                "kind",
+                "instrument_name",
+                "protocol_name",
+                "protocol_url",
+                "notes",
+                *_FLAT_PROVENANCE_KEYS,
+            ),
         )
         super().__init__(**data)
 
@@ -2681,11 +3021,7 @@ class Test(BundleJsonModel):
         if not isinstance(dataset_ids, list):
             dataset_ids = []
         raw_conformance = test.get("conformance")
-        conformance = (
-            TestConformance.from_record(raw_conformance)
-            if isinstance(raw_conformance, Mapping)
-            else None
-        )
+        conformance = TestConformance.from_record(raw_conformance) if isinstance(raw_conformance, Mapping) else None
         artifacts = record.get("artifacts")
         if not isinstance(artifacts, list):
             artifacts = []
@@ -2721,7 +3057,9 @@ class Test(BundleJsonModel):
 
     def to_record(self) -> dict[str, Any]:
         if self.id is None:
-            raise ValueError("Test.id is required before serialization. Use battinfo.build_publication_package(...) or battinfo.publish(...) to finalize IDs.")
+            raise ValueError(
+                "Test.id is required before serialization. Use battinfo.build_publication_package(...) or battinfo.publish(...) to finalize IDs."
+            )
         if self.name is None:
             raise ValueError("Test.name is required before serialization.")
         if self.cell_instance_id is None:
@@ -2789,51 +3127,187 @@ class Dataset(BundleJsonModel):
     default_filename: ClassVar[str] = DATASET_FILENAME
 
     kind: str = "Dataset"
-    id: str | None = Field(default=None, description="Canonical IRI for this dataset (https://w3id.org/battinfo/dataset/{uid}); minted at save time when omitted.")
+    id: str | None = Field(
+        default=None,
+        description="Canonical IRI for this dataset (https://w3id.org/battinfo/dataset/{uid}); minted at save time when omitted.",
+    )
     # Transient short id used only to mint the canonical IRI when no id is given; never serialized.
-    uid: str | None = Field(default=None, exclude=True, repr=False, description="Transient 16-char Crockford Base32 uid used to mint the canonical IRI when no id is given; never serialized.")
-    identifier: Any = Field(default=None, description="External identifier (e.g. {'property_id': 'doi', 'value': '10.5281/...'}); defaults to one derived from the IRI.")
+    uid: str | None = Field(
+        default=None,
+        exclude=True,
+        repr=False,
+        description="Transient 16-char Crockford Base32 uid used to mint the canonical IRI when no id is given; never serialized.",
+    )
+    identifier: Any = Field(
+        default=None,
+        description="External identifier (e.g. {'property_id': 'doi', 'value': '10.5281/...'}); defaults to one derived from the IRI.",
+    )
     name: str | None = Field(default=None, description="Dataset title (authoring alias: title=).")
-    handle: str | None = Field(default=None, description="Short readable slug, unique within one registry workspace and shown as <workspace>/<handle> (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text only, never part of the identity; build one with battinfo.naming.handle_for().")
+    handle: str | None = Field(
+        default=None,
+        description="Short readable slug, unique within one registry workspace and shown as <workspace>/<handle> (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text only, never part of the identity; build one with battinfo.naming.handle_for().",
+    )
     description: str | None = Field(default=None, description="Free-text description of the dataset contents.")
     license: str | None = Field(default=None, description="License URL (e.g. a creativecommons.org license).")
-    same_as: _StrList = Field(default_factory=list, validation_alias=AliasChoices("same_as", "sameAs"), description="URLs of other representations of this same dataset.")
-    additional_type: _StrList = Field(default_factory=list, validation_alias=AliasChoices("additional_type", "additionalType"), description="Additional schema.org/ontology type IRIs for discovery.")
+    same_as: _StrList = Field(
+        default_factory=list,
+        validation_alias=AliasChoices("same_as", "sameAs"),
+        description="URLs of other representations of this same dataset.",
+    )
+    additional_type: _StrList = Field(
+        default_factory=list,
+        validation_alias=AliasChoices("additional_type", "additionalType"),
+        description="Additional schema.org/ontology type IRIs for discovery.",
+    )
     version: str | None = Field(default=None, description="Dataset version label.")
     keywords: _StrList = Field(default_factory=list, description="Free-text discovery keywords.")
-    creators: list[dict[str, Any]] = Field(default_factory=list, validation_alias=AliasChoices("creators", "creator"), description="Creator agents; dicts with name and optionally orcid, given_name/family_name, affiliation.")
-    publisher: dict[str, Any] | None = Field(default=None, description="Publishing agent (name plus optional url/ROR sameAs).")
-    funders: list[dict[str, Any]] = Field(default_factory=list, validation_alias=AliasChoices("funders", "funder"), description="Funding agents (name plus optional ROR sameAs).")
-    citations: list[dict[str, Any]] = Field(default_factory=list, validation_alias=AliasChoices("citations", "citation"), description="Bibliographic references describing this dataset (list; a flat string citation= is routed to provenance instead).")
-    measurement_techniques: _StrList = Field(default_factory=list, validation_alias=AliasChoices("measurement_techniques", "measurementTechnique"), description="Measurement techniques used (e.g. 'electrochemical cycling').")
-    measurement_methods: _StrList = Field(default_factory=list, validation_alias=AliasChoices("measurement_methods", "measurementMethod"), description="Measurement methods used (e.g. 'constant current').")
-    variable_measured: list[dict[str, Any]] = Field(default_factory=list, validation_alias=AliasChoices("variable_measured", "variableMeasured"), description="Measured variables; dicts with name, unit_text, and optional QUDT sameAs.")
-    is_accessible_for_free: bool | None = Field(default=None, validation_alias=AliasChoices("is_accessible_for_free", "isAccessibleForFree"), description="Whether the data is accessible without payment.")
-    conditions_of_access: str | None = Field(default=None, validation_alias=AliasChoices("conditions_of_access", "conditionsOfAccess"), description="Access conditions statement (e.g. 'open', 'on request').")
-    in_language: str | None = Field(default=None, validation_alias=AliasChoices("in_language", "inLanguage"), description="Language tag of textual content (e.g. 'en').")
-    data_format: str | None = Field(default=None, description="Media type of the data (authoring alias: format=; e.g. 'application/x-hdf5').")
-    dataset_path: str | None = Field(default=None, validation_alias=AliasChoices("dataset_path", "path"), description="Local path to the data (may also be passed positionally); workspace/publication flows derive access_url from it.")
-    access_url: str | None = Field(default=None, description="Landing page or direct download URL where the data lives (schema-required at serialization; a dataset path or provenance source_url also satisfies it).")
-    download_url: str | None = Field(default=None, description="Direct download URL when it differs from the landing page.")
-    created_at: int | str | None = Field(default=None, validation_alias=AliasChoices("created_at", "dateCreated"), description="When the dataset was created: Unix seconds, ISO 8601 string, or datetime/date (defaults to now at save).")
-    modified_at: int | str | None = Field(default=None, validation_alias=AliasChoices("modified_at", "dateModified"), description="Last modification time; defaults to created_at.")
-    published_at: int | str | None = Field(default=None, validation_alias=AliasChoices("published_at", "datePublished"), description="Publication time; defaults to created_at.")
-    temporal_coverage: str | None = Field(default=None, validation_alias=AliasChoices("temporal_coverage", "temporalCoverage"), description="Time interval the data covers (ISO 8601 interval, e.g. '2026-01-01/2026-01-31').")
-    spatial_coverage: str | None = Field(default=None, validation_alias=AliasChoices("spatial_coverage", "spatialCoverage"), description="Place the data was collected (free text).")
-    is_based_on: _StrList = Field(default_factory=list, validation_alias=AliasChoices("is_based_on", "isBasedOn"), description="URLs of resources this dataset derives from (e.g. a protocol).")
-    series_id: str | None = Field(default=None, validation_alias=AliasChoices("series_id", "seriesId"), description="Canonical IRI of the dataset series (dcat:DatasetSeries record) this dataset belongs to.")
-    included_in_data_catalog: str | dict[str, Any] | None = Field(default=None, validation_alias=AliasChoices("included_in_data_catalog", "includedInDataCatalog"), description="Catalog this dataset is listed in (URL or DataCatalog object).")
-    main_entity: list[dict[str, Any]] = Field(default_factory=list, validation_alias=AliasChoices("main_entity", "mainEntity"), description="Primary content entities (e.g. a CSVW Table with its tableSchema).")
-    distributions: list[dict[str, Any]] = Field(default_factory=list, validation_alias=AliasChoices("distributions", "distribution"), description="DataDownload entries (content_url, encoding_format, checksum); synthesized from download_url/data_format/checksum when omitted.")
-    checksum: ChecksumInfo = Field(default_factory=ChecksumInfo, description="Checksum of the primary distribution (authoring aliases: checksum_algorithm=, checksum_value=).")
-    cell_instance_id: str | None = Field(default=None, description="IRI of the primary cell this data was measured on (emitted first in the record's about list).")
-    test_id: str | None = Field(default=None, description="IRI of the primary test that produced this data (emitted first in the record's about list).")
-    related_cell_ids: _StrList = Field(default_factory=list, description="IRIs of additional related cells beyond the primary one.")
-    related_test_ids: _StrList = Field(default_factory=list, description="IRIs of additional related tests beyond the primary one.")
-    test: Test | None = Field(default=None, exclude=True, repr=False, description="Linked test object (alternative to test_id).")
-    cell: Cell | None = Field(default=None, exclude=True, repr=False, description="Linked cell-instance object (alternative to cell_instance_id).")
-    source: ProvenanceInfo = Field(default_factory=ProvenanceInfo, description="Provenance of this record (flat authoring aliases: source_type=, source_url=, retrieved_at=, curated_by=, ...).")
-    comment: _StrList = Field(default_factory=list, description="Free-text notes on the record (authoring alias: notes=).")
+    creators: list[dict[str, Any]] = Field(
+        default_factory=list,
+        validation_alias=AliasChoices("creators", "creator"),
+        description="Creator agents; dicts with name and optionally orcid, given_name/family_name, affiliation.",
+    )
+    publisher: dict[str, Any] | None = Field(
+        default=None, description="Publishing agent (name plus optional url/ROR sameAs)."
+    )
+    funders: list[dict[str, Any]] = Field(
+        default_factory=list,
+        validation_alias=AliasChoices("funders", "funder"),
+        description="Funding agents (name plus optional ROR sameAs).",
+    )
+    citations: list[dict[str, Any]] = Field(
+        default_factory=list,
+        validation_alias=AliasChoices("citations", "citation"),
+        description="Bibliographic references describing this dataset (list; a flat string citation= is routed to provenance instead).",
+    )
+    measurement_techniques: _StrList = Field(
+        default_factory=list,
+        validation_alias=AliasChoices("measurement_techniques", "measurementTechnique"),
+        description="Measurement techniques used (e.g. 'electrochemical cycling').",
+    )
+    measurement_methods: _StrList = Field(
+        default_factory=list,
+        validation_alias=AliasChoices("measurement_methods", "measurementMethod"),
+        description="Measurement methods used (e.g. 'constant current').",
+    )
+    variable_measured: list[dict[str, Any]] = Field(
+        default_factory=list,
+        validation_alias=AliasChoices("variable_measured", "variableMeasured"),
+        description="Measured variables; dicts with name, unit_text, and optional QUDT sameAs.",
+    )
+    is_accessible_for_free: bool | None = Field(
+        default=None,
+        validation_alias=AliasChoices("is_accessible_for_free", "isAccessibleForFree"),
+        description="Whether the data is accessible without payment.",
+    )
+    conditions_of_access: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("conditions_of_access", "conditionsOfAccess"),
+        description="Access conditions statement (e.g. 'open', 'on request').",
+    )
+    in_language: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("in_language", "inLanguage"),
+        description="Language tag of textual content (e.g. 'en').",
+    )
+    data_format: str | None = Field(
+        default=None, description="Media type of the data (authoring alias: format=; e.g. 'application/x-hdf5')."
+    )
+    dataset_path: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("dataset_path", "path"),
+        description="Local path to the data (may also be passed positionally); workspace/publication flows derive access_url from it.",
+    )
+    access_url: str | None = Field(
+        default=None,
+        description="Landing page or direct download URL where the data lives (schema-required at serialization; a dataset path or provenance source_url also satisfies it).",
+    )
+    download_url: str | None = Field(
+        default=None, description="Direct download URL when it differs from the landing page."
+    )
+    created_at: int | str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("created_at", "dateCreated"),
+        description="When the dataset was created: Unix seconds, ISO 8601 string, or datetime/date (defaults to now at save).",
+    )
+    modified_at: int | str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("modified_at", "dateModified"),
+        description="Last modification time; defaults to created_at.",
+    )
+    published_at: int | str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("published_at", "datePublished"),
+        description="Publication time; defaults to created_at.",
+    )
+    temporal_coverage: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("temporal_coverage", "temporalCoverage"),
+        description="Time interval the data covers (ISO 8601 interval, e.g. '2026-01-01/2026-01-31').",
+    )
+    spatial_coverage: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("spatial_coverage", "spatialCoverage"),
+        description="Place the data was collected (free text).",
+    )
+    is_based_on: _StrList = Field(
+        default_factory=list,
+        validation_alias=AliasChoices("is_based_on", "isBasedOn"),
+        description="URLs of resources this dataset derives from (e.g. a protocol).",
+    )
+    series_id: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("series_id", "seriesId"),
+        description="Canonical IRI of the dataset series (dcat:DatasetSeries record) this dataset belongs to.",
+    )
+    included_in_data_catalog: str | dict[str, Any] | None = Field(
+        default=None,
+        validation_alias=AliasChoices("included_in_data_catalog", "includedInDataCatalog"),
+        description="Catalog this dataset is listed in (URL or DataCatalog object).",
+    )
+    main_entity: list[dict[str, Any]] = Field(
+        default_factory=list,
+        validation_alias=AliasChoices("main_entity", "mainEntity"),
+        description="Primary content entities (e.g. a CSVW Table with its tableSchema).",
+    )
+    distributions: list[dict[str, Any]] = Field(
+        default_factory=list,
+        validation_alias=AliasChoices("distributions", "distribution"),
+        description="DataDownload entries (content_url, encoding_format, checksum); synthesized from download_url/data_format/checksum when omitted.",
+    )
+    checksum: ChecksumInfo = Field(
+        default_factory=ChecksumInfo,
+        description="Checksum of the primary distribution (authoring aliases: checksum_algorithm=, checksum_value=).",
+    )
+    cell_instance_id: str | None = Field(
+        default=None,
+        description="IRI of the primary cell this data was measured on (emitted first in the record's about list).",
+    )
+    test_id: str | None = Field(
+        default=None,
+        description="IRI of the primary test that produced this data (emitted first in the record's about list).",
+    )
+    related_cell_ids: _StrList = Field(
+        default_factory=list, description="IRIs of additional related cells beyond the primary one."
+    )
+    related_test_ids: _StrList = Field(
+        default_factory=list, description="IRIs of additional related tests beyond the primary one."
+    )
+    test: Test | None = Field(
+        default=None, exclude=True, repr=False, description="Linked test object (alternative to test_id)."
+    )
+    cell: Cell | None = Field(
+        default=None,
+        exclude=True,
+        repr=False,
+        description="Linked cell-instance object (alternative to cell_instance_id).",
+    )
+    source: ProvenanceInfo = Field(
+        default_factory=ProvenanceInfo,
+        description="Provenance of this record (flat authoring aliases: source_type=, source_url=, retrieved_at=, curated_by=, ...).",
+    )
+    comment: _StrList = Field(
+        default_factory=list, description="Free-text notes on the record (authoring alias: notes=)."
+    )
 
     def __init__(self, path: str | Path | None = None, /, **data: Any) -> None:
         if path is not None and "dataset_path" not in data and "path" not in data:
@@ -2858,9 +3332,13 @@ class Dataset(BundleJsonModel):
         # into that source (an already-set source.citation wins).
         _prov_citation = data.pop("citation") if isinstance(data.get("citation"), str) else None
         _flat_provenance = {
-            "source_type": "type", "source_name": "name", "source_file": "file",
-            "source_url": "url", "file_hash": "file_hash",
-            "retrieved_at": "retrieved_at", "workflow_version": "workflow_version",
+            "source_type": "type",
+            "source_name": "name",
+            "source_file": "file",
+            "source_url": "url",
+            "file_hash": "file_hash",
+            "retrieved_at": "retrieved_at",
+            "workflow_version": "workflow_version",
             "curated_by": "curated_by",
         }
         if any(key in data for key in _flat_provenance) and "source" not in data:
@@ -2876,9 +3354,19 @@ class Dataset(BundleJsonModel):
             elif isinstance(source, ProvenanceInfo) and source.citation is None:
                 data["source"] = source.model_copy(update={"citation": _prov_citation})
         _reject_unknown_kwargs(
-            type(self), data,
-            extra_allowed=("title", "format", "citation_list", "checksum_algorithm",
-                           "checksum_value", "notes", "citation", "path", *_FLAT_PROVENANCE_KEYS),
+            type(self),
+            data,
+            extra_allowed=(
+                "title",
+                "format",
+                "citation_list",
+                "checksum_algorithm",
+                "checksum_value",
+                "notes",
+                "citation",
+                "path",
+                *_FLAT_PROVENANCE_KEYS,
+            ),
         )
         super().__init__(**data)
 
@@ -2964,9 +3452,7 @@ class Dataset(BundleJsonModel):
                 self.cell_instance_id = self.test.cell_instance_id
         if self.name is None:
             self.name = (
-                Path(self.dataset_path).name
-                if self.dataset_path is not None
-                else self.access_url or _id_tail(self.id)
+                Path(self.dataset_path).name if self.dataset_path is not None else self.access_url or _id_tail(self.id)
             )
         if self.modified_at is None:
             self.modified_at = self.created_at
@@ -3089,11 +3575,27 @@ class Dataset(BundleJsonModel):
             creators=_mapping_list(dataset.get("creators")),
             publisher=_canonical_agent(dataset.get("publisher")),
             funders=_mapping_list(dataset.get("funders")),
-            citations=[citation for item in (dataset.get("citations") if isinstance(dataset.get("citations"), list) else [dataset.get("citations")] if dataset.get("citations") is not None else []) if (citation := _canonical_citation(item)) is not None],
+            citations=[
+                citation
+                for item in (
+                    dataset.get("citations")
+                    if isinstance(dataset.get("citations"), list)
+                    else [dataset.get("citations")]
+                    if dataset.get("citations") is not None
+                    else []
+                )
+                if (citation := _canonical_citation(item)) is not None
+            ],
             measurement_techniques=_string_list(dataset.get("measurement_techniques")),
             measurement_methods=_string_list(dataset.get("measurement_methods")),
-            variable_measured=[variable for item in _mapping_list(dataset.get("variable_measured")) if (variable := _canonical_variable_measured(item)) is not None],
-            is_accessible_for_free=dataset.get("is_accessible_for_free") if isinstance(dataset.get("is_accessible_for_free"), bool) else None,
+            variable_measured=[
+                variable
+                for item in _mapping_list(dataset.get("variable_measured"))
+                if (variable := _canonical_variable_measured(item)) is not None
+            ],
+            is_accessible_for_free=dataset.get("is_accessible_for_free")
+            if isinstance(dataset.get("is_accessible_for_free"), bool)
+            else None,
             conditions_of_access=dataset.get("conditions_of_access"),
             in_language=dataset.get("in_language"),
             data_format=data_format,
@@ -3108,8 +3610,14 @@ class Dataset(BundleJsonModel):
             is_based_on=_string_list(dataset.get("is_based_on")),
             series_id=dataset.get("series_id") if isinstance(dataset.get("series_id"), str) else None,
             included_in_data_catalog=_canonical_data_catalog(dataset.get("included_in_data_catalog")),
-            main_entity=[entity for item in _mapping_list(dataset.get("main_entity")) if (entity := _canonical_main_entity(item)) is not None],
-            distributions=[dist for item in _mapping_list(distribution) if (dist := _canonical_distribution(item)) is not None],
+            main_entity=[
+                entity
+                for item in _mapping_list(dataset.get("main_entity"))
+                if (entity := _canonical_main_entity(item)) is not None
+            ],
+            distributions=[
+                dist for item in _mapping_list(distribution) if (dist := _canonical_distribution(item)) is not None
+            ],
             checksum=checksum,
             cell_instance_id=related_cell_id,
             test_id=related_test_id,
@@ -3121,7 +3629,9 @@ class Dataset(BundleJsonModel):
 
     def to_record(self) -> dict[str, Any]:
         if self.id is None:
-            raise ValueError("Dataset.id is required before serialization. Use battinfo.build_publication_package(...) or battinfo.publish(...) to finalize IDs.")
+            raise ValueError(
+                "Dataset.id is required before serialization. Use battinfo.build_publication_package(...) or battinfo.publish(...) to finalize IDs."
+            )
         if self.name is None:
             raise ValueError("Dataset.name is required before serialization.")
         dataset_obj: dict[str, Any] = {
@@ -3191,12 +3701,16 @@ class Dataset(BundleJsonModel):
             dataset_obj["spatial_coverage"] = self.spatial_coverage
         # Primary references come FIRST so from_record() can recover the primary/related
         # split from the flat `about` list (first cell id = primary, rest = related).
-        about = list(dict.fromkeys([
-            *([self.cell_instance_id] if self.cell_instance_id is not None else []),
-            *self.related_cell_ids,
-            *([self.test_id] if self.test_id is not None else []),
-            *self.related_test_ids,
-        ]))
+        about = list(
+            dict.fromkeys(
+                [
+                    *([self.cell_instance_id] if self.cell_instance_id is not None else []),
+                    *self.related_cell_ids,
+                    *([self.test_id] if self.test_id is not None else []),
+                    *self.related_test_ids,
+                ]
+            )
+        )
         if about:
             dataset_obj["about"] = about
         if self.is_based_on:
@@ -3293,18 +3807,16 @@ class BattinfoBundle(BundleJsonModel):
             cell_instance=Cell.from_path(root / str(manifest.get("cell_instance_file", CELL_INSTANCE_FILENAME))),
             test=Test.from_path(root / str(manifest.get("test_file", TEST_FILENAME))),
             dataset=Dataset.from_path(root / str(manifest.get("dataset_file", DATASET_FILENAME))),
-            comment=[str(item) for item in manifest.get("comment", [])] if isinstance(manifest.get("comment"), list) else [],
+            comment=[str(item) for item in manifest.get("comment", [])]
+            if isinstance(manifest.get("comment"), list)
+            else [],
         )
 
     @classmethod
     def from_jsonld(cls, source: Mapping[str, Any] | PathLike) -> Self:
         payload = _read_json(_as_path(source)) if isinstance(source, (str, Path)) else dict(source)
         graph = _graph_nodes(payload)
-        graph_by_id = {
-            str(node["@id"]): node
-            for node in graph
-            if isinstance(node.get("@id"), str)
-        }
+        graph_by_id = {str(node["@id"]): node for node in graph if isinstance(node.get("@id"), str)}
 
         def _is_cell_instance(node: Mapping[str, Any]) -> bool:
             # Legacy shapes; or the gold-standard instance node, whose @type is the
@@ -3314,7 +3826,8 @@ class BattinfoBundle(BundleJsonModel):
                 return True
             nid = node.get("@id")
             return (
-                isinstance(nid, str) and "/cell/" in nid
+                isinstance(nid, str)
+                and "/cell/" in nid
                 and bool(node.get("hasDescription") or node.get("dcterms:conformsTo"))
             )
 
@@ -3327,15 +3840,16 @@ class BattinfoBundle(BundleJsonModel):
             cell_spec_id = next((value for value in _type_values(cell_instance_node) if "/cell-spec/" in value), None)
             if cell_spec_id is None:
                 # hasDescription is the current term; schema:isVariantOf is kept for backward compatibility
-                cell_spec_id = _ref_id(cell_instance_node.get("hasDescription") or cell_instance_node.get("schema:isVariantOf"))
+                cell_spec_id = _ref_id(
+                    cell_instance_node.get("hasDescription") or cell_instance_node.get("schema:isVariantOf")
+                )
         cell_spec_node = graph_by_id.get(cell_spec_id) if cell_spec_id is not None else None
         if cell_spec_node is None:
             cell_spec_node = next(
                 (
                     node
                     for node in graph
-                    if _node_has_type(node, OWL_CLASS_IRI)
-                    or _node_has_type(node, "BatteryCellSpecification")
+                    if _node_has_type(node, OWL_CLASS_IRI) or _node_has_type(node, "BatteryCellSpecification")
                 ),
                 None,
             )
@@ -3404,9 +3918,7 @@ class BattinfoBundle(BundleJsonModel):
         if not isinstance(manufacturer_obj, Mapping) and cell_specification_node is not None:
             manufacturer_obj = cell_specification_node.get("schema:manufacturer")
         manufacturer = (
-            manufacturer_obj.get("schema:name")
-            if isinstance(manufacturer_obj, Mapping)
-            else manufacturer_obj
+            manufacturer_obj.get("schema:name") if isinstance(manufacturer_obj, Mapping) else manufacturer_obj
         )
         properties: dict[str, Any] = {}
         property_source = cell_specification_node if cell_specification_node is not None else cell_spec_node
@@ -3434,31 +3946,48 @@ class BattinfoBundle(BundleJsonModel):
         is_desc_types = _type_values(is_desc) if isinstance(is_desc, Mapping) else []
         format_value = (
             "coin"
-            if "CoinCell" in subclass_ids or _node_has_type(cell_instance_node, "CoinCell") or "CoinCell" in is_desc_types
+            if "CoinCell" in subclass_ids
+            or _node_has_type(cell_instance_node, "CoinCell")
+            or "CoinCell" in is_desc_types
             else "cylindrical"
-            if "CylindricalBattery" in subclass_ids or _node_has_type(cell_instance_node, "CylindricalBattery") or "CylindricalBattery" in is_desc_types
+            if "CylindricalBattery" in subclass_ids
+            or _node_has_type(cell_instance_node, "CylindricalBattery")
+            or "CylindricalBattery" in is_desc_types
             else "pouch"
-            if "PouchCell" in subclass_ids or _node_has_type(cell_instance_node, "PouchCell") or "PouchCell" in is_desc_types
+            if "PouchCell" in subclass_ids
+            or _node_has_type(cell_instance_node, "PouchCell")
+            or "PouchCell" in is_desc_types
             else "prismatic"
-            if "PrismaticBattery" in subclass_ids or _node_has_type(cell_instance_node, "PrismaticBattery") or "PrismaticBattery" in is_desc_types
+            if "PrismaticBattery" in subclass_ids
+            or _node_has_type(cell_instance_node, "PrismaticBattery")
+            or "PrismaticBattery" in is_desc_types
             else "unknown"
         )
         cell_spec = CellSpec(
             id=str(cell_spec_node["@id"]),
-            name=str(cell_spec_node.get("schema:name") or f"{manufacturer} {cell_spec_node.get('schema:model') or 'unknown'}"),
+            name=str(
+                cell_spec_node.get("schema:name") or f"{manufacturer} {cell_spec_node.get('schema:model') or 'unknown'}"
+            ),
             manufacturer=str(manufacturer or "unknown"),
             model=str(
                 cell_spec_node.get("schema:model")
-                or (cell_specification_node.get("schema:model") if isinstance(cell_specification_node, Mapping) else None)
+                or (
+                    cell_specification_node.get("schema:model")
+                    if isinstance(cell_specification_node, Mapping)
+                    else None
+                )
                 or cell_spec_node.get("schema:name")
                 or "unknown"
             ),
             format=format_value,
             chemistry="unknown",
-            size_code=cell_spec_node.get("schema:size") or (cell_specification_node.get("schema:size") if isinstance(cell_specification_node, Mapping) else None),
+            size_code=cell_spec_node.get("schema:size")
+            or (cell_specification_node.get("schema:size") if isinstance(cell_specification_node, Mapping) else None),
             country_of_origin=_country_name_value(cell_spec_node.get("schema:countryOfOrigin")),
             year=_year_value(cell_spec_node.get("schema:releaseDate")),
-            cell_specification_id=str(cell_specification_node.get("@id")) if isinstance(cell_specification_node, Mapping) else None,
+            cell_specification_id=str(cell_specification_node.get("@id"))
+            if isinstance(cell_specification_node, Mapping)
+            else None,
             properties=properties,
             source=ProvenanceInfo(
                 type=source_obj.get("schema:additionalType"),
@@ -3550,7 +4079,9 @@ class BattinfoBundle(BundleJsonModel):
             started_at=test_node.get("schema:startTime"),
         )
         dataset_distribution = dataset_node.get("schema:distribution")
-        first_distribution = dataset_distribution[0] if isinstance(dataset_distribution, list) and dataset_distribution else {}
+        first_distribution = (
+            dataset_distribution[0] if isinstance(dataset_distribution, list) and dataset_distribution else {}
+        )
         dataset_main_entity = dataset_node.get("schema:mainEntity")
         # An IRI reference in deposits, a bare string in older ones. An spdx.org
         # page that earlier versions spelled in lower case (a 404) is read back
@@ -3570,25 +4101,66 @@ class BattinfoBundle(BundleJsonModel):
             additional_type=_text_list(dataset_node.get("schema:additionalType")),
             version=dataset_node.get("schema:version"),
             keywords=_text_list(dataset_node.get("schema:keywords")),
-            creators=[agent for item in (dataset_node.get("schema:creator") if isinstance(dataset_node.get("schema:creator"), list) else [dataset_node.get("schema:creator")] if dataset_node.get("schema:creator") is not None else []) if (agent := _canonical_agent(item)) is not None],
+            creators=[
+                agent
+                for item in (
+                    dataset_node.get("schema:creator")
+                    if isinstance(dataset_node.get("schema:creator"), list)
+                    else [dataset_node.get("schema:creator")]
+                    if dataset_node.get("schema:creator") is not None
+                    else []
+                )
+                if (agent := _canonical_agent(item)) is not None
+            ],
             publisher=_canonical_agent(dataset_node.get("schema:publisher")),
-            funders=[agent for item in (dataset_node.get("schema:funder") if isinstance(dataset_node.get("schema:funder"), list) else [dataset_node.get("schema:funder")] if dataset_node.get("schema:funder") is not None else []) if (agent := _canonical_agent(item)) is not None],
-            citations=[citation for item in (dataset_node.get("schema:citation") if isinstance(dataset_node.get("schema:citation"), list) else [dataset_node.get("schema:citation")] if dataset_node.get("schema:citation") is not None else []) if (citation := _canonical_citation(item)) is not None],
+            funders=[
+                agent
+                for item in (
+                    dataset_node.get("schema:funder")
+                    if isinstance(dataset_node.get("schema:funder"), list)
+                    else [dataset_node.get("schema:funder")]
+                    if dataset_node.get("schema:funder") is not None
+                    else []
+                )
+                if (agent := _canonical_agent(item)) is not None
+            ],
+            citations=[
+                citation
+                for item in (
+                    dataset_node.get("schema:citation")
+                    if isinstance(dataset_node.get("schema:citation"), list)
+                    else [dataset_node.get("schema:citation")]
+                    if dataset_node.get("schema:citation") is not None
+                    else []
+                )
+                if (citation := _canonical_citation(item)) is not None
+            ],
             measurement_techniques=_text_list(dataset_node.get("schema:measurementTechnique")),
             measurement_methods=_text_list(dataset_node.get("schema:measurementMethod")),
-            variable_measured=[variable for item in _mapping_list(dataset_node.get("schema:variableMeasured")) if (variable := _canonical_variable_measured(item)) is not None],
-            is_accessible_for_free=dataset_node.get("schema:isAccessibleForFree") if isinstance(dataset_node.get("schema:isAccessibleForFree"), bool) else None,
+            variable_measured=[
+                variable
+                for item in _mapping_list(dataset_node.get("schema:variableMeasured"))
+                if (variable := _canonical_variable_measured(item)) is not None
+            ],
+            is_accessible_for_free=dataset_node.get("schema:isAccessibleForFree")
+            if isinstance(dataset_node.get("schema:isAccessibleForFree"), bool)
+            else None,
             conditions_of_access=dataset_node.get("schema:conditionsOfAccess"),
             in_language=dataset_node.get("schema:inLanguage"),
-            data_format=first_distribution.get("schema:encodingFormat") if isinstance(first_distribution, Mapping) else None,
+            data_format=first_distribution.get("schema:encodingFormat")
+            if isinstance(first_distribution, Mapping)
+            else None,
             access_url=dataset_node.get("schema:url"),
-            download_url=first_distribution.get("schema:contentUrl") if isinstance(first_distribution, Mapping) else None,
+            download_url=first_distribution.get("schema:contentUrl")
+            if isinstance(first_distribution, Mapping)
+            else None,
             created_at=dataset_node.get("schema:dateCreated"),
             modified_at=dataset_node.get("schema:dateModified"),
             published_at=dataset_node.get("schema:datePublished"),
             temporal_coverage=dataset_node.get("schema:temporalCoverage"),
             spatial_coverage=dataset_node.get("schema:spatialCoverage"),
-            is_based_on=_ref_ids(dataset_node.get("schema:isBasedOn")) or _text_list(dataset_node.get("schema:isBasedOn")),
+            is_based_on=_ref_ids(dataset_node.get("schema:isBasedOn"))
+            or _text_list(dataset_node.get("schema:isBasedOn")),
             series_id=_ref_id(dataset_node.get("dcat:inSeries")) or _ref_id(dataset_node.get("schema:isPartOf")),
             included_in_data_catalog=_canonical_data_catalog(
                 _ref_id(dataset_node.get("schema:includedInDataCatalog"))
@@ -3598,19 +4170,29 @@ class BattinfoBundle(BundleJsonModel):
                     else None
                 )
             ),
-            main_entity=[entity for item in _mapping_list(dataset_main_entity) if (entity := _canonical_main_entity(item)) is not None],
-            distributions=[dist for item in _mapping_list(dataset_distribution) if (dist := _canonical_distribution(item)) is not None],
+            main_entity=[
+                entity
+                for item in _mapping_list(dataset_main_entity)
+                if (entity := _canonical_main_entity(item)) is not None
+            ],
+            distributions=[
+                dist
+                for item in _mapping_list(dataset_distribution)
+                if (dist := _canonical_distribution(item)) is not None
+            ],
             # In the gold-standard shape the dataset→test link lives on the test
             # (prov:generated / hasOutput), not in the dataset's schema:about, so fall
             # back to the reconstructed test/cell-instance of this single-dataset bundle.
             cell_instance_id=next(
                 (ref_id for ref_id in _ref_ids(dataset_node.get("schema:about")) if "/cell/" in ref_id),
                 None,
-            ) or cell_instance.id,
+            )
+            or cell_instance.id,
             test_id=next(
                 (ref_id for ref_id in _ref_ids(dataset_node.get("schema:about")) if "/test/" in ref_id),
                 None,
-            ) or str(test_node.get("@id")),
+            )
+            or str(test_node.get("@id")),
         )
         return cls(
             bundle_name=dataset.name,
@@ -3726,11 +4308,13 @@ class ZenodoCellRecord(BaseModel):
             ci_raws = entry_raw.get("cell_instances") or []
             if not isinstance(ci_raws, list):
                 raise ValueError(f"datasets[{i}].cell_instances must be a list.")
-            entries.append(ZenodoDatasetEntry(
-                cell_instances=[Cell.from_record(ci) for ci in ci_raws if isinstance(ci, Mapping)],
-                test=Test.from_record(test_raw),
-                dataset=Dataset.from_record(ds_raw),
-            ))
+            entries.append(
+                ZenodoDatasetEntry(
+                    cell_instances=[Cell.from_record(ci) for ci in ci_raws if isinstance(ci, Mapping)],
+                    test=Test.from_record(test_raw),
+                    dataset=Dataset.from_record(ds_raw),
+                )
+            )
 
         return cls(
             schema_version=_stored_schema_version(data),

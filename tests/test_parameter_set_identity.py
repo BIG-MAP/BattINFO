@@ -20,6 +20,7 @@ Rules under test:
 - supersede_parameter_set() builds the dataset/ replacement of a legacy
   record from the current seeds.
 """
+
 from __future__ import annotations
 
 import copy
@@ -169,9 +170,7 @@ def test_an_id_in_neither_namespace_says_which_are_accepted() -> None:
 def test_the_builders_never_mint_under_spec() -> None:
     legacy = _legacy(CLAIM_BATCH_FIXTURE)["parameter_set"]
     with pytest.raises(ValueError, match=r"IDENTIFIER_POLICY 6\.3.*supersede_parameter_set"):
-        create_parameter_set(
-            id=legacy["id"], name=legacy["name"], material_kind="graphite", claims=legacy["claims"]
-        )
+        create_parameter_set(id=legacy["id"], name=legacy["name"], material_kind="graphite", claims=legacy["claims"])
     from battinfo.interop import from_bpx_parameters
 
     fixture = Path(__file__).resolve().parent / "fixtures" / "interop" / "bpx-dfn-full.bpx.json"
@@ -223,7 +222,8 @@ def test_a_lookup_opens_only_the_parameter_set_file_named_by_the_uid(
     assert _find_record_path_by_id(_load(CLAIM_BATCH_FIXTURE)["parameter_set"]["id"], tmp_path) == current
     assert _find_record(legacy["parameter_set"]["id"], tmp_path) is not None
     assert [path.name for path in opened if path.parent.name == "parameter-set"] == [
-        current.name, f"parameter-set-{legacy['parameter_set']['id'].rsplit('/', 1)[-1]}.json",
+        current.name,
+        f"parameter-set-{legacy['parameter_set']['id'].rsplit('/', 1)[-1]}.json",
     ]
 
 
@@ -287,8 +287,10 @@ def test_a_workspace_saves_a_legacy_record_and_refuses_to_submit_it(tmp_path: Pa
     assert [p.name for p in saved] == ["parameter-set-8qqs-rh43-wt8d-172n.json"]
     with pytest.raises(SubmitError) as excinfo:
         ws.submit(
-            registry_url="https://registry.example.org", api_key="placeholder",
-            workspace_id="placeholder", publisher_id="placeholder",
+            registry_url="https://registry.example.org",
+            api_key="placeholder",
+            workspace_id="placeholder",
+            publisher_id="placeholder",
         )
     assert "supersede_parameter_set" in excinfo.value.failed[0]["error"]
 
@@ -304,10 +306,14 @@ def _no_zenodo(*args: object, **kwargs: object) -> None:
 CREATORS = [{"name": "Doe, Jane"}]  # a deposit without creators is refused before anything else
 
 
-@pytest.mark.parametrize("record,code", [
-    (_legacy(CLAIM_BATCH_FIXTURE), LEGACY_CODE),
-    (_moved(CLAIM_BATCH_FIXTURE), "semantic.parameter_set_uid_reused"),
-], ids=["spec-iri", "spec-uid-under-dataset"])
+@pytest.mark.parametrize(
+    "record,code",
+    [
+        (_legacy(CLAIM_BATCH_FIXTURE), LEGACY_CODE),
+        (_moved(CLAIM_BATCH_FIXTURE), "semantic.parameter_set_uid_reused"),
+    ],
+    ids=["spec-iri", "spec-uid-under-dataset"],
+)
 def test_ws_zenodo_refuses_a_parameter_set_ws_submit_refuses(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, record: dict, code: str
 ) -> None:
@@ -347,16 +353,12 @@ def test_ws_zenodo_deposits_a_dataset_parameter_set(tmp_path: Path, monkeypatch:
 def test_a_record_that_supersedes_itself_is_an_error_under_every_policy(policy: str) -> None:
     record = _load(CLAIM_BATCH_FIXTURE)
     record["parameter_set"]["supersedes"] = record["parameter_set"]["id"]
-    assert "semantic.parameter_set_supersedes_itself" in _codes(
-        validate_record_report(record, policy=policy), "error"
-    )
+    assert "semantic.parameter_set_supersedes_itself" in _codes(validate_record_report(record, policy=policy), "error")
 
 
 @pytest.mark.parametrize("path", [CLAIM_BATCH_FIXTURE, PARAMETER_FILE_EXAMPLE], ids=["claims", "file"])
 @pytest.mark.parametrize("policy", ["default", "strict", "ingest", "publisher"])
-def test_keeping_the_uid_of_the_superseded_record_is_an_error_under_every_policy(
-    path: Path, policy: str
-) -> None:
+def test_keeping_the_uid_of_the_superseded_record_is_an_error_under_every_policy(path: Path, policy: str) -> None:
     # The naive migration: spec/<uid> moved to dataset/<uid>, superseding itself.
     record = _legacy(path)
     old = record["parameter_set"]["id"]
@@ -369,8 +371,11 @@ def test_the_builder_refuses_to_reuse_the_superseded_uid() -> None:
     legacy = _legacy(CLAIM_BATCH_FIXTURE)["parameter_set"]
     with pytest.raises(ValueError, match="never reused"):
         create_parameter_set(
-            uid=legacy["id"].rsplit("/", 1)[-1], supersedes=legacy["id"],
-            name=legacy["name"], material_kind="graphite", claims=legacy["claims"],
+            uid=legacy["id"].rsplit("/", 1)[-1],
+            supersedes=legacy["id"],
+            name=legacy["name"],
+            material_kind="graphite",
+            claims=legacy["claims"],
         )
 
 
@@ -418,7 +423,9 @@ def test_the_legacy_warning_names_the_replacement_iri() -> None:
     # A production record: the Ai2020 graphite claim batch, published as
     # spec/27fw-rh2c-t82v-t96q and republished as dataset/3zge-ge5d-cdn7-vzfy.
     record = create_parameter_set(
-        validate=False, name="Ai2020 (PyBaMM) - graphite", material_kind="graphite",
+        validate=False,
+        name="Ai2020 (PyBaMM) - graphite",
+        material_kind="graphite",
         claims=_load(CLAIM_BATCH_FIXTURE)["parameter_set"]["claims"],
     )
     record["parameter_set"]["id"] = "https://w3id.org/battinfo/spec/27fw-rh2c-t82v-t96q"
@@ -434,20 +441,27 @@ def test_the_legacy_warning_names_the_replacement_iri() -> None:
 # ── a save never replaces a record of another kind ───────────────────────────
 
 
-@pytest.mark.parametrize("mode,policy", [
-    ("create_only", "error"), ("create_only", "return_existing"), ("upsert", "error"),
-])
-def test_a_parameter_set_never_overwrites_a_dataset_at_the_same_iri(
-    tmp_path: Path, mode: str, policy: str
-) -> None:
+@pytest.mark.parametrize(
+    "mode,policy",
+    [
+        ("create_only", "error"),
+        ("create_only", "return_existing"),
+        ("upsert", "error"),
+    ],
+)
+def test_a_parameter_set_never_overwrites_a_dataset_at_the_same_iri(tmp_path: Path, mode: str, policy: str) -> None:
     dataset = Dataset(
-        name="pOCV curves", access_url="https://example.org/data.parquet",
+        name="pOCV curves",
+        access_url="https://example.org/data.parquet",
         source=ProvenanceInfo(type="measurement"),
     )
     saved = save_dataset(dataset, source_root=tmp_path)
     before = Path(saved["path"]).read_text(encoding="utf-8")
     clash = create_parameter_set(
-        validate=False, id=saved["id"], name="Chen 2020 - graphite", material_kind="graphite",
+        validate=False,
+        id=saved["id"],
+        name="Chen 2020 - graphite",
+        material_kind="graphite",
         claims=_load(CLAIM_BATCH_FIXTURE)["parameter_set"]["claims"],
     )
     with pytest.raises(ValueError, match="already the IRI of the dataset record") as excinfo:
@@ -458,13 +472,17 @@ def test_a_parameter_set_never_overwrites_a_dataset_at_the_same_iri(
 
 def test_the_kind_check_holds_inside_a_bulk_session(tmp_path: Path) -> None:
     dataset = Dataset(
-        name="pOCV curves", access_url="https://example.org/data.parquet",
+        name="pOCV curves",
+        access_url="https://example.org/data.parquet",
         source=ProvenanceInfo(type="measurement"),
     )
     with battinfo.bulk_save_session(tmp_path):
         saved = save_dataset(dataset, source_root=tmp_path)
         clash = create_parameter_set(
-            validate=False, id=saved["id"], name="Chen 2020 - graphite", material_kind="graphite",
+            validate=False,
+            id=saved["id"],
+            name="Chen 2020 - graphite",
+            material_kind="graphite",
             claims=_load(CLAIM_BATCH_FIXTURE)["parameter_set"]["claims"],
         )
         with pytest.raises(ValueError, match="already the IRI of the dataset record"):
@@ -568,9 +586,14 @@ def test_ws_zenodo_leaves_out_a_legacy_record_its_replacement_supersedes(
 # ── an id of another shape is skipped, not a crash ───────────────────────────
 
 
-@pytest.mark.parametrize("bad_id", [
-    ["https://w3id.org/battinfo/dataset/aaaa-bbbb-cccc-dddd"], {"@id": "https://example.org/x"},
-], ids=["list", "dict"])
+@pytest.mark.parametrize(
+    "bad_id",
+    [
+        ["https://w3id.org/battinfo/dataset/aaaa-bbbb-cccc-dddd"],
+        {"@id": "https://example.org/x"},
+    ],
+    ids=["list", "dict"],
+)
 def test_a_parameter_set_id_of_another_shape_does_not_break_a_query(tmp_path: Path, bad_id: object) -> None:
     from battinfo.parameters import collate_claims
 
@@ -591,11 +614,13 @@ def test_a_parameter_set_id_of_another_shape_does_not_break_a_query(tmp_path: Pa
 
 
 _SPECIFIC_CAPACITY = {
-    "parameter": "specific_capacity", "quantity": {"value": 372.0, "unit": "mAh/g"},
+    "parameter": "specific_capacity",
+    "quantity": {"value": 372.0, "unit": "mAh/g"},
     "provenance_class": "literature",
 }
 _NOMINAL_CAPACITY = {
-    "parameter": "nominal_capacity", "quantity": {"value": 5.0, "unit": "Ah"},
+    "parameter": "nominal_capacity",
+    "quantity": {"value": 5.0, "unit": "Ah"},
     "provenance_class": "literature",
 }
 _MATERIAL_SPEC = "https://w3id.org/battinfo/spec/bbbb-cccc-dddd-eeee"
@@ -623,25 +648,48 @@ def _deposit(record_sets: dict[str, list[dict]]) -> tuple[dict, list[str]]:
     from battinfo.ws import AuthoringWorkspace
 
     doc = AuthoringWorkspace._assemble_zenodo_jsonld(
-        record_sets, zenodo_record_id=1, prereserved_doi="10.5281/zenodo.1",
-        record_url="https://zenodo.org/records/1", data_filenames=[], title="Parameter sets",
-        license="cc-by-4.0", creators=[{"name": "Doe, Jane"}],
+        record_sets,
+        zenodo_record_id=1,
+        prereserved_doi="10.5281/zenodo.1",
+        record_url="https://zenodo.org/records/1",
+        data_filenames=[],
+        title="Parameter sets",
+        license="cc-by-4.0",
+        creators=[{"name": "Doe, Jane"}],
     )
     report = validate_publication_report(doc, policy="publisher")
     return doc, [issue.code for issue in report.errors]
 
 
-@pytest.mark.parametrize("record,target,stub_type", [
-    (lambda: create_parameter_set(
-        validate=False, name="A - graphite", material_spec_id=_MATERIAL_SPEC, claims=[_SPECIFIC_CAPACITY],
-    ), _MATERIAL_SPEC, _MATERIAL_SPEC_TYPE),
-    (lambda: create_parameter_set(
-        validate=False, name="A - cell", cell_spec_id=_CELL_SPEC, claims=[_NOMINAL_CAPACITY],
-    ), _CELL_SPEC, "BatteryCellSpecification"),
-    (lambda: _parameter_file_about(cell_spec_id=_CELL_SPEC), _CELL_SPEC, "BatteryCellSpecification"),
-    (lambda: _parameter_file_about(cell_instance_id=_CELL), _CELL, "BatteryCell"),
-    (_part_with_material_spec, _MATERIAL_SPEC, _MATERIAL_SPEC_TYPE),
-], ids=["claims-material-spec", "claims-cell-spec", "file-cell-spec", "file-cell", "file-part"])
+@pytest.mark.parametrize(
+    "record,target,stub_type",
+    [
+        (
+            lambda: create_parameter_set(
+                validate=False,
+                name="A - graphite",
+                material_spec_id=_MATERIAL_SPEC,
+                claims=[_SPECIFIC_CAPACITY],
+            ),
+            _MATERIAL_SPEC,
+            _MATERIAL_SPEC_TYPE,
+        ),
+        (
+            lambda: create_parameter_set(
+                validate=False,
+                name="A - cell",
+                cell_spec_id=_CELL_SPEC,
+                claims=[_NOMINAL_CAPACITY],
+            ),
+            _CELL_SPEC,
+            "BatteryCellSpecification",
+        ),
+        (lambda: _parameter_file_about(cell_spec_id=_CELL_SPEC), _CELL_SPEC, "BatteryCellSpecification"),
+        (lambda: _parameter_file_about(cell_instance_id=_CELL), _CELL, "BatteryCell"),
+        (_part_with_material_spec, _MATERIAL_SPEC, _MATERIAL_SPEC_TYPE),
+    ],
+    ids=["claims-material-spec", "claims-cell-spec", "file-cell-spec", "file-cell", "file-part"],
+)
 def test_a_deposit_of_parameter_sets_alone_stubs_what_they_point_at(record, target: str, stub_type) -> None:
     doc, errors = _deposit({"parameter-set": [record()]})
     assert errors == []
@@ -653,7 +701,10 @@ def test_a_target_the_deposit_carries_gets_no_stub() -> None:
     material = _load(sorted((EXAMPLES_ROOT / "material-spec").glob("*.json"))[0])
     target = material["material_spec"]["id"]
     claim_batch = create_parameter_set(
-        validate=False, name="A - graphite", material_spec_id=target, claims=[_SPECIFIC_CAPACITY],
+        validate=False,
+        name="A - graphite",
+        material_spec_id=target,
+        claims=[_SPECIFIC_CAPACITY],
     )
     doc, errors = _deposit({"material-spec": [material], "parameter-set": [claim_batch]})
     assert errors == []

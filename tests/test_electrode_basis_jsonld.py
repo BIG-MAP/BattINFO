@@ -25,9 +25,11 @@ def _negative_electrode(basis: str) -> dict | None:
         "schema_version": "0.1.0",
         "cell_spec": {
             "id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
-            "name": "X", "model": "X",
+            "name": "X",
+            "model": "X",
             "manufacturer": {"type": "Organization", "name": "A"},
-            "cell_format": "cylindrical", "chemistry": "Li-ion",
+            "cell_format": "cylindrical",
+            "chemistry": "Li-ion",
             "positive_electrode_basis": "LFP",
             "negative_electrode_basis": basis,
         },
@@ -48,13 +50,13 @@ def _types(node: dict | None) -> list[str]:
     "basis,expected",
     [
         ("graphite", "GraphiteElectrode"),
-        ("hard carbon", "HardCarbonElectrode"),   # space accepted for hard-carbon
+        ("hard carbon", "HardCarbonElectrode"),  # space accepted for hard-carbon
         ("hard-carbon", "HardCarbonElectrode"),
-        ("silicon", "SiliconBasedElectrode"),      # bare silicon != silicon-graphite
+        ("silicon", "SiliconBasedElectrode"),  # bare silicon != silicon-graphite
         ("si", "SiliconBasedElectrode"),
         ("silicon-graphite", "SiliconGraphiteElectrode"),
         ("silicon, graphite", "SiliconGraphiteElectrode"),  # comma accepted
-        ("silicon/graphite", "SiliconGraphiteElectrode"),   # slash accepted
+        ("silicon/graphite", "SiliconGraphiteElectrode"),  # slash accepted
         ("lithium metal", "LithiumElectrode"),
         ("LTO", "LithiumTitanateElectrode"),
     ],

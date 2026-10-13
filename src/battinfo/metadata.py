@@ -27,7 +27,9 @@ class TableColumn(BaseModel):
     description: str | None = None
     datatype: str | None = None
     unit_text: str | None = Field(default=None, validation_alias=AliasChoices("unit_text", "unit", "unitText"))
-    same_as: str | None = Field(default=None, validation_alias=AliasChoices("same_as", "sameAs", "property_id", "propertyUrl", "iri"))
+    same_as: str | None = Field(
+        default=None, validation_alias=AliasChoices("same_as", "sameAs", "property_id", "propertyUrl", "iri")
+    )
     required: bool | None = None
 
     def to_mapping(self) -> dict[str, Any]:
@@ -54,7 +56,9 @@ class TableSchema(BaseModel):
     name: str | None = None
     description: str | None = None
     columns: list[TableColumn] = Field(default_factory=list, validation_alias=AliasChoices("columns", "column"))
-    primary_key: str | list[str] | None = Field(default=None, validation_alias=AliasChoices("primary_key", "primaryKey"))
+    primary_key: str | list[str] | None = Field(
+        default=None, validation_alias=AliasChoices("primary_key", "primaryKey")
+    )
 
     def to_mapping(self) -> dict[str, Any]:
         payload: dict[str, Any] = {
@@ -320,7 +324,9 @@ def _coerce_table_schema_columns(table_schema: TableSchema | Mapping[str, Any] |
             continue
         titles = candidate.get("titles")
         if isinstance(titles, list):
-            label = next((str(value).strip() for value in titles if isinstance(value, str) and str(value).strip()), None)
+            label = next(
+                (str(value).strip() for value in titles if isinstance(value, str) and str(value).strip()), None
+            )
             if label:
                 out.append(label)
                 continue
@@ -350,7 +356,9 @@ def _coerce_table_schema_metadata(table_schema: TableSchema | Mapping[str, Any] 
         label = None
         titles = candidate.get("titles")
         if isinstance(titles, list):
-            label = next((str(value).strip() for value in titles if isinstance(value, str) and str(value).strip()), None)
+            label = next(
+                (str(value).strip() for value in titles if isinstance(value, str) and str(value).strip()), None
+            )
         elif isinstance(titles, str) and titles.strip():
             label = titles.strip()
         if label is None:
@@ -499,7 +507,9 @@ def _infer_csvw_url(dataset: Any) -> str | None:
         encoding_format = item.get("encoding_format") or item.get("encodingFormat")
         if not isinstance(content_url, str):
             continue
-        if isinstance(encoding_format, str) and any(token in encoding_format.lower() for token in ("csv", "tsv", "tabular", "parquet")):
+        if isinstance(encoding_format, str) and any(
+            token in encoding_format.lower() for token in ("csv", "tsv", "tabular", "parquet")
+        ):
             return content_url
     download_url = getattr(dataset, "download_url", None)
     if isinstance(download_url, str):
@@ -535,7 +545,9 @@ def enrich_tabular_dataset(
     if merge_variables:
         variable_measured = _merge_variable_measured(dataset.variable_measured, inferred_variables)
     else:
-        variable_measured = [dict(item) for item in inferred_variables] or [dict(item) for item in dataset.variable_measured]
+        variable_measured = [dict(item) for item in inferred_variables] or [
+            dict(item) for item in dataset.variable_measured
+        ]
 
     main_entity = [dict(item) for item in dataset.main_entity]
     inferred_table = None

@@ -4,6 +4,7 @@ Downstream pinners upgrading across the consolidation get a DeprecationWarning
 naming the replacement, not an ImportError. Shims last one release — see the
 deprecation policy in CONTRIBUTING.md.
 """
+
 from __future__ import annotations
 
 import sys

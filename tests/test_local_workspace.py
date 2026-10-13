@@ -116,7 +116,10 @@ def test_workspace_cli_init_validate_bundle_happy_path(tmp_path: Path) -> None:
     assert "metadata" not in resources["cell"]["semantic_payload"]
     assert "metadata" not in resources["test"]["semantic_payload"]
     assert "metadata" not in resources["dataset"]["semantic_payload"]
-    assert resources["test"]["semantic_payload"]["battinfo_records"]["test"]["test"]["cell_id"] == resources["cell"]["semantic_payload"]["battinfo_records"]["cell"]["cell_instance"]["id"]
+    assert (
+        resources["test"]["semantic_payload"]["battinfo_records"]["test"]["test"]["cell_id"]
+        == resources["cell"]["semantic_payload"]["battinfo_records"]["cell"]["cell_instance"]["id"]
+    )
     assert resources["dataset"]["semantic_payload"]["battinfo_records"]["dataset"]["dataset"]["about"] == [
         resources["cell"]["semantic_payload"]["battinfo_records"]["cell"]["cell_instance"]["id"],
         resources["test"]["semantic_payload"]["battinfo_records"]["test"]["test"]["id"],
@@ -302,11 +305,14 @@ def test_local_workspace_rehydrates_from_publication_bundle(tmp_path: Path) -> N
     assert objects["dataset"].license == "https://spdx.org/licenses/CC-BY-4.0.html"
 
 
-@pytest.mark.parametrize(("stored", "read_back"), [
-    ("https://spdx.org/licenses/cc-by-4.0.html", "https://spdx.org/licenses/CC-BY-4.0.html"),
-    ("https://spdx.org/licenses/gpl-3.0.html", "https://spdx.org/licenses/GPL-3.0-only.html"),
-    ("https://spdx.org/licenses/Lab-Terms-1.0.html", "https://spdx.org/licenses/Lab-Terms-1.0.html"),
-])
+@pytest.mark.parametrize(
+    ("stored", "read_back"),
+    [
+        ("https://spdx.org/licenses/cc-by-4.0.html", "https://spdx.org/licenses/CC-BY-4.0.html"),
+        ("https://spdx.org/licenses/gpl-3.0.html", "https://spdx.org/licenses/GPL-3.0-only.html"),
+        ("https://spdx.org/licenses/Lab-Terms-1.0.html", "https://spdx.org/licenses/Lab-Terms-1.0.html"),
+    ],
+)
 def test_publication_bundle_reads_an_old_spdx_link_in_spdx_spelling(
     tmp_path: Path, stored: str, read_back: str
 ) -> None:
@@ -358,7 +364,9 @@ def test_local_workspace_rehydrates_from_registry_export_wrapper(tmp_path: Path)
         force=True,
         capture_artifact=True,
     )
-    submission = json.loads(Path(workspace.bundle(policy="strict")["submission_package_path"]).read_text(encoding="utf-8"))
+    submission = json.loads(
+        Path(workspace.bundle(policy="strict")["submission_package_path"]).read_text(encoding="utf-8")
+    )
     export_payload = {
         "workspace_id": submission["workspace_id"],
         "publisher_id": submission["publisher_id"],
@@ -399,6 +407,3 @@ def test_local_workspace_rehydrates_from_registry_export_wrapper(tmp_path: Path)
     assert objects["test"].cell_instance_id == objects["cell"].id
     assert objects["dataset"].test_id == objects["test"].id
     assert objects["dataset"].cell_instance_id == objects["cell"].id
-
-
-

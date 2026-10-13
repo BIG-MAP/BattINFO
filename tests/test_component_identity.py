@@ -25,6 +25,7 @@ EC = {
 
 # ── models ──────────────────────────────────────────────────────────────────────
 
+
 def test_material_component_accepts_identity_fields():
     comp = MaterialComponent(**EC)
     assert comp.inchikey == "KMTRUDSVKNLOMY-UHFFFAOYSA-N"
@@ -32,8 +33,7 @@ def test_material_component_accepts_identity_fields():
 
 
 def test_salt_accepts_identity_fields():
-    salt = Salt(name="LiPF6", inchikey="AXPLOJNSKRXQPA-UHFFFAOYSA-N",
-                pubchem_cid=23688915, cation="Li+", anion="PF6-")
+    salt = Salt(name="LiPF6", inchikey="AXPLOJNSKRXQPA-UHFFFAOYSA-N", pubchem_cid=23688915, cation="Li+", anion="PF6-")
     assert salt.inchikey == "AXPLOJNSKRXQPA-UHFFFAOYSA-N"
 
 
@@ -51,6 +51,7 @@ def test_malformed_cas_is_rejected():
 
 
 # ── schema validation of a full record ──────────────────────────────────────────
+
 
 def test_electrolyte_spec_with_identity_fields_validates(tmp_path):
     spec = create_electrolyte_spec(
@@ -76,6 +77,7 @@ def test_electrolyte_spec_with_identity_fields_validates(tmp_path):
 
 # ── resolver -> record stamping shape ───────────────────────────────────────────
 
+
 def test_resolver_identity_fields_fit_the_component_model():
     fields = resolve("EC", slot="solvent").identity_fields()
     comp = MaterialComponent(name="EC", **fields)
@@ -89,6 +91,7 @@ def test_resolver_identity_fields_fit_the_salt_model():
 
 
 # ── JSON-LD emission ────────────────────────────────────────────────────────────
+
 
 def test_constituent_node_emits_identity_triples():
     node = _typed_constituent_node(EC, "Solvent")
@@ -105,6 +108,7 @@ def test_constituent_node_without_identity_is_unchanged():
 
 
 # ── authoring auto-stamp ────────────────────────────────────────────────────────
+
 
 def test_electrolyte_recipe_stamps_identity_from_names():
     from battinfo.authoring import electrolyte_recipe, material
@@ -147,6 +151,7 @@ def test_electrolyte_recipe_never_overwrites_explicit_identity():
 
 
 # ── save-gate warnings for unresolved substances ────────────────────────────────
+
 
 def test_unresolved_substance_warns_at_validation():
     from battinfo.validate.semantic import validate_semantic_report

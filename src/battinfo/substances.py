@@ -32,9 +32,7 @@ class AmbiguousSubstanceError(ValueError):
     def __init__(self, name: str, candidates: list["Substance"]):
         self.name = name
         self.candidates = candidates
-        options = "; ".join(
-            f"{c.label or c.symbol} (roles: {', '.join(c.roles) or 'any'})" for c in candidates
-        )
+        options = "; ".join(f"{c.label or c.symbol} (roles: {', '.join(c.roles) or 'any'})" for c in candidates)
         super().__init__(
             f"substance name {name!r} is ambiguous: {options}. "
             "Pass the record slot (e.g. slot='solvent' or slot='binder') to disambiguate."

@@ -105,6 +105,7 @@ def _make_dataset_entry(
 
 # ── single-dataset round-trips ─────────────────────────────────────────────────
 
+
 def test_round_trip_no_cell_instances() -> None:
     """Aggregate record: no individual cell tracking."""
     record = ZenodoCellRecord(
@@ -193,6 +194,7 @@ def test_round_trip_multi_dataset_mixed_instances() -> None:
 
 # ── file I/O ──────────────────────────────────────────────────────────────────
 
+
 def test_to_path_and_from_path(tmp_path: Path) -> None:
     record = ZenodoCellRecord(
         cell_spec=_make_cell_spec(),
@@ -212,6 +214,7 @@ def test_to_path_and_from_path(tmp_path: Path) -> None:
 
 
 # ── from_battinfo_bundles ──────────────────────────────────────────────────────
+
 
 def test_from_battinfo_bundles_single() -> None:
     cell_spec = _make_cell_spec()
@@ -266,6 +269,7 @@ def test_from_battinfo_bundles_rejects_mixed_cell_specs() -> None:
 
 # ── JSON structure ─────────────────────────────────────────────────────────────
 
+
 def test_flat_json_cell_spec_structure() -> None:
     flat = ZenodoCellRecord(
         cell_spec=_make_cell_spec(),
@@ -290,6 +294,7 @@ def test_flat_json_dataset_entry_keys() -> None:
 
 
 # ── error cases ────────────────────────────────────────────────────────────────
+
 
 def test_from_flat_json_missing_cell_spec_raises() -> None:
     with pytest.raises(ValueError, match="cell_spec"):

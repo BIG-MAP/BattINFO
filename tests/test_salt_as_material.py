@@ -1,4 +1,5 @@
 """Salts are materials: electrolyte_recipe accepts the same material() form as solvents."""
+
 from __future__ import annotations
 
 import sys
@@ -42,7 +43,5 @@ def test_salt_with_molecular_formula_refuses_instead_of_dropping() -> None:
 
 
 def test_string_salt_with_concentration_still_works() -> None:
-    e = electrolyte_recipe(
-        family="organic", salt="LiPF6", salt_concentration={"value": 1.0, "unit": "mol/L"}
-    )
+    e = electrolyte_recipe(family="organic", salt="LiPF6", salt_concentration={"value": 1.0, "unit": "mol/L"})
     assert e.salt is not None and e.salt.name == "LiPF6"

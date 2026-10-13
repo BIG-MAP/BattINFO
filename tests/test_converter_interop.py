@@ -251,18 +251,22 @@ def test_imported_converter_record_renders_to_coin_cell_jsonld() -> None:
 def test_imported_converter_record_renders_to_converter_compatible_jsonld() -> None:
     result = import_converter_jsonld_record(_load_fixture())
     specification = result.record["specification"]
-    specification["housing"]["parts"].append({
-        "type": "lid",
-        "material": "Stainless steel",
-        "coating": "Au",
-        "manufacturer": "Empa",
-    })
-    specification["housing"]["parts"].append({
-        "type": "can",
-        "material": "Stainless steel",
-        "coating": "Ni",
-        "supplier": "CaseParts AG",
-    })
+    specification["housing"]["parts"].append(
+        {
+            "type": "lid",
+            "material": "Stainless steel",
+            "coating": "Au",
+            "manufacturer": "Empa",
+        }
+    )
+    specification["housing"]["parts"].append(
+        {
+            "type": "can",
+            "material": "Stainless steel",
+            "coating": "Ni",
+            "supplier": "CaseParts AG",
+        }
+    )
 
     mapped = to_jsonld(result.record, target="converter-compatible")
 

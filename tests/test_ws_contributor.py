@@ -29,6 +29,7 @@ ORCID_URL = f"https://orcid.org/{ORCID}"
 
 # ── ORCID normalization ───────────────────────────────────────────────────────
 
+
 def test_normalize_orcid_accepts_bare_and_url() -> None:
     assert _normalize_orcid(ORCID) == ORCID
     assert _normalize_orcid(ORCID_URL) == ORCID
@@ -42,6 +43,7 @@ def test_normalize_orcid_rejects_invalid() -> None:
 
 
 # ── ContributorRef model ──────────────────────────────────────────────────────
+
 
 def test_person_block_shape() -> None:
     block = ContributorRef(ORCID, name="Jane Researcher", affiliation="SINTEF").person_block()
@@ -64,6 +66,7 @@ def test_to_from_dict_roundtrip() -> None:
 
 
 # ── ws.contributor() set / get / persist ──────────────────────────────────────
+
 
 def test_set_contributor_persists(tmp_path: Path) -> None:
     ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
@@ -108,6 +111,7 @@ def test_clear_removes_contributor(tmp_path: Path) -> None:
 
 # ── stamping onto dataset creators at save() ──────────────────────────────────
 
+
 def _populate(ws: AuthoringWorkspace, tmp_path: Path) -> None:
     """Author a full cell-spec → cell → test → dataset chain on the workspace."""
     from battinfo import quantity
@@ -117,16 +121,20 @@ def _populate(ws: AuthoringWorkspace, tmp_path: Path) -> None:
     data_file.write_text("time_s,voltage_v\n0,3.0\n60,2.95\n", encoding="utf-8")
 
     cell_spec = ws._ws.cell_spec(
-        manufacturer="Energizer", model="CR2032", format="coin", chemistry="Li-primary",
-        specs={"nominal_voltage": quantity(3.0, "V"), "diameter": quantity(20.0, "mm"),
-               "height": quantity(3.2, "mm")},
+        manufacturer="Energizer",
+        model="CR2032",
+        format="coin",
+        chemistry="Li-primary",
+        specs={"nominal_voltage": quantity(3.0, "V"), "diameter": quantity(20.0, "mm"), "height": quantity(3.2, "mm")},
         source_file="energizer-cr2032.manual.json",
     )
     cell = ws._ws.cell(cell_spec, serial_number="cr2032-001", source_type="lab")
-    test = ws._ws.test(cell, kind="capacity_check", protocol="0.2 mA CC discharge",
-                       instrument="Biologic VSP-300", status="completed")
-    ws._ws.dataset(cell, title="CR2032 capacity", description="discharge summary",
-                   test=test, path=data_file, license="CC-BY-4.0")
+    test = ws._ws.test(
+        cell, kind="capacity_check", protocol="0.2 mA CC discharge", instrument="Biologic VSP-300", status="completed"
+    )
+    ws._ws.dataset(
+        cell, title="CR2032 capacity", description="discharge summary", test=test, path=data_file, license="CC-BY-4.0"
+    )
 
 
 def _all_records(records_root: Path) -> list[dict]:
@@ -154,9 +162,7 @@ def test_save_stamps_contributor_on_every_record(tmp_path: Path) -> None:
         assert ORCID_URL in _contributor_orcids(rec), f"missing contributor: {rec.keys()}"
 
 
-def test_interrupted_contributor_stamp_leaves_records_valid(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_interrupted_contributor_stamp_leaves_records_valid(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     # The contributor stamp is applied to each record as it is written; an
     # interrupted write must never leave a truncated/half-written record (R-5).
     # A no-op re-save writes nothing, so force a genuine change (a second
@@ -182,9 +188,7 @@ def test_interrupted_contributor_stamp_leaves_records_valid(
         json.loads(p.read_text(encoding="utf-8"))
 
 
-def test_interrupted_funding_stamp_leaves_records_valid(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_interrupted_funding_stamp_leaves_records_valid(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     # Same R-5 guarantee for the funding (project) stamp, which shares the record
     # write path. A no-op re-save writes nothing, so change the funding block to
     # force every record to be rewritten.
@@ -242,19 +246,28 @@ def test_no_contributor_leaves_records_unstamped(tmp_path: Path) -> None:
 
 # ── contributor → schema:contributor in JSON-LD ───────────────────────────────
 
+
 def test_contributor_to_jsonld_shape() -> None:
     from battinfo.jsonld import contributor_to_jsonld
 
-    out = contributor_to_jsonld([
-        {"type": "Person", "name": "Jane Researcher", "same_as": ORCID_URL,
-         "affiliation": {"type": "Organization", "name": "SINTEF"}},
-    ])
-    assert out == [{
-        "@type": "schema:Person",
-        "@id": ORCID_URL,
-        "schema:name": "Jane Researcher",
-        "schema:affiliation": {"@type": "schema:Organization", "schema:name": "SINTEF"},
-    }]
+    out = contributor_to_jsonld(
+        [
+            {
+                "type": "Person",
+                "name": "Jane Researcher",
+                "same_as": ORCID_URL,
+                "affiliation": {"type": "Organization", "name": "SINTEF"},
+            },
+        ]
+    )
+    assert out == [
+        {
+            "@type": "schema:Person",
+            "@id": ORCID_URL,
+            "schema:name": "Jane Researcher",
+            "schema:affiliation": {"@type": "schema:Organization", "schema:name": "SINTEF"},
+        }
+    ]
 
 
 def test_contributor_to_jsonld_handles_none_and_empty() -> None:
@@ -272,8 +285,7 @@ def test_record_to_jsonld_emits_contributor_for_every_kind(tmp_path: Path) -> No
     ws.contributor(ORCID, name="Jane Researcher")
     ws.save(validation_policy="strict")
 
-    type_by_dir = {"cell-spec": "cell-spec", "cell-instance": "cell-instance",
-                   "test": "test", "dataset": "dataset"}
+    type_by_dir = {"cell-spec": "cell-spec", "cell-instance": "cell-instance", "test": "test", "dataset": "dataset"}
     examples = ws._ws.source_root
     seen = set()
     for subdir, rtype in type_by_dir.items():
