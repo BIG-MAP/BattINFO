@@ -185,7 +185,7 @@ only to a throwaway `_scratch/` directory next to it.
 | Layer | What it provides |
 |-------|-----------------|
 | `battinfo.ttl` | OWL application ontology; imports EMMO domain-battery 0.21.0 and domain-electrochemistry 0.39.0 with pinned versioned IRIs |
-| [`assets/mappings/domain-battery/`](https://github.com/BIG-MAP/BattINFO/tree/main/assets/mappings/domain-battery) | 114 curated property→EMMO-IRI mappings and 63 unit→EMMO-IRI mappings; drives JSON→JSON-LD transformation |
+| [`assets/mappings/domain-battery/`](https://github.com/BIG-MAP/BattINFO/tree/main/assets/mappings/domain-battery) | 115 curated property→EMMO-IRI mappings and 63 unit→EMMO-IRI mappings; drives JSON→JSON-LD transformation |
 | `assets/schemas/` | 25 JSON Schema (draft 2020-12) files: one for each of the 22 record types, plus the shared base, the canonical cell description and the ingest manifest |
 | [`src/battinfo/transform/json_to_jsonld.py`](https://github.com/BIG-MAP/BattINFO/blob/main/src/battinfo/transform/json_to_jsonld.py) | Deterministic, mapping-table-driven transformation to EMMO-aligned JSON-LD using the canonical domain-battery context |
 | [`src/battinfo/validate/`](https://github.com/BIG-MAP/BattINFO/tree/main/src/battinfo/validate) | Multi-layer validation: JSON Schema, Pydantic, JSON-LD (URDNA2015), semantic rules, referential integrity, publication |
@@ -198,7 +198,7 @@ Published records use:
 
 ## Project status
 
-> **Beta.** The test suite (3,221 tests at the 0.8.0 release) runs in CI on Python 3.11 and 3.12, on Linux and Windows. Ontology dependency versions are pinned and verified. See [`docs/scope.md`](https://github.com/BIG-MAP/BattINFO/blob/main/docs/scope.md) for the full capability map and the [known limitations](https://github.com/BIG-MAP/BattINFO/blob/main/docs/scope.md#known-limitations-in-080) of this release.
+> **Beta.** The test suite (3,240 tests at the 0.8.0 release) runs in CI on Python 3.11 and 3.12, on Linux and Windows. Ontology dependency versions are pinned and verified. See [`docs/scope.md`](https://github.com/BIG-MAP/BattINFO/blob/main/docs/scope.md) for the full capability map and the [known limitations](https://github.com/BIG-MAP/BattINFO/blob/main/docs/scope.md#known-limitations-in-080) of this release.
 
 **Supported**
 - Cell-descriptor validation and mapping, canonical record query/save/publish/index flows, JSON-LD-first publication, and validation policies.

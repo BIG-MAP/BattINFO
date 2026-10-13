@@ -21,11 +21,11 @@ its own licence.
 EMMO ontologies
 ---------------
 What:    battinfo/data/context/domain-battery.context.json, a copy of the
-         JSON-LD context of EMMO domain-battery 0.20.2, and the EMMO class and
+         JSON-LD context of EMMO domain-battery 0.21.0, and the EMMO class and
          unit IRIs and labels in battinfo/data/context/, battinfo/data/mappings/
-         and battinfo/data/vocab/, taken from EMMO 1.0.2, domain-battery 0.20.2,
-         domain-electrochemistry 0.37.2 and domain-chemical-substance. Selected
-         and rearranged for BattINFO.
+         and battinfo/data/vocab/, taken from EMMO 1.0.2, domain-battery 0.21.0,
+         domain-electrochemistry 0.39.0 and domain-chemical-substance 0.15.0.
+         Selected and rearranged for BattINFO.
 From:    https://github.com/emmo-repo
 Licence: Creative Commons Attribution 4.0 International (CC BY 4.0),
          https://creativecommons.org/licenses/by/4.0/
