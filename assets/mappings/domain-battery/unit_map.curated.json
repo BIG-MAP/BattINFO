@@ -269,12 +269,12 @@
     {
       "symbol": "W/L",
       "status": "curated",
-      "unit_iri": "http://qudt.org/vocab/unit/W-PER-L",
-      "unit_qname": "qudt:W-PER-L",
+      "unit_iri": "https://w3id.org/emmo#WattPerLitre",
+      "unit_qname": "emmo:WattPerLitre",
       "unit_pref_label": "WattPerLitre",
       "unit_label": "W/L",
-      "confidence": 0.9,
-      "notes": "Power density, on the QUDT IRI. EMMO declares WattPerLitre in its siacceptedunits module, which the pinned closure imports from domain-electrochemistry 0.38.0 on, but the v1 records context already publishes the WattPerLitre term with this QUDT IRI, so the entry is unchanged; moving it is a maintainer decision. QUDT code W-PER-L pending dereference verification."
+      "confidence": 1.0,
+      "notes": "Power density. EMMO 1.0.2 declares WattPerLitre in its siacceptedunits module, which the pinned closure imports from domain-electrochemistry 0.38.0 on. Moved from the QUDT IRI W-PER-L, which does not dereference, together with the WattPerLitre term of the v1 records context before 0.8.0."
     },
     {
       "symbol": "%",

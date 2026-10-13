@@ -45,8 +45,14 @@
       "@id": "emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0",
       "@type": "@id"
     },
-    "hasNumberValue": "emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4",
-    "hasNumericalValue": "emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4",
+    "hasNumberValue": {
+      "@id": "emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4",
+      "@type": "xsd:double"
+    },
+    "hasNumericalValue": {
+      "@id": "emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4",
+      "@type": "xsd:double"
+    },
     "hasMeasurementUnit": {
       "@id": "emmo:EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569",
       "@type": "@id"
@@ -60,18 +66,18 @@
       "@type": "@id"
     },
     "hasTestObject": {
-      "@id": "battery:battery_da3b3f28_aaad_4d67_b674_df47e109fb8b",
+      "@id": "electrochemistry:electrochemistry_5998f7c1_d8e3_4c55_8170_c358e1b0c93c",
       "@type": "@id"
     },
     "hasTestEquipment": {
-      "@id": "battery:battery_df4ff8f1_2cf2_444a_9498_23f533bd295c",
+      "@id": "electrochemistry:electrochemistry_52702560_2034_4369_ab7f_28e8bb32680c",
       "@type": "@id"
     },
     "hasOutput": {
       "@id": "emmo:EMMO_c4bace1d_4db0_4cd3_87e9_18122bae2840",
       "@type": "@id"
     },
-    "id": "schema:productID",
+    "id": "schema:identifier",
     "discharging_capacity": "electrochemistry:electrochemistry_0141b5c2_9f15_46f4_82e6_92a104faa476",
     "charging_capacity": "electrochemistry:electrochemistry_10763eb0_dbc9_4d34_bd1a_7b8996590d45",
     "nominal_capacity": "electrochemistry:electrochemistry_8abde9d0_84f6_4b4f_a87e_86028a397100",
@@ -92,9 +98,9 @@
     "discharging_energy": "electrochemistry:electrochemistry_ca36cbf3_1fed_4b88_9177_b4e16ad00cf7",
     "charging_energy": "electrochemistry:electrochemistry_2ab7af60_da58_4243_b3bc_cbb2155cac53",
     "nominal_energy": "electrochemistry:electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d",
-    "typical_energy": "electrochemistry:electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d",
-    "rated_energy": "electrochemistry:electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d",
-    "certified_usable_energy": "electrochemistry:electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d",
+    "typical_energy": "electrochemistry:electrochemistry_46376e5d_9627_4514_9881_9e62083625c3",
+    "rated_energy": "electrochemistry:electrochemistry_da215d1a_196a_465f_9de8_89f6fbb76982",
+    "certified_usable_energy": "electrochemistry:electrochemistry_da215d1a_196a_465f_9de8_89f6fbb76982",
     "power_capability": "electrochemistry:electrochemistry_4e6c4e9d_64cb_4c24_a0f3_5b4146ebbeb0",
     "maximum_power": "electrochemistry:electrochemistry_4e6c4e9d_64cb_4c24_a0f3_5b4146ebbeb0",
     "specific_energy": "emmo:EMMO_e218c625_6a39_47a9_8d08_a2ef41c152a9",
@@ -274,7 +280,7 @@
       "@type": "@id"
     },
     "cell_id": {
-      "@id": "battery:battery_da3b3f28_aaad_4d67_b674_df47e109fb8b",
+      "@id": "electrochemistry:electrochemistry_5998f7c1_d8e3_4c55_8170_c358e1b0c93c",
       "@type": "@id"
     },
     "protocol_id": {
@@ -290,7 +296,7 @@
       "@type": "@id"
     },
     "active_material_spec_id": {
-      "@id": "electrochemistry:electrochemistry_79d1b273_58cd_4be6_a250_434817f7c261",
+      "@id": "electrochemistry:electrochemistry_860aa941_5ff9_4452_8a16_7856fad07bee",
       "@type": "@id"
     },
     "batch_id": "battinfo:batchId",
@@ -323,7 +329,7 @@
         "deviations": "battinfo:deviation"
       }
     },
-    "ambient_temperature": "battinfo:ambientTemperature",
+    "ambient_temperature": "electrochemistry:electrochemistry_abd08921_6f3b_4a48_811e_7685c58aec0b",
     "voltage_reference": "battinfo:voltageReference",
     "note": "schema:description",
     "notes": "rdfs:comment",

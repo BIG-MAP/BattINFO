@@ -39,9 +39,12 @@ CHARGING_TIME = ECHEM + "a3d54f83_4dc2_4833_acc2_c8652702d9b7"
 MINIMUM_CAPACITY = ECHEM + "d3c0078e_c1d3_461e_873d_e5c3adf441c5"
 CHARGING_CURRENT = ECHEM + "79551e01_4bc6_4292_916e_08fe28a84600"
 DISCHARGING_CURRENT = ECHEM + "e4d666ee_d637_45cd_a904_dc33941ead4f"
+RATED_ENERGY = ECHEM + "da215d1a_196a_465f_9de8_89f6fbb76982"
+STORED_ENERGY = ECHEM + "46376e5d_9627_4514_9881_9e62083625c3"
 # Classes the keys above were typed with before 0.8.0.
 CHARGING = ECHEM + "a9873d3d_945b_40ba_b9cd_8dfb64cec88f"
 CAPACITY = ECHEM + "791c1915_a791_4450_acd8_7f94764743b5"
+NOMINAL_ENERGY = ECHEM + "19e27aa3_0970_43a6_86d3_e3cdd956134d"
 MAXIMUM_CONTINUOUS_CHARGING_CURRENT = ECHEM + "39d8a6ee_cd55_4855_8b5b_d42bef95ac78"
 MAXIMUM_CONTINUOUS_DISCHARGING_CURRENT = ECHEM + "ba7ac581_0e13_4815_b888_013c378932f5"
 
@@ -140,6 +143,9 @@ def _property_types(record: dict[str, Any]) -> list[set[str]]:
             DISCHARGING_CURRENT,
             MAXIMUM_CONTINUOUS_DISCHARGING_CURRENT,
         ),
+        ("rated_energy", {"value": 8.25, "unit": "Wh"}, RATED_ENERGY, NOMINAL_ENERGY),
+        ("certified_usable_energy", {"value": 8.0, "unit": "Wh"}, RATED_ENERGY, NOMINAL_ENERGY),
+        ("typical_energy", {"value": 8.4, "unit": "Wh"}, STORED_ENERGY, NOMINAL_ENERGY),
     ],
 )
 def test_a_cell_spec_key_types_as_its_curated_class(key: str, quantity: dict, iri: str, not_iri: str) -> None:

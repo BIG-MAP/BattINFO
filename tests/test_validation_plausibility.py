@@ -246,13 +246,25 @@ class TestPropertyMappability:
         report = validate_semantic_report(
             self._record(
                 {
-                    "nominal_energy": {"value": 18.0, "unit": "Wh"},
-                    "rated_energy": {"value": 18.2, "unit": "Wh"},
+                    "charging_cutoff_voltage": {"value": 4.2, "unit": "V"},
+                    "upper_voltage_limit": {"value": 4.2, "unit": "V"},
                 }
             )
         )
         codes = [i.code for i in report.issues]
         assert "semantic.property_alias_collision" in codes
+
+    def test_nominal_and_rated_energy_are_distinct_quantities(self) -> None:
+        """rated_energy types as RatedEnergy, no longer as NominalEnergy."""
+        report = validate_semantic_report(
+            self._record(
+                {
+                    "nominal_energy": {"value": 18.0, "unit": "Wh"},
+                    "rated_energy": {"value": 18.2, "unit": "Wh"},
+                }
+            )
+        )
+        assert "semantic.property_alias_collision" not in [i.code for i in report.issues]
 
     def test_mapped_numeric_property_is_silent(self) -> None:
         report = validate_semantic_report(self._record({"nominal_capacity": {"value": 2.5, "unit": "Ah"}}))

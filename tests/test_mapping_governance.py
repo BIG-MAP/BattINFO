@@ -357,11 +357,15 @@ OPEN_CIRCUIT_VOLTAGE = _ELECTROCHEMISTRY + "9c657fdc_b9d3_4964_907c_f9a6e8c5f52b
 
 # Deprecated upstream and still emitted, each with its reason. The set may only
 # shrink: a test below fails once an entry is no longer deprecated.
-_DEPRECATED_IN_USE = {
-    # LithiumNickelManganeseOxideElectrode, the electrode node of
-    # positive_electrode_basis "lnmo". Deprecated since before 0.37.2 with no
+_DEPRECATED_IN_USE: set[str] = set()
+
+# Deprecated upstream and no longer emitted, but a term of the v1 records context,
+# which keeps every term it published. Nothing but that context may name them.
+_DEPRECATED_KEPT_IN_V1 = {
+    # LithiumNickelManganeseOxideElectrode. Deprecated since before 0.37.2 with no
     # replacement, while its siblings were restored as defined classes; the
-    # upstream ask is in docs/internal/ontology-additions-needed.md.
+    # upstream ask is in docs/internal/ontology-additions-needed.md. The electrode
+    # of positive_electrode_basis "lnmo" types as MetalOxideElectrode instead.
     _ELECTROCHEMISTRY + "41ddf723_245f_4ce8_b9b1_7d9b3b9eea7d",
 }
 
@@ -442,13 +446,19 @@ def test_no_emitted_emmo_iri_is_deprecated_in_the_pinned_closure() -> None:
     deprecated = {entry["iri"]: entry for entry in _load_json(_CLOSURE_TERMS)["deprecated"]}
     emitted = _emitted_emmo_iris()
     assert len(emitted) > 300, "the inventory of emitted IRIs looks broken"
+    kept_in_v1 = {
+        iri
+        for iri in _DEPRECATED_KEPT_IN_V1
+        if all(source.startswith("records.context.v1.json:") for source in emitted.get(iri, []))
+    }
     hits = {
         f"{deprecated[iri]['pref_label']} <{iri}> replaced by {deprecated[iri]['replaced_by']}": sources
         for iri, sources in emitted.items()
-        if iri in deprecated and iri not in _DEPRECATED_IN_USE
+        if iri in deprecated and iri not in _DEPRECATED_IN_USE and iri not in kept_in_v1
     }
     assert not hits, hits
-    assert _DEPRECATED_IN_USE <= set(deprecated), "an allowed deprecated term was restored upstream: drop it"
+    allowed = _DEPRECATED_IN_USE | _DEPRECATED_KEPT_IN_V1
+    assert allowed <= set(deprecated), "an allowed deprecated term was restored upstream: drop it"
 
 
 def test_curated_property_classes_agree_with_the_bundled_context() -> None:

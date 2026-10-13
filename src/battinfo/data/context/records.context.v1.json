@@ -44,8 +44,14 @@
       "@id": "emmo:EMMO_8ef3cd6d_ae58_4a8d_9fc0_ad8f49015cd0",
       "@type": "@id"
     },
-    "hasNumberValue": "emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4",
-    "hasNumericalValue": "emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4",
+    "hasNumberValue": {
+      "@id": "emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4",
+      "@type": "xsd:double"
+    },
+    "hasNumericalValue": {
+      "@id": "emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4",
+      "@type": "xsd:double"
+    },
     "hasMeasurementUnit": {
       "@id": "emmo:EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569",
       "@type": "@id"
@@ -59,18 +65,18 @@
       "@type": "@id"
     },
     "hasTestObject": {
-      "@id": "battery:battery_da3b3f28_aaad_4d67_b674_df47e109fb8b",
+      "@id": "electrochemistry:electrochemistry_5998f7c1_d8e3_4c55_8170_c358e1b0c93c",
       "@type": "@id"
     },
     "hasTestEquipment": {
-      "@id": "battery:battery_df4ff8f1_2cf2_444a_9498_23f533bd295c",
+      "@id": "electrochemistry:electrochemistry_52702560_2034_4369_ab7f_28e8bb32680c",
       "@type": "@id"
     },
     "hasOutput": {
       "@id": "emmo:EMMO_c4bace1d_4db0_4cd3_87e9_18122bae2840",
       "@type": "@id"
     },
-    "id": "schema:productID",
+    "id": "schema:identifier",
     "nominal_capacity": "electrochemistry:electrochemistry_8abde9d0_84f6_4b4f_a87e_86028a397100",
     "minimum_capacity": "electrochemistry:electrochemistry_d3c0078e_c1d3_461e_873d_e5c3adf441c5",
     "rated_capacity": "electrochemistry:electrochemistry_9b3b4668_0795_4a35_9965_2af383497a26",
@@ -87,9 +93,9 @@
     "nominal_continuous_discharging_current": "electrochemistry:electrochemistry_e4d666ee_d637_45cd_a904_dc33941ead4f",
     "maximum_pulse_discharging_current": "electrochemistry:electrochemistry_3e54f9e3_a31d_4821_9bfb_ef953a42c35b",
     "nominal_energy": "electrochemistry:electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d",
-    "typical_energy": "electrochemistry:electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d",
-    "rated_energy": "electrochemistry:electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d",
-    "certified_usable_energy": "electrochemistry:electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d",
+    "typical_energy": "electrochemistry:electrochemistry_46376e5d_9627_4514_9881_9e62083625c3",
+    "rated_energy": "electrochemistry:electrochemistry_da215d1a_196a_465f_9de8_89f6fbb76982",
+    "certified_usable_energy": "electrochemistry:electrochemistry_da215d1a_196a_465f_9de8_89f6fbb76982",
     "power_capability": "electrochemistry:electrochemistry_4e6c4e9d_64cb_4c24_a0f3_5b4146ebbeb0",
     "maximum_power": "electrochemistry:electrochemistry_4e6c4e9d_64cb_4c24_a0f3_5b4146ebbeb0",
     "specific_energy": "emmo:EMMO_e218c625_6a39_47a9_8d08_a2ef41c152a9",
@@ -169,7 +175,7 @@
     "min": "emmo:Minute",
     "s": "emmo:Second",
     "1": "emmo:EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
-    "%": "emmo:Percent",
+    "%": "electrochemistry:electrochemistry_8430be19_6cae_4a15_a570_3c15d0d190eb",
     "license": {
       "@id": "dcterms:license",
       "@type": "@id"
@@ -268,7 +274,7 @@
     "WattHourPerKilogram": "emmo:WattHourPerKilogram",
     "WattHourPerLitre": "emmo:WattHourPerLitre",
     "WattPerKilogram": "emmo:WattPerKilogram",
-    "WattPerLitre": "http://qudt.org/vocab/unit/W-PER-L",
+    "WattPerLitre": "emmo:WattPerLitre",
     "WeightPercent": "electrochemistry:electrochemistry_2c0e66c8_d58d_44b2_b0ce_ba55194bd505",
     "VolumePercent": "electrochemistry:electrochemistry_db37b358_b2f0_4e06_b6ae_8c56c8fbb6ba",
     "MicroMetre": "emmo:MicroMetre",
@@ -646,7 +652,7 @@
       "@type": "@id"
     },
     "cell_id": {
-      "@id": "battery:battery_da3b3f28_aaad_4d67_b674_df47e109fb8b",
+      "@id": "electrochemistry:electrochemistry_5998f7c1_d8e3_4c55_8170_c358e1b0c93c",
       "@type": "@id"
     },
     "protocol_id": {
@@ -662,7 +668,7 @@
       "@type": "@id"
     },
     "active_material_spec_id": {
-      "@id": "electrochemistry:electrochemistry_79d1b273_58cd_4be6_a250_434817f7c261",
+      "@id": "electrochemistry:electrochemistry_860aa941_5ff9_4452_8a16_7856fad07bee",
       "@type": "@id"
     },
     "batch_id": "battinfo:batchId",
@@ -695,7 +701,7 @@
         "deviations": "battinfo:deviation"
       }
     },
-    "ambient_temperature": "battinfo:ambientTemperature",
+    "ambient_temperature": "electrochemistry:electrochemistry_abd08921_6f3b_4a48_811e_7685c58aec0b",
     "voltage_reference": "battinfo:voltageReference",
     "note": "schema:description",
     "notes": "rdfs:comment",
@@ -845,6 +851,20 @@
     "TemperatureCoefficientOfTheOpenCircuitPotential": "electrochemistry:electrochemistry_9b44a651_afa9_4889_ae07_9ac49ede8ac1",
     "OpenCircuitPotential": "electrochemistry:electrochemistry_e272f229_7b45_4436_9b0b_30391ee4e5be",
     "GuestDiffusivity": "electrochemistry:electrochemistry_fed4582e_0de4_43e1_b51a_e3496697c25d",
-    "TransportEfficiency": "electrochemistry:electrochemistry_3605456a_e952_4093_98b6_d8c24c37c19e"
+    "TransportEfficiency": "electrochemistry:electrochemistry_3605456a_e952_4093_98b6_d8c24c37c19e",
+    "RatedEnergy": "electrochemistry:electrochemistry_da215d1a_196a_465f_9de8_89f6fbb76982",
+    "StoredEnergy": "electrochemistry:electrochemistry_46376e5d_9627_4514_9881_9e62083625c3",
+    "MetalOxideElectrode": "electrochemistry:electrochemistry_e4b6cb36_4dac_49e3_871d_40bcfca943a5",
+    "Charging": "electrochemistry:electrochemistry_a9873d3d_945b_40ba_b9cd_8dfb64cec88f",
+    "Discharging": "electrochemistry:electrochemistry_06d8e1ee_924a_4915_998d_33a69f41dadc",
+    "ElectricResistance": "emmo:EMMO_e88f75d6_9a17_4cfc_bdf7_43d7cea5a9a1",
+    "CurrentControlledProcess": "electrochemistry:electrochemistry_5548f188_df00_4c05_ae98_7846e92efe36",
+    "PowerControlledProcess": "electrochemistry:electrochemistry_dc1af38d_438e_40c2_8a68_0d631a8f46f2",
+    "LowerCurrentLimit": "electrochemistry:electrochemistry_7db845e7_0e5b_47d4_b954_2a2b8e85deea",
+    "UpperCurrentLimit": "electrochemistry:electrochemistry_3dac5115_6337_40a6_a2ab_317087fe3b45",
+    "ConstantVoltageCharging": "electrochemistry:electrochemistry_acdeaa89_0e99_4941_8821_d5dea3d34912",
+    "ConstantVoltageDischarging": "electrochemistry:electrochemistry_9865e4f9_756d_4d94_a6fd_4102ab795f9e",
+    "Mesh": "electrochemistry:electrochemistry_18f2199b_c50c_49ec_bd17_a37626ca5e63",
+    "Foam": "emmo:EMMO_1f5e3e7e_72c9_40d4_91dd_ae432d7b7018"
   }
 }

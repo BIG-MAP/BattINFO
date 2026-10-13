@@ -9,7 +9,7 @@
     "correct mapping is to temperature-limit property classes in domain-electrochemistry.",
     "0.4.0: wired the operating-temperature, typical-capacity and maximum-pulse-current keys that were fallback-emitted while their EMMO classes were pending.",
     "0.5.0: adopted domain-electrochemistry 0.39.0. ocp types OpenCircuitPotential (the electrode quantity; OpenCircuitVoltage is now strictly the cell-level one) and entropic_coefficient TemperatureCoefficientOfTheOpenCircuitPotential; solid_diffusivity moves to the new GuestDiffusivity, electrode_pair_count to NumberOfElectrodePairs, and transport_efficiency is mapped to the new TransportEfficiency.",
-    "0.6.0: promoted nominal_continuous_charging_current and nominal_continuous_discharging_current from the candidate map as ChargingCurrent and DischargingCurrent; the emitter no longer reads the candidate map."
+    "0.6.0: promoted nominal_continuous_charging_current and nominal_continuous_discharging_current from the candidate map as ChargingCurrent and DischargingCurrent; the emitter no longer reads the candidate map. rated_energy and certified_usable_energy move from NominalEnergy to RatedEnergy, and typical_energy to StoredEnergy, since domain-electrochemistry 0.39.0 has no TypicalEnergy class."
   ],
   "mappings": [
     {
@@ -80,12 +80,12 @@
     {
       "key": "certified_usable_energy",
       "status": "curated",
-      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d",
-      "class_qname": "emmo:NominalEnergy",
-      "class_pref_label": "NominalEnergy",
-      "class_label": "NominalEnergy",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_da215d1a_196a_465f_9de8_89f6fbb76982",
+      "class_qname": "emmo:RatedEnergy",
+      "class_pref_label": "RatedEnergy",
+      "class_label": "RatedEnergy",
       "confidence": 1.0,
-      "notes": "certified_usable_energy (EU Battery Regulation) maps to NominalEnergy; matches the schema slot_uri."
+      "notes": "The certified usable energy of the EU Battery Regulation 2023/1542 is a rated value under specified conditions, so RatedEnergy."
     },
     {
       "key": "charging_capacity",
@@ -807,12 +807,12 @@
     {
       "key": "rated_energy",
       "status": "curated",
-      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d",
-      "class_qname": "emmo:NominalEnergy",
-      "class_pref_label": "NominalEnergy",
-      "class_label": "NominalEnergy",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_da215d1a_196a_465f_9de8_89f6fbb76982",
+      "class_qname": "emmo:RatedEnergy",
+      "class_pref_label": "RatedEnergy",
+      "class_label": "RatedEnergy",
       "confidence": 1.0,
-      "notes": "rated_energy maps to NominalEnergy (no distinct RatedEnergy class in domain-electrochemistry); matches the schema slot_uri."
+      "notes": "The energy a device can store under specified conditions (RatedEnergy, a subclass of StoredEnergy in domain-electrochemistry 0.39.0)."
     },
     {
       "key": "rated_specific_discharge_capacity",
@@ -1061,12 +1061,12 @@
     {
       "key": "typical_energy",
       "status": "curated",
-      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d",
-      "class_qname": "emmo:NominalEnergy",
-      "class_pref_label": "NominalEnergy",
-      "class_label": "NominalEnergy",
-      "confidence": 1.0,
-      "notes": "typical_energy is a legacy field name; maps to NominalEnergy per IEC 60050-151 IEV 151-16-11."
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_46376e5d_9627_4514_9881_9e62083625c3",
+      "class_qname": "emmo:StoredEnergy",
+      "class_pref_label": "StoredEnergy",
+      "class_label": "StoredEnergy",
+      "confidence": 0.9,
+      "notes": "domain-electrochemistry 0.39.0 has no TypicalEnergy class (requested upstream). StoredEnergy, the parent of NominalEnergy and RatedEnergy, is true of a typical value; EMMO keeps typical apart from nominal, as TypicalCapacity is not a NominalCapacity."
     },
     {
       "key": "upper_voltage_limit",

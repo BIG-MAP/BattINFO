@@ -24,7 +24,7 @@ each becomes in JSON-LD:
 | `cap_assembly_weight` | [Mass](https://w3id.org/emmo#EMMO_ed4af7ae_63a2_497e_bb88_2309619ea405) |
 | `capacity_fade` | [CapacityFadeRate](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_5b59a86e_99b4_493e_ae12_33ae8b5ec7c0) |
 | `capacity_threshold_exhaustion` | [EndOfLifeCapacityThreshold](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_02dc55b3_18a1_438e_bee0_ab77670cb2d5) |
-| `certified_usable_energy` | [NominalEnergy](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d) |
+| `certified_usable_energy` | [RatedEnergy](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_da215d1a_196a_465f_9de8_89f6fbb76982) |
 | `charging_capacity` | [ChargingCapacity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_10763eb0_dbc9_4d34_bd1a_7b8996590d45) |
 | `charging_cutoff_voltage` | [UpperVoltageLimit](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_6dcd5baf_58cd_43f5_a692_51508e036c88) |
 | `charging_energy` | [ChargingEnergy](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_2ab7af60_da58_4243_b3bc_cbb2155cac53) |
@@ -97,7 +97,7 @@ each becomes in JSON-LD:
 | `pulse_discharging_current` | [MaximumPulseDischargingCurrent](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_3e54f9e3_a31d_4821_9bfb_ef953a42c35b) |
 | `rated_areal_discharge_capacity` | [AreicCapacity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_bcb33f7e_5573_4bc2_b636_4ea313a9dd3a) |
 | `rated_capacity` | [RatedCapacity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_9b3b4668_0795_4a35_9965_2af383497a26) |
-| `rated_energy` | [NominalEnergy](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d) |
+| `rated_energy` | [RatedEnergy](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_da215d1a_196a_465f_9de8_89f6fbb76982) |
 | `rated_specific_discharge_capacity` | [DischargingSpecificCapacity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_884650fd_6cc6_4ec6_8264_c18fbe6b90ee) |
 | `reaction_rate_activation_energy` | [ActivationEnergy](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_d7f8cab9_b035_4ecd_be63_292672572526) |
 | `reaction_rate_constant` | [ReactionRateConstant](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_0335e3f6_d1d8_4daa_8376_a9285f1bc9f1) |
@@ -120,7 +120,7 @@ each becomes in JSON-LD:
 | `transference_number` | [ChargeCarrierTransportNumber](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_e3e78df2_d568_4ab7_8c0d_d3a2ee3ae282) |
 | `transport_efficiency` | [TransportEfficiency](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_3605456a_e952_4093_98b6_d8c24c37c19e) |
 | `typical_capacity` | [TypicalCapacity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_34d6cdd9_d3a7_4302_a54d_9dbd8a3b5e68) |
-| `typical_energy` | [NominalEnergy](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d) |
+| `typical_energy` | [StoredEnergy](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_46376e5d_9627_4514_9881_9e62083625c3) |
 | `upper_voltage_limit` | [UpperVoltageLimit](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_6dcd5baf_58cd_43f5_a692_51508e036c88) |
 | `volume` | [Volume](https://w3id.org/emmo#EMMO_f1a51559_aa3d_43a0_9327_918039f0dfed) |
 | `wall_thickness` | [Thickness](https://w3id.org/emmo#EMMO_43003c86_9d15_433b_9789_ee2940920656) |
@@ -210,7 +210,7 @@ to (EMMO where a term exists, QUDT as the documented fallback):
 | `W/(m.K)` | [WattPerMetreKelvin](https://w3id.org/emmo#WattPerMetreKelvin) |
 | `W/(m2.K)` | [WattPerSquareMetreKelvin](https://w3id.org/emmo#WattPerSquareMetreKelvin) |
 | `W/kg` | [WattPerKilogram](https://w3id.org/emmo#WattPerKilogram) |
-| `W/L` | [WattPerLitre](http://qudt.org/vocab/unit/W-PER-L) |
+| `W/L` | [WattPerLitre](https://w3id.org/emmo#WattPerLitre) |
 | `Wh` | [WattHour](https://w3id.org/emmo#Watthour) |
 | `Wh/kg` | [WattHourPerKilogram](https://w3id.org/emmo#WattHourPerKilogram) |
 | `Wh/L` | [WattHourPerLitre](https://w3id.org/emmo#WattHourPerLitre) |

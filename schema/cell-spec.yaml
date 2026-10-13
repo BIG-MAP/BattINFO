@@ -150,7 +150,7 @@ slots:
   # ── CellSpecification identity slots ───────────────────────────────────────────────
 
   id:
-    slot_uri: schema:productID
+    slot_uri: schema:identifier
     identifier: true
     required: true
     range: SpecIri
@@ -474,21 +474,21 @@ slots:
       - "Nominal energy [Wh]"
 
   typical_energy:
-    slot_uri: electrochemistry:electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d
+    slot_uri: electrochemistry:electrochemistry_46376e5d_9627_4514_9881_9e62083625c3
     range: SpecValue
     description: Typical stored energy as manufactured.
     aliases:
       - "Typical energy [Wh]"
 
   rated_energy:
-    slot_uri: electrochemistry:electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d
+    slot_uri: electrochemistry:electrochemistry_da215d1a_196a_465f_9de8_89f6fbb76982
     range: SpecValue
     description: Manufacturer-rated energy content.
     aliases:
       - "Rated energy [Wh]"
 
   certified_usable_energy:
-    slot_uri: electrochemistry:electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d
+    slot_uri: electrochemistry:electrochemistry_da215d1a_196a_465f_9de8_89f6fbb76982
     range: SpecValue
     description: Certified usable energy per EU Battery Regulation 2023/1542.
     aliases:

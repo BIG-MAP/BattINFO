@@ -1073,6 +1073,43 @@ def _validate_test_semantics(
         )
 
 
+# Kelvin spellings as _unit_token returns them (lower-cased); "kel" is the
+# UN/CEFACT code.
+_KELVIN_UNITS = frozenset({"k", "kelvin", "kel"})
+
+
+def _validate_ambient_temperature_unit(
+    doc: Mapping[str, Any],
+    issues: list[ValidationIssue],
+    resource_type: str | None,
+) -> None:
+    """Warn when an ambient temperature is given in kelvin.
+
+    The records context types ``ambient_temperature`` as AmbientCelsiusTemperature,
+    so a value in kelvin would be published as a Celsius temperature. A test
+    protocol plans its conditions at the top level, a test records them as run.
+    """
+    test = doc.get("test")
+    holders = [("conditions", doc.get("conditions"))]
+    if isinstance(test, Mapping):
+        holders.append(("test.conditions", test.get("conditions")))
+    for prefix, conditions in holders:
+        quantity = conditions.get("ambient_temperature") if isinstance(conditions, Mapping) else None
+        if not isinstance(quantity, Mapping) or _unit_token(quantity) not in _KELVIN_UNITS:
+            continue
+        _append_issue(
+            issues,
+            code="semantic.ambient_temperature_kelvin",
+            severity="warning",
+            path=f"{prefix}.ambient_temperature",
+            message=(
+                "ambient_temperature is given in kelvin, but the records context types it as "
+                "AmbientCelsiusTemperature, a Celsius temperature. Give the value in degC."
+            ),
+            resource_type=resource_type,
+        )
+
+
 _EPOCH_MIN = 946684800  # 2000-01-01
 _EPOCH_MAX = 4102444800  # 2100-01-01
 
@@ -1551,6 +1588,7 @@ def validate_semantic_report(
     test = doc.get("test")
     if isinstance(test, Mapping):
         _validate_test_semantics(test, issues, resource_type, hard_issue_severity)
+    _validate_ambient_temperature_unit(doc, issues, resource_type)
 
     return ValidationReport(issues=tuple(issues), policy=resolved_policy)
 

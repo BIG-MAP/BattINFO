@@ -73,11 +73,6 @@ battinfo:TestSpec a owl:Class ;
     rdfs:comment "Placeholder for record key(s) 'TestSpec' pending an upstream EMMO domain-battery/electrochemistry term; will be retired when the upstream term is published."@en ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/> .
 
-battinfo:ambientTemperature a rdf:Property ;
-    rdfs:label "Ambient Temperature"@en ;
-    rdfs:comment "Placeholder for record key(s) 'ambient_temperature' pending an upstream EMMO domain-battery/electrochemistry term; will be retired when the upstream term is published."@en ;
-    rdfs:isDefinedBy <https://w3id.org/battinfo/> .
-
 battinfo:artifacts a rdf:Property ;
     rdfs:label "Artifacts"@en ;
     rdfs:comment "Placeholder for record key(s) 't_artifacts, ts_artifacts' pending an upstream EMMO domain-battery/electrochemistry term; will be retired when the upstream term is published."@en ;

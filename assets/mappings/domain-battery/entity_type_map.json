@@ -417,7 +417,7 @@
       },
       "lnmo": {
         "relation": "hasPositiveElectrode",
-        "node_type": "LithiumNickelManganeseOxideElectrode",
+        "node_type": "MetalOxideElectrode",
         "battery_types": []
       }
     },
