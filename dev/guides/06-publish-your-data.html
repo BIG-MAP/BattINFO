@@ -566,8 +566,7 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
 <span class="c1"># This notebook runs from its own folder (docs/guides); fresh scratch every run.</span>
@@ -754,7 +753,7 @@ test/test-9f4c-mxny-yhym-2zh4.json
 ...
 provenance: {
   &#34;source_type&#34;: &#34;measurement&#34;,
-  &#34;retrieved_at&#34;: 1791835753,
+  &#34;retrieved_at&#34;: 1791908039,
   &#34;battinfo_version&#34;: &#34;0.8.0&#34;
 }
 </pre></div></div>
@@ -769,7 +768,7 @@ default). It leaves a reviewable draft by default — click Publish on Zenodo (o
 <li><p><strong>The Battery Genome registry (``ws.publish()``) — optional.</strong> Submits your records to the review queue, where a curator promotes them to the public index. This needs a registry API key (<code class="docutils literal notranslate"><span class="pre">ws.login(api_key=&quot;bk_...&quot;)</span></code>). During the soft launch keys are granted by the operators — start from <a class="reference external" href="https://battinfo.org/publish">battinfo.org/publish</a> and say who you are and what you plan to publish. The registry refuses records that still point at files on this computer, since it would publish those
 paths as the download links. Deposit on Zenodo first, which points each record at its deposited copy, or call <code class="docutils literal notranslate"><span class="pre">ws.publish(zenodo=True)</span></code>, which does both in one go.</p></li>
 </ul>
-<p>Both cells are guarded no-ops until you provide the credential, so the notebook runs fully offline without them.</p>
+<p>Both cells are guarded no-ops until you provide the credential, so the notebook runs fully offline without them. They ask the workspace with <code class="docutils literal notranslate"><span class="pre">ws.has_credential(...)</span></code>, which also finds a token kept in the workspace’s <code class="docutils literal notranslate"><span class="pre">.battinfo/credentials</span></code> file, not only one in the environment.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
@@ -778,7 +777,7 @@ paths as the download links. Deposit on Zenodo first, which points each record a
 <span class="c1"># The deposit inherits the workspace license from Stage 4; creators credit the</span>
 <span class="c1"># authors on the deposit. A click on Zenodo (or publish=True) mints the DOI.</span>
 <span class="c1"># Here we leave a reviewable draft.</span>
-<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ZENODO_SANDBOX_TOKEN&quot;</span><span class="p">):</span>
+<span class="k">if</span> <span class="n">ws</span><span class="o">.</span><span class="n">has_credential</span><span class="p">(</span><span class="s2">&quot;ZENODO_SANDBOX_TOKEN&quot;</span><span class="p">):</span>
     <span class="n">deposit</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">zenodo</span><span class="p">(</span>
         <span class="n">sandbox</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">creators</span><span class="o">=</span><span class="p">[</span>
@@ -807,7 +806,7 @@ Get a token at https://sandbox.zenodo.org, then re-run this cell.
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Registry path — needs the API key granted by the operators (link above).</span>
-<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;BATTINFO_API_KEY&quot;</span><span class="p">):</span>
+<span class="k">if</span> <span class="n">ws</span><span class="o">.</span><span class="n">has_credential</span><span class="p">(</span><span class="s2">&quot;BATTINFO_API_KEY&quot;</span><span class="p">):</span>
     <span class="n">outcomes</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">note</span><span class="o">=</span><span class="s2">&quot;My first BattINFO dataset&quot;</span><span class="p">)</span>
     <span class="n">ws</span><span class="o">.</span><span class="n">status</span><span class="p">()</span>
 <span class="k">else</span><span class="p">:</span>

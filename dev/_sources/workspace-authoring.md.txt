@@ -48,9 +48,34 @@ ws.status()                          # see it live
 ```
 
 Every verb is a method on the returned `AuthoringWorkspace` (also importable as
-`battinfo.AuthoringWorkspace`): `login`, `project`, `convert`, `search`, `add`, `load`,
-`save`, `publish`, `submit`, `status`, `zenodo`. Each has a docstring with examples —
+`battinfo.AuthoringWorkspace`): `login`, `whoami`, `credentials_status`, `has_credential`,
+`project`, `convert`, `search`, `add`, `load`, `save`, `publish`, `submit`, `status`,
+`zenodo`. Each has a docstring with examples —
 `help(ws.add)` is the fastest reference.
+
+## Credentials
+
+`ws.login(api_key=...)` saves your registry key in `.battinfo/credentials` in the workspace folder, with the workspace and publisher ids the registry returns. When the registry cannot be asked, `login()` keeps the ids the workspace already has and saves the defaults for any it lacks; an id found only in the environment is used but not saved. `ws.setup()` writes the same file from a template that lists the registry, R2 and Zenodo settings, with the default ids filled in. A name set on more than one line takes the last value. The file is git-ignored, and both calls make it readable by you only (mode 0600 on Linux and macOS).
+
+Each name is looked up in this order, and the first value found is used:
+
+1. an argument passed to the call, such as `ws.zenodo(token=...)` or `ws.submit(api_key=...)`;
+2. a value `ws.login()` set on this workspace in this session;
+3. an environment variable of the same name;
+4. this workspace's `.battinfo/credentials`;
+5. the default, for the few names that have one.
+
+The file belongs to its workspace. Opening a workspace reads it into the workspace object, and the workspace reads it again when it changes, so an edit takes effect without reopening the workspace. Nothing is copied into the environment, so two workspaces open in one Python session each use their own credentials, and `os.environ.get("ZENODO_API_TOKEN")` does not tell you what a workspace will use. Ask the workspace:
+
+```python
+ws.credentials_status()                    # {"ZENODO_API_TOKEN": {"set": True, "source": "credentials_file"}, ...}
+ws.has_credential("ZENODO_SANDBOX_TOKEN")  # True or False
+ws.whoami()                                # your registry identity, and where each credential came from
+```
+
+None of the three shows a secret. The status gives each name's source (`login`, `environment`, `credentials_file` or `default`, and `argument` for a registry URL passed to `battinfo.workspace()`) and never its value.
+
+The registry URL is looked up the same way, each time it is used. `battinfo.workspace(".")` takes `BATTINFO_REGISTRY_URL` from the environment, then from `.battinfo/credentials`, then uses the production registry, which is also what `battinfo.registry.Registry()` defaults to. `ws.login()` and `ws.whoami()` print the registry they ask and where its URL came from. `registry_url="..."` picks a registry. `registry_url=None` turns registry lookups off, and `ws.login()`, `ws.submit()` and `ws.status()` on such a workspace then need `BATTINFO_REGISTRY_URL` or a `registry_url=` of their own; they never fall back to the production registry.
 
 ## Which surface do I use?
 

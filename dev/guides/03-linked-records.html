@@ -816,9 +816,9 @@ Saved 6 record(s) under &lt;repo&gt;\docs\guides\_scratch\guide-03\.battinfo\rec
   &#34;name&#34;: &#34;1C cycle life, cell A001 data&#34;,
   &#34;license&#34;: &#34;CC-BY-4.0&#34;,
   &#34;access_url&#34;: &#34;file:///&lt;repo&gt;/docs/guides/_scratch/guide-03/inputs/sdi-a001-cycle-life.csv&#34;,
-  &#34;created_at&#34;: 1791835716,
-  &#34;modified_at&#34;: 1791835716,
-  &#34;published_at&#34;: 1791835716,
+  &#34;created_at&#34;: 1791908012,
+  &#34;modified_at&#34;: 1791908012,
+  &#34;published_at&#34;: 1791908012,
   &#34;about&#34;: [
     &#34;https://w3id.org/battinfo/cell/y9xy-kr0v-y5tn-dfj7&#34;,
     &#34;https://w3id.org/battinfo/test/6nec-h262-tthy-4rnt&#34;
@@ -827,7 +827,7 @@ Saved 6 record(s) under &lt;repo&gt;\docs\guides\_scratch\guide-03\.battinfo\rec
     {
       &#34;type&#34;: &#34;DataDownload&#34;,
       &#34;content_url&#34;: &#34;file:///&lt;repo&gt;/docs/guides/_scratch/guide-03/inputs/sdi-a001-cycle-life.csv&#34;,
-      &#34;encodi
+      &#34;enco
   ...
 
 ok: True | errors: 0 | warnings: 0
@@ -877,14 +877,13 @@ ok: True | errors: 0 | warnings: 0
 </section>
 <section id="Step-8-—-Publish">
 <h2>Step 8 — Publish<a class="headerlink" href="#Step-8-—-Publish" title="Link to this heading">#</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">ws.publish()</span></code> submits the records to the registry review queue (staged — a curator promotes them to the public index); <code class="docutils literal notranslate"><span class="pre">zenodo=True</span></code> archives the data with a citable DOI first. Both need credentials, so this cell is a guarded no-op without them. (Publishing goes to the Battery Genome registry at battery-genome.org; during the soft launch, API keys are granted by the registry operators — there is no self-service key page yet.)</p>
+<p><code class="docutils literal notranslate"><span class="pre">ws.publish()</span></code> submits the records to the registry review queue (staged — a curator promotes them to the public index); <code class="docutils literal notranslate"><span class="pre">zenodo=True</span></code> archives the data with a citable DOI first. Both need credentials, so this cell is a guarded no-op without them. (Publishing goes to the Battery Genome registry at battery-genome.org; during the soft launch, API keys are granted by the registry operators — there is no self-service key page yet.) The cell asks the workspace with <code class="docutils literal notranslate"><span class="pre">ws.has_credential(...)</span></code>,
+which looks where the workspace itself looks: a <code class="docutils literal notranslate"><span class="pre">ws.login()</span></code> in this session, the environment, then <code class="docutils literal notranslate"><span class="pre">.battinfo/credentials</span></code>.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
-
-<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;BATTINFO_API_KEY&quot;</span><span class="p">):</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">ws</span><span class="o">.</span><span class="n">has_credential</span><span class="p">(</span><span class="s2">&quot;BATTINFO_API_KEY&quot;</span><span class="p">):</span>
     <span class="n">ws</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">note</span><span class="o">=</span><span class="s2">&quot;Guide 3 walkthrough — INR21700-50E cycle life&quot;</span><span class="p">)</span>
     <span class="n">ws</span><span class="o">.</span><span class="n">status</span><span class="p">()</span>
 <span class="k">else</span><span class="p">:</span>

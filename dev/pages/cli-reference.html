@@ -2537,6 +2537,9 @@ battinfo config set creator “Clark, Simon; SINTEF”
 battinfo config set creator “Clark, Simon; SINTEF | Smith, Jane; NTNU”
 battinfo config set license CC-BY-4.0
 battinfo config set community battinfo-reference</p>
+<p>A secret, such as zenodo_token, is echoed with only its last four
+characters shown, or fully hidden when it is shorter than 12 characters.
+A config file that is not valid YAML is left as it is: fix it by hand first.</p>
 <p><strong>Usage</strong>:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>battinfo<span class="w"> </span>config<span class="w"> </span><span class="nb">set</span><span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span><span class="w"> </span><span class="o">{</span>key<span class="o">}</span><span class="w"> </span><span class="o">{</span>value<span class="o">}</span>
 </pre></div>
@@ -2554,6 +2557,8 @@ battinfo config set community battinfo-reference</p>
 <section id="battinfo-config-show">
 <h3><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">config</span> <span class="pre">show</span></code><a class="headerlink" href="#battinfo-config-show" title="Link to this heading">#</a></h3>
 <p>Show current user preferences.</p>
+<p>Secrets, such as zenodo_token, show only their last four characters, or
+nothing when they are shorter than 12 characters.</p>
 <p><strong>Usage</strong>:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>battinfo<span class="w"> </span>config<span class="w"> </span>show<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
 </pre></div>

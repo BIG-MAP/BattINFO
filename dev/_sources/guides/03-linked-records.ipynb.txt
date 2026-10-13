@@ -33,10 +33,10 @@
    "id": "49487b5d",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-12T20:08:36.043194Z",
-     "iopub.status.busy": "2026-10-12T20:08:36.042148Z",
-     "iopub.status.idle": "2026-10-12T20:08:36.545837Z",
-     "shell.execute_reply": "2026-10-12T20:08:36.544291Z"
+     "iopub.execute_input": "2026-10-13T16:13:32.059284Z",
+     "iopub.status.busy": "2026-10-13T16:13:32.059284Z",
+     "iopub.status.idle": "2026-10-13T16:13:32.779071Z",
+     "shell.execute_reply": "2026-10-13T16:13:32.776542Z"
     }
    },
    "outputs": [],
@@ -76,10 +76,10 @@
    "id": "d5e7a580",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-12T20:08:36.553832Z",
-     "iopub.status.busy": "2026-10-12T20:08:36.551834Z",
-     "iopub.status.idle": "2026-10-12T20:08:36.561316Z",
-     "shell.execute_reply": "2026-10-12T20:08:36.560299Z"
+     "iopub.execute_input": "2026-10-13T16:13:32.784586Z",
+     "iopub.status.busy": "2026-10-13T16:13:32.784586Z",
+     "iopub.status.idle": "2026-10-13T16:13:32.796649Z",
+     "shell.execute_reply": "2026-10-13T16:13:32.796649Z"
     }
    },
    "outputs": [
@@ -127,10 +127,10 @@
    "id": "05b87289",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-12T20:08:36.568318Z",
-     "iopub.status.busy": "2026-10-12T20:08:36.567314Z",
-     "iopub.status.idle": "2026-10-12T20:08:36.576472Z",
-     "shell.execute_reply": "2026-10-12T20:08:36.575466Z"
+     "iopub.execute_input": "2026-10-13T16:13:32.802437Z",
+     "iopub.status.busy": "2026-10-13T16:13:32.802437Z",
+     "iopub.status.idle": "2026-10-13T16:13:32.811781Z",
+     "shell.execute_reply": "2026-10-13T16:13:32.811781Z"
     }
    },
    "outputs": [
@@ -176,10 +176,10 @@
    "id": "3f90949f",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-12T20:08:36.578472Z",
-     "iopub.status.busy": "2026-10-12T20:08:36.578472Z",
-     "iopub.status.idle": "2026-10-12T20:08:36.603426Z",
-     "shell.execute_reply": "2026-10-12T20:08:36.602418Z"
+     "iopub.execute_input": "2026-10-13T16:13:32.819374Z",
+     "iopub.status.busy": "2026-10-13T16:13:32.818373Z",
+     "iopub.status.idle": "2026-10-13T16:13:32.832846Z",
+     "shell.execute_reply": "2026-10-13T16:13:32.830836Z"
     }
    },
    "outputs": [
@@ -265,10 +265,10 @@
    "id": "0ae05fc8",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-12T20:08:36.608524Z",
-     "iopub.status.busy": "2026-10-12T20:08:36.607816Z",
-     "iopub.status.idle": "2026-10-12T20:08:36.637974Z",
-     "shell.execute_reply": "2026-10-12T20:08:36.635715Z"
+     "iopub.execute_input": "2026-10-13T16:13:32.838954Z",
+     "iopub.status.busy": "2026-10-13T16:13:32.836936Z",
+     "iopub.status.idle": "2026-10-13T16:13:32.870934Z",
+     "shell.execute_reply": "2026-10-13T16:13:32.869925Z"
     }
    },
    "outputs": [
@@ -321,10 +321,10 @@
    "id": "f739b75c",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-12T20:08:36.643490Z",
-     "iopub.status.busy": "2026-10-12T20:08:36.643490Z",
-     "iopub.status.idle": "2026-10-12T20:08:37.667519Z",
-     "shell.execute_reply": "2026-10-12T20:08:37.665509Z"
+     "iopub.execute_input": "2026-10-13T16:13:32.876833Z",
+     "iopub.status.busy": "2026-10-13T16:13:32.875852Z",
+     "iopub.status.idle": "2026-10-13T16:13:34.119126Z",
+     "shell.execute_reply": "2026-10-13T16:13:34.119126Z"
     }
    },
    "outputs": [
@@ -379,10 +379,10 @@
    "id": "b1bde293",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-12T20:08:37.670565Z",
-     "iopub.status.busy": "2026-10-12T20:08:37.670565Z",
-     "iopub.status.idle": "2026-10-12T20:08:37.682373Z",
-     "shell.execute_reply": "2026-10-12T20:08:37.680365Z"
+     "iopub.execute_input": "2026-10-13T16:13:34.124202Z",
+     "iopub.status.busy": "2026-10-13T16:13:34.124202Z",
+     "iopub.status.idle": "2026-10-13T16:13:34.136963Z",
+     "shell.execute_reply": "2026-10-13T16:13:34.136963Z"
     }
    },
    "outputs": [
@@ -397,9 +397,9 @@
       "  \"name\": \"1C cycle life, cell A001 data\",\n",
       "  \"license\": \"CC-BY-4.0\",\n",
       "  \"access_url\": \"file:///<repo>/docs/guides/_scratch/guide-03/inputs/sdi-a001-cycle-life.csv\",\n",
-      "  \"created_at\": 1791835716,\n",
-      "  \"modified_at\": 1791835716,\n",
-      "  \"published_at\": 1791835716,\n",
+      "  \"created_at\": 1791908012,\n",
+      "  \"modified_at\": 1791908012,\n",
+      "  \"published_at\": 1791908012,\n",
       "  \"about\": [\n",
       "    \"https://w3id.org/battinfo/cell/y9xy-kr0v-y5tn-dfj7\",\n",
       "    \"https://w3id.org/battinfo/test/6nec-h262-tthy-4rnt\"\n",
@@ -408,7 +408,7 @@
       "    {\n",
       "      \"type\": \"DataDownload\",\n",
       "      \"content_url\": \"file:///<repo>/docs/guides/_scratch/guide-03/inputs/sdi-a001-cycle-life.csv\",\n",
-      "      \"encodi\n",
+      "      \"enco\n",
       "  ...\n",
       "\n",
       "ok: True | errors: 0 | warnings: 0\n"
@@ -449,10 +449,10 @@
    "id": "bac15f6f",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-12T20:08:37.686881Z",
-     "iopub.status.busy": "2026-10-12T20:08:37.685375Z",
-     "iopub.status.idle": "2026-10-12T20:08:38.470359Z",
-     "shell.execute_reply": "2026-10-12T20:08:38.469353Z"
+     "iopub.execute_input": "2026-10-13T16:13:34.143105Z",
+     "iopub.status.busy": "2026-10-13T16:13:34.143105Z",
+     "iopub.status.idle": "2026-10-13T16:13:34.750211Z",
+     "shell.execute_reply": "2026-10-13T16:13:34.746671Z"
     }
    },
    "outputs": [
@@ -499,7 +499,7 @@
     "`ws.publish()` submits the records to the registry review queue (staged — a\n",
     "curator promotes them to the public index); `zenodo=True` archives the data\n",
     "with a citable DOI first. Both need credentials, so this cell is a guarded\n",
-    "no-op without them. (Publishing goes to the Battery Genome registry at battery-genome.org; during the soft launch, API keys are granted by the registry operators — there is no self-service key page yet.)"
+    "no-op without them. (Publishing goes to the Battery Genome registry at battery-genome.org; during the soft launch, API keys are granted by the registry operators — there is no self-service key page yet.) The cell asks the workspace with `ws.has_credential(...)`, which looks where the workspace itself looks: a `ws.login()` in this session, the environment, then `.battinfo/credentials`."
    ]
   },
   {
@@ -508,10 +508,10 @@
    "id": "17b1abe0",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-12T20:08:38.475358Z",
-     "iopub.status.busy": "2026-10-12T20:08:38.475358Z",
-     "iopub.status.idle": "2026-10-12T20:08:38.482574Z",
-     "shell.execute_reply": "2026-10-12T20:08:38.480566Z"
+     "iopub.execute_input": "2026-10-13T16:13:34.756223Z",
+     "iopub.status.busy": "2026-10-13T16:13:34.755716Z",
+     "iopub.status.idle": "2026-10-13T16:13:34.769386Z",
+     "shell.execute_reply": "2026-10-13T16:13:34.765339Z"
     }
    },
    "outputs": [
@@ -525,9 +525,7 @@
     }
    ],
    "source": [
-    "import os\n",
-    "\n",
-    "if os.environ.get(\"BATTINFO_API_KEY\"):\n",
+    "if ws.has_credential(\"BATTINFO_API_KEY\"):\n",
     "    ws.publish(note=\"Guide 3 walkthrough — INR21700-50E cycle life\")\n",
     "    ws.status()\n",
     "else:\n",
@@ -549,10 +547,10 @@
    "id": "2647bdf5",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-12T20:08:38.485574Z",
-     "iopub.status.busy": "2026-10-12T20:08:38.485574Z",
-     "iopub.status.idle": "2026-10-12T20:08:38.503562Z",
-     "shell.execute_reply": "2026-10-12T20:08:38.501044Z"
+     "iopub.execute_input": "2026-10-13T16:13:34.779634Z",
+     "iopub.status.busy": "2026-10-13T16:13:34.778637Z",
+     "iopub.status.idle": "2026-10-13T16:13:34.801401Z",
+     "shell.execute_reply": "2026-10-13T16:13:34.799379Z"
     }
    },
    "outputs": [
@@ -645,7 +643,7 @@
    "name": "python",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
-   "version": "3.11.15"
+   "version": "3.12.13"
   }
  },
  "nbformat": 4,
