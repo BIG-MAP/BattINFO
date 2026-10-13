@@ -54,19 +54,9 @@ the value-basis class alone.
 
 ## 4. Continuous-current rated properties (red-team W3.3, 2026-07-07)
 
-The canonical schema accepts `nominal_continuous_charging_current` /
-`nominal_continuous_discharging_current` (datasheet staples), but neither has a
-resolvable EMMO class — the candidate mappings still point at fabricated
-`w3id.org/emmo/domain/battery#nominalContinuous...` IRIs that do not exist in the 0.20.1
-closure. Until EMMO gains these terms, the keys validate with a
-`semantic.property_unmapped` warning and are omitted from JSON-LD.
+Resolved without a new class (owner ruling 2026-10-13). `nominal_continuous_charging_current` and `nominal_continuous_discharging_current` are curated as `ChargingCurrent` (`electrochemistry_79551e01_…`) and `DischargingCurrent` (`electrochemistry_e4d666ee_…`), the published classes of a current applied during charging or discharging. A standard continuous current is not a maximum, so neither key shares the `MaximumContinuous*Current` classes of the maximum keys, and the v1 records context was corrected to match before 0.8.0. A `NominalContinuousChargingCurrent` class is not needed unless upstream wants to tell a datasheet's standard current from any charging current.
 
-- **NominalContinuousChargingCurrent** — proposed electrochemistry class
-- **NominalContinuousDischargingCurrent** — proposed electrochemistry class
-- Also unmapped SpecSet keys awaiting terms or curation: `capacity_threshold_exhaustion`,
-  `charging_time`, `cycle_life_c_rate`, `maximum_power`, `power_capability`,
-  `power_energy_ratio`, `round_trip_energy_efficiency(_50pct)`
-  (see `tests/test_validation_plausibility.py` `KNOWN_UNMAPPED` — the list may only shrink).
+The other SpecSet keys that once waited here are mapped, except `cycle_life_c_rate` and `round_trip_energy_efficiency_50pct` (see `tests/test_validation_plausibility.py` `KNOWN_UNMAPPED`, which may only shrink).
 
 ## 5. Statistical dispersion of a sample (gap E7, 2026-08-17)
 
@@ -334,9 +324,7 @@ curated map drift apart again.
 allowlisted only. Wiring them is a future save-gate addition (`capacity_loss`,
 `capacity_retention`, `charge_recovery`), not part of this pass.
 
-Still unmapped, with no upstream class: `cycle_life_c_rate`,
-`round_trip_energy_efficiency_50pct` (measurement qualifiers upstream does not name) and
-the two `nominal_continuous_*_current` keys from section 4.
+Still unmapped, with no upstream class: `cycle_life_c_rate` and `round_trip_energy_efficiency_50pct` (measurement qualifiers upstream does not name). The two `nominal_continuous_*_current` keys from section 4 were curated as `ChargingCurrent` and `DischargingCurrent` on 2026-10-13.
 
 ### domain-electrochemistry 0.38.0 / 0.39.0 (domain-battery 0.21.0)
 

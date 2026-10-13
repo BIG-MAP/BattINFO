@@ -50,11 +50,6 @@ EMITTER_CLASS_TERMS = {
     "PositiveElectrode": "electrochemistry:electrochemistry_aff732a9_238a_4734_977c_b2ba202af126",
     "MolarMass": "emmo:EMMO_e980389d_6dfe_4156_9b40_32050c9644a5",
     "SpecificSurfaceArea": "electrochemistry:electrochemistry_cf54e7c1_f359_4715_b61d_0350b890d597",
-    # The classes the candidate property map gives the two nominal continuous
-    # current keys. Those keys stay deferred in the curated map, so nothing else
-    # brings these terms into the context.
-    "ChargingCurrent": "electrochemistry:electrochemistry_79551e01_4bc6_4292_916e_08fe28a84600",
-    "DischargingCurrent": "electrochemistry:electrochemistry_e4d666ee_d637_45cd_a904_dc33941ead4f",
 }
 
 
@@ -62,9 +57,11 @@ EMITTER_CLASS_TERMS = {
 # 2026-10-13). v1 was frozen before domain-electrochemistry 0.37.1 and
 # domain-battery 0.20.2 were adopted, so the first eight terms kept a private
 # battinfo: mint, a superseded class or a deprecated IRI while the curated
-# property map and the entity type map had moved on. The last two were wrong
-# from the start: degC named EMMO's class for the programming language C, and
-# TemperatureCoefficientOfTheOpenCircuitVoltage named the CoatingThickness IRI.
+# property map and the entity type map had moved on. degC and
+# TemperatureCoefficientOfTheOpenCircuitVoltage were wrong from the start: degC
+# named EMMO's class for the programming language C, and the other term the
+# CoatingThickness IRI. The rest come from an audit of every record-body term
+# against the pinned closure (ruled on 2026-10-13).
 # No released package has shipped v1, so it is corrected in place rather than
 # bumped to v2. After 0.8.0 this table must not grow: a change of meaning then
 # needs a v2 context. tests/test_context_v1_agreement.py fails if v1 and the
@@ -87,6 +84,12 @@ PRE_RELEASE_CORRECTIONS = {
     # was electrochemistry_3b938708_..., the IRI of CoatingThickness
     "TemperatureCoefficientOfTheOpenCircuitVoltage": (
         "electrochemistry:electrochemistry_3bb5ae23_59fa_4bc7_9495_803eb6719f28"
+    ),
+    # The maximum continuous currents -> ChargingCurrent and DischargingCurrent:
+    # a standard charge or discharge current is not a maximum.
+    "nominal_continuous_charging_current": "electrochemistry:electrochemistry_79551e01_4bc6_4292_916e_08fe28a84600",
+    "nominal_continuous_discharging_current": (
+        "electrochemistry:electrochemistry_e4d666ee_d637_45cd_a904_dc33941ead4f"
     ),
 }
 

@@ -799,7 +799,7 @@ class SpecSet(ConfiguredBaseModel):
             "linkml_meta": {
                 "aliases": ["Nominal continuous charging current [A]"],
                 "domain_of": ["SpecSet"],
-                "slot_uri": "electrochemistry:electrochemistry_39d8a6ee_cd55_4855_8b5b_d42bef95ac78",
+                "slot_uri": "electrochemistry:electrochemistry_79551e01_4bc6_4292_916e_08fe28a84600",
             }
         },
     )
@@ -832,7 +832,7 @@ class SpecSet(ConfiguredBaseModel):
             "linkml_meta": {
                 "aliases": ["Nominal continuous discharging current [A]"],
                 "domain_of": ["SpecSet"],
-                "slot_uri": "electrochemistry:electrochemistry_ba7ac581_0e13_4815_b888_013c378932f5",
+                "slot_uri": "electrochemistry:electrochemistry_e4d666ee_d637_45cd_a904_dc33941ead4f",
             }
         },
     )

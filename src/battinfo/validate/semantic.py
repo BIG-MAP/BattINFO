@@ -826,9 +826,9 @@ def _validate_property_mappability(
         if class_iri is None:
             from battinfo.transform.json_to_jsonld import _property_type_term
 
-            candidate = _property_type_term(str(key))
-            if candidate:
-                outcome = f"the JSON-LD export types it with the unreviewed candidate class '{candidate}'."
+            hand_kept = _property_type_term(str(key))
+            if hand_kept:
+                outcome = f"the JSON-LD export types it with the hand-kept class '{hand_kept}'."
             else:
                 outcome = (
                     "the JSON-LD export gives it no quantity class, only its "

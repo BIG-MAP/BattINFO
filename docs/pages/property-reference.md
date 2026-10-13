@@ -9,7 +9,7 @@ unit IRI, by the curated mapping tables under
 `assets/mappings/domain-battery/` — the single source of truth for the
 semantics of emitted JSON-LD. This page is generated from those tables.
 
-## Properties (107)
+## Properties (109)
 
 The keys of quantities in `properties={...}` on a cell spec and in the
 `property` blocks of material and component records, and the EMMO class
@@ -79,6 +79,8 @@ each becomes in JSON-LD:
 | `minimum_storage_temperature` | [MinimumStorageTemperature](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_0ddfd57a_d338_4690_be45_b26884ed6302) |
 | `n_p_ratio` | [NPRatio](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_05012606_b93d_4016_bbc7_8a927efdf723) |
 | `nominal_capacity` | [NominalCapacity](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_8abde9d0_84f6_4b4f_a87e_86028a397100) |
+| `nominal_continuous_charging_current` | [ChargingCurrent](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_79551e01_4bc6_4292_916e_08fe28a84600) |
+| `nominal_continuous_discharging_current` | [DischargingCurrent](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_e4d666ee_d637_45cd_a904_dc33941ead4f) |
 | `nominal_energy` | [NominalEnergy](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d) |
 | `nominal_voltage` | [NominalVoltage](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_639b844a_e801_436b_985d_28926129ead6) |
 | `ocp` | [OpenCircuitPotential](https://w3id.org/emmo/domain/electrochemistry#electrochemistry_e272f229_7b45_4436_9b0b_30391ee4e5be) |

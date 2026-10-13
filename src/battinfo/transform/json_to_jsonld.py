@@ -33,6 +33,8 @@ BATTERY_TYPE_FALLBACK = "Battery"
 # is recorded in battinfo.ttl (owl:imports) and in this comment: 0.18.7.
 BATTERY_CONTEXT_URL = "https://w3id.org/emmo/domain/battery/context"
 
+# Hand-kept property classes. They fill a key the curated property map lacks and
+# never override it (see _property_type_map); today the curated map holds every one.
 MANUAL_PROPERTY_TYPES = {
     "minimum_capacity": {"term": "MinimumCapacity"},
     "maximum_charging_temperature": {"term": "MaximumChargingTemperature"},
@@ -263,28 +265,31 @@ def _load_profile_file(*parts: str) -> dict[str, Any]:
 
 @lru_cache(maxsize=1)
 def _property_type_map() -> dict[str, dict[str, str]]:
+    """Property key -> its class term and IRI. The curated map wins, then the
+    hand-kept entries fill keys it lacks. ``property_map.candidates.json`` is
+    generated review input and types nothing: read first, it once typed
+    ``charging_time`` as the Charging process and ``min_capacity`` as Capacity."""
     merged: dict[str, dict[str, str]] = {}
 
-    for filename in ("property_map.candidates.json", "property_map.curated.json"):
-        data = _load_mapping_file(filename)
-        for item in data.get("mappings", []):
-            key = item.get("key")
-            if not isinstance(key, str):
-                continue
+    for item in _load_mapping_file("property_map.curated.json").get("mappings", []):
+        key = item.get("key")
+        if not isinstance(key, str):
+            continue
 
-            term = item.get("class_pref_label") or item.get("class_label")
-            iri = item.get("class_iri")
-            if isinstance(term, str) and term and isinstance(iri, str) and iri:
-                entry: dict[str, str] = {"term": term, "iri": iri}
-                co_type = item.get("co_type")
-                if isinstance(co_type, str) and co_type:
-                    entry["co_type"] = co_type
-                co_type_pending = item.get("co_type_pending")
-                if isinstance(co_type_pending, str) and co_type_pending:
-                    entry["co_type_pending"] = co_type_pending
-                merged.setdefault(key, entry)
+        term = item.get("class_pref_label") or item.get("class_label")
+        iri = item.get("class_iri")
+        if isinstance(term, str) and term and isinstance(iri, str) and iri:
+            entry: dict[str, str] = {"term": term, "iri": iri}
+            co_type = item.get("co_type")
+            if isinstance(co_type, str) and co_type:
+                entry["co_type"] = co_type
+            co_type_pending = item.get("co_type_pending")
+            if isinstance(co_type_pending, str) and co_type_pending:
+                entry["co_type_pending"] = co_type_pending
+            merged.setdefault(key, entry)
 
-    merged.update(MANUAL_PROPERTY_TYPES)
+    for key, entry in MANUAL_PROPERTY_TYPES.items():
+        merged.setdefault(key, entry)
     return merged
 
 

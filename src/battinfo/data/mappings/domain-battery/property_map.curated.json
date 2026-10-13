@@ -1,5 +1,5 @@
 {
-  "version": "0.5.0",
+  "version": "0.6.0",
   "status": "curated",
   "notes": [
     "Curated mapping entries promoted from decisions in interactive review.",
@@ -8,7 +8,8 @@
     "Temperature properties corrected: candidates mapped these to process classes (Charging/Discharging);",
     "correct mapping is to temperature-limit property classes in domain-electrochemistry.",
     "0.4.0: wired the operating-temperature, typical-capacity and maximum-pulse-current keys that were fallback-emitted while their EMMO classes were pending.",
-    "0.5.0: adopted domain-electrochemistry 0.39.0. ocp types OpenCircuitPotential (the electrode quantity; OpenCircuitVoltage is now strictly the cell-level one) and entropic_coefficient TemperatureCoefficientOfTheOpenCircuitPotential; solid_diffusivity moves to the new GuestDiffusivity, electrode_pair_count to NumberOfElectrodePairs, and transport_efficiency is mapped to the new TransportEfficiency."
+    "0.5.0: adopted domain-electrochemistry 0.39.0. ocp types OpenCircuitPotential (the electrode quantity; OpenCircuitVoltage is now strictly the cell-level one) and entropic_coefficient TemperatureCoefficientOfTheOpenCircuitPotential; solid_diffusivity moves to the new GuestDiffusivity, electrode_pair_count to NumberOfElectrodePairs, and transport_efficiency is mapped to the new TransportEfficiency.",
+    "0.6.0: promoted nominal_continuous_charging_current and nominal_continuous_discharging_current from the candidate map as ChargingCurrent and DischargingCurrent; the emitter no longer reads the candidate map."
   ],
   "mappings": [
     {
@@ -629,6 +630,26 @@
       "class_pref_label": "NominalCapacity",
       "class_label": "NominalCapacity",
       "confidence": 1.0
+    },
+    {
+      "key": "nominal_continuous_charging_current",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_79551e01_4bc6_4292_916e_08fe28a84600",
+      "class_qname": "emmo:ChargingCurrent",
+      "class_pref_label": "ChargingCurrent",
+      "class_label": "ChargingCurrent",
+      "confidence": 1.0,
+      "notes": "The standard continuous charge current of a datasheet. It is not a maximum, so not MaximumContinuousChargingCurrent."
+    },
+    {
+      "key": "nominal_continuous_discharging_current",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_e4d666ee_d637_45cd_a904_dc33941ead4f",
+      "class_qname": "emmo:DischargingCurrent",
+      "class_pref_label": "DischargingCurrent",
+      "class_label": "DischargingCurrent",
+      "confidence": 1.0,
+      "notes": "The standard continuous discharge current of a datasheet. It is not a maximum, so not MaximumContinuousDischargingCurrent."
     },
     {
       "key": "nominal_energy",

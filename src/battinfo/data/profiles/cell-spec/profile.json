@@ -501,7 +501,7 @@
     },
     "specification.property": {
       "kind": "battery_semantic_binding",
-      "binding_source": "assets/mappings/domain-battery/property_map.candidates.json",
+      "binding_source": "assets/mappings/domain-battery/property_map.curated.json",
       "jsonld_target": "hasProperty"
     },
     "instances": {
