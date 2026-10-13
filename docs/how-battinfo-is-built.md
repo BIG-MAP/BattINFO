@@ -154,7 +154,9 @@ Supporting cast: `_jsonio.py` (atomic JSON file I/O), `_record_index.py`
 Zenodo deposit: which locations it may read, names, URLs and checksums, what
 a deposit would leave out, and the check of its files before a publish),
 `_deposit_index.py` (`.battinfo/deposit-files.json`, the local data files a
-workspace registered), `canonical_aliases.py`
+workspace registered and the local file behind each copy its deposits and
+uploads made, and `.battinfo/zenodo.json`, the Zenodo record it continues),
+`canonical_aliases.py`
 (legacy key normalisation), `testmethod.py` (structured test-method steps),
 `metadata.py` (CSVW/DCAT dataset enrichment).
 

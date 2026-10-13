@@ -43,12 +43,23 @@ def _zenodo_checksum_matches(path: Path, checksum: str | None) -> bool:
     Zenodo reports file checksums as MD5 (sometimes prefixed ``"md5:"``). Any
     missing/non-MD5/mismatching value returns False, so the caller safely re-uploads
     (correctness over optimisation)."""
-    if not checksum:
-        return False
+    listed = _listed_md5(checksum)
+    return bool(listed) and _file_md5(path) == listed
+
+
+def _listed_md5(checksum: object) -> str:
+    """The md5 hex digest in a checksum Zenodo lists (``"md5:<hex>"`` or ``"<hex>"``), or ``""``."""
+    if not isinstance(checksum, str) or not checksum:
+        return ""
     algo, _, digest = checksum.partition(":") if ":" in checksum else ("md5", "", checksum)
-    if algo.lower() not in ("md5", ""):
+    return digest.strip().lower() if algo.lower() in ("md5", "") else ""
+
+
+def deposit_is_published(deposit: object) -> bool:
+    """True when a deposit Zenodo returned is published (state ``done``, or submitted)."""
+    if not isinstance(deposit, dict):
         return False
-    return _file_md5(path) == digest.strip().lower()
+    return str(deposit.get("state") or "").lower() == "done" or deposit.get("submitted") is True
 
 
 class ZenodoError(RuntimeError):
@@ -201,8 +212,7 @@ class ZenodoClient:
                 deposit = self.get_deposit(deposit_id)
             except ZenodoError:
                 raise exc from None
-            state = str(deposit.get("state") or "").lower()
-            if state == "done" or deposit.get("submitted") is True:
+            if deposit_is_published(deposit):
                 return deposit
             raise
 
@@ -263,8 +273,17 @@ class ZenodoClient:
             Mapping of {local_path: zenodo_download_url} for each uploaded file.
 
         Raises:
+            FileNotFoundError: naming each local file that is not there,
+                before anything is sent.
             ZenodoError: naming the file, when an upload fails.
         """
+        absent = [f"{name} ({path})" for path, name in files.items() if not Path(path).is_file()]
+        if absent:
+            raise FileNotFoundError(
+                f"Not uploaded to deposit {deposit_id}: no local file for {'; '.join(absent)}."
+            )
+        if not files:
+            return {}
         deposit = self.get_deposit(deposit_id)
         bucket_url = deposit.get("links", {}).get("bucket")
         if not bucket_url:
@@ -273,8 +292,6 @@ class ZenodoClient:
         result: dict[Path, str] = {}
         for local_path, zenodo_name in files.items():
             local_path = Path(local_path)
-            if not local_path.is_file():
-                continue
             key_path = "/".join(url_segment(part) for part in zenodo_name.split("/"))
             upload_url = f"{bucket_url}/{key_path}"
             # Zenodo's S3-compatible bucket endpoint requires application/octet-stream
@@ -333,23 +350,57 @@ class ZenodoClient:
         self,
         deposit_id: int | str,
         files: dict[Path, str],
+        *,
+        keep: dict[str, str] | None = None,
     ) -> dict[str, list[str]]:
-        """Make the deposit's files match *files* while re-uploading as little as possible.
+        """Make the deposit's files match *files* and *keep* while re-uploading as little as possible.
 
         Files already on the deposit whose content is unchanged (MD5 match) are kept;
-        changed files are replaced; files no longer present are removed; new files are
-        uploaded. This is what makes a new version cheap — Zenodo copies the prior
-        version's files into the new draft, so unchanged data (often gigabytes) need not
-        be re-uploaded; typically only ``battinfo.json``/``ro-crate-metadata.json`` change.
+        changed files are replaced; new files are uploaded. This is what makes a new
+        version cheap — Zenodo copies the prior version's files into the new draft, so
+        unchanged data (often gigabytes) need not be re-uploaded; typically only
+        ``battinfo.json``/``ro-crate-metadata.json`` change.
 
         ``files`` maps ``{local_path: zenodo_filename}`` (same shape as :meth:`upload_files`).
+        ``keep`` maps ``{zenodo_filename: md5}`` for files the deposit must already
+        hold because there is no local file to send, such as the data files a new
+        version takes over from the one before after their local copies were
+        deleted. Such a copy is kept when its md5 is the one given (any md5 when the
+        one given is empty). A file the deposit holds that neither ``files`` nor
+        ``keep`` names is removed; one they name is never removed.
+
+        Nothing on the deposit changes when a local file in ``files`` is missing
+        (``FileNotFoundError``), or when a file in ``keep`` is not on the deposit or
+        has another md5 there (:class:`ZenodoError`, naming each).
+
         Returns ``{"uploaded": [...], "kept": [...], "removed": [...]}``.
         """
+        absent = [f"{name} ({path})" for path, name in files.items() if not Path(path).is_file()]
+        if absent:
+            raise FileNotFoundError(
+                f"Not uploaded to deposit {deposit_id}: no local file for {'; '.join(absent)}."
+            )
         existing = {(f.get("filename") or f.get("key")): f for f in self.list_files(deposit_id)}
         desired = {name: Path(path) for path, name in files.items()}
+        keep = {name: md5 for name, md5 in (keep or {}).items() if name not in desired}
+
+        lacking: list[str] = []
+        for name, md5 in sorted(keep.items()):
+            ex = existing.get(name)
+            listed = _listed_md5(ex.get("checksum")) if ex is not None else ""
+            if ex is None:
+                lacking.append(f"{name} is not on it")
+            elif md5 and listed != md5.lower():
+                lacking.append(f"{name} is on it with md5 {listed or '(none listed)'}, not {md5}")
+        if lacking:
+            raise ZenodoError(
+                f"Deposit {deposit_id} does not hold the files that have no local copy to upload: "
+                + "; ".join(lacking)
+                + ". Nothing on the deposit was changed."
+            )
 
         to_upload: dict[Path, str] = {}
-        kept: list[str] = []
+        kept: list[str] = list(keep)
         for name, path in desired.items():
             ex = existing.get(name)
             if ex is not None and _zenodo_checksum_matches(path, ex.get("checksum")):
@@ -357,7 +408,7 @@ class ZenodoClient:
             else:
                 to_upload[path] = name
 
-        removed = [name for name in existing if name not in desired]
+        removed = [name for name in existing if name not in desired and name not in keep]
         # A changed file must be deleted before its replacement is uploaded.
         changed = [name for name in to_upload.values() if name in existing]
         for name in removed + changed:

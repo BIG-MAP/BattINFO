@@ -170,6 +170,29 @@ def _state(ws: AuthoringWorkspace) -> dict | None:
     return json.loads(path.read_text(encoding="utf-8")) if path.exists() else None
 
 
+def _deposit_state(*, published: bool) -> dict:
+    """What .battinfo/zenodo.json says of deposit 7, but for the records it holds."""
+    return {
+        "environment": "production", "concept_record_id": "7", "record_id": "7", "deposit_id": "7",
+        "doi": "10.5281/zenodo.7", "published": published,
+    }
+
+
+def _recorded(state: object) -> dict:
+    """*state* without its list of records."""
+    assert isinstance(state, dict)
+    return {key: value for key, value in state.items() if key != "records"}
+
+
+def _record_iris(ws: AuthoringWorkspace) -> list[str]:
+    """The IRI of every record the workspace saved, sorted."""
+    return sorted(
+        next(body["id"] for body in json.loads(path.read_text(encoding="utf-8")).values()
+             if isinstance(body, dict) and "id" in body)
+        for path in _saved_records(ws)
+    )
+
+
 def _catalog(graph: dict) -> dict:
     return next(node for node in graph["@graph"] if "dcat:Catalog" in (node.get("@type") or []))
 
@@ -357,13 +380,13 @@ def test_a_publish_sends_the_metadata_first_and_points_the_records_last(tmp_path
         "POST /deposit/depositions/7/actions/publish",
     ]
     # The draft was saved before its metadata went up, as unpublished.
-    assert seen["state_at_metadata"] == {
-        "record_id": "7", "doi": "10.5281/zenodo.7", "published": False, "sandbox": False,
-    }
+    assert _recorded(seen["state_at_metadata"]) == _deposit_state(published=False)
     # The records kept their local files until the DOI existed.
     assert seen["urls_at_publish"] == local_urls and local_urls[0].startswith("file:")
     assert _content_urls(ws) == ["https://zenodo.org/records/7/files/cycling.csv"]
-    assert _state(ws) == {"record_id": "7", "doi": "10.5281/zenodo.7", "published": True, "sandbox": False}
+    state = _state(ws)
+    assert _recorded(state) == _deposit_state(published=True)
+    assert state is not None and state["records"] == _record_iris(ws)
     assert result.published and result.doi == "10.5281/zenodo.7"
 
 
@@ -387,7 +410,7 @@ def test_metadata_zenodo_does_not_accept_stops_the_deposit_before_any_file(
     assert api.files == {} and not api.published
     assert _content_urls(ws) == local_urls
     # The draft is saved, unpublished, so the next run updates it rather than open another.
-    assert _state(ws) == {"record_id": "7", "doi": "10.5281/zenodo.7", "published": False, "sandbox": False}
+    assert _recorded(_state(ws)) == _deposit_state(published=False)
 
     api.metadata_errors = None
     api.requests.clear()

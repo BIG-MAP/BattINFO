@@ -626,7 +626,7 @@ class _RecordingZenodo:
     def create_empty_deposit(self) -> dict:
         return {"id": 7, "record_id": 7, "metadata": {"prereserve_doi": {"doi": "10.5281/zenodo.7"}}}
 
-    def sync_files(self, deposit_id: int, upload_map: dict) -> dict:
+    def sync_files(self, deposit_id: int, upload_map: dict, *, keep: dict | None = None) -> dict:
         self.uploaded = {name: Path(path).read_text(encoding="utf-8") for path, name in upload_map.items()}
         self.md5 = {name: _file_md5(Path(path)) for path, name in upload_map.items()}
         return {"uploaded": sorted(self.uploaded), "kept": [], "removed": []}
@@ -699,7 +699,10 @@ class TestDepositTitle:
         monkeypatch.setattr(ws, "submit", lambda **kwargs: submitted.append(kwargs.get("doi")) or [])
         ws.publish(zenodo=True, note="title check", creators=CREATORS)
 
-        assert recording_zenodo.published and submitted == ["10.5281/zenodo.7"]
+        # ws.submit() takes the DOI from the published record in .battinfo/zenodo.json.
+        assert recording_zenodo.published and submitted == [None]
+        state = json.loads((tmp_path / ".battinfo" / "zenodo.json").read_text(encoding="utf-8"))
+        assert state["published"] is True and state["doi"] == "10.5281/zenodo.7"
         graph = json.loads(recording_zenodo.uploaded["battinfo.json"])
         assert _catalog(graph)["schema:name"] == recording_zenodo.metadata["title"] == AUTO_TITLE
 

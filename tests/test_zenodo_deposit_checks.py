@@ -420,7 +420,8 @@ def test_a_publish_is_refused_when_the_deposit_lacks_a_file_or_its_md5_differs(
     # The deposit's files were listed after the upload, and nothing was published.
     assert api.requests[-1] == "GET /deposit/depositions/7/files" and PUBLISH_REQUEST not in api.requests
     assert not api.published
-    assert _state(ws) == {"record_id": "7", "doi": "10.5281/zenodo.7", "published": False, "sandbox": False}
+    state = _state(ws)
+    assert state is not None and state["record_id"] == "7" and state["published"] is False
     assert _content_urls(ws) == local_urls
 
 
@@ -459,22 +460,25 @@ def test_a_distribution_hosted_elsewhere_passes(tmp_path: Path, api: _ZenodoAPI)
     assert sorted(urls) == sorted([f"{RECORD_URL}/files/cycling.csv", external])
 
 
-def test_a_draft_then_a_publish_never_publishes_without_the_data_file(tmp_path: Path, api: _ZenodoAPI) -> None:
-    """The draft points the records at its files; the publish that follows must still carry them.
+def test_a_draft_then_a_publish_keeps_the_data_file(tmp_path: Path, api: _ZenodoAPI) -> None:
+    """The draft points the records at its files; the publish that follows still carries them.
 
-    Here it cannot yet: the second run finds no local file to send, and the
-    upload removes the deposited copy. The check refuses the publish rather
-    than mint a DOI for a deposit whose graph links to a file it lacks.
+    The second run finds the local file behind the record's Zenodo URL
+    through .battinfo/deposit-files.json, sees that the draft holds it
+    unchanged, and publishes the draft with it.
     """
     ws = _workspace(tmp_path)
     ws.zenodo(token="placeholder", creators=CREATORS)
     assert _content_urls(ws) == [f"{RECORD_URL}/files/cycling.csv"]
+    data = (tmp_path / "C01" / "cycling.csv").read_bytes()
 
-    with pytest.warns(UserWarning, match="unpublished draft"), pytest.raises(RuntimeError) as excinfo:
-        ws.zenodo(token="placeholder", creators=CREATORS, publish=True)
+    with pytest.warns(UserWarning, match="unpublished draft"):
+        result = ws.zenodo(token="placeholder", creators=CREATORS, publish=True)
 
-    assert "links to cycling.csv, which is not on the deposit" in str(excinfo.value)
-    assert not api.published and PUBLISH_REQUEST not in api.requests
+    assert result.published and api.published
+    assert api.files["cycling.csv"] == data
+    assert [line for line in api.requests if line.startswith("PUT /files/")].count("PUT /files/bucket-7/cycling.csv") == 1
+    assert _content_urls(ws) == [f"{RECORD_URL}/files/cycling.csv"]
 
 
 # ── The check itself ──────────────────────────────────────────────────────────

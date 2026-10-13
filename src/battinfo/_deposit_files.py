@@ -13,6 +13,15 @@ A record, or a distribution entry, that cannot be read is an
 :class:`Omission`, never a silent skip, and :func:`deposit_file_problems`
 checks the deposit's files against the deposit graph before it is published.
 
+A record a deposit has pointed at its copy of a file no longer names the
+local file. The deposit index (``.battinfo/deposit-files.json``, see
+:mod:`battinfo._deposit_index`) does, and :class:`DepositContext` reads it:
+a URL under a record of this workspace's Zenodo record, or one
+``ws.upload()`` made, is a file of the deposit (a :class:`RemoteSource`).
+Its local file is planned as any other when it is there. When it is gone, a
+deposit that continues the record keeps the copy it already holds (a kept
+file, never sent again), and any other deposit lists it as missing.
+
 A location in a record is screened from its text before the file system is
 asked about it (:func:`location_path`). A network path outside the workspace
 folder is not read unless the workspace registered the file
@@ -35,6 +44,14 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import unquote
 
+from battinfo._deposit_index import (
+    ZENODO_HOSTS,
+    IndexedFile,
+    concept_of_record,
+    deposited_files,
+    hosted_file,
+    parse_zenodo_file_url,
+)
 from battinfo._util import (
     file_uri_to_path,
     has_parent_reference,
@@ -176,6 +193,13 @@ class DepositFile:
     kind: str = "other"
     #: The archive that carries the file in a zipped deposit; empty when the file is deposited as itself.
     archive: str = ""
+    #: True for a file the deposit already holds and keeps as it is, because
+    #: there is no local file to send: a copy a new version took over from
+    #: the version before, or one an earlier run uploaded to the draft.
+    #: ``path`` is the local file it was made from, which is gone (``Path()``
+    #: when no record of it was kept), and the size and digests are the ones
+    #: recorded when it was deposited (empty when none were).
+    kept: bool = False
 
     def url(self, files_base: str) -> str:
         """The download URL of the deposit file that holds this file: the file itself, or its archive."""
@@ -187,6 +211,119 @@ def measured_file(path: Path, name: str, *, kind: str = "other") -> DepositFile:
     size, md5, sha256 = _measure(path)
     return DepositFile(
         path=path, name=name, segment=url_segment(name), size=size, md5=md5, sha256=sha256, kind=kind,
+    )
+
+
+@dataclass(frozen=True)
+class RemoteSource:
+    """A URL a record gives for its data, which names a file of this workspace's deposits.
+
+    The URL is a copy a deposit or ``ws.upload()`` made of a local file:
+    ``path`` is that file, when the deposit index knows it, with the size and
+    digests recorded then. ``name`` is the name the file has in the Zenodo
+    record the deposit continues (or, for a Zenodo URL, in its own record);
+    empty when it has none yet. ``continued`` says that the record the deposit
+    continues already holds the file under ``name``, so the deposit can keep
+    that copy when the local file is gone. ``hosted`` marks a copy hosted
+    elsewhere (R2): the deposit carries the file too, but the records keep
+    pointing at the hosted copy.
+    """
+
+    url: str
+    name: str = ""
+    path: Path | None = None
+    size: int = 0
+    md5: str = ""
+    sha256: str = ""
+    continued: bool = False
+    hosted: bool = False
+
+
+@dataclass(frozen=True)
+class DepositContext:
+    """What a deposit knows, before it asks Zenodo, about the Zenodo record it makes or continues.
+
+    ``environment`` is ``production`` or ``sandbox``. ``concept`` is the
+    concept record id of the record the deposit continues (``None`` for a new
+    record, or when no concept id was recorded), and ``records`` the record
+    ids of that record's versions this workspace knows: a URL under one of
+    them names a file the record already holds, whether or not the index
+    knows the local file behind it. ``index`` is the loaded deposit index.
+    """
+
+    environment: str = "production"
+    concept: str | None = None
+    records: frozenset[str] = frozenset()
+    index: Mapping[str, Any] = field(default_factory=dict)
+
+    def recorded_names(self) -> dict[str, str]:
+        """The name each local file has in the record the deposit continues, keyed by :func:`path_key`."""
+        return {
+            item.path_key(): name
+            for name, item in deposited_files(self.index, self.environment, self.concept).items()
+            if item.path
+        }
+
+    def source_for(self, url: str) -> RemoteSource | None:
+        """The deposit file *url* names, or ``None`` for a URL elsewhere on the web.
+
+        A Zenodo file URL (``https://zenodo.org/records/<id>/files/<name>``)
+        names a deposit file when the index knows the local file behind it,
+        under any record of this workspace, or when ``<id>`` is a record the
+        deposit continues. Any other URL does when ``ws.upload()`` made it.
+        """
+        zenodo_url = parse_zenodo_file_url(url)
+        if zenodo_url is not None:
+            same_environment = zenodo_url.environment == self.environment
+            concept = concept_of_record(self.index, zenodo_url.environment, zenodo_url.record_id)
+            continued = same_environment and (
+                zenodo_url.record_id in self.records or (concept is not None and concept == self.concept)
+            )
+            known = deposited_files(self.index, zenodo_url.environment, concept).get(zenodo_url.name)
+            if known is None and not continued:
+                return None
+            return _remote(url, zenodo_url.name, known, continued=continued)
+        hosted = hosted_file(self.index, url)
+        if hosted is None or not hosted.path:
+            return None
+        # The name and digests the file has in the record the deposit
+        # continues, when an earlier version of it deposited the file.
+        for name, item in deposited_files(self.index, self.environment, self.concept).items():
+            if item.path and item.path_key() == hosted.path_key():
+                return _remote(url, name, item, continued=True, hosted=True)
+        return _remote(url, "", hosted, hosted=True)
+
+    def refusal_for(self, url: str) -> str | None:
+        """Why a deposit refuses a dataset whose data *url* names, or ``None``.
+
+        A deposit on zenodo.org does not link to a file in a sandbox record:
+        the sandbox is a test service, and its records do not last. (A file
+        the index knows is taken from its local copy instead, see
+        :meth:`source_for`.)
+        """
+        zenodo_url = parse_zenodo_file_url(url)
+        if zenodo_url is None or self.environment != "production" or zenodo_url.environment != "sandbox":
+            return None
+        return (
+            f"its data file is at {url}, in a record on the Zenodo sandbox ({ZENODO_HOSTS['sandbox']}), "
+            "a test service whose records do not last, and this workspace has no record of the local "
+            "file behind it. Point the dataset at its local file again (ws.add(..., data=...), then "
+            "ws.save())"
+        )
+
+
+def _remote(
+    url: str, name: str, known: IndexedFile | None, *, continued: bool = False, hosted: bool = False
+) -> RemoteSource:
+    return RemoteSource(
+        url=url,
+        name=name,
+        path=Path(known.path) if known is not None and known.path else None,
+        size=known.size if known is not None else 0,
+        md5=known.md5 if known is not None else "",
+        sha256=known.sha256 if known is not None else "",
+        continued=continued,
+        hosted=hosted,
     )
 
 
@@ -255,11 +392,17 @@ def dataset_distributions(dataset: Mapping[str, Any]) -> tuple[list[Mapping[str,
 
 @dataclass
 class DepositFilePlan:
-    """The local files one deposit carries, each named once and found by its resolved path."""
+    """The files one deposit carries, each named once and found by its resolved path.
+
+    ``files`` holds the local files first, then the kept files (see
+    :attr:`DepositFile.kept`).
+    """
 
     root: Path
     files: list[DepositFile] = field(default_factory=list)
-    #: Distribution locations whose file does not exist or is not a file.
+    #: Distribution locations whose file does not exist or is not a file, and
+    #: copies a record points at whose local file is gone and which the
+    #: deposit does not already hold.
     missing: list[str] = field(default_factory=list)
     #: Artifacts left out of the deposit, one warning each.
     artifact_warnings: list[str] = field(default_factory=list)
@@ -273,13 +416,18 @@ class DepositFilePlan:
     measured: bool = True
     #: The :func:`~battinfo._util.lexical_key` of each file the workspace registered.
     registered: frozenset[str] = frozenset()
+    #: URLs of copies hosted elsewhere (R2) whose files the deposit carries
+    #: too; the records keep pointing at these.
+    hosted: frozenset[str] = frozenset()
     _by_key: dict[str, DepositFile] = field(default_factory=dict, repr=False)
     _by_location: dict[str, DepositFile | None] = field(default_factory=dict, repr=False)
 
     def entry_for(self, location: object) -> DepositFile | None:
-        """The planned file a record location names (a ``file:`` URI or a path), by resolved path.
+        """The planned file a record location names, by resolved path.
 
-        ``None`` for a remote URL, for a file the deposit does not carry, for
+        *location* is a ``file:`` URI or a path, or a URL of a copy one of
+        this workspace's deposits or uploads made (see :class:`RemoteSource`).
+        ``None`` for any other URL, for a file the deposit does not carry, for
         a location the screen refuses (nothing asks the file system about
         it), and for anything that is not a string.
         """
@@ -289,6 +437,14 @@ class DepositFilePlan:
             key = location_key(location, self.root, registered=self.registered)
             self._by_location[location] = self._by_key.get(key) if key is not None else None
         return self._by_location[location]
+
+    def local_files(self) -> list[DepositFile]:
+        """The files the deposit sends from this computer (or packs into archives, when zipped)."""
+        return [entry for entry in self.files if not entry.kept]
+
+    def kept_files(self) -> list[DepositFile]:
+        """The files the deposit already holds and keeps, with no local file to send."""
+        return [entry for entry in self.files if entry.kept]
 
     def archives(self) -> dict[str, list[DepositFile]]:
         """The files of a zipped deposit, by the archive that carries them."""
@@ -300,7 +456,9 @@ class DepositFilePlan:
 
     def deposited_names(self) -> list[str]:
         """The names of the data files the deposit holds: the files, or their archives when zipped."""
-        return list(self.archives()) if self.zipped else [entry.name for entry in self.files]
+        if self.zipped:
+            return list(self.archives()) + [entry.name for entry in self.kept_files()]
+        return [entry.name for entry in self.files]
 
 
 def _archive_name(kind: str) -> str:
@@ -344,6 +502,7 @@ def build_deposit_file_plan(
     measure: bool = True,
     registered: Collection[str] = frozenset(),
     owners: Mapping[str, str] | None = None,
+    remote: Iterable[tuple[RemoteSource, str]] = (),
 ) -> DepositFilePlan:
     """Plan the files of one deposit.
 
@@ -361,18 +520,28 @@ def build_deposit_file_plan(
     the dataset *owners* maps it to (the location itself when it maps it to
     none), for the caller to refuse the deposit over.
 
-    Each file keeps the name *recorded_names* gives its :func:`path_key` (the
-    name an earlier deposit gave it), or else takes its own name in NFC form.
-    A name whose :func:`name_key` another file, or one of *reserved_names*,
-    already holds gets the first eight hex digits of the sha256 of the file's
-    path inside *root* (its folder and name when it lies outside) in front:
+    *remote* are ``(source, test kind)`` pairs for the distributions whose
+    URL names a copy one of this workspace's deposits or uploads made (see
+    :meth:`DepositContext.source_for`). The local file behind a copy is
+    planned as any other file when it is there. When it is gone, a copy the
+    deposit already holds (``source.continued``) is a kept file, never sent
+    again; any other is listed in ``missing``.
+
+    A kept file has the name it has on the deposit. Each other file keeps
+    the name in the URL of the copy a record points at, or else the name
+    *recorded_names* gives its :func:`path_key` (the name an earlier deposit
+    gave it), or else takes its own name in NFC form. A name whose
+    :func:`name_key` another file, or one of *reserved_names*, already holds
+    gets the first eight hex digits of the sha256 of the file's path inside
+    *root* (its folder and name when it lies outside) in front:
     ``C01/data.csv`` stays ``data.csv`` and ``C02/Data.csv`` becomes
     ``3f2a9c1d-Data.csv``. The first file keeps its name, so a deposit without
     such clashes has the URLs it always had.
 
-    With more than *zip_threshold* files, each file is assigned to the
-    archive ``<kind>.zip``. Without *measure* the files are located and named
-    but not read, which is enough to count them or to build the graph.
+    With more than *zip_threshold* local files, each is assigned to the
+    archive ``<kind>.zip``; a kept file stays as it is. Without *measure* the
+    files are located and named but not read, which is enough to count them
+    or to build the graph.
     """
     found: list[tuple[str, Path, str]] = []   # (path key, resolved path, kind)
     seen: set[str] = set()
@@ -380,6 +549,10 @@ def build_deposit_file_plan(
     missing: list[str] = []
     left_out = list(omissions)
     refused: set[str] = set()
+    kept: dict[str, DepositFile] = {}          # name key -> the kept file
+    kept_location: dict[str, DepositFile] = {}  # URL -> the kept file it names
+    url_names: dict[str, str] = {}             # path key -> the name in a record's URL
+    hosted: set[str] = set()
 
     def _add(key: str, path: Path, kind: str) -> None:
         if key not in seen:
@@ -409,17 +582,51 @@ def build_deposit_file_plan(
         key = os.path.normcase(str(resolved))
         key_of_location[location] = key
         _add(key, resolved, kind)
+    for source, kind in remote:
+        if source.hosted:
+            hosted.add(source.url)
+        # The index wrote this path when the file went into a deposit or an
+        # upload, after the screen had passed it.
+        if source.path is not None and source.path.is_file():
+            resolved = _resolved(source.path)
+            key = os.path.normcase(str(resolved))
+            key_of_location[source.url] = key
+            _add(key, resolved, kind)
+            if source.name:
+                url_names.setdefault(key, source.name)
+            continue
+        if source.continued and source.name:
+            entry = kept.get(name_key(source.name))
+            if entry is None:
+                entry = DepositFile(
+                    path=source.path or Path(),
+                    name=source.name,
+                    segment=url_segment(source.name),
+                    size=source.size,
+                    md5=source.md5,
+                    sha256=source.sha256,
+                    kind=kind,
+                    kept=True,
+                )
+                kept[name_key(source.name)] = entry
+            kept_location[source.url] = entry
+            continue
+        missing.append(f"{source.path} (the local file of {source.url})" if source.path is not None else source.url)
     for artifact in artifacts:
         resolved = _resolved(artifact)
         _add(os.path.normcase(str(resolved)), resolved, "protocol")
 
-    taken = {name_key(name) for name in reserved_names}
+    # Names already settled come first: those of the deposit's own files and
+    # of the files it keeps, then each name a record's URL gives a file, then
+    # each name an earlier deposit gave one.
+    taken = {name_key(name) for name in reserved_names} | set(kept)
     names: dict[str, str] = {}
-    for key, _path, _kind in found:
-        recorded = (recorded_names or {}).get(key)
-        if recorded and name_key(recorded) not in taken:
-            names[key] = recorded
-            taken.add(name_key(recorded))
+    for preferred in (url_names, recorded_names or {}):
+        for key, _path, _kind in found:
+            name = preferred.get(key)
+            if key not in names and name and name_key(name) not in taken:
+                names[key] = name
+                taken.add(name_key(name))
     for key, path, _kind in found:
         if key in names:
             continue
@@ -447,17 +654,19 @@ def build_deposit_file_plan(
         )
     for location, key in key_of_location.items():
         by_location[location] = by_key[key]
+    by_location.update(kept_location)
     for location in refused:
         by_location[location] = None
     return DepositFilePlan(
         root=root,
-        files=list(by_key.values()),
+        files=[*by_key.values(), *kept.values()],
         missing=missing,
         artifact_warnings=list(artifact_warnings),
         omissions=left_out,
         zipped=zipped,
         measured=measure,
         registered=frozenset(registered),
+        hosted=frozenset(hosted),
         _by_key=by_key,
         _by_location=by_location,
     )
@@ -515,15 +724,19 @@ def deposit_file_problems(
     files_base: str,
     listing: object,
     sent: Mapping[str, str],
+    kept: Mapping[str, str] | None = None,
 ) -> list[str]:
     """What is wrong with a deposit's files, one line each; empty when nothing is.
 
     *graph* is the deposit graph, *files_base* the URL the deposit serves its
     files under (``{record_url}/files``), *listing* the deposit's file
-    listing, and *sent* the ``{name: md5}`` of the files this run uploaded or
-    kept. The deposit must hold:
+    listing, *sent* the ``{name: md5}`` of the files this run uploaded, or
+    found on the deposit unchanged, and *kept* the ``{name: md5}`` of the
+    files it kept with no local file to send (an empty md5 when none was
+    recorded). The deposit must hold:
 
     - every file in *sent*, with that md5;
+    - every file in *kept*, with that md5 when it is not empty;
     - every file a ``dcat:downloadURL`` in the graph names under
       *files_base* (the name percent-encoded), with the md5 its distribution
       states when it states one and is the file itself, not an archive that
@@ -540,6 +753,15 @@ def deposit_file_problems(
         elif on_deposit[name] != md5:
             held = f"with md5 {on_deposit[name]}" if on_deposit[name] else "without an md5"
             problems.append(f"{name} is on the deposit {held}, but the file uploaded has md5 {md5}")
+    for name, md5 in sorted((kept or {}).items()):
+        if name not in on_deposit:
+            problems.append(f"{name} has no local file to upload and is not on the deposit")
+        elif md5 and on_deposit[name] != md5:
+            held = f"with md5 {on_deposit[name]}" if on_deposit[name] else "without an md5"
+            problems.append(
+                f"{name} has no local file to upload and is on the deposit {held}, "
+                f"not with the md5 {md5} it had when it was deposited"
+            )
     prefix = files_base.rstrip("/") + "/"
     for node in _graph_nodes(graph):
         types = node.get("@type")
@@ -554,7 +776,7 @@ def deposit_file_problems(
             if url.startswith(prefix):
                 name = unquote(url[len(prefix):])
                 if name not in on_deposit:
-                    if name not in sent:   # an upload that did not arrive is reported above
+                    if name not in sent and name not in (kept or {}):   # reported above
                         problems.append(f"{owner}: links to {name}, which is not on the deposit")
                     continue
                 stated = _stated_md5(dist)

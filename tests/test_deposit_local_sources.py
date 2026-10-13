@@ -67,7 +67,7 @@ class _FakeZenodo:
         self.calls.append("metadata")
         return {}
 
-    def sync_files(self, deposit_id: int, upload_map: dict) -> dict:
+    def sync_files(self, deposit_id: int, upload_map: dict, *, keep: dict | None = None) -> dict:
         self.calls.append("sync")
         self.uploaded = {name: Path(path).read_bytes() for path, name in upload_map.items()}
         return {"uploaded": sorted(self.uploaded), "kept": [], "removed": []}
@@ -346,11 +346,11 @@ def test_the_index_keeps_what_it_does_not_know(tmp_path: Path) -> None:
     ws = _workspace(tmp_path, {"C01": "C01.csv"})
     path = tmp_path / ".battinfo" / "deposit-files.json"
     index = _index(tmp_path)
-    index["deposits"] = [{"name": "C01.csv"}]
+    index["notes"] = [{"name": "C01.csv"}]
     path.write_text(json.dumps(index), encoding="utf-8")
     (tmp_path / "C02.csv").write_text(CSV, encoding="utf-8")
     ws.add("test", type="cycling", cell="C01", data="C02.csv")
-    assert _index(tmp_path)["deposits"] == [{"name": "C01.csv"}]
+    assert _index(tmp_path)["notes"] == [{"name": "C01.csv"}]
     assert str((tmp_path / "C02.csv").resolve()) in _index(tmp_path)["sources"]
 
 

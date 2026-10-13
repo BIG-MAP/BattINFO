@@ -1,29 +1,73 @@
-"""The local-source index of a workspace: ``.battinfo/deposit-files.json``.
+"""What a workspace records about its deposits: ``.battinfo/deposit-files.json`` and ``.battinfo/zenodo.json``.
 
-A Zenodo deposit reads a data file that a record names only when it may (see
-:func:`battinfo._deposit_files.location_path`). A file on another computer,
-such as a cycler export on a lab share, may be read when this workspace
-registered it: ``ws.add("test", ..., data=...)`` registers each data file and
-raw file it makes a dataset from, and ``ws.convert()`` each file it converts
-and each file it writes. The registered files are kept here, so that the
-registration outlives the session.
+``deposit-files.json``, the deposit index, answers two questions a Zenodo
+deposit asks about a data file before it reads it.
 
-The file is a JSON object. ``sources`` maps the resolved path of each
-registered file to how it was registered::
+May it read the file at all? A data file on another computer, such as a
+cycler export on a lab share, may be read when this workspace registered
+it (see :func:`battinfo._deposit_files.location_path`): ``ws.add("test",
+..., data=...)`` registers each data file and raw file it makes a dataset
+from, and ``ws.convert()`` each file it converts and each file it writes.
 
-    {"sources": {"//lab/share/run1.csv": {"registered_by": "ws.add"}}}
+Which local file is behind a URL a record points at? A deposit points the
+dataset records at the copies it holds
+(``https://zenodo.org/records/<id>/files/<name>``), and ``ws.upload()``
+points them at copies in R2 object storage. Once a record names the copy,
+nothing in it names the local file any more, so the index keeps it: the
+next deposit (a new version, a retry after a failed run, or a new record
+after ``zenodo.json`` was deleted) finds the file through the index, and
+keeps the copy a new version takes over from the one before when the local
+file is gone.
 
-Keys other than ``sources`` are kept as they are when the file is written,
-so that records of deposits can live in the same file. The file is written
-atomically, and one that cannot be read is never written over, since it may
-hold what no run can rebuild.
+The index is a JSON object::
+
+    {
+      "sources": {"//lab/share/run1.csv": {"registered_by": "ws.add"}},
+      "deposits": {
+        "production": {
+          "7000": {
+            "records": ["7001", "7002"],
+            "files": {
+              "cycling.csv": {"path": "C:/lab/C01/cycling.csv", "size": 70,
+                              "md5": "...", "sha256": "..."}
+            }
+          }
+        }
+      },
+      "hosted": {
+        "https://pub.example/datasets/abc/cycling.csv": {"path": "...", "size": 70,
+                                                         "md5": "...", "sha256": "..."}
+      }
+    }
+
+``sources`` maps the resolved path of each registered file to how it was
+registered. ``deposits`` is keyed by environment (``production`` or
+``sandbox``), then by the concept record id that groups the versions of
+one Zenodo record, and lists the record ids of those versions this
+workspace made and each file it deposited, by deposit file name, with its
+local path, size, md5 and sha256. Entries are kept across versions.
+``hosted`` maps each URL ``ws.upload()`` gave a record to the local file
+behind it.
+
+``zenodo.json``, the deposit state, names the Zenodo record the next
+``ws.zenodo()`` continues: its environment, concept record id, record id,
+deposit id and DOI, whether it is published, and the IRIs of the records
+it holds (``ws.submit()`` records its DOI on those only).
+
+Both files are written atomically. One that cannot be read raises
+:class:`DepositIndexError`, naming the file, and is never written over,
+since it may hold what no run can rebuild. Keys of the index other than
+these are kept as they are when it is written.
 """
 from __future__ import annotations
 
 import json
+import os
 from collections.abc import Iterable, Mapping
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+from urllib.parse import unquote, urlsplit
 
 from battinfo._jsonio import write_json
 from battinfo._util import lexical_key
@@ -31,9 +75,23 @@ from battinfo._util import lexical_key
 #: Where a workspace keeps the index, relative to its root folder.
 INDEX_PATH = Path(".battinfo") / "deposit-files.json"
 
+#: Where a workspace keeps the state of its Zenodo record, relative to its root folder.
+STATE_PATH = Path(".battinfo") / "zenodo.json"
+
+#: The Zenodo environments, with the host that serves the record pages of each.
+ZENODO_HOSTS: dict[str, str] = {"production": "zenodo.org", "sandbox": "sandbox.zenodo.org"}
+
 
 class DepositIndexError(ValueError):
-    """The index file exists and cannot be read."""
+    """A file that records the workspace's deposits exists and cannot be read."""
+
+
+def zenodo_environment(sandbox: bool) -> str:
+    """``"sandbox"`` or ``"production"``."""
+    return "sandbox" if sandbox else "production"
+
+
+# ── The index ────────────────────────────────────────────────────────────────
 
 
 def index_path(root: Path) -> Path:
@@ -45,7 +103,8 @@ def load_deposit_index(root: Path) -> dict[str, Any]:
     """The index of the workspace in *root*, or ``{"sources": {}}`` when it has none yet.
 
     Raises :class:`DepositIndexError`, naming the file, when the file cannot
-    be read, is not JSON, or is not an object whose ``sources`` is an object.
+    be read, is not JSON, or is not an object of the shape the module
+    docstring shows.
     """
     path = index_path(root)
     try:
@@ -60,6 +119,9 @@ def load_deposit_index(root: Path) -> dict[str, Any]:
         raise DepositIndexError(_unreadable(path, exc)) from exc
     if not isinstance(index, dict) or not isinstance(index.setdefault("sources", {}), dict):
         raise DepositIndexError(_unreadable(path, "it is not a JSON object with a 'sources' object"))
+    problem = _index_shape_problem(index)
+    if problem:
+        raise DepositIndexError(_unreadable(path, problem))
     return index
 
 
@@ -94,6 +156,268 @@ def registered_keys(index: Mapping[str, Any]) -> frozenset[str]:
     return frozenset(lexical_key(Path(text)) for text in sources if isinstance(text, str) and text)
 
 
+@dataclass(frozen=True)
+class IndexedFile:
+    """A file the index knows: the local file behind a deposited or hosted copy."""
+
+    #: The resolved local path, as text; empty when the index does not know it.
+    path: str
+    size: int = 0
+    md5: str = ""
+    sha256: str = ""
+
+    @classmethod
+    def from_entry(cls, entry: Mapping[str, Any]) -> IndexedFile:
+        size = entry.get("size")
+        return cls(
+            path=str(entry.get("path") or ""),
+            size=size if isinstance(size, int) and not isinstance(size, bool) else 0,
+            md5=str(entry.get("md5") or ""),
+            sha256=str(entry.get("sha256") or ""),
+        )
+
+    def to_entry(self) -> dict[str, Any]:
+        return {"path": self.path, "size": self.size, "md5": self.md5, "sha256": self.sha256}
+
+    def path_key(self) -> str:
+        """The file's path in the case the OS compares, as the deposit file plan keys files."""
+        return os.path.normcase(self.path) if self.path else ""
+
+
+def _concepts(index: Mapping[str, Any], environment: str) -> Mapping[str, Any]:
+    deposits = index.get("deposits")
+    concepts = deposits.get(environment) if isinstance(deposits, Mapping) else None
+    return concepts if isinstance(concepts, Mapping) else {}
+
+
+def deposited_files(index: Mapping[str, Any], environment: str, concept: str | None) -> dict[str, IndexedFile]:
+    """The files the index lists for the Zenodo record *concept* in *environment*, by deposit file name."""
+    entry = _concepts(index, environment).get(concept or "")
+    files = entry.get("files") if isinstance(entry, Mapping) else None
+    if not isinstance(files, Mapping):
+        return {}
+    return {name: IndexedFile.from_entry(item) for name, item in files.items() if isinstance(item, Mapping)}
+
+
+def concept_records(index: Mapping[str, Any], environment: str, concept: str | None) -> frozenset[str]:
+    """The record ids of the versions of *concept* in *environment* that this workspace made."""
+    entry = _concepts(index, environment).get(concept or "")
+    records = entry.get("records") if isinstance(entry, Mapping) else None
+    return frozenset(str(item) for item in records) if isinstance(records, list) else frozenset()
+
+
+def concept_of_record(index: Mapping[str, Any], environment: str, record_id: str) -> str | None:
+    """The concept record id the index files *record_id* under in *environment*, or ``None``."""
+    for concept, entry in _concepts(index, environment).items():
+        records = entry.get("records") if isinstance(entry, Mapping) else None
+        if isinstance(records, list) and record_id in (str(item) for item in records):
+            return str(concept)
+    return None
+
+
+def note_deposit(
+    index: dict[str, Any],
+    environment: str,
+    concept: str,
+    *,
+    record_ids: Iterable[str] = (),
+    files: Mapping[str, IndexedFile] | None = None,
+) -> bool:
+    """Add *record_ids* and *files* (by deposit file name) to the entry of *concept*; True when it changed."""
+    deposits = index.setdefault("deposits", {})
+    entry = deposits.setdefault(environment, {}).setdefault(concept, {})
+    records = entry.setdefault("records", [])
+    files_entry = entry.setdefault("files", {})
+    changed = False
+    for record_id in record_ids:
+        if record_id and record_id not in records:
+            records.append(record_id)
+            changed = True
+    for name, item in (files or {}).items():
+        value = item.to_entry()
+        if files_entry.get(name) != value:
+            files_entry[name] = value
+            changed = True
+    return changed
+
+
+def hosted_file(index: Mapping[str, Any], url: str) -> IndexedFile | None:
+    """The local file behind *url*, a copy ``ws.upload()`` made, or ``None``."""
+    hosted = index.get("hosted")
+    entry = hosted.get(url) if isinstance(hosted, Mapping) else None
+    return IndexedFile.from_entry(entry) if isinstance(entry, Mapping) else None
+
+
+def note_hosted(index: dict[str, Any], files: Mapping[str, IndexedFile]) -> bool:
+    """Record the local file behind each URL of *files*; True when the index changed."""
+    hosted = index.setdefault("hosted", {})
+    changed = False
+    for url, item in files.items():
+        value = item.to_entry()
+        if hosted.get(url) != value:
+            hosted[url] = value
+            changed = True
+    return changed
+
+
+@dataclass(frozen=True)
+class ZenodoFileURL:
+    """The parts of the URL of a file in a Zenodo record."""
+
+    environment: str
+    record_id: str
+    #: The file name, percent-decoded.
+    name: str
+
+
+def parse_zenodo_file_url(url: object) -> ZenodoFileURL | None:
+    """The environment, record id and file name of a Zenodo file URL, or ``None``.
+
+    The URL is ``https://zenodo.org/records/<id>/files/<name>`` (or
+    ``sandbox.zenodo.org``, or the older ``/record/<id>``), the form a deposit
+    gives the records it points at its files. A query such as
+    ``?download=1`` is ignored.
+    """
+    if not isinstance(url, str):
+        return None
+    try:
+        parts = urlsplit(url.strip())
+        port = parts.port
+    except ValueError:
+        return None
+    host = (parts.hostname or "").lower()
+    environment = next((env for env, name in ZENODO_HOSTS.items() if name == host), None)
+    if environment is None or parts.scheme.lower() not in ("http", "https") or port not in (None, 443):
+        return None
+    segments = parts.path.split("/")
+    if len(segments) < 5 or segments[0] or segments[1] not in ("records", "record") or segments[3] != "files":
+        return None
+    record_id, name = segments[2], unquote("/".join(segments[4:]))
+    if not record_id.isdigit() or not name:
+        return None
+    return ZenodoFileURL(environment=environment, record_id=record_id, name=name)
+
+
+# ── The state of the workspace's Zenodo record ───────────────────────────────
+
+
+def state_path(root: Path) -> Path:
+    """The state file of the workspace in *root*."""
+    return root / STATE_PATH
+
+
+def load_deposit_state(root: Path) -> dict[str, Any]:
+    """The state of the Zenodo record the workspace in *root* continues, or ``{}`` when it has none.
+
+    A state written before the environment was stored names it with
+    ``"sandbox": true`` or ``false``, or not at all (production), and the
+    environment is filled in from that. Raises :class:`DepositIndexError`,
+    naming the file, when the file cannot be read or does not hold a state.
+    """
+    path = state_path(root)
+    try:
+        text = path.read_text(encoding="utf-8-sig")
+    except FileNotFoundError:
+        return {}
+    except (OSError, UnicodeError) as exc:
+        raise DepositIndexError(_unreadable_state(path, exc)) from exc
+    try:
+        state = json.loads(text)
+    except ValueError as exc:
+        raise DepositIndexError(_unreadable_state(path, exc)) from exc
+    problem = _state_shape_problem(state)
+    if problem:
+        raise DepositIndexError(_unreadable_state(path, problem))
+    state.setdefault("environment", "sandbox" if state.get("sandbox") is True else "production")
+    state.pop("sandbox", None)
+    for key in ("record_id", "deposit_id", "concept_record_id"):
+        if state.get(key) is not None:
+            state[key] = str(state[key])
+    return state
+
+
+def save_deposit_state(root: Path, state: Mapping[str, Any]) -> None:
+    """Write *state* as the state of the workspace in *root*, atomically."""
+    write_json(state_path(root), state)
+
+
+# ── Shapes ────────────────────────────────────────────────────────────────────
+
+
+def _file_entry_problem(entry: object) -> str | None:
+    if not isinstance(entry, Mapping):
+        return "is not an object"
+    if not isinstance(entry.get("path", ""), str):
+        return "has a path that is not text"
+    for key in ("md5", "sha256"):
+        if not isinstance(entry.get(key, ""), str):
+            return f"has an {key} that is not text"
+    size = entry.get("size", 0)
+    if not isinstance(size, int) or isinstance(size, bool):
+        return "has a size that is not a whole number"
+    return None
+
+
+def _index_shape_problem(index: Mapping[str, Any]) -> str | None:
+    """What is wrong with the shape of the ``deposits`` and ``hosted`` parts of *index*, or ``None``."""
+    deposits = index.get("deposits", {})
+    if not isinstance(deposits, Mapping):
+        return "its 'deposits' is not an object"
+    for environment, concepts in deposits.items():
+        if environment not in ZENODO_HOSTS:
+            return f"its 'deposits' names the environment {environment!r}, not 'production' or 'sandbox'"
+        if not isinstance(concepts, Mapping):
+            return f"its 'deposits' entry {environment!r} is not an object"
+        for concept, entry in concepts.items():
+            where = f"'deposits' entry {environment!r} {concept!r}"
+            if not isinstance(entry, Mapping):
+                return f"its {where} is not an object"
+            records = entry.get("records", [])
+            if not isinstance(records, list) or not all(isinstance(item, str) for item in records):
+                return f"its {where} 'records' is not a list of record ids"
+            files = entry.get("files", {})
+            if not isinstance(files, Mapping):
+                return f"its {where} 'files' is not an object"
+            for name, item in files.items():
+                problem = _file_entry_problem(item)
+                if problem:
+                    return f"the file {name!r} of its {where} {problem}"
+    hosted = index.get("hosted", {})
+    if not isinstance(hosted, Mapping):
+        return "its 'hosted' is not an object"
+    for url, item in hosted.items():
+        problem = _file_entry_problem(item)
+        if problem:
+            return f"its 'hosted' entry {url!r} {problem}"
+    return None
+
+
+def _state_shape_problem(state: object) -> str | None:
+    """What keeps *state* from being a deposit state, or ``None``."""
+    if not isinstance(state, dict):
+        return "it is not a JSON object"
+    for key in ("record_id", "deposit_id", "concept_record_id"):
+        value = state.get(key)
+        if value is not None and (isinstance(value, bool) or not isinstance(value, (str, int)) or not str(value).strip()):
+            return f"its {key!r} is not a record id"
+    if not state.get("record_id"):
+        return "it names no 'record_id'"
+    environment = state.get("environment")
+    if environment is not None and environment not in ZENODO_HOSTS:
+        return f"its 'environment' is {environment!r}, not 'production' or 'sandbox'"
+    for key in ("published", "sandbox"):
+        if key in state and not isinstance(state[key], bool):
+            return f"its {key!r} is not true or false"
+    if environment is not None and isinstance(state.get("sandbox"), bool) and (environment == "sandbox") != state["sandbox"]:
+        return "its 'environment' and its 'sandbox' disagree"
+    if "doi" in state and not isinstance(state["doi"], str):
+        return "its 'doi' is not text"
+    records = state.get("records", [])
+    if not isinstance(records, list) or not all(isinstance(item, str) for item in records):
+        return "its 'records' is not a list of record IRIs"
+    return None
+
+
 def _resolved(path: Path) -> Path:
     try:
         return path.resolve()
@@ -104,6 +428,14 @@ def _resolved(path: Path) -> Path:
 def _unreadable(path: Path, problem: object) -> str:
     return (
         f"{path} cannot be read ({problem}). It lists the data files this workspace registered "
-        "for its Zenodo deposits, and it was left as it is. Repair it, or delete it and run "
-        "ws.add(..., data=...) again for the data files outside the workspace folder."
+        "and the local files behind the copies its deposits and uploads made, and it was left as "
+        "it is. Repair it, or delete it and run ws.add(..., data=...) again for the data files "
+        "outside the workspace folder."
+    )
+
+
+def _unreadable_state(path: Path, problem: object) -> str:
+    return (
+        f"{path} cannot be read ({problem}). It names the Zenodo record this workspace continues, "
+        "and it was left as it is. Repair it, or delete it to start a new Zenodo record."
     )

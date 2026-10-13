@@ -60,7 +60,7 @@ class _FakeZenodo:
     def create_empty_deposit(self) -> dict:
         return {"id": 7, "record_id": 7, "metadata": {"prereserve_doi": {"doi": "10.5281/zenodo.7"}}}
 
-    def sync_files(self, deposit_id: int, upload_map: dict) -> dict:
+    def sync_files(self, deposit_id: int, upload_map: dict, *, keep: dict | None = None) -> dict:
         self.uploaded = {name: Path(path).read_bytes() for path, name in upload_map.items()}
         return {"uploaded": sorted(self.uploaded), "kept": [], "removed": []}
 

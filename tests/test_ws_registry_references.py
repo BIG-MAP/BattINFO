@@ -364,7 +364,7 @@ class _FakeZenodo:
         self.calls.append("create")
         return {"id": 7, "record_id": 7, "metadata": {"prereserve_doi": {"doi": "10.5281/zenodo.7"}}}
 
-    def sync_files(self, deposit_id: int, upload_map: dict) -> dict:
+    def sync_files(self, deposit_id: int, upload_map: dict, *, keep: dict | None = None) -> dict:
         self.calls.append("upload")
         self.uploaded = {name: Path(path).read_text(encoding="utf-8") for path, name in upload_map.items()}
         self.md5 = {
