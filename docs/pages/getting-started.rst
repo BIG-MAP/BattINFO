@@ -14,14 +14,14 @@ Working at the bench? The :doc:`how-to guides <howto>` map lab tasks, such as re
 Installation
 ------------
 
-BattINFO requires Python 3.11 or later. Install it from PyPI. The optional extras add features as you need them, and a feature whose dependency is missing raises an error that names the extra to install:
+BattINFO requires Python 3.11 or later. Until 0.8.0, its first working release on PyPI, install it from GitHub. The optional extras add features as you need them, and a feature whose dependency is missing raises an error that names the extra to install:
 
 .. code-block:: bash
 
-   pip install battinfo                  # core
-   pip install "battinfo[processing]"    # cycler-file conversion (ws.convert) + plotting
-   pip install "battinfo[tabular]"       # CSV/Parquet/XLSX readers
-   pip install "battinfo[publish]"       # RO-Crate validation for publishing
+   pip install "battinfo @ git+https://github.com/BIG-MAP/BattINFO.git"              # core
+   pip install "battinfo[processing] @ git+https://github.com/BIG-MAP/BattINFO.git"  # cycler-file conversion (ws.convert) + plotting
+   pip install "battinfo[tabular] @ git+https://github.com/BIG-MAP/BattINFO.git"     # CSV/Parquet/XLSX readers
+   pip install "battinfo[publish] @ git+https://github.com/BIG-MAP/BattINFO.git"     # RO-Crate validation for publishing
 
 .. note::
 
