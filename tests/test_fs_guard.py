@@ -1,9 +1,11 @@
 """Recursive deletes go through one guard, ``battinfo._fs_guard``.
 
 ``force=True`` and ``--force`` used to delete whatever folder they were given,
-with everything in it. These tests pin what the guard refuses, that roots built
-by 0.8.0 (which carry no marker) still rebuild with ``--force``, and that no
-other module calls ``shutil.rmtree``. The last section pins that the paths a
+with everything in it. These tests pin what the guard refuses, among it the
+folder where ``battinfo.workspace()`` keeps a project's records, that roots
+built by 0.8.0 (which carry no marker) still rebuild with ``--force`` while a
+project folder BattINFO wrote into keeps its own files, and that no other
+module calls ``shutil.rmtree``. The last section pins that the paths a
 workspace manifest names stay inside the workspace.
 
 Tests that point the guard at a home, working or filesystem-root folder replace
@@ -31,12 +33,14 @@ from battinfo._fs_guard import (
     MARKER_FILENAME,
     UnsafeDeleteError,
     check_relative_path,
+    check_remove,
     is_within,
     remove_temp_tree,
     remove_tree,
 )
 from battinfo._workspace import Workspace, quantity
 from battinfo.cli import app
+from battinfo.demo import setup_demo_environment
 from battinfo.ingest import build_ingest_workspace
 from battinfo.local_workspace import LocalWorkspace
 from battinfo.workspace_state import WorkspaceStateManifest
@@ -127,7 +131,27 @@ def test_an_empty_folder_a_marked_folder_and_a_missing_one_are_fine(tmp_path: Pa
             id="local-workspace",
         ),
         pytest.param({"index.json": "{}", "examples/x.json": "{}", "inputs/cycle-life.csv": "1"}, id="demo-workspace"),
-        pytest.param({"index.json": "{}", "records/cell-spec/x.json": "{}", "library/x.json": "{}"}, id="records-layout"),
+        pytest.param(
+            {
+                "index.json": "{}",
+                "examples/cell-spec/x.json": "{}",
+                "library/cell-spec/x.json": "{}",
+                "library-rdf/cell-spec.index.json": "{}",
+                "library-rdf/cell-spec/x.jsonld": "{}",
+                "ontology/library/cell-spec.jsonld": "{}",
+                "package/cell-spec/x.json": "{}",
+                "publication/cycle-life/battinfo.publish.jsonld": "{}",
+                "publication/cycle-life/cycle-life.csv": "1",
+                "release/battinfo-workspace.json": "{}",
+                "release/artifacts/cycle-life.csv": "1",
+                "release/dist/registry-intake.json": "{}",
+                "battinfo-authoring-workspace.json": "{}",
+                "records/tests/x.json": "{}",
+                "artifacts/dataset/x/cycle-life.csv": "1",
+                "dist/validation-report.json": "{}",
+            },
+            id="engine-root",
+        ),
     ],
 )
 def test_a_root_built_by_0_8_0_without_the_marker_is_deleted(tmp_path: Path, layout: dict[str, str]) -> None:
@@ -137,6 +161,130 @@ def test_a_root_built_by_0_8_0_without_the_marker_is_deleted(tmp_path: Path, lay
     remove_tree(root)
 
     assert not root.exists()
+
+
+def test_every_root_this_version_builds_is_recognised_without_its_marker(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The layouts the guard knows cover everything BattINFO writes into its roots.
+
+    Each root is built as this version builds it, and its markers are then
+    removed, as in a root built by 0.8.0. A new kind of entry at the top of a
+    root, or a new type of file in a record or report folder, fails here until
+    the layouts in ``battinfo._fs_guard`` include it.
+    """
+    monkeypatch.chdir(tmp_path)
+    publish(_spec(), destination="local", root=tmp_path / "pub")
+    setup_demo_environment(tmp_path / "demo")
+    build_ingest_workspace(
+        _make_evidence(tmp_path), type_record=EXAMPLE_CELL_TYPE, workspace_root=tmp_path / "ing",
+        workspace_id="guard-demo", publisher_id="demo-lab",
+    )
+    local = LocalWorkspace.init(tmp_path / "lw")
+    local.validate(write_report=True)
+    local.build_submission_package()
+    local.clone(tmp_path / "lw-clone")
+    local.new_version(tmp_path / "lw-v2", version="2.0.0")
+
+    engine = Workspace(root=tmp_path / "eng")
+    _write_tree(tmp_path, {"data/cycle-life.csv": "cycle,capacity_ah\n0,2.50\n"})
+    cell_spec = engine.cell_spec(
+        manufacturer="A123", model="ANR26650M1-B", format="cylindrical", chemistry="Li-ion",
+        specs={"nominal_voltage": quantity(3.3, "V")},
+    )
+    cell = engine.cell(cell_spec, serial_number="guard-001", source_type="lab")
+    test = engine.test(cell, kind="cycling", protocol="1C / 1C", status="completed")
+    dataset = engine.dataset(cell, title="Guard dataset", test=test, path=tmp_path / "data" / "cycle-life.csv",
+                             license="CC-BY-4.0")
+    engine.save()
+    engine.build_submission_package(dataset, registry="digibatt/hello-world")
+    engine.build_publication_package(dataset, emit_html_page=True, emit_bundle_dir=True)
+    engine.describe_cell(manufacturer="Google", model="G20M7", format="pouch", chemistry="Li-ion")
+    engine.save_descriptions(mode="upsert")
+    engine.save_workspace()
+    engine.check_workspace(write_report=True)
+
+    roots = ["pub", "demo/workspace", "demo/release", "ing", "lw", "lw-clone", "lw-v2", "eng"]
+    for name in roots:
+        root = tmp_path / name
+        for marker in root.rglob(MARKER_FILENAME):
+            marker.unlink()
+        assert any(root.iterdir()), name
+        check_remove(root)
+    assert {"library", "publication", "release", "records"} <= {entry.name for entry in (tmp_path / "eng").iterdir()}
+
+
+def test_index_json_next_to_records_is_not_a_root_battinfo_built(tmp_path: Path) -> None:
+    root = tmp_path / "root"
+    _write_tree(root, {"index.json": "{}", "records/cell-spec/x.json": "{}"})
+
+    with pytest.raises(UnsafeDeleteError, match="BattINFO did not create it"):
+        remove_tree(root)
+
+    assert (root / "records" / "cell-spec" / "x.json").exists()
+
+
+@pytest.mark.parametrize(
+    ("target", "tree"),
+    [
+        pytest.param(
+            "lab/.battinfo",
+            {"lab/.battinfo/index.json": "{}", "lab/.battinfo/records/cell-spec/cell-spec-x.json": "{}"},
+            id="records-of-0.8",
+        ),
+        pytest.param(
+            "lab/.battinfo/records",
+            {"lab/.battinfo/records/index.json": "{}", "lab/.battinfo/records/examples/cell-spec/x.json": "{}"},
+            id="records-of-0.7",
+        ),
+        pytest.param(
+            "lab/.battinfo",
+            {f"lab/.battinfo/{MARKER_FILENAME}": "x", "lab/.battinfo/records/cell-spec/x.json": "{}"},
+            id="marked",
+        ),
+        pytest.param(
+            "lab",
+            {f"lab/{MARKER_FILENAME}": "x", "lab/.battinfo/records/cell-spec/x.json": "{}"},
+            id="folder-holding-one",
+        ),
+    ],
+)
+def test_the_folder_where_a_workspace_keeps_its_records_is_refused(
+    tmp_path: Path, target: str, tree: dict[str, str]
+) -> None:
+    _write_tree(tmp_path, tree)
+
+    with pytest.raises(UnsafeDeleteError, match=r"battinfo\.workspace\(\) keeps a project's records"):
+        remove_tree(tmp_path / target)
+
+    assert all((tmp_path / relative).exists() for relative in tree)
+
+
+@pytest.mark.parametrize(
+    "own",
+    [
+        pytest.param({"inputs/raw_cycler_run.csv": "t,v\n0,4.2\n"}, id="inputs"),
+        pytest.param({"inputs/cycle-life.csv": "1", "inputs/notes.txt": "mine"}, id="inputs-beside-the-demo-file"),
+        pytest.param({"publication/main.tex": "x"}, id="publication-file"),
+        pytest.param({"publication/figures/plot.png": "x"}, id="publication-folder"),
+        pytest.param({"dist/mypkg-1.0-py3-none-any.whl": "x"}, id="dist"),
+        pytest.param({"library/paper.pdf": "x"}, id="library"),
+        pytest.param({"release/notes.md": "x"}, id="release"),
+        pytest.param({"examples/analysis.ipynb": "{}"}, id="examples"),
+        pytest.param({"artifacts/run.csv": "1"}, id="artifacts"),
+    ],
+)
+def test_a_common_folder_name_counts_only_with_the_content_battinfo_writes_there(
+    tmp_path: Path, own: dict[str, str]
+) -> None:
+    root = tmp_path / "a_project"
+    _write_tree(root, {"index.json": "{}", "examples/cell-spec/cell-spec-x.json": "{}", **own})
+    name = next(iter(own)).split("/")[0]
+
+    with pytest.raises(UnsafeDeleteError, match=f"it holds {name}, which is not BattINFO output"):
+        remove_tree(root)
+
+    assert all((root / relative).exists() for relative in own)
 
 
 def test_an_old_layout_that_also_holds_other_files_is_refused(tmp_path: Path) -> None:
@@ -316,16 +464,18 @@ def test_new_output_roots_carry_the_marker_and_a_marked_root_rebuilds(tmp_path: 
     assert (root / MARKER_FILENAME).is_file()
 
 
-def test_a_folder_battinfo_writes_into_is_not_marked(tmp_path: Path) -> None:
+@pytest.mark.parametrize("own", ["data/run.csv", "inputs/raw_cycler_run.csv"])
+def test_a_folder_battinfo_writes_into_is_not_marked(tmp_path: Path, own: str) -> None:
+    """A publish without force writes index.json and examples/ into a project folder; force then keeps its files."""
     project = tmp_path / "my_project"
-    _write_tree(project, {"data/run.csv": "1"})
+    _write_tree(project, {own: "t,v\n0,4.2\n"})
 
     publish(_spec(), destination="local", root=project)
 
     assert not (project / MARKER_FILENAME).exists()
-    with pytest.raises(UnsafeDeleteError, match="data, which BattINFO did not put there"):
+    with pytest.raises(UnsafeDeleteError, match=f"{own.split('/')[0]}, which is not BattINFO output"):
         publish(_spec(), destination="local", root=project, force=True)
-    assert (project / "data" / "run.csv").exists()
+    assert (project / own).exists()
 
 
 def test_the_authoring_workspace_folder_is_not_marked(tmp_path: Path) -> None:
@@ -333,6 +483,26 @@ def test_the_authoring_workspace_folder_is_not_marked(tmp_path: Path) -> None:
 
     assert (tmp_path / "lab" / ".battinfo").is_dir()
     assert not (tmp_path / "lab" / ".battinfo" / MARKER_FILENAME).exists()
+
+
+def test_publish_cli_force_refuses_the_folder_where_a_workspace_keeps_its_records(tmp_path: Path) -> None:
+    """After an offline session the folder holds only index.json and records/."""
+    ws = battinfo.workspace(tmp_path / "lab", registry_url=None)
+    spec = CellSpec(manufacturer="Example Lab", model="R2032 graphite half cell", format="coin", chemistry="li-ion")
+    ws.add("cell", spec=spec, serial_numbers=["C01", "C02"])
+    ws.save()
+    store = tmp_path / "lab" / ".battinfo"
+    saved = sorted(store.rglob("*.json"))
+
+    result = CliRunner().invoke(app, [
+        "publish", "cell-spec",
+        "--manufacturer", "Google", "--model", "G20M7", "--cell-format", "pouch", "--chemistry", "Li-ion",
+        "--root", str(store), "--force",
+    ])
+
+    assert result.exit_code == 1
+    assert "keeps a project's records there" in result.stdout
+    assert len(saved) == 4 and all(path.exists() for path in saved)
 
 
 # ── Ingest builds ───────────────────────────────────────────────────────────

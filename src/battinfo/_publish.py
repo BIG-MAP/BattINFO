@@ -85,8 +85,9 @@ def publish(
         ``.battinfo/publish/<manufacturer>-<model>`` in the current folder.
     force:
         Delete ``root`` first and build it again. Refused (``UnsafeDeleteError``,
-        a ``ValueError``) for a folder BattINFO did not create, and for the home
-        or working folder.
+        a ``ValueError``) for a folder BattINFO did not create, for the
+        ``.battinfo`` folder where ``battinfo.workspace()`` keeps a project's
+        records, and for the home or working folder.
     validation_policy:
         Validation policy for the saved record. Defaults to ``"strict"``.
     registry_base_url, api_key, api_key_header, platform_base_url, workspace_id, publisher_id, source_version:

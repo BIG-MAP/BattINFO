@@ -28,16 +28,21 @@ link cannot lead it outside.
 
 BattINFO writes :data:`MARKER_FILENAME` into each output root it creates
 (:func:`write_marker`), so that a later ``force=True`` may delete that root.
-Roots made by 0.7 and 0.8 carry no marker; they are recognised by their layout
-instead, as long as they hold nothing BattINFO does not put there.
+Roots made by 0.7 and 0.8 carry no marker. They are recognised by their layout
+instead, and only when everything in them is what BattINFO writes there: a
+folder with a common name such as ``inputs/``, ``release/`` or ``dist/`` counts
+only when its content matches. The ``.battinfo`` folder where
+``battinfo.workspace()`` keeps a project's records is never deleted, marker or
+not, and neither is a folder that holds one.
 """
 
 from __future__ import annotations
 
 import os
 import shutil
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable, Mapping
 from pathlib import Path, PureWindowsPath
+from typing import NamedTuple
 
 PathLike = str | Path
 
@@ -48,36 +53,14 @@ _MARKER_TEXT = (
     "and everything in it to build it again.\n"
 )
 
-# Roots made by 0.7 and 0.8 carry no marker. They are recognised by one of
-# these files, or by index.json next to examples/ or records/.
-_LAYOUT_FILES = ("battinfo-workspace.json", "battinfo-authoring-workspace.json")
-_ENGINE_INDEX = "index.json"
-_ENGINE_RECORD_DIRS = ("examples", "records")
-
-# What those roots hold at their top level: LocalWorkspace roots (manifest,
-# resources/, artifacts/, dist/), ingest and authoring roots (records/,
-# artifacts/, dist/) and object-graph engine roots (index.json, records,
-# library exports, publication/ and release/ output, the demo's inputs/). A
-# marker-less root that holds anything else may be a user's folder that
-# BattINFO wrote into, so it is not deleted.
-_LAYOUT_ENTRIES = frozenset({
-    *_LAYOUT_FILES,
-    _ENGINE_INDEX,
-    *_ENGINE_RECORD_DIRS,
-    "artifacts",
-    "dist",
-    "inputs",
-    "library",
-    "library-rdf",
-    "ontology",
-    "package",
-    "publication",
-    "release",
-    "resources",
-})
+# Where battinfo.workspace() keeps a project's records, credentials and
+# settings. 0.8 keeps the records in .battinfo/records/; 0.7 kept index.json
+# and examples/ there, which looks like an output root.
+_AUTHORING_STORE = ".battinfo"
 
 # Files an operating system leaves in a folder someone has browsed.
 _SYSTEM_FILES = frozenset({".DS_Store", "Thumbs.db", "desktop.ini"})
+_JSON_SUFFIXES = (".json", ".jsonld")
 
 
 class UnsafeDeleteError(ValueError):
@@ -156,7 +139,12 @@ def is_empty_or_missing(path: PathLike) -> bool:
         return True
     if not folder.is_dir():
         return False
-    return all(entry.name in _SYSTEM_FILES for entry in folder.iterdir())
+    return not _visible(folder)
+
+
+def _visible(folder: Path) -> list[Path]:
+    """What ``folder`` holds, leaving out the files an operating system leaves behind."""
+    return [entry for entry in folder.iterdir() if entry.name not in _SYSTEM_FILES]
 
 
 def write_marker(root: PathLike) -> Path:
@@ -203,32 +191,143 @@ def _overlap(path: Path, inputs: Iterable[PathLike | None]) -> str | None:
     return None
 
 
-def _has_old_layout(path: Path, names: set[str]) -> bool:
-    if any(name in names and (path / name).is_file() for name in _LAYOUT_FILES):
-        return True
-    return (
-        _ENGINE_INDEX in names
-        and (path / _ENGINE_INDEX).is_file()
-        and any(name in names and (path / name).is_dir() for name in _ENGINE_RECORD_DIRS)
+def _authoring_store(path: Path) -> str | None:
+    """Why ``path`` is, or holds, the folder where battinfo.workspace() keeps a project's records, or None."""
+    folder = _resolved(path)
+    name, parent = folder.name.lower(), folder.parent.name.lower()  # Windows and macOS ignore case
+    if name == _AUTHORING_STORE or (name == "records" and parent == _AUTHORING_STORE):
+        return "battinfo.workspace() keeps a project's records there. Delete it yourself if you mean to."
+    if (folder / _AUTHORING_STORE).is_dir():
+        return (
+            f"it holds {_AUTHORING_STORE}, where battinfo.workspace() keeps a project's records. "
+            "Choose another folder, or delete this one yourself."
+        )
+    return None
+
+
+# The content checks for what a root made by 0.7 or 0.8 holds at its top level.
+
+
+def _a_file(path: Path) -> bool:
+    return path.is_file()
+
+
+def _a_folder(path: Path) -> bool:
+    return path.is_dir()
+
+
+def _json_files(path: Path) -> bool:
+    """A folder of records, indexes or reports: JSON and JSON-LD files only, at any depth."""
+    return path.is_dir() and all(
+        item.is_dir() or item.name.endswith(_JSON_SUFFIXES) or item.name in _SYSTEM_FILES
+        for item in path.rglob("*")
     )
 
 
-def _not_ours(path: Path) -> str | None:
-    """Why the folder ``path`` does not look like one BattINFO created, or None."""
-    names = {entry.name for entry in path.iterdir()} - _SYSTEM_FILES
-    if not names or (path / MARKER_FILENAME).is_file():
+def _publications(path: Path) -> bool:
+    """``publication/``: a folder for each dataset, holding the dataset's JSON-LD publication record."""
+    return path.is_dir() and all(
+        item.is_dir() and any(child.suffix == ".jsonld" for child in item.iterdir())
+        for item in _visible(path)
+    )
+
+
+def _demo_inputs(path: Path) -> bool:
+    """The demo's ``inputs/``, which holds its ``cycle-life.csv`` and nothing else."""
+    return path.is_dir() and all(item.name == "cycle-life.csv" for item in _visible(path))
+
+
+def _release(path: Path) -> bool:
+    """The ``release/`` folder an export writes, which is a LocalWorkspace root."""
+    return path.is_dir() and _not_ours(path, (_LOCAL_WORKSPACE,)) is None
+
+
+class _Layout(NamedTuple):
+    """A kind of root that 0.7 and 0.8 made: the entries that identify it, and what it may hold."""
+
+    files: tuple[str, ...]
+    folders: tuple[str, ...]
+    entries: Mapping[str, Callable[[Path], bool]]
+
+
+_LOCAL_WORKSPACE = _Layout(
+    # LocalWorkspace.init(), clone(), new_version(), and the release/ an export writes.
+    files=("battinfo-workspace.json",),
+    folders=(),
+    entries={
+        "battinfo-workspace.json": _a_file,
+        "resources": _json_files,
+        "artifacts": _a_folder,  # copies of the dataset's files
+        "dist": _json_files,
+    },
+)
+_AUTHORING_WORKSPACE = _Layout(
+    # Ingest builds, `battinfo dataset process` and Workspace.save_workspace().
+    files=("battinfo-authoring-workspace.json",),
+    folders=(),
+    entries={
+        "battinfo-authoring-workspace.json": _a_file,
+        "records": _json_files,
+        "artifacts": _a_folder,  # copies of the datasets' files
+        "dist": _json_files,
+    },
+)
+_ENGINE = _Layout(
+    # publish() and the demo workspace: the object-graph engine's records and exports.
+    files=("index.json",),
+    folders=("examples",),
+    entries={
+        "index.json": _a_file,
+        "examples": _json_files,
+        "library": _json_files,
+        "library-rdf": _json_files,
+        "ontology": _json_files,
+        "package": _json_files,
+        "dist": _json_files,
+        "publication": _publications,
+        "release": _release,
+        "inputs": _demo_inputs,
+    },
+)
+_LAYOUTS = (_LOCAL_WORKSPACE, _AUTHORING_WORKSPACE, _ENGINE)
+
+
+def _not_ours(path: Path, layouts: tuple[_Layout, ...] = _LAYOUTS) -> str | None:
+    """Why the folder ``path`` does not look like one BattINFO created, or None.
+
+    A marker-less root counts as BattINFO's when ``layouts`` recognise it and
+    each entry in it passes the content check of a layout that does. A project
+    folder that BattINFO once wrote ``index.json`` and ``examples/`` into keeps
+    its own ``inputs/``, ``publication/`` or ``dist/``.
+    """
+    reason = _authoring_store(path)
+    if reason is not None:
+        return reason
+    entries = _visible(path)
+    if not entries or (path / MARKER_FILENAME).is_file():
         return None
-    if _has_old_layout(path, names):
-        extra = sorted(names - _LAYOUT_ENTRIES)
-        if not extra:
-            return None
+    matched = [
+        layout
+        for layout in layouts
+        if all((path / name).is_file() for name in layout.files)
+        and all((path / name).is_dir() for name in layout.folders)
+    ]
+    if not matched:
         return (
-            f"it holds {', '.join(extra)}, which BattINFO did not put there. Move "
-            f"{'it' if len(extra) == 1 else 'them'} out, choose another folder, or delete this one yourself."
+            "it is not empty and BattINFO did not create it. Choose an empty or new "
+            "folder, or delete this one yourself."
         )
+    extra = sorted(
+        entry.name
+        for entry in entries
+        if not any(entry.name in layout.entries and layout.entries[entry.name](entry) for layout in matched)
+    )
+    if not extra:
+        return None
+    one = len(extra) == 1
     return (
-        "it is not empty and BattINFO did not create it. Choose an empty or new "
-        "folder, or delete this one yourself."
+        f"it holds {', '.join(extra)}, which {'is' if one else 'are'} not BattINFO output. "
+        f"Move {'it' if one else 'them'} out, choose another folder, or delete this one yourself."
     )
 
 
@@ -284,7 +383,10 @@ def remove_tree(
       not exist;
     - without ``within``: a folder that is not empty and carries neither the
       marker nor the layout of a root BattINFO 0.7 or 0.8 made, or one with
-      such a layout that also holds entries BattINFO does not put there.
+      such a layout that also holds something BattINFO does not write there;
+    - without ``within``, marker or not: the ``.battinfo`` folder where
+      ``battinfo.workspace()`` keeps a project's records, its ``records``
+      folder, and a folder that holds a ``.battinfo`` folder.
 
     A path that does not exist is left alone. A symbolic link or junction is
     refused rather than followed, and a file raises ``NotADirectoryError``.
