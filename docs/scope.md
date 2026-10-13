@@ -98,6 +98,10 @@ These gaps were known when 0.8.0 was released and are planned for 0.8.x or 0.9. 
 - Display papercuts: `ws.search()` shows manufacturer and model in lower case, `ws.list(verbose=True)` shows cells by file name, the `ws.save()` summary cuts titles at about 36 characters and collapses after 20 records, and `battinfo.naming.title_for()` writes an all-lowercase method in capitals ("CYCLING test").
 - Submission reporting: outcomes and journal entries carry an empty `iri`, a deduplicated re-submission is reported as live, and `ws.status()` lists every submission in the shared registry workspace.
 
+### CLI batch path
+
+- `battinfo batch upload` and `battinfo push` upload only to the Zenodo sandbox, so an upload needs `--sandbox`; without it they stop before contacting Zenodo. They read the token from `--token`, the config file or `ZENODO_API_TOKEN`, not `ZENODO_SANDBOX_TOKEN`, so pass a sandbox token with `--token`. Uploads to zenodo.org from the batch path come in a later release; to publish there now, use `ws.zenodo()` from `battinfo.workspace()`.
+
 ### Dependencies
 
 - The `processing` extra requires `batterydf[nda,excel,mat]>=0.2.0rc2,<0.3`, so it installs the batterydf 0.2.0 release candidate until batterydf 0.2.0 is published.

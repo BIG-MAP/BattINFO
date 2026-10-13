@@ -3611,7 +3611,11 @@ def batch_package(
 def batch_upload(
     staging_dir: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True, help="Staging directory produced by `batch package`."),
     token: str | None = typer.Option(None, "--token", help="Zenodo API token. Env: ZENODO_API_TOKEN."),
-    sandbox: bool = typer.Option(False, "--sandbox", help="Use Zenodo sandbox (sandbox.zenodo.org)."),
+    sandbox: bool = typer.Option(
+        False,
+        "--sandbox",
+        help="Upload to the Zenodo sandbox (sandbox.zenodo.org), with a token made there. Required in this release.",
+    ),
     community: str | None = typer.Option(None, "--community", help="Zenodo community. Default: value from config or battinfo-reference."),
     no_community: bool = typer.Option(False, "--no-community", help="Skip community submission."),
     creator: list[str] | None = typer.Option(
@@ -3624,7 +3628,12 @@ def batch_upload(
     placeholder: str = typer.Option("ZENODO_RECORD_ID", "--placeholder", help="Placeholder token used in package."),
     json_output: bool = typer.Option(False, "--json", help="Emit machine-readable JSON to stdout."),
 ) -> None:
-    """Upload a staged Zenodo package to Zenodo (or sandbox).
+    """Upload a staged Zenodo package to the Zenodo sandbox.
+
+    In this release the batch path uploads only to the Zenodo sandbox, so
+    --sandbox is required. Uploads to zenodo.org from the batch path come in
+    a later release; to publish there now, use ws.zenodo() from a
+    battinfo.workspace().
 
     \b
     Workflow:
@@ -3661,6 +3670,15 @@ def batch_upload(
 
     cfg = load_user_config()
     effective_community = None if no_community else (community or cfg.get("community", "battinfo-reference"))
+
+    if not sandbox:
+        from battinfo.zenodo import _BATCH_UPLOAD_SANDBOX_ONLY
+
+        if json_output:
+            typer.echo(json.dumps({"ok": False, "error": _BATCH_UPLOAD_SANDBOX_ONLY}))
+        else:
+            typer.echo(f"Error: {_BATCH_UPLOAD_SANDBOX_ONLY}", err=True)
+        raise typer.Exit(code=1)
 
     if not json_output:
         target = "Zenodo Sandbox" if sandbox else "Zenodo"
@@ -3724,7 +3742,11 @@ def push(
     creator: list[str] | None = typer.Option(None, "--creator", "-c",
                                               help='Creator: "Family, Given; Affiliation". Falls back to config.'),
     token: str | None = typer.Option(None, "--token", help="Zenodo API token. Falls back to config / ZENODO_API_TOKEN."),
-    sandbox: bool = typer.Option(False, "--sandbox", help="Upload to sandbox.zenodo.org instead of production."),
+    sandbox: bool = typer.Option(
+        False,
+        "--sandbox",
+        help="Upload to sandbox.zenodo.org, with a token made there. Every upload needs it in this release.",
+    ),
     community: str | None = typer.Option(None, "--community", help="Zenodo community. Default: from config."),
     no_community: bool = typer.Option(False, "--no-community", help="Skip community submission."),
     yes: bool = typer.Option(False, "--yes", "-y", help="Skip confirmation prompt."),
@@ -3732,13 +3754,18 @@ def push(
     staging: Path | None = typer.Option(None, "--staging", help="Override staging directory."),
     json_output: bool = typer.Option(False, "--json", help="Emit machine-readable JSON to stdout."),
 ) -> None:
-    """Publish battery data to Zenodo in one command.
+    """Package battery data and upload it to the Zenodo sandbox in one command.
+
+    In this release the batch path uploads only to the Zenodo sandbox, so
+    every run except --dry-run needs --sandbox. Uploads to zenodo.org from
+    the batch path come in a later release; to publish there now, use
+    ws.zenodo() from a battinfo.workspace().
 
     \b
     Accepts three layouts:
-      battinfo push ./flat_files/    --cell-spec "Energizer CR2032"   # groups by filename
-      battinfo push ./cell_folders/  --cell-spec "Energizer CR2032"   # one subdir per cell
-      battinfo push ./my_batch/                                        # existing batch.yaml
+      battinfo push ./flat_files/    --cell-spec "Energizer CR2032" --sandbox   # groups by filename
+      battinfo push ./cell_folders/  --cell-spec "Energizer CR2032" --sandbox   # one subdir per cell
+      battinfo push ./my_batch/                                     --sandbox   # existing batch.yaml
 
     \b
     One-time setup:
@@ -3767,6 +3794,11 @@ def push(
     resolved_token = resolve_zenodo_token(token)
     if not dry_run and not resolved_token:
         _err("Zenodo token required. Pass --token or run: battinfo config set zenodo_token <token>")
+
+    if not dry_run and not sandbox:
+        from battinfo.zenodo import _BATCH_UPLOAD_SANDBOX_ONLY
+
+        _err(_BATCH_UPLOAD_SANDBOX_ONLY)
 
     effective_community = None if no_community else (community or cfg.get("community", "battinfo-reference"))
 

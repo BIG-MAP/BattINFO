@@ -695,6 +695,20 @@ def _type_list(node: dict[str, Any]) -> list[Any]:
     return types if isinstance(types, list) else [types]
 
 
+_BATCH_UPLOAD_SANDBOX_ONLY = (
+    "In this release the batch path (battinfo batch upload, battinfo push) uploads only to the "
+    "Zenodo sandbox: pass --sandbox, or sandbox=True in Python. Uploads to zenodo.org from the "
+    "batch path come in a later release. To publish on zenodo.org now, describe the data with "
+    "battinfo.workspace() and deposit it with ws.zenodo(). Nothing was sent to Zenodo."
+)
+
+
+def _require_sandbox(sandbox: bool) -> None:
+    """Refuse zenodo.org for the batch path, which uploads only to the sandbox in this release."""
+    if not sandbox:
+        raise ValueError(_BATCH_UPLOAD_SANDBOX_ONLY)
+
+
 def upload_zenodo_package(
     staging_dir: PathLike,
     creators: list[dict[str, Any]],
@@ -715,6 +729,11 @@ def upload_zenodo_package(
 ) -> dict[str, Any]:
     """Upload a staged Zenodo package and optionally publish it.
 
+    In this release the package goes only to the Zenodo sandbox: without
+    ``sandbox=True`` the call raises a ``ValueError`` before any request is
+    made. Uploads to zenodo.org from the batch path come in a later release;
+    to publish there now, use ``ws.zenodo()`` from :func:`battinfo.workspace`.
+
     Workflow:
     1. Load ``battinfo.bundle.json`` from *staging_dir* to derive metadata.
     2. Create an empty Zenodo deposit to obtain the pre-reserved record ID.
@@ -728,7 +747,7 @@ def upload_zenodo_package(
         creators: Zenodo creator list, e.g.
                   ``[{"name": "Clark, Simon", "affiliation": "SINTEF"}]``.
         token: Zenodo API token.  Falls back to ``ZENODO_API_TOKEN`` env var.
-        sandbox: Use the Zenodo sandbox instead of production.
+        sandbox: Use the Zenodo sandbox. Required in this release.
         community: Zenodo community identifier for submission
                    (``None`` skips community submission).
         title: Override the auto-derived record title. The staged graph's
@@ -749,7 +768,12 @@ def upload_zenodo_package(
         Dict with ``deposit_id``, ``record_id``, ``record_url``,
         ``deposit_url``, ``doi``, ``patch_counts``, ``uploaded_files``,
         and ``published`` keys.
+
+    Raises:
+        ValueError: without ``sandbox=True``, or with no creators, before
+            any request is made.
     """
+    _require_sandbox(sandbox)
     if not creators:
         raise ValueError("creators must be a non-empty list.")
 

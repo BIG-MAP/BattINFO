@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
@@ -17,6 +18,7 @@ from battinfo.contribution import (
     _test_kind_from_path,
     init_batch,
     package_batch,
+    push_batch,
 )
 from battinfo.publication import DEFAULT_PUBLISH_FILENAME, DEFAULT_RO_CRATE_METADATA_FILENAME
 
@@ -277,6 +279,46 @@ class TestPackageBatch:
         bdf_files = list(staging.glob("*.bdf.parquet"))
         assert len(bdf_files) >= 1
 
+    def test_packaged_batch_names_no_local_path(self, tmp_path: Path) -> None:
+        # The package goes to Zenodo: no file: URL, and no absolute path of the batch
+        # (which holds the user name), in any file it writes.
+        batch = _make_batch(tmp_path)
+        result = package_batch(batch, creators=CREATORS)
+        staging = Path(result["staging_dir"])
+        local = {form for path in (batch, batch.resolve()) for form in (str(path), path.as_posix(), json.dumps(str(path))[1:-1])}
+        texts = {
+            name: (staging / name).read_text(encoding="utf-8")
+            for name in (ZENODO_CELL_RECORD_FILENAME, DEFAULT_PUBLISH_FILENAME, DEFAULT_RO_CRATE_METADATA_FILENAME)
+        }
+        for name, text in texts.items():
+            assert "file:" not in text.lower(), name
+            assert not [path for path in local if path in text], name
+
+        # Each dataset points at the Zenodo record instead, which the upload fills in.
+        bundle = json.loads(texts[ZENODO_CELL_RECORD_FILENAME])
+        for entry in bundle["datasets"]:
+            assert entry["dataset"]["dataset"]["access_url"] == "https://zenodo.org/records/ZENODO_RECORD_ID"
+
+    def test_dropping_the_local_urls_keeps_the_iris(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+        # The dataset IRI is seeded from the folder's name, so the local URLs go only after
+        # the IRIs are minted: the same batch packaged with them kept gives the same IRIs.
+        import re
+
+        from battinfo import contribution
+
+        batch = _make_batch(tmp_path)
+
+        def iris(staging: Path) -> list[str]:
+            text = (staging / ZENODO_CELL_RECORD_FILENAME).read_text(encoding="utf-8")
+            return sorted(set(re.findall(r"https://w3id\.org/battinfo/(?:cell|test|dataset)/[a-z0-9-]+", text)))
+
+        cleaned = iris(Path(package_batch(batch, tmp_path / "cleaned", creators=CREATORS)["staging_dir"]))
+        monkeypatch.setattr(contribution, "_without_local_urls", lambda record: record)
+        kept_staging = Path(package_batch(batch, tmp_path / "kept", creators=CREATORS)["staging_dir"])
+
+        assert "file:" in (kept_staging / ZENODO_CELL_RECORD_FILENAME).read_text(encoding="utf-8")
+        assert cleaned and cleaned == iris(kept_staging)
+
 
 # ── CLI: batch package ─────────────────────────────────────────────────────────
 
@@ -339,3 +381,51 @@ class TestBatchPackageCli:
             "--creator", "Clark, Simon",
         ])
         assert "batch upload" in result.output
+
+
+# ── Uploads go only to the Zenodo sandbox in this release ──────────────────────
+
+def _one_line(text: str) -> str:
+    return " ".join(text.split())
+
+
+class TestSandboxOnlyUploads:
+    def test_batch_upload_refuses_zenodo_org(self, tmp_path: Path) -> None:
+        staging = Path(package_batch(_make_batch(tmp_path), creators=CREATORS)["staging_dir"])
+        with patch("battinfo.zenodo.ZenodoClient") as client:
+            result = runner.invoke(app, [
+                "batch", "upload", str(staging),
+                "--token", "tok",
+                "--creator", "Clark, Simon",
+            ])
+        assert result.exit_code == 1
+        assert "only to the Zenodo sandbox" in _one_line(result.output)
+        client.assert_not_called()
+        assert "ZENODO_RECORD_ID" in (staging / DEFAULT_PUBLISH_FILENAME).read_text(encoding="utf-8")
+
+    def test_push_refuses_zenodo_org_before_it_moves_a_file(self, tmp_path: Path) -> None:
+        folder = tmp_path / "flat"
+        folder.mkdir()
+        for n in (1, 2):
+            (folder / f"cell{n}_cycling.csv").write_text("time,voltage\n0,3.0\n", encoding="utf-8")
+        before = sorted(p.relative_to(folder).as_posix() for p in folder.rglob("*"))
+        with patch("battinfo.zenodo.ZenodoClient") as client:
+            result = runner.invoke(app, [
+                "push", str(folder),
+                "--cell-spec", "Energizer CR2032",
+                "--creator", "Clark, Simon",
+                "--token", "tok",
+                "--yes",
+            ])
+        assert result.exit_code == 1
+        assert "only to the Zenodo sandbox" in _one_line(result.output)
+        client.assert_not_called()
+        assert sorted(p.relative_to(folder).as_posix() for p in folder.rglob("*")) == before
+
+    def test_push_batch_refuses_zenodo_org_before_it_packages(self, tmp_path: Path) -> None:
+        batch = _make_batch(tmp_path)
+        with patch("battinfo.zenodo.ZenodoClient") as client:
+            with pytest.raises(ValueError, match="only to the Zenodo sandbox"):
+                push_batch(batch, creators=CREATORS, zenodo_token="tok")
+        client.assert_not_called()
+        assert not (batch / "staging").exists()
