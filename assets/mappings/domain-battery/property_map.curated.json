@@ -1,13 +1,14 @@
 {
-  "version": "0.4.0",
+  "version": "0.5.0",
   "status": "curated",
   "notes": [
     "Curated mapping entries promoted from decisions in interactive review.",
     "These entries are treated as authoritative for JSON->RDF conversion.",
-    "IRIs verified against EMMO domain-battery 0.20.2, domain-electrochemistry 0.37.2, domain-chemical-substance 0.15.0 and EMMO 1.0.2.",
+    "IRIs verified against EMMO domain-battery 0.21.0, domain-electrochemistry 0.39.0, domain-chemical-substance 0.15.0 and EMMO 1.0.2.",
     "Temperature properties corrected: candidates mapped these to process classes (Charging/Discharging);",
     "correct mapping is to temperature-limit property classes in domain-electrochemistry.",
-    "0.4.0: wired the operating-temperature, typical-capacity and maximum-pulse-current keys that were fallback-emitted while their EMMO classes were pending."
+    "0.4.0: wired the operating-temperature, typical-capacity and maximum-pulse-current keys that were fallback-emitted while their EMMO classes were pending.",
+    "0.5.0: adopted domain-electrochemistry 0.39.0. ocp types OpenCircuitPotential (the electrode quantity; OpenCircuitVoltage is now strictly the cell-level one) and entropic_coefficient TemperatureCoefficientOfTheOpenCircuitPotential; solid_diffusivity moves to the new GuestDiffusivity, electrode_pair_count to NumberOfElectrodePairs, and transport_efficiency is mapped to the new TransportEfficiency."
   ],
   "mappings": [
     {
@@ -310,12 +311,12 @@
     {
       "key": "electrode_pair_count",
       "status": "curated",
-      "class_iri": "https://w3id.org/emmo#EMMO_41efdf5d_0c9c_4ea0_bb65_f8236e663be5",
-      "class_qname": "emmo:NumberOfEntities",
-      "class_pref_label": "NumberOfEntities",
-      "class_label": "NumberOfEntities",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_f7a81b04_6600_4bbf_a70e_5ebbed911069",
+      "class_qname": "emmo:NumberOfElectrodePairs",
+      "class_pref_label": "NumberOfElectrodePairs",
+      "class_label": "NumberOfElectrodePairs",
       "confidence": 1.0,
-      "notes": "BPX 'Number of electrode pairs connected in parallel to make a cell'. NumberOfEntities is the count of entities of a given kind in a system; which entities rides the key (the geometry->Area precedent)."
+      "notes": "BPX 'Number of electrode pairs connected in parallel to make a cell'. NumberOfElectrodePairs (domain-electrochemistry 0.39.0) is that count; it subclasses NumberOfEntities, which the key mapped to before."
     },
     {
       "key": "electrolyte_diffusivity",
@@ -347,12 +348,12 @@
     {
       "key": "entropic_coefficient",
       "status": "curated",
-      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_3b938708_e7e4_4ac0_a959_9c04306302e7",
-      "class_qname": "emmo:TemperatureCoefficientOfTheOpenCircuitVoltage",
-      "class_pref_label": "TemperatureCoefficientOfTheOpenCircuitVoltage",
-      "class_label": "TemperatureCoefficientOfTheOpenCircuitVoltage",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_9b44a651_afa9_4889_ae07_9ac49ede8ac1",
+      "class_qname": "emmo:TemperatureCoefficientOfTheOpenCircuitPotential",
+      "class_pref_label": "TemperatureCoefficientOfTheOpenCircuitPotential",
+      "class_label": "TemperatureCoefficientOfTheOpenCircuitPotential",
       "confidence": 1.0,
-      "notes": "dU/dT of a material's open-circuit potential. The published parent of the frozen Positive/NegativeElectrodeEntropicChangeCoefficient pair, so polarity rides the graph (depth rule, docs/internal/ontology-additions-needed.md section 10)."
+      "notes": "dU/dT of an electrode material's open-circuit potential (BPX 'Entropic change coefficient', altLabel EntropicChangeCoefficient). The electrode-level class added in domain-electrochemistry 0.39.0 and the replacement of the deprecated Positive/NegativeElectrodeEntropicChangeCoefficient pair; polarity rides the graph (depth rule, docs/internal/ontology-additions-needed.md section 10). TemperatureCoefficientOfTheOpenCircuitVoltage is the cell-level quantity (IEV 482-03-33). Before 0.5.0 this entry paired that label with the CoatingThickness IRI."
     },
     {
       "key": "external_surface_area",
@@ -437,7 +438,7 @@
       "class_pref_label": "ThermodynamicTemperature",
       "class_label": "ThermodynamicTemperature",
       "confidence": 1.0,
-      "notes": "BPX State 'Initial temperature [K]'. Generic per the depth rule; the published InititalThermodynamicTemperature carries a misspelled label."
+      "notes": "BPX State 'Initial temperature [K]'. Generic per the depth rule. domain-electrochemistry 0.38.0 corrected the misspelled prefLabel of InitialThermodynamicTemperature, so whether to use that class instead is open again."
     },
     {
       "key": "internal_resistance",
@@ -650,11 +651,12 @@
     {
       "key": "ocp",
       "status": "curated",
-      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_9c657fdc_b9d3_4964_907c_f9a6e8c5f52b",
-      "class_qname": "emmo:OpenCircuitVoltage",
-      "class_pref_label": "OpenCircuitVoltage",
-      "class_label": "OpenCircuitVoltage",
-      "confidence": 1.0
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_e272f229_7b45_4436_9b0b_30391ee4e5be",
+      "class_qname": "emmo:OpenCircuitPotential",
+      "class_pref_label": "OpenCircuitPotential",
+      "class_label": "OpenCircuitPotential",
+      "confidence": 1.0,
+      "notes": "A half-cell open-circuit potential of an electrode material, so the electrode quantity OpenCircuitPotential (domain-electrochemistry 0.39.0). It used to map to OpenCircuitVoltage, which 0.39.0 makes strictly the cell-level quantity: the voltage between the terminals of a cell at zero current."
     },
     {
       "key": "operating_temperature_max",
@@ -871,12 +873,12 @@
     {
       "key": "solid_diffusivity",
       "status": "curated",
-      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_37b24a94_cae0_4d7a_9519_9f7692dec607",
-      "class_qname": "emmo:Diffusivity",
-      "class_pref_label": "Diffusivity",
-      "class_label": "Diffusivity",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_fed4582e_0de4_43e1_b51a_e3496697c25d",
+      "class_qname": "emmo:GuestDiffusivity",
+      "class_pref_label": "GuestDiffusivity",
+      "class_label": "GuestDiffusivity",
       "confidence": 1.0,
-      "notes": "Generic Diffusivity per the depth rule; the guest species and host material ride the claim target. Repoint to a polarity-free GuestDiffusivity once domain-electrochemistry publishes one (docs/internal/ontology-additions-needed.md section 10a)."
+      "notes": "Diffusivity of the guest species in the active material of an insertion electrode: GuestDiffusivity, the polarity-free class domain-electrochemistry 0.39.0 published for this ask (defined as Diffusivity and isPropertyFor some ActiveMaterial). The host material rides the claim target, the polarity the part (docs/internal/ontology-additions-needed.md section 10a)."
     },
     {
       "key": "specific_capacity",
@@ -1014,6 +1016,16 @@
       "class_pref_label": "ChargeCarrierTransportNumber",
       "class_label": "ChargeCarrierTransportNumber",
       "confidence": 1.0
+    },
+    {
+      "key": "transport_efficiency",
+      "status": "curated",
+      "class_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_3605456a_e952_4093_98b6_d8c24c37c19e",
+      "class_qname": "emmo:TransportEfficiency",
+      "class_pref_label": "TransportEfficiency",
+      "class_label": "TransportEfficiency",
+      "confidence": 1.0,
+      "notes": "BPX 'Transport efficiency' of an electrode or the separator: the ratio of an effective transport coefficient in the porous medium to its bulk value (porosity over tortuosity, or porosity to the Bruggeman exponent). TransportEfficiency was added in domain-electrochemistry 0.39.0; BruggemanCoefficient is the exponent, a different quantity."
     },
     {
       "key": "typical_capacity",

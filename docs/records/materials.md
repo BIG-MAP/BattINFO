@@ -332,7 +332,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
                 "@type": "RealData",
                 "hasNumberValue": 25
               },
-              "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
+              "hasMeasurementUnit": "https://w3id.org/emmo#DegreeCelsius"
             },
             {
               "@type": [
@@ -506,7 +506,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
                 "@type": "RealData",
                 "hasNumberValue": 25
               },
-              "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
+              "hasMeasurementUnit": "https://w3id.org/emmo#DegreeCelsius"
             },
             {
               "@type": [
@@ -680,7 +680,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
                 "@type": "RealData",
                 "hasNumberValue": 25
               },
-              "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
+              "hasMeasurementUnit": "https://w3id.org/emmo#DegreeCelsius"
             },
             {
               "@type": [
@@ -912,7 +912,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
                 "@type": "RealData",
                 "hasNumberValue": 25
               },
-              "hasMeasurementUnit": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc"
+              "hasMeasurementUnit": "https://w3id.org/emmo#DegreeCelsius"
             },
             {
               "@type": [

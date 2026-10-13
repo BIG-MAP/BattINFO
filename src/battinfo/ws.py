@@ -4005,8 +4005,11 @@ class AuthoringWorkspace:
                 for m in json.loads(_unit_path.read_text(encoding="utf-8")).get("mappings", []):
                     if m.get("unit_iri") and m.get("symbol"):
                         rev_unit.setdefault(m["unit_iri"], m["symbol"])
+        from battinfo.transform.json_to_jsonld import LEGACY_UNIT_IRIS as _LEGACY_UNIT_IRIS
         from battinfo.transform.json_to_jsonld import MANUAL_UNIT_TYPES as _MANUAL_UNIT_TYPES
         for _sym, _iri in _MANUAL_UNIT_TYPES.items():
+            rev_unit.setdefault(_iri, _sym)
+        for _iri, _sym in _LEGACY_UNIT_IRIS.items():
             rev_unit.setdefault(_iri, _sym)
 
         # Build chemistry value reverse map (IRI → original-case chemistry string)

@@ -50,13 +50,20 @@ MANUAL_PROPERTY_TYPES = {
 }
 
 MANUAL_UNIT_TYPES = {
-    "degC": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc",
-    "°C": "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc",
+    "degC": "https://w3id.org/emmo#DegreeCelsius",
+    "°C": "https://w3id.org/emmo#DegreeCelsius",
     "milliohm": "https://w3id.org/emmo#MilliOhm",
     "mΩ": "https://w3id.org/emmo#MilliOhm",
     "L": "https://w3id.org/emmo#Litre",
     "kg": "https://w3id.org/emmo#Kilogram",
     "mol/L": "https://w3id.org/emmo#MolePerLitre",
+}
+
+# Unit IRIs BattINFO wrote by mistake before 0.8.0, read back as the symbol they
+# stood for so that records published with them still import. Never emitted.
+LEGACY_UNIT_IRIS: dict[str, str] = {
+    # EMMO's class for the programming language C, written for degree Celsius.
+    "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc": "°C",
 }
 CONVERTER_LABEL_TO_TYPE = {label: type_name for type_name, label in {
     "Aluminium": "Aluminium",
@@ -339,17 +346,28 @@ def _allowed_extension_terms() -> set[str]:
 
 @lru_cache(maxsize=1)
 def _unit_type_map() -> dict[str, str]:
+    """Unit symbol -> unit IRI. The curated map wins, then the hand-kept aliases, then
+    the candidate map, so a reviewed entry can never be overridden by an unreviewed one
+    (the candidate and hand-kept entries for degree Celsius once replaced the curated
+    DegreeCelsius with EMMO's class for the programming language C)."""
     merged: dict[str, str] = {}
 
-    for filename in ("unit_map.candidates.json", "unit_map.curated.json"):
-        data = _load_mapping_file(filename)
-        for item in data.get("mappings", []):
+    def _add(table: dict[str, str]) -> None:
+        for symbol, iri in table.items():
+            merged.setdefault(symbol, iri)
+
+    def _from_file(filename: str) -> dict[str, str]:
+        out: dict[str, str] = {}
+        for item in _load_mapping_file(filename).get("mappings", []):
             symbol = item.get("symbol")
             iri = item.get("unit_iri")
             if isinstance(symbol, str) and symbol and isinstance(iri, str) and iri:
-                merged.setdefault(symbol, iri)
+                out.setdefault(symbol, iri)
+        return out
 
-    merged.update(MANUAL_UNIT_TYPES)
+    _add(_from_file("unit_map.curated.json"))
+    _add(MANUAL_UNIT_TYPES)
+    _add(_from_file("unit_map.candidates.json"))
     return merged
 
 

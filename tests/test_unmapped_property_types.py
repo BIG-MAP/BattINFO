@@ -57,8 +57,9 @@ def test_unmapped_key_is_typed_by_its_value_basis_only() -> None:
 @pytest.mark.parametrize(
     ("key", "term"),
     [
-        ("solid_diffusivity", "Diffusivity"),
-        ("entropic_coefficient", "TemperatureCoefficientOfTheOpenCircuitVoltage"),
+        ("solid_diffusivity", "GuestDiffusivity"),
+        ("entropic_coefficient", "TemperatureCoefficientOfTheOpenCircuitPotential"),
+        ("transport_efficiency", "TransportEfficiency"),
         ("initial_concentration", "InitialChargeCarrierConcentrationInElectrolyte"),
         ("particle_d50", "D50ParticleSize"),
         ("compaction_density", "CalenderedDensity"),
@@ -99,16 +100,16 @@ def test_unmapped_parameter_claim_warns_like_an_unmapped_property() -> None:
         "schema_version": "0.2.0",
         "parameter_set": {
             "id": "https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd",
-            "name": "Separator transport",
-            "scope": "separator",
+            "name": "Graphite hysteresis fit",
+            "scope": "material",
             "claims": [
-                {"parameter": "porosity", "quantity": {"value": 0.4, "unit": "1"}},
-                {"parameter": "transport_efficiency", "quantity": {"value": 0.25, "unit": "1"}},
+                {"parameter": "stoichiometry_max", "quantity": {"value": 0.9, "unit": "1"}},
+                {"parameter": "ocp_hysteresis_decay_constant", "quantity": {"value": 10.0, "unit": "1"}},
             ],
         },
     }
     report = validate_semantic_report(doc)
     hits = [i for i in report.issues if i.code == "semantic.property_unmapped"]
-    assert [i.path for i in hits] == ["parameter_set.claims[1].transport_efficiency"]
+    assert [i.path for i in hits] == ["parameter_set.claims[1].ocp_hysteresis_decay_constant"]
     assert hits[0].severity == "warning"
     assert "no quantity class" in hits[0].message
