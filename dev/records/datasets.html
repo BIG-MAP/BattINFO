@@ -603,14 +603,18 @@ Python</label><div class="sd-tab-content docutils">
     <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;https://w3id.org/battinfo/cell/y9xy-kr0v-y5tn-dfj7&quot;</span><span class="p">,</span>
     <span class="n">cell_spec</span><span class="o">=</span><span class="n">CellSpec</span><span class="p">(</span>
         <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5&quot;</span><span class="p">,</span>
-        <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Samsung SDI&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;INR21700-50E&quot;</span><span class="p">,</span>
-        <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;cylindrical&quot;</span><span class="p">,</span> <span class="n">chemistry</span><span class="o">=</span><span class="s2">&quot;Li-ion&quot;</span><span class="p">,</span>
+        <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Samsung SDI&quot;</span><span class="p">,</span>
+        <span class="n">model</span><span class="o">=</span><span class="s2">&quot;INR21700-50E&quot;</span><span class="p">,</span>
+        <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;cylindrical&quot;</span><span class="p">,</span>
+        <span class="n">chemistry</span><span class="o">=</span><span class="s2">&quot;Li-ion&quot;</span><span class="p">,</span>
     <span class="p">),</span>
     <span class="n">serial_number</span><span class="o">=</span><span class="s2">&quot;LAB-2026-0001&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">test</span> <span class="o">=</span> <span class="n">Test</span><span class="p">(</span>
     <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;https://w3id.org/battinfo/test/3w87-0ddf-ryjg-evxe&quot;</span><span class="p">,</span>
-    <span class="n">cell</span><span class="o">=</span><span class="n">cell</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;cycling&quot;</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="s2">&quot;completed&quot;</span><span class="p">,</span>
+    <span class="n">cell</span><span class="o">=</span><span class="n">cell</span><span class="p">,</span>
+    <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;cycling&quot;</span><span class="p">,</span>
+    <span class="n">status</span><span class="o">=</span><span class="s2">&quot;completed&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span>
     <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;https://w3id.org/battinfo/dataset/6nec-h262-tthy-4rnt&quot;</span><span class="p">,</span>
@@ -643,18 +647,20 @@ Python</label><div class="sd-tab-content docutils">
     <span class="c1"># The table schema of the processed file (CSVW): column names,</span>
     <span class="c1"># datatypes and units, so a consumer knows the shape of the data</span>
     <span class="c1"># without downloading it.</span>
-    <span class="n">main_entity</span><span class="o">=</span><span class="p">[{</span>
-        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;Table&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;run.bdf.parquet&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;table_schema&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;columns&quot;</span><span class="p">:</span> <span class="p">[</span>
-                <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;test_time_s&quot;</span><span class="p">,</span> <span class="s2">&quot;datatype&quot;</span><span class="p">:</span> <span class="s2">&quot;number&quot;</span><span class="p">,</span> <span class="s2">&quot;unit_text&quot;</span><span class="p">:</span> <span class="s2">&quot;s&quot;</span><span class="p">},</span>
-                <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;voltage_v&quot;</span><span class="p">,</span> <span class="s2">&quot;datatype&quot;</span><span class="p">:</span> <span class="s2">&quot;number&quot;</span><span class="p">,</span> <span class="s2">&quot;unit_text&quot;</span><span class="p">:</span> <span class="s2">&quot;V&quot;</span><span class="p">},</span>
-                <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;current_a&quot;</span><span class="p">,</span> <span class="s2">&quot;datatype&quot;</span><span class="p">:</span> <span class="s2">&quot;number&quot;</span><span class="p">,</span> <span class="s2">&quot;unit_text&quot;</span><span class="p">:</span> <span class="s2">&quot;A&quot;</span><span class="p">},</span>
-                <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;discharging_capacity_ah&quot;</span><span class="p">,</span> <span class="s2">&quot;datatype&quot;</span><span class="p">:</span> <span class="s2">&quot;number&quot;</span><span class="p">,</span> <span class="s2">&quot;unit_text&quot;</span><span class="p">:</span> <span class="s2">&quot;Ah&quot;</span><span class="p">},</span>
-            <span class="p">],</span>
-        <span class="p">},</span>
-    <span class="p">}],</span>
+    <span class="n">main_entity</span><span class="o">=</span><span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;Table&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;run.bdf.parquet&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;table_schema&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;columns&quot;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;test_time_s&quot;</span><span class="p">,</span> <span class="s2">&quot;datatype&quot;</span><span class="p">:</span> <span class="s2">&quot;number&quot;</span><span class="p">,</span> <span class="s2">&quot;unit_text&quot;</span><span class="p">:</span> <span class="s2">&quot;s&quot;</span><span class="p">},</span>
+                    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;voltage_v&quot;</span><span class="p">,</span> <span class="s2">&quot;datatype&quot;</span><span class="p">:</span> <span class="s2">&quot;number&quot;</span><span class="p">,</span> <span class="s2">&quot;unit_text&quot;</span><span class="p">:</span> <span class="s2">&quot;V&quot;</span><span class="p">},</span>
+                    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;current_a&quot;</span><span class="p">,</span> <span class="s2">&quot;datatype&quot;</span><span class="p">:</span> <span class="s2">&quot;number&quot;</span><span class="p">,</span> <span class="s2">&quot;unit_text&quot;</span><span class="p">:</span> <span class="s2">&quot;A&quot;</span><span class="p">},</span>
+                    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;discharging_capacity_ah&quot;</span><span class="p">,</span> <span class="s2">&quot;datatype&quot;</span><span class="p">:</span> <span class="s2">&quot;number&quot;</span><span class="p">,</span> <span class="s2">&quot;unit_text&quot;</span><span class="p">:</span> <span class="s2">&quot;Ah&quot;</span><span class="p">},</span>
+                <span class="p">],</span>
+            <span class="p">},</span>
+        <span class="p">}</span>
+    <span class="p">],</span>
     <span class="c1"># Membership in a dataset series (a collection record): emitted as</span>
     <span class="c1"># dcat:inSeries and schema:isPartOf. The collection publishes first.</span>
     <span class="n">series_id</span><span class="o">=</span><span class="s2">&quot;https://w3id.org/battinfo/dataset/0rp6-kncv-cyem-qwcd&quot;</span><span class="p">,</span>
