@@ -155,7 +155,8 @@ Zenodo deposit: which locations it may read, names, URLs and checksums, what
 a deposit would leave out, and the check of its files before a publish),
 `_deposit_index.py` (`.battinfo/deposit-files.json`, the local data files a
 workspace registered and the local file behind each copy its deposits and
-uploads made, and `.battinfo/zenodo.json`, the Zenodo record it continues),
+uploads made, and `.battinfo/zenodo.json` and `.battinfo/zenodo-sandbox.json`,
+the Zenodo record it continues on zenodo.org and on the sandbox),
 `canonical_aliases.py`
 (legacy key normalisation), `testmethod.py` (structured test-method steps),
 `metadata.py` (CSVW/DCAT dataset enrichment).

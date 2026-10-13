@@ -1,4 +1,4 @@
-"""What a workspace records about its deposits: ``.battinfo/deposit-files.json`` and ``.battinfo/zenodo.json``.
+"""What a workspace records about its deposits: ``.battinfo/deposit-files.json`` and the Zenodo state files.
 
 ``deposit-files.json``, the deposit index, answers two questions a Zenodo
 deposit asks about a data file before it reads it.
@@ -7,7 +7,8 @@ May it read the file at all? A data file on another computer, such as a
 cycler export on a lab share, may be read when this workspace registered
 it (see :func:`battinfo._deposit_files.location_path`): ``ws.add("test",
 ..., data=...)`` registers each data file and raw file it makes a dataset
-from, and ``ws.convert()`` each file it converts and each file it writes.
+from, ``ws.convert()`` each file it converts and each file it writes, and
+``ws.process()`` each preview it writes.
 
 Which local file is behind a URL a record points at? A deposit points the
 dataset records at the copies it holds
@@ -49,12 +50,16 @@ local path, size, md5 and sha256. Entries are kept across versions.
 ``hosted`` maps each URL ``ws.upload()`` gave a record to the local file
 behind it.
 
-``zenodo.json``, the deposit state, names the Zenodo record the next
-``ws.zenodo()`` continues: its environment, concept record id, record id,
-deposit id and DOI, whether it is published, and the IRIs of the records
-it holds (``ws.submit()`` records its DOI on those only).
+The deposit state names the Zenodo record the next ``ws.zenodo()``
+continues, one file for each Zenodo: ``zenodo.json`` for zenodo.org and
+``zenodo-sandbox.json`` for the sandbox, so a dry run on the sandbox never
+touches the record on zenodo.org. A state holds the environment, concept
+record id, record id, deposit id and DOI, whether the record is published,
+the published record a draft of a new version was made from
+(``version_of``), and the IRIs of the records the deposit holds
+(``ws.submit()`` records the DOI on those only).
 
-Both files are written atomically. One that cannot be read raises
+The files are written atomically. One that cannot be read raises
 :class:`DepositIndexError`, naming the file, and is never written over,
 since it may hold what no run can rebuild. Keys of the index other than
 these are kept as they are when it is written.
@@ -75,8 +80,11 @@ from battinfo._util import lexical_key
 #: Where a workspace keeps the index, relative to its root folder.
 INDEX_PATH = Path(".battinfo") / "deposit-files.json"
 
-#: Where a workspace keeps the state of its Zenodo record, relative to its root folder.
-STATE_PATH = Path(".battinfo") / "zenodo.json"
+#: Where a workspace keeps the state of its record on each Zenodo, relative to its root folder.
+STATE_PATHS: dict[str, Path] = {
+    "production": Path(".battinfo") / "zenodo.json",
+    "sandbox": Path(".battinfo") / "zenodo-sandbox.json",
+}
 
 #: The Zenodo environments, with the host that serves the record pages of each.
 ZENODO_HOSTS: dict[str, str] = {"production": "zenodo.org", "sandbox": "sandbox.zenodo.org"}
@@ -301,44 +309,79 @@ def parse_zenodo_file_url(url: object) -> ZenodoFileURL | None:
 # ── The state of the workspace's Zenodo record ───────────────────────────────
 
 
-def state_path(root: Path) -> Path:
-    """The state file of the workspace in *root*."""
-    return root / STATE_PATH
+def state_path(root: Path, environment: str = "production") -> Path:
+    """The file that holds the state of the record the workspace in *root* has on the Zenodo of *environment*."""
+    return root / STATE_PATHS[environment]
 
 
-def load_deposit_state(root: Path) -> dict[str, Any]:
-    """The state of the Zenodo record the workspace in *root* continues, or ``{}`` when it has none.
+def state_file(environment: str) -> str:
+    """The state file of *environment* as messages name it, such as ``.battinfo/zenodo.json``."""
+    return STATE_PATHS[environment].as_posix()
 
-    A state written before the environment was stored names it with
-    ``"sandbox": true`` or ``false``, or not at all (production), and the
-    environment is filled in from that. Raises :class:`DepositIndexError`,
-    naming the file, when the file cannot be read or does not hold a state.
+
+def _read_state(path: Path, environment: str) -> dict[str, Any] | None:
+    """The state the file *path* of *environment* holds, or ``None`` when there is no such file.
+
+    The state's own environment is filled in: a state written before it was
+    stored names it with ``"sandbox": true`` or ``false``, or not at all (the
+    environment of its file).
     """
-    path = state_path(root)
     try:
         text = path.read_text(encoding="utf-8-sig")
     except FileNotFoundError:
-        return {}
+        return None
     except (OSError, UnicodeError) as exc:
-        raise DepositIndexError(_unreadable_state(path, exc)) from exc
+        raise DepositIndexError(_unreadable_state(path, environment, exc)) from exc
     try:
         state = json.loads(text)
     except ValueError as exc:
-        raise DepositIndexError(_unreadable_state(path, exc)) from exc
-    problem = _state_shape_problem(state)
+        raise DepositIndexError(_unreadable_state(path, environment, exc)) from exc
+    problem = _state_shape_problem(state, environment)
     if problem:
-        raise DepositIndexError(_unreadable_state(path, problem))
-    state.setdefault("environment", "sandbox" if state.get("sandbox") is True else "production")
+        raise DepositIndexError(_unreadable_state(path, environment, problem))
+    state.setdefault("environment", "sandbox" if state.get("sandbox") is True else environment)
     state.pop("sandbox", None)
-    for key in ("record_id", "deposit_id", "concept_record_id"):
+    for key in ("record_id", "deposit_id", "concept_record_id", "version_of"):
         if state.get(key) is not None:
             state[key] = str(state[key])
     return state
 
 
+def load_deposit_state(root: Path, environment: str = "production") -> dict[str, Any]:
+    """The state of the record the workspace in *root* has on the Zenodo of *environment*, or ``{}``.
+
+    Each Zenodo has its own file (:data:`STATE_PATHS`), so a dry run on the
+    sandbox never touches the record on zenodo.org. An earlier build kept a
+    sandbox record in ``zenodo.json`` too, marked ``"sandbox": true``. Such a
+    state is read as the sandbox's, until the sandbox has a file of its own,
+    and never as the record on zenodo.org. Raises :class:`DepositIndexError`,
+    naming the file, when a file it reads cannot be read or does not hold a
+    state.
+    """
+    state = _read_state(state_path(root, environment), environment)
+    if state is not None:
+        return state if state["environment"] == environment else {}
+    if environment == "sandbox":
+        legacy = _read_state(state_path(root, "production"), "production")
+        if legacy is not None and legacy["environment"] == "sandbox":
+            return legacy
+    return {}
+
+
 def save_deposit_state(root: Path, state: Mapping[str, Any]) -> None:
-    """Write *state* as the state of the workspace in *root*, atomically."""
-    write_json(state_path(root), state)
+    """Write *state* to the state file of its environment in *root*, atomically.
+
+    A sandbox record an earlier build kept in ``zenodo.json`` is moved to
+    the sandbox's own file first, when that has none yet, so the record on
+    zenodo.org does not write over it.
+    """
+    environment = str(state.get("environment") or "production")
+    if environment == "production":
+        current = _read_state(state_path(root, "production"), "production")
+        sandbox_path = state_path(root, "sandbox")
+        if current is not None and current["environment"] == "sandbox" and not sandbox_path.exists():
+            write_json(sandbox_path, current)
+    write_json(state_path(root, environment), {**state, "environment": environment})
 
 
 # ── Shapes ────────────────────────────────────────────────────────────────────
@@ -392,11 +435,11 @@ def _index_shape_problem(index: Mapping[str, Any]) -> str | None:
     return None
 
 
-def _state_shape_problem(state: object) -> str | None:
-    """What keeps *state* from being a deposit state, or ``None``."""
+def _state_shape_problem(state: object, environment_of_file: str) -> str | None:
+    """What keeps *state*, read from the state file of *environment_of_file*, from being a deposit state, or ``None``."""
     if not isinstance(state, dict):
         return "it is not a JSON object"
-    for key in ("record_id", "deposit_id", "concept_record_id"):
+    for key in ("record_id", "deposit_id", "concept_record_id", "version_of"):
         value = state.get(key)
         if value is not None and (isinstance(value, bool) or not isinstance(value, (str, int)) or not str(value).strip()):
             return f"its {key!r} is not a record id"
@@ -410,6 +453,8 @@ def _state_shape_problem(state: object) -> str | None:
             return f"its {key!r} is not true or false"
     if environment is not None and isinstance(state.get("sandbox"), bool) and (environment == "sandbox") != state["sandbox"]:
         return "its 'environment' and its 'sandbox' disagree"
+    if environment_of_file == "sandbox" and (environment == "production" or state.get("sandbox") is False):
+        return "it names a record on zenodo.org, but it is the file of the sandbox record"
     if "doi" in state and not isinstance(state["doi"], str):
         return "its 'doi' is not text"
     records = state.get("records", [])
@@ -434,8 +479,10 @@ def _unreadable(path: Path, problem: object) -> str:
     )
 
 
-def _unreadable_state(path: Path, problem: object) -> str:
+def _unreadable_state(path: Path, environment: str, problem: object) -> str:
+    host = ZENODO_HOSTS[environment]
     return (
-        f"{path} cannot be read ({problem}). It names the Zenodo record this workspace continues, "
-        "and it was left as it is. Repair it, or delete it to start a new Zenodo record."
+        f"{path} cannot be read ({problem}). It names the record this workspace continues on {host}, "
+        f"and it was left as it is. Repair it, or delete it to start a new record on {host} "
+        "(ws.zenodo(record_id=...) after that continues a published record instead)."
     )

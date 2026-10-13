@@ -534,6 +534,40 @@ def test_the_check_compares_names_and_md5s() -> None:
     ]
 
 
+def test_the_check_compares_a_stated_sha256_and_size_with_the_file_planned(tmp_path: Path) -> None:
+    from battinfo._deposit_files import measured_file
+
+    data_file = tmp_path / "cycling.csv"
+    data_file.write_text("a,b\n1,2\n", encoding="utf-8")
+    entry = measured_file(data_file, "cycling.csv")
+    files = f"{RECORD_URL}/files"
+    stale = _distribution(f"{files}/cycling.csv", "cycling.csv")
+    stale["spdx:checksum"] = {
+        "@type": "spdx:Checksum",
+        "spdx:checksumAlgorithm": {"@id": "spdx:checksumAlgorithm_sha256"},
+        "spdx:checksumValue": "4" * 64,
+    }
+    stale["dcat:byteSize"] = entry.size + 3
+    listing = [{"filename": "cycling.csv", "checksum": f"md5:{entry.md5}"}]
+
+    problems = deposit_file_problems(
+        _graph(stale), files_base=files, listing=listing, sent={"cycling.csv": entry.md5},
+        planned={"cycling.csv": entry},
+    )
+
+    dataset = "dataset https://w3id.org/battinfo/dataset/d-001"
+    assert problems == [
+        f"{dataset}: cycling.csv has sha256 {entry.sha256}, but the record states sha256 {'4' * 64}",
+        f"{dataset}: cycling.csv is {entry.size} bytes, but the record states {entry.size + 3}",
+    ]
+    stale["spdx:checksum"]["spdx:checksumValue"] = entry.sha256
+    stale["dcat:byteSize"] = entry.size
+    assert deposit_file_problems(
+        _graph(stale), files_base=files, listing=listing, sent={"cycling.csv": entry.md5},
+        planned={"cycling.csv": entry},
+    ) == []
+
+
 def test_the_check_passes_a_deposit_that_holds_what_it_sent() -> None:
     a = "0" * 32
     files = f"{RECORD_URL}/files"

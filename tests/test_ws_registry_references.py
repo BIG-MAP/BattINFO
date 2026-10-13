@@ -402,6 +402,8 @@ def test_a_refused_publish_leaves_nothing_on_zenodo(
     message = str(excinfo.value)
     assert message.startswith("Refusing to publish: 1 validation error(s)")
     assert "Not found locally" in message and message.endswith("Nothing was sent to Zenodo.")
+    # A draft would be refused for the same error, so the refusal does not suggest one.
+    assert "leave the deposit as a draft" not in message
     assert zenodo.calls == []  # no client, so no draft with a dangling cell IRI
     assert not (tmp_path / ".battinfo" / "zenodo.json").exists()
 

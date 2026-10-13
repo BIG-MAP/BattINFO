@@ -436,6 +436,27 @@ def test_a_draft_with_a_graph_error_is_refused_before_the_deposit_exists(tmp_pat
     assert api.requests == [] and _state(ws) is None
 
 
+def test_only_a_refusal_after_the_draft_exists_suggests_leaving_it_a_draft(tmp_path: Path) -> None:
+    ws = _workspace(tmp_path)
+    for path in (ws._ws.source_root / "cell-instance").glob("*.json"):
+        path.unlink()
+    graph = ws._build_zenodo_jsonld(
+        zenodo_record_id=7, prereserved_doi="10.5281/zenodo.7", record_url="https://zenodo.org/records/7",
+        file_plan=ws._deposit_file_plan(ws._ws.source_root, report=False, measure=False),
+        creators=CREATORS, license="cc-by-4.0",
+    )
+
+    # Before anything is sent, a draft is refused for the same errors: no such hint.
+    with pytest.raises(RuntimeError) as before:
+        ws._assert_publishable(graph, nothing_sent=True)
+    assert str(before.value).startswith("Refusing to publish: ")
+    assert "leave the deposit as a draft" not in str(before.value)
+    # After the draft exists, a refused publish leaves it a draft.
+    with pytest.raises(RuntimeError) as after:
+        ws._assert_publishable(graph)
+    assert "leave the deposit as a draft" in str(after.value)
+
+
 def test_a_draft_missing_a_data_file_is_refused_before_the_deposit_exists(tmp_path: Path, api: _ZenodoAPI) -> None:
     ws = _workspace(tmp_path)
     (tmp_path / "C01" / "cycling.csv").unlink()

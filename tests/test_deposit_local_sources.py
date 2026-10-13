@@ -454,6 +454,79 @@ def test_r2_upload_reads_no_file_the_screen_refuses(
     assert f"WARNING: dataset {dataset_iri}: its data file {location} is on another computer" in out
 
 
+# ── Previews ws.process() writes ──────────────────────────────────────────────
+
+
+def _fake_plots(monkeypatch: pytest.MonkeyPatch) -> None:
+    """ws.process() without the plotting extras: each preview is a small file written next to the data."""
+    import battinfo.processing as processing
+
+    def plots(data_path: Path, out_dir: Path, **kwargs: object) -> tuple[Path, Path]:
+        stem = data_path.name.split(".")[0]
+        json_path, png_path = out_dir / f"{stem}.plot.json", out_dir / f"{stem}.png"
+        json_path.write_text("{}", encoding="utf-8")
+        png_path.write_bytes(b"png")
+        return json_path, png_path
+
+    monkeypatch.setattr(processing, "generate_dataset_plots", plots)
+
+
+def test_process_registers_its_previews_so_a_deposit_reads_them_on_a_lab_share(
+    tmp_path: Path, zenodo: _FakeZenodo, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import battinfo._deposit_files as deposit_files
+    from battinfo._util import network_host as real_network_host
+
+    share = (tmp_path / "share").resolve()
+    share.mkdir()
+    data = share / "C01.bdf.csv"
+    data.write_text(CSV, encoding="utf-8")
+
+    def network_host(path: object) -> str | None:
+        # The share folder stands in for a computer called 'lab', so no network is needed.
+        text = str(path).replace("\\", "/").lower()
+        return "lab" if text.startswith(str(share).replace("\\", "/").lower()) else real_network_host(str(path))
+
+    monkeypatch.setattr(deposit_files, "network_host", network_host)
+    _fake_plots(monkeypatch)
+    root = tmp_path / "lab-workspace"
+    root.mkdir()
+    ws = AuthoringWorkspace(root=root, registry_url=None)
+    ws.license("cc-by-4.0")
+    spec = battinfo.CellSpec(manufacturer="Example Lab", model="R2032", format="coin", chemistry="li-ion")
+    ws.add("cell", spec=spec, serial_numbers=["C01"])
+    ws.add("test", type="cycling", cell="C01", data=data)
+    ws.save()
+
+    written = ws.process()
+
+    assert sorted(path.name for path in written) == ["C01.plot.json", "C01.png"]
+    sources = _index(root)["sources"]
+    assert [sources[str(path.resolve())] for path in written] == [{"registered_by": "ws.process"}] * 2
+    ws.zenodo(token="placeholder", creators=CREATORS)
+    assert zenodo.data_names() == ["C01.bdf.csv", "C01.plot.json", "C01.png"]
+
+
+def test_process_reads_no_file_the_screen_refuses(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    ws = _workspace(tmp_path, {"C01": "C01.csv"})
+    location = f"file://{HOST}/share/C01.csv"
+    path, record = _saved(ws, "dataset")[0]
+    record["dataset"]["access_url"] = location
+    record["dataset"]["distributions"][0]["content_url"] = location
+    path.write_text(json.dumps(record, indent=2), encoding="utf-8")
+    _fake_plots(monkeypatch)
+    asked = _watch(monkeypatch)
+    capsys.readouterr()
+
+    assert ws.process() == []
+
+    assert asked == []
+    out = capsys.readouterr().out
+    assert f"WARNING: dataset {record['dataset']['id']}: its data file {location} is on another computer" in out
+
+
 # ── Artifacts ─────────────────────────────────────────────────────────────────
 
 

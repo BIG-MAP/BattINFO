@@ -63,7 +63,15 @@ def deposit_is_published(deposit: object) -> bool:
 
 
 class ZenodoError(RuntimeError):
-    """Raised when the Zenodo API returns an error response."""
+    """Raised when the Zenodo API returns an error response.
+
+    ``status`` is the HTTP status Zenodo answered with, or ``None`` when the
+    request got no answer or the error is not an HTTP one.
+    """
+
+    def __init__(self, message: str, *, status: int | None = None) -> None:
+        super().__init__(message)
+        self.status = status
 
 
 def _metadata_errors(reply: Any) -> list[str]:
@@ -138,7 +146,7 @@ class ZenodoClient:
                     last_exc = exc
                     time.sleep(0.5 * (2 ** attempt))
                     continue
-                raise ZenodoError(f"Zenodo {exc.code} on {method} {url}: {body[:400]}") from exc
+                raise ZenodoError(f"Zenodo {exc.code} on {method} {url}: {body[:400]}", status=exc.code) from exc
             except (urllib.error.URLError, TimeoutError, OSError) as exc:
                 # Connection reset / DNS / timeout: previously escaped as a raw, opaque exception.
                 # Retry idempotent reads; otherwise surface as a clean ZenodoError.
@@ -319,7 +327,9 @@ class ZenodoClient:
                     break
                 except urllib.error.HTTPError as exc:
                     body = exc.read().decode("utf-8", errors="replace") if exc.fp else ""
-                    raise ZenodoError(f"Upload failed for {zenodo_name}: {exc.code} {body[:300]}") from exc
+                    raise ZenodoError(
+                        f"Upload failed for {zenodo_name}: {exc.code} {body[:300]}", status=exc.code
+                    ) from exc
                 except (urllib.error.URLError, TimeoutError, OSError) as exc:
                     if attempt >= retries:
                         raise ZenodoError(

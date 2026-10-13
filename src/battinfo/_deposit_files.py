@@ -20,7 +20,10 @@ a URL under a record of this workspace's Zenodo record, or one
 ``ws.upload()`` made, is a file of the deposit (a :class:`RemoteSource`).
 Its local file is planned as any other when it is there. When it is gone, a
 deposit that continues the record keeps the copy it already holds (a kept
-file, never sent again), and any other deposit lists it as missing.
+file, never sent again), and any other deposit lists it as missing. A copy
+of the workspace's own data whose local file the index does not know, such
+as an R2 copy an earlier build made, refuses the deposit instead of being
+linked to (:meth:`DepositContext.refusal_for`).
 
 A location in a record is screened from its text before the file system is
 asked about it (:func:`location_path`). A network path outside the workspace
@@ -42,7 +45,7 @@ from collections.abc import Collection, Iterable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
-from urllib.parse import unquote
+from urllib.parse import unquote, urlsplit
 
 from battinfo._deposit_index import (
     ZENODO_HOSTS,
@@ -205,6 +208,20 @@ class DepositFile:
         """The download URL of the deposit file that holds this file: the file itself, or its archive."""
         return f"{files_base}/{url_segment(self.archive) if self.archive else self.segment}"
 
+    def stated_by(self, checksum: object) -> bool:
+        """True when a record's ``checksum`` block states this file's sha256 or md5.
+
+        A file that was not read (no digests) states nothing, and so matches
+        nothing.
+        """
+        if not isinstance(checksum, Mapping):
+            return False
+        algorithm, value = checksum.get("algorithm"), checksum.get("value")
+        if not isinstance(algorithm, str) or not isinstance(value, str):
+            return False
+        digest = {"sha256": self.sha256, "md5": self.md5}.get(algorithm.strip().lower(), "")
+        return bool(digest) and value.strip().lower() == digest
+
 
 def measured_file(path: Path, name: str, *, kind: str = "other") -> DepositFile:
     """A file deposited as *name*, measured now (an archive staged for a zipped deposit)."""
@@ -249,12 +266,15 @@ class DepositContext:
     ids of that record's versions this workspace knows: a URL under one of
     them names a file the record already holds, whether or not the index
     knows the local file behind it. ``index`` is the loaded deposit index.
+    ``hosted_bases`` are the URLs ``ws.upload()`` puts its R2 copies under
+    (``R2_PUBLIC_BASE_URL``), when one is configured.
     """
 
     environment: str = "production"
     concept: str | None = None
     records: frozenset[str] = frozenset()
     index: Mapping[str, Any] = field(default_factory=dict)
+    hosted_bases: tuple[str, ...] = ()
 
     def recorded_names(self) -> dict[str, str]:
         """The name each local file has in the record the deposit continues, keyed by :func:`path_key`."""
@@ -293,23 +313,73 @@ class DepositContext:
                 return _remote(url, name, item, continued=True, hosted=True)
         return _remote(url, "", hosted, hosted=True)
 
-    def refusal_for(self, url: str) -> str | None:
+    def refusal_for(self, url: str, *, short_id: str = "") -> str | None:
         """Why a deposit refuses a dataset whose data *url* names, or ``None``.
 
-        A deposit on zenodo.org does not link to a file in a sandbox record:
-        the sandbox is a test service, and its records do not last. (A file
-        the index knows is taken from its local copy instead, see
-        :meth:`source_for`.)
+        Called for a URL :meth:`source_for` does not place, so the index
+        knows no local file behind it. A deposit does not link to such a URL
+        when it is a copy of the workspace's own data that the deposit should
+        carry instead, or one a reader could not follow:
+
+        - a file in a sandbox record, from a deposit on zenodo.org: the
+          sandbox is a test service, and its records do not last;
+        - a copy ``ws.upload()`` made in R2 storage: a URL under one of
+          ``hosted_bases``, or one whose path ends in
+          ``datasets/<short_id>/<name>`` with the dataset's own *short_id*,
+          the key ``ws.upload()`` gives a copy. An earlier build kept no
+          record of the local file behind such a copy;
+        - an ``s3:`` URL, which no reader can open.
         """
         zenodo_url = parse_zenodo_file_url(url)
-        if zenodo_url is None or self.environment != "production" or zenodo_url.environment != "sandbox":
+        if zenodo_url is not None:
+            if self.environment != "production" or zenodo_url.environment != "sandbox":
+                return None
+            return (
+                f"its data file is at {url}, in a record on the Zenodo sandbox ({ZENODO_HOSTS['sandbox']}), "
+                "a test service whose records do not last, and this workspace has no record of the local "
+                "file behind it. Point the dataset at its local file again (ws.add(..., data=...), then "
+                "ws.save())"
+            )
+        try:
+            parts = urlsplit(url.strip())
+        except ValueError:
             return None
-        return (
-            f"its data file is at {url}, in a record on the Zenodo sandbox ({ZENODO_HOSTS['sandbox']}), "
-            "a test service whose records do not last, and this workspace has no record of the local "
-            "file behind it. Point the dataset at its local file again (ws.add(..., data=...), then "
-            "ws.save())"
-        )
+        if parts.scheme.lower() == "s3":
+            return (
+                f"its data file is at {url}, in object storage that a reader of the deposit cannot open, "
+                "and this workspace has no record of the local file behind it. Point the dataset at its "
+                "local file again (ws.add(..., data=...), then ws.save())"
+            )
+        own_key = bool(short_id) and f"/datasets/{short_id}/" in parts.path
+        if own_key or any(url.startswith(f"{base}/") for base in self.hosted_bases):
+            return (
+                f"its data file is at {url}, a copy ws.upload() made in R2 storage, and this workspace "
+                "has no record of the local file behind it, so the deposit cannot carry the file (an "
+                "upload made by an earlier build). Point the dataset at its local file again "
+                "(ws.add(..., data=...), then ws.save()) and run ws.upload() again"
+            )
+        return None
+
+    def unplaced_record(self, url: str) -> str | None:
+        """The record id of a Zenodo file *url* that may be in a version of the deposit's own record, or ``None``.
+
+        That is a URL on this context's Zenodo, while the deposit continues a
+        record, under a record that is neither one of ``records`` nor one the
+        index files under any record of the workspace. An earlier build may
+        have pointed the records at a version it never recorded. Only Zenodo
+        can tell whether the record is a version of the deposit's own, and
+        ``ws.zenodo()`` asks it before it creates or changes anything.
+        """
+        if not self.records:
+            return None
+        zenodo_url = parse_zenodo_file_url(url)
+        if zenodo_url is None or zenodo_url.environment != self.environment:
+            return None
+        if zenodo_url.record_id in self.records:
+            return None
+        if concept_of_record(self.index, self.environment, zenodo_url.record_id) is not None:
+            return None
+        return zenodo_url.record_id
 
 
 def _remote(
@@ -419,6 +489,11 @@ class DepositFilePlan:
     #: URLs of copies hosted elsewhere (R2) whose files the deposit carries
     #: too; the records keep pointing at these.
     hosted: frozenset[str] = frozenset()
+    #: Zenodo file URLs that may be in a version of the deposit's own record
+    #: this workspace never recorded, by record id, each as ``(dataset, URL)``
+    #: (see :meth:`DepositContext.unplaced_record`). The deposit links to
+    #: them unless Zenodo says the record is a version of its own.
+    unplaced: dict[str, list[tuple[str, str]]] = field(default_factory=dict)
     _by_key: dict[str, DepositFile] = field(default_factory=dict, repr=False)
     _by_location: dict[str, DepositFile | None] = field(default_factory=dict, repr=False)
 
@@ -503,6 +578,7 @@ def build_deposit_file_plan(
     registered: Collection[str] = frozenset(),
     owners: Mapping[str, str] | None = None,
     remote: Iterable[tuple[RemoteSource, str]] = (),
+    unplaced: Mapping[str, Iterable[tuple[str, str]]] | None = None,
 ) -> DepositFilePlan:
     """Plan the files of one deposit.
 
@@ -525,7 +601,8 @@ def build_deposit_file_plan(
     :meth:`DepositContext.source_for`). The local file behind a copy is
     planned as any other file when it is there. When it is gone, a copy the
     deposit already holds (``source.continued``) is a kept file, never sent
-    again; any other is listed in ``missing``.
+    again; any other is listed in ``missing``. *unplaced* goes into the plan
+    as it is (see :attr:`DepositFilePlan.unplaced`).
 
     A kept file has the name it has on the deposit. Each other file keeps
     the name in the URL of the copy a record points at, or else the name
@@ -667,6 +744,7 @@ def build_deposit_file_plan(
         measured=measure,
         registered=frozenset(registered),
         hosted=frozenset(hosted),
+        unplaced={record: list(uses) for record, uses in (unplaced or {}).items()},
         _by_key=by_key,
         _by_location=by_location,
     )
@@ -704,16 +782,19 @@ def _url_of(value: object) -> str:
     return value.strip() if isinstance(value, str) else ""
 
 
-def _stated_md5(dist: Mapping[str, Any]) -> str:
-    """The md5 a distribution node states for its file (``spdx:checksum``), or ``""``."""
+def _stated_checksum(dist: Mapping[str, Any], algorithm: str) -> str:
+    """The *algorithm* digest (``md5``, ``sha256``) a distribution node states for its file (``spdx:checksum``), or ``""``."""
     checksum = dist.get("spdx:checksum")
     if not isinstance(checksum, Mapping):
         return ""
-    algorithm = checksum.get("spdx:checksumAlgorithm")
-    if isinstance(algorithm, Mapping):
-        algorithm = algorithm.get("@id")
+    stated = checksum.get("spdx:checksumAlgorithm")
+    if isinstance(stated, Mapping):
+        stated = stated.get("@id")
     value = checksum.get("spdx:checksumValue")
-    if not isinstance(algorithm, str) or not algorithm.lower().endswith("md5") or not isinstance(value, str):
+    if not isinstance(stated, str) or not isinstance(value, str):
+        return ""
+    # An SPDX algorithm IRI (spdx:checksumAlgorithm_sha256), or the bare name.
+    if stated.rpartition("_")[2].lower() != algorithm and stated.lower() != algorithm:
         return ""
     return value.strip().lower()
 
@@ -725,15 +806,17 @@ def deposit_file_problems(
     listing: object,
     sent: Mapping[str, str],
     kept: Mapping[str, str] | None = None,
+    planned: Mapping[str, DepositFile] | None = None,
 ) -> list[str]:
     """What is wrong with a deposit's files, one line each; empty when nothing is.
 
     *graph* is the deposit graph, *files_base* the URL the deposit serves its
     files under (``{record_url}/files``), *listing* the deposit's file
     listing, *sent* the ``{name: md5}`` of the files this run uploaded, or
-    found on the deposit unchanged, and *kept* the ``{name: md5}`` of the
-    files it kept with no local file to send (an empty md5 when none was
-    recorded). The deposit must hold:
+    found on the deposit unchanged, *kept* the ``{name: md5}`` of the files
+    it kept with no local file to send (an empty md5 when none was
+    recorded), and *planned* the planned data files by deposit name, with
+    the size and sha256 the plan measured. The deposit must hold:
 
     - every file in *sent*, with that md5;
     - every file in *kept*, with that md5 when it is not empty;
@@ -744,6 +827,10 @@ def deposit_file_problems(
     - a download URL for every distribution of every member dataset
       (``dcat:Dataset``), either a file of the deposit or an http(s) URL
       elsewhere, which counts as external.
+
+    A distribution of a planned file, the file itself, must also state the
+    sha256 and byte size the plan measured, when it states them: Zenodo
+    lists md5 only, and the bytes it holds are the bytes the plan read.
     """
     on_deposit = listed_files(listing)
     problems: list[str] = []
@@ -779,12 +866,25 @@ def deposit_file_problems(
                     if name not in sent and name not in (kept or {}):   # reported above
                         problems.append(f"{owner}: links to {name}, which is not on the deposit")
                     continue
-                stated = _stated_md5(dist)
-                if stated and name == label and on_deposit[name] and stated != on_deposit[name]:
+                if name != label:
+                    continue   # an archive that holds the file: its digests are the archive's
+                stated = _stated_checksum(dist, "md5")
+                if stated and on_deposit[name] and stated != on_deposit[name]:
                     problems.append(
                         f"{owner}: {name} is on the deposit with md5 {on_deposit[name]}, "
                         f"but the record states md5 {stated}"
                     )
+                entry = (planned or {}).get(name)
+                if entry is None or not entry.sha256:
+                    continue
+                stated = _stated_checksum(dist, "sha256")
+                if stated and stated != entry.sha256:
+                    problems.append(
+                        f"{owner}: {name} has sha256 {entry.sha256}, but the record states sha256 {stated}"
+                    )
+                size = dist.get("dcat:byteSize")
+                if isinstance(size, int) and not isinstance(size, bool) and size != entry.size:
+                    problems.append(f"{owner}: {name} is {entry.size} bytes, but the record states {size}")
             elif member and not url:
                 problems.append(f"{owner}: {label} has no download URL")
             elif member and not url.startswith(("http://", "https://")):
