@@ -8,6 +8,7 @@ making the committed page byte-identical on every platform.
 Usage:
     uv run python scripts/gen_cli_reference.py
 """
+
 from __future__ import annotations
 
 import os
@@ -24,8 +25,18 @@ def build() -> str:
     with tempfile.TemporaryDirectory() as tmp:
         raw = Path(tmp) / "cli.md"
         subprocess.run(
-            [sys.executable, "-m", "typer", "battinfo.cli", "utils", "docs",
-             "--name", "battinfo", "--output", str(raw)],
+            [
+                sys.executable,
+                "-m",
+                "typer",
+                "battinfo.cli",
+                "utils",
+                "docs",
+                "--name",
+                "battinfo",
+                "--output",
+                str(raw),
+            ],
             check=True,
             cwd=ROOT,
             capture_output=True,
@@ -41,7 +52,7 @@ def build() -> str:
         "(so it cannot drift). All commands and options:\n"
     )
     assert text.startswith("# `battinfo`\n"), "unexpected typer docs header"
-    return header + text[len("# `battinfo`\n"):]
+    return header + text[len("# `battinfo`\n") :]
 
 
 def main() -> int:

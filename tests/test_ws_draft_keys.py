@@ -8,6 +8,7 @@ read it). A draft reads every key that has a home in the record it becomes (the
 record model's fields and the spellings its constructor takes), and only a key
 with no home raises, with a did-you-mean and the list of keys it accepts.
 """
+
 from __future__ import annotations
 
 import inspect
@@ -69,27 +70,36 @@ def test_supplied_draft_keeps_its_five_datasheet_values(ws, tmp_path: Path) -> N
 
 
 def test_specs_and_properties_merge_like_the_model(ws, tmp_path: Path) -> None:
-    payload = {**BASE, "properties": {"mass": {"value": 11.5, "unit": "g"}},
-               "specs": {"mass": {"value": 99, "unit": "g"}, "nominal_voltage": {"value": 1.5, "unit": "V"}}}
+    payload = {
+        **BASE,
+        "properties": {"mass": {"value": 11.5, "unit": "g"}},
+        "specs": {"mass": {"value": 99, "unit": "g"}, "nominal_voltage": {"value": 1.5, "unit": "V"}},
+    }
     spec = ws.load(_write(tmp_path, "both.cell-spec.json", payload))
     model = battinfo.CellSpec(**payload)
     assert spec.properties == model.properties == QTY  # properties wins per key, as in CellSpec
 
 
 def test_template_placeholders_are_dropped_but_ranges_are_kept(ws, tmp_path: Path) -> None:
-    payload = {**BASE, "properties": {
-        "nominal_voltage": {"value": None, "unit": "V"},                       # unfilled placeholder
-        "maximum_storage_temperature": {"min_value": -20, "max_value": 35, "unit": "degC"},
-        "cycle_life": {"value_text": "not stated", "unit": "1"},
-    }}
+    payload = {
+        **BASE,
+        "properties": {
+            "nominal_voltage": {"value": None, "unit": "V"},  # unfilled placeholder
+            "maximum_storage_temperature": {"min_value": -20, "max_value": 35, "unit": "degC"},
+            "cycle_life": {"value_text": "not stated", "unit": "1"},
+        },
+    }
     spec = ws.load(_write(tmp_path, "range.cell-spec.json", payload))
     assert set(spec.properties) == {"maximum_storage_temperature", "cycle_life"}
 
 
 @pytest.mark.parametrize(("key", "suggestion"), [("speks", "properties"), ("manufactuer", "manufacturer")])
 def test_unknown_cell_spec_key_raises_with_did_you_mean(ws, tmp_path: Path, key: str, suggestion: str) -> None:
-    payload = {**BASE, key: QTY} if key == "speks" else {**{k: v for k, v in BASE.items() if k != "manufacturer"},
-                                                         "manufacturer": "Duracell", key: "Duracell"}
+    payload = (
+        {**BASE, key: QTY}
+        if key == "speks"
+        else {**{k: v for k, v in BASE.items() if k != "manufacturer"}, "manufacturer": "Duracell", key: "Duracell"}
+    )
     with pytest.raises(ValueError) as excinfo:
         ws.load(_write(tmp_path, "typo.cell-spec.json", payload))
     message = str(excinfo.value)
@@ -124,22 +134,30 @@ def test_termination_criteria_raises_and_says_how_to_state_a_cutoff(ws, tmp_path
 
 
 def test_unknown_equipment_spec_key_raises(ws, tmp_path: Path) -> None:
-    payload = {"name": "SkyRC MC3000", "manufacturer": "SkyRC", "model": "MC3000",
-               "equipment_class": "cycler", "chanel_count": 4}
+    payload = {
+        "name": "SkyRC MC3000",
+        "manufacturer": "SkyRC",
+        "model": "MC3000",
+        "equipment_class": "cycler",
+        "chanel_count": 4,
+    }
     with pytest.raises(ValueError, match=r"'chanel_count' \(did you mean 'channel_count'\?\)"):
         ws.load(_write(tmp_path, "mc3000.equipment-spec.json", payload))
 
 
 def test_template_drafts_still_load(ws, tmp_path: Path) -> None:
     """Every key ws.template() writes is accepted, '_' comment keys included."""
-    cell_draft = ws.template("cell-spec", manufacturer="Duracell", model="MN2400",
-                             format="cylindrical", chemistry="zn-mno2")
+    cell_draft = ws.template(
+        "cell-spec", manufacturer="Duracell", model="MN2400", format="cylindrical", chemistry="zn-mno2"
+    )
     assert ws.load(cell_draft).manufacturer == "Duracell"
-    test_draft = ws.template("test-spec", name="CC discharge", type="capacity_check",
-                             steps=["Discharge at C/5 until 0.9 V"])
+    test_draft = ws.template(
+        "test-spec", name="CC discharge", type="capacity_check", steps=["Discharge at C/5 until 0.9 V"]
+    )
     assert ws.load(test_draft).name == "CC discharge"
-    equipment_draft = ws.template("equipment-spec", name="SkyRC MC3000", manufacturer="SkyRC",
-                                  model="MC3000", channel_count=4)
+    equipment_draft = ws.template(
+        "equipment-spec", name="SkyRC MC3000", manufacturer="SkyRC", model="MC3000", channel_count=4
+    )
     assert ws.load(equipment_draft)["equipment_spec"]["name"] == "SkyRC MC3000"
 
 
@@ -156,11 +174,20 @@ def _saved(saved: dict, kind: str) -> dict:
 
 def test_cell_spec_draft_reads_the_record_fields(ws, tmp_path: Path) -> None:
     draft = {
-        "manufacturer": "Duracell", "model_name": "MN2400", "format": "cylindrical", "chemistry": "zn-mno2",
-        "product_type": "commercial", "datasheet_revision": "2019-03", "rechargeable": False,
-        "construction": {"assembly_type": "other"}, "housing": {"comment": "nickel-plated steel can"},
-        "comment": "Values from the 2019 datasheet.", "notes": ["Checked by hand."],
-        "source_url": "https://example.org/mn2400.pdf", "retrieved_at": "2026-10-01", "curated_by": ORCID,
+        "manufacturer": "Duracell",
+        "model_name": "MN2400",
+        "format": "cylindrical",
+        "chemistry": "zn-mno2",
+        "product_type": "commercial",
+        "datasheet_revision": "2019-03",
+        "rechargeable": False,
+        "construction": {"assembly_type": "other"},
+        "housing": {"comment": "nickel-plated steel can"},
+        "comment": "Values from the 2019 datasheet.",
+        "notes": ["Checked by hand."],
+        "source_url": "https://example.org/mn2400.pdf",
+        "retrieved_at": "2026-10-01",
+        "curated_by": ORCID,
         "uid": "1f8r6v2k9p4m3t7x",
         "nominal_capacity": {"value": 1.2, "unit": "Ah"},  # a flat property name, as CellSpec takes it
         "properties": {"nominal_voltage": {"value": 1.5, "unit": "V"}},
@@ -168,8 +195,10 @@ def test_cell_spec_draft_reads_the_record_fields(ws, tmp_path: Path) -> None:
     spec = ws.load(_write(tmp_path, "mn2400.cell-spec.json", draft))
     assert spec.id == "https://w3id.org/battinfo/spec/1f8r-6v2k-9p4m-3t7x"
     assert (spec.model, spec.datasheet_revision) == ("MN2400", "2019-03")
-    assert spec.properties == {"nominal_voltage": {"value": 1.5, "unit": "V"},
-                               "nominal_capacity": {"value": 1.2, "unit": "Ah"}}
+    assert spec.properties == {
+        "nominal_voltage": {"value": 1.5, "unit": "V"},
+        "nominal_capacity": {"value": 1.2, "unit": "Ah"},
+    }
 
     record = _saved(ws.save(), "cell_specs")
     body = record["cell_spec"]
@@ -179,25 +208,39 @@ def test_cell_spec_draft_reads_the_record_fields(ws, tmp_path: Path) -> None:
     assert record["notes"] == ["Values from the 2019 datasheet.", "Checked by hand."]
     provenance = record["provenance"]
     assert (provenance["source_type"], provenance["source_url"], provenance["curated_by"]) == (
-        "datasheet", "https://example.org/mn2400.pdf", ORCID)
+        "datasheet",
+        "https://example.org/mn2400.pdf",
+        ORCID,
+    )
     assert isinstance(provenance["retrieved_at"], int)
 
 
 def test_cell_spec_draft_reads_component_links(ws, tmp_path: Path) -> None:
-    links = {"manufacturer_id": "https://w3id.org/battinfo/organization/1f8r-6v2k-9p4m-3t7a",
-             "positive_electrode_spec_id": "https://w3id.org/battinfo/spec/1f8r-6v2k-9p4m-3t7b",
-             "electrolyte_spec_id": "https://w3id.org/battinfo/spec/1f8r-6v2k-9p4m-3t7c"}
+    links = {
+        "manufacturer_id": "https://w3id.org/battinfo/organization/1f8r-6v2k-9p4m-3t7a",
+        "positive_electrode_spec_id": "https://w3id.org/battinfo/spec/1f8r-6v2k-9p4m-3t7b",
+        "electrolyte_spec_id": "https://w3id.org/battinfo/spec/1f8r-6v2k-9p4m-3t7c",
+    }
     spec = ws.load(_write(tmp_path, "links.cell-spec.json", {**BASE, **links}))
     assert {key: getattr(spec, key) for key in links} == links
 
 
 def test_test_spec_draft_reads_the_record_fields(ws, tmp_path: Path) -> None:
     draft = {
-        "name": "CC discharge", "test_kind": "capacity_check", "steps": ["Discharge at C/5 until 0.9 V"],
-        "version": "2", "protocol": "IEC 60086-2 application test", "protocol_url": "https://example.org/iec",
-        "comment": "Run at room temperature.", "notes": ["Second note."],
-        "source_type": "lab", "source_name": "Lab handbook", "source_url": "https://example.org/protocol.pdf",
-        "retrieved_at": "2026-10-01", "workflow_version": "w1", "curated_by": ORCID,
+        "name": "CC discharge",
+        "test_kind": "capacity_check",
+        "steps": ["Discharge at C/5 until 0.9 V"],
+        "version": "2",
+        "protocol": "IEC 60086-2 application test",
+        "protocol_url": "https://example.org/iec",
+        "comment": "Run at room temperature.",
+        "notes": ["Second note."],
+        "source_type": "lab",
+        "source_name": "Lab handbook",
+        "source_url": "https://example.org/protocol.pdf",
+        "retrieved_at": "2026-10-01",
+        "workflow_version": "w1",
+        "curated_by": ORCID,
     }
     protocol = ws.load(_write(tmp_path, "cc.test-spec.json", draft))
     assert (protocol.version, protocol.protocol.url) == ("2", "https://example.org/iec")
@@ -207,22 +250,39 @@ def test_test_spec_draft_reads_the_record_fields(ws, tmp_path: Path) -> None:
     # The test-spec record has no field for a protocol's name, so it is kept as a note.
     assert record["notes"] == ["Run at room temperature.", "Second note.", "protocol: IEC 60086-2 application test"]
     provenance = record["provenance"]
-    assert {key: provenance[key] for key in ("source_type", "source_name", "source_url", "workflow_version",
-                                             "curated_by")} == {
-        "source_type": "lab", "source_name": "Lab handbook", "source_url": "https://example.org/protocol.pdf",
-        "workflow_version": "w1", "curated_by": ORCID}
+    assert {
+        key: provenance[key] for key in ("source_type", "source_name", "source_url", "workflow_version", "curated_by")
+    } == {
+        "source_type": "lab",
+        "source_name": "Lab handbook",
+        "source_url": "https://example.org/protocol.pdf",
+        "workflow_version": "w1",
+        "curated_by": ORCID,
+    }
 
 
 def test_equipment_spec_draft_reads_the_builder_fields(ws, tmp_path: Path) -> None:
-    draft = {"name": "SkyRC MC3000", "manufacturer": "SkyRC", "model": "MC3000", "equipment_class": "cycler",
-             "uid": "1f8r6v2k9p4m3t7z", "notes": "Bought in 2024.", "source_type": "manual",
-             "source_name": "SkyRC site", "source_file": "mc3000-manual.pdf", "retrieved_at": "2026-10-01"}
+    draft = {
+        "name": "SkyRC MC3000",
+        "manufacturer": "SkyRC",
+        "model": "MC3000",
+        "equipment_class": "cycler",
+        "uid": "1f8r6v2k9p4m3t7z",
+        "notes": "Bought in 2024.",
+        "source_type": "manual",
+        "source_name": "SkyRC site",
+        "source_file": "mc3000-manual.pdf",
+        "retrieved_at": "2026-10-01",
+    }
     record = ws.load(_write(tmp_path, "mc3000.equipment-spec.json", draft))
     assert record["equipment_spec"]["id"] == "https://w3id.org/battinfo/spec/1f8r-6v2k-9p4m-3t7z"
     assert record["notes"] == ["Bought in 2024."]
     provenance = record["provenance"]
     assert (provenance["source_type"], provenance["source_name"], provenance["source_file"]) == (
-        "manual", "SkyRC site", "mc3000-manual.pdf")
+        "manual",
+        "SkyRC site",
+        "mc3000-manual.pdf",
+    )
     assert isinstance(provenance["retrieved_at"], int)
 
 
@@ -233,26 +293,44 @@ def test_equipment_spec_draft_keys_are_the_builder_fields() -> None:
 
 def test_api_authoring_drafts_load_with_every_key(ws, tmp_path: Path) -> None:
     """template_cell_spec_draft() and template_test_spec_draft() write keys ws.load() now reads."""
-    cell_draft = api.template_cell_spec_draft(manufacturer="Duracell", model_name="MN2400", chemistry="zn-mno2",
-                                              format="cylindrical", datasheet_revision="2019-03")
+    cell_draft = api.template_cell_spec_draft(
+        manufacturer="Duracell",
+        model_name="MN2400",
+        chemistry="zn-mno2",
+        format="cylindrical",
+        datasheet_revision="2019-03",
+    )
     spec = ws.load(_write(tmp_path, "draft.cell-spec.json", cell_draft))
     assert spec.datasheet_revision == "2019-03"
     assert spec.comment == [cell_draft["comment"]]
-    test_draft = api.template_test_spec_draft(name="CC discharge", version="2",
-                                              protocol_url="https://example.org/iec")
+    test_draft = api.template_test_spec_draft(name="CC discharge", version="2", protocol_url="https://example.org/iec")
     protocol = ws.load(_write(tmp_path, "draft.test-spec.json", test_draft))
     assert (protocol.version, protocol.protocol.url) == ("2", "https://example.org/iec")
     assert protocol.comment == [test_draft["comment"]]
 
 
-@pytest.mark.parametrize(("name", "payload", "match"), [
-    ("a.cell-spec.json", {**BASE, "model_name": "MN1500"}, "'model_name' and 'model' disagree"),
-    ("b.cell-spec.json", {**BASE, "source_url": "https://example.org/a", "source": {"url": "https://example.org/b"}},
-     "'source_url' and 'source.url' disagree"),
-    ("c.test-spec.json", {"name": "T", "type": "capacity_check", "kind": "cycling"}, "name different test types"),
-    ("d.test-spec.json", {"name": "T", "type": "capacity_check", "protocol_url": "https://example.org/a",
-                          "protocol": {"url": "https://example.org/b"}}, "'protocol_url' and 'protocol.url' disagree"),
-])
+@pytest.mark.parametrize(
+    ("name", "payload", "match"),
+    [
+        ("a.cell-spec.json", {**BASE, "model_name": "MN1500"}, "'model_name' and 'model' disagree"),
+        (
+            "b.cell-spec.json",
+            {**BASE, "source_url": "https://example.org/a", "source": {"url": "https://example.org/b"}},
+            "'source_url' and 'source.url' disagree",
+        ),
+        ("c.test-spec.json", {"name": "T", "type": "capacity_check", "kind": "cycling"}, "name different test types"),
+        (
+            "d.test-spec.json",
+            {
+                "name": "T",
+                "type": "capacity_check",
+                "protocol_url": "https://example.org/a",
+                "protocol": {"url": "https://example.org/b"},
+            },
+            "'protocol_url' and 'protocol.url' disagree",
+        ),
+    ],
+)
 def test_a_value_given_two_ways_must_agree(ws, tmp_path: Path, name: str, payload: dict, match: str) -> None:
     with pytest.raises(ValueError, match=match):
         ws.load(_write(tmp_path, name, payload))

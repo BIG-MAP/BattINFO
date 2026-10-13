@@ -70,8 +70,3 @@ def test_detailed_descriptor_matrix_validates_builds_and_queries(tmp_path: Path)
     prismatic_rows = query_library_cell_specs(directory=library_root, format="prismatic")
     assert len(prismatic_rows) == 1
     assert prismatic_rows[0]["construction"]["layer_count"] == 24
-
-
-
-
-

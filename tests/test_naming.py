@@ -41,10 +41,18 @@ FLORES = [
     ("cell-spec", GR, "flores-ocv/graphite-aq-1-cell-spec", "Graphite AQ-1 cell spec"),
     ("cell", GR_SAMPLE, "flores-ocv/graphite-aq-1-063b77-cell", "Graphite AQ-1 cell 063b77"),
     ("test-spec", {"method": "gitt"}, "flores-ocv/gitt-test-spec", "GITT test spec"),
-    ("test", {**GR_SAMPLE, "method": "gitt"}, "flores-ocv/graphite-aq-1-063b77-gitt-test",
-     "Graphite AQ-1 cell 063b77 GITT test"),
-    ("dataset", {**GR_SAMPLE, "method": "gitt"}, "flores-ocv/graphite-aq-1-063b77-gitt-dataset",
-     "Graphite AQ-1 cell 063b77 GITT dataset"),
+    (
+        "test",
+        {**GR_SAMPLE, "method": "gitt"},
+        "flores-ocv/graphite-aq-1-063b77-gitt-test",
+        "Graphite AQ-1 cell 063b77 GITT test",
+    ),
+    (
+        "dataset",
+        {**GR_SAMPLE, "method": "gitt"},
+        "flores-ocv/graphite-aq-1-063b77-gitt-dataset",
+        "Graphite AQ-1 cell 063b77 GITT dataset",
+    ),
 ]
 
 
@@ -66,17 +74,20 @@ def test_kind_words_cover_every_entity_kind_and_nothing_else() -> None:
         assert is_valid_handle(word)
 
 
-@pytest.mark.parametrize(("kind", "word"), [
-    ("material", "material-lot"),
-    ("material-lot", "material-lot"),
-    ("test_spec", "test-spec"),
-    ("test-protocol", "test-spec"),
-    ("cell_instance", "cell"),
-    ("Cell Spec", "cell-spec"),
-    ("current_collector", "current-collector"),
-    ("collection", None),
-    ("dataset-series", None),
-])
+@pytest.mark.parametrize(
+    ("kind", "word"),
+    [
+        ("material", "material-lot"),
+        ("material-lot", "material-lot"),
+        ("test_spec", "test-spec"),
+        ("test-protocol", "test-spec"),
+        ("cell_instance", "cell"),
+        ("Cell Spec", "cell-spec"),
+        ("current_collector", "current-collector"),
+        ("collection", None),
+        ("dataset-series", None),
+    ],
+)
 def test_kind_word_resolves_every_spelling_of_a_kind(kind: str, word: str | None) -> None:
     assert kind_word(kind) == word
 
@@ -87,21 +98,23 @@ def test_unknown_kind_is_a_value_error_listing_the_kinds() -> None:
 
 
 def test_kind_word_is_always_last() -> None:
-    handle = handle_for("dataset", group=GROUP, subject="lnmo", variant="LNMO-NMP-2",
-                        sample="A7", method="p-OCV hold")
+    handle = handle_for("dataset", group=GROUP, subject="lnmo", variant="LNMO-NMP-2", sample="A7", method="p-OCV hold")
     assert handle == "flores-ocv/lnmo-nmp-2-a7-p-ocv-hold-dataset"
     assert handle.endswith("-dataset")
 
 
-@pytest.mark.parametrize(("subject", "variant", "expected"), [
-    ("graphite", "Gr-AQ-1", "aq-1"),
-    ("lnmo", "LNMO-NMP-2", "nmp-2"),           # NMP is a material kind too, but not the subject
-    ("silicon_graphite", "Si-Gr-AQ-1", "aq-1"),  # a two-token prefix
-    ("silicon-graphite", "SiGr_AQ_3", "aq-3"),
-    ("silicon", "Si-AQ-1", "aq-1"),
-    ("graphite", "AQ-1", "aq-1"),               # already without a prefix: unchanged
-    ("lnmo", "Gr-AQ-1", "gr-aq-1"),             # another material's prefix is kept
-])
+@pytest.mark.parametrize(
+    ("subject", "variant", "expected"),
+    [
+        ("graphite", "Gr-AQ-1", "aq-1"),
+        ("lnmo", "LNMO-NMP-2", "nmp-2"),  # NMP is a material kind too, but not the subject
+        ("silicon_graphite", "Si-Gr-AQ-1", "aq-1"),  # a two-token prefix
+        ("silicon-graphite", "SiGr_AQ_3", "aq-3"),
+        ("silicon", "Si-AQ-1", "aq-1"),
+        ("graphite", "AQ-1", "aq-1"),  # already without a prefix: unchanged
+        ("lnmo", "Gr-AQ-1", "gr-aq-1"),  # another material's prefix is kept
+    ],
+)
 def test_variant_drops_only_the_subjects_material_prefix(subject: str, variant: str, expected: str) -> None:
     handle = handle_for("electrode-spec", subject=subject, variant=variant)
     assert handle == f"{subject.replace('_', '-')}-{expected}-electrode-spec"
@@ -127,34 +140,41 @@ def test_subject_outside_the_vocabulary_is_slugged_as_given() -> None:
     assert title_for("equipment", subject="Maccor 4000") == "Maccor 4000 equipment"
 
 
-@pytest.mark.parametrize(("subject", "label"), [
-    ("graphite", "Graphite"),
-    ("silicon_graphite", "Silicon-graphite"),
-    ("silicon", "Silicon"),
-    ("lnmo", "LNMO"),
-    ("lfp", "LFP"),
-    ("nmc111", "NMC111"),
-    ("nmc532", "NMC532"),
-    ("litfsi", "LiTFSI"),  # the trailing abbreviation, not "Lithium bis"
-])
+@pytest.mark.parametrize(
+    ("subject", "label"),
+    [
+        ("graphite", "Graphite"),
+        ("silicon_graphite", "Silicon-graphite"),
+        ("silicon", "Silicon"),
+        ("lnmo", "LNMO"),
+        ("lfp", "LFP"),
+        ("nmc111", "NMC111"),
+        ("nmc532", "NMC532"),
+        ("litfsi", "LiTFSI"),  # the trailing abbreviation, not "Lithium bis"
+    ],
+)
 def test_subject_labels_are_short(subject: str, label: str) -> None:
     assert title_for("material-spec", subject=subject) == f"{label} material spec"
 
 
 def test_inputs_are_normalised_defensively() -> None:
-    handle = handle_for("cell", group="  Flörés OCV / Batch_2 ", subject="graphite",
-                        variant="Gr  AQ--1", sample=" 063B77 ")
+    handle = handle_for(
+        "cell", group="  Flörés OCV / Batch_2 ", subject="graphite", variant="Gr  AQ--1", sample=" 063B77 "
+    )
     assert handle == "flores-ocv/batch-2/graphite-aq-1-063b77-cell"
     assert handle_for("cell", group=GROUP, sample=42) == "flores-ocv/42-cell"
 
 
-@pytest.mark.parametrize("parts", [
-    {"group": "!!!"},
-    {"group": GROUP, "sample": "---"},
-    {"group": GROUP, "method": "  "},
-    {"group": GROUP, "subject": "%%"},
-    {"group": "//"},
-])
+@pytest.mark.parametrize(
+    "parts",
+    [
+        {"group": "!!!"},
+        {"group": GROUP, "sample": "---"},
+        {"group": GROUP, "method": "  "},
+        {"group": GROUP, "subject": "%%"},
+        {"group": "//"},
+    ],
+)
 def test_a_part_with_nothing_left_after_normalising_is_a_value_error(parts: dict) -> None:
     with pytest.raises(ValueError):
         handle_for("cell", **parts)
@@ -184,26 +204,29 @@ def test_handle_longer_than_the_limit_is_refused() -> None:
         handle_for("cell", group=GROUP, sample="x" * HANDLE_MAX_LENGTH)
 
 
-@pytest.mark.parametrize(("value", "ok"), [
-    ("flores-ocv", True),
-    ("flores-ocv/graphite-aq-1-063b77-cell", True),
-    ("a/b/c-1", True),
-    ("0", True),
-    ("Flores-OCV", False),
-    ("flores_ocv", False),
-    ("flores--ocv", False),
-    ("-flores", False),
-    ("flores-", False),
-    ("flores//ocv", False),
-    ("/flores", False),
-    ("flores/", False),
-    ("flörés", False),
-    ("", False),
-    (None, False),
-    (12, False),
-    ("a" * HANDLE_MAX_LENGTH, True),
-    ("a" * (HANDLE_MAX_LENGTH + 1), False),
-])
+@pytest.mark.parametrize(
+    ("value", "ok"),
+    [
+        ("flores-ocv", True),
+        ("flores-ocv/graphite-aq-1-063b77-cell", True),
+        ("a/b/c-1", True),
+        ("0", True),
+        ("Flores-OCV", False),
+        ("flores_ocv", False),
+        ("flores--ocv", False),
+        ("-flores", False),
+        ("flores-", False),
+        ("flores//ocv", False),
+        ("/flores", False),
+        ("flores/", False),
+        ("flörés", False),
+        ("", False),
+        (None, False),
+        (12, False),
+        ("a" * HANDLE_MAX_LENGTH, True),
+        ("a" * (HANDLE_MAX_LENGTH + 1), False),
+    ],
+)
 def test_is_valid_handle(value: object, ok: bool) -> None:
     assert is_valid_handle(value) is ok
 
@@ -261,13 +284,20 @@ def test_title_keeps_a_capitalised_method_as_written() -> None:
 # ── Products and organizations ────────────────────────────────────────────────
 
 
-@pytest.mark.parametrize(("manufacturer", "model", "handle", "title"), [
-    ("Saft", "VL 5U", "saft/vl-5u-cell-spec", "Saft VL 5U"),
-    ("SAMSUNG", "INR18650-35E", "samsung/inr18650-35e-cell-spec", "SAMSUNG INR18650-35E"),
-    ("Samsung SDI", "Samsung SDI INR21700-50E", "samsung-sdi/inr21700-50e-cell-spec", "Samsung SDI INR21700-50E"),
-    ("Wuhan Lisun Power Corp. Ltd", "IMP225069S", "wuhan-lisun-power-corp-ltd/imp225069s-cell-spec",
-     "Wuhan Lisun Power Corp. Ltd IMP225069S"),
-])
+@pytest.mark.parametrize(
+    ("manufacturer", "model", "handle", "title"),
+    [
+        ("Saft", "VL 5U", "saft/vl-5u-cell-spec", "Saft VL 5U"),
+        ("SAMSUNG", "INR18650-35E", "samsung/inr18650-35e-cell-spec", "SAMSUNG INR18650-35E"),
+        ("Samsung SDI", "Samsung SDI INR21700-50E", "samsung-sdi/inr21700-50e-cell-spec", "Samsung SDI INR21700-50E"),
+        (
+            "Wuhan Lisun Power Corp. Ltd",
+            "IMP225069S",
+            "wuhan-lisun-power-corp-ltd/imp225069s-cell-spec",
+            "Wuhan Lisun Power Corp. Ltd IMP225069S",
+        ),
+    ],
+)
 def test_a_product_is_named_by_its_manufacturer_and_model(manufacturer, model, handle, title) -> None:
     assert handle_for("cell-spec", manufacturer=manufacturer, model=model) == handle
     assert title_for("cell-spec", manufacturer=manufacturer, model=model) == title
@@ -277,8 +307,11 @@ def test_a_product_is_named_by_its_manufacturer_and_model(manufacturer, model, h
 def test_an_organization_reference_with_a_handle_sets_the_group() -> None:
     # Two spellings of one company resolve to one group once its record has a handle.
     for spelling in ("EVE", "EVE Energy"):
-        ref = {"name": spelling, "id": "https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx",
-               "handle": "eve-energy"}
+        ref = {
+            "name": spelling,
+            "id": "https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx",
+            "handle": "eve-energy",
+        }
         assert handle_for("cell-spec", manufacturer=ref, model="LF280K") == "eve-energy/lf280k-cell-spec"
     record = {"organization": {"name": "EVE Energy", "handle": "eve-energy"}}
     assert title_for("cell-spec", manufacturer=record, model="LF280K") == "EVE Energy LF280K"
@@ -319,20 +352,32 @@ def test_organization_handles_are_one_bare_segment() -> None:
 # ── Source-first titles ───────────────────────────────────────────────────────
 
 
-@pytest.mark.parametrize(("kind", "parts", "title"), [
-    ("material-spec", {"subject": "graphite"}, "Flores 2026 graphite material spec"),
-    ("material", {"subject": "graphite"}, "Flores 2026 graphite material lot"),
-    ("electrode-spec", {"subject": "graphite", "variant": "Gr-AQ-1"}, "Flores 2026 graphite AQ-1 electrode spec"),
-    ("electrode", {"subject": "graphite", "variant": "Gr-AQ-1", "sample": "063b77"},
-     "Flores 2026 graphite AQ-1 electrode 063b77"),
-    ("cell-spec", {"subject": "lnmo", "variant": "LNMO-NMP-1"}, "Flores 2026 LNMO NMP-1 cell spec"),
-    ("cell", {"subject": "silicon_graphite", "variant": "SiGr-AQ-2", "sample": "61a57a"},
-     "Flores 2026 silicon-graphite AQ-2 cell 61a57a"),
-    ("test-protocol", {"method": "GITT"}, "Flores 2026 GITT test spec"),
-    ("test-protocol", {"method": "p-OCV hold"}, "Flores 2026 p-OCV hold test spec"),
-    ("dataset", {"subject": "graphite", "variant": "Gr-AQ-1", "sample": "063b77", "method": "GITT"},
-     "Flores 2026 graphite AQ-1 cell 063b77 GITT dataset"),
-])
+@pytest.mark.parametrize(
+    ("kind", "parts", "title"),
+    [
+        ("material-spec", {"subject": "graphite"}, "Flores 2026 graphite material spec"),
+        ("material", {"subject": "graphite"}, "Flores 2026 graphite material lot"),
+        ("electrode-spec", {"subject": "graphite", "variant": "Gr-AQ-1"}, "Flores 2026 graphite AQ-1 electrode spec"),
+        (
+            "electrode",
+            {"subject": "graphite", "variant": "Gr-AQ-1", "sample": "063b77"},
+            "Flores 2026 graphite AQ-1 electrode 063b77",
+        ),
+        ("cell-spec", {"subject": "lnmo", "variant": "LNMO-NMP-1"}, "Flores 2026 LNMO NMP-1 cell spec"),
+        (
+            "cell",
+            {"subject": "silicon_graphite", "variant": "SiGr-AQ-2", "sample": "61a57a"},
+            "Flores 2026 silicon-graphite AQ-2 cell 61a57a",
+        ),
+        ("test-protocol", {"method": "GITT"}, "Flores 2026 GITT test spec"),
+        ("test-protocol", {"method": "p-OCV hold"}, "Flores 2026 p-OCV hold test spec"),
+        (
+            "dataset",
+            {"subject": "graphite", "variant": "Gr-AQ-1", "sample": "063b77", "method": "GITT"},
+            "Flores 2026 graphite AQ-1 cell 063b77 GITT dataset",
+        ),
+    ],
+)
 def test_a_source_leads_the_title(kind, parts, title) -> None:
     assert title_for(kind, source="Flores 2026", **parts) == title
 

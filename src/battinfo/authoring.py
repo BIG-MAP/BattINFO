@@ -301,8 +301,12 @@ def tab(
     """
     property_set = properties or PropertySet(**named_properties)
     return CurrentCollectorTab(
-        material=material, manufacturer=manufacturer, supplier=supplier,
-        product_id=product_id, property=property_set, comment=comment,
+        material=material,
+        manufacturer=manufacturer,
+        supplier=supplier,
+        product_id=product_id,
+        property=property_set,
+        comment=comment,
     )
 
 
@@ -376,9 +380,7 @@ def electrolyte_recipe(
     if salt_obj is not None and stamp_salt:
         salt_obj = _stamp_salt_identity(salt_obj)
 
-    solvent_components = [
-        _stamp_component_identity(c, slot="solvent") for c in _component_list(solvents)
-    ]
+    solvent_components = [_stamp_component_identity(c, slot="solvent") for c in _component_list(solvents)]
     solvent_mixture = None
     if solvent_components:
         solvent_mixture = SolventMixture(component=solvent_components, comment=solvent_comment)
@@ -472,8 +474,13 @@ def separator_spec(
     if diameter is not None:
         resolved_properties.diameter = diameter
     return Separator(
-        name=name, material=material, material_spec_id=material_spec_id,
-        structure=structure, coating=coating, property=resolved_properties, comment=comment,
+        name=name,
+        material=material,
+        material_spec_id=material_spec_id,
+        structure=structure,
+        coating=coating,
+        property=resolved_properties,
+        comment=comment,
     )
 
 
@@ -496,9 +503,14 @@ def case(
     """
     property_set = properties or PropertySet(**named_properties)
     return Case(
-        material=material, size_code=size_code, coating=coating,
-        manufacturer=manufacturer, supplier=supplier, product_id=product_id,
-        property=property_set, comment=comment,
+        material=material,
+        size_code=size_code,
+        coating=coating,
+        manufacturer=manufacturer,
+        supplier=supplier,
+        product_id=product_id,
+        property=property_set,
+        comment=comment,
     )
 
 
@@ -520,8 +532,14 @@ def terminal(
     """
     property_set = properties or PropertySet(**named_properties)
     return Terminal(
-        polarity=polarity, type=type, material=material, manufacturer=manufacturer,
-        supplier=supplier, product_id=product_id, property=property_set, comment=comment,
+        polarity=polarity,
+        type=type,
+        material=material,
+        manufacturer=manufacturer,
+        supplier=supplier,
+        product_id=product_id,
+        property=property_set,
+        comment=comment,
     )
 
 
@@ -565,6 +583,7 @@ def housing(
     This is the format-neutral home for mechanical hardware (prismatic/cylindrical/pouch
     case + terminals + seals, or coin case + spring/spacer).
     """
+
     def _as_list(value: Any) -> list[Any]:
         if value is None:
             return []
@@ -647,9 +666,7 @@ def cell_description(
         comment: General note(s) about the cell.
     """
     specification_comments = (
-        [specification_comment]
-        if isinstance(specification_comment, str)
-        else list(specification_comment or [])
+        [specification_comment] if isinstance(specification_comment, str) else list(specification_comment or [])
     )
     comments = [comment] if isinstance(comment, str) else list(comment or [])
     return CellSpec(

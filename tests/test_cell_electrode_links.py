@@ -63,7 +63,10 @@ def _cell(**overrides) -> Cell:
 def _spec_draft(**overrides) -> dict:
     """The authoring dict ``ws.add("cell", spec=...)`` accepts."""
     fields = {
-        "manufacturer": "Lab", "model": "LNMO-AQ", "format": "coin", "chemistry": "li-ion",
+        "manufacturer": "Lab",
+        "model": "LNMO-AQ",
+        "format": "coin",
+        "chemistry": "li-ion",
     }
     fields.update(overrides)
     return fields
@@ -71,8 +74,12 @@ def _spec_draft(**overrides) -> dict:
 
 def _spec(**overrides) -> CellSpec:
     fields = {
-        "id": SPEC_IRI, "name": "LNMO half cell", "manufacturer": "Lab",
-        "model": "LNMO-AQ", "format": "coin", "chemistry": "li-ion",
+        "id": SPEC_IRI,
+        "name": "LNMO half cell",
+        "manufacturer": "Lab",
+        "model": "LNMO-AQ",
+        "format": "coin",
+        "chemistry": "li-ion",
         "source": ProvenanceInfo(type="manual"),
     }
     fields.update(overrides)
@@ -80,6 +87,7 @@ def _spec(**overrides) -> CellSpec:
 
 
 # ── The record ────────────────────────────────────────────────────────────────
+
 
 def test_the_link_round_trips_through_the_record() -> None:
     """Author -> record -> model -> record, with the IRIs intact at every hop.
@@ -108,9 +116,7 @@ def test_the_fields_are_optional() -> None:
 
     Most of the world buys cells sealed. The link is for the lab that built one.
     """
-    record = Cell(
-        id=CELL_IRI, cell_spec_id=SPEC_IRI, name="sealed", source=ProvenanceInfo(type="lab")
-    ).to_record()
+    record = Cell(id=CELL_IRI, cell_spec_id=SPEC_IRI, name="sealed", source=ProvenanceInfo(type="lab")).to_record()
     assert "working_electrode_id" not in record["cell_instance"]
     assert list(validate_record_report(record).errors) == []
 
@@ -132,6 +138,7 @@ def test_the_schema_refuses_an_iri_from_another_namespace(field: str) -> None:
 
 # ── Emission ──────────────────────────────────────────────────────────────────
 
+
 def test_the_cell_emits_its_electrodes_as_role_typed_linked_nodes() -> None:
     node = record_to_jsonld(_cell().to_record(), "cell-instance")
 
@@ -151,26 +158,20 @@ def test_a_half_cell_counter_electrode_is_also_the_reference() -> None:
     manufacturer. A half cell has no third electrode, so its counter electrode IS
     its reference: a second class on the one node, never a second relation.
     """
-    node = cell_instance_to_jsonld(
-        _cell().to_record(), cell_spec={"cell_configuration": "half_cell"}
-    )
+    node = cell_instance_to_jsonld(_cell().to_record(), cell_spec={"cell_configuration": "half_cell"})
     assert node["hasWorkingElectrode"]["@type"] == "WorkingElectrode"
     assert node["hasCounterElectrode"]["@type"] == ["CounterElectrode", "ReferenceElectrode"]
 
 
 def test_reference_electrode_marker_reads_as_a_half_cell() -> None:
     """``reference_electrode`` is the schema's half-cell marker for older records."""
-    node = cell_instance_to_jsonld(
-        _cell().to_record(), cell_spec={"reference_electrode": "Li metal"}
-    )
+    node = cell_instance_to_jsonld(_cell().to_record(), cell_spec={"reference_electrode": "Li metal"})
     assert node["hasCounterElectrode"]["@type"] == ["CounterElectrode", "ReferenceElectrode"]
 
 
 def test_a_three_electrode_cell_counter_is_not_the_reference() -> None:
     """Its reference is a third electrode the cell spec names separately."""
-    node = cell_instance_to_jsonld(
-        _cell().to_record(), cell_spec={"cell_configuration": "three_electrode_cell"}
-    )
+    node = cell_instance_to_jsonld(_cell().to_record(), cell_spec={"cell_configuration": "three_electrode_cell"})
     assert node["hasCounterElectrode"]["@type"] == "CounterElectrode"
 
 
@@ -194,8 +195,13 @@ def test_the_emitted_terms_resolve_offline() -> None:
     """
     doc = record_to_jsonld(_cell().to_record(), "cell-instance", context="inline")
     context = doc["@context"]
-    for term in ("hasWorkingElectrode", "hasCounterElectrode", "WorkingElectrode",
-                 "CounterElectrode", "ReferenceElectrode"):
+    for term in (
+        "hasWorkingElectrode",
+        "hasCounterElectrode",
+        "WorkingElectrode",
+        "CounterElectrode",
+        "ReferenceElectrode",
+    ):
         assert term in context, term
 
 
@@ -205,11 +211,11 @@ def test_a_cell_without_electrode_links_keeps_the_plain_context() -> None:
     injection, so an unused role term being present is correct, not leakage."""
     plain = record_to_jsonld(
         Cell(id=CELL_IRI, cell_spec_id=SPEC_IRI, source=ProvenanceInfo(type="lab")).to_record(),
-        "cell-instance", context="inline",
+        "cell-instance",
+        context="inline",
     )
     v1 = json.loads(
-        (ROOT / "src" / "battinfo" / "data" / "context" / "records.context.v1.json")
-        .read_text(encoding="utf-8")
+        (ROOT / "src" / "battinfo" / "data" / "context" / "records.context.v1.json").read_text(encoding="utf-8")
     )["@context"]
     assert plain["@context"] == v1
 
@@ -217,16 +223,21 @@ def test_a_cell_without_electrode_links_keeps_the_plain_context() -> None:
 def test_url_and_inline_contexts_agree_on_the_role_terms() -> None:
     """The hosted v1 context already serves them, so both forms expand alike."""
     v1 = json.loads(
-        (ROOT / "src" / "battinfo" / "data" / "context" / "records.context.v1.json")
-        .read_text(encoding="utf-8")
+        (ROOT / "src" / "battinfo" / "data" / "context" / "records.context.v1.json").read_text(encoding="utf-8")
     )["@context"]
     inline = record_to_jsonld(_cell().to_record(), "cell-instance", context="inline")["@context"]
-    for term in ("hasWorkingElectrode", "hasCounterElectrode", "WorkingElectrode",
-                 "CounterElectrode", "ReferenceElectrode"):
+    for term in (
+        "hasWorkingElectrode",
+        "hasCounterElectrode",
+        "WorkingElectrode",
+        "CounterElectrode",
+        "ReferenceElectrode",
+    ):
         assert v1[term] == inline[term], term
 
 
 # ── The one implementation of the role rule ───────────────────────────────────
+
 
 @pytest.mark.parametrize(
     "configuration,expected",
@@ -265,12 +276,8 @@ def test_the_cell_spec_holder_emitter_uses_the_shared_rule() -> None:
 
     spec = _spec(
         cell_configuration="half_cell",
-        working_electrode=Electrode(
-            coating={"component": {"active_material": [{"name": "LNMO"}]}}
-        ),
-        counter_electrode=Electrode(
-            coating={"component": {"active_material": [{"name": "Lithium"}]}}
-        ),
+        working_electrode=Electrode(coating={"component": {"active_material": [{"name": "LNMO"}]}}),
+        counter_electrode=Electrode(coating={"component": {"active_material": [{"name": "Lithium"}]}}),
     )
     holder = record_to_jsonld(spec.to_record(), "cell-spec")["isDescriptionFor"]["hasCounterElectrode"]
     link = electrode_role_link("counter", COUNTER_IRI, "half_cell")
@@ -278,6 +285,7 @@ def test_the_cell_spec_holder_emitter_uses_the_shared_rule() -> None:
 
 
 # ── Reference resolution ──────────────────────────────────────────────────────
+
 
 def _save_corpus(root: Path, *, cell_overrides: dict | None = None) -> None:
     from battinfo.api import create_electrode, create_electrode_spec
@@ -288,7 +296,10 @@ def _save_corpus(root: Path, *, cell_overrides: dict | None = None) -> None:
     (root / "electrode").mkdir(parents=True, exist_ok=True)
 
     electrode_spec = create_electrode_spec(
-        validate=False, uid="9999-8888-7777-6666", name="LNMO cathode", kind="lnmo",
+        validate=False,
+        uid="9999-8888-7777-6666",
+        name="LNMO cathode",
+        kind="lnmo",
     )
     design_iri = electrode_spec["electrode_spec"]["id"]
     (root / "electrode-spec" / "electrode-spec-9999-8888-7777-6666.json").write_text(
@@ -297,31 +308,26 @@ def _save_corpus(root: Path, *, cell_overrides: dict | None = None) -> None:
     for uid, name in ((WORKING_IRI, "LNMO disc"), (COUNTER_IRI, "Li disc")):
         tail = uid.rsplit("/", 1)[-1]
         record = create_electrode(
-            validate=False, uid=tail, name=name,
-            electrode_spec_id=design_iri, batch=name,
+            validate=False,
+            uid=tail,
+            name=name,
+            electrode_spec_id=design_iri,
+            batch=name,
         )
         record["electrode"]["id"] = uid
-        (root / "electrode" / f"electrode-{tail}.json").write_text(
-            json.dumps(record), encoding="utf-8"
-        )
+        (root / "electrode" / f"electrode-{tail}.json").write_text(json.dumps(record), encoding="utf-8")
 
     spec_record = _spec(cell_configuration="half_cell").to_record()
-    (root / "cell-spec" / "cell-spec-eeee-ffff-gggg-hhhh.json").write_text(
-        json.dumps(spec_record), encoding="utf-8"
-    )
+    (root / "cell-spec" / "cell-spec-eeee-ffff-gggg-hhhh.json").write_text(json.dumps(spec_record), encoding="utf-8")
     cell_record = _cell().to_record()
     if cell_overrides:
         cell_record["cell_instance"].update(cell_overrides)
-    (root / "cell-instance" / "cell-aaaa-bbbb-cccc-dddd.json").write_text(
-        json.dumps(cell_record), encoding="utf-8"
-    )
+    (root / "cell-instance" / "cell-aaaa-bbbb-cccc-dddd.json").write_text(json.dumps(cell_record), encoding="utf-8")
 
 
 def test_a_resolvable_electrode_reference_passes_the_save_gate(tmp_path: Path) -> None:
     _save_corpus(tmp_path)
-    record = json.loads(
-        (tmp_path / "cell-instance" / "cell-aaaa-bbbb-cccc-dddd.json").read_text(encoding="utf-8")
-    )
+    record = json.loads((tmp_path / "cell-instance" / "cell-aaaa-bbbb-cccc-dddd.json").read_text(encoding="utf-8"))
     report = validate_record_report(record, source_root=tmp_path)
     assert [issue for issue in report.errors if "electrode" in issue.message] == []
 
@@ -329,13 +335,9 @@ def test_a_resolvable_electrode_reference_passes_the_save_gate(tmp_path: Path) -
 def test_a_missing_electrode_is_a_reference_error(tmp_path: Path) -> None:
     _save_corpus(
         tmp_path,
-        cell_overrides={
-            "working_electrode_id": "https://w3id.org/battinfo/electrode/0000-0000-0000-0000"
-        },
+        cell_overrides={"working_electrode_id": "https://w3id.org/battinfo/electrode/0000-0000-0000-0000"},
     )
-    record = json.loads(
-        (tmp_path / "cell-instance" / "cell-aaaa-bbbb-cccc-dddd.json").read_text(encoding="utf-8")
-    )
+    record = json.loads((tmp_path / "cell-instance" / "cell-aaaa-bbbb-cccc-dddd.json").read_text(encoding="utf-8"))
     report = validate_record_report(record, source_root=tmp_path)
     codes = {issue.code for issue in report.errors}
     paths = {issue.path for issue in report.errors}
@@ -344,6 +346,7 @@ def test_a_missing_electrode_is_a_reference_error(tmp_path: Path) -> None:
 
 
 # ── The deposit graph ─────────────────────────────────────────────────────────
+
 
 def _deposit(record_sets: dict[str, list[dict]]) -> dict:
     return AuthoringWorkspace._assemble_zenodo_jsonld(
@@ -363,23 +366,28 @@ def test_the_deposit_graph_carries_the_link_and_reads_the_spec() -> None:
     electrode node carries both role classes. This is the path the corpus
     publishes through, so it is the one that has to be right.
     """
-    graph = _deposit({
-        "cell-spec": [_spec(cell_configuration="half_cell").to_record()],
-        "cell-instance": [_cell().to_record()],
-    })["@graph"]
+    graph = _deposit(
+        {
+            "cell-spec": [_spec(cell_configuration="half_cell").to_record()],
+            "cell-instance": [_cell().to_record()],
+        }
+    )["@graph"]
     cell_node = next(node for node in graph if node.get("@id") == CELL_IRI)
 
     assert cell_node["hasWorkingElectrode"] == {"@id": WORKING_IRI, "@type": "WorkingElectrode"}
     assert cell_node["hasCounterElectrode"] == {
-        "@id": COUNTER_IRI, "@type": ["CounterElectrode", "ReferenceElectrode"],
+        "@id": COUNTER_IRI,
+        "@type": ["CounterElectrode", "ReferenceElectrode"],
     }
 
 
 def test_a_full_cell_in_the_deposit_graph_keeps_its_counter_role_alone() -> None:
-    graph = _deposit({
-        "cell-spec": [_spec(cell_configuration="full_cell").to_record()],
-        "cell-instance": [_cell().to_record()],
-    })["@graph"]
+    graph = _deposit(
+        {
+            "cell-spec": [_spec(cell_configuration="full_cell").to_record()],
+            "cell-instance": [_cell().to_record()],
+        }
+    )["@graph"]
     cell_node = next(node for node in graph if node.get("@id") == CELL_IRI)
     assert cell_node["hasCounterElectrode"]["@type"] == "CounterElectrode"
 
@@ -394,20 +402,28 @@ def test_the_link_resolves_to_a_described_node_in_the_same_deposit() -> None:
     from battinfo.api import create_electrode, create_electrode_spec
 
     electrode_spec = create_electrode_spec(
-        validate=False, uid="9999-8888-7777-6666", name="LNMO cathode", kind="lnmo",
+        validate=False,
+        uid="9999-8888-7777-6666",
+        name="LNMO cathode",
+        kind="lnmo",
     )
     electrode = create_electrode(
-        validate=False, uid=WORKING_IRI.rsplit("/", 1)[-1], name="LNMO disc",
-        electrode_spec_id=electrode_spec["electrode_spec"]["id"], batch="LNMO-AQ-1",
+        validate=False,
+        uid=WORKING_IRI.rsplit("/", 1)[-1],
+        name="LNMO disc",
+        electrode_spec_id=electrode_spec["electrode_spec"]["id"],
+        batch="LNMO-AQ-1",
     )
     electrode["electrode"]["id"] = WORKING_IRI
 
-    graph = _deposit({
-        "cell-spec": [_spec(cell_configuration="half_cell").to_record()],
-        "cell-instance": [_cell().to_record()],
-        "electrode-spec": [electrode_spec],
-        "electrode": [electrode],
-    })["@graph"]
+    graph = _deposit(
+        {
+            "cell-spec": [_spec(cell_configuration="half_cell").to_record()],
+            "cell-instance": [_cell().to_record()],
+            "electrode-spec": [electrode_spec],
+            "electrode": [electrode],
+        }
+    )["@graph"]
 
     cell_node = next(node for node in graph if node.get("@id") == CELL_IRI)
     electrode_node = next(node for node in graph if node.get("@id") == WORKING_IRI)
@@ -419,13 +435,17 @@ def test_the_link_resolves_to_a_described_node_in_the_same_deposit() -> None:
 
 # ── Authoring ─────────────────────────────────────────────────────────────────
 
+
 def test_ws_add_applies_one_electrode_to_a_whole_batch(tmp_path: Path) -> None:
     """Cells punched from one coated web share their electrode batch."""
     ws = AuthoringWorkspace(tmp_path)
     spec = _spec_draft(cell_configuration="half_cell")
     cells = ws.add(
-        "cell", spec=spec, serial_numbers=["c-1", "c-2", "c-3"],
-        working_electrode_id=WORKING_IRI, counter_electrode_id=COUNTER_IRI,
+        "cell",
+        spec=spec,
+        serial_numbers=["c-1", "c-2", "c-3"],
+        working_electrode_id=WORKING_IRI,
+        counter_electrode_id=COUNTER_IRI,
     )
     assert len(cells) == 3
     assert {cell.working_electrode_id for cell in cells} == {WORKING_IRI}
@@ -438,7 +458,10 @@ def test_ws_add_assigns_one_electrode_per_cell(tmp_path: Path) -> None:
     spec = _spec_draft(cell_configuration="half_cell")
     discs = [f"https://w3id.org/battinfo/electrode/000{n}-2222-3333-4444" for n in (1, 2, 3)]
     cells = ws.add(
-        "cell", spec=spec, serial_numbers=["c-1", "c-2", "c-3"], working_electrode_id=discs,
+        "cell",
+        spec=spec,
+        serial_numbers=["c-1", "c-2", "c-3"],
+        working_electrode_id=discs,
     )
     assert [cell.working_electrode_id for cell in cells] == discs
 
@@ -449,7 +472,9 @@ def test_a_mismatched_electrode_list_is_refused(tmp_path: Path) -> None:
     spec = _spec_draft()
     with pytest.raises(ValueError, match="working_electrode_id list must match"):
         ws.add(
-            "cell", spec=spec, serial_numbers=["c-1", "c-2", "c-3"],
+            "cell",
+            spec=spec,
+            serial_numbers=["c-1", "c-2", "c-3"],
             working_electrode_id=[WORKING_IRI],
         )
 

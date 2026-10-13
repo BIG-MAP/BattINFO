@@ -1,4 +1,5 @@
 """Committed generated reference pages must match what the code produces today."""
+
 from __future__ import annotations
 
 import importlib.util
@@ -29,8 +30,7 @@ def test_cli_reference_matches_the_typer_app() -> None:
     expected = gen.build()
     actual = gen.OUT.read_text(encoding="utf-8").replace("\r\n", "\n")
     assert actual == expected, (
-        "docs/pages/cli-reference.md drifts from the CLI — regenerate with "
-        "`uv run python scripts/gen_cli_reference.py`"
+        "docs/pages/cli-reference.md drifts from the CLI — regenerate with `uv run python scripts/gen_cli_reference.py`"
     )
 
 
@@ -60,6 +60,5 @@ def test_property_reference_matches_the_mapping_tables() -> None:
 
     committed = (ROOT / "docs" / "pages" / "property-reference.md").read_text(encoding="utf-8")
     assert committed == gen.build(), (
-        "docs/pages/property-reference.md is stale - regenerate with "
-        "`uv run python scripts/gen_property_reference.py`"
+        "docs/pages/property-reference.md is stale - regenerate with `uv run python scripts/gen_property_reference.py`"
     )

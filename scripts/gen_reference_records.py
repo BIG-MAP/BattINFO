@@ -21,6 +21,7 @@ The chapter is the review surface for change propagation: the git history of
 docs/records/ is the record of how schema, API, and emitter changes reached
 real examples.
 """
+
 from __future__ import annotations
 
 import importlib.util
@@ -95,7 +96,7 @@ def snippet_cell_instance():
     )
     cell = Cell(
         id="https://w3id.org/battinfo/cell/y9xy-kr0v-y5tn-dfj7",
-        cell_spec=spec,                    # every cell links to its spec
+        cell_spec=spec,  # every cell links to its spec
         serial_number="LAB-2026-0001",
         batch_id="2026-W03",
         manufactured_at="2026-01-15",
@@ -157,7 +158,7 @@ def snippet_material_spec():
     record = create_material_spec(
         uid="7d9k-2m4p-8t3x-6nq5",
         name="NMC811 cathode powder",
-        kind="nmc811",                     # Level-1 key from the curated vocabulary
+        kind="nmc811",  # Level-1 key from the curated vocabulary
         property={
             "specific_capacity": {"value": 200, "unit": "mAh/g"},
             "d50_particle_size": {"value": 10, "unit": "um"},
@@ -185,12 +186,14 @@ def snippet_electrode_spec():
     record = create_electrode_spec(
         uid="kxwy-5f5f-f682-hhch",
         name="NMC811 cathode design A",
-        active_material_kind="nmc811",     # from the curated material-kind vocabulary
+        active_material_kind="nmc811",  # from the curated material-kind vocabulary
         active_material_spec_id="https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
-        composition={"active": 0.96,       # weight fractions -> coating.component
-                     "binder": {"name": "PVDF", "fraction": 0.02},
-                     "conductive_additive": {"name": "Carbon black", "fraction": 0.02}},
-        coating={"double_sided": False},   # coated on one side (a lab half-cell disc)
+        composition={
+            "active": 0.96,  # weight fractions -> coating.component
+            "binder": {"name": "PVDF", "fraction": 0.02},
+            "conductive_additive": {"name": "Carbon black", "fraction": 0.02},
+        },
+        coating={"double_sided": False},  # coated on one side (a lab half-cell disc)
         source_type="lab",
     )
     return record
@@ -359,7 +362,7 @@ def snippet_test_protocol():
         id="https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
         name="1C cycle life at 25 degC",
         kind="cycling",
-        experiment=[                       # PyBaMM syntax — runnable as-is
+        experiment=[  # PyBaMM syntax — runnable as-is
             "Charge at 1C until 4.2 V",
             "Hold at 4.2 V until C/20",
             "Discharge at 1C until 2.5 V",
@@ -380,20 +383,22 @@ def snippet_test():
         id="https://w3id.org/battinfo/cell/y9xy-kr0v-y5tn-dfj7",
         cell_spec=CellSpec(
             id="https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
-            manufacturer="Samsung SDI", model="INR21700-50E",
-            format="cylindrical", chemistry="Li-ion",
+            manufacturer="Samsung SDI",
+            model="INR21700-50E",
+            format="cylindrical",
+            chemistry="Li-ion",
         ),
         serial_number="LAB-2026-0001",
     )
-    protocol = TestSpec(                   # the protocol defined above
+    protocol = TestSpec(  # the protocol defined above
         id="https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
         name="1C cycle life at 25 degC",
         kind="cycling",
     )
     test = Test(
         id="https://w3id.org/battinfo/test/3w87-0ddf-ryjg-evxe",
-        cell=cell,                         # what you did, to which cell
-        protocol=protocol,                 # kind, name, protocol_id all derive
+        cell=cell,  # what you did, to which cell
+        protocol=protocol,  # kind, name, protocol_id all derive
         instrument="Biologic VMP-300",
         status="completed",
         # As-run conditions: what actually applied, as {value, unit}
@@ -413,14 +418,18 @@ def snippet_dataset():
         id="https://w3id.org/battinfo/cell/y9xy-kr0v-y5tn-dfj7",
         cell_spec=CellSpec(
             id="https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
-            manufacturer="Samsung SDI", model="INR21700-50E",
-            format="cylindrical", chemistry="Li-ion",
+            manufacturer="Samsung SDI",
+            model="INR21700-50E",
+            format="cylindrical",
+            chemistry="Li-ion",
         ),
         serial_number="LAB-2026-0001",
     )
     test = Test(
         id="https://w3id.org/battinfo/test/3w87-0ddf-ryjg-evxe",
-        cell=cell, kind="cycling", status="completed",
+        cell=cell,
+        kind="cycling",
+        status="completed",
     )
     dataset = Dataset(
         id="https://w3id.org/battinfo/dataset/6nec-h262-tthy-4rnt",
@@ -453,18 +462,20 @@ def snippet_dataset():
         # The table schema of the processed file (CSVW): column names,
         # datatypes and units, so a consumer knows the shape of the data
         # without downloading it.
-        main_entity=[{
-            "type": "Table",
-            "url": "run.bdf.parquet",
-            "table_schema": {
-                "columns": [
-                    {"name": "test_time_s", "datatype": "number", "unit_text": "s"},
-                    {"name": "voltage_v", "datatype": "number", "unit_text": "V"},
-                    {"name": "current_a", "datatype": "number", "unit_text": "A"},
-                    {"name": "discharging_capacity_ah", "datatype": "number", "unit_text": "Ah"},
-                ],
-            },
-        }],
+        main_entity=[
+            {
+                "type": "Table",
+                "url": "run.bdf.parquet",
+                "table_schema": {
+                    "columns": [
+                        {"name": "test_time_s", "datatype": "number", "unit_text": "s"},
+                        {"name": "voltage_v", "datatype": "number", "unit_text": "V"},
+                        {"name": "current_a", "datatype": "number", "unit_text": "A"},
+                        {"name": "discharging_capacity_ah", "datatype": "number", "unit_text": "Ah"},
+                    ],
+                },
+            }
+        ],
         # Membership in a dataset series (a collection record): emitted as
         # dcat:inSeries and schema:isPartOf. The collection publishes first.
         series_id="https://w3id.org/battinfo/dataset/0rp6-kncv-cyem-qwcd",
@@ -504,7 +515,7 @@ def snippet_equipment_spec():
         name="SkyRC MC3000",
         manufacturer="SkyRC",
         model="MC3000",
-        equipment_class="cycler",          # category is data, never a namespace
+        equipment_class="cycler",  # category is data, never a namespace
         channel_count=4,
         supported_chemistries=["NiMH", "Li-ion", "LiFePO4", "Na-ion"],
     )
@@ -562,24 +573,30 @@ def snippet_parameter_file():
     from battinfo.interop import bpx_file_distribution, from_bpx_parameters
 
     # A BPX file's bytes (a small partial file here; read yours from disk).
-    raw = json.dumps({
-        "Header": {"BPX": "1.1.0", "Title": "Example pouch cell", "Model": "Partial"},
-        "Parameterisation": {
-            "Cell": {"Nominal cell capacity [A.h]": 5.0, "Electrode area [m2]": 0.1},
-            "Negative electrode": {"Particle radius [m]": 5.86e-6, "Thickness [m]": 8.52e-5},
+    raw = json.dumps(
+        {
+            "Header": {"BPX": "1.1.0", "Title": "Example pouch cell", "Model": "Partial"},
+            "Parameterisation": {
+                "Cell": {"Nominal cell capacity [A.h]": 5.0, "Electrode area [m2]": 0.1},
+                "Negative electrode": {"Particle radius [m]": 5.86e-6, "Thickness [m]": 8.52e-5},
+            },
+            "State": {"Initial conditions": {"Initial state-of-charge": 1.0}},
         },
-        "State": {"Initial conditions": {"Initial state-of-charge": 1.0}},
-    }, indent=2).encode("utf-8")
+        indent=2,
+    ).encode("utf-8")
 
     # One file, one record: its IRI derives from the file's parameters.
     result = from_bpx_parameters(raw)
     record = result.to_parameter_set(
-        virtual_cell=True,                    # or cell_spec_id= / cell_instance_id=
-        materials={"negative": "graphite"},   # BPX does not name its materials
-        distributions=[bpx_file_distribution(
-            raw, name="example-cell.bpx.json",
-            content_url="https://files.example.org/parameter-sets/example-cell.bpx.json",
-        )],
+        virtual_cell=True,  # or cell_spec_id= / cell_instance_id=
+        materials={"negative": "graphite"},  # BPX does not name its materials
+        distributions=[
+            bpx_file_distribution(
+                raw,
+                name="example-cell.bpx.json",
+                content_url="https://files.example.org/parameter-sets/example-cell.bpx.json",
+            )
+        ],
         retrieved_at=1750000000,
     )
     return record
@@ -613,8 +630,7 @@ FAMILIES = [
         "slug": "cells",
         "title": "Cells",
         "intro": (
-            "How to describe a cell: the design as a **cell spec**, each "
-            "physical unit as a **cell instance** under it."
+            "How to describe a cell: the design as a **cell spec**, each physical unit as a **cell instance** under it."
         ),
         "sections": [
             {
@@ -626,8 +642,7 @@ FAMILIES = [
                     "The cell it describes — with its capacity, voltage and "
                     "electrodes — hangs off `isDescriptionFor`, because a "
                     "document doesn't have a positive electrode.",
-                    "`schema:manufacturer` and `schema:model` carry the identity "
-                    "that seeded the IRI.",
+                    "`schema:manufacturer` and `schema:model` carry the identity that seeded the IRI.",
                 ],
             },
             {
@@ -635,8 +650,7 @@ FAMILIES = [
                 "fn": snippet_cell_instance,
                 "record_type": "cell-instance",
                 "notice": [
-                    "`cell_spec_id` is the instantiation edge; the JSON-LD states "
-                    "it as a reference to the spec node.",
+                    "`cell_spec_id` is the instantiation edge; the JSON-LD states it as a reference to the spec node.",
                     "`schema:serialNumber` carries the physical identity.",
                 ],
             },
@@ -662,8 +676,7 @@ FAMILIES = [
                 "fn": snippet_half_cell_spec,
                 "record_type": "cell-spec",
                 "notice": [
-                    "The described device types as `HalfCellDevice` (never "
-                    "`ElectrochemicalHalfCell`).",
+                    "The described device types as `HalfCellDevice` (never `ElectrochemicalHalfCell`).",
                     "The working electrode emits under `hasWorkingElectrode` "
                     "as a reference to its spec; the counter node types as "
                     "BOTH `CounterElectrode` and `ReferenceElectrode`.",
@@ -674,8 +687,7 @@ FAMILIES = [
                 "fn": snippet_three_electrode_cell_spec,
                 "record_type": "cell-spec",
                 "notice": [
-                    "The described device types as `ThreeElectrodeCellDevice`; "
-                    "the counter is ONLY a counter here.",
+                    "The described device types as `ThreeElectrodeCellDevice`; the counter is ONLY a counter here.",
                     "The dedicated reference emits under "
                     "`hasReferenceElectrode` typed `ReferenceElectrode` — a "
                     "lithium ring or wire is a monolithic `material`, like "
@@ -736,8 +748,7 @@ FAMILIES = [
                 "fn": snippet_electrode_spec,
                 "record_type": "electrode-spec",
                 "notice": [
-                    "`active_material_spec_id` cites the powder, so no design "
-                    "points at a bare vocabulary key.",
+                    "`active_material_spec_id` cites the powder, so no design points at a bare vocabulary key.",
                 ],
             },
             {
@@ -781,8 +792,7 @@ FAMILIES = [
                 "fn": snippet_electrolyte,
                 "record_type": "electrolyte",
                 "notice": [
-                    "`spec_id` carries the formulation; the batch is what a "
-                    "cell build actually consumed.",
+                    "`spec_id` carries the formulation; the batch is what a cell build actually consumed.",
                 ],
             },
         ],
@@ -834,7 +844,8 @@ FAMILIES = [
             },
         ],
         "schemas": [
-            "current-collector-spec.schema.json", "current-collector.schema.json",
+            "current-collector-spec.schema.json",
+            "current-collector.schema.json",
         ],
     },
     {
@@ -885,8 +896,7 @@ FAMILIES = [
                 "fn": snippet_test,
                 "record_type": "test",
                 "notice": [
-                    "`hasTestObject` / `schema:object` point at the cell; "
-                    "`dcterms:conformsTo` points at the protocol.",
+                    "`hasTestObject` / `schema:object` point at the cell; `dcterms:conformsTo` points at the protocol.",
                     "`protocol=` takes the TestSpec itself: kind, protocol "
                     "name and `protocol_id` derive from it — stated once, on "
                     "the protocol, never retyped on the execution.",
@@ -928,8 +938,7 @@ FAMILIES = [
                 "fn": snippet_dataset_series,
                 "record_type": "dataset",
                 "notice": [
-                    "`@type` carries `dcat:DatasetSeries` alongside "
-                    "`dcat:Dataset` — no new record type exists.",
+                    "`@type` carries `dcat:DatasetSeries` alongside `dcat:Dataset` — no new record type exists.",
                     "No `about` and no distributions: the members hold the cell "
                     "links and the files, and the strict policy admits that "
                     "for the series flavor only.",
@@ -977,8 +986,7 @@ FAMILIES = [
                 "fn": snippet_channel,
                 "record_type": "channel",
                 "notice": [
-                    "`schema:isPartOf` carries the parent link; "
-                    "`schema:position` the index.",
+                    "`schema:isPartOf` carries the parent link; `schema:position` the index.",
                 ],
             },
         ],
@@ -1004,7 +1012,7 @@ FAMILIES = [
                     "No claim batch ships among the packaged examples, which are "
                     "all BPX files. Build one with `create_parameter_set`, as "
                     "above, or in a workspace with "
-                    "`ws.add(\"parameter_set\", name=..., material=..., claims=[...])`.",
+                    '`ws.add("parameter_set", name=..., material=..., claims=[...])`.',
                 ],
             },
             {
@@ -1030,10 +1038,7 @@ FAMILIES = [
     {
         "slug": "organizations",
         "title": "Organizations",
-        "intro": (
-            "How to describe an organization — the manufacturers, labs, and "
-            "publishers other records point at."
-        ),
+        "intro": ("How to describe an organization — the manufacturers, labs, and publishers other records point at."),
         "sections": [
             {
                 "heading": "A manufacturer",
@@ -1041,7 +1046,7 @@ FAMILIES = [
                 "record_type": "organization",
                 "notice": [
                     "`create_organization` mints the IRI deterministically "
-                    "from the normalized name — creating \"A123 Systems\" "
+                    'from the normalized name — creating "A123 Systems" '
                     "twice lands on the same record.",
                     "Pure schema.org emission (`schema:Organization`, with "
                     "`Corporation`/`ResearchOrganization`/... stacked when "
@@ -1056,6 +1061,7 @@ FAMILIES = [
 
 
 # ── Field reference from the packaged JSON Schemas ───────────────────────────
+
 
 def _type_str(prop: dict) -> str:
     """A compact, human-readable type for one schema property."""
@@ -1101,7 +1107,8 @@ def render_field_tables(schema_file: str) -> str:
     parts = [f"### {label} fields", NL, NL]
     parts += [
         f"Schema: [`{schema_file}`]({SCHEMA_URL_BASE}{schema_file}) · "
-        f"required at top level: " + ", ".join(f"`{k}`" for k in schema.get("required", [])) + NL, NL,
+        f"required at top level: " + ", ".join(f"`{k}`" for k in schema.get("required", [])) + NL,
+        NL,
     ]
     for key in body_keys:
         body = top_props[key]
@@ -1112,7 +1119,8 @@ def render_field_tables(schema_file: str) -> str:
             parts += [
                 f"Top-level `{key}`{marker}: "
                 + (_clean_description(description) if description else _type_str(body))
-                + NL, NL,
+                + NL,
+                NL,
             ]
             continue
         required = set(body.get("required", []))
@@ -1131,6 +1139,7 @@ def render_field_tables(schema_file: str) -> str:
 
 # ── Build ────────────────────────────────────────────────────────────────────
 
+
 def _validate_or_die(record: dict, where: str, *, schema_only: str | None = None) -> str:
     """Strict-validate; die loudly on ANY issue; return the verdict line.
 
@@ -1148,8 +1157,7 @@ def _validate_or_die(record: dict, where: str, *, schema_only: str | None = None
         report = validate_schema_data(record, schema)
         if not report.ok:
             raise SystemExit(
-                f"gen_reference_records: the '{where}' reference record no longer "
-                f"validates against {schema_only}."
+                f"gen_reference_records: the '{where}' reference record no longer validates against {schema_only}."
             )
         return (
             "**Schema-validated** — 0 errors against "
@@ -1160,8 +1168,7 @@ def _validate_or_die(record: dict, where: str, *, schema_only: str | None = None
     report = validate_record_report(record, policy="strict")
     if report.issues:
         details = NL.join(
-            f"  - {issue.severity} {issue.code} at {issue.path}: {issue.message}"
-            for issue in report.issues
+            f"  - {issue.severity} {issue.code} at {issue.path}: {issue.message}" for issue in report.issues
         )
         raise SystemExit(
             f"gen_reference_records: the '{where}' reference record no longer "
@@ -1169,10 +1176,7 @@ def _validate_or_die(record: dict, where: str, *, schema_only: str | None = None
             "A reference record is contract — fix the record shape or the "
             "change that broke it, in this same PR."
         )
-    return (
-        "**Validated clean** — strict policy, 0 errors, 0 warnings "
-        f"(battinfo {battinfo.__version__})."
-    )
+    return f"**Validated clean** — strict policy, 0 errors, 0 warnings (battinfo {battinfo.__version__})."
 
 
 def build_sections(family: dict) -> list[dict]:
@@ -1192,11 +1196,7 @@ def build_sections(family: dict) -> list[dict]:
             f"{family['slug']}: {section['heading']}",
             schema_only=section.get("schema_only"),
         )
-        jsonld = (
-            record_to_jsonld(record, section["record_type"])
-            if section.get("record_type")
-            else None
-        )
+        jsonld = record_to_jsonld(record, section["record_type"]) if section.get("record_type") else None
         sections.append({**section, "record": record, "jsonld": jsonld, "verdict": verdict})
     return sections
 
@@ -1205,9 +1205,19 @@ def build_sections(family: dict) -> list[dict]:
 # (materials up through components), then the flavored and full cells built
 # from them, then what is done with a cell and what comes out of it.
 _PAGE_ORDER = [
-    "materials", "electrodes", "electrolytes", "separators",
-    "current-collectors", "housings", "cells", "half-cells",
-    "tests", "datasets", "equipment", "parameter-sets", "organizations",
+    "materials",
+    "electrodes",
+    "electrolytes",
+    "separators",
+    "current-collectors",
+    "housings",
+    "cells",
+    "half-cells",
+    "tests",
+    "datasets",
+    "equipment",
+    "parameter-sets",
+    "organizations",
 ]
 assert sorted(_PAGE_ORDER) == sorted(f["slug"] for f in FAMILIES)
 FAMILIES.sort(key=lambda f: _PAGE_ORDER.index(f["slug"]))
@@ -1273,7 +1283,7 @@ PAGE_RULES: dict[str, list[str]] = {
     "datasets": [
         "A dataset describes data files (URLs, checksums, measured variables); the files stay where they are published.",
         "`about` links the cell and the test the data came from.",
-        "A **series** is an ordinary dataset flavored `additional_type: [\"DatasetSeries\"]`; members point at it with `series_id`, so the collection publishes first.",
+        'A **series** is an ordinary dataset flavored `additional_type: ["DatasetSeries"]`; members point at it with `series_id`, so the collection publishes first.',
     ],
     "equipment": [
         "**Spec** = the product; **equipment** = one bench unit (serial, location); **channel** = one addressable slot on a unit.",
@@ -1406,7 +1416,8 @@ def render_shelf(family: dict) -> str:
         "A selection of real, validated records from the packaged examples "
         "corpus — each one click away, included from its single source under "
         f"`examples/`. The full, living library is the registry: "
-        f"[browse it there]({browse})." + NL, NL,
+        f"[browse it there]({browse})." + NL,
+        NL,
     ]
     for rel in picks:
         path = ROOT / "examples" / rel
@@ -1432,28 +1443,70 @@ def render_shelf(family: dict) -> str:
         # view is emitted live where an emitter exists, so shelf entries are
         # one more surface where an emitter change must show its diff.
         loader = (
-            "import json" + NL
-            + "from importlib import resources" + NL + NL
-            + "record = json.loads(" + NL
-            + '    resources.files("battinfo")' + NL
-            + f'    .joinpath("data/examples/{rel}")' + NL
-            + '    .read_text(encoding="utf-8")' + NL
+            "import json"
+            + NL
+            + "from importlib import resources"
+            + NL
+            + NL
+            + "record = json.loads("
+            + NL
+            + '    resources.files("battinfo")'
+            + NL
+            + f'    .joinpath("data/examples/{rel}")'
+            + NL
+            + '    .read_text(encoding="utf-8")'
+            + NL
             + ")"
         )
         parts += [f"::::::{{dropdown}} {name} ({type_label})", NL]
         parts += [":::::{tab-set}", NL, NL]
-        parts += ["::::{tab-item} Python", NL,
-                  "The record ships in the installed wheel — load it as a starting point:", NL, NL,
-                  "```python", NL, loader, NL, "```", NL, "::::", NL, NL]
-        parts += ["::::{tab-item} Canonical record", NL,
-                  f"```{{literalinclude}} ../../examples/{rel}", NL,
-                  ":language: json", NL, "```", NL, "::::", NL, NL]
+        parts += [
+            "::::{tab-item} Python",
+            NL,
+            "The record ships in the installed wheel — load it as a starting point:",
+            NL,
+            NL,
+            "```python",
+            NL,
+            loader,
+            NL,
+            "```",
+            NL,
+            "::::",
+            NL,
+            NL,
+        ]
+        parts += [
+            "::::{tab-item} Canonical record",
+            NL,
+            f"```{{literalinclude}} ../../examples/{rel}",
+            NL,
+            ":language: json",
+            NL,
+            "```",
+            NL,
+            "::::",
+            NL,
+            NL,
+        ]
         jsonld = _shelf_jsonld(doc, type_label)
         if jsonld is not None:
-            parts += ["::::{tab-item} JSON-LD", NL,
-                      "Emitted by `record_to_jsonld`, hosted-context mode.", NL, NL,
-                      "```json", NL, json.dumps(jsonld, indent=2, ensure_ascii=False),
-                      NL, "```", NL, "::::", NL, NL]
+            parts += [
+                "::::{tab-item} JSON-LD",
+                NL,
+                "Emitted by `record_to_jsonld`, hosted-context mode.",
+                NL,
+                NL,
+                "```json",
+                NL,
+                json.dumps(jsonld, indent=2, ensure_ascii=False),
+                NL,
+                "```",
+                NL,
+                "::::",
+                NL,
+                NL,
+            ]
         parts += [":::::", NL, "::::::", NL, NL]
     return "".join(parts)
 
@@ -1461,10 +1514,24 @@ def render_shelf(family: dict) -> str:
 # Record types record_to_jsonld can emit; equipment, channel, and organization
 # records have no emitter yet (stated as known gaps on their pages).
 _EMITTABLE_TYPES = {
-    "cell-spec", "cell-instance", "test", "test-protocol", "dataset",
-    "material-spec", "material", "electrode-spec", "electrode",
-    "separator-spec", "separator", "current-collector-spec", "current-collector",
-    "electrolyte-spec", "electrolyte", "housing-spec", "housing", "parameter-set",
+    "cell-spec",
+    "cell-instance",
+    "test",
+    "test-protocol",
+    "dataset",
+    "material-spec",
+    "material",
+    "electrode-spec",
+    "electrode",
+    "separator-spec",
+    "separator",
+    "current-collector-spec",
+    "current-collector",
+    "electrolyte-spec",
+    "electrolyte",
+    "housing-spec",
+    "housing",
+    "parameter-set",
 }
 
 
@@ -1477,11 +1544,16 @@ def _shelf_jsonld(doc: dict, type_label: str):
 
 
 BANNER = (
-    "<!-- GENERATED by scripts/gen_reference_records.py — do not edit this page." + NL
-    + "     Model prose is injected from docs/records/_fragments/<slug>.md:" + NL
-    + "     edit the fragment, then regenerate:" + NL
-    + "     uv run python scripts/gen_reference_records.py" + NL
-    + "     tests/test_reference_records.py fails when this page drifts. -->" + NL
+    "<!-- GENERATED by scripts/gen_reference_records.py — do not edit this page."
+    + NL
+    + "     Model prose is injected from docs/records/_fragments/<slug>.md:"
+    + NL
+    + "     edit the fragment, then regenerate:"
+    + NL
+    + "     uv run python scripts/gen_reference_records.py"
+    + NL
+    + "     tests/test_reference_records.py fails when this page drifts. -->"
+    + NL
 )
 
 
@@ -1529,21 +1601,52 @@ def render_page(family: dict, sections: list[dict]) -> str:
         # the docs landing page already uses. Python first — the authoring
         # code is the teaching artifact; the JSON views are what it becomes.
         parts += ["::::{tab-set}", NL, NL]
-        parts += [":::{tab-item} Python", NL, "```python", NL,
-                  snippet_source(section["fn"]), NL, "```", NL, ":::", NL, NL]
-        parts += [":::{tab-item} Canonical record", NL, "```json", NL,
-                  json.dumps(section["record"], indent=2, ensure_ascii=False),
-                  NL, "```", NL, ":::", NL, NL]
+        parts += [
+            ":::{tab-item} Python",
+            NL,
+            "```python",
+            NL,
+            snippet_source(section["fn"]),
+            NL,
+            "```",
+            NL,
+            ":::",
+            NL,
+            NL,
+        ]
+        parts += [
+            ":::{tab-item} Canonical record",
+            NL,
+            "```json",
+            NL,
+            json.dumps(section["record"], indent=2, ensure_ascii=False),
+            NL,
+            "```",
+            NL,
+            ":::",
+            NL,
+            NL,
+        ]
         if section.get("jsonld") is not None:
-            parts += [":::{tab-item} JSON-LD", NL,
-                      "Emitted by `record_to_jsonld`, hosted-context mode.", NL, NL,
-                      "```json", NL,
-                      json.dumps(section["jsonld"], indent=2, ensure_ascii=False),
-                      NL, "```", NL, ":::", NL, NL]
+            parts += [
+                ":::{tab-item} JSON-LD",
+                NL,
+                "Emitted by `record_to_jsonld`, hosted-context mode.",
+                NL,
+                NL,
+                "```json",
+                NL,
+                json.dumps(section["jsonld"], indent=2, ensure_ascii=False),
+                NL,
+                "```",
+                NL,
+                ":::",
+                NL,
+                NL,
+            ]
         parts += ["::::", NL, NL]
         if section.get("gap"):
-            parts += ["```{admonition} Known gap", NL, ":class: warning", NL, NL,
-                      section["gap"], NL, "```", NL, NL]
+            parts += ["```{admonition} Known gap", NL, ":class: warning", NL, NL, section["gap"], NL, "```", NL, NL]
         if section.get("notice"):
             parts += ["What to notice:", NL, NL]
             for line in section["notice"]:
@@ -1573,7 +1676,8 @@ def render_page(family: dict, sections: list[dict]) -> str:
         "`hasMetrologicalReference` datum on the quantity, beside its "
         "unit. When authoring, an instance references its spec with the "
         "`spec_id=` kwarg; the record stores the self-describing "
-        "`<type>_spec_id` key shown in the tables below." + NL, NL,
+        "`<type>_spec_id` key shown in the tables below." + NL,
+        NL,
     ]
     for schema_file in family["schemas"]:
         parts += [render_field_tables(schema_file)]
@@ -1586,42 +1690,60 @@ def _append_notes(parts: list, family: dict) -> None:
     notes = _notes_fragment(family["slug"])
     if notes is None:
         return
-    parts += [NL, "## Design notes", NL, NL,
-              ":::{dropdown} The reasoning behind the model", NL,
-              notes, ":::", NL]
+    parts += [NL, "## Design notes", NL, NL, ":::{dropdown} The reasoning behind the model", NL, notes, ":::", NL]
 
 
 def render_index() -> str:
     rows = NL.join(
-        f"| [{family['title']}]({family['slug']}.md) | "
-        + " · ".join(s["heading"] for s in family["sections"]) + " |"
+        f"| [{family['title']}]({family['slug']}.md) | " + " · ".join(s["heading"] for s in family["sections"]) + " |"
         for family in FAMILIES
     )
     toc = NL.join(family["slug"] for family in FAMILIES)
     return (
-        BANNER + NL
-        + "# Record types" + NL + NL
+        BANNER
+        + NL
+        + "# Record types"
+        + NL
+        + NL
         + "One page per record family, and each page is the whole story: what "
         + "the thing is, a reference example (authoring code, the canonical "
         + "record it produces, the JSON-LD that record emits), and the field "
         + "reference from the JSON Schemas. When someone asks how to describe "
-        + "a cell, a material, or a separator — the answer is one link below." + NL + NL
+        + "a cell, a material, or a separator — the answer is one link below."
+        + NL
+        + NL
         + "Everything generated here is produced against the current library "
         + "on every change, validated clean under the strict policy, and "
         + "drift-gated: a schema, API, or emitter change must regenerate this "
         + "chapter in the same PR, so the git history of `docs/records/` is "
-        + "the record of how changes propagate to real examples." + NL + NL
+        + "the record of how changes propagate to real examples."
+        + NL
+        + NL
         + "Each page also carries a shelf of common, real examples — the "
-        + "docs' reasonable selection; the registry is the full library." + NL + NL
-        + "| Family | Reference examples |" + NL
-        + "|---|---|" + NL
-        + rows + NL + NL
+        + "docs' reasonable selection; the registry is the full library."
+        + NL
+        + NL
+        + "| Family | Reference examples |"
+        + NL
+        + "|---|---|"
+        + NL
+        + rows
+        + NL
+        + NL
         + "Coverage accounting (every schema property exercised by a reference "
         + "example, or waived with a reason) arrives with the next expansion "
-        + "of this chapter." + NL + NL
-        + "```{toctree}" + NL + ":hidden:" + NL + NL
-        + toc + NL
-        + "```" + NL
+        + "of this chapter."
+        + NL
+        + NL
+        + "```{toctree}"
+        + NL
+        + ":hidden:"
+        + NL
+        + NL
+        + toc
+        + NL
+        + "```"
+        + NL
     )
 
 
@@ -1643,7 +1765,8 @@ def main() -> int:
                 stale.append(name)
         if stale:
             print(
-                "docs/records/ drifts: " + ", ".join(sorted(stale))
+                "docs/records/ drifts: "
+                + ", ".join(sorted(stale))
                 + " — run `uv run python scripts/gen_reference_records.py`",
                 file=sys.stderr,
             )

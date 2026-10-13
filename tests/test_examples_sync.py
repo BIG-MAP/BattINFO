@@ -7,6 +7,7 @@ i.e. someone edited the source without regenerating, or edited the copy directly
 
 Fix: `python scripts/sync_examples.py`
 """
+
 from __future__ import annotations
 
 import subprocess

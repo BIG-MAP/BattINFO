@@ -32,11 +32,10 @@ SPEC_IRI = "https://w3id.org/battinfo/spec/abcd-2345-6789-abcd"
 
 # ── Identity: deterministic, content-derived, route-aware ──────────────────────
 
+
 def test_electrode_spec_id_is_deterministic() -> None:
     ids = [
-        api.create_electrode_spec(name="Graphite anode", kind="graphite", validate=False)[
-            "electrode_spec"
-        ]["id"]
+        api.create_electrode_spec(name="Graphite anode", kind="graphite", validate=False)["electrode_spec"]["id"]
         for _ in range(3)
     ]
     assert len(set(ids)) == 1
@@ -60,11 +59,15 @@ def test_processing_route_is_part_of_spec_identity() -> None:
     processing is an instance property. Collapsing the two here would silently
     overwrite one design with the other.
     """
+
     def spec(route: str | None):
         kwargs = {"processing": {"route": route}} if route else {}
         return api.create_electrode_spec(
-            name="Si-Gr anode", kind="silicon_graphite", manufacturer="SINTEF",
-            validate=False, **kwargs,
+            name="Si-Gr anode",
+            kind="silicon_graphite",
+            manufacturer="SINTEF",
+            validate=False,
+            **kwargs,
         )["electrode_spec"]["id"]
 
     assert spec("aqueous") != spec("nmp")
@@ -72,9 +75,7 @@ def test_processing_route_is_part_of_spec_identity() -> None:
 
 
 def test_electrode_batch_id_from_spec_and_batch() -> None:
-    spec_id = api.create_electrode_spec(name="LFP cathode", kind="lfp", validate=False)[
-        "electrode_spec"
-    ]["id"]
+    spec_id = api.create_electrode_spec(name="LFP cathode", kind="lfp", validate=False)["electrode_spec"]["id"]
     a = api.create_electrode(electrode_spec_id=spec_id, batch="B-1", validate=False)["electrode"]["id"]
     b = api.create_electrode(electrode_spec_id=spec_id, batch="B-1", validate=False)["electrode"]["id"]
     c = api.create_electrode(electrode_spec_id=spec_id, batch="B-2", validate=False)["electrode"]["id"]
@@ -85,9 +86,13 @@ def test_electrode_batch_id_from_spec_and_batch() -> None:
 def test_resave_of_identical_content_is_unchanged(tmp_path: Path) -> None:
     def author():
         ws = battinfo.workspace(str(tmp_path))
-        spec = ws.add("electrode_spec", name="Graphite anode", kind="graphite",
-                      manufacturer="Canrud",
-                      property={"loading": {"value": 11.5, "unit": "mg/cm2"}})[0]
+        spec = ws.add(
+            "electrode_spec",
+            name="Graphite anode",
+            kind="graphite",
+            manufacturer="Canrud",
+            property={"loading": {"value": 11.5, "unit": "mg/cm2"}},
+        )[0]
         ws.add("electrode", spec=spec, batch="GR-1")
         return ws.save()
 
@@ -100,6 +105,7 @@ def test_resave_of_identical_content_is_unchanged(tmp_path: Path) -> None:
 
 
 # ── Kind: required, controlled, and the ACTIVE material ────────────────────────
+
 
 def test_kind_resolves_through_the_material_vocabulary() -> None:
     assert resolve_electrode_kind("Si/Gr") == "silicon_graphite"
@@ -121,9 +127,7 @@ def test_polarity_is_authored_never_derived() -> None:
     spec = api.create_electrode_spec(name="LFP electrode", kind="lfp", validate=False)
     assert "polarity" not in spec["electrode_spec"]
 
-    authored = api.create_electrode_spec(
-        name="LFP positive electrode", kind="lfp", polarity="positive", validate=False
-    )
+    authored = api.create_electrode_spec(name="LFP positive electrode", kind="lfp", polarity="positive", validate=False)
     assert authored["electrode_spec"]["polarity"] == "positive"
 
 
@@ -140,15 +144,14 @@ def test_missing_kind_blocks_strict_save_only() -> None:
 
     spec = api.create_electrode_spec(uid="abcd23456789abcd", name="Mystery electrode", validate=False)
     assert "kind" not in spec["electrode_spec"]
-    assert validate_record(spec).ok               # tolerant flows still validate
+    assert validate_record(spec).ok  # tolerant flows still validate
     assert not validate_record(spec, policy="strict").ok  # ws.save requires it
 
 
 def test_non_active_kind_warns_rather_than_failing() -> None:
     from battinfo.validate.semantic import validate_semantic_report
 
-    spec = api.create_electrode_spec(uid="abcd23456789abcd", name="Binder layer", kind="pvdf",
-                                     validate=False)
+    spec = api.create_electrode_spec(uid="abcd23456789abcd", name="Binder layer", kind="pvdf", validate=False)
     report = validate_semantic_report(spec, policy="default")
     issue = next(i for i in report.issues if i.code == "semantic.electrode_kind_not_active")
     assert issue.severity == "warning"
@@ -160,8 +163,9 @@ def test_authored_polarity_never_conflicts_with_the_kind() -> None:
     # legitimate design in a lithium-counter half cell).
     from battinfo.validate.semantic import validate_semantic_report
 
-    spec = api.create_electrode_spec(uid="abcd23456789abcd", name="LFP working electrode",
-                                     kind="lfp", polarity="negative", validate=False)
+    spec = api.create_electrode_spec(
+        uid="abcd23456789abcd", name="LFP working electrode", kind="lfp", polarity="negative", validate=False
+    )
     report = validate_semantic_report(spec, policy="default")
     assert not any(i.code == "semantic.electrode_polarity_conflict" for i in report.issues)
 
@@ -169,7 +173,9 @@ def test_authored_polarity_never_conflicts_with_the_kind() -> None:
 def test_purchased_electrode_needs_no_material_spec() -> None:
     """The point of a required kind and an optional powder reference."""
     spec = api.create_electrode_spec(
-        name="Vendor NMC811 cathode sheet", kind="nmc811", manufacturer="Some Vendor",
+        name="Vendor NMC811 cathode sheet",
+        kind="nmc811",
+        manufacturer="Some Vendor",
         validate=False,
     )["electrode_spec"]
     # `kind=` is the deprecated alias kwarg: still accepted, and the record
@@ -181,12 +187,17 @@ def test_purchased_electrode_needs_no_material_spec() -> None:
 
 def test_active_material_kind_is_the_canonical_spelling() -> None:
     spec = api.create_electrode_spec(
-        name="Vendor NMC811 cathode sheet", active_material_kind="nmc811", validate=False,
+        name="Vendor NMC811 cathode sheet",
+        active_material_kind="nmc811",
+        validate=False,
     )["electrode_spec"]
     assert spec["active_material_kind"] == "nmc811"
     # A round-trip through the body pass-through also normalizes the old key.
     again = api.create_electrode_spec(
-        name="Old record", kind="graphite", body={"kind": "graphite"}, validate=False,
+        name="Old record",
+        kind="graphite",
+        body={"kind": "graphite"},
+        validate=False,
     )["electrode_spec"]
     assert again["active_material_kind"] == "graphite"
     assert "kind" not in again
@@ -194,12 +205,16 @@ def test_active_material_kind_is_the_canonical_spelling() -> None:
 
 # ── Composition: the cell-spec coating shape, not a divergent one ──────────────
 
+
 def test_composition_shorthand_expands_to_the_canonical_coating_shape() -> None:
     spec = api.create_electrode_spec(
-        name="Graphite anode", kind="graphite",
-        composition={"active": 0.95,
-                     "binder": {"name": "CMC", "fraction": 0.04},
-                     "conductive_additive": {"name": "Carbon black", "fraction": 0.01}},
+        name="Graphite anode",
+        kind="graphite",
+        composition={
+            "active": 0.95,
+            "binder": {"name": "CMC", "fraction": 0.04},
+            "conductive_additive": {"name": "Carbon black", "fraction": 0.01},
+        },
         validate=False,
     )["electrode_spec"]
     component = spec["coating"]["component"]
@@ -211,8 +226,11 @@ def test_composition_shorthand_expands_to_the_canonical_coating_shape() -> None:
 
 def test_active_material_reference_reaches_the_coating_holder() -> None:
     spec = api.create_electrode_spec(
-        name="Graphite anode", kind="graphite", active_material_spec_id=SPEC_IRI,
-        composition={"active": 0.95}, validate=False,
+        name="Graphite anode",
+        kind="graphite",
+        active_material_spec_id=SPEC_IRI,
+        composition={"active": 0.95},
+        validate=False,
     )["electrode_spec"]
     holder = spec["coating"]["component"]["active_material"][0]
     assert holder["material_spec_id"] == SPEC_IRI
@@ -220,12 +238,11 @@ def test_active_material_reference_reaches_the_coating_holder() -> None:
 
 def test_bare_fraction_without_a_derivable_name_is_a_helpful_error() -> None:
     with pytest.raises(ValueError, match="bare weight fraction"):
-        api.create_electrode_spec(
-            name="X", kind="graphite", composition={"binder": 0.04}, validate=False
-        )
+        api.create_electrode_spec(name="X", kind="graphite", composition={"binder": 0.04}, validate=False)
 
 
 # ── Attribution: stamped like every other record type ─────────────────────────
+
 
 def test_attribution_stamped_on_both_electrode_types(tmp_path: Path) -> None:
     ws = battinfo.workspace(str(tmp_path))
@@ -252,14 +269,13 @@ def test_electrode_schemas_permit_attribution() -> None:
         (api.create_electrode(electrode_spec_id=SPEC_IRI, batch="B-1", validate=False), "electrode"),
     ):
         record["license"] = "cc-by-4.0"
-        record["contributor"] = [
-            {"type": "Person", "name": "A", "same_as": "https://orcid.org/0000-0002-1825-0097"}
-        ]
+        record["contributor"] = [{"type": "Person", "name": "A", "same_as": "https://orcid.org/0000-0002-1825-0097"}]
         record["funding"] = {"type": "Grant", "identifier": "101069765"}
         assert validate_record(record).ok, key
 
 
 # ── Emission ──────────────────────────────────────────────────────────────────
+
 
 def test_kind_types_the_node_and_authored_polarity_stacks() -> None:
     """A spec is an information artifact: CreativeWork, with the physical
@@ -274,11 +290,10 @@ def test_kind_types_the_node_and_authored_polarity_stacks() -> None:
     assert node["isDescriptionFor"]["@type"] == "SiliconGraphiteElectrode"
     assert node["isDescriptionFor"]["skos:prefLabel"] == "Si-Gr electrode"
 
-    cathode = api.create_electrode_spec(
-        name="LFP positive electrode", kind="lfp", polarity="positive", validate=False
-    )
+    cathode = api.create_electrode_spec(name="LFP positive electrode", kind="lfp", polarity="positive", validate=False)
     assert record_to_jsonld(cathode, "electrode-spec")["isDescriptionFor"]["@type"] == [
-        "LithiumIronPhosphateElectrode", "PositiveElectrode",
+        "LithiumIronPhosphateElectrode",
+        "PositiveElectrode",
     ]
 
 
@@ -313,13 +328,19 @@ def test_pieces_cut_from_a_parent_carry_the_genealogy() -> None:
 
     spec_iri = "https://w3id.org/battinfo/spec/abcd-2345-6789-abcd"
     roll = api.create_electrode(
-        electrode_spec_id=spec_iri, batch_id="Si-AQ-1", count=24, validate=False,
+        electrode_spec_id=spec_iri,
+        batch_id="Si-AQ-1",
+        count=24,
+        validate=False,
     )["electrode"]
 
     def disc(piece: str) -> dict:
         return api.create_electrode(
-            electrode_spec_id=spec_iri, batch_id="Si-AQ-1",
-            parent_id=roll["id"], piece_id=piece, validate=False,
+            electrode_spec_id=spec_iri,
+            batch_id="Si-AQ-1",
+            parent_id=roll["id"],
+            piece_id=piece,
+            validate=False,
         )["electrode"]
 
     d7, d8 = disc("disc-07"), disc("disc-08")
@@ -336,8 +357,7 @@ def test_pieces_cut_from_a_parent_carry_the_genealogy() -> None:
     assert node["prov:wasDerivedFrom"] == {"@id": roll["id"]}
     identifiers = node["schema:identifier"]
     identifiers = identifiers if isinstance(identifiers, list) else [identifiers]
-    assert {"@type": "schema:PropertyValue", "schema:name": "piece_id",
-            "schema:value": "disc-07"} in identifiers
+    assert {"@type": "schema:PropertyValue", "schema:name": "piece_id", "schema:value": "disc-07"} in identifiers
 
 
 def test_parent_id_must_be_an_electrode_iri() -> None:
@@ -356,7 +376,8 @@ def test_monolithic_foil_electrode_is_material_not_coating() -> None:
     from battinfo.jsonld import record_to_jsonld
 
     spec = api.create_electrode_spec(
-        name="Lithium foil counter", kind="lithium_metal",
+        name="Lithium foil counter",
+        kind="lithium_metal",
         material={"name": "Lithium metal"},
         validate=False,
     )
@@ -378,8 +399,12 @@ def test_half_cell_counter_foil_types_as_counter_and_reference() -> None:
 
     spec = CellSpec(
         id="https://w3id.org/battinfo/spec/abcd-2345-6789-abcd",
-        name="HC", manufacturer="Lab", model="HC-1", format="coin",
-        chemistry="lithium_ion", cell_configuration="half_cell",
+        name="HC",
+        manufacturer="Lab",
+        model="HC-1",
+        format="coin",
+        chemistry="lithium_ion",
+        cell_configuration="half_cell",
         counter_electrode={"material": {"name": "Lithium metal"}},
         source=ProvenanceInfo(type="lab"),
     ).to_record()
@@ -400,8 +425,12 @@ def test_three_electrode_cell_carries_a_dedicated_reference() -> None:
 
     spec = CellSpec(
         id="https://w3id.org/battinfo/spec/abcd-2345-6789-abcd",
-        name="3E", manufacturer="Lab", model="3E-1", format="coin",
-        chemistry="lithium_ion", cell_configuration="three_electrode_cell",
+        name="3E",
+        manufacturer="Lab",
+        model="3E-1",
+        format="coin",
+        chemistry="lithium_ion",
+        cell_configuration="three_electrode_cell",
         working_electrode_spec_id="https://w3id.org/battinfo/spec/bcde-2345-6789-abcd",
         counter_electrode={"material": {"name": "Lithium metal"}},
         reference_electrode={"material": {"name": "Lithium metal"}},
@@ -419,8 +448,12 @@ def test_three_electrode_cell_carries_a_dedicated_reference() -> None:
 
     legacy = CellSpec(
         id="https://w3id.org/battinfo/spec/abcd-2345-6789-abcd",
-        name="3E", manufacturer="Lab", model="3E-1", format="coin",
-        chemistry="lithium_ion", cell_configuration="three_electrode_cell",
+        name="3E",
+        manufacturer="Lab",
+        model="3E-1",
+        format="coin",
+        chemistry="lithium_ion",
+        cell_configuration="three_electrode_cell",
         reference_electrode="NHE",
         source=ProvenanceInfo(type="lab"),
     ).to_record()
@@ -434,8 +467,10 @@ def test_coating_sidedness_is_stated_and_emitted() -> None:
     from battinfo.jsonld import record_to_jsonld
 
     spec = api.create_electrode_spec(
-        name="Graphite anode", kind="graphite",
-        coating={"double_sided": True}, validate=False,
+        name="Graphite anode",
+        kind="graphite",
+        coating={"double_sided": True},
+        validate=False,
     )
     assert spec["electrode_spec"]["coating"]["double_sided"] is True
     coating_node = record_to_jsonld(spec, "electrode-spec")["isDescriptionFor"]["hasCoating"]
@@ -454,7 +489,8 @@ def test_active_material_reference_emits_as_a_linked_node() -> None:
     # Physical fact of the described electrode, referencing the material
     # spec's DESCRIBED substance - never the Description document.
     assert ld["isDescriptionFor"]["hasActiveMaterial"] == {
-        "@id": f"{SPEC_IRI}#described", "@type": "ActiveMaterial",
+        "@id": f"{SPEC_IRI}#described",
+        "@type": "ActiveMaterial",
     }
 
 
@@ -462,8 +498,10 @@ def test_processing_emits_as_a_manufacturing_process() -> None:
     from battinfo.jsonld import record_to_jsonld
 
     spec = api.create_electrode_spec(
-        name="Si-Gr anode", kind="silicon_graphite",
-        processing={"route": "nmp", "detail": "planetary mixing"}, validate=False,
+        name="Si-Gr anode",
+        kind="silicon_graphite",
+        processing={"route": "nmp", "detail": "planetary mixing"},
+        validate=False,
     )
     node = record_to_jsonld(spec, "electrode-spec")["isDescriptionFor"]["prov:wasGeneratedBy"]
     assert node["@type"] == "Manufacturing"
@@ -476,16 +514,18 @@ def test_design_values_map_to_emmo_classes() -> None:
     from battinfo.jsonld import record_to_jsonld
 
     spec = api.create_electrode_spec(
-        name="Graphite anode", kind="graphite",
-        property={"loading": {"value": 11.5, "unit": "mg/cm2"},
-                  "dry_thickness": {"value": 80, "unit": "um"},
-                  "calendered_thickness": {"value": 72, "unit": "um"},
-                  "areal_capacity": {"value": 4.2, "unit": "mAh/cm2"}},
+        name="Graphite anode",
+        kind="graphite",
+        property={
+            "loading": {"value": 11.5, "unit": "mg/cm2"},
+            "dry_thickness": {"value": 80, "unit": "um"},
+            "calendered_thickness": {"value": 72, "unit": "um"},
+            "areal_capacity": {"value": 4.2, "unit": "mAh/cm2"},
+        },
         validate=False,
     )
     types = {t for p in record_to_jsonld(spec, "electrode-spec")["isDescriptionFor"]["hasProperty"] for t in p["@type"]}
-    assert {"ActiveMassLoading", "DryCoatingThickness", "CalenderedCoatingThickness",
-            "AreicCapacity"} <= types
+    assert {"ActiveMassLoading", "DryCoatingThickness", "CalenderedCoatingThickness", "AreicCapacity"} <= types
 
 
 def test_batch_emits_its_spec_link_and_batch_identifier() -> None:
@@ -504,11 +544,14 @@ def test_attribution_reaches_the_emitted_electrode_node() -> None:
     spec["license"] = "cc-by-4.0"
     spec["funding"] = {"type": "Grant", "identifier": "101069765"}
     ld = record_to_jsonld(spec, "electrode-spec")
-    assert ld["dcterms:license"] == {"@id": "https://spdx.org/licenses/CC-BY-4.0.html"}  # slug -> SPDX IRI, never a relative IRI
+    assert ld["dcterms:license"] == {
+        "@id": "https://spdx.org/licenses/CC-BY-4.0.html"
+    }  # slug -> SPDX IRI, never a relative IRI
     assert ld["schema:funding"]["schema:identifier"] == "101069765"
 
 
 # ── Cell-spec linkage ─────────────────────────────────────────────────────────
+
 
 def test_cell_spec_electrode_holder_may_cite_an_electrode_spec() -> None:
     from battinfo.transform.json_to_jsonld import to_jsonld
@@ -518,8 +561,11 @@ def test_cell_spec_electrode_holder_may_cite_an_electrode_spec() -> None:
         "schema_version": "0.2.0",
         "cell_spec": {
             "id": "https://w3id.org/battinfo/spec/1111-2222-3333-4444",
-            "name": "Demo cell", "model": "Demo", "cell_format": "coin",
-            "manufacturer": {"name": "Demo Co"}, "chemistry": "lithium_ion",
+            "name": "Demo cell",
+            "model": "Demo",
+            "cell_format": "coin",
+            "manufacturer": {"name": "Demo Co"},
+            "chemistry": "lithium_ion",
             "negative_electrode_basis": "graphite",
         },
         "negative_electrode": {
@@ -548,8 +594,11 @@ def test_both_electrode_spec_seams_are_authorable_and_round_trip() -> None:
 
     cs = CellSpec(
         id="https://w3id.org/battinfo/spec/1111-2222-3333-4444",
-        name="Demo cell", manufacturer="Demo Co", model="Demo",
-        format="coin", chemistry="lithium_ion",
+        name="Demo cell",
+        manufacturer="Demo Co",
+        model="Demo",
+        format="coin",
+        chemistry="lithium_ion",
         positive_electrode_spec_id=SPEC_IRI,
         negative_electrode=Electrode(
             coating={"component": {"active_material": [{"name": "Graphite"}]}},
@@ -579,11 +628,15 @@ def test_inline_current_collector_cites_its_foil_material_spec() -> None:
     material_spec = "https://w3id.org/battinfo/spec/9999-8888-7777-6666"
     cs = CellSpec(
         id="https://w3id.org/battinfo/spec/1111-2222-3333-4444",
-        name="Demo cell", manufacturer="Demo Co", model="Demo",
-        format="coin", chemistry="lithium_ion",
+        name="Demo cell",
+        manufacturer="Demo Co",
+        model="Demo",
+        format="coin",
+        chemistry="lithium_ion",
         positive_electrode=Electrode(
             current_collector=CurrentCollector(
-                name="Aluminium foil", material_spec_id=material_spec,
+                name="Aluminium foil",
+                material_spec_id=material_spec,
             ),
         ),
     )
@@ -603,8 +656,11 @@ def test_electrode_spec_reference_only_holder_is_valid() -> None:
         "schema_version": "0.2.0",
         "cell_spec": {
             "id": "https://w3id.org/battinfo/spec/1111-2222-3333-4444",
-            "name": "Demo cell", "model": "Demo", "cell_format": "coin",
-            "manufacturer": {"name": "Demo Co"}, "chemistry": "lithium_ion",
+            "name": "Demo cell",
+            "model": "Demo",
+            "cell_format": "coin",
+            "manufacturer": {"name": "Demo Co"},
+            "chemistry": "lithium_ion",
         },
         "positive_electrode": {"electrode_spec_id": SPEC_IRI},
         "provenance": {"source_type": "datasheet"},
@@ -613,6 +669,7 @@ def test_electrode_spec_reference_only_holder_is_valid() -> None:
 
 
 # ── Submission ────────────────────────────────────────────────────────────────
+
 
 def test_submit_covers_every_saved_record_type() -> None:
     """_SUBDIRS must list every directory ws.save() can write.
@@ -627,9 +684,20 @@ def test_submit_covers_every_saved_record_type() -> None:
 
     source = inspect.getsource(AuthoringWorkspace.submit)
     saved_subdirs = {
-        kind.subdir for kind in ENTITY_KINDS
-        if kind.entity_type in {"cell-spec", "cell", "test-protocol", "test", "dataset",
-                                "material-spec", "material", "electrode-spec", "electrode"}
+        kind.subdir
+        for kind in ENTITY_KINDS
+        if kind.entity_type
+        in {
+            "cell-spec",
+            "cell",
+            "test-protocol",
+            "test",
+            "dataset",
+            "material-spec",
+            "material",
+            "electrode-spec",
+            "electrode",
+        }
     }
     for subdir in saved_subdirs:
         assert f'"{subdir}"' in source, f"ws.submit() never enumerates {subdir}/"

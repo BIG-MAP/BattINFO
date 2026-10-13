@@ -5,6 +5,7 @@ symbol under the @id-typed hasMeasurementUnit (which rdflib coerces into a cwd-r
 IRI). D-3 — when validating a record for publication, a bare-token @id (no scheme, no CURIE) is
 rejected, because it would resolve against the cwd on export; local/staging validation and
 legitimate file:// bundle links are left untouched."""
+
 from __future__ import annotations
 
 import sys

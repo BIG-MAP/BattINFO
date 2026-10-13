@@ -6,6 +6,7 @@ keyword argument 'test_spec'"), which named that private method and listed
 nothing. The error now names ws.add, suggests the closest keyword and lists
 the accepted ones, before anything is created.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -94,8 +95,13 @@ def test_accepted_component_keywords_still_work(tmp_path: Path) -> None:
 def test_accepted_test_keywords_still_work(tmp_path: Path) -> None:
     ws = _workspace_with_cell(tmp_path)
     tests = ws.add(
-        "test", type="cycling", cell="S1", description="first run", status="completed",
-        license="cc-by-4.0", instrument="Maccor 4200",
+        "test",
+        type="cycling",
+        cell="S1",
+        description="first run",
+        status="completed",
+        license="cc-by-4.0",
+        instrument="Maccor 4200",
     )
     assert len(tests) == 1
     assert tests[0].description == "first run"

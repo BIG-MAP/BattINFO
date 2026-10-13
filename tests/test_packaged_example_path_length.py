@@ -20,6 +20,7 @@ top-level ``battinfo/`` package directory, which is the segment that actually
 adds to the install path. It leaves headroom for the research records while
 still failing any reintroduced type-prefixed (long) filename.
 """
+
 from __future__ import annotations
 
 from pathlib import PurePosixPath

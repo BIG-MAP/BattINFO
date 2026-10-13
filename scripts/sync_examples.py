@@ -12,6 +12,7 @@ Usage:
 The generated copy is committed so the wheel always contains the files; the
 ``--check`` mode runs on CI to guarantee it never drifts from the source.
 """
+
 from __future__ import annotations
 
 import filecmp

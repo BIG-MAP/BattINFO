@@ -163,7 +163,9 @@ def test_bundle_round_trip_and_save(tmp_path: Path) -> None:
     assert instance_payload["status"] == "created"
     cell_instance_record = json.loads(Path(instance_payload["path"]).read_text(encoding="utf-8"))
     assert "dataset_id" not in cell_instance_record.get("provenance", {})
-    assert cell_instance_record["datasets"] == [{"id": "https://w3id.org/battinfo/dataset/gj1y-pn2n-t5pm-gs9c", "role": "raw"}]
+    assert cell_instance_record["datasets"] == [
+        {"id": "https://w3id.org/battinfo/dataset/gj1y-pn2n-t5pm-gs9c", "role": "raw"}
+    ]
 
     test_payload = save_test(
         loaded.test,
@@ -219,10 +221,14 @@ def test_dataset_round_trip_preserves_rich_metadata() -> None:
                 "sameAs": "https://ror.org/02mhbdp94",
             }
         ],
-        citations=[{"name": "Reference article", "url": "https://doi.org/10.1000/reference", "doi": "10.1000/reference"}],
+        citations=[
+            {"name": "Reference article", "url": "https://doi.org/10.1000/reference", "doi": "10.1000/reference"}
+        ],
         measurement_techniques=["electrochemical cycling"],
         measurement_methods=["constant current"],
-        variable_measured=[{"name": "Voltage", "unit_text": "V", "sameAs": "https://qudt.org/vocab/quantitykind/Voltage"}],
+        variable_measured=[
+            {"name": "Voltage", "unit_text": "V", "sameAs": "https://qudt.org/vocab/quantitykind/Voltage"}
+        ],
         is_accessible_for_free=True,
         conditions_of_access="open",
         in_language="en",
@@ -289,7 +295,9 @@ def test_dataset_round_trip_preserves_rich_metadata() -> None:
     assert loaded.variable_measured[0]["name"] == "Voltage"
     assert loaded.main_entity[0]["type"] == "Table"
     assert loaded.main_entity[0]["table_schema"]["id"] == "https://example.org/datasets/rich-metadata/schema"
-    assert loaded.main_entity[0]["table_schema"]["columns"][0]["same_as"] == "https://qudt.org/vocab/quantitykind/Voltage"
+    assert (
+        loaded.main_entity[0]["table_schema"]["columns"][0]["same_as"] == "https://qudt.org/vocab/quantitykind/Voltage"
+    )
     assert loaded.distributions[0]["content_url"] == "https://example.org/datasets/rich-metadata/raw.parquet"
     assert loaded.distributions[0]["checksum"]["value"] == "a" * 64
     assert loaded.included_in_data_catalog["name"] == "Example Battery Catalog"
@@ -317,7 +325,9 @@ def test_dataset_records_never_fabricate_example_org_urls() -> None:
         name="Provenance-URL dataset",
         data_format="text/csv",
         created_at=1771804803,
-        source=ProvenanceInfo(type="measurement", url="https://data.lab.example.com/run42.csv", retrieved_at=1771805001),
+        source=ProvenanceInfo(
+            type="measurement", url="https://data.lab.example.com/run42.csv", retrieved_at=1771805001
+        ),
     )
     record = dataset.to_record()
     assert record["dataset"]["access_url"] == "https://data.lab.example.com/run42.csv"
@@ -360,7 +370,9 @@ def test_dataset_about_round_trip_is_a_fixed_point() -> None:
 
 
 def test_load_cell_specification_from_library_record() -> None:
-    spec = load_cell_specification(ROOT / "src" / "battinfo" / "data" / "library" / "cell-spec" / "A123__ANR26650M1-B.json")
+    spec = load_cell_specification(
+        ROOT / "src" / "battinfo" / "data" / "library" / "cell-spec" / "A123__ANR26650M1-B.json"
+    )
 
     assert spec.model == "ANR26650M1-B"
     assert spec.positive_electrode is not None
@@ -375,7 +387,11 @@ def test_load_cell_specification_from_library_record() -> None:
 
 
 def test_derive_cell_spec_from_library_record_mapping() -> None:
-    spec_record = json.loads((ROOT / "src" / "battinfo" / "data" / "library" / "cell-spec" / "A123__ANR26650M1-B.json").read_text(encoding="utf-8"))
+    spec_record = json.loads(
+        (ROOT / "src" / "battinfo" / "data" / "library" / "cell-spec" / "A123__ANR26650M1-B.json").read_text(
+            encoding="utf-8"
+        )
+    )
 
     cell_spec = derive_cell_spec(spec_record)
 
@@ -494,8 +510,7 @@ def test_cell_specification_accepts_human_first_helper_objects() -> None:
     record = spec.to_library_record()
 
     assert record["specification"]["construction"]["layer_count"] == 18
-    assert record["specification"]["positive_electrode"]["coating"]["component"]["additive"][0]["name"] == "Carbon black"
+    assert (
+        record["specification"]["positive_electrode"]["coating"]["component"]["additive"][0]["name"] == "Carbon black"
+    )
     assert record["specification"]["electrolyte"]["salt"]["property"]["concentration"]["value"] == 1.0
-
-
-

@@ -19,6 +19,7 @@ Design rules under test:
 - collation folds many records into {parameter: [claim, ...]} with per-claim
   source context, never picking a winner.
 """
+
 from __future__ import annotations
 
 import json
@@ -48,9 +49,7 @@ from battinfo.parameters import (
 )
 from battinfo.validate.record import validate_record_report
 
-DATASET_IRI = re.compile(
-    r"^https://w3id\.org/battinfo/dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
-)
+DATASET_IRI = re.compile(r"^https://w3id\.org/battinfo/dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$")
 LEGACY_IRI = "https://w3id.org/battinfo/spec/8qqs-rh43-wt8d-172n"
 CELL_SPEC_IRI = "https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd"
 MATERIAL_SPEC_IRI = "https://w3id.org/battinfo/spec/cccc-dddd-eeee-ffff"
@@ -113,8 +112,11 @@ def test_claim_batch_seed_is_the_registry_contract() -> None:
     assert body["id"] == "https://w3id.org/battinfo/dataset/xm4e-fr60-10y6-ajqh"
     assert body["short_id"] == "xm4efr"
     electrode = _record(
-        material_kind=None, cell_spec_id=CELL_SPEC_IRI, scope="electrode",
-        electrode_polarity="negative", name="Fit - cell",
+        material_kind=None,
+        cell_spec_id=CELL_SPEC_IRI,
+        scope="electrode",
+        electrode_polarity="negative",
+        name="Fit - cell",
     )["parameter_set"]
     assert electrode["id"] == "https://w3id.org/battinfo/dataset/" + stable_uid(
         f"parameter-claims:{CELL_SPEC_IRI}:electrode:negative:fit - cell"
@@ -203,9 +205,7 @@ def test_two_targets_are_rejected() -> None:
 
 def test_scope_defaults_follow_the_target() -> None:
     assert _record()["parameter_set"]["scope"] == "material"
-    cell = _record(
-        material_kind=None, cell_spec_id=CELL_SPEC_IRI, name="Fit - cell"
-    )
+    cell = _record(material_kind=None, cell_spec_id=CELL_SPEC_IRI, name="Fit - cell")
     assert cell["parameter_set"]["scope"] == "cell"
 
 
@@ -224,32 +224,44 @@ def test_claim_without_a_value_form_is_rejected() -> None:
 
 def test_claim_with_two_value_forms_is_rejected() -> None:
     with pytest.raises(ValueError, match="exactly one of quantity"):
-        _record(claims=[{
-            "parameter": "porosity",
-            "quantity": {"value": 0.3, "unit": "1"},
-            "expression": {"text": "0.3", "language": "bpx"},
-        }])
+        _record(
+            claims=[
+                {
+                    "parameter": "porosity",
+                    "quantity": {"value": 0.3, "unit": "1"},
+                    "expression": {"text": "0.3", "language": "bpx"},
+                }
+            ]
+        )
 
 
 def test_curve_with_mismatched_lengths_is_rejected() -> None:
     with pytest.raises(ValueError, match="equal length"):
-        _record(claims=[{
-            "parameter": "ocp",
-            "curve": {"x_quantity": "stoichiometry", "x": [0, 1], "y": [1.0], "y_unit": "V"},
-        }])
+        _record(
+            claims=[
+                {
+                    "parameter": "ocp",
+                    "curve": {"x_quantity": "stoichiometry", "x": [0, 1], "y": [1.0], "y_unit": "V"},
+                }
+            ]
+        )
 
 
 def test_curve_with_non_finite_values_is_rejected() -> None:
     with pytest.raises(ValueError, match="non-finite"):
-        _record(claims=[{
-            "parameter": "ocp",
-            "curve": {
-                "x_quantity": "stoichiometry",
-                "x": [0.0, 1.0],
-                "y": [float("nan"), 0.05],
-                "y_unit": "V",
-            },
-        }])
+        _record(
+            claims=[
+                {
+                    "parameter": "ocp",
+                    "curve": {
+                        "x_quantity": "stoichiometry",
+                        "x": [0.0, 1.0],
+                        "y": [float("nan"), 0.05],
+                        "y_unit": "V",
+                    },
+                }
+            ]
+        )
 
 
 def test_default_provenance_class_fills_only_missing() -> None:
@@ -270,19 +282,27 @@ def test_default_provenance_class_fills_only_missing() -> None:
 
 def test_bad_provenance_class_is_rejected() -> None:
     with pytest.raises(ValueError, match="provenance_class"):
-        _record(claims=[{
-            "parameter": "density",
-            "quantity": {"value": 2.26, "unit": "g/cm3"},
-            "provenance_class": "vibes",
-        }])
+        _record(
+            claims=[
+                {
+                    "parameter": "density",
+                    "quantity": {"value": 2.26, "unit": "g/cm3"},
+                    "provenance_class": "vibes",
+                }
+            ]
+        )
 
 
 def test_unknown_parameter_key_is_tolerated() -> None:
-    record = _record(claims=[{
-        "parameter": "frobnication_index",
-        "quantity": {"value": 42.0, "unit": "1"},
-        "provenance_class": "assumed",
-    }])
+    record = _record(
+        claims=[
+            {
+                "parameter": "frobnication_index",
+                "quantity": {"value": 42.0, "unit": "1"},
+                "provenance_class": "assumed",
+            }
+        ]
+    )
     assert record["parameter_set"]["claims"][0]["parameter"] == "frobnication_index"
 
 
@@ -334,8 +354,7 @@ def test_every_tier_requirement_is_a_declared_parameter_with_that_scope() -> Non
             for key in keys:
                 assert key in vocab, f"{tier}.{scope} requires undeclared key {key}"
                 assert scope in vocab[key]["scopes"], (
-                    f"{tier} requires {key} at scope {scope}, but the vocabulary "
-                    f"scopes it {vocab[key]['scopes']}"
+                    f"{tier} requires {key} at scope {scope}, but the vocabulary scopes it {vocab[key]['scopes']}"
                 )
 
 
@@ -377,16 +396,17 @@ def test_completeness_ignores_unknown_keys_and_checks_scope() -> None:
 
 def test_cell_completeness_distinguishes_electrode_sides() -> None:
     sep = ["thickness", "porosity", "transport_efficiency"]
-    ely = ["initial_concentration", "transference_number", "ionic_conductivity",
-           "electrolyte_diffusivity"]
+    ely = ["initial_concentration", "transference_number", "ionic_conductivity", "electrolyte_diffusivity"]
     spm_material = tier_requirements("spm")["material"]
-    result = cell_completeness({
-        "material_negative": spm_material,
-        "material_positive": ["ocp"],
-        "electrode": sep,
-        "separator": sep,
-        "electrolyte": ely,
-    })
+    result = cell_completeness(
+        {
+            "material_negative": spm_material,
+            "material_positive": ["ocp"],
+            "electrode": sep,
+            "separator": sep,
+            "electrolyte": ely,
+        }
+    )
     assert not result["spme"]["satisfied"]
     assert "material_positive" in result["spme"]["missing"]
     assert "material_negative" not in result["spme"]["missing"]
@@ -400,11 +420,13 @@ def test_collate_claims_folds_records_and_attaches_source() -> None:
     mohtat = _record(
         name="Mohtat 2020 - graphite",
         citation_doi="10.1149/1945-7111/aba5d1",
-        claims=[{
-            "parameter": "particle_radius",
-            "quantity": {"value": 2.5e-06, "unit": "m"},
-            "provenance_class": "fitted",
-        }],
+        claims=[
+            {
+                "parameter": "particle_radius",
+                "quantity": {"value": 2.5e-06, "unit": "m"},
+                "provenance_class": "fitted",
+            }
+        ],
     )
     collated = collate_claims([chen, mohtat])
     radii = collated["particle_radius"]
@@ -416,12 +438,16 @@ def test_collate_claims_folds_records_and_attaches_source() -> None:
 
 
 def test_collate_claims_prefers_claim_level_citation() -> None:
-    record = _record(claims=[{
-        "parameter": "density",
-        "quantity": {"value": 2.26, "unit": "g/cm3"},
-        "provenance_class": "literature",
-        "citation_doi": "10.1039/D0SE00175A",
-    }])
+    record = _record(
+        claims=[
+            {
+                "parameter": "density",
+                "quantity": {"value": 2.26, "unit": "g/cm3"},
+                "provenance_class": "literature",
+                "citation_doi": "10.1039/D0SE00175A",
+            }
+        ]
+    )
     collated = collate_claims([record])
     assert collated["density"][0]["source"]["citation_doi"] == "10.1039/D0SE00175A"
 
@@ -529,9 +555,12 @@ def _parameter_file(**overrides) -> dict:
         "parameters_sha256": "a" * 64,
         "parts": [
             {"part": "negative_material", "material_kind": "graphite", "claims": _claims()},
-            {"part": "separator", "claims": [
-                {"parameter": "porosity", "quantity": {"value": 0.47, "unit": "1"}},
-            ]},
+            {
+                "part": "separator",
+                "claims": [
+                    {"parameter": "porosity", "quantity": {"value": 0.47, "unit": "1"}},
+                ],
+            },
         ],
         "default_provenance_class": "fitted",
     }
@@ -590,9 +619,7 @@ def test_a_parameter_file_collates_and_queries_by_material(tmp_path) -> None:
     save_parameter_set(file_record, source_root=tmp_path)
     save_parameter_set(_record(), source_root=tmp_path)
     rows = query_parameter_sets(source_root=tmp_path, material_kind="graphite")
-    assert {row["id"] for row in rows} == {
-        file_record["parameter_set"]["id"], _record()["parameter_set"]["id"]
-    }
+    assert {row["id"] for row in rows} == {file_record["parameter_set"]["id"], _record()["parameter_set"]["id"]}
     assert len(query_parameter_sets(source_root=tmp_path, parameter="porosity")) == 1
 
 
@@ -655,12 +682,16 @@ def test_jsonld_expression_claims_carry_the_expression() -> None:
 
 
 def test_jsonld_claim_citation_overrides_ride_the_claim_node() -> None:
-    record = _record(claims=[{
-        "parameter": "density",
-        "quantity": {"value": 2.26, "unit": "g/cm3"},
-        "provenance_class": "literature",
-        "citation_doi": "10.1039/D0SE00175A",
-    }])
+    record = _record(
+        claims=[
+            {
+                "parameter": "density",
+                "quantity": {"value": 2.26, "unit": "g/cm3"},
+                "provenance_class": "literature",
+                "citation_doi": "10.1039/D0SE00175A",
+            }
+        ]
+    )
     node = _emitted(record)
     prop = node["hasProperty"]
     prop = prop[0] if isinstance(prop, list) else prop

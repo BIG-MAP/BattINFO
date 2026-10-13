@@ -5,6 +5,7 @@ entities-registry kind) under the 0.8.0 core-features scope ruling. The
 canonical keys are snake_case; the family's original camelCase spellings stay
 accepted forever as deprecated aliases and normalize on round-trip.
 """
+
 from __future__ import annotations
 
 import json
@@ -39,7 +40,9 @@ def test_existing_random_minted_ids_are_kept() -> None:
 
 def test_camel_case_kwargs_normalize_to_canonical_keys() -> None:
     rec = api.create_organization(
-        name="SINTEF", legalName="SINTEF AS", foundingDate="1950-01-01",
+        name="SINTEF",
+        legalName="SINTEF AS",
+        foundingDate="1950-01-01",
         location={"addressCountry": "NO", "addressLocality": "Trondheim"},
     )
     body = rec["organization"]
@@ -86,7 +89,8 @@ def test_legacy_camel_case_record_normalizes_on_round_trip() -> None:
 
 def test_emission_is_pure_schema_org() -> None:
     rec = api.create_organization(
-        name="EMPA", type="ResearchOrganization",
+        name="EMPA",
+        type="ResearchOrganization",
         url="https://www.empa.ch",
         same_as="https://ror.org/02x681a42",
         parent_organization={"name": "ETH Domain"},
@@ -111,7 +115,8 @@ def test_manufacturer_type_stays_data_not_a_type() -> None:
 
 def test_legacy_and_canonical_records_emit_identically() -> None:
     canonical = api.create_organization(
-        name="A123 Systems", legal_name="A123 Systems LLC",
+        name="A123 Systems",
+        legal_name="A123 Systems LLC",
         id="https://w3id.org/battinfo/organization/8z6j-n7vw-e73w-smh7",
         retrieved_at=1750000000,
     )

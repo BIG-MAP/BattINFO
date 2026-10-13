@@ -18,6 +18,7 @@ def load_user_config() -> dict[str, Any]:
         return {}
     try:
         import yaml  # type: ignore[import-untyped]
+
         text = USER_CONFIG_PATH.read_text(encoding="utf-8")
         return dict(yaml.safe_load(text) or {})
     except Exception:
@@ -27,6 +28,7 @@ def load_user_config() -> dict[str, Any]:
 def save_user_config(config: dict[str, Any]) -> None:
     """Write the full config dict to ~/.battinfo/config.yaml."""
     import yaml  # type: ignore[import-untyped]
+
     USER_CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
     USER_CONFIG_PATH.write_text(
         yaml.dump(config, default_flow_style=False, allow_unicode=True),

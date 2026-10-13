@@ -71,60 +71,97 @@ def _record_sets() -> dict[str, list[dict]]:
     several types reach the graph only through the record that references them.
     """
     material_spec = create_material_spec(
-        validate=False, uid=MATERIAL_SPEC_IRI.rsplit("/", 1)[-1], name="Graphite powder",
+        validate=False,
+        uid=MATERIAL_SPEC_IRI.rsplit("/", 1)[-1],
+        name="Graphite powder",
         kind="graphite",
     )
     material = create_material(
-        validate=False, uid="1111-2222-3333-4444", name="Graphite lot",
-        material_spec_id=material_spec["material_spec"]["id"], lot="LOT-1",
+        validate=False,
+        uid="1111-2222-3333-4444",
+        name="Graphite lot",
+        material_spec_id=material_spec["material_spec"]["id"],
+        lot="LOT-1",
     )
     electrode_spec = create_electrode_spec(
-        validate=False, uid=ELECTRODE_SPEC_IRI.rsplit("/", 1)[-1], name="Graphite anode",
-        kind="graphite", active_material_spec_id=material_spec["material_spec"]["id"],
+        validate=False,
+        uid=ELECTRODE_SPEC_IRI.rsplit("/", 1)[-1],
+        name="Graphite anode",
+        kind="graphite",
+        active_material_spec_id=material_spec["material_spec"]["id"],
         property={"areal_capacity": {"value": 3.4, "unit": "mA.h/cm2"}},
     )
     electrode = create_electrode(
-        validate=False, uid="2222-3333-4444-5555", name="Coating batch A",
-        electrode_spec_id=electrode_spec["electrode_spec"]["id"], batch="B-1",
+        validate=False,
+        uid="2222-3333-4444-5555",
+        name="Coating batch A",
+        electrode_spec_id=electrode_spec["electrode_spec"]["id"],
+        batch="B-1",
     )
     equipment_spec = create_equipment_spec(
-        validate=False, uid="3333-4444-5555-6666", name="MC3000",
+        validate=False,
+        uid="3333-4444-5555-6666",
+        name="MC3000",
     )
     equipment = create_equipment(
-        validate=False, uid=UID, equipment_spec_id=equipment_spec["equipment_spec"]["id"],
+        validate=False,
+        uid=UID,
+        equipment_spec_id=equipment_spec["equipment_spec"]["id"],
         serial_number="SN-1",
     )
     channel = create_channel(validate=False, uid=UID, equipment_id=EQUIPMENT_IRI, index=1)
     parameter_set = create_parameter_set(
-        validate=False, uid="4444-5555-6666-7777", name="Demo source - graphite",
+        validate=False,
+        uid="4444-5555-6666-7777",
+        name="Demo source - graphite",
         material_kind="graphite",
-        claims=[{
-            "parameter": "specific_capacity",
-            "quantity": {"value": 372.0, "unit": "mAh/g"},
-            "provenance_class": "literature",
-        }],
+        claims=[
+            {
+                "parameter": "specific_capacity",
+                "quantity": {"value": 372.0, "unit": "mAh/g"},
+                "provenance_class": "literature",
+            }
+        ],
     )
 
     cell_spec = CellSpec(
-        id=CELL_SPEC_IRI, name="Demo half cell", manufacturer="Demo Co", model="DEMO-1",
-        format="coin", chemistry="lithium_ion",
+        id=CELL_SPEC_IRI,
+        name="Demo half cell",
+        manufacturer="Demo Co",
+        model="DEMO-1",
+        format="coin",
+        chemistry="lithium_ion",
         positive_electrode_spec_id=electrode_spec["electrode_spec"]["id"],
         source=ProvenanceInfo(type="datasheet"),
     ).to_record()
     cell = Cell(
-        id=CELL_IRI, name="cell-001", cell_spec_id=CELL_SPEC_IRI, serial_number="cell-001",
+        id=CELL_IRI,
+        name="cell-001",
+        cell_spec_id=CELL_SPEC_IRI,
+        serial_number="cell-001",
         source=ProvenanceInfo(type="measurement"),
     ).to_record()
     test_spec = TestSpec(
-        id=TEST_SPEC_IRI, name="pOCV protocol", source=ProvenanceInfo(type="protocol"),
+        id=TEST_SPEC_IRI,
+        name="pOCV protocol",
+        source=ProvenanceInfo(type="protocol"),
     ).to_record()
     test = Test(
-        id=TEST_IRI, name="pOCV run", kind="cycling", cell_id=CELL_IRI,
-        protocol_id=TEST_SPEC_IRI, equipment_id=EQUIPMENT_IRI, channel_id=CHANNEL_IRI,
-        dataset_ids=[DATASET_IRI], source=ProvenanceInfo(type="measurement"),
+        id=TEST_IRI,
+        name="pOCV run",
+        kind="cycling",
+        cell_id=CELL_IRI,
+        protocol_id=TEST_SPEC_IRI,
+        equipment_id=EQUIPMENT_IRI,
+        channel_id=CHANNEL_IRI,
+        dataset_ids=[DATASET_IRI],
+        source=ProvenanceInfo(type="measurement"),
     ).to_record()
     dataset = Dataset(
-        id=DATASET_IRI, name="pOCV curves", cell_instance_id=CELL_IRI, test_id=TEST_IRI,
+        id=DATASET_IRI,
+        name="pOCV curves",
+        cell_instance_id=CELL_IRI,
+        test_id=TEST_IRI,
         access_url="https://example.org/data.parquet",
         source=ProvenanceInfo(type="measurement"),
     ).to_record()
@@ -153,12 +190,17 @@ def _record_sets() -> dict[str, list[dict]]:
         spec_uid = f"{index}aaa-bbbb-cccc-dddd"
         inst_uid = f"{index}eee-ffff-gggg-hhhh"
         spec = create_component_spec(
-            family, validate=False, uid=spec_uid, name=f"{hyphen} spec",
+            family,
+            validate=False,
+            uid=spec_uid,
+            name=f"{hyphen} spec",
         )
         sets[f"{hyphen}-spec"] = [spec]
         sets[hyphen] = [
             create_component_instance(
-                family, validate=False, uid=inst_uid,
+                family,
+                validate=False,
+                uid=inst_uid,
                 spec_id=f"https://w3id.org/battinfo/spec/{spec_uid}",
             )
         ]
@@ -202,10 +244,7 @@ def _coverage() -> dict[str, bool]:
     """entity_type -> whether that type's record reached the deposit graph."""
     record_sets = _record_sets()
     ids = _deposit_node_ids(record_sets)
-    return {
-        kind.entity_type: all(_record_iri(rec) in ids for rec in record_sets[kind.subdir])
-        for kind in ENTITY_KINDS
-    }
+    return {kind.entity_type: all(_record_iri(rec) in ids for rec in record_sets[kind.subdir]) for kind in ENTITY_KINDS}
 
 
 def test_every_record_type_reaches_the_deposit_graph_or_is_exempt() -> None:
@@ -249,7 +288,7 @@ def test_electrode_nodes_carry_their_full_emission() -> None:
     assert spec_node["@type"] == ["Description", "schema:ProductModel", "schema:CreativeWork"], spec_node["@type"]
     described = spec_node["isDescriptionFor"]["@type"]
     types = described if isinstance(described, list) else [described]
-    assert "GraphiteElectrode" in types, types           # chemistry from the kind
+    assert "GraphiteElectrode" in types, types  # chemistry from the kind
     # No polarity class: the vocabulary assigns no side to an active material
     # (system-relative), so an unauthored polarity emits nothing.
     assert "NegativeElectrode" not in types, types
@@ -263,8 +302,7 @@ def test_electrode_nodes_carry_their_full_emission() -> None:
 def test_exemptions_are_still_real(entity_type: str) -> None:
     """Delete the entry when the type starts reaching the deposit on its own."""
     assert not _coverage()[entity_type], (
-        f"{entity_type} now reaches the deposit graph; remove it from "
-        "DEPOSIT_COVERAGE_EXEMPT"
+        f"{entity_type} now reaches the deposit graph; remove it from DEPOSIT_COVERAGE_EXEMPT"
     )
 
 
@@ -305,7 +343,8 @@ def test_parameter_sets_are_not_checked_as_dataset_records() -> None:
     assert len(paths) == len(parameter_set_iris)
     report = validate_publication_report(doc, policy="publisher")
     flagged = [
-        issue for issue in report.issues
+        issue
+        for issue in report.issues
         if issue.code in {"publication.dataset_about_missing", "publication.dataset_distribution_missing"}
         and issue.path.split(".")[0] in paths
     ]
@@ -340,9 +379,12 @@ def test_a_claim_batch_node_states_only_the_scope_its_record_states() -> None:
 
     for target in ({"material_kind": "graphite"}, {"cell_spec_id": CELL_SPEC_IRI}):
         record = create_parameter_set(
-            validate=False, name="Fit", claims=[
+            validate=False,
+            name="Fit",
+            claims=[
                 {"parameter": "density", "quantity": {"value": 2.2, "unit": "g/cm3"}, "provenance_class": "fitted"}
-            ], **target,
+            ],
+            **target,
         )
         record["parameter_set"].pop("scope")
         doc = record_to_jsonld(record, "parameter-set")
@@ -384,12 +426,15 @@ def test_a_deposit_of_parameter_sets_alone_passes_publication_validation() -> No
 
     fixture = ROOT / "tests" / "fixtures" / "interop" / "bpx-dfn-full.bpx.json"
     claim_batch = create_parameter_set(
-        name="Demo source - graphite", material_kind="graphite",
-        claims=[{
-            "parameter": "specific_capacity",
-            "quantity": {"value": 372.0, "unit": "mAh/g"},
-            "provenance_class": "literature",
-        }],
+        name="Demo source - graphite",
+        material_kind="graphite",
+        claims=[
+            {
+                "parameter": "specific_capacity",
+                "quantity": {"value": 372.0, "unit": "mAh/g"},
+                "provenance_class": "literature",
+            }
+        ],
     )
     parameter_file = from_bpx_parameters(fixture).to_parameter_set(
         virtual_cell=True,

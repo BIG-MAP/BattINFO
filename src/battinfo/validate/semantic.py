@@ -118,59 +118,59 @@ PAIRED_SPEC_RANGES: tuple[tuple[str, str], ...] = (
 # All comparisons use the numeric value as-is in the stated unit (no conversion).
 SPEC_PLAUSIBILITY_BOUNDS: dict[str, dict[str, tuple[float, float]]] = {
     # Material properties — loose sanity bounds catching decimal/units typos
-    "specific_capacity":            {"mah/g": (0.0, 4000.0), "ah/kg": (0.0, 4.0)},
-    "specific_discharge_capacity":  {"mah/g": (0.0, 4000.0), "ah/kg": (0.0, 4.0)},
-    "first_cycle_efficiency":       {"%": (0.0, 100.0), "percent": (0.0, 100.0)},
-    "true_density":                 {"g/cm3": (0.1, 25.0), "kg/m3": (100.0, 25000.0)},
-    "tap_density":                  {"g/cm3": (0.1, 25.0), "kg/m3": (100.0, 25000.0)},
-    "density":                      {"g/cm3": (0.1, 25.0), "kg/m3": (100.0, 25000.0)},
-    "bet_surface_area":             {"m2/g": (0.0, 5000.0)},
-    "particle_size_d10":            {"um": (0.001, 1000.0), "nm": (1.0, 1_000_000.0)},
-    "particle_size_d50":            {"um": (0.001, 1000.0), "nm": (1.0, 1_000_000.0)},
-    "particle_size_d90":            {"um": (0.001, 1000.0), "nm": (1.0, 1_000_000.0)},
-    "average_voltage":              {"v": (0.0, 6.0), "mv": (0.0, 6000.0)},
-    "molar_mass":                   {"g/mol": (1.0, 2_000_000.0), "kg/mol": (0.001, 2000.0)},
+    "specific_capacity": {"mah/g": (0.0, 4000.0), "ah/kg": (0.0, 4.0)},
+    "specific_discharge_capacity": {"mah/g": (0.0, 4000.0), "ah/kg": (0.0, 4.0)},
+    "first_cycle_efficiency": {"%": (0.0, 100.0), "percent": (0.0, 100.0)},
+    "true_density": {"g/cm3": (0.1, 25.0), "kg/m3": (100.0, 25000.0)},
+    "tap_density": {"g/cm3": (0.1, 25.0), "kg/m3": (100.0, 25000.0)},
+    "density": {"g/cm3": (0.1, 25.0), "kg/m3": (100.0, 25000.0)},
+    "bet_surface_area": {"m2/g": (0.0, 5000.0)},
+    "particle_size_d10": {"um": (0.001, 1000.0), "nm": (1.0, 1_000_000.0)},
+    "particle_size_d50": {"um": (0.001, 1000.0), "nm": (1.0, 1_000_000.0)},
+    "particle_size_d90": {"um": (0.001, 1000.0), "nm": (1.0, 1_000_000.0)},
+    "average_voltage": {"v": (0.0, 6.0), "mv": (0.0, 6000.0)},
+    "molar_mass": {"g/mol": (1.0, 2_000_000.0), "kg/mol": (0.001, 2000.0)},
     # Voltages — catches decimal-shift errors (e.g. 35 V instead of 3.5 V)
-    "nominal_voltage":              {"v": (0.3, 5.5), "mv": (300.0, 5500.0)},
-    "charging_voltage":             {"v": (0.3, 6.0), "mv": (300.0, 6000.0)},
-    "discharging_cutoff_voltage":   {"v": (0.0, 5.0), "mv": (0.0, 5000.0)},
-    "charging_cutoff_voltage":      {"v": (1.0, 6.0)},
-    "upper_voltage_limit":          {"v": (1.0, 6.0)},
+    "nominal_voltage": {"v": (0.3, 5.5), "mv": (300.0, 5500.0)},
+    "charging_voltage": {"v": (0.3, 6.0), "mv": (300.0, 6000.0)},
+    "discharging_cutoff_voltage": {"v": (0.0, 5.0), "mv": (0.0, 5000.0)},
+    "charging_cutoff_voltage": {"v": (1.0, 6.0)},
+    "upper_voltage_limit": {"v": (1.0, 6.0)},
     # Capacity — catches Ah/mAh confusion and orders-of-magnitude typos
-    "discharging_capacity":         {"ah": (1e-4, 2000.0), "mah": (0.1, 2_000_000.0)},
-    "charging_capacity":            {"ah": (1e-4, 2000.0), "mah": (0.1, 2_000_000.0)},
-    "nominal_capacity":             {"ah": (1e-4, 2000.0), "mah": (0.1, 2_000_000.0)},
-    "minimum_capacity":             {"ah": (1e-4, 2000.0), "mah": (0.1, 2_000_000.0)},
-    "min_capacity":                 {"ah": (1e-4, 2000.0), "mah": (0.1, 2_000_000.0)},
-    "rated_capacity":               {"ah": (1e-4, 2000.0), "mah": (0.1, 2_000_000.0)},
-    "typical_capacity":             {"ah": (1e-4, 2000.0), "mah": (0.1, 2_000_000.0)},
+    "discharging_capacity": {"ah": (1e-4, 2000.0), "mah": (0.1, 2_000_000.0)},
+    "charging_capacity": {"ah": (1e-4, 2000.0), "mah": (0.1, 2_000_000.0)},
+    "nominal_capacity": {"ah": (1e-4, 2000.0), "mah": (0.1, 2_000_000.0)},
+    "minimum_capacity": {"ah": (1e-4, 2000.0), "mah": (0.1, 2_000_000.0)},
+    "min_capacity": {"ah": (1e-4, 2000.0), "mah": (0.1, 2_000_000.0)},
+    "rated_capacity": {"ah": (1e-4, 2000.0), "mah": (0.1, 2_000_000.0)},
+    "typical_capacity": {"ah": (1e-4, 2000.0), "mah": (0.1, 2_000_000.0)},
     # Energy
-    "discharging_energy":           {"wh": (1e-4, 200_000.0), "kwh": (1e-7, 200.0)},
-    "charging_energy":              {"wh": (1e-4, 200_000.0), "kwh": (1e-7, 200.0)},
-    "nominal_energy":               {"wh": (1e-4, 200_000.0), "kwh": (1e-7, 200.0)},
-    "typical_energy":               {"wh": (1e-4, 200_000.0), "kwh": (1e-7, 200.0)},
-    "rated_energy":                 {"wh": (1e-4, 200_000.0), "kwh": (1e-7, 200.0)},
-    "certified_usable_energy":      {"wh": (1e-4, 200_000.0), "kwh": (1e-7, 200.0)},
+    "discharging_energy": {"wh": (1e-4, 200_000.0), "kwh": (1e-7, 200.0)},
+    "charging_energy": {"wh": (1e-4, 200_000.0), "kwh": (1e-7, 200.0)},
+    "nominal_energy": {"wh": (1e-4, 200_000.0), "kwh": (1e-7, 200.0)},
+    "typical_energy": {"wh": (1e-4, 200_000.0), "kwh": (1e-7, 200.0)},
+    "rated_energy": {"wh": (1e-4, 200_000.0), "kwh": (1e-7, 200.0)},
+    "certified_usable_energy": {"wh": (1e-4, 200_000.0), "kwh": (1e-7, 200.0)},
     # Specific energy / energy density — bounded by known cell chemistry physics
-    "specific_energy":              {"wh/kg": (1.0, 1000.0), "mah/g": (1.0, 500.0)},
-    "energy_density":               {"wh/l": (1.0, 2500.0)},
+    "specific_energy": {"wh/kg": (1.0, 1000.0), "mah/g": (1.0, 500.0)},
+    "energy_density": {"wh/l": (1.0, 2500.0)},
     # Physical dimensions — single-cell bounds
-    "mass":                         {"g": (0.05, 70_000.0), "kg": (5e-5, 70.0)},
-    "diameter":                     {"mm": (0.5, 500.0)},
-    "height":                       {"mm": (0.3, 2000.0)},
-    "width":                        {"mm": (0.3, 2000.0)},
-    "length":                       {"mm": (0.3, 2000.0)},
-    "thickness":                    {"mm": (0.05, 200.0)},
+    "mass": {"g": (0.05, 70_000.0), "kg": (5e-5, 70.0)},
+    "diameter": {"mm": (0.5, 500.0)},
+    "height": {"mm": (0.3, 2000.0)},
+    "width": {"mm": (0.3, 2000.0)},
+    "length": {"mm": (0.3, 2000.0)},
+    "thickness": {"mm": (0.05, 200.0)},
     # Cycle life — catches 10x typos (100000 cycles instead of 10000)
-    "cycle_life":                   {"count": (1, 100_000), "cycle": (1, 100_000), "cycles": (1, 100_000)},
+    "cycle_life": {"count": (1, 100_000), "cycle": (1, 100_000), "cycles": (1, 100_000)},
     # Efficiency / fade — must be a percentage
-    "round_trip_energy_efficiency":      {"%": (0.0, 100.0), "percent": (0.0, 100.0)},
+    "round_trip_energy_efficiency": {"%": (0.0, 100.0), "percent": (0.0, 100.0)},
     "round_trip_energy_efficiency_50pct": {"%": (0.0, 100.0), "percent": (0.0, 100.0)},
-    "capacity_fade":                     {"%": (0.0, 100.0), "percent": (0.0, 100.0)},
-    "capacity_threshold_exhaustion":     {"%": (0.0, 100.0), "percent": (0.0, 100.0)},
-    "initial_coulombic_efficiency":      {"%": (0.0, 100.0), "percent": (0.0, 100.0)},
-    "state_of_health":                   {"%": (0.0, 100.0), "percent": (0.0, 100.0)},
-    "self_discharge_rate":               {"%": (0.0, 100.0), "percent": (0.0, 100.0)},
+    "capacity_fade": {"%": (0.0, 100.0), "percent": (0.0, 100.0)},
+    "capacity_threshold_exhaustion": {"%": (0.0, 100.0), "percent": (0.0, 100.0)},
+    "initial_coulombic_efficiency": {"%": (0.0, 100.0), "percent": (0.0, 100.0)},
+    "state_of_health": {"%": (0.0, 100.0), "percent": (0.0, 100.0)},
+    "self_discharge_rate": {"%": (0.0, 100.0), "percent": (0.0, 100.0)},
 }
 
 CELL_IRI_PREFIX = "https://w3id.org/battinfo/cell/"
@@ -462,8 +462,7 @@ def _validate_controlled_values(
 # full cell; the role holders describe a cell that has no polarity to assign.
 _POLARITY_ELECTRODE_FIELDS = ("positive_electrode", "negative_electrode")
 _ROLE_ELECTRODE_FIELDS = ("working_electrode", "counter_electrode")
-_ROLELESS_CONFIGURATIONS = {"half_cell", "half-cell", "three_electrode_cell",
-                            "three-electrode-cell", "three-electrode"}
+_ROLELESS_CONFIGURATIONS = {"half_cell", "half-cell", "three_electrode_cell", "three-electrode-cell", "three-electrode"}
 
 
 def _populated_electrode_fields(doc: Mapping[str, Any], fields: tuple[str, ...]) -> list[str]:
@@ -525,8 +524,7 @@ def _validate_electrode_role_coherence(
     stated = f"cell_configuration '{configuration}'" if configuration else "an unstated cell_configuration"
     if polarity_fields and role_fields:
         preferred, discouraged = (
-            (_ROLE_ELECTRODE_FIELDS, polarity_fields) if roleless
-            else (_POLARITY_ELECTRODE_FIELDS, role_fields)
+            (_ROLE_ELECTRODE_FIELDS, polarity_fields) if roleless else (_POLARITY_ELECTRODE_FIELDS, role_fields)
         )
         _append_issue(
             issues,
@@ -618,10 +616,7 @@ def _validate_material_kind(
             code="semantic.material_kind_unknown",
             severity="error",
             path="material_spec.kind",
-            message=(
-                f"unknown material kind '{kind}'. Valid kinds: "
-                f"{', '.join(material_kind_keys())}."
-            ),
+            message=(f"unknown material kind '{kind}'. Valid kinds: {', '.join(material_kind_keys())}."),
             resource_type=resource_type,
         )
 
@@ -673,10 +668,7 @@ def _validate_electrode_kind(
             code="semantic.electrode_kind_unknown",
             severity="error",
             path="electrode_spec.active_material_kind",
-            message=(
-                f"unknown electrode kind '{kind}'. Valid kinds: "
-                f"{', '.join(electrode_kind_keys())}."
-            ),
+            message=(f"unknown electrode kind '{kind}'. Valid kinds: {', '.join(electrode_kind_keys())}."),
             resource_type=resource_type,
         )
         return
@@ -782,9 +774,7 @@ def _validate_spec_plausibility(
 @lru_cache(maxsize=1)
 def _curated_property_map() -> dict[str, str]:
     """key -> EMMO class IRI from the packaged curated property map."""
-    path = resources.files("battinfo").joinpath(
-        "data", "mappings", "domain-battery", "property_map.curated.json"
-    )
+    path = resources.files("battinfo").joinpath("data", "mappings", "domain-battery", "property_map.curated.json")
     with path.open("r", encoding="utf-8") as fh:
         doc = json.load(fh)
     return {m["key"]: m.get("class_iri", "") for m in doc.get("mappings", [])}
@@ -838,10 +828,7 @@ def _validate_property_mappability(
 
             candidate = _property_type_term(str(key))
             if candidate:
-                outcome = (
-                    f"the JSON-LD export types it with the unreviewed candidate "
-                    f"class '{candidate}'."
-                )
+                outcome = f"the JSON-LD export types it with the unreviewed candidate class '{candidate}'."
             else:
                 outcome = (
                     "the JSON-LD export gives it no quantity class, only its "
@@ -926,7 +913,11 @@ def _validate_specs(
         min_value = spec_value.get("min_value")
         max_value = spec_value.get("max_value")
         typical_value = spec_value.get("typical_value")
-        if isinstance(min_value, (int, float)) and isinstance(max_value, (int, float)) and float(min_value) > float(max_value):
+        if (
+            isinstance(min_value, (int, float))
+            and isinstance(max_value, (int, float))
+            and float(min_value) > float(max_value)
+        ):
             _append_issue(
                 issues,
                 code="semantic.range_invalid",
@@ -993,8 +984,7 @@ def _validate_dataset_semantics(
     has_battery_link = False
     if isinstance(about, list):
         has_battery_link = any(
-            isinstance(item, str)
-            and (item.startswith(CELL_IRI_PREFIX) or item.startswith(CELL_TYPE_IRI_PREFIX))
+            isinstance(item, str) and (item.startswith(CELL_IRI_PREFIX) or item.startswith(CELL_TYPE_IRI_PREFIX))
             for item in about
         )
     elif isinstance(related_entities, Mapping):
@@ -1083,8 +1073,8 @@ def _validate_test_semantics(
         )
 
 
-_EPOCH_MIN = 946684800    # 2000-01-01
-_EPOCH_MAX = 4102444800   # 2100-01-01
+_EPOCH_MIN = 946684800  # 2000-01-01
+_EPOCH_MAX = 4102444800  # 2100-01-01
 
 
 def _walk_epoch_plausibility(
@@ -1288,8 +1278,7 @@ def _validate_parameter_set_identity(
             severity="error",
             path="parameter_set.supersedes",
             message=(
-                f"supersedes names this record's own IRI ({record_id}); it names the earlier "
-                "record this one replaces."
+                f"supersedes names this record's own IRI ({record_id}); it names the earlier record this one replaces."
             ),
             resource_type=resource_type,
         )
@@ -1496,23 +1485,35 @@ def validate_semantic_report(
         """Run the mappability check on ``block['property']`` when present."""
         if isinstance(block, Mapping) and isinstance(block.get("property"), Mapping):
             _validate_property_mappability(
-                block["property"], issues, resource_type,
+                block["property"],
+                issues,
+                resource_type,
                 path_prefix=f"{prefix}.property",
                 extra_known=_component_known,
             )
 
     for body_key in (
-        "material_spec", "material",
-        "electrode_spec", "electrode",
+        "material_spec",
+        "material",
+        "electrode_spec",
+        "electrode",
         # Inline electrode bodies carried directly on a cell spec (not just the
         # standalone electrode records) emit fallback terms too, so check them.
-        "positive_electrode", "negative_electrode",
-        "working_electrode", "counter_electrode",
-        "electrolyte_spec", "electrolyte",
-        "separator_spec", "separator",
-        "current_collector_spec", "current_collector",
-        "housing_spec", "housing",
-        "equipment_spec", "equipment", "channel",
+        "positive_electrode",
+        "negative_electrode",
+        "working_electrode",
+        "counter_electrode",
+        "electrolyte_spec",
+        "electrolyte",
+        "separator_spec",
+        "separator",
+        "current_collector_spec",
+        "current_collector",
+        "housing_spec",
+        "housing",
+        "equipment_spec",
+        "equipment",
+        "channel",
     ):
         body = doc.get(body_key)
         if not isinstance(body, Mapping):

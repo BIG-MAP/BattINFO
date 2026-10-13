@@ -3,6 +3,7 @@
 Split from the former monolithic ``battinfo/api.py`` (beta-hardening 4.2);
 import the public surface from ``battinfo.api``, not from this module.
 """
+
 from __future__ import annotations
 
 import difflib
@@ -38,20 +39,12 @@ UID_UNDASHED_RE = re.compile(r"^[0-9a-hjkmnp-tv-z]{16}$")
 UID_DASHED_RE = re.compile(r"^[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$")
 UID_ALPHABET = "0123456789abcdefghjkmnpqrstvwxyz"
 
-SPEC_IRI_RE = re.compile(
-    r"^https://w3id\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
-)
+SPEC_IRI_RE = re.compile(r"^https://w3id\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$")
 CELL_SPEC_IRI_RE = SPEC_IRI_RE
 TEST_PROTOCOL_IRI_RE = SPEC_IRI_RE
-CELL_IRI_RE = re.compile(
-    r"^https://w3id\.org/battinfo/cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
-)
-DATASET_IRI_RE = re.compile(
-    r"^https://w3id\.org/battinfo/dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
-)
-TEST_IRI_RE = re.compile(
-    r"^https://w3id\.org/battinfo/test/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
-)
+CELL_IRI_RE = re.compile(r"^https://w3id\.org/battinfo/cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$")
+DATASET_IRI_RE = re.compile(r"^https://w3id\.org/battinfo/dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$")
+TEST_IRI_RE = re.compile(r"^https://w3id\.org/battinfo/test/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$")
 # spec/ is canonical; the superseded material-spec/ form stays accepted as
 # input so pre-consolidation records keep loading (IDENTIFIER_POLICY 6.1).
 MATERIAL_SPEC_IRI_RE = re.compile(
@@ -306,9 +299,7 @@ def _query_record_files(
         root = _as_path(source_root) if source_root is not None else Path(DEFAULT_REGISTRATION_SOURCE_ROOT)
         files.extend((path, QUERY_ORIGIN_LOCAL) for path in iter_entity_files(entity_type, root))
     if include_packaged_examples:
-        files.extend(
-            (path, QUERY_ORIGIN_PACKAGED) for path in iter_entity_files(entity_type, EXAMPLES_ROOT)
-        )
+        files.extend((path, QUERY_ORIGIN_PACKAGED) for path in iter_entity_files(entity_type, EXAMPLES_ROOT))
     return files
 
 
@@ -465,6 +456,4 @@ def _spec_iri_re(family_namespace: str) -> re.Pattern[str]:
     """Spec IRIs mint under the shared spec/ namespace (IDENTIFIER_POLICY 6.1);
     the superseded per-family '{family}-spec/' form stays accepted as input so
     records minted before the consolidation keep loading (never break an IRI)."""
-    return re.compile(
-        rf"^https://w3id\.org/battinfo/(?:spec|{re.escape(family_namespace)})/{_UID_TAIL}$"
-    )
+    return re.compile(rf"^https://w3id\.org/battinfo/(?:spec|{re.escape(family_namespace)})/{_UID_TAIL}$")

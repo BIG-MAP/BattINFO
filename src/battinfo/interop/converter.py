@@ -280,9 +280,7 @@ def import_converter_jsonld_record(
     imported_model = model or _extract_product_id(payload.get("schema:productID"))
     if imported_model is None:
         imported_model = _infer_size_code(payload.get("hasCase")) or "converter-coin-cell"
-        warnings.append(
-            "Converter JSON-LD did not expose schema:productID; BattINFO imported a fallback model label."
-        )
+        warnings.append("Converter JSON-LD did not expose schema:productID; BattINFO imported a fallback model label.")
     elif model is None:
         warnings.append(
             "BattINFO imported schema:productID as specification.model because the converter export does not include a distinct reusable model field."
@@ -482,7 +480,9 @@ def import_converter_package(
                 cell_spec=cell_spec,
                 serial_number=first.get("serial_number"),
                 source=ProvenanceInfo(
-                    type=specification.source.type if specification.source.type in {"manual", "lab", "simulation", "other"} else "other",
+                    type=specification.source.type
+                    if specification.source.type in {"manual", "lab", "simulation", "other"}
+                    else "other",
                     file=specification.source.file,
                     url=specification.source.url,
                     citation=specification.source.citation,
@@ -779,9 +779,7 @@ def _map_electrode(node: dict[str, Any] | None) -> dict[str, Any] | None:
 
     collector_node = _mapping_or_none(node.get("hasCurrentCollector"))
     if collector_node is not None:
-        collector_name = _label_for_type(
-            _preferred_type(collector_node, exclude={"CurrentCollector"})
-        )
+        collector_name = _label_for_type(_preferred_type(collector_node, exclude={"CurrentCollector"}))
         collector: dict[str, Any] = {}
         if collector_name is not None:
             collector["name"] = collector_name
@@ -889,7 +887,9 @@ def _map_electrolyte(node: dict[str, Any] | None, warnings: list[str]) -> dict[s
             out["salt"] = salt
 
         raw_solutes = solute_node.get("hasConstituent")
-        raw_solute_count = len(raw_solutes) if isinstance(raw_solutes, list) else (1 if isinstance(raw_solutes, Mapping) else 0)
+        raw_solute_count = (
+            len(raw_solutes) if isinstance(raw_solutes, list) else (1 if isinstance(raw_solutes, Mapping) else 0)
+        )
         if raw_solute_count > 1:
             # The model carries a single salt, so blended-salt electrolytes (e.g.
             # LiPF6 + LiFSI) would otherwise lose every co-salt. Preserve any real
@@ -900,7 +900,9 @@ def _map_electrolyte(node: dict[str, Any] | None, warnings: list[str]) -> dict[s
             for comp in _map_component_group(raw_solutes) or []:
                 if comp.get("name") == chosen_name:
                     continue
-                conc = comp.get("property", {}).get("concentration") if isinstance(comp.get("property"), Mapping) else None
+                conc = (
+                    comp.get("property", {}).get("concentration") if isinstance(comp.get("property"), Mapping) else None
+                )
                 conc_value = conc.get("value") if isinstance(conc, Mapping) else None
                 if not isinstance(conc_value, (int, float)) or conc_value == 0:
                     continue  # zero / placeholder solute — intentionally not modelled
@@ -948,9 +950,7 @@ def _map_separator(node: dict[str, Any] | None) -> dict[str, Any] | None:
         proper_parts = node.get("hasProperPart")
         if isinstance(proper_parts, list):
             part_labels = [
-                _label_for_type(_preferred_type(p, exclude=set()))
-                for p in proper_parts
-                if isinstance(p, Mapping)
+                _label_for_type(_preferred_type(p, exclude=set())) for p in proper_parts if isinstance(p, Mapping)
             ]
             part_labels = [lb for lb in part_labels if lb]
             if part_labels:
@@ -1054,7 +1054,11 @@ def _hardware_summary_comment(payload: Mapping[str, Any]) -> str | None:
 
     if not fragments:
         return None
-    return "Converter-specific hardware metadata not yet modeled in BattINFO descriptor core: " + "; ".join(fragments) + "."
+    return (
+        "Converter-specific hardware metadata not yet modeled in BattINFO descriptor core: "
+        + "; ".join(fragments)
+        + "."
+    )
 
 
 def _case_material(case_node: Mapping[str, Any]) -> str | None:
@@ -1235,8 +1239,7 @@ def _task_chain_to_method(task: Any) -> list[Any]:
                 info = _CONV_TERMINATION.get(sibling or "")
                 if info:
                     quantity, tdir, unit = info
-                    step.termination.append(
-                        Termination(quantity=quantity, value=value, unit=unit, direction=tdir))
+                    step.termination.append(Termination(quantity=quantity, value=value, unit=unit, direction=tdir))
             else:
                 setpoint = next((_CONV_SETPOINT[t] for t in types if t in _CONV_SETPOINT), None)
                 if setpoint:
@@ -1311,7 +1314,10 @@ def _extract_procedure_records(
     test_records: list[dict[str, Any]] = []
     retrieved_timestamp = _safe_retrieved_at(retrieved_at)
 
-    for role, electrode_node in (("positive_electrode", positive_electrode_node), ("negative_electrode", negative_electrode_node)):
+    for role, electrode_node in (
+        ("positive_electrode", positive_electrode_node),
+        ("negative_electrode", negative_electrode_node),
+    ):
         if electrode_node is None:
             continue
         measured_properties = _mapping_list(electrode_node.get("hasMeasuredProperty"))
@@ -1329,7 +1335,9 @@ def _extract_procedure_records(
 
             measurement_parameter = _mapping_or_none(battery_test.get("hasMeasurementParameter")) or {}
             role_label = role.replace("_", " ")
-            protocol_name = _string_value(measurement_parameter.get("rdfs:label")) or f"{role_label} rated capacity procedure"
+            protocol_name = (
+                _string_value(measurement_parameter.get("rdfs:label")) or f"{role_label} rated capacity procedure"
+            )
             protocol_description = _string_value(measurement_parameter.get("rdfs:comment"))
             method = _task_chain_to_method(measurement_parameter.get("hasTask"))
             conditions = _test_object_context(battery_test.get("hasTestObject"))
@@ -1473,6 +1481,7 @@ def _map_distributions(dcat_distributions: list[Any]) -> list[dict[str, Any]]:
 def _extract_doi_from_url(url: str) -> str | None:
     """Extract a bare DOI from a doi.org URL or return None."""
     import re
+
     match = re.search(r"10\.\d{4,9}/[^\s#]+", url)
     return match.group(0) if match else None
 
@@ -1566,6 +1575,7 @@ def import_dataset_record(
     if citation_url is None and citation_text:
         # Try to pull a DOI URL out of the citation string
         import re
+
         doi_match = re.search(r"https?://doi\.org/\S+", citation_text)
         citation_url = doi_match.group(0).rstrip(".,;)") if doi_match else None
     if citation_url or citation_text:
@@ -1589,9 +1599,9 @@ def import_dataset_record(
     # Measurement technique (always cycling for these files)
     dataset["measurement_techniques"] = ["Galvanostatic cycling", "Electrochemical impedance spectroscopy"]
 
-    retrieved_at = _parse_converter_date(
-        _string_value(has_output.get("dc:issued") or has_output.get("schema:datePublished"))
-    ) or 0
+    retrieved_at = (
+        _parse_converter_date(_string_value(has_output.get("dc:issued") or has_output.get("schema:datePublished"))) or 0
+    )
 
     provenance: dict[str, Any] = {
         "source_type": "measurement",
@@ -1615,6 +1625,7 @@ def import_dataset_record(
 # ---------------------------------------------------------------------------
 # Batch importer
 # ---------------------------------------------------------------------------
+
 
 @dataclass(slots=True)
 class BatchImportResult:

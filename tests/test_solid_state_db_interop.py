@@ -8,6 +8,7 @@ anodes, sulfur/NMC/LFP cathodes) absent from the example corpus.
 The fixture is a trimmed, version-pinned sample of the master sheet — see
 tests/fixtures/interop/solid-state-db/PROVENANCE.md.
 """
+
 from __future__ import annotations
 
 import csv
@@ -117,6 +118,7 @@ def test_all_iris_unique() -> None:
 
 def _strip_import_stamps(records: list[dict]) -> list[dict]:
     import copy
+
     records = copy.deepcopy(records)
     for r in records:
         for holder in r.values():
@@ -156,6 +158,7 @@ def batch_import_solid_state_db_from_rows(rows: list[dict[str, str]]):
     # helper mirroring the batch skip-logic without writing a temp CSV
     out = []
     from battinfo.interop.solid_state_db import _clean
+
     for row in rows:
         if _clean(row.get("CAM_Material")) is None and _clean(row.get("AAM_Material")) is None:
             continue
@@ -165,8 +168,5 @@ def batch_import_solid_state_db_from_rows(rows: list[dict[str, str]]):
 
 @pytest.mark.parametrize("fmt", ["coin", "pouch", "other"])
 def test_fixture_covers_multiple_formats(fmt: str) -> None:
-    formats = {
-        r.cell_spec["cell_spec"]["cell_format"]
-        for r in batch_import_solid_state_db(FIXTURE, validate=False)
-    }
+    formats = {r.cell_spec["cell_spec"]["cell_format"] for r in batch_import_solid_state_db(FIXTURE, validate=False)}
     assert fmt in formats

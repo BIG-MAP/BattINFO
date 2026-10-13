@@ -10,6 +10,7 @@ gallery always shows exactly what the current library emits.
 Usage:
     uv run python scripts/gen_web_jsonld.py
 """
+
 from __future__ import annotations
 
 import json
@@ -98,8 +99,7 @@ def render_public(entries: list) -> dict:
     """Raw JSON-LD documents served at /jsonld/<slug>.jsonld — permalinks the
     W3C JSON-LD Playground can fetch (CORS headers set in web/vercel.json)."""
     return {
-        entry["slug"] + ".jsonld": json.dumps(entry["jsonld"], indent=2, ensure_ascii=False) + NL
-        for entry in entries
+        entry["slug"] + ".jsonld": json.dumps(entry["jsonld"], indent=2, ensure_ascii=False) + NL for entry in entries
     }
 
 

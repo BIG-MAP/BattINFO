@@ -9,6 +9,7 @@ The failure modes are injected *after* the code commits to writing (during the
 flush or the atomic commit), not before serialization — a test that only makes
 ``json.dumps`` raise would pass even against the old, non-atomic implementation.
 """
+
 from __future__ import annotations
 
 import json
@@ -29,6 +30,7 @@ from battinfo.workspace_state import _swap_dir
 
 # ── _jsonio.write_json atomicity ──────────────────────────────────────────────
 
+
 def test_write_json_roundtrips_and_leaves_no_temp(tmp_path: Path) -> None:
     path = tmp_path / "rec.json"
     write_json(path, {"a": 1, "b": "x"})
@@ -36,9 +38,7 @@ def test_write_json_roundtrips_and_leaves_no_temp(tmp_path: Path) -> None:
     assert sorted(p.name for p in tmp_path.iterdir()) == ["rec.json"]
 
 
-def test_write_json_preserves_prior_record_when_commit_fails(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_write_json_preserves_prior_record_when_commit_fails(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     path = tmp_path / "rec.json"
     write_json(path, {"original": True})
 
@@ -73,6 +73,7 @@ def test_write_json_preserves_prior_record_when_flush_interrupted(
 
 # ── _swap_dir atomic directory replacement ────────────────────────────────────
 
+
 def test_swap_dir_replaces_contents_with_no_residue(tmp_path: Path) -> None:
     target = tmp_path / "records"
     target.mkdir()
@@ -88,9 +89,7 @@ def test_swap_dir_replaces_contents_with_no_residue(tmp_path: Path) -> None:
     assert not any(p.name.endswith(".bak") for p in tmp_path.iterdir())
 
 
-def test_swap_dir_restores_target_when_swap_fails(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_swap_dir_restores_target_when_swap_fails(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     target = tmp_path / "records"
     target.mkdir()
     (target / "old.json").write_text("OLD", encoding="utf-8")
@@ -126,9 +125,7 @@ def _swap_fixture(tmp_path: Path) -> tuple[Path, Path]:
     return staging, target
 
 
-def test_swap_dir_retries_a_rename_refused_for_a_moment(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_swap_dir_retries_a_rename_refused_for_a_moment(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     staging, target = _swap_fixture(tmp_path)
     real_replace = os.replace
     refusals = {"left": 2}
@@ -169,9 +166,7 @@ def test_swap_dir_gives_up_after_the_retry_window_and_restores_target(
 
 
 @pytest.mark.skipif(sys.platform != "win32", reason="only Windows refuses to rename a folder with a file open in it")
-def test_swap_dir_waits_for_a_handle_held_briefly_in_staging(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_swap_dir_waits_for_a_handle_held_briefly_in_staging(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """The September review's F14 (A-15 in the 0.8.0 evaluation): a file held open in
     the staging folder for half a second, as a virus scanner or indexer does with a
     fresh file, failed the swap at once with WinError 5."""
@@ -204,6 +199,7 @@ def test_swap_dir_waits_for_a_handle_held_briefly_in_staging(
 
 # ── WorkspaceStateStore._write_workspace stages-then-swaps (no rmtree-first) ───
 
+
 def _build_workspace(workspace_root: Path, tmp_path: Path) -> Workspace:
     dataset = tmp_path / "inputs" / "cyc.csv"
     dataset.parent.mkdir(parents=True, exist_ok=True)
@@ -234,16 +230,13 @@ def _build_workspace(workspace_root: Path, tmp_path: Path) -> Workspace:
     return ws
 
 
-def test_interrupted_save_preserves_existing_records(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_interrupted_save_preserves_existing_records(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     workspace_root = tmp_path / "workspace"
     ws = _build_workspace(workspace_root, tmp_path)
     assert ws.save_workspace()["status"] == "ok"
 
     before = {
-        p.relative_to(workspace_root).as_posix(): p.read_text(encoding="utf-8")
-        for p in workspace_root.rglob("*.json")
+        p.relative_to(workspace_root).as_posix(): p.read_text(encoding="utf-8") for p in workspace_root.rglob("*.json")
     }
     assert before, "expected the first save to persist record files"
 
@@ -257,8 +250,7 @@ def test_interrupted_save_preserves_existing_records(
         ws.save_workspace()
 
     after = {
-        p.relative_to(workspace_root).as_posix(): p.read_text(encoding="utf-8")
-        for p in workspace_root.rglob("*.json")
+        p.relative_to(workspace_root).as_posix(): p.read_text(encoding="utf-8") for p in workspace_root.rglob("*.json")
     }
     for rel, content in before.items():
         assert rel in after, f"record {rel} was destroyed by an interrupted save"

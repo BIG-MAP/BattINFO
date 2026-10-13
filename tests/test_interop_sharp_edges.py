@@ -6,6 +6,7 @@
   imported TestSpec instead of silently ignoring the field.
 - A batch import that produces zero records from a real source says so in warnings.
 """
+
 from __future__ import annotations
 
 import sys
@@ -54,11 +55,13 @@ def test_load_json_source_errors_carry_the_file_path(tmp_path: Path) -> None:
 
 
 def test_aurora_unparseable_numeric_field_warns_on_the_record() -> None:
-    spec = import_aurora_unicycler({
-        "method": [
-            {"step": "constant_current", "rate_C": "0.5", "until_voltage_V": "4..2"},
-        ],
-    })
+    spec = import_aurora_unicycler(
+        {
+            "method": [
+                {"step": "constant_current", "rate_C": "0.5", "until_voltage_V": "4..2"},
+            ],
+        }
+    )
     assert any("until_voltage_V" in w for w in spec.comment), spec.comment
     # The parseable setpoint still imports.
     assert spec.method and spec.method[0].setpoints["c_rate"].value == 0.5

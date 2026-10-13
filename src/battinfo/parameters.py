@@ -32,7 +32,12 @@ from pathlib import Path
 from typing import Any, Iterable, Mapping
 
 PARAMETER_SCOPES: tuple[str, ...] = (
-    "material", "electrode", "separator", "electrolyte", "cell", "state",
+    "material",
+    "electrode",
+    "separator",
+    "electrolyte",
+    "cell",
+    "state",
 )
 
 # The parts of a parameter file (one BPX file), in canonical order. A part
@@ -56,14 +61,16 @@ MATERIAL_PARTS: tuple[str, ...] = ("negative_material", "positive_material")
 # BPX importer gives it no provenance class, and record validation warns. A
 # table may reach zero (a conductivity at zero concentration), so only
 # scalars count.
-_POSITIVE_TRANSPORT_PARAMETERS = frozenset({
-    "ionic_conductivity",
-    "electrolyte_diffusivity",
-    "transference_number",
-    "solid_diffusivity",
-    "electronic_conductivity",
-    "transport_efficiency",
-})
+_POSITIVE_TRANSPORT_PARAMETERS = frozenset(
+    {
+        "ionic_conductivity",
+        "electrolyte_diffusivity",
+        "transference_number",
+        "solid_diffusivity",
+        "electronic_conductivity",
+        "transport_efficiency",
+    }
+)
 
 
 def _nonpositive_transport_value(claim: Any) -> float | None:
@@ -318,9 +325,7 @@ def parameter_set_claim_groups(body: Mapping[str, Any]) -> list[tuple[dict[str, 
     parts = body.get("parts")
     if isinstance(parts, list):
         cell_link = {
-            field: body[field]
-            for field in ("cell_spec_id", "cell_instance_id", "virtual_cell")
-            if body.get(field)
+            field: body[field] for field in ("cell_spec_id", "cell_instance_id", "virtual_cell") if body.get(field)
         }
         groups: list[tuple[dict[str, Any], list[Any]]] = []
         for part in parts:

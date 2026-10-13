@@ -84,7 +84,8 @@ def test_build_ingest_workspace_bundles_submission_with_preview_image(tmp_path: 
     assert preview_image.startswith("http://127.0.0.1:8040/")
     assert preview_image.endswith("/IMG_0001.jpg")
     dataset_relations = [
-        relation for relation in cell_resource.get("related_resources", [])
+        relation
+        for relation in cell_resource.get("related_resources", [])
         if relation.get("relationship") == "hasDataset" and relation.get("resource_type") == "dataset"
     ]
     assert len(dataset_relations) == 3, (
@@ -206,9 +207,7 @@ def test_publish_ingest_workspace_submits_bundle_and_returns_cell_url(tmp_path: 
     assert "payload" in captured
 
 
-def test_publish_ingest_workspace_calls_artifact_uploader_and_sets_access_url(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_publish_ingest_workspace_calls_artifact_uploader_and_sets_access_url(tmp_path: Path, monkeypatch) -> None:
     """artifact_uploader receives (key, source_path) and its return value is set as access_url."""
     ingest_root = _make_ingest_root(tmp_path)
     upload_calls: list[tuple[str, Path]] = []
@@ -395,8 +394,10 @@ def _accepting_registry(monkeypatch) -> list[dict]:
     def fake_urlopen(request, timeout=None):  # noqa: ANN001
         payload = json.loads(request.data.decode("utf-8"))
         sent.append(payload)
-        mapping = {resource["source_local_id"]: f"{resource['resource_type']}-demo-{index:03d}"
-                   for index, resource in enumerate(payload["resources"], start=1)}
+        mapping = {
+            resource["source_local_id"]: f"{resource['resource_type']}-demo-{index:03d}"
+            for index, resource in enumerate(payload["resources"], start=1)
+        }
         return _RegistryResponse({"status": "validated", "canonical_id_map": mapping})
 
     monkeypatch.setattr("battinfo.api.urlopen", fake_urlopen)
@@ -420,8 +421,11 @@ def _publish_kwargs(tmp_path: Path) -> dict:
 
 
 def _test_records(payload: dict) -> list[dict]:
-    return [resource["semantic_payload"]["battinfo_records"]["test"]
-            for resource in payload["resources"] if resource["resource_type"] == "test"]
+    return [
+        resource["semantic_payload"]["battinfo_records"]["test"]
+        for resource in payload["resources"]
+        if resource["resource_type"] == "test"
+    ]
 
 
 def test_publish_with_an_artifact_base_url_sends_no_local_path(tmp_path: Path, monkeypatch) -> None:
@@ -431,7 +435,9 @@ def test_publish_with_an_artifact_base_url_sends_no_local_path(tmp_path: Path, m
     ingest_root = _make_ingest_root(tmp_path)
     sent = _accepting_registry(monkeypatch)
     result = publish_ingest_workspace(
-        ingest_root, artifact_base_url="https://cdn.example.org/battinfo", **_publish_kwargs(tmp_path),
+        ingest_root,
+        artifact_base_url="https://cdn.example.org/battinfo",
+        **_publish_kwargs(tmp_path),
     )
     assert result["status"] == "ok" and len(sent) == 1
     assert local_file_references(sent[0]) == []
@@ -449,15 +455,20 @@ def test_publish_with_an_uploader_sends_no_local_path(tmp_path: Path, monkeypatc
     ingest_root = _make_ingest_root(tmp_path)
     sent = _accepting_registry(monkeypatch)
     result = publish_ingest_workspace(
-        ingest_root, artifact_uploader=lambda key, path: f"https://store.example.org/{key}",
+        ingest_root,
+        artifact_uploader=lambda key, path: f"https://store.example.org/{key}",
         **_publish_kwargs(tmp_path),
     )
     assert result["status"] == "ok"
     assert local_file_references(sent[0]) == []
-    datasets = [resource["semantic_payload"]["battinfo_records"]["dataset"]
-                for resource in sent[0]["resources"] if resource["resource_type"] == "dataset"]
-    assert datasets and all(record["dataset"]["access_url"].startswith("https://store.example.org/")
-                            for record in datasets)
+    datasets = [
+        resource["semantic_payload"]["battinfo_records"]["dataset"]
+        for resource in sent[0]["resources"]
+        if resource["resource_type"] == "dataset"
+    ]
+    assert datasets and all(
+        record["dataset"]["access_url"].startswith("https://store.example.org/") for record in datasets
+    )
 
 
 def test_publish_without_artifact_urls_is_refused(tmp_path: Path, monkeypatch) -> None:
@@ -476,19 +487,32 @@ def test_ingest_publish_cli_with_an_artifact_base_url_passes(tmp_path: Path, mon
     result = CliRunner().invoke(
         app,
         [
-            "ingest", "publish", str(ingest_root),
-            "--type-record", str(EXAMPLE_CELL_TYPE),
-            "--resource-iri", "https://w3id.org/battinfo/cell/15qn-rpd4-xhy7-kx2q",
-            "--workspace-root", str(tmp_path / "workspace"),
-            "--workspace-id", "google-g20m7-instance-demo",
-            "--publisher-id", "demo-lab",
-            "--source-version", "demo-2026-04-09",
-            "--license", "CC-BY-4.0",
-            "--artifact-base-url", "https://cdn.example.org/battinfo",
-            "--registry-url", "https://registry.example.org",
-            "--api-key", "secret",
+            "ingest",
+            "publish",
+            str(ingest_root),
+            "--type-record",
+            str(EXAMPLE_CELL_TYPE),
+            "--resource-iri",
+            "https://w3id.org/battinfo/cell/15qn-rpd4-xhy7-kx2q",
+            "--workspace-root",
+            str(tmp_path / "workspace"),
+            "--workspace-id",
+            "google-g20m7-instance-demo",
+            "--publisher-id",
+            "demo-lab",
+            "--source-version",
+            "demo-2026-04-09",
+            "--license",
+            "CC-BY-4.0",
+            "--artifact-base-url",
+            "https://cdn.example.org/battinfo",
+            "--registry-url",
+            "https://registry.example.org",
+            "--api-key",
+            "secret",
             "--force",
-            "--format", "json",
+            "--format",
+            "json",
         ],
     )
     assert result.exit_code == 0, result.stdout
@@ -508,19 +532,30 @@ def _two_file_dataset_package(folder: Path) -> dict:
         "dataset": {
             "id": "https://w3id.org/battinfo/dataset/aaaa-bbbb-cccc-dddd",
             "access_url": first.as_uri(),
-            "distributions": [{"content_url": first.as_uri(), "encoding_format": "text/csv"},
-                              {"content_url": second.as_uri(), "encoding_format": "text/csv"}],
+            "distributions": [
+                {"content_url": first.as_uri(), "encoding_format": "text/csv"},
+                {"content_url": second.as_uri(), "encoding_format": "text/csv"},
+            ],
         },
         "provenance": {"source_type": "measurement", "source_url": first.as_uri()},
     }
-    return {"resources": [{
-        "resource_type": "dataset", "source_local_id": "ds-1",
-        "semantic_payload": {"battinfo_records": {"dataset": record}},
-        "distributions": [
-            {"title": "run", "access_url": first.as_uri(), "package_path": "artifacts/dataset/x/run.csv"},
-            {"title": "run raw", "access_url": second.as_uri(), "package_path": "artifacts/dataset/x/run-raw.csv"},
-        ],
-    }]}
+    return {
+        "resources": [
+            {
+                "resource_type": "dataset",
+                "source_local_id": "ds-1",
+                "semantic_payload": {"battinfo_records": {"dataset": record}},
+                "distributions": [
+                    {"title": "run", "access_url": first.as_uri(), "package_path": "artifacts/dataset/x/run.csv"},
+                    {
+                        "title": "run raw",
+                        "access_url": second.as_uri(),
+                        "package_path": "artifacts/dataset/x/run-raw.csv",
+                    },
+                ],
+            }
+        ]
+    }
 
 
 def _dataset_record(package: dict) -> dict:
@@ -546,11 +581,14 @@ def test_an_artifact_base_url_points_each_distribution_at_its_own_copy(tmp_path:
     from battinfo.ingest import _prepare_live_submission_payload
 
     package = _two_file_dataset_package(tmp_path / "ingest")
-    _prepare_live_submission_payload(package, artifact_base_url="https://cdn.example.org/battinfo",
-                                     hero_alt="", hero_caption="")
+    _prepare_live_submission_payload(
+        package, artifact_base_url="https://cdn.example.org/battinfo", hero_alt="", hero_caption=""
+    )
     record = _dataset_record(package)
-    first, second = ("https://cdn.example.org/battinfo/dataset/x/run.csv",
-                     "https://cdn.example.org/battinfo/dataset/x/run-raw.csv")
+    first, second = (
+        "https://cdn.example.org/battinfo/dataset/x/run.csv",
+        "https://cdn.example.org/battinfo/dataset/x/run-raw.csv",
+    )
     assert [item["content_url"] for item in record["dataset"]["distributions"]] == [first, second]
     assert record["dataset"]["access_url"] == first
     assert record["provenance"]["source_url"] == first

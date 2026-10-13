@@ -23,6 +23,7 @@ Layout (private submodules; import from ``battinfo.api``, not from them):
 Truly shared helpers live one level up in ``battinfo._util`` and
 ``battinfo._emmo_instruments``.
 """
+
 from __future__ import annotations
 
 import difflib
@@ -338,8 +339,6 @@ from battinfo.workflows.map import run_mapping
 # monolithic module exposed them.
 for _wrapper_name in _COMPONENT_WRAPPER_NAMES:
     globals()[_wrapper_name] = getattr(_components_mod, _wrapper_name)
-
-
 
 
 __all__ = [

@@ -9,6 +9,7 @@ Absence is simulated by poisoning sys.modules with None: both the import
 statement and importlib.import_module raise ImportError when a module's
 sys.modules entry is None, and monkeypatch restores the real entries afterwards.
 """
+
 from __future__ import annotations
 
 import sys
@@ -42,8 +43,7 @@ def test_require_extra_pandas_names_tabular_extra(monkeypatch: pytest.MonkeyPatc
         require_extra("pandas", "tabular", "This feature reads tabular data files")
     message = str(excinfo.value)
     assert message == (
-        "This feature reads tabular data files and needs the [tabular] extra: "
-        "pip install battinfo[tabular]"
+        "This feature reads tabular data files and needs the [tabular] extra: pip install battinfo[tabular]"
     )
     assert excinfo.value.__cause__ is not None  # original ImportError is chained
 
@@ -70,9 +70,7 @@ def test_import_discovery_xlsx_names_tabular_extra(monkeypatch: pytest.MonkeyPat
         import_discovery_xlsx("does-not-matter.xlsx")
 
 
-def test_convert_without_converter_names_processing_extra(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_convert_without_converter_names_processing_extra(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     import battinfo
 
     _poison(monkeypatch, "bdf")

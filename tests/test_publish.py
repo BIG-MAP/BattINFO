@@ -213,9 +213,12 @@ def test_publish_record_cell_spec_is_battery_cell_specification(tmp_path: Path) 
 def test_descriptor_instance_nodes_have_dual_type() -> None:
     """Cell instance nodes must carry both BatteryCell (EMMO) and schema:IndividualProduct (schema.org)."""
     from battinfo.transform.json_to_jsonld import _descriptor_instances_to_jsonld
-    nodes = _descriptor_instances_to_jsonld([
-        {"id": "https://w3id.org/battinfo/cell/test1", "name": "cell-1"},
-    ])
+
+    nodes = _descriptor_instances_to_jsonld(
+        [
+            {"id": "https://w3id.org/battinfo/cell/test1", "name": "cell-1"},
+        ]
+    )
     assert len(nodes) == 1
     types = nodes[0]["@type"]
     if isinstance(types, str):
@@ -268,6 +271,7 @@ def test_publish_record_test_protocol(tmp_path: Path) -> None:
 # save_record() — dry-run and duplicate handling
 # ---------------------------------------------------------------------------
 
+
 def test_save_record_dry_run_does_not_write(tmp_path: Path) -> None:
     doc = json.loads(_EXAMPLE_CELL_TYPE.read_text(encoding="utf-8"))
     result = save_record(doc, source_root=tmp_path / "src", dry_run=True)
@@ -302,4 +306,3 @@ def test_save_record_duplicate_policy_return_existing(tmp_path: Path) -> None:
     save_record(doc, source_root=tmp_path / "src")
     result = save_record(doc, source_root=tmp_path / "src", duplicate_policy="return_existing")
     assert result["status"] == "exists"
-

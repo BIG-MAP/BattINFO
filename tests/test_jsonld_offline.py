@@ -6,6 +6,7 @@ network is required to validate or normalize a record. The suite-wide
 ``--disable-socket`` gate enforces offline-ness for every test; these tests pin
 the JSON-LD machinery that makes the publish path offline in the first place.
 """
+
 from __future__ import annotations
 
 import sys

@@ -210,7 +210,12 @@ def test_workspace_bundle_writes_registry_intake_for_multi_record_workspace(tmp_
     assert "cell_spec" in cell_resources[0]["semantic_payload"]["battinfo_records"]
     cell_local_id = cell_resources[0]["source_local_id"]
     test_related = {item["source_local_id"] for resource in test_resources for item in resource["related_resources"]}
-    dataset_related = {item["source_local_id"] for resource in dataset_resources for item in resource["related_resources"] if item["resource_type"] == "cell"}
+    dataset_related = {
+        item["source_local_id"]
+        for resource in dataset_resources
+        for item in resource["related_resources"]
+        if item["resource_type"] == "cell"
+    }
     assert test_related == {cell_local_id}
     assert dataset_related == {cell_local_id}
 
@@ -218,7 +223,9 @@ def test_workspace_bundle_writes_registry_intake_for_multi_record_workspace(tmp_
     relationships = {item["relationship"] for item in dataset_resource["related_resources"]}
     assert relationships == {"aboutCell", "generatedByTest"}
     test_local_ids = {item["source_local_id"] for item in test_resources}
-    assert {item["source_local_id"] for item in dataset_resource["related_resources"] if item["resource_type"] == "test"} <= test_local_ids
+    assert {
+        item["source_local_id"] for item in dataset_resource["related_resources"] if item["resource_type"] == "test"
+    } <= test_local_ids
     distribution = dataset_resource["distributions"][0]
     assert distribution["package_path"].startswith("artifacts/dataset/")
     assert distribution["access_url"].startswith("file:")
@@ -310,7 +317,3 @@ def test_workspace_bundle_can_emit_single_cell_spec_submission(tmp_path: Path) -
     assert payload["submission_mode"] == "resource"
     assert payload["resource"]["resource_type"] == "cell_spec"
     assert payload["resource"]["semantic_payload"]["battinfo_records"]["cell_spec"]["cell_spec"]["model"] == "CR2032"
-
-
-
-

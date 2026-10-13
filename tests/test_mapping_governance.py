@@ -85,30 +85,44 @@ def test_entity_type_map_covers_current_descriptor_core_values() -> None:
 def _type_stack(specification: dict[str, Any]) -> list[str]:
     """Return the physical EMMO @type list from the isDescriptionFor node in descriptor pipeline output."""
     from battinfo.transform.json_to_jsonld import _descriptor_specification_to_jsonld
+
     node = _descriptor_specification_to_jsonld(specification)
     types = node.get("isDescriptionFor", {}).get("@type", [])
     return types if isinstance(types, list) else [types]
 
 
 def test_entity_type_map_na_ion_chemistry_stacks_sodium_ion_battery() -> None:
-    spec = {"format": "prismatic", "chemistry": "na-ion",
-            "positive_electrode_basis": "unknown", "negative_electrode_basis": "hard-carbon"}
+    spec = {
+        "format": "prismatic",
+        "chemistry": "na-ion",
+        "positive_electrode_basis": "unknown",
+        "negative_electrode_basis": "hard-carbon",
+    }
     types = _type_stack(spec)
     assert "SodiumIonBattery" in types, f"SodiumIonBattery not in @type: {types}"
 
 
 def test_entity_type_map_lco_uses_specific_battery_class() -> None:
-    spec = {"format": "cylindrical", "chemistry": "li-ion",
-            "positive_electrode_basis": "lco", "negative_electrode_basis": "graphite"}
+    spec = {
+        "format": "cylindrical",
+        "chemistry": "li-ion",
+        "positive_electrode_basis": "lco",
+        "negative_electrode_basis": "graphite",
+    }
     types = _type_stack(spec)
     assert "LithiumIonCobaltOxideBattery" in types, f"LithiumIonCobaltOxideBattery not in @type: {types}"
     assert "LithiumIonBattery" not in types or "LithiumIonCobaltOxideBattery" in types
 
 
 def test_entity_type_map_nca_uses_specific_battery_class_without_electrode_node() -> None:
-    spec = {"format": "cylindrical", "chemistry": "li-ion",
-            "positive_electrode_basis": "nca", "negative_electrode_basis": "graphite"}
+    spec = {
+        "format": "cylindrical",
+        "chemistry": "li-ion",
+        "positive_electrode_basis": "nca",
+        "negative_electrode_basis": "graphite",
+    }
     from battinfo.transform.json_to_jsonld import _descriptor_specification_to_jsonld
+
     full_node = _descriptor_specification_to_jsonld(spec)
     types = full_node.get("isDescriptionFor", {}).get("@type", [])
     if isinstance(types, str):
@@ -120,8 +134,13 @@ def test_entity_type_map_nca_uses_specific_battery_class_without_electrode_node(
 
 def test_entity_type_map_silicon_graphite_anode_emits_electrode_node() -> None:
     from battinfo.transform.json_to_jsonld import _descriptor_specification_to_jsonld
-    spec = {"format": "cylindrical", "chemistry": "li-ion",
-            "positive_electrode_basis": "nmc", "negative_electrode_basis": "silicon-graphite"}
+
+    spec = {
+        "format": "cylindrical",
+        "chemistry": "li-ion",
+        "positive_electrode_basis": "nmc",
+        "negative_electrode_basis": "silicon-graphite",
+    }
     node = _descriptor_specification_to_jsonld(spec)["isDescriptionFor"]
     neg = node.get("hasNegativeElectrode", {})
     assert neg.get("@type") == "SiliconGraphiteElectrode", f"Expected SiliconGraphiteElectrode, got: {neg}"
@@ -129,8 +148,13 @@ def test_entity_type_map_silicon_graphite_anode_emits_electrode_node() -> None:
 
 def test_entity_type_map_hard_carbon_anode_emits_electrode_node() -> None:
     from battinfo.transform.json_to_jsonld import _descriptor_specification_to_jsonld
-    spec = {"format": "prismatic", "chemistry": "na-ion",
-            "positive_electrode_basis": "unknown", "negative_electrode_basis": "hard-carbon"}
+
+    spec = {
+        "format": "prismatic",
+        "chemistry": "na-ion",
+        "positive_electrode_basis": "unknown",
+        "negative_electrode_basis": "hard-carbon",
+    }
     node = _descriptor_specification_to_jsonld(spec)["isDescriptionFor"]
     neg = node.get("hasNegativeElectrode", {})
     assert neg.get("@type") == "HardCarbonElectrode", f"Expected HardCarbonElectrode, got: {neg}"
@@ -140,14 +164,22 @@ def test_reference_electrode_stacks_the_half_cell_device_classes() -> None:
     """A half-cell types as the DEVICE classes, never as ElectrochemicalHalfCell."""
     from battinfo.transform.cell_spec_node import physical_type_stack
 
-    spec = {"cell_format": "coin", "chemistry": "li-metal",
-            "positive_electrode_basis": "lfp", "reference_electrode": "lithium"}
+    spec = {
+        "cell_format": "coin",
+        "chemistry": "li-metal",
+        "positive_electrode_basis": "lfp",
+        "reference_electrode": "lithium",
+    }
     types = physical_type_stack(spec)
     assert "BatteryHalfCell" in types and "HalfCellDevice" in types, types
     assert "ElectrochemicalHalfCell" not in types
 
-    full_cell = {"cell_format": "coin", "chemistry": "li-ion",
-                 "positive_electrode_basis": "lfp", "negative_electrode_basis": "graphite"}
+    full_cell = {
+        "cell_format": "coin",
+        "chemistry": "li-ion",
+        "positive_electrode_basis": "lfp",
+        "negative_electrode_basis": "graphite",
+    }
     assert "BatteryHalfCell" not in physical_type_stack(full_cell)
 
 
@@ -155,8 +187,7 @@ def test_descriptor_path_agrees_on_the_half_cell_type_stack() -> None:
     from battinfo.transform.json_to_jsonld import _descriptor_specification_to_jsonld
 
     node = _descriptor_specification_to_jsonld(
-        {"format": "coin", "chemistry": "li-metal", "positive_electrode_basis": "lfp",
-         "reference_electrode": "lithium"}
+        {"format": "coin", "chemistry": "li-metal", "positive_electrode_basis": "lfp", "reference_electrode": "lithium"}
     )
     types = node["isDescriptionFor"]["@type"]
     assert "BatteryHalfCell" in types and "HalfCellDevice" in types, types
@@ -174,9 +205,7 @@ def test_material_map_resolves_stoichiometric_nmc_and_keeps_the_generic() -> Non
 
 def test_every_mapped_term_resolves_in_the_bundled_emmo_context() -> None:
     """Emitted class prefLabels must expand through the pinned domain-battery context."""
-    context = _load_json(
-        ROOT / "src" / "battinfo" / "data" / "context" / "domain-battery.context.json"
-    )["@context"]
+    context = _load_json(ROOT / "src" / "battinfo" / "data" / "context" / "domain-battery.context.json")["@context"]
     material_map = _load_json(ROOT / "assets" / "mappings" / "domain-battery" / "material_map.json")
     unresolved = [m["emmo_class"] for m in material_map["mappings"] if m["emmo_class"] not in context]
     assert not unresolved, f"material_map classes missing from the EMMO context: {unresolved}"
@@ -206,18 +235,17 @@ def test_battinfo_application_ontology_imports_are_pinned() -> None:
         "battinfo.ttl must explicitly import domain-electrochemistry at a pinned version IRI."
     )
     # domain-chemical-substance carries the material vocabulary material_map.json uses.
-    assert (
-        "owl:imports <https://w3id.org/emmo/domain/chemical-substance/0.15.0/chemical-substance>" in content
-    ), "battinfo.ttl must explicitly import domain-chemical-substance at a pinned version IRI."
+    assert "owl:imports <https://w3id.org/emmo/domain/chemical-substance/0.15.0/chemical-substance>" in content, (
+        "battinfo.ttl must explicitly import domain-chemical-substance at a pinned version IRI."
+    )
     # The ontology must carry a versionIRI.
     assert "owl:versionIRI" in content, "battinfo.ttl must declare owl:versionIRI."
     # No local hasInstance property should be defined (it belongs to domain-battery).
     assert "battinfo:hasInstance a owl:ObjectProperty" not in content
 
 
-
-
 # ── chemistry vocabulary (entity_type_map 0.6.0) ──────────────────────────────
+
 
 def _chemistry_map() -> dict[str, dict[str, Any]]:
     path = ROOT / "src" / "battinfo" / "data" / "mappings" / "domain-battery" / "entity_type_map.json"
@@ -264,14 +292,26 @@ def test_recommended_chemistry_labels_each_own_their_battery_class() -> None:
 
 
 def test_specific_lithium_metal_system_emits_its_own_class() -> None:
-    types = _type_stack({"format": "coin", "chemistry": "Li-MnO2",
-                         "positive_electrode_basis": "unknown", "negative_electrode_basis": "unknown"})
+    types = _type_stack(
+        {
+            "format": "coin",
+            "chemistry": "Li-MnO2",
+            "positive_electrode_basis": "unknown",
+            "negative_electrode_basis": "unknown",
+        }
+    )
     assert "LithiumManganeseDioxideBattery" in types, types
 
 
 def test_li_primary_alias_keeps_resolving_and_says_primary() -> None:
-    types = _type_stack({"format": "coin", "chemistry": "Li-primary",
-                         "positive_electrode_basis": "unknown", "negative_electrode_basis": "unknown"})
+    types = _type_stack(
+        {
+            "format": "coin",
+            "chemistry": "Li-primary",
+            "positive_electrode_basis": "unknown",
+            "negative_electrode_basis": "unknown",
+        }
+    )
     assert "LithiumMetalBattery" in types, types
     assert "PrimaryBattery" in types, types
 
@@ -357,7 +397,7 @@ def _emitted_emmo_iris() -> dict[str, list[str]]:
             value = value.get("@id")
         for prefix, base in _COMPACT_PREFIXES:
             if isinstance(value, str) and value.startswith(prefix):
-                return base + value[len(prefix):]
+                return base + value[len(prefix) :]
         return value
 
     found: dict[str, list[str]] = {}
@@ -472,7 +512,11 @@ def test_an_electrode_ocp_claim_types_as_open_circuit_potential() -> None:
     ("key", "label", "uuid"),
     [
         ("ocp", "OpenCircuitPotential", "e272f229_7b45_4436_9b0b_30391ee4e5be"),
-        ("entropic_coefficient", "TemperatureCoefficientOfTheOpenCircuitPotential", "9b44a651_afa9_4889_ae07_9ac49ede8ac1"),
+        (
+            "entropic_coefficient",
+            "TemperatureCoefficientOfTheOpenCircuitPotential",
+            "9b44a651_afa9_4889_ae07_9ac49ede8ac1",
+        ),
         ("solid_diffusivity", "GuestDiffusivity", "fed4582e_0de4_43e1_b51a_e3496697c25d"),
         ("electrode_pair_count", "NumberOfElectrodePairs", "f7a81b04_6600_4bbf_a70e_5ebbed911069"),
         ("transport_efficiency", "TransportEfficiency", "3605456a_e952_4093_98b6_d8c24c37c19e"),
@@ -572,10 +616,12 @@ def test_a_curated_unit_beats_a_candidate_and_a_hand_kept_alias(monkeypatch: pyt
 
     tables = {
         "unit_map.curated.json": {"mappings": [{"symbol": "Xq", "unit_iri": "https://example.org/curated"}]},
-        "unit_map.candidates.json": {"mappings": [
-            {"symbol": "Xq", "unit_iri": "https://example.org/candidate"},
-            {"symbol": "Yq", "unit_iri": "https://example.org/candidate-only"},
-        ]},
+        "unit_map.candidates.json": {
+            "mappings": [
+                {"symbol": "Xq", "unit_iri": "https://example.org/candidate"},
+                {"symbol": "Yq", "unit_iri": "https://example.org/candidate-only"},
+            ]
+        },
     }
     monkeypatch.setattr(json_to_jsonld, "_load_mapping_file", lambda name: tables[name])
     monkeypatch.setattr(json_to_jsonld, "MANUAL_UNIT_TYPES", {"Xq": "https://example.org/manual"})

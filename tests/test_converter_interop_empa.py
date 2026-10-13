@@ -18,6 +18,7 @@ Generation B: v3.2.0 / CoinCellSchema v1.1.17
   - hasOutput plain object with dcat:distribution list
   - NMC active material with rdfs:comment, no @type
 """
+
 from __future__ import annotations
 
 import sys
@@ -38,6 +39,7 @@ from battinfo.validate import validate_json  # noqa: E402
 # ---------------------------------------------------------------------------
 # Minimal inline fixtures — representative of each generation
 # ---------------------------------------------------------------------------
+
 
 def _gen_a_fixture() -> dict:
     """Generation A: v1.1.4 / CoinCellSchema 1.1.7 (Dataset-rocrate format)."""
@@ -533,6 +535,7 @@ def _gen_b_fixture() -> dict:
 # Generation A tests
 # ---------------------------------------------------------------------------
 
+
 class TestGenerationA:
     def test_import_produces_valid_descriptor(self) -> None:
         result = import_converter_jsonld_record(_gen_a_fixture())
@@ -596,6 +599,7 @@ class TestGenerationA:
 # Generation B tests
 # ---------------------------------------------------------------------------
 
+
 class TestGenerationB:
     def test_import_produces_valid_descriptor(self) -> None:
         result = import_converter_jsonld_record(_gen_b_fixture())
@@ -648,6 +652,7 @@ class TestGenerationB:
 # Cross-generation consistency
 # ---------------------------------------------------------------------------
 
+
 class TestCrossGeneration:
     def test_both_produce_coin_format(self) -> None:
         a = import_converter_jsonld_record(_gen_a_fixture()).record
@@ -683,7 +688,9 @@ def test_batch_import_kiye_all_succeed() -> None:
     failures = [r for r in results if not r.ok]
     assert not failures, "\n".join(f"{r.path.name}: {r.error}" for r in failures)
     for r in results:
-        assert isinstance(r.descriptor.get("specification"), dict), f"{r.path.name}: converter output should have specification key"
+        assert isinstance(r.descriptor.get("specification"), dict), (
+            f"{r.path.name}: converter output should have specification key"
+        )
 
 
 @pytest.mark.skipif(not ROCRATE_DIR.exists(), reason="Dataset-rocrate not present on this machine")
@@ -693,4 +700,6 @@ def test_batch_import_rocrate_all_succeed() -> None:
     failures = [r for r in results if not r.ok]
     assert not failures, "\n".join(f"{r.path.name}: {r.error}" for r in failures)
     for r in results:
-        assert isinstance(r.descriptor.get("specification"), dict), f"{r.path.name}: converter output should have specification key"
+        assert isinstance(r.descriptor.get("specification"), dict), (
+            f"{r.path.name}: converter output should have specification key"
+        )

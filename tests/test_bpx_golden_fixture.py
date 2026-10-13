@@ -8,6 +8,7 @@ here: every value in the file is a claim in one part of one record, the
 record's annex, or a NAMED warning, and ``to_bpx`` rebuilds the file's
 Parameterisation and State exactly from that record.
 """
+
 from __future__ import annotations
 
 import copy
@@ -54,9 +55,13 @@ def test_one_record_holds_every_part() -> None:
     body = record["parameter_set"]
     assert [p["part"] for p in body["parts"]] == [
         "cell",
-        "negative_material", "negative_electrode",
-        "positive_material", "positive_electrode",
-        "separator", "electrolyte", "state",
+        "negative_material",
+        "negative_electrode",
+        "positive_material",
+        "positive_electrode",
+        "separator",
+        "electrolyte",
+        "state",
     ]
     assert {part: len(claims) for part, claims in _parts(record).items()} == {
         "cell": 8,
@@ -73,9 +78,7 @@ def test_one_record_holds_every_part() -> None:
     assert by_part["positive_material"]["material_kind"] == "nmc811"
     assert body["cell_spec_id"] == CELL_SPEC_IRI
     # Curves stay curves: both OCPs and both electrolyte transport tables.
-    curves = {
-        c["parameter"] for claims in _parts(record).values() for c in claims if "curve" in c
-    }
+    curves = {c["parameter"] for claims in _parts(record).values() for c in claims if "curve" in c}
     assert curves == {"ocp", "electrolyte_diffusivity", "ionic_conductivity"}
     # The Cell and State blocks are claims now, in the units BPX states them in.
     cell = {c["parameter"]: c["quantity"] for c in _parts(record)["cell"]}
@@ -268,8 +271,9 @@ def test_bpx_v1_state_round_trips() -> None:
     doc = _as_v1(_doc())
     record = _record(doc)
     state = {c["parameter"]: c["quantity"]["value"] for c in _parts(record)["state"]}
-    assert state["initial_concentration"] == (
-        doc["State"]["Initial conditions"]["Initial electrolyte concentration [mol.m-3]"]
+    assert (
+        state["initial_concentration"]
+        == (doc["State"]["Initial conditions"]["Initial electrolyte concentration [mol.m-3]"])
     )
     out = to_bpx(record)
     assert out.bpx["State"] == doc["State"]
@@ -291,8 +295,11 @@ def test_a_unit_other_than_bpx_states_is_converted_on_export() -> None:
         if claim["parameter"] == "nominal_capacity":
             claim["quantity"] = {"value": 1500.0, "unit": "mAh"}
     edited = create_parameter_set(
-        name=body["name"], parts=body["parts"], parameters_sha256=body["parameters_sha256"],
-        cell_spec_id=CELL_SPEC_IRI, model_context=body["model_context"],
+        name=body["name"],
+        parts=body["parts"],
+        parameters_sha256=body["parameters_sha256"],
+        cell_spec_id=CELL_SPEC_IRI,
+        model_context=body["model_context"],
     )
     out = to_bpx(edited)
     assert out.bpx["Parameterisation"]["Cell"]["Nominal cell capacity [A.h]"] == pytest.approx(1.5)
@@ -324,7 +331,7 @@ def test_emitted_jsonld_uses_the_records_context_and_absolute_license() -> None:
                 if not k.startswith("@") and ":" not in k:
                     out.add(k)
                 if k == "@type":
-                    for t in (v if isinstance(v, list) else [v]):
+                    for t in v if isinstance(v, list) else [v]:
                         if isinstance(t, str) and ":" not in t:
                             out.add(t)
                 else:

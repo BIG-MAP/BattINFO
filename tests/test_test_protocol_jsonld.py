@@ -5,6 +5,7 @@ implementation lived inside the publication graph builder. It now lives in
 ``battinfo.jsonld`` and both callers share it, so a protocol published in a deposit
 and one exported standalone are the same graph.
 """
+
 from __future__ import annotations
 
 import json
@@ -107,7 +108,7 @@ def _bare_terms(node: object, out: set[str] | None = None) -> set[str]:
             if not key.startswith("@") and ":" not in key:
                 out.add(key)
             if key == "@type":
-                for token in (value if isinstance(value, list) else [value]):
+                for token in value if isinstance(value, list) else [value]:
                     if isinstance(token, str) and ":" not in token:
                         out.add(token)
             else:
@@ -124,13 +125,18 @@ def test_publication_graph_and_standalone_document_agree(tmp_path: Path) -> None
     ws = battinfo.workspace(str(tmp_path))
     graph_doc = ws._assemble_zenodo_jsonld(
         {"test-protocol": [record]},
-        zenodo_record_id=1, prereserved_doi="10.5281/zenodo.1",
-        record_url="https://zenodo.org/records/1", data_filenames=[],
-        title="t", description="d", license="CC-BY-4.0",
+        zenodo_record_id=1,
+        prereserved_doi="10.5281/zenodo.1",
+        record_url="https://zenodo.org/records/1",
+        data_filenames=[],
+        title="t",
+        description="d",
+        license="CC-BY-4.0",
     )
     graph_node = next(n for n in graph_doc["@graph"] if n.get("@id") == record["test_spec"]["id"])
-    standalone = {k: v for k, v in record_to_jsonld(record, "test-protocol").items()
-                  if k not in ("@context", "dcterms:source")}
+    standalone = {
+        k: v for k, v in record_to_jsonld(record, "test-protocol").items() if k not in ("@context", "dcterms:source")
+    }
     for key, value in standalone.items():
         assert graph_node.get(key) == value, f"{key} differs between the two emitters"
 
@@ -138,8 +144,7 @@ def test_publication_graph_and_standalone_document_agree(tmp_path: Path) -> None
 def test_attribution_is_stamped_like_every_other_record_type() -> None:
     record = dict(_example("3p7k-2m9r-6t4n-1v8x"))
     record["license"] = "https://creativecommons.org/licenses/by/4.0/"
-    record["contributor"] = [{"name": "Josiah Carberry",
-                              "same_as": "https://orcid.org/0000-0002-1825-0097"}]
+    record["contributor"] = [{"name": "Josiah Carberry", "same_as": "https://orcid.org/0000-0002-1825-0097"}]
     record["funding"] = {"identifier": "101103997", "name": "A grant"}
     doc = record_to_jsonld(record, "test-protocol")
     assert doc["dcterms:license"]["@id"] == record["license"]
@@ -152,8 +157,6 @@ def test_export_writes_a_protocol_document(tmp_path: Path) -> None:
     records = tmp_path / ".battinfo" / "records" / "test-protocol"
     records.mkdir(parents=True)
     record = _example("3p7k-2m9r-6t4n-1v8x")
-    (records / "test-protocol-3p7k-2m9r-6t4n-1v8x.json").write_text(
-        json.dumps(record), encoding="utf-8"
-    )
+    (records / "test-protocol-3p7k-2m9r-6t4n-1v8x.json").write_text(json.dumps(record), encoding="utf-8")
     written = ws.export()
     assert any(p.name.endswith(".jsonld") and "test-protocol" in p.parent.name for p in written)

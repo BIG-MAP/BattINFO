@@ -40,7 +40,9 @@ def component_spec_from_holder(
 
     body = {k: v for k, v in holder.items() if k != "name"}
     return create_component_spec(
-        family, name=name, body=body,
+        family,
+        name=name,
+        body=body,
         uid=_stable_uid(uid_seed or f"{family}-spec:{name.strip().lower()}"),
         validate=False,
     )
@@ -59,9 +61,5 @@ def extract_component_specs(cell_spec_record: Mapping[str, Any]) -> list[dict[st
         holder = cell_spec_record.get(holder_key)
         if isinstance(holder, Mapping) and holder:
             name = holder.get("name") or f"{base} {label}"
-            out.append(
-                component_spec_from_holder(
-                    family, holder, name=name, uid_seed=f"{family}-spec:{base}:{label}"
-                )
-            )
+            out.append(component_spec_from_holder(family, holder, name=name, uid_seed=f"{family}-spec:{base}:{label}"))
     return out

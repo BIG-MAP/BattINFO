@@ -16,6 +16,7 @@ labs, publishers. Design rules:
 
 Import the public surface from ``battinfo.api``, not from this module.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -88,13 +89,24 @@ def _record_from_organization(
         if unknown:
             raise TypeError(f"unexpected keyword argument(s): {', '.join(sorted(unknown))}")
         explicit: dict[str, Any] = {
-            "name": name, "handle": handle, "type": type, "legal_name": legal_name,
-            "alternate_name": alternate_name, "url": url, "same_as": same_as,
-            "location": location, "founding_date": founding_date,
+            "name": name,
+            "handle": handle,
+            "type": type,
+            "legal_name": legal_name,
+            "alternate_name": alternate_name,
+            "url": url,
+            "same_as": same_as,
+            "location": location,
+            "founding_date": founding_date,
             "dissolution_date": dissolution_date,
-            "parent_organization": parent_organization, "description": description,
-            "uid": uid, "id": id, "source_type": source_type,
-            "source_url": source_url, "retrieved_at": retrieved_at, "notes": notes,
+            "parent_organization": parent_organization,
+            "description": description,
+            "uid": uid,
+            "id": id,
+            "source_type": source_type,
+            "source_url": source_url,
+            "retrieved_at": retrieved_at,
+            "notes": notes,
         }
         for camel, value in aliases.items():
             snake = _ORGANIZATION_TO_SNAKE[camel]
@@ -106,9 +118,7 @@ def _record_from_organization(
     if not isinstance(name, str) or not name.strip():
         raise ValueError("organization needs a non-empty name.")
     if type is not None and type not in _ORGANIZATION_TYPES:
-        raise ValueError(
-            f"type must be one of {', '.join(_ORGANIZATION_TYPES)}; got {type!r}."
-        )
+        raise ValueError(f"type must be one of {', '.join(_ORGANIZATION_TYPES)}; got {type!r}.")
 
     if id is not None:
         if not ORGANIZATION_IRI_RE.fullmatch(id):
@@ -138,9 +148,7 @@ def _record_from_organization(
     if legal_name is not None:
         body["legal_name"] = legal_name
     if alternate_name is not None:
-        body["alternate_name"] = (
-            [alternate_name] if isinstance(alternate_name, str) else list(alternate_name)
-        )
+        body["alternate_name"] = [alternate_name] if isinstance(alternate_name, str) else list(alternate_name)
     if url is not None:
         body["url"] = url
     if same_as is not None:
@@ -266,15 +274,17 @@ def query_organizations(
             continue
         if type is not None and body.get("type") != type:
             continue
-        records.append({
-            "id": body.get("id"),
-            "short_id": body.get("short_id"),
-            "name": body.get("name"),
-            "type": body.get("type"),
-            "url": body.get("url"),
-            "origin": origin,
-            "path": str(path),
-            "record": doc,
-        })
+        records.append(
+            {
+                "id": body.get("id"),
+                "short_id": body.get("short_id"),
+                "name": body.get("name"),
+                "type": body.get("type"),
+                "url": body.get("url"),
+                "origin": origin,
+                "path": str(path),
+                "record": doc,
+            }
+        )
     records.sort(key=lambda r: (str(r.get("name") or ""), str(r.get("id") or "")))
     return _paginate(records, limit=limit, offset=offset)

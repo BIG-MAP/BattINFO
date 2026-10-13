@@ -3,6 +3,7 @@
 Split from the former monolithic ``battinfo/api.py`` (beta-hardening 4.2);
 import the public surface from ``battinfo.api``, not from this module.
 """
+
 from __future__ import annotations
 
 import re
@@ -126,31 +127,65 @@ def _staging_cell_spec_input(
                 uid=uid,
                 model_name=str(product.get("model") or product.get("model_name") or ""),
                 manufacturer=str(manufacturer or ""),
-                format=str(product.get("cell_format") or product.get("cell_format") or product.get("format") or "unknown"),
+                format=str(
+                    product.get("cell_format") or product.get("cell_format") or product.get("format") or "unknown"
+                ),
                 chemistry=str(product.get("chemistry") or "unknown"),
-                positive_electrode_basis=(product.get("positive_electrode_basis") or product.get("positive_electrode_basis"))
+                positive_electrode_basis=(
+                    product.get("positive_electrode_basis") or product.get("positive_electrode_basis")
+                )
                 if isinstance(product.get("positive_electrode_basis") or product.get("positive_electrode_basis"), str)
                 else None,
-                negative_electrode_basis=(product.get("negative_electrode_basis") or product.get("negative_electrode_basis"))
+                negative_electrode_basis=(
+                    product.get("negative_electrode_basis") or product.get("negative_electrode_basis")
+                )
                 if isinstance(product.get("negative_electrode_basis") or product.get("negative_electrode_basis"), str)
                 else None,
-                size_code=(product.get("size_code") if isinstance(product.get("size_code"), str) else product.get("size_code") if isinstance(product.get("size_code"), str) else None),
-                iec_code=(product.get("iec_code") if isinstance(product.get("iec_code"), str) else product.get("iec_code") if isinstance(product.get("iec_code"), str) else None),
-                country_of_origin=(product.get("country_of_origin") if isinstance(product.get("country_of_origin"), str) else product.get("country_of_origin") if isinstance(product.get("country_of_origin"), str) else None),
+                size_code=(
+                    product.get("size_code")
+                    if isinstance(product.get("size_code"), str)
+                    else product.get("size_code")
+                    if isinstance(product.get("size_code"), str)
+                    else None
+                ),
+                iec_code=(
+                    product.get("iec_code")
+                    if isinstance(product.get("iec_code"), str)
+                    else product.get("iec_code")
+                    if isinstance(product.get("iec_code"), str)
+                    else None
+                ),
+                country_of_origin=(
+                    product.get("country_of_origin")
+                    if isinstance(product.get("country_of_origin"), str)
+                    else product.get("country_of_origin")
+                    if isinstance(product.get("country_of_origin"), str)
+                    else None
+                ),
                 year=product.get("year") if isinstance(product.get("year"), int) else None,
                 datasheet_revision=(product.get("datasheet_revision") or product.get("datasheet_revision"))
                 if isinstance(product.get("datasheet_revision") or product.get("datasheet_revision"), str)
                 else None,
                 specs=dict(record_payload.get("properties") or {}),
-                source_type=str(provenance.get("source_type")) if isinstance(provenance, Mapping) and provenance.get("source_type") else None,
+                source_type=str(provenance.get("source_type"))
+                if isinstance(provenance, Mapping) and provenance.get("source_type")
+                else None,
                 source_file=(
                     str(provenance.get("source_file"))
                     if isinstance(provenance, Mapping) and isinstance(provenance.get("source_file"), str)
-                    else source_path.name if source_path is not None else None
+                    else source_path.name
+                    if source_path is not None
+                    else None
                 ),
-                source_url=provenance.get("source_url") if isinstance(provenance, Mapping) and isinstance(provenance.get("source_url"), str) else None,
-                citation=provenance.get("citation") if isinstance(provenance, Mapping) and isinstance(provenance.get("citation"), str) else None,
-                file_hash=provenance.get("file_hash") if isinstance(provenance, Mapping) and isinstance(provenance.get("file_hash"), str) else None,
+                source_url=provenance.get("source_url")
+                if isinstance(provenance, Mapping) and isinstance(provenance.get("source_url"), str)
+                else None,
+                citation=provenance.get("citation")
+                if isinstance(provenance, Mapping) and isinstance(provenance.get("citation"), str)
+                else None,
+                file_hash=provenance.get("file_hash")
+                if isinstance(provenance, Mapping) and isinstance(provenance.get("file_hash"), str)
+                else None,
                 retrieved_at=_to_unix_time(provenance.get("retrieved_at")) if isinstance(provenance, Mapping) else None,
                 notes=_comment_list(record_payload.get("notes")),
             ),
@@ -163,8 +198,12 @@ def _staging_cell_spec_input(
     manufacturer = payload.get("manufacturer")
     format_value = payload.get("format")
     chemistry = payload.get("chemistry")
-    if not all(isinstance(value, str) and value.strip() for value in (manufacturer, model_name, format_value, chemistry)):
-        raise ValueError("staging cell-spec JSON requires non-empty string fields: manufacturer, model/model_name, format, chemistry.")
+    if not all(
+        isinstance(value, str) and value.strip() for value in (manufacturer, model_name, format_value, chemistry)
+    ):
+        raise ValueError(
+            "staging cell-spec JSON requires non-empty string fields: manufacturer, model/model_name, format, chemistry."
+        )
 
     specs = payload.get("properties")
     if specs is None:
@@ -179,7 +218,9 @@ def _staging_cell_spec_input(
         raise ValueError("staging cell-spec JSON field 'provenance' must be an object when provided.")
 
     year = payload.get("year")
-    parsed_year = year if isinstance(year, int) else int(year) if isinstance(year, str) and year.strip().isdigit() else None
+    parsed_year = (
+        year if isinstance(year, int) else int(year) if isinstance(year, str) and year.strip().isdigit() else None
+    )
     retrieved_at = payload.get("retrieved_at", provenance.get("retrieved_at"))
 
     return (
@@ -197,15 +238,21 @@ def _staging_cell_spec_input(
             else None,
             size_code=payload.get("size_code") if isinstance(payload.get("size_code"), str) else None,
             iec_code=payload.get("iec_code") if isinstance(payload.get("iec_code"), str) else None,
-            country_of_origin=payload.get("country_of_origin") if isinstance(payload.get("country_of_origin"), str) else None,
+            country_of_origin=payload.get("country_of_origin")
+            if isinstance(payload.get("country_of_origin"), str)
+            else None,
             year=parsed_year,
-            datasheet_revision=payload.get("datasheet_revision") if isinstance(payload.get("datasheet_revision"), str) else None,
+            datasheet_revision=payload.get("datasheet_revision")
+            if isinstance(payload.get("datasheet_revision"), str)
+            else None,
             specs=dict(specs),
             source_type=str(payload.get("source_type", provenance.get("source_type")) or "") or None,
             source_file=(
                 str(payload.get("source_file", provenance.get("source_file")))
                 if isinstance(payload.get("source_file", provenance.get("source_file")), str)
-                else source_path.name if source_path is not None else None
+                else source_path.name
+                if source_path is not None
+                else None
             ),
             source_url=payload.get("source_url", provenance.get("source_url"))
             if isinstance(payload.get("source_url", provenance.get("source_url")), str)
@@ -385,6 +432,7 @@ def promote_staging_cell_specs(
 # Datasets carry their own canonical IRI and `bdc:` identifier, so promotion is
 # simpler than cell-spec: no manufacturer/model token derivation. Citations (the
 # dataset↔publication links) pass through unchanged into the curated record.
+
 
 def _staging_dataset_input(source: dict[str, Any] | PathLike) -> tuple[dict[str, Any], Path | None]:
     """Load a staging dataset record (a ``{schema_version, dataset, provenance}`` doc)."""
@@ -587,7 +635,11 @@ def _curated_cell_spec_source(
 
     inferred_local_id: str | None = None
     if source_path is not None:
-        if source_path.name == "record.json" and source_path.parent.name and not source_path.parent.name.startswith("_"):
+        if (
+            source_path.name == "record.json"
+            and source_path.parent.name
+            and not source_path.parent.name.startswith("_")
+        ):
             inferred_local_id = source_path.parent.name
         elif source_path.stem and not source_path.stem.startswith("_"):
             inferred_local_id = source_path.stem
@@ -702,7 +754,9 @@ def build_curated_cell_spec_submission(
     record, source_path, inferred_local_id = _curated_cell_spec_source(source)
     resolved_source_local_id = source_local_id or inferred_local_id
     if not isinstance(resolved_source_local_id, str) or not resolved_source_local_id.strip():
-        raise ValueError("Could not infer source_local_id for curated cell-spec source; provide source_local_id explicitly.")
+        raise ValueError(
+            "Could not infer source_local_id for curated cell-spec source; provide source_local_id explicitly."
+        )
 
     validation = validate_record(record, policy=validation_policy)
     if not validation.ok:

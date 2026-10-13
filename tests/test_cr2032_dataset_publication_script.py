@@ -91,6 +91,7 @@ def test_generate_cr2032_dataset_publication(tmp_path: Path) -> None:
 
     assert report_file["cell_spec_id"] in ids_a
     assert report_file["cell_spec_id"] in ids_b
+
     def _is_schema_dataset(node: dict) -> bool:
         types = node.get("@type")
         types = types if isinstance(types, list) else [types]
@@ -330,7 +331,9 @@ def test_publish_object_first_api(tmp_path: Path) -> None:
     assert loaded.dataset.funders[0]["name"] == "Battery Data Alliance"
     assert loaded.dataset.main_entity[0]["type"] == "Table"
     assert loaded.dataset.main_entity[0]["table_schema"]["id"] == "https://example.org/datasets/cr2032/table-schema"
-    assert any(dist["content_url"] == "https://example.org/downloads/cr2032.csv" for dist in loaded.dataset.distributions)
+    assert any(
+        dist["content_url"] == "https://example.org/downloads/cr2032.csv" for dist in loaded.dataset.distributions
+    )
     assert loaded.cell_spec.model == "CR2032"
     assert loaded.cell_instance.serial_number == "energizer-cr2032-202602-dtjrga"
     assert loaded.test.protocol.name == "constant current discharging"
@@ -338,9 +341,7 @@ def test_publish_object_first_api(tmp_path: Path) -> None:
 
     payload = _load_json(dataset_dir / "battinfo.publish.jsonld")
     dataset_node = next(
-        node
-        for node in payload["@graph"]
-        if isinstance(node, dict) and node.get("@id") == loaded.dataset.id
+        node for node in payload["@graph"] if isinstance(node, dict) and node.get("@id") == loaded.dataset.id
     )
     assert dataset_node["schema:keywords"] == ["battery", "coin cell"]
     assert dataset_node["schema:funder"][0]["schema:name"] == "Battery Data Alliance"
@@ -356,5 +357,3 @@ def test_publish_object_first_api(tmp_path: Path) -> None:
     html_text = Path(result["html_path"]).read_text(encoding="utf-8")
     assert "application/ld+json" in html_text
     assert "Energizer CR2032 dataset" in html_text
-
-

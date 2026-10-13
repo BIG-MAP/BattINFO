@@ -281,7 +281,6 @@ def _checked(value: Any, path: str) -> Any:
         if value.reason == "too large":
             raise ValueError(f"{_where(path)} is {value.text[:40]}, too large for a JSON number (RFC 8785).")
         raise ValueError(
-            f"{_where(path)} is {value.text}, which is not JSON (RFC 8259): RFC 8785 JSON has no NaN "
-            "or Infinity."
+            f"{_where(path)} is {value.text}, which is not JSON (RFC 8259): RFC 8785 JSON has no NaN or Infinity."
         )
     return value

@@ -122,9 +122,7 @@ def test_a_handle_off_the_grammar_is_a_schema_error(entity_type: str, bad: str) 
 def test_a_handle_over_the_length_limit_is_a_schema_error() -> None:
     long_handle = "flores-ocv/" + "a" * 120 + "-cell"
     report = validate_record_report(_with_handle("cell", long_handle), policy="default")
-    assert any(
-        issue.code == "schema.maxLength" and issue.path == "cell_instance.handle" for issue in report.errors
-    )
+    assert any(issue.code == "schema.maxLength" and issue.path == "cell_instance.handle" for issue in report.errors)
 
 
 # ── Semantic nudge ────────────────────────────────────────────────────────────
@@ -135,13 +133,16 @@ def _handle_warnings(record: dict, policy: str = "strict") -> list:
     return [issue for issue in report.issues if issue.code == "semantic.handle_kind_word_expected"]
 
 
-@pytest.mark.parametrize(("entity_type", "handle"), [
-    ("cell", "flores-ocv/graphite-aq-1-063b77-cell-spec"),
-    ("cell-spec", "flores-ocv/graphite-aq-1-cell"),
-    ("material", "flores-ocv/graphite-material"),
-    ("test-protocol", "flores-ocv/gitt-protocol"),
-    ("electrode", "flores-ocv/graphite-aq-1-063b77"),
-])
+@pytest.mark.parametrize(
+    ("entity_type", "handle"),
+    [
+        ("cell", "flores-ocv/graphite-aq-1-063b77-cell-spec"),
+        ("cell-spec", "flores-ocv/graphite-aq-1-cell"),
+        ("material", "flores-ocv/graphite-material"),
+        ("test-protocol", "flores-ocv/gitt-protocol"),
+        ("electrode", "flores-ocv/graphite-aq-1-063b77"),
+    ],
+)
 def test_a_handle_without_its_kind_word_gets_a_warning(entity_type: str, handle: str) -> None:
     warnings = _handle_warnings(_with_handle(entity_type, handle))
     assert len(warnings) == 1
@@ -158,7 +159,9 @@ def test_the_kind_word_may_be_the_whole_last_segment() -> None:
 
 def test_a_collection_carries_no_kind_word_but_a_plain_dataset_does() -> None:
     series = Dataset(
-        id=SERIES_PIN, name="Half-cell OCV collection", handle="flores-ocv",
+        id=SERIES_PIN,
+        name="Half-cell OCV collection",
+        handle="flores-ocv",
         access_url="https://doi.org/10.5281/zenodo.20086298",
         additional_type=["DatasetSeries"],
         source=ProvenanceInfo(type="catalog", retrieved_at=1755648000),
@@ -189,11 +192,13 @@ def test_every_record_type_emits_its_handle_as_an_identifier(entity_type: str) -
     record = _with_handle(entity_type, handle)
     for mode in ("url", "inline"):
         node = record_to_jsonld(record, _jsonld_type(entity_type), context=mode)
-        assert _handle_identifiers(node) == [{
-            "@type": "schema:PropertyValue",
-            "schema:propertyID": HANDLE_PROPERTY_ID,
-            "schema:value": handle,
-        }]
+        assert _handle_identifiers(node) == [
+            {
+                "@type": "schema:PropertyValue",
+                "schema:propertyID": HANDLE_PROPERTY_ID,
+                "schema:value": handle,
+            }
+        ]
 
 
 @pytest.mark.parametrize("entity_type", KIND_IDS)
@@ -265,14 +270,28 @@ def test_api_builders_place_the_handle_next_to_the_name() -> None:
         (create_material_spec(name="Graphite", kind="graphite", handle=handle), "material_spec"),
         (create_equipment_spec(uid=SPEC_UID, name="Cycler", handle="lab/cycler-equipment-spec"), "equipment_spec"),
         (create_organization(name="SINTEF", handle="sintef-organization"), "organization"),
-        (create_component_spec("separator", uid=SPEC_UID, name="PP", handle="lab/pp-separator-spec"),
-         "separator_spec"),
-        (create_component_instance("separator", uid=SPEC_UID, spec_id=SPEC_PIN, name="PP roll 1",
-                                   handle="lab/pp-1-separator"), "separator"),
-        (create_parameter_set(name="Chen 2020 - graphite", material_kind="graphite",
-                              handle="chen-2020/graphite-parameter-set",
-                              claims=[{"parameter": "density", "quantity": {"value": 2.26, "unit": "g/cm3"},
-                                       "provenance_class": "literature"}]), "parameter_set"),
+        (create_component_spec("separator", uid=SPEC_UID, name="PP", handle="lab/pp-separator-spec"), "separator_spec"),
+        (
+            create_component_instance(
+                "separator", uid=SPEC_UID, spec_id=SPEC_PIN, name="PP roll 1", handle="lab/pp-1-separator"
+            ),
+            "separator",
+        ),
+        (
+            create_parameter_set(
+                name="Chen 2020 - graphite",
+                material_kind="graphite",
+                handle="chen-2020/graphite-parameter-set",
+                claims=[
+                    {
+                        "parameter": "density",
+                        "quantity": {"value": 2.26, "unit": "g/cm3"},
+                        "provenance_class": "literature",
+                    }
+                ],
+            ),
+            "parameter_set",
+        ),
     ]
     for record, key in records:
         body_keys = list(record[key])
@@ -280,8 +299,12 @@ def test_api_builders_place_the_handle_next_to_the_name() -> None:
 
 
 def test_record_models_round_trip_the_handle() -> None:
-    cell = Cell(id=CELL_IRI, cell_spec_id=SPEC_PIN, name="Graphite AQ-1 cell 063b77",
-                handle="flores-ocv/graphite-aq-1-063b77-cell")
+    cell = Cell(
+        id=CELL_IRI,
+        cell_spec_id=SPEC_PIN,
+        name="Graphite AQ-1 cell 063b77",
+        handle="flores-ocv/graphite-aq-1-063b77-cell",
+    )
     record = cell.to_record()
     assert record["cell_instance"]["handle"] == "flores-ocv/graphite-aq-1-063b77-cell"
     assert Cell.from_record(record).to_record() == record
@@ -320,8 +343,9 @@ def _gitt_session(tmp_path: Path, *, name: str, **test_kwargs) -> AuthoringWorks
 
 
 def test_ws_add_carries_handles_into_saved_records(tmp_path: Path) -> None:
-    _gitt_session(tmp_path, name="Graphite AQ-1 cell 063b77 GITT test",
-                  handle="flores-ocv/graphite-aq-1-063b77-gitt-test")
+    _gitt_session(
+        tmp_path, name="Graphite AQ-1 cell 063b77 GITT test", handle="flores-ocv/graphite-aq-1-063b77-gitt-test"
+    )
     (spec,) = _records(tmp_path, "cell-spec")
     (cell,) = _records(tmp_path, "cell-instance")
     (test,) = _records(tmp_path, "test")
@@ -368,8 +392,9 @@ def test_a_new_test_title_moves_the_iri_unless_it_is_pinned(tmp_path: Path) -> N
 
     original = _records(tmp_path / "a", "test")[0]["test"]["id"]
     original_dataset = _records(tmp_path / "a", "dataset")[0]["dataset"]["id"]
-    _gitt_session(tmp_path / "c", name="Graphite AQ-1 cell 063b77 GITT test",
-                  iri=original, dataset_iris=[original_dataset])
+    _gitt_session(
+        tmp_path / "c", name="Graphite AQ-1 cell 063b77 GITT test", iri=original, dataset_iris=[original_dataset]
+    )
     (test,) = _records(tmp_path / "c", "test")
     (dataset,) = _records(tmp_path / "c", "dataset")
     assert test["test"]["id"] == original
@@ -385,13 +410,16 @@ def test_a_test_can_be_pinned_by_uid(tmp_path: Path) -> None:
     assert _records(tmp_path, "dataset")[0]["dataset"]["id"] == DATASET_PIN
 
 
-@pytest.mark.parametrize(("pins", "message"), [
-    ({"iri": "https://w3id.org/battinfo/cell/aaaa-bbbb-cccc-0002"}, "not a test IRI"),
-    ({"iri": TEST_PIN, "uid": "aaaa-bbbb-cccc-0009"}, "different tests"),
-    ({"uid": "not-a-uid"}, "UID must be"),
-    ({"dataset_iris": [DATASET_PIN, MEMBER_PIN]}, "number of data files"),
-    ({"dataset_iris": ["https://w3id.org/battinfo/test/aaaa-bbbb-cccc-0002"]}, "dataset IRIs"),
-])
+@pytest.mark.parametrize(
+    ("pins", "message"),
+    [
+        ({"iri": "https://w3id.org/battinfo/cell/aaaa-bbbb-cccc-0002"}, "not a test IRI"),
+        ({"iri": TEST_PIN, "uid": "aaaa-bbbb-cccc-0009"}, "different tests"),
+        ({"uid": "not-a-uid"}, "UID must be"),
+        ({"dataset_iris": [DATASET_PIN, MEMBER_PIN]}, "number of data files"),
+        ({"dataset_iris": ["https://w3id.org/battinfo/test/aaaa-bbbb-cccc-0002"]}, "dataset IRIs"),
+    ],
+)
 def test_bad_test_pins_fail_before_anything_is_created(tmp_path: Path, pins: dict, message: str) -> None:
     ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
     spec = _cell_spec(ws, tmp_path)
@@ -420,10 +448,17 @@ def test_one_test_options_are_refused_in_batch_mode(tmp_path: Path) -> None:
 def test_a_test_spec_draft_keeps_its_explicit_id_and_handle(tmp_path: Path) -> None:
     ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
     draft = tmp_path / "gitt.test-spec.json"
-    draft.write_text(json.dumps({
-        "name": "GITT test spec", "type": "gitt", "id": SPEC_PIN,
-        "handle": "flores-ocv/gitt-test-spec",
-    }), encoding="utf-8")
+    draft.write_text(
+        json.dumps(
+            {
+                "name": "GITT test spec",
+                "type": "gitt",
+                "id": SPEC_PIN,
+                "handle": "flores-ocv/gitt-test-spec",
+            }
+        ),
+        encoding="utf-8",
+    )
     test_spec = ws.load(draft)
     spec = _cell_spec(ws, tmp_path)
     ws.add("cell", spec=spec, names=["c1"])
@@ -445,20 +480,33 @@ def test_a_test_spec_draft_may_pin_by_uid_and_rejects_a_foreign_id(tmp_path: Pat
         ws.load(draft)
 
 
-@pytest.mark.parametrize(("iri", "extra"), [
-    (SERIES_PIN, {"additional_type": ["DatasetSeries"], "handle": "flores-ocv"}),
-    (MEMBER_PIN, {"series_id": SERIES_PIN, "cell_instance_id": CELL_IRI,
-                  "handle": "flores-ocv/graphite-aq-1-063b77-gitt-dataset"}),
-])
+@pytest.mark.parametrize(
+    ("iri", "extra"),
+    [
+        (SERIES_PIN, {"additional_type": ["DatasetSeries"], "handle": "flores-ocv"}),
+        (
+            MEMBER_PIN,
+            {
+                "series_id": SERIES_PIN,
+                "cell_instance_id": CELL_IRI,
+                "handle": "flores-ocv/graphite-aq-1-063b77-gitt-dataset",
+            },
+        ),
+    ],
+)
 def test_save_dataset_keeps_an_explicit_id_whatever_the_name(tmp_path: Path, iri: str, extra: dict) -> None:
     """A collection's IRI otherwise seeds from access_url + name; an explicit id wins."""
     for name in ("Old title", "Graphite AQ-1 cell 063b77 GITT dataset"):
         dataset = Dataset(
-            id=iri, name=name, access_url="https://doi.org/10.5281/zenodo.20086298",
-            source=ProvenanceInfo(type="catalog", retrieved_at=1755648000), **extra,
+            id=iri,
+            name=name,
+            access_url="https://doi.org/10.5281/zenodo.20086298",
+            source=ProvenanceInfo(type="catalog", retrieved_at=1755648000),
+            **extra,
         )
-        result = save_dataset(dataset, source_root=tmp_path, mode="upsert",
-                              resolve_references=False, build_jsonld=False, build_html=False)
+        result = save_dataset(
+            dataset, source_root=tmp_path, mode="upsert", resolve_references=False, build_jsonld=False, build_html=False
+        )
         assert result["id"] == iri
     (saved,) = [json.loads(p.read_text(encoding="utf-8")) for p in (tmp_path / "dataset").glob("*.json")]
     assert saved["dataset"]["id"] == iri

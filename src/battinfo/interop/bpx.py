@@ -57,34 +57,34 @@ PathLike = str | Path
 # BPX "Parameterisation.Cell" key → (battinfo_spec_key, unit, scale_to_unit)
 # scale_to_unit: multiply the BPX value by this factor to get the battinfo unit
 _BPX_CELL_MAP: dict[str, tuple[str, str, float]] = {
-    "Nominal cell capacity [A.h]":        ("nominal_capacity",           "Ah",   1.0),
-    "Nominal cell energy [W.h]":          ("nominal_energy",             "Wh",   1.0),
-    "Nominal cell voltage [V]":           ("nominal_voltage",            "V",    1.0),
-    "Upper voltage cut-off [V]":          ("charging_cutoff_voltage",    "V",    1.0),
-    "Lower voltage cut-off [V]":          ("discharging_cutoff_voltage", "V",    1.0),
-    "Cell mass [kg]":                     ("mass",                       "g",    1000.0),
-    "Cell diameter [m]":                  ("diameter",                   "mm",   1000.0),
-    "Cell height [m]":                    ("height",                     "mm",   1000.0),
-    "Electrode height [m]":               ("height",                     "mm",   1000.0),
-    "Electrode width [m]":                ("width",                      "mm",   1000.0),
-    "Cell thickness [m]":                 ("thickness",                  "mm",   1000.0),
-    "Nominal cell resistance [Ohm]":      ("internal_resistance",        "Ω",    1.0),
+    "Nominal cell capacity [A.h]": ("nominal_capacity", "Ah", 1.0),
+    "Nominal cell energy [W.h]": ("nominal_energy", "Wh", 1.0),
+    "Nominal cell voltage [V]": ("nominal_voltage", "V", 1.0),
+    "Upper voltage cut-off [V]": ("charging_cutoff_voltage", "V", 1.0),
+    "Lower voltage cut-off [V]": ("discharging_cutoff_voltage", "V", 1.0),
+    "Cell mass [kg]": ("mass", "g", 1000.0),
+    "Cell diameter [m]": ("diameter", "mm", 1000.0),
+    "Cell height [m]": ("height", "mm", 1000.0),
+    "Electrode height [m]": ("height", "mm", 1000.0),
+    "Electrode width [m]": ("width", "mm", 1000.0),
+    "Cell thickness [m]": ("thickness", "mm", 1000.0),
+    "Nominal cell resistance [Ohm]": ("internal_resistance", "Ω", 1.0),
     # As-designed geometry (the BPX-required electrode area included): these
     # are engineering facts of the cell design, so they live as spec
     # properties and round-trip through to_bpx.
-    "Electrode area [m2]":                ("electrode_area",         "cm2",  1e4),
-    "External surface area [m2]":         ("external_surface_area",  "cm2",  1e4),
-    "Volume [m3]":                        ("volume",                 "cm3",  1e6),
-    "Cell volume [m3]":                   ("volume",                 "cm3",  1e6),
-    "Specific heat capacity [J.K-1.kg-1]": None,   # no battinfo spec equivalent
-    "Thermal conductivity [W.m-1.K-1]":   None,
-    "Initial temperature [K]":            None,
-    "Ambient temperature [K]":            None,
+    "Electrode area [m2]": ("electrode_area", "cm2", 1e4),
+    "External surface area [m2]": ("external_surface_area", "cm2", 1e4),
+    "Volume [m3]": ("volume", "cm3", 1e6),
+    "Cell volume [m3]": ("volume", "cm3", 1e6),
+    "Specific heat capacity [J.K-1.kg-1]": None,  # no battinfo spec equivalent
+    "Thermal conductivity [W.m-1.K-1]": None,
+    "Initial temperature [K]": None,
+    "Ambient temperature [K]": None,
     # The temperature parameters are stated conditions of the parameterisation
     # (model conventions), not properties of the cell design.
-    "Reference temperature [K]":          None,
+    "Reference temperature [K]": None,
     "Number of electrode pairs connected in parallel to make a cell": None,
-    "External temperature [K]":           None,
+    "External temperature [K]": None,
 }
 
 # Fields in Positive/Negative electrode blocks that hint at the electrode basis
@@ -224,7 +224,7 @@ def _extract_specs(
     specs: dict[str, Any] = {}
     extras: dict[str, Any] = {}
     known_no_spec: list[str] = []  # in our table, deliberately no BattINFO equivalent
-    unknown: list[str] = []        # not in our table at all
+    unknown: list[str] = []  # not in our table at all
 
     for bpx_key, raw_value in cell_params.items():
         if bpx_key not in _BPX_CELL_MAP:
@@ -240,14 +240,10 @@ def _extract_specs(
             continue
         battinfo_key, unit, scale = mapping
         if not isinstance(raw_value, (int, float)) or isinstance(raw_value, bool):
-            warnings.append(
-                f"BPX field '{bpx_key}' has non-numeric value {raw_value!r}; skipped."
-            )
+            warnings.append(f"BPX field '{bpx_key}' has non-numeric value {raw_value!r}; skipped.")
             continue
         if not math.isfinite(raw_value):
-            warnings.append(
-                f"BPX field '{bpx_key}' has non-finite value {raw_value!r}; skipped."
-            )
+            warnings.append(f"BPX field '{bpx_key}' has non-finite value {raw_value!r}; skipped.")
             continue
         value = float(raw_value) * scale
         # Round to 6 significant figures to avoid float noise from scaling
@@ -265,16 +261,11 @@ def _extract_specs(
             f"verbatim in extras: {', '.join(known_no_spec)}"
         )
     if unknown:
-        warnings.append(
-            f"Unknown BPX Cell parameters, carried verbatim in extras: "
-            f"{', '.join(unknown)}"
-        )
+        warnings.append(f"Unknown BPX Cell parameters, carried verbatim in extras: {', '.join(unknown)}")
     return specs, extras
 
 
-def _fold_state_block(
-    data: Mapping[str, Any], warnings: list[str]
-) -> tuple[dict[str, Any], dict[str, Any]]:
+def _fold_state_block(data: Mapping[str, Any], warnings: list[str]) -> tuple[dict[str, Any], dict[str, Any]]:
     """Fold a BPX >= 1.0 top-level ``State`` block back into its v0.x homes.
 
     The inverse of the State moves of :func:`upgrade_bpx`:
@@ -312,10 +303,7 @@ def _fold_state_block(
             unknown.append(str(section))
     if unknown:
         # EVERY key is named — a truncated list is a silent drop for the rest.
-        warnings.append(
-            "BPX State entries with no BattINFO home were skipped: "
-            + ", ".join(sorted(unknown))
-        )
+        warnings.append("BPX State entries with no BattINFO home were skipped: " + ", ".join(sorted(unknown)))
     return cell_fields, electrolyte_fields
 
 
@@ -378,12 +366,7 @@ def from_bpx(
     title, bpx_version, model_type, description = _extract_header(data)
 
     # Navigate to Parameterisation block (case-insensitive key search)
-    params_raw = (
-        data.get("Parameterisation")
-        or data.get("parameterisation")
-        or data.get("parameters")
-        or {}
-    )
+    params_raw = data.get("Parameterisation") or data.get("parameterisation") or data.get("parameters") or {}
     if not isinstance(params_raw, Mapping) or not params_raw:
         warnings.append("BPX file has no 'Parameterisation' block; no specs extracted.")
         return BpxImportResult(
@@ -396,16 +379,9 @@ def from_bpx(
             warnings=warnings,
         )
 
-    cell_params_raw = (
-        params_raw.get("Cell")
-        or params_raw.get("cell")
-        or {}
-    )
+    cell_params_raw = params_raw.get("Cell") or params_raw.get("cell") or {}
     if not isinstance(cell_params_raw, Mapping):
-        warnings.append(
-            "BPX 'Parameterisation.Cell' block is missing or not a mapping; "
-            "no cell-level specs extracted."
-        )
+        warnings.append("BPX 'Parameterisation.Cell' block is missing or not a mapping; no cell-level specs extracted.")
         cell_params: dict[str, Any] = {}
     else:
         cell_params = dict(cell_params_raw)
@@ -426,8 +402,12 @@ def from_bpx(
         density = cell_params.get("Density [kg.m-3]")
         volume = cell_params.get("Volume [m3]")
         if (
-            isinstance(density, (int, float)) and not isinstance(density, bool) and math.isfinite(density)
-            and isinstance(volume, (int, float)) and not isinstance(volume, bool) and math.isfinite(volume)
+            isinstance(density, (int, float))
+            and not isinstance(density, bool)
+            and math.isfinite(density)
+            and isinstance(volume, (int, float))
+            and not isinstance(volume, bool)
+            and math.isfinite(volume)
         ):
             specs["mass"] = {"value": _sig6(density * volume * 1000.0), "unit": "g"}  # kg -> g
             warnings.append(
@@ -484,18 +464,16 @@ _AREA_TO_M2: dict[str, float] = {"m2": 1.0, "cm2": 1e-4, "mm2": 1e-6}
 _VOL_TO_M3: dict[str, float] = {"m3": 1.0, "cm3": 1e-6, "mm3": 1e-9, "L": 1e-3, "mL": 1e-6}
 
 _BPX_EXPORT_DIRECT: dict[str, tuple[str, dict[str, float], bool]] = {
-    "nominal_capacity":            ("Nominal cell capacity [A.h]", _CAP_TO_AH, True),
-    "charging_cutoff_voltage":     ("Upper voltage cut-off [V]",   _VOLT_TO_V, True),
-    "discharging_cutoff_voltage":  ("Lower voltage cut-off [V]",   _VOLT_TO_V, True),
-    "electrode_area":              ("Electrode area [m2]",         _AREA_TO_M2, True),
-    "external_surface_area":       ("External surface area [m2]",  _AREA_TO_M2, False),
-    "volume":                      ("Volume [m3]",                 _VOL_TO_M3, False),
+    "nominal_capacity": ("Nominal cell capacity [A.h]", _CAP_TO_AH, True),
+    "charging_cutoff_voltage": ("Upper voltage cut-off [V]", _VOLT_TO_V, True),
+    "discharging_cutoff_voltage": ("Lower voltage cut-off [V]", _VOLT_TO_V, True),
+    "electrode_area": ("Electrode area [m2]", _AREA_TO_M2, True),
+    "external_surface_area": ("External surface area [m2]", _AREA_TO_M2, False),
+    "volume": ("Volume [m3]", _VOL_TO_M3, False),
 }
 
 # Required BPX Cell keys that a cell spec can never supply on its own.
-_BPX_REQUIRED_UNFILLABLE: tuple[str, ...] = (
-    "Number of electrode pairs connected in parallel to make a cell",
-)
+_BPX_REQUIRED_UNFILLABLE: tuple[str, ...] = ("Number of electrode pairs connected in parallel to make a cell",)
 
 # Cell formats whose volume/surface area follow from diameter + height.
 _CYLINDRICAL_FORMATS = {"cylindrical", "coin", "button"}
@@ -738,10 +716,7 @@ def to_bpx(
         )
     result.complete = not lacking
     if strict and lacking:
-        raise ValueError(
-            "to_bpx(strict=True): the document would lack values its source holds: "
-            + "; ".join(lacking)
-        )
+        raise ValueError("to_bpx(strict=True): the document would lack values its source holds: " + "; ".join(lacking))
     rejection, parser_missing = _official_parser_rejection(result.bpx)
     if rejection is not None:
         result.warnings.append(f"The official bpx parser rejects this document: {rejection}")
@@ -783,13 +758,13 @@ def _export_source(source: Any) -> dict[str, Any]:
         return dict(candidates[0])
     kind = kind_for_doc(source)
     if kind is not None and kind.entity_type not in ("cell-spec", "parameter-set"):
-        raise TypeError(
-            f"to_bpx exports a parameter-file record or a cell spec; this is a {kind.entity_type} record."
-        )
+        raise TypeError(f"to_bpx exports a parameter-file record or a cell spec; this is a {kind.entity_type} record.")
     if kind is None and "properties" not in source and "cell_spec" not in source:
         quantities = [value for value in source.values() if isinstance(value, Mapping)]
-        if not source or len(quantities) != len(source) or not all(
-            "value" in value or "unit" in value for value in quantities
+        if (
+            not source
+            or len(quantities) != len(source)
+            or not all("value" in value or "unit" in value for value in quantities)
         ):
             raise TypeError(
                 "to_bpx exports a parameter-file record, a cell-spec record or a cell spec's "
@@ -1050,7 +1025,9 @@ def _claim_to_bpx_value(
     if isinstance(curve, Mapping):
         xs, ys = curve.get("x"), curve.get("y")
         if not (
-            isinstance(xs, list) and isinstance(ys, list) and len(xs) == len(ys) >= 2
+            isinstance(xs, list)
+            and isinstance(ys, list)
+            and len(xs) == len(ys) >= 2
             and all(_finite_number(v) for v in [*xs, *ys])
         ):
             raise ValueError(f"{label} has a malformed curve: x and y need equal lengths of finite numbers.")
@@ -1070,7 +1047,9 @@ def _claim_to_bpx_value(
             )
         y_unit = curve.get("y_unit")
         return {
-            "x": _converted(xs, None if given_x_unit is None else str(given_x_unit), x_unit, f"{label} x axis", field_name),
+            "x": _converted(
+                xs, None if given_x_unit is None else str(given_x_unit), x_unit, f"{label} x axis", field_name
+            ),
             "y": _converted(ys, None if y_unit is None else str(y_unit), bpx_unit, label, field_name),
         }
     expression = claim.get("expression")
@@ -1225,7 +1204,7 @@ def _parameter_file_to_bpx(
     if isinstance(body.get("description"), str) and body["description"]:
         header["Description"] = body["description"]
     references = [
-        note[len(_REFERENCES_NOTE_PREFIX):]
+        note[len(_REFERENCES_NOTE_PREFIX) :]
         for note in record.get("notes") or []
         if isinstance(note, str) and note.startswith(_REFERENCES_NOTE_PREFIX)
     ]
@@ -1399,9 +1378,7 @@ _BPX_ELECTRODE_BLOCKS = {"negative": "Negative electrode", "positive": "Positive
 # recorded checks.
 
 # Top-level sections the parameter importer reads (or folds, for State).
-_BPX_PARAMETER_SECTIONS = frozenset(
-    {"Header", "header", "Parameterisation", "parameterisation", "parameters", "State"}
-)
+_BPX_PARAMETER_SECTIONS = frozenset({"Header", "header", "Parameterisation", "parameterisation", "parameters", "State"})
 
 
 def bpx_content_digest(source: Mapping[str, Any] | str | Path | bytes) -> str:
@@ -1452,10 +1429,7 @@ class BpxUpgradeResult:
     def conversion_note(self, tool: str) -> str:
         """One line for a runnable distribution's ``conversion`` field."""
         if not self.changes:
-            return (
-                f"BPX {self.source_version} file already in the BPX v1 layout; "
-                f"nothing rewritten by {tool}."
-            )
+            return f"BPX {self.source_version} file already in the BPX v1 layout; nothing rewritten by {tool}."
         rewritten = [change for change in self.changes if not change.startswith("added ")]
         note = (
             f"BPX {self.source_version} file in the v0.x layout, rewritten in the BPX v1 layout as "
@@ -1865,9 +1839,7 @@ class BpxParameterImportResult:
         part_classes = _part_provenance_classes(default_provenance_class, provenance_classes)
         _check_record_kwargs(record_kwargs)
         if self.content_digest is None or bpx_content_digest(self._document) != self.content_digest:
-            raise ValueError(
-                "this import no longer holds the document it was read from; import the file again."
-            )
+            raise ValueError("this import no longer holds the document it was read from; import the file again.")
         # Re-read the file rather than trusting self.parts: the IRI names the
         # file's parameters, so the record must say exactly what the file says.
         parts, annex, _warnings, not_imported = _parse_bpx_parameters(self._document)
@@ -1879,9 +1851,7 @@ class BpxParameterImportResult:
         materials = dict(materials or {})
         unknown_sides = sorted(set(materials) - set(_BPX_ELECTRODE_BLOCKS))
         if unknown_sides:
-            raise ValueError(
-                f"materials keys are 'negative' and 'positive'; got {', '.join(unknown_sides)}."
-            )
+            raise ValueError(f"materials keys are 'negative' and 'positive'; got {', '.join(unknown_sides)}.")
         for side, block_name in _BPX_ELECTRODE_BLOCKS.items():
             part = next((p for p in parts if p["part"] == f"{side}_material"), None)
             target = materials.get(side)
@@ -1933,11 +1903,7 @@ class BpxParameterImportResult:
         record_kwargs = dict(record_kwargs)
         if self.description is not None:
             record_kwargs.setdefault("description", self.description)
-        if (
-            self.references is not None
-            and "citation" not in record_kwargs
-            and "citation_doi" not in record_kwargs
-        ):
+        if self.references is not None and "citation" not in record_kwargs and "citation_doi" not in record_kwargs:
             # provenance.citation is URI-typed: a URL/DOI goes there, free text
             # rides a note verbatim (to_bpx reads it back into the header).
             citation_value = _citation_url_value(self.references)
@@ -2148,9 +2114,7 @@ def _material_target(value: Any, side: str) -> dict[str, str]:
 _PARTS_WITHOUT_DEFAULT_CLASS = ("cell", "state")
 
 
-def _part_provenance_classes(
-    default: Any, overrides: Mapping[str, Any] | None
-) -> dict[str, str | None]:
+def _part_provenance_classes(default: Any, overrides: Mapping[str, Any] | None) -> dict[str, str | None]:
     """The provenance class each part's claims get, by part name (``None``: no class)."""
     from battinfo.api._parameters import _PROVENANCE_CLASSES  # noqa: PLC0415
     from battinfo.parameters import PARAMETER_FILE_PARTS  # noqa: PLC0415
@@ -2159,8 +2123,7 @@ def _part_provenance_classes(
         if value is None or value in _PROVENANCE_CLASSES:
             return value
         raise ValueError(
-            f"{what} is {value!r}; a provenance class is one of {', '.join(_PROVENANCE_CLASSES)}, "
-            "or None for no class."
+            f"{what} is {value!r}; a provenance class is one of {', '.join(_PROVENANCE_CLASSES)}, or None for no class."
         )
 
     default = checked(default, "default_provenance_class")
@@ -2187,12 +2150,27 @@ def _part_provenance_classes(
 
 # Keywords of create_parameter_set that to_parameter_set sets from the file,
 # or that belong to a claim batch; the others pass through as record fields.
-_SET_FROM_THE_FILE = frozenset({
-    "name", "claims", "parts", "material_kind", "material_spec_id", "cell_spec_id",
-    "cell_instance_id", "virtual_cell", "parameters_sha256", "scope", "electrode_polarity",
-    "model_context", "annex", "not_imported", "distributions", "supersedes",
-    "default_provenance_class",
-})
+_SET_FROM_THE_FILE = frozenset(
+    {
+        "name",
+        "claims",
+        "parts",
+        "material_kind",
+        "material_spec_id",
+        "cell_spec_id",
+        "cell_instance_id",
+        "virtual_cell",
+        "parameters_sha256",
+        "scope",
+        "electrode_polarity",
+        "model_context",
+        "annex",
+        "not_imported",
+        "distributions",
+        "supersedes",
+        "default_provenance_class",
+    }
+)
 
 
 def _check_record_kwargs(record_kwargs: Mapping[str, Any]) -> None:
@@ -2209,7 +2187,8 @@ def _check_record_kwargs(record_kwargs: Mapping[str, Any]) -> None:
     if not unknown:
         return
     own = [
-        name for name in inspect.signature(BpxParameterImportResult.to_parameter_set).parameters
+        name
+        for name in inspect.signature(BpxParameterImportResult.to_parameter_set).parameters
         if name not in ("self", "record_kwargs")
     ]
     raise TypeError(
@@ -2315,8 +2294,7 @@ def _bpx_block_claims(
         claim = _bpx_value_to_claim(key, raw_value, entry, mapping["unit"])
         if claim is None:
             warnings.append(
-                f"BPX {label} field '{field_name}' has unusable value {_short_repr(raw_value)}; "
-                "not read as a claim."
+                f"BPX {label} field '{field_name}' has unusable value {_short_repr(raw_value)}; not read as a claim."
             )
             not_imported.append(f"{path}/{field_name}")
             continue
@@ -2325,9 +2303,7 @@ def _bpx_block_claims(
         out.append((claim, list(entry.get("scopes", []))))
     if unknown:
         # EVERY field is named: a truncated list is a silent drop for the rest.
-        warnings.append(
-            f"BPX {label} fields with no parameter mapping, not read as claims: {', '.join(unknown)}"
-        )
+        warnings.append(f"BPX {label} fields with no parameter mapping, not read as claims: {', '.join(unknown)}")
     if not_positive:
         warnings.append(
             "BPX transport values a physics model needs positive are zero or negative, which "
@@ -2356,8 +2332,7 @@ def _bpx_state_sections(
     state: dict[str, Any] = {}
     if isinstance(raw_state, Mapping):
         state = {
-            section: dict(fields) if isinstance(fields, Mapping) else fields
-            for section, fields in raw_state.items()
+            section: dict(fields) if isinstance(fields, Mapping) else fields for section, fields in raw_state.items()
         }
     elif raw_state is not None:
         warnings.append(f"BPX State is {_json_kind(raw_state)}, not an object; not read.")
@@ -2369,10 +2344,7 @@ def _bpx_state_sections(
         value = block.pop(key)
         target = state.setdefault(section, {})
         if not isinstance(target, dict):
-            warnings.append(
-                f"BPX {block_name}.{key} not read: State.{section} is {_json_kind(target)}, "
-                "not an object."
-            )
+            warnings.append(f"BPX {block_name}.{key} not read: State.{section} is {_json_kind(target)}, not an object.")
             not_imported.append(f"{params_key}/{block_name}/{key}")
             continue
         if new_key in target and target[new_key] != value:
@@ -2431,8 +2403,7 @@ def _parse_bpx_parameters(
     cell = blocks.get("Cell")
     if cell:
         claims["cell"] = [
-            claim
-            for claim, _ in _bpx_block_claims(cell, "cell", "Cell", warnings, not_imported, f"{params_key}/Cell")
+            claim for claim, _ in _bpx_block_claims(cell, "cell", "Cell", warnings, not_imported, f"{params_key}/Cell")
         ]
 
     for side, block_name in _BPX_ELECTRODE_BLOCKS.items():
@@ -2464,8 +2435,7 @@ def _parse_bpx_parameters(
         if block:
             path = f"{params_key}/{block_name}"
             found = [
-                claim
-                for claim, _ in _bpx_block_claims(block, vocab_block, block_name, warnings, not_imported, path)
+                claim for claim, _ in _bpx_block_claims(block, vocab_block, block_name, warnings, not_imported, path)
             ]
             if found:
                 claims[vocab_block] = found
@@ -2485,9 +2455,7 @@ def _parse_bpx_parameters(
     # record's annex so a re-export reproduces it, and named so the carry is
     # visible.
     user_defined_raw = params_raw.get("User-defined")
-    annex: dict[str, Any] = (
-        copy.deepcopy(dict(user_defined_raw)) if isinstance(user_defined_raw, Mapping) else {}
-    )
+    annex: dict[str, Any] = copy.deepcopy(dict(user_defined_raw)) if isinstance(user_defined_raw, Mapping) else {}
     if annex:
         keys = [str(k) for k in annex]
         warnings.append(
@@ -2502,8 +2470,7 @@ def _parse_bpx_parameters(
             not_imported.append(f"{params_key}/{block_name}")
         elif not isinstance(block, Mapping):
             warnings.append(
-                f"BPX Parameterisation block '{block_name}' is {_json_kind(block)}, not an object; "
-                "not read."
+                f"BPX Parameterisation block '{block_name}' is {_json_kind(block)}, not an object; not read."
             )
             not_imported.append(f"{params_key}/{block_name}")
     # Header fields beyond the ones the record holds are named too: they are
@@ -2657,9 +2624,7 @@ def from_bpx_parameters(source: Mapping[str, Any] | str | Path | bytes) -> BpxPa
     )
 
 
-def import_bpx_parameters(
-    source: Mapping[str, Any] | str | Path | bytes, **kwargs: Any
-) -> dict[str, Any]:
+def import_bpx_parameters(source: Mapping[str, Any] | str | Path | bytes, **kwargs: Any) -> dict[str, Any]:
     """One-call form of ``from_bpx_parameters(source).to_parameter_set(**kwargs)``.
 
     Returns the record. Use the two-step form to read the warnings.
@@ -2667,9 +2632,7 @@ def import_bpx_parameters(
     return from_bpx_parameters(source).to_parameter_set(**kwargs)
 
 
-def _instance_reference(
-    meta: Mapping[str, Any], cell_instance: Mapping[str, Any] | Any | None
-) -> str | None:
+def _instance_reference(meta: Mapping[str, Any], cell_instance: Mapping[str, Any] | Any | None) -> str | None:
     """Build a Header.References provenance string from spec/instance identity."""
     parts: list[str] = []
     spec_id = meta.get("id") or meta.get("identifier")

@@ -24,13 +24,18 @@ from battinfo.api._components import create_component_spec, create_material_spec
 
 # EMMO / QUDT unit token (any prefix) → canonical BattINFO unit text.
 _UNIT = {
-    "Percent": "%", "PERCENT": "%",
-    "MicroMetre": "um", "MicroM": "um",
-    "MilliMetre": "mm", "MilliM": "mm",
+    "Percent": "%",
+    "PERCENT": "%",
+    "MicroMetre": "um",
+    "MicroM": "um",
+    "MilliMetre": "mm",
+    "MilliM": "mm",
     "GramPerCubicCentiMetre": "g/cm3",
-    "MilliGramPerSquareCentiMetre": "mg/cm2", "MilliGM-PER-CentiM2": "mg/cm2",
+    "MilliGramPerSquareCentiMetre": "mg/cm2",
+    "MilliGM-PER-CentiM2": "mg/cm2",
     "MilliAmpereHourPerSquareCentiMetre": "mAh/cm2",
-    "MilliAmpereHourPerGram": "mAh/g", "MilliA-HR-PER-GM": "mAh/g",
+    "MilliAmpereHourPerGram": "mAh/g",
+    "MilliA-HR-PER-GM": "mAh/g",
 }
 
 # EMMO substance @type → (display name, chemistry_family or None).
@@ -53,8 +58,12 @@ _SALT = {
     "LithiumBistrifluoromethanesulfonylimide": "LiTFSI",
 }
 _SOLVENT = {
-    "EthyleneCarbonate": "EC", "DimethylCarbonate": "DMC", "EthylMethylCarbonate": "EMC",
-    "PropyleneCarbonate": "PC", "FluoroethyleneCarbonate": "FEC", "VinyleneCarbonate": "VC",
+    "EthyleneCarbonate": "EC",
+    "DimethylCarbonate": "DMC",
+    "EthylMethylCarbonate": "EMC",
+    "PropyleneCarbonate": "PC",
+    "FluoroethyleneCarbonate": "FEC",
+    "VinyleneCarbonate": "VC",
     "DiethylCarbonate": "DEC",
 }
 _COLLECTOR = {"Aluminium": "Aluminium foil", "Copper": "Copper foil"}
@@ -201,12 +210,12 @@ class _Extractor:
             active["property"] = {"mass_fraction": mf}
         component: dict[str, Any] = {"active_material": [active]}
 
-        binder_node = (_children(coating_node, "hasBinder") or _children(electrode, "hasBinder"))
+        binder_node = _children(coating_node, "hasBinder") or _children(electrode, "hasBinder")
         if binder_node:
             b = self._material(binder_node[0], "binder", {"Binder"})
             if b:
                 component["binder"] = [{"name": b[0], "material_spec_id": b[1]}]
-        add_node = (_children(coating_node, "hasConductiveAdditive") or _children(electrode, "hasConductiveAdditive"))
+        add_node = _children(coating_node, "hasConductiveAdditive") or _children(electrode, "hasConductiveAdditive")
         if add_node:
             a = self._material(add_node[0], "conductive_additive", {"ConductiveAdditive"})
             if a:
@@ -233,28 +242,42 @@ class _Extractor:
             body["current_collector"] = {"name": _COLLECTOR.get(cc_type or "", "current collector")}
 
         rec = create_component_spec(
-            "electrode", validate=self.validate,
+            "electrode",
+            validate=self.validate,
             uid=_uid(self.seed, "electrode", polarity),
             name=f"{active_name} {polarity} electrode",
-            polarity=polarity, body=body, source_type="datasheet",
+            polarity=polarity,
+            body=body,
+            source_type="datasheet",
         )
         self.out.electrode_specs.append(rec)
         return rec["electrode_spec"]["id"]
 
     def electrolyte(self, node: Mapping[str, Any]) -> str | None:
         body: dict[str, Any] = {"family": "organic"}
-        salts = [_substance_type(c, {"Solute", "Constituent"}) for grp in _children(node, "hasSolute") for c in _children(grp, "hasConstituent")]
+        salts = [
+            _substance_type(c, {"Solute", "Constituent"})
+            for grp in _children(node, "hasSolute")
+            for c in _children(grp, "hasConstituent")
+        ]
         salt_name = next((_SALT[s] for s in salts if s in _SALT), None)
         if salt_name:
             body["salt"] = {"name": salt_name}
-        solvents = [_substance_type(c, {"Solvent", "Constituent"}) for grp in _children(node, "hasSolvent") for c in _children(grp, "hasConstituent")]
+        solvents = [
+            _substance_type(c, {"Solvent", "Constituent"})
+            for grp in _children(node, "hasSolvent")
+            for c in _children(grp, "hasConstituent")
+        ]
         comps = [{"name": _SOLVENT[s]} for s in solvents if s in _SOLVENT]
         if comps:
             body["solvent_mixture"] = {"component": comps}
         rec = create_component_spec(
-            "electrolyte", validate=self.validate,
+            "electrolyte",
+            validate=self.validate,
             uid=_uid(self.seed, "electrolyte"),
-            name="Electrolyte", body=body, source_type="datasheet",
+            name="Electrolyte",
+            body=body,
+            source_type="datasheet",
         )
         self.out.electrolyte_specs.append(rec)
         return rec["electrolyte_spec"]["id"]
@@ -269,16 +292,17 @@ class _Extractor:
         if props:
             body["property"] = props
         rec = create_component_spec(
-            "separator", validate=self.validate,
+            "separator",
+            validate=self.validate,
             uid=_uid(self.seed, "separator"),
-            name="Separator", body=body, source_type="datasheet",
+            name="Separator",
+            body=body,
+            source_type="datasheet",
         )
         self.out.separator_specs.append(rec)
 
 
-def extract_component_specs(
-    coin_cell: Mapping[str, Any], *, seed: str, validate: bool = True
-) -> ComponentExtraction:
+def extract_component_specs(coin_cell: Mapping[str, Any], *, seed: str, validate: bool = True) -> ComponentExtraction:
     """Walk a converter CoinCell node into deduplicated canonical component specs."""
     ex = _Extractor(seed, validate)
     for relation, polarity, setter in (

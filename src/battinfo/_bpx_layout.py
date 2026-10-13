@@ -166,8 +166,7 @@ def _checked_target(target_version: str) -> str:
         or ".".join(map(str, parts)) != target_version
     ):
         raise ValueError(
-            "the v1 layout is written as a 1.x version such as '1.1.0'; "
-            f"target_version is {target_version!r}."
+            f"the v1 layout is written as a 1.x version such as '1.1.0'; target_version is {target_version!r}."
         )
     return target_version
 
@@ -229,9 +228,7 @@ def to_v1_layout(
         block = parameterisation.get(block_name)
         if not isinstance(block, dict) or key not in block:
             continue
-        target_section = _object_at(
-            state, section, f"State.{section}", f"{block_name}.{key} cannot move into it"
-        )
+        target_section = _object_at(state, section, f"State.{section}", f"{block_name}.{key} cannot move into it")
         value = block.pop(key)
         if new_key in target_section:
             if target_section[new_key] != value:
@@ -256,9 +253,7 @@ def to_v1_layout(
             user_defined[THERMAL_CONDUCTIVITY] = value
             changes.append(f"Cell.{THERMAL_CONDUCTIVITY} -> User-defined.{THERMAL_CONDUCTIVITY}")
         elif user_defined[THERMAL_CONDUCTIVITY] == value:
-            changes.append(
-                f"Cell.{THERMAL_CONDUCTIVITY} dropped: User-defined already holds the same value"
-            )
+            changes.append(f"Cell.{THERMAL_CONDUCTIVITY} dropped: User-defined already holds the same value")
         else:
             raise ValueError(
                 f"BPX Cell.{THERMAL_CONDUCTIVITY} is {_number_text(value)} but User-defined holds "
@@ -281,8 +276,7 @@ def to_v1_layout(
             thermal[_AMBIENT_TEMPERATURE] = _DEFAULT_TEMPERATURE_K
             why = "no ambient or reference temperature in the file"
         changes.append(
-            f"added State.{_THERMAL}.{_AMBIENT_TEMPERATURE} = "
-            f"{_number_text(thermal[_AMBIENT_TEMPERATURE])} ({why})"
+            f"added State.{_THERMAL}.{_AMBIENT_TEMPERATURE} = {_number_text(thermal[_AMBIENT_TEMPERATURE])} ({why})"
         )
     if _INITIAL_TEMPERATURE not in initial:
         initial[_INITIAL_TEMPERATURE] = thermal[_AMBIENT_TEMPERATURE]
@@ -307,10 +301,6 @@ def _ordered_state(state: dict[str, Any]) -> dict[str, Any]:
         fields = state[section]
         known = _KEY_ORDER.get(section, ())
         if isinstance(fields, dict):
-            fields = {
-                key: fields[key]
-                for key in (*known, *(k for k in fields if k not in known))
-                if key in fields
-            }
+            fields = {key: fields[key] for key in (*known, *(k for k in fields if k not in known)) if key in fields}
         ordered[section] = fields
     return ordered
