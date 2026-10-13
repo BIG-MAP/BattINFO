@@ -227,6 +227,27 @@ def test_download_reports_a_dataset_with_no_data_file(reg: Registry) -> None:
         reg.download(DATASET, role="raw")
 
 
+@pytest.mark.parametrize("hostile", ["../../x", "..\\..\\x", "aaaa-bbbb-cccc-dddd/../../../x"])
+def test_download_refuses_an_entry_whose_id_is_not_a_uid(
+    reg: Registry, fake: FakeRegistry, tmp_path: Path, hostile: str
+) -> None:
+    """The cache folder is named after the dataset's uid, so the uid may not climb out of it."""
+    entry = {key: value for key, value in fake.details["dataset/aaaa-bbbb-cccc-dddd"].items() if key != "canonical_iri"}
+    entry["canonical_id"] = hostile
+
+    with pytest.raises(ValueError, match="not a record uid"):
+        reg.download(entry)
+
+    assert not any(url.startswith(FILES) for url in fake.calls)
+    assert [path for path in tmp_path.rglob("*") if path.is_file()] == []
+
+
+@pytest.mark.parametrize("name", ["..", ".", "...", " ", ""])
+def test_a_file_name_that_names_no_file_is_kept_as_data(tmp_path: Path, name: str) -> None:
+    folder = tmp_path / "files" / "aaaa-bbbb-cccc-dddd"
+    assert _cache_file(folder, name) == folder / "data"
+
+
 # ── Checksums in any algorithm ────────────────────────────────────────────────
 
 def _state_checksum(fake: FakeRegistry, algorithm: str | None, value: str | None = None) -> None:

@@ -3,7 +3,8 @@
 ``force=True`` and ``--force`` used to delete whatever folder they were given,
 with everything in it. These tests pin what the guard refuses, that roots built
 by 0.8.0 (which carry no marker) still rebuild with ``--force``, and that no
-other module calls ``shutil.rmtree``.
+other module calls ``shutil.rmtree``. The last section pins that the paths a
+workspace manifest names stay inside the workspace.
 
 Tests that point the guard at a home, working or filesystem-root folder replace
 ``shutil.rmtree`` with a function that fails, so a broken guard cannot delete
@@ -13,6 +14,7 @@ from __future__ import annotations
 
 import ast
 import json
+import re
 import shutil
 import sys
 from pathlib import Path
@@ -28,6 +30,7 @@ from battinfo import CellSpec, publish
 from battinfo._fs_guard import (
     MARKER_FILENAME,
     UnsafeDeleteError,
+    check_relative_path,
     is_within,
     remove_temp_tree,
     remove_tree,
@@ -36,6 +39,7 @@ from battinfo._workspace import Workspace, quantity
 from battinfo.cli import app
 from battinfo.ingest import build_ingest_workspace
 from battinfo.local_workspace import LocalWorkspace
+from battinfo.workspace_state import WorkspaceStateManifest
 
 EXAMPLE_CELL_TYPE = ROOT / "examples" / "cell-spec" / "A123__ANR26650M1-B.json"
 
@@ -455,3 +459,106 @@ def test_export_force_refuses_a_release_root_that_holds_the_dataset_file(tmp_pat
         engine.build_submission_package(dataset, root=release, registry="digibatt/hello-world", force=True)
 
     assert data_file.exists()
+
+
+# ── Paths a workspace manifest names ────────────────────────────────────────
+
+
+@pytest.mark.parametrize("value", [
+    "../x", r"..\x", "dist/../../x", "dist/..", "/tmp/x", r"\x", r"C:\x", "C:x",
+    r"\\host\share\x", "//host/share/x", "", ".", "./", "...", " ",
+])
+def test_a_manifest_path_that_leaves_the_folder_or_names_it_is_refused(value: str) -> None:
+    with pytest.raises(ValueError, match="dist_dir"):
+        check_relative_path(value, field="dist_dir")
+
+
+@pytest.mark.parametrize("value", ["dist", "out/dist", r"out\dist", "./dist", "records/cell-spec", "resources/cell.json"])
+def test_a_relative_manifest_path_inside_the_folder_is_kept(value: str) -> None:
+    assert check_relative_path(value, field="dist_dir") == value
+
+
+def _edit_manifest(path: Path, keys: tuple[str | int, ...], value: str) -> None:
+    manifest = json.loads(path.read_text(encoding="utf-8"))
+    node = manifest
+    for key in keys[:-1]:
+        node = node[key]
+    node[keys[-1]] = value
+    path.write_text(json.dumps(manifest), encoding="utf-8")
+
+
+@pytest.mark.parametrize(
+    "keys",
+    [("dist_dir",), ("artifacts_dir",), ("resources", "cell"), ("resources", "test"), ("resources", "dataset")],
+    ids=".".join,
+)
+def test_a_local_workspace_manifest_path_outside_the_workspace_is_refused_on_load(
+    tmp_path: Path, keys: tuple[str, ...]
+) -> None:
+    workspace = LocalWorkspace.init(tmp_path / "ws")
+    _edit_manifest(workspace.manifest_path, keys, "../outside")
+
+    with pytest.raises(ValueError, match=re.escape(".".join(keys))):
+        workspace.load()
+
+
+def test_validate_reports_a_dist_dir_outside_the_workspace_and_writes_nothing_there(tmp_path: Path) -> None:
+    workspace = LocalWorkspace.init(tmp_path / "ws")
+    _edit_manifest(workspace.manifest_path, ("dist_dir",), "../outside")
+
+    report = workspace.validate(write_report=True)
+
+    assert report["ok"] is False
+    assert "dist_dir '../outside'" in report["issues"][0]["message"]
+    assert not (tmp_path / "outside").exists()
+
+
+def test_update_release_rewrites_no_file_outside_the_workspace(tmp_path: Path) -> None:
+    workspace = LocalWorkspace.init(tmp_path / "ws")
+    victim = tmp_path / "outside" / "dataset.json"
+    victim.parent.mkdir()
+    shutil.copyfile(workspace.root / "resources" / "dataset.json", victim)
+    before = victim.read_text(encoding="utf-8")
+    _edit_manifest(workspace.manifest_path, ("resources", "dataset"), "../outside/dataset.json")
+
+    with pytest.raises(ValueError, match=re.escape("resources.dataset")):
+        workspace.update_release(version="9.9.9")
+
+    assert victim.read_text(encoding="utf-8") == before
+
+
+@pytest.mark.parametrize(
+    "keys",
+    [("dist_dir",), ("artifacts_dir",), ("paths", "cell_specs"), ("paths", "cells"), ("paths", "tests"), ("paths", "datasets")],
+    ids=".".join,
+)
+def test_an_authoring_workspace_manifest_path_outside_the_workspace_is_refused(keys: tuple[str, ...]) -> None:
+    raw: dict = {"paths": {}}
+    node = raw
+    for key in keys[:-1]:
+        node = node[key]
+    node[keys[-1]] = r"C:\outside"
+
+    with pytest.raises(ValueError, match=re.escape(".".join(keys))):
+        WorkspaceStateManifest.model_validate(raw)
+
+
+def test_reopening_copies_no_dataset_artifact_from_outside_the_workspace(tmp_path: Path) -> None:
+    """A manifest's artifact path is read back as the dataset's file, which the next save copies."""
+    root = tmp_path / "ws"
+    _write_tree(tmp_path, {"inputs/a.csv": "cycle,capacity_ah\n0,2.50\n", "secret/notes.txt": "private"})
+    engine = Workspace(root, name="guard", title="Guard", tenant="digibatt", publisher="demo-lab", version="0.1.0")
+    cell_spec = engine.cell_spec(
+        manufacturer="A123", model="ANR26650M1-B", format="cylindrical", chemistry="Li-ion",
+        specs={"nominal_voltage": quantity(3.3, "V")}, source_file="a123.manual.json",
+    )
+    cell = engine.cell(cell_spec, serial_number="guard-001", source_type="lab")
+    test = engine.test(cell, kind="cycling", protocol="1C / 1C", status="completed")
+    engine.dataset(cell, title="Guard dataset", test=test, path=tmp_path / "inputs" / "a.csv", license="CC-BY-4.0")
+    engine.save_workspace()
+    _edit_manifest(root / "battinfo-authoring-workspace.json", ("dataset_artifacts", 0, "path"), "../secret")
+
+    with pytest.raises(ValueError, match="dataset_artifacts"):
+        Workspace.open(root).save_workspace()
+
+    assert not list(root.rglob("notes.txt"))

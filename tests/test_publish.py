@@ -4,6 +4,7 @@ import importlib
 import inspect
 import json
 import sys
+from html.parser import HTMLParser
 from pathlib import Path
 
 import pytest
@@ -14,6 +15,8 @@ sys.path.insert(0, str(ROOT / "src"))
 publish_module = importlib.import_module("battinfo._publish")
 from battinfo import CellSpec, PublishResult, publish
 from battinfo.api import publish_record, save_record
+from battinfo.entities import entity_files_for_uid, save_entity_path
+from battinfo.publication import save_publication_html
 
 
 def _sample_cell_spec() -> CellSpec:
@@ -355,3 +358,117 @@ def test_save_record_duplicate_policy_return_existing(tmp_path: Path) -> None:
     result = save_record(doc, source_root=tmp_path / "src", duplicate_policy="return_existing")
     assert result["status"] == "exists"
 
+
+# ---------------------------------------------------------------------------
+# A record's files are named after the uid that ends its IRI, and only a uid
+# ---------------------------------------------------------------------------
+#
+# Record IRIs come from records and registry responses that someone else may
+# have written. On Windows an IRI ending in "..\..\..\..\x" named a file
+# outside the records folder: the file name's "cell-spec-" prefix takes the
+# first "..", and the other three climb out of cell-spec/ and records/.
+
+_CLIMBING_TAIL = "\\".join(["..", "..", "..", "..", "x"])
+
+
+def _cell_spec_with_id(iri: str) -> dict:
+    doc = json.loads(_EXAMPLE_CELL_TYPE.read_text(encoding="utf-8"))
+    doc["cell_spec"]["id"] = iri
+    return doc
+
+
+def _files_under(top: Path) -> list[Path]:
+    return [path for path in top.rglob("*") if path.is_file()]
+
+
+@pytest.mark.parametrize(
+    "uid",
+    ["../../x", _CLIMBING_TAIL, "C:x", "", "..", "AAAA-BBBB-CCCC-DDDD", "aaaabbbbccccdddd", "aaaa-bbbb-cccc-dddd\n"],
+)
+def test_save_entity_path_takes_only_a_dashed_uid(tmp_path: Path, uid: str) -> None:
+    with pytest.raises(ValueError, match="not a record uid"):
+        save_entity_path("cell-spec", uid, tmp_path)
+
+
+def test_save_entity_path_names_the_file_after_the_uid(tmp_path: Path) -> None:
+    assert save_entity_path("cell-spec", "pge5-wer6-2q82-v9k0", tmp_path) == (
+        tmp_path / "cell-spec" / "cell-spec-pge5-wer6-2q82-v9k0.json"
+    )
+
+
+def test_save_record_refuses_an_id_that_does_not_end_in_a_uid(tmp_path: Path) -> None:
+    doc = _cell_spec_with_id(f"https://w3id.org/battinfo/spec/{_CLIMBING_TAIL}")
+
+    with pytest.raises(ValueError, match="not a record uid"):
+        save_record(doc, source_root=tmp_path / "a" / "b" / "records", validate=False)
+
+    assert _files_under(tmp_path) == []
+
+
+def test_a_lookup_by_an_id_that_is_not_a_uid_opens_only_the_kinds_files(tmp_path: Path) -> None:
+    """A record may sit under any file name, so the lookup still lists the kind's files."""
+    source_root = tmp_path / "a" / "b" / "records"
+    saved = source_root / "cell-spec" / "written-by-hand.json"
+    saved.parent.mkdir(parents=True)
+    saved.write_text("{}", encoding="utf-8")
+    # Where the file named after that uid would land on Windows.
+    (tmp_path / "a" / "b" / "x.json").write_text("{}", encoding="utf-8")
+
+    assert entity_files_for_uid("cell-spec", _CLIMBING_TAIL, source_root) == [saved]
+    assert entity_files_for_uid("parameter-set", _CLIMBING_TAIL, source_root) == []
+
+
+@pytest.mark.parametrize("iri", ["https://w3id.org/battinfo/../..", "https://w3id.org/battinfo/../pge5-wer6-2q82-v9k0"])
+def test_publish_record_refuses_an_id_that_names_a_folder_outside(tmp_path: Path, iri: str) -> None:
+    target_root = tmp_path / "a" / "b" / "site"
+
+    with pytest.raises(ValueError, match="must end in"):
+        publish_record(_cell_spec_with_id(iri), target_root=target_root, validate=False)
+
+    assert _files_under(tmp_path) == []
+
+
+# ---------------------------------------------------------------------------
+# The publication page embeds the record as data, never as markup
+# ---------------------------------------------------------------------------
+
+
+class _ScriptBodies(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.bodies: list[str] = []
+        self._inside = False
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag == "script":
+            self._inside = True
+            self.bodies.append("")
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag == "script":
+            self._inside = False
+
+    def handle_data(self, data: str) -> None:
+        if self._inside:
+            self.bodies[-1] += data
+
+
+def test_the_publication_page_keeps_record_text_inside_its_script(tmp_path: Path) -> None:
+    payload = {
+        "@context": {"schema": "https://schema.org/"},
+        "@graph": [{
+            "@id": "https://w3id.org/battinfo/dataset/pge5-wer6-2q82-v9k0",
+            "@type": "schema:Dataset",
+            "schema:name": "Cycling <b>data</b> & more",
+            "schema:description": "</script><script>alert(document.domain)</script><!-- -->",
+        }],
+    }
+
+    page = save_publication_html(payload, tmp_path / "index.html").read_text(encoding="utf-8")
+
+    parser = _ScriptBodies()
+    parser.feed(page)
+    assert len(parser.bodies) == 1
+    assert json.loads(parser.bodies[0]) == payload
+    assert "<script>alert" not in page
+    assert "<title>Cycling &lt;b&gt;data&lt;/b&gt; &amp; more</title>" in page

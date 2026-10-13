@@ -37,7 +37,7 @@ from battinfo._jsonio import atomic_write_text as _atomic_write_text
 from battinfo._jsonio import read_json as _read_json
 from battinfo._util import _now_iso, is_dataset_series, local_file_references
 from battinfo._util import local_files_message as _local_files_message
-from battinfo.entities import entity_id_from_doc, kind_for_type, record_set_dirs, save_entity_path
+from battinfo.entities import entity_id_from_doc, is_dashed_uid, kind_for_type, record_set_dirs, save_entity_path
 
 # Short-name pattern: 6 lowercase alphanumeric characters at the end of a
 # dash-delimited name component (e.g. "666h1s" in "duracell-mn2400-2026-02-666h1s").
@@ -7784,6 +7784,8 @@ class AuthoringWorkspace:
         if any(getattr(obj, "id", None) == iri for obj in sessions.get(entity_type, [])):
             return True
         uid = iri.rstrip("/").rsplit("/", 1)[-1]
+        if not is_dashed_uid(uid):
+            return False  # no file is named after it
         for root in (self._ws.source_root, self._references_root):
             path = save_entity_path(entity_type, uid, root)
             try:
@@ -7820,8 +7822,19 @@ class AuthoringWorkspace:
         return record, "found"
 
     def _keep_reference_copy(self, record: dict, entity_type: str) -> Path:
-        """Write a read-only copy of a published record to ``.battinfo/references/<kind>/``."""
-        uid = (entity_id_from_doc(record) or "").rstrip("/").rsplit("/", 1)[-1]
+        """Write a read-only copy of a published record to ``.battinfo/references/<kind>/``.
+
+        The file is named after the uid that ends the record's IRI. The record
+        comes from a registry, so an IRI that does not end in a uid raises
+        ``ValueError`` and nothing is written.
+        """
+        iri = entity_id_from_doc(record) or ""
+        uid = iri.rstrip("/").rsplit("/", 1)[-1]
+        if not is_dashed_uid(uid):
+            raise ValueError(
+                f"The registry returned a {entity_type} record whose IRI {iri!r} does not end in a "
+                "record uid (such as pge5-wer6-2q82-v9k0), so it is not copied into this workspace."
+            )
         path = save_entity_path(entity_type, uid, self._references_root)
         path.parent.mkdir(parents=True, exist_ok=True)
         _atomic_write_text(path, json.dumps(record, indent=2, ensure_ascii=False))
@@ -7837,6 +7850,8 @@ class AuthoringWorkspace:
         ``offline``, ``not_found``, ``unreachable`` or ``unreadable``. Each record
         is looked up at most once per session: a later reference to it reuses the
         outcome, so a registry that is down costs one timeout, not one per test.
+        A record found under an IRI that does not end in a uid raises
+        ``ValueError`` (see ``_keep_reference_copy``).
         """
         if self._knows_record(iri, entity_type):
             return "local"

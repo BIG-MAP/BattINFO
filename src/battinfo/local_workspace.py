@@ -8,9 +8,25 @@ from datetime import date
 from pathlib import Path
 from typing import Any, Mapping
 
-from pydantic import AliasChoices, BaseModel, ConfigDict, Field, ValidationError, model_validator
+from pydantic import (
+    AliasChoices,
+    BaseModel,
+    ConfigDict,
+    Field,
+    ValidationError,
+    ValidationInfo,
+    field_validator,
+    model_validator,
+)
 
-from battinfo._fs_guard import is_empty_or_missing, is_within, remove_tree, require_within, write_marker
+from battinfo._fs_guard import (
+    check_relative_path,
+    is_empty_or_missing,
+    is_within,
+    remove_tree,
+    require_within,
+    write_marker,
+)
 from battinfo._jsonio import read_json as _read_json
 from battinfo._jsonio import write_json as _write_json
 from battinfo._util import _as_path, _now_iso, _sha256
@@ -90,6 +106,11 @@ class WorkspaceResourcePaths(BaseModel):
     test: str = DEFAULT_TEST_RESOURCE_PATH
     dataset: str = DEFAULT_DATASET_RESOURCE_PATH
 
+    @field_validator("cell", "test", "dataset")
+    @classmethod
+    def _inside_the_workspace(cls, value: str, info: ValidationInfo) -> str:
+        return check_relative_path(value, field=f"resources.{info.field_name}")
+
 
 class RegistryTarget(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -146,6 +167,11 @@ class WorkspaceManifest(BaseModel):
     registry: RegistryTarget
     release: ReleaseInfo = Field(default_factory=ReleaseInfo)
     comment: list[str] = Field(default_factory=list)
+
+    @field_validator("artifacts_dir", "dist_dir")
+    @classmethod
+    def _inside_the_workspace(cls, value: str, info: ValidationInfo) -> str:
+        return check_relative_path(value, field=str(info.field_name))
 
 
 class SubmissionRelatedResource(BaseModel):
@@ -1578,11 +1604,12 @@ class LocalWorkspace:
                 generated_at=_now_iso(),
             ),
             release=dataset_doc.dataset.release.model_dump(mode="json", exclude_none=True),
+            # No local path: the package goes to the registry, and the
+            # workspace folder (with the user name in it) stays here.
             workspace={
                 "workspace_id": manifest.workspace_id,
                 "title": manifest.title,
                 "description": manifest.description,
-                "root": str(self.root),
                 "registry": manifest.registry.model_dump(mode="json"),
             },
             resources=[

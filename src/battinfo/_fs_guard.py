@@ -1,4 +1,4 @@
-"""Guarded recursive deletes.
+"""Guarded recursive deletes, and the check on paths a workspace manifest names.
 
 This module holds the only ``shutil.rmtree`` calls in battinfo;
 ``tests/test_fs_guard.py`` fails if another module makes one. Code that
@@ -18,6 +18,14 @@ caller that wants to refuse before doing any work. ``is_within(path, root)``
 says whether a path lies inside a folder; it is the contained-path test shared
 by the delete guard and the manifest path checks.
 
+The paths a workspace manifest names (``dist_dir``, ``artifacts_dir``,
+``paths.*``, ``resources.*`` and the ``dataset_artifacts`` paths) are checked
+twice. When the manifest is read, ``check_relative_path`` requires each to be
+a relative path that stays inside the workspace, written the same way on every
+system. When BattINFO deletes a folder a manifest names,
+``remove_tree(..., within=root)`` checks the resolved path again, so a symbolic
+link cannot lead it outside.
+
 BattINFO writes :data:`MARKER_FILENAME` into each output root it creates
 (:func:`write_marker`), so that a later ``force=True`` may delete that root.
 Roots made by 0.7 and 0.8 carry no marker; they are recognised by their layout
@@ -29,7 +37,7 @@ from __future__ import annotations
 import os
 import shutil
 from collections.abc import Iterable
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 
 PathLike = str | Path
 
@@ -102,6 +110,39 @@ def require_within(path: PathLike, root: PathLike) -> None:
             f"Refusing to delete {path}: it is not inside {root}. A folder named in a "
             "manifest or a record must lie inside the workspace that owns it."
         )
+
+
+def check_relative_path(value: str, *, field: str) -> str:
+    """Return ``value`` if it is a relative path that stays inside the folder it is read against.
+
+    For a path a manifest names: ``dist``, ``records/cell-spec`` or
+    ``resources/cell.json`` pass. Refused with ``ValueError``, which names
+    ``field``:
+
+    - an absolute path, or one with a drive or a share (``/x``, ``C:\\x``,
+      ``C:x``, ``//host/share/x``);
+    - a ``..`` segment, and a segment of dots and spaces only, which Windows
+      reads as the folder it is in;
+    - an empty path or ``.``, which name the folder itself.
+
+    ``/`` and ``\\`` both separate segments, so a manifest written on one
+    system means the same on another.
+    """
+    pure = PureWindowsPath(value)  # its anchor holds a leading slash, a drive or a share
+    if pure.anchor:
+        problem = "starts at a drive, a share or a root folder"
+    elif ".." in pure.parts:
+        problem = "climbs out of the folder with '..'"
+    elif any(not part.strip(". ") for part in pure.parts):
+        problem = "has a segment of only dots and spaces, which Windows reads as the folder it is in"
+    elif not pure.parts:
+        problem = "names the folder itself"
+    else:
+        return value
+    raise ValueError(
+        f"{field} {value!r} {problem}. It must be a path relative to the workspace folder that "
+        "stays inside it, such as 'dist' or 'records/cell-spec'."
+    )
 
 
 def is_empty_or_missing(path: PathLike) -> bool:
@@ -271,6 +312,7 @@ def remove_temp_tree(path: PathLike) -> None:
 __all__ = [
     "MARKER_FILENAME",
     "UnsafeDeleteError",
+    "check_relative_path",
     "check_remove",
     "is_empty_or_missing",
     "is_within",

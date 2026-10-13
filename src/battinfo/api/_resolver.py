@@ -26,6 +26,7 @@ from battinfo.api._shared import (
     _validate_canonical_record,
     _validate_publication_artifact,
 )
+from battinfo.entities import is_dashed_uid
 from battinfo.jsonld import dataset_series_edges, electrode_role_links, schema_checksum_terms
 from battinfo.transform.cell_spec_node import build_cell_spec_node
 from battinfo.validate.core import DEFAULT_POLICY, ValidationPolicy
@@ -629,6 +630,10 @@ def _resolver_html(doc: dict[str, Any]) -> str:
     )
 
 
+# The namespace segment of a record IRI (spec, cell, current-collector, ...).
+_NAMESPACE_SEGMENT_RE = re.compile(r"[a-z][a-z-]*")
+
+
 def publish_record(
     record: dict[str, Any] | PathLike,
     *,
@@ -638,13 +643,24 @@ def publish_record(
     validate: bool = True,
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
 ) -> dict[str, Any]:
-    """Publish one canonical resource into resolver-ready static artifacts."""
+    """Publish one canonical resource into resolver-ready static artifacts.
+
+    The files go to ``<target_root>/<namespace>/<uid>/``, named after the end
+    of the record's IRI. An IRI that does not end in a namespace and a uid
+    (``spec/pge5-wer6-2q82-v9k0``) raises ``ValueError``, also with
+    ``validate=False``.
+    """
     doc = _load_json(_as_path(record)) if isinstance(record, (str, Path)) else record
     if validate:
         _validate_canonical_record(doc, policy=validation_policy)
 
     iri = _entity_id(doc)
     namespace, uid = _iri_tail(iri)
+    if not (_NAMESPACE_SEGMENT_RE.fullmatch(namespace) and is_dashed_uid(uid)):
+        raise ValueError(
+            f"Cannot publish {iri!r}: its files are written to a folder named after the end of "
+            "its IRI, which must end in a namespace and a uid, such as spec/pge5-wer6-2q82-v9k0."
+        )
     logical_type = _logical_entity_type_from_doc(doc)
     out_dir = _as_path(target_root) / namespace / uid
     out_dir.mkdir(parents=True, exist_ok=True)

@@ -16,11 +16,22 @@ copy-pasted across ``api.py``, ``validate/record.py``, ``validate/references.py`
 from __future__ import annotations
 
 import hashlib
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Mapping, Optional
 
 UID_ALPHABET = "0123456789abcdefghjkmnpqrstvwxyz"
+
+#: A uid in its dashed form: four groups of four characters from
+#: :data:`UID_ALPHABET`, joined by dashes (``pge5-wer6-2q82-v9k0``). Record
+#: files are named after it, so nothing else may name one.
+UID_DASHED_RE = re.compile(r"^[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$")
+
+
+def is_dashed_uid(value: object) -> bool:
+    """True when *value* is a uid in its dashed form, such as ``pge5-wer6-2q82-v9k0``."""
+    return isinstance(value, str) and UID_DASHED_RE.fullmatch(value) is not None
 
 
 def stable_uid(seed: str) -> str:
@@ -404,10 +415,22 @@ def entity_id_from_doc(doc: Mapping[str, object]) -> Optional[str]:
 
 
 def save_entity_path(entity_type: str, uid: str, source_root: Path) -> Path:
-    """Canonical on-disk path for a record of *entity_type* with *uid*."""
+    """Canonical on-disk path for a record of *entity_type* with *uid*.
+
+    *uid* must be a dashed uid (:func:`is_dashed_uid`); anything else raises
+    ``ValueError``. It is the end of a record's IRI, which a record file or a
+    registry response supplies, and a value such as ``..\\..\\x`` would name a
+    file outside *source_root*.
+    """
     kind = ENTITY_BY_TYPE.get(entity_type)
     if kind is None:
         raise ValueError(f"Unsupported entity type for save path: {entity_type}")
+    if not is_dashed_uid(uid):
+        raise ValueError(
+            f"Cannot name a {entity_type} file after {uid!r}: it is not a record uid. A uid is four "
+            "groups of four characters (digits, and lower-case letters other than i, l, o and u) "
+            "joined by dashes, such as pge5-wer6-2q82-v9k0."
+        )
     return source_root / kind.subdir / f"{entity_type}-{uid}.json"
 
 
@@ -432,10 +455,16 @@ def entity_files_for_uid(entity_type: str, uid: str, source_root: Path) -> list[
     parameter sets) stops at the canonical path: it is searched under two
     namespaces (``dataset/`` and its legacy ``spec/``), and a miss in either
     must not load every one of its files.
+
+    A *uid* that is not a dashed uid names no file of its own (see
+    :func:`save_entity_path`), so no path is built from it; the other files
+    of the kind are still listed.
     """
-    expected = save_entity_path(entity_type, uid, source_root)
-    found = [expected] if expected.exists() else []
     kind = ENTITY_BY_TYPE.get(entity_type)
-    if kind is not None and kind.files_named_by_uid:
+    if kind is None:
+        raise ValueError(f"Unsupported entity type for save path: {entity_type}")
+    expected = save_entity_path(entity_type, uid, source_root) if is_dashed_uid(uid) else None
+    found = [expected] if expected is not None and expected.exists() else []
+    if kind.files_named_by_uid:
         return found
     return found + [path for path in iter_entity_files(entity_type, source_root) if path != expected]

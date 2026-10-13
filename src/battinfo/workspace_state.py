@@ -10,9 +10,9 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import unquote, urlparse
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator
 
-from battinfo._fs_guard import is_within, remove_temp_tree, remove_tree, require_within
+from battinfo._fs_guard import check_relative_path, is_within, remove_temp_tree, remove_tree, require_within
 from battinfo._jsonio import read_json as _read_json
 from battinfo._jsonio import write_json as _write_json
 from battinfo._util import _as_path, _now_iso, _sha256
@@ -158,12 +158,24 @@ class WorkspacePaths(BaseModel):
     tests: str = "records/tests"
     datasets: str = "records/dataset"
 
+    @field_validator("cell_specs", "cells", "tests", "datasets")
+    @classmethod
+    def _inside_the_workspace(cls, value: str, info: ValidationInfo) -> str:
+        return check_relative_path(value, field=f"paths.{info.field_name}")
+
 
 class WorkspaceArtifact(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     dataset_id: str
+    # Read back as the dataset's file, which the next save copies into the
+    # workspace, so it must lie inside the workspace too.
     path: str
+
+    @field_validator("path")
+    @classmethod
+    def _inside_the_workspace(cls, value: str) -> str:
+        return check_relative_path(value, field="dataset_artifacts path")
 
 
 class WorkspaceStateManifest(BaseModel):
@@ -182,6 +194,11 @@ class WorkspaceStateManifest(BaseModel):
     artifacts_dir: str = "artifacts"
     dist_dir: str = "dist"
     dataset_artifacts: list[WorkspaceArtifact] = Field(default_factory=list)
+
+    @field_validator("artifacts_dir", "dist_dir")
+    @classmethod
+    def _inside_the_workspace(cls, value: str, info: ValidationInfo) -> str:
+        return check_relative_path(value, field=str(info.field_name))
 
 
 class WorkspaceStateStore:
@@ -462,11 +479,12 @@ class WorkspaceStateStore:
                 generated_at=_now_iso(),
             ),
             release={"version": manifest.version} if manifest.version is not None else {},
+            # No local path: the package goes to the registry, and the
+            # workspace folder (with the user name in it) stays here.
             workspace={
                 "workspace_id": manifest.workspace_id,
                 "title": manifest.title,
                 "description": manifest.description,
-                "root": str(self.root),
                 "registry": {key: value for key, value in {"tenant": manifest.tenant, "workspace": manifest.workspace_id}.items() if value is not None},
             },
             resource=resource,

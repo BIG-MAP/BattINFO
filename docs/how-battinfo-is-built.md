@@ -150,7 +150,7 @@ src/battinfo/
 ```
 
 Supporting cast: `_jsonio.py` (atomic JSON file I/O), `_fs_guard.py` (the
-one place that deletes folders, and the checks it makes first), `_record_index.py`
+one place that deletes folders, the checks it makes first, and the check on the paths a workspace manifest names), `_record_index.py`
 (the bulk-save id→path cache), `canonical_aliases.py` (legacy key
 normalisation), `testmethod.py` (structured test-method steps),
 `metadata.py` (CSVW/DCAT dataset enrichment).
