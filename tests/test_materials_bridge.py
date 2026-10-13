@@ -48,3 +48,42 @@ def test_link_component_to_spec_adds_reference() -> None:
     spec = bi.material_spec_from_component(holder)
     linked = bi.link_component_to_spec(holder, spec["material_spec"]["id"])
     assert linked["material_spec_id"] == spec["material_spec"]["id"]
+
+
+def test_graphite_from_two_suppliers_lifts_to_two_specs(tmp_path: Path) -> None:
+    """The bridge mints through the material-spec seed, not the lower-cased name."""
+    imerys = {"name": "Graphite", "manufacturer": "Imerys", "product_id": "SLP30"}
+    btr = {"name": "Graphite", "manufacturer": "BTR", "product_id": "BFC-18"}
+    record = {
+        "positive_electrode": {"coating": {"component": {"active_material": [imerys]}}},
+        "negative_electrode": {"coating": {"component": {"active_material": [btr]}}},
+    }
+    lifted = {
+        spec["material_spec"]["manufacturer"]["name"]: spec["material_spec"]
+        for spec in bi.extract_material_specs(record)
+    }
+    assert sorted(lifted) == ["BTR", "Imerys"]
+    ws = bi.workspace(tmp_path, registry_url=None)
+    for holder in (imerys, btr):
+        added = ws.add("material_spec", **holder)[0]["material_spec"]
+        assert lifted[holder["manufacturer"]]["id"] == added["id"]
+        assert added["kind"] == "graphite"
+
+
+def test_graphite_and_graphite_from_one_supplier_still_merge() -> None:
+    record = {
+        "positive_electrode": {
+            "coating": {"component": {"active_material": [{"name": "Graphite", "manufacturer": "Imerys"}]}}
+        },
+        "negative_electrode": {
+            "coating": {"component": {"active_material": [{"name": "graphite", "manufacturer": "Imerys"}]}}
+        },
+    }
+    assert len(bi.extract_material_specs(record)) == 1
+
+
+def test_an_explicit_uid_seed_still_wins() -> None:
+    from battinfo.entities import stable_uid
+
+    spec = bi.material_spec_from_component({"name": "Graphite"}, uid_seed="lab-graphite")
+    assert spec["material_spec"]["id"].endswith(stable_uid("lab-graphite"))

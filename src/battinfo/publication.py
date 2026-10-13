@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import hashlib
 import html
 import json
 import mimetypes
@@ -27,7 +26,7 @@ from battinfo.bundle import (
     Test,
     ZenodoCellRecord,
 )
-from battinfo.entities import dataset_locator_seed
+from battinfo.entities import cell_spec_identity_seed, dataset_locator_seed, seed_text, stable_uid
 from battinfo.jsonld import dataset_series_edges, electrode_role_links, schema_checksum_terms
 from battinfo.validate.core import PUBLISHER_POLICY, ValidationPolicy
 from battinfo.validate.publication import validate_publication_report
@@ -204,13 +203,8 @@ def _tail_id(entity_id: str) -> str:
 
 
 def _stable_uid(seed: str) -> str:
-    value = int.from_bytes(hashlib.sha256(seed.encode("utf-8")).digest()[:16], "big")
-    chars: list[str] = []
-    for _ in range(16):
-        value, remainder = divmod(value, 32)
-        chars.append(UID_ALPHABET[remainder])
-    token = "".join(reversed(chars))
-    return "-".join((token[:4], token[4:8], token[8:12], token[12:16]))
+    # The shared minting primitive, with its Unicode NFC step.
+    return stable_uid(seed)
 
 
 _PUB_IRI_NAMESPACE: dict[str, str] = {
@@ -247,6 +241,11 @@ def _cell_spec_iri(entity_id: str) -> str:
 def _with_default(value: str | None, fallback: str) -> str:
     text = (value or "").strip()
     return text or fallback
+
+
+def _seed_text_or(value: Any, fallback: str) -> str:
+    """A free-text identity field as it enters a seed (``entities.seed_text``), else *fallback*."""
+    return seed_text(value) or fallback
 
 
 def _without_none(payload: dict[str, Any]) -> dict[str, Any]:
@@ -1493,14 +1492,12 @@ def _finalize_cell_spec(
             if cell_specification is not None
             else _entity_iri(
                 "cell-spec",
-                "::".join(
-                    [
-                        _with_default(finalized.manufacturer, "unknown-manufacturer"),
-                        _with_default(finalized.model, "unknown-model"),
-                        _with_default(finalized.format, "unknown-format"),
-                        _with_default(finalized.chemistry, "unknown-chemistry"),
-                        finalized.size_code or "",
-                    ]
+                cell_spec_identity_seed(
+                    manufacturer=finalized.manufacturer,
+                    model=finalized.model,
+                    format=finalized.format,
+                    chemistry=finalized.chemistry,
+                    size_code=finalized.size_code,
                 ),
             )
         )
@@ -1531,9 +1528,9 @@ def _finalize_cell_instance(
             "::".join(
                 [
                     _with_default(finalized.cell_spec_id, "unknown-cell-spec"),
-                    finalized.serial_number or "",
-                    finalized.batch_id or "",
-                    _with_default(finalized.name, dataset_dir.name),
+                    seed_text(finalized.serial_number),
+                    seed_text(finalized.batch_id),
+                    _seed_text_or(finalized.name, seed_text(dataset_dir.name)),
                 ]
             ),
         )
@@ -1569,8 +1566,8 @@ def _finalize_test(
                 [
                     _with_default(finalized.cell_instance_id, "unknown-cell"),
                     _with_default(finalized.test_kind, "other"),
-                    protocol_name,
-                    _with_default(finalized.name, "test"),
+                    _seed_text_or(finalized.protocol.name, "test"),
+                    _seed_text_or(finalized.name, "test"),
                 ]
             ),
         )
@@ -1621,7 +1618,7 @@ def _finalize_dataset(
                         download_url=finalized.download_url,
                         dataset_path=dataset_dir,
                     ),
-                    _with_default(finalized.name, dataset_dir.name),
+                    _seed_text_or(finalized.name, seed_text(dataset_dir.name)),
                 ]
             ),
         )

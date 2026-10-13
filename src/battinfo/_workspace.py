@@ -56,8 +56,10 @@ from battinfo.bundle import (
 )
 from battinfo.entities import (
     cell_instance_identity_seed,
+    cell_spec_uid,
     dataset_locator_seed,
     iri_namespace_map,
+    seed_text,
     stable_uid,
 )
 from battinfo.publication import DEFAULT_PUBLISH_FILENAME
@@ -144,6 +146,25 @@ def _entity_iri(entity_type: str, seed: str) -> str:
 def _with_default(value: str | None, fallback: str) -> str:
     text = (value or "").strip()
     return text or fallback
+
+
+def _seed_text_or(value: Any, fallback: str) -> str:
+    """A free-text identity field as it enters a seed (``entities.seed_text``), else *fallback*."""
+    return seed_text(value) or fallback
+
+
+def _cell_spec_fields(manufacturer: Any, model: Any, format: Any, chemistry: Any, size_code: Any) -> dict[str, Any]:
+    return {
+        "manufacturer": manufacturer,
+        "model": model,
+        "format": format,
+        "chemistry": chemistry,
+        "size_code": size_code,
+    }
+
+
+def _cell_spec_iri(uid: str) -> str:
+    return f"https://w3id.org/battinfo/{_IRI_NAMESPACE['cell-spec']}/{uid}"
 
 
 # Fields that vary across runs (or are the IRI itself) and must NOT influence a
@@ -764,19 +785,14 @@ class Workspace:
         specification_comment: str | list[str] | None = None,
         comment: str | list[str] | None = None,
     ) -> CellSpec:
+        from battinfo.api._records import _library_cell_spec_uid  # noqa: PLC0415
+
+        fields = _cell_spec_fields(manufacturer, model, format, chemistry, size_code)
+        # The library holds one file per manufacturer and model; a spec it holds
+        # under the IRI the seeds of before 0.8.0 gave it keeps that IRI.
+        uid = _library_cell_spec_uid(fields, self.library_root) or cell_spec_uid(fields)
         specification = build_cell_description(
-            id=_entity_iri(
-                "cell-spec",
-                "::".join(
-                    [
-                        _with_default(manufacturer, "unknown-manufacturer"),
-                        _with_default(model, "unknown-model"),
-                        _with_default(format, "unknown-format"),
-                        _with_default(chemistry, "unknown-chemistry"),
-                        size_code or "",
-                    ]
-                ),
-            ),
+            id=_cell_spec_iri(uid),
             manufacturer=manufacturer,
             model=model,
             format=format,
@@ -1686,7 +1702,7 @@ class Workspace:
         stamp: Callable[[dict[str, Any]], None] | None = None,
     ) -> dict[str, Any]:
         target_root = _as_path(source_root) if source_root is not None else self.source_root
-        finalized = self._finalize()
+        finalized = self._finalize(record_roots=[target_root])
 
         from battinfo._record_index import bulk_save_session  # noqa: PLC0415 — avoid import cycle
 
@@ -1885,8 +1901,15 @@ class Workspace:
     load_test_protocols = load_test_specs
     query_test_protocols = query_test_specs
 
-    def _finalize(self) -> dict[str, list[Any]]:
-        finalized_cell_specs = [self._finalize_cell_spec(item) for item in self.cell_specs]
+    def _finalize(self, *, record_roots: Sequence[Path] | None = None) -> dict[str, list[Any]]:
+        """Mint and link every record of the session, in place.
+
+        *record_roots* are the records folders a save writes to (by default
+        :attr:`source_root`): a cell spec saved there under the IRI the seeds
+        of before 0.8.0 gave it keeps that IRI.
+        """
+        roots = [self.source_root] if record_roots is None else list(record_roots)
+        finalized_cell_specs = [self._finalize_cell_spec(item, record_roots=roots) for item in self.cell_specs]
         cell_spec_map = {
             id(original): finalized for original, finalized in zip(self.cell_specs, finalized_cell_specs, strict=True)
         }
@@ -2066,21 +2089,18 @@ class Workspace:
             finalized.source.retrieved_at = _now_unix()
         return finalized
 
-    def _finalize_cell_spec(self, cell_spec: CellSpec) -> CellSpec:
+    def _finalize_cell_spec(self, cell_spec: CellSpec, *, record_roots: Sequence[Path] = ()) -> CellSpec:
+        """A finalized copy of *cell_spec*, its IRI minted from its natural key when it has none.
+
+        A spec saved under *record_roots* (the records folder the save writes
+        to) with the IRI the seeds of before 0.8.0 gave it keeps that IRI.
+        """
         finalized = cell_spec.model_copy(deep=True)
         if finalized.id is None:
-            finalized.id = _entity_iri(
-                "cell-spec",
-                "::".join(
-                    [
-                        _with_default(finalized.manufacturer, "unknown-manufacturer"),
-                        _with_default(finalized.model, "unknown-model"),
-                        _with_default(finalized.format, "unknown-format"),
-                        _with_default(finalized.chemistry, "unknown-chemistry"),
-                        finalized.size_code or "",
-                    ]
-                ),
+            fields = _cell_spec_fields(
+                finalized.manufacturer, finalized.model, finalized.format, finalized.chemistry, finalized.size_code
             )
+            finalized.id = _cell_spec_iri(cell_spec_uid(fields, roots=record_roots))
         if finalized.name is None:
             finalized.name = f"{finalized.manufacturer} {finalized.model}"
         if finalized.source.type is None:
@@ -2130,8 +2150,8 @@ class Workspace:
                 "::".join(
                     [
                         _with_default(finalized.test_kind, "other"),
-                        _with_default(finalized.name, "test-protocol"),
-                        finalized.version or "",
+                        _seed_text_or(finalized.name, "test-protocol"),
+                        seed_text(finalized.version),
                     ]
                 ),
             )
@@ -2169,8 +2189,8 @@ class Workspace:
                     [
                         _with_default(finalized.cell_instance_id, "unknown-cell"),
                         _with_default(finalized.test_kind, "other"),
-                        protocol_name,
-                        _with_default(finalized.name, "test"),
+                        _seed_text_or(finalized.protocol.name, "test"),
+                        _seed_text_or(finalized.name, "test"),
                     ]
                 ),
             )
@@ -2227,7 +2247,7 @@ class Workspace:
                             dataset_path=finalized.dataset_path,
                             workspace_root=self.data_root,
                         ),
-                        _with_default(finalized.name, "dataset"),
+                        _seed_text_or(finalized.name, "dataset"),
                     ]
                 ),
             )

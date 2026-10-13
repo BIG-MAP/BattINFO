@@ -12,6 +12,8 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
@@ -159,3 +161,139 @@ def test_workspace_rename_with_a_serial_keeps_the_iri(tmp_path: Path) -> None:
         return json.loads(path.read_text(encoding="utf-8"))["cell_instance"]["id"]
 
     assert minted("first", "Cell one") == minted("second", "Graphite AQ-1 cell C01")
+
+
+# ── Parity: one identity, one IRI, on every minting path ──────────────────────
+#
+# The workspace (ws.add), the create_* builders, the save_* functions, a save of
+# a record without an id (save_record) and the embedded-to-standalone bridges
+# mint the same material-spec and electrode-spec IRI for the same identity.
+
+
+def _without_id_save(body_key: str, body: dict, root: Path) -> str:
+    from battinfo.bundle import SCHEMA_VERSION
+
+    doc = {"schema_version": SCHEMA_VERSION, body_key: body}
+    return api.save_record(doc, source_root=root, validate=False, dry_run=True, resolve_references=False)["id"]
+
+
+MATERIAL_SPEC_IDENTITIES = {
+    "kind key": {"name": "Graphite SLP30", "kind": "graphite", "manufacturer": "Imerys", "product_id": "SLP30"},
+    "kind alias": {"name": "Graphite SLP30", "kind": "Graphite", "manufacturer": "Imerys", "product_id": "SLP30"},
+    "kind from the name": {"name": "Graphite"},
+    "grade": {"name": "NMC811", "kind": "NMC 811", "manufacturer": "Targray", "grade": "SNMC03008"},
+}
+
+
+@pytest.mark.parametrize("case", sorted(MATERIAL_SPEC_IDENTITIES))
+def test_every_path_mints_one_material_spec_iri(case: str, tmp_path: Path) -> None:
+    import battinfo
+
+    fields = MATERIAL_SPEC_IDENTITIES[case]
+    ws = battinfo.workspace(tmp_path / "ws", registry_url=None)
+    iris = {
+        "ws": ws.add("material_spec", **fields)[0]["material_spec"]["id"],
+        "create": api.create_material_spec(validate=False, **fields)["material_spec"]["id"],
+        "save": api.save_material_spec(dict(fields), source_root=tmp_path / "save", validate=False)["id"],
+        "save_record": _without_id_save(
+            "material_spec",
+            {**fields, "manufacturer": {"type": "Organization", "name": fields["manufacturer"]}}
+            if "manufacturer" in fields
+            else dict(fields),
+            tmp_path / "save-record",
+        ),
+    }
+    assert len(set(iris.values())) == 1, iris
+
+
+def test_the_material_bridge_mints_the_material_spec_iri(tmp_path: Path) -> None:
+    import battinfo
+    from battinfo.materials import material_spec_from_component
+
+    ws = battinfo.workspace(tmp_path, registry_url=None)
+    holder = {"name": "Graphite", "manufacturer": "Imerys", "product_id": "SLP30"}
+    lifted = material_spec_from_component(holder)["material_spec"]["id"]
+    assert lifted == ws.add("material_spec", **holder)[0]["material_spec"]["id"]
+    assert lifted == api.create_material_spec(validate=False, **holder)["material_spec"]["id"]
+
+
+ELECTRODE_SPEC_IDENTITIES = {
+    "kind key": {"name": "Graphite anode", "active_material_kind": "graphite"},
+    "kind alias": {"name": "Graphite anode", "active_material_kind": "Graphite"},
+    "kind from the name": {"name": "LFP"},
+    "producer and route": {
+        "name": "Si-Gr anode",
+        "active_material_kind": "Si-Gr",
+        "manufacturer": "SINTEF",
+        "product_id": "SG-1",
+        "processing": {"route": "aqueous"},
+    },
+}
+
+
+@pytest.mark.parametrize("case", sorted(ELECTRODE_SPEC_IDENTITIES))
+def test_every_path_mints_one_electrode_spec_iri(case: str, tmp_path: Path) -> None:
+    import battinfo
+
+    fields = ELECTRODE_SPEC_IDENTITIES[case]
+    ws = battinfo.workspace(tmp_path / "ws", registry_url=None)
+    body = dict(fields)
+    if "manufacturer" in body:
+        body["manufacturer"] = {"type": "Organization", "name": body["manufacturer"]}
+    iris = {
+        "ws": ws.add("electrode_spec", **fields)[0]["electrode_spec"]["id"],
+        "create": api.create_electrode_spec(validate=False, **fields)["electrode_spec"]["id"],
+        "save": api.save_electrode_spec(dict(fields), source_root=tmp_path / "save", validate=False)["id"],
+        "save_record": _without_id_save("electrode_spec", body, tmp_path / "save-record"),
+    }
+    assert len(set(iris.values())) == 1, iris
+
+
+def test_the_component_bridge_lifts_electrodes_through_the_electrode_spec_builder() -> None:
+    from battinfo.components import extract_component_specs
+
+    record = {
+        "cell_spec": {"name": "Example cell"},
+        "positive_electrode": {
+            "manufacturer": "SINTEF",
+            "product_id": "LFP-1",
+            "coating": {"component": {"active_material": [{"name": "LFP"}], "binder": [{"name": "PVDF"}]}},
+        },
+        "negative_electrode": {"coating": {"component": {"active_material": [{"name": "Graphite"}]}}},
+    }
+    lifted = {spec["electrode_spec"]["name"]: spec["electrode_spec"] for spec in extract_component_specs(record)}
+    positive = lifted["Example cell positive electrode"]
+    negative = lifted["Example cell negative electrode"]
+    # The active material's kind is read from the coating, and the IRI is the
+    # one the electrode-spec builder gives the same identity.
+    assert positive["active_material_kind"] == "lfp"
+    assert negative["active_material_kind"] == "graphite"
+    expected = api.create_electrode_spec(
+        validate=False,
+        name="Example cell positive electrode",
+        active_material_kind="lfp",
+        manufacturer="SINTEF",
+        product_id="LFP-1",
+    )["electrode_spec"]["id"]
+    assert positive["id"] == expected
+    assert (
+        negative["id"]
+        == (
+            api.create_electrode_spec(
+                validate=False, name="Example cell negative electrode", active_material_kind="graphite"
+            )["electrode_spec"]["id"]
+        )
+    )
+
+
+def test_a_save_without_an_id_refuses_an_unknown_kind_as_the_builders_do(tmp_path: Path) -> None:
+    body = {"name": "Mystery powder", "kind": "unobtainium"}
+    with pytest.raises(ValueError, match="Unknown material kind 'unobtainium'"):
+        api.create_material_spec(validate=False, **body)
+    with pytest.raises(ValueError, match="Unknown material kind 'unobtainium'"):
+        _without_id_save("material_spec", body, tmp_path)
+    electrode = {"name": "Mystery electrode", "active_material_kind": "unobtainium"}
+    with pytest.raises(ValueError, match="Unknown electrode kind 'unobtainium'"):
+        api.create_electrode_spec(validate=False, **electrode)
+    with pytest.raises(ValueError, match="Unknown electrode kind 'unobtainium'"):
+        _without_id_save("electrode_spec", electrode, tmp_path)

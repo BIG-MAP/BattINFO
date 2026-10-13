@@ -3,8 +3,9 @@
 Seed rules freeze with the first PyPI release: a seed change after it moves
 IRIs that users have already published. ``tests/fixtures/identity/golden-iris.json``
 holds the IRI every case below minted at 057b66a0, the commit the 0.8.0
-identity freeze started from, before any of its seed changes. The file is
-never regenerated. A change that moves an IRI adds the case to ``MOVED`` with
+identity freeze started from, before any of its seed changes (every case
+mints the same at 6a52fd5, the release candidate it was reviewed at). The
+file is never regenerated. A change that moves an IRI adds the case to ``MOVED`` with
 the IRI it mints now and the reason, and the changelog lists the move.
 
 A case id reads ``kind | path | case``. The paths are the authoring
@@ -46,8 +47,191 @@ GOLDEN_PATH = ROOT / "tests" / "fixtures" / "identity" / "golden-iris.json"
 RANDOM = "random"
 REFUSED = "refused"
 
+# Why IRIs moved. Each seed change names its reason once and lists its moves below.
+CHEMISTRY_KEY = (
+    "A cell spec's chemistry seeds as its vocabulary key, case-folded and with an alias "
+    "resolved: Li-ion and LI-ION seed as li-ion, the alias li-primary as li-metal."
+)
+MATERIAL_BRIDGE = (
+    "The material bridge mints through the material-spec seed (manufacturer, product, grade, "
+    "kind) rather than the lower-cased name, and extract_material_specs de-duplicates by IRI."
+)
+ELECTRODE_BRIDGE = (
+    "The component bridge lifts an electrode holder through create_electrode_spec, with the "
+    "coating's first active material as its kind."
+)
+KIND_RESOLVED = (
+    "A material or electrode spec saved without an id seeds its kind as the builders do: "
+    "resolved through the vocabulary, else from its name or product id."
+)
+
 #: Cases whose IRI moved since 057b66a0: case id -> (what it mints now, why it moved).
-MOVED: dict[str, tuple[str, str]] = {}
+MOVED: dict[str, tuple[str, str]] = {
+    "cell-spec | engine | chemistry alias": (
+        "https://w3id.org/battinfo/spec/vm5x-t3tk-5se8-xaqm",
+        CHEMISTRY_KEY,
+    ),
+    "cell-spec | engine | chemistry case variant": (
+        "https://w3id.org/battinfo/spec/s08z-hw1a-r5bw-ejpn",
+        CHEMISTRY_KEY,
+    ),
+    "cell-spec | engine | chemistry upper case": (
+        "https://w3id.org/battinfo/spec/pmda-v1sm-tv57-zrqt",
+        CHEMISTRY_KEY,
+    ),
+    "cell-spec | publication | chemistry alias": (
+        "https://w3id.org/battinfo/spec/vm5x-t3tk-5se8-xaqm",
+        CHEMISTRY_KEY,
+    ),
+    "cell-spec | publication | chemistry case variant": (
+        "https://w3id.org/battinfo/spec/s08z-hw1a-r5bw-ejpn",
+        CHEMISTRY_KEY,
+    ),
+    "cell-spec | publication | chemistry upper case": (
+        "https://w3id.org/battinfo/spec/pmda-v1sm-tv57-zrqt",
+        CHEMISTRY_KEY,
+    ),
+    "cell-spec | save | chemistry alias": (
+        "https://w3id.org/battinfo/spec/vm5x-t3tk-5se8-xaqm",
+        CHEMISTRY_KEY,
+    ),
+    "cell-spec | save | chemistry case variant": (
+        "https://w3id.org/battinfo/spec/s08z-hw1a-r5bw-ejpn",
+        CHEMISTRY_KEY,
+    ),
+    "cell-spec | save | chemistry upper case": (
+        "https://w3id.org/battinfo/spec/pmda-v1sm-tv57-zrqt",
+        CHEMISTRY_KEY,
+    ),
+    "cell-spec | save_record | chemistry alias": (
+        "https://w3id.org/battinfo/spec/vm5x-t3tk-5se8-xaqm",
+        CHEMISTRY_KEY,
+    ),
+    "cell-spec | save_record | chemistry case variant": (
+        "https://w3id.org/battinfo/spec/s08z-hw1a-r5bw-ejpn",
+        CHEMISTRY_KEY,
+    ),
+    "cell-spec | save_record | chemistry upper case": (
+        "https://w3id.org/battinfo/spec/pmda-v1sm-tv57-zrqt",
+        CHEMISTRY_KEY,
+    ),
+    "cell-spec | ws | chemistry alias": (
+        "https://w3id.org/battinfo/spec/vm5x-t3tk-5se8-xaqm",
+        CHEMISTRY_KEY,
+    ),
+    "cell-spec | ws | chemistry case variant": (
+        "https://w3id.org/battinfo/spec/s08z-hw1a-r5bw-ejpn",
+        CHEMISTRY_KEY,
+    ),
+    "cell-spec | ws | chemistry upper case": (
+        "https://w3id.org/battinfo/spec/pmda-v1sm-tv57-zrqt",
+        CHEMISTRY_KEY,
+    ),
+    "electrode-spec | bridge | extended example, A123 ANR26650M1-B negative electrode": (
+        "https://w3id.org/battinfo/spec/58e8-7982-avxm-w0y4",
+        ELECTRODE_BRIDGE,
+    ),
+    "electrode-spec | bridge | extended example, A123 ANR26650M1-B positive electrode": (
+        "https://w3id.org/battinfo/spec/cptc-3hxy-bn2m-cyh5",
+        ELECTRODE_BRIDGE,
+    ),
+    "electrode-spec | save_record | kind from the name": (
+        "https://w3id.org/battinfo/spec/h3t5-dn8b-8pd1-tjms",
+        KIND_RESOLVED,
+    ),
+    "material-spec | bridge | Graphite from BTR": (
+        "https://w3id.org/battinfo/spec/kb21-02cj-ffhz-ax86",
+        MATERIAL_BRIDGE,
+    ),
+    "material-spec | bridge | Graphite from Imerys": (
+        "https://w3id.org/battinfo/spec/3z1m-c26r-mc8q-vge8",
+        MATERIAL_BRIDGE,
+    ),
+    "material-spec | bridge | lower-case name": (
+        "https://w3id.org/battinfo/spec/qdbk-w86d-ae1x-jxgz",
+        MATERIAL_BRIDGE,
+    ),
+    "material-spec | bridge | name only": (
+        "https://w3id.org/battinfo/spec/6rq6-s3tx-b6ym-ht0g",
+        MATERIAL_BRIDGE,
+    ),
+    "material-spec | extract | Graphite and graphite": (
+        "https://w3id.org/battinfo/spec/qdbk-w86d-ae1x-jxgz",
+        MATERIAL_BRIDGE,
+    ),
+    "material-spec | extract | Graphite from two suppliers": (
+        "https://w3id.org/battinfo/spec/3z1m-c26r-mc8q-vge8, https://w3id.org/battinfo/spec/kb21-02cj-ffhz-ax86",
+        MATERIAL_BRIDGE,
+    ),
+    "material-spec | extract | extended example, Al foil": (
+        "https://w3id.org/battinfo/spec/nqva-2dhw-mzy8-f8x8",
+        MATERIAL_BRIDGE,
+    ),
+    "material-spec | extract | extended example, Al2O3 particles": (
+        "https://w3id.org/battinfo/spec/2j42-4zq6-xwk1-dtr2",
+        MATERIAL_BRIDGE,
+    ),
+    "material-spec | extract | extended example, CMC/SBR": (
+        "https://w3id.org/battinfo/spec/gd25-a1vh-0yh1-ce83",
+        MATERIAL_BRIDGE,
+    ),
+    "material-spec | extract | extended example, Carbon black": (
+        "https://w3id.org/battinfo/spec/8yq1-rsc0-h6nh-3xhj",
+        MATERIAL_BRIDGE,
+    ),
+    "material-spec | extract | extended example, Cu foil": (
+        "https://w3id.org/battinfo/spec/6rpq-zcnn-wqzc-g9st",
+        MATERIAL_BRIDGE,
+    ),
+    "material-spec | extract | extended example, EC": (
+        "https://w3id.org/battinfo/spec/yb44-wr9q-hwc0-vwbw",
+        MATERIAL_BRIDGE,
+    ),
+    "material-spec | extract | extended example, EMC": (
+        "https://w3id.org/battinfo/spec/myrj-s5dn-ex88-m6t5",
+        MATERIAL_BRIDGE,
+    ),
+    "material-spec | extract | extended example, FEC": (
+        "https://w3id.org/battinfo/spec/v5nx-qbaq-gn9e-fn2w",
+        MATERIAL_BRIDGE,
+    ),
+    "material-spec | extract | extended example, Graphite": (
+        "https://w3id.org/battinfo/spec/qdbk-w86d-ae1x-jxgz",
+        MATERIAL_BRIDGE,
+    ),
+    "material-spec | extract | extended example, LFP": (
+        "https://w3id.org/battinfo/spec/6rq6-s3tx-b6ym-ht0g",
+        MATERIAL_BRIDGE,
+    ),
+    "material-spec | extract | extended example, LiPF6": (
+        "https://w3id.org/battinfo/spec/aeqc-tqax-m5f1-g6qq",
+        MATERIAL_BRIDGE,
+    ),
+    "material-spec | extract | extended example, PE/PP trilayer": (
+        "https://w3id.org/battinfo/spec/caf0-889v-mnp6-kntt",
+        MATERIAL_BRIDGE,
+    ),
+    "material-spec | extract | extended example, PVDF": (
+        "https://w3id.org/battinfo/spec/je56-4c60-jxdz-050c",
+        MATERIAL_BRIDGE,
+    ),
+    "material-spec | extract | extended example, SiOx": (
+        "https://w3id.org/battinfo/spec/cx3r-61k7-mw27-rc1w",
+        MATERIAL_BRIDGE,
+    ),
+    "material-spec | extract | extended example, VC": (
+        "https://w3id.org/battinfo/spec/cqgd-n9q6-vyxr-6mrv",
+        MATERIAL_BRIDGE,
+    ),
+    "material-spec | save_record | kind alias": (
+        "https://w3id.org/battinfo/spec/kb21-02cj-ffhz-ax86",
+        KIND_RESOLVED,
+    ),
+    "material-spec | save_record | kind from the name": (
+        "https://w3id.org/battinfo/spec/6rq6-s3tx-b6ym-ht0g",
+        KIND_RESOLVED,
+    ),
+}
 
 
 # ── Inputs ────────────────────────────────────────────────────────────────────

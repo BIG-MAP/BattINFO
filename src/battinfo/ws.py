@@ -8933,12 +8933,13 @@ class AuthoringWorkspace:
         """Lift an equipment-spec draft (from ``ws.template``) to a canonical record.
 
         The uid is minted deterministically from the draft's natural key
-        (manufacturer :: model :: name), so re-loading the same draft converges
-        on the same spec IRI instead of minting a duplicate. An ``id`` or
-        ``uid`` in the draft pins the IRI instead.
+        (manufacturer :: model :: name, each normalised by
+        ``entities.seed_text``), so re-loading the same draft converges on the
+        same spec IRI instead of minting a duplicate. An ``id`` or ``uid`` in
+        the draft pins the IRI instead.
         """
         from battinfo.api import create_equipment_spec  # noqa: PLC0415
-        from battinfo.entities import stable_uid  # noqa: PLC0415
+        from battinfo.entities import seed_text, stable_uid  # noqa: PLC0415
 
         raw = json.loads(path.read_text(encoding="utf-8"))
         _check_draft_keys(raw, _EQUIPMENT_SPEC_DRAFT_KEYS, draft="equipment-spec", path=path)
@@ -8950,7 +8951,11 @@ class AuthoringWorkspace:
                 f"{path.name} needs at least a name (or manufacturer/model) - fill in the template before loading it."
             )
         pinned = _draft_spec_iri(raw.get("id"), raw.get("uid"), path.name)
-        uid = None if pinned else stable_uid("::".join(["equipment-spec", manufacturer or "", model or "", name]))
+        uid = (
+            None
+            if pinned
+            else stable_uid("::".join(["equipment-spec", seed_text(manufacturer), seed_text(model), seed_text(name)]))
+        )
         # Drop template placeholders (null quantity fields) so the record stays valid.
         props: dict[str, dict] = {}
         for key, value in (raw.get("property") or {}).items():
@@ -9056,7 +9061,7 @@ class AuthoringWorkspace:
         the same records instead of duplicating them.
         """
         from battinfo.api import create_channel, create_equipment, save_record  # noqa: PLC0415
-        from battinfo.entities import stable_uid  # noqa: PLC0415
+        from battinfo.entities import seed_text, stable_uid  # noqa: PLC0415
 
         if spec is None:
             raise ValueError(
@@ -9103,7 +9108,7 @@ class AuthoringWorkspace:
         # ws.add('equipment', ...) with the same inputs converges on the existing
         # unit instead of minting a duplicate. Chosen over random minting because
         # a physical unit's natural key IS its model + serial number.
-        equipment_uid = stable_uid(f"equipment:{spec_uid}:{serial_number}")
+        equipment_uid = stable_uid(f"equipment:{spec_uid}:{seed_text(serial_number)}")
         equipment_record = create_equipment(
             uid=equipment_uid,
             equipment_spec_id=spec_id,

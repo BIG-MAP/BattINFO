@@ -623,14 +623,14 @@ def _generate_cell_iri(
 
     The seed is stable: same cell_spec + batch + serial (or index) always
     produces the same IRI, so re-running init on an existing batch is safe.
+    The batch and serial enter as ``entities.seed_text``.
     """
+    from battinfo.entities import seed_text
     from battinfo.publication import _entity_iri
 
-    seed_parts = [cell_spec_iri, batch_id or "batch"]
-    if serial_number:
-        seed_parts.append(serial_number)
-    else:
-        seed_parts.append(str(index))
+    seed_parts = [cell_spec_iri, seed_text(batch_id) or "batch"]
+    serial = seed_text(serial_number)
+    seed_parts.append(serial if serial else str(index))
     return _entity_iri("cell", "::".join(seed_parts))
 
 

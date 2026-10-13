@@ -19,11 +19,7 @@ Example: `https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0`
   every such change.
 - **Stable** — once minted, an IRI never changes and is never reused. It is
   safe to cite in a paper, store in a database, or print on a label.
-- **Deterministic where it matters** — the workspace mints IRIs from each
-  record's identity, so re-saving the same records is an update, never a
-  duplicate (`tests/test_idempotent_minting.py` guards this). Standalone
-  material specs are minted from the material name, so the same material
-  lifts to the same spec IRI across cells.
+- **Deterministic where it matters** — the workspace mints IRIs from each record's identity, so re-saving the same records is an update, never a duplicate (`tests/test_idempotent_minting.py` guards this). Free text in an identity (a manufacturer, model, name, serial number or batch) is normalised first: surrounding and repeated whitespace, a no-break space and a decomposed accent do not change an IRI, but case does. A cell spec's chemistry counts by its vocabulary key, so `Li-ion` and `li-ion` give one cell spec. A material spec lifted out of a cell spec is minted from its manufacturer, product, grade and kind, as `ws.add("material_spec", ...)` mints it, so the same material lifts to the same spec IRI across cells, and one material from two suppliers to two.
 
 ## The UID
 
