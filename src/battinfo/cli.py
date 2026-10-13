@@ -1388,7 +1388,11 @@ def library_save_cell_spec(
         Path(".battinfo/library-rdf/cell-spec.index.json"),
         help="Path for the generated library manifest JSON.",
     ),
-    clean_output: bool = typer.Option(False, "--clean-output", help="Clean existing JSON-LD outputs before rebuilding."),
+    clean_output: bool = typer.Option(
+        False,
+        "--clean-output",
+        help="Before rebuilding with --build-rdf, delete the JSON-LD files the previous build listed in its manifest.",
+    ),
     dry_run: bool = typer.Option(False, "--dry-run", help="Preview save without writing files."),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
@@ -1476,7 +1480,9 @@ def library_build_rdf(
         help="Path for the generated library manifest JSON.",
     ),
     glob: str = typer.Option("*.json", help="File glob used to select library cell specifications."),
-    clean_output: bool = typer.Option(False, "--clean-output", help="Remove existing JSON-LD outputs before writing."),
+    clean_output: bool = typer.Option(
+        False, "--clean-output", help="Delete the JSON-LD files the previous build listed in its manifest before rebuilding."
+    ),
     output_format: str = typer.Option("json", "--format", help="Output format: table|json."),
 ) -> None:
     """Build domain-battery JSON-LD artifacts for the reusable cell-spec library."""

@@ -14,9 +14,11 @@ removes a folder calls one of two functions:
     a folder it renamed aside while swapping a new one in), ignoring errors.
 
 ``check_remove`` runs the checks of ``remove_tree`` without deleting, for a
-caller that wants to refuse before doing any work. ``is_within(path, root)``
-says whether a path lies inside a folder; it is the contained-path test shared
-by the delete guard and the manifest path checks.
+caller that wants to refuse before doing any work, and ``require_apart`` runs
+only its check against the operation's inputs, for a caller that deletes files
+in a folder but not the folder. ``is_within(path, root)`` says whether a path
+lies inside a folder; it is the contained-path test shared by the delete guard
+and the manifest path checks.
 
 The paths a workspace manifest names (``dist_dir``, ``artifacts_dir``,
 ``paths.*``, ``resources.*`` and the ``dataset_artifacts`` paths) are checked
@@ -396,6 +398,19 @@ def remove_tree(
         shutil.rmtree(path)
 
 
+def require_apart(path: PathLike, inputs: Iterable[PathLike | None], *, action: str = "delete") -> None:
+    """Raise :class:`UnsafeDeleteError` when ``path`` is, holds or lies inside one of ``inputs``.
+
+    The input check of :func:`remove_tree` alone, for a caller that deletes
+    files in ``path`` but not the folder itself, such as a build that clears
+    its old output first. ``action`` names what the caller would do in the
+    error message.
+    """
+    reason = _overlap(_resolved(path), inputs)
+    if reason is not None:
+        raise UnsafeDeleteError(f"Refusing to {action} {path}: {reason}")
+
+
 def remove_temp_tree(path: PathLike) -> None:
     """Delete a temporary folder the code made itself, ignoring errors.
 
@@ -420,6 +435,7 @@ __all__ = [
     "is_within",
     "remove_temp_tree",
     "remove_tree",
+    "require_apart",
     "require_within",
     "write_marker",
 ]

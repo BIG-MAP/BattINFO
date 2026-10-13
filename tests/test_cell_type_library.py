@@ -1,11 +1,20 @@
 from __future__ import annotations
 
 import json
+import shutil
 import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
+
+from battinfo._fs_guard import UnsafeDeleteError
+from battinfo.api import build_cell_spec_library_rdf
+
+MINIMAL_SPEC = ROOT / "examples" / "cell-spec" / "research" / "minimal.example.json"
 
 
 def _load_json(path: Path) -> dict:
@@ -62,5 +71,61 @@ def test_build_cell_spec_library_rdf_from_descriptor(tmp_path: Path) -> None:
     assert manifest_payload["entries"][0]["model"] == expected_model
 
 
+def _library(folder: Path, *names: str) -> Path:
+    folder.mkdir(parents=True, exist_ok=True)
+    for name in names:
+        shutil.copyfile(MINIMAL_SPEC, folder / name)
+    return folder
 
 
+def _build(input_dir: Path, output_dir: Path, tmp_path: Path, **kwargs: object) -> dict:
+    return build_cell_spec_library_rdf(
+        input_dir=input_dir,
+        output_jsonld_dir=output_dir,
+        aggregate_jsonld=tmp_path / "ontology" / "cell-spec.jsonld",
+        manifest_json=tmp_path / "library-rdf" / "cell-spec.index.json",
+        **kwargs,
+    )
+
+
+def test_clean_output_into_the_input_folder_is_refused_and_keeps_its_files(tmp_path: Path) -> None:
+    library = _library(tmp_path / "lib", "ENERGIZER__CR2032.json")
+    (library / "my-notes.json").write_text('{"note": "mine"}', encoding="utf-8")
+
+    with pytest.raises(UnsafeDeleteError, match="which this operation reads"):
+        _build(library, library, tmp_path, clean_output=True)
+
+    assert sorted(path.name for path in library.iterdir()) == ["ENERGIZER__CR2032.json", "my-notes.json"]
+
+
+@pytest.mark.parametrize("output", ["rdf", ".."], ids=["inside", "holding"])
+def test_clean_output_refuses_an_output_folder_inside_or_around_the_input_folder(tmp_path: Path, output: str) -> None:
+    library = _library(tmp_path / "lib" / "cell-spec", "ENERGIZER__CR2032.json")
+
+    with pytest.raises(UnsafeDeleteError, match="which this operation reads"):
+        _build(library, library / output, tmp_path, clean_output=True)
+
+    assert (library / "ENERGIZER__CR2032.json").exists()
+    assert not (library / "rdf").exists()
+
+
+def test_clean_output_deletes_only_the_outputs_the_previous_build_listed(tmp_path: Path) -> None:
+    library = _library(tmp_path / "lib", "a.json", "b.json")
+    output = tmp_path / "rdf"
+    _build(library, output, tmp_path)
+    assert sorted(path.name for path in output.iterdir()) == ["a.jsonld", "b.jsonld"]
+    (output / "notes.json").write_text("{}", encoding="utf-8")
+    (output / "mine.jsonld").write_text("{}", encoding="utf-8")
+    elsewhere = tmp_path / "elsewhere.jsonld"
+    elsewhere.write_text("{}", encoding="utf-8")
+    manifest = tmp_path / "library-rdf" / "cell-spec.index.json"
+    listed = _load_json(manifest)
+    listed["entries"] += [{"output_jsonld": str(elsewhere)}, {"output_jsonld": str(output / ".." / "elsewhere.jsonld")}]
+    manifest.write_text(json.dumps(listed), encoding="utf-8")
+    (library / "b.json").unlink()
+
+    result = _build(library, output, tmp_path, clean_output=True)
+
+    assert result["entry_count"] == 1
+    assert sorted(path.name for path in output.iterdir()) == ["a.jsonld", "mine.jsonld", "notes.json"]
+    assert elsewhere.exists()

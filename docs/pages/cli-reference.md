@@ -1041,7 +1041,7 @@ $ battinfo library build-rdf [OPTIONS]
 * `--aggregate-jsonld <path>`: Path for the aggregated library JSON-LD file.  [default: .battinfo/library/cell-spec.jsonld]
 * `--manifest-json <path>`: Path for the generated library manifest JSON.  [default: .battinfo/library-rdf/cell-spec.index.json]
 * `--glob <str>`: File glob used to select library cell specifications.  [default: *.json]
-* `--clean-output`: Remove existing JSON-LD outputs before writing.
+* `--clean-output`: Delete the JSON-LD files the previous build listed in its manifest before rebuilding.
 * `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
 
@@ -1147,7 +1147,7 @@ $ battinfo library save cell-spec [OPTIONS]
 * `--output-jsonld-dir <path>`: Directory for per-record domain-battery JSON-LD artifacts.  [default: .battinfo/library-rdf/cell-spec]
 * `--aggregate-jsonld <path>`: Path for the aggregated library JSON-LD file.  [default: .battinfo/library/cell-spec.jsonld]
 * `--manifest-json <path>`: Path for the generated library manifest JSON.  [default: .battinfo/library-rdf/cell-spec.index.json]
-* `--clean-output`: Clean existing JSON-LD outputs before rebuilding.
+* `--clean-output`: Before rebuilding with --build-rdf, delete the JSON-LD files the previous build listed in its manifest.
 * `--dry-run`: Preview save without writing files.
 * `--format <str>`: Output format: table|json.  [default: json]
 * `--help`: Show this message and exit.
