@@ -4,9 +4,10 @@
 with everything in it. These tests pin what the guard refuses, among it the
 folder where ``battinfo.workspace()`` keeps a project's records, that roots
 built by 0.8.0 (which carry no marker) still rebuild with ``--force`` while a
-project folder BattINFO wrote into keeps its own files, and that no other
-module calls ``shutil.rmtree``. The last section pins that the paths a
-workspace manifest names stay inside the workspace.
+project folder BattINFO wrote into keeps its own files, that the refusal
+names the files in the way, and that no other module calls ``shutil.rmtree``.
+The last section pins that the paths a workspace manifest names stay inside
+the workspace.
 
 Tests that point the guard at a home, working or filesystem-root folder replace
 ``shutil.rmtree`` with a function that fails, so a broken guard cannot delete
@@ -16,9 +17,11 @@ from __future__ import annotations
 
 import ast
 import json
+import os
 import re
 import shutil
 import sys
+import tempfile
 from pathlib import Path
 
 import pytest
@@ -261,30 +264,96 @@ def test_the_folder_where_a_workspace_keeps_its_records_is_refused(
 
 
 @pytest.mark.parametrize(
-    "own",
+    ("own", "in_the_way"),
     [
-        pytest.param({"inputs/raw_cycler_run.csv": "t,v\n0,4.2\n"}, id="inputs"),
-        pytest.param({"inputs/cycle-life.csv": "1", "inputs/notes.txt": "mine"}, id="inputs-beside-the-demo-file"),
-        pytest.param({"publication/main.tex": "x"}, id="publication-file"),
-        pytest.param({"publication/figures/plot.png": "x"}, id="publication-folder"),
-        pytest.param({"dist/mypkg-1.0-py3-none-any.whl": "x"}, id="dist"),
-        pytest.param({"library/paper.pdf": "x"}, id="library"),
-        pytest.param({"release/notes.md": "x"}, id="release"),
-        pytest.param({"examples/analysis.ipynb": "{}"}, id="examples"),
-        pytest.param({"artifacts/run.csv": "1"}, id="artifacts"),
+        pytest.param({"inputs/raw_cycler_run.csv": "t,v\n0,4.2\n"}, "inputs/raw_cycler_run.csv", id="inputs"),
+        pytest.param(
+            {"inputs/cycle-life.csv": "1", "inputs/notes.txt": "mine"}, "inputs/notes.txt",
+            id="inputs-beside-the-demo-file",
+        ),
+        pytest.param({"publication/main.tex": "x"}, "publication/main.tex", id="publication-file"),
+        pytest.param({"publication/figures/plot.png": "x"}, "publication/figures", id="publication-folder"),
+        pytest.param({"dist/mypkg-1.0-py3-none-any.whl": "x"}, "dist/mypkg-1.0-py3-none-any.whl", id="dist"),
+        pytest.param({"library/paper.pdf": "x"}, "library/paper.pdf", id="library"),
+        pytest.param({"release/notes.md": "x"}, "release", id="release"),
+        pytest.param(
+            {f"release/{MARKER_FILENAME}": "x", "release/.battinfo/records/cell-spec/x.json": "{}"}, "release/.battinfo",
+            id="release-holding-a-workspace-store",
+        ),
+        pytest.param({"examples/analysis.ipynb": "{}"}, "examples/analysis.ipynb", id="examples"),
+        pytest.param({"artifacts/run.csv": "1"}, "artifacts", id="artifacts"),
     ],
 )
 def test_a_common_folder_name_counts_only_with_the_content_battinfo_writes_there(
-    tmp_path: Path, own: dict[str, str]
+    tmp_path: Path, own: dict[str, str], in_the_way: str
 ) -> None:
     root = tmp_path / "a_project"
     _write_tree(root, {"index.json": "{}", "examples/cell-spec/cell-spec-x.json": "{}", **own})
-    name = next(iter(own)).split("/")[0]
 
-    with pytest.raises(UnsafeDeleteError, match=f"it holds {name}, which is not BattINFO output"):
+    with pytest.raises(UnsafeDeleteError, match=re.escape(f"it holds {Path(in_the_way)}, which is not BattINFO output")):
         remove_tree(root)
 
     assert all((root / relative).exists() for relative in own)
+
+
+def test_the_refusal_names_the_file_in_the_way_not_the_battinfo_folder(tmp_path: Path) -> None:
+    root = tmp_path / "r1"
+    _write_tree(root, {
+        "index.json": "{}",
+        "examples/cell-spec/cell-spec-x.json": "{}",
+        "examples/cell-spec/notes.md": "mine",
+    })
+
+    with pytest.raises(UnsafeDeleteError) as refused:
+        publish(_spec(), destination="local", root=root, force=True)
+
+    message = str(refused.value)
+    assert f"it holds {Path('examples/cell-spec/notes.md')}, which is not BattINFO output" in message
+    assert "it holds examples," not in message
+    assert (root / "examples" / "cell-spec" / "notes.md").exists()
+
+
+def test_the_refusal_names_five_things_in_the_way_and_counts_the_rest(tmp_path: Path) -> None:
+    root = tmp_path / "root"
+    _write_tree(root, {"index.json": "{}", **{f"examples/notes-{n}.md": "mine" for n in range(7)}})
+
+    with pytest.raises(UnsafeDeleteError) as refused:
+        remove_tree(root)
+
+    message = str(refused.value)
+    assert f"{Path('examples/notes-4.md')} and 2 more, which are not BattINFO output" in message
+    assert "notes-5" not in message
+
+
+def test_what_battinfo_leaves_part_way_through_a_write_counts_as_its_own(tmp_path: Path) -> None:
+    """A crash can leave _jsonio's temporary file, or the folders workspace_state swaps in and out."""
+    root = tmp_path / "root"
+    _write_tree(root, {
+        "index.json": "{}",
+        "examples/cell-spec/cell-spec-x.json": "{}",
+        "battinfo-authoring-workspace.json": "{}",
+        "records/cell-spec/7d9k2m.json": "{}",
+    })
+    # Named as _jsonio.atomic_write_text and workspace_state._swap_dir name them.
+    handle, _ = tempfile.mkstemp(dir=root / "examples" / "cell-spec", prefix=".cell-spec-y.json.", suffix=".tmp")
+    os.close(handle)
+    staging = Path(tempfile.mkdtemp(dir=root / "records", prefix=".cell-spec.staging-"))
+    (staging / "7d9k2m.json").write_text("{}", encoding="utf-8")
+    shutil.copytree(staging, staging.with_name(staging.name + ".bak"))
+
+    remove_tree(root)
+
+    assert not root.exists()
+
+
+def test_a_temporary_file_counts_only_where_the_file_it_stands_in_for_would(tmp_path: Path) -> None:
+    root = tmp_path / "root"
+    _write_tree(root, {"index.json": "{}", "examples/cell-spec/cell-spec-x.json": "{}"})
+    handle, leftover = tempfile.mkstemp(dir=root / "examples" / "cell-spec", prefix=".notes.md.", suffix=".tmp")
+    os.close(handle)
+
+    with pytest.raises(UnsafeDeleteError, match=re.escape(str(Path(leftover).relative_to(root)))):
+        remove_tree(root)
 
 
 def test_an_old_layout_that_also_holds_other_files_is_refused(tmp_path: Path) -> None:
@@ -464,8 +533,14 @@ def test_new_output_roots_carry_the_marker_and_a_marked_root_rebuilds(tmp_path: 
     assert (root / MARKER_FILENAME).is_file()
 
 
-@pytest.mark.parametrize("own", ["data/run.csv", "inputs/raw_cycler_run.csv"])
-def test_a_folder_battinfo_writes_into_is_not_marked(tmp_path: Path, own: str) -> None:
+@pytest.mark.parametrize(
+    ("own", "in_the_way"),
+    [
+        ("data/run.csv", "data"),
+        ("inputs/raw_cycler_run.csv", "inputs/raw_cycler_run.csv"),
+    ],
+)
+def test_a_folder_battinfo_writes_into_is_not_marked(tmp_path: Path, own: str, in_the_way: str) -> None:
     """A publish without force writes index.json and examples/ into a project folder; force then keeps its files."""
     project = tmp_path / "my_project"
     _write_tree(project, {own: "t,v\n0,4.2\n"})
@@ -473,7 +548,7 @@ def test_a_folder_battinfo_writes_into_is_not_marked(tmp_path: Path, own: str) -
     publish(_spec(), destination="local", root=project)
 
     assert not (project / MARKER_FILENAME).exists()
-    with pytest.raises(UnsafeDeleteError, match=f"{own.split('/')[0]}, which is not BattINFO output"):
+    with pytest.raises(UnsafeDeleteError, match=re.escape(f"{Path(in_the_way)}, which is not BattINFO output")):
         publish(_spec(), destination="local", root=project, force=True)
     assert (project / own).exists()
 

@@ -33,16 +33,18 @@ BattINFO writes :data:`MARKER_FILENAME` into each output root it creates
 Roots made by 0.7 and 0.8 carry no marker. They are recognised by their layout
 instead, and only when everything in them is what BattINFO writes there: a
 folder with a common name such as ``inputs/``, ``release/`` or ``dist/`` counts
-only when its content matches. The ``.battinfo`` folder where
-``battinfo.workspace()`` keeps a project's records is never deleted, marker or
-not, and neither is a folder that holds one.
+only when its content matches. A file or folder that BattINFO left part way
+through a write counts as the one it stands in for. The ``.battinfo`` folder
+where ``battinfo.workspace()`` keeps a project's records is never deleted,
+marker or not, and neither is a folder that holds one.
 """
 
 from __future__ import annotations
 
 import os
+import re
 import shutil
-from collections.abc import Callable, Iterable, Mapping
+from collections.abc import Callable, Iterable, Iterator, Mapping
 from pathlib import Path, PureWindowsPath
 from typing import NamedTuple
 
@@ -63,6 +65,16 @@ _AUTHORING_STORE = ".battinfo"
 # Files an operating system leaves in a folder someone has browsed.
 _SYSTEM_FILES = frozenset({".DS_Store", "Thumbs.db", "desktop.ini"})
 _JSON_SUFFIXES = (".json", ".jsonld")
+
+# What BattINFO leaves when it stops part way: the temporary file of
+# _jsonio.atomic_write_text (".<name>.<8 characters>.tmp"), the folder
+# workspace_state builds a record group in (".<name>.staging-<8 characters>")
+# and the old group _swap_dir renames aside (the same name with ".bak"). Each
+# counts where <name> does.
+_LEFTOVER = re.compile(r"\.(?P<name>.+?)\.(?:[a-z0-9_]{8}\.tmp|staging-[a-z0-9_]{8}(?:\.bak)?)")
+
+# How many of the things in the way an error names.
+_SHOWN = 5
 
 
 class UnsafeDeleteError(ValueError):
@@ -207,49 +219,84 @@ def _authoring_store(path: Path) -> str | None:
     return None
 
 
-# The content checks for what a root made by 0.7 or 0.8 holds at its top level.
+# The content checks for what a root made by 0.7 or 0.8 holds. Each takes an
+# entry of the root and yields what BattINFO did not write there: the entry
+# itself when it is the wrong kind of thing, or what inside it is out of place.
+
+_Check = Callable[[Path], Iterator[Path]]
 
 
-def _a_file(path: Path) -> bool:
-    return path.is_file()
+def _real_name(name: str) -> str:
+    """``name``, or the name that a file or folder BattINFO left part way through stands in for."""
+    leftover = _LEFTOVER.fullmatch(name)
+    return leftover.group("name") if leftover else name
 
 
-def _a_folder(path: Path) -> bool:
-    return path.is_dir()
+def _a_file(path: Path) -> Iterator[Path]:
+    if _is_link(path) or not path.is_file():
+        yield path
 
 
-def _json_files(path: Path) -> bool:
+def _a_folder(path: Path) -> Iterator[Path]:
+    """A folder that may hold anything: ``artifacts/``, with its copies of the datasets' files."""
+    if _is_link(path) or not path.is_dir():
+        yield path
+
+
+def _json_files(path: Path) -> Iterator[Path]:
     """A folder of records, indexes or reports: JSON and JSON-LD files only, at any depth."""
-    return path.is_dir() and all(
-        item.is_dir() or item.name.endswith(_JSON_SUFFIXES) or item.name in _SYSTEM_FILES
-        for item in path.rglob("*")
-    )
+    if _is_link(path) or not path.is_dir():
+        yield path
+        return
+    for item in sorted(_visible(path)):
+        if item.is_dir() or _is_link(item):
+            yield from _json_files(item)
+        elif not _real_name(item.name).endswith(_JSON_SUFFIXES):
+            yield item
 
 
-def _publications(path: Path) -> bool:
-    """``publication/``: a folder for each dataset, holding the dataset's JSON-LD publication record."""
-    return path.is_dir() and all(
-        item.is_dir() and any(child.suffix == ".jsonld" for child in item.iterdir())
-        for item in _visible(path)
-    )
+def _publications(path: Path) -> Iterator[Path]:
+    """``publication/``: a folder for each dataset, holding the dataset's JSON-LD publication record.
+
+    A dataset's folder also holds copies of the dataset's files, so the rest
+    of what it holds is not checked.
+    """
+    if _is_link(path) or not path.is_dir():
+        yield path
+        return
+    for item in sorted(_visible(path)):
+        if _is_link(item) or not (item.is_dir() and any(child.suffix == ".jsonld" for child in item.iterdir())):
+            yield item
 
 
-def _demo_inputs(path: Path) -> bool:
+def _demo_inputs(path: Path) -> Iterator[Path]:
     """The demo's ``inputs/``, which holds its ``cycle-life.csv`` and nothing else."""
-    return path.is_dir() and all(item.name == "cycle-life.csv" for item in _visible(path))
+    if _is_link(path) or not path.is_dir():
+        yield path
+        return
+    for item in sorted(_visible(path)):
+        if item.name != "cycle-life.csv":
+            yield item
 
 
-def _release(path: Path) -> bool:
+def _release(path: Path) -> Iterator[Path]:
     """The ``release/`` folder an export writes, which is a LocalWorkspace root."""
-    return path.is_dir() and _not_ours(path, (_LOCAL_WORKSPACE,)) is None
+    strays = None if _is_link(path) or not path.is_dir() else _layout_strays(path, (_LOCAL_WORKSPACE,))
+    if strays is None:
+        yield path
+        return
+    store = path / _AUTHORING_STORE
+    if store.is_dir() and store not in strays:
+        yield store  # marker or not, as at the top of a root
+    yield from strays
 
 
 class _Layout(NamedTuple):
-    """A kind of root that 0.7 and 0.8 made: the entries that identify it, and what it may hold."""
+    """A kind of root that 0.7 and 0.8 made: the entries that identify it, and what each may hold."""
 
     files: tuple[str, ...]
     folders: tuple[str, ...]
-    entries: Mapping[str, Callable[[Path], bool]]
+    entries: Mapping[str, _Check]
 
 
 _LOCAL_WORKSPACE = _Layout(
@@ -294,20 +341,16 @@ _ENGINE = _Layout(
 _LAYOUTS = (_LOCAL_WORKSPACE, _AUTHORING_WORKSPACE, _ENGINE)
 
 
-def _not_ours(path: Path, layouts: tuple[_Layout, ...] = _LAYOUTS) -> str | None:
-    """Why the folder ``path`` does not look like one BattINFO created, or None.
+def _layout_strays(path: Path, layouts: tuple[_Layout, ...]) -> list[Path] | None:
+    """What the folder ``path`` holds that BattINFO did not write there, or None when no layout fits it.
 
-    A marker-less root counts as BattINFO's when ``layouts`` recognise it and
-    each entry in it passes the content check of a layout that does. A project
-    folder that BattINFO once wrote ``index.json`` and ``examples/`` into keeps
-    its own ``inputs/``, ``publication/`` or ``dist/``.
+    An empty or marked folder holds nothing of the kind. Otherwise one of
+    ``layouts`` must recognise the folder, and each entry in it must pass the
+    content check of a layout that does.
     """
-    reason = _authoring_store(path)
-    if reason is not None:
-        return reason
     entries = _visible(path)
     if not entries or (path / MARKER_FILENAME).is_file():
-        return None
+        return []
     matched = [
         layout
         for layout in layouts
@@ -315,20 +358,45 @@ def _not_ours(path: Path, layouts: tuple[_Layout, ...] = _LAYOUTS) -> str | None
         and all((path / name).is_dir() for name in layout.folders)
     ]
     if not matched:
+        return None
+    strays: list[Path] = []
+    for entry in sorted(entries):
+        name = _real_name(entry.name)
+        found = [entry]
+        for check in dict.fromkeys(layout.entries[name] for layout in matched if name in layout.entries):
+            found = list(check(entry))
+            if not found:
+                break
+        strays.extend(found)
+    return strays
+
+
+def _not_ours(path: Path) -> str | None:
+    """Why the folder ``path`` does not look like one BattINFO created, or None.
+
+    A marker-less root counts as BattINFO's when a layout recognises it and
+    everything in it is what BattINFO writes there. A project folder that
+    BattINFO once wrote ``index.json`` and ``examples/`` into keeps its own
+    ``inputs/``, ``publication/`` or ``dist/``. The reason names what is in the
+    way.
+    """
+    reason = _authoring_store(path)
+    if reason is not None:
+        return reason
+    strays = _layout_strays(path, _LAYOUTS)
+    if strays is None:
         return (
             "it is not empty and BattINFO did not create it. Choose an empty or new "
             "folder, or delete this one yourself."
         )
-    extra = sorted(
-        entry.name
-        for entry in entries
-        if not any(entry.name in layout.entries and layout.entries[entry.name](entry) for layout in matched)
-    )
-    if not extra:
+    if not strays:
         return None
-    one = len(extra) == 1
+    named = ", ".join(str(stray.relative_to(path)) for stray in strays[:_SHOWN])
+    if len(strays) > _SHOWN:
+        named += f" and {len(strays) - _SHOWN} more"
+    one = len(strays) == 1
     return (
-        f"it holds {', '.join(extra)}, which {'is' if one else 'are'} not BattINFO output. "
+        f"it holds {named}, which {'is' if one else 'are'} not BattINFO output. "
         f"Move {'it' if one else 'them'} out, choose another folder, or delete this one yourself."
     )
 
