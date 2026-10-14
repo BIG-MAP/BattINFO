@@ -32,7 +32,6 @@
       "specific_capacity": {
         "value": 198,
         "unit": "mAh/g",
-        "value_basis": "Measured",
         "conditions": {
           "discharging_c_rate": {
             "value": 0.1,

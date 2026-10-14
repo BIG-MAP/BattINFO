@@ -11,7 +11,7 @@
     "cell_format": "cylindrical",
     "chemistry": "Li-ion",
     "positive_electrode_basis": "LFP",
-    "negative_electrode_basis": "graphite"
+    "negative_electrode_basis": "unknown"
   },
   "provenance": {
     "source_type": "manual"

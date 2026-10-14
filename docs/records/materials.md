@@ -287,7 +287,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       {
         "@type": [
           "SpecificCapacity",
-          "MeasuredProperty"
+          "ConventionalProperty"
         ],
         "skos:prefLabel": "SpecificCapacity",
         "hasNumericalPart": {
@@ -295,66 +295,39 @@ Emitted by `record_to_jsonld`, hosted-context mode.
           "hasNumberValue": 200
         },
         "schema:unitText": "mAh/g",
-        "schema:valueReference": {
-          "@type": [
-            "ReferenceElectrode",
-            "LithiumElectrode"
-          ],
-          "skos:prefLabel": "Li/Li+"
-        },
-        "isOutputOf": {
-          "@type": "BatteryMeasurement",
-          "hasMeasurementParameter": [
-            {
-              "@type": [
-                "CRate",
-                "ConventionalProperty"
-              ],
-              "skos:prefLabel": "discharging_c_rate",
-              "hasNumericalPart": {
-                "@type": "RealData",
-                "hasNumberValue": 0.1
-              },
-              "schema:unitText": "C"
-            },
-            {
-              "@type": [
-                "LowerVoltageLimit",
-                "ConventionalProperty"
-              ],
-              "skos:prefLabel": "lower_voltage_limit",
-              "hasNumericalPart": {
-                "@type": "RealData",
-                "hasNumberValue": 3.0
-              },
-              "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
-            },
-            {
-              "@type": [
-                "CelsiusTemperature",
-                "ConventionalProperty"
-              ],
-              "skos:prefLabel": "temperature",
-              "hasNumericalPart": {
-                "@type": "RealData",
-                "hasNumberValue": 25
-              },
-              "hasMeasurementUnit": "https://w3id.org/emmo#DegreeCelsius"
-            },
-            {
-              "@type": [
-                "UpperVoltageLimit",
-                "ConventionalProperty"
-              ],
-              "skos:prefLabel": "upper_voltage_limit",
-              "hasNumericalPart": {
-                "@type": "RealData",
-                "hasNumberValue": 4.3
-              },
-              "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
-            }
-          ]
-        }
+        "schema:valueReference": [
+          {
+            "@type": "schema:PropertyValue",
+            "schema:propertyID": "discharging_c_rate",
+            "schema:value": 0.1,
+            "schema:unitText": "C"
+          },
+          {
+            "@type": "schema:PropertyValue",
+            "schema:propertyID": "lower_voltage_limit",
+            "schema:value": 3.0,
+            "schema:unitText": "V"
+          },
+          {
+            "@type": "schema:PropertyValue",
+            "schema:propertyID": "temperature",
+            "schema:value": 25,
+            "schema:unitText": "degC"
+          },
+          {
+            "@type": "schema:PropertyValue",
+            "schema:propertyID": "upper_voltage_limit",
+            "schema:value": 4.3,
+            "schema:unitText": "V"
+          },
+          {
+            "@type": [
+              "ReferenceElectrode",
+              "LithiumElectrode"
+            ],
+            "skos:prefLabel": "Li/Li+"
+          }
+        ]
       },
       {
         "@type": [
@@ -471,7 +444,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       {
         "@type": [
           "SpecificCapacity",
-          "MeasuredProperty"
+          "ConventionalProperty"
         ],
         "skos:prefLabel": "SpecificCapacity",
         "hasNumericalPart": {
@@ -479,66 +452,39 @@ Emitted by `record_to_jsonld`, hosted-context mode.
           "hasNumberValue": 160
         },
         "schema:unitText": "mAh/g",
-        "schema:valueReference": {
-          "@type": [
-            "ReferenceElectrode",
-            "LithiumElectrode"
-          ],
-          "skos:prefLabel": "Li/Li+"
-        },
-        "isOutputOf": {
-          "@type": "BatteryMeasurement",
-          "hasMeasurementParameter": [
-            {
-              "@type": [
-                "CRate",
-                "ConventionalProperty"
-              ],
-              "skos:prefLabel": "discharging_c_rate",
-              "hasNumericalPart": {
-                "@type": "RealData",
-                "hasNumberValue": 0.1
-              },
-              "schema:unitText": "C"
-            },
-            {
-              "@type": [
-                "LowerVoltageLimit",
-                "ConventionalProperty"
-              ],
-              "skos:prefLabel": "lower_voltage_limit",
-              "hasNumericalPart": {
-                "@type": "RealData",
-                "hasNumberValue": 2.5
-              },
-              "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
-            },
-            {
-              "@type": [
-                "CelsiusTemperature",
-                "ConventionalProperty"
-              ],
-              "skos:prefLabel": "temperature",
-              "hasNumericalPart": {
-                "@type": "RealData",
-                "hasNumberValue": 25
-              },
-              "hasMeasurementUnit": "https://w3id.org/emmo#DegreeCelsius"
-            },
-            {
-              "@type": [
-                "UpperVoltageLimit",
-                "ConventionalProperty"
-              ],
-              "skos:prefLabel": "upper_voltage_limit",
-              "hasNumericalPart": {
-                "@type": "RealData",
-                "hasNumberValue": 3.65
-              },
-              "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
-            }
-          ]
-        }
+        "schema:valueReference": [
+          {
+            "@type": "schema:PropertyValue",
+            "schema:propertyID": "discharging_c_rate",
+            "schema:value": 0.1,
+            "schema:unitText": "C"
+          },
+          {
+            "@type": "schema:PropertyValue",
+            "schema:propertyID": "lower_voltage_limit",
+            "schema:value": 2.5,
+            "schema:unitText": "V"
+          },
+          {
+            "@type": "schema:PropertyValue",
+            "schema:propertyID": "temperature",
+            "schema:value": 25,
+            "schema:unitText": "degC"
+          },
+          {
+            "@type": "schema:PropertyValue",
+            "schema:propertyID": "upper_voltage_limit",
+            "schema:value": 3.65,
+            "schema:unitText": "V"
+          },
+          {
+            "@type": [
+              "ReferenceElectrode",
+              "LithiumElectrode"
+            ],
+            "skos:prefLabel": "Li/Li+"
+          }
+        ]
       },
       {
         "@type": [
@@ -648,7 +594,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       {
         "@type": [
           "SpecificCapacity",
-          "MeasuredProperty"
+          "ConventionalProperty"
         ],
         "skos:prefLabel": "SpecificCapacity",
         "hasNumericalPart": {
@@ -656,66 +602,39 @@ Emitted by `record_to_jsonld`, hosted-context mode.
           "hasNumberValue": 360
         },
         "schema:unitText": "mAh/g",
-        "schema:valueReference": {
-          "@type": [
-            "ReferenceElectrode",
-            "LithiumElectrode"
-          ],
-          "skos:prefLabel": "Li/Li+"
-        },
-        "isOutputOf": {
-          "@type": "BatteryMeasurement",
-          "hasMeasurementParameter": [
-            {
-              "@type": [
-                "CRate",
-                "ConventionalProperty"
-              ],
-              "skos:prefLabel": "discharging_c_rate",
-              "hasNumericalPart": {
-                "@type": "RealData",
-                "hasNumberValue": 0.1
-              },
-              "schema:unitText": "C"
-            },
-            {
-              "@type": [
-                "LowerVoltageLimit",
-                "ConventionalProperty"
-              ],
-              "skos:prefLabel": "lower_voltage_limit",
-              "hasNumericalPart": {
-                "@type": "RealData",
-                "hasNumberValue": 0.01
-              },
-              "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
-            },
-            {
-              "@type": [
-                "CelsiusTemperature",
-                "ConventionalProperty"
-              ],
-              "skos:prefLabel": "temperature",
-              "hasNumericalPart": {
-                "@type": "RealData",
-                "hasNumberValue": 25
-              },
-              "hasMeasurementUnit": "https://w3id.org/emmo#DegreeCelsius"
-            },
-            {
-              "@type": [
-                "UpperVoltageLimit",
-                "ConventionalProperty"
-              ],
-              "skos:prefLabel": "upper_voltage_limit",
-              "hasNumericalPart": {
-                "@type": "RealData",
-                "hasNumberValue": 1.5
-              },
-              "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
-            }
-          ]
-        }
+        "schema:valueReference": [
+          {
+            "@type": "schema:PropertyValue",
+            "schema:propertyID": "discharging_c_rate",
+            "schema:value": 0.1,
+            "schema:unitText": "C"
+          },
+          {
+            "@type": "schema:PropertyValue",
+            "schema:propertyID": "lower_voltage_limit",
+            "schema:value": 0.01,
+            "schema:unitText": "V"
+          },
+          {
+            "@type": "schema:PropertyValue",
+            "schema:propertyID": "temperature",
+            "schema:value": 25,
+            "schema:unitText": "degC"
+          },
+          {
+            "@type": "schema:PropertyValue",
+            "schema:propertyID": "upper_voltage_limit",
+            "schema:value": 1.5,
+            "schema:unitText": "V"
+          },
+          {
+            "@type": [
+              "ReferenceElectrode",
+              "LithiumElectrode"
+            ],
+            "skos:prefLabel": "Li/Li+"
+          }
+        ]
       },
       {
         "@type": [
@@ -890,7 +809,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       {
         "@type": [
           "SpecificCapacity",
-          "MeasuredProperty"
+          "ConventionalProperty"
         ],
         "skos:prefLabel": "SpecificCapacity",
         "hasNumericalPart": {
@@ -898,66 +817,39 @@ Emitted by `record_to_jsonld`, hosted-context mode.
           "hasNumberValue": 140
         },
         "schema:unitText": "mAh/g",
-        "schema:valueReference": {
-          "@type": [
-            "ReferenceElectrode",
-            "LithiumElectrode"
-          ],
-          "skos:prefLabel": "Li/Li+"
-        },
-        "isOutputOf": {
-          "@type": "BatteryMeasurement",
-          "hasMeasurementParameter": [
-            {
-              "@type": [
-                "CRate",
-                "ConventionalProperty"
-              ],
-              "skos:prefLabel": "discharging_c_rate",
-              "hasNumericalPart": {
-                "@type": "RealData",
-                "hasNumberValue": 0.1
-              },
-              "schema:unitText": "C"
-            },
-            {
-              "@type": [
-                "LowerVoltageLimit",
-                "ConventionalProperty"
-              ],
-              "skos:prefLabel": "lower_voltage_limit",
-              "hasNumericalPart": {
-                "@type": "RealData",
-                "hasNumberValue": 3.5
-              },
-              "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
-            },
-            {
-              "@type": [
-                "CelsiusTemperature",
-                "ConventionalProperty"
-              ],
-              "skos:prefLabel": "temperature",
-              "hasNumericalPart": {
-                "@type": "RealData",
-                "hasNumberValue": 25
-              },
-              "hasMeasurementUnit": "https://w3id.org/emmo#DegreeCelsius"
-            },
-            {
-              "@type": [
-                "UpperVoltageLimit",
-                "ConventionalProperty"
-              ],
-              "skos:prefLabel": "upper_voltage_limit",
-              "hasNumericalPart": {
-                "@type": "RealData",
-                "hasNumberValue": 4.9
-              },
-              "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
-            }
-          ]
-        }
+        "schema:valueReference": [
+          {
+            "@type": "schema:PropertyValue",
+            "schema:propertyID": "discharging_c_rate",
+            "schema:value": 0.1,
+            "schema:unitText": "C"
+          },
+          {
+            "@type": "schema:PropertyValue",
+            "schema:propertyID": "lower_voltage_limit",
+            "schema:value": 3.5,
+            "schema:unitText": "V"
+          },
+          {
+            "@type": "schema:PropertyValue",
+            "schema:propertyID": "temperature",
+            "schema:value": 25,
+            "schema:unitText": "degC"
+          },
+          {
+            "@type": "schema:PropertyValue",
+            "schema:propertyID": "upper_voltage_limit",
+            "schema:value": 4.9,
+            "schema:unitText": "V"
+          },
+          {
+            "@type": [
+              "ReferenceElectrode",
+              "LithiumElectrode"
+            ],
+            "skos:prefLabel": "Li/Li+"
+          }
+        ]
       }
     ],
     "@id": "https://w3id.org/battinfo/spec/83bd-jmk7-2x47-s04a#described",

@@ -22,6 +22,7 @@ ROOT = Path(__file__).resolve().parents[1]
 FLAGSHIP = ROOT / "examples" / "cell-spec" / "A123__ANR26650M1-B.json"
 RESEARCH = ROOT / "examples" / "cell-spec" / "research" / "a123-anr26650m1-b.detailed.example.json"
 EXTENDED = ROOT / "examples" / "cell-spec" / "research" / "extended.example.json"
+MINIMAL = ROOT / "examples" / "cell-spec" / "research" / "minimal.example.json"
 LIBRARY = ROOT / "src" / "battinfo" / "data" / "library" / "cell-spec" / "A123__ANR26650M1-B.json"
 
 STRICT = ValidationPolicy(name="strict", semantic="error")
@@ -201,14 +202,15 @@ def test_library_copy_header_agrees_with_the_flagship() -> None:
     assert specification.get("format") == flagship.get("cell_format")
 
 
-@pytest.mark.parametrize("path", [RESEARCH, EXTENDED], ids=["research", "extended"])
+@pytest.mark.parametrize("path", [RESEARCH, EXTENDED, MINIMAL], ids=["research", "extended", "minimal"])
 def test_research_copy_header_agrees_with_the_flagship_or_says_why_not(path: Path) -> None:
     flagship = _load(FLAGSHIP)["cell_spec"]
     record = _load(path)
     header = record["cell_spec"]
     notes = " ".join(record.get("notes", []))
     for key in HEADER_KEYS:
-        if header.get(key) == flagship.get(key):
+        # A minimal copy may leave a key out; what it does state must agree.
+        if key not in header or header.get(key) == flagship.get(key):
             continue
         # The data sheet names no negative electrode. A copy whose illustrative
         # internals use graphite may say so in its header, but only if its notes
@@ -240,3 +242,13 @@ def test_extended_copy_fractions_sum_to_one() -> None:
         for item in components.get(group, [])
     )
     assert total == pytest.approx(1.0)
+
+
+@pytest.mark.parametrize("path", [RESEARCH, EXTENDED], ids=["research", "extended"])
+def test_research_copy_provenance_links_only_a_real_source(path: Path) -> None:
+    # The namespace root supports none of the values. A copy either cites the
+    # data sheet or leaves the link empty.
+    provenance = _load(path)["provenance"]
+    for key in ("source_url", "citation"):
+        value = provenance.get(key)
+        assert value in (None, "") or value.rstrip("/") != "https://w3id.org/battinfo", key

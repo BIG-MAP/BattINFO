@@ -278,6 +278,35 @@ def test_no_example_claims_an_unnamed_datasheet() -> None:
         assert named, path.relative_to(EXAMPLES).as_posix()
 
 
+def _measured_values(node: Any, where: str = "") -> list[str]:
+    found: list[str] = []
+    if isinstance(node, dict):
+        if str(node.get("value_basis", "")).lower() == "measured":
+            found.append(where or "/")
+        for key, value in node.items():
+            found.extend(_measured_values(value, f"{where}/{key}"))
+    elif isinstance(node, list):
+        for index, value in enumerate(node):
+            found.extend(_measured_values(value, f"{where}/{index}"))
+    return found
+
+
+@pytest.mark.parametrize("root", [EXAMPLES, PACKAGED_EXAMPLES], ids=["examples", "packaged-copy"])
+def test_no_illustrative_example_claims_a_measured_value(root: Path) -> None:
+    # A record that calls its values illustrative cannot also state that they
+    # were measured: value_basis Measured emits a MeasuredProperty with an
+    # isOutputOf measurement node in the JSON-LD.
+    offenders: dict[str, list[str]] = {}
+    for path in _record_paths(root):
+        record = _load(path)
+        if "illustrative" not in json.dumps(record, ensure_ascii=False).lower():
+            continue
+        measured = _measured_values(record)
+        if measured:
+            offenders[path.relative_to(root).as_posix()] = measured
+    assert not offenders, json.dumps(offenders, indent=2)
+
+
 # ── single values the reviews found wrong ───────────────────────────────────
 
 

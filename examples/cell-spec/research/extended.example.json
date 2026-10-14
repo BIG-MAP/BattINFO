@@ -341,11 +341,10 @@
     "source_type": "manual",
     "source_name": "A123 ANR26650M1-B data sheet, MD100113-02 (2012), with illustrative internals",
     "source_file": null,
-    "source_url": "https://w3id.org/battinfo",
+    "source_url": null,
     "retrieved_at": 1773000000,
     "workflow_version": "battinfo-refactor",
-    "comment": "Full-option schema example. The cell header and properties follow the data sheet, except the graphite negative electrode basis; every other block is illustrative.",
-    "citation": "https://w3id.org/battinfo"
+    "comment": "Full-option schema example. The cell header and properties follow the data sheet, except the graphite negative electrode basis; every other block is illustrative."
   },
   "notes": [
     "Extended example that fills every optional descriptor section.",
