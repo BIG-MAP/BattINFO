@@ -163,7 +163,12 @@ registry_app = typer.Typer(
     add_completion=False, no_args_is_help=True, help="Manage registry tenants, workspaces, and publishers."
 )
 dataset_app = typer.Typer(
-    add_completion=False, no_args_is_help=True, help="Contribute measurement datasets: init -> process -> publish."
+    add_completion=False,
+    no_args_is_help=True,
+    help=(
+        "Experimental: contribute measurement datasets (init -> process -> publish). "
+        "The flow cannot complete in 0.8.0; publish a dataset with ws.zenodo() instead."
+    ),
 )
 batch_app = typer.Typer(
     add_completion=False, no_args_is_help=True, help="Scaffold and manage multi-cell batch contributions."
@@ -198,7 +203,12 @@ library_app.add_typer(library_template_app, name="template")
 
 
 def _emit_json(data: Any) -> None:
-    typer.echo(json.dumps(data, indent=2, ensure_ascii=False))
+    try:
+        typer.echo(json.dumps(data, indent=2, ensure_ascii=False))
+    except UnicodeEncodeError:
+        # A terminal that cannot encode a character (a Windows console redirected to a
+        # file writes cp1252, which has no 'Ω') gets the same JSON with \u escapes.
+        typer.echo(json.dumps(data, indent=2))
 
 
 def _emit_table(items: list[dict[str, Any]], columns: list[str]) -> None:
@@ -218,7 +228,7 @@ def _emit_table(items: list[dict[str, Any]], columns: list[str]) -> None:
     typer.echo(header_line)
     typer.echo(sep_line)
     for row in rows:
-        typer.echo(" | ".join(row[i].ljust(widths[i]) for i in range(len(headers))))
+        _safe_echo(" | ".join(row[i].ljust(widths[i]) for i in range(len(headers))))
 
 
 def _parse_optional_bool(raw: str | None, option_name: str) -> bool | None:
@@ -965,11 +975,25 @@ def notebook_recover(
 @app.command()
 def map(
     input_path: Path = typer.Argument(..., exists=True, readable=True),
-    target: str = typer.Option("batterypass", help="Mapping target ('domain-battery' or 'batterypass')."),
+    target: str = typer.Option(
+        "domain-battery", help="Mapping target: 'domain-battery', or 'converter-compatible' for a cell descriptor."
+    ),
     out: Path = typer.Option(..., help="Output JSON-LD path."),
 ) -> None:
-    """Map canonical JSON to JSON-LD for a target."""
-    data = json.loads(input_path.read_text(encoding="utf-8"))
+    """Map a record to JSON-LD.
+
+    Maps cell-spec, material, electrode, separator, current-collector,
+    electrolyte, housing and parameter-set records. Other record types exit
+    with an error; emit them in Python with battinfo.record_to_jsonld.
+    """
+    try:
+        data = json.loads(input_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        typer.echo(f"{input_path} is not valid JSON: {exc}")
+        raise typer.Exit(code=2) from exc
+    if not isinstance(data, dict):
+        typer.echo(f"{input_path} does not hold a JSON object.")
+        raise typer.Exit(code=2)
     try:
         mapped = run_mapping(data, target=target)
     except ValueError as exc:
@@ -3511,7 +3535,10 @@ def dataset_publish(
     community: str = typer.Option("battery-genome", "--community", help="Zenodo community identifier."),
     no_community: bool = typer.Option(False, "--no-community", help="Skip community submission."),
 ) -> None:
-    """Publish the processed contribution folder.
+    """Experimental: publish the processed contribution folder.
+
+    The init, process and publish flow cannot complete in 0.8.0. Publish a
+    dataset from Python with ws.zenodo() instead.
 
     \b
     Options:
@@ -3601,7 +3628,11 @@ def batch_init(
         "--serials",
         help="Comma-separated serial numbers (one per cell, used as folder names).",
     ),
-    overwrite: bool = typer.Option(False, "--force", help="Overwrite an existing output directory."),
+    overwrite: bool = typer.Option(
+        False,
+        "--force",
+        help="Write into an existing batch directory; its cell folders keep the IRIs their battinfo.yaml records.",
+    ),
 ) -> None:
     """Scaffold a multi-cell batch directory.
 
@@ -3618,6 +3649,13 @@ def batch_init(
          e.g. 2025-06-01__capacity_check__25degC.csv
       2. Edit battinfo.yaml in each cell folder if you have more metadata.
       3. Process each cell:  battinfo dataset process <cell-folder>
+
+    \b
+    A cell given a serial (--serials) gets the IRI save_cell_instance and
+    create_cell_instance give that serial and batch, and without --batch-id
+    the one ws.add("cell") gives it. A cell without a serial gets a random IRI,
+    recorded in its battinfo.yaml: keep that file, nothing else can give the
+    cell its IRI again.
     """
     from battinfo.contribution import init_batch
 
@@ -3681,7 +3719,7 @@ def batch_add(
 
     \b
     Reads batch.yaml to inherit cell spec, lab, operator, and project.
-    New cells are numbered after the existing ones.
+    A new cell without a serial gets a random IRI, recorded in its battinfo.yaml.
     Provide --batch-id / --operator / --project to override for the new cells.
     Updates the count in batch.yaml automatically.
     """
@@ -4383,12 +4421,10 @@ def _all_specs_data() -> list[dict[str, Any]]:
     all_names = sorted(schema["$defs"]["SpecSet"]["properties"].keys())
     rows = []
     for name in all_names:
+        # The canonical symbols, as the unit map spells them ('mΩ', '°C', 'µm'); validation
+        # also accepts the usual alternatives ('mOhm', 'degC', 'um').
         units = SPEC_UNIT_COMPATIBILITY.get(name)
-        if units:
-            ascii_units = sorted(u for u in units if u.isascii())
-            display_units = ", ".join(ascii_units) if ascii_units else ", ".join(sorted(units))
-        else:
-            display_units = "any"
+        display_units = ", ".join(units) if units else "any"
         rows.append(
             {
                 "name": name,
@@ -4434,7 +4470,7 @@ def specs_show(
         raise typer.Exit(code=1)
 
     units = SPEC_UNIT_COMPATIBILITY.get(name)
-    canonical_unit = sorted(units)[0] if units else "<unit>"
+    canonical_unit = units[0] if units else "<unit>"  # the first symbol, with a unit IRI where one exists
     example = {"value": 0.0, "unit": canonical_unit}
 
     detail = {
@@ -4446,10 +4482,10 @@ def specs_show(
     if fmt == "json":
         _emit_json(detail)
         return
-    typer.echo(f"name:        {detail['name']}")
-    typer.echo(f"category:    {detail['category']}")
-    typer.echo(f"valid units: {detail['valid_units']}")
-    typer.echo(f"example:     {json.dumps(detail['example'])}")
+    _safe_echo(f"name:        {detail['name']}")
+    _safe_echo(f"category:    {detail['category']}")
+    _safe_echo(f"valid units: {detail['valid_units']}")
+    _safe_echo(f"example:     {json.dumps(detail['example'], ensure_ascii=False)}")
 
 
 @app.command("import-protocol")

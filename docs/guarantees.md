@@ -43,16 +43,51 @@ preserved, so re-serialising another build's record never falsifies origin.
 
 ### Identifiers are deterministic
 
-Records saved without an explicit `uid` mint their IRI from the record's
-natural identity key (for a cell spec: manufacturer :: model :: format ::
-chemistry :: size code), using the same seeds in every authoring path.
-Consequences you can rely on:
+Records saved without an explicit `uid` mint their IRI on your machine from the
+record's natural identity key, through one primitive (`entities.stable_uid`)
+and the shared seed builders in `battinfo.entities`. A cell spec's key is its
+manufacturer, model, format, chemistry and size code; a cell's is its spec and
+its serial number (or name); a test's is its cell, kind, protocol and run.
+Free text in a key is normalised first (surrounding and repeated whitespace, a
+no-break space and a decomposed accent change nothing, case does), and a
+chemistry counts by its vocabulary key, so `Li-ion` and `LI-ION` are one cell
+spec. Consequences you can rely on:
 
 - re-running an identical ingest is a **no-op**, never a duplicate corpus;
-- the workspace and `save_*` paths mint **identical IRIs** for identical
-  identities (tested);
+- running the same `ws.load()` or `ws.add()` call again in one session, as a notebook does when a cell is re-run, reuses the record the session already holds instead of adding a copy;
+- an IRI a record already has (pinned, imported, or given by an earlier save, in this session or an earlier one in the same folder, a cell spec or test saved before 0.8.0 included) never moves when a record with the same identity fields joins: the newcomer is minted from its content. A record saved by an earlier session is recognised by its content, so one you edit in the same save in which such a newcomer joins is minted from its content too; pin it;
+- a test's IRI names one run on one cell, told apart by its protocol and its first data file (or, for a test without data, a start time you pass, else the name you give it), so a later run with its own data, start time or name never takes an earlier run's IRI, and renaming a test with data or a start time keeps its IRI; a title BattINFO generates (`C01 cycling`) never enters, and a save refuses to let a test with none of these replace a saved run with another instrument or time window;
+- the workspace, its engine, a save without an id, and the `save_*` and `create_*` functions for cell specs, cells, test specs, tests without data files, materials, electrodes, channels, parameter sets and organizations mint **identical IRIs** for identical identities, and so do the workspace, its engine and `save_dataset` for datasets, the publication package for cell specs and cells, and the batch path for a cell with a serial number (with `ws.add("cell")` only when the batch cell has no batch id) (`tests/test_idempotent_minting.py`); `tests/test_golden_iris.py` fails if any path's IRI moves without a changelog entry;
 - records with no distinguishing identity still mint randomly — two anonymous
   but physically distinct cells never silently merge.
+
+Some paths are outside this until 0.9, which moves every minting path onto
+`battinfo.entities` and keeps the IRIs they minted in 0.8 findable (section 5
+of the identifier policy):
+
+- the component and equipment builders (`create_component_spec`,
+  `create_component_instance`, their per-family wrappers, `create_equipment_spec`
+  and `create_equipment`) give a record without `uid=` or `id=` a random IRI,
+  a new one on every call;
+- `battinfo batch init` and `battinfo batch add` give a cell without a serial
+  number a random IRI, recorded in its `battinfo.yaml`;
+- the interop importers (BattInfoConverter, the solid-state database,
+  Discovery and the Battery Data Commons bridge) mint from their own seeds:
+  stable when the same source is imported again, but not the IRIs the
+  workspace gives the same records;
+- the publication package and `battinfo batch package` seed a dataset from its
+  folder and title, not its file, so its dataset IRI differs from the
+  workspace's, and the publication package does the same for the run of a
+  test with data;
+- `battinfo batch package` seeds a test from its raw file's path in the cell
+  folder, so it matches the workspace's test only when the workspace's data
+  file has that path in the workspace folder;
+- `save_test()` and a save without an id never see a data file, so they give
+  a test with data another IRI than the workspace does, and a save without an
+  id leaves a dataset's cell and test out of its seed.
+
+The [known limitations](scope.md#identifiers) say what to do on each of these
+paths.
 
 Governance of the IRI space itself is written down in the
 [identifier policy](https://github.com/BIG-MAP/BattINFO/blob/main/IDENTIFIER_POLICY.md).
@@ -79,6 +114,7 @@ The same record gets the same structural verdict in all three.
   exponential backoff.
 - Submission content conflicts return a **structured 409** naming the existing
   record, not a bare string.
+- A record whose IRI another publisher already holds comes back from `ws.submit()` as a `conflict` outcome that names the IRI and that publisher and says how to rename or pin the record. It is not retried as a new version.
 
 ### Deprecations are announced
 
@@ -150,9 +186,13 @@ Representative issue codes:
 - `semantic.electrode_holders_mixed` (with `semantic.electrode_role_expected` /
   `semantic.electrode_polarity_expected`: the electrode holders disagree with the
   cell configuration — see [Electrodes](records/half-cells.md))
+- `semantic.chemistry_electrode_conflict` (the negative electrode basis contradicts the chemistry, such as lithium metal in a full `li-ion` cell or graphite in a `li-metal` one; see the chemistry labels in the [property keys reference](pages/property-reference.md))
+- `semantic.percent_basis_mismatch` (a warning under every policy: a fraction's percent unit states the other basis, such as `vol%` on a `mass_fraction` or `wt%` on a `volume_fraction` or a `porosity`; see the units in the [property keys reference](pages/property-reference.md))
+- `semantic.method_step_unmapped` (a warning under every policy: no published EMMO process class fits a test-protocol step, such as a constant-resistance charge or a cr or cccv step with no direction, so the JSON-LD export gives it none; see [Tests](records/tests.md))
 - `semantic.handle_kind_word_expected` (a warning under every policy: the record's `handle` does not end with its type's kind word; see [Name your records](howto/name-your-records.md))
 - `semantic.schema_version_superseded` and `semantic.schema_version_unknown` (warnings under every policy: the record's `schema_version` is one an earlier release wrote, `0.1.0` or `1.0.0`, or one this release does not know at all; the current version is `0.2.0`)
 - `semantic.timestamp_implausible` (a warning under every policy: a `*_at` Unix time outside 2000 to 2100) and `semantic.timestamp_out_of_range` (a `*_at` number that cannot be a Unix time in seconds, because it falls outside the years 1 to 9999 as a time in milliseconds does; an error under the strict and publisher policies, a warning under the others)
+- `jsonld.type_term_unknown` (an error under every policy: a bare `@type` that the document's own `@context` does not define as a class, so it would expand to a machine-local IRI; `record_to_jsonld` raises on it for every record type)
 - `publication.distribution_url_invalid`
 - `jsonld.parse_error` (the JSON-LD could not be parsed into an RDF dataset)
 - `publication.shacl_unavailable`, `publication.shapes_not_found` and `publication.shacl_runtime_error` (the SHACL publication shapes could not check a deposit graph because pyshacl could not be imported, the shapes file is missing or pyshacl failed: an error under the `publisher` policy, which `ws.zenodo()` applies before it mints a DOI, and a warning under the others)

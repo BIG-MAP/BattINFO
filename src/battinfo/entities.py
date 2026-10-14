@@ -17,9 +17,12 @@ from __future__ import annotations
 
 import hashlib
 import re
+import unicodedata
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Mapping, Optional
+from types import MappingProxyType
+from typing import Any, Mapping, Optional
 
 UID_ALPHABET = "0123456789abcdefghjkmnpqrstvwxyz"
 
@@ -42,14 +45,286 @@ def stable_uid(seed: str) -> str:
     re-run of an identical ingest lands on the existing record instead of
     creating a duplicate corpus. The registry's dedup logic mirrors the same
     volatile-key policy (see ``_workspace._VOLATILE_SEED_KEYS``).
+
+    The seed is put in Unicode NFC first, so a composed and a decomposed
+    spelling of one text mint one uid. NFC leaves an ASCII seed as it is, so
+    URLs, hashes and every ASCII seed keep their uids. The seed builders
+    normalise their free-text fields further (:func:`seed_text`).
     """
-    value = int.from_bytes(hashlib.sha256(seed.encode("utf-8")).digest()[:16], "big")
+    return _uid_from_bytes(unicodedata.normalize("NFC", seed).encode("utf-8"))
+
+
+def legacy_stable_uid(seed: str) -> str:
+    """The uid :func:`stable_uid` gave *seed* before 0.8.0, which had no NFC step.
+
+    Only for finding a record minted under an earlier seed rule (see
+    :func:`keep_legacy_uid`); nothing new is minted with it.
+    """
+    return _uid_from_bytes(seed.encode("utf-8"))
+
+
+def _uid_from_bytes(data: bytes) -> str:
+    value = int.from_bytes(hashlib.sha256(data).digest()[:16], "big")
     chars: list[str] = []
     for _ in range(16):
         value, remainder = divmod(value, 32)
         chars.append(UID_ALPHABET[remainder])
     token = "".join(reversed(chars))
     return "-".join((token[:4], token[4:8], token[8:12], token[12:16]))
+
+
+def seed_text(value: object) -> str:
+    """A free-text identity field as it enters an identity seed.
+
+    The one normaliser every seed builder applies to its free-text identity
+    fields (manufacturer, model, name, serial number, batch, labels and size
+    code): the text in Unicode NFC, stripped, with each run of whitespace,
+    no-break and other non-space whitespace included, as one space. Case is
+    kept. ``"C01 "``, ``"C01"`` and ``"C01"`` followed by a no-break space all
+    give ``"C01"``. ``None``, and a value that is nothing but whitespace,
+    give ``""``, which a seed treats as missing.
+
+    Locators (URLs and paths) are not free text: whitespace is part of a
+    location, so they get NFC alone (:func:`dataset_locator_seed`). Hashes and
+    content seeds are left as they are.
+    """
+    if value is None:
+        return ""
+    text = value if isinstance(value, str) else str(value)
+    return " ".join(unicodedata.normalize("NFC", text).split())
+
+
+def _nfc(text: str) -> str:
+    return unicodedata.normalize("NFC", text)
+
+
+def _stripped(value: object) -> str:
+    """*value* stripped, as the seeds of before 0.8.0 read a field."""
+    if value is None:
+        return ""
+    return (value if isinstance(value, str) else str(value)).strip()
+
+
+#: The chemistry part of a cell-spec seed, frozen with 0.8.0: each key and alias
+#: of the chemistry vocabulary (``entity_type_map.json``) as it stood then,
+#: case-folded, to the key it seeds as, an alias resolved. The vocabulary grows
+#: when the ontology mappings are vendored again; this table does not follow it,
+#: because a new key or alias would change the seed of every cell spec spelled
+#: that way and move its IRI, and the IRIs of its cells, tests and datasets.
+#: Changing it is a seed change (IDENTIFIER_POLICY 5.5), which needs a lookup
+#: under the old table; ``tests/test_seed_normalisation.py`` fails when it changes.
+CHEMISTRY_SEED_KEYS: Mapping[str, str] = MappingProxyType(
+    {
+        "al-air": "al-air",
+        "alkaline": "alkaline-zn-mno2",
+        "alkaline-zn-mno2": "alkaline-zn-mno2",
+        "ca-ion": "ca-ion",
+        "fe-air": "fe-air",
+        "fe-flow": "fe-flow",
+        "k-ion": "k-ion",
+        "lead-acid": "lead-acid",
+        "leclanche": "leclanche",
+        "li-air": "li-air",
+        "li-cfx": "li-cfx",
+        "li-cuo": "li-cuo",
+        "li-fes2": "li-fes2",
+        "li-ion": "li-ion",
+        "li-metal": "li-metal",
+        "li-mno2": "li-mno2",
+        "li-primary": "li-metal",
+        "li-s": "li-s",
+        "li-socl2": "li-socl2",
+        "mg-air": "mg-air",
+        "mg-ion": "mg-ion",
+        "na-air": "na-air",
+        "na-ion": "na-ion",
+        "ni-cd": "ni-cd",
+        "ni-fe": "ni-fe",
+        "ni-mh": "ni-mh",
+        "ni-zn": "ni-zn",
+        "si-air": "si-air",
+        "vanadium-flow": "vanadium-flow",
+        "zinc-carbon": "zinc-carbon",
+        "zinc-chloride": "zinc-chloride",
+        "zn-air": "zn-air",
+        "zn-br-flow": "zn-br-flow",
+        "zn-hgo": "zn-hgo",
+        "zn-mno2": "zn-mno2",
+        "znmno2": "zn-mno2",
+    }
+)
+
+
+def chemistry_seed_key(value: object) -> str:
+    """The chemistry part of a cell-spec identity seed: its vocabulary key.
+
+    A value that matches a key or an alias of the chemistry vocabulary after
+    case-folding seeds as that key, with the alias resolved: ``Li-ion``,
+    ``li-ion`` and ``LI-ION`` give ``li-ion``, and the alias ``li-primary``
+    gives ``li-metal``. A narrower couple keeps its own key (``li-mno2`` is
+    not seeded as its broader ``li-metal``). Any other value is seeded as
+    normalised free text (:func:`seed_text`), its case kept. The vocabulary
+    read is the one frozen with 0.8.0 (:data:`CHEMISTRY_SEED_KEYS`), so a key
+    added to the vocabulary later does not move an IRI.
+    """
+    text = seed_text(value)
+    return CHEMISTRY_SEED_KEYS.get(text.casefold(), text)
+
+
+def cell_spec_identity_seed(
+    *,
+    manufacturer: object,
+    model: object,
+    format: object,
+    chemistry: object,
+    size_code: object = None,
+) -> str:
+    """Identity seed for a cell spec, shared by every minting surface.
+
+    ``manufacturer :: model :: format :: chemistry :: size_code``. The
+    manufacturer, model and size code enter as :func:`seed_text`, their case
+    kept; the chemistry as its vocabulary key (:func:`chemistry_seed_key`);
+    the format, a controlled value, stripped. A missing manufacturer, model,
+    format or chemistry seeds as ``unknown-manufacturer`` (and so on).
+    """
+    return "::".join(
+        [
+            seed_text(manufacturer) or "unknown-manufacturer",
+            seed_text(model) or "unknown-model",
+            _stripped(format) or "unknown-format",
+            chemistry_seed_key(chemistry) or "unknown-chemistry",
+            seed_text(size_code),
+        ]
+    )
+
+
+def legacy_cell_spec_identity_seed(
+    *,
+    manufacturer: object,
+    model: object,
+    format: object,
+    chemistry: object,
+    size_code: object = None,
+) -> str:
+    """The cell-spec identity seed of before 0.8.0, kept to find specs minted under it.
+
+    The same parts as :func:`cell_spec_identity_seed`, each only stripped (the
+    size code not even that) and the chemistry as written. Hash it with
+    :func:`legacy_stable_uid`; nothing new is minted from it.
+    """
+    return "::".join(
+        [
+            _stripped(manufacturer) or "unknown-manufacturer",
+            _stripped(model) or "unknown-model",
+            _stripped(format) or "unknown-format",
+            _stripped(chemistry) or "unknown-chemistry",
+            size_code if isinstance(size_code, str) else "",
+        ]
+    )
+
+
+def cell_spec_seed_fields(body: Mapping[str, Any]) -> dict[str, Any]:
+    """The identity fields of a cell-spec record body, as the seed functions take them.
+
+    Reads a canonical ``cell_spec`` body (``cell_format``, a manufacturer
+    organization) and a library ``specification`` body (``format``, a
+    manufacturer name) alike.
+    """
+    manufacturer = body.get("manufacturer")
+    if isinstance(manufacturer, Mapping):
+        manufacturer = manufacturer.get("name")
+    return {
+        "manufacturer": manufacturer,
+        "model": body.get("model"),
+        "format": body.get("cell_format") or body.get("format"),
+        "chemistry": body.get("chemistry"),
+        "size_code": body.get("size_code"),
+    }
+
+
+def keep_legacy_uid(
+    uid: str,
+    legacy_uid: str,
+    *,
+    saved: Callable[[str], Optional[Mapping[str, Any]]],
+    same_identity: Callable[[Mapping[str, Any]], bool],
+) -> str:
+    """The uid a record minted as *uid* takes, keeping an IRI minted under an earlier seed rule.
+
+    *legacy_uid* is the uid the earlier rule gives the same fields. A seed
+    change must not move a record that is already saved: when *legacy_uid*
+    differs from *uid*, nothing is saved under *uid*, and the record saved
+    under *legacy_uid* has the same identity (*same_identity* of its body),
+    that record keeps its IRI and *legacy_uid* is returned. Otherwise *uid*.
+    *saved* returns the body of the record saved under a uid, or ``None``.
+    """
+    if legacy_uid == uid or saved(uid) is not None:
+        return uid
+    body = saved(legacy_uid)
+    return legacy_uid if body is not None and same_identity(body) else uid
+
+
+def saved_record_document(entity_type: str, uid: str, roots: Iterable[str | Path]) -> Optional[Mapping[str, Any]]:
+    """The *entity_type* record document saved as *uid* under one of *roots*, or ``None``.
+
+    Looks at the file a save writes (:func:`save_entity_path`) in each root
+    and returns the whole document (its body and the sections beside it, such
+    as a cell spec's ``properties``) only when the body carries the IRI *uid*
+    names.
+    """
+    from battinfo._jsonio import read_record_json  # noqa: PLC0415
+
+    kind = ENTITY_BY_TYPE[entity_type]
+    iri = f"https://w3id.org/battinfo/{kind.iri_namespace}/{uid}"
+    for root in roots:
+        path = save_entity_path(entity_type, uid, Path(root))
+        if not path.is_file():
+            continue
+        try:
+            doc = read_record_json(path)
+        except (OSError, ValueError):
+            continue
+        body = doc.get(kind.record_key) if isinstance(doc, Mapping) else None
+        if isinstance(body, Mapping) and body.get("id") == iri:
+            return doc
+    return None
+
+
+def saved_record_body(entity_type: str, uid: str, roots: Iterable[str | Path]) -> Optional[Mapping[str, Any]]:
+    """The body of the *entity_type* record saved as *uid* under one of *roots*, or ``None``.
+
+    The object under the kind's record key in :func:`saved_record_document`.
+    """
+    doc = saved_record_document(entity_type, uid, roots)
+    return None if doc is None else doc[ENTITY_BY_TYPE[entity_type].record_key]
+
+
+def cell_spec_uid(
+    fields: Mapping[str, Any],
+    *,
+    roots: Iterable[str | Path] = (),
+    saved: Optional[Callable[[str], Optional[Mapping[str, Any]]]] = None,
+) -> str:
+    """The uid of a cell spec minted from its natural key (*fields*, see :func:`cell_spec_seed_fields`).
+
+    A cell spec already saved with the IRI the seeds of before 0.8.0 gave the
+    same identity keeps that IRI (:func:`keep_legacy_uid`). It is looked for
+    under *roots*, the records folders a save writes to, or with *saved*, which
+    returns the body of the spec saved under a uid, or ``None``.
+    """
+    seed = cell_spec_identity_seed(**fields)
+    if saved is None:
+        folders = tuple(roots)
+
+        def saved(uid: str) -> Optional[Mapping[str, Any]]:
+            return saved_record_body("cell-spec", uid, folders)
+
+    return keep_legacy_uid(
+        stable_uid(seed),
+        legacy_stable_uid(legacy_cell_spec_identity_seed(**fields)),
+        saved=saved,
+        same_identity=lambda body: cell_spec_identity_seed(**cell_spec_seed_fields(body)) == seed,
+    )
 
 
 #: The uid record templates used as a placeholder ("0000000000000000", dashed).
@@ -82,22 +357,23 @@ def cell_instance_identity_seed(
     a serial keeps its IRI. A cell without a serial is still seeded from its
     name, then its batch.
 
+    The serial, batch and name enter as :func:`seed_text`, so ``"C01 "`` and
+    ``"C01"`` are one cell.
+
     Returns ``None`` when the instance carries no distinguishing identity at all
     (no name, serial, or batch) — callers must then fall back to their own
     anonymous policy (e.g. a random uid), because two anonymous but physically
     distinct cells must never silently dedup into one.
     """
-    label = next(
-        (value.strip() for value in (serial_number, name, batch_id) if value and value.strip()),
-        "",
-    )
+    serial, batch = seed_text(serial_number), seed_text(batch_id)
+    label = next((value for value in (serial, seed_text(name), batch) if value), "")
     if not label:
         return None
     return "::".join(
         [
             (cell_spec_id or "").strip() or "unknown-cell-spec",
-            serial_number or "",
-            batch_id or "",
+            serial,
+            batch,
             label,
         ]
     )
@@ -125,13 +401,17 @@ def dataset_locator_seed(
     the seed, so the same workspace built in another folder, by a colleague or
     a CI job, mints the same dataset IRIs.
 
+    The locator is put in Unicode NFC and keeps its whitespace: a URL or a
+    path that differs only between composed and decomposed characters names
+    one location, one that differs in whitespace names another.
+
     Returns ``""`` when the dataset names no location at all.
     """
     from battinfo._util import is_local_location, local_path, path_tail  # noqa: PLC0415
 
     for url in (access_url, download_url):
         if isinstance(url, str) and url.strip() and not is_local_location(url):
-            return url.strip()
+            return _nfc(url.strip())
     root = Path(workspace_root).resolve() if workspace_root is not None else None
     for candidate in (dataset_path, access_url, download_url):
         path = local_path(candidate)
@@ -144,9 +424,163 @@ def dataset_locator_seed(
             except (OSError, ValueError):
                 relative = None
             if relative is not None and relative.parts:
-                return relative.as_posix()
-        return path_tail(path)
+                return _nfc(relative.as_posix())
+        return _nfc(path_tail(path))
     return ""
+
+
+def test_identity_seed(
+    *,
+    cell_id: object,
+    kind: object,
+    protocol_id: object = None,
+    protocol_name: object = None,
+    data_locator: object = None,
+    started_at: object = None,
+    name: object = None,
+) -> str:
+    """Identity seed for a test, one run on one cell, shared by every minting surface.
+
+    ``cell IRI :: kind :: protocol :: run``:
+
+    - The protocol is the IRI of the test spec the run followed whenever the
+      test names one, saved in this workspace or published elsewhere. A test
+      without one is seeded with its protocol name (:func:`seed_text`), and
+      with nothing when that name only restates the kind (``ws.add("test")``
+      names an unnamed protocol after the test type). A name read from a copy
+      of a published record never enters, so the IRI does not depend on
+      whether a registry lookup worked.
+    - The run tells two runs of one kind on one cell apart: the locator of
+      the test's first data file (*data_locator*, from
+      :func:`dataset_locator_seed`); for a test without a data file, the
+      start time the caller gave (*started_at*) in Unix seconds; and for a
+      test with neither, the name the caller gave it (*name*, as
+      :func:`seed_text`), as a cell without a serial number is seeded from
+      its name. A test with none of these has an empty run part.
+
+    A test with a data file or a start time is told apart by those, so its
+    name is display text and renaming it keeps its IRI. A title that
+    BattINFO generated, such as ``C01 cycling``, depends on how the cell was
+    referenced and never decides an IRI: callers pass only a name the caller
+    gave (see :func:`given_test_name`). Nothing read from inside a data file
+    enters either: a start time measured from a file can first appear after
+    a converter upgrade, and one run would get two IRIs. A caller that has
+    data files therefore gives their locator, and *started_at* only when
+    there is none.
+    """
+    kind_text = _stripped(kind)
+    return "::".join(
+        [
+            _stripped(cell_id) or "unknown-cell",
+            kind_text or "other",
+            _test_protocol_seed(protocol_id, protocol_name, kind_text),
+            _test_run_seed(data_locator, started_at, name),
+        ]
+    )
+
+
+# Its name starts with "test", so pytest would collect it from a test module that imports it.
+test_identity_seed.__test__ = False  # type: ignore[attr-defined]
+
+
+def _test_protocol_seed(protocol_id: object, protocol_name: object, kind: str) -> str:
+    """The protocol part of a test seed: its IRI, else its name unless that only restates *kind*."""
+    iri = _stripped(protocol_id)
+    if iri:
+        return iri
+    name = seed_text(protocol_name)
+    if name.casefold() == seed_text(kind.replace("_", " ")).casefold():
+        return ""
+    return name
+
+
+def _test_run_seed(data_locator: object, started_at: object, name: object = None) -> str:
+    """The run part of a test seed: the data file's locator, else ``started_at=<Unix seconds>``, else ``name=<name>``."""
+    if isinstance(data_locator, str) and data_locator.strip():
+        return _nfc(data_locator)
+    if started_at is not None:
+        from battinfo.api._shared import _to_unix_time  # noqa: PLC0415
+
+        unix = _to_unix_time(started_at)
+        text = str(unix) if unix is not None else seed_text(started_at)
+        if text:
+            return f"started_at={text}"
+    label = seed_text(name)
+    return f"name={label}" if label else ""
+
+
+def given_test_name(
+    name: object, *, kind: object = None, protocol_name: object = None, cell_labels: Iterable[object] = ()
+) -> Optional[str]:
+    """*name*, a test's name, when the caller gave it; ``None`` when BattINFO could have generated it.
+
+    BattINFO titles an unnamed test after its cell and its protocol, or its
+    kind when it has no protocol name (``C01 cycling``, or ``cycling`` alone
+    when the cell has no name). Such a title restates the cell and the
+    protocol, and depends on how the cell was referenced, so it never tells a
+    run apart (:func:`test_identity_seed`). A name counts as generated when it
+    is the protocol name, the kind (with or without underscores) or ``test``,
+    alone or after one of *cell_labels* (the cell's name, serial number and
+    batch) or ``cell``; case and spacing aside.
+    """
+    text = seed_text(name)
+    if not text:
+        return None
+    kind_text = seed_text(getattr(kind, "value", kind))
+    bases = {seed_text(protocol_name), kind_text, kind_text.replace("_", " "), "test"} - {""}
+    labels = ({seed_text(label) for label in cell_labels} | {"cell"}) - {""}
+    generated = bases | {f"{label} {base}" for label in labels for base in bases}
+    return None if text.casefold() in {item.casefold() for item in generated} else text
+
+
+def legacy_test_identity_seed(*, cell_id: object, kind: object, protocol_name: object, name: object) -> str:
+    """The test identity seed of before 0.8.0, kept to find tests minted under it.
+
+    ``cell IRI :: kind :: protocol name :: name``: the protocol name as
+    written (``test`` without one), the cell, kind and name stripped, and
+    ``test`` for a missing name. Hash it with :func:`legacy_stable_uid`;
+    nothing new is minted from it.
+    """
+    protocol = protocol_name if isinstance(protocol_name, str) and protocol_name else "test"
+    return "::".join(
+        [
+            _stripped(cell_id) or "unknown-cell",
+            _stripped(kind) or "other",
+            protocol,
+            _stripped(name) or "test",
+        ]
+    )
+
+
+def material_spec_identity_seed(
+    *,
+    manufacturer: str | None,
+    product: str | None,
+    grade: str | None = None,
+    kind: str | None = None,
+) -> str:
+    """Identity seed for a material spec, shared by every minting surface.
+
+    ``material-spec :: manufacturer :: product :: grade :: kind``: the
+    manufacturer, the product (its product id, else its name) and the grade
+    enter as :func:`seed_text`, lower-cased, so "Graphite" and "graphite" from
+    one manufacturer are one spec; the kind as its canonical vocabulary key.
+    Processing is not part of a material spec's identity.
+    """
+    return "::".join(
+        [
+            "material-spec",
+            seed_text(manufacturer).lower() or "unknown-manufacturer",
+            seed_text(product).lower() or "unknown-product",
+            seed_text(grade).lower(),
+            kind or "",
+        ]
+    )
+
+
+def material_identity_seed(*, material_spec_id: str | None, lot: object) -> str:
+    """Identity seed for a material lot: ``material :: spec IRI :: lot``, the lot as :func:`seed_text`."""
+    return "::".join(["material", (material_spec_id or "").strip(), seed_text(lot)])
 
 
 def electrode_spec_identity_seed(
@@ -166,15 +600,17 @@ def electrode_spec_identity_seed(
     two genuinely different designs onto one IRI and silently lose one of them.
     (A material lot's processing is the opposite: an instance property, and
     correctly absent from the material-spec seed.)
+
+    Each part enters as :func:`seed_text`, lower-cased.
     """
     return "::".join(
         [
             "electrode-spec",
-            (producer or "unknown-producer").strip().lower(),
-            (product or "unknown-product").strip().lower(),
-            (grade or "").strip().lower(),
-            (kind or "").strip().lower(),
-            (route or "").strip().lower(),
+            seed_text(producer).lower() or "unknown-producer",
+            seed_text(product).lower() or "unknown-product",
+            seed_text(grade).lower(),
+            seed_text(kind).lower(),
+            seed_text(route).lower(),
         ]
     )
 
@@ -194,17 +630,19 @@ def electrode_identity_seed(
     cut from a parent (a roll, web, or strip) appends the parent IRI and its
     piece label, so disc-07 of one roll and disc-07 of another mint distinct
     IRIs — appended only when present, which keeps every pre-genealogy seed
-    (and therefore every existing record IRI) byte-identical.
+    (and therefore every existing record IRI) byte-identical. The batch and
+    piece labels enter as :func:`seed_text`.
     """
     parts = [
         "electrode",
         (electrode_spec_id or "").strip(),
-        (batch or "").strip(),
+        seed_text(batch),
     ]
     if parent_id and parent_id.strip():
         parts.append(parent_id.strip())
-    if piece_id and piece_id.strip():
-        parts.append(piece_id.strip())
+    piece = seed_text(piece_id)
+    if piece:
+        parts.append(piece)
     return "::".join(parts)
 
 

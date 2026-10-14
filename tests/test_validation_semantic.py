@@ -268,7 +268,9 @@ def test_electrode_design_values_do_not_warn(key: str) -> None:
         "provenance": {"source_type": "datasheet"},
     }
     report = validate_semantic_report(rec, policy=STRICT_SEMANTIC)
-    assert [i.code for i in report.issues] == []
+    # The property maps. Its unit has no IRI in the unit map, which is a separate
+    # warning (semantic.unit_unmapped), so it is left out here.
+    assert [i.code for i in report.issues if i.code != "semantic.unit_unmapped"] == []
 
 
 @pytest.mark.parametrize("key", ["bet_surface_area", "specific_capacity", "particle_size_d50"])
@@ -320,3 +322,32 @@ def test_validator_known_keys_equal_the_emitter_registry() -> None:
 
     expected = {key for table in COMPONENT_PROPERTY_TERM_TABLES for key in table}
     assert set(_component_property_terms()) == expected
+
+
+# The v1 records context types ambient_temperature as AmbientCelsiusTemperature,
+# so a value given in kelvin is published as a Celsius temperature.
+@pytest.mark.parametrize("unit", ["K", "kelvin", "Kelvin"])
+def test_planned_ambient_temperature_in_kelvin_warns(unit: str) -> None:
+    doc = _load_json("src/battinfo/data/examples/test-protocol/test-protocol-3p7k-2m9r-6t4n-1v8x.json")
+    doc["conditions"]["ambient_temperature"] = {"value": 298.15, "unit": unit}
+    report = validate_semantic_report(doc, policy="strict")
+    assert report.ok
+    hits = [i for i in report.issues if i.code == "semantic.ambient_temperature_kelvin"]
+    assert [(i.severity, i.path) for i in hits] == [("warning", "conditions.ambient_temperature")]
+    assert "degC" in hits[0].message
+
+
+def test_as_run_ambient_temperature_in_kelvin_warns() -> None:
+    doc = _load_json("src/battinfo/data/examples/test/test-5p7v-2n8k-4m3t-6q9r.json")
+    doc["test"]["conditions"] = {"ambient_temperature": {"value": 298.15, "unit_text": "K"}}
+    report = validate_semantic_report(doc, policy="strict")
+    hits = [i for i in report.issues if i.code == "semantic.ambient_temperature_kelvin"]
+    assert [(i.severity, i.path) for i in hits] == [("warning", "test.conditions.ambient_temperature")]
+
+
+@pytest.mark.parametrize("unit", ["degC", "°C"])
+def test_ambient_temperature_in_celsius_does_not_warn(unit: str) -> None:
+    doc = _load_json("src/battinfo/data/examples/test-protocol/test-protocol-3p7k-2m9r-6t4n-1v8x.json")
+    doc["conditions"]["ambient_temperature"] = {"value": 25.0, "unit": unit}
+    report = validate_semantic_report(doc, policy="strict")
+    assert not [i for i in report.issues if i.code == "semantic.ambient_temperature_kelvin"]

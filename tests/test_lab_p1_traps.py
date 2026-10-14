@@ -83,7 +83,7 @@ def test_convert_clean_file_has_no_loss_warning(tmp_path: Path, capsys: pytest.C
     assert isinstance(manifest[str(written[0].resolve())], str)
 
 
-_NEWARE_SAMPLE = ROOT / "docs" / "guides" / "data" / "neware-sample.csv"
+_NEWARE_SAMPLE = ROOT / "src" / "battinfo" / "data" / "samples" / "neware-sample.csv"
 
 
 def test_convert_does_not_call_a_row_counter_data_loss(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:

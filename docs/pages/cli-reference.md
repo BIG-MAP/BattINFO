@@ -16,7 +16,7 @@ $ battinfo [OPTIONS] COMMAND [ARGS]...
 
 * `validate`: Validate a BattINFO record (JSON Schema +...
 * `init`: Create a minimal workspace scaffold with...
-* `map`: Map canonical JSON to JSON-LD for a target.
+* `map`: Map a record to JSON-LD.
 * `push`: Package battery data and upload it to the...
 * `import-protocol`: One-liner protocol import: executable file...
 * `query`: Query BattINFO resources.
@@ -32,7 +32,7 @@ $ battinfo [OPTIONS] COMMAND [ARGS]...
 * `demo`: Scaffold and verify end-to-end BattINFO...
 * `ingest`: Register typed resource instances from...
 * `registry`: Manage registry tenants, workspaces, and...
-* `dataset`: Contribute measurement datasets: init -&gt;...
+* `dataset`: Experimental: contribute measurement...
 * `batch`: Scaffold and manage multi-cell batch...
 * `config`: Manage user preferences (creator, license,...
 * `properties`: Browse valid spec property names and their...
@@ -81,7 +81,11 @@ $ battinfo init [OPTIONS] {workspace_dir}
 
 ## `battinfo map`
 
-Map canonical JSON to JSON-LD for a target.
+Map a record to JSON-LD.
+
+Maps cell-spec, material, electrode, separator, current-collector,
+electrolyte, housing and parameter-set records. Other record types exit
+with an error; emit them in Python with battinfo.record_to_jsonld.
 
 **Usage**:
 
@@ -95,7 +99,7 @@ $ battinfo map [OPTIONS] {input_path}
 
 **Options**:
 
-* `--target <str>`: Mapping target (&#x27;domain-battery&#x27; or &#x27;batterypass&#x27;).  [default: batterypass]
+* `--target <str>`: Mapping target: &#x27;domain-battery&#x27;, or &#x27;converter-compatible&#x27; for a cell descriptor.  [default: domain-battery]
 * `--out <path>`: Output JSON-LD path.  [required]
 * `--help`: Show this message and exit.
 
@@ -1837,7 +1841,7 @@ $ battinfo registry bootstrap [OPTIONS]
 
 ## `battinfo dataset`
 
-Contribute measurement datasets: init -&gt; process -&gt; publish.
+Experimental: contribute measurement datasets (init -&gt; process -&gt; publish). The flow cannot complete in 0.8.0; publish a dataset with ws.zenodo() instead.
 
 **Usage**:
 
@@ -1853,7 +1857,7 @@ $ battinfo dataset [OPTIONS] COMMAND [ARGS]...
 
 * `init`: Create a new dataset contribution folder...
 * `process`: Validate metadata, infer tests from data...
-* `publish`: Publish the processed contribution folder.
+* `publish`: Experimental: publish the processed...
 
 ### `battinfo dataset init`
 
@@ -1913,7 +1917,10 @@ $ battinfo dataset process [OPTIONS] {folder}
 
 ### `battinfo dataset publish`
 
-Publish the processed contribution folder.
+Experimental: publish the processed contribution folder.
+
+The init, process and publish flow cannot complete in 0.8.0. Publish a
+dataset from Python with ws.zenodo() instead.
 
 
 Options:
@@ -1985,6 +1992,13 @@ After running this command:
   2. Edit battinfo.yaml in each cell folder if you have more metadata.
   3. Process each cell:  battinfo dataset process &lt;cell-folder&gt;
 
+
+A cell given a serial (--serials) gets the IRI save_cell_instance and
+create_cell_instance give that serial and batch, and without --batch-id
+the one ws.add(&quot;cell&quot;) gives it. A cell without a serial gets a random IRI,
+recorded in its battinfo.yaml: keep that file, nothing else can give the
+cell its IRI again.
+
 **Usage**:
 
 ```console
@@ -2006,7 +2020,7 @@ $ battinfo batch init [OPTIONS] {output_dir}
 * `--license <str>`: SPDX licence identifier.  [default: CC-BY-4.0]
 * `--iris <str>`: Comma-separated list of pre-assigned BattINFO cell IRIs (one per cell).
 * `--serials <str>`: Comma-separated serial numbers (one per cell, used as folder names).
-* `--force`: Overwrite an existing output directory.
+* `--force`: Write into an existing batch directory; its cell folders keep the IRIs their battinfo.yaml records.
 * `--help`: Show this message and exit.
 
 ### `battinfo batch add`
@@ -2015,7 +2029,7 @@ Add more cells to an existing batch directory.
 
 
 Reads batch.yaml to inherit cell spec, lab, operator, and project.
-New cells are numbered after the existing ones.
+A new cell without a serial gets a random IRI, recorded in its battinfo.yaml.
 Provide --batch-id / --operator / --project to override for the new cells.
 Updates the count in batch.yaml automatically.
 

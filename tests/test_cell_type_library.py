@@ -129,3 +129,49 @@ def test_clean_output_deletes_only_the_outputs_the_previous_build_listed(tmp_pat
     assert result["entry_count"] == 1
     assert sorted(path.name for path in output.iterdir()) == ["a.jsonld", "mine.jsonld", "notes.json"]
     assert elsewhere.exists()
+
+
+def _library_with_an_unversioned_descriptor(tmp_path: Path) -> Path:
+    """A library whose a.json maps and whose b.json is a cell descriptor without schema_version."""
+    library = _library(tmp_path / "lib", "a.json")
+    descriptor = _load_json(ROOT / "src" / "battinfo" / "data" / "library" / "cell-spec" / "A123__ANR26650M1-B.json")
+    del descriptor["schema_version"]
+    (library / "b.json").write_text(json.dumps(descriptor), encoding="utf-8")
+    return library
+
+
+def test_build_names_the_file_of_a_descriptor_it_cannot_map(tmp_path: Path) -> None:
+    library = _library_with_an_unversioned_descriptor(tmp_path)
+
+    with pytest.raises(ValueError) as raised:
+        _build(library, tmp_path / "rdf", tmp_path)
+
+    message = str(raised.value)
+    assert str(library / "b.json") in message, message
+    assert "schema_version" in message
+
+
+def test_library_build_rdf_command_names_the_file_it_cannot_map(tmp_path: Path) -> None:
+    from typer.testing import CliRunner
+
+    from battinfo.cli import app
+
+    library = _library_with_an_unversioned_descriptor(tmp_path)
+    result = CliRunner().invoke(
+        app,
+        [
+            "library",
+            "build-rdf",
+            "--input-dir",
+            str(library),
+            "--output-jsonld-dir",
+            str(tmp_path / "rdf"),
+            "--aggregate-jsonld",
+            str(tmp_path / "ontology" / "cell-spec.jsonld"),
+            "--manifest-json",
+            str(tmp_path / "library-rdf" / "cell-spec.index.json"),
+        ],
+    )
+
+    assert result.exit_code == 1, result.output
+    assert "b.json" in result.output and "schema_version" in result.output

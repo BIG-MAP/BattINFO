@@ -44,6 +44,9 @@ UNIT_MAP = ROOT / "assets" / "mappings" / "domain-battery" / "unit_map.curated.j
         ("milliohm", "mΩ"),
         ("Ohm", "Ω"),
         ("ohm", "Ω"),
+        ("\u2126", "Ω"),  # OHM SIGN, which NFKC also maps to Greek capital omega
+        ("m\u2126", "mΩ"),
+        ("\u212a", "K"),  # KELVIN SIGN
         ("mPa*s", "mPa.s"),
         ("mPa·s", "mPa.s"),
         ("mPa s", "mPa.s"),

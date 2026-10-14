@@ -11,7 +11,7 @@
       "name": "Example Lab"
     },
     "cell_format": "coin",
-    "chemistry": "Zn-MnO2 alkaline",
+    "chemistry": "alkaline-zn-mno2",
     "positive_electrode_basis": "MnO2",
     "negative_electrode_basis": "zinc"
   },

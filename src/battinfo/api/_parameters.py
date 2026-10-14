@@ -59,7 +59,7 @@ from battinfo.api._shared import (
 )
 from battinfo.bundle import SCHEMA_VERSION, stamp_provenance
 from battinfo.canonical_aliases import record_to_snake_aliases
-from battinfo.entities import stable_uid
+from battinfo.entities import legacy_stable_uid, seed_text, stable_uid
 from battinfo.validate.core import DEFAULT_POLICY, ValidationPolicy
 
 _PARAMETER_KEY_RE = re.compile(r"^[a-z][a-z0-9_]*$")
@@ -186,16 +186,17 @@ def parameter_file_uid(parameters_sha256: str) -> str:
 
 def _legacy_parameter_file_uid(parameters_sha256: str) -> str:
     """The uid a parameter file minted under spec/ before 2026-10-11 has."""
-    return stable_uid(f"{_LEGACY_PARAMETER_FILE_SEED}:{parameters_sha256}")
+    return legacy_stable_uid(f"{_LEGACY_PARAMETER_FILE_SEED}:{parameters_sha256}")
 
 
 def claim_batch_uid(target: str, scope: str, name: str, electrode_polarity: str | None = None) -> str:
     """The uid of a claim batch's record (IDENTIFIER_POLICY 6.3).
 
     ``stable_uid("parameter-claims:<target>:<scope>[:<electrode_polarity>]:<name>")``,
-    under ``dataset/``, the name stripped and lowercased, so the same
-    source's claims about the same target re-import onto the same IRI. The
-    builder and a save of a record that has no id both mint through here.
+    under ``dataset/``, the name normalised (``entities.seed_text``) and
+    lowercased, so the same source's claims about the same target re-import
+    onto the same IRI. The builder and a save of a record that has no id both
+    mint through here.
     """
     return _seeded_claim_batch_uid(_CLAIM_BATCH_SEED, target, scope, name, electrode_polarity)
 
@@ -204,7 +205,11 @@ def _seeded_claim_batch_uid(seed: str, target: str, scope: str, name: str, elect
     parts = [seed, target, scope]
     if electrode_polarity:
         parts.append(electrode_polarity)
-    parts.append(name.strip().lower())
+    if seed == _LEGACY_CLAIM_BATCH_SEED:
+        # The uid a claim batch had under spec/, exactly as it was minted then.
+        parts.append(name.strip().lower())
+        return legacy_stable_uid(":".join(parts))
+    parts.append(seed_text(name).lower())
     return stable_uid(":".join(parts))
 
 

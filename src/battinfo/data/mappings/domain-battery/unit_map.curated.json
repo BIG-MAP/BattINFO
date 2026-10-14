@@ -1,16 +1,19 @@
 {
-  "version": "0.5.2",
+  "version": "0.6.0",
   "status": "review",
   "notes": [
     "Curated unit mappings promoted from decisions in interactive review.",
     "These entries are treated as authoritative for JSON->RDF conversion.",
     "IRIs verified against EMMO 1.0.2, domain-battery 0.21.0, domain-electrochemistry 0.39.0 and domain-chemical-substance 0.15.0. From domain-electrochemistry 0.38.0 the closure imports EMMO's siacceptedunits module, so the hour- and litre-based units (AmpereHour, MilliAmpereHour, Watthour, KiloWatthour, MolePerLitre, WattHourPerKilogram, WattHourPerLitre, MilliLitre) are declared in it under the same EMMO IRIs this map already used.",
     "All candidates with confidence 1.0 promoted. MANUAL_UNIT_TYPES entries consolidated here.",
-    "Wh/kg and Wh/L use EMMO IRIs (confirmed present). W/kg uses QUDT (not in EMMO core).",
+    "Wh/kg, Wh/L and W/kg use EMMO IRIs (confirmed present).",
     "Wh and kWh: EMMO spells the local names Watthour / KiloWatthour (lower-case h) while the prefLabels read WattHour / KiloWattHour; the IRIs follow EMMO, the labels follow the prefLabel.",
     "0.5.0: added 1, mS/cm, m2/g, g/mol, mol/kg, nm, mPa.s, mg, Hz, A/Ah, kg/m3, cm3, cm2; IRIs verified against the bundled domain-battery context. ASCII aliases (um, mg/cm^2, mOhm, ...) are normalised in code, not listed here.",
     "0.5.1: added mA/cm2, A/cm2 and A/m2 for current densities in test methods (coin-cell protocols state their currents per area). IRIs checked in EMMO 1.0.2 disciplines/units/noncoherentsiunits.ttl (MilliAmperePerSquareCentiMetre, AmperePerSquareCentiMetre) and coherentsiunits.ttl (AmperePerSquareMetre), all subclasses of ElectricCurrentDensityUnit, and present in the bundled domain-battery context.",
-    "0.5.2: added the SI units BPX states its parameters in: m2, m3, mol/m3, m2/s, J/mol, V/K, S/m, 1/m, mol.m-2.s-1, J/(kg.K), W/(m.K) and W/(m2.K). IRIs checked in EMMO 1.0.2 disciplines/units/coherentsiunits.ttl (SquareMetre, CubicMetre, MolePerCubicMetre, SquareMetrePerSecond, JoulePerMole, VoltPerKelvin, SiemensPerMetre, PerMetre, MolePerSquareMetrePerSecond, JoulePerKilogramKelvin, WattPerMetreKelvin, WattPerSquareMetreKelvin), all present in the bundled domain-battery context."
+    "0.5.2: added the SI units BPX states its parameters in: m2, m3, mol/m3, m2/s, J/mol, V/K, S/m, 1/m, mol.m-2.s-1, J/(kg.K), W/(m.K) and W/(m2.K). IRIs checked in EMMO 1.0.2 disciplines/units/coherentsiunits.ttl (SquareMetre, CubicMetre, MolePerCubicMetre, SquareMetrePerSecond, JoulePerMole, VoltPerKelvin, SiemensPerMetre, PerMetre, MolePerSquareMetrePerSecond, JoulePerKilogramKelvin, WattPerMetreKelvin, WattPerSquareMetreKelvin), all present in the bundled domain-battery context.",
+    "0.5.3: added mAh/g and Ah/kg for specific capacities, mAh/cm2 for areal capacities, S/cm for conductivities, and kPa and MPa for pressures, which the export had kept as text (schema:unitText) only. The IRIs (MilliAmpereHourPerGram, AmpereHourPerKilogram, MilliAmpereHourPerSquareCentiMetre, SiemensPerCentiMetre, KiloPascal, MegaPascal) are measurement units of the pinned EMMO closure and terms of the bundled domain-battery context.",
+    "0.5.4: added W/Wh for a power-to-energy ratio, kW and mW for powers, mm2 for areas, mm3 for volumes and day for a calendar life: units validation accepts on cell-spec properties, which the export had kept as text (schema:unitText) only. The IRIs (electrochemistry:WattPerWattHour, KiloWatt, MilliWatt, SquareMilliMetre, CubicMilliMetre, Day) are measurement units of the pinned EMMO closure and terms of the bundled domain-battery context.",
+    "0.6.0: % and vol% name PercentUnit (domain-electrochemistry 0.39.0), the closure's only percent unit. They named WeightPercent and VolumePercent, which are PercentQuantity classes, quantities rather than units. The basis a spelling states is not a unit: the emitter adds WeightPercent (wt%, wt.%) or VolumePercent (vol%, vol.%, v/v%) as an extra class of the quantity, and on porosity, mass_fraction and volume_fraction rescales every percent spelling to [0, 1] with UnitOne. W/L moves from the QUDT IRI W-PER-L to emmo:WattPerLitre."
   ],
   "mappings": [
     {
@@ -264,36 +267,37 @@
       "unit_pref_label": "WattPerKilogram",
       "unit_label": "WattPerKilogram",
       "confidence": 1.0,
-      "notes": "Not defined in EMMO core; QUDT IRI used as authoritative fallback."
+      "notes": "Specific power. EMMO 1.0.2 declares WattPerKilogram, and the pinned closure imports it."
     },
     {
       "symbol": "W/L",
       "status": "curated",
-      "unit_iri": "http://qudt.org/vocab/unit/W-PER-L",
-      "unit_qname": "qudt:W-PER-L",
+      "unit_iri": "https://w3id.org/emmo#WattPerLitre",
+      "unit_qname": "emmo:WattPerLitre",
       "unit_pref_label": "WattPerLitre",
       "unit_label": "W/L",
-      "confidence": 0.9,
-      "notes": "Power density, on the QUDT IRI. EMMO declares WattPerLitre in its siacceptedunits module, which the pinned closure imports from domain-electrochemistry 0.38.0 on, but the v1 records context already publishes the WattPerLitre term with this QUDT IRI, so the entry is unchanged; moving it is a maintainer decision. QUDT code W-PER-L pending dereference verification."
+      "confidence": 1.0,
+      "notes": "Power density. EMMO 1.0.2 declares WattPerLitre in its siacceptedunits module, which the pinned closure imports from domain-electrochemistry 0.38.0 on. Moved from the QUDT IRI W-PER-L, which does not dereference, together with the WattPerLitre term of the v1 records context before 0.8.0."
     },
     {
       "symbol": "%",
       "status": "curated",
-      "unit_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_2c0e66c8_d58d_44b2_b0ce_ba55194bd505",
-      "unit_qname": "electrochemistry:WeightPercent",
-      "unit_pref_label": "WeightPercent",
-      "unit_label": "wt%",
+      "unit_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_8430be19_6cae_4a15_a570_3c15d0d190eb",
+      "unit_qname": "electrochemistry:PercentUnit",
+      "unit_pref_label": "PercentUnit",
+      "unit_label": "%",
       "confidence": 1.0,
-      "note": "Fraction quantities (MassFraction, VolumeFraction, Porosity) use UnitOne with value converted to [0,1]. This entry is retained for other percent quantities."
+      "note": "Also percent, pct, wt% and wt.%, which the emitter folds into %. A spelling that states a mass basis (wt%, wt.%) adds WeightPercent as an extra class of the quantity. Fraction quantities (MassFraction, VolumeFraction, Porosity) use UnitOne with the value converted to [0, 1]."
     },
     {
       "symbol": "vol%",
       "status": "curated",
-      "unit_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_db37b358_b2f0_4e06_b6ae_8c56c8fbb6ba",
-      "unit_qname": "electrochemistry:VolumePercent",
-      "unit_pref_label": "VolumePercent",
+      "unit_iri": "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_8430be19_6cae_4a15_a570_3c15d0d190eb",
+      "unit_qname": "electrochemistry:PercentUnit",
+      "unit_pref_label": "PercentUnit",
       "unit_label": "vol%",
-      "confidence": 1.0
+      "confidence": 1.0,
+      "note": "Also vol.% and v/v%. The volume basis adds VolumePercent as an extra class of the quantity; fraction quantities use UnitOne with the value converted to [0, 1]."
     },
     {
       "symbol": "µm",
@@ -584,6 +588,114 @@
       "unit_qname": "emmo:WattPerSquareMetreKelvin",
       "unit_pref_label": "WattPerSquareMetreKelvin",
       "unit_label": "W/(m²·K)",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "mAh/g",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#MilliAmpereHourPerGram",
+      "unit_qname": "emmo:MilliAmpereHourPerGram",
+      "unit_pref_label": "MilliAmpereHourPerGram",
+      "unit_label": "mAh/g",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "Ah/kg",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#AmpereHourPerKilogram",
+      "unit_qname": "emmo:AmpereHourPerKilogram",
+      "unit_pref_label": "AmpereHourPerKilogram",
+      "unit_label": "Ah/kg",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "mAh/cm2",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#MilliAmpereHourPerSquareCentiMetre",
+      "unit_qname": "emmo:MilliAmpereHourPerSquareCentiMetre",
+      "unit_pref_label": "MilliAmpereHourPerSquareCentiMetre",
+      "unit_label": "mAh/cm²",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "S/cm",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#SiemensPerCentiMetre",
+      "unit_qname": "emmo:SiemensPerCentiMetre",
+      "unit_pref_label": "SiemensPerCentiMetre",
+      "unit_label": "S/cm",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "kPa",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#KiloPascal",
+      "unit_qname": "emmo:KiloPascal",
+      "unit_pref_label": "KiloPascal",
+      "unit_label": "kPa",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "MPa",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#MegaPascal",
+      "unit_qname": "emmo:MegaPascal",
+      "unit_pref_label": "MegaPascal",
+      "unit_label": "MPa",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "W/Wh",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo/domain/electrochemistry#WattPerWattHour",
+      "unit_qname": "electrochemistry:WattPerWattHour",
+      "unit_pref_label": "WattPerWattHour",
+      "unit_label": "W/Wh",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "kW",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#KiloWatt",
+      "unit_qname": "emmo:KiloWatt",
+      "unit_pref_label": "KiloWatt",
+      "unit_label": "kW",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "mW",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#MilliWatt",
+      "unit_qname": "emmo:MilliWatt",
+      "unit_pref_label": "MilliWatt",
+      "unit_label": "mW",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "mm2",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#SquareMilliMetre",
+      "unit_qname": "emmo:SquareMilliMetre",
+      "unit_pref_label": "SquareMilliMetre",
+      "unit_label": "mm²",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "mm3",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#CubicMilliMetre",
+      "unit_qname": "emmo:CubicMilliMetre",
+      "unit_pref_label": "CubicMilliMetre",
+      "unit_label": "mm³",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "day",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#Day",
+      "unit_qname": "emmo:Day",
+      "unit_pref_label": "Day",
+      "unit_label": "day",
       "confidence": 1.0
     }
   ]

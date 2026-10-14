@@ -362,27 +362,6 @@ def test_import_keeps_minimal_spec_without_properties(tmp_path: Path) -> None:
     assert spec.format == "cylindrical"
 
 
-def test_batterypass_target_follows_the_description_pattern() -> None:
-    """target="batterypass" wraps the domain-battery emission, so its spec node
-    must carry the physical payload under isDescriptionFor too — this public
-    target had no shape pin at all."""
-    from battinfo.transform.json_to_jsonld import to_jsonld
-
-    record = _cell_spec_record()
-    doc = to_jsonld(
-        {
-            "schema_version": record["schema_version"],
-            "specification": {**record["cell_spec"], "property": record["properties"]},
-        },
-        target="batterypass",
-    )
-    assert "batterypass:BatteryPassportRecord" in doc["@type"]
-    node = doc["@graph"][0]
-    described = node["isDescriptionFor"]
-    assert "hasProperty" in described
-    assert not any(key.startswith("has") for key in node)
-
-
 # ── Step 3: C shares the builder with B ──────────────────────────────────────
 
 

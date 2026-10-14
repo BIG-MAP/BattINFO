@@ -12,7 +12,7 @@ Artifacts:
 
 - `property_map.curated.json`: reviewed/approved property-key to ontology-class mapping.
 - `unit_map.curated.json`: reviewed/approved unit-symbol to ontology-unit mapping.
-- `property_map.candidates.json`: auto-generated mapping candidates.
+- `property_map.candidates.json`: auto-generated mapping candidates, review input only; the JSON-LD emitter never reads it.
 - `unit_map.candidates.json`: auto-generated unit candidates.
 - `quantitative_mapping_report.md`: optional generated summary for review.
 

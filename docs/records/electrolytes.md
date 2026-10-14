@@ -186,6 +186,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "VolumeFraction",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "VolumeFraction",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.3
@@ -207,6 +208,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "VolumeFraction",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "VolumeFraction",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.7
@@ -229,6 +231,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
           "MassFraction",
           "ConventionalProperty"
         ],
+        "skos:prefLabel": "MassFraction",
         "hasNumericalPart": {
           "@type": "RealData",
           "hasNumberValue": 0.02
@@ -412,6 +415,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "VolumeFraction",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "VolumeFraction",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.3
@@ -433,6 +437,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "VolumeFraction",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "VolumeFraction",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.7
@@ -562,7 +567,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 
 ## Fields
 
-Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`). Quantities are `{value, unit}` maps and may also carry `value_basis` (Measured, Conventional, Rated, or Nominal) and `conditions` (the parameters under which the value holds, each itself a quantity; a qualitative condition may be `value_text` alone). In JSON-LD, conditions on a measured value ride a measurement node the quantity `isOutputOf`, and conditions on a declared value (Conventional, Rated or Nominal) become named `schema:valueReference` qualifiers on the quantity. The `voltage_reference` key goes under `schema:valueReference` either way, as a node typed with the reference electrode's classes (`Li/Li+` gives `ReferenceElectrode` and `LithiumElectrode`). When authoring, an instance references its spec with the `spec_id=` kwarg; the record stores the self-describing `<type>_spec_id` key shown in the tables below.
+Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`). Quantities are `{value, unit}` maps whose `value` is a number; text that is not a number goes in `value_text`. They may also carry `value_basis` (Measured, Conventional, Rated, or Nominal) and `conditions` (the parameters under which the value holds, each itself a quantity; a qualitative condition may be `value_text` alone). In JSON-LD, conditions on a measured value ride a measurement node the quantity `isOutputOf`, and conditions on a declared value (Conventional, Rated or Nominal) become named `schema:valueReference` qualifiers on the quantity. The `voltage_reference` key goes under `schema:valueReference` either way, as a node typed with the reference electrode's classes (`Li/Li+` gives `ReferenceElectrode` and `LithiumElectrode`). When authoring, an instance references its spec with the `spec_id=` kwarg; the record stores the self-describing `<type>_spec_id` key shown in the tables below.
 
 ### electrolyte-spec fields
 

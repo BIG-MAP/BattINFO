@@ -1,17 +1,19 @@
 from __future__ import annotations
 
 import json
+import math
 import re
 import warnings
 from collections.abc import Mapping
 from datetime import datetime, timezone
+from decimal import Decimal, InvalidOperation
 from functools import lru_cache
 from importlib import resources
 from pathlib import Path
-from typing import Any
+from typing import Any, NamedTuple
 
-from battinfo._util import _citation_doi_from_url
-from battinfo.entities import COMPONENT_FAMILIES
+from battinfo._util import _citation_doi_from_url, is_real_number
+from battinfo.entities import COMPONENT_FAMILIES, EntityKind, kind_for_doc
 from battinfo.validate.jsonld import validate_jsonld
 
 # Battery aggregation level -> EMMO domain-battery class (resolved by the
@@ -33,6 +35,8 @@ BATTERY_TYPE_FALLBACK = "Battery"
 # is recorded in battinfo.ttl (owl:imports) and in this comment: 0.18.7.
 BATTERY_CONTEXT_URL = "https://w3id.org/emmo/domain/battery/context"
 
+# Hand-kept property classes. They fill a key the curated property map lacks and
+# never override it (see _property_type_map); today the curated map holds every one.
 MANUAL_PROPERTY_TYPES = {
     "minimum_capacity": {"term": "MinimumCapacity"},
     "maximum_charging_temperature": {"term": "MaximumChargingTemperature"},
@@ -64,6 +68,10 @@ MANUAL_UNIT_TYPES = {
 LEGACY_UNIT_IRIS: dict[str, str] = {
     # EMMO's class for the programming language C, written for degree Celsius.
     "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc": "°C",
+    # WeightPercent and VolumePercent, two PercentQuantity classes, written as
+    # the units of % (and wt%, percent, pct) and vol%.
+    "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_2c0e66c8_d58d_44b2_b0ce_ba55194bd505": "%",
+    "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_db37b358_b2f0_4e06_b6ae_8c56c8fbb6ba": "vol%",
 }
 CONVERTER_LABEL_TO_TYPE = {
     label: type_name
@@ -189,19 +197,192 @@ def _normalize_term(value: Any) -> str | None:
     return normalized or None
 
 
-def _entity_mapping(field: str, value: Any) -> dict[str, Any] | None:
+def _entity_key(field: str, value: Any) -> str | None:
+    """The ``entity_type_map.json`` key *value* names in *field*, or None."""
     key = _normalize_term(value)
     if key is None:
         return None
     field_map = _entity_type_map().get(field, {})
-    hit = field_map.get(key)
-    if hit is not None:
-        return hit
+    if key in field_map:
+        return key
     # The map keys use hyphens ("hard-carbon", "silicon-graphite", "li-metal");
     # accept the same term written with spaces, underscores, commas or slashes
     # ("hard carbon", "silicon, graphite", "silicon/graphite").
     variant = re.sub(r"[\s_,/]+", "-", key)
-    return field_map.get(variant) if variant != key else None
+    return variant if variant in field_map else None
+
+
+def _entity_mapping(field: str, value: Any) -> dict[str, Any] | None:
+    key = _entity_key(field, value)
+    return None if key is None else _entity_type_map()[field][key]
+
+
+def chemistry_lineage(value: Any) -> tuple[str, ...]:
+    """The chemistry label *value* names, then every label broader than it.
+
+    An older spelling (``alias_of``) stands for the label it points at, so
+    ``"Li-MnO2"`` gives ``("li-mno2", "li-metal")`` and ``"li-primary"`` gives
+    ``("li-metal",)``. A value outside the vocabulary gives ``()``: it declares
+    no chemistry class.
+    """
+    chemistry = _entity_type_map().get("chemistry", {})
+    key = _entity_key("chemistry", value)
+    if key is None:
+        return ()
+    alias_of = chemistry[key].get("alias_of")
+    if isinstance(alias_of, str) and alias_of in chemistry:
+        key = alias_of
+    lineage: list[str] = []
+    while key is not None and key not in lineage:
+        lineage.append(key)
+        broader = chemistry[key].get("broader")
+        key = broader if isinstance(broader, str) and broader in chemistry else None
+    return tuple(lineage)
+
+
+def electrode_basis_battery_types(cell: Mapping[str, Any]) -> list[str]:
+    """The battery classes the electrode bases of a cell add, positive first.
+
+    The declared chemistry decides. An electrode basis adds its ``battery_types``
+    only when its ``battery_types_chemistry`` label is the cell's chemistry, a
+    label broader than it or a label narrower than it. So graphite, LTO and the
+    lithium-ion positives add their classes to a li-ion cell only, a lithium
+    negative adds LithiumMetalBattery to li-metal and the couples under it, and
+    MnO2 adds LithiumManganeseDioxideBattery to li-mno2 and li-metal (li-primary
+    included), never to a zinc cell.
+
+    A chemistry outside the vocabulary declares no class. Then only the stated
+    electrodes can say what the cell is: a positive basis adds its classes when
+    its couple fixes the negative electrode and the cell is a full cell with
+    that negative. So an MnO2 positive with a lithium negative adds
+    LithiumManganeseDioxideBattery, since li-mno2 sits under li-metal, whose
+    negative is lithium. Nothing else is added, and a half cell or a
+    three-electrode cell, where lithium is the counter or reference electrode,
+    gets none.
+
+    *cell* is a cell-spec body or a specification dict: both name the fields
+    ``chemistry``, ``positive_electrode_basis`` and ``negative_electrode_basis``.
+    """
+    lineage = chemistry_lineage(cell.get("chemistry"))
+    types: list[str] = []
+    if not lineage:
+        for battery_type in _basis_types_from_the_negative(cell):
+            if battery_type not in types:
+                types.append(battery_type)
+        return types
+    for field in ("positive_electrode_basis", "negative_electrode_basis"):
+        entry = _entity_mapping(field, cell.get(field)) or {}
+        belongs_to = entry.get("battery_types_chemistry")
+        if not isinstance(belongs_to, str):
+            continue
+        if belongs_to not in lineage and lineage[0] not in chemistry_lineage(belongs_to):
+            continue
+        for battery_type in entry.get("battery_types", []):
+            if isinstance(battery_type, str) and battery_type not in types:
+                types.append(battery_type)
+    return types
+
+
+def _negative_electrode_node(key: str | None) -> str | None:
+    """The electrode a negative basis names: lithium, lithium-metal and li-metal are one."""
+    if key is None:
+        return None
+    node_type = _entity_type_map().get("negative_electrode_basis", {}).get(key, {}).get("node_type")
+    return node_type if isinstance(node_type, str) else key
+
+
+def _basis_types_from_the_negative(cell: Mapping[str, Any]) -> list[str]:
+    """The positive basis's battery classes for a cell whose chemistry declares none.
+
+    Added only when the positive's couple (``battery_types_chemistry``, or a
+    label broader than it) names a negative electrode on its chemistry entry,
+    the record states that negative, and the cell is a full cell.
+    """
+    if _cell_configuration_key(cell) in _COUNTER_ELECTRODE_CONFIGURATIONS:
+        return []
+    stated = _negative_electrode_node(_entity_key("negative_electrode_basis", cell.get("negative_electrode_basis")))
+    entry = _entity_mapping("positive_electrode_basis", cell.get("positive_electrode_basis")) or {}
+    belongs_to = entry.get("battery_types_chemistry")
+    if stated is None or not isinstance(belongs_to, str):
+        return []
+    chemistries = _entity_type_map().get("chemistry", {})
+    required = next(
+        (
+            chemistries[label]["negative_electrode_basis"]
+            for label in chemistry_lineage(belongs_to)
+            if isinstance(chemistries[label].get("negative_electrode_basis"), str)
+        ),
+        None,
+    )
+    if required is None or _negative_electrode_node(required) != stated:
+        return []
+    return [battery_type for battery_type in entry.get("battery_types", []) if isinstance(battery_type, str)]
+
+
+# A half cell or a three-electrode cell may use a metal as its counter or
+# reference electrode, whatever couple the cell is about.
+_COUNTER_ELECTRODE_CONFIGURATIONS = frozenset({"half-cell", "three-electrode", "three-electrode-cell"})
+
+
+def _join_labels(labels: list[str]) -> str:
+    return labels[0] if len(labels) == 1 else f"{', '.join(labels[:-1])} and {labels[-1]}"
+
+
+def chemistry_electrode_conflicts(cell: Mapping[str, Any]) -> list[str]:
+    """Where a cell's negative electrode basis contradicts its chemistry, as messages.
+
+    Judges what the record states, not the classes it emits. A couple defined by
+    its negative electrode names it on its chemistry entry
+    (``negative_electrode_basis``: lithium for li-metal, zinc for the zinc
+    couples), and narrower labels inherit it. Two statements disagree when
+
+    - the chemistry names a negative electrode and the record states another, or
+    - the record states a negative electrode that only those couples have, the
+      chemistry is not one of them, and the cell is not a half cell or a
+      three-electrode cell (where lithium can be the counter electrode).
+
+    A chemistry or a basis outside the vocabulary is not judged; the
+    controlled-value check reports those.
+    """
+    lineage = chemistry_lineage(cell.get("chemistry"))
+    stated = _entity_key("negative_electrode_basis", cell.get("negative_electrode_basis"))
+    if not lineage or stated is None:
+        return []
+    chemistries = _entity_type_map().get("chemistry", {})
+    electrode = _negative_electrode_node
+    chemistry_text = str(cell.get("chemistry")).strip()
+    stated_text = str(cell.get("negative_electrode_basis")).strip()
+    required = next(
+        (
+            chemistries[label]["negative_electrode_basis"]
+            for label in lineage
+            if isinstance(chemistries[label].get("negative_electrode_basis"), str)
+        ),
+        None,
+    )
+    if required is not None:
+        if electrode(required) == electrode(stated):
+            return []
+        return [
+            f"chemistry '{chemistry_text}' is a couple whose negative electrode is {required}, "
+            f"but negative_electrode_basis is '{stated_text}'. Correct whichever of the two is wrong."
+        ]
+    owners = [
+        label
+        for label, entry in chemistries.items()
+        if "alias_of" not in entry
+        and isinstance(entry.get("negative_electrode_basis"), str)
+        and electrode(entry["negative_electrode_basis"]) == electrode(stated)
+    ]
+    if not owners or _cell_configuration_key(cell) in _COUNTER_ELECTRODE_CONFIGURATIONS:
+        return []
+    those = "that label" if len(owners) == 1 else "those labels"
+    return [
+        f"negative_electrode_basis '{stated_text}' is the negative electrode of {_join_labels(owners)} "
+        f"cells and the couples under {those}, but chemistry is '{chemistry_text}'. State the couple "
+        "the cell is, or set cell_configuration to half_cell or three_electrode_cell if the "
+        f"{stated_text} is a counter or reference electrode."
+    ]
 
 
 # Role-based electrode holders. A cell that is not a full cell has no polarity to
@@ -263,29 +444,51 @@ def _load_profile_file(*parts: str) -> dict[str, Any]:
 
 @lru_cache(maxsize=1)
 def _property_type_map() -> dict[str, dict[str, str]]:
+    """Property key -> its class term and IRI. The curated map wins, then the
+    hand-kept entries fill keys it lacks. ``property_map.candidates.json`` is
+    generated review input and types nothing: read first, it once typed
+    ``charging_time`` as the Charging process and ``min_capacity`` as Capacity."""
     merged: dict[str, dict[str, str]] = {}
 
-    for filename in ("property_map.candidates.json", "property_map.curated.json"):
-        data = _load_mapping_file(filename)
-        for item in data.get("mappings", []):
-            key = item.get("key")
-            if not isinstance(key, str):
-                continue
+    for item in _load_mapping_file("property_map.curated.json").get("mappings", []):
+        key = item.get("key")
+        if not isinstance(key, str):
+            continue
 
-            term = item.get("class_pref_label") or item.get("class_label")
-            iri = item.get("class_iri")
-            if isinstance(term, str) and term and isinstance(iri, str) and iri:
-                entry: dict[str, str] = {"term": term, "iri": iri}
-                co_type = item.get("co_type")
-                if isinstance(co_type, str) and co_type:
-                    entry["co_type"] = co_type
-                co_type_pending = item.get("co_type_pending")
-                if isinstance(co_type_pending, str) and co_type_pending:
-                    entry["co_type_pending"] = co_type_pending
-                merged.setdefault(key, entry)
+        term = item.get("class_pref_label") or item.get("class_label")
+        iri = item.get("class_iri")
+        if isinstance(term, str) and term and isinstance(iri, str) and iri:
+            entry: dict[str, str] = {"term": term, "iri": iri}
+            co_type = item.get("co_type")
+            if isinstance(co_type, str) and co_type:
+                entry["co_type"] = co_type
+            co_type_pending = item.get("co_type_pending")
+            if isinstance(co_type_pending, str) and co_type_pending:
+                entry["co_type_pending"] = co_type_pending
+            merged.setdefault(key, entry)
 
-    merged.update(MANUAL_PROPERTY_TYPES)
+    for key, entry in MANUAL_PROPERTY_TYPES.items():
+        merged.setdefault(key, entry)
     return merged
+
+
+@lru_cache(maxsize=1)
+def _bound_classes() -> dict[str, str]:
+    """Class term -> the bound it names, ``"max"`` or ``"min"``.
+
+    Read from the ``bound`` flag of ``property_map.curated.json``: a Maximum or
+    Upper class names a maximum, a Minimum or Lower class a minimum. A quantity
+    typed with such a class and given only that bound has the bound as its
+    number (a ``max_value`` of 10 A on MaximumPulseChargingCurrent is that
+    maximum, 10 A).
+    """
+    flags: dict[str, str] = {}
+    for item in _load_mapping_file("property_map.curated.json").get("mappings", []):
+        term = item.get("class_pref_label") or item.get("class_label")
+        bound = item.get("bound")
+        if isinstance(term, str) and bound in ("max", "min"):
+            flags[term] = bound
+    return flags
 
 
 @lru_cache(maxsize=1)
@@ -487,10 +690,12 @@ def normalize_unit_symbol(unit: str | None) -> str | None:
     Canonical symbols pass through unchanged. Accepted alternative spellings are
     rewritten: ASCII exponents (``mg/cm^2`` -> ``mg/cm2``, ``g/cm³`` -> ``g/cm3``),
     ASCII micro prefixes (``um`` -> ``µm``), Ohm spellings (``mOhm`` / ``milliohm`` ->
-    ``mΩ``), product separators (``mPa*s`` / ``mPa·s`` -> ``mPa.s``), Celsius
-    spellings (``degC`` / ``deg C`` -> ``°C``), and a short list of spelled-out
-    names (``percent`` -> ``%``, ``hour`` -> ``h``). Unknown strings are returned
-    trimmed, so the caller can still fall back to ``schema:unitText``.
+    ``mΩ``, and the ohm sign U+2126 -> ``Ω``), the kelvin sign U+212A -> ``K``,
+    product separators (``mPa*s`` / ``mPa·s`` -> ``mPa.s``), Celsius spellings
+    (``degC`` / ``deg C`` -> ``°C``), and a short list of spelled-out names
+    (``percent`` -> ``%``, ``hour`` -> ``h``). Case is kept, because it can change
+    magnitude (``mV`` is a millivolt, ``MV`` a megavolt). Unknown strings are
+    returned trimmed, so the caller can still fall back to ``schema:unitText``.
     """
     if not isinstance(unit, str):
         return None
@@ -506,9 +711,119 @@ def normalize_unit_symbol(unit: str | None) -> str | None:
     # A remaining interior space is a product separator ("mPa s").
     text = text.replace(" ", ".")
     text = text.replace("μ", "µ")  # Greek mu (U+03BC) -> micro sign (U+00B5)
+    text = text.replace("\u2126", "Ω").replace("\u212a", "K")  # ohm and kelvin signs -> the letters
     text = _MICRO_PREFIX_RE.sub("µ", text)
     text = _OHM_SUFFIX_RE.sub("Ω", text)
     return _UNIT_ALIASES.get(text, text)
+
+
+# Percent spellings. normalize_unit_symbol folds %, percent, pct and " %" into
+# "%", wt% and wt.% into "%" as well, and vol%, vol.% and v/v% into "vol%"; all
+# of them are the unit PercentUnit. The basis is read from the spelling itself,
+# before the fold drops it.
+_PERCENT_SYMBOLS = frozenset({"%", "vol%"})
+_MASS_PERCENT_SPELLINGS = frozenset({"wt%", "wt.%"})
+# The class that carries a stated basis on a quantity that is not a fraction.
+_PERCENT_BASIS_CLASS = {"mass": "WeightPercent", "volume": "VolumePercent"}
+# The basis each fraction key has by definition: porosity is a volume fraction.
+_FRACTION_BASIS = {"mass_fraction": "mass", "volume_fraction": "volume", "porosity": "volume"}
+
+
+def _is_percent(unit: Any) -> bool:
+    """True for every percent spelling the unit map accepts."""
+    return isinstance(unit, str) and normalize_unit_symbol(unit) in _PERCENT_SYMBOLS
+
+
+def _percent_basis(unit: Any) -> str | None:
+    """The basis a percent spelling states: ``"mass"`` for wt% and wt.%,
+    ``"volume"`` for vol%, vol.% and v/v%, and ``None`` for a plain percent
+    (%, percent, pct) or a unit that is not a percent."""
+    if not _is_percent(unit):
+        return None
+    if normalize_unit_symbol(unit) == "vol%":
+        return "volume"
+    if "".join(unit.split()).lower() in _MASS_PERCENT_SPELLINGS:
+        return "mass"
+    return None
+
+
+def _quantity_percent_basis(quantity: Mapping[str, Any]) -> str | None:
+    """The basis a quantity's percent unit states, from ``unit`` or ``unit_text``."""
+    for field in ("unit", "unit_text"):
+        basis = _percent_basis(quantity.get(field))
+        if basis:
+            return basis
+    return None
+
+
+def percent_basis_conflict(key: str, quantity: Any) -> str | None:
+    """Why a fraction's percent unit contradicts the fraction, or ``None``.
+
+    ``mass_fraction`` is by mass, ``volume_fraction`` and ``porosity`` by
+    volume. A unit that states the other basis (``vol%`` on a mass fraction,
+    ``wt%`` on a volume fraction or a porosity) contradicts the key. The
+    JSON-LD export then publishes the value on [0, 1] without the stated
+    basis; the emitter warns and validation reports
+    ``semantic.percent_basis_mismatch``, a warning under every policy.
+    """
+    expected = _FRACTION_BASIS.get(key)
+    if expected is None or not isinstance(quantity, Mapping):
+        return None
+    stated = _quantity_percent_basis(quantity)
+    if stated is None or stated == expected:
+        return None
+    unit = quantity.get("unit") or quantity.get("unit_text")
+    return (
+        f"'{key}' is given in {unit}, a {stated} basis, but a {key.replace('_', ' ')} is by {expected}; "
+        "the JSON-LD export publishes it as a fraction of 1 and drops the stated basis."
+    )
+
+
+def _percent_to_fraction(value: Any) -> float | None:
+    """A percentage as a fraction of 1 (``41`` -> ``0.41``), or ``None`` if it is not a number.
+
+    Divides in decimal, so 4.3 gives 0.043 and not 0.043000000000000003. Only
+    a finite real number counts: text, even "95", is never scaled.
+    """
+    if not is_real_number(value):
+        return None
+    try:
+        number = Decimal(str(value).strip())
+    except InvalidOperation:
+        return None
+    if not number.is_finite():
+        return None
+    fraction = float(number / 100)
+    return fraction if math.isfinite(fraction) else None
+
+
+def _fraction_quantity(name: str, quantity: dict[str, Any]) -> dict[str, Any]:
+    """A fraction key's quantity on [0, 1]: a percent in any spelling is rescaled.
+
+    ``porosity``, ``mass_fraction`` and ``volume_fraction`` are published with
+    UnitOne. When the unit is a percent (``%``, ``percent``, ``pct``, ``wt%``,
+    ``vol%`` and the rest), ``value``, ``typical_value``, the bounds and
+    ``standard_deviation`` are divided by 100 and the unit becomes ``1``. If
+    any of them is not a number, nothing is rescaled and the percent unit
+    stays. A basis that contradicts the key warns.
+    """
+    problem = percent_basis_conflict(name, quantity)
+    if problem:
+        warnings.warn(f"semantic.percent_basis_mismatch: {problem}", stacklevel=3)
+    unit = quantity.get("unit") or quantity.get("unit_text")
+    if not _is_percent(unit):
+        return quantity
+    keys = [
+        k
+        for k in ("value", "typical_value", "min_value", "max_value", "standard_deviation")
+        if quantity.get(k) is not None
+    ]
+    scaled = {k: _percent_to_fraction(quantity[k]) for k in keys}
+    if not keys or any(v is None for v in scaled.values()):
+        return quantity
+    rescaled = {**quantity, **scaled, "unit": "1"}
+    rescaled.pop("unit_text", None)
+    return rescaled
 
 
 def _unit_lookup_candidates(unit: str) -> list[str]:
@@ -773,11 +1088,73 @@ def _condition_qualifier(ckey: str, cqty: Mapping[str, Any]) -> dict[str, Any] |
     return qualifier
 
 
+def _bound_value(value: Any) -> int | float | None:
+    """A ``min_value`` or ``max_value`` that can be published: a finite real number."""
+    return value if is_real_number(value) else None
+
+
+def _bound_as_number(term: str | None, lower: Any, upper: Any) -> int | float | None:
+    """The single bound that is the quantity's number, or ``None``.
+
+    Only where the curated property map flags the class as that bound
+    (:func:`_bound_classes`) and only that bound is given: ``max_value`` on a
+    Maximum class, ``min_value`` on a Minimum class. Never for any other class,
+    where a bound is not the value.
+    """
+    flag = _bound_classes().get(term.split(":", 1)[-1]) if term else None
+    if flag == "max" and upper is not None and lower is None:
+        return upper
+    if flag == "min" and lower is not None and upper is None:
+        return lower
+    return None
+
+
+# Keys that carry something a reader can use. A quantity node with none of
+# them is left out, with a warning.
+_QUANTITY_DATA_KEYS = ("hasNumericalPart", "hasStringValue", "schema:minValue", "schema:maxValue")
+
+
+def _add_string_value(node: dict[str, Any], text: Any) -> None:
+    """Add non-blank *text* to the node's ``hasStringValue``, growing a list for a second one."""
+    if not isinstance(text, str) or not text.strip():
+        return
+    existing = node.get("hasStringValue")
+    if existing is None:
+        node["hasStringValue"] = text
+    elif isinstance(existing, list):
+        if text not in existing:
+            existing.append(text)
+    elif existing != text:
+        node["hasStringValue"] = [existing, text]
+
+
 def _descriptor_quantity_node(name: str, quantity: dict[str, Any], *, term: str | None = None) -> dict[str, Any] | None:
+    """One EMMO quantity node: ``[class, value-basis class]`` with its number,
+    unit, bounds, text, sample statistics and conditions.
+
+    The number is ``value``, else ``typical_value``, else, when neither is
+    given, the one bound the class names (:func:`_bound_as_number`).
+    ``hasNumberValue`` is ``xsd:double`` and carries a finite real number only
+    (:func:`battinfo._util.is_real_number`). A string in ``value`` or
+    ``typical_value``, which the schema refuses, is never coerced, not even
+    "3.6": it is published as ``hasStringValue`` beside ``value_text``, with a
+    ``semantic.value_text_only`` warning. ``min_value`` and ``max_value`` are
+    kept when they are numbers, as ``schema:minValue`` and
+    ``schema:maxValue``. A percent unit
+    in any spelling is PercentUnit; on a key that is not a fraction, a spelling
+    that states a basis (``wt%``, ``vol%``) adds WeightPercent or VolumePercent
+    to the node's classes. The fraction keys (``porosity``, ``mass_fraction``,
+    ``volume_fraction``) are rescaled from a percent to [0, 1] first, see
+    :func:`_fraction_quantity`. A quantity with no number, bound or
+    ``value_text`` warns ``semantic.quantity_not_emitted`` and gives ``None``.
+    """
     if not isinstance(quantity, dict):
         return None
 
-    resolved_term = term or _property_type_term(name)
+    fraction = name in _FRACTION_PROPERTY_TERMS
+    if fraction:
+        quantity = _fraction_quantity(name, quantity)
+    resolved_term = term or _property_type_term(name) or _FRACTION_PROPERTY_TERMS.get(name)
     co_token = quantity.get("value_basis", quantity.get("co_type"))
     co_class = _CO_TYPE_CLASS.get(co_token) if isinstance(co_token, str) else None
     basis_class = co_class or _property_co_type(name)
@@ -791,18 +1168,36 @@ def _descriptor_quantity_node(name: str, quantity: dict[str, Any], *, term: str 
         # No mapped class: the value-basis class is the only type and the record
         # key names the quantity. Callers warn semantic.property_unmapped.
         node = {"@type": [basis_class], "skos:prefLabel": name}
+    percent_class = None if fraction else _PERCENT_BASIS_CLASS.get(_quantity_percent_basis(quantity) or "")
+    if percent_class:
+        node["@type"].append(percent_class)
 
-    # Emit the primary (nominal/typical) value only.  EMMO's canonical pattern for a
-    # ConventionalProperty is a single RealData node; a range (min/max) is correctly
-    # represented as separate hasProperty entries with distinct EMMO property classes
-    # (e.g. MinimumCapacity alongside NominalCapacity).  Min/max bounds are preserved
-    # in the canonical JSON record and are available to JSON consumers.
-    primary = quantity.get("value") if quantity.get("value") is not None else quantity.get("typical_value")
+    lower = _bound_value(quantity.get("min_value"))
+    upper = _bound_value(quantity.get("max_value"))
+    # hasNumberValue carries a finite real number only. A dict that skipped
+    # validation may hold text in value: it goes out as hasStringValue, beside
+    # value_text, and is never coerced here.
+    value, typical = quantity.get("value"), quantity.get("typical_value")
+    primary = value if is_real_number(value) else typical if is_real_number(typical) else None
+    if value is None and typical is None:
+        primary = _bound_as_number(resolved_term, lower, upper)
     if primary is not None:
         node["hasNumericalPart"] = {"@type": "RealData", "hasNumberValue": primary}
+    if lower is not None:
+        node["schema:minValue"] = lower
+    if upper is not None:
+        node["schema:maxValue"] = upper
 
-    if quantity.get("value_text"):
-        node["hasStringValue"] = quantity["value_text"]
+    text = next((item.strip() for item in (value, typical) if isinstance(item, str) and item.strip()), None)
+    if text is not None:
+        warnings.warn(
+            f"semantic.value_text_only: '{name}' value '{text}' is text, not a number - the JSON-LD "
+            "export carries it as text (hasStringValue), not as a number. Put the number in "
+            "value and the wording in value_text.",
+            stacklevel=2,
+        )
+    for item in (quantity.get("value_text"), value, typical):
+        _add_string_value(node, item)
 
     unit = quantity.get("unit") or quantity.get("unit_text")
     iri = _unit_iri(unit)
@@ -852,12 +1247,18 @@ def _descriptor_quantity_node(name: str, quantity: dict[str, Any], *, term: str 
                 "hasMeasurementParameter": params[0] if len(params) == 1 else params,
             }
 
-    # @type + skos:prefLabel alone carry no data - treat as empty (same
-    # behaviour as before the prefLabel injection).
-    return node if len(node) > 2 else None
+    if not any(key in node for key in _QUANTITY_DATA_KEYS):
+        warnings.warn(
+            f"semantic.quantity_not_emitted: '{name}' has no value, typical_value, min_value, "
+            "max_value or value_text that the JSON-LD export can carry, so it is left out.",
+            stacklevel=2,
+        )
+        return None
+    return node
 
 
-# Dimensionless fraction keys (need the UnitOne %→[0,1] encoding) → EMMO class.
+# Dimensionless fraction keys -> EMMO class. They are published on [0, 1] with
+# UnitOne: a value in any percent spelling is rescaled (_fraction_quantity).
 _FRACTION_PROPERTY_TERMS = {
     "mass_fraction": "MassFraction",
     "volume_fraction": "VolumeFraction",
@@ -915,10 +1316,12 @@ _ELECTRODE_PROPERTY_TERMS: dict[str, str] = {
 def _descriptor_property_nodes(prop: Any, *, term_overrides: dict[str, str] | None = None) -> list[dict[str, Any]]:
     """Emit ``hasProperty`` nodes for an arbitrary holder property dict.
 
-    Every numeric quantity becomes a ``[EMMOClass, co-type]`` node via the curated
-    property map (with optional holder-specific ``term_overrides``); fraction keys use
-    the UnitOne encoding. This is the generic, holder-agnostic emitter that lets any
-    curated property attach to any component, rather than a per-holder whitelist.
+    Every quantity becomes a ``[EMMOClass, co-type]`` node via the curated
+    property map (with optional holder-specific ``term_overrides``) through the
+    shared :func:`_descriptor_quantity_node`; the fraction keys are rescaled to
+    [0, 1] with UnitOne there. This is the generic, holder-agnostic emitter that
+    lets any curated property attach to any component, rather than a per-holder
+    whitelist.
     """
     out: list[dict[str, Any]] = []
     if not isinstance(prop, dict):
@@ -928,14 +1331,34 @@ def _descriptor_property_nodes(prop: Any, *, term_overrides: dict[str, str] | No
         quantity = prop[name]
         if not isinstance(quantity, dict):
             continue
-        if name in _FRACTION_PROPERTY_TERMS:
-            term = overrides.get(name) or _FRACTION_PROPERTY_TERMS[name]
-            node = _fraction_quantity_node(term, quantity)
-        else:
-            term = overrides.get(name) or _property_type_term(name)
-            node = _descriptor_quantity_node(name, quantity, term=term)
+        term = overrides.get(name) or _FRACTION_PROPERTY_TERMS.get(name) or _property_type_term(name)
+        node = _descriptor_quantity_node(name, quantity, term=term)
         if node:
             out.append(node)
+    return out
+
+
+def schema_quantity_fields(quantity: Mapping[str, Any]) -> dict[str, Any]:
+    """The schema.org value fields of a quantity, for ``schema:PropertyValue``
+    and ``schema:QuantitativeValue`` nodes.
+
+    ``schema:value`` is ``value``, else ``typical_value``, else ``value_text``;
+    ``schema:minValue`` and ``schema:maxValue`` are the bounds; and
+    ``schema:unitText`` is ``unit``, else ``unit_text``. A field the quantity
+    lacks is left out, so a range-only quantity gives its bounds and unit.
+    """
+    out: dict[str, Any] = {}
+    for key in ("value", "typical_value", "value_text"):
+        value = quantity.get(key)
+        if value is not None and value != "":
+            out["schema:value"] = value
+            break
+    for key, term in (("min_value", "schema:minValue"), ("max_value", "schema:maxValue")):
+        if quantity.get(key) is not None:
+            out[term] = quantity[key]
+    unit = quantity.get("unit") or quantity.get("unit_text")
+    if unit:
+        out["schema:unitText"] = unit
     return out
 
 
@@ -943,41 +1366,23 @@ def _quantity_to_jsonld(quantity: dict[str, Any] | None) -> dict[str, Any] | Non
     if not isinstance(quantity, dict):
         return None
 
-    out: dict[str, Any] = {"@type": "schema:QuantitativeValue"}
-    has_content = False
-
-    if quantity.get("value") is not None:
-        out["schema:value"] = quantity["value"]
-        has_content = True
-    if quantity.get("min_value") is not None:
-        out["schema:minValue"] = quantity["min_value"]
-        has_content = True
-    if quantity.get("max_value") is not None:
-        out["schema:maxValue"] = quantity["max_value"]
-        has_content = True
-    if quantity.get("typical_value") is not None and "schema:value" not in out:
+    fields = schema_quantity_fields(quantity)
+    if not fields:
+        return None
+    out: dict[str, Any] = {"@type": "schema:QuantitativeValue", **fields}
+    if quantity.get("value") is None and quantity.get("typical_value") is not None:
         # A typical value is a value attributed by convention: emit it as the
         # schema:value and co-type the node so the nature stays explicit
         # (no battinfo:typicalValue duplicate of the schema/EMMO forms).
         # ConventionalProperty, never NominalProperty: EMMO's NominalProperty
         # means a property with no magnitude.
-        out["schema:value"] = quantity["typical_value"]
         out["@type"] = ["schema:QuantitativeValue", "ConventionalProperty"]
-        has_content = True
-    if quantity.get("value_text") and "schema:value" not in out:
-        out["schema:value"] = quantity["value_text"]
-        has_content = True
-
-    unit = quantity.get("unit") or quantity.get("unit_text")
-    if unit:
-        out["schema:unitText"] = unit
-        has_content = True
 
     unit_uri = quantity.get("unit_uri")
     if unit_uri:
         out["schema:unitCode"] = unit_uri
 
-    return out if has_content else None
+    return out
 
 
 def _agent_to_jsonld(agent: dict[str, Any] | None) -> dict[str, Any] | None:
@@ -1287,15 +1692,19 @@ def _converter_quantity_node(
     *,
     property_types: dict[str, str] | None = None,
 ) -> dict[str, Any] | None:
-    if not isinstance(quantity, dict) or quantity.get("value") is None:
+    if not isinstance(quantity, dict):
         return None
+    value = quantity.get("value")
     type_name = (property_types or CONVERTER_PROPERTY_TYPES).get(name)
     if type_name is None:
         return None
-    node: dict[str, Any] = {
-        "@type": type_name,
-        "hasNumericalPart": {"@type": "emmo:RealData", "hasNumberValue": quantity["value"]},
-    }
+    node: dict[str, Any] = {"@type": type_name}
+    if is_real_number(value):
+        node["hasNumericalPart"] = {"@type": "emmo:RealData", "hasNumberValue": value}
+    elif isinstance(value, str) and value.strip():
+        node["hasStringValue"] = value
+    else:
+        return None
     unit_token = _converter_unit_token(str(quantity.get("unit") or quantity.get("unit_text") or ""))
     if unit_token is not None:
         node["hasMeasurementUnit"] = unit_token
@@ -1656,119 +2065,125 @@ _ELECTRODE_ROLE_MAP: dict[str, dict[str, str]] = {
     "other_additive": {"relation": "hasAdditive", "role_class": "Additive"},
 }
 
-# UnitOne IRI — used for dimensionless fraction quantities (MassFraction, VolumeFraction, Porosity).
-# Fraction values stored as percentages (0–100) are converted to the [0, 1] range on output.
-_UNIT_ONE_IRI = "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-
-# Recognized current-collector form factors and their EMMO class terms.
+# Current-collector forms and substrates -> EMMO class terms, keyed by whole
+# lower-case words. One normaliser (_current_collector_terms) reads a
+# collector's form and material fields and then its name with these tables. A
+# generic "mesh" is a Mesh; only a name that also says "woven" is a WovenMesh.
+# The form field's values (foil, mesh, foam, perforated) are keys too. Plain
+# steel has no class: neither the v1 records context nor the pinned EMMO context
+# defines Steel, so only "stainless steel" and its spellings type.
+# tests/test_mapping_governance.py checks that every class here resolves in both.
 _CC_FORM_FACTOR_MAP: dict[str, str] = {
     "foil": "Foil",
     "perforated foil": "PerforatedFoil",
+    "perforated": "PerforatedFoil",
     "expanded mesh": "ExpandedMesh",
     "woven mesh": "WovenMesh",
-    "mesh": "WovenMesh",
     "electrospun mesh": "ElectrospunMesh",
+    "mesh": "Mesh",
+    "foam": "Foam",
 }
 
-# Recognized current-collector substrate materials and their EMMO class terms.
 _CC_MATERIAL_MAP: dict[str, str] = {
     "aluminium": "Aluminium",
     "aluminum": "Aluminium",
+    "al": "Aluminium",
     "copper": "Copper",
+    "cu": "Copper",
     "nickel": "Nickel",
-    "steel": "Steel",
-    "stainless steel": "StainlessSteel",
+    "ni": "Nickel",
     "titanium": "Titanium",
+    "ti": "Titanium",
+    "stainless steel": "StainlessSteel",
+    "stainless": "StainlessSteel",
+    "ss": "StainlessSteel",
     "carbon": "Carbon",
 }
 
-
-def _emmo_quantity_node(
-    emmo_type: str,
-    quantity: dict[str, Any],
-    unit_iri_override: str | None = None,
-) -> dict[str, Any] | None:
-    """Build a ConventionalProperty node with an explicit EMMO type (bypasses the property map)."""
-    if not isinstance(quantity, dict):
-        return None
-    value = quantity.get("value")
-    if value is None:
-        return None
-    node: dict[str, Any] = {
-        "@type": [emmo_type, "ConventionalProperty"],
-        "hasNumericalPart": {"@type": "RealData", "hasNumberValue": value},
-    }
-    unit = quantity.get("unit")
-    iri = unit_iri_override or _unit_iri(unit)
-    if iri:
-        node["hasMeasurementUnit"] = iri
-    elif unit:
-        node["schema:unitText"] = unit
-    _apply_sample_statistics(node, quantity, unit)
-    return node
+# A stainless steel grade written as one word: SUS304, SS316L, 316L.
+_CC_STAINLESS_GRADE = re.compile(r"^(?:(?:sus|ss)3\d\d[a-z]?|3\d\dl)$")
+# "carbon-coated Al", "nickel-plated copper": the word before marks the coating,
+# and so does the word after "coated with".
+_CC_COATING_WORDS = frozenset({"coated", "plated"})
+# Words that say how or where a foil is coated, not what with: "double side
+# coated", "pre-coated", "non-coated", and the form words ("Al foil coated").
+_CC_NOT_A_COATING = frozenset(
+    {"double", "single", "side", "sided", "both", "one", "two", "pre", "non", "un"}
+    | {word for key in _CC_FORM_FACTOR_MAP for word in key.split()}
+)
+# The kinds of mesh, by the word that names them. A name that says "mesh"
+# anywhere is that kind of mesh when the word is in it too: "Expanded copper
+# mesh" is an ExpandedMesh, "Woven stainless steel mesh" a WovenMesh.
+_CC_MESH_KINDS: dict[str, str] = {
+    key.split()[0]: cls for key, cls in _CC_FORM_FACTOR_MAP.items() if key.endswith(" mesh")
+}
 
 
-def _fraction_quantity_node(emmo_type: str, quantity: dict[str, Any]) -> dict[str, Any] | None:
-    """Build a ConventionalProperty node for a dimensionless fraction (MassFraction, VolumeFraction).
+def _phrases(table: dict[str, str]) -> list[tuple[tuple[str, ...], str]]:
+    """``(words, class)`` for each key of ``table``, longest phrase first."""
+    return sorted(((tuple(key.split()), cls) for key, cls in table.items()), key=lambda item: -len(" ".join(item[0])))
 
-    When the stored unit is '%', the value is converted from the 0–100 percentage range to the
-    [0, 1] range and hasMeasurementUnit is set to UnitOne (dimensionless).  Other units are passed
-    through to the standard unit map lookup.
+
+_CC_FORM_PHRASES = _phrases(_CC_FORM_FACTOR_MAP)
+_CC_MATERIAL_PHRASES = _phrases(_CC_MATERIAL_MAP)
+
+
+class _CollectorTerms(NamedTuple):
+    substrate: str | None
+    form: str | None
+    coating: str | None
+
+
+def _current_collector_terms(text: Any) -> _CollectorTerms:
+    """The substrate class, form class and coating text a collector string names.
+
+    One normaliser for the ``material`` field, the ``form`` field and the
+    product name. Words match whole and in any case. The substrate is the first
+    material named, a two-word name ("stainless steel") before a word of it. A
+    word before "coated" or "plated", or after "coated with", is the coating
+    and never the substrate, so "carbon-coated Al" is aluminium with a carbon
+    coating; the coating is returned as written. A word that says how the foil
+    is coated ("double side coated", "pre-coated") or a form word ("Al foil
+    coated") names no coating. The form is the most specific one named, so
+    "perforated foil" wins over "foil", and a name with "mesh" in it is a
+    woven, expanded or electrospun mesh when it says so anywhere ("Woven
+    stainless steel mesh").
     """
-    if not isinstance(quantity, dict):
-        return None
-    value = quantity.get("value")
-    if value is None:
-        return None
-    unit = quantity.get("unit", "")
-    if unit == "%":
-        try:
-            scaled = round(float(value) / 100, 6)
-        except (TypeError, ValueError):
-            # Non-numeric fraction (e.g. a string from CSV/spreadsheet ingestion):
-            # emit verbatim via the standard path rather than crashing the whole
-            # document transform on `value / 100`.
-            return _emmo_quantity_node(emmo_type, quantity)
-        node = {
-            "@type": [emmo_type, "ConventionalProperty"],
-            "hasNumericalPart": {"@type": "RealData", "hasNumberValue": scaled},
-            "hasMeasurementUnit": _UNIT_ONE_IRI,
-        }
-        # A spread stated in % rescales with the value it qualifies, or the
-        # emitted node would pair a [0,1] mean with a 0-100 deviation.
-        rescaled = dict(quantity)
-        deviation = quantity.get("standard_deviation")
-        if isinstance(deviation, (int, float)) and not isinstance(deviation, bool):
-            rescaled["standard_deviation"] = round(float(deviation) / 100, 6)
-        _apply_sample_statistics(node, rescaled)
-        return node
-    return _emmo_quantity_node(emmo_type, quantity)
-
-
-def _parse_current_collector_types(name: str) -> list[str]:
-    """Parse a current collector name into EMMO @type classes.
-
-    Examples:
-        'Aluminium foil'     → ['CurrentCollector', 'Aluminium', 'Foil']
-        'Copper foil'        → ['CurrentCollector', 'Copper', 'Foil']
-        'Aluminium mesh'     → ['CurrentCollector', 'Aluminium', 'WovenMesh']
-    """
-    types: list[str] = ["CurrentCollector"]
-    name_lower = name.strip().lower()
-    # Collect material class first (single word lookup)
-    mat_class: str | None = None
-    for word in name_lower.split():
-        mat_class = _CC_MATERIAL_MAP.get(word)
-        if mat_class:
-            types.append(mat_class)
-            name_lower = name_lower.replace(word, "").strip()
+    if not isinstance(text, str) or not text.strip():
+        return _CollectorTerms(None, None, None)
+    words = re.findall(r"[A-Za-z0-9]+", text)
+    tokens = [word.lower() for word in words]
+    coating_at: set[int] = set()
+    for idx, token in enumerate(tokens):
+        if token not in _CC_COATING_WORDS:
+            continue
+        if idx + 2 < len(tokens) and tokens[idx + 1] == "with":
+            if tokens[idx + 2] not in _CC_NOT_A_COATING:
+                coating_at.add(idx + 2)
+        elif idx > 0 and tokens[idx - 1] not in _CC_NOT_A_COATING:
+            coating_at.add(idx - 1)
+    substrate: str | None = None
+    for start, token in enumerate(tokens):
+        if start in coating_at:
+            continue
+        for phrase, cls in _CC_MATERIAL_PHRASES:
+            end = start + len(phrase)
+            if tuple(tokens[start:end]) == phrase and not coating_at.intersection(range(start, end)):
+                substrate = cls
+                break
+        if substrate is None and _CC_STAINLESS_GRADE.match(token):
+            substrate = _CC_MATERIAL_MAP["stainless steel"]
+        if substrate is not None:
             break
-    # Then check for multi-word form factors (longest match first)
-    for form, emmo_class in sorted(_CC_FORM_FACTOR_MAP.items(), key=lambda x: -len(x[0])):
-        if form in name_lower:
-            types.append(emmo_class)
+    form: str | None = None
+    for phrase, cls in _CC_FORM_PHRASES:
+        if any(tuple(tokens[start : start + len(phrase)]) == phrase for start in range(len(tokens))):
+            form = cls
             break
-    return types
+    if form == _CC_FORM_FACTOR_MAP["mesh"]:
+        form = next((cls for word, cls in _CC_MESH_KINDS.items() if word in tokens), form)
+    coating = words[min(coating_at)] if coating_at else None
+    return _CollectorTerms(substrate, form, coating)
 
 
 def _typed_constituent_node(
@@ -1878,9 +2293,22 @@ def _descriptor_electrode_coating_to_jsonld(coating: dict[str, Any] | None) -> d
 def _descriptor_current_collector_to_jsonld(cc: dict[str, Any] | None) -> dict[str, Any] | None:
     """Convert a current collector dict to a typed CurrentCollector node.
 
-    The name (e.g. 'Aluminium foil') is parsed to build an @type list that stacks the
-    substrate material and physical form onto CurrentCollector:
-        'Aluminium foil' → ['CurrentCollector', 'Aluminium', 'Foil']
+    The substrate and form classes stack onto CurrentCollector. They come from
+    the ``material`` and ``form`` fields first and from the name after them,
+    through one normaliser (:func:`_current_collector_terms`)::
+
+        'Aluminium foil'                → ['CurrentCollector', 'Aluminium', 'Foil']
+        {material: 'Al', form: 'foil'}  → ['CurrentCollector', 'Aluminium', 'Foil']
+        'Stainless steel mesh'          → ['CurrentCollector', 'StainlessSteel', 'Mesh']
+        'Carbon coated aluminium foil'  → ['CurrentCollector', 'Aluminium', 'Foil']
+
+    A field that names no class leaves its facet to the name, except form
+    ``other``, which says the form is none of the listed ones. Form ``mesh``
+    takes the kind of mesh the name gives ("Woven SS mesh" is a WovenMesh).
+    The name and the material are kept as ``schema:name`` and
+    ``schema:material``. A coating is not a class of the collector: it is kept
+    as the text of a ``hasCoating`` node (``{"schema:material": "Carbon"}``),
+    as housing parts keep theirs.
 
     ``material_spec_id`` cites the standalone material-spec for the foil material,
     emitted as ``schema:isVariantOf`` — the same reference seam a material
@@ -1889,17 +2317,34 @@ def _descriptor_current_collector_to_jsonld(cc: dict[str, Any] | None) -> dict[s
     if not isinstance(cc, dict):
         return None
     name = cc.get("name", "")
-    cc_types = _parse_current_collector_types(name) if name else ["CurrentCollector"]
+    material = cc.get("material")
+    form = cc.get("form")
+    from_name = _current_collector_terms(name)
+    from_material = _current_collector_terms(material)
+    substrate = from_material.substrate or from_name.substrate
+    if isinstance(form, str) and form.strip().lower() == "other":
+        form_class = None
+    else:
+        form_class = _current_collector_terms(form).form or from_name.form
+        # Form "mesh" leaves the kind of mesh to the name.
+        if form_class == _CC_FORM_FACTOR_MAP["mesh"] and from_name.form in _CC_MESH_KINDS.values():
+            form_class = from_name.form
+    coating = from_material.coating or from_name.coating
+    cc_types = ["CurrentCollector", *(cls for cls in (substrate, form_class) if cls)]
     node: dict[str, Any] = {"@type": cc_types if len(cc_types) > 1 else cc_types[0]}
     if name:
         node["schema:name"] = name
+    if isinstance(material, str) and material.strip():
+        node["schema:material"] = material
+    if coating:
+        node["hasCoating"] = {"schema:material": coating}
     spec_ref = cc.get("material_spec_id")
     if isinstance(spec_ref, str) and spec_ref.strip():
         node["schema:isVariantOf"] = {"@id": spec_ref}
     prop_nodes = _descriptor_property_nodes(cc.get("property"))
     if prop_nodes:
         node["hasProperty"] = prop_nodes[0] if len(prop_nodes) == 1 else prop_nodes
-    return node if len(node) > 1 else None
+    return node if len(node) > 1 or len(cc_types) > 1 else None
 
 
 def _descriptor_electrolyte_to_jsonld(electrolyte: dict[str, Any] | None) -> dict[str, Any] | None:
@@ -2203,13 +2648,8 @@ def _descriptor_specification_to_jsonld(specification: dict[str, Any]) -> dict[s
     if chemistry_mapping:
         battery_type_list.extend(chemistry_mapping.get("battery_types", []))
 
-    positive_electrode = _entity_mapping("positive_electrode_basis", specification.get("positive_electrode_basis"))
-    if positive_electrode:
-        battery_type_list.extend(positive_electrode.get("battery_types", []))
-
-    negative_electrode = _entity_mapping("negative_electrode_basis", specification.get("negative_electrode_basis"))
-    if negative_electrode:
-        battery_type_list.extend(negative_electrode.get("battery_types", []))
+    # The electrode bases add only the classes of the declared chemistry.
+    battery_type_list.extend(electrode_basis_battery_types(specification))
 
     battery_types_deduped = list(dict.fromkeys(battery_type_list))
     physical_type: str | list[str] = (
@@ -3348,6 +3788,58 @@ def _to_domain_battery_jsonld_component(data: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+# Record kinds `_to_domain_battery_jsonld` routes. The other kinds (cell
+# instances, test specs, tests, datasets, equipment specs, equipment, channels
+# and organizations) are emitted by battinfo.record_to_jsonld only.
+_DOMAIN_BATTERY_RECORD_KEYS: frozenset[str] = frozenset(
+    {
+        "cell_spec",
+        "parameter_set",
+        "material_spec",
+        "material",
+        "electrode_spec",
+        "electrode",
+        *COMPONENT_FAMILIES,
+        *(f"{family}_spec" for family in COMPONENT_FAMILIES),
+    }
+)
+
+# Top-level keys of the base-profile envelope (battinfo.base.schema.json),
+# which the legacy emitter maps.
+_BASE_ENVELOPE_KEYS = ("record", "battery", "measurements")
+
+
+def _record_to_jsonld_type(kind: EntityKind) -> str:
+    """The ``record_type`` that :func:`battinfo.record_to_jsonld` takes for *kind*."""
+    return "cell-instance" if kind.entity_type == "cell" else kind.entity_type
+
+
+def _unrouted_document_error(data: dict[str, Any]) -> ValueError:
+    """The error for a document the domain-battery target cannot map.
+
+    Such documents used to fall through to the legacy emitter, which wrote a
+    ``schema:Dataset`` with no ``@id`` and none of the record's content.
+    """
+    kind = kind_for_doc(data)
+    if kind is None:
+        if isinstance(data.get("specification"), dict):
+            return ValueError("to_jsonld maps a cell descriptor only when it has a schema_version; add one.")
+        return ValueError(
+            "to_jsonld cannot map this document: it is not a BattINFO record and has none of the "
+            f"base-profile keys {', '.join(_BASE_ENVELOPE_KEYS)}."
+        )
+    hint = f"battinfo.record_to_jsonld(record, {_record_to_jsonld_type(kind)!r})"
+    if kind.record_key in _DOMAIN_BATTERY_RECORD_KEYS:
+        # A kind this target emits, without the schema_version that routes it.
+        # record_to_jsonld has its own emitter for a cell spec, but hands the
+        # other kinds back to to_jsonld, so only a cell spec gets the hint.
+        message = f"to_jsonld maps {kind.entity_type} records only when they have a schema_version; add one"
+        if kind.record_key == "cell_spec":
+            return ValueError(f"{message}, or use {hint}.")
+        return ValueError(f"{message}.")
+    return ValueError(f"to_jsonld does not emit {kind.entity_type} records; use {hint}.")
+
+
 def _to_domain_battery_jsonld(data: dict[str, Any]) -> dict[str, Any]:
     if isinstance(data.get("parameter_set"), dict):
         return _to_domain_battery_jsonld_parameter_set(data)
@@ -3425,7 +3917,9 @@ def _to_domain_battery_jsonld(data: dict[str, Any]) -> dict[str, Any]:
             "comment": data.get("notes"),
         }
         return _to_domain_battery_jsonld_descriptor(descriptor)
-    return _to_domain_battery_jsonld_legacy(data)
+    if kind_for_doc(data) is None and any(key in data for key in _BASE_ENVELOPE_KEYS):
+        return _to_domain_battery_jsonld_legacy(data)
+    raise _unrouted_document_error(data)
 
 
 def _to_converter_compatible_jsonld(data: dict[str, Any]) -> dict[str, Any]:
@@ -3500,36 +3994,29 @@ def _to_converter_compatible_jsonld(data: dict[str, Any]) -> dict[str, Any]:
     return doc
 
 
-def _to_batterypass_jsonld(data: dict[str, Any]) -> dict[str, Any]:
-    doc = _to_domain_battery_jsonld(data)
-    context = doc.get("@context", [])
-    if isinstance(context, list):
-        context.append({"batterypass": "https://w3id.org/batterypass#"})
-        doc["@context"] = context
-
-    current_type = doc.get("@type")
-    if current_type is None:
-        doc["@type"] = "batterypass:BatteryPassportRecord"
-    elif isinstance(current_type, list):
-        doc["@type"] = [*current_type, "batterypass:BatteryPassportRecord"]
-    else:
-        doc["@type"] = [current_type, "batterypass:BatteryPassportRecord"]
-    doc["batterypass:version"] = "1.2.0"
-    return doc
-
-
 def to_jsonld(data: dict[str, Any], target: str = "domain-battery") -> dict[str, Any]:
-    """Transform canonical JSON to JSON-LD for a given target."""
+    """Transform a record to JSON-LD for a mapping target.
+
+    ``target="domain-battery"`` maps cell-spec, material, electrode, component
+    and parameter-set records, and the base-profile envelope of
+    ``battinfo.base.schema.json``. For the other record kinds (cell
+    instances, test specs, tests, datasets, equipment specs, equipment,
+    channels and organizations) it raises ``ValueError`` naming
+    :func:`battinfo.record_to_jsonld`, which emits every kind, and it raises
+    ``ValueError`` for a document it cannot route. ``target="converter-compatible"``
+    maps a cell descriptor to BattInfoConverter JSON-LD.
+    """
     if target == "domain-battery":
         doc = _to_domain_battery_jsonld(data)
-    elif target == "batterypass":
-        doc = _to_batterypass_jsonld(data)
     elif target == "converter-compatible":
         return _to_converter_compatible_jsonld(data)
-    else:
+    elif target == "batterypass":
         raise ValueError(
-            f"Unknown mapping target '{target}'. Expected 'domain-battery', 'batterypass', or 'converter-compatible'."
+            "The 'batterypass' mapping target was removed in 0.8.0: it added a placeholder type, "
+            "not Battery Pass data. Use 'domain-battery'."
         )
+    else:
+        raise ValueError(f"Unknown mapping target '{target}'. Expected 'domain-battery' or 'converter-compatible'.")
     validation = validate_jsonld(doc)
     if not validation.ok:
         raise ValueError(f"json-ld validation failed: {'; '.join(validation.errors)}")

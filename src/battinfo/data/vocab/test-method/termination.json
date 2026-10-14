@@ -1,6 +1,6 @@
 {
- "$comment": "Controlled vocabulary mapping a termination condition (the measured quantity + the direction the limit is approached from) to the EMMO termination quantity class, attached under hasTerminationParameter. This replaces the old name-encoded scheme (e.g. 'discharging_cutoff_voltage' -> LowerVoltageLimit) with an explicit (quantity, direction) pair, mirroring bmgen's LOWER_LIMITS/UPPER_LIMITS remap. 'below'/'above' = the value is a lower/upper bound the channel crosses to end the step. 'duration' is time-based and direction-free. 'current_density' is not a quantity an author writes: a 'current' cutoff stated per area (mA/cm2, A/m2) is a current density, and the emitters type it with these classes.",
- "version": "1.0.0",
+ "$comment": "Controlled vocabulary mapping a termination condition (the measured quantity + the direction the limit is approached from) to the EMMO termination quantity class, attached under hasTerminationParameter. This replaces the old name-encoded scheme (e.g. 'discharging_cutoff_voltage' -> LowerVoltageLimit) with an explicit (quantity, direction) pair, mirroring bmgen's LOWER_LIMITS/UPPER_LIMITS remap. 'below'/'above' = the value is a lower/upper bound the channel crosses to end the step; a cutoff with no direction takes the 'below' entry. 'duration' is time-based and direction-free. 'current_density' is not a quantity an author writes: a 'current' cutoff stated per area (mA/cm2, A/m2) is a current density, and the emitters type it with these classes. A 'current' cutoff in a unit of another quantity (V, C, Ah) takes the 'generic' class: a current limit class would claim an electric current. C-rate and capacity cutoffs have no limit class of their own. Every emmo_class resolves in the v1 records context and in the bundled EMMO context (tests/test_mapping_governance.py).",
+ "version": "1.1.0",
  "terminations": {
   "voltage": {
    "below": {
@@ -12,10 +12,12 @@
   },
   "current": {
    "below": {
-    "emmo_class": "TerminationQuantity"
+    "emmo_class": "LowerCurrentLimit",
+    "iri": "electrochemistry:electrochemistry_7db845e7_0e5b_47d4_b954_2a2b8e85deea"
    },
    "above": {
-    "emmo_class": "TerminationQuantity"
+    "emmo_class": "UpperCurrentLimit",
+    "iri": "electrochemistry:electrochemistry_3dac5115_6337_40a6_a2ab_317087fe3b45"
    }
   },
   "current_density": {
@@ -58,6 +60,9 @@
     "emmo_class": "StateOfCharge"
    }
   }
+ },
+ "generic": {
+  "emmo_class": "TerminationQuantity"
  },
  "relations": {
   "hasControlParameter": {

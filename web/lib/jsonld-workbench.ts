@@ -240,7 +240,8 @@ function walkTerms(
 /**
  * Cheap, browser-side semantic checks on the canonical (framed) view:
  *   - @id values that claim a battinfo IRI must match the canonical shape;
- *   - quantity nodes (under hasProperty) must carry a value and a unit;
+ *   - quantity nodes (under hasProperty) must carry a value, a bound or a
+ *     text value, and a unit;
  *   - *_id references that look like our IRIs must match the canonical shape.
  * This is a pre-check — the library runs the full semantic/SHACL layer.
  */
@@ -255,8 +256,13 @@ function isQuantityContainer(key: string): boolean {
   return key === "hasProperty" || key.endsWith("EMMO_e1097637_70d2_4895_973f_2396f04fa204");
 }
 
+// A range carries its bounds instead of a single number (schema:minValue and
+// schema:maxValue, compacted to min_value and max_value by the records context).
+const BOUND_KEYS = ["schema:minValue", "schema:maxValue", "min_value", "max_value"];
+
 function hasNumericValue(node: Record<string, unknown>): boolean {
-  if ("schema:value" in node || "value" in node) return true;
+  if ("schema:value" in node || "value" in node || "hasStringValue" in node) return true;
+  if (BOUND_KEYS.some((k) => k in node)) return true;
   const part = node["hasNumericalPart"] as Record<string, unknown> | undefined;
   if (part && typeof part === "object") {
     return "hasNumberValue" in part || "hasNumericalValue" in part;
@@ -441,7 +447,14 @@ function propertyValue(node: Record<string, unknown>): string | null {
     const v = part["hasNumberValue"] ?? part["hasNumericalValue"];
     if (v !== undefined) return asString(v);
   }
-  return asString(node["value"] ?? node["schema:value"]);
+  const plain = asString(node["value"] ?? node["schema:value"] ?? node["hasStringValue"]);
+  if (plain !== null) return plain;
+  const low = asString(node["min_value"] ?? node["schema:minValue"]);
+  const high = asString(node["max_value"] ?? node["schema:maxValue"]);
+  if (low !== null && high !== null) return `${low} to ${high}`;
+  if (low !== null) return `at least ${low}`;
+  if (high !== null) return `at most ${high}`;
+  return null;
 }
 
 function propertyUnit(node: Record<string, unknown>): string | null {

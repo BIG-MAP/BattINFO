@@ -11,6 +11,7 @@ Usage:
 from __future__ import annotations
 
 import json
+import textwrap
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -59,15 +60,21 @@ def build() -> str:
         "",
         f"## Properties ({len(props)})",
         "",
+        "A quantity given as a range keeps both bounds, as `schema:minValue` and",
+        "`schema:maxValue` on its EMMO node. Where the class names a bound (the",
+        "Bound column below), that bound given alone is also the quantity's number:",
+        "a `max_value` of 10 A under `pulse_charging_current` is a",
+        "MaximumPulseChargingCurrent of 10 A. Any other range has no single number.",
+        "",
         "The keys of quantities in `properties={...}` on a cell spec and in the",
         "`property` blocks of material and component records, and the EMMO class",
         "each becomes in JSON-LD:",
         "",
-        "| Key | EMMO class |",
-        "|---|---|",
+        "| Key | EMMO class | Bound |",
+        "|---|---|---|",
     ]
     for p in sorted(props, key=lambda p: p["key"]):
-        lines.append(f"| `{p['key']}` | [{p['class_pref_label']}]({p['class_iri']}) |")
+        lines.append(f"| `{p['key']}` | [{p['class_pref_label']}]({p['class_iri']}) | {p.get('bound', '')} |")
 
     lines += [
         "",
@@ -91,8 +98,22 @@ def build() -> str:
         "",
         f"## Units ({len(units)})",
         "",
+        "Every percent spelling (`%`, `percent`, `pct`, `wt%`, `wt.%`, `vol%`,",
+        "`vol.%`, `v/v%`) is the unit PercentUnit. A spelling that states a basis",
+        "keeps it as an extra class of the quantity: WeightPercent for `wt%` and",
+        "`wt.%`, VolumePercent for `vol%`, `vol.%` and `v/v%`. On `porosity`,",
+        "`mass_fraction` and `volume_fraction` a percent in any spelling is",
+        "published as a fraction of 1 with UnitOne. A basis that contradicts the",
+        "key (`vol%` on a mass fraction, `wt%` on a volume fraction or a porosity)",
+        "gets the warning `semantic.percent_basis_mismatch`.",
+        "",
         "The unit symbols accepted in quantity dicts, and the unit IRI each maps",
-        "to (EMMO where a term exists, QUDT as the documented fallback):",
+        "to (EMMO where a term exists, QUDT as the documented fallback).",
+        "",
+        "Validation and the JSON-LD export read the usual alternative spellings as the listed symbol: "
+        "`um` as `µm`, `mOhm` as `mΩ`, `degC` and `℃` as `°C`, `g/cm³` as `g/cm3`. Case is kept, because "
+        "it can change magnitude: `mV` is a millivolt and `MV` a megavolt. A unit that is none of these is "
+        "written as text (`schema:unitText`) only, and validation warns `semantic.unit_unmapped`.",
         "",
         "| Symbol | Unit |",
         "|---|---|",
@@ -112,6 +133,15 @@ def build() -> str:
 
     canonical = {k: v for k, v in chemistry.items() if "alias_of" not in v}
     aliases = {k: v for k, v in chemistry.items() if "alias_of" in v}
+
+    def code_list(labels: list[str]) -> str:
+        quoted = [f"`{label}`" for label in labels]
+        return quoted[0] if len(quoted) == 1 else f"{', '.join(quoted[:-1])} and {quoted[-1]}"
+
+    defined_by_negative: dict[str, list[str]] = {}
+    for key, entry in canonical.items():
+        if entry.get("negative_electrode_basis"):
+            defined_by_negative.setdefault(entry["negative_electrode_basis"], []).append(key)
     lines += [
         "",
         f"## Chemistry labels ({len(canonical)})",
@@ -125,6 +155,30 @@ def build() -> str:
         "`li-metal` cell. State the narrowest one you know. Matching ignores case,",
         "so `Li-ion` and `li-ion` are the same label. A value that is not listed is",
         "kept as plain text and the record gets no battery class from it.",
+        "",
+        "The chemistry decides the battery classes. An electrode basis adds its",
+        "class only where the class fits the chemistry: `graphite`, `lto` and the",
+        "lithium-ion positives add theirs to a `li-ion` cell, a lithium negative",
+        "adds LithiumMetalBattery to `li-metal` and the labels under it, and `mno2`",
+        "adds LithiumManganeseDioxideBattery to `li-mno2` and `li-metal`. So an",
+        "alkaline cell with an MnO2 positive stays an alkaline zinc cell. A",
+        "chemistry that is not listed gets no class from its electrodes either,",
+        "with one exception: a full cell with an `mno2` positive and a lithium",
+        "negative is a LithiumManganeseDioxideBattery whatever its chemistry text.",
+        "",
+        *textwrap.wrap(
+            "Some couples are defined by their negative electrode: "
+            + "; ".join(
+                f"{code_list(labels)} and the labels under {'it' if len(labels) == 1 else 'them'} "
+                f"have a {basis} negative"
+                for basis, labels in defined_by_negative.items()
+            )
+            + ". A full cell with one of those negatives needs one of those chemistries. Validation "
+            "reports a record that breaks either rule as `semantic.chemistry_electrode_conflict`, an "
+            "error under the strict and publisher policies. A half cell or a three-electrode cell may "
+            "use lithium as its counter electrode under any chemistry.",
+            width=74,
+        ),
         "",
         "| Label | Narrower than | Battery class |",
         "|---|---|---|",

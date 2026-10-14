@@ -31,7 +31,7 @@ import json
 import sys
 from pathlib import Path
 
-from battinfo.entities import stable_uid
+from battinfo.entities import material_identity_seed, material_spec_identity_seed, stable_uid
 from battinfo.materials import resolve_material_kind
 
 _SPEC_BASE = "https://w3id.org/battinfo/spec/"
@@ -54,24 +54,19 @@ def _org_name(value: object) -> str | None:
 def _spec_uid(body: dict) -> str:
     """Deterministic uid for a material-spec body (mirrors api._components)."""
     kind = resolve_material_kind(body.get("kind")) or resolve_material_kind(body.get("name")) or ""
-    manufacturer = _org_name(body.get("manufacturer"))
-    product = body.get("product_id") or body.get("name")
-    seed = "::".join(
-        [
-            "material-spec",
-            (manufacturer or "unknown-manufacturer").strip().lower(),
-            (product or "unknown-product").strip().lower(),
-            (body.get("grade") or "").strip().lower(),
-            kind,
-        ]
+    seed = material_spec_identity_seed(
+        manufacturer=_org_name(body.get("manufacturer")),
+        product=body.get("product_id") or body.get("name"),
+        grade=body.get("grade"),
+        kind=kind,
     )
     return stable_uid(seed)
 
 
 def _material_uid(body: dict, spec_id: str) -> str:
     """Deterministic uid for a material instance body (mirrors api._components)."""
-    lot = body.get("lot_id") or body.get("batch_id") or body.get("name") or ""
-    return stable_uid("::".join(["material", spec_id.strip(), str(lot).strip()]))
+    lot = body.get("lot_id") or body.get("batch_id") or body.get("name")
+    return stable_uid(material_identity_seed(material_spec_id=spec_id, lot=lot))
 
 
 def _load(path: Path) -> dict:

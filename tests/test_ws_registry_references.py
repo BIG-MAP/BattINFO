@@ -178,6 +178,26 @@ def test_cell_spec_hit_and_protocol_iri_resolve_the_same_way(tmp_path: Path, reg
     assert (_references(tmp_path) / "test-protocol" / f"test-protocol-{_uid(PROTOCOL_IRI)}.json").exists()
 
 
+def test_a_test_iri_does_not_depend_on_whether_its_protocol_was_looked_up(
+    tmp_path: Path, registry: FakeRegistry
+) -> None:
+    """A run under a published protocol is seeded from the protocol's IRI, never from the name in the copy."""
+
+    def run(root: Path, registry_url: str | None) -> str:
+        ws = AuthoringWorkspace(root=root, registry_url=registry_url)
+        spec = battinfo.CellSpec(manufacturer="Example Lab", model="R2032", format="coin", chemistry="li-ion")
+        ws.add("cell", spec=spec, serial_numbers=["S1"])
+        (test,) = ws.add("test", type="cycling", cell="S1", spec=PROTOCOL_IRI)
+        ws.save()
+        return str(test.id)
+
+    looked_up = run(tmp_path / "online", REGISTRY)
+    assert (_references(tmp_path / "online") / "test-protocol" / f"test-protocol-{_uid(PROTOCOL_IRI)}.json").exists()
+    with_the_copy = run(tmp_path / "online", REGISTRY)
+    offline = run(tmp_path / "offline", None)
+    assert looked_up == with_the_copy == offline
+
+
 def test_reference_copies_are_never_submitted(
     tmp_path: Path, registry: FakeRegistry, monkeypatch: pytest.MonkeyPatch
 ) -> None:

@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib
 import inspect
 import json
+import re
 import sys
 from html.parser import HTMLParser
 from pathlib import Path
@@ -13,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 publish_module = importlib.import_module("battinfo._publish")
+import battinfo
 from battinfo import CellSpec, PublishResult, publish
 from battinfo.api import publish_record, save_record
 from battinfo.entities import entity_files_for_uid, save_entity_path
@@ -168,7 +170,7 @@ def test_publish_preserves_legacy_publication_package_call_shape(monkeypatch) ->
 
 
 def test_publish_requires_object_or_legacy_keywords() -> None:
-    with pytest.raises(TypeError, match="requires a BattINFO object"):
+    with pytest.raises(TypeError, match="needs a CellSpec"):
         publish()
 
 
@@ -239,6 +241,130 @@ def test_legacy_publish_rejects_keywords_it_does_not_take(monkeypatch, extra: di
     with pytest.raises(TypeError, match=next(iter(extra))):
         publish(cell_spec="cell-spec", cell_instance="cell-instance", test="test", dataset="dataset", **extra)
     assert calls == []
+
+
+# ---------------------------------------------------------------------------
+# publish() takes a CellSpec; every other record model has a save_* function
+# ---------------------------------------------------------------------------
+
+_SPEC_IRI = "https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0"
+_CELL_IRI = "https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8"
+
+# (model name, fields of a draft without an id, the function that saves and mints it)
+_OTHER_MODELS = [
+    ("Cell", {"cell_spec_id": _SPEC_IRI, "serial_number": "S1"}, "save_cell_instance"),
+    ("TestSpec", {"name": "CC discharge C/5", "test_type": "capacity_check"}, "save_test_spec"),
+    ("Test", {"cell_instance_id": _CELL_IRI, "kind": "cycling", "name": "S1 cycling"}, "save_test"),
+    ("Dataset", {"name": "Run 1", "access_url": "https://example.org/run-1"}, "save_dataset"),
+]
+_OTHER_MODEL_IDS = [name for name, _, _ in _OTHER_MODELS]
+
+
+@pytest.mark.parametrize(("model", "fields", "save_function"), _OTHER_MODELS, ids=_OTHER_MODEL_IDS)
+def test_publish_sends_another_record_model_to_its_save_function(
+    tmp_path: Path, model: str, fields: dict, save_function: str
+) -> None:
+    root = tmp_path / "publish-out"
+
+    with pytest.raises(TypeError) as excinfo:
+        publish(getattr(battinfo, model)(**fields), destination="local", root=root)
+
+    message = str(excinfo.value)
+    assert "CellSpec" in message and model in message, message
+    assert f"battinfo.{save_function}(" in message, message
+    assert "battinfo.workspace(" in message, message
+    # The publication-package forms take a cell spec, cell, test and dataset together.
+    assert "publication_package" not in message, message
+    assert not root.exists()
+
+
+@pytest.mark.parametrize(("model", "fields", "save_function"), _OTHER_MODELS, ids=_OTHER_MODEL_IDS)
+def test_the_save_function_publish_names_saves_the_draft(
+    tmp_path: Path, model: str, fields: dict, save_function: str
+) -> None:
+    result = getattr(battinfo, save_function)(
+        getattr(battinfo, model)(**fields), source_root=tmp_path / "records", resolve_references=False
+    )
+
+    assert result["status"] == "created"
+    assert result["id"].startswith("https://w3id.org/battinfo/")
+
+
+def test_publish_names_the_save_functions_for_an_object_that_is_not_a_record_model() -> None:
+    with pytest.raises(TypeError) as excinfo:
+        publish({"cell_spec": {"name": "A123 ANR26650M1-B"}}, destination="local")
+
+    message = str(excinfo.value)
+    assert "CellSpec" in message and "dict" in message, message
+    assert "battinfo.save_record(" in message and "battinfo.workspace(" in message, message
+    assert "publication_package" not in message, message
+
+
+@pytest.mark.parametrize(("model", "fields", "save_function"), _OTHER_MODELS, ids=_OTHER_MODEL_IDS)
+def test_a_record_model_without_an_id_names_the_function_that_mints_one(
+    model: str, fields: dict, save_function: str
+) -> None:
+    with pytest.raises(ValueError) as excinfo:
+        getattr(battinfo, model)(**fields).to_record()
+
+    message = str(excinfo.value)
+    assert f"battinfo.{save_function}(" in message, message
+    assert "battinfo.workspace(" in message, message
+    assert "build_publication_package" not in message and "battinfo.publish(" not in message, message
+
+
+def test_publish_docstring_says_it_takes_a_cell_spec_only() -> None:
+    doc = inspect.getdoc(publish) or ""
+
+    assert "CellSpec" in doc
+    for _, _, save_function in _OTHER_MODELS:
+        assert save_function in doc, save_function
+    for parameter in ("obj", "destination"):
+        assert re.search(rf"^{parameter}\b", doc, re.MULTILINE), f"the docstring does not describe {parameter}"
+
+
+# The pages that say what battinfo.publish() takes. A mention of the function sits
+# in a paragraph, list item or table row that names CellSpec, and names the save_*
+# function of any other record model it lists.
+_PUBLISH_DOCS = [
+    "AGENTS.md",
+    "QUICKSTART.md",
+    "docs/scope.md",
+    "docs/workspace-authoring.md",
+    "docs/how-battinfo-is-built.md",
+    "docs/pages/api-reference.rst",
+]
+_PUBLISH_MENTION = re.compile(r"battinfo\.publish(?![\w.])|``publish``")
+
+
+def _logical_lines(text: str) -> list[str]:
+    """Paragraphs, list items and table rows, each joined onto one line."""
+    lines: list[str] = []
+    for raw in text.splitlines():
+        line = raw.strip()
+        if not line:
+            lines.append("")
+        elif lines and lines[-1] and not re.match(r"([-*+]|\d+\.)\s|\|", line):
+            lines[-1] += " " + line
+        else:
+            lines.append(line)
+    return [line for line in lines if line and not line.startswith(".. ")]
+
+
+@pytest.mark.parametrize("rel", _PUBLISH_DOCS)
+def test_docs_hand_publish_a_cell_spec_only(rel: str) -> None:
+    claims = [
+        line for line in _logical_lines((ROOT / rel).read_text(encoding="utf-8")) if _PUBLISH_MENTION.search(line)
+    ]
+    assert claims, f"{rel} no longer mentions battinfo.publish; drop it from this check"
+    for claim in claims:
+        assert "CellSpec" in claim, f"{rel}: publish() takes a CellSpec only, but this does not say so:\n{claim}"
+        assert "linked graph" not in claim, f"{rel}: publish() takes one CellSpec:\n{claim}"
+        for model, _, save_function in _OTHER_MODELS:
+            if f"`{model}`" in claim:
+                assert save_function in claim, (
+                    f"{rel}: names `{model}` next to publish() but not {save_function}:\n{claim}"
+                )
 
 
 # ---------------------------------------------------------------------------

@@ -103,7 +103,7 @@ def test_parameter_set_mints_under_the_dataset_namespace() -> None:
 
 def test_claim_batch_seed_is_the_registry_contract() -> None:
     # IDENTIFIER_POLICY 6.3: stable_uid("parameter-claims:<target>:<scope>
-    # [:<polarity>]:<name>"), name stripped and lowercased. The registry
+    # [:<polarity>]:<name>"), name normalised and lowercased. The registry
     # recomputes only parameter-file uids, not this one, but published records
     # and their replacements rely on the seed, so the literal uids are pinned.
     body = _record(name="  Chen 2020 - Graphite ")["parameter_set"]

@@ -664,22 +664,58 @@ def _cell_folder_name(
 def _generate_cell_iri(
     cell_spec_iri: str,
     batch_id: str | None,
-    index: int,
     serial_number: str | None = None,
 ) -> str:
-    """Mint a deterministic cell instance IRI.
+    """Mint a cell IRI the way every other path mints it.
 
-    The seed is stable: same cell_spec + batch + serial (or index) always
-    produces the same IRI, so re-running init on an existing batch is safe.
+    A cell with a serial number is seeded with the shared cell seed
+    (``entities.cell_instance_identity_seed``: spec, serial, batch), so
+    ``battinfo batch init``, ``ws.add("cell")``, ``save_cell_instance`` and
+    ``create_cell_instance`` give one cell one IRI. A cell without a serial
+    gets a random IRI: its place in the batch is not an identity, and two
+    unlabelled cells must never share one. The caller records it in the
+    cell's ``battinfo.yaml``, which is where ``package_batch`` reads it.
     """
-    from battinfo.publication import _entity_iri
+    from battinfo.api._shared import _normalized_dashed_uid
+    from battinfo.entities import cell_instance_identity_seed, seed_text, stable_uid
 
-    seed_parts = [cell_spec_iri, batch_id or "batch"]
-    if serial_number:
-        seed_parts.append(serial_number)
-    else:
-        seed_parts.append(str(index))
-    return _entity_iri("cell", "::".join(seed_parts))
+    seed = (
+        cell_instance_identity_seed(cell_spec_id=cell_spec_iri, serial_number=serial_number, batch_id=batch_id)
+        if seed_text(serial_number)
+        else None
+    )
+    uid = stable_uid(seed) if seed is not None else _normalized_dashed_uid()
+    return f"https://w3id.org/battinfo/cell/{uid}"
+
+
+def _recorded_cell_iris(
+    batch_dir: Path,
+    cell_spec_iri: str,
+    manufacturer: str,
+    model: str,
+) -> tuple[dict[str, str], list[str]]:
+    """The cell IRIs the cell folders of an existing batch already record.
+
+    Only folders whose ``battinfo.yaml`` names *cell_spec_iri* count. Returns
+    the IRIs by folder name, and, in folder order, those of the cells without
+    a serial number, whose folder is named after the cell's IRI rather than a
+    serial (``_cell_folder_name``).
+    """
+    by_folder: dict[str, str] = {}
+    if not batch_dir.is_dir():
+        return by_folder, []
+    for cell_dir in sorted(d for d in batch_dir.iterdir() if d.is_dir()):
+        manifest_path = cell_dir / CONTRIBUTION_MANIFEST
+        if not manifest_path.is_file():
+            continue
+        manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8")) or {}
+        iri = manifest.get("cell_iri")
+        if manifest.get("cell_spec_iri") == cell_spec_iri and isinstance(iri, str) and iri.strip():
+            by_folder[cell_dir.name] = iri.strip()
+    unserialled = [
+        iri for folder, iri in by_folder.items() if folder == _cell_folder_name(iri, manufacturer, model, None)
+    ]
+    return by_folder, unserialled
 
 
 _CELL_YAML_TEMPLATE = """\
@@ -745,7 +781,18 @@ def init_batch(
                    must equal *count* when provided).
         serial_numbers: Known serial numbers, one per cell.  Used as
                         folder names when provided.
-        overwrite: Allow writing into an existing directory.
+        overwrite: Allow writing into an existing directory.  A cell
+                   folder already there keeps the cell IRI its
+                   ``battinfo.yaml`` records for the same cell spec: a
+                   serial's folder by its name, and the folders of cells
+                   without a serial in folder order.
+
+    A cell with a serial number gets the IRI it gets on every path that
+    takes its spec, serial and batch (``save_cell_instance``,
+    ``create_cell_instance``, the engine; ``ws.add("cell")``, which takes no
+    batch, only without ``batch_id``).  A cell without one gets a random IRI,
+    recorded in its ``battinfo.yaml``; keep that file, because nothing else
+    can give the cell its IRI again.
 
     Returns:
         Dict with ``output_dir``, ``cell_spec_iri``, ``cell_spec_name``,
@@ -762,6 +809,7 @@ def init_batch(
 
     if output_dir.exists() and not overwrite:
         raise FileExistsError(f"{output_dir} already exists. Pass overwrite=True or choose a different path.")
+    recorded, unserialled = _recorded_cell_iris(output_dir, cell_spec_iri, manufacturer, model)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # ── batch.yaml ─────────────────────────────────────────────────────────────
@@ -784,7 +832,12 @@ def init_batch(
     seen_folders: dict[str, str] = {}
     for i in range(count):
         sn = serial_numbers[i].strip() if serial_numbers else None
-        cell_iri = cell_iris[i] if cell_iris else _generate_cell_iri(cell_spec_iri, batch_id, i, sn)
+        if cell_iris:
+            cell_iri = cell_iris[i]
+        elif sn:
+            cell_iri = recorded.get(_slugify(sn)) or _generate_cell_iri(cell_spec_iri, batch_id, sn)
+        else:
+            cell_iri = unserialled.pop(0) if unserialled else _generate_cell_iri(cell_spec_iri, batch_id)
         folder_name = _cell_folder_name(cell_iri, manufacturer, model, sn)
         # Fail closed on a within-batch folder collision: two cells that slug to the same
         # folder (e.g. duplicate serials) would otherwise reuse the dir (mkdir exist_ok)
@@ -856,9 +909,12 @@ def add_to_batch(
     """Add *count* more cell folders to an existing batch directory.
 
     Reads ``batch.yaml`` to inherit cell spec, lab, operator, project and
-    current count.  New cell folders are numbered sequentially after the
-    existing ones.  Any keyword argument that is not None overrides the
-    corresponding value from ``batch.yaml`` for the new cells only.
+    current count.  Any keyword argument that is not None overrides the
+    corresponding value from ``batch.yaml`` for the new cells only.  As in
+    ``init_batch``, a new cell with a serial number gets the IRI the paths
+    that take its spec, serial and batch give it, and one without gets a
+    random IRI recorded in its ``battinfo.yaml``; the cell count never
+    enters an IRI.
 
     Updates ``count`` in ``batch.yaml`` after creating the new folders.
 
@@ -903,9 +959,7 @@ def add_to_batch(
     new_cells: list[dict[str, Any]] = []
     for i in range(count):
         sn = serial_numbers[i].strip() if serial_numbers else None
-        cell_iri = (
-            cell_iris[i] if cell_iris else _generate_cell_iri(cell_spec_iri, effective_batch_id, existing_count + i, sn)
-        )
+        cell_iri = cell_iris[i] if cell_iris else _generate_cell_iri(cell_spec_iri, effective_batch_id, sn or None)
         folder_name = _cell_folder_name(cell_iri, manufacturer, model, sn)
         cell_name = sn or folder_name
 
@@ -1147,6 +1201,7 @@ def package_batch(
         ZenodoCellRecord,
         ZenodoDatasetEntry,
     )
+    from battinfo.entities import dataset_locator_seed
     from battinfo.publication import (
         _finalize_cell_instance,
         _finalize_cell_spec,
@@ -1178,7 +1233,8 @@ def package_batch(
     # serial / cell_name): publishing both would silently overwrite one on ingest.
     # A unique cell IRI is necessary but NOT sufficient — distinct data files within one
     # cell can still mint colliding test IRIs, so the test seed below carries a per-file
-    # discriminator and build_zenodo_package asserts test/dataset @id uniqueness.
+    # discriminator (the data file's location in the cell folder) and
+    # build_zenodo_package asserts test/dataset @id uniqueness.
     seen_cell_iris: dict[str, str] = {}
 
     for cell_dir in cell_dirs:
@@ -1210,10 +1266,11 @@ def package_batch(
         for raw_path, bdf_path in pairs:
             subdir_name = raw_path.parent.name
             test_kind = _test_kind_from_path(raw_path, subdir_name)
-            # raw_path.stem is unique per file in the folder, so two same-kind data files
+            # The run is the data file: its location in the cell folder is the run part
+            # of the test seed (entities.test_identity_seed), so two same-kind data files
             # in one cell mint distinct test IRIs. The filename date alone is insufficient:
             # undated same-kind files previously collided onto one test @id and overwrote
-            # each other on ingest.
+            # each other on ingest. The name is display text and never enters the seed.
             test_name = f"{ci.name or cell_dir.name} {test_kind} {raw_path.stem}"
 
             raw_test = Test(
@@ -1222,7 +1279,14 @@ def package_batch(
                 test_kind=test_kind,
                 source=ProvenanceInfo(type="measurement"),
             )
-            test = _without_local_urls(_finalize_test(raw_test, cell_instance=ci, dataset_dir=cell_dir))
+            test = _without_local_urls(
+                _finalize_test(
+                    raw_test,
+                    cell_instance=ci,
+                    dataset_dir=cell_dir,
+                    data_locator=dataset_locator_seed(dataset_path=raw_path, workspace_root=cell_dir),
+                )
+            )
 
             ds_name = f"{cell_spec.name} {ci.name or cell_dir.name} {raw_path.stem}"
             raw_ds = Dataset(

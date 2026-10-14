@@ -37,6 +37,10 @@ export type Values = Record<string, string>;
 
 // Units are emitted as full EMMO IRIs (hasMeasurementUnit is @type:@id), so they
 // need no @context term — and unit tokens with a slash cannot be context terms.
+// Each IRI is the one the package's unit map (unit_map.curated.json) gives the
+// same symbol; tests/test_mapping_governance.py reads this table and fails on a
+// disagreement or on an IRI that is not a unit of the pinned EMMO closure.
+// "%" is PercentUnit, the closure's only percent unit.
 const EMMO = "https://w3id.org/emmo#";
 const ECHEM = "https://w3id.org/emmo/domain/electrochemistry#";
 const UNIT_IRI: Record<string, string> = {
@@ -45,13 +49,15 @@ const UNIT_IRI: Record<string, string> = {
   A: EMMO + "Ampere", mA: EMMO + "MilliAmpere",
   g: EMMO + "Gram", kg: EMMO + "Kilogram", mg: EMMO + "MilliGram",
   mm: EMMO + "MilliMetre", cm: EMMO + "CentiMetre", um: EMMO + "MicroMetre",
-  "Ω": EMMO + "Ohm", "mΩ": EMMO + "MilliOhm", "%": EMMO + "Percent",
+  "Ω": EMMO + "Ohm", "mΩ": EMMO + "MilliOhm",
+  "%": ECHEM + "electrochemistry_8430be19_6cae_4a15_a570_3c15d0d190eb",
   degC: EMMO + "DegreeCelsius",
   "Wh/kg": EMMO + "WattHourPerKilogram", "Wh/L": EMMO + "WattHourPerLitre",
   "mg/cm2": EMMO + "MilliGramPerSquareCentiMetre",
   "g/cm3": EMMO + "GramPerCubicCentiMetre",
-  "mAh/g": ECHEM + "MilliAmpereHourPerGram",
-  "mAh/cm2": ECHEM + "MilliAmpereHourPerSquareCentiMetre",
+  "mAh/g": EMMO + "MilliAmpereHourPerGram",
+  "mAh/cm2": EMMO + "MilliAmpereHourPerSquareCentiMetre",
+  count: EMMO + "EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978", // UnitOne
 };
 
 function unitIri(token: string): string {
@@ -59,9 +65,16 @@ function unitIri(token: string): string {
 }
 
 // --- shared helpers ----------------------------------------------------------
-function num(value: string): number | string {
+// A quantity's value holds a number only; input that is not a number is kept
+// verbatim in value_text, as the record schemas and the Python package expect.
+function num(value: string): number | undefined {
   const n = Number(value);
-  return value.trim() !== "" && Number.isFinite(n) ? n : value;
+  return value.trim() !== "" && Number.isFinite(n) ? n : undefined;
+}
+
+function valueFields(value: string): { value: number } | { value_text: string } {
+  const n = num(value);
+  return n === undefined ? { value_text: value.trim() } : { value: n };
 }
 
 function activeProps(props: DraftProperty[]): DraftProperty[] {
@@ -74,7 +87,7 @@ function inSection(props: DraftProperty[], section: string): DraftProperty[] {
 }
 
 function propBlock(props: DraftProperty[]): Record<string, unknown> {
-  return Object.fromEntries(activeProps(props).map((p) => [p.key, { value: num(p.value), unit: p.unit }]));
+  return Object.fromEntries(activeProps(props).map((p) => [p.key, { ...valueFields(p.value), unit: p.unit }]));
 }
 
 function pyKwargs(pairs: [string, string][]): string[] {
@@ -86,7 +99,10 @@ function pyNamedBlock(props: DraftProperty[], name: string): string[] {
   const list = activeProps(props);
   if (!list.length) return [];
   const lines = [`    ${name}={`];
-  for (const p of list) lines.push(`        "${p.key}": {"value": ${JSON.stringify(num(p.value))}, "unit": ${JSON.stringify(p.unit)}},`);
+  for (const p of list) {
+    const [field, value] = Object.entries(valueFields(p.value))[0];
+    lines.push(`        "${p.key}": {"${field}": ${JSON.stringify(value)}, "unit": ${JSON.stringify(p.unit)}},`);
+  }
   lines.push("    },");
   return lines;
 }
@@ -106,11 +122,15 @@ function jsonldProps(props: DraftProperty[], terms?: Record<string, string>): Re
   // their snake_case records-context terms (the default), component and test
   // properties the transform's PascalCase classes via the catalog's `term`.
   // The unit is a full EMMO IRI so it needs no context term.
-  return activeProps(props).map((p) => ({
-    "@type": terms?.[p.key] ?? p.key,
-    hasNumericalPart: { hasNumberValue: num(p.value) },
-    hasMeasurementUnit: unitIri(p.unit),
-  }));
+  // A number goes out as hasNumberValue; text, which is not one, as hasStringValue.
+  return activeProps(props).map((p) => {
+    const n = num(p.value);
+    return {
+      "@type": terms?.[p.key] ?? p.key,
+      ...(n === undefined ? { hasStringValue: p.value.trim() } : { hasNumericalPart: { hasNumberValue: n } }),
+      hasMeasurementUnit: unitIri(p.unit),
+    };
+  });
 }
 
 // key -> JSON-LD term map for a property catalog.
@@ -246,7 +266,7 @@ const CELL_SPEC_PROPS: PropDef[] = [
   { key: "maximum_continuous_charging_current", label: "Max continuous charge current", units: ["A", "mA"], section: "spec", term: "MaximumContinuousChargingCurrent" },
   { key: "maximum_continuous_discharging_current", label: "Max continuous discharge current", units: ["A", "mA"], section: "spec", term: "MaximumContinuousDischargingCurrent" },
   // Life, resistance, mass
-  { key: "cycle_life", label: "Cycle life", units: ["cycles"], section: "spec" },
+  { key: "cycle_life", label: "Cycle life", units: ["count"], section: "spec" },
   { key: "internal_resistance", label: "Internal resistance", units: ["mΩ", "Ω"], section: "spec" },
   { key: "mass", label: "Mass", units: ["g", "kg"], section: "spec" },
   // Dimensions — the schema ties these to cell_format: diameter for round cells,

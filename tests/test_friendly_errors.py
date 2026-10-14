@@ -62,7 +62,8 @@ def test_quantity_shape_error_shows_example_and_command() -> None:
     with pytest.raises(ValueError) as exc:
         _validate_canonical_record(_bad_cell_spec_doc())
     message = str(exc.value)
-    assert '"nominal_capacity": {"value": 0.0, "unit": "ah"}' in message
+    # The example shows the canonical symbol, which has a unit IRI, never a lower-cased token.
+    assert '"nominal_capacity": {"value": 0.0, "unit": "Ah"}' in message
     assert "battinfo properties show nominal_capacity" in message
 
 

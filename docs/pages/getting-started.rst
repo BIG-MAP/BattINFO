@@ -27,6 +27,13 @@ BattINFO supports Python 3.11–3.14. Until 0.8.0, its first working release on 
 
    The ``processing`` extra requires ``batterydf[nda,excel,mat]>=0.2.0rc2,<0.3``, so pip installs the batterydf 0.2.0 release candidate until 0.2.0 itself is published.
 
+A hosted notebook such as Colab starts without BattINFO. Install it in a cell before you import it; the second line adds the ``processing`` extra, which tutorial 6 needs:
+
+.. code-block:: text
+
+   %pip install "battinfo @ git+https://github.com/BIG-MAP/BattINFO.git"
+   %pip install "battinfo[processing] @ git+https://github.com/BIG-MAP/BattINFO.git"
+
 To work on BattINFO itself, clone the repository and follow the `contributing guide <https://github.com/BIG-MAP/BattINFO/blob/main/CONTRIBUTING.md>`_.
 
 
@@ -54,8 +61,10 @@ the offline-safe core is:
        format="cylindrical",
        chemistry="Li-ion",
    )
-   ws.add("cell", spec=spec, serial_numbers=["S1"])
-   ws.add("test", type="cycling", cell="S1", data="bdf/S1.bdf.csv")
+   # The serial printed on the cell, or a label only your lab uses: a cell's
+   # IRI comes from its spec and serial, so a bare "S1" would be every lab's S1.
+   ws.add("cell", spec=spec, serial_numbers=["MYLAB-P45B-001"])
+   ws.add("test", type="cycling", cell="MYLAB-P45B-001", data="bdf/MYLAB-P45B-001.bdf.csv")
 
    ws.save()                                     # validated records, stable IRIs
    # ws.login(api_key="...")                     # then: ws.publish() for the registry

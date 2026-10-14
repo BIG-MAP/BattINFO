@@ -36,7 +36,7 @@ These capabilities are covered by tests in CI, documented as supported, and are 
 - JSON-LD for every record type through `battinfo.record_to_jsonld`, built from the curated property and unit maps and the versioned records context at `https://w3id.org/battinfo/context/records/v1.json`
 - authoring with `battinfo.workspace()` for cells, test specs, tests, datasets from local data files, materials, electrodes, equipment and channels, and parameter sets, all saved with deterministic IRIs
 - publishing a workspace as a Zenodo deposit (`ws.zenodo()`, which leaves a draft unless `publish=True`) and submitting it to the registry review queue (`ws.submit()`), with `ws.preview_jsonld()` to run the publication checks on the deposit graph beforehand
-- single records through the record models (`CellSpec`, `Cell`, `TestSpec`, `Test`, `Dataset`) and `battinfo.publish(...)`
+- single cell-spec records with `CellSpec` and `battinfo.publish(...)`, and single `Cell`, `TestSpec`, `Test` and `Dataset` records with `save_cell_instance`, `save_test_spec`, `save_test` and `save_dataset`
 - CLI and `battinfo.api` save, query, index and resolver-publish flows for cell specs, cells, test specs, tests and datasets; `battinfo save record` saves a record of any type from a JSON file
 - detailed cell descriptions for coin, cylindrical, single-layer pouch, multilayer pouch and prismatic formats, plus half cells and three-electrode cells through `cell_configuration`
 - test records with a controlled `kind` such as `cycling`, `capacity_check`, `rate_capability`, `gitt`, `hppc` or `eis` (the full list is in `assets/schemas/test.schema.json`)
@@ -64,6 +64,7 @@ Present but with no stability promise:
 - datasheet tooling under `.tools/datasheets/`, which is maintainer-only and has no public contract
 - semantic mapping candidate generation and review (`.tools/semantic/`)
 - reference validation for corpora larger than a repository-scale source tree
+- a Battery Pass crosswalk, from cell records to the Battery Pass Data Model. 0.8.0 has none: the draft `batterypass` mapping target and validation profile are removed, and the draft profile schema stays at its URL, marked withdrawn
 
 ## Known limitations in 0.8.0
 
@@ -83,20 +84,45 @@ These gaps were known when 0.8.0 was released and are planned for 0.8.x or 0.9. 
 - A new version of a published dataset made with `Dataset.from_record` loses the curve-preview files unless you copy them across from the registry entry, and nothing warns you; [Make a new version of a published dataset](howto/read-registry-data.md#make-a-new-version-of-a-published-dataset) shows how.
 - `save_dataset` resolves a dataset's cell and test only against the workspace and the registry records the workspace has looked up, which never include tests, so a new version that keeps a published test link needs `resolve_references=False`.
 - Once `ws.save()` or `ws.add("equipment")` has written records in a session, `ws.submit()` sends only those, even with `submit_all=True`. Submit records written by `save_dataset` or the other `save_*` functions from a new workspace object.
-- `ws.add("test")` takes no as-run `conditions`, start or end time, notes or `source_url`, although the `Test` model has them.
+- `ws.add("test")` takes no as-run `conditions`, notes or `source_url`, although the `Test` model has them.
+- Lab labels are not scoped to a lab until 0.9. A cell's IRI comes from its spec and its serial number (or its name, for a cell without one), so two labs that both call a cell of one spec `S1` or `C01` mint one cell IRI, and the tests and datasets on it can share IRIs too. The registry refuses the second lab's record, and `ws.submit()` reports that clash with how to rename or pin the record rather than retrying it as a new version. Use the serial printed on the cell, or a label only your lab uses. For the same reason, `ws.add("test", cell="C01")` can find another lab's `C01` in the registry when your workspace holds no such cell; it prints the cell's publisher, and refuses to choose when several cells match.
 - `ws.search(type="cell", serial=...)` fetches the registry's whole cell list on every call; use `serials=[...]` to look up many cells at once.
 - Adding tests to a test spec that is already published sends the spec again, and the registry stores an unchanged copy as a new version.
 - `ws.pending()` lists submissions newest first, and approving in that order can publish datasets before the tests and cells they describe. Approve specs, cells and tests first.
 - Saving unchanged records again marks datasets and cells `[updated]` with new timestamps, and a test rebuilt in a new workspace gets a new `retrieved_at`, so a re-submission can create versions whose content did not change.
 - Collection rules are advice, not checks: a member whose `series_id` names a collection that was never saved passes strict validation (only `ws.preview_jsonld()` warns), and a collection with files or an `about` list still saves.
-- The Zenodo deposit graph and `record_to_jsonld` describe tests and datasets differently: `schema:about` against `dcterms:subject` for a dataset's cell and test, `prov:used` against `dcterms:conformsTo` for a test's protocol, and different test titles. Neither emits a test's `description`.
+- The Zenodo deposit graph and `record_to_jsonld` describe tests and datasets differently: `schema:about` against `dcterms:subject` for a dataset's cell and test, `prov:used` against `dcterms:conformsTo` for a test's protocol, and different test titles. Neither emits a test's `description`. The deposit graph's equipment and channel nodes carry none of their `property` values, which `record_to_jsonld` emits.
 - In JSON-LD, `provenance.retrieved_at` is an untyped `prov:generatedAtTime` literal, not an `xsd:dateTime`.
-- A value in `%` or `vol%` is typed with `WeightPercent` or `VolumePercent`, which EMMO defines as quantities rather than units, because EMMO's `Percent` unit is outside the imported ontologies (and EMMO 1.0.2 gives it a conversion factor of 1 instead of 0.01).
+- A percent value is published with the unit `PercentUnit` from domain-electrochemistry, the only percent unit in the imported ontologies, and its maintainers have yet to confirm it as the long-term IRI. EMMO's own `Percent` unit is outside the imported ontologies, and EMMO 1.0.2 gives it a conversion factor of 1 instead of 0.01. A basis the unit states (`wt%`, `vol%`) is not part of the unit: it rides as an extra `WeightPercent` or `VolumePercent` class on the quantity.
+- EMMO has no class for a constant-resistance step or a CC-CV discharge. In a test protocol's JSON-LD a cr or cccv discharge is typed with the parent class `Discharging`, and a cr charge, or a cr or cccv step with no direction, has no class, only its mode as `skos:prefLabel`; validation warns `semantic.method_step_unmapped`.
 - A cell record lists its dataset with role `raw` even when the dataset's main file is the processed table.
 - `TestSpec.experiment` writes a constant-current step that has a cutoff but no current as "Discharge until 0.9 V", which the step grammar does not read back.
 - `ws.save()` prints "ERROR: ... failed validation" for some records it does write, such as a parameter set still minted under `spec/`.
 - Display papercuts: `ws.search()` shows manufacturer and model in lower case, `ws.list(verbose=True)` shows cells by file name, the `ws.save()` summary cuts titles at about 36 characters and collapses after 20 records, and `battinfo.naming.title_for()` writes an all-lowercase method in capitals ("CYCLING test").
 - Submission reporting: outcomes and journal entries carry an empty `iri`, a deduplicated re-submission is reported as live, and `ws.status()` lists every submission in the shared registry workspace.
+
+### Identifiers
+
+These paths mint IRIs that no other path reproduces. The [identifier policy](https://github.com/BIG-MAP/BattINFO/blob/main/IDENTIFIER_POLICY.md) (section 5.4) keeps them outside the identity contract until 0.9, which moves every minting path onto the shared seed builders in `battinfo.entities`; an IRI they minted in 0.8 stays findable then.
+
+- `create_component_spec`, `create_component_instance` and their per-family wrappers (separators, current collectors, electrolytes and housings), `create_equipment_spec` and `create_equipment` give a record without `uid=` or `id=` a random IRI, a new one on every call, so saving their output again saves a second record. Pass a uid derived from the part's natural key, as [Build a cell from components](howto/build-a-cell-from-components.md) does; `ws.add("equipment")` mints equipment from its spec and serial number.
+- The BattInfoConverter, solid-state database and Discovery importers, and the Battery Data Commons bridge, mint from their own seeds. Importing one source again gives the same IRIs, but a cell imported from two sources, or imported and also authored in the workspace, gets two.
+- On the batch path, `battinfo batch init` and `battinfo batch add` give a cell without a serial number a random IRI, recorded in its `battinfo.yaml`. Keep that file, or pass `--serials` (or `--iris`).
+- The publication package (`publish_publication_package`, `build_publication_package`) and `battinfo batch package` seed a dataset from its folder and title rather than its file, so the same data saved from a workspace gets another dataset IRI, and so does a test with data in the publication package. There, `Dataset(id=...)` and `Test(id=...)` keep an IRI you published. `battinfo batch package` seeds a test from its raw file's path in the cell folder, so it matches the workspace only when the workspace's data file has that path in the workspace folder.
+- `battinfo batch init --batch-id` seeds a cell from its serial number and its batch. `ws.add("cell")` takes no batch, so it gives the same cell another IRI unless the batch cell has no batch id; pin one with `iris=` or `--iris`.
+- `save_test()` and a save of a record without an id never see a data file, so a test with data files gets another IRI there than in the workspace; pass `id=` (or an `id` in the record). A save of a dataset without an id leaves its cell and test out of its seed, so give a dataset of a test its `id`.
+
+### Linked data at record IRIs
+
+- A record's `https://w3id.org/battinfo/` IRI serves the record body expanded with the v1 records context, not the EMMO model that `battinfo.record_to_jsonld`, `ws.export` and the Zenodo deposit graph write. In that body a quantity key such as `nominal_capacity` is a property named by its EMMO class IRI, with `schema:value` and `schema:unitText`, and the record's own id is a `schema:productID` literal. For the EMMO model, run `record_to_jsonld` on the record or read the deposit's `battinfo.json`. Serving that model at record IRIs is planned for 0.9.
+
+### Command line
+
+- `battinfo dataset` is experimental: its `init`, `process` and `publish` steps cannot take a contribution through to a published dataset in 0.8.0. Publish a dataset from Python with `ws.add("test", data=...)` and `ws.zenodo()` instead.
+
+### Tutorials
+
+- The tutorials have no "Open in Colab" link in 0.8.0. A hosted notebook service such as Colab starts without BattINFO, so install it in a cell first with the `%pip` line that [Getting started](pages/getting-started.rst) gives; tutorial 6 needs the one with the `processing` extra.
 
 ### CLI batch path
 

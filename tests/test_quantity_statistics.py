@@ -253,7 +253,8 @@ def test_the_statistics_do_not_disturb_the_value_or_the_save_gate() -> None:
     statistics must still map to the same class with no new warning — the failure
     mode the notes workaround was avoiding.
     """
-    plain = _electrode_property_nodes(_electrode(loading={"value": 3.6472, "unit": "mg/cm2"}))
+    without_statistics = {k: v for k, v in LOADING.items() if k not in ("standard_deviation", "sample_count")}
+    plain = _electrode_property_nodes(_electrode(loading=without_statistics))
     annotated = _electrode_property_nodes(_electrode())
 
     plain_node = plain["ActiveMassLoading"]

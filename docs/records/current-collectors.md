@@ -85,6 +85,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "Foil"
     ],
     "schema:name": "Aluminium foil",
+    "schema:material": "Al",
     "hasProperty": {
       "@type": [
         "Thickness",
@@ -336,7 +337,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 
 ## Fields
 
-Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`). Quantities are `{value, unit}` maps and may also carry `value_basis` (Measured, Conventional, Rated, or Nominal) and `conditions` (the parameters under which the value holds, each itself a quantity; a qualitative condition may be `value_text` alone). In JSON-LD, conditions on a measured value ride a measurement node the quantity `isOutputOf`, and conditions on a declared value (Conventional, Rated or Nominal) become named `schema:valueReference` qualifiers on the quantity. The `voltage_reference` key goes under `schema:valueReference` either way, as a node typed with the reference electrode's classes (`Li/Li+` gives `ReferenceElectrode` and `LithiumElectrode`). When authoring, an instance references its spec with the `spec_id=` kwarg; the record stores the self-describing `<type>_spec_id` key shown in the tables below.
+Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`). Quantities are `{value, unit}` maps whose `value` is a number; text that is not a number goes in `value_text`. They may also carry `value_basis` (Measured, Conventional, Rated, or Nominal) and `conditions` (the parameters under which the value holds, each itself a quantity; a qualitative condition may be `value_text` alone). In JSON-LD, conditions on a measured value ride a measurement node the quantity `isOutputOf`, and conditions on a declared value (Conventional, Rated or Nominal) become named `schema:valueReference` qualifiers on the quantity. The `voltage_reference` key goes under `schema:valueReference` either way, as a node typed with the reference electrode's classes (`Li/Li+` gives `ReferenceElectrode` and `LithiumElectrode`). When authoring, an instance references its spec with the `spec_id=` kwarg; the record stores the self-describing `<type>_spec_id` key shown in the tables below.
 
 ### current-collector-spec fields
 
@@ -382,7 +383,7 @@ Schema: [`current-collector.schema.json`](https://w3id.org/battinfo/schema/curre
 :::{dropdown} The reasoning behind the model
 **Inline first, standalone when shared.** An electrode spec carries its collector inline (`current_collector` holder: name, form, thickness); that inline holder and this standalone record are the same shape, and both can cite the foil's material-spec via `material_spec_id` — so a lab that later starts tracking foil lots promotes the holder to a record without re-modeling.
 
-**Emission.** The name parses to a typed stack — 'Aluminium foil' → `[CurrentCollector, Aluminium, Foil]`, 'expanded mesh' variants reach `ExpandedMesh` / `WovenMesh` / `PerforatedFoil` — so substrate and form are classes, not strings. On a spec the stack rides the described individual (`<spec-IRI>#described`) under `isDescriptionFor` (the spec itself is a `[Description, schema:ProductModel, schema:CreativeWork]`); on an instance it types the node directly.
+**Emission.** The substrate and the form are classes stacked on `CurrentCollector`, read from the `material` and `form` fields first and from the name after them. `{"material": "Al", "form": "foil"}` and 'Aluminium foil' both give `[CurrentCollector, Aluminium, Foil]`, 'Stainless steel mesh' gives `[CurrentCollector, StainlessSteel, Mesh]`, and form `foam` gives `Foam`. A mesh whose name also says 'woven', 'expanded' or 'electrospun', anywhere, is a `WovenMesh`, `ExpandedMesh` or `ElectrospunMesh` ('Woven stainless steel mesh'), also when the `form` field says `mesh`, and a name that says 'perforated' gets `PerforatedFoil`. A coated foil types as its substrate and keeps the coating as text: 'Carbon coated aluminium foil' is `[CurrentCollector, Aluminium, Foil]` with `hasCoating` `{"schema:material": "Carbon"}`. A substrate with no class, such as plain steel or brass, is left untyped, and the name and the material are always kept as `schema:name` and `schema:material`. On a spec the stack rides the described individual (`<spec-IRI>#described`) under `isDescriptionFor` (the spec itself is a `[Description, schema:ProductModel, schema:CreativeWork]`); on an instance it types the node directly.
 
 **Generated surface.** `create_current_collector_spec` and friends wrap the shared component machinery; family identifiers use underscores (`current_collector`), IRI namespaces use hyphens (`current-collector`), and the API derives one from the other.
 :::

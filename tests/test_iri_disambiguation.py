@@ -182,3 +182,331 @@ def test_three_way_collision_gives_distinct_ids(tmp_path: Path) -> None:
         _spec(ws, cap)
     ws._finalize()
     assert len({s.id for s in ws.cell_specs}) == 3
+
+
+# ── An IRI a record already has is never re-minted ────────────────────────────
+#
+# Pinned by the caller, imported, or minted by an earlier save in the session:
+# a sibling whose identity fields collide later is the one that moves, and two
+# records holding one IRI before a save are refused.
+
+PINNED = "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5"
+
+
+def _identity_mint(tmp_path: Path, capacity: float) -> str:
+    """The IRI the spec _ws_spec builds mints when nothing collides with it."""
+    alone = _ws(tmp_path / f"alone-{capacity}")
+    spec = _ws_spec(alone, capacity)
+    alone._finalize()
+    return str(spec.id)
+
+
+def test_a_colliding_sibling_never_moves_a_saved_iri(tmp_path: Path) -> None:
+    ws = _ws(tmp_path / "ws")
+    first = _ws_spec(ws, 2.5)
+    cell = ws.cell(first, serial_number="c1", source_type="lab")
+    ws._finalize()
+    saved_spec, saved_cell = first.id, cell.id
+    assert saved_spec == _identity_mint(tmp_path, 2.5)
+
+    second = _ws_spec(ws, 3.5)
+    ws._finalize()
+
+    assert (first.id, cell.id, cell.cell_spec_id) == (saved_spec, saved_cell, saved_spec)
+    assert second.id is not None and second.id != saved_spec
+
+
+def test_a_colliding_sibling_never_moves_a_pinned_iri(tmp_path: Path) -> None:
+    ws = _ws(tmp_path / "ws")
+    pinned = _ws_spec(ws, 2.5)
+    pinned.id = _identity_mint(tmp_path, 3.5)  # the IRI the sibling below mints
+    sibling = _ws_spec(ws, 3.5)
+    ws._finalize()
+    assert pinned.id == _identity_mint(tmp_path, 3.5)
+    assert sibling.id not in (None, pinned.id)
+
+
+def test_the_sibling_gets_the_iri_it_would_get_beside_any_other_collision(tmp_path: Path) -> None:
+    # The record minted in the pass is re-seeded from its content, as it would be
+    # if both were new: a later save of the same content lands on the same IRI.
+    ws = _ws(tmp_path / "ws")
+    _ws_spec(ws, 2.5)
+    ws._finalize()
+    later = _ws_spec(ws, 3.5)
+    ws._finalize()
+
+    both_new = _ws(tmp_path / "both-new")
+    _ws_spec(both_new, 2.5)
+    together = _ws_spec(both_new, 3.5)
+    both_new._finalize()
+    assert later.id == together.id
+
+
+def test_two_records_that_held_one_iri_before_the_pass_are_refused(tmp_path: Path) -> None:
+    ws = _ws(tmp_path / "ws")
+    first = _ws_spec(ws, 2.5)
+    second = _ws_spec(ws, 3.5)
+    first.id = second.id = PINNED
+    with pytest.raises(ValueError, match=f"have the IRI {PINNED}") as excinfo:
+        ws._finalize()
+    assert "One IRI names one record" in str(excinfo.value)
+    assert first.id == second.id == PINNED, "a refused pass changes nothing"
+
+
+def test_a_test_saved_earlier_in_the_session_keeps_its_iri_when_a_sibling_joins(tmp_path: Path) -> None:
+    import battinfo
+
+    root = tmp_path / "lab"
+    (root / "data").mkdir(parents=True)
+    for name, voltage in (("a.csv", "3.1"), ("b.csv", "3.2")):
+        (root / "data" / name).write_text(f"test_time_second,voltage_volt\n0,3.0\n60,{voltage}\n", encoding="utf-8")
+    ws = battinfo.workspace(root, registry_url=None)
+    spec = battinfo.CellSpec(manufacturer="Example Lab", model="R2032", format="coin", chemistry="li-ion")
+    ws.add("cell", spec=spec, serial_numbers=["C01"])
+    (first,) = ws.add("test", type="cycling", cell="C01", data="data/a.csv")
+    ws.save()
+    saved = first.id
+    (first_dataset,) = [d for d in ws._ws.datasets if d.test_id == saved]
+
+    (second,) = ws.add("test", type="cycling", cell="C01", data="data/b.csv")
+    ws.save()
+
+    assert first.id == saved
+    assert second.id not in (None, saved)
+    assert first_dataset.test_id == saved
+    records = {
+        doc["test"]["id"]: doc["test"]
+        for doc in (json.loads(p.read_text(encoding="utf-8")) for p in (root / ".battinfo/records/test").glob("*.json"))
+    }
+    assert set(records) == {saved, second.id}
+    assert records[saved]["dataset_ids"] == [first_dataset.id]
+
+
+def test_a_content_seed_leaves_derived_dataset_links_out() -> None:
+    from battinfo._workspace import _content_seed
+    from battinfo.bundle import Test
+
+    test = Test(test_kind="cycling", cell_instance_id="https://w3id.org/battinfo/cell/aaaa-bbbb-cccc-dddd")
+    linked = test.model_copy(update={"dataset_ids": ["https://w3id.org/battinfo/dataset/aaaa-bbbb-cccc-0001"]})
+    assert _content_seed(linked) == _content_seed(test)
+
+
+# ── Records saved by an earlier session ─────────────────────────────────────
+#
+# A notebook re-run in a new kernel mints every record again. A record saved in
+# the folder by an earlier session keeps its IRI when a colliding record joins,
+# whether or not the earlier session saved before adding that record.
+
+
+def _records_in(root: Path, folder: str) -> dict[str, dict]:
+    paths = sorted((root / ".battinfo" / "records" / folder).glob("*.json"))
+    return {path.name: json.loads(path.read_text(encoding="utf-8")) for path in paths}
+
+
+def _lab_spec(rated: float, name: str | None = None):
+    import battinfo
+
+    return battinfo.CellSpec(
+        manufacturer="Example Lab",
+        model="R2032",
+        format="coin",
+        chemistry="li-ion",
+        name=name,
+        properties={"rated_capacity": {"value": rated, "unit": "Ah"}},
+    )
+
+
+@pytest.mark.parametrize("sibling_first", [False, True], ids=["sibling added after", "sibling added before"])
+def test_a_spec_saved_in_an_earlier_session_keeps_its_iri_when_a_sibling_joins(
+    tmp_path: Path, sibling_first: bool
+) -> None:
+    """The specs differ only in a property beside the record body, so the whole saved document is compared."""
+    import battinfo
+
+    root = tmp_path / "lab"
+    first = battinfo.workspace(root, registry_url=None)
+    first.add("cell", spec=_lab_spec(2.0), serial_numbers=["C01"])
+    first.save()
+    (saved_spec,), (saved_cell,) = first._ws.cell_specs, first._ws.cells
+    saved_record = _records_in(root, "cell-spec")
+
+    rerun = battinfo.workspace(root, registry_url=None)
+    adds = [(_lab_spec(2.0), "C01"), (_lab_spec(3.0), "C02")]
+    for spec, serial in reversed(adds) if sibling_first else adds:
+        rerun.add("cell", spec=spec, serial_numbers=[serial])
+    rerun.save()
+
+    by_serial = {cell.serial_number: cell for cell in rerun._ws.cells}
+    assert (by_serial["C01"].cell_spec_id, by_serial["C01"].id) == (saved_spec.id, saved_cell.id)
+    assert by_serial["C02"].cell_spec_id not in (None, saved_spec.id)
+    specs = _records_in(root, "cell-spec")
+    assert len(specs) == 2 and len(_records_in(root, "cell-instance")) == 2
+    (saved_file,) = saved_record
+    assert specs[saved_file]["properties"] == saved_record[saved_file]["properties"]
+
+
+def test_a_rerun_keeps_the_iris_whether_or_not_a_save_ran_between_the_adds(tmp_path: Path) -> None:
+    import battinfo
+
+    root = tmp_path / "lab"
+    first = battinfo.workspace(root, registry_url=None)
+    first.add("cell", spec=_lab_spec(2.0, "R2032 A"), serial_numbers=["MYLAB-001"])
+    first.save()
+    first.add("cell", spec=_lab_spec(3.0, "R2032 B"), serial_numbers=["MYLAB-002"])
+    first.save()
+    saved = ([str(s.id) for s in first._ws.cell_specs], [str(c.id) for c in first._ws.cells])
+    files = (_records_in(root, "cell-spec"), _records_in(root, "cell-instance"))
+
+    rerun = battinfo.workspace(root, registry_url=None)
+    rerun.add("cell", spec=_lab_spec(2.0, "R2032 A"), serial_numbers=["MYLAB-001"])
+    rerun.add("cell", spec=_lab_spec(3.0, "R2032 B"), serial_numbers=["MYLAB-002"])
+    rerun.save()
+
+    assert ([str(s.id) for s in rerun._ws.cell_specs], [str(c.id) for c in rerun._ws.cells]) == saved
+    assert (_records_in(root, "cell-spec"), _records_in(root, "cell-instance")) == files
+
+
+def test_a_test_saved_in_an_earlier_session_keeps_its_iri_when_a_sibling_joins(tmp_path: Path) -> None:
+    import battinfo
+
+    root = tmp_path / "lab"
+    first = battinfo.workspace(root, registry_url=None)
+    first.add("cell", spec=_lab_spec(2.0), serial_numbers=["C01"])
+    (saved,) = first.add("test", type="cycling", cell="C01")
+    first.save()
+
+    rerun = battinfo.workspace(root, registry_url=None)
+    rerun.add("cell", spec=_lab_spec(2.0), serial_numbers=["C01"])
+    (again,) = rerun.add("test", type="cycling", cell="C01")
+    (other,) = rerun.add("test", type="cycling", cell="C01", instrument="Cycler-2")
+    rerun.save()
+
+    assert again.id == saved.id
+    assert other.id not in (None, saved.id)
+    assert len(_records_in(root, "test")) == 2
+
+
+# What 057b66a0, before the 0.8.0 seed changes, minted for the calls in the test
+# below: two cell specs whose chemistry is spelled Li-ion, not as its vocabulary
+# key, with one natural key, so its finalize pass minted both from their content.
+SPECS_SAVED_BEFORE_0_8_0 = [
+    "https://w3id.org/battinfo/spec/asnk-vtg6-ghnp-q0t2",
+    "https://w3id.org/battinfo/spec/392y-8nwq-jrhg-ywv5",
+]
+CELLS_SAVED_BEFORE_0_8_0 = [
+    "https://w3id.org/battinfo/cell/y6ty-ba06-ade2-5r54",
+    "https://w3id.org/battinfo/cell/t113-jw8t-695m-nbmk",
+    "https://w3id.org/battinfo/cell/d10r-6gt9-6dtn-n2zc",
+]
+
+
+def test_colliding_cell_specs_saved_before_0_8_0_keep_their_iris(tmp_path: Path) -> None:
+    """The first session pins the IRIs 057b66a0 minted, so its records are the ones that release saved."""
+    import battinfo
+
+    root = tmp_path / "lab"
+
+    def session(pinned: bool) -> dict[str, list[str]]:
+        ws = battinfo.workspace(root, registry_url=None)
+        plain = battinfo.CellSpec(manufacturer="Example Lab", model="R2032", format="coin", chemistry="Li-ion")
+        rated = battinfo.CellSpec(
+            manufacturer="Example Lab",
+            model="R2032",
+            format="coin",
+            chemistry="Li-ion",
+            properties={"rated_capacity": {"value": 3.0, "unit": "mAh"}},
+        )
+        ws.add("cell", spec=plain, serial_numbers=["C01", "C02"])
+        ws.add("cell", spec=rated, names=["half cell X"])
+        if pinned:
+            for spec, iri in zip(ws._ws.cell_specs, SPECS_SAVED_BEFORE_0_8_0, strict=True):
+                spec.id = iri
+        ws.save()
+        return {
+            "specs": [str(spec.id) for spec in ws._ws.cell_specs],
+            "cells": [str(cell.id) for cell in ws._ws.cells],
+        }
+
+    saved = session(pinned=True)
+    assert saved == {"specs": SPECS_SAVED_BEFORE_0_8_0, "cells": CELLS_SAVED_BEFORE_0_8_0}
+    files = (_records_in(root, "cell-spec"), _records_in(root, "cell-instance"))
+
+    assert session(pinned=False) == saved
+    assert (_records_in(root, "cell-spec"), _records_in(root, "cell-instance")) == files
+    # A fresh session finds one cell under each serial.
+    fresh = battinfo.workspace(root, registry_url=None)
+    assert fresh._resolve_cell("C01").id == CELLS_SAVED_BEFORE_0_8_0[0]
+
+
+# What 057b66a0 minted for one cell spec saved on its own (chemistry spelled
+# Li-ion, not as its vocabulary key) and its cell C01: the plain natural-key IRI
+# of before 0.8.0, and the cell seeded from it.
+SPEC_SAVED_ALONE_BEFORE_0_8_0 = "https://w3id.org/battinfo/spec/8tdq-hs3n-kqf4-bmhb"
+CELL_SAVED_ALONE_BEFORE_0_8_0 = "https://w3id.org/battinfo/cell/a9qe-9ymx-n3sc-855k"
+
+
+def _li_ion_spec(rated: float):
+    import battinfo
+
+    return battinfo.CellSpec(
+        manufacturer="Example Lab",
+        model="R2032",
+        format="coin",
+        chemistry="Li-ion",
+        properties={"rated_capacity": {"value": rated, "unit": "mAh"}},
+    )
+
+
+def _save_spec_alone_before_0_8_0(root: Path) -> dict:
+    """Save the spec and C01 as 057b66a0 did, by pinning the IRI it minted; return the saved spec record."""
+    import battinfo
+
+    first = battinfo.workspace(root, registry_url=None)
+    first.add("cell", spec=_li_ion_spec(2.0), serial_numbers=["C01"])
+    first._ws.cell_specs[0].id = SPEC_SAVED_ALONE_BEFORE_0_8_0
+    first.save()
+    assert [str(cell.id) for cell in first._ws.cells] == [CELL_SAVED_ALONE_BEFORE_0_8_0]
+    return _records_in(root, "cell-spec")["cell-spec-8tdq-hs3n-kqf4-bmhb.json"]
+
+
+@pytest.mark.parametrize("sibling_first", [False, True], ids=["sibling added after", "sibling added before"])
+def test_a_spec_saved_alone_before_0_8_0_keeps_its_iri_when_a_sibling_joins(
+    tmp_path: Path, sibling_first: bool
+) -> None:
+    """The sibling shares the natural key of before 0.8.0; only the spec the saved record describes takes its IRI."""
+    import battinfo
+
+    root = tmp_path / "lab"
+    saved = _save_spec_alone_before_0_8_0(root)
+
+    rerun = battinfo.workspace(root, registry_url=None)
+    adds = [(_li_ion_spec(2.0), "C01"), (_li_ion_spec(3.0), "C02")]
+    for spec, serial in reversed(adds) if sibling_first else adds:
+        rerun.add("cell", spec=spec, serial_numbers=[serial])
+    rerun.save()
+
+    by_serial = {cell.serial_number: cell for cell in rerun._ws.cells}
+    assert by_serial["C01"].id == CELL_SAVED_ALONE_BEFORE_0_8_0
+    assert by_serial["C01"].cell_spec_id == SPEC_SAVED_ALONE_BEFORE_0_8_0
+    assert by_serial["C02"].cell_spec_id not in (None, SPEC_SAVED_ALONE_BEFORE_0_8_0)
+    specs = _records_in(root, "cell-spec")
+    assert len(specs) == 2 and len(_records_in(root, "cell-instance")) == 2
+    assert specs["cell-spec-8tdq-hs3n-kqf4-bmhb.json"]["properties"] == saved["properties"]
+    fresh = battinfo.workspace(root, registry_url=None)
+    assert fresh._resolve_cell("C01").id == CELL_SAVED_ALONE_BEFORE_0_8_0
+
+
+def test_a_sibling_never_takes_the_iri_of_a_spec_saved_alone_before_0_8_0(tmp_path: Path) -> None:
+    """When no spec of the session is the saved one (it was edited as the sibling joined), none takes its IRI."""
+    import battinfo
+
+    root = tmp_path / "lab"
+    saved = _save_spec_alone_before_0_8_0(root)
+
+    rerun = battinfo.workspace(root, registry_url=None)
+    rerun.add("cell", spec=_li_ion_spec(2.5), serial_numbers=["C01"])
+    rerun.add("cell", spec=_li_ion_spec(3.0), serial_numbers=["C02"])
+    rerun.save()
+
+    assert SPEC_SAVED_ALONE_BEFORE_0_8_0 not in {spec.id for spec in rerun._ws.cell_specs}
+    assert _records_in(root, "cell-spec")["cell-spec-8tdq-hs3n-kqf4-bmhb.json"] == saved

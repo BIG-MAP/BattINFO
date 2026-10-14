@@ -44,17 +44,22 @@ LICENSE = "https://www.apache.org/licenses/LICENSE-2.0"
 # IRIs verified against the vendored domain contexts. The corpus-wide sweep in
 # tests/test_jsonld_type_guards.py fails whenever an emitted bare @type is
 # missing from the context, so additions land here (0.8.0 review follow-up).
+# tests/test_context_v1_agreement.py checks each IRI against the bundled
+# domain-battery context. A class named in data/vocab/test-method/ or in an
+# emitter lookup table (the current-collector forms and substrates, for one)
+# reaches v1 through TEST_METHOD_CONTEXT_TERMS or label_to_compact() and needs
+# no entry here: Discharging, Mesh, Foam and the other classes added before
+# 0.8.0 for the fixed test-method and current-collector emitters arrive that way.
 EMITTER_CLASS_TERMS = {
     "Manufacturing": "emmo:EMMO_a4d66059_5dd3_4b90_b4cb_10960559441b",
     "NegativeElectrode": "electrochemistry:electrochemistry_c94c041b_8ea6_43e7_85cc_d2bce7785b4c",
     "PositiveElectrode": "electrochemistry:electrochemistry_aff732a9_238a_4734_977c_b2ba202af126",
     "MolarMass": "emmo:EMMO_e980389d_6dfe_4156_9b40_32050c9644a5",
     "SpecificSurfaceArea": "electrochemistry:electrochemistry_cf54e7c1_f359_4715_b61d_0350b890d597",
-    # The classes the candidate property map gives the two nominal continuous
-    # current keys. Those keys stay deferred in the curated map, so nothing else
-    # brings these terms into the context.
-    "ChargingCurrent": "electrochemistry:electrochemistry_79551e01_4bc6_4292_916e_08fe28a84600",
-    "DischargingCurrent": "electrochemistry:electrochemistry_e4d666ee_d637_45cd_a904_dc33941ead4f",
+    # Added with the test-method classes before 0.8.0. No emitter writes it, since
+    # a constant-resistance charge has no class, but v1 keeps every term it
+    # publishes, and this keeps the term's source in one place.
+    "Charging": "electrochemistry:electrochemistry_a9873d3d_945b_40ba_b9cd_8dfb64cec88f",
 }
 
 
@@ -62,9 +67,11 @@ EMITTER_CLASS_TERMS = {
 # 2026-10-13). v1 was frozen before domain-electrochemistry 0.37.1 and
 # domain-battery 0.20.2 were adopted, so the first eight terms kept a private
 # battinfo: mint, a superseded class or a deprecated IRI while the curated
-# property map and the entity type map had moved on. The last two were wrong
-# from the start: degC named EMMO's class for the programming language C, and
-# TemperatureCoefficientOfTheOpenCircuitVoltage named the CoatingThickness IRI.
+# property map and the entity type map had moved on. degC and
+# TemperatureCoefficientOfTheOpenCircuitVoltage were wrong from the start: degC
+# named EMMO's class for the programming language C, and the other term the
+# CoatingThickness IRI. The rest come from an audit of every record-body term
+# against the pinned closure (ruled on 2026-10-13).
 # No released package has shipped v1, so it is corrected in place rather than
 # bumped to v2. After 0.8.0 this table must not grow: a change of meaning then
 # needs a v2 context. tests/test_context_v1_agreement.py fails if v1 and the
@@ -88,6 +95,49 @@ PRE_RELEASE_CORRECTIONS = {
     "TemperatureCoefficientOfTheOpenCircuitVoltage": (
         "electrochemistry:electrochemistry_3bb5ae23_59fa_4bc7_9495_803eb6719f28"
     ),
+    # emmo:Percent -> PercentUnit. EMMO declares Percent in a module the pinned
+    # chain does not import; PercentUnit is the closure's only percent unit.
+    "%": "electrochemistry:electrochemistry_8430be19_6cae_4a15_a570_3c15d0d190eb",
+    # The maximum continuous currents -> ChargingCurrent and DischargingCurrent:
+    # a standard charge or discharge current is not a maximum.
+    "nominal_continuous_charging_current": "electrochemistry:electrochemistry_79551e01_4bc6_4292_916e_08fe28a84600",
+    "nominal_continuous_discharging_current": (
+        "electrochemistry:electrochemistry_e4d666ee_d637_45cd_a904_dc33941ead4f"
+    ),
+    # NominalEnergy -> RatedEnergy, and StoredEnergy for typical_energy (no
+    # TypicalEnergy class in the closure).
+    "rated_energy": "electrochemistry:electrochemistry_da215d1a_196a_465f_9de8_89f6fbb76982",
+    "certified_usable_energy": "electrochemistry:electrochemistry_da215d1a_196a_465f_9de8_89f6fbb76982",
+    "typical_energy": "electrochemistry:electrochemistry_46376e5d_9627_4514_9881_9e62083625c3",
+    # QUDT W-PER-L, which does not dereference -> the EMMO unit in the closure.
+    "WattPerLitre": "emmo:WattPerLitre",
+    # The domain-battery duplicates, which carry no definition -> the
+    # domain-electrochemistry relations the pinned context names.
+    "hasTestObject": {
+        "@id": "electrochemistry:electrochemistry_5998f7c1_d8e3_4c55_8170_c358e1b0c93c",
+        "@type": "@id",
+    },
+    "hasTestEquipment": {
+        "@id": "electrochemistry:electrochemistry_52702560_2034_4369_ab7f_28e8bb32680c",
+        "@type": "@id",
+    },
+    "cell_id": {
+        "@id": "electrochemistry:electrochemistry_5998f7c1_d8e3_4c55_8170_c358e1b0c93c",
+        "@type": "@id",
+    },
+    # The battinfo:ambientTemperature placeholder -> AmbientCelsiusTemperature.
+    "ambient_temperature": "electrochemistry:electrochemistry_abd08921_6f3b_4a48_811e_7685c58aec0b",
+    # schema:productID made every record body claim a product ID.
+    "id": "schema:identifier",
+    # Untyped, a number without a fractional part became xsd:integer under
+    # pyld 3 and xsd:double under pyld 2 and rdflib.
+    "hasNumberValue": {"@id": "emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4", "@type": "xsd:double"},
+    "hasNumericalValue": {"@id": "emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4", "@type": "xsd:double"},
+    # A link to the active material spec: hasActiveMaterial, not the ActiveMaterial class.
+    "active_material_spec_id": {
+        "@id": "electrochemistry:electrochemistry_860aa941_5ff9_4452_8a16_7856fad07bee",
+        "@type": "@id",
+    },
 }
 
 

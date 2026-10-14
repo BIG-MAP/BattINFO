@@ -44,8 +44,8 @@ ws = battinfo.workspace(".")
 
 ws.convert()                              # raw cycler files → tidy BDF tables
 spec = ws.search("samsung inr21700 50e")[0]   # reuse the registry's identity
-ws.add("cell", spec=spec, serial_numbers=["S1", "S2"])
-ws.add("test", type="cycling", cell="S1", data="bdf/S1.bdf.csv")
+ws.add("cell", spec=spec, serial_numbers=["MYLAB-50E-001", "MYLAB-50E-002"])   # serials only your lab uses
+ws.add("test", type="cycling", cell="MYLAB-50E-001", data="bdf/MYLAB-50E-001.bdf.csv")
 ws.save()
 ws.publish(note="My cycling campaign, 2026")
 ```
@@ -63,9 +63,7 @@ existing registry record instead (reused, never re-published).
 
 ## Record classes
 
-`CellSpec`, `Cell`, `TestSpec`, `Test`, and `Dataset` are the record types as
-pydantic classes — the single source of truth for authoring and for what is on
-disk. For a standalone cell-spec record, `publish` is the shortcut:
+`CellSpec`, `Cell`, `TestSpec`, `Test`, and `Dataset` are the record types as pydantic classes, written by hand in `bundle.py`. You author records with them, and every save validates the record against the JSON Schema, which is the save-time contract. For a standalone cell-spec record, `publish` is the shortcut:
 
 ```python
 from battinfo import CellSpec, publish
@@ -88,6 +86,7 @@ registry_result = publish(
 )
 ```
 
+- `publish` takes a `CellSpec` only. A `Cell`, `TestSpec`, `Test` or `Dataset` is saved with `save_cell_instance`, `save_test_spec`, `save_test` or `save_dataset`, which mint its IRI; the "Query and save" section below shows one.
 - `destination="local"` writes the canonical BattINFO record and returns its path in `debug_paths`.
 - `destination="registry"` also generates the submission package and submits it to `battinfo-registry`.
 - `destination="battery-genome"` additionally returns the expected Battery Genome page URL when `platform_base_url` is configured.
@@ -123,6 +122,7 @@ Notes:
 - `battinfo.publish.jsonld` is the foundational Schema.org JSON-LD artifact.
 - `ro-crate-metadata.json` and `datacite-metadata.json` are emitted alongside it.
 - `battinfo.dcat.jsonld` is available as an optional export.
+- `load_publication_package` reads a package back into the record objects. Units come back as they were written. Of the cell spec's properties it reads the dimensions, mass, nominal capacity and nominal voltage, and it gives the chemistry as `unknown`.
 
 ## Query and save (`battinfo.api`)
 

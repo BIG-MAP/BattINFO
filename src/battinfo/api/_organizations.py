@@ -41,10 +41,20 @@ from battinfo.api._shared import (
 )
 from battinfo.bundle import SCHEMA_VERSION, stamp_provenance
 from battinfo.canonical_aliases import record_to_snake_aliases
-from battinfo.entities import stable_uid
+from battinfo.entities import seed_text, stable_uid
 from battinfo.validate.core import DEFAULT_POLICY, ValidationPolicy
 
 ORGANIZATION_IRI_RE = _component_iri_re("organization")
+
+
+def organization_identity_seed(name: str) -> str:
+    """Identity seed for an organization: ``organization:<name>``.
+
+    The name enters as :func:`battinfo.entities.seed_text`, lower-cased, so
+    "A123 Systems" re-created anywhere mints one IRI.
+    """
+    return f"organization:{seed_text(name).lower()}"
+
 
 _ORGANIZATION_TYPES = (
     "Organization",
@@ -133,7 +143,7 @@ def _record_from_organization(
     else:
         # Deterministic identity from the normalized name: the same
         # organization re-created anywhere mints the same IRI.
-        dashed_uid = stable_uid(f"organization:{name.strip().lower()}")
+        dashed_uid = stable_uid(organization_identity_seed(name))
         entity_id = f"https://w3id.org/battinfo/organization/{dashed_uid}"
 
     body: dict[str, Any] = {

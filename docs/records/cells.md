@@ -661,6 +661,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.94
@@ -679,6 +680,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.03
@@ -697,6 +699,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.03
@@ -734,6 +737,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "hasCurrentCollector": {
         "@type": [
           "CurrentCollector",
+          "Aluminium",
           "Foil"
         ],
         "schema:name": "Al foil",
@@ -766,6 +770,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.95
@@ -781,6 +786,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.05
@@ -804,6 +810,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "hasCurrentCollector": {
         "@type": [
           "CurrentCollector",
+          "Copper",
           "Foil"
         ],
         "schema:name": "Cu foil",
@@ -855,6 +862,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "VolumeFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "VolumeFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.3
@@ -873,6 +881,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "VolumeFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "VolumeFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.7
@@ -892,6 +901,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "VolumeFraction",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "VolumeFraction",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.02
@@ -1051,6 +1061,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.94
@@ -1069,6 +1080,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.03
@@ -1087,6 +1099,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.03
@@ -1110,6 +1123,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "hasCurrentCollector": {
         "@type": [
           "CurrentCollector",
+          "Aluminium",
           "Foil"
         ],
         "schema:name": "Al foil"
@@ -1130,6 +1144,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.95
@@ -1145,6 +1160,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.05
@@ -1168,6 +1184,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "hasCurrentCollector": {
         "@type": [
           "CurrentCollector",
+          "Copper",
           "Foil"
         ],
         "schema:name": "Cu foil"
@@ -1207,6 +1224,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "VolumeFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "VolumeFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.25
@@ -1225,6 +1243,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "VolumeFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "VolumeFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.75
@@ -1244,6 +1263,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "VolumeFraction",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "VolumeFraction",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.03
@@ -1402,6 +1422,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.94
@@ -1420,6 +1441,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.03
@@ -1438,6 +1460,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.03
@@ -1461,6 +1484,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "hasCurrentCollector": {
         "@type": [
           "CurrentCollector",
+          "Aluminium",
           "Foil"
         ],
         "schema:name": "Al foil"
@@ -1481,6 +1505,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.95
@@ -1496,6 +1521,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.05
@@ -1519,6 +1545,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "hasCurrentCollector": {
         "@type": [
           "CurrentCollector",
+          "Copper",
           "Foil"
         ],
         "schema:name": "Cu foil"
@@ -1558,6 +1585,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "VolumeFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "VolumeFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.3
@@ -1576,6 +1604,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "VolumeFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "VolumeFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.7
@@ -1595,6 +1624,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "VolumeFraction",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "VolumeFraction",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.02
@@ -1753,6 +1783,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.92
@@ -1771,6 +1802,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.04
@@ -1789,6 +1821,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.04
@@ -1812,6 +1845,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "hasCurrentCollector": {
         "@type": [
           "CurrentCollector",
+          "Aluminium",
           "Foil"
         ],
         "schema:name": "Al foil"
@@ -1832,6 +1866,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.95
@@ -1847,6 +1882,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.05
@@ -1870,6 +1906,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "hasCurrentCollector": {
         "@type": [
           "CurrentCollector",
+          "Copper",
           "Foil"
         ],
         "schema:name": "Cu foil"
@@ -1909,6 +1946,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "VolumeFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "VolumeFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.5
@@ -1924,6 +1962,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "VolumeFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "VolumeFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.5
@@ -2254,7 +2293,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     "@type": [
       "BatteryCell",
       "CoinCell",
-      "LithiumManganeseDioxideBattery"
+      "AlkalineZincManganeseDioxideBattery"
     ],
     "@id": "https://w3id.org/battinfo/spec/jgyy-x3h5-drmv-5tn5#described",
     "skos:prefLabel": "Example Lab COIN-ZNMNO2-ALK",
@@ -2318,7 +2357,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 
 ## Fields
 
-Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`). Quantities are `{value, unit}` maps and may also carry `value_basis` (Measured, Conventional, Rated, or Nominal) and `conditions` (the parameters under which the value holds, each itself a quantity; a qualitative condition may be `value_text` alone). In JSON-LD, conditions on a measured value ride a measurement node the quantity `isOutputOf`, and conditions on a declared value (Conventional, Rated or Nominal) become named `schema:valueReference` qualifiers on the quantity. The `voltage_reference` key goes under `schema:valueReference` either way, as a node typed with the reference electrode's classes (`Li/Li+` gives `ReferenceElectrode` and `LithiumElectrode`). When authoring, an instance references its spec with the `spec_id=` kwarg; the record stores the self-describing `<type>_spec_id` key shown in the tables below.
+Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`). Quantities are `{value, unit}` maps whose `value` is a number; text that is not a number goes in `value_text`. They may also carry `value_basis` (Measured, Conventional, Rated, or Nominal) and `conditions` (the parameters under which the value holds, each itself a quantity; a qualitative condition may be `value_text` alone). In JSON-LD, conditions on a measured value ride a measurement node the quantity `isOutputOf`, and conditions on a declared value (Conventional, Rated or Nominal) become named `schema:valueReference` qualifiers on the quantity. The `voltage_reference` key goes under `schema:valueReference` either way, as a node typed with the reference electrode's classes (`Li/Li+` gives `ReferenceElectrode` and `LithiumElectrode`). When authoring, an instance references its spec with the `spec_id=` kwarg; the record stores the self-describing `<type>_spec_id` key shown in the tables below.
 
 ### cell-spec fields
 
@@ -2341,7 +2380,7 @@ The `cell_spec` block:
 | `additional_type` | string or array of string |  | Extra JSON-LD type IRIs or labels stacked onto the record's @type. |
 | `product_type` | `commercial` \| `research` \| `prototype` |  | Whether this cell spec is a commercial product, a research cell, or a prototype. |
 | `cell_format` | `cylindrical` \| `prismatic` \| `pouch` \| `coin` … (6 values) | yes | Mechanical format of the cell. |
-| `size_code` | string |  | Standard size designation (e.g. '18650', '21700', 'CR2032'). |
+| `size_code` | string |  | Shape letter plus dimensions, the size part of an IEC 60086 or IEC 61960 designation: 'R' for cylindrical and coin cells, 'P' for prismatic and pouch cells, for example 'R18650', 'R21700', 'R2032' or 'P20/50/50'. The full designation, such as 'CR2032' or 'INR18650', goes in iec_code. |
 | `iec_code` | string |  | IEC designation code (IEC 60086 / IEC 61960), when defined. |
 | `country_of_origin` | string |  | Country where the cell is manufactured. |
 | `rechargeable` | boolean |  | Whether this cell is rechargeable (true) or primary/single-use (false). |
