@@ -367,7 +367,8 @@ def test_the_reader_takes_unit_text_and_string_values() -> None:
         assert _extract_property_item(text_value) == ("nominal_voltage", {"value_text": "about 3.7", "unit": "V"})
 
 
-def test_ws_import_reads_units_through_the_same_table(tmp_path: Path) -> None:
+def _units_deposit(tmp_path: Path) -> tuple[dict, dict[str, dict]]:
+    """A deposit graph with three cell-spec properties, and its property nodes by label."""
     from battinfo.ws import AuthoringWorkspace
 
     source = AuthoringWorkspace(root=tmp_path / "source", registry_url=None)
@@ -394,8 +395,14 @@ def test_ws_import_reads_units_through_the_same_table(tmp_path: Path) -> None:
         creators=[{"name": "Doe, Jane"}],
     )
     [spec_node] = [n for n in graph["@graph"] if "BatteryCellSpecification" in (n.get("@type") or [])]
-    nodes = {node["skos:prefLabel"]: node for node in spec_node["isDescriptionFor"]["hasProperty"]}
-    # kW as resolve_unit_iri writes it: a records-context unit term, in no unit map.
+    return graph, {node["skos:prefLabel"]: node for node in spec_node["isDescriptionFor"]["hasProperty"]}
+
+
+def test_ws_import_reads_units_through_the_same_table(tmp_path: Path) -> None:
+    from battinfo.ws import AuthoringWorkspace
+
+    graph, nodes = _units_deposit(tmp_path)
+    # kW as resolve_unit_iri wrote it before the unit map named it: a records-context unit term.
     power = nodes["MaximumPower"]
     power.pop("schema:unitText", None)
     power["hasMeasurementUnit"] = "emmo:KiloWatt"
@@ -410,6 +417,25 @@ def test_ws_import_reads_units_through_the_same_table(tmp_path: Path) -> None:
     units = {key: quantity["unit"] for key, quantity in saved["properties"].items()}
     assert units["maximum_power"] == "kW"
     assert "°C" in units.values()
+
+
+def test_ws_import_keeps_an_unknown_unit_iri_whole_and_warns(tmp_path: Path) -> None:
+    from battinfo.ws import AuthoringWorkspace
+
+    graph, nodes = _units_deposit(tmp_path)
+    power = nodes["MaximumPower"]
+    power.pop("schema:unitText", None)
+    power["hasMeasurementUnit"] = {"@id": "https://example.org/units/KiloWattish"}
+    path = tmp_path / "battinfo.json"
+    path.write_text(json.dumps(graph), encoding="utf-8")
+
+    imported = AuthoringWorkspace(root=tmp_path / "imported", registry_url=None)
+    # As the publication-package reader does: the IRI is kept whole, never cut at its first colon.
+    with pytest.warns(UserWarning, match="'https://example.org/units/KiloWattish' has no symbol"):
+        imported.import_(str(path))
+    [spec] = imported._ws.cell_specs
+    assert spec.properties["maximum_power"]["unit"] == "https://example.org/units/KiloWattish"
+    assert spec.properties["nominal_capacity"]["unit"] == "Ah"
 
 
 # ── BPX export of a cell spec: unit_text is read, no unit is never SI ────────

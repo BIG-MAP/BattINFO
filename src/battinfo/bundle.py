@@ -3,7 +3,7 @@ from __future__ import annotations
 import copy
 import difflib
 import warnings
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from enum import StrEnum
 from pathlib import Path
 from typing import Annotated, Any, ClassVar, Mapping, Self
@@ -215,17 +215,22 @@ def _subclass_ref_ids(node: Mapping[str, Any]) -> list[str]:
     return _ref_ids(node.get(RDFS_SUBCLASS_OF_IRI)) + _ref_ids(node.get("rdfs:subClassOf"))
 
 
-def _unit_from_node(node: Mapping[str, Any]) -> str | None:
+def _unit_from_node(node: Mapping[str, Any], expand: Callable[[str], str] | None = None) -> str | None:
     """The unit symbol of a quantity node, read back exactly as the emitter wrote it.
 
     ``hasMeasurementUnit`` (a full or compact IRI, or ``{"@id": ...}``) goes
     through the reverse of the emitters' unit tables, so ``MilliAmpereHour``
     comes back as ``mAh``, never ``Ah``. An IRI no table names is kept whole,
     with a warning. A node with no unit IRI gives its ``schema:unitText``.
+    *expand*, when given, first expands a compact IRI with the document's own
+    context. The publication-package reader and ``ws.import_`` both read
+    units this way.
     """
     from battinfo.jsonld import unit_symbol_for_iri  # noqa: PLC0415
 
     iri = _ref_id(node.get("hasMeasurementUnit"))
+    if iri and expand is not None:
+        iri = expand(iri)
     if iri:
         symbol = unit_symbol_for_iri(iri)
         if symbol is not None:

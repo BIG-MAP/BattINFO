@@ -4464,7 +4464,7 @@ class AuthoringWorkspace:
             return term
 
         # ── 3. Build reverse lookup tables ────────────────────────────────────
-        from battinfo.jsonld import unit_symbol_for_iri
+        from battinfo.bundle import _unit_from_node  # noqa: PLC0415
 
         # Load prop map directly so we can keep only the FIRST key per IRI
         # (later aliases like "discharging_temperature_min" must not overwrite
@@ -4515,8 +4515,10 @@ class AuthoringWorkspace:
             Accepts both quantity-node generations: the legacy single-string
             ``@type`` with a ``{"@id": ...}`` unit reference, and the canonical
             shape (list ``@type`` of ``[PropertyClass, co-type]`` with the unit
-            as a bare IRI string). A unit without an IRI is read from
-            ``schema:unitText``.
+            as a bare IRI string). Units are read back as the publication-package
+            reader reads them: an IRI goes through the emitters' unit tables, an
+            IRI no table names is kept whole with a warning, and a unit without
+            an IRI is read from ``schema:unitText``.
 
             A deposit written before 0.8.0 may carry text in
             ``hasNumberValue``: a numeric string comes back as the number, and
@@ -4551,17 +4553,8 @@ class AuthoringWorkspace:
                 quantity: dict[str, Any] = {"value": value}
                 if text := _jsonld_text(node.get("hasStringValue")):
                     quantity["value_text"] = text
-                unit_raw = node.get("hasMeasurementUnit")
-                if isinstance(unit_raw, str):
-                    unit_term = unit_raw
-                elif isinstance(unit_raw, dict):
-                    unit_term = unit_raw.get("@id", "")
-                else:
-                    unit_term = ""
-                if unit_term:
-                    quantity["unit"] = unit_symbol_for_iri(_expand(unit_term)) or unit_term.split(":")[-1]
-                elif text_unit := _jsonld_text(node.get("schema:unitText")):
-                    quantity["unit"] = text_unit
+                if unit := _unit_from_node(node, _expand):
+                    quantity["unit"] = unit
                 moved.extend(migrate_quantity_values(quantity, f"properties.{prop_key}"))
                 specs[prop_key] = quantity
             _warn_text_moved(where, moved)
