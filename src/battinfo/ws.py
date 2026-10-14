@@ -3570,7 +3570,8 @@ class AuthoringWorkspace:
         hold text there: a numeric string (``"2.5"``) is read as the number,
         and other text moves to ``value_text`` with a warning. In a draft this
         covers every quantity, those in the electrodes, electrolyte,
-        separator, housing and construction included.
+        separator, housing and construction included. The equipment spec
+        given to ``ws.add("equipment", spec=...)`` is read the same way.
 
         Example::
 
@@ -3686,7 +3687,10 @@ class AuthoringWorkspace:
         ``spec`` accepts a canonical equipment-spec record dict, a path to one, or
         the IRI of one already saved in this workspace.  ``channels=N`` overrides
         the spec's ``channel_count``.  Re-running with the same inputs is
-        idempotent (deterministic equipment + channel IRIs).
+        idempotent (deterministic equipment + channel IRIs).  A spec saved
+        before 0.8.0 may hold text in a quantity's ``value``: a numeric string
+        is read as the number and other text moves to ``value_text``, with a
+        warning, and the saved spec is rewritten that way.
         """
         rt_key = str(record_type).strip().lower().replace("_", "-")
         if rt_key == "equipment":
@@ -9034,16 +9038,24 @@ class AuthoringWorkspace:
         print(f"  equipment-spec: {body['name']}  {body['id']}")
         return record
 
-    def _resolve_equipment_spec_arg(self, spec: Any) -> dict:
+    def _resolve_equipment_spec_arg(self, spec: Any) -> tuple[dict, Path | None, builtins.list[str]]:
         """Resolve ``spec=`` for ``ws.add('equipment', ...)`` to a canonical record.
 
         Accepts a canonical equipment-spec record dict, a path to one (a
         template draft is also accepted and lifted like ``ws.load`` would), or
         the IRI of a spec already saved in this workspace's records tree.
+
+        Returns the record, the file it was read from (None for a dict or a
+        draft) and the notes ``migrate_quantity_values`` gave on it. A record
+        saved before 0.8.0 may hold text in a quantity's value: it comes back
+        with a numeric string as the number and other text in ``value_text``,
+        and the caller warns with the notes. A dict passed in is copied, never
+        changed. A draft is migrated and warned about by ``_load_equipment_spec``.
         """
         if isinstance(spec, dict):
             if isinstance(spec.get("equipment_spec"), dict):
-                return spec
+                doc = copy.deepcopy(spec)
+                return doc, None, migrate_quantity_values(doc)
             raise TypeError(
                 "spec= must be a canonical equipment-spec record (a dict with an "
                 "'equipment_spec' key), a path to one, or its IRI. Author one with "
@@ -9058,7 +9070,7 @@ class AuthoringWorkspace:
                     continue
                 body = doc.get("equipment_spec") or {}
                 if body.get("id") == spec:
-                    return doc
+                    return doc, path, migrate_quantity_values(doc)
             raise ValueError(
                 f"No equipment-spec record with id {spec!r} in this workspace. "
                 "Pass the record dict (or a path to it) instead - "
@@ -9072,9 +9084,9 @@ class AuthoringWorkspace:
                 raise FileNotFoundError(f"equipment-spec file not found: {path}")
             doc = json.loads(path.read_text(encoding="utf-8"))
             if isinstance(doc.get("equipment_spec"), dict):
-                return doc
+                return doc, path, migrate_quantity_values(doc)
             # A template draft (no canonical envelope): lift it like ws.load would.
-            return self._load_equipment_spec(path)
+            return self._load_equipment_spec(path), None, []
         raise TypeError(
             "spec= must be a canonical equipment-spec record dict, a path to one, "
             "or its IRI (https://w3id.org/battinfo/spec/...)."
@@ -9116,7 +9128,7 @@ class AuthoringWorkspace:
                 "ws.add('equipment', ...) needs serial_number=... - it is the unit's "
                 "stable identity (the equipment IRI is minted from spec uid + serial number)."
             )
-        spec_record = self._resolve_equipment_spec_arg(spec)
+        spec_record, spec_read_from, spec_moved = self._resolve_equipment_spec_arg(spec)
         spec_body = spec_record["equipment_spec"]
         spec_id = spec_body["id"]
         spec_uid = spec_id.rsplit("/", 1)[-1]
@@ -9144,6 +9156,16 @@ class AuthoringWorkspace:
             return result
 
         spec_result = _track(save_record(spec_record, source_root=source_root, mode="upsert"))
+        # Text read out of the spec is reported once. When spec= named the
+        # saved copy itself (by IRI or path), the upsert finds that file
+        # unchanged, rewrites it and warns with the same notes.
+        rewrote_the_source = (
+            spec_read_from is not None
+            and not spec_result.get("content_changed")
+            and Path(spec_result["path"]).resolve() == spec_read_from.resolve()
+        )
+        if not rewrote_the_source:
+            _warn_text_moved(spec_read_from.name if spec_read_from else f"equipment spec {spec_id}", spec_moved)
 
         # Deterministic equipment identity: the same (spec, serial_number) always
         # mints the same equipment IRI - the seed mirrors the ratified channel

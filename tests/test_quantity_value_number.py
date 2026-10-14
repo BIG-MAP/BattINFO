@@ -7,8 +7,9 @@ the cell-spec conditions map included, and the emitters wrote that text as
 ``hasNumberValue`` for finite real numbers only and send text to
 ``hasStringValue``, the converter importer reads ``hasStringValue`` into
 ``value_text``, and the places that read older records back (``ws.import_``,
-``ws.load`` and the upsert in ``save_record``) turn a numeric string into the
-number and move other text to ``value_text`` with a warning.
+``ws.load``, the spec given to ``ws.add("equipment")`` and the upsert in
+``save_record``) turn a numeric string into the number and move other text to
+``value_text`` with a warning.
 """
 
 from __future__ import annotations
@@ -483,6 +484,55 @@ def test_load_reads_text_out_of_an_equipment_spec_draft(tmp_path: Path) -> None:
     assert prop["charge_current"] == {"value_text": "adjustable", "unit": "A"}
     report = validate_record_report(record, policy="strict")
     assert report.ok, [i.message for i in report.errors]
+
+
+def _equipment_spec_saved_with_text(tmp_path: Path) -> tuple[AuthoringWorkspace, Path, dict]:
+    """A workspace whose saved equipment spec holds text in two quantity values, as 0.7 could write it."""
+    ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
+    draft = ws.template("equipment-spec", name="Cycler", manufacturer="Example", model="C1", channel_count=2)
+    ws.add("equipment", spec=ws.load(draft), serial_number="A1")
+    [path] = (tmp_path / ".battinfo" / "records" / "equipment-spec").glob("*.json")
+    older = _load(path)
+    older["equipment_spec"]["property"] = {
+        "channel_voltage_max": {"value": "4.35", "unit": "V"},
+        "charge_current": {"value": "adjustable", "unit": "A"},
+    }
+    path.write_text(json.dumps(older, indent=2), encoding="utf-8")
+    return ws, path, older
+
+
+@pytest.mark.parametrize("given", ["iri", "saved file", "other file", "dict"])
+def test_adding_equipment_reads_text_out_of_the_spec_it_is_given(tmp_path: Path, given: str) -> None:
+    ws, saved_path, older = _equipment_spec_saved_with_text(tmp_path)
+    passed = copy.deepcopy(older)
+    if given == "iri":
+        spec: Any = older["equipment_spec"]["id"]
+    elif given == "saved file":
+        spec = saved_path
+    elif given == "other file":
+        spec = saved_path.replace(tmp_path / "cycler.equipment-spec.json")
+    else:
+        saved_path.unlink()
+        spec = passed
+
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        ws.add("equipment", spec=spec, serial_number="B")
+    moved = [str(w.message) for w in caught if "held text" in str(w.message)]
+    # Said once, whether the spec was read from the saved copy, another file or a dict.
+    assert len(moved) == 1, moved
+    assert "equipment_spec.property.charge_current.value: moved the text 'adjustable' to value_text" in moved[0]
+    assert "channel_voltage_max" not in moved[0]  # a numeric string becomes the number without a note
+
+    rewritten = _load(saved_path)
+    prop = rewritten["equipment_spec"]["property"]
+    assert prop["channel_voltage_max"] == {"value": 4.35, "unit": "V"}
+    assert prop["charge_current"] == {"value_text": "adjustable", "unit": "A"}
+    report = validate_record_report(rewritten, policy="strict")
+    assert report.ok, [i.message for i in report.errors]
+    assert ws.save()["index"]["failures"] == []  # strict by default
+    if given == "dict":
+        assert passed == older  # the caller's dict is left as it was
 
 
 def test_load_of_a_search_hit_reads_text_out_of_the_referenced_spec(tmp_path: Path) -> None:
