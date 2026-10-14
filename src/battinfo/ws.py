@@ -199,25 +199,6 @@ def _iri_short_id(iri: str | None) -> str | None:
     return tail.replace("-", "")[:6] if is_dashed_uid(tail) else None
 
 
-def _label_short_id(label: str, *, file_stem: bool = False) -> str | None:
-    """The short ID a cell label stands for, or None.
-
-    A label stands for a short ID only when it is one. A data file's name may
-    also carry one: for a file-name stem, the short ID its name starts with or
-    ends in (``gm6pmr.bdf``, ``cycling-gm6pmr``) counts too.
-    """
-    if _is_short_id(label):
-        return label
-    if file_stem:
-        base = label.split(".", 1)[0]
-        if _is_short_id(base):
-            return base
-        sid = _short_id(label)
-        if sid and _is_short_id(sid):
-            return sid
-    return None
-
-
 def _cells_named_by(
     label: str, cells: Sequence[tuple[builtins.list[str], str | None]], short_id: str | None
 ) -> builtins.list[int]:
@@ -3695,6 +3676,9 @@ class AuthoringWorkspace:
             # ...or from a JSON map {serial: iri}:
             ws.add("cell", spec=spec, from_file="cell_iris.json")
 
+        It returns the cells it names, in the order given; a serial (or name)
+        the workspace already holds returns that cell, so a re-run adds nothing.
+
         **Tests** (``"test"``) — link a cell and its data explicitly::
 
             ws.add("test", type="capacity_check", cell="FAC-001",
@@ -3724,8 +3708,11 @@ class AuthoringWorkspace:
         channel label, or ``"<unit>/CHn"`` (see ``ws.add("equipment", ...)``).
 
         For large batches you may instead pass ``datasets="glob"`` to match files to
-        already-loaded cells: a file named after a cell's serial or name matches
-        that cell, and otherwise the 6-char short ID in its name does.
+        already-loaded cells: a file named after a cell's serial or name
+        (``C01.csv``, ``C01.bdf.csv``) matches that cell. Otherwise a file named
+        by a cell's 6-char short ID alone (``gm6pmr.csv``) matches the cell whose
+        IRI or label carries it, and one whose name ends in it
+        (``cycling-gm6pmr.csv``) the cell whose IRI it is the short ID of.
 
         The keywords a test takes are ``type`` (or ``kind``), ``cell``, ``data``,
         ``raw``, ``datasets``, ``spec`` (or ``protocol``), ``conformance``,
@@ -4349,6 +4336,31 @@ class AuthoringWorkspace:
         print(f"  Loaded {count} cell instance(s) into matching index.")
         return count
 
+    def _unsaved_cell_iris(self) -> set[str]:
+        """The IRIs the next save mints for the session's cells that have none yet.
+
+        Each cell's own seed (``Workspace._finalize_cell``), its spec's IRI
+        minted the same way when the spec has none either. A cell another of
+        the session collides with is minted from its content at the save; it
+        is not covered here.
+        """
+        engine = self._ws
+        specs: dict[int, Any] = {}
+        iris: set[str] = set()
+        for cell in engine.cells:
+            if cell.id is not None:
+                continue
+            spec = cell.cell_spec
+            if spec is not None and getattr(spec, "id", None) is None and id(spec) not in specs:
+                specs[id(spec)] = engine._finalize_cell_spec(spec, record_roots=[engine.source_root])
+            try:
+                minted = engine._finalize_cell(cell, specs).id
+            except (TypeError, ValueError):
+                continue
+            if minted:
+                iris.add(minted)
+        return iris
+
     def _index_cell(self, cell: Any, *keys: str | None) -> None:
         """Index ``cell`` under the labels it answers to (its serial number and name).
 
@@ -4367,16 +4379,16 @@ class AuthoringWorkspace:
         else:
             entry[1].extend(label for label in labels if label not in entry[1])
 
-    def _cells_labelled(self, label: str, *, file_stem: bool = False) -> builtins.list[Any]:
+    def _cells_labelled(self, label: str) -> builtins.list[Any]:
         """Every cell this session indexes that *label* names, exact matches first.
 
         A cell whose serial number or name is *label* matches. Only when none
-        does, and *label* is a short ID on its own (or, for a data file's
-        *file_stem*, carries one), does a cell match whose IRI or label carries
-        that short ID. See ``_cells_named_by``.
+        does, and *label* is a short ID on its own, does a cell match whose IRI
+        or label carries that short ID. See ``_cells_named_by``; a data file's
+        name is matched by :meth:`_cells_for_data_file`.
         """
         cells = [(labels, getattr(cell, "id", None)) for cell, labels in self._indexed_cells]
-        short_id = _label_short_id(label, file_stem=file_stem)
+        short_id = label if _is_short_id(label) else None
         return [self._indexed_cells[i][0] for i in _cells_named_by(label, cells, short_id)]
 
     def _index_saved_cells(self) -> int:
@@ -4384,10 +4396,11 @@ class AuthoringWorkspace:
 
         Shared core of :meth:`reload_cells` and :meth:`_rehydrate_cell_index`;
         scans ``.battinfo/records/cell-instance/`` and returns the count loaded.
-        A saved cell the session already holds under its IRI is counted but not
-        loaded again, so reading the records back never gives one cell two
-        objects. Marks the index as rehydrated so :meth:`_rehydrate_cell_index`
-        becomes a no-op afterwards.
+        A saved cell the session already holds is counted but not loaded
+        again, so reading the records back never gives one cell two objects:
+        one held under its IRI, and one not saved yet whose next save mints the
+        IRI the saved cell has. Marks the index as rehydrated so
+        :meth:`_rehydrate_cell_index` becomes a no-op afterwards.
         """
         from battinfo.bundle import Cell
 
@@ -4397,6 +4410,7 @@ class AuthoringWorkspace:
             return 0
 
         held = {getattr(cell, "id", None) for cell, _ in self._indexed_cells} - {None}
+        held |= self._unsaved_cell_iris()
         count = 0
         for src in sorted(ci_dir.glob("*.json")):
             try:
@@ -8907,7 +8921,12 @@ class AuthoringWorkspace:
         working_electrode_id: Any = None,
         counter_electrode_id: Any = None,
     ) -> builtins.list:
-        """Create cell instances.
+        """Create cell instances, and return the cells the call names.
+
+        The cells come back in the order given. A serial number (or, for a
+        cell without one, a name) the workspace already holds a cell under
+        returns that cell instead of adding another, so running the same call
+        again returns the same cells and adds nothing.
 
         * ``names`` — human labels (e.g. lab batch IDs); display text, which
           several cells of one batch may share.
@@ -8983,6 +9002,9 @@ class AuthoringWorkspace:
         repeated_serials: list[str] = []
         repeated_names: list[str] = []
         deduped: list[tuple[str | None, str | None, str | None, str | None]] = []
+        # What the call returns, in input order: a cell the workspace already
+        # holds, or the place of a cell about to be made in `deduped`.
+        returned: list[Any] = []
         for n, s, iri, h in entries:
             key = s or n or ""
             if key and key in seen:
@@ -8991,11 +9013,14 @@ class AuthoringWorkspace:
                 # merely indistinguishable (warn and keep the first).
                 (repeated_serials if s else repeated_names).append(key)
                 continue
-            if key and any(key in labels for _, labels in self._indexed_cells):
+            held = next((cell for cell, labels in self._indexed_cells if key and key in labels), None)
+            if held is not None:
                 already.append(key)
+                returned.append(held)
                 continue
             if key:
                 seen[key] = n
+            returned.append(len(deduped))
             deduped.append((n, s, iri, h))
         if repeated_serials:
             dupes = sorted(set(repeated_serials))
@@ -9015,15 +9040,16 @@ class AuthoringWorkspace:
             )
         if already:
             print(
-                f"  WARNING: {len(already)} already in workspace -- skipping: {already[:5]}"
+                f"  {len(already)} already in this workspace, reusing them: {already[:5]}"
                 + (" ..." if len(already) > 5 else "")
             )
         entries = deduped
         self._refuse_shared_cell_iris(entries)
 
         if not entries:
-            print("  No cell instances to add" + (f" (match={match!r})." if match else "."))
-            return []
+            if not already:
+                print("  No cell instances to add" + (f" (match={match!r})." if match else "."))
+            return returned
 
         # NOTE: spec nominal ratings are deliberately NOT copied into each
         # instance's `measured` block. Rated/nominal values are not
@@ -9081,7 +9107,7 @@ class AuthoringWorkspace:
             self._index_cell(cell, serial, name)
             cells.append(cell)
             print(f"  cell: {name or serial}  {iri or '(IRI auto-assigned)'}")
-        return cells
+        return [cells[item] if isinstance(item, int) else item for item in returned]
 
     def _refuse_shared_cell_iris(
         self, entries: builtins.list[tuple[str | None, str | None, str | None, str | None]]
@@ -9845,7 +9871,8 @@ class AuthoringWorkspace:
         """Create a test (+ dataset(s)).
 
         Explicit (preferred): ``cell=<serial|IRI|object>`` and ``data=<path|list>``.
-        Batch: ``datasets="glob"`` matches files to loaded cells by short ID.
+        Batch: ``datasets="glob"`` matches files to loaded cells by serial
+        number or name, else by short ID (``_cells_for_data_file``).
         Relative paths resolve against the workspace root, and a data file that
         does not exist raises ``FileNotFoundError`` before anything is created.
 
@@ -10087,7 +10114,7 @@ class AuthoringWorkspace:
             )
             return [test]
 
-        # ── Batch mode: match a glob of files to loaded cells by short ID ────────
+        # ── Batch mode: match a glob of files to loaded cells by name ────────────
         if datasets is not None:
             if conformance is not None:
                 raise ValueError(
@@ -10346,6 +10373,38 @@ class AuthoringWorkspace:
             )
         raise TypeError("cell= must be a serial, IRI, Cell, or search result.")
 
+    def _cells_for_data_file(self, path: Path) -> tuple[builtins.list[Any], str | None, bool]:
+        """The cells a data file's name names, the part of the name that named them, and whether it was a label.
+
+        The name with its suffixes taken off one at a time (``LAB-01.bdf.csv``
+        gives ``LAB-01.bdf``, then ``LAB-01``) is matched against every cell's
+        serial number and name exactly; the first that matches a cell decides.
+        Only when none does is a short ID tried. A name that is a short ID on
+        its own (``gm6pmr.bdf.csv``) finds a cell whose IRI or label carries
+        it. A short ID a name ends in (``cycling-gm6pmr.csv``) finds only the
+        cell whose IRI it is the short ID of, because a serial number such as
+        ``LAB-2024-000001`` ends in six characters another serial can share.
+        """
+        stems: builtins.list[str] = []
+        name = path.name
+        while "." in name.strip("."):
+            name = name.rsplit(".", 1)[0]
+            stems.append(name)
+        stems = stems or [path.name]
+        for stem in stems:
+            exact = [cell for cell, labels in self._indexed_cells if stem in labels]
+            if exact:
+                return exact, stem, True
+        base = stems[-1]
+        if _is_short_id(base):
+            cells = [(labels, getattr(cell, "id", None)) for cell, labels in self._indexed_cells]
+            return [self._indexed_cells[i][0] for i in _cells_named_by(base, cells, base)], base, False
+        short_id = next((sid for sid in (_short_id(stem) for stem in stems) if sid and _is_short_id(sid)), None)
+        if short_id is None:
+            return [], None, False
+        by_iri = [cell for cell, _ in self._indexed_cells if _iri_short_id(getattr(cell, "id", None)) == short_id]
+        return by_iri, short_id, False
+
     def _session_cell(self, label: str) -> Any:
         """The one session cell *label* names, or None; raises when it names several."""
         cells = self._cells_labelled(label)
@@ -10371,7 +10430,7 @@ class AuthoringWorkspace:
         description: str | None,
         status: str,
     ) -> builtins.list:
-        """Batch helper: match a glob of data files to loaded cells by short ID."""
+        """Batch helper: match a glob of data files to loaded cells by serial, name or short ID."""
         if isinstance(datasets, str):
             matched_files = sorted(self._root.glob(datasets))
         else:
@@ -10398,13 +10457,10 @@ class AuthoringWorkspace:
         print(f"Matching {len(matched_files)} file(s) to cell instances...")
         unmatched: list[Path] = []
         tests = []
-        labels_of = {id(cell): labels for cell, labels in self._indexed_cells}
         for f in matched_files:
             # A file named after a cell's serial or name matches that cell; only
             # otherwise does the short ID in its name count.
-            candidates = self._cells_labelled(f.stem, file_stem=True)
-            by_label = bool(candidates) and f.stem in labels_of[id(candidates[0])]
-            key = f.stem if by_label else _label_short_id(f.stem, file_stem=True)
+            candidates, key, by_label = self._cells_for_data_file(f)
             if len(candidates) > 1:
                 # Matching this file to "a" cell would attach the measurement to
                 # an arbitrary one of several. Skip it and say why.
@@ -10421,7 +10477,7 @@ class AuthoringWorkspace:
             if not by_label:
                 how = f'short id "{key}"'
             else:
-                how = "serial number" if f.stem == getattr(cell, "serial_number", None) else "name"
+                how = "serial number" if key == getattr(cell, "serial_number", None) else "name"
             test = self._ws.record_test(
                 cell,
                 kind=test_type,

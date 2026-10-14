@@ -179,7 +179,8 @@ def test_the_same_cell_iri_map_added_twice_keeps_its_iris(tmp_path: Path) -> Non
     ws = AuthoringWorkspace(root=root, registry_url=None)
     spec = ws.load("spec.cell-spec.json")
     first = ws.add("cell", spec=spec, from_file="cell_iris.json")
-    assert ws.add("cell", spec=spec, from_file="cell_iris.json") == []
+    again = ws.add("cell", spec=spec, from_file="cell_iris.json")
+    assert len(again) == 2 and all(held is made for held, made in zip(again, first))
     ws.save()
 
     assert len(first) == len(ws._ws.cells) == 2

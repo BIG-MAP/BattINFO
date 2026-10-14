@@ -214,11 +214,74 @@ def test_a_data_file_named_after_a_serial_matches_that_cell_before_its_short_id(
     assert tests[0].cell.serial_number == "LAB-2024-000001"
 
 
-def test_a_data_file_named_after_a_short_id_still_matches_its_cell(tmp_path: Path) -> None:
+def _data(path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("a,b\n0,1\n", encoding="utf-8")
+
+
+def test_a_data_file_named_after_its_cells_short_id_matches_that_cell(tmp_path: Path) -> None:
     ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
     (cell,) = ws.add("cell", spec=OTHER_SPEC, serial_numbers=["duracell-mn2400-2026-02-tpejqj"])
-    (tmp_path / "cycling-tpejqj.csv").write_text("a,b\n0,1\n", encoding="utf-8")
+    ws.save()
+    short_id = cell.id.rsplit("/", 1)[-1].replace("-", "")[:6]
+    _data(tmp_path / "data" / f"cycling-{short_id}.csv")
+    _data(tmp_path / "data" / f"{short_id}.bdf.csv")
 
-    tests = ws.add("test", type="cycling", datasets="cycling-*.csv")
+    tests = ws.add("test", type="cycling", datasets="data/*.csv")
+
+    assert len(tests) == 2 and all(test.cell is cell for test in tests)
+
+
+def test_a_short_id_a_label_ends_in_counts_only_for_a_file_named_by_it_alone(tmp_path: Path) -> None:
+    """A file name that ends in six characters a serial ends in does not name that cell; the short ID alone does."""
+    ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
+    (cell,) = ws.add("cell", spec=OTHER_SPEC, serial_numbers=["duracell-mn2400-2026-02-tpejqj"])
+    _data(tmp_path / "data" / "tpejqj.csv")
+    _data(tmp_path / "data" / "cycling-tpejqj.csv")
+
+    tests = ws.add("test", type="cycling", datasets="data/*.csv")
 
     assert len(tests) == 1 and tests[0].cell is cell
+    assert [Path(d.dataset_path).name for d in ws._ws.datasets] == ["tpejqj.csv"]
+
+
+def test_a_converted_file_named_after_a_serial_binds_only_that_serial(tmp_path: Path, capsys) -> None:
+    """``ws.convert()`` writes ``<serial>.bdf.csv``; the serial in it is matched whole, never by its last six characters."""
+    ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
+    ws.add("cell", spec=SPEC, serial_numbers=["LAB-2025-000001", "LAB-2025-000002"])
+    _data(tmp_path / "bdf" / "LAB-2024-000001.bdf.csv")
+    _data(tmp_path / "bdf" / "LAB-2025-000002.csv")
+
+    tests = ws.add("test", type="cycling", datasets="bdf/*.csv")
+
+    assert [test.cell.serial_number for test in tests] == ["LAB-2025-000002"]
+    assert "NO MATCH  LAB-2024-000001.bdf.csv" in capsys.readouterr().out
+
+
+def test_converted_files_of_cells_whose_serials_share_a_tail_each_bind_their_own_cell(tmp_path: Path) -> None:
+    ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
+    serials = ["LAB-2024-000001", "LAB-2025-000001", "MYLAB-50E-001"]
+    ws.add("cell", spec=SPEC, serial_numbers=serials)
+    for serial in serials:
+        _data(tmp_path / "bdf" / f"{serial}.bdf.csv")
+
+    tests = ws.add("test", type="cycling", datasets="bdf/*.bdf.csv")
+
+    assert sorted(test.cell.serial_number for test in tests) == sorted(serials)
+    for test in tests:
+        (dataset,) = [d for d in ws._ws.datasets if d.test is test]
+        assert Path(dataset.dataset_path).name == f"{test.cell.serial_number}.bdf.csv"
+
+
+def test_reading_the_saved_cells_back_leaves_an_unsaved_session_cell_unambiguous(tmp_path: Path) -> None:
+    """A fresh session adds the cells a saved one holds; a failed lookup reads the saved cells back."""
+    first = AuthoringWorkspace(root=tmp_path, registry_url=None)
+    first.add("cell", spec=SPEC, serial_numbers=["C01", "C02"])
+    first.save()
+
+    ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
+    (c01, _) = ws.add("cell", spec=SPEC, serial_numbers=["C01", "C02"])
+    with pytest.raises(ValueError, match="Could not resolve cell 'C03'"):
+        ws._resolve_cell("C03")
+
+    assert ws._resolve_cell("C01") is c01
