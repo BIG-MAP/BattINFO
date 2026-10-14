@@ -376,12 +376,13 @@ def test_renaming_a_cell_with_a_serial_keeps_its_iri_in_the_publication_package(
 
 PROTOCOL_IRI = "https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-eeee"
 
-# One run on one cell, without data files. The name is display text and never
-# enters the IRI; a protocol enters as its IRI, else its name; the start time a
-# caller gives tells two runs without data apart.
+# One run on one cell, without data files. A protocol enters as its IRI, else
+# its name; the start time a caller gives, else the name a caller gives, tells
+# two runs without data apart. A generated title (S1 cycling) never enters.
 TEST_IDENTITIES: dict[str, dict] = {
     "unnamed": {},
     "named": {"name": "S1 formation run"},
+    "named with a start time": {"name": "S1 formation run", "started_at": 1790845200},
     "protocol name": {"protocol": "CCCV 1C"},
     "protocol IRI": {"protocol_id": PROTOCOL_IRI},
     "protocol IRI and name": {"protocol_id": PROTOCOL_IRI, "protocol": "Formation C/10"},

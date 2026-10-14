@@ -102,11 +102,12 @@ Cells take `handles=[...]` in parallel with `names=` and `serial_numbers=`. The 
 
 ## Rename without moving an IRI
 
-Several record types seed their IRI from their name, so a new title would mint a new record. A cell with a serial number and a test are the exceptions. A cell's IRI comes from its serial. A test's comes from its cell, its kind, its protocol and its first data file (or the `started_at=` you pass for a test without data), so it keeps its IRI when you rename it. The datasets made from a test's data files are titled after the test, though, and their IRIs follow their titles. When you rename anything else that is already published, pin its identity:
+Several record types seed their IRI from their name, so a new title would mint a new record. A cell with a serial number and a test with data or a start time are the exceptions. A cell's IRI comes from its serial. A test's comes from its cell, its kind, its protocol and its first data file (or the `started_at=` you pass for a test without data), so it keeps its IRI when you rename it. A test with neither is told apart by the name you gave it, so renaming it moves its IRI, like a cell without a serial; a title BattINFO generates, such as `C01 cycling`, never counts. The datasets made from a test's data files are titled after the test, though, and their IRIs follow their titles. When you rename anything else that is already published, pin its identity:
 
 | Record | How to pin |
 |---|---|
 | Cell without a serial number | `ws.add("cell", ..., iris=[...])`, one IRI per cell |
+| Test without data files or a start time | `ws.add("test", ..., iri=...)` or `uid=...` |
 | The datasets made from a test's data files | `ws.add("test", ..., dataset_iris=[...])`, in the order of `data=` |
 | A test published before 0.8.0, rebuilt in a new folder | `ws.add("test", ..., iri=...)` or `uid=...`; the test seed changed in 0.8.0, and only a test saved in the folder you save to keeps its earlier IRI by itself |
 | Test spec drafts | an `"id"` (or `"uid"`) key in the `.test-spec.json` file |

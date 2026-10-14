@@ -3756,11 +3756,12 @@ class AuthoringWorkspace:
 
         A test's IRI names one run: it is seeded from the cell, the type, the
         protocol (the IRI of ``spec=`` whenever there is one) and the run, which
-        is the location of the first ``data`` file, or ``started_at`` for a
-        test without data. The name never enters it, so renaming a test keeps
-        its IRI, and a second run of one type on one cell, with its own data
-        file, gets its own IRI, in this session or a later one. A time read
-        from a data file never enters it either. A test saved before 0.8.0
+        is the location of the first ``data`` file, else ``started_at``, else
+        the ``name`` you give. So renaming a test with data or a start time
+        keeps its IRI, and a second run of one type on one cell, with its own
+        data file, start time or name, gets its own IRI, in this session or a
+        later one. A title the workspace generates (``C01 cycling``) and a time
+        read from a data file never enter it. A test saved before 0.8.0
         changed this seed keeps the IRI it was saved under.
 
         ``series_id`` puts every dataset made from ``data=`` in a collection. Pass
@@ -9851,13 +9852,16 @@ class AuthoringWorkspace:
         ``name`` is the test's title and ``handle`` its short slug (see
         :mod:`battinfo.naming`); neither is generated for you.
 
-        The test IRI names one run and is never seeded from the name
-        (``entities.test_identity_seed``): it comes from the cell, the type,
-        the protocol (the IRI of ``spec=`` whenever there is one, saved in this
-        workspace or not) and the run, which is the location of the first
-        ``data`` file, or ``started_at`` for a test without data. Renaming a
-        test keeps its IRI, and two runs of one type on one cell, with other
-        data files or start times, get two IRIs.
+        The test IRI names one run (``entities.test_identity_seed``): it
+        comes from the cell, the type, the protocol (the IRI of ``spec=``
+        whenever there is one, saved in this workspace or not) and the run,
+        which is the location of the first ``data`` file, else
+        ``started_at``, else the ``name`` you give. Renaming a test with data
+        or a start time keeps its IRI, and two runs of one type on one cell,
+        with other data files, start times or names, get two IRIs. A test
+        with none of these is one run per cell, type and protocol: a later
+        ``ws.save()`` refuses to let such a test replace a saved run with
+        another instrument or time window.
 
         ``started_at`` and ``ended_at`` (Unix seconds, an ISO 8601 time or a
         datetime) say when the run started and ended. Without them, the times

@@ -398,6 +398,7 @@ def test_identity_seed(
     protocol_name: object = None,
     data_locator: object = None,
     started_at: object = None,
+    name: object = None,
 ) -> str:
     """Identity seed for a test, one run on one cell, shared by every minting surface.
 
@@ -412,17 +413,21 @@ def test_identity_seed(
       whether a registry lookup worked.
     - The run tells two runs of one kind on one cell apart: the locator of
       the test's first data file (*data_locator*, from
-      :func:`dataset_locator_seed`), and for a test without a data file, the
-      start time the caller gave (*started_at*) in Unix seconds. A test with
-      neither has an empty run part.
+      :func:`dataset_locator_seed`); for a test without a data file, the
+      start time the caller gave (*started_at*) in Unix seconds; and for a
+      test with neither, the name the caller gave it (*name*, as
+      :func:`seed_text`), as a cell without a serial number is seeded from
+      its name. A test with none of these has an empty run part.
 
-    The test's name is display text, as a cell's name is, so renaming a test
-    keeps its IRI, and a generated title such as ``C01 cycling``, which
-    depends on how the cell was referenced, never decides it. Nothing read
-    from inside a data file enters either: a start time measured from a file
-    can first appear after a converter upgrade, and one run would get two
-    IRIs. A caller that has data files therefore gives their locator, and
-    *started_at* only when there is none.
+    A test with a data file or a start time is told apart by those, so its
+    name is display text and renaming it keeps its IRI. A title that
+    BattINFO generated, such as ``C01 cycling``, depends on how the cell was
+    referenced and never decides an IRI: callers pass only a name the caller
+    gave (see :func:`given_test_name`). Nothing read from inside a data file
+    enters either: a start time measured from a file can first appear after
+    a converter upgrade, and one run would get two IRIs. A caller that has
+    data files therefore gives their locator, and *started_at* only when
+    there is none.
     """
     kind_text = _stripped(kind)
     return "::".join(
@@ -430,7 +435,7 @@ def test_identity_seed(
             _stripped(cell_id) or "unknown-cell",
             kind_text or "other",
             _test_protocol_seed(protocol_id, protocol_name, kind_text),
-            _test_run_seed(data_locator, started_at),
+            _test_run_seed(data_locator, started_at, name),
         ]
     )
 
@@ -450,17 +455,43 @@ def _test_protocol_seed(protocol_id: object, protocol_name: object, kind: str) -
     return name
 
 
-def _test_run_seed(data_locator: object, started_at: object) -> str:
-    """The run part of a test seed: the data file's locator, else ``started_at=<Unix seconds>``."""
+def _test_run_seed(data_locator: object, started_at: object, name: object = None) -> str:
+    """The run part of a test seed: the data file's locator, else ``started_at=<Unix seconds>``, else ``name=<name>``."""
     if isinstance(data_locator, str) and data_locator.strip():
         return _nfc(data_locator)
-    if started_at is None:
-        return ""
-    from battinfo.api._shared import _to_unix_time  # noqa: PLC0415
+    if started_at is not None:
+        from battinfo.api._shared import _to_unix_time  # noqa: PLC0415
 
-    unix = _to_unix_time(started_at)
-    text = str(unix) if unix is not None else seed_text(started_at)
-    return f"started_at={text}" if text else ""
+        unix = _to_unix_time(started_at)
+        text = str(unix) if unix is not None else seed_text(started_at)
+        if text:
+            return f"started_at={text}"
+    label = seed_text(name)
+    return f"name={label}" if label else ""
+
+
+def given_test_name(
+    name: object, *, kind: object = None, protocol_name: object = None, cell_labels: Iterable[object] = ()
+) -> Optional[str]:
+    """*name*, a test's name, when the caller gave it; ``None`` when BattINFO could have generated it.
+
+    BattINFO titles an unnamed test after its cell and its protocol, or its
+    kind when it has no protocol name (``C01 cycling``, or ``cycling`` alone
+    when the cell has no name). Such a title restates the cell and the
+    protocol, and depends on how the cell was referenced, so it never tells a
+    run apart (:func:`test_identity_seed`). A name counts as generated when it
+    is the protocol name, the kind (with or without underscores) or ``test``,
+    alone or after one of *cell_labels* (the cell's name, serial number and
+    batch) or ``cell``; case and spacing aside.
+    """
+    text = seed_text(name)
+    if not text:
+        return None
+    kind_text = seed_text(getattr(kind, "value", kind))
+    bases = {seed_text(protocol_name), kind_text, kind_text.replace("_", " "), "test"} - {""}
+    labels = ({seed_text(label) for label in cell_labels} | {"cell"}) - {""}
+    generated = bases | {f"{label} {base}" for label in labels for base in bases}
+    return None if text.casefold() in {item.casefold() for item in generated} else text
 
 
 def legacy_test_identity_seed(*, cell_id: object, kind: object, protocol_name: object, name: object) -> str:

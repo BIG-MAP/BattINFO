@@ -1,12 +1,12 @@
-"""A test's IRI names one run on one cell, told apart by its data, never by its title.
+"""A test's IRI names one run on one cell, told apart by its data, never by a generated title.
 
 A test is seeded from its cell, its kind, the protocol it followed (the
 protocol's IRI whenever the test names one) and the run: the location of its
-first data file, or, for a test without one, the start time the caller gives.
-The name is display text. A test saved before 0.8.0 keeps its IRI: the rule of
-before 0.8.0 is minted as well, and a saved test with the same cell, kind,
-protocol and data files keeps the IRI it was saved under, and so do its
-datasets.
+first data file, else the start time the caller gives, else the name the
+caller gives. A title BattINFO generates (``C01 cycling``) never enters. A
+test saved before 0.8.0 keeps its IRI: the rule of before 0.8.0 is minted as
+well, and a saved test with the same cell, kind, protocol and data files
+keeps the IRI it was saved under, and so do its datasets.
 """
 
 from __future__ import annotations
@@ -79,6 +79,23 @@ def test_the_seed_is_the_cell_kind_protocol_and_run() -> None:
     assert seed(**base, started_at=1790845200) == f"{CELL_IRI}::cycling::::started_at=1790845200"
     assert seed(**base, started_at="2026-10-01T09:00:00Z") == seed(**base, started_at=1790845200)
     assert seed(**base, started_at="2026-10-01T09:00:00+00:00") == seed(**base, started_at=1790845200)
+    # A test with neither is told apart by the name its caller gave, as a cell without a serial is.
+    assert seed(**base, name=" Formation\u00a0run ") == f"{CELL_IRI}::cycling::::name=Formation run"
+    assert seed(**base, data_locator="data/C01.csv", name="Formation run") == seed(**base, data_locator="data/C01.csv")
+    assert seed(**base, started_at=1790845200, name="Formation run") == seed(**base, started_at=1790845200)
+
+
+def test_a_generated_title_is_not_a_name_the_caller_gave() -> None:
+    given = entities.given_test_name
+    labels = ("C01", "Cell A", "B7")
+    for title in ("C01 cycling", "Cell A cycling", "cell cycling", "cycling", "c01 CYCLING", "C01 capacity check"):
+        kind = "capacity_check" if "capacity" in title else "cycling"
+        assert given(title, kind=kind, cell_labels=labels) is None, title
+    assert given("C01 CCCV 1C", kind="cycling", protocol_name="CCCV 1C", cell_labels=labels) is None
+    assert given("C01 test", kind="cycling", cell_labels=labels) is None
+    assert given(None, kind="cycling") is None
+    assert given("Formation run", kind="cycling", cell_labels=labels) == "Formation run"
+    assert given("C02 cycling", kind="cycling", cell_labels=labels) == "C02 cycling"
 
 
 def test_the_seed_of_before_0_8_0_is_kept_to_find_saved_tests() -> None:
@@ -153,6 +170,87 @@ def test_renaming_a_test_keeps_its_iri(tmp_path: Path) -> None:
         ws.save()
         minted.append(test.id)
     assert minted[0] == minted[1]
+
+
+def test_two_named_runs_without_data_in_two_sessions_keep_two_records(tmp_path: Path) -> None:
+    """Neither run has a data file or a start time; the names they were given tell them apart."""
+    root = tmp_path / "lab"
+
+    def session(name: str, instrument: str) -> str:
+        ws = _workspace(root)
+        ws.add("cell", spec=CellSpec(**SPEC), serial_numbers=["MYLAB-001"])
+        (test,) = ws.add("test", type="cycling", cell="MYLAB-001", name=name, instrument=instrument, status="planned")
+        ws.save()
+        return str(test.id)
+
+    formation = session("Formation run", "Cycler-1")
+    ageing = session("Ageing run", "Cycler-2")
+
+    assert formation != ageing
+    assert _test_body(root, formation)["name"] == "Formation run"
+    assert _test_body(root, formation)["instrument_name"] == "Cycler-1"
+    assert _test_body(root, ageing)["instrument_name"] == "Cycler-2"
+    assert len(_records(root, "test")) == 2
+    # The same named run again is the same test.
+    assert session("Formation run", "Cycler-1") == formation
+    assert len(_records(root, "test")) == 2
+
+
+def _unnamed_run(root: Path, **options) -> battinfo.AuthoringWorkspace:
+    ws = _workspace(root)
+    ws.add("cell", spec=CellSpec(**SPEC), serial_numbers=["MYLAB-001"])
+    ws.add("test", type="cycling", cell="MYLAB-001", status="planned", **options)
+    return ws
+
+
+def test_a_save_refuses_to_let_an_unnamed_run_replace_another_saved_run(tmp_path: Path) -> None:
+    """Nothing tells two unnamed runs without data or a start time apart, so the save stops."""
+    root = tmp_path / "lab"
+    first = _unnamed_run(root, instrument="Cycler-1")
+    first.save()
+    (saved,) = first._ws.tests
+    files = _records(root, "test")
+
+    second = _unnamed_run(root, instrument="Cycler-2")
+    with pytest.raises(ValueError, match="replace a saved test with another run") as excinfo:
+        second.save()
+
+    message = str(excinfo.value)
+    assert str(saved.id) in message and "'Cycler-1' saved, 'Cycler-2' now" in message
+    assert "name=" in message and "started_at=" in message and "iri=" in message
+    assert _records(root, "test") == files
+    # The session is as it was: nothing was minted, so a name lets it save as a run of its own.
+    (test,) = second._ws.tests
+    assert test.id is None
+    test.name = "Ageing run"
+    second.save()
+    assert test.id != saved.id and len(_records(root, "test")) == 2
+
+
+def test_an_unnamed_run_that_only_fills_in_or_repeats_the_saved_run_updates_it(tmp_path: Path) -> None:
+    root = tmp_path / "lab"
+    _unnamed_run(root).save()
+    (iri,) = (body["test"]["id"] for body in _records(root, "test").values())
+
+    _unnamed_run(root, instrument="Cycler-1").save()
+    again = _unnamed_run(root, instrument="Cycler-1")
+    again.save()
+
+    assert str(again._ws.tests[0].id) == iri
+    assert _test_body(root, iri)["instrument_name"] == "Cycler-1"
+    assert len(_records(root, "test")) == 1
+
+
+def test_pinning_the_saved_iri_updates_the_saved_run(tmp_path: Path) -> None:
+    root = tmp_path / "lab"
+    first = _unnamed_run(root, instrument="Cycler-1")
+    first.save()
+    iri = str(first._ws.tests[0].id)
+
+    _unnamed_run(root, instrument="Cycler-2", iri=iri).save()
+
+    assert _test_body(root, iri)["instrument_name"] == "Cycler-2"
+    assert len(_records(root, "test")) == 1
 
 
 def test_the_cell_reference_does_not_change_the_test_iri(tmp_path: Path) -> None:

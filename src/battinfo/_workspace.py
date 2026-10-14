@@ -59,6 +59,7 @@ from battinfo.entities import (
     cell_instance_identity_seed,
     cell_spec_uid,
     dataset_locator_seed,
+    given_test_name,
     iri_namespace_map,
     kind_for_doc,
     legacy_stable_uid,
@@ -293,6 +294,45 @@ def _repeat_key(entity: Any) -> tuple[Any, ...]:
     if isinstance(entity, Cell):
         return (entity.serial_number, entity.batch_id)
     return ()
+
+
+def _given_test_name(test: Any, linked_cell: Any = None) -> str | None:
+    """The name the caller gave *test*, or ``None`` when it has none or the workspace generated it.
+
+    A generated title restates the test's cell and protocol (``C01 cycling``);
+    see ``entities.given_test_name``. *linked_cell* is the finalized cell the
+    test links to, whose name the workspace defaults to its serial number.
+    """
+    labels = [
+        getattr(cell, field, None)
+        for cell in (linked_cell, getattr(test, "cell", None))
+        if cell is not None
+        for field in ("name", "serial_number", "batch_id")
+    ]
+    protocol = getattr(test, "protocol", None)
+    return given_test_name(
+        test.name,
+        kind=getattr(test, "test_kind", None),
+        protocol_name=getattr(protocol, "name", None) if protocol is not None else None,
+        cell_labels=labels,
+    )
+
+
+def _run_differences(saved: Mapping[str, Any], test: Any) -> list[str]:
+    """How *saved*, a test record body, and *test* describe two runs: another instrument, start or end time.
+
+    A field only one of them gives is not a difference; filling it in is an update.
+    """
+    pairs = (
+        ("instrument", saved.get("instrument_name"), getattr(test, "instrument", None)),
+        ("started at", _to_unix_time(saved.get("started_at")), _to_unix_time(getattr(test, "started_at", None))),
+        ("ended at", _to_unix_time(saved.get("ended_at")), _to_unix_time(getattr(test, "ended_at", None))),
+    )
+    return [
+        f"{label} {old!r} saved, {new!r} now"
+        for label, old, new in pairs
+        if old not in (None, "") and new not in (None, "") and old != new
+    ]
 
 
 def _entity_label(entity: Any) -> str:
@@ -1866,7 +1906,7 @@ class Workspace:
         stamp: Callable[[dict[str, Any]], None] | None = None,
     ) -> dict[str, Any]:
         target_root = _as_path(source_root) if source_root is not None else self.source_root
-        finalized = self._finalize(record_roots=[target_root])
+        finalized = self._finalize(record_roots=[target_root], refuse_replaced_runs=True)
 
         from battinfo._record_index import bulk_save_session  # noqa: PLC0415 — avoid import cycle
 
@@ -2121,12 +2161,17 @@ class Workspace:
         view = self._session_view(entity)
         return [other for other in candidates if self._session_view(other) == view]
 
-    def _finalize(self, *, record_roots: Sequence[Path] | None = None) -> dict[str, list[Any]]:
+    def _finalize(
+        self, *, record_roots: Sequence[Path] | None = None, refuse_replaced_runs: bool = False
+    ) -> dict[str, list[Any]]:
         """Mint and link every record of the session, in place.
 
         *record_roots* are the records folders a save writes to (by default
         :attr:`source_root`): a cell spec saved there under the IRI the seeds
-        of before 0.8.0 gave it keeps that IRI.
+        of before 0.8.0 gave it keeps that IRI. With *refuse_replaced_runs* (a
+        save), a test that nothing tells apart from a saved test that records
+        another run raises ``ValueError`` instead
+        (:meth:`_refuse_replacing_saved_runs`); the session is left as it was.
 
         A record keeps an IRI it had before the pass, whether the caller pinned
         it, an import set it or an earlier pass minted it; a record minted in
@@ -2174,6 +2219,10 @@ class Workspace:
         # The test seed changed in 0.8.0; a test saved under its earlier IRI keeps it.
         self._keep_legacy_test_iris(finalized_tests, assigned=assigned_tests, record_roots=roots, cell_map=cell_map)
         _disambiguate_entity_ids(finalized_tests, "test", workspace_root=self.data_root, assigned=assigned_tests)
+        if refuse_replaced_runs:
+            self._refuse_replacing_saved_runs(
+                finalized_tests, assigned=assigned_tests, record_roots=roots, cell_map=cell_map
+            )
 
         finalized_datasets = [self._finalize_dataset(item, cell_map, test_map) for item in self.datasets]
         _disambiguate_entity_ids(
@@ -2421,12 +2470,14 @@ class Workspace:
         if finalized.protocol_id is None and linked_protocol is not None:
             finalized.protocol_id = linked_protocol.id
         protocol_name = finalized.protocol.name or "test"
+        given_name = _given_test_name(test, linked_cell)
         if finalized.name is None:
             finalized.name = f"{linked_cell.name} {protocol_name}" if linked_cell is not None else protocol_name
         if finalized.id is None:
             # One run on one cell (entities.test_identity_seed): the cell, the kind, the
-            # protocol's IRI (else its name) and the run, the first data file's location,
-            # else the start time given. Never the name, a title generated or not.
+            # protocol's IRI (else its name) and the run: the first data file's location,
+            # else the start time given, else the name given. A title the workspace
+            # generated (C01 cycling) never enters.
             finalized.id = _entity_iri(
                 "test",
                 test_identity_seed(
@@ -2436,6 +2487,7 @@ class Workspace:
                     protocol_name=finalized.protocol.name,
                     data_locator=self._test_data_locator(test),
                     started_at=finalized.started_at,
+                    name=given_name,
                 ),
             )
         if finalized.source.type is None:
@@ -2511,6 +2563,52 @@ class Workspace:
                 continue
             test.id = legacy
             taken.add(legacy)
+
+    def _refuse_replacing_saved_runs(
+        self,
+        finalized_tests: Sequence[Test],
+        *,
+        assigned: Sequence[bool],
+        record_roots: Sequence[Path],
+        cell_map: dict[int, Cell],
+    ) -> None:
+        """Raise ``ValueError`` when a save would let a test replace a saved test that records another run.
+
+        A test with no data file, no start time and no name of its own has
+        nothing that tells its run apart (``entities.test_identity_seed``), so
+        it is one run per cell, kind and protocol. When a records folder the
+        save writes to (*record_roots*) holds a test under its IRI with another
+        instrument, start or end time, the save would overwrite that run's
+        record. Only tests minted in this pass are checked: one whose IRI was
+        pinned, imported or saved earlier in the session updates its record.
+        Nothing in the session has changed when this raises.
+        """
+        roots = [Path(root) for root in record_roots]
+        if not roots:
+            return
+        clashes: list[str] = []
+        for original, test, held in zip(self.tests, finalized_tests, assigned, strict=True):
+            if held or test.id is None or test.started_at is not None:
+                continue
+            body = saved_record_body("test", _iri_uid(test.id), roots)
+            if body is None or self._test_data_locator(original):
+                continue
+            linked_cell = cell_map.get(id(original.cell)) if original.cell is not None else None
+            if _given_test_name(original, linked_cell) is not None:
+                continue
+            differences = _run_differences(body, test)
+            if differences:
+                clashes.append(f"  {test.id} ({test.name}): {'; '.join(differences)}")
+        if clashes:
+            listing = "\n".join(clashes)
+            raise ValueError(
+                "This save would replace a saved test with another run of the same kind on the same cell:\n"
+                f"{listing}\n"
+                "Nothing tells the two runs apart: the new one has no data file, no start time and no name. "
+                "To add it as a run of its own, give it a name (name=...), its start time (started_at=...) "
+                "or its data file (data=...). To update the saved test instead, pin its IRI (iri=...). "
+                "No cell, test or dataset record was written."
+            )
 
     def _is_saved_run(
         self,

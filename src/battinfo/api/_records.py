@@ -1149,8 +1149,8 @@ def _identity_seed(entity_kind: str, entity: Any, *, workspace_root: PathLike | 
     - test-protocol:  test_kind :: name :: version
     - test:           cell_instance_id :: test_kind :: protocol :: run
       (``entities.test_identity_seed``): the protocol's IRI, else its name; a
-      ``Test`` names no data file, so its run is the ``started_at`` it gives.
-      The name is display text and never enters.
+      ``Test`` names no data file, so its run is the ``started_at`` it gives,
+      else its name (``entities.given_test_name``).
     - dataset:        cell_instance_id :: test_id :: locator :: name, where the
       locator is the remote access/download URL, or a local data file's path
       relative to *workspace_root* (its folder and file name outside it); see
@@ -1198,17 +1198,28 @@ def _identity_seed(entity_kind: str, entity: Any, *, workspace_root: PathLike | 
             ]
         )
     elif entity_kind == "test":
-        from battinfo.entities import test_identity_seed  # noqa: PLC0415
+        from battinfo.entities import given_test_name, test_identity_seed  # noqa: PLC0415
 
         if not _seed_part(entity.cell_instance_id):
             return None
         protocol = getattr(entity, "protocol", None)
+        protocol_name = getattr(protocol, "name", None) if protocol is not None else None
+        # A title generated from the cell (C01 cycling) is not a name the caller gave;
+        # the cell's labels are known here only when the test holds the Cell object.
+        cell = getattr(entity, "cell", None)
+        cell_labels = [getattr(cell, field, None) for field in ("name", "serial_number", "batch_id")] if cell else []
         seed = test_identity_seed(
             cell_id=entity.cell_instance_id,
             kind=getattr(entity, "test_kind", None),
             protocol_id=getattr(entity, "protocol_id", None),
-            protocol_name=getattr(protocol, "name", None) if protocol is not None else None,
+            protocol_name=protocol_name,
             started_at=getattr(entity, "started_at", None),
+            name=given_test_name(
+                getattr(entity, "name", None),
+                kind=getattr(entity, "test_kind", None),
+                protocol_name=protocol_name,
+                cell_labels=cell_labels,
+            ),
         )
     elif entity_kind == "dataset":
         locator = dataset_locator_seed(

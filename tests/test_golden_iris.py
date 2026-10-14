@@ -71,7 +71,8 @@ PUBLICATION_SERIAL_FIRST = (
 
 TEST_RUN = (
     "A test is seeded from its cell, kind, protocol (its IRI whenever it has one, else its name) "
-    "and run (its first data file's locator, else a start time the caller gives), never from its name."
+    "and run (its first data file's locator, else a start time the caller gives, else a name the "
+    "caller gives), never from a title BattINFO generates."
 )
 TEST_RUN_SAVED_WITHOUT_ID = (
     TEST_RUN + " A save without an id mints a test that has a cell and a kind, where it refused one "
@@ -334,7 +335,7 @@ MOVED: dict[str, tuple[str, str]] = {
         TEST_RUN,
     ),
     "test | save | named": (
-        "https://w3id.org/battinfo/test/5xta-r5e0-eswr-fyzh",
+        "https://w3id.org/battinfo/test/ha18-0evh-gx4w-87nh",
         TEST_RUN,
     ),
     "test | save | protocol name": (
@@ -346,7 +347,7 @@ MOVED: dict[str, tuple[str, str]] = {
         TEST_RUN,
     ),
     "test | save_record | named": (
-        "https://w3id.org/battinfo/test/5xta-r5e0-eswr-fyzh",
+        "https://w3id.org/battinfo/test/ha18-0evh-gx4w-87nh",
         TEST_RUN,
     ),
     "test | save_record | protocol name": (
@@ -366,7 +367,7 @@ MOVED: dict[str, tuple[str, str]] = {
         TEST_RUN,
     ),
     "test | ws | named": (
-        "https://w3id.org/battinfo/test/5xta-r5e0-eswr-fyzh",
+        "https://w3id.org/battinfo/test/ha18-0evh-gx4w-87nh",
         TEST_RUN,
     ),
     "test | ws | protocol by IRI, not saved here": (

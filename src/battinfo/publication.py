@@ -30,6 +30,7 @@ from battinfo.entities import (
     cell_instance_identity_seed,
     cell_spec_identity_seed,
     dataset_locator_seed,
+    given_test_name,
     seed_text,
     stable_uid,
     test_identity_seed,
@@ -1570,11 +1571,17 @@ def _finalize_test(
     if finalized.cell_instance_id is None:
         finalized.cell_instance_id = cell_instance.id
     protocol_name = finalized.protocol.name or "test"
+    given_name = given_test_name(
+        finalized.name,
+        kind=finalized.test_kind,
+        protocol_name=finalized.protocol.name,
+        cell_labels=(cell_instance.name, cell_instance.serial_number, cell_instance.batch_id),
+    )
     if finalized.name is None:
         finalized.name = f"{cell_instance.name} {protocol_name}"
     if finalized.id is None:
         # The test seed every surface shares: cell, kind, protocol (its IRI, else its
-        # name) and the run, here the data's location. The name never enters.
+        # name) and the run, here the data's location, so the name does not enter.
         finalized.id = _entity_iri(
             "test",
             test_identity_seed(
@@ -1584,6 +1591,7 @@ def _finalize_test(
                 protocol_name=finalized.protocol.name,
                 data_locator=data_locator,
                 started_at=finalized.started_at,
+                name=given_name,
             ),
         )
     finalized.dataset_ids = _append_unique(finalized.dataset_ids, dataset_id)
