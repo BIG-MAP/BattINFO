@@ -21,8 +21,8 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
       "properties": {
         "battinfo_version": {
           "type": "string",
-          "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$",
-          "description": "Version of the BattINFO envelope format (semantic versioning)."
+          "pattern": "^\\d+\\.\\d+\\.\\d+(((a|b|rc)\\d+)?(\\.post\\d+)?(\\.dev\\d+)?(\\+[A-Za-z0-9.]+)?|-[A-Za-z0-9.-]+)$",
+          "description": "Version of the BattINFO envelope format: X.Y.Z with an optional PEP 440 suffix (0.8.0rc1, 0.8.0.dev1) or a hyphenated one (0.8.0-rc1)."
         },
         "profile": {
           "type": "string",
@@ -420,8 +420,8 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "battinfo_version": {
               "type": "string",
-              "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$",
-              "description": "Version of the battinfo library that wrote this record (semantic versioning); stamped on save."
+              "pattern": "^\\d+\\.\\d+\\.\\d+(((a|b|rc)\\d+)?(\\.post\\d+)?(\\.dev\\d+)?(\\+[A-Za-z0-9.]+)?|-[A-Za-z0-9.-]+)$",
+              "description": "Version of the battinfo library that wrote this record, stamped on save: X.Y.Z with an optional PEP 440 suffix (0.8.0rc1, 0.8.0.dev1, 0.8.0.post1, 0.8.0+local) or a hyphenated one (0.8.0-rc1)."
             }
           },
           "description": "Where the information in this record came from: source type, file or URL, citation, and retrieval time."
@@ -1315,8 +1315,8 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "battinfo_version": {
               "type": "string",
-              "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$",
-              "description": "Version of the battinfo library that wrote this record (semantic versioning); stamped on save."
+              "pattern": "^\\d+\\.\\d+\\.\\d+(((a|b|rc)\\d+)?(\\.post\\d+)?(\\.dev\\d+)?(\\+[A-Za-z0-9.]+)?|-[A-Za-z0-9.-]+)$",
+              "description": "Version of the battinfo library that wrote this record, stamped on save: X.Y.Z with an optional PEP 440 suffix (0.8.0rc1, 0.8.0.dev1, 0.8.0.post1, 0.8.0+local) or a hyphenated one (0.8.0-rc1)."
             }
           },
           "description": "Where the information in this record came from: source type, file or URL, citation, and retrieval time."
@@ -1915,8 +1915,8 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "battinfo_version": {
               "type": "string",
-              "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$",
-              "description": "Version of the battinfo library that wrote this record (semantic versioning); stamped on save."
+              "pattern": "^\\d+\\.\\d+\\.\\d+(((a|b|rc)\\d+)?(\\.post\\d+)?(\\.dev\\d+)?(\\+[A-Za-z0-9.]+)?|-[A-Za-z0-9.-]+)$",
+              "description": "Version of the battinfo library that wrote this record, stamped on save: X.Y.Z with an optional PEP 440 suffix (0.8.0rc1, 0.8.0.dev1, 0.8.0.post1, 0.8.0+local) or a hyphenated one (0.8.0-rc1)."
             }
           },
           "description": "Where the information in this record came from: source type, file or URL, citation, and retrieval time."
@@ -2561,7 +2561,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "battinfo_version": {
               "type": "string",
-              "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+              "pattern": "^\\d+\\.\\d+\\.\\d+(((a|b|rc)\\d+)?(\\.post\\d+)?(\\.dev\\d+)?(\\+[A-Za-z0-9.]+)?|-[A-Za-z0-9.-]+)$"
             }
           }
         }
@@ -2789,8 +2789,8 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "battinfo_version": {
               "type": "string",
-              "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$",
-              "description": "Version of the battinfo library that wrote this record (semantic versioning); stamped on save."
+              "pattern": "^\\d+\\.\\d+\\.\\d+(((a|b|rc)\\d+)?(\\.post\\d+)?(\\.dev\\d+)?(\\+[A-Za-z0-9.]+)?|-[A-Za-z0-9.-]+)$",
+              "description": "Version of the battinfo library that wrote this record, stamped on save: X.Y.Z with an optional PEP 440 suffix (0.8.0rc1, 0.8.0.dev1, 0.8.0.post1, 0.8.0+local) or a hyphenated one (0.8.0-rc1)."
             }
           },
           "description": "Where the information in this record came from: source type, file or URL, citation, and retrieval time."
@@ -3062,8 +3062,8 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "battinfo_version": {
               "type": "string",
-              "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$",
-              "description": "Version of the battinfo library that wrote this record (semantic versioning); stamped on save."
+              "pattern": "^\\d+\\.\\d+\\.\\d+(((a|b|rc)\\d+)?(\\.post\\d+)?(\\.dev\\d+)?(\\+[A-Za-z0-9.]+)?|-[A-Za-z0-9.-]+)$",
+              "description": "Version of the battinfo library that wrote this record, stamped on save: X.Y.Z with an optional PEP 440 suffix (0.8.0rc1, 0.8.0.dev1, 0.8.0.post1, 0.8.0+local) or a hyphenated one (0.8.0-rc1)."
             }
           },
           "description": "Where the information in this record came from: source type, file or URL, citation, and retrieval time."
@@ -3455,8 +3455,8 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "battinfo_version": {
               "type": "string",
-              "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$",
-              "description": "Version of the battinfo library that wrote this record (semantic versioning); stamped on save."
+              "pattern": "^\\d+\\.\\d+\\.\\d+(((a|b|rc)\\d+)?(\\.post\\d+)?(\\.dev\\d+)?(\\+[A-Za-z0-9.]+)?|-[A-Za-z0-9.-]+)$",
+              "description": "Version of the battinfo library that wrote this record, stamped on save: X.Y.Z with an optional PEP 440 suffix (0.8.0rc1, 0.8.0.dev1, 0.8.0.post1, 0.8.0+local) or a hyphenated one (0.8.0-rc1)."
             }
           },
           "description": "Where the information in this record came from: source type, file or URL, citation, and retrieval time."
@@ -4525,8 +4525,8 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "battinfo_version": {
               "type": "string",
-              "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$",
-              "description": "Version of the battinfo library that wrote this record (semantic versioning); stamped on save."
+              "pattern": "^\\d+\\.\\d+\\.\\d+(((a|b|rc)\\d+)?(\\.post\\d+)?(\\.dev\\d+)?(\\+[A-Za-z0-9.]+)?|-[A-Za-z0-9.-]+)$",
+              "description": "Version of the battinfo library that wrote this record, stamped on save: X.Y.Z with an optional PEP 440 suffix (0.8.0rc1, 0.8.0.dev1, 0.8.0.post1, 0.8.0+local) or a hyphenated one (0.8.0-rc1)."
             }
           },
           "description": "Where the information in this record came from: source type, file or URL, citation, and retrieval time."
@@ -4935,8 +4935,8 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "battinfo_version": {
               "type": "string",
-              "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$",
-              "description": "Version of the battinfo library that wrote this record (semantic versioning); stamped on save."
+              "pattern": "^\\d+\\.\\d+\\.\\d+(((a|b|rc)\\d+)?(\\.post\\d+)?(\\.dev\\d+)?(\\+[A-Za-z0-9.]+)?|-[A-Za-z0-9.-]+)$",
+              "description": "Version of the battinfo library that wrote this record, stamped on save: X.Y.Z with an optional PEP 440 suffix (0.8.0rc1, 0.8.0.dev1, 0.8.0.post1, 0.8.0+local) or a hyphenated one (0.8.0-rc1)."
             }
           },
           "description": "Where the information in this record came from: source type, file or URL, citation, and retrieval time."
@@ -5166,8 +5166,8 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "battinfo_version": {
               "type": "string",
-              "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$",
-              "description": "Version of the battinfo library that wrote this record (semantic versioning); stamped on save."
+              "pattern": "^\\d+\\.\\d+\\.\\d+(((a|b|rc)\\d+)?(\\.post\\d+)?(\\.dev\\d+)?(\\+[A-Za-z0-9.]+)?|-[A-Za-z0-9.-]+)$",
+              "description": "Version of the battinfo library that wrote this record, stamped on save: X.Y.Z with an optional PEP 440 suffix (0.8.0rc1, 0.8.0.dev1, 0.8.0.post1, 0.8.0+local) or a hyphenated one (0.8.0-rc1)."
             }
           },
           "description": "Where the information in this record came from: source type, file or URL, citation, and retrieval time."
@@ -5439,8 +5439,8 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "battinfo_version": {
               "type": "string",
-              "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$",
-              "description": "Version of the battinfo library that wrote this record (semantic versioning); stamped on save."
+              "pattern": "^\\d+\\.\\d+\\.\\d+(((a|b|rc)\\d+)?(\\.post\\d+)?(\\.dev\\d+)?(\\+[A-Za-z0-9.]+)?|-[A-Za-z0-9.-]+)$",
+              "description": "Version of the battinfo library that wrote this record, stamped on save: X.Y.Z with an optional PEP 440 suffix (0.8.0rc1, 0.8.0.dev1, 0.8.0.post1, 0.8.0+local) or a hyphenated one (0.8.0-rc1)."
             }
           },
           "description": "Where the information in this record came from: source type, file or URL, citation, and retrieval time."
@@ -5642,7 +5642,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "battinfo_version": {
               "type": "string",
-              "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+              "pattern": "^\\d+\\.\\d+\\.\\d+(((a|b|rc)\\d+)?(\\.post\\d+)?(\\.dev\\d+)?(\\+[A-Za-z0-9.]+)?|-[A-Za-z0-9.-]+)$"
             }
           }
         }
@@ -5811,7 +5811,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "battinfo_version": {
               "type": "string",
-              "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+              "pattern": "^\\d+\\.\\d+\\.\\d+(((a|b|rc)\\d+)?(\\.post\\d+)?(\\.dev\\d+)?(\\+[A-Za-z0-9.]+)?|-[A-Za-z0-9.-]+)$"
             }
           }
         }
@@ -6060,8 +6060,8 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "battinfo_version": {
               "type": "string",
-              "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$",
-              "description": "Version of the battinfo library that wrote this record (semantic versioning); stamped on save."
+              "pattern": "^\\d+\\.\\d+\\.\\d+(((a|b|rc)\\d+)?(\\.post\\d+)?(\\.dev\\d+)?(\\+[A-Za-z0-9.]+)?|-[A-Za-z0-9.-]+)$",
+              "description": "Version of the battinfo library that wrote this record, stamped on save: X.Y.Z with an optional PEP 440 suffix (0.8.0rc1, 0.8.0.dev1, 0.8.0.post1, 0.8.0+local) or a hyphenated one (0.8.0-rc1)."
             }
           }
         },
@@ -6457,8 +6457,8 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "battinfo_version": {
               "type": "string",
-              "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$",
-              "description": "Version of the battinfo library that wrote this record (semantic versioning); stamped on save."
+              "pattern": "^\\d+\\.\\d+\\.\\d+(((a|b|rc)\\d+)?(\\.post\\d+)?(\\.dev\\d+)?(\\+[A-Za-z0-9.]+)?|-[A-Za-z0-9.-]+)$",
+              "description": "Version of the battinfo library that wrote this record, stamped on save: X.Y.Z with an optional PEP 440 suffix (0.8.0rc1, 0.8.0.dev1, 0.8.0.post1, 0.8.0+local) or a hyphenated one (0.8.0-rc1)."
             }
           },
           "description": "Where the information in this record came from: source type, file or URL, citation, and retrieval time."
@@ -6800,8 +6800,8 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "battinfo_version": {
               "type": "string",
-              "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$",
-              "description": "Version of the battinfo library that wrote this record (semantic versioning); stamped on save."
+              "pattern": "^\\d+\\.\\d+\\.\\d+(((a|b|rc)\\d+)?(\\.post\\d+)?(\\.dev\\d+)?(\\+[A-Za-z0-9.]+)?|-[A-Za-z0-9.-]+)$",
+              "description": "Version of the battinfo library that wrote this record, stamped on save: X.Y.Z with an optional PEP 440 suffix (0.8.0rc1, 0.8.0.dev1, 0.8.0.post1, 0.8.0+local) or a hyphenated one (0.8.0-rc1)."
             }
           },
           "description": "Where the information in this record came from: source type, file or URL, citation, and retrieval time."
@@ -7245,8 +7245,8 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "battinfo_version": {
               "type": "string",
-              "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$",
-              "description": "Version of the battinfo library that wrote this record (semantic versioning); stamped on save."
+              "pattern": "^\\d+\\.\\d+\\.\\d+(((a|b|rc)\\d+)?(\\.post\\d+)?(\\.dev\\d+)?(\\+[A-Za-z0-9.]+)?|-[A-Za-z0-9.-]+)$",
+              "description": "Version of the battinfo library that wrote this record, stamped on save: X.Y.Z with an optional PEP 440 suffix (0.8.0rc1, 0.8.0.dev1, 0.8.0.post1, 0.8.0+local) or a hyphenated one (0.8.0-rc1)."
             }
           },
           "description": "Where the information in this record came from: source type, file or URL, citation, and retrieval time."
@@ -7575,8 +7575,8 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "battinfo_version": {
           "type": "string",
-          "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$",
-          "description": "Version of the battinfo library that wrote this record (semantic versioning); stamped on save."
+          "pattern": "^\\d+\\.\\d+\\.\\d+(((a|b|rc)\\d+)?(\\.post\\d+)?(\\.dev\\d+)?(\\+[A-Za-z0-9.]+)?|-[A-Za-z0-9.-]+)$",
+          "description": "Version of the battinfo library that wrote this record, stamped on save: X.Y.Z with an optional PEP 440 suffix (0.8.0rc1, 0.8.0.dev1, 0.8.0.post1, 0.8.0+local) or a hyphenated one (0.8.0-rc1)."
         }
       }
     }
@@ -9177,8 +9177,8 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "battinfo_version": {
               "type": "string",
-              "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$",
-              "description": "Version of the battinfo library that wrote this record (semantic versioning); stamped on save."
+              "pattern": "^\\d+\\.\\d+\\.\\d+(((a|b|rc)\\d+)?(\\.post\\d+)?(\\.dev\\d+)?(\\+[A-Za-z0-9.]+)?|-[A-Za-z0-9.-]+)$",
+              "description": "Version of the battinfo library that wrote this record, stamped on save: X.Y.Z with an optional PEP 440 suffix (0.8.0rc1, 0.8.0.dev1, 0.8.0.post1, 0.8.0+local) or a hyphenated one (0.8.0-rc1)."
             }
           },
           "description": "Where the information in this record came from: source type, file or URL, citation, and retrieval time."
@@ -10068,7 +10068,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "battinfo_version": {
               "type": "string",
-              "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+              "pattern": "^\\d+\\.\\d+\\.\\d+(((a|b|rc)\\d+)?(\\.post\\d+)?(\\.dev\\d+)?(\\+[A-Za-z0-9.]+)?|-[A-Za-z0-9.-]+)$"
             }
           }
         },
@@ -10649,8 +10649,8 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "battinfo_version": {
               "type": "string",
-              "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$",
-              "description": "Version of the battinfo library that wrote this record (semantic versioning); stamped on save."
+              "pattern": "^\\d+\\.\\d+\\.\\d+(((a|b|rc)\\d+)?(\\.post\\d+)?(\\.dev\\d+)?(\\+[A-Za-z0-9.]+)?|-[A-Za-z0-9.-]+)$",
+              "description": "Version of the battinfo library that wrote this record, stamped on save: X.Y.Z with an optional PEP 440 suffix (0.8.0rc1, 0.8.0.dev1, 0.8.0.post1, 0.8.0+local) or a hyphenated one (0.8.0-rc1)."
             }
           },
           "description": "Where the information in this record came from: source type, file or URL, citation, and retrieval time."
@@ -10922,8 +10922,8 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "battinfo_version": {
               "type": "string",
-              "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$",
-              "description": "Version of the battinfo library that wrote this record (semantic versioning); stamped on save."
+              "pattern": "^\\d+\\.\\d+\\.\\d+(((a|b|rc)\\d+)?(\\.post\\d+)?(\\.dev\\d+)?(\\+[A-Za-z0-9.]+)?|-[A-Za-z0-9.-]+)$",
+              "description": "Version of the battinfo library that wrote this record, stamped on save: X.Y.Z with an optional PEP 440 suffix (0.8.0rc1, 0.8.0.dev1, 0.8.0.post1, 0.8.0+local) or a hyphenated one (0.8.0-rc1)."
             }
           },
           "description": "Where the information in this record came from: source type, file or URL, citation, and retrieval time."
@@ -11210,8 +11210,8 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "battinfo_version": {
               "type": "string",
-              "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$",
-              "description": "Version of the battinfo library that wrote this record (semantic versioning); stamped on save."
+              "pattern": "^\\d+\\.\\d+\\.\\d+(((a|b|rc)\\d+)?(\\.post\\d+)?(\\.dev\\d+)?(\\+[A-Za-z0-9.]+)?|-[A-Za-z0-9.-]+)$",
+              "description": "Version of the battinfo library that wrote this record, stamped on save: X.Y.Z with an optional PEP 440 suffix (0.8.0rc1, 0.8.0.dev1, 0.8.0.post1, 0.8.0+local) or a hyphenated one (0.8.0-rc1)."
             }
           },
           "description": "Where the information in this record came from: source type, file or URL, citation, and retrieval time."
@@ -11957,8 +11957,8 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "battinfo_version": {
               "type": "string",
-              "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$",
-              "description": "Version of the battinfo library that wrote this record (semantic versioning); stamped on save."
+              "pattern": "^\\d+\\.\\d+\\.\\d+(((a|b|rc)\\d+)?(\\.post\\d+)?(\\.dev\\d+)?(\\+[A-Za-z0-9.]+)?|-[A-Za-z0-9.-]+)$",
+              "description": "Version of the battinfo library that wrote this record, stamped on save: X.Y.Z with an optional PEP 440 suffix (0.8.0rc1, 0.8.0.dev1, 0.8.0.post1, 0.8.0+local) or a hyphenated one (0.8.0-rc1)."
             }
           },
           "description": "Where the information in this record came from: source type, file or URL, citation, and retrieval time."
