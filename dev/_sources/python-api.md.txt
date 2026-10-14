@@ -44,8 +44,8 @@ ws = battinfo.workspace(".")
 
 ws.convert()                              # raw cycler files → tidy BDF tables
 spec = ws.search("samsung inr21700 50e")[0]   # reuse the registry's identity
-ws.add("cell", spec=spec, serial_numbers=["S1", "S2"])
-ws.add("test", type="cycling", cell="S1", data="bdf/S1.bdf.csv")
+ws.add("cell", spec=spec, serial_numbers=["MYLAB-50E-001", "MYLAB-50E-002"])   # serials only your lab uses
+ws.add("test", type="cycling", cell="MYLAB-50E-001", data="bdf/MYLAB-50E-001.bdf.csv")
 ws.save()
 ws.publish(note="My cycling campaign, 2026")
 ```

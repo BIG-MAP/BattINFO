@@ -80,6 +80,7 @@ handled by the BattINFO registry deployment. What a record's IRI serves today is
 
 `import_()` reconstructs the **structural core** — cell specs, cell instances, tests
 (kind, protocol name, instrument), datasets and distributions — losslessly.
+Every record keeps the IRI it was published under, and a test that produced several data files comes back as one test with one dataset per file. A dataset that several tests list as an output comes back once, related to each of them.
 
 **Not restored on import** (the published graph is the source of truth; re-importing then
 re-publishing would drop these): conformance/quality annotations (`dqv`/`earl` +

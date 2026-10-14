@@ -561,7 +561,8 @@
 <p>Describe a coin cell the way you built it: materials → electrodes →
 electrolyte/separator/housing → cell spec → physical cells — every layer a
 saved record, every link an IRI. This whole page is one continuous script;
-run it top to bottom.</p>
+run it top to bottom. Running it again updates the records it saved in place,
+because every record here gets its IRI from what identifies it.</p>
 <p><strong>Ingredients:</strong> a library folder (here <code class="docutils literal notranslate"><span class="pre">my-library</span></code>) and the material specs
 from <a class="reference internal" href="register-materials.html"><span class="std std-doc">Register materials</span></a>. All the <code class="docutils literal notranslate"><span class="pre">create_*</span></code>/<code class="docutils literal notranslate"><span class="pre">save_*</span></code>
 functions live in <code class="docutils literal notranslate"><span class="pre">battinfo.api</span></code>.</p>
@@ -589,53 +590,64 @@ capture it, it is how the next layer refers to this one:</p>
 </section>
 <section id="the-electrodes-a-96-2-2-coating-by-iri">
 <span id="electrode-recipe"></span><h2>2. The electrodes — a 96/2/2 coating, by IRI<a class="headerlink" href="#the-electrodes-a-96-2-2-coating-by-iri" title="Link to this heading">#</a></h2>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_component_spec</span><span class="p">,</span> <span class="n">save_component_spec</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_electrode_spec</span><span class="p">,</span> <span class="n">save_electrode_spec</span>
 
-<span class="n">cathode</span> <span class="o">=</span> <span class="n">create_component_spec</span><span class="p">(</span>
-    <span class="s2">&quot;electrode&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;NMC811 cathode 96/2/2&quot;</span><span class="p">,</span> <span class="n">polarity</span><span class="o">=</span><span class="s2">&quot;positive&quot;</span><span class="p">,</span>
-    <span class="n">body</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;coating&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;component&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;active_material&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;NMC811&quot;</span><span class="p">,</span> <span class="s2">&quot;material_spec_id&quot;</span><span class="p">:</span> <span class="n">NMC811_IRI</span><span class="p">,</span>
-                                     <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;mass_fraction&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">0.96</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">}}}],</span>
-                <span class="s2">&quot;binder&quot;</span><span class="p">:</span>   <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;PVDF&quot;</span><span class="p">,</span> <span class="s2">&quot;material_spec_id&quot;</span><span class="p">:</span> <span class="n">PVDF_IRI</span><span class="p">,</span>
-                              <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;mass_fraction&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">0.02</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">}}}],</span>
-                <span class="s2">&quot;additive&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Carbon black&quot;</span><span class="p">,</span> <span class="s2">&quot;material_spec_id&quot;</span><span class="p">:</span> <span class="n">CB_IRI</span><span class="p">,</span>
-                              <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;mass_fraction&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">0.02</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">}}}],</span>
-            <span class="p">},</span>
-            <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;loading&quot;</span><span class="p">:</span>   <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">21</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;mg/cm2&quot;</span><span class="p">},</span>
-                         <span class="s2">&quot;thickness&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">75</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;um&quot;</span><span class="p">}},</span>
+<span class="n">cathode</span> <span class="o">=</span> <span class="n">create_electrode_spec</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;NMC811 cathode 96/2/2&quot;</span><span class="p">,</span> <span class="n">active_material_kind</span><span class="o">=</span><span class="s2">&quot;nmc811&quot;</span><span class="p">,</span> <span class="n">polarity</span><span class="o">=</span><span class="s2">&quot;positive&quot;</span><span class="p">,</span>
+    <span class="n">coating</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;component&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;active_material&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;NMC811&quot;</span><span class="p">,</span> <span class="s2">&quot;material_spec_id&quot;</span><span class="p">:</span> <span class="n">NMC811_IRI</span><span class="p">,</span>
+                                 <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;mass_fraction&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">0.96</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">}}}],</span>
+            <span class="s2">&quot;binder&quot;</span><span class="p">:</span>   <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;PVDF&quot;</span><span class="p">,</span> <span class="s2">&quot;material_spec_id&quot;</span><span class="p">:</span> <span class="n">PVDF_IRI</span><span class="p">,</span>
+                          <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;mass_fraction&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">0.02</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">}}}],</span>
+            <span class="s2">&quot;additive&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Carbon black&quot;</span><span class="p">,</span> <span class="s2">&quot;material_spec_id&quot;</span><span class="p">:</span> <span class="n">CB_IRI</span><span class="p">,</span>
+                          <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;mass_fraction&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">0.02</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">}}}],</span>
         <span class="p">},</span>
-        <span class="s2">&quot;current_collector&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Aluminium foil&quot;</span><span class="p">,</span>
-                              <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;thickness&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">15</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;um&quot;</span><span class="p">}}},</span>
-    <span class="p">})</span>
-<span class="n">CATHODE_IRI</span> <span class="o">=</span> <span class="n">save_component_spec</span><span class="p">(</span><span class="s2">&quot;electrode&quot;</span><span class="p">,</span> <span class="n">cathode</span><span class="p">,</span> <span class="n">source_root</span><span class="o">=</span><span class="n">LAB</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;upsert&quot;</span><span class="p">)[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+        <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;loading&quot;</span><span class="p">:</span>   <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">21</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;mg/cm2&quot;</span><span class="p">},</span>
+                     <span class="s2">&quot;thickness&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">75</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;um&quot;</span><span class="p">}},</span>
+    <span class="p">},</span>
+    <span class="n">current_collector</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Aluminium foil&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;thickness&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">15</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;um&quot;</span><span class="p">}}})</span>
+<span class="n">CATHODE_IRI</span> <span class="o">=</span> <span class="n">save_electrode_spec</span><span class="p">(</span><span class="n">cathode</span><span class="p">,</span> <span class="n">source_root</span><span class="o">=</span><span class="n">LAB</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;upsert&quot;</span><span class="p">)[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
 
-<span class="n">anode</span> <span class="o">=</span> <span class="n">create_component_spec</span><span class="p">(</span>
-    <span class="s2">&quot;electrode&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Graphite anode&quot;</span><span class="p">,</span> <span class="n">polarity</span><span class="o">=</span><span class="s2">&quot;negative&quot;</span><span class="p">,</span>
-    <span class="n">body</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;coating&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;component&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;active_material&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Graphite&quot;</span><span class="p">,</span> <span class="s2">&quot;material_spec_id&quot;</span><span class="p">:</span> <span class="n">GRAPHITE_IRI</span><span class="p">,</span>
-                                     <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;mass_fraction&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">0.96</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">}}}],</span>
-                <span class="s2">&quot;binder&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;PVDF&quot;</span><span class="p">,</span> <span class="s2">&quot;material_spec_id&quot;</span><span class="p">:</span> <span class="n">PVDF_IRI</span><span class="p">}],</span>
-            <span class="p">},</span>
-            <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;loading&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;mg/cm2&quot;</span><span class="p">}},</span>
+<span class="n">anode</span> <span class="o">=</span> <span class="n">create_electrode_spec</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Graphite anode&quot;</span><span class="p">,</span> <span class="n">active_material_kind</span><span class="o">=</span><span class="s2">&quot;graphite&quot;</span><span class="p">,</span> <span class="n">polarity</span><span class="o">=</span><span class="s2">&quot;negative&quot;</span><span class="p">,</span>
+    <span class="n">coating</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;component&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;active_material&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Graphite&quot;</span><span class="p">,</span> <span class="s2">&quot;material_spec_id&quot;</span><span class="p">:</span> <span class="n">GRAPHITE_IRI</span><span class="p">,</span>
+                                 <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;mass_fraction&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">0.96</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">}}}],</span>
+            <span class="s2">&quot;binder&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;PVDF&quot;</span><span class="p">,</span> <span class="s2">&quot;material_spec_id&quot;</span><span class="p">:</span> <span class="n">PVDF_IRI</span><span class="p">}],</span>
         <span class="p">},</span>
-        <span class="s2">&quot;current_collector&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Copper foil&quot;</span><span class="p">,</span>
-                              <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;thickness&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;um&quot;</span><span class="p">}}},</span>
-    <span class="p">})</span>
-<span class="n">ANODE_IRI</span> <span class="o">=</span> <span class="n">save_component_spec</span><span class="p">(</span><span class="s2">&quot;electrode&quot;</span><span class="p">,</span> <span class="n">anode</span><span class="p">,</span> <span class="n">source_root</span><span class="o">=</span><span class="n">LAB</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;upsert&quot;</span><span class="p">)[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+        <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;loading&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;mg/cm2&quot;</span><span class="p">}},</span>
+    <span class="p">},</span>
+    <span class="n">current_collector</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Copper foil&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;thickness&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;um&quot;</span><span class="p">}}})</span>
+<span class="n">ANODE_IRI</span> <span class="o">=</span> <span class="n">save_electrode_spec</span><span class="p">(</span><span class="n">anode</span><span class="p">,</span> <span class="n">source_root</span><span class="o">=</span><span class="n">LAB</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;upsert&quot;</span><span class="p">)[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
-<p>The <code class="docutils literal notranslate"><span class="pre">body=</span></code> shapes mirror the canonical examples in
+<p>An electrode spec gets its IRI from its producer, product (here its name),
+grade, active-material kind and processing route: the IRI
+<code class="docutils literal notranslate"><span class="pre">ws.add(&quot;electrode_spec&quot;,</span> <span class="pre">...)</span></code> gives the same electrode. The <code class="docutils literal notranslate"><span class="pre">coating=</span></code> and
+<code class="docutils literal notranslate"><span class="pre">current_collector=</span></code> shapes mirror the canonical examples in
 <a class="reference external" href="https://github.com/BIG-MAP/BattINFO/tree/main/examples/electrode-spec"><code class="docutils literal notranslate"><span class="pre">examples/electrode-spec/</span></code></a>
 — when in doubt, open one and copy its structure.</p>
 </section>
 <section id="electrolyte-separator-housing">
 <h2>3. Electrolyte, separator, housing<a class="headerlink" href="#electrolyte-separator-housing" title="Link to this heading">#</a></h2>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">electrolyte</span> <span class="o">=</span> <span class="n">create_component_spec</span><span class="p">(</span>
+<p>These three do not mint from a natural key yet: without a <code class="docutils literal notranslate"><span class="pre">uid=</span></code> or <code class="docutils literal notranslate"><span class="pre">id=</span></code>,
+<code class="docutils literal notranslate"><span class="pre">create_component_spec</span></code> gives each a random IRI, a new one on every call, so a
+second run would save a second copy. Derive each uid from what identifies the
+part instead:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_component_spec</span><span class="p">,</span> <span class="n">save_component_spec</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.entities</span><span class="w"> </span><span class="kn">import</span> <span class="n">stable_uid</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">part_uid</span><span class="p">(</span><span class="n">family</span><span class="p">,</span> <span class="o">*</span><span class="n">key</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A uid from the part&#39;s natural key: the same part always gets the same IRI.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">stable_uid</span><span class="p">(</span><span class="s2">&quot;::&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">family</span><span class="si">}</span><span class="s2">-spec&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">key</span><span class="p">]))</span>
+
+<span class="n">electrolyte</span> <span class="o">=</span> <span class="n">create_component_spec</span><span class="p">(</span>
     <span class="s2">&quot;electrolyte&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;1M LiPF6 EC:EMC 3:7&quot;</span><span class="p">,</span>
+    <span class="n">uid</span><span class="o">=</span><span class="n">part_uid</span><span class="p">(</span><span class="s2">&quot;electrolyte&quot;</span><span class="p">,</span> <span class="s2">&quot;My Lab&quot;</span><span class="p">,</span> <span class="s2">&quot;1M LiPF6 EC:EMC 3:7&quot;</span><span class="p">),</span>
     <span class="n">body</span><span class="o">=</span><span class="p">{</span>
         <span class="s2">&quot;family&quot;</span><span class="p">:</span> <span class="s2">&quot;organic&quot;</span><span class="p">,</span>
         <span class="s2">&quot;salt&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;LiPF6&quot;</span><span class="p">,</span> <span class="s2">&quot;material_spec_id&quot;</span><span class="p">:</span> <span class="n">LIPF6_IRI</span><span class="p">,</span>
@@ -651,7 +663,8 @@ capture it, it is how the next layer refers to this one:</p>
                                       <span class="n">source_root</span><span class="o">=</span><span class="n">LAB</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;upsert&quot;</span><span class="p">)[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
 
 <span class="n">separator</span> <span class="o">=</span> <span class="n">create_component_spec</span><span class="p">(</span>
-    <span class="s2">&quot;separator&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Celgard 2325&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;separator&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Celgard 2325&quot;</span><span class="p">,</span> <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Celgard&quot;</span><span class="p">,</span> <span class="n">product_id</span><span class="o">=</span><span class="s2">&quot;2325&quot;</span><span class="p">,</span>
+    <span class="n">uid</span><span class="o">=</span><span class="n">part_uid</span><span class="p">(</span><span class="s2">&quot;separator&quot;</span><span class="p">,</span> <span class="s2">&quot;Celgard&quot;</span><span class="p">,</span> <span class="s2">&quot;2325&quot;</span><span class="p">),</span>
     <span class="n">body</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;material&quot;</span><span class="p">:</span> <span class="s2">&quot;polypropylene&quot;</span><span class="p">,</span> <span class="s2">&quot;structure&quot;</span><span class="p">:</span> <span class="s2">&quot;trilayer&quot;</span><span class="p">,</span>
           <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;thickness&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;um&quot;</span><span class="p">},</span>
                        <span class="s2">&quot;porosity&quot;</span><span class="p">:</span>  <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">0.39</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">}}})</span>
@@ -660,6 +673,7 @@ capture it, it is how the next layer refers to this one:</p>
 
 <span class="n">housing</span> <span class="o">=</span> <span class="n">create_component_spec</span><span class="p">(</span>
     <span class="s2">&quot;housing&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;CR2032 coin housing&quot;</span><span class="p">,</span>
+    <span class="n">uid</span><span class="o">=</span><span class="n">part_uid</span><span class="p">(</span><span class="s2">&quot;housing&quot;</span><span class="p">,</span> <span class="s2">&quot;My Lab&quot;</span><span class="p">,</span> <span class="s2">&quot;CR2032 coin housing&quot;</span><span class="p">),</span>
     <span class="n">body</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;cell_format&quot;</span><span class="p">:</span> <span class="s2">&quot;coin&quot;</span><span class="p">,</span>
           <span class="s2">&quot;case&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;size_code&quot;</span><span class="p">:</span> <span class="s2">&quot;2032&quot;</span><span class="p">,</span> <span class="s2">&quot;material&quot;</span><span class="p">:</span> <span class="s2">&quot;Stainless steel&quot;</span><span class="p">,</span>
                    <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;diameter&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;mm&quot;</span><span class="p">},</span>
@@ -673,6 +687,12 @@ capture it, it is how the next layer refers to this one:</p>
 the electrolyte’s <code class="docutils literal notranslate"><span class="pre">&quot;organic&quot;</span></code>/<code class="docutils literal notranslate"><span class="pre">&quot;aqueous&quot;</span></code> classification is the <code class="docutils literal notranslate"><span class="pre">family</span></code> key
 <em>inside</em> <code class="docutils literal notranslate"><span class="pre">body=</span></code>, not a keyword argument.</p>
 </div></blockquote>
+<p>The random IRI that <code class="docutils literal notranslate"><span class="pre">create_component_spec</span></code> and <code class="docutils literal notranslate"><span class="pre">create_component_instance</span></code>,
+and the equipment builders <code class="docutils literal notranslate"><span class="pre">create_equipment_spec</span></code> and <code class="docutils literal notranslate"><span class="pre">create_equipment</span></code>,
+give a record without a <code class="docutils literal notranslate"><span class="pre">uid=</span></code> or <code class="docutils literal notranslate"><span class="pre">id=</span></code> is outside BattINFO’s identity
+contract: nothing can derive it again. These builders get natural-key minting
+in 0.9. Until then, give every record you will save a uid, as above; the
+<a class="reference internal" href="../scope.html#identifiers"><span class="std std-ref">known limitations</span></a> list this.</p>
 </section>
 <section id="the-cell-spec-all-five-references">
 <h2>4. The cell spec — all five references<a class="headerlink" href="#the-cell-spec-all-five-references" title="Link to this heading">#</a></h2>
@@ -715,9 +735,11 @@ see <a class="reference internal" href="../records/separators.html"><span class=
 </section>
 <section id="validate-the-whole-set">
 <span id="validate-the-set"></span><h2>6. Validate the whole set<a class="headerlink" href="#validate-the-whole-set" title="Link to this heading">#</a></h2>
-<p>Save does <strong>not</strong> currently reject a reference to a spec that does not exist —
-a typo in an IRI lands on disk silently. <code class="docutils literal notranslate"><span class="pre">validate_record_report</span></code> catches it,
-so finish every build session by sweeping the library:</p>
+<p>Saves check references by default, so a typo in an IRI normally fails at
+<code class="docutils literal notranslate"><span class="pre">save_*</span></code> time. Finish every build session by sweeping the library under the
+strict policy anyway: it also catches a reference that went missing after the
+save, and the gaps strict validation refuses, such as an electrode spec with no
+active-material kind:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">battinfo</span><span class="w"> </span><span class="kn">import</span> <span class="n">validate_record_report</span>
@@ -725,7 +747,7 @@ so finish every build session by sweeping the library:</p>
 <span class="n">bad</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">LAB</span><span class="p">)</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s2">&quot;*.json&quot;</span><span class="p">)):</span>
     <span class="n">report</span> <span class="o">=</span> <span class="n">validate_record_report</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)),</span>
-                                    <span class="n">source_root</span><span class="o">=</span><span class="n">LAB</span><span class="p">)</span>
+                                    <span class="n">source_root</span><span class="o">=</span><span class="n">LAB</span><span class="p">,</span> <span class="n">policy</span><span class="o">=</span><span class="s2">&quot;strict&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">report</span><span class="o">.</span><span class="n">ok</span><span class="p">:</span>
         <span class="n">bad</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;INVALID </span><span class="si">{</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -736,16 +758,14 @@ so finish every build session by sweeping the library:</p>
 </pre></div>
 </div>
 <p>A dangling reference reports as <code class="docutils literal notranslate"><span class="pre">reference.missing</span></code> with the offending IRI —
-fix the reference (or register the missing part) and re-run. Saves also
-check references by default, so a typo normally fails at <code class="docutils literal notranslate"><span class="pre">save_*</span></code> time
-before it ever lands on disk; this sweep is the belt-and-braces check over
-a finished set.</p>
+fix the reference (or register the missing part) and re-run.</p>
 </section>
 <section id="what-you-have-now">
 <h2>What you have now<a class="headerlink" href="#what-you-have-now" title="Link to this heading">#</a></h2>
 <p>A three-level graph on disk — cell → components → materials — where every node
-is a schema-valid record with a permanent IRI, and shared parts (that binder,
-that electrolyte) are registered once and referenced everywhere. The
+is a strictly valid record with a permanent IRI, and shared parts (that binder,
+that electrolyte) are registered once and referenced everywhere. Run the page
+again and it lands on the same files and the same links. The
 <a class="reference internal" href="../records/cells.html"><span class="std std-doc">cells page</span></a> shows the same pattern across the packaged
 example fleet, and <a class="reference internal" href="find-existing-records.html"><span class="std std-doc">Find existing records</span></a> shows how
 to query what you have built.</p>

@@ -627,17 +627,51 @@ preserved, so re-serialising another build’s record never falsifies origin.</p
 </section>
 <section id="identifiers-are-deterministic">
 <h3>Identifiers are deterministic<a class="headerlink" href="#identifiers-are-deterministic" title="Link to this heading">#</a></h3>
-<p>Records saved without an explicit <code class="docutils literal notranslate"><span class="pre">uid</span></code> mint their IRI from the record’s
-natural identity key (for a cell spec: manufacturer :: model :: format ::
-chemistry :: size code), using the same seeds in every authoring path.
-Consequences you can rely on:</p>
+<p>Records saved without an explicit <code class="docutils literal notranslate"><span class="pre">uid</span></code> mint their IRI on your machine from the
+record’s natural identity key, through one primitive (<code class="docutils literal notranslate"><span class="pre">entities.stable_uid</span></code>)
+and the shared seed builders in <code class="docutils literal notranslate"><span class="pre">battinfo.entities</span></code>. A cell spec’s key is its
+manufacturer, model, format, chemistry and size code; a cell’s is its spec and
+its serial number (or name); a test’s is its cell, kind, protocol and run.
+Free text in a key is normalised first (surrounding and repeated whitespace, a
+no-break space and a decomposed accent change nothing, case does), and a
+chemistry counts by its vocabulary key, so <code class="docutils literal notranslate"><span class="pre">Li-ion</span></code> and <code class="docutils literal notranslate"><span class="pre">LI-ION</span></code> are one cell
+spec. Consequences you can rely on:</p>
 <ul class="simple">
 <li><p>re-running an identical ingest is a <strong>no-op</strong>, never a duplicate corpus;</p></li>
-<li><p>the workspace and <code class="docutils literal notranslate"><span class="pre">save_*</span></code> paths mint <strong>identical IRIs</strong> for identical
-identities (tested);</p></li>
+<li><p>running the same <code class="docutils literal notranslate"><span class="pre">ws.load()</span></code> or <code class="docutils literal notranslate"><span class="pre">ws.add()</span></code> call again in one session, as a notebook does when a cell is re-run, reuses the record the session already holds instead of adding a copy;</p></li>
+<li><p>an IRI a record already has (pinned, imported, or given by an earlier save, in this session or an earlier one in the same folder, a cell spec or test saved before 0.8.0 included) never moves when a record with the same identity fields joins: the newcomer is minted from its content. A record saved by an earlier session is recognised by its content, so one you edit in the same save in which such a newcomer joins is minted from its content too; pin it;</p></li>
+<li><p>a test’s IRI names one run on one cell, told apart by its protocol and its first data file (or, for a test without data, a start time you pass, else the name you give it), so a later run with its own data, start time or name never takes an earlier run’s IRI, and renaming a test with data or a start time keeps its IRI; a title BattINFO generates (<code class="docutils literal notranslate"><span class="pre">C01</span> <span class="pre">cycling</span></code>) never enters, and a save refuses to let a test with none of these replace a saved run with another instrument or time window;</p></li>
+<li><p>the workspace, its engine, a save without an id, and the <code class="docutils literal notranslate"><span class="pre">save_*</span></code> and <code class="docutils literal notranslate"><span class="pre">create_*</span></code> functions for cell specs, cells, test specs, tests without data files, materials, electrodes, channels, parameter sets and organizations mint <strong>identical IRIs</strong> for identical identities, and so do the workspace, its engine and <code class="docutils literal notranslate"><span class="pre">save_dataset</span></code> for datasets, the publication package for cell specs and cells, and the batch path for a cell with a serial number (with <code class="docutils literal notranslate"><span class="pre">ws.add(&quot;cell&quot;)</span></code> only when the batch cell has no batch id) (<code class="docutils literal notranslate"><span class="pre">tests/test_idempotent_minting.py</span></code>); <code class="docutils literal notranslate"><span class="pre">tests/test_golden_iris.py</span></code> fails if any path’s IRI moves without a changelog entry;</p></li>
 <li><p>records with no distinguishing identity still mint randomly — two anonymous
 but physically distinct cells never silently merge.</p></li>
 </ul>
+<p>Some paths are outside this until 0.9, which moves every minting path onto
+<code class="docutils literal notranslate"><span class="pre">battinfo.entities</span></code> and keeps the IRIs they minted in 0.8 findable (section 5
+of the identifier policy):</p>
+<ul class="simple">
+<li><p>the component and equipment builders (<code class="docutils literal notranslate"><span class="pre">create_component_spec</span></code>,
+<code class="docutils literal notranslate"><span class="pre">create_component_instance</span></code>, their per-family wrappers, <code class="docutils literal notranslate"><span class="pre">create_equipment_spec</span></code>
+and <code class="docutils literal notranslate"><span class="pre">create_equipment</span></code>) give a record without <code class="docutils literal notranslate"><span class="pre">uid=</span></code> or <code class="docutils literal notranslate"><span class="pre">id=</span></code> a random IRI,
+a new one on every call;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">batch</span> <span class="pre">init</span></code> and <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">batch</span> <span class="pre">add</span></code> give a cell without a serial
+number a random IRI, recorded in its <code class="docutils literal notranslate"><span class="pre">battinfo.yaml</span></code>;</p></li>
+<li><p>the interop importers (BattInfoConverter, the solid-state database,
+Discovery and the Battery Data Commons bridge) mint from their own seeds:
+stable when the same source is imported again, but not the IRIs the
+workspace gives the same records;</p></li>
+<li><p>the publication package and <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">batch</span> <span class="pre">package</span></code> seed a dataset from its
+folder and title, not its file, so its dataset IRI differs from the
+workspace’s, and the publication package does the same for the run of a
+test with data;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">batch</span> <span class="pre">package</span></code> seeds a test from its raw file’s path in the cell
+folder, so it matches the workspace’s test only when the workspace’s data
+file has that path in the workspace folder;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">save_test()</span></code> and a save without an id never see a data file, so they give
+a test with data another IRI than the workspace does, and a save without an
+id leaves a dataset’s cell and test out of its seed.</p></li>
+</ul>
+<p>The <a class="reference internal" href="scope.html#identifiers"><span class="std std-ref">known limitations</span></a> say what to do on each of these
+paths.</p>
 <p>Governance of the IRI space itself is written down in the
 <a class="reference external" href="https://github.com/BIG-MAP/BattINFO/blob/main/IDENTIFIER_POLICY.md">identifier policy</a>.</p>
 </section>
@@ -680,6 +714,7 @@ re-sending only what is missing; transient registry failures retry with
 exponential backoff.</p></li>
 <li><p>Submission content conflicts return a <strong>structured 409</strong> naming the existing
 record, not a bare string.</p></li>
+<li><p>A record whose IRI another publisher already holds comes back from <code class="docutils literal notranslate"><span class="pre">ws.submit()</span></code> as a <code class="docutils literal notranslate"><span class="pre">conflict</span></code> outcome that names the IRI and that publisher and says how to rename or pin the record. It is not retried as a new version.</p></li>
 </ul>
 </section>
 <section id="deprecations-are-announced">

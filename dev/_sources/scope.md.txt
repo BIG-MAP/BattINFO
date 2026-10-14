@@ -84,7 +84,8 @@ These gaps were known when 0.8.0 was released and are planned for 0.8.x or 0.9. 
 - A new version of a published dataset made with `Dataset.from_record` loses the curve-preview files unless you copy them across from the registry entry, and nothing warns you; [Make a new version of a published dataset](howto/read-registry-data.md#make-a-new-version-of-a-published-dataset) shows how.
 - `save_dataset` resolves a dataset's cell and test only against the workspace and the registry records the workspace has looked up, which never include tests, so a new version that keeps a published test link needs `resolve_references=False`.
 - Once `ws.save()` or `ws.add("equipment")` has written records in a session, `ws.submit()` sends only those, even with `submit_all=True`. Submit records written by `save_dataset` or the other `save_*` functions from a new workspace object.
-- `ws.add("test")` takes no as-run `conditions`, start or end time, notes or `source_url`, although the `Test` model has them.
+- `ws.add("test")` takes no as-run `conditions`, notes or `source_url`, although the `Test` model has them.
+- Lab labels are not scoped to a lab until 0.9. A cell's IRI comes from its spec and its serial number (or its name, for a cell without one), so two labs that both call a cell of one spec `S1` or `C01` mint one cell IRI, and the tests and datasets on it can share IRIs too. The registry refuses the second lab's record, and `ws.submit()` reports that clash with how to rename or pin the record rather than retrying it as a new version. Use the serial printed on the cell, or a label only your lab uses. For the same reason, `ws.add("test", cell="C01")` can find another lab's `C01` in the registry when your workspace holds no such cell; it prints the cell's publisher, and refuses to choose when several cells match.
 - `ws.search(type="cell", serial=...)` fetches the registry's whole cell list on every call; use `serials=[...]` to look up many cells at once.
 - Adding tests to a test spec that is already published sends the spec again, and the registry stores an unchanged copy as a new version.
 - `ws.pending()` lists submissions newest first, and approving in that order can publish datasets before the tests and cells they describe. Approve specs, cells and tests first.
@@ -99,6 +100,17 @@ These gaps were known when 0.8.0 was released and are planned for 0.8.x or 0.9. 
 - `ws.save()` prints "ERROR: ... failed validation" for some records it does write, such as a parameter set still minted under `spec/`.
 - Display papercuts: `ws.search()` shows manufacturer and model in lower case, `ws.list(verbose=True)` shows cells by file name, the `ws.save()` summary cuts titles at about 36 characters and collapses after 20 records, and `battinfo.naming.title_for()` writes an all-lowercase method in capitals ("CYCLING test").
 - Submission reporting: outcomes and journal entries carry an empty `iri`, a deduplicated re-submission is reported as live, and `ws.status()` lists every submission in the shared registry workspace.
+
+### Identifiers
+
+These paths mint IRIs that no other path reproduces. The [identifier policy](https://github.com/BIG-MAP/BattINFO/blob/main/IDENTIFIER_POLICY.md) (section 5.4) keeps them outside the identity contract until 0.9, which moves every minting path onto the shared seed builders in `battinfo.entities`; an IRI they minted in 0.8 stays findable then.
+
+- `create_component_spec`, `create_component_instance` and their per-family wrappers (separators, current collectors, electrolytes and housings), `create_equipment_spec` and `create_equipment` give a record without `uid=` or `id=` a random IRI, a new one on every call, so saving their output again saves a second record. Pass a uid derived from the part's natural key, as [Build a cell from components](howto/build-a-cell-from-components.md) does; `ws.add("equipment")` mints equipment from its spec and serial number.
+- The BattInfoConverter, solid-state database and Discovery importers, and the Battery Data Commons bridge, mint from their own seeds. Importing one source again gives the same IRIs, but a cell imported from two sources, or imported and also authored in the workspace, gets two.
+- On the batch path, `battinfo batch init` and `battinfo batch add` give a cell without a serial number a random IRI, recorded in its `battinfo.yaml`. Keep that file, or pass `--serials` (or `--iris`).
+- The publication package (`publish_publication_package`, `build_publication_package`) and `battinfo batch package` seed a dataset from its folder and title rather than its file, so the same data saved from a workspace gets another dataset IRI, and so does a test with data in the publication package. There, `Dataset(id=...)` and `Test(id=...)` keep an IRI you published. `battinfo batch package` seeds a test from its raw file's path in the cell folder, so it matches the workspace only when the workspace's data file has that path in the workspace folder.
+- `battinfo batch init --batch-id` seeds a cell from its serial number and its batch. `ws.add("cell")` takes no batch, so it gives the same cell another IRI unless the batch cell has no batch id; pin one with `iris=` or `--iris`.
+- `save_test()` and a save of a record without an id never see a data file, so a test with data files gets another IRI there than in the workspace; pass `id=` (or an `id` in the record). A save of a dataset without an id leaves its cell and test out of its seed, so give a dataset of a test its `id`.
 
 ### Linked data at record IRIs
 

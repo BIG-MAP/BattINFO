@@ -649,7 +649,8 @@ handled by the BattINFO registry deployment. What a record’s IRI serves today 
 <section id="round-trip-fidelity-ws-import">
 <h2>Round-trip fidelity (<code class="docutils literal notranslate"><span class="pre">ws.import_</span></code>)<a class="headerlink" href="#round-trip-fidelity-ws-import" title="Link to this heading">#</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">import_()</span></code> reconstructs the <strong>structural core</strong> — cell specs, cell instances, tests
-(kind, protocol name, instrument), datasets and distributions — losslessly.</p>
+(kind, protocol name, instrument), datasets and distributions — losslessly.
+Every record keeps the IRI it was published under, and a test that produced several data files comes back as one test with one dataset per file. A dataset that several tests list as an output comes back once, related to each of them.</p>
 <p><strong>Not restored on import</strong> (the published graph is the source of truth; re-importing then
 re-publishing would drop these): conformance/quality annotations (<code class="docutils literal notranslate"><span class="pre">dqv</span></code>/<code class="docutils literal notranslate"><span class="pre">earl</span></code> +
 deviations), the catalog’s creators/publisher/keywords/version, the structured test

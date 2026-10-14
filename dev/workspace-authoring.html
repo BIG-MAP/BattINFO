@@ -589,11 +589,13 @@ equipment; materials and component specs are authored through <code class="docut
 <span class="c1"># 4. Find your cell in the registry (fuzzy search)</span>
 <span class="n">spec</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;samsung inr21700 50e&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
-<span class="c1"># 5. Register the physical cells you tested</span>
-<span class="n">ws</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;cell&quot;</span><span class="p">,</span> <span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span> <span class="n">serial_numbers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;S1&quot;</span><span class="p">,</span> <span class="s2">&quot;S2&quot;</span><span class="p">,</span> <span class="s2">&quot;S3&quot;</span><span class="p">])</span>
+<span class="c1"># 5. Register the physical cells you tested, by the serials printed on</span>
+<span class="c1">#    them or labels only your lab uses: a cell&#39;s IRI comes from its spec</span>
+<span class="c1">#    and serial, so a bare &quot;S1&quot; mints the IRI of every other lab&#39;s &quot;S1&quot;.</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;cell&quot;</span><span class="p">,</span> <span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span> <span class="n">serial_numbers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;MYLAB-50E-001&quot;</span><span class="p">,</span> <span class="s2">&quot;MYLAB-50E-002&quot;</span><span class="p">,</span> <span class="s2">&quot;MYLAB-50E-003&quot;</span><span class="p">])</span>
 
 <span class="c1"># 6. Attach a test + data to a cell (explicit)</span>
-<span class="n">ws</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;cycling&quot;</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="s2">&quot;S1&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="s2">&quot;bdf/S1.bdf.csv&quot;</span><span class="p">)</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;cycling&quot;</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="s2">&quot;MYLAB-50E-001&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="s2">&quot;bdf/MYLAB-50E-001.bdf.csv&quot;</span><span class="p">)</span>
 
 <span class="c1"># 7. Publish (add zenodo=True for a citable DOI)</span>
 <span class="n">ws</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>

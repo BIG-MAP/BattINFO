@@ -569,8 +569,11 @@ IRI, so a term means the same thing in every source. See
 <a class="reference internal" href="ontology-profile-architecture.html"><span class="std std-doc">Ontology / profile architecture</span></a>.</p></li>
 <li><p><strong>Shared identifiers</strong> — cells, specs, tests, and datasets receive persistent
 <code class="docutils literal notranslate"><span class="pre">https://w3id.org/battinfo/</span></code> IRIs, so a record in one repository can reference
-a record published by another and the link still resolves. The registry mints
-these and renders resolvable public artifacts.</p></li>
+a record published by another and the link still resolves. BattINFO mints
+them where the record is written, from what identifies it, so the same thing
+described twice gets the same IRI (see <a class="reference internal" href="identifiers.html"><span class="std std-doc">Identifiers</span></a>); the
+registry mints one only for a submission that carries none, and renders
+resolvable public artifacts.</p></li>
 <li><p><strong>Shared serialization</strong> — records publish as JSON-LD aligned to one context,
 so independently authored documents merge into a single RDF graph. See the
 <a class="reference internal" href="guides/04-semantic-layer.html"><span class="std std-doc">Semantic layer guide</span></a>.</p></li>

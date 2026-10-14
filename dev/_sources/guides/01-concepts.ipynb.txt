@@ -25,10 +25,10 @@
    "id": "d1bde660",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-14T00:54:18.192951Z",
-     "iopub.status.busy": "2026-10-14T00:54:18.192951Z",
-     "iopub.status.idle": "2026-10-14T00:54:18.203185Z",
-     "shell.execute_reply": "2026-10-14T00:54:18.202179Z"
+     "iopub.execute_input": "2026-10-14T12:38:34.213412Z",
+     "iopub.status.busy": "2026-10-14T12:38:34.212404Z",
+     "iopub.status.idle": "2026-10-14T12:38:34.228998Z",
+     "shell.execute_reply": "2026-10-14T12:38:34.225988Z"
     }
    },
    "outputs": [],
@@ -82,10 +82,10 @@
    "id": "af9f7f36",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-14T00:54:18.207185Z",
-     "iopub.status.busy": "2026-10-14T00:54:18.206185Z",
-     "iopub.status.idle": "2026-10-14T00:54:18.638885Z",
-     "shell.execute_reply": "2026-10-14T00:54:18.637876Z"
+     "iopub.execute_input": "2026-10-14T12:38:34.235036Z",
+     "iopub.status.busy": "2026-10-14T12:38:34.235036Z",
+     "iopub.status.idle": "2026-10-14T12:38:35.786396Z",
+     "shell.execute_reply": "2026-10-14T12:38:35.783845Z"
     }
    },
    "outputs": [
@@ -118,10 +118,10 @@
    "id": "2876af4e",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-14T00:54:18.642541Z",
-     "iopub.status.busy": "2026-10-14T00:54:18.642541Z",
-     "iopub.status.idle": "2026-10-14T00:54:18.650042Z",
-     "shell.execute_reply": "2026-10-14T00:54:18.649537Z"
+     "iopub.execute_input": "2026-10-14T12:38:35.792423Z",
+     "iopub.status.busy": "2026-10-14T12:38:35.791914Z",
+     "iopub.status.idle": "2026-10-14T12:38:35.811570Z",
+     "shell.execute_reply": "2026-10-14T12:38:35.806016Z"
     }
    },
    "outputs": [
@@ -164,10 +164,10 @@
    "id": "8d47a257",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-14T00:54:18.653048Z",
-     "iopub.status.busy": "2026-10-14T00:54:18.652047Z",
-     "iopub.status.idle": "2026-10-14T00:54:18.659773Z",
-     "shell.execute_reply": "2026-10-14T00:54:18.658766Z"
+     "iopub.execute_input": "2026-10-14T12:38:35.817909Z",
+     "iopub.status.busy": "2026-10-14T12:38:35.816899Z",
+     "iopub.status.idle": "2026-10-14T12:38:35.850126Z",
+     "shell.execute_reply": "2026-10-14T12:38:35.845077Z"
     }
    },
    "outputs": [
@@ -300,10 +300,10 @@
    "id": "e85e0b8a",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-14T00:54:18.663286Z",
-     "iopub.status.busy": "2026-10-14T00:54:18.662287Z",
-     "iopub.status.idle": "2026-10-14T00:54:18.666797Z",
-     "shell.execute_reply": "2026-10-14T00:54:18.666797Z"
+     "iopub.execute_input": "2026-10-14T12:38:35.857167Z",
+     "iopub.status.busy": "2026-10-14T12:38:35.856169Z",
+     "iopub.status.idle": "2026-10-14T12:38:35.870086Z",
+     "shell.execute_reply": "2026-10-14T12:38:35.866553Z"
     }
    },
    "outputs": [
@@ -353,10 +353,10 @@
    "id": "e670cfbb",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-14T00:54:18.670070Z",
-     "iopub.status.busy": "2026-10-14T00:54:18.670070Z",
-     "iopub.status.idle": "2026-10-14T00:54:19.237455Z",
-     "shell.execute_reply": "2026-10-14T00:54:19.236447Z"
+     "iopub.execute_input": "2026-10-14T12:38:35.877629Z",
+     "iopub.status.busy": "2026-10-14T12:38:35.875619Z",
+     "iopub.status.idle": "2026-10-14T12:38:38.249824Z",
+     "shell.execute_reply": "2026-10-14T12:38:38.247804Z"
     }
    },
    "outputs": [
@@ -364,7 +364,7 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "IRI: https://w3id.org/battinfo/spec/e4t5-w9re-mpq6-8g7e\n"
+      "IRI: https://w3id.org/battinfo/spec/5jw5-wm4v-f9w9-gexv\n"
      ]
     }
    ],
@@ -394,10 +394,10 @@
    "id": "0f9bd621",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-14T00:54:19.239454Z",
-     "iopub.status.busy": "2026-10-14T00:54:19.239454Z",
-     "iopub.status.idle": "2026-10-14T00:54:19.971633Z",
-     "shell.execute_reply": "2026-10-14T00:54:19.969621Z"
+     "iopub.execute_input": "2026-10-14T12:38:38.255356Z",
+     "iopub.status.busy": "2026-10-14T12:38:38.255356Z",
+     "iopub.status.idle": "2026-10-14T12:38:39.621765Z",
+     "shell.execute_reply": "2026-10-14T12:38:39.619754Z"
     }
    },
    "outputs": [
@@ -434,10 +434,10 @@
    "id": "50971f8b",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-14T00:54:19.977153Z",
-     "iopub.status.busy": "2026-10-14T00:54:19.976157Z",
-     "iopub.status.idle": "2026-10-14T00:54:19.983181Z",
-     "shell.execute_reply": "2026-10-14T00:54:19.982674Z"
+     "iopub.execute_input": "2026-10-14T12:38:39.627298Z",
+     "iopub.status.busy": "2026-10-14T12:38:39.626298Z",
+     "iopub.status.idle": "2026-10-14T12:38:39.645241Z",
+     "shell.execute_reply": "2026-10-14T12:38:39.642722Z"
     }
    },
    "outputs": [
@@ -479,10 +479,10 @@
    "id": "4bb41daf",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-14T00:54:19.988390Z",
-     "iopub.status.busy": "2026-10-14T00:54:19.987375Z",
-     "iopub.status.idle": "2026-10-14T00:54:19.998863Z",
-     "shell.execute_reply": "2026-10-14T00:54:19.997853Z"
+     "iopub.execute_input": "2026-10-14T12:38:39.657819Z",
+     "iopub.status.busy": "2026-10-14T12:38:39.657819Z",
+     "iopub.status.idle": "2026-10-14T12:38:39.677755Z",
+     "shell.execute_reply": "2026-10-14T12:38:39.671219Z"
     }
    },
    "outputs": [
@@ -490,7 +490,7 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "JSON-LD exported to: <repo>\\docs\\guides\\_scratch\\guide-01\\resolver\\spec\\e4t5-w9re-mpq6-8g7e\\index.jsonld\n",
+      "JSON-LD exported to: <repo>\\docs\\guides\\_scratch\\guide-01\\resolver\\spec\\5jw5-wm4v-f9w9-gexv\\index.jsonld\n",
       "\n",
       "{\n",
       "  \"@context\": [\n",
@@ -507,15 +507,15 @@
       "    \"schema:ProductModel\",\n",
       "    \"schema:CreativeWork\"\n",
       "  ],\n",
-      "  \"@id\": \"https://w3id.org/battinfo/spec/e4t5-w9re-mpq6-8g7e\",\n",
-      "  \"schema:identifier\": \"e4t5-w9re-mpq6-8g7e\",\n",
+      "  \"@id\": \"https://w3id.org/battinfo/spec/5jw5-wm4v-f9w9-gexv\",\n",
+      "  \"schema:identifier\": \"5jw5-wm4v-f9w9-gexv\",\n",
       "  \"schema:name\": \"A123 Systems ANR26650M1-B\",\n",
       "  \"schema:model\": \"ANR26650M1-B\",\n",
       "  \"schema:manufacturer\": {\n",
       "    \"@type\": \"schema:Organization\",\n",
       "    \"schema:name\": \"A123 Systems\"\n",
       "  },\n",
-      "  \"schema:url\": \"https://www.battery-genome.org/registry/spec/e4t5-w9re-mpq6-8g7e\",\n",
+      "  \"schema:url\": \"https://www.battery-genome.org/registry/spec/5jw5-wm4v-f9w9-gexv\",\n",
       "  \"isDescriptionFor\": {\n",
       "    \"@type\": [\n",
       "      \"BatteryCell\",\n",
@@ -524,7 +524,7 @@
       "      \"LithiumIonIronPhosphateBattery\",\n",
       "      \"LithiumIonGraphiteBattery\"\n",
       "    ],\n",
-      "    \"@id\": \"https://w3id.org/battinfo/spec/e4t5-w9re-mpq6-8g7e#described\",\n",
+      "    \"@id\": \"https://w3id.org/battinfo/spec/5jw5-wm4v-f9w9-gexv#described\",\n",
       "    \"skos:prefLabel\": \"A123 Systems ANR26650M1-B\",\n",
       "    \"hasProperty\": [\n",
       "      {\n",
@@ -563,7 +563,7 @@
       "  \"dcterms:source\": {\n",
       "    \"@type\": \"prov:Entity\",\n",
       "    \"dcterms:type\": \"datasheet\",\n",
-      "    \"prov:generatedAtTime\": \"2026-10-14T00:54:18+00:00\"\n",
+      "    \"prov:generatedAtTime\": \"2026-10-14T12:38:35+00:00\"\n",
       "  }\n",
       "}\n"
      ]
@@ -596,10 +596,10 @@
    "id": "bfc0b477",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-14T00:54:20.004130Z",
-     "iopub.status.busy": "2026-10-14T00:54:20.002868Z",
-     "iopub.status.idle": "2026-10-14T00:54:20.040280Z",
-     "shell.execute_reply": "2026-10-14T00:54:20.038040Z"
+     "iopub.execute_input": "2026-10-14T12:38:39.684282Z",
+     "iopub.status.busy": "2026-10-14T12:38:39.683283Z",
+     "iopub.status.idle": "2026-10-14T12:38:39.756714Z",
+     "shell.execute_reply": "2026-10-14T12:38:39.753195Z"
     }
    },
    "outputs": [

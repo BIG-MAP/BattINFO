@@ -638,7 +638,9 @@ BDF columns: test_time_second,voltage_volt,current_ampere,unix_time_second,cycle
         <span class="n">nominal_capacity</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">4.5</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;Ah&quot;</span><span class="p">},</span>
     <span class="p">)</span>
 
-<span class="n">cells</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;cell&quot;</span><span class="p">,</span> <span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span> <span class="n">serial_numbers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;S1&quot;</span><span class="p">])</span>
+<span class="c1"># The serial printed on the cell, or a label only your lab uses: a cell&#39;s IRI</span>
+<span class="c1"># comes from its spec and serial, so a bare &quot;S1&quot; would be every lab&#39;s S1.</span>
+<span class="n">cells</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;cell&quot;</span><span class="p">,</span> <span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span> <span class="n">serial_numbers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;MYLAB-P45B-001&quot;</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
@@ -649,7 +651,7 @@ BDF columns: test_time_second,voltage_volt,current_ampere,unix_time_second,cycle
 <div class="highlight"><pre>
 No cell-spec match for &#39;molicel inr21700 p45b&#39;.
   Tip: ws.template(&#39;cell-spec&#39;, manufacturer=&#39;...&#39;, model=&#39;...&#39;)
-  cell: S1  (IRI auto-assigned)
+  cell: MYLAB-P45B-001  (IRI auto-assigned)
 </pre></div></div>
 </div>
 </section>
@@ -661,7 +663,7 @@ No cell-spec match for &#39;molicel inr21700 p45b&#39;.
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tests</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;cycling&quot;</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="s2">&quot;S1&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">bdf_file</span><span class="p">))</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tests</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;cycling&quot;</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="s2">&quot;MYLAB-P45B-001&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">bdf_file</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -670,7 +672,7 @@ No cell-spec match for &#39;molicel inr21700 p45b&#39;.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-  test [cycling] on S1  +1 dataset(s)  (+1 raw source)
+  test [cycling] on MYLAB-P45B-001  +1 dataset(s)  (+1 raw source)
 </pre></div></div>
 </div>
 </section>
@@ -714,16 +716,16 @@ Workspace contributors (2):
   - Alan Turing (https://orcid.org/0000-0001-5109-3700)
   Saved to .battinfo/workspace.json; stamped onto records on ws.save().
 Saved 4 record(s) under &lt;repo&gt;\docs\guides\_scratch\guide-06\.battinfo\records:
-  cell spec   Molicel INR21700-P45B                [created]  .battinfo\records\cell-spec\cell-spec-fpdr-z1qt-23v0-stzx.json
-  cell        S1                                   [created]  .battinfo\records\cell-instance\cell-d6tp-jgqy-a3s9-4qem.json
-  test        S1 cycling                           [created]  .battinfo\records\test\test-9f4c-mxny-yhym-2zh4.json
-  dataset     S1 data                              [created]  .battinfo\records\dataset\dataset-bqyr-91ck-5568-tr25.json
+  cell spec   Molicel INR21700-P45B                [created]  .battinfo\records\cell-spec\cell-spec-vgwn-7exg-09tt-zwq3.json
+  cell        MYLAB-P45B-001                       [created]  .battinfo\records\cell-instance\cell-fhcx-9qtr-3vep-wahx.json
+  test        MYLAB-P45B-001 cycling               [created]  .battinfo\records\test\test-04bx-fcf2-hxm2-rtva.json
+  dataset     MYLAB-P45B-001 data                  [created]  .battinfo\records\dataset\dataset-s34m-fyym-c479-hfge.json
 
   Next: ws.list(verbose=True) to inspect, or ws.publish() to publish.
-cell-instance/cell-d6tp-jgqy-a3s9-4qem.json
-cell-spec/cell-spec-fpdr-z1qt-23v0-stzx.json
-dataset/dataset-bqyr-91ck-5568-tr25.json
-test/test-9f4c-mxny-yhym-2zh4.json
+cell-instance/cell-fhcx-9qtr-3vep-wahx.json
+cell-spec/cell-spec-vgwn-7exg-09tt-zwq3.json
+dataset/dataset-s34m-fyym-c479-hfge.json
+test/test-04bx-fcf2-hxm2-rtva.json
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -746,16 +748,16 @@ test/test-9f4c-mxny-yhym-2zh4.json
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 {
-  &#34;id&#34;: &#34;https://w3id.org/battinfo/cell/d6tp-jgqy-a3s9-4qem&#34;,
-  &#34;short_id&#34;: &#34;d6tpjg&#34;,
-  &#34;cell_spec_id&#34;: &#34;https://w3id.org/battinfo/spec/fpdr-z1qt-23v0-stzx&#34;,
-  &#34;name&#34;: &#34;S1&#34;,
-  &#34;serial_number&#34;: &#34;S1&#34;
+  &#34;id&#34;: &#34;https://w3id.org/battinfo/cell/fhcx-9qtr-3vep-wahx&#34;,
+  &#34;short_id&#34;: &#34;fhcx9q&#34;,
+  &#34;cell_spec_id&#34;: &#34;https://w3id.org/battinfo/spec/vgwn-7exg-09tt-zwq3&#34;,
+  &#34;name&#34;: &#34;MYLAB-P45B-001&#34;,
+  &#34;serial_number&#34;: &#34;MYLAB-P45B-001&#34;
 }
 ...
 provenance: {
   &#34;source_type&#34;: &#34;measurement&#34;,
-  &#34;retrieved_at&#34;: 1791939273,
+  &#34;retrieved_at&#34;: 1791981082,
   &#34;battinfo_version&#34;: &#34;0.8.0&#34;
 }
 </pre></div></div>

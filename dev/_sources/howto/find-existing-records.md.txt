@@ -80,6 +80,8 @@ Reading the registry needs no account or API key. What the results mean:
   empty list after printing a "Registry unreachable" notice. An empty result
   while offline is not evidence that a record does not exist.
 
+A cell search matches a serial number or name exactly. A six-character short ID on its own, such as `tpejqj`, also finds the cell whose IRI or label carries it, but a longer label never matches a cell that only ends the same way: `LAB-2025-000001` does not find `LAB-2024-000001`. Each hit names its publisher. `ws.add("test", cell="C01", ...)` looks the label up the same way when the workspace holds no such cell. It prints a line naming the registry cell it found and its publisher, and when several cells match, it raises an error listing them, so you can pass the one you mean by its IRI. Lab labels such as `C01` are not scoped to a lab yet, so another lab's `C01` can be the match.
+
 `ws.status()` (what have I published?) talks to the registry too, and needs
 `ws.login(api_key=...)` first — see the
 [troubleshooting page](../pages/troubleshooting.md) if it asks for a

@@ -61,8 +61,10 @@ the offline-safe core is:
        format="cylindrical",
        chemistry="Li-ion",
    )
-   ws.add("cell", spec=spec, serial_numbers=["S1"])
-   ws.add("test", type="cycling", cell="S1", data="bdf/S1.bdf.csv")
+   # The serial printed on the cell, or a label only your lab uses: a cell's
+   # IRI comes from its spec and serial, so a bare "S1" would be every lab's S1.
+   ws.add("cell", spec=spec, serial_numbers=["MYLAB-P45B-001"])
+   ws.add("test", type="cycling", cell="MYLAB-P45B-001", data="bdf/MYLAB-P45B-001.bdf.csv")
 
    ws.save()                                     # validated records, stable IRIs
    # ws.login(api_key="...")                     # then: ws.publish() for the registry
