@@ -719,6 +719,13 @@
 <li><p>Submission reporting: outcomes and journal entries carry an empty <code class="docutils literal notranslate"><span class="pre">iri</span></code>, a deduplicated re-submission is reported as live, and <code class="docutils literal notranslate"><span class="pre">ws.status()</span></code> lists every submission in the shared registry workspace.</p></li>
 </ul>
 </section>
+<section id="cli-batch-path">
+<h3>CLI batch path<a class="headerlink" href="#cli-batch-path" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">batch</span> <span class="pre">upload</span></code> and <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">push</span></code> upload only to the Zenodo sandbox, so an upload needs <code class="docutils literal notranslate"><span class="pre">--sandbox</span></code>; without it they stop before contacting Zenodo. They send a sandbox token: <code class="docutils literal notranslate"><span class="pre">--token</span></code>, else <code class="docutils literal notranslate"><span class="pre">ZENODO_SANDBOX_TOKEN</span></code>, else <code class="docutils literal notranslate"><span class="pre">zenodo_sandbox_token</span></code> in the config file (<code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">config</span> <span class="pre">set</span> <span class="pre">zenodo_sandbox_token</span> <span class="pre">&lt;token&gt;</span></code>). Uploads to zenodo.org from the batch path come in a later release; to publish there now, use <code class="docutils literal notranslate"><span class="pre">ws.zenodo()</span></code> from <code class="docutils literal notranslate"><span class="pre">battinfo.workspace()</span></code>.</p></li>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">batch</span> <span class="pre">package</span></code> again before you retry <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">batch</span> <span class="pre">upload</span></code>: a retry of the same staging folder carries the record id of the first upload. The fix comes in 0.8.1.</p></li>
+</ul>
+</section>
 <section id="dependencies">
 <h3>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading">#</a></h3>
 <ul class="simple">
@@ -798,6 +805,7 @@ uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </sp
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#known-limitations-in-0-8-0">Known limitations in 0.8.0</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bpx-parameter-files">BPX parameter files</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#workspace-and-submission">Workspace and submission</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cli-batch-path">CLI batch path</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dependencies">Dependencies</a></li>
 </ul>
 </li>

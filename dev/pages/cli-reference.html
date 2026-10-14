@@ -589,7 +589,7 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">validate</span></code>: Validate a BattINFO record (JSON Schema +…</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">init</span></code>: Create a minimal workspace scaffold with…</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">map</span></code>: Map canonical JSON to JSON-LD for a target.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">push</span></code>: Publish battery data to Zenodo in one…</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">push</span></code>: Package battery data and upload it to the…</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">import-protocol</span></code>: One-liner protocol import: executable file…</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">query</span></code>: Query BattINFO resources.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">create</span></code>: Create BattINFO resources.</p></li>
@@ -667,14 +667,18 @@
 </section>
 <section id="battinfo-push">
 <h2><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">push</span></code><a class="headerlink" href="#battinfo-push" title="Link to this heading">#</a></h2>
-<p>Publish battery data to Zenodo in one command.</p>
+<p>Package battery data and upload it to the Zenodo sandbox in one command.</p>
+<p>In this release the batch path uploads only to the Zenodo sandbox, so
+every run except –dry-run needs –sandbox. Uploads to zenodo.org from
+the batch path come in a later release; to publish there now, use
+ws.zenodo() from a battinfo.workspace().</p>
 <p>Accepts three layouts:
-battinfo push ./flat_files/    –cell-spec “Energizer CR2032”   # groups by filename
-battinfo push ./cell_folders/  –cell-spec “Energizer CR2032”   # one subdir per cell
-battinfo push ./my_batch/                                        # existing batch.yaml</p>
-<p>One-time setup:
+battinfo push ./flat_files/    –cell-spec “Energizer CR2032” –sandbox   # groups by filename
+battinfo push ./cell_folders/  –cell-spec “Energizer CR2032” –sandbox   # one subdir per cell
+battinfo push ./my_batch/                                     –sandbox   # existing batch.yaml</p>
+<p>One-time setup, with a token made on sandbox.zenodo.org:
 battinfo config set creator “Family, Given; Institution”
-battinfo config set zenodo_token &lt;token&gt;</p>
+battinfo config set zenodo_sandbox_token &lt;token&gt;</p>
 <p><strong>Usage</strong>:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>battinfo<span class="w"> </span>push<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span><span class="w"> </span><span class="o">{</span>folder<span class="o">}</span>
 </pre></div>
@@ -691,8 +695,8 @@ battinfo config set zenodo_token &lt;token&gt;</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">--lab</span> <span class="pre">&lt;str&gt;</span></code>: Lab name.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--operator</span> <span class="pre">&lt;str&gt;</span></code>: Operator name.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">-c,</span> <span class="pre">--creator</span> <span class="pre">&lt;str&gt;</span></code>: Creator: “Family, Given; Affiliation”. Falls back to config.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">--token</span> <span class="pre">&lt;str&gt;</span></code>: Zenodo API token. Falls back to config / ZENODO_API_TOKEN.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">--sandbox</span></code>: Upload to sandbox.zenodo.org instead of production.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--token</span> <span class="pre">&lt;str&gt;</span></code>: Zenodo sandbox token, made on sandbox.zenodo.org. Falls back to ZENODO_SANDBOX_TOKEN, then zenodo_sandbox_token in the config file.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--sandbox</span></code>: Upload to sandbox.zenodo.org, with a token made there. Every upload needs it in this release.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--community</span> <span class="pre">&lt;str&gt;</span></code>: Zenodo community. Default: from config.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--no-community</span></code>: Skip community submission.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">-y,</span> <span class="pre">--yes</span></code>: Skip confirmation prompt.</p></li>
@@ -2360,7 +2364,7 @@ Required scopes: deposit:write</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">add</span></code>: Add more cells to an existing batch…</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">status</span></code>: Show the current state of a batch at a…</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">package</span></code>: Build a flat Zenodo upload package from a…</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">upload</span></code>: Upload a staged Zenodo package to Zenodo…</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">upload</span></code>: Upload a staged Zenodo package to the…</p></li>
 </ul>
 <section id="battinfo-batch-init">
 <h3><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">batch</span> <span class="pre">init</span></code><a class="headerlink" href="#battinfo-batch-init" title="Link to this heading">#</a></h3>
@@ -2481,7 +2485,11 @@ battinfo batch upload &lt;staging-dir&gt; –token $ZENODO_TOKEN –sandbox</p>
 </section>
 <section id="battinfo-batch-upload">
 <h3><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">batch</span> <span class="pre">upload</span></code><a class="headerlink" href="#battinfo-batch-upload" title="Link to this heading">#</a></h3>
-<p>Upload a staged Zenodo package to Zenodo (or sandbox).</p>
+<p>Upload a staged Zenodo package to the Zenodo sandbox.</p>
+<p>In this release the batch path uploads only to the Zenodo sandbox, so
+–sandbox is required. Uploads to zenodo.org from the batch path come in
+a later release; to publish there now, use ws.zenodo() from a
+battinfo.workspace().</p>
 <p>Workflow:</p>
 <ol class="arabic simple">
 <li><p>Creates an empty deposit to obtain the pre-reserved record ID.</p></li>
@@ -2501,8 +2509,8 @@ battinfo batch upload &lt;staging-dir&gt; –token $ZENODO_TOKEN –sandbox</p>
 </ul>
 <p><strong>Options</strong>:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">--token</span> <span class="pre">&lt;str&gt;</span></code>: Zenodo API token. Env: ZENODO_API_TOKEN.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">--sandbox</span></code>: Use Zenodo sandbox (sandbox.zenodo.org).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--token</span> <span class="pre">&lt;str&gt;</span></code>: Zenodo sandbox token, made on sandbox.zenodo.org. Falls back to ZENODO_SANDBOX_TOKEN, then zenodo_sandbox_token in the config file.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--sandbox</span></code>: Upload to the Zenodo sandbox (sandbox.zenodo.org), with a token made there. Required in this release.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--community</span> <span class="pre">&lt;str&gt;</span></code>: Zenodo community. Default: value from config or battinfo-reference.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--no-community</span></code>: Skip community submission.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">-c,</span> <span class="pre">--creator</span> <span class="pre">&lt;str&gt;</span></code>: Creator: “Family, Given; Affiliation”. Repeat for multiple. Falls back to <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">config</span> <span class="pre">set</span> <span class="pre">creator</span></code>.</p></li>
@@ -2536,7 +2544,10 @@ battinfo batch upload &lt;staging-dir&gt; –token $ZENODO_TOKEN –sandbox</p>
 battinfo config set creator “Clark, Simon; SINTEF”
 battinfo config set creator “Clark, Simon; SINTEF | Smith, Jane; NTNU”
 battinfo config set license CC-BY-4.0
-battinfo config set community battinfo-reference</p>
+battinfo config set community battinfo-reference
+battinfo config set zenodo_sandbox_token &lt;token&gt;</p>
+<p>zenodo_sandbox_token is a token made on sandbox.zenodo.org, which the
+batch path (battinfo batch upload, battinfo push) sends to the sandbox.</p>
 <p>A secret, such as zenodo_token, is echoed with only its last four
 characters shown, or fully hidden when it is shorter than 12 characters.
 A config file that is not valid YAML is left as it is: fix it by hand first.</p>
@@ -2546,7 +2557,7 @@ A config file that is not valid YAML is left as it is: fix it by hand first.</p>
 </div>
 <p><strong>Arguments</strong>:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">key</span></code>: Config key: creator, license, community, zenodo_token.  [required]</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">key</span></code>: Config key: creator, license, community, zenodo_token, zenodo_sandbox_token.  [required]</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">value</span></code>: Value to store.  [required]</p></li>
 </ul>
 <p><strong>Options</strong>:</p>

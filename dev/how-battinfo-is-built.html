@@ -706,8 +706,15 @@ workspace. Nothing exists “only in the CLI”, which is why the
 </div>
 <p>Supporting cast: <code class="docutils literal notranslate"><span class="pre">_jsonio.py</span></code> (atomic JSON file I/O), <code class="docutils literal notranslate"><span class="pre">_fs_guard.py</span></code> (the
 one place that deletes folders, the checks it makes first, and the check on the paths a workspace manifest names), <code class="docutils literal notranslate"><span class="pre">_record_index.py</span></code>
-(the bulk-save id→path cache), <code class="docutils literal notranslate"><span class="pre">canonical_aliases.py</span></code> (legacy key
-normalisation), <code class="docutils literal notranslate"><span class="pre">testmethod.py</span></code> (structured test-method steps),
+(the bulk-save id→path cache), <code class="docutils literal notranslate"><span class="pre">_deposit_files.py</span></code> (the data files of a
+Zenodo deposit: which locations it may read, names, URLs and checksums, what
+a deposit would leave out, and the check of its files before a publish),
+<code class="docutils literal notranslate"><span class="pre">_deposit_index.py</span></code> (<code class="docutils literal notranslate"><span class="pre">.battinfo/deposit-files.json</span></code>, the local data files a
+workspace registered and the local file behind each copy its deposits and
+uploads made, and <code class="docutils literal notranslate"><span class="pre">.battinfo/zenodo.json</span></code> and <code class="docutils literal notranslate"><span class="pre">.battinfo/zenodo-sandbox.json</span></code>,
+the Zenodo record it continues on zenodo.org and on the sandbox),
+<code class="docutils literal notranslate"><span class="pre">canonical_aliases.py</span></code>
+(legacy key normalisation), <code class="docutils literal notranslate"><span class="pre">testmethod.py</span></code> (structured test-method steps),
 <code class="docutils literal notranslate"><span class="pre">metadata.py</span></code> (CSVW/DCAT dataset enrichment).</p>
 </section>
 <section id="how-it-stays-correct">
