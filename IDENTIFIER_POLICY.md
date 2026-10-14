@@ -340,26 +340,26 @@ Each row gives what the term expanded to on 30 July 2026, or when it was first s
 | `charging_time` | `battinfo:chargingTime` | ChargingTime | PR #415 |
 | `degC` | `emmo:EMMO_36a9bf69_…`, EMMO's class for the programming language C | `emmo:DegreeCelsius` | PR #443 (13 October) |
 | `TemperatureCoefficientOfTheOpenCircuitVoltage` | `electrochemistry_3b938708_…`, the IRI of CoatingThickness | `electrochemistry_3bb5ae23_…`, the temperature coefficient | PR #443 |
-| `%` | `emmo:Percent`, outside the pinned EMMO closure | PercentUnit (domain-electrochemistry) | 0.8.0 |
-| `nominal_continuous_charging_current` | MaximumContinuousChargingCurrent | ChargingCurrent | 0.8.0 |
-| `nominal_continuous_discharging_current` | MaximumContinuousDischargingCurrent | DischargingCurrent | 0.8.0 |
-| `rated_energy`, `certified_usable_energy` | NominalEnergy | RatedEnergy | 0.8.0 |
-| `typical_energy` | NominalEnergy | StoredEnergy | 0.8.0 |
-| `WattPerLitre` | QUDT `unit:W-PER-L`, which does not resolve | `emmo:WattPerLitre` | 0.8.0 |
-| `hasTestObject`, `cell_id` | `battery_da3b3f28_…`, a domain-battery relation with no definition | hasTestObject of domain-electrochemistry | 0.8.0 |
-| `hasTestEquipment` | `battery_df4ff8f1_…`, a domain-battery relation with no definition | hasTestEquipment of domain-electrochemistry | 0.8.0 |
-| `ambient_temperature` | `battinfo:ambientTemperature`, a placeholder | AmbientCelsiusTemperature | 0.8.0 |
-| `id` | `schema:productID` | `schema:identifier` | 0.8.0 |
-| `hasNumberValue`, `hasNumericalValue` | EMMO's hasNumberValue, with no datatype | the same IRI, typed `xsd:double` | 0.8.0 |
-| `active_material_spec_id` | the ActiveMaterial class | hasActiveMaterial | 0.8.0 |
+| `%` | `emmo:Percent`, outside the pinned EMMO closure | PercentUnit (domain-electrochemistry) | PR #465 (14 October) |
+| `nominal_continuous_charging_current` | MaximumContinuousChargingCurrent | ChargingCurrent | PR #465 |
+| `nominal_continuous_discharging_current` | MaximumContinuousDischargingCurrent | DischargingCurrent | PR #465 |
+| `rated_energy`, `certified_usable_energy` | NominalEnergy | RatedEnergy | PR #465 |
+| `typical_energy` | NominalEnergy | StoredEnergy | PR #465 |
+| `WattPerLitre` | QUDT `unit:W-PER-L`, which does not resolve | `emmo:WattPerLitre` | PR #465 |
+| `hasTestObject`, `cell_id` | `battery_da3b3f28_…`, a domain-battery relation with no definition | hasTestObject of domain-electrochemistry | PR #465 |
+| `hasTestEquipment` | `battery_df4ff8f1_…`, a domain-battery relation with no definition | hasTestEquipment of domain-electrochemistry | PR #465 |
+| `ambient_temperature` | `battinfo:ambientTemperature`, a placeholder | AmbientCelsiusTemperature | PR #465 |
+| `id` | `schema:productID` | `schema:identifier` | PR #465 |
+| `hasNumberValue`, `hasNumericalValue` | EMMO's hasNumberValue, with no datatype | the same IRI, typed `xsd:double` | PR #465 |
+| `active_material_spec_id` | the ActiveMaterial class | hasActiveMaterial | PR #465 |
 
-`PrismaticBattery` also changed in PR #331, to a hyphenated IRI the battery ontology had deprecated, and PR #415 restored it, so it ends as it was on 30 July. The registry served the PR #331 changes from 11 August 2026 and the PR #415 changes from 7 October, and from 11 October it served `TemperatureCoefficientOfTheOpenCircuitVoltage` with the CoatingThickness IRI. The PR #443 corrections and those marked 0.8.0 reach the hosted copy with the 0.8.0 re-sync. Among the terms 0.8.0 adds are twelve unit terms, `MilliAmpereHourPerGram`, `AmpereHourPerKilogram`, `MilliAmpereHourPerSquareCentiMetre`, `SiemensPerCentiMetre`, `KiloPascal`, `MegaPascal`, `WattPerWattHour`, `KiloWatt`, `MilliWatt`, `SquareMilliMetre`, `CubicMilliMetre` and `Day`. `%/month` and `year` have no unit in the pinned EMMO closure, so `v1` has no term for them and records keep them as text (`schema:unitText`); a term for them would be an addition.
+`PrismaticBattery` also changed in PR #331, to a hyphenated IRI the battery ontology had deprecated, and PR #415 restored it, so it ends as it was on 30 July. The registry served the PR #331 changes from 11 August 2026 and the PR #415 changes from 7 October, and from 11 October it served `TemperatureCoefficientOfTheOpenCircuitVoltage` with the CoatingThickness IRI. The PR #443 and PR #465 corrections reach the hosted copy with the 0.8.0 re-sync. Among the terms 0.8.0 adds are twelve unit terms from PR #460, `MilliAmpereHourPerGram`, `AmpereHourPerKilogram`, `MilliAmpereHourPerSquareCentiMetre`, `SiemensPerCentiMetre`, `KiloPascal`, `MegaPascal`, `WattPerWattHour`, `KiloWatt`, `MilliWatt`, `SquareMilliMetre`, `CubicMilliMetre` and `Day`. `%/month` and `year` have no unit in the pinned EMMO closure, so `v1` has no term for them and records keep them as text (`schema:unitText`); a term for them would be an addition.
 
 ##### The JSON Schemas
 
 These changes can make a record that validated before fail now:
 
-- Quantity values are numbers only (0.8.0). `value` in `modules/common/quantity.schema.json` and in the `Quantity` of `battinfo.base.schema.json` took a number or a non-empty string, and now takes a number only; text goes in `value_text`. 19 of the 22 record kinds use this module, and so do the `conditions` maps of quantities. A scan of the published corpus on 13 October 2026 (all 1,695 records in battinfo-records and a sample of 295 registry records) found none with text in `value`. When battinfo reads an older record (`ws.import_()`, `ws.load()`, an upsert through `save_record`), it turns a numeric string into a number and moves other text to `value_text`, with a warning.
+- Quantity values are numbers only (14 October, PR #460). `value` in `modules/common/quantity.schema.json` and in the `Quantity` of `battinfo.base.schema.json` took a number or a non-empty string, and now takes a number only; text goes in `value_text`. 19 of the 22 record kinds use this module, and so do the `conditions` maps of quantities. A scan of the published corpus on 13 October 2026 (all 1,695 records in battinfo-records and a sample of 295 registry records) found none with text in `value`. When battinfo reads an older record (`ws.import_()`, `ws.load()`, an upsert through `save_record`), it turns a numeric string into a number and moves other text to `value_text`, with a warning.
 - Date strings have a fixed form (8 September, PR #388). In cell, current-collector, electrode, electrolyte, housing, material and separator records, `manufactured_at`, `expires_at`, `received_date` and `opened_date` took a Unix time or any string. A string must now read `YYYY`, `YYYY-MM` or `YYYY-MM-DD`.
 - Test conditions are quantities (8 September, PR #388). An entry of a test record's `conditions` map could hold anything and must now be a quantity.
 - A cell spec's `housing` and `construction` are checked (8 September, PR #388). `housing` took any object and now follows `modules/components/housing.schema.json`, which allows `cap`, `case`, `comment`, `parts`, `property`, `seals` and `terminals` only. In `construction`, `electrode_length` and `jellyroll_volume` took any object and must now be quantities.
@@ -371,7 +371,7 @@ These changes can make a record that validated before fail now:
 These changes only accept more, so a record that validated before still does:
 
 - `battinfo_version`, in the provenance block and in the envelope of `battinfo.base.schema.json`, takes PEP 440 versions (`0.8.0rc1`, `0.8.0.dev1`, `0.8.0.post1`, `0.8.0+local`) as well as `X.Y.Z` with a hyphenated suffix, in all 25 schemas that carry the pattern (PR #456).
-- `material_spec_id` in the material-component, current-collector and electrolyte modules, and `electrode_spec_id` in the electrode module, take the superseded `material-spec/` and `electrode-spec/` IRIs as well as `spec/` (0.8.0).
+- `material_spec_id` in the material-component, current-collector and electrolyte modules, and `electrode_spec_id` in the electrode module, take the superseded `material-spec/` and `electrode-spec/` IRIs as well as `spec/` (14 October, PR #460).
 - A quantity that gives only `value_text` needs no unit (8 September), and an inline electrode may consist of its `electrode_spec_id` alone (14 August).
 - A cell spec's `reference_electrode` takes an inline electrode as well as a string, and a parameter set no longer needs `claims` (4 October).
 - A parameter set's `id` and `supersedes` take a `dataset/` IRI as well as a `spec/` one (12 October, PR #436). New parameter sets mint under `dataset/`, and a `spec/` IRI remains valid for a record minted before (section 6.3).
