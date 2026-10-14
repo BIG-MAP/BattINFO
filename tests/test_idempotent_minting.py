@@ -168,7 +168,8 @@ def test_workspace_rename_with_a_serial_keeps_the_iri(tmp_path: Path) -> None:
 # The workspace (ws.add and the engine behind it), the create_* builders, the
 # save_* functions, a save of a record without an id (save_record), the
 # publication package and the embedded-to-standalone bridges mint the same cell,
-# material-spec and electrode-spec IRI for the same identity.
+# test, dataset, material-spec and electrode-spec IRI for the same identity, each
+# on the paths that can build it.
 
 
 def _without_id_save(body_key: str, body: dict, root: Path) -> str:
@@ -483,3 +484,83 @@ def test_a_test_with_data_mints_one_iri_in_the_workspace_the_engine_and_the_batc
     (entry,) = json.loads(Path(package["bundle_path"]).read_text(encoding="utf-8"))["datasets"]
 
     assert added.id == test.id == entry["test"]["test"]["id"]
+
+
+REMOTE_URL = "https://example.org/data/S1-run2.csv"
+
+# A dataset of a test, read from a data file in the workspace or named by a remote
+# URL. Its seed is its cell, its test, its data's locator and its name; without a
+# name, its location stands in.
+DATASET_IDENTITIES: dict[str, dict] = {
+    "local file, named": {"name": "S1 data", "path": "data/S1.csv"},
+    "local file, unnamed": {"path": "data/S1.csv"},
+    "remote URL, named": {"name": "S1 remote run", "access_url": REMOTE_URL},
+    "remote URL, unnamed": {"access_url": REMOTE_URL},
+}
+
+
+def _data_file(root: Path) -> Path:
+    path = root / "data" / "S1.csv"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("time_s,voltage_V\n0,3.0\n", encoding="utf-8")
+    return path
+
+
+@pytest.mark.parametrize("case", sorted(DATASET_IDENTITIES))
+def test_every_path_mints_one_dataset_iri(case: str, tmp_path: Path) -> None:
+    import battinfo
+    from battinfo.bundle import CellSpec, Dataset
+
+    fields = DATASET_IDENTITIES[case]
+    engine = Workspace(tmp_path / "engine")
+    cell = engine.cell(CellSpec(id=CELL_SPEC_IRI, **SPEC_FIELDS), serial_number="S1")
+    test = engine.test(cell, kind="cycling")
+    local = _data_file(tmp_path / "engine") if "path" in fields else None
+    dataset = engine.dataset(cell, title=fields.get("name"), test=test, path=local, access_url=fields.get("access_url"))
+    engine.render()
+
+    saved_root = tmp_path / "save"
+    saved_file = _data_file(saved_root) if "path" in fields else None
+    draft = {
+        "name": fields.get("name"),
+        "cell_instance_id": str(cell.id),
+        "test_id": str(test.id),
+        "dataset_path": str(saved_file) if saved_file else None,
+        "access_url": saved_file.resolve().as_uri() if saved_file else fields.get("access_url"),
+    }
+    iris = {
+        "engine": str(dataset.id),
+        "save": api.save_dataset(
+            Dataset(**{key: value for key, value in draft.items() if value is not None}),
+            source_root=saved_root / ".battinfo" / "records",
+            resolve_references=False,
+        )["id"],
+    }
+    if case == "local file, named":  # ws.add("test", data=...) titles the dataset "<cell> data"
+        ws = battinfo.workspace(tmp_path / "ws", registry_url=None)
+        _data_file(tmp_path / "ws")
+        ws.add("cell", spec=CellSpec(id=CELL_SPEC_IRI, **SPEC_FIELDS), serial_numbers=["S1"])
+        ws.add("test", type="cycling", cell="S1", data="data/S1.csv")
+        ws._ws.render()
+        (made,) = ws._ws.datasets
+        iris["ws"] = str(made.id)
+    assert len(set(iris.values())) == 1, iris
+
+
+@pytest.mark.parametrize("named", [True, False], ids=["named", "unnamed"])
+def test_a_dataset_without_a_cell_or_test_mints_one_iri_saved_with_or_without_an_id(
+    named: bool, tmp_path: Path
+) -> None:
+    """A save without an id leaves a dataset's cell and test out of its seed.
+
+    Its ``about`` list does not say which cell and test are the dataset's own,
+    so only a dataset that names neither, such as a collection or a file
+    archived elsewhere, mints the IRI ``save_dataset`` gives it.
+    """
+    from battinfo.bundle import Dataset
+
+    fields = {"name": "S1 remote run"} if named else {}
+    saved = api.save_dataset(
+        Dataset(access_url=REMOTE_URL, **fields), source_root=tmp_path / "save", resolve_references=False
+    )["id"]
+    assert _without_id_save("dataset", {"access_url": REMOTE_URL, **fields}, tmp_path / "rec") == saved
