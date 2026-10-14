@@ -33,7 +33,7 @@ uv run pytest --nbmake docs/guides/ -q
 uv run sphinx-build -b html -W --keep-going docs docs/_build/html
 ```
 
-CI also lints every workflow file with [actionlint](https://github.com/rhysd/actionlint), which passes each `run:` script to shellcheck, so run `actionlint` before you push a change to `.github/workflows/`. `tests/test_release_workflow.py` checks the conditions in `release.yml` that keep PyPI uploads to pushed tags, and `tests/test_docs_deploy.py` runs `docs-deploy.sh` against a scratch gh-pages tree.
+CI also lints every workflow file with [actionlint](https://github.com/rhysd/actionlint), which passes each `run:` script to shellcheck, so run `actionlint` before you push a change to `.github/workflows/`. `tests/test_release_workflow.py` checks the conditions in `release.yml` that keep PyPI uploads to pushed tags, and `tests/test_docs_deploy.py` runs `docs-deploy.sh` against a scratch gh-pages tree. After `uv build`, the CI package job runs `scripts/check_distribution.py dist`, which fails when the wheel or the sdist carries other metadata than `pyproject.toml` declares, or the sdist holds the tests.
 
 The test suite runs with sockets disabled (pytest-socket, set in `pyproject.toml`). Mock network calls; a test that really needs the network opts in with `@pytest.mark.enable_socket`. Coverage has to stay at or above the `fail_under` floor in `pyproject.toml`.
 
@@ -158,7 +158,7 @@ Edit the source, then regenerate. A CI step or a test fails when a generated cop
 | mapping tables, emitter terms | `assets/vocab/emmo-labels.ttl` | `uv run python scripts/gen_emmo_labels.py` |
 | examples, emitters | `web/lib/showcase.generated.ts`, `web/lib/jsonld.generated.ts` | `scripts/gen_web_examples.py`, `scripts/gen_web_jsonld.py` |
 | schemas, examples, records context | the other `web/lib/*.generated.ts` files | `npm run sync:schemas`, `sync:examples`, `sync:context` in `web/` |
-| the version (`__version__` in `src/battinfo/__init__.py`) | `battinfo.ttl`, `CITATION.cff`, `SECURITY.md`, `docs/records/*.md`, `web/lib/showcase.generated.ts` | `uv run python scripts/set_version.py X.Y.Z`; `tests/test_set_version.py` runs its `--check` |
+| the version (`__version__` in `src/battinfo/__init__.py`) | `battinfo.ttl`, `CITATION.cff`, `SECURITY.md`, the `Changelog` URL in `pyproject.toml`, `docs/records/*.md`, `web/lib/showcase.generated.ts` | `uv run python scripts/set_version.py X.Y.Z`; `tests/test_set_version.py` runs its `--check` |
 | EMMO pins in `battinfo.ttl` | `src/battinfo/data/context/domain-battery.context.json`, `tests/fixtures/emmo/closure-terms.json` | set `PINNED_VERSION` in `.tools/quality/refresh_emmo_context.py`, run it, then run `.tools/quality/emmo_closure_terms.py` (both read the release tags online) |
 
 The record-type pages under `docs/records/` run each authoring snippet against the current library and validate the result under the strict policy. A change to a schema, the API or an emitter that alters a reference record must regenerate that chapter in the same commit.

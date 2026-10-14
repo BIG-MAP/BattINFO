@@ -275,7 +275,7 @@ each release also gets its own version DOI on Zenodo.
 
 ## License
 
-Distributed under the **Apache License 2.0**. See [`LICENSE`](https://github.com/BIG-MAP/BattINFO/blob/main/LICENSE).
+Distributed under the **Apache License 2.0**. See [`LICENSE`](https://github.com/BIG-MAP/BattINFO/blob/main/LICENSE). The package also includes EMMO-derived context files and labels under CC BY 4.0 and five BPX example parameter sets under MIT; [`NOTICE`](https://github.com/BIG-MAP/BattINFO/blob/main/NOTICE) says which files they are.
 
 ## Acknowledgements
 

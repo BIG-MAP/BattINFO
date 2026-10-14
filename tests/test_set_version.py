@@ -1,7 +1,7 @@
 """The release version is set in one place and checked everywhere it is stamped.
 
 scripts/set_version.py writes ``__version__`` and the stamps that follow from it
-(battinfo.ttl, CITATION.cff, SECURITY.md), reruns the generators that embed the
+(battinfo.ttl, CITATION.cff, SECURITY.md, the Changelog URL in pyproject.toml), reruns the generators that embed the
 version, and has a check mode. tests/installed_smoke.py compares the installed
 distribution's version with ``battinfo.__version__`` instead of pinning one.
 """
@@ -39,7 +39,7 @@ smoke = _load("installed_smoke", ROOT / "tests" / "installed_smoke.py")
 
 CURRENT = sv.read_version(ROOT)
 BASE = sv.parse_version(CURRENT).base
-STAMPED = ["src/battinfo/__init__.py", "battinfo.ttl", "CITATION.cff", "SECURITY.md", "CHANGELOG.md"]
+STAMPED = ["src/battinfo/__init__.py", "battinfo.ttl", "CITATION.cff", "SECURITY.md", "CHANGELOG.md", "pyproject.toml"]
 GENERATED = [
     *(page.relative_to(ROOT).as_posix() for page in sorted((ROOT / "docs" / "records").glob("*.md"))),
     "web/lib/showcase.generated.ts",
@@ -177,6 +177,7 @@ def test_check_mode_exits_zero_on_this_checkout(capsys: pytest.CaptureFixture[st
         ("CITATION.cff", r"^# Set to the day the v\S+ tag", "# Set to the day the v0.0.9 tag"),
         ("SECURITY.md", r"^\| \d+\.\d+\.x \|", "| 0.0.x |"),
         ("SECURITY.md", r"^\| < \d+\.\d+\.\d+ \|", "| < 0.0.1 |"),
+        ("pyproject.toml", r"blob/v[^/]+/CHANGELOG\.md", "blob/v0.0.9/CHANGELOG.md"),
         (
             "tests/installed_smoke.py",
             r"^def main\(\) -> None:$",
@@ -218,7 +219,7 @@ def test_a_pre_release_sets_only_the_package_version(tmp_path: Path, suffix: str
     sv.set_version(root, version, generate=False)
 
     assert f'__version__ = "{version}"' in _read(root, "src/battinfo/__init__.py")
-    for rel in ("battinfo.ttl", "CITATION.cff", "SECURITY.md", "CHANGELOG.md"):
+    for rel in ("battinfo.ttl", "CITATION.cff", "SECURITY.md", "CHANGELOG.md", "pyproject.toml"):
         assert (root / rel).read_bytes() == (ROOT / rel).read_bytes(), rel
     # Until the generators run, their output still carries the old version.
     stale = sv.check(root)
@@ -242,6 +243,8 @@ def test_a_new_release_moves_every_stamp(tmp_path: Path) -> None:
     security = _read(root, "SECURITY.md")
     assert "| 9.10.x | :white_check_mark: |" in security
     assert "| < 9.10.0 | :x: |" in security
+    changelog_url = tomllib.loads(_read(root, "pyproject.toml"))["project"]["urls"]["Changelog"]
+    assert changelog_url == "https://github.com/BIG-MAP/BattINFO/blob/v9.10.0/CHANGELOG.md"
 
     _regenerate(root, "9.10.0")
     problems = sv.check(root)

@@ -10,25 +10,48 @@ refreshes the lock.
 
 The classifiers name the Python versions CI tests, and the install pages, the
 contributor guides and the scope page state the same range.
+
+The rest of the metadata is fixed at upload as well: the licence expression,
+the project URLs, the keywords and the classifiers. scripts/check_distribution.py
+checks that the built wheel and sdist carry what pyproject.toml declares, and
+that the sdist leaves the tests out.
 """
 
 from __future__ import annotations
 
+import importlib.util
+import io
 import re
 import subprocess
 import sys
+import tarfile
 import tomllib
+import zipfile
 from collections import Counter
 from collections.abc import Iterable
 from pathlib import Path
+from types import ModuleType
 
+import pytest
 import yaml
+from packaging.licenses import canonicalize_license_expression
 from packaging.requirements import Requirement
 from packaging.specifiers import SpecifierSet
 from packaging.utils import canonicalize_name
 from packaging.version import Version
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def _load_script(name: str) -> ModuleType:
+    spec = importlib.util.spec_from_file_location(name, ROOT / "scripts" / f"{name}.py")
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+set_version = _load_script("set_version")
 
 # The Python versions 0.8.0 supports. Python 3.15 is left out until PyYAML
 # publishes wheels for it: without them a core install on Windows needs a C
@@ -216,3 +239,184 @@ def test_dependabot_refreshes_the_lock_and_leaves_the_floors_alone() -> None:
     assert build_requires <= ignored, (
         f"Dependabot may still change the build requirements {sorted(build_requires - ignored)}"
     )
+
+
+# ── Metadata an index keeps as it was uploaded ──
+
+
+def test_the_licence_expression_names_every_licence_in_the_wheel() -> None:
+    # Besides battinfo's own code (Apache-2.0), the wheel ships the EMMO-derived
+    # context and labels (CC BY 4.0) and five BPX example parameter sets (MIT).
+    # NOTICE says which files are which, and ships next to LICENSE.
+    project = _pyproject()["project"]
+    assert project["license"] == "Apache-2.0 AND CC-BY-4.0 AND MIT"
+    assert canonicalize_license_expression(project["license"]) == project["license"]
+    assert {"LICENSE", "NOTICE"} <= set(project["license-files"])
+    notice = (ROOT / "NOTICE").read_text(encoding="utf-8")
+    assert "Creative Commons Attribution 4.0 International (CC BY 4.0)" in notice
+    assert "Licence: MIT" in notice
+
+
+def test_the_project_urls_point_at_the_rendered_docs_the_website_and_the_release_changelog() -> None:
+    urls = _pyproject()["project"]["urls"]
+    assert urls["Homepage"] == "https://battinfo.org"
+    # The root of the docs site forwards to stable/, the newest final release
+    # (to dev/ before the first one), as .github/workflows/docs-deploy.sh writes it.
+    assert urls["Documentation"] == "https://big-map.github.io/BattINFO/"
+    # The changelog as tagged; scripts/set_version.py moves it with the version.
+    base = set_version.parse_version(set_version.read_version(ROOT)).base
+    assert urls["Changelog"] == f"https://github.com/BIG-MAP/BattINFO/blob/v{base}/CHANGELOG.md"
+    assert urls["Repository"] == "https://github.com/BIG-MAP/BattINFO"
+    assert urls["Issues"] == "https://github.com/BIG-MAP/BattINFO/issues"
+
+
+def test_the_package_and_the_citation_share_their_keywords_and_battery_pass_is_not_one() -> None:
+    keywords = _pyproject()["project"]["keywords"]
+    citation = _yaml("CITATION.cff")
+    assert citation["keywords"] == keywords
+    assert not [keyword for keyword in keywords if "battery pass" in keyword.lower()]
+
+
+def test_typed_is_claimed_only_once_mypy_checks_every_module() -> None:
+    # py.typed ships, so type checkers read battinfo's annotations. The modules
+    # in the ignore_errors override are not type-checked yet, so the
+    # "Typing :: Typed" classifier waits until that list is empty.
+    pyproject = _pyproject()
+    unchecked = [
+        module
+        for override in pyproject["tool"]["mypy"].get("overrides", [])
+        if override.get("ignore_errors")
+        for module in override["module"]
+    ]
+    typed = "Typing :: Typed" in pyproject["project"]["classifiers"]
+    assert not (typed and unchecked), f"'Typing :: Typed' is claimed while mypy skips {unchecked}"
+    assert "py.typed" in pyproject["tool"]["setuptools"]["package-data"]["battinfo"]
+    assert (ROOT / "src" / "battinfo" / "py.typed").is_file()
+
+
+def test_the_sdist_leaves_the_tests_out() -> None:
+    # setuptools puts tests/test*.py into an sdist by default, but not the
+    # fixtures, docs, scripts and web files they read, so they could not run
+    # from it. They run from a checkout of the release tag instead.
+    lines = [line.strip() for line in (ROOT / "MANIFEST.in").read_text(encoding="utf-8").splitlines()]
+    assert "prune tests" in lines
+
+
+# ── scripts/check_distribution.py, which CI and release.yml run on dist/ ──
+
+
+@pytest.fixture()
+def distribution_check() -> ModuleType:
+    return _load_script("check_distribution")
+
+
+def _metadata_fields(**replace: list[str]) -> list[tuple[str, str]]:
+    """The fields setuptools writes into METADATA for this pyproject.toml, with some replaced."""
+    project = _pyproject()["project"]
+    fields: dict[str, list[str]] = {
+        "Metadata-Version": ["2.4"],
+        "Name": ["battinfo"],
+        "Version": [set_version.read_version(ROOT)],
+        "License-Expression": [project["license"]],
+        "Project-URL": [f"{label}, {url}" for label, url in project["urls"].items()],
+        "Keywords": [",".join(project["keywords"])],
+        "Classifier": list(project["classifiers"]),
+        "License-File": list(project["license-files"]),
+    }
+    fields.update(replace)
+    return [(name, value) for name, values in fields.items() for value in values]
+
+
+def _write_dist(
+    dist: Path,
+    *,
+    fields: list[tuple[str, str]] | None = None,
+    sdist_extra: Iterable[str] = (),
+    wheel_licences: Iterable[str] = ("LICENSE", "NOTICE"),
+) -> Path:
+    """A wheel and an sdist holding only what scripts/check_distribution.py reads."""
+    fields = fields if fields is not None else _metadata_fields()
+    metadata = "".join(f"{name}: {value}\n" for name, value in fields).encode("utf-8") + b"\nThe README.\n"
+    version = set_version.read_version(ROOT)
+    dist.mkdir(parents=True, exist_ok=True)
+    info = f"battinfo-{version}.dist-info"
+    with zipfile.ZipFile(dist / f"battinfo-{version}-py3-none-any.whl", "w") as wheel:
+        wheel.writestr("battinfo/__init__.py", "")
+        wheel.writestr(f"{info}/METADATA", metadata)
+        for name in wheel_licences:
+            wheel.writestr(f"{info}/licenses/{name}", f"{name}\n")
+    top = f"battinfo-{version}"
+    members = {
+        f"{top}/PKG-INFO": metadata,
+        f"{top}/LICENSE": b"LICENSE\n",
+        f"{top}/NOTICE": b"NOTICE\n",
+        f"{top}/pyproject.toml": b"",
+        f"{top}/src/battinfo/__init__.py": b"",
+        **{f"{top}/{name}": b"" for name in sdist_extra},
+    }
+    with tarfile.open(dist / f"battinfo-{version}.tar.gz", "w:gz") as sdist:
+        for name, data in members.items():
+            member = tarfile.TarInfo(name)
+            member.size = len(data)
+            sdist.addfile(member, io.BytesIO(data))
+    return dist
+
+
+def test_a_distribution_built_from_this_pyproject_passes(
+    distribution_check: ModuleType, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    dist = _write_dist(tmp_path / "dist")
+    assert distribution_check.check(dist, ROOT) == []
+    assert distribution_check.main([str(dist)]) == 0
+    assert "match pyproject.toml" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize(
+    ("field", "values"),
+    [
+        ("License-Expression", ["Apache-2.0"]),
+        ("Project-URL", ["Documentation, https://github.com/BIG-MAP/BattINFO/tree/main/docs"]),
+        ("Keywords", ["batteries,Battery Pass"]),
+        ("Classifier", ["Typing :: Typed"]),
+        ("License-File", ["LICENSE"]),
+    ],
+)
+def test_metadata_that_differs_from_pyproject_is_named(
+    distribution_check: ModuleType, tmp_path: Path, field: str, values: list[str]
+) -> None:
+    dist = _write_dist(tmp_path / "dist", fields=_metadata_fields(**{field: values}))
+    problems = distribution_check.check(dist, ROOT)
+    assert problems and all(field in problem for problem in problems), problems
+    assert any(".whl" in problem for problem in problems) and any(".tar.gz" in problem for problem in problems)
+
+
+def test_a_licence_file_missing_from_the_wheel_fails(distribution_check: ModuleType, tmp_path: Path) -> None:
+    dist = _write_dist(tmp_path / "dist", wheel_licences=["LICENSE"])
+    problems = distribution_check.check(dist, ROOT)
+    assert len(problems) == 1 and "NOTICE" in problems[0], problems
+
+
+def test_tests_in_the_sdist_fail(distribution_check: ModuleType, tmp_path: Path) -> None:
+    dist = _write_dist(tmp_path / "dist", sdist_extra=["tests/test_api.py"])
+    problems = distribution_check.check(dist, ROOT)
+    assert len(problems) == 1 and "tests/" in problems[0], problems
+
+
+def test_a_dist_folder_without_exactly_one_wheel_and_one_sdist_fails(
+    distribution_check: ModuleType, tmp_path: Path
+) -> None:
+    empty = tmp_path / "empty"
+    empty.mkdir()
+    assert distribution_check.main([str(empty)]) == 1
+    dist = _write_dist(tmp_path / "dist")
+    wheel = next(dist.glob("*.whl"))
+    (dist / "battinfo-0.0.1-py3-none-any.whl").write_bytes(wheel.read_bytes())
+    problems = distribution_check.check(dist, ROOT)
+    assert problems and "one wheel" in problems[0], problems
+
+
+def test_ci_and_the_release_build_check_the_distribution() -> None:
+    command = "python3 scripts/check_distribution.py dist"
+    assert command in _run_text(_ci_jobs()["package"])
+    release_build = _yaml(".github/workflows/release.yml")["jobs"]["build"]
+    assert command in _run_text(release_build)

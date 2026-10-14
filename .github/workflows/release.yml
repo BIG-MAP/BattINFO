@@ -93,6 +93,9 @@ jobs:
       - name: Validate metadata (twine check)
         run: uvx twine check dist/*
 
+      - name: Check the distribution against pyproject.toml
+        run: python3 scripts/check_distribution.py dist
+
       - name: Verify tag matches built version
         id: tag
         if: startsWith(github.ref, 'refs/tags/')

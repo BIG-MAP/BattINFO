@@ -8,7 +8,10 @@ dynamic = ["version"]
 description = "Implementation and interoperability layer for the domain-battery ontology."
 readme = "README.md"
 requires-python = ">=3.11"
-license = "Apache-2.0"
+# battinfo's own code is Apache-2.0. The wheel also ships EMMO-derived context
+# files and labels (CC BY 4.0) and five BPX example parameter sets (MIT); NOTICE
+# says which files are which.
+license = "Apache-2.0 AND CC-BY-4.0 AND MIT"
 license-files = ["LICENSE", "NOTICE"]
 authors = [
   { name = "Simon Clark" },
@@ -30,7 +33,6 @@ keywords = [
   "linked data",
   "JSON-LD",
   "FAIR data",
-  "Battery Pass",
   "semantic web",
 ]
 classifiers = [
@@ -43,7 +45,8 @@ classifiers = [
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
   "Topic :: Scientific/Engineering",
-  "Typing :: Typed",
+  # No "Typing :: Typed" yet: py.typed ships, but the modules in the mypy
+  # override below with ignore_errors are not type-checked.
 ]
 dependencies = [
   # import battinfo fails on 2.7.0 to 2.10.3, and the generated record models
@@ -122,12 +125,14 @@ docs = [
   "sphinx-design>=0.6",
 ]
 
+# An index keeps these as uploaded. The docs root forwards to stable/, the
+# newest final release. scripts/set_version.py moves the Changelog to the tag.
 [project.urls]
-Homepage = "https://github.com/BIG-MAP/BattINFO"
+Homepage = "https://battinfo.org"
 Repository = "https://github.com/BIG-MAP/BattINFO"
-Documentation = "https://github.com/BIG-MAP/BattINFO/tree/main/docs"
+Documentation = "https://big-map.github.io/BattINFO/"
 Issues = "https://github.com/BIG-MAP/BattINFO/issues"
-Changelog = "https://github.com/BIG-MAP/BattINFO/blob/main/CHANGELOG.md"
+Changelog = "https://github.com/BIG-MAP/BattINFO/blob/v0.8.0/CHANGELOG.md"
 
 [project.scripts]
 battinfo = "battinfo.cli:app"

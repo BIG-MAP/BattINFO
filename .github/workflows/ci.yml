@@ -271,6 +271,10 @@ jobs:
         run: uv build
       - name: Validate distribution metadata
         run: uvx twine check dist/*
+      # The licence, URLs, keywords and classifiers an index will keep, and an
+      # sdist without the tests.
+      - name: Check the distribution against pyproject.toml
+        run: python3 scripts/check_distribution.py dist
       # Smoke the built wheel against the *locked* dependency versions (what we
       # support and lock), not whatever floats latest from PyPI — otherwise the
       # smoke is non-deterministic. Dependency-bump compatibility is covered
