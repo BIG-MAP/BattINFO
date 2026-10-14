@@ -316,7 +316,11 @@ def _lab_spec(rated: float, name: str | None = None):
     )
 
 
-def test_a_spec_saved_in_an_earlier_session_keeps_its_iri_when_a_sibling_joins(tmp_path: Path) -> None:
+@pytest.mark.parametrize("sibling_first", [False, True], ids=["sibling added after", "sibling added before"])
+def test_a_spec_saved_in_an_earlier_session_keeps_its_iri_when_a_sibling_joins(
+    tmp_path: Path, sibling_first: bool
+) -> None:
+    """The specs differ only in a property beside the record body, so the whole saved document is compared."""
     import battinfo
 
     root = tmp_path / "lab"
@@ -324,17 +328,21 @@ def test_a_spec_saved_in_an_earlier_session_keeps_its_iri_when_a_sibling_joins(t
     first.add("cell", spec=_lab_spec(2.0), serial_numbers=["C01"])
     first.save()
     (saved_spec,), (saved_cell,) = first._ws.cell_specs, first._ws.cells
+    saved_record = _records_in(root, "cell-spec")
 
     rerun = battinfo.workspace(root, registry_url=None)
-    rerun.add("cell", spec=_lab_spec(2.0), serial_numbers=["C01"])
-    rerun.add("cell", spec=_lab_spec(3.0), serial_numbers=["C02"])
+    adds = [(_lab_spec(2.0), "C01"), (_lab_spec(3.0), "C02")]
+    for spec, serial in reversed(adds) if sibling_first else adds:
+        rerun.add("cell", spec=spec, serial_numbers=[serial])
     rerun.save()
 
-    spec, sibling = rerun._ws.cell_specs
-    cell, other_cell = rerun._ws.cells
-    assert (spec.id, cell.id) == (saved_spec.id, saved_cell.id)
-    assert sibling.id not in (None, saved_spec.id) and other_cell.cell_spec_id == sibling.id
-    assert len(_records_in(root, "cell-spec")) == 2 and len(_records_in(root, "cell-instance")) == 2
+    by_serial = {cell.serial_number: cell for cell in rerun._ws.cells}
+    assert (by_serial["C01"].cell_spec_id, by_serial["C01"].id) == (saved_spec.id, saved_cell.id)
+    assert by_serial["C02"].cell_spec_id not in (None, saved_spec.id)
+    specs = _records_in(root, "cell-spec")
+    assert len(specs) == 2 and len(_records_in(root, "cell-instance")) == 2
+    (saved_file,) = saved_record
+    assert specs[saved_file]["properties"] == saved_record[saved_file]["properties"]
 
 
 def test_a_rerun_keeps_the_iris_whether_or_not_a_save_ran_between_the_adds(tmp_path: Path) -> None:
@@ -428,3 +436,77 @@ def test_colliding_cell_specs_saved_before_0_8_0_keep_their_iris(tmp_path: Path)
     # A fresh session finds one cell under each serial.
     fresh = battinfo.workspace(root, registry_url=None)
     assert fresh._resolve_cell("C01").id == CELLS_SAVED_BEFORE_0_8_0[0]
+
+
+# What 057b66a0 minted for one cell spec saved on its own (chemistry spelled
+# Li-ion, not as its vocabulary key) and its cell C01: the plain natural-key IRI
+# of before 0.8.0, and the cell seeded from it.
+SPEC_SAVED_ALONE_BEFORE_0_8_0 = "https://w3id.org/battinfo/spec/8tdq-hs3n-kqf4-bmhb"
+CELL_SAVED_ALONE_BEFORE_0_8_0 = "https://w3id.org/battinfo/cell/a9qe-9ymx-n3sc-855k"
+
+
+def _li_ion_spec(rated: float):
+    import battinfo
+
+    return battinfo.CellSpec(
+        manufacturer="Example Lab",
+        model="R2032",
+        format="coin",
+        chemistry="Li-ion",
+        properties={"rated_capacity": {"value": rated, "unit": "mAh"}},
+    )
+
+
+def _save_spec_alone_before_0_8_0(root: Path) -> dict:
+    """Save the spec and C01 as 057b66a0 did, by pinning the IRI it minted; return the saved spec record."""
+    import battinfo
+
+    first = battinfo.workspace(root, registry_url=None)
+    first.add("cell", spec=_li_ion_spec(2.0), serial_numbers=["C01"])
+    first._ws.cell_specs[0].id = SPEC_SAVED_ALONE_BEFORE_0_8_0
+    first.save()
+    assert [str(cell.id) for cell in first._ws.cells] == [CELL_SAVED_ALONE_BEFORE_0_8_0]
+    return _records_in(root, "cell-spec")["cell-spec-8tdq-hs3n-kqf4-bmhb.json"]
+
+
+@pytest.mark.parametrize("sibling_first", [False, True], ids=["sibling added after", "sibling added before"])
+def test_a_spec_saved_alone_before_0_8_0_keeps_its_iri_when_a_sibling_joins(
+    tmp_path: Path, sibling_first: bool
+) -> None:
+    """The sibling shares the natural key of before 0.8.0; only the spec the saved record describes takes its IRI."""
+    import battinfo
+
+    root = tmp_path / "lab"
+    saved = _save_spec_alone_before_0_8_0(root)
+
+    rerun = battinfo.workspace(root, registry_url=None)
+    adds = [(_li_ion_spec(2.0), "C01"), (_li_ion_spec(3.0), "C02")]
+    for spec, serial in reversed(adds) if sibling_first else adds:
+        rerun.add("cell", spec=spec, serial_numbers=[serial])
+    rerun.save()
+
+    by_serial = {cell.serial_number: cell for cell in rerun._ws.cells}
+    assert by_serial["C01"].id == CELL_SAVED_ALONE_BEFORE_0_8_0
+    assert by_serial["C01"].cell_spec_id == SPEC_SAVED_ALONE_BEFORE_0_8_0
+    assert by_serial["C02"].cell_spec_id not in (None, SPEC_SAVED_ALONE_BEFORE_0_8_0)
+    specs = _records_in(root, "cell-spec")
+    assert len(specs) == 2 and len(_records_in(root, "cell-instance")) == 2
+    assert specs["cell-spec-8tdq-hs3n-kqf4-bmhb.json"]["properties"] == saved["properties"]
+    fresh = battinfo.workspace(root, registry_url=None)
+    assert fresh._resolve_cell("C01").id == CELL_SAVED_ALONE_BEFORE_0_8_0
+
+
+def test_a_sibling_never_takes_the_iri_of_a_spec_saved_alone_before_0_8_0(tmp_path: Path) -> None:
+    """When no spec of the session is the saved one (it was edited as the sibling joined), none takes its IRI."""
+    import battinfo
+
+    root = tmp_path / "lab"
+    saved = _save_spec_alone_before_0_8_0(root)
+
+    rerun = battinfo.workspace(root, registry_url=None)
+    rerun.add("cell", spec=_li_ion_spec(2.5), serial_numbers=["C01"])
+    rerun.add("cell", spec=_li_ion_spec(3.0), serial_numbers=["C02"])
+    rerun.save()
+
+    assert SPEC_SAVED_ALONE_BEFORE_0_8_0 not in {spec.id for spec in rerun._ws.cell_specs}
+    assert _records_in(root, "cell-spec")["cell-spec-8tdq-hs3n-kqf4-bmhb.json"] == saved

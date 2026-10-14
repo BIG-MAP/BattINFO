@@ -63,6 +63,7 @@ from battinfo.bundle import (
     TestSpec,
 )
 from battinfo.entities import (
+    ENTITY_BY_TYPE,
     cell_instance_identity_seed,
     cell_spec_identity_seed,
     cell_spec_seed_fields,
@@ -76,6 +77,7 @@ from battinfo.entities import (
     legacy_test_identity_seed,
     save_entity_path,
     saved_record_body,
+    saved_record_document,
     seed_text,
     stable_uid,
     test_identity_seed,
@@ -264,6 +266,9 @@ def _seed_view(value: Any, workspace_root: Path | None, *, top: bool = True, eve
 # Links a finalize pass derives from other records (the datasets that name a cell
 # or a test), not content of the record itself.
 _DERIVED_BACK_LINKS = ("dataset_ids",)
+# The same back-links where a record document carries them beside its body (a
+# cell's ``datasets`` list, written from its dataset_ids).
+_DERIVED_DOCUMENT_LINKS = ("datasets",)
 
 
 def _content_seed(entity: Any, *, workspace_root: Path | None = None) -> str:
@@ -489,6 +494,18 @@ def _legacy_disambiguated_ids(
         seen.add(current)
         result.append(current)
     return result
+
+
+def _legacy_candidates(started: Sequence[str | None], ended: Sequence[str | None]) -> list[tuple[str, ...]]:
+    """For each record, the IRIs a finalize pass of before 0.8.0 can have given it, most specific first.
+
+    *started* holds the IRIs that pass started from and *ended* the ones it
+    ended with (:func:`_legacy_disambiguated_ids`). A record that shared its
+    seed with a sibling in this session gets the re-minted IRI first, then the
+    plain one, which it had if it was saved before the sibling was added. A
+    record that shares its seed with no other gets its one IRI.
+    """
+    return [tuple(dict.fromkeys(iri for iri in (end, start) if iri)) for start, end in zip(started, ended, strict=True)]
 
 
 def _path_from_file_uri(uri: str) -> Path | None:
@@ -2590,7 +2607,7 @@ class Workspace:
         *,
         assigned: Sequence[bool],
         record_roots: Sequence[Path],
-        legacy_ids: Sequence[str | None] | None = None,
+        legacy_ids: Sequence[Sequence[str]] | None = None,
         is_legacy_record: Callable[[int, Mapping[str, Any]], bool] | None = None,
     ) -> list[bool]:
         """Which of *finalized* keep their IRI when the pass breaks collisions: *assigned*, and the records already saved.
@@ -2603,12 +2620,19 @@ class Workspace:
         it, the one whose save would write that record again (:meth:`_is_saved_record`)
         keeps it, and only the others are re-minted from their content; so a
         record keeps its IRI whether or not a save ran before the record that
-        collides with it was added. A record saved under a seed of before 0.8.0
-        keeps that IRI too: *legacy_ids* holds, for each record, the IRI the
-        rule of before 0.8.0 ends with, and a record takes it when a record is
-        saved under it and *is_legacy_record* says that saved record is this
-        one. A record alone on an IRI that is saved already has its own record
-        and keeps it. An IRI another record of the session has is never taken.
+        collides with it was added. A record alone on an IRI that is saved
+        already has its own record and keeps it.
+
+        A record saved under a seed of before 0.8.0 keeps that IRI too.
+        *legacy_ids* holds, for each record, the IRIs the rule of before 0.8.0
+        can have given it, most specific first: the IRI that rule re-minted it
+        to when a sibling of the session shared its seed, then its plain seeded
+        IRI. A record takes the first of them that is saved, that no record of
+        the session has, and whose saved record *is_legacy_record* says is this
+        one. Several records can claim one saved IRI: the plain IRI of a record
+        saved on its own before a sibling with the same seed was added. Then
+        only the record whose save would write the saved record again takes it
+        (the first, when several would); when none would, none takes it.
         """
         held = list(assigned)
         roots = [Path(root) for root in record_roots]
@@ -2628,35 +2652,57 @@ class Workspace:
             if len(members) == 1:
                 own_record.add(members[0])
                 continue
-            body = saved_record_body(entity_type, uid, roots)
+            doc = saved_record_document(entity_type, uid, roots)
             match = next(
-                (index for index in members if body is not None and self._is_saved_record(finalized[index], body)),
+                (index for index in members if doc is not None and self._is_saved_record(finalized[index], doc)),
                 None,
             )
             if match is not None:
                 held[match] = True
         if legacy_ids is None or is_legacy_record is None:
             return held
+        record_key = ENTITY_BY_TYPE[entity_type].record_key
         taken = {item.id for item in finalized if item.id is not None}
-        for index, item in enumerate(finalized):
-            legacy = legacy_ids[index]
-            if held[index] or index in own_record or item.id is None or legacy is None or legacy in taken:
-                continue
-            body = saved_record_body(entity_type, _iri_uid(legacy), roots)
-            if body is None or not is_legacy_record(index, body):
-                continue
-            item.id = legacy
-            held[index] = True
-            taken.add(legacy)
+        pending = [
+            index
+            for index, item in enumerate(finalized)
+            if not held[index] and index not in own_record and item.id is not None
+        ]
+        depth = max((len(legacy_ids[index]) for index in pending), default=0)
+        for position in range(depth):
+            claims: dict[str, list[int]] = {}
+            for index in pending:
+                candidates = legacy_ids[index]
+                if held[index] or position >= len(candidates) or candidates[position] in taken:
+                    continue
+                claims.setdefault(candidates[position], []).append(index)
+            for legacy, claimants in claims.items():
+                doc = saved_record_document(entity_type, _iri_uid(legacy), roots)
+                if doc is None:
+                    continue
+                matches = [index for index in claimants if is_legacy_record(index, doc[record_key])]
+                if len(matches) > 1:
+                    matches = [
+                        index
+                        for index in matches
+                        if self._is_saved_record(finalized[index].model_copy(update={"id": legacy}), doc)
+                    ][:1]
+                if len(matches) != 1:
+                    continue
+                finalized[matches[0]].id = legacy
+                held[matches[0]] = True
+                taken.add(legacy)
         return held
 
     def _is_saved_record(self, item: Any, saved: Mapping[str, Any]) -> bool:
-        """Whether *saved*, a record body saved under *item*'s IRI, is the record a save of *item* writes.
+        """Whether *saved*, a record document saved under *item*'s IRI, is the record a save of *item* writes.
 
-        The two bodies are compared without the record's own IRI, the
-        volatile timestamps and derived back-links (``dataset_ids``), and, for
-        a dataset that has none of its own, without the publication time and
-        licence a save fills in.
+        The whole documents are compared, the sections beside the body (such
+        as a cell spec's ``properties``) included. Left out are the record's
+        own IRI, the volatile timestamps, the schema and BattINFO versions that
+        wrote it, the derived back-links (``dataset_ids``, a cell's
+        ``datasets``) and, for a dataset that has none of its own, the
+        publication time and licence a save fills in.
         """
         builders: dict[type, Callable[[Any], dict[str, Any]]] = {
             CellSpec: _record_from_cell_spec,
@@ -2673,8 +2719,7 @@ class Workspace:
         except (ValueError, TypeError):
             return False
         kind = kind_for_doc(doc)
-        body = doc.get(kind.record_key) if kind is not None else None
-        if not isinstance(body, Mapping):
+        if kind is None:
             return False
         skip = {_RECORD_ID_KEY, *_DERIVED_BACK_LINKS}
         if isinstance(item, Dataset):
@@ -2683,19 +2728,31 @@ class Workspace:
             if not item.license:
                 skip.add("license")
 
-        def view(value: Mapping[str, Any]) -> Any:
-            return {key: entry for key, entry in _without_volatile(dict(value)).items() if key not in skip}
+        def view(document: Mapping[str, Any]) -> dict[str, Any] | None:
+            data = _without_volatile(dict(document))
+            body = data.get(kind.record_key)
+            if not isinstance(body, dict):
+                return None
+            data[kind.record_key] = {key: entry for key, entry in body.items() if key not in skip}
+            for key in ("schema_version", *_DERIVED_DOCUMENT_LINKS):
+                data.pop(key, None)
+            provenance = data.get("provenance")
+            if isinstance(provenance, dict):
+                provenance.pop("battinfo_version", None)
+            return data
 
-        return view(body) == view(saved)
+        mine = view(doc)
+        return mine is not None and mine == view(saved)
 
-    def _legacy_cell_spec_ids(self, finalized: Sequence[CellSpec], assigned: Sequence[bool]) -> list[str | None]:
-        """The IRI the finalize pass of before 0.8.0 gave each cell spec of *finalized*.
+    def _legacy_cell_spec_ids(self, finalized: Sequence[CellSpec], assigned: Sequence[bool]) -> list[tuple[str, ...]]:
+        """The IRIs the finalize pass of before 0.8.0 can have given each cell spec of *finalized*.
 
-        The natural-key seed of before 0.8.0 (``entities.legacy_cell_spec_identity_seed``,
-        hashed without NFC), and the re-mint from content that kept colliding
-        specs apart then (:func:`_legacy_disambiguated_ids`). A spec in
-        *assigned* starts from the IRI it has. Only for finding specs saved
-        under those IRIs.
+        The re-mint from content that kept specs sharing a seed apart then
+        (:func:`_legacy_disambiguated_ids`), then the plain natural-key IRI of
+        before 0.8.0 (``entities.legacy_cell_spec_identity_seed``, hashed
+        without NFC), which a spec saved on its own has. A spec in *assigned*
+        starts from the IRI it has. Only for finding specs saved under those
+        IRIs (:meth:`_hold_saved_iris`).
         """
         started = [
             spec.id
@@ -2708,15 +2765,18 @@ class Workspace:
             )
             for spec, held in zip(finalized, assigned, strict=True)
         ]
-        return _legacy_disambiguated_ids(started, finalized, "cell-spec", workspace_root=self.data_root)
+        ended = _legacy_disambiguated_ids(started, finalized, "cell-spec", workspace_root=self.data_root)
+        return _legacy_candidates(started, ended)
 
-    def _legacy_test_ids(self, finalized: Sequence[Test], assigned: Sequence[bool]) -> list[str | None]:
-        """The IRI the finalize pass of before 0.8.0 gave each test of *finalized*.
+    def _legacy_test_ids(self, finalized: Sequence[Test], assigned: Sequence[bool]) -> list[tuple[str, ...]]:
+        """The IRIs the finalize pass of before 0.8.0 can have given each test of *finalized*.
 
-        Its seed (``entities.legacy_test_identity_seed``), and the re-mint from
-        content that kept colliding tests apart then
-        (:func:`_legacy_disambiguated_ids`). A test in *assigned* starts from
-        the IRI it has. Only for finding tests saved under those IRIs.
+        The re-mint from content that kept tests sharing a seed apart then
+        (:func:`_legacy_disambiguated_ids`), then the plain IRI of its seed of
+        before 0.8.0 (``entities.legacy_test_identity_seed``), which a test
+        saved without such a sibling has. A test in *assigned* starts from the
+        IRI it has. Only for finding tests saved under those IRIs
+        (:meth:`_hold_saved_iris`).
         """
         started = [
             test.id
@@ -2732,7 +2792,8 @@ class Workspace:
             )
             for test, held in zip(finalized, assigned, strict=True)
         ]
-        return _legacy_disambiguated_ids(started, finalized, "test", workspace_root=self.data_root)
+        ended = _legacy_disambiguated_ids(started, finalized, "test", workspace_root=self.data_root)
+        return _legacy_candidates(started, ended)
 
     def _refuse_replacing_saved_runs(
         self,

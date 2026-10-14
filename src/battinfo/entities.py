@@ -264,11 +264,13 @@ def keep_legacy_uid(
     return legacy_uid if body is not None and same_identity(body) else uid
 
 
-def saved_record_body(entity_type: str, uid: str, roots: Iterable[str | Path]) -> Optional[Mapping[str, Any]]:
-    """The body of the *entity_type* record saved as *uid* under one of *roots*, or ``None``.
+def saved_record_document(entity_type: str, uid: str, roots: Iterable[str | Path]) -> Optional[Mapping[str, Any]]:
+    """The *entity_type* record document saved as *uid* under one of *roots*, or ``None``.
 
     Looks at the file a save writes (:func:`save_entity_path`) in each root
-    and returns the body only when it carries the IRI *uid* names.
+    and returns the whole document (its body and the sections beside it, such
+    as a cell spec's ``properties``) only when the body carries the IRI *uid*
+    names.
     """
     from battinfo._jsonio import read_record_json  # noqa: PLC0415
 
@@ -284,8 +286,17 @@ def saved_record_body(entity_type: str, uid: str, roots: Iterable[str | Path]) -
             continue
         body = doc.get(kind.record_key) if isinstance(doc, Mapping) else None
         if isinstance(body, Mapping) and body.get("id") == iri:
-            return body
+            return doc
     return None
+
+
+def saved_record_body(entity_type: str, uid: str, roots: Iterable[str | Path]) -> Optional[Mapping[str, Any]]:
+    """The body of the *entity_type* record saved as *uid* under one of *roots*, or ``None``.
+
+    The object under the kind's record key in :func:`saved_record_document`.
+    """
+    doc = saved_record_document(entity_type, uid, roots)
+    return None if doc is None else doc[ENTITY_BY_TYPE[entity_type].record_key]
 
 
 def cell_spec_uid(

@@ -505,6 +505,33 @@ def test_a_saved_test_is_kept_only_for_the_same_run(tmp_path: Path) -> None:
     assert _test_body(root, GOLDEN["test | ws | with data"])["dataset_ids"] == [GOLDEN["dataset | ws | local file"]]
 
 
+@pytest.mark.parametrize("second_first", [False, True], ids=["second run added after", "second run added before"])
+def test_a_run_saved_alone_before_the_change_keeps_its_iris_when_a_second_run_joins(
+    tmp_path: Path, second_first: bool
+) -> None:
+    """Before 0.8.0 both runs share one seed, so its pass would have re-minted both; the saved run keeps its IRI."""
+    root = tmp_path / "ws"
+    _write(root / "data" / "C01.csv", "time_s,voltage_V\n0,3.0\n")
+    _write(root / "data" / "C01-b.csv", "time_s,voltage_V\n0,3.1\n")
+    first = _workspace(root)
+    first.add("cell", spec=CellSpec(**SPEC), serial_numbers=["C01"])
+    first.add("test", type="capacity_check", cell="C01", data="data/C01.csv", iri=GOLDEN["test | ws | with data"])
+    first.save()
+    assert [str(d.id) for d in first._ws.datasets] == [GOLDEN["dataset | ws | local file"]]
+
+    rerun = _workspace(root)
+    rerun.add("cell", spec=CellSpec(**SPEC), serial_numbers=["C01"])
+    tests = {}
+    for name in ("C01-b.csv", "C01.csv") if second_first else ("C01.csv", "C01-b.csv"):
+        (tests[name],) = rerun.add("test", type="capacity_check", cell="C01", data=f"data/{name}")
+    rerun.save()
+
+    assert tests["C01.csv"].id == GOLDEN["test | ws | with data"]
+    assert tests["C01-b.csv"].id not in (None, GOLDEN["test | ws | with data"])
+    assert _test_body(root, GOLDEN["test | ws | with data"])["dataset_ids"] == [GOLDEN["dataset | ws | local file"]]
+    assert len(_records(root, "test")) == 2 and len(_records(root, "dataset")) == 2
+
+
 def _engine_cell_iri(root: Path) -> str:
     engine = Workspace(root)
     cell = engine.cell(engine.cell_spec(**SPEC), serial_number="C01")
