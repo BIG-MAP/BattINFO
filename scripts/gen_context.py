@@ -11,13 +11,22 @@ offline validator/viewer resolve the URL against — one source of truth.
 Regenerate when new EMMO terms are adopted; bump to a v2 file for a breaking
 change (a published version's meaning must never change).
 
-    uv run python scripts/gen_context.py           # write
-    uv run python scripts/gen_context.py --check    # CI drift gate
+v1 is append-only from the v0.8.0 tag. ``tests/fixtures/context/records-v1-0.8.0.json``
+holds every term as 0.8.0 ships it, and this script refuses to write a v1 that
+changes or drops one of them. ``--write-snapshot`` retakes that snapshot from the
+v1 it writes; it is for the release work before the tag and refuses once the
+v0.8.0 tag exists.
+
+    uv run python scripts/gen_context.py                    # write
+    uv run python scripts/gen_context.py --check             # CI drift gate
+    uv run python scripts/gen_context.py --write-snapshot    # before the v0.8.0 tag only
 """
 
 from __future__ import annotations
 
+import argparse
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -32,6 +41,13 @@ from battinfo.jsonld import (  # noqa: E402
 from battinfo.transform.cell_spec_node import label_to_compact  # noqa: E402
 
 OUT = ROOT / "src" / "battinfo" / "data" / "context" / "records.context.v1.json"
+CONTEXT_URL = "https://w3id.org/battinfo/context/records/v1.json"
+
+# v1 as the first release ships it. From the v0.8.0 tag on, every term here keeps
+# its definition: build() refuses an output that changes or drops one, and
+# tests/test_context_v1_freeze.py checks the bundled v1 against the same file.
+SNAPSHOT = ROOT / "tests" / "fixtures" / "context" / "records-v1-0.8.0.json"
+SNAPSHOT_RELEASE = "0.8.0"
 
 # The repository (and thus every generated artifact it serves) is Apache-2.0.
 # The claim rides as a top-level sibling of ``@context`` — JSON-LD context
@@ -68,7 +84,8 @@ EMITTER_CLASS_TERMS = {
 # No released package has shipped v1, so it is corrected in place rather than
 # bumped to v2. After 0.8.0 this table must not grow: a change of meaning then
 # needs a v2 context. tests/test_context_v1_agreement.py fails if v1 and the
-# curated maps disagree again.
+# curated maps disagree again. The snapshot is taken after the last correction,
+# and from then on build() refuses any entry here that changes a snapshot term.
 PRE_RELEASE_CORRECTIONS = {
     # private battinfo: mints -> the classes added in domain-electrochemistry 0.37.1
     "power_capability": "electrochemistry:electrochemistry_4e6c4e9d_64cb_4c24_a0f3_5b4146ebbeb0",
@@ -91,6 +108,10 @@ PRE_RELEASE_CORRECTIONS = {
 }
 
 
+class FrozenTermError(ValueError):
+    """A build would change or drop a term that the v1 snapshot holds."""
+
+
 def _published() -> dict:
     """The v1 terms already served at the hosted URL, or ``{}`` before first write."""
     if not OUT.exists():
@@ -98,16 +119,52 @@ def _published() -> dict:
     return json.loads(OUT.read_text(encoding="utf-8")).get("@context", {})
 
 
-def build() -> dict:
+def snapshot_terms() -> dict:
+    """The terms frozen in the snapshot, or ``{}`` before the snapshot is taken."""
+    if not SNAPSHOT.exists():
+        return {}
+    return json.loads(SNAPSHOT.read_text(encoding="utf-8"))["terms"]
+
+
+def frozen_term_changes(context: dict, frozen: dict) -> list[str]:
+    """One line for each *frozen* term that *context* removes or defines differently.
+
+    The whole definition counts, so a term keeps its expanded IRI, ``@type`` and
+    ``@container``. Terms in *context* that *frozen* lacks are additions and pass.
+    """
+    changes = []
+    for term, definition in frozen.items():
+        if term not in context:
+            changes.append(f"{term!r} removed (was {json.dumps(definition)})")
+        elif context[term] != definition:
+            changes.append(f"{term!r} changed from {json.dumps(definition)} to {json.dumps(context[term])}")
+    return changes
+
+
+def _refusal(changes: list[str]) -> str:
+    snapshot = SNAPSHOT.relative_to(ROOT).as_posix() if SNAPSHOT.is_relative_to(ROOT) else str(SNAPSHOT)
+    lines = [f"Refusing to change {len(changes)} v1 term(s) frozen in {snapshot}:"]
+    lines += [f"  {change}" for change in changes]
+    lines.append(
+        "v1 is append-only: a term keeps the meaning it shipped with, so documents that use it "
+        "keep expanding to the same graph. Give a new meaning a new term (or a v2 context) "
+        "and leave the old term as it is."
+    )
+    return "\n".join(lines)
+
+
+def build(*, enforce_snapshot: bool = True) -> dict:
     """The complete records context: base conveniences + class table + method terms.
 
     v1 is append-only. Every source below is merged with ``setdefault`` on top of
     the terms already published, so regenerating can add a term but can never
     rewrite one: a document minted against v1 keeps expanding to the same graph
     forever. Changing what an existing term means requires a v2 file, not an edit
-    here — and the drift check will not paper over it, because the inline context
-    and v1 would then disagree and ``test_url_mode_is_compact_and_equivalent``
-    fails until the bump is made deliberately.
+    here. The merge alone cannot hold that line: it starts from the committed v1,
+    so a hand edit survives it, and ``PRE_RELEASE_CORRECTIONS`` overwrites terms
+    by design. So once the snapshot exists, a build that changes or drops one of
+    its terms raises :class:`FrozenTermError`. Only ``--write-snapshot`` builds
+    without that check.
     """
     context: dict = _published()
     context.update(PRE_RELEASE_CORRECTIONS)
@@ -120,21 +177,104 @@ def build() -> dict:
     ):
         for term, value in source.items():
             context.setdefault(term, value)
+    if enforce_snapshot:
+        changes = frozen_term_changes(context, snapshot_terms())
+        if changes:
+            raise FrozenTermError(_refusal(changes))
     return {"license": LICENSE, "@context": context}
 
 
-def render() -> str:
-    return json.dumps(build(), indent=2, ensure_ascii=False) + "\n"
+def render(doc: dict | None = None) -> str:
+    return json.dumps(build() if doc is None else doc, indent=2, ensure_ascii=False) + "\n"
+
+
+def render_snapshot(doc: dict) -> str:
+    """The snapshot of the v1 document *doc*: every term with its full definition."""
+    snapshot = {
+        "description": (
+            "Every term of the v1 records context as BattINFO 0.8.0 ships it. v1 is append-only "
+            "from the v0.8.0 tag: each term here keeps this definition, and a new meaning needs a "
+            "new term. scripts/gen_context.py refuses to change these terms, and "
+            "tests/test_context_v1_freeze.py checks the bundled copy against them. Written by "
+            "scripts/gen_context.py --write-snapshot, which refuses once the tag exists."
+        ),
+        "context": CONTEXT_URL,
+        "release": SNAPSHOT_RELEASE,
+        "terms": doc["@context"],
+    }
+    return json.dumps(snapshot, indent=2, ensure_ascii=False) + "\n"
+
+
+def release_tagged() -> bool:
+    """Whether this checkout has the tag of the snapshot's release (best effort, via git)."""
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(ROOT), "rev-parse", "-q", "--verify", f"refs/tags/v{SNAPSHOT_RELEASE}"],
+            capture_output=True,
+            check=False,
+        )
+    except OSError:
+        return False
+    return result.returncode == 0
+
+
+def _write(path: Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Generate records.context.v1.json.")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--check", action="store_true", help="fail when the committed v1 differs from a fresh build")
+    mode.add_argument(
+        "--write-snapshot",
+        action="store_true",
+        help=f"write v1 and retake the {SNAPSHOT_RELEASE} snapshot from it (before the v{SNAPSHOT_RELEASE} tag only)",
+    )
+    args = parser.parse_args(argv)
+
+    if args.write_snapshot:
+        if release_tagged():
+            print(
+                f"v{SNAPSHOT_RELEASE} is tagged, so its v1 snapshot is final. v1 is append-only: "
+                "give a new meaning a new term instead of changing one the snapshot holds.",
+                file=sys.stderr,
+            )
+            return 1
+        doc = build(enforce_snapshot=False)
+        previous = snapshot_terms()
+        changes = frozen_term_changes(doc["@context"], previous)
+        added = [term for term in doc["@context"] if term not in previous]
+        _write(OUT, render(doc))
+        _write(SNAPSHOT, render_snapshot(doc))
+        print(f"Wrote {OUT} and {SNAPSHOT} ({len(doc['@context'])} terms).")
+        if previous:
+            print(f"Against the previous snapshot: {len(added)} term(s) added, {len(changes)} changed or removed.")
+            for change in changes:
+                print(f"  {change}")
+        return 0
+
+    try:
+        doc = build()
+    except FrozenTermError as exc:
+        print(exc, file=sys.stderr)
+        return 1
+    text = render(doc)
+    count = len(doc["@context"])
+    if args.check:
+        current = OUT.read_text(encoding="utf-8") if OUT.exists() else ""
+        if current.replace("\r\n", "\n") != text:
+            print("src/battinfo/data/context/records.context.v1.json drifts — run scripts/gen_context.py")
+            return 1
+        frozen = snapshot_terms()
+        added = f"; {count - len(frozen)} added since the {SNAPSHOT_RELEASE} snapshot" if frozen else ""
+        print(f"records.context.v1.json in sync ({count} terms{added}).")
+        return 0
+    _write(OUT, text)
+    print(f"Wrote {OUT} ({count} terms).")
+    return 0
 
 
 if __name__ == "__main__":
-    text = render()
-    if "--check" in sys.argv:
-        current = OUT.read_text(encoding="utf-8") if OUT.exists() else ""
-        if current.replace("\r\n", "\n") != text.replace("\r\n", "\n"):
-            print("src/battinfo/data/context/records.context.v1.json drifts — run scripts/gen_context.py")
-            sys.exit(1)
-        print(f"records.context.v1.json in sync ({len(build()['@context'])} terms).")
-    else:
-        OUT.write_text(text, encoding="utf-8")
-        print(f"Wrote {OUT} ({len(build()['@context'])} terms).")
+    sys.exit(main())

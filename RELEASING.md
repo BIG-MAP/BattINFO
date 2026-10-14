@@ -39,6 +39,8 @@ Keep the Zenodo integration switched on for the repository. Its webhook archives
 
    `check_distribution.py` checks that the wheel and the sdist carry the licence expression, project URLs, keywords and classifiers of `pyproject.toml`, which an index keeps as uploaded, and that the sdist has no `tests/` folder. CI and the release build run it too.
 
+   For 0.8.0, `python scripts/gen_context.py --check` must also report `0 added since the 0.8.0 snapshot`, so that the snapshot holds every v1 term the release ships ([The frozen v1 records context](#the-frozen-v1-records-context)).
+
 5. Push the branch and rehearse on TestPyPI. The workflow runs the CI suite and the install gate, builds the distribution and uploads it. On a manual run the hosted check only reports, since a rehearsal usually runs before the registry has the new copies:
 
    ```bash
@@ -77,6 +79,19 @@ Keep the Zenodo integration switched on for the repository. Its webhook archives
 9. Once the docs workflow has deployed the tag, check that the ontology IRIs serve the release's `battinfo.ttl` (next section), and that the next run of `hosted-files.yml` is green.
 
 Never delete a published tag or a PyPI release, because downstream users and the Zenodo archive refer to them. A bad release is fixed by publishing a patch release.
+
+## The frozen v1 records context
+
+`src/battinfo/data/context/records.context.v1.json` is the bundled copy of `https://w3id.org/battinfo/context/records/v1.json`, and it is append-only from the v0.8.0 tag: a term it defines keeps its definition, and a new meaning needs a new term or a v2 context. `tests/fixtures/context/records-v1-0.8.0.json` holds every v1 term as 0.8.0 ships it. `tests/test_context_v1_freeze.py` fails when v1 changes or drops one of those terms, and `scripts/gen_context.py` refuses to write such a v1, whether the change comes from a hand edit, a source table or an entry in `PRE_RELEASE_CORRECTIONS`. Added terms pass.
+
+The snapshot is taken last, in the freeze pull request, once every change to v1 for 0.8.0 is on `main`, the pre-release corrections included. Until then `gen_context.py --check` fails on any correction the snapshot does not hold yet, and the command that retakes it is:
+
+```bash
+python scripts/gen_context.py --write-snapshot
+python scripts/gen_context.py --check
+```
+
+The first command writes v1 and the snapshot from the same build; commit both. The second should then report `0 added since the 0.8.0 snapshot`. A term added to v1 after the snapshot, by a soak fix for instance, passes the guard but is not frozen, so if the count is not 0, run the first command again before the tag. `--write-snapshot` refuses once the checkout has the `v0.8.0` tag; from then on the guard blocks every correction of a frozen term, and `PRE_RELEASE_CORRECTIONS` can no longer change v1. Later releases add terms without retaking this snapshot.
 
 ## The ontology at its w3id IRIs
 
