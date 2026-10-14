@@ -69,6 +69,16 @@ PUBLICATION_SERIAL_FIRST = (
     "with a serial and another name gets the IRI every other path gives it."
 )
 
+TEST_RUN = (
+    "A test is seeded from its cell, kind, protocol (its IRI whenever it has one, else its name) "
+    "and run (its first data file's locator, else a start time the caller gives), never from its name."
+)
+TEST_RUN_SAVED_WITHOUT_ID = (
+    TEST_RUN + " A save without an id mints a test that has a cell and a kind, where it refused one "
+    "with no name or protocol name."
+)
+DATASET_OF_MOVED_TEST = "A dataset's seed includes its test's IRI, which moved with the test seed."
+
 #: Cases whose IRI moved since 057b66a0: case id -> (what it mints now, why it moved).
 MOVED: dict[str, tuple[str, str]] = {
     "cell-spec | engine | chemistry alias": (
@@ -138,6 +148,38 @@ MOVED: dict[str, tuple[str, str]] = {
     "cell | publication | serial, batch and name": (
         "https://w3id.org/battinfo/cell/pxp5-t8ca-9d85-hkk9",
         PUBLICATION_SERIAL_FIRST,
+    ),
+    "dataset | batch | data file": (
+        "https://w3id.org/battinfo/dataset/54nw-xwsp-ych4-bsbe",
+        DATASET_OF_MOVED_TEST,
+    ),
+    "dataset | engine | local file": (
+        "https://w3id.org/battinfo/dataset/sn2k-65ds-d0p7-sw6m",
+        DATASET_OF_MOVED_TEST,
+    ),
+    "dataset | engine | remote URL": (
+        "https://w3id.org/battinfo/dataset/jaxg-v6h0-dk5t-hjbq",
+        DATASET_OF_MOVED_TEST,
+    ),
+    "dataset | publication | dataset folder": (
+        "https://w3id.org/battinfo/dataset/4paf-wh40-5b0b-wgjk",
+        DATASET_OF_MOVED_TEST,
+    ),
+    "dataset | save | local file": (
+        "https://w3id.org/battinfo/dataset/n7hj-ykny-pdfg-f3es",
+        DATASET_OF_MOVED_TEST,
+    ),
+    "dataset | save | remote URL": (
+        "https://w3id.org/battinfo/dataset/jaxg-v6h0-dk5t-hjbq",
+        DATASET_OF_MOVED_TEST,
+    ),
+    "dataset | ws | colliding pair": (
+        "https://w3id.org/battinfo/dataset/6ga0-td7g-4nf4-j55r, https://w3id.org/battinfo/dataset/9w9d-06sq-4eee-35vm",
+        DATASET_OF_MOVED_TEST,
+    ),
+    "dataset | ws | local file": (
+        "https://w3id.org/battinfo/dataset/7hsd-56hd-xtk2-cckf",
+        DATASET_OF_MOVED_TEST,
     ),
     "electrode-spec | bridge | extended example, A123 ANR26650M1-B negative electrode": (
         "https://w3id.org/battinfo/spec/58e8-7982-avxm-w0y4",
@@ -242,6 +284,90 @@ MOVED: dict[str, tuple[str, str]] = {
     "material-spec | save_record | kind from the name": (
         "https://w3id.org/battinfo/spec/6rq6-s3tx-b6ym-ht0g",
         KIND_RESOLVED,
+    ),
+    "test | batch | data file": (
+        "https://w3id.org/battinfo/test/wfzv-bzmz-4vnv-czgg",
+        TEST_RUN,
+    ),
+    "test | engine | named": (
+        "https://w3id.org/battinfo/test/jnz2-b453-nmwr-12jw",
+        TEST_RUN,
+    ),
+    "test | engine | protocol name": (
+        "https://w3id.org/battinfo/test/q97r-dted-6djm-be68",
+        TEST_RUN,
+    ),
+    "test | engine | unnamed": (
+        "https://w3id.org/battinfo/test/qqkc-ye32-0wn1-rg87",
+        TEST_RUN,
+    ),
+    "test | engine | with data": (
+        "https://w3id.org/battinfo/test/jtkh-tr1b-pz2m-eynn",
+        TEST_RUN,
+    ),
+    "test | publication | named": (
+        "https://w3id.org/battinfo/test/9581-wqtz-26qv-d2ac",
+        TEST_RUN,
+    ),
+    "test | publication | protocol name": (
+        "https://w3id.org/battinfo/test/h436-1422-wdbv-q43x",
+        TEST_RUN,
+    ),
+    "test | publication | unnamed": (
+        "https://w3id.org/battinfo/test/mev1-meek-zta8-61f1",
+        TEST_RUN,
+    ),
+    "test | save | named": (
+        "https://w3id.org/battinfo/test/5xta-r5e0-eswr-fyzh",
+        TEST_RUN,
+    ),
+    "test | save | protocol name": (
+        "https://w3id.org/battinfo/test/q97r-dted-6djm-be68",
+        TEST_RUN,
+    ),
+    "test | save | unnamed": (
+        "https://w3id.org/battinfo/test/qqkc-ye32-0wn1-rg87",
+        TEST_RUN,
+    ),
+    "test | save_record | named": (
+        "https://w3id.org/battinfo/test/5xta-r5e0-eswr-fyzh",
+        TEST_RUN,
+    ),
+    "test | save_record | protocol name": (
+        "https://w3id.org/battinfo/test/q97r-dted-6djm-be68",
+        TEST_RUN,
+    ),
+    "test | save_record | unnamed": (
+        "https://w3id.org/battinfo/test/qqkc-ye32-0wn1-rg87",
+        TEST_RUN_SAVED_WITHOUT_ID,
+    ),
+    "test | ws | colliding pair, a.csv": (
+        "https://w3id.org/battinfo/test/cyjy-8abx-gj74-693b",
+        TEST_RUN,
+    ),
+    "test | ws | colliding pair, b.csv": (
+        "https://w3id.org/battinfo/test/6w8h-wfmr-gary-mzsm",
+        TEST_RUN,
+    ),
+    "test | ws | named": (
+        "https://w3id.org/battinfo/test/5xta-r5e0-eswr-fyzh",
+        TEST_RUN,
+    ),
+    "test | ws | protocol by IRI, not saved here": (
+        "https://w3id.org/battinfo/test/n7x2-v3t4-ge1v-2f93",
+        TEST_RUN,
+    ),
+    "test | ws | protocol object": (
+        "https://w3id.org/battinfo/test/y4w0-0k6s-8a94-6g24",
+        TEST_RUN,
+    ),
+    "test | ws | unnamed": (
+        "https://w3id.org/battinfo/test/qqkc-ye32-0wn1-rg87",
+        TEST_RUN,
+    ),
+    "test | ws | with data": (
+        "https://w3id.org/battinfo/test/jtkh-tr1b-pz2m-eynn",
+        TEST_RUN,
     ),
 }
 

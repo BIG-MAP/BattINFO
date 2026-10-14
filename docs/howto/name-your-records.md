@@ -102,17 +102,18 @@ Cells take `handles=[...]` in parallel with `names=` and `serial_numbers=`. The 
 
 ## Rename without moving an IRI
 
-Several record types seed their IRI from their name, so a new title would mint a new record. A cell with a serial number is the exception: its IRI comes from the serial, so it keeps its IRI when you rename it. When you rename anything else that is already published, pin its identity:
+Several record types seed their IRI from their name, so a new title would mint a new record. A cell with a serial number and a test are the exceptions. A cell's IRI comes from its serial. A test's comes from its cell, its kind, its protocol and its first data file (or the `started_at=` you pass for a test without data), so it keeps its IRI when you rename it. The datasets made from a test's data files are titled after the test, though, and their IRIs follow their titles. When you rename anything else that is already published, pin its identity:
 
 | Record | How to pin |
 |---|---|
 | Cell without a serial number | `ws.add("cell", ..., iris=[...])`, one IRI per cell |
-| Test, and the datasets made from its data files | `ws.add("test", ..., iri=...)` or `uid=...`, plus `dataset_iris=[...]` in the order of `data=` |
+| The datasets made from a test's data files | `ws.add("test", ..., dataset_iris=[...])`, in the order of `data=` |
+| A test published before 0.8.0, rebuilt in a new folder | `ws.add("test", ..., iri=...)` or `uid=...`; the test seed changed in 0.8.0, and only a test saved in the folder you save to keeps its earlier IRI by itself |
 | Test spec drafts | an `"id"` (or `"uid"`) key in the `.test-spec.json` file |
 | Material and electrode records | `uid=...` or `id=...` |
 | Datasets and collections written with `battinfo.Dataset` | `Dataset(id=...)`; a collection's IRI otherwise comes from its access URL and name |
 
-A dataset made from a data file is seeded from its cell, its test, its name and the file's location. When the dataset has an https access or download URL, that URL is the location. For a local file it is the path relative to the workspace folder, such as `bdf/C01.bdf.csv`; a relative path is read against the workspace folder, not the directory you run from. A file outside the workspace is located by its folder and name, such as `run1/data.csv`, so two files called `data.csv` in different folders stay two datasets. Where the workspace folder itself sits never enters the seed, so a colleague or a CI job that builds the same workspace in another folder gets the same dataset IRIs. Moving or renaming a data file inside the workspace does give its dataset a new IRI; pin a published one with `dataset_iris=[...]`. A publication package built with `publish_publication_package()` or `Workspace.build_publication_package()` follows the same rule; there the local location is the dataset folder and its parent, such as `project/run-1`.
+A dataset made from a data file is seeded from its cell, its test, its name and the file's location. When the dataset has an https access or download URL, that URL is the location. For a local file it is the path relative to the workspace folder, such as `bdf/C01.bdf.csv`; a relative path is read against the workspace folder, not the directory you run from. A file outside the workspace is located by its folder and name, such as `run1/data.csv`, so two files called `data.csv` in different folders stay two datasets. Where the workspace folder itself sits never enters the seed, so a colleague or a CI job that builds the same workspace in another folder gets the same dataset IRIs. Moving or renaming a data file inside the workspace does give its dataset a new IRI, and its test too when it is the test's first data file; pin a published dataset with `dataset_iris=[...]` and a published test with `iri=`. A publication package built with `publish_publication_package()` or `Workspace.build_publication_package()` follows the same rule; there the local location is the dataset folder and its parent, such as `project/run-1`.
 
 For example, rebuilding a corpus with the new titles keeps the cell and test IRIs they were published under:
 

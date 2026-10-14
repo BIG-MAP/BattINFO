@@ -51,6 +51,7 @@ Consequences you can rely on:
 - re-running an identical ingest is a **no-op**, never a duplicate corpus;
 - running the same `ws.load()` or `ws.add()` call again in one session, as a notebook does when a cell is re-run, reuses the record the session already holds instead of adding a copy;
 - an IRI a record already has (pinned, imported, or given by an earlier save) never moves when a record with the same identity fields joins the session: the newcomer is minted from its content;
+- a test's IRI names one run on one cell, told apart by its protocol and its first data file (or, for a test without data, a start time you pass), so a later run with its own data never takes an earlier run's IRI, and renaming a test keeps its IRI;
 - the workspace and `save_*` paths mint **identical IRIs** for identical
   identities (tested);
 - records with no distinguishing identity still mint randomly — two anonymous

@@ -390,6 +390,98 @@ def dataset_locator_seed(
     return ""
 
 
+def test_identity_seed(
+    *,
+    cell_id: object,
+    kind: object,
+    protocol_id: object = None,
+    protocol_name: object = None,
+    data_locator: object = None,
+    started_at: object = None,
+) -> str:
+    """Identity seed for a test, one run on one cell, shared by every minting surface.
+
+    ``cell IRI :: kind :: protocol :: run``:
+
+    - The protocol is the IRI of the test spec the run followed whenever the
+      test names one, saved in this workspace or published elsewhere. A test
+      without one is seeded with its protocol name (:func:`seed_text`), and
+      with nothing when that name only restates the kind (``ws.add("test")``
+      names an unnamed protocol after the test type). A name read from a copy
+      of a published record never enters, so the IRI does not depend on
+      whether a registry lookup worked.
+    - The run tells two runs of one kind on one cell apart: the locator of
+      the test's first data file (*data_locator*, from
+      :func:`dataset_locator_seed`), and for a test without a data file, the
+      start time the caller gave (*started_at*) in Unix seconds. A test with
+      neither has an empty run part.
+
+    The test's name is display text, as a cell's name is, so renaming a test
+    keeps its IRI, and a generated title such as ``C01 cycling``, which
+    depends on how the cell was referenced, never decides it. Nothing read
+    from inside a data file enters either: a start time measured from a file
+    can first appear after a converter upgrade, and one run would get two
+    IRIs. A caller that has data files therefore gives their locator, and
+    *started_at* only when there is none.
+    """
+    kind_text = _stripped(kind)
+    return "::".join(
+        [
+            _stripped(cell_id) or "unknown-cell",
+            kind_text or "other",
+            _test_protocol_seed(protocol_id, protocol_name, kind_text),
+            _test_run_seed(data_locator, started_at),
+        ]
+    )
+
+
+# Its name starts with "test", so pytest would collect it from a test module that imports it.
+test_identity_seed.__test__ = False  # type: ignore[attr-defined]
+
+
+def _test_protocol_seed(protocol_id: object, protocol_name: object, kind: str) -> str:
+    """The protocol part of a test seed: its IRI, else its name unless that only restates *kind*."""
+    iri = _stripped(protocol_id)
+    if iri:
+        return iri
+    name = seed_text(protocol_name)
+    if name.casefold() == seed_text(kind.replace("_", " ")).casefold():
+        return ""
+    return name
+
+
+def _test_run_seed(data_locator: object, started_at: object) -> str:
+    """The run part of a test seed: the data file's locator, else ``started_at=<Unix seconds>``."""
+    if isinstance(data_locator, str) and data_locator.strip():
+        return _nfc(data_locator)
+    if started_at is None:
+        return ""
+    from battinfo.api._shared import _to_unix_time  # noqa: PLC0415
+
+    unix = _to_unix_time(started_at)
+    text = str(unix) if unix is not None else seed_text(started_at)
+    return f"started_at={text}" if text else ""
+
+
+def legacy_test_identity_seed(*, cell_id: object, kind: object, protocol_name: object, name: object) -> str:
+    """The test identity seed of before 0.8.0, kept to find tests minted under it.
+
+    ``cell IRI :: kind :: protocol name :: name``: the protocol name as
+    written (``test`` without one), the cell, kind and name stripped, and
+    ``test`` for a missing name. Hash it with :func:`legacy_stable_uid`;
+    nothing new is minted from it.
+    """
+    protocol = protocol_name if isinstance(protocol_name, str) and protocol_name else "test"
+    return "::".join(
+        [
+            _stripped(cell_id) or "unknown-cell",
+            _stripped(kind) or "other",
+            protocol,
+            _stripped(name) or "test",
+        ]
+    )
+
+
 def material_spec_identity_seed(
     *,
     manufacturer: str | None,

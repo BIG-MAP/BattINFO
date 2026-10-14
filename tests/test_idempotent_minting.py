@@ -361,3 +361,99 @@ def test_renaming_a_cell_with_a_serial_keeps_its_iri_in_the_publication_package(
     first = _publication_cell_iri(tmp_path / "a", serial_number="FAC-001", name="Cell A")
     renamed = _publication_cell_iri(tmp_path / "b", serial_number="FAC-001", name="Graphite AQ-1 cell FAC-001")
     assert first == renamed
+
+
+PROTOCOL_IRI = "https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-eeee"
+
+# One run on one cell, without data files. The name is display text and never
+# enters the IRI; a protocol enters as its IRI, else its name; the start time a
+# caller gives tells two runs without data apart.
+TEST_IDENTITIES: dict[str, dict] = {
+    "unnamed": {},
+    "named": {"name": "S1 formation run"},
+    "protocol name": {"protocol": "CCCV 1C"},
+    "protocol IRI": {"protocol_id": PROTOCOL_IRI},
+    "protocol IRI and name": {"protocol_id": PROTOCOL_IRI, "protocol": "Formation C/10"},
+    "start time": {"started_at": 1790845200},
+}
+
+
+@pytest.mark.parametrize("case", sorted(TEST_IDENTITIES))
+def test_every_path_mints_one_test_iri(case: str, tmp_path: Path) -> None:
+    import battinfo
+    from battinfo.bundle import CellSpec, Test
+
+    fields = TEST_IDENTITIES[case]
+    engine = Workspace(tmp_path / "engine")
+    cell = engine.cell(CellSpec(id=CELL_SPEC_IRI, **SPEC_FIELDS), serial_number="S1")
+    test = engine.test(
+        cell,
+        kind="cycling",
+        name=fields.get("name"),
+        protocol=fields.get("protocol"),
+        started_at=fields.get("started_at"),
+    )
+    test.protocol_id = fields.get("protocol_id")
+    engine.render()
+    cell_iri = str(cell.id)
+
+    record_fields = {
+        "cell_instance_id": cell_iri,
+        "test_kind": "cycling",
+        "name": fields.get("name"),
+        "protocol": {"name": fields["protocol"]} if "protocol" in fields else None,
+        "protocol_id": fields.get("protocol_id"),
+        "started_at": fields.get("started_at"),
+    }
+    body = {
+        "cell_id": cell_iri,
+        "kind": "cycling",
+        "name": fields.get("name"),
+        "protocol_name": fields.get("protocol"),
+        "protocol_id": fields.get("protocol_id"),
+        "started_at": fields.get("started_at"),
+    }
+    iris = {
+        "engine": str(test.id),
+        "save": api.save_test(
+            Test(**{key: value for key, value in record_fields.items() if value is not None}),
+            source_root=tmp_path / "save",
+            resolve_references=False,
+        )["id"],
+        "save_record": _without_id_save(
+            "test", {key: value for key, value in body.items() if value is not None}, tmp_path / "rec"
+        ),
+    }
+    if "protocol" not in fields:  # ws.add("test") takes a protocol as a TestSpec or its IRI, not a name
+        ws = battinfo.workspace(tmp_path / "ws", registry_url=None)
+        ws.add("cell", spec=CellSpec(id=CELL_SPEC_IRI, **SPEC_FIELDS), serial_numbers=["S1"])
+        options = {
+            "name": fields.get("name"),
+            "spec": fields.get("protocol_id"),
+            "started_at": fields.get("started_at"),
+        }
+        (added,) = ws.add("test", type="cycling", cell="S1", **{k: v for k, v in options.items() if v is not None})
+        ws._ws.render()
+        iris["ws"] = str(added.id)
+    assert len(set(iris.values())) == 1, iris
+
+
+def test_a_test_with_data_mints_one_iri_in_the_workspace_and_the_engine(tmp_path: Path) -> None:
+    """The run is told apart by its first data file's location in the workspace folder."""
+    import battinfo
+    from battinfo.bundle import CellSpec
+
+    for path in ("engine", "ws"):
+        data = tmp_path / path / "data" / "S1.csv"
+        data.parent.mkdir(parents=True)
+        data.write_text("time_s,voltage_V\n0,3.0\n", encoding="utf-8")
+    engine = Workspace(tmp_path / "engine")
+    cell = engine.cell(CellSpec(id=CELL_SPEC_IRI, **SPEC_FIELDS), serial_number="S1")
+    test = engine.record_test(cell, kind="cycling", path=tmp_path / "engine" / "data" / "S1.csv")
+    engine.render()
+
+    ws = battinfo.workspace(tmp_path / "ws", registry_url=None)
+    ws.add("cell", spec=CellSpec(id=CELL_SPEC_IRI, **SPEC_FIELDS), serial_numbers=["S1"])
+    (added,) = ws.add("test", type="cycling", cell="S1", data="data/S1.csv")
+    ws._ws.render()
+    assert added.id == test.id

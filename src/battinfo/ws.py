@@ -31,6 +31,8 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
+    import datetime as _datetime
+
     from battinfo._workspace import Workspace
 
 from battinfo._fs_guard import remove_temp_tree
@@ -480,6 +482,28 @@ def _unix_to_iso(ts: int | None) -> str | None:
     import datetime
 
     return datetime.datetime.fromtimestamp(ts, tz=datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def _given_run_period(started_at: Any, ended_at: Any) -> tuple[int | None, int | None]:
+    """The start and end of a run passed to ``ws.add("test")``, in Unix seconds (``None`` when not given).
+
+    Raises ``ValueError`` for a value that is not a time, and for an end before the start.
+    """
+    from battinfo.api._shared import _to_unix_time  # noqa: PLC0415
+
+    times: dict[str, int | None] = {}
+    for keyword, value in (("started_at", started_at), ("ended_at", ended_at)):
+        unix = _to_unix_time(value) if value is not None else None
+        if value is not None and unix is None:
+            raise ValueError(
+                f"{keyword}={value!r} is not a time. Pass Unix seconds, an ISO 8601 time such as "
+                "'2026-10-01T09:00:00Z' (read as UTC without an offset) or a datetime."
+            )
+        times[keyword] = unix
+    start, end = times["started_at"], times["ended_at"]
+    if start is not None and end is not None and end < start:
+        raise ValueError(f"ended_at={ended_at!r} is before started_at={started_at!r}.")
+    return start, end
 
 
 def _plan_zenodo_deposit(
@@ -3621,7 +3645,8 @@ class AuthoringWorkspace:
         The keywords a test takes are ``type`` (or ``kind``), ``cell``, ``data``,
         ``raw``, ``datasets``, ``spec`` (or ``protocol``), ``conformance``,
         ``name``, ``handle``, ``iri``, ``uid``, ``dataset_iris``, ``series_id``,
-        ``instrument``, ``channel``, ``license``, ``description`` and ``status``.
+        ``instrument``, ``channel``, ``license``, ``description``, ``status``,
+        ``started_at`` and ``ended_at``.
         Any other keyword raises ``TypeError`` naming the closest match and
         listing the accepted ones, before anything is created; every record type
         checks its keywords this way.
@@ -3640,6 +3665,18 @@ class AuthoringWorkspace:
         - ``conformance`` says whether the run followed its spec:
           ``"conformant"``, ``"non-conformant"``, ``"unknown"``, or a dict with
           ``status``, ``note`` and ``deviations``.
+        - ``started_at`` and ``ended_at`` say when the run started and ended
+          (Unix seconds, an ISO 8601 time or a datetime). Without them the times
+          are read from a BDF data file that records them.
+
+        A test's IRI names one run: it is seeded from the cell, the type, the
+        protocol (the IRI of ``spec=`` whenever there is one) and the run, which
+        is the location of the first ``data`` file, or ``started_at`` for a
+        test without data. The name never enters it, so renaming a test keeps
+        its IRI, and a second run of one type on one cell, with its own data
+        file, gets its own IRI, in this session or a later one. A time read
+        from a data file never enters it either. A test saved before 0.8.0
+        changed this seed keeps the IRI it was saved under.
 
         ``series_id`` puts every dataset made from ``data=`` in a collection. Pass
         the collection's IRI; the collection itself is saved first, with
@@ -3657,8 +3694,10 @@ class AuthoringWorkspace:
         never generated here; build them with ``battinfo.naming.handle_for()``.
         Renaming a record must not move its IRI, so pin a published identity
         when the display name changes: ``iris=[...]`` for cells, ``uid=`` for
-        material and electrode records, and ``iri=``/``uid=`` (plus
-        ``dataset_iris=[...]`` for its data files) for a test::
+        material and electrode records, and ``dataset_iris=[...]`` for the data
+        files of a test, whose dataset titles are made from the test's name.
+        A test keeps its IRI when renamed; pin one published before 0.8.0 with
+        ``iri=``/``uid=`` when you rebuild it in a new folder::
 
             ws.add("test", type="gitt", cell="063b77", name="Graphite AQ-1 cell 063b77 GITT test",
                    handle="flores-ocv/graphite-aq-1-063b77-gitt-test",
@@ -9683,6 +9722,8 @@ class AuthoringWorkspace:
         license: str | None = None,
         description: str | None = None,
         status: str = "completed",
+        started_at: "int | float | str | _datetime.datetime | None" = None,
+        ended_at: "int | float | str | _datetime.datetime | None" = None,
     ) -> builtins.list:
         """Create a test (+ dataset(s)).
 
@@ -9694,12 +9735,28 @@ class AuthoringWorkspace:
         ``name`` is the test's title and ``handle`` its short slug (see
         :mod:`battinfo.naming`); neither is generated for you.
 
+        The test IRI names one run and is never seeded from the name
+        (``entities.test_identity_seed``): it comes from the cell, the type,
+        the protocol (the IRI of ``spec=`` whenever there is one, saved in this
+        workspace or not) and the run, which is the location of the first
+        ``data`` file, or ``started_at`` for a test without data. Renaming a
+        test keeps its IRI, and two runs of one type on one cell, with other
+        data files or start times, get two IRIs.
+
+        ``started_at`` and ``ended_at`` (Unix seconds, an ISO 8601 time or a
+        datetime) say when the run started and ended. Without them, the times
+        are read from a BDF data file's ``unix_time_second`` column when it has
+        one. A time read from a file never enters the IRI, so converting the
+        data again after a converter upgrade keeps it.
+
         ``iri`` (a full ``https://w3id.org/battinfo/test/...`` IRI) or ``uid``
-        (its 16-character uid) pins a published identity when the display name
-        changes. The test IRI is otherwise seeded from the cell, type, protocol
-        and name, so a new title would mint a new test. ``dataset_iris`` does the
-        same for the datasets made from ``data=``: one IRI per data file, in the
-        same order. All three need the explicit ``cell=`` form.
+        (its 16-character uid) pins a published identity, such as a test
+        published before the test seed changed in 0.8.0 and rebuilt in a new
+        folder. ``dataset_iris`` does the same for the datasets made from
+        ``data=``: one IRI per data file, in the same order. A dataset's IRI is
+        seeded from its test, its file's location and its title, which is made
+        from the test's name. ``iri``, ``uid``, ``dataset_iris``, ``started_at``
+        and ``ended_at`` need the explicit ``cell=`` form.
 
         ``series_id`` puts the datasets made from ``data=`` in a collection: it is
         the collection's IRI (``https://w3id.org/battinfo/dataset/...``) and is set
@@ -9729,6 +9786,7 @@ class AuthoringWorkspace:
         # The collection for the datasets made from data=. Checked first, so a bad
         # value fails before any test, dataset or test spec is created.
         member_series_id = self._checked_series_id(series_id, cell=cell, data=data)
+        given_start, given_end = _given_run_period(started_at, ended_at)
 
         # Resolve the test type (type=, legacy kind=, or from a linked spec).
         test_type = type or kind
@@ -9803,10 +9861,10 @@ class AuthoringWorkspace:
         # Identity pins and the handle name ONE test, so they need the explicit
         # form; check them before anything is created.
         pinned_test_id = self._pinned_test_iri(iri, uid)
-        if cell is None and any(v is not None for v in (handle, iri, uid, dataset_iris)):
+        if cell is None and any(v is not None for v in (handle, iri, uid, dataset_iris, started_at, ended_at)):
             raise ValueError(
-                "handle=, iri=, uid= and dataset_iris= describe one test; use the explicit "
-                "form ws.add('test', cell=..., ...) rather than datasets='glob'."
+                "handle=, iri=, uid=, dataset_iris=, started_at= and ended_at= describe one test; use "
+                "the explicit form ws.add('test', cell=..., ...) rather than datasets='glob'."
             )
 
         # ── Explicit mode: a named cell (+ optional data files) ──────────────────
@@ -9827,9 +9885,13 @@ class AuthoringWorkspace:
             pinned_dataset_ids = self._pinned_dataset_iris(dataset_iris, len(files))
             # Measured period per data file (from the BDF unix_time_second column), so
             # the test activity and each dataset are placed in time from the data itself
-            # rather than the record-assembly clock.
+            # rather than the record-assembly clock. A start or end the caller gives wins.
+            # Neither measured time enters the test IRI: the first data file's location
+            # tells the run apart (entities.test_identity_seed).
             periods = [_bdf_measurement_period(f) for f in files]
             _spans = [p for p in periods if p]
+            run_start = given_start if given_start is not None else (min(s for s, _ in _spans) if _spans else None)
+            run_end = given_end if given_end is not None else (max(e for _, e in _spans) if _spans else None)
             test = self._ws.test(
                 resolved,
                 kind=test_type,
@@ -9841,8 +9903,8 @@ class AuthoringWorkspace:
                 status=status,
                 conformance=conformance,
                 instrument=instrument,
-                started_at=min(s for s, _ in _spans) if _spans else None,
-                ended_at=max(e for _, e in _spans) if _spans else None,
+                started_at=run_start,
+                ended_at=run_end,
             )
             if pinned_test_id is not None:
                 test.id = pinned_test_id

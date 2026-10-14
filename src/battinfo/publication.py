@@ -32,6 +32,7 @@ from battinfo.entities import (
     dataset_locator_seed,
     seed_text,
     stable_uid,
+    test_identity_seed,
 )
 from battinfo.jsonld import dataset_series_edges, electrode_role_links, schema_checksum_terms
 from battinfo.validate.core import PUBLISHER_POLICY, ValidationPolicy
@@ -1556,8 +1557,15 @@ def _finalize_test(
     *,
     cell_instance: Cell,
     dataset_dir: Path,
+    data_locator: str,
     dataset_id: str | None = None,
 ) -> Test:
+    """A finalized copy of *test*, its IRI minted from its identity when it has none.
+
+    *data_locator* is the location of the run's data (``entities.dataset_locator_seed``),
+    which tells it apart from another run of one kind on one cell
+    (``entities.test_identity_seed``); ``""`` when the run has none.
+    """
     finalized = test.model_copy(deep=True, update={"cell": None})
     if finalized.cell_instance_id is None:
         finalized.cell_instance_id = cell_instance.id
@@ -1565,15 +1573,17 @@ def _finalize_test(
     if finalized.name is None:
         finalized.name = f"{cell_instance.name} {protocol_name}"
     if finalized.id is None:
+        # The test seed every surface shares: cell, kind, protocol (its IRI, else its
+        # name) and the run, here the data's location. The name never enters.
         finalized.id = _entity_iri(
             "test",
-            "::".join(
-                [
-                    _with_default(finalized.cell_instance_id, "unknown-cell"),
-                    _with_default(finalized.test_kind, "other"),
-                    _seed_text_or(finalized.protocol.name, "test"),
-                    _seed_text_or(finalized.name, "test"),
-                ]
+            test_identity_seed(
+                cell_id=finalized.cell_instance_id,
+                kind=finalized.test_kind,
+                protocol_id=finalized.protocol_id,
+                protocol_name=finalized.protocol.name,
+                data_locator=data_locator,
+                started_at=finalized.started_at,
             ),
         )
     finalized.dataset_ids = _append_unique(finalized.dataset_ids, dataset_id)
@@ -1586,6 +1596,18 @@ def _finalize_test(
         source.retrieved_at = _now_unix()
     finalized.source = source
     return finalized
+
+
+def _dataset_locator(dataset: Dataset, dataset_dir: Path) -> str:
+    """The location part of a publication dataset's seed: an explicit remote URL, else the dataset folder.
+
+    The dataset's own seed and the run part of its test's seed both take it.
+    """
+    return dataset_locator_seed(
+        access_url=dataset.access_url or dataset_dir.resolve().as_uri(),
+        download_url=dataset.download_url,
+        dataset_path=dataset_dir,
+    )
 
 
 def _finalize_dataset(
@@ -1618,11 +1640,7 @@ def _finalize_dataset(
                 [
                     _with_default(finalized.cell_instance_id, "unknown-cell"),
                     finalized.test_id or "",
-                    dataset_locator_seed(
-                        access_url=finalized.access_url,
-                        download_url=finalized.download_url,
-                        dataset_path=dataset_dir,
-                    ),
+                    _dataset_locator(finalized, dataset_dir),
                     _seed_text_or(finalized.name, seed_text(dataset_dir.name)),
                 ]
             ),
@@ -1657,6 +1675,7 @@ def _finalize_publication_bundle(
         test,
         cell_instance=finalized_cell_instance,
         dataset_dir=dataset_dir,
+        data_locator=_dataset_locator(dataset, dataset_dir),
     )
     finalized_dataset = _finalize_dataset(
         dataset,

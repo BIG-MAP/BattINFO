@@ -1071,6 +1071,7 @@ def package_batch(
         ZenodoCellRecord,
         ZenodoDatasetEntry,
     )
+    from battinfo.entities import dataset_locator_seed
     from battinfo.publication import (
         _finalize_cell_instance,
         _finalize_cell_spec,
@@ -1102,7 +1103,8 @@ def package_batch(
     # serial / cell_name): publishing both would silently overwrite one on ingest.
     # A unique cell IRI is necessary but NOT sufficient — distinct data files within one
     # cell can still mint colliding test IRIs, so the test seed below carries a per-file
-    # discriminator and build_zenodo_package asserts test/dataset @id uniqueness.
+    # discriminator (the data file's location in the cell folder) and
+    # build_zenodo_package asserts test/dataset @id uniqueness.
     seen_cell_iris: dict[str, str] = {}
 
     for cell_dir in cell_dirs:
@@ -1137,10 +1139,11 @@ def package_batch(
         for raw_path, bdf_path in pairs:
             subdir_name = raw_path.parent.name
             test_kind = _test_kind_from_path(raw_path, subdir_name)
-            # raw_path.stem is unique per file in the folder, so two same-kind data files
+            # The run is the data file: its location in the cell folder is the run part
+            # of the test seed (entities.test_identity_seed), so two same-kind data files
             # in one cell mint distinct test IRIs. The filename date alone is insufficient:
             # undated same-kind files previously collided onto one test @id and overwrote
-            # each other on ingest.
+            # each other on ingest. The name is display text and never enters the seed.
             test_name = f"{ci.name or cell_dir.name} {test_kind} {raw_path.stem}"
 
             raw_test = Test(
@@ -1149,7 +1152,12 @@ def package_batch(
                 test_kind=test_kind,
                 source=ProvenanceInfo(type="measurement"),
             )
-            test = _finalize_test(raw_test, cell_instance=ci, dataset_dir=cell_dir)
+            test = _finalize_test(
+                raw_test,
+                cell_instance=ci,
+                dataset_dir=cell_dir,
+                data_locator=dataset_locator_seed(dataset_path=raw_path, workspace_root=cell_dir),
+            )
 
             ds_name = f"{cell_spec.name} {ci.name or cell_dir.name} {raw_path.stem}"
             raw_ds = Dataset(

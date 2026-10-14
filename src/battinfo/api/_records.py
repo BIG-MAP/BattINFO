@@ -56,6 +56,7 @@ from battinfo.api._shared import (
     _str_contains,
     _str_eq,
     _str_fuzzy_match,
+    _to_unix_time,
     _validate_canonical_record,
     _validate_schema,
 )
@@ -1146,7 +1147,10 @@ def _identity_seed(entity_kind: str, entity: Any, *, workspace_root: PathLike | 
       the chemistry as its vocabulary key (``entities.cell_spec_identity_seed``)
     - cell:           cell_spec_id :: serial_number :: batch_id :: name
     - test-protocol:  test_kind :: name :: version
-    - test:           cell_instance_id :: test_kind :: protocol name :: name
+    - test:           cell_instance_id :: test_kind :: protocol :: run
+      (``entities.test_identity_seed``): the protocol's IRI, else its name; a
+      ``Test`` names no data file, so its run is the ``started_at`` it gives.
+      The name is display text and never enters.
     - dataset:        cell_instance_id :: test_id :: locator :: name, where the
       locator is the remote access/download URL, or a local data file's path
       relative to *workspace_root* (its folder and file name outside it); see
@@ -1194,17 +1198,17 @@ def _identity_seed(entity_kind: str, entity: Any, *, workspace_root: PathLike | 
             ]
         )
     elif entity_kind == "test":
-        protocol = getattr(entity, "protocol", None)
-        protocol_name = _seed_text_part(getattr(protocol, "name", None) if protocol is not None else None)
-        if not (_seed_text_part(entity.name) or protocol_name):
+        from battinfo.entities import test_identity_seed  # noqa: PLC0415
+
+        if not _seed_part(entity.cell_instance_id):
             return None
-        seed = "::".join(
-            [
-                _seed_part(entity.cell_instance_id, "unknown-cell"),
-                _seed_part(getattr(entity, "test_kind", None), "other"),
-                protocol_name or "test",
-                _seed_text_part(entity.name) or protocol_name or "test",
-            ]
+        protocol = getattr(entity, "protocol", None)
+        seed = test_identity_seed(
+            cell_id=entity.cell_instance_id,
+            kind=getattr(entity, "test_kind", None),
+            protocol_id=getattr(entity, "protocol_id", None),
+            protocol_name=getattr(protocol, "name", None) if protocol is not None else None,
+            started_at=getattr(entity, "started_at", None),
         )
     elif entity_kind == "dataset":
         locator = dataset_locator_seed(
@@ -1238,6 +1242,64 @@ def _identity_minted_uid(entity_kind: str, entity: Any, *, workspace_root: PathL
 
     seed = _identity_seed(entity_kind, entity, workspace_root=workspace_root)
     return stable_uid(seed) if seed is not None else _normalized_dashed_uid(None)
+
+
+def _legacy_test_seed(test: Any) -> str | None:
+    """The identity seed a test had before 0.8.0, or ``None`` when it had none (no name and no protocol name)."""
+    from battinfo.entities import legacy_test_identity_seed  # noqa: PLC0415
+
+    protocol = getattr(test, "protocol", None)
+    protocol_name = getattr(protocol, "name", None) if protocol is not None else None
+    if not (_seed_part(test.name) or _seed_part(protocol_name)):
+        return None
+    return legacy_test_identity_seed(
+        cell_id=test.cell_instance_id,
+        kind=getattr(test, "test_kind", None),
+        protocol_name=protocol_name,
+        name=test.name or protocol_name or "test",
+    )
+
+
+def _is_same_test_run(body: Mapping[str, Any], test: Any) -> bool:
+    """Whether *body*, a saved test, records the run *test* describes.
+
+    The same cell, kind and protocol, the same start time (the run part of the
+    seed for a test without data files) and the same datasets.
+    """
+    return (
+        _seed_part(body.get("cell_id")) == _seed_part(test.cell_instance_id)
+        and _seed_part(body.get("kind")) == _seed_part(getattr(test, "test_kind", None))
+        and (body.get("protocol_id") or None) == (getattr(test, "protocol_id", None) or None)
+        and _to_unix_time(body.get("started_at")) == _to_unix_time(getattr(test, "started_at", None))
+        and sorted(map(str, body.get("dataset_ids") or []))
+        == sorted(map(str, getattr(test, "dataset_ids", None) or []))
+    )
+
+
+def _test_minted_uid(test: Any, *, record_roots: Sequence[PathLike] = ()) -> str:
+    """The uid a test without an id mints from its identity (``_identity_seed``); a random one without one.
+
+    The test seed changed in 0.8.0. A test saved under one of *record_roots*
+    with the IRI the seed of before 0.8.0 gives the same fields keeps that IRI
+    when the saved test is the same run (``_is_same_test_run``) and nothing
+    is saved under the new one (``entities.keep_legacy_uid``).
+    """
+    from battinfo.entities import keep_legacy_uid, legacy_stable_uid, saved_record_body, stable_uid  # noqa: PLC0415
+
+    seed = _identity_seed("test", test)
+    if seed is None:
+        return _normalized_dashed_uid(None)
+    uid = stable_uid(seed)
+    legacy = _legacy_test_seed(test)
+    roots = [_as_path(root) for root in record_roots]
+    if legacy is None or not roots:
+        return uid
+    return keep_legacy_uid(
+        uid,
+        legacy_stable_uid(legacy),
+        saved=lambda candidate: saved_record_body("test", candidate, roots),
+        same_identity=lambda body: _is_same_test_run(body, test),
+    )
 
 
 def _cell_spec_minted_uid(spec: Any, *, source_root: PathLike | None = None) -> str:
@@ -1332,7 +1394,7 @@ _NATURAL_KEY_FIELDS = {
     "cell-spec": "manufacturer or model",
     "cell": "serial_number, batch_id or name",
     "test-protocol": "name or version",
-    "test": "name or protocol_name",
+    "test": "cell_id and kind",
     "dataset": "name or access_url",
     "parameter-set": (
         "name and material_kind, material_spec_id or cell_spec_id (a claim batch), "
@@ -1363,7 +1425,9 @@ def _canonical_identity_uid(
     would turn every re-run of the save into a duplicate, so the save refuses it.
 
     A cell spec saved under one of *record_roots* with the IRI the seeds of
-    before 0.8.0 gave the same identity keeps that IRI (``entities.cell_spec_uid``).
+    before 0.8.0 gave the same identity keeps that IRI (``entities.cell_spec_uid``),
+    and so does a test saved there under its earlier IRI as the same run
+    (``_test_minted_uid``).
     """
     from types import SimpleNamespace  # noqa: PLC0415
 
@@ -1401,15 +1465,18 @@ def _canonical_identity_uid(
             ),
         )
     elif entity_type == "test":
-        seed = _identity_seed(
-            "test",
-            SimpleNamespace(
-                name=body.get("name"),
-                cell_instance_id=body.get("cell_id"),
-                test_kind=body.get("kind"),
-                protocol=SimpleNamespace(name=body.get("protocol_name")),
-            ),
+        test = SimpleNamespace(
+            name=body.get("name"),
+            cell_instance_id=body.get("cell_id"),
+            test_kind=body.get("kind"),
+            protocol_id=body.get("protocol_id"),
+            protocol=SimpleNamespace(name=body.get("protocol_name")),
+            started_at=body.get("started_at"),
+            dataset_ids=body.get("dataset_ids") or [],
         )
+        if _identity_seed("test", test) is None:
+            return None
+        return _test_minted_uid(test, record_roots=record_roots)
     elif entity_type == "dataset":
         # The about list does not say which cell and test are the dataset's primary
         # ones, and a template lists its cells and tests as related ones, which the
@@ -1598,7 +1665,13 @@ def _record_from_dataset(dataset: Dataset, *, workspace_root: PathLike | None = 
     return finalized.to_record()
 
 
-def _record_from_test(test: Test) -> dict[str, Any]:
+def _record_from_test(test: Test, *, source_root: PathLike | None = None) -> dict[str, Any]:
+    """The canonical record of *test*, its IRI minted from its identity when it has none.
+
+    With *source_root* (the records folder a save writes to), a test saved
+    there under the IRI the seed of before 0.8.0 gave the same run keeps that
+    IRI (``_test_minted_uid``).
+    """
     if test.cell_instance_id is None or not CELL_IRI_RE.fullmatch(test.cell_instance_id):
         raise ValueError("cell_id must match https://w3id.org/battinfo/cell/{uid}.")
     if test.protocol_id is not None and not TEST_PROTOCOL_IRI_RE.fullmatch(test.protocol_id):
@@ -1613,7 +1686,11 @@ def _record_from_test(test: Test) -> dict[str, Any]:
             _assert_id_matches_uid(test.id, _normalized_dashed_uid(test.uid))
         entity_id = test.id
     else:
-        dashed = _normalized_dashed_uid(test.uid) if test.uid is not None else _identity_minted_uid("test", test)
+        dashed = (
+            _normalized_dashed_uid(test.uid)
+            if test.uid is not None
+            else _test_minted_uid(test, record_roots=[source_root] if source_root is not None else [])
+        )
         entity_id = f"https://w3id.org/battinfo/test/{dashed}"
     # Finalize a copy (mint the id, convert timestamps, apply save-time provenance defaults).
     finalized = test.model_copy(deep=True)
@@ -2170,7 +2247,7 @@ def save_test(
             stamp=stamp,
         )
     test = draft if isinstance(draft, TestBundle) else TestBundle(**dict(draft))
-    record = _record_from_test(test)
+    record = _record_from_test(test, source_root=source_root)
     return save_record(
         record,
         source_root=source_root,

@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import mimetypes
 import shutil
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 from urllib.parse import unquote, urlparse
@@ -42,6 +42,7 @@ from battinfo.api import (
 from battinfo.api import (
     query as query_api,
 )
+from battinfo.api._shared import _to_unix_time
 from battinfo.authoring import cell_description as build_cell_description
 from battinfo.bundle import (
     Cell,
@@ -60,8 +61,12 @@ from battinfo.entities import (
     dataset_locator_seed,
     iri_namespace_map,
     kind_for_doc,
+    legacy_stable_uid,
+    legacy_test_identity_seed,
+    saved_record_body,
     seed_text,
     stable_uid,
+    test_identity_seed,
 )
 from battinfo.publication import DEFAULT_PUBLISH_FILENAME
 from battinfo.publication import publish as publish_bundle
@@ -143,6 +148,20 @@ def _entity_iri(entity_type: str, seed: str) -> str:
     return f"https://w3id.org/battinfo/{namespace}/{_stable_uid(seed)}"
 
 
+def _legacy_entity_iri(entity_type: str, seed: str) -> str:
+    """The IRI the minting of before 0.8.0 gave *seed*, which had no NFC step (``entities.legacy_stable_uid``).
+
+    Only for finding a record saved under it; nothing new is minted with it.
+    """
+    namespace = _IRI_NAMESPACE.get(entity_type, entity_type)
+    return f"https://w3id.org/battinfo/{namespace}/{legacy_stable_uid(seed)}"
+
+
+def _iri_uid(iri: str) -> str:
+    """The uid that ends *iri*."""
+    return iri.rstrip("/").rsplit("/", 1)[-1]
+
+
 def _with_default(value: str | None, fallback: str) -> str:
     text = (value or "").strip()
     return text or fallback
@@ -209,23 +228,24 @@ def _strip_volatile(value: Any) -> Any:
 _LOCATION_SEED_KEYS = frozenset({*LOCATION_FIELDS, "dataset_path", "path", "url", "file"})
 
 
-def _seed_view(value: Any, workspace_root: Path | None, *, top: bool = True) -> Any:
+def _seed_view(value: Any, workspace_root: Path | None, *, top: bool = True, every_id: bool = False) -> Any:
     """*value*, a record, without its own ``id`` and the volatile fields, each local file location as its locator.
 
     The record's own ``id`` is the one at its top level; a nested ``id`` stays
-    (see :data:`_VOLATILE_SEED_KEYS`).
+    (see :data:`_VOLATILE_SEED_KEYS`). With *every_id*, every ``id`` is left
+    out, as the content seed of before 0.8.0 did (:func:`_legacy_content_seed`).
     """
     if isinstance(value, dict):
         view: dict[str, Any] = {}
         for key, item in value.items():
-            if key in _VOLATILE_SEED_KEYS or (top and key == _RECORD_ID_KEY):
+            if key in _VOLATILE_SEED_KEYS or (key == _RECORD_ID_KEY and (top or every_id)):
                 continue
             if key in _LOCATION_SEED_KEYS and isinstance(item, str) and is_local_location(item):
                 item = dataset_locator_seed(dataset_path=item, workspace_root=workspace_root)
-            view[key] = _seed_view(item, workspace_root, top=False)
+            view[key] = _seed_view(item, workspace_root, top=False, every_id=every_id)
         return view
     if isinstance(value, list):
-        return [_seed_view(item, workspace_root, top=False) for item in value]
+        return [_seed_view(item, workspace_root, top=False, every_id=every_id) for item in value]
     return value
 
 
@@ -356,6 +376,56 @@ def _disambiguate_entity_ids(
             current = candidate
         entity.id = current
         seen.add(current)
+
+
+def _legacy_content_seed(entity: Any, *, workspace_root: Path | None = None) -> str:
+    """The content seed of before 0.8.0, which left out every ``id``, nested ones too.
+
+    Only for finding a record saved under an IRI minted from it
+    (:func:`_legacy_disambiguated_ids`).
+    """
+    data = entity.model_dump(mode="json", exclude_none=True)
+    return json.dumps(_seed_view(data, workspace_root, every_id=True), sort_keys=True, ensure_ascii=False)
+
+
+def _legacy_disambiguated_ids(
+    ids: Sequence[str | None],
+    entities: Sequence[Any],
+    entity_type: str,
+    *,
+    workspace_root: Path | None = None,
+) -> list[str | None]:
+    """The IRIs the finalize pass of before 0.8.0 ended with, given the *ids* it started from.
+
+    That pass re-minted every member of a group of *entities* sharing an IRI
+    from its content (:func:`_legacy_content_seed`), and gave a member whose
+    content repeated another's an ordinal suffix, hashing without the NFC
+    step. Only for finding records saved under those IRIs; nothing new is
+    minted with them.
+    """
+    counts: dict[str, int] = {}
+    for current in ids:
+        if current is not None:
+            counts[current] = counts.get(current, 0) + 1
+    seen: set[str] = set()
+    result: list[str | None] = []
+    for current, entity in zip(ids, entities, strict=True):
+        if current is None:
+            result.append(None)
+            continue
+        if counts[current] > 1:
+            content = _legacy_content_seed(entity, workspace_root=workspace_root)
+            current = _legacy_entity_iri(entity_type, f"{current}::{content}")
+        if current in seen:
+            ordinal = 1
+            candidate = _legacy_entity_iri(entity_type, f"{current}::dup{ordinal}")
+            while candidate in seen:
+                ordinal += 1
+                candidate = _legacy_entity_iri(entity_type, f"{current}::dup{ordinal}")
+            current = candidate
+        seen.add(current)
+        result.append(current)
+    return result
 
 
 def _path_from_file_uri(uri: str) -> Path | None:
@@ -2101,6 +2171,8 @@ class Workspace:
 
         finalized_tests = [self._finalize_test(item, cell_map, test_spec_map) for item in self.tests]
         test_map = {id(original): finalized for original, finalized in zip(self.tests, finalized_tests, strict=True)}
+        # The test seed changed in 0.8.0; a test saved under its earlier IRI keeps it.
+        self._keep_legacy_test_iris(finalized_tests, assigned=assigned_tests, record_roots=roots, cell_map=cell_map)
         _disambiguate_entity_ids(finalized_tests, "test", workspace_root=self.data_root, assigned=assigned_tests)
 
         finalized_datasets = [self._finalize_dataset(item, cell_map, test_map) for item in self.datasets]
@@ -2352,15 +2424,18 @@ class Workspace:
         if finalized.name is None:
             finalized.name = f"{linked_cell.name} {protocol_name}" if linked_cell is not None else protocol_name
         if finalized.id is None:
+            # One run on one cell (entities.test_identity_seed): the cell, the kind, the
+            # protocol's IRI (else its name) and the run, the first data file's location,
+            # else the start time given. Never the name, a title generated or not.
             finalized.id = _entity_iri(
                 "test",
-                "::".join(
-                    [
-                        _with_default(finalized.cell_instance_id, "unknown-cell"),
-                        _with_default(finalized.test_kind, "other"),
-                        _seed_text_or(finalized.protocol.name, "test"),
-                        _seed_text_or(finalized.name, "test"),
-                    ]
+                test_identity_seed(
+                    cell_id=finalized.cell_instance_id,
+                    kind=finalized.test_kind,
+                    protocol_id=finalized.protocol_id,
+                    protocol_name=finalized.protocol.name,
+                    data_locator=self._test_data_locator(test),
+                    started_at=finalized.started_at,
                 ),
             )
         if finalized.source.type is None:
@@ -2368,6 +2443,101 @@ class Workspace:
         if finalized.source.retrieved_at is None:
             finalized.source.retrieved_at = _now_unix()
         return finalized
+
+    def _test_data_locator(self, test: Test) -> str:
+        """The locator of *test*'s first data file (``entities.dataset_locator_seed``), or ``""``.
+
+        The first dataset of the session made from *test* that names a data
+        file, in the order the datasets were added.
+        """
+        for dataset in self.datasets:
+            if dataset.test is not test:
+                continue
+            locator = dataset_locator_seed(
+                access_url=dataset.access_url,
+                download_url=dataset.download_url,
+                dataset_path=dataset.dataset_path,
+                workspace_root=self.data_root,
+            )
+            if locator:
+                return locator
+        return ""
+
+    def _keep_legacy_test_iris(
+        self,
+        finalized_tests: Sequence[Test],
+        *,
+        assigned: Sequence[bool],
+        record_roots: Sequence[Path],
+        cell_map: dict[int, Cell],
+    ) -> None:
+        """Keep the IRI a test was saved under before 0.8.0 changed the test seed.
+
+        Each test minted in this pass is also minted under the rule of before
+        0.8.0: its seed (``entities.legacy_test_identity_seed``) and the re-mint
+        from content that kept colliding tests apart then
+        (:func:`_legacy_disambiguated_ids`). When a records folder the save
+        writes to (*record_roots*) holds a test under that IRI and none under
+        the new one, and the saved test is this run (:meth:`_is_saved_run`),
+        the test keeps the saved IRI, and the datasets seeded from it keep
+        theirs. An IRI another test of the session has is never taken.
+        """
+        roots = [Path(root) for root in record_roots]
+        if not roots or all(assigned):
+            return
+        started = [
+            test.id
+            if held
+            else _legacy_entity_iri(
+                "test",
+                legacy_test_identity_seed(
+                    cell_id=test.cell_instance_id,
+                    kind=test.test_kind,
+                    protocol_name=test.protocol.name,
+                    name=test.name,
+                ),
+            )
+            for test, held in zip(finalized_tests, assigned, strict=True)
+        ]
+        legacy_ids = _legacy_disambiguated_ids(started, finalized_tests, "test", workspace_root=self.data_root)
+        taken = {test.id for test in finalized_tests if test.id is not None}
+        for index, (test, held, legacy) in enumerate(zip(finalized_tests, assigned, legacy_ids, strict=True)):
+            if held or test.id is None or legacy is None or legacy in taken:
+                continue
+            if saved_record_body("test", _iri_uid(test.id), roots) is not None:
+                continue
+            body = saved_record_body("test", _iri_uid(legacy), roots)
+            if body is None or not self._is_saved_run(body, self.tests[index], test, legacy, cell_map):
+                continue
+            test.id = legacy
+            taken.add(legacy)
+
+    def _is_saved_run(
+        self,
+        body: Mapping[str, Any],
+        original: Test,
+        finalized: Test,
+        iri: str,
+        cell_map: dict[int, Cell],
+    ) -> bool:
+        """Whether *body*, the test saved as *iri*, records the run *finalized* (made from *original*) describes.
+
+        It has the same cell, kind and protocol, and the same data files: the
+        datasets the session made from this run, minted with *iri* as their
+        test, are the ones the saved test lists. A test without data files is
+        told apart only by its start time, so the saved one must have the same.
+        """
+        if body.get("cell_id") != finalized.cell_instance_id or str(body.get("kind") or "") != str(finalized.test_kind):
+            return False
+        if (body.get("protocol_id") or None) != (finalized.protocol_id or None):
+            return False
+        listed = sorted(str(item) for item in body.get("dataset_ids") or [])
+        datasets = [dataset for dataset in self.datasets if dataset.test is original]
+        if not datasets:
+            return not listed and _to_unix_time(body.get("started_at")) == _to_unix_time(finalized.started_at)
+        probe = finalized.model_copy(update={"id": iri})
+        made = sorted(str(self._finalize_dataset(dataset, cell_map, {id(original): probe}).id) for dataset in datasets)
+        return made == listed
 
     def _finalize_dataset(
         self,
