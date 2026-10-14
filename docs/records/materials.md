@@ -118,7 +118,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
           "@type": "RealData",
           "hasNumberValue": 200
         },
-        "schema:unitText": "mAh/g"
+        "hasMeasurementUnit": "https://w3id.org/emmo#MilliAmpereHourPerGram"
       }
     ],
     "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5#described",
@@ -129,12 +129,6 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 :::
 
 ::::
-
-```{admonition} Known gap
-:class: warning
-
-The unit map has no EMMO unit IRI for `mAh/g` yet, so the JSON-LD above writes the unit of the specific capacity as text (`schema:unitText`) only, and strict validation gives the warning `semantic.unit_unmapped`.
-```
 
 What to notice:
 
@@ -293,7 +287,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
           "@type": "RealData",
           "hasNumberValue": 200
         },
-        "schema:unitText": "mAh/g",
+        "hasMeasurementUnit": "https://w3id.org/emmo#MilliAmpereHourPerGram",
         "schema:valueReference": {
           "@type": [
             "ReferenceElectrode",
@@ -467,7 +461,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
           "@type": "RealData",
           "hasNumberValue": 160
         },
-        "schema:unitText": "mAh/g",
+        "hasMeasurementUnit": "https://w3id.org/emmo#MilliAmpereHourPerGram",
         "schema:valueReference": {
           "@type": [
             "ReferenceElectrode",
@@ -641,7 +635,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
           "@type": "RealData",
           "hasNumberValue": 360
         },
-        "schema:unitText": "mAh/g",
+        "hasMeasurementUnit": "https://w3id.org/emmo#MilliAmpereHourPerGram",
         "schema:valueReference": {
           "@type": [
             "ReferenceElectrode",
@@ -787,7 +781,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         "@type": "RealData",
         "hasNumberValue": 450
       },
-      "schema:unitText": "mAh/g"
+      "hasMeasurementUnit": "https://w3id.org/emmo#MilliAmpereHourPerGram"
     },
     "@id": "https://w3id.org/battinfo/spec/jnab-ggw9-cbn8-hhjr#described",
     "skos:prefLabel": "Silicon-graphite composite"
@@ -873,7 +867,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
           "@type": "RealData",
           "hasNumberValue": 140
         },
-        "schema:unitText": "mAh/g",
+        "hasMeasurementUnit": "https://w3id.org/emmo#MilliAmpereHourPerGram",
         "schema:valueReference": {
           "@type": [
             "ReferenceElectrode",

@@ -270,14 +270,13 @@ def test_every_cell_spec_property_has_a_unit_check() -> None:
     assert not sorted(spec_keys - set(SPEC_UNIT_COMPATIBILITY))
 
 
-# Example units with no EMMO unit IRI yet: count-like and per-time units the unit map
-# does not cover, and the specific-capacity units that wait for their unit-map entry.
+# Example units the unit map gives no EMMO unit IRI: 'year' and '%/month', for which the
+# pinned closure defines no unit, and 'W/Wh', which the closure defines as
+# electrochemistry:WattPerWattHour but the map does not list.
 EXAMPLE_UNITS_WITHOUT_IRI = {
     "calendar_life": "year",
     "power_energy_ratio": "W/Wh",
     "self_discharge_rate": "%/month",
-    "specific_capacity": "mAh/g",
-    "specific_discharge_capacity": "mAh/g",
 }
 
 
@@ -297,11 +296,12 @@ def test_plausibility_bound_for_ah_per_kg_matches_mah_per_g() -> None:
 
 
 def test_an_unmapped_unit_is_a_warning_under_strict() -> None:
-    report = validate_semantic_report(_material_spec(), policy=STRICT)
+    # molar_mass accepts kg/mol, for which the pinned closure has no unit.
+    report = validate_semantic_report(_material_spec(molar_mass={"value": 0.158, "unit": "kg/mol"}), policy=STRICT)
     assert report.ok
-    warnings = _at(report, "semantic.unit_unmapped", "material_spec.property.specific_capacity")
+    warnings = _at(report, "semantic.unit_unmapped", "material_spec.property.molar_mass")
     assert len(warnings) == 1 and warnings[0].severity == "warning"
-    assert "'mAh/g'" in warnings[0].message and "unit_map.curated.json" in warnings[0].message
+    assert "'kg/mol'" in warnings[0].message and "unit_map.curated.json" in warnings[0].message
 
 
 def test_an_unlisted_property_names_a_case_insensitive_match() -> None:
@@ -312,10 +312,18 @@ def test_an_unlisted_property_names_a_case_insensitive_match() -> None:
     assert len(warnings) == 1 and "did you mean 'mg/cm2'?" in warnings[0].message
 
 
-def test_only_capacity_units_go_unmapped_in_the_packaged_examples() -> None:
-    # The unit map has no IRI yet for a specific capacity in mAh/g (11 material specs)
-    # or an areal capacity in mAh/cm2 (2 electrode specs). No other packaged example
-    # states a unit the JSON-LD export can only keep as text.
+@pytest.mark.parametrize("unit", ["mPa", "mpa"])
+def test_a_milli_unit_is_not_offered_its_mega_twin(unit: str) -> None:
+    # The unit map knows 'MPa', a billion times a millipascal, and not 'mPa'. A viscosity
+    # in 'mPa' that lacks its '.s' must not be told to write megapascals.
+    report = validate_semantic_report(_material_spec(viscosity={"value": 2.5, "unit": unit}), policy=STRICT)
+    (warning,) = _at(report, "semantic.unit_unmapped", "material_spec.property.viscosity")
+    assert "did you mean" not in warning.message and "MPa" not in warning.message
+
+
+def test_no_packaged_example_draws_unit_unmapped() -> None:
+    # Every unit a packaged example states in its properties or property maps has an
+    # EMMO unit IRI, including mAh/g (11 material specs) and mAh/cm2 (2 electrode specs).
     files: dict[tuple[str, str], set[str]] = {}
     for path in sorted(EXAMPLES.rglob("*.json")):
         doc = json.loads(path.read_text(encoding="utf-8"))
@@ -327,10 +335,7 @@ def test_only_capacity_units_go_unmapped_in_the_packaged_examples() -> None:
                 for key in issue.path.split("."):
                     quantity = quantity[key]
                 files.setdefault((path.parent.name, quantity["unit"]), set()).add(path.name)
-    assert {key: len(names) for key, names in files.items()} == {
-        ("material-spec", "mAh/g"): 11,
-        ("electrode-spec", "mAh/cm2"): 2,
-    }
+    assert files == {}
 
 
 def test_unit_issues_name_the_property_where_it_is() -> None:

@@ -372,7 +372,7 @@ def test_the_bpx_units_are_published_emmo_units() -> None:
     published = {value if isinstance(value, str) else value.get("@id") for value in context.values()}
     unit_map = json.loads((data / "mappings" / "domain-battery" / "unit_map.curated.json").read_text(encoding="utf-8"))
     entries = {entry["symbol"]: entry for entry in unit_map["mappings"]}
-    assert unit_map["version"] == "0.5.2"
+    assert tuple(int(part) for part in unit_map["version"].split(".")) >= (0, 5, 2)
     (note,) = [note for note in unit_map["notes"] if note.startswith("0.5.2:")]
     for symbol, name in BPX_UNITS.items():
         entry = entries[symbol]

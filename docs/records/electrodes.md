@@ -933,7 +933,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
           "@type": "RealData",
           "hasNumberValue": 2.8
         },
-        "schema:unitText": "mAh/cm2"
+        "hasMeasurementUnit": "https://w3id.org/emmo#MilliAmpereHourPerSquareCentiMetre"
       },
       {
         "@type": [

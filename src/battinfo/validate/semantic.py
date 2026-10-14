@@ -365,18 +365,24 @@ def _unit_map_by_casefold() -> dict[str, tuple[str, str] | None]:
     return _casefold_index(pairs)
 
 
-def _swaps_milli_and_mega(written: str, spelling: str) -> bool:
-    """Whether ``written`` reads the SI prefix 'm' (milli) of ``spelling`` as 'M' (mega),
-    or the reverse, in front of a unit: 'MV' for 'mV', 'MAh/g' for 'mAh/g'."""
+def _turns_milli_into_mega(written: str, spelling: str) -> bool:
+    """Whether ``spelling`` reads the SI prefix 'm' (milli) of ``written`` as 'M' (mega)
+    in front of a unit: 'MPa' for 'mPa'."""
     for got, want in zip(_UNIT_FACTOR_SPLIT.split(written), _UNIT_FACTOR_SPLIT.split(spelling)):
         if (
             len(got) > 1
             and len(want) > 1
-            and {got[0], want[0]} == {"m", "M"}
+            and (got[0], want[0]) == ("m", "M")
             and want[1:].casefold() in _PREFIXABLE_UNITS
         ):
             return True
     return False
+
+
+def _swaps_milli_and_mega(written: str, spelling: str) -> bool:
+    """Whether ``written`` reads the SI prefix 'm' (milli) of ``spelling`` as 'M' (mega),
+    or the reverse, in front of a unit: 'MV' for 'mV', 'MAh/g' for 'mAh/g'."""
+    return _turns_milli_into_mega(written, spelling) or _turns_milli_into_mega(spelling, written)
 
 
 def _match_spec_unit(unit: str, allowed: tuple[str, ...]) -> tuple[str, str] | None:
@@ -406,12 +412,16 @@ def _match_spec_unit(unit: str, allowed: tuple[str, ...]) -> tuple[str, str] | N
 
 
 def _unit_map_match(unit: str) -> str | None:
-    """The unit-map symbol ``unit`` matches once case is ignored, when exactly one does."""
+    """The unit-map symbol ``unit`` matches once case is ignored, when exactly one does.
+
+    A symbol that reads a written milli prefix as mega is never offered: 'mPa' does
+    not get 'MPa', which is a billion times more.
+    """
     from battinfo.transform.json_to_jsonld import _unit_iri  # noqa: PLC0415
 
     for form in (unit, *_unit_forms(unit)):
         hit = _unit_map_by_casefold().get(form.casefold())
-        if hit is not None and _unit_iri(hit[1]) is not None:
+        if hit is not None and _unit_iri(hit[1]) is not None and not _turns_milli_into_mega(form, hit[0]):
             return hit[1]
     return None
 
@@ -453,7 +463,7 @@ def _warn_unit_unmapped(
     is the accepted symbol the unit stands for, when the property has a unit check;
     the warning names it when the unit is spelled another way ('ah' for 'Ah'). For a
     property without a unit check it offers the unit-map symbol that matches once case
-    is ignored.
+    is ignored, unless that symbol reads a milli prefix as mega.
     """
     from battinfo.transform.json_to_jsonld import _unit_iri, normalize_unit_symbol  # noqa: PLC0415
 

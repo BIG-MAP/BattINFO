@@ -145,7 +145,7 @@ validation warns `semantic.property_unmapped`.
 | `specific_heat_capacity` | `J/(kg.K)` | [SpecificHeatCapacity](https://w3id.org/emmo#EMMO_b4f4ed28_d24c_4a00_9583_62ab839abeca) |
 | `thermal_conductivity` | `W/(m.K)` | [ThermalConductivity](https://w3id.org/emmo#EMMO_8dd40ec6_2c5a_43f3_bf64_cadcd447a1c1) |
 
-## Units (63)
+## Units (69)
 
 The unit symbols accepted in quantity dicts, and the unit IRI each maps
 to (EMMO where a term exists, QUDT as the documented fallback).
@@ -162,6 +162,7 @@ Validation and the JSON-LD export read the usual alternative spellings as the li
 | `A/cm2` | [AmperePerSquareCentiMetre](https://w3id.org/emmo#AmperePerSquareCentiMetre) |
 | `A/m2` | [AmperePerSquareMetre](https://w3id.org/emmo#AmperePerSquareMetre) |
 | `Ah` | [AmpereHour](https://w3id.org/emmo#AmpereHour) |
+| `Ah/kg` | [AmpereHourPerKilogram](https://w3id.org/emmo#AmpereHourPerKilogram) |
 | `cm` | [CentiMetre](https://w3id.org/emmo#CentiMetre) |
 | `cm2` | [SquareCentiMetre](https://w3id.org/emmo#SquareCentiMetre) |
 | `cm3` | [CubicCentiMetre](https://w3id.org/emmo#CubicCentiMetre) |
@@ -177,6 +178,7 @@ Validation and the JSON-LD export read the usual alternative spellings as the li
 | `K` | [Kelvin](https://w3id.org/emmo#Kelvin) |
 | `kg` | [Kilogram](https://w3id.org/emmo#Kilogram) |
 | `kg/m3` | [KilogramPerCubicMetre](https://w3id.org/emmo#KilogramPerCubicMetre) |
+| `kPa` | [KiloPascal](https://w3id.org/emmo#KiloPascal) |
 | `kWh` | [KiloWattHour](https://w3id.org/emmo#KiloWatthour) |
 | `L` | [Litre](https://w3id.org/emmo#Litre) |
 | `m` | [Metre](https://w3id.org/emmo#Metre) |
@@ -187,6 +189,8 @@ Validation and the JSON-LD export read the usual alternative spellings as the li
 | `mA` | [MilliAmpere](https://w3id.org/emmo#MilliAmpere) |
 | `mA/cm2` | [MilliAmperePerSquareCentiMetre](https://w3id.org/emmo#MilliAmperePerSquareCentiMetre) |
 | `mAh` | [MilliAmpereHour](https://w3id.org/emmo#MilliAmpereHour) |
+| `mAh/cm2` | [MilliAmpereHourPerSquareCentiMetre](https://w3id.org/emmo#MilliAmpereHourPerSquareCentiMetre) |
+| `mAh/g` | [MilliAmpereHourPerGram](https://w3id.org/emmo#MilliAmpereHourPerGram) |
 | `mg` | [MilliGram](https://w3id.org/emmo#MilliGram) |
 | `mg/cm2` | [MilliGramPerSquareCentiMetre](https://w3id.org/emmo#MilliGramPerSquareCentiMetre) |
 | `min` | [Minute](https://w3id.org/emmo#Minute) |
@@ -196,12 +200,14 @@ Validation and the JSON-LD export read the usual alternative spellings as the li
 | `mol/kg` | [MolPerKilogram](https://w3id.org/emmo#MolPerKilogram) |
 | `mol/L` | [MolePerLitre](https://w3id.org/emmo#MolePerLitre) |
 | `mol/m3` | [MolePerCubicMetre](https://w3id.org/emmo#MolePerCubicMetre) |
+| `MPa` | [MegaPascal](https://w3id.org/emmo#MegaPascal) |
 | `mPa.s` | [MilliPascalSecond](https://w3id.org/emmo#MilliPascalSecond) |
 | `mS/cm` | [MilliSiemensPerCentiMetre](https://w3id.org/emmo#MilliSiemensPerCentiMetre) |
 | `mV` | [MilliVolt](https://w3id.org/emmo#MilliVolt) |
 | `mΩ` | [MilliOhm](https://w3id.org/emmo#MilliOhm) |
 | `nm` | [NanoMetre](https://w3id.org/emmo#NanoMetre) |
 | `s` | [Second](https://w3id.org/emmo#Second) |
+| `S/cm` | [SiemensPerCentiMetre](https://w3id.org/emmo#SiemensPerCentiMetre) |
 | `S/m` | [SiemensPerMetre](https://w3id.org/emmo#SiemensPerMetre) |
 | `V` | [Volt](https://w3id.org/emmo#Volt) |
 | `V/K` | [VoltPerKelvin](https://w3id.org/emmo#VoltPerKelvin) |

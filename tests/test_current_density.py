@@ -140,13 +140,13 @@ def test_a_cutoff_whose_unit_has_no_iri_keeps_the_unit_as_text() -> None:
     record = _step(
         termination=[
             {"quantity": "current", "value": 5, "unit": "µA/cm2", "direction": "below"},
-            {"quantity": "capacity", "value": 300, "unit": "mAh/g", "direction": "above"},
+            {"quantity": "capacity", "value": 300, "unit": "µAh", "direction": "above"},
         ]
     )
     terms = record_to_jsonld(record, "test-protocol")["hasTask"][0]["hasTerminationParameter"]
     assert terms[0]["@type"] == "LowerCurrentDensityLimit"
     assert terms[0]["schema:unitText"] == "µA/cm2"
-    assert terms[1]["schema:unitText"] == "mAh/g"
+    assert terms[1]["schema:unitText"] == "µAh"
     for term in terms:
         assert "hasMeasurementUnit" not in term
 
