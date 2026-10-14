@@ -11,7 +11,7 @@ the registry's own vendoring check compares them:
   ``application/ld+json``;
 * every JSON Schema under ``src/battinfo/data/schemas/``, at its ``$id``;
 * the record vocabulary, ``assets/vocab/battinfo-records.ttl``, which w3id
-  serves for a vocabulary term IRI such as https://w3id.org/battinfo/sourceType.
+  serves for each term it declares, such as https://w3id.org/battinfo/batchId.
 
 ``.github/workflows/release.yml`` runs it before an upload, and a mismatch
 blocks only a final release tag. With ``--release-terms`` it checks instead
@@ -33,7 +33,9 @@ where each IRI landed:
   versionIRI of this checkout's battinfo.ttl land where w3id should send them.
   Before the tag the release's files are not there yet, so a 404 in the right
   place passes. With ``--served`` each must also answer with this checkout's
-  battinfo.ttl, which is the check after the tag.
+  battinfo.ttl, which is the check after the tag. /latest still leads to the
+  master branch until a perma-id pull request moves it to main; while it does,
+  it is reported as ``pending`` and does not fail the check.
 * ``--ontology`` checks that the root declares the last release's versionIRI
   and imports, and that /X.Y.Z and the versionIRI serve that release's
   battinfo.ttl. ``.github/workflows/hosted-files.yml`` runs it every day. It is
@@ -41,7 +43,10 @@ where each IRI landed:
   tag's own docs deploy, and it leaves /latest out, since that follows main.
 
 A request is tried again when the server is busy or does not answer, since the
-registry's host can take a minute to wake up.
+registry's host can take a minute to wake up. So that a run always ends with a
+report, even when w3id or the registry is down, it stops asking once
+``--deadline`` seconds have passed (600 by default), and after two files in a
+row got no answer it reports the rest as unreachable without asking.
 
 Usage::
 
@@ -49,6 +54,8 @@ Usage::
     python scripts/check_hosted_files.py --release-terms [--tag vX.Y.Z] [--summary FILE]
     python scripts/check_hosted_files.py --ontology-routes [--served] [--summary FILE]
     python scripts/check_hosted_files.py --ontology [--tag vX.Y.Z] [--summary FILE]
+
+Each also takes ``--attempts``, ``--wait`` and ``--deadline``.
 
 The exit status is 0 when everything matches and 1 when anything differs or
 could not be fetched. Only the standard library is used, so it runs without
@@ -79,15 +86,20 @@ CONTEXT_PATH = Path("src/battinfo/data/context/records.context.v1.json")
 CONTEXT_URL = "https://w3id.org/battinfo/context/records/v1.json"
 SCHEMAS_PATH = Path("src/battinfo/data/schemas")
 VOCABULARY_PATH = Path("assets/vocab/battinfo-records.ttl")
-# w3id forwards any bare term IRI to the registry, which answers with a 303 to
+# w3id forwards a bare term IRI to the registry, which answers with a 303 to
 # /vocab/battinfo-records.ttl, so this IRI stands for the vocabulary document.
-VOCABULARY_URL = "https://w3id.org/battinfo/sourceType"
+# batchId is a term the vocabulary declares and the v1 context maps (batch_id),
+# so the IRI keeps resolving if the registry ever routes declared terms only.
+VOCABULARY_URL = "https://w3id.org/battinfo/batchId"
 
 ONTOLOGY_PATH = Path("battinfo.ttl")
 ONTOLOGY_IRI = "https://w3id.org/battinfo"
 LATEST_IRI = "https://w3id.org/battinfo/latest"
 PAGES = "https://big-map.github.io/BattINFO"
 LATEST_FILE = "https://raw.githubusercontent.com/BIG-MAP/BattINFO/main/battinfo.ttl"
+# Where /latest leads until the perma-id pull request that moves it to main is
+# merged. Landing there is reported as pending and does not fail a check.
+LATEST_FILE_ON_MASTER = "https://raw.githubusercontent.com/BIG-MAP/BattINFO/master/battinfo.ttl"
 # docs-deploy.sh publishes the ontology from this release on; older releases
 # were published by hand, under other paths.
 FIRST_ONTOLOGY_RELEASE = (0, 8, 0)
@@ -100,8 +112,14 @@ REDIRECT_STATUSES = frozenset({301, 302, 303, 307, 308})
 # How a hosted file can compare with the checkout's copy, in report order.
 STATUSES = ("same", "differs", "missing", "unreachable")
 # How an ontology IRI can come out, in report order. "routed" lands in the right
-# place (before the tag the file there may not exist yet); "misrouted" elsewhere.
-ONTOLOGY_STATUSES = ("same", "routed", "differs", "missing", "misrouted", "unreachable")
+# place (before the tag the file there may not exist yet); "pending" lands where
+# the IRI leads until a known routing change is merged; "misrouted" elsewhere.
+ONTOLOGY_STATUSES = ("same", "routed", "pending", "differs", "missing", "misrouted", "unreachable")
+# Seconds a run may spend asking before it reports what it has (--deadline).
+DEFAULT_DEADLINE = 600.0
+# After this many files in a row got no answer, the host is taken to be down
+# and the remaining files are reported unreachable without a request.
+GIVE_UP_AFTER = 2
 
 
 @dataclass(frozen=True)
@@ -157,10 +175,15 @@ class OntologyFacts:
 
 @dataclass(frozen=True)
 class Route:
-    """An ontology IRI, and the file on GitHub that w3id should send it to (*lands*)."""
+    """An ontology IRI, and the file on GitHub that w3id should send it to (*lands*).
+
+    *interim* is where the IRI leads until a routing change outside this
+    repository is merged; landing there is reported as pending, not as a fault.
+    """
 
     iri: str
     lands: str
+    interim: str | None = None
 
 
 def hosted_files(root: Path = ROOT) -> list[HostedFile]:
@@ -183,6 +206,55 @@ def normalised_sha256(data: bytes) -> str:
     return hashlib.sha256(data.replace(b"\r\n", b"\n")).hexdigest()
 
 
+def _ask(
+    open_url: Callable[..., Any],
+    request: urllib.request.Request,
+    *,
+    attempts: int,
+    wait: float,
+    timeout: float,
+    sleep: Callable[[float], None],
+    deadline: float | None,
+    clock: Callable[[], float],
+    source: str = "",
+) -> tuple[int, bytes]:
+    """Send *request* until a server gives a definite answer; return its status and body.
+
+    No answer, a dropped connection or a status in :data:`RETRY_STATUSES` is
+    tried again, up to *attempts* times, waiting *wait* seconds longer before
+    each new attempt. Any other HTTP status is a definite answer and comes back
+    as the :class:`urllib.error.HTTPError` it was raised as.
+
+    *deadline* is a reading of *clock* after which nothing more is sent: a
+    request gets at most the time left, and when that is used up, or too short
+    for the next wait, :class:`FetchError` is raised at once, as it is after the
+    last attempt. *source* names the URL in that message.
+    """
+    problem = ""
+    for attempt in range(1, attempts + 1):
+        left = None if deadline is None else deadline - clock()
+        if left is not None and left <= 0:
+            if attempt == 1:
+                raise FetchError("not asked: the check's time limit had run out")
+            raise FetchError(f"no answer{source} before the time limit, after {attempt - 1} attempts ({problem})")
+        try:
+            with open_url(request, timeout=timeout if left is None else min(timeout, left)) as response:
+                return getattr(response, "status", 200), response.read()
+        except urllib.error.HTTPError as exc:
+            if exc.code not in RETRY_STATUSES:
+                raise
+            problem = f"HTTP {exc.code}"
+        except (urllib.error.URLError, http.client.HTTPException, OSError) as exc:
+            problem = str(getattr(exc, "reason", exc)) or type(exc).__name__
+        if attempt == attempts:
+            raise FetchError(f"no answer{source} after {attempts} attempts ({problem})")
+        pause = wait * attempt
+        if deadline is not None and deadline - clock() <= pause:
+            raise FetchError(f"no answer{source} before the time limit, after {attempt} attempts ({problem})")
+        sleep(pause)
+    raise AssertionError("unreachable")  # pragma: no cover
+
+
 def fetch(
     url: str,
     accept: str,
@@ -192,28 +264,31 @@ def fetch(
     timeout: float = 90.0,
     opener: Callable[..., Any] = urllib.request.urlopen,
     sleep: Callable[[float], None] = time.sleep,
+    deadline: float | None = None,
+    clock: Callable[[], float] = time.monotonic,
 ) -> bytes:
     """GET *url*, following redirects, and return the body.
 
     No answer, a dropped connection or a status in :data:`RETRY_STATUSES` is
     tried again, up to *attempts* times, waiting *wait* seconds longer before
-    each new attempt. Any other HTTP status raises :class:`FetchError` at once.
+    each new attempt, and never past *deadline*, a reading of *clock*. Any
+    other HTTP status raises :class:`FetchError` at once.
     """
     request = urllib.request.Request(url, headers={"Accept": accept, "User-Agent": USER_AGENT})
-    for attempt in range(1, attempts + 1):
-        try:
-            with opener(request, timeout=timeout) as response:
-                return response.read()
-        except urllib.error.HTTPError as exc:
-            if exc.code not in RETRY_STATUSES:
-                raise FetchError(f"HTTP {exc.code}", status=exc.code) from exc
-            problem = f"HTTP {exc.code}"
-        except (urllib.error.URLError, http.client.HTTPException, OSError) as exc:
-            problem = str(getattr(exc, "reason", exc)) or type(exc).__name__
-        if attempt == attempts:
-            raise FetchError(f"no answer after {attempts} attempts ({problem})")
-        sleep(wait * attempt)
-    raise AssertionError("unreachable")  # pragma: no cover
+    try:
+        _status, body = _ask(
+            opener,
+            request,
+            attempts=attempts,
+            wait=wait,
+            timeout=timeout,
+            sleep=sleep,
+            deadline=deadline,
+            clock=clock,
+        )
+    except urllib.error.HTTPError as exc:
+        raise FetchError(f"HTTP {exc.code}", status=exc.code) from exc
+    return body
 
 
 class _NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -233,54 +308,73 @@ def trace(
     opener: Callable[..., Any] | None = None,
     sleep: Callable[[float], None] = time.sleep,
     max_hops: int = 10,
+    deadline: float | None = None,
+    clock: Callable[[], float] = time.monotonic,
 ) -> Landing:
     """GET *url* and follow its redirects one at a time, asking for *accept* each time.
 
     Return where the request landed: the first answer that is not a redirect,
     whatever its status, so a 404 at the end is a result, not an error. Each
-    request is tried again as :func:`fetch` does. :class:`FetchError` is raised
-    when a server does not answer, or after *max_hops* redirects.
+    request is tried again as :func:`fetch` does, within the same *deadline*.
+    :class:`FetchError` is raised when a server does not answer, or after
+    *max_hops* redirects.
     """
     open_url = opener or urllib.request.build_opener(_NoRedirect).open
     current = url
     hops = [url]
     for _hop in range(max_hops + 1):
         request = urllib.request.Request(current, headers={"Accept": accept, "User-Agent": USER_AGENT})
-        for attempt in range(1, attempts + 1):
-            try:
-                with open_url(request, timeout=timeout) as response:
-                    return Landing(current, getattr(response, "status", 200), response.read(), tuple(hops))
-            except urllib.error.HTTPError as exc:
-                location = exc.headers.get("Location") if exc.headers is not None else None
-                if exc.code in REDIRECT_STATUSES and location:
-                    current = urllib.parse.urljoin(current, location)
-                    hops.append(current)
-                    break
-                if exc.code not in RETRY_STATUSES:
-                    return Landing(current, exc.code, b"", tuple(hops))
-                problem = f"HTTP {exc.code}"
-            except (urllib.error.URLError, http.client.HTTPException, OSError) as exc:
-                problem = str(getattr(exc, "reason", exc)) or type(exc).__name__
-            if attempt == attempts:
-                raise FetchError(f"no answer from {current} after {attempts} attempts ({problem})")
-            sleep(wait * attempt)
+        try:
+            status, body = _ask(
+                open_url,
+                request,
+                attempts=attempts,
+                wait=wait,
+                timeout=timeout,
+                sleep=sleep,
+                deadline=deadline,
+                clock=clock,
+                source=f" from {current}",
+            )
+        except urllib.error.HTTPError as exc:
+            location = exc.headers.get("Location") if exc.headers is not None else None
+            if exc.code in REDIRECT_STATUSES and location:
+                current = urllib.parse.urljoin(current, location)
+                hops.append(current)
+                continue
+            return Landing(current, exc.code, b"", tuple(hops))
+        return Landing(current, status, body, tuple(hops))
     raise FetchError(f"more than {max_hops} redirects from {url}")
 
 
-def compare_files(files: Iterable[HostedFile], fetch_file: Fetch, root: Path = ROOT) -> list[Outcome]:
-    """Compare the hosted copy of each file with its copy in *root*."""
+def compare_files(
+    files: Iterable[HostedFile], fetch_file: Fetch, root: Path = ROOT, *, give_up_after: int | None = GIVE_UP_AFTER
+) -> list[Outcome]:
+    """Compare the hosted copy of each file with its copy in *root*.
+
+    Every file is reached through w3id and the registry, so once
+    *give_up_after* files in a row got no answer at all, the remaining files
+    are reported unreachable without a request.
+    """
     outcomes: list[Outcome] = []
+    silent = 0  # files in a row that got no answer
     for hosted_file in files:
         if not hosted_file.url:
             outcomes.append(Outcome(hosted_file, "missing", "it declares no $id, so nothing serves it"))
+            continue
+        if give_up_after is not None and silent >= give_up_after:
+            detail = f"not asked: {silent} files in a row before it got no answer"
+            outcomes.append(Outcome(hosted_file, "unreachable", detail))
             continue
         local = normalised_sha256((root / hosted_file.path).read_bytes())
         try:
             served = normalised_sha256(fetch_file(hosted_file.url, hosted_file.accept))
         except FetchError as exc:
             status = "missing" if exc.status == 404 else "unreachable"
+            silent = silent + 1 if exc.status is None else 0
             outcomes.append(Outcome(hosted_file, status, str(exc)))
             continue
+        silent = 0
         if served == local:
             outcomes.append(Outcome(hosted_file, "same"))
         else:
@@ -406,7 +500,7 @@ def ontology_routes(facts: OntologyFacts, version: str, *, latest: bool) -> list
     versioned = f"{PAGES}/battinfo/versions/{version}/battinfo.ttl"
     routes = [Route(ONTOLOGY_IRI, f"{PAGES}/battinfo.ttl")]
     if latest:
-        routes.append(Route(LATEST_IRI, LATEST_FILE))
+        routes.append(Route(LATEST_IRI, LATEST_FILE, interim=LATEST_FILE_ON_MASTER))
     routes.append(Route(f"{ONTOLOGY_IRI}/{version}", versioned))
     if facts.version_iri:
         routes.append(Route(facts.version_iri, versioned))
@@ -422,6 +516,9 @@ def _ontology_outcome(route: Route, landing: Landing, expected: bytes, *, by_imp
     hosted_file = HostedFile(route.iri, "text/turtle", ONTOLOGY_PATH)
     where = f"lands on {landing.url} (HTTP {landing.status})"
     if landing.url != route.lands:
+        if route.interim is not None and landing.url == route.interim:
+            detail = f"{where}, where it leads until the perma-id change to {route.lands} is merged"
+            return Outcome(hosted_file, "pending", detail)
         return Outcome(hosted_file, "misrouted", f"{where}, expected {route.lands}")
     if landing.status != 200:
         return Outcome(hosted_file, "missing" if served else "routed", where)
@@ -478,7 +575,10 @@ def check_ontology_routes(
         return 1, [message], ["### Hosted ontology", "", message]
     routes = ontology_routes(facts, facts.version, latest=True)
     outcomes = _trace_routes(trace_url, routes, expected, served=served, root_by_imports=False)
-    passing = {"same"} if served else {"same", "routed"}
+    # /latest still on master is reported but never fails the check: the
+    # perma-id pull request that moves it has its own review, outside this
+    # repository, and does not block a release.
+    passing = {"same", "pending"} if served else {"same", "routed", "pending"}
     if served:
         head = f"The w3id ontology IRIs, which must serve this checkout's battinfo.ttl ({facts.version}):"
     else:
@@ -566,21 +666,33 @@ def main(
     parser.add_argument(
         "--wait", type=float, default=10.0, help="seconds before the second request; each later one waits longer"
     )
+    parser.add_argument(
+        "--deadline",
+        type=float,
+        default=DEFAULT_DEADLINE,
+        help=(
+            f"seconds the run may spend asking (default {DEFAULT_DEADLINE:.0f}); after that, what has not "
+            "answered is reported unreachable, so the run always ends with a report"
+        ),
+    )
     args = parser.parse_args(argv)
     if args.served and not args.ontology_routes:
         parser.error("--served goes with --ontology-routes")
     if args.tag and not (args.release_terms or args.ontology):
         parser.error("--tag goes with --release-terms or --ontology")
+    if args.deadline <= 0:
+        parser.error("--deadline must be a positive number of seconds")
+    deadline = time.monotonic() + args.deadline
 
     if fetch_file is None:
 
         def fetch_file(url: str, accept: str) -> bytes:
-            return fetch(url, accept, attempts=args.attempts, wait=args.wait)
+            return fetch(url, accept, attempts=args.attempts, wait=args.wait, deadline=deadline)
 
     if trace_url is None:
 
         def trace_url(url: str, accept: str) -> Landing:
-            return trace(url, accept, attempts=args.attempts, wait=args.wait)
+            return trace(url, accept, attempts=args.attempts, wait=args.wait, deadline=deadline)
 
     if args.release_terms:
         status, log, markdown = check_release_terms(fetch_file, args.tag, root)

@@ -17,6 +17,7 @@ import importlib.util
 import io
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -74,9 +75,19 @@ def test_the_hosted_files_are_the_context_every_schema_at_its_id_and_the_vocabul
         assert schema_id.startswith("https://w3id.org/battinfo/schema/")
 
     vocabulary = by_path["assets/vocab/battinfo-records.ttl"]
-    assert vocabulary.url == "https://w3id.org/battinfo/sourceType"
+    assert vocabulary.url == "https://w3id.org/battinfo/batchId"
     assert vocabulary.accept == "text/turtle"
     assert len(files) == len(schemas) + 2
+
+
+def test_the_vocabulary_is_asked_for_through_a_term_it_declares() -> None:
+    # The registry sends any bare term IRI to the vocabulary today, but it may
+    # come to route declared terms only, as its other rows already fail closed.
+    term = check.VOCABULARY_URL.removeprefix("https://w3id.org/battinfo/")
+    vocabulary = (ROOT / check.VOCABULARY_PATH).read_text(encoding="utf-8")
+    assert re.search(rf"^battinfo:{re.escape(term)} a ", vocabulary, re.MULTILINE), term
+    context = json.loads((ROOT / check.CONTEXT_PATH).read_text(encoding="utf-8"))["@context"]
+    assert f"battinfo:{term}" in context.values()
 
 
 def test_hosted_files_equal_to_the_checkout_pass(capsys: pytest.CaptureFixture[str], tmp_path: Path) -> None:
@@ -140,7 +151,7 @@ def _busy(url: str, code: int) -> urllib.error.HTTPError:
     return urllib.error.HTTPError(url, code, "busy", None, io.BytesIO(b""))  # type: ignore[arg-type]
 
 
-URL = "https://w3id.org/battinfo/sourceType"
+URL = "https://w3id.org/battinfo/batchId"
 
 
 def test_a_busy_or_silent_server_is_asked_again_with_growing_waits() -> None:
@@ -177,6 +188,120 @@ def test_a_definite_answer_is_not_asked_again_and_attempts_are_limited() -> None
     with pytest.raises(check.FetchError, match="no answer after 3 attempts") as excinfo:
         check.fetch(URL, "text/turtle", attempts=3, opener=silent, sleep=lambda _: None)
     assert excinfo.value.status is None and len(calls) == 3
+
+
+# ── A host that does not answer ──
+#
+# release.yml gives the hosted check a time limit of its own. The script has to
+# end, with its report written, before that limit or the job's would kill it:
+# it stops asking at --deadline, and once two files in a row got no answer it
+# reports the rest without asking.
+
+
+class _Clock:
+    """A clock that moves only when the code under test sleeps or a request takes time."""
+
+    def __init__(self) -> None:
+        self.now = 0.0
+
+    def __call__(self) -> float:
+        return self.now
+
+    def sleep(self, seconds: float) -> None:
+        self.now += seconds
+
+
+def test_no_request_is_sent_and_no_wait_starts_past_the_deadline() -> None:
+    clock = _Clock()
+    timeouts: list[float] = []
+
+    def silent(request, timeout):  # noqa: ANN001, ANN202
+        timeouts.append(timeout)
+        clock.now += 5  # each request takes 5 s to fail
+        raise urllib.error.URLError("timed out")
+
+    waits: list[float] = []
+
+    def sleep(seconds: float) -> None:
+        waits.append(seconds)
+        clock.sleep(seconds)
+
+    # Deadline at 30 s: fails at 5 s, waits 10 s, fails at 20 s, and the next
+    # wait (20 s) would end past the deadline, so it stops there.
+    with pytest.raises(check.FetchError) as excinfo:
+        check.fetch(URL, "text/turtle", attempts=4, wait=10, opener=silent, sleep=sleep, deadline=30, clock=clock)
+    assert str(excinfo.value) == "no answer before the time limit, after 2 attempts (timed out)"
+    assert excinfo.value.status is None
+    assert waits == [10]
+    # A request never gets longer than the time left.
+    assert timeouts == [30, 15]
+
+    timeouts.clear()
+    with pytest.raises(check.FetchError, match="not asked: the check's time limit had run out"):
+        check.fetch(URL, "text/turtle", opener=silent, sleep=sleep, deadline=clock.now, clock=clock)
+    assert timeouts == []
+
+
+def test_following_redirects_keeps_to_the_same_deadline() -> None:
+    clock = _Clock()
+
+    def slow_redirects(request, timeout):  # noqa: ANN001, ANN202
+        clock.now += 40
+        raise _redirect(request.full_url, 303, request.full_url + "x")
+
+    with pytest.raises(check.FetchError, match="not asked: the check's time limit had run out"):
+        check.trace(URL, "text/turtle", opener=slow_redirects, deadline=100, clock=clock)
+    assert clock.now == 120  # three hops of 40 s; the fourth is never sent
+
+
+def test_after_two_files_in_a_row_get_no_answer_the_rest_are_reported_without_asking(
+    capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    hosted = _Hosted()
+    for url in hosted.by_url:
+        hosted.by_url[url] = check.FetchError("no answer after 4 attempts (HTTP 503)")
+    summary = tmp_path / "summary.md"
+
+    assert check.main(["--summary", str(summary)], fetch_file=hosted) == 1
+
+    files = check.hosted_files()
+    assert len(hosted.requests) == check.GIVE_UP_AFTER == 2
+    out = capsys.readouterr().out
+    assert f"{len(files)} files: 0 same, 0 differs, 0 missing, {len(files)} unreachable." in out
+    assert "not asked: 2 files in a row before it got no answer" in out
+    # The report is written although nothing answered.
+    assert f"{len(files)} files compared with this commit" in summary.read_text(encoding="utf-8")
+
+
+def test_a_file_that_answers_resets_the_count_of_silent_files() -> None:
+    hosted = _Hosted()
+    urls = [f.url for f in check.hosted_files()]
+    silent = check.FetchError("no answer after 4 attempts (timed out)")
+    hosted.by_url[urls[0]] = silent
+    del hosted.by_url[urls[1]]  # a 404 is an answer
+    hosted.by_url[urls[2]] = silent
+    hosted.by_url[urls[4]] = silent
+
+    status, _log, _markdown = check.check_files(hosted)
+
+    assert status == 1
+    assert len(hosted.requests) == len(urls)
+
+
+def test_the_command_line_check_asks_within_its_deadline(monkeypatch: pytest.MonkeyPatch) -> None:
+    deadlines: list[float] = []
+
+    def no_answer(url: str, accept: str, **kwargs: object) -> bytes:
+        deadlines.append(kwargs["deadline"])  # type: ignore[arg-type]
+        raise check.FetchError("not asked: the check's time limit had run out")
+
+    monkeypatch.setattr(check, "fetch", no_answer)
+    started = check.time.monotonic()
+    assert check.main(["--deadline", "300"]) == 1
+    assert len(deadlines) == 2
+    assert all(started + 300 <= deadline <= check.time.monotonic() + 300 for deadline in deadlines)
+    with pytest.raises(SystemExit):
+        check.main(["--deadline", "0"])
 
 
 def test_the_newest_final_release_tag_is_the_last_release() -> None:
@@ -459,10 +584,39 @@ def test_before_the_tag_the_routes_check_passes_when_each_iri_leads_where_w3id_s
 
 def test_a_route_that_leads_elsewhere_fails(capsys: pytest.CaptureFixture[str]) -> None:
     landings = _before_the_tag()
-    master = "https://raw.githubusercontent.com/BIG-MAP/BattINFO/master/battinfo.ttl"
-    landings["https://w3id.org/battinfo/latest"] = check.Landing(master, 200, _ontology("0.8.0-beta"))
+    elsewhere = f"{PAGES}/battinfo.ttl"
+    landings["https://w3id.org/battinfo/latest"] = check.Landing(elsewhere, 200, _ontology("0.8.0-beta"))
     assert check.main(["--ontology-routes"], trace_url=_Traced(landings)) == 1
-    assert f"misrouted    https://w3id.org/battinfo/latest  (lands on {master}" in capsys.readouterr().out
+    assert f"misrouted    https://w3id.org/battinfo/latest  (lands on {elsewhere}" in capsys.readouterr().out
+
+
+MASTER = "https://raw.githubusercontent.com/BIG-MAP/BattINFO/master/battinfo.ttl"
+
+
+def test_latest_still_on_master_is_reported_as_pending_and_does_not_fail(
+    capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    # /latest leads to the master branch until a perma-id pull request, which
+    # has its own review outside this repository, moves it to main. That must
+    # not turn the routes check red before the tag, nor the check after it.
+    assert check.LATEST_FILE_ON_MASTER == MASTER
+    before = _before_the_tag()
+    before["https://w3id.org/battinfo/latest"] = check.Landing(MASTER, 200, _ontology("0.8.0-beta"))
+    summary = tmp_path / "summary.md"
+    assert check.main(["--ontology-routes", "--summary", str(summary)], trace_url=_Traced(before)) == 0
+    out = capsys.readouterr().out
+    assert f"pending      https://w3id.org/battinfo/latest  (lands on {MASTER} (HTTP 200)" in out
+    assert "| https://w3id.org/battinfo/latest | pending |" in summary.read_text(encoding="utf-8")
+
+    ttl = (ROOT / "battinfo.ttl").read_bytes()
+    version = check.ontology_facts(ttl).version
+    assert version
+    after = _landings(ttl, version)
+    after["https://w3id.org/battinfo/latest"] = check.Landing(MASTER, 200, _ontology("0.8.0-beta"))
+    assert check.main(["--ontology-routes", "--served"], trace_url=_Traced(after)) == 0
+    # Only /latest gets that leeway: the root still on the old file fails after the tag.
+    after["https://w3id.org/battinfo"] = check.Landing(f"{PAGES}/battinfo.ttl", 200, _ontology("0.8.0-beta"))
+    assert check.main(["--ontology-routes", "--served"], trace_url=_Traced(after)) == 1
 
 
 def test_after_the_tag_every_route_serves_the_ontology_of_the_checkout() -> None:

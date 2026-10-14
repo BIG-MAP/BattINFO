@@ -43,6 +43,8 @@ jobs:
   install-smoke:
     name: Install gate
     uses: ./.github/workflows/install-smoke.yml
+    with:
+      ref: ${{ github.sha }}   # the git URL install takes this commit, not main
 
   hosted:
     # The registry serves the v1 records context, the JSON Schemas and the
@@ -58,19 +60,25 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
+      # When w3id or the registry is down, the script stops asking after
+      # --deadline seconds and still writes its report. The step's own time
+      # limit, below the job's, backs that up: a step that runs out of time
+      # fails like a mismatch, which continue-on-error absorbs, so the step
+      # below decides, and a pre-release or a manual run is never blocked.
       - name: Compare the files w3id serves with this commit's copies
         id: compare
         continue-on-error: true
-        run: python scripts/check_hosted_files.py --summary "$GITHUB_STEP_SUMMARY"
+        timeout-minutes: 12
+        run: python scripts/check_hosted_files.py --deadline 480 --summary "$GITHUB_STEP_SUMMARY"
       - name: Block a final release on a mismatch
-        if: steps.compare.outcome == 'failure'
+        if: steps.compare.outcome != 'success'
         run: |
           final='^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$'
           if [[ "$GITHUB_EVENT_NAME" == push && "$GITHUB_REF" =~ $final ]]; then
-            echo "::error::The files w3id serves differ from this commit's copies, as the step above lists. Deploy the registry with this commit's copies, then re-run this job."
+            echo "::error::The files w3id serves differ from this commit's copies or could not be fetched, as the step above lists. Deploy the registry with this commit's copies, or wait until it answers, then re-run this job."
             exit 1
           fi
-          echo "::warning::The files w3id serves differ from this commit's copies, as the step above lists. Only a final release tag is blocked by this."
+          echo "::warning::The files w3id serves differ from this commit's copies or could not be fetched, as the step above lists. Only a final release tag is blocked by this."
 
   build:
     name: Build & validate distribution

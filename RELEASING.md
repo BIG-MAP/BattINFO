@@ -67,9 +67,11 @@ Keep the Zenodo integration switched on for the repository. Its webhook archives
 
    The tag runs `release.yml` again: the CI gate; the install gate (`install-smoke.yml`, which installs the built wheel in empty environments on Python 3.11 and 3.14, on Linux and Windows, core-only and with `[processing]`); the build and a check that the tag matches the built version; the hosted check; then, after the `pypi` approval, the upload to PyPI and a draft GitHub Release with the files attached. A manual run of `release.yml` can only target TestPyPI.
 
-   The hosted check (`scripts/check_hosted_files.py`) compares the files w3id serves (the v1 records context, every JSON Schema at its `$id` and the record vocabulary) with the tag's copies. For a final tag a difference stops the upload: deploy the registry with the tag's copies, then use "Re-run failed jobs" on the same run. If the upload itself stops part-way, "Re-run failed jobs" finishes it, since files PyPI already has are skipped. After the release, a daily workflow (`hosted-files.yml`) checks that the hosted context still holds every term of the last release with the same value.
+   The hosted check (`scripts/check_hosted_files.py`) compares the files w3id serves (the v1 records context, every JSON Schema at its `$id` and the record vocabulary) with the tag's copies. For a final tag a difference stops the upload: deploy the registry with the tag's copies, then use "Re-run failed jobs" on the same run. When w3id or the registry does not answer, the check stops asking after eight minutes and lists the files it could not fetch; for a final tag that also stops the upload, and "Re-run failed jobs" tries again once the registry is back. If the upload itself stops part-way, "Re-run failed jobs" finishes it, since files PyPI already has are skipped. After the release, a daily workflow (`hosted-files.yml`) checks that the hosted context still holds every term of the last release with the same value.
 
    A pre-release tag such as `vX.Y.Zrc1` goes the same way, except that the hosted check only reports, and the draft release is marked as a pre-release. Leave that draft unpublished, since Zenodo archives pre-releases too. The docs workflow publishes the documentation of each tag in its own folder; only a final tag also updates `stable/` and the version switcher, and publishes the ontology.
+
+   Push a pre-release tag only when PyPI already holds a final release of `battinfo`, such as the 0.0.1 placeholder that reserves the name, and when the README, the known limitations and the identity, context and schema rules are final and the registry is deployed with the release's copies. While PyPI holds no final release, a plain `pip install battinfo` installs the newest pre-release, and no upload can be edited afterwards. Until then, rehearse with the TestPyPI run of step 5.
 
 8. Review the draft release and publish it. Zenodo then archives it under the concept DOI and takes the metadata, authors included, from `CITATION.cff`. The README badge and citation use the concept DOI and need no change.
 9. Once the docs workflow has deployed the tag, check that the ontology IRIs serve the release's `battinfo.ttl` (next section), and that the next run of `hosted-files.yml` is green.
@@ -95,7 +97,7 @@ Before the tag, on the frozen `main` and after the registry deploy, check where 
 python scripts/check_hosted_files.py --ontology-routes
 ```
 
-It takes the version and the versionIRI from the checkout's `battinfo.ttl` and follows every redirect. It passes when each IRI lands where the table says, even where the file is not there yet: before the tag, `/X.Y.Z` and the versionIRI land on a 404 in `battinfo/versions/X.Y.Z/`, and the root still serves the last release. `/latest` already serves the frozen `main`.
+It takes the version and the versionIRI from the checkout's `battinfo.ttl` and follows every redirect. It passes when each IRI lands where the table says, even where the file is not there yet: before the tag, `/X.Y.Z` and the versionIRI land on a 404 in `battinfo/versions/X.Y.Z/`, and the root still serves the last release. Once the perma-id pull request has moved it, `/latest` already serves the frozen `main`. Until then `/latest` lands on `master`, and the check reports it as `pending` without failing: that pull request is reviewed outside this repository and does not block the tag. Any other landing place for `/latest` fails the check.
 
 After the tag's docs deploy, from a checkout of the tag:
 
@@ -104,7 +106,7 @@ python scripts/check_hosted_files.py --ontology-routes --served
 python scripts/check_hosted_files.py --ontology --tag vX.Y.Z
 ```
 
-The first wants all four IRIs to serve the tag's `battinfo.ttl`. The second is what `hosted-files.yml` runs every day against the newest final tag: the root declares the release's versionIRI and imports, and `/X.Y.Z` and the versionIRI serve its `battinfo.ttl`. Neither runs in `release.yml`, because the versionIRI resolves only after the tag's own docs deploy.
+The first wants all four IRIs to serve the tag's `battinfo.ttl`, apart from a `/latest` that is still pending on `master`. The second is what `hosted-files.yml` runs every day against the newest final tag: the root declares the release's versionIRI and imports, and `/X.Y.Z` and the versionIRI serve its `battinfo.ttl`. Neither runs in `release.yml`, because the versionIRI resolves only after the tag's own docs deploy.
 
 ## Zenodo sandbox run
 

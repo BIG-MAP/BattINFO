@@ -30,6 +30,11 @@ on:
       - src/battinfo/_util.py
       - .github/workflows/install-smoke.yml
   workflow_call:
+    inputs:
+      ref:
+        description: "Commit for the git URL install; release.yml passes the commit it releases"
+        type: string
+        default: ""
   workflow_dispatch:
 
 jobs:
@@ -90,15 +95,22 @@ jobs:
           cd "$work"
           "$py" -c "import bdf, fastnda, fastexcel, scipy; import battinfo; ws = battinfo.workspace('.'); out = ws.convert('*.csv'); assert len(out) == 1, out; print(open(out[0]).readline().strip())"
 
+      # The git URL install line of the README. Called from release.yml, it
+      # installs the commit being released (inputs.ref), so the gate never
+      # tests whatever main holds by then; otherwise main, as the README line
+      # does.
       - name: pip install git+https://github.com/BIG-MAP/BattINFO.git
         shell: bash
+        env:
+          REF: ${{ inputs.ref }}
         run: |
           set -euxo pipefail
+          spec="git+https://github.com/BIG-MAP/BattINFO.git${REF:+@$REF}"
           v="$RUNNER_TEMP/venv-git"
           python -m venv "$v"
           if [ -f "$v/Scripts/python.exe" ]; then py="$v/Scripts/python.exe"; else py="$v/bin/python"; fi
           "$py" -m pip install --upgrade pip
-          "$py" -m pip install "git+https://github.com/BIG-MAP/BattINFO.git"
+          "$py" -m pip install "$spec"
           "$py" -c "import battinfo; print(battinfo.__version__)"
 
       # The install docs give that one converter line, and nothing in the repo

@@ -34,9 +34,10 @@ jobs:
         with:
           python-version: "3.12"
       # The registry's host can take a minute to wake up, so each request is
-      # tried up to six times, waiting 30 s longer each time.
+      # tried up to six times, waiting 30 s longer each time. The run stops
+      # asking after 20 minutes, inside the job's limit, so it always reports.
       - name: Compare the hosted v1 context with the last release's terms
-        run: python scripts/check_hosted_files.py --release-terms --attempts 6 --wait 30 --summary "$GITHUB_STEP_SUMMARY"
+        run: python scripts/check_hosted_files.py --release-terms --attempts 6 --wait 30 --deadline 1200 --summary "$GITHUB_STEP_SUMMARY"
 
   ontology:
     name: Ontology IRIs serve the last release
@@ -51,4 +52,4 @@ jobs:
           python-version: "3.12"
       # The versionIRI goes through the registry, which can take a minute to wake up.
       - name: Check that the w3id ontology IRIs serve the last release's battinfo.ttl
-        run: python scripts/check_hosted_files.py --ontology --attempts 6 --wait 30 --summary "$GITHUB_STEP_SUMMARY"
+        run: python scripts/check_hosted_files.py --ontology --attempts 6 --wait 30 --deadline 1200 --summary "$GITHUB_STEP_SUMMARY"

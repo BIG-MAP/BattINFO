@@ -325,11 +325,31 @@ def test_a_hosted_mismatch_blocks_only_a_pushed_final_tag(event: str, ref: str, 
     assert compare["continue-on-error"] is True
     assert compare["run"].startswith("python scripts/check_hosted_files.py")
     block = _step(job, name="Block a final release on a mismatch")
-    assert block["if"] == "steps.compare.outcome == 'failure'"
+    # Any outcome but success, so a step that ran out of time is decided here too.
+    assert block["if"] == "steps.compare.outcome != 'success'"
 
     proc = _run_step(block["run"], tmp_path, {"GITHUB_EVENT_NAME": event, "GITHUB_REF": ref})
     assert proc.returncode == (1 if blocks else 0), proc.stdout + proc.stderr
     assert ("::error::" if blocks else "::warning::") in proc.stdout
+
+
+def _deadline(run: str) -> float:
+    match = re.search(r"--deadline (\d+)", run)
+    assert match, f"no --deadline in {run!r}"
+    return float(match.group(1))
+
+
+def test_a_host_that_does_not_answer_cannot_time_the_hosted_job_out() -> None:
+    # The job's own time limit is not covered by continue-on-error: had it
+    # killed the job, publish-pypi (which needs it) would be skipped even for a
+    # pre-release, with no report written. The script stops asking at its
+    # deadline and writes the report; the step's time limit backs that up and,
+    # unlike the job's, is a step failure that the block step then decides.
+    job = _release()["jobs"]["hosted"]
+    compare = _step(job, step_id="compare")
+    assert compare["timeout-minutes"] < job["timeout-minutes"]
+    assert _deadline(compare["run"]) < compare["timeout-minutes"] * 60
+    assert "--summary" in compare["run"]
 
 
 @pytest.mark.parametrize(
@@ -374,6 +394,33 @@ def test_the_install_gate_can_be_called_and_tests_the_oldest_and_newest_python()
     assert _step(job, uses="actions/setup-python@")["with"]["python-version"] == "${{ matrix.python-version }}"
 
 
+GIT_INSTALL_STEP = "pip install git+https://github.com/BIG-MAP/BattINFO.git"
+
+
+def test_in_a_release_the_git_url_install_takes_the_commit_being_released() -> None:
+    # Without a commit the git URL install takes main, which a hotfix tag cut
+    # from a release branch never contains.
+    assert _release()["jobs"]["install-smoke"]["with"] == {"ref": "${{ github.sha }}"}
+    workflow = _workflow("install-smoke.yml")
+    ref = _triggers(workflow)["workflow_call"]["inputs"]["ref"]
+    assert (ref["type"], ref["default"]) == ("string", "")
+    [job] = workflow["jobs"].values()
+    step = _step(job, name=GIT_INSTALL_STEP)
+    assert step["env"] == {"REF": "${{ inputs.ref }}"}
+    assert '"$py" -m pip install "$spec"' in step["run"]
+    [spec_line] = [line for line in step["run"].splitlines() if line.strip().startswith("spec=")]
+
+    def spec(ref: str) -> str:
+        proc = _run_step(f'{spec_line}\necho "$spec"', ROOT, {"REF": ref})
+        assert proc.returncode == 0, proc.stderr
+        return proc.stdout.strip()
+
+    sha = "0123456789abcdef0123456789abcdef01234567"
+    assert spec(sha) == f"git+https://github.com/BIG-MAP/BattINFO.git@{sha}"
+    # Run on its own (a pull request, a push to main), it installs main, as the README line does.
+    assert spec("") == "git+https://github.com/BIG-MAP/BattINFO.git"
+
+
 def test_the_install_gate_runs_the_cli_from_the_wheel_core_only_and_with_processing() -> None:
     [job] = _workflow("install-smoke.yml")["jobs"].values()
     script = _step(job, name="wheel in an empty environment, outside the checkout")["run"]
@@ -404,6 +451,7 @@ def test_a_scheduled_job_checks_the_hosted_context_keeps_the_released_terms() ->
     run = _step(job, name="Compare the hosted v1 context with the last release's terms")["run"]
     assert run.startswith("python scripts/check_hosted_files.py --release-terms")
     assert "--attempts" in run
+    assert _deadline(run) < job["timeout-minutes"] * 60  # it reports before the job is killed
 
 
 def test_a_scheduled_job_checks_the_ontology_iris_serve_the_last_release() -> None:
@@ -415,5 +463,6 @@ def test_a_scheduled_job_checks_the_ontology_iris_serve_the_last_release() -> No
     run = _step(job, name="Check that the w3id ontology IRIs serve the last release's battinfo.ttl")["run"]
     assert run.startswith("python scripts/check_hosted_files.py --ontology ")
     assert "--attempts" in run
+    assert _deadline(run) < job["timeout-minutes"] * 60
     release_runs = [str(step.get("run", "")) for job in _release()["jobs"].values() for step in job.get("steps", [])]
     assert not [run for run in release_runs if "--ontology" in run]
