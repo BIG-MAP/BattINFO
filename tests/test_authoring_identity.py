@@ -140,3 +140,60 @@ def test_non_conflict_error_does_not_bump(monkeypatch: pytest.MonkeyPatch) -> No
     assert out["ok"] is False
     assert out["version_bumped"] is None
     assert state["n"] == 1  # a non-conflict error is not retried
+
+
+# ── Nested ids are content: only the record's own id is left out ──────────────
+SPEC_IRI = "https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd"
+WRONG_DATASET = "https://w3id.org/battinfo/dataset/aaaa-bbbb-cccc-0001"
+RIGHT_DATASET = "https://w3id.org/battinfo/dataset/aaaa-bbbb-cccc-0002"
+
+
+def test_an_upsert_that_changes_only_a_dataset_link_rewrites_the_file(tmp_path: Path) -> None:
+    from battinfo.api import save_cell_instance
+
+    draft = {"cell_spec_id": SPEC_IRI, "serial_number": "S1"}
+    first = save_cell_instance(
+        {**draft, "dataset_ids": [WRONG_DATASET]}, source_root=tmp_path, resolve_references=False
+    )
+    corrected = save_cell_instance(
+        {**draft, "dataset_ids": [RIGHT_DATASET]},
+        source_root=tmp_path,
+        mode=REGISTER_MODE_UPSERT,
+        resolve_references=False,
+    )
+    assert corrected["id"] == first["id"]
+    assert corrected["content_changed"] is True
+    saved = json.loads(Path(corrected["path"]).read_text(encoding="utf-8"))
+    assert [link["id"] for link in saved["datasets"]] == [RIGHT_DATASET]
+
+
+def test_an_upsert_that_changes_only_an_organisation_iri_is_a_change(tmp_path: Path) -> None:
+    doc = json.loads(EXAMPLE.read_text(encoding="utf-8"))
+    doc["cell_spec"]["manufacturer"]["id"] = "https://w3id.org/battinfo/organization/aaaa-bbbb-cccc-0001"
+    save_record(doc, source_root=tmp_path, mode=REGISTER_MODE_UPSERT, validate=False, publish=False)
+    doc["cell_spec"]["manufacturer"]["id"] = "https://w3id.org/battinfo/organization/aaaa-bbbb-cccc-0002"
+    again = save_record(doc, source_root=tmp_path, mode=REGISTER_MODE_UPSERT, validate=False, publish=False)
+    assert again["content_changed"] is True
+
+
+def test_the_comparison_still_leaves_out_the_records_own_id(tmp_path: Path) -> None:
+    body = {"cell_spec_id": SPEC_IRI, "serial_number": "S1", "datasets": [{"id": RIGHT_DATASET}]}
+    existing = _write(tmp_path / "a.json", {"cell_instance": {**body, "id": "https://w3id.org/battinfo/cell/a"}})
+    assert (
+        _record_content_differs(existing, {"cell_instance": {**body, "id": "https://w3id.org/battinfo/cell/b"}})
+        is False
+    )
+
+
+def test_a_content_seed_tells_apart_records_that_differ_only_in_a_nested_id() -> None:
+    from battinfo._workspace import _content_seed
+    from battinfo.bundle import Test
+
+    def run(chamber: str) -> Test:
+        return Test(test_kind="cycling", cell_instance_id=SPEC_IRI, conditions={"chamber": {"id": chamber}})
+
+    first = run("https://example.org/chamber/1")
+    second = run("https://example.org/chamber/2")
+    assert _content_seed(first) != _content_seed(second)
+    # The record's own IRI stays out of its content seed.
+    assert _content_seed(first) == _content_seed(first.model_copy(update={"id": "https://w3id.org/battinfo/test/x"}))

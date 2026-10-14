@@ -59,6 +59,7 @@ from battinfo.entities import (
     cell_spec_uid,
     dataset_locator_seed,
     iri_namespace_map,
+    kind_for_doc,
     seed_text,
     stable_uid,
 )
@@ -166,20 +167,40 @@ def _cell_spec_iri(uid: str) -> str:
     return f"https://w3id.org/battinfo/{_IRI_NAMESPACE['cell-spec']}/{uid}"
 
 
-# Fields that vary across runs (or are the IRI itself) and must NOT influence a
-# content-derived disambiguation seed — otherwise a re-minted IRI would be unstable
-# across re-runs (e.g. a finalize-time ``retrieved_at`` timestamp).
-_VOLATILE_SEED_KEYS = frozenset(
-    {"id", "uid", "retrieved_at", "created_at", "modified_at", "generated_at", "imported_at"}
-)
+# Fields that vary across runs and must NOT influence a content-derived
+# disambiguation seed or an upsert's change check, wherever they sit: otherwise a
+# re-minted IRI would be unstable across re-runs (e.g. a finalize-time
+# ``retrieved_at`` timestamp). The record's own ``id`` is left out as well, but
+# only at the record's top level (_RECORD_ID_KEY): a nested ``id``, such as a
+# dataset link or a manufacturer's organisation IRI, is content, so an edit to it
+# is a change and two records that differ only there are two records.
+_VOLATILE_SEED_KEYS = frozenset({"uid", "retrieved_at", "created_at", "modified_at", "generated_at", "imported_at"})
+_RECORD_ID_KEY = "id"
+
+
+def _without_volatile(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {k: _without_volatile(v) for k, v in value.items() if k not in _VOLATILE_SEED_KEYS}
+    if isinstance(value, list):
+        return [_without_volatile(v) for v in value]
+    return value
 
 
 def _strip_volatile(value: Any) -> Any:
-    if isinstance(value, dict):
-        return {k: _strip_volatile(v) for k, v in value.items() if k not in _VOLATILE_SEED_KEYS}
-    if isinstance(value, list):
-        return [_strip_volatile(v) for v in value]
-    return value
+    """*value*, a record document, without what never marks a change.
+
+    That is the volatile fields (:data:`_VOLATILE_SEED_KEYS`) wherever they sit,
+    and the record's own ``id``: the one in its body (the object under its
+    kind's record key, such as ``cell_instance``), or at the top of *value*
+    when it has no record key. Every other ``id`` stays and is compared.
+    """
+    stripped = _without_volatile(value)
+    if isinstance(stripped, dict):
+        kind = kind_for_doc(stripped)
+        body = stripped.get(kind.record_key) if kind is not None else stripped
+        if isinstance(body, dict):
+            body.pop(_RECORD_ID_KEY, None)
+    return stripped
 
 
 # Fields that can name a local file. In a content seed a local value enters as its
@@ -188,26 +209,30 @@ def _strip_volatile(value: Any) -> Any:
 _LOCATION_SEED_KEYS = frozenset({*LOCATION_FIELDS, "dataset_path", "path", "url", "file"})
 
 
-def _seed_view(value: Any, workspace_root: Path | None) -> Any:
-    """*value* without volatile fields, with each local file location as its locator."""
+def _seed_view(value: Any, workspace_root: Path | None, *, top: bool = True) -> Any:
+    """*value*, a record, without its own ``id`` and the volatile fields, each local file location as its locator.
+
+    The record's own ``id`` is the one at its top level; a nested ``id`` stays
+    (see :data:`_VOLATILE_SEED_KEYS`).
+    """
     if isinstance(value, dict):
         view: dict[str, Any] = {}
         for key, item in value.items():
-            if key in _VOLATILE_SEED_KEYS:
+            if key in _VOLATILE_SEED_KEYS or (top and key == _RECORD_ID_KEY):
                 continue
             if key in _LOCATION_SEED_KEYS and isinstance(item, str) and is_local_location(item):
                 item = dataset_locator_seed(dataset_path=item, workspace_root=workspace_root)
-            view[key] = _seed_view(item, workspace_root)
+            view[key] = _seed_view(item, workspace_root, top=False)
         return view
     if isinstance(value, list):
-        return [_seed_view(item, workspace_root) for item in value]
+        return [_seed_view(item, workspace_root, top=False) for item in value]
     return value
 
 
 def _content_seed(entity: Any, *, workspace_root: Path | None = None) -> str:
     """A stable, order-independent seed from an entity's distinguishing content
-    (its canonical record minus the IRI and volatile timestamps, with local file
-    locations as their workspace-relative locators)."""
+    (its canonical record minus its own IRI and the volatile timestamps, with
+    local file locations as their workspace-relative locators)."""
     data = entity.model_dump(mode="json", exclude_none=True)
     return json.dumps(_seed_view(data, workspace_root), sort_keys=True, ensure_ascii=False)
 

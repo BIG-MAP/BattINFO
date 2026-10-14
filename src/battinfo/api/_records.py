@@ -1668,9 +1668,10 @@ def _resolve_references_for_save(doc: dict[str, Any], source_root: Path) -> None
 def _record_content_differs(existing_path: PathLike, new_doc: Mapping[str, Any]) -> bool:
     """True if the record already on disk differs from *new_doc* in a meaningful way.
 
-    Volatile timestamps and identity scaffolding (see ``_strip_volatile``) are ignored, so an
-    idempotent re-save of unchanged content reports False and a real edit reports True. A
-    missing or unreadable existing file is treated as "differs" (the write is not a no-op)."""
+    Volatile timestamps and the record's own ``id`` (see ``_strip_volatile``) are ignored, so an
+    idempotent re-save of unchanged content reports False and a real edit reports True, an edit
+    to a nested ``id`` (a dataset link, an organisation IRI) included. A missing or unreadable
+    existing file is treated as "differs" (the write is not a no-op)."""
     from battinfo._workspace import _strip_volatile
 
     try:
@@ -2046,7 +2047,7 @@ def save_dataset(
     - ``"updated"`` (``mode="upsert"`` over a saved record):
       ``content_changed`` is ``True`` when the record differs from the saved
       one and ``False`` when it does not, in which case nothing is rewritten.
-      The comparison ignores ``id``, ``uid`` and the ``created_at``,
+      The comparison ignores the record's own ``id``, ``uid`` and the ``created_at``,
       ``modified_at``, ``retrieved_at``, ``generated_at`` and ``imported_at``
       timestamps, but not ``published_at``: a ``Dataset`` saved without one
       gets the save time, so its re-save compares as changed.
