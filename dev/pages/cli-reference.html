@@ -588,7 +588,7 @@
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">validate</span></code>: Validate a BattINFO record (JSON Schema +…</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">init</span></code>: Create a minimal workspace scaffold with…</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">map</span></code>: Map canonical JSON to JSON-LD for a target.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">map</span></code>: Map a record to JSON-LD.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">push</span></code>: Package battery data and upload it to the…</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">import-protocol</span></code>: One-liner protocol import: executable file…</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">query</span></code>: Query BattINFO resources.</p></li>
@@ -604,7 +604,7 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">demo</span></code>: Scaffold and verify end-to-end BattINFO…</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ingest</span></code>: Register typed resource instances from…</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">registry</span></code>: Manage registry tenants, workspaces, and…</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">dataset</span></code>: Contribute measurement datasets: init -&gt;…</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dataset</span></code>: Experimental: contribute measurement…</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">batch</span></code>: Scaffold and manage multi-cell batch…</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">config</span></code>: Manage user preferences (creator, license,…</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">properties</span></code>: Browse valid spec property names and their…</p></li>
@@ -649,7 +649,10 @@
 </section>
 <section id="battinfo-map">
 <h2><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">map</span></code><a class="headerlink" href="#battinfo-map" title="Link to this heading">#</a></h2>
-<p>Map canonical JSON to JSON-LD for a target.</p>
+<p>Map a record to JSON-LD.</p>
+<p>Maps cell-spec, material, electrode, separator, current-collector,
+electrolyte, housing and parameter-set records. Other record types exit
+with an error; emit them in Python with battinfo.record_to_jsonld.</p>
 <p><strong>Usage</strong>:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>battinfo<span class="w"> </span>map<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span><span class="w"> </span><span class="o">{</span>input_path<span class="o">}</span>
 </pre></div>
@@ -660,7 +663,7 @@
 </ul>
 <p><strong>Options</strong>:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">--target</span> <span class="pre">&lt;str&gt;</span></code>: Mapping target (‘domain-battery’ or ‘batterypass’).  [default: batterypass]</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--target</span> <span class="pre">&lt;str&gt;</span></code>: Mapping target: ‘domain-battery’, or ‘converter-compatible’ for a cell descriptor.  [default: domain-battery]</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--out</span> <span class="pre">&lt;path&gt;</span></code>: Output JSON-LD path.  [required]</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--help</span></code>: Show this message and exit.</p></li>
 </ul>
@@ -2251,7 +2254,7 @@ BATTINFO_ADMIN_TOKEN     registry admin token</p>
 </section>
 <section id="battinfo-dataset">
 <h2><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">dataset</span></code><a class="headerlink" href="#battinfo-dataset" title="Link to this heading">#</a></h2>
-<p>Contribute measurement datasets: init -&gt; process -&gt; publish.</p>
+<p>Experimental: contribute measurement datasets (init -&gt; process -&gt; publish). The flow cannot complete in 0.8.0; publish a dataset with ws.zenodo() instead.</p>
 <p><strong>Usage</strong>:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>battinfo<span class="w"> </span>dataset<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span><span class="w"> </span>COMMAND<span class="w"> </span><span class="o">[</span>ARGS<span class="o">]</span>...
 </pre></div>
@@ -2264,7 +2267,7 @@ BATTINFO_ADMIN_TOKEN     registry admin token</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">init</span></code>: Create a new dataset contribution folder…</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">process</span></code>: Validate metadata, infer tests from data…</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">publish</span></code>: Publish the processed contribution folder.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">publish</span></code>: Experimental: publish the processed…</p></li>
 </ul>
 <section id="battinfo-dataset-init">
 <h3><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">dataset</span> <span class="pre">init</span></code><a class="headerlink" href="#battinfo-dataset-init" title="Link to this heading">#</a></h3>
@@ -2319,7 +2322,9 @@ sub-folders are processed automatically.</p>
 </section>
 <section id="battinfo-dataset-publish">
 <h3><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">dataset</span> <span class="pre">publish</span></code><a class="headerlink" href="#battinfo-dataset-publish" title="Link to this heading">#</a></h3>
-<p>Publish the processed contribution folder.</p>
+<p>Experimental: publish the processed contribution folder.</p>
+<p>The init, process and publish flow cannot complete in 0.8.0. Publish a
+dataset from Python with ws.zenodo() instead.</p>
 <p>Options:
 –zenodo      Upload to Zenodo (creates a draft for your review)
 –sandbox     Use the Zenodo sandbox for testing

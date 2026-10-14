@@ -10,7 +10,7 @@
     "**The tutorial version of the [publishing journey](https://battinfo.org/publish):** you start\n",
     "with a raw cycler export and finish with validated, linked records, a citable archive, and a\n",
     "place in the Battery Genome registry. Every code cell here executes in CI, against the sample\n",
-    "Neware CSV that ships with the repository — swap in your own files and the recipe is identical.\n",
+    "Neware CSV that ships inside the battinfo package — swap in your own files and the recipe is identical.\n",
     "\n",
     "The five stages:\n",
     "\n",
@@ -31,15 +31,16 @@
    "id": "e43cee13",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-13T16:13:51.757062Z",
-     "iopub.status.busy": "2026-10-13T16:13:51.756527Z",
-     "iopub.status.idle": "2026-10-13T16:13:52.518254Z",
-     "shell.execute_reply": "2026-10-13T16:13:52.517226Z"
+     "iopub.execute_input": "2026-10-14T00:54:27.459597Z",
+     "iopub.status.busy": "2026-10-14T00:54:27.459597Z",
+     "iopub.status.idle": "2026-10-14T00:54:27.875691Z",
+     "shell.execute_reply": "2026-10-14T00:54:27.874682Z"
     }
    },
    "outputs": [],
    "source": [
     "import shutil\n",
+    "from importlib.resources import files\n",
     "from pathlib import Path\n",
     "\n",
     "# This notebook runs from its own folder (docs/guides); fresh scratch every run.\n",
@@ -49,8 +50,9 @@
     "SCRATCH.mkdir(parents=True)\n",
     "\n",
     "# Your starting point: a folder with raw cycler exports. Here, the sample\n",
-    "# Neware CSV that ships with the repo (one CC charge + discharge cycle).\n",
-    "shutil.copy(Path(\"data/neware-sample.csv\"), SCRATCH / \"neware-sample.csv\")\n",
+    "# Neware CSV that ships inside the battinfo package (one CC charge + discharge cycle).\n",
+    "sample = files(\"battinfo.data\") / \"samples\" / \"neware-sample.csv\"\n",
+    "(SCRATCH / \"neware-sample.csv\").write_bytes(sample.read_bytes())\n",
     "\n",
     "import battinfo\n",
     "\n",
@@ -77,10 +79,10 @@
    "id": "e2c1ddca",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-13T16:13:52.525460Z",
-     "iopub.status.busy": "2026-10-13T16:13:52.525460Z",
-     "iopub.status.idle": "2026-10-13T16:13:59.025939Z",
-     "shell.execute_reply": "2026-10-13T16:13:59.022790Z"
+     "iopub.execute_input": "2026-10-14T00:54:27.878689Z",
+     "iopub.status.busy": "2026-10-14T00:54:27.877689Z",
+     "iopub.status.idle": "2026-10-14T00:54:32.897568Z",
+     "shell.execute_reply": "2026-10-14T00:54:32.895558Z"
     }
    },
    "outputs": [
@@ -123,10 +125,10 @@
    "id": "c7d97399",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-13T16:13:59.030950Z",
-     "iopub.status.busy": "2026-10-13T16:13:59.030950Z",
-     "iopub.status.idle": "2026-10-13T16:13:59.139773Z",
-     "shell.execute_reply": "2026-10-13T16:13:59.138257Z"
+     "iopub.execute_input": "2026-10-14T00:54:32.902246Z",
+     "iopub.status.busy": "2026-10-14T00:54:32.900738Z",
+     "iopub.status.idle": "2026-10-14T00:54:32.986752Z",
+     "shell.execute_reply": "2026-10-14T00:54:32.985714Z"
     }
    },
    "outputs": [
@@ -178,10 +180,10 @@
    "id": "d9a22b72",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-13T16:13:59.145773Z",
-     "iopub.status.busy": "2026-10-13T16:13:59.144774Z",
-     "iopub.status.idle": "2026-10-13T16:13:59.160479Z",
-     "shell.execute_reply": "2026-10-13T16:13:59.158448Z"
+     "iopub.execute_input": "2026-10-14T00:54:32.994514Z",
+     "iopub.status.busy": "2026-10-14T00:54:32.990958Z",
+     "iopub.status.idle": "2026-10-14T00:54:33.010624Z",
+     "shell.execute_reply": "2026-10-14T00:54:33.008616Z"
     }
    },
    "outputs": [
@@ -233,10 +235,10 @@
    "id": "241ee167",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-13T16:13:59.170845Z",
-     "iopub.status.busy": "2026-10-13T16:13:59.169338Z",
-     "iopub.status.idle": "2026-10-13T16:14:00.019183Z",
-     "shell.execute_reply": "2026-10-13T16:14:00.019183Z"
+     "iopub.execute_input": "2026-10-14T00:54:33.014624Z",
+     "iopub.status.busy": "2026-10-14T00:54:33.014624Z",
+     "iopub.status.idle": "2026-10-14T00:54:34.320002Z",
+     "shell.execute_reply": "2026-10-14T00:54:34.318517Z"
     }
    },
    "outputs": [
@@ -293,10 +295,10 @@
    "id": "03b2dfb0",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-13T16:14:00.023543Z",
-     "iopub.status.busy": "2026-10-13T16:14:00.023543Z",
-     "iopub.status.idle": "2026-10-13T16:14:00.032479Z",
-     "shell.execute_reply": "2026-10-13T16:14:00.030992Z"
+     "iopub.execute_input": "2026-10-14T00:54:34.324522Z",
+     "iopub.status.busy": "2026-10-14T00:54:34.324011Z",
+     "iopub.status.idle": "2026-10-14T00:54:34.332639Z",
+     "shell.execute_reply": "2026-10-14T00:54:34.331630Z"
     }
    },
    "outputs": [
@@ -314,7 +316,7 @@
       "...\n",
       "provenance: {\n",
       "  \"source_type\": \"measurement\",\n",
-      "  \"retrieved_at\": 1791908039,\n",
+      "  \"retrieved_at\": 1791939273,\n",
       "  \"battinfo_version\": \"0.8.0\"\n",
       "}\n"
      ]
@@ -373,10 +375,10 @@
    "id": "5e115f9a",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-13T16:14:00.035508Z",
-     "iopub.status.busy": "2026-10-13T16:14:00.035508Z",
-     "iopub.status.idle": "2026-10-13T16:14:00.043287Z",
-     "shell.execute_reply": "2026-10-13T16:14:00.041905Z"
+     "iopub.execute_input": "2026-10-14T00:54:34.341794Z",
+     "iopub.status.busy": "2026-10-14T00:54:34.337773Z",
+     "iopub.status.idle": "2026-10-14T00:54:34.350770Z",
+     "shell.execute_reply": "2026-10-14T00:54:34.349761Z"
     }
    },
    "outputs": [
@@ -414,10 +416,10 @@
    "id": "7f208a76",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-13T16:14:00.047026Z",
-     "iopub.status.busy": "2026-10-13T16:14:00.047026Z",
-     "iopub.status.idle": "2026-10-13T16:14:00.054767Z",
-     "shell.execute_reply": "2026-10-13T16:14:00.053200Z"
+     "iopub.execute_input": "2026-10-14T00:54:34.355020Z",
+     "iopub.status.busy": "2026-10-14T00:54:34.354013Z",
+     "iopub.status.idle": "2026-10-14T00:54:34.362075Z",
+     "shell.execute_reply": "2026-10-14T00:54:34.361068Z"
     }
    },
    "outputs": [

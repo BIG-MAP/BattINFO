@@ -551,7 +551,7 @@
                   
   <section id="Guide-6-—-Publish-your-first-dataset">
 <h1>Guide 6 — Publish your first dataset<a class="headerlink" href="#Guide-6-—-Publish-your-first-dataset" title="Link to this heading">#</a></h1>
-<p><strong>The tutorial version of the</strong> <a class="reference external" href="https://battinfo.org/publish">publishing journey</a><strong>:</strong> you start with a raw cycler export and finish with validated, linked records, a citable archive, and a place in the Battery Genome registry. Every code cell here executes in CI, against the sample Neware CSV that ships with the repository — swap in your own files and the recipe is identical.</p>
+<p><strong>The tutorial version of the</strong> <a class="reference external" href="https://battinfo.org/publish">publishing journey</a><strong>:</strong> you start with a raw cycler export and finish with validated, linked records, a citable archive, and a place in the Battery Genome registry. Every code cell here executes in CI, against the sample Neware CSV that ships inside the battinfo package — swap in your own files and the recipe is identical.</p>
 <p>The five stages:</p>
 <ol class="arabic simple">
 <li><p><strong>Convert</strong> — instrument files → tidy BDF tables</p></li>
@@ -567,6 +567,7 @@
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
 <span class="c1"># This notebook runs from its own folder (docs/guides); fresh scratch every run.</span>
@@ -576,8 +577,9 @@
 <span class="n">SCRATCH</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="c1"># Your starting point: a folder with raw cycler exports. Here, the sample</span>
-<span class="c1"># Neware CSV that ships with the repo (one CC charge + discharge cycle).</span>
-<span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;data/neware-sample.csv&quot;</span><span class="p">),</span> <span class="n">SCRATCH</span> <span class="o">/</span> <span class="s2">&quot;neware-sample.csv&quot;</span><span class="p">)</span>
+<span class="c1"># Neware CSV that ships inside the battinfo package (one CC charge + discharge cycle).</span>
+<span class="n">sample</span> <span class="o">=</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;battinfo.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;samples&quot;</span> <span class="o">/</span> <span class="s2">&quot;neware-sample.csv&quot;</span>
+<span class="p">(</span><span class="n">SCRATCH</span> <span class="o">/</span> <span class="s2">&quot;neware-sample.csv&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_bytes</span><span class="p">(</span><span class="n">sample</span><span class="o">.</span><span class="n">read_bytes</span><span class="p">())</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">battinfo</span>
 
@@ -753,7 +755,7 @@ test/test-9f4c-mxny-yhym-2zh4.json
 ...
 provenance: {
   &#34;source_type&#34;: &#34;measurement&#34;,
-  &#34;retrieved_at&#34;: 1791908039,
+  &#34;retrieved_at&#34;: 1791939273,
   &#34;battinfo_version&#34;: &#34;0.8.0&#34;
 }
 </pre></div></div>

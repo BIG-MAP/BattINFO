@@ -558,6 +558,11 @@ pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot
 <p class="admonition-title">Note</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">processing</span></code> extra requires <code class="docutils literal notranslate"><span class="pre">batterydf[nda,excel,mat]&gt;=0.2.0rc2,&lt;0.3</span></code>, so pip installs the batterydf 0.2.0 release candidate until 0.2.0 itself is published.</p>
 </div>
+<p>A hosted notebook such as Colab starts without BattINFO. Install it in a cell before you import it; the second line adds the <code class="docutils literal notranslate"><span class="pre">processing</span></code> extra, which tutorial 6 needs:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>%pip install &quot;battinfo @ git+https://github.com/BIG-MAP/BattINFO.git&quot;
+%pip install &quot;battinfo[processing] @ git+https://github.com/BIG-MAP/BattINFO.git&quot;
+</pre></div>
+</div>
 <p>To work on BattINFO itself, clone the repository and follow the <a class="reference external" href="https://github.com/BIG-MAP/BattINFO/blob/main/CONTRIBUTING.md">contributing guide</a>.</p>
 </section>
 <section id="if-you-have-data-the-workspace">

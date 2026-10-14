@@ -594,11 +594,12 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load the canonical A123 cell-spec record that ships with the repo</span>
-<span class="n">a123</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span>
-    <span class="c1"># Repo files sit two levels up from this notebook.</span>
-    <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;../../examples/cell-spec/A123__ANR26650M1-B.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
-<span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span>
+
+<span class="c1"># The canonical A123 cell-spec record ships inside the battinfo package, so</span>
+<span class="c1"># this cell runs from a pip install as well as from a checkout.</span>
+<span class="n">a123_file</span> <span class="o">=</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;battinfo.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;examples&quot;</span> <span class="o">/</span> <span class="s2">&quot;cell-spec&quot;</span> <span class="o">/</span> <span class="s2">&quot;A123__ANR26650M1-B.json&quot;</span>
+<span class="n">a123</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">a123_file</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
 
 <span class="c1"># Top-level structure</span>
 <span class="nb">list</span><span class="p">(</span><span class="n">a123</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
@@ -977,7 +978,7 @@ JSON-LD exported to: &lt;repo&gt;\docs\guides\_scratch\guide-01\resolver\spec\e4
   &#34;dcterms:source&#34;: {
     &#34;@type&#34;: &#34;prov:Entity&#34;,
     &#34;dcterms:type&#34;: &#34;datasheet&#34;,
-    &#34;prov:generatedAtTime&#34;: &#34;2026-10-12T20:08:15+00:00&#34;
+    &#34;prov:generatedAtTime&#34;: &#34;2026-10-14T00:54:18+00:00&#34;
   }
 }
 </pre></div></div>

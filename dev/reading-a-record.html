@@ -614,8 +614,7 @@ from one source so they cannot drift.</p>
 </section>
 <section id="quantities">
 <h2>Quantities<a class="headerlink" href="#quantities" title="Link to this heading">#</a></h2>
-<p>Every quantity (capacity, voltage, …) uses <strong>one</strong> EMMO encoding everywhere — published
-record and SHACL validation alike:</p>
+<p>Every quantity (capacity, voltage, …) uses <strong>one</strong> EMMO encoding in this graph, in <code class="docutils literal notranslate"><span class="pre">battinfo.record_to_jsonld</span></code> output and in the SHACL shapes that check them:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;hasProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NominalVoltage&quot;</span><span class="p">,</span>
 <span class="w">                  </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RealData&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">3.0</span><span class="w"> </span><span class="p">},</span>
 <span class="w">                  </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;emmo:Volt&quot;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}]</span>
@@ -643,7 +642,7 @@ conditions as <code class="docutils literal notranslate"><span class="pre">schem
 <p>Every <code class="docutils literal notranslate"><span class="pre">&#64;id</span></code> either resolves to a node in the document or is a typed stub pointing at the
 authoritative resource (e.g. a remote <code class="docutils literal notranslate"><span class="pre">BatteryCellSpecification</span></code> with <code class="docutils literal notranslate"><span class="pre">rdfs:isDefinedBy</span></code>).
 Registry IRI resolution (<code class="docutils literal notranslate"><span class="pre">w3id.org/battinfo/spec/…</span></code>) and the published context URL are
-handled by the BattINFO registry deployment.</p>
+handled by the BattINFO registry deployment. What a record’s IRI serves today is the record body expanded with the records context, not the graph this page describes; see the <a class="reference internal" href="scope.html#known-limitations-in-0-8-0"><span class="std std-ref">known limitations</span></a>.</p>
 </section>
 <section id="round-trip-fidelity-ws-import">
 <h2>Round-trip fidelity (<code class="docutils literal notranslate"><span class="pre">ws.import_</span></code>)<a class="headerlink" href="#round-trip-fidelity-ws-import" title="Link to this heading">#</a></h2>

@@ -642,9 +642,9 @@ equipment; materials and component specs are authored through <code class="docut
 <td><p><strong>Authoring workspace</strong></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">ws</span> <span class="pre">=</span> <span class="pre">battinfo.workspace(&quot;.&quot;)</span></code> — this page</p></td>
 </tr>
-<tr class="row-odd"><td><p>Create a single record in code and save/publish it</p></td>
+<tr class="row-odd"><td><p>Create a single record in code and save or publish it</p></td>
 <td><p><strong>Models + functions</strong></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">CellSpec(...)</span></code> + <code class="docutils literal notranslate"><span class="pre">battinfo.publish(...)</span></code> — see the <a class="reference internal" href="pages/api-reference.html"><span class="std std-doc">Python API</span></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">CellSpec(...)</span></code> + <code class="docutils literal notranslate"><span class="pre">battinfo.publish(...)</span></code> for a cell spec; the other models with their <code class="docutils literal notranslate"><span class="pre">save_*</span></code> function. See the <a class="reference internal" href="pages/api-reference.html"><span class="std std-doc">Python API</span></a></p></td>
 </tr>
 <tr class="row-even"><td><p>Register materials and component specs (electrodes, electrolytes, …)</p></td>
 <td><p><strong><code class="docutils literal notranslate"><span class="pre">battinfo.api</span></code> functions</strong></p></td>
@@ -728,12 +728,11 @@ holds linked <code class="docutils literal notranslate"><span class="pre">CellSp
 finalizes ids and provenance, and writes the canonical records. The authoring
 workspace delegates to it; script against it directly when you are building
 pipelines rather than working interactively.</p></li>
-<li><p><strong>The record models</strong> (<code class="docutils literal notranslate"><span class="pre">CellSpec</span></code>, <code class="docutils literal notranslate"><span class="pre">Cell</span></code>, <code class="docutils literal notranslate"><span class="pre">Test</span></code>, <code class="docutils literal notranslate"><span class="pre">TestSpec</span></code>,
-<code class="docutils literal notranslate"><span class="pre">Dataset</span></code>) are both the canonical source of truth and the authoring input — every
-field carries a description (<code class="docutils literal notranslate"><span class="pre">help(battinfo.CellSpec)</span></code>), and misspelled
-arguments get a did-you-mean.</p></li>
-<li><p><strong><code class="docutils literal notranslate"><span class="pre">battinfo.publish(...)</span></code></strong> takes a single model (or a linked graph of them) and
-writes/publishes the canonical records without a workspace.</p></li>
+<li><p><strong>The record models</strong> (<code class="docutils literal notranslate"><span class="pre">CellSpec</span></code>, <code class="docutils literal notranslate"><span class="pre">Cell</span></code>, <code class="docutils literal notranslate"><span class="pre">Test</span></code>, <code class="docutils literal notranslate"><span class="pre">TestSpec</span></code>, <code class="docutils literal notranslate"><span class="pre">Dataset</span></code>) are the authoring input, and every save validates their records against the JSON Schema, which is the save-time contract. Every field carries a description (<code class="docutils literal notranslate"><span class="pre">help(battinfo.CellSpec)</span></code>), and misspelled arguments get a did-you-mean.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">battinfo.publish(...)</span></code></strong> takes one <code class="docutils literal notranslate"><span class="pre">CellSpec</span></code> and saves its canonical
+record without a workspace, or saves and submits it to a registry. A <code class="docutils literal notranslate"><span class="pre">Cell</span></code>,
+<code class="docutils literal notranslate"><span class="pre">TestSpec</span></code>, <code class="docutils literal notranslate"><span class="pre">Test</span></code> or <code class="docutils literal notranslate"><span class="pre">Dataset</span></code> is saved with <code class="docutils literal notranslate"><span class="pre">save_cell_instance</span></code>,
+<code class="docutils literal notranslate"><span class="pre">save_test_spec</span></code>, <code class="docutils literal notranslate"><span class="pre">save_test</span></code> or <code class="docutils literal notranslate"><span class="pre">save_dataset</span></code> instead.</p></li>
 </ul>
 </section>
 </section>

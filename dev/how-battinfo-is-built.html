@@ -583,17 +583,16 @@ Tuesday). The record types chain into a provenance line:</p>
 (<code class="docutils literal notranslate"><span class="pre">src/battinfo/entities.py</span></code>): its JSON discriminator key, its schema file, its
 on-disk folder, its IRI namespace. Adding a record type means adding one entry
 there — every dispatch table in the package derives from it.</p>
-<p><strong>2. The pydantic models are the single source of truth.</strong> There is no
-separate “input DTO” layer: <code class="docutils literal notranslate"><span class="pre">CellSpec</span></code>, <code class="docutils literal notranslate"><span class="pre">Cell</span></code>, <code class="docutils literal notranslate"><span class="pre">Test</span></code>,
-<code class="docutils literal notranslate"><span class="pre">TestSpec</span></code>, and <code class="docutils literal notranslate"><span class="pre">Dataset</span></code> (in <code class="docutils literal notranslate"><span class="pre">src/battinfo/bundle.py</span></code>) are simultaneously</p>
+<p><strong>2. The JSON Schema is the contract, and the pydantic models are how you write to it.</strong> There is no separate “input DTO” layer: <code class="docutils literal notranslate"><span class="pre">CellSpec</span></code>, <code class="docutils literal notranslate"><span class="pre">Cell</span></code>, <code class="docutils literal notranslate"><span class="pre">Test</span></code>, <code class="docutils literal notranslate"><span class="pre">TestSpec</span></code>, and <code class="docutils literal notranslate"><span class="pre">Dataset</span></code>, written by hand in <code class="docutils literal notranslate"><span class="pre">src/battinfo/bundle.py</span></code>, are at once</p>
 <ul class="simple">
 <li><p>the <strong>authoring input</strong> — construct them with flat datasheet-style kwargs
 (<code class="docutils literal notranslate"><span class="pre">manufacturer=</span></code>, <code class="docutils literal notranslate"><span class="pre">nominal_capacity={&quot;value&quot;:</span> <span class="pre">2.5,</span> <span class="pre">&quot;unit&quot;:</span> <span class="pre">&quot;Ah&quot;}</span></code>),</p></li>
 <li><p>the <strong>validator</strong> — <code class="docutils literal notranslate"><span class="pre">extra=&quot;forbid&quot;</span></code> plus did-you-mean errors, so a typo’d
 field teaches instead of disappearing,</p></li>
 <li><p>the <strong>serializer</strong> — <code class="docutils literal notranslate"><span class="pre">to_record()</span></code> / <code class="docutils literal notranslate"><span class="pre">from_record()</span></code> convert to and from the
-canonical JSON shape, losslessly.</p></li>
+canonical JSON shape.</p></li>
 </ul>
+<p>Every save then validates the record against the JSON Schema in <code class="docutils literal notranslate"><span class="pre">src/battinfo/data/schemas/</span></code>, which is the save-time contract, and <code class="docutils literal notranslate"><span class="pre">tests/test_schema_model_parity.py</span></code> checks that every schema property can be reached from the models, apart from a listed set of known gaps.</p>
 <p>If you know pydantic, you already know the core of BattINFO.</p>
 </section>
 <section id="the-layers-top-to-bottom">
@@ -613,7 +612,7 @@ canonical JSON shape, losslessly.</p></li>
 <td><p><code class="docutils literal notranslate"><span class="pre">ws.py</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><strong>Scripting records</strong> directly — building a cell spec in code, batch-generating records</p></td>
-<td><p>The record classes (<code class="docutils literal notranslate"><span class="pre">CellSpec</span></code>, <code class="docutils literal notranslate"><span class="pre">Test</span></code>, …) + <code class="docutils literal notranslate"><span class="pre">battinfo.publish(...)</span></code> or the <code class="docutils literal notranslate"><span class="pre">save_*</span></code> functions</p></td>
+<td><p>The record classes with their <code class="docutils literal notranslate"><span class="pre">save_*</span></code> functions, or <code class="docutils literal notranslate"><span class="pre">battinfo.publish(...)</span></code> for a <code class="docutils literal notranslate"><span class="pre">CellSpec</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">bundle.py</span></code>, <code class="docutils literal notranslate"><span class="pre">api.py</span></code></p></td>
 </tr>
 </tbody>
@@ -653,14 +652,12 @@ EMMO-aligned JSON-LD. It is <strong>table-driven</strong>: curated mapping files
 <code class="docutils literal notranslate"><span class="pre">assets/mappings/domain-battery/</span></code> say that the key <code class="docutils literal notranslate"><span class="pre">nominal_capacity</span></code> <em>is</em>
 <code class="docutils literal notranslate"><span class="pre">emmo:NominalCapacity</span></code> and the unit <code class="docutils literal notranslate"><span class="pre">&quot;Ah&quot;</span></code> <em>is</em> <code class="docutils literal notranslate"><span class="pre">emmo:AmpereHour</span></code>. The
 transform stacks types (a cylindrical LFP cell is simultaneously
-<code class="docutils literal notranslate"><span class="pre">BatteryCell</span></code>, <code class="docutils literal notranslate"><span class="pre">CylindricalBattery</span></code>, <code class="docutils literal notranslate"><span class="pre">LithiumIronPhosphateBattery</span></code>) and emits
+<code class="docutils literal notranslate"><span class="pre">BatteryCell</span></code>, <code class="docutils literal notranslate"><span class="pre">CylindricalBattery</span></code>, <code class="docutils literal notranslate"><span class="pre">LithiumIonIronPhosphateBattery</span></code>) and emits
 the canonical EMMO quantity pattern. No inference, no LLMs, no network —
 deterministic output from those tables, which is why the website can show
 <a class="reference external" href="https://battinfo.org/examples">real before/after pairs</a> generated at build
 time.</p>
-<p>Two files carry the EMMO annotations in Python: <code class="docutils literal notranslate"><span class="pre">bundle_generated.py</span></code> is
-generated from LinkML schemas and holds IRI metadata; application code never
-imports it directly — <code class="docutils literal notranslate"><span class="pre">bundle_adapter.py</span></code> is the one crossing point.</p>
+<p>Two files carry the EMMO annotations in Python. <code class="docutils literal notranslate"><span class="pre">bundle_generated.py</span></code> holds the IRI metadata. It was generated from the LinkML schema once and has been edited by hand since, so do not regenerate it; regenerating or retiring it is planned for 0.9. Most code reaches it through <code class="docutils literal notranslate"><span class="pre">bundle_adapter.py</span></code>.</p>
 </section>
 <section id="getting-data-in-and-out-interop-and-bdf">
 <h3>Getting data in and out — <code class="docutils literal notranslate"><span class="pre">interop/</span></code> and BDF<a class="headerlink" href="#getting-data-in-and-out-interop-and-bdf" title="Link to this heading">#</a></h3>
@@ -701,7 +698,7 @@ workspace. Nothing exists “only in the CLI”, which is why the
 ├── cli.py               typer CLI over the same api functions
 ├── data/schemas/        the canonical JSON Schemas (the contract)
 ├── data/examples/       packaged canonical example records
-└── bundle_generated.py + bundle_adapter.py   EMMO-annotated schema layer (generated)
+└── bundle_generated.py + bundle_adapter.py   EMMO-annotated schema layer (generated once, edited by hand since)
 </pre></div>
 </div>
 <p>Supporting cast: <code class="docutils literal notranslate"><span class="pre">_jsonio.py</span></code> (atomic JSON file I/O), <code class="docutils literal notranslate"><span class="pre">_fs_guard.py</span></code> (the
