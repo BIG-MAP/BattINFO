@@ -84,8 +84,12 @@ EMITTER_CLASS_TERMS = {
 # No released package has shipped v1, so it is corrected in place rather than
 # bumped to v2. After 0.8.0 this table must not grow: a change of meaning then
 # needs a v2 context. tests/test_context_v1_agreement.py fails if v1 and the
-# curated maps disagree again. The snapshot is taken after the last correction,
-# and from then on build() refuses any entry here that changes a snapshot term.
+# curated maps disagree again. The table is closed: build() no longer applies it,
+# v1 already carries every entry (tests/test_context_v1_freeze.py checks that),
+# and it stays as the record of what was corrected in place, which the erratum to
+# section 11.1 of IDENTIFIER_POLICY.md lists. A correction ruled before the v0.8.0
+# tag is an edit of v1 plus an entry here, taken into the snapshot with
+# --write-snapshot (RELEASING.md, "The frozen v1 records context").
 PRE_RELEASE_CORRECTIONS = {
     # private battinfo: mints -> the classes added in domain-electrochemistry 0.37.1
     "power_capability": "electrochemistry:electrochemistry_4e6c4e9d_64cb_4c24_a0f3_5b4146ebbeb0",
@@ -130,7 +134,10 @@ def frozen_term_changes(context: dict, frozen: dict) -> list[str]:
     """One line for each *frozen* term that *context* removes or defines differently.
 
     The whole definition counts, so a term keeps its expanded IRI, ``@type`` and
-    ``@container``. Terms in *context* that *frozen* lacks are additions and pass.
+    ``@container``. Terms in *context* that *frozen* lacks are additions and pass,
+    except a JSON-LD keyword such as ``@vocab``, ``@base`` or ``@language``: adding
+    one changes how the terms and keys of every document expand, so it counts as a
+    change.
     """
     changes = []
     for term, definition in frozen.items():
@@ -138,6 +145,12 @@ def frozen_term_changes(context: dict, frozen: dict) -> list[str]:
             changes.append(f"{term!r} removed (was {json.dumps(definition)})")
         elif context[term] != definition:
             changes.append(f"{term!r} changed from {json.dumps(definition)} to {json.dumps(context[term])}")
+    if frozen:
+        for term, definition in context.items():
+            if term.startswith("@") and term not in frozen:
+                changes.append(
+                    f"{term!r} added as {json.dumps(definition)}: a JSON-LD keyword changes how every document expands"
+                )
     return changes
 
 
@@ -150,6 +163,12 @@ def _refusal(changes: list[str]) -> str:
         "keep expanding to the same graph. Give a new meaning a new term (or a v2 context) "
         "and leave the old term as it is."
     )
+    if not release_tagged():
+        lines.append(
+            f"Before the v{SNAPSHOT_RELEASE} tag, a correction the release has ruled on is taken into the "
+            "snapshot with `python scripts/gen_context.py --write-snapshot` (RELEASING.md, "
+            '"The frozen v1 records context").'
+        )
     return "\n".join(lines)
 
 
@@ -160,14 +179,14 @@ def build(*, enforce_snapshot: bool = True) -> dict:
     the terms already published, so regenerating can add a term but can never
     rewrite one: a document minted against v1 keeps expanding to the same graph
     forever. Changing what an existing term means requires a v2 file, not an edit
-    here. The merge alone cannot hold that line: it starts from the committed v1,
-    so a hand edit survives it, and ``PRE_RELEASE_CORRECTIONS`` overwrites terms
-    by design. So once the snapshot exists, a build that changes or drops one of
-    its terms raises :class:`FrozenTermError`. Only ``--write-snapshot`` builds
-    without that check.
+    here. The merge alone cannot hold that line, because it starts from the
+    committed v1 and so keeps a hand edit. So once the snapshot exists, a build
+    that changes or drops one of its terms, or adds a JSON-LD keyword, raises
+    :class:`FrozenTermError`. Only ``--write-snapshot`` builds without that check.
+    ``PRE_RELEASE_CORRECTIONS`` is not applied: the table is closed, and v1
+    already carries each of its entries.
     """
     context: dict = _published()
-    context.update(PRE_RELEASE_CORRECTIONS)
     for source in (
         _CONTEXT_INLINE,
         label_to_compact(),

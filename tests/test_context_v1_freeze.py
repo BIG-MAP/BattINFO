@@ -7,18 +7,31 @@ those terms keeps its definition (and with it its expanded IRI, ``@type`` and
 ``@container``) for good. Terms added after the snapshot are allowed.
 
 ``scripts/gen_context.py`` enforces the same rule when it writes v1: it refuses
-an output that changes or drops a snapshot term, whether the change comes from a
-hand edit of v1, from ``PRE_RELEASE_CORRECTIONS`` or from a source table. Before
-the tag, ``gen_context.py --write-snapshot`` retakes the snapshot after the last
-pre-release correction; once the tag exists it refuses.
+an output that changes or drops a snapshot term, or adds a JSON-LD keyword,
+whether the change comes from a hand edit of v1 or from a source table.
+``PRE_RELEASE_CORRECTIONS`` is closed: the build no longer applies it, and v1
+already carries every entry. Before the tag, ``gen_context.py --write-snapshot``
+retakes the snapshot after the last pre-release correction; once the tag exists it
+refuses.
+
+Two checks hold the line where the snapshot file alone cannot. In a checkout that
+has release tags from v0.8.0 on, v1 keeps every term each tag's v1 defines, and the
+snapshot equals the tag's copy, so a change to v1 and the snapshot together fails,
+and so does a change to a term added after 0.8.0. In CI for a 0.8.0 release build
+(the ``release/0.8.0`` branch or a ``v0.8.0`` tag, release candidates included) the
+snapshot must hold every v1 term, so that no term ships in 0.8.0 unfrozen.
 """
 
 from __future__ import annotations
 
 import importlib.util
 import json
+import os
+import re
 import shutil
+import subprocess
 import sys
+from collections.abc import Callable, Iterable, Mapping
 from pathlib import Path
 
 import pytest
@@ -26,6 +39,9 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 V1 = ROOT / "src" / "battinfo" / "data" / "context" / "records.context.v1.json"
 SNAPSHOT = ROOT / "tests" / "fixtures" / "context" / "records-v1-0.8.0.json"
+V1_PATH = "src/battinfo/data/context/records.context.v1.json"
+SNAPSHOT_PATH = "tests/fixtures/context/records-v1-0.8.0.json"
+_FINAL_TAG = re.compile(r"^v(\d+)\.(\d+)\.(\d+)$")
 
 
 def _load_gen():
@@ -122,6 +138,17 @@ def test_frozen_term_changes_flags_changed_and_dropped_terms_only() -> None:
     assert len(dropped) == 1 and dropped[0].startswith("'a'") and "removed" in dropped[0]
 
 
+@pytest.mark.parametrize("keyword", ["@vocab", "@base", "@language", "@propagate", "@protected", "@import"])
+def test_frozen_term_changes_flags_an_added_keyword(keyword) -> None:
+    # A keyword is no term of its own: it changes how every key of every document expands.
+    gen = _load_gen()
+    frozen = {"@version": 1.1, "a": "emmo:A"}
+
+    changes = gen.frozen_term_changes({**frozen, keyword: "en"}, frozen)
+    assert len(changes) == 1 and changes[0].startswith(repr(keyword)) and "added" in changes[0]
+    assert gen.frozen_term_changes({**frozen, keyword: "en"}, {}) == []  # no snapshot, nothing to guard
+
+
 # --- the generator guard -----------------------------------------------------------
 
 
@@ -161,12 +188,57 @@ def test_check_and_write_refuse_a_changed_frozen_term(gen, capsys) -> None:
     assert gen.OUT.read_text(encoding="utf-8") == edited
 
 
-def test_build_refuses_a_correction_of_a_frozen_term(gen, monkeypatch) -> None:
+def test_build_no_longer_applies_pre_release_corrections(gen, monkeypatch) -> None:
     term = _plain_frozen_term(gen)
-    monkeypatch.setattr(gen, "PRE_RELEASE_CORRECTIONS", {**gen.PRE_RELEASE_CORRECTIONS, term: "emmo:Corrected"})
+    frozen = _snapshot()["terms"][term]
+    monkeypatch.setattr(
+        gen,
+        "PRE_RELEASE_CORRECTIONS",
+        {**gen.PRE_RELEASE_CORRECTIONS, term: "emmo:Corrected", "added_by_a_correction": "emmo:Added"},
+    )
 
-    with pytest.raises(gen.FrozenTermError, match="append-only"):
+    context = gen.build()["@context"]
+    assert context[term] == frozen
+    assert "added_by_a_correction" not in context
+
+
+def test_every_pre_release_correction_is_already_in_v1() -> None:
+    """The closed table is a record: v1 carries each entry, so dropping it from the build changed nothing."""
+    terms = _v1_terms()
+    missing = {
+        term: definition
+        for term, definition in _load_gen().PRE_RELEASE_CORRECTIONS.items()
+        if terms.get(term) != definition
+    }
+    assert not missing, (
+        "PRE_RELEASE_CORRECTIONS holds entries that records.context.v1.json does not carry. The build no longer "
+        f"applies the table: edit v1 to match, then run python scripts/gen_context.py --write-snapshot. {missing}"
+    )
+
+
+def test_build_refuses_an_added_json_ld_keyword(gen, monkeypatch) -> None:
+    monkeypatch.setattr(gen, "EMITTER_CLASS_TERMS", {**gen.EMITTER_CLASS_TERMS, "@vocab": "https://w3id.org/battinfo/"})
+
+    with pytest.raises(gen.FrozenTermError) as caught:
         gen.build()
+    assert "'@vocab' added" in str(caught.value)
+
+
+def test_refusal_names_the_retake_only_before_the_tag(gen, monkeypatch) -> None:
+    term = _plain_frozen_term(gen)
+    doc = json.loads(gen.OUT.read_text(encoding="utf-8"))
+    doc["@context"][term] = "emmo:SomethingElse"
+    gen.OUT.write_text(json.dumps(doc, indent=2) + "\n", encoding="utf-8")
+
+    with pytest.raises(gen.FrozenTermError) as before_tag:
+        gen.build()
+    assert "--write-snapshot" in str(before_tag.value)
+
+    monkeypatch.setattr(gen, "release_tagged", lambda: True)
+    with pytest.raises(gen.FrozenTermError) as after_tag:
+        gen.build()
+    assert "--write-snapshot" not in str(after_tag.value)
+    assert "new term" in str(after_tag.value)
 
 
 def test_build_refuses_to_drop_a_frozen_term(gen) -> None:
@@ -189,10 +261,16 @@ def test_build_takes_new_terms(gen, monkeypatch) -> None:
     assert gen.main(["--check"]) == 0
 
 
-def test_build_without_a_snapshot_has_nothing_to_guard(gen, monkeypatch) -> None:
+def _hand_edit(gen, term: str, definition: str) -> None:
+    doc = json.loads(gen.OUT.read_text(encoding="utf-8"))
+    doc["@context"][term] = definition
+    gen.OUT.write_text(gen.render(doc), encoding="utf-8")
+
+
+def test_build_without_a_snapshot_has_nothing_to_guard(gen) -> None:
     gen.SNAPSHOT.unlink()
     term = _plain_frozen_term(gen)
-    monkeypatch.setattr(gen, "PRE_RELEASE_CORRECTIONS", {**gen.PRE_RELEASE_CORRECTIONS, term: "emmo:Corrected"})
+    _hand_edit(gen, term, "emmo:Corrected")
 
     assert gen.build()["@context"][term] == "emmo:Corrected"
 
@@ -200,10 +278,12 @@ def test_build_without_a_snapshot_has_nothing_to_guard(gen, monkeypatch) -> None
 # --- retaking the snapshot ---------------------------------------------------------
 
 
-def test_write_snapshot_takes_a_pre_release_correction_before_the_tag(gen, monkeypatch, capsys) -> None:
+def test_write_snapshot_takes_a_pre_release_correction_before_the_tag(gen, capsys) -> None:
+    # A ruled correction before the tag is an edit of v1 (plus a PRE_RELEASE_CORRECTIONS
+    # entry for the record), which the retake then freezes.
     term = _plain_frozen_term(gen)
     added = _added_since_snapshot(gen)
-    monkeypatch.setattr(gen, "PRE_RELEASE_CORRECTIONS", {**gen.PRE_RELEASE_CORRECTIONS, term: "emmo:Corrected"})
+    _hand_edit(gen, term, "emmo:Corrected")
     assert gen.main(["--check"]) == 1  # the snapshot still holds the old definition
 
     capsys.readouterr()
@@ -221,7 +301,7 @@ def test_write_snapshot_takes_a_pre_release_correction_before_the_tag(gen, monke
 
 def test_write_snapshot_refuses_once_the_release_is_tagged(gen, monkeypatch, capsys) -> None:
     term = _plain_frozen_term(gen)
-    monkeypatch.setattr(gen, "PRE_RELEASE_CORRECTIONS", {**gen.PRE_RELEASE_CORRECTIONS, term: "emmo:Corrected"})
+    _hand_edit(gen, term, "emmo:Corrected")
     monkeypatch.setattr(gen, "release_tagged", lambda: True)
     before = (gen.OUT.read_text(encoding="utf-8"), gen.SNAPSHOT.read_text(encoding="utf-8"))
 
@@ -239,3 +319,142 @@ def test_check_counts_terms_added_since_the_snapshot(gen, monkeypatch, capsys) -
 
     assert gen.main(["--check"]) == 0
     assert f"{added + 1} added since the 0.8.0 snapshot" in capsys.readouterr().out
+
+
+# --- against the release tags --------------------------------------------------------
+
+
+def _final_release_tags(names: Iterable[str]) -> list[str]:
+    """The final release tags from v0.8.0 on among *names*, oldest first."""
+    versions = {}
+    for name in names:
+        match = _FINAL_TAG.match(name)
+        if match and tuple(int(part) for part in match.groups()) >= (0, 8, 0):
+            versions[name] = tuple(int(part) for part in match.groups())
+    return sorted(versions, key=versions.__getitem__)
+
+
+def _local_tags() -> list[str]:
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(ROOT), "tag", "--list", "v*"], capture_output=True, text=True, check=False
+        )
+    except OSError:
+        return []
+    return result.stdout.split() if result.returncode == 0 else []
+
+
+def _file_at(tag: str, path: str) -> str | None:
+    """*path* as *tag* holds it, or ``None`` when the tag has no such file."""
+    result = subprocess.run(["git", "-C", str(ROOT), "show", f"{tag}:{path}"], capture_output=True, check=False)
+    return result.stdout.decode("utf-8") if result.returncode == 0 else None
+
+
+def tagged_release_problems(tags: Iterable[str], read: Callable[[str, str], str | None]) -> list[str]:
+    """What the bundled v1 and snapshot change against each release tag's copies."""
+    gen = _load_gen()
+    current = _v1_terms()
+    snapshot = _snapshot()
+    problems = []
+    for tag in tags:
+        tagged_v1 = read(tag, V1_PATH)
+        if tagged_v1 is not None:
+            for change in gen.frozen_term_changes(current, json.loads(tagged_v1)["@context"]):
+                problems.append(f"{tag}: {change}")
+        tagged_snapshot = read(tag, SNAPSHOT_PATH)
+        if tagged_snapshot is not None and json.loads(tagged_snapshot) != snapshot:
+            problems.append(f"{tag}: {SNAPSHOT_PATH} differs from the copy the tag holds")
+    return problems
+
+
+def test_final_release_tags_start_at_0_8_0() -> None:
+    names = ["v0.0.1", "v0.6.0", "v0.8.0rc1", "v0.8.0", "v0.10.0", "v0.8.2", "v1.0.0-beta", "release"]
+    assert _final_release_tags(names) == ["v0.8.0", "v0.8.2", "v0.10.0"]
+
+
+def test_v1_keeps_every_term_of_each_tagged_release() -> None:
+    """Covers what the snapshot file cannot: a pull request that changes v1 and the snapshot together,
+    and a change to a term added after 0.8.0. Runs where the checkout has the release tags."""
+    tags = _final_release_tags(_local_tags())
+    if not tags:
+        pytest.skip("this checkout has no release tag from v0.8.0 on")
+    problems = tagged_release_problems(tags, _file_at)
+    assert not problems, (
+        "v1 is append-only: every term a release shipped keeps its definition, and the 0.8.0 snapshot stays "
+        "as tagged. " + "; ".join(problems)
+    )
+
+
+def test_tagged_release_check_flags_changes_to_v1_and_the_snapshot() -> None:
+    v1_text = V1.read_text(encoding="utf-8")
+    snapshot_text = SNAPSHOT.read_text(encoding="utf-8")
+    term = _plain_frozen_term(_load_gen())
+
+    def reader(v1: str, snapshot: str | None) -> Callable[[str, str], str | None]:
+        return lambda tag, path: {V1_PATH: v1, SNAPSHOT_PATH: snapshot}[path]
+
+    assert tagged_release_problems(["v0.8.0"], reader(v1_text, snapshot_text)) == []
+    assert tagged_release_problems(["v0.8.1"], reader(v1_text, None)) == []
+
+    # The tag shipped the term with another definition, so the bundled v1 changed it since.
+    tagged = json.loads(v1_text)
+    tagged["@context"][term] = "emmo:AsTagged"
+    changed = tagged_release_problems(["v0.8.1"], reader(json.dumps(tagged), None))
+    assert len(changed) == 1 and changed[0].startswith(f"v0.8.1: {term!r} changed")
+
+    # The tag shipped a term the bundled v1 has dropped since.
+    tagged = json.loads(v1_text)
+    tagged["@context"]["shipped_in_a_later_release"] = "emmo:Later"
+    dropped = tagged_release_problems(["v0.8.2"], reader(json.dumps(tagged), None))
+    assert len(dropped) == 1 and "'shipped_in_a_later_release' removed" in dropped[0]
+
+    # The snapshot was edited after the tag.
+    edited = json.loads(snapshot_text)
+    edited["terms"][term] = "emmo:Loosened"
+    assert tagged_release_problems(["v0.8.0"], reader(v1_text, json.dumps(edited))) == [
+        f"v0.8.0: {SNAPSHOT_PATH} differs from the copy the tag holds"
+    ]
+
+
+# --- the release build ---------------------------------------------------------------
+
+
+def is_release_build(env: Mapping[str, str], release: str = "0.8.0") -> bool:
+    """Whether a GitHub Actions run builds *release*: its tags (release candidates included) or its branch."""
+    version = re.escape(release) + r"(?![0-9])"
+    ref = env.get("GITHUB_REF", "")
+    head = env.get("GITHUB_HEAD_REF", "")
+    return bool(
+        re.match(rf"refs/tags/v{version}", ref)
+        or re.match(rf"refs/heads/release/{version}", ref)
+        or re.match(rf"release/{version}", head)
+    )
+
+
+@pytest.mark.parametrize(
+    ("env", "expected"),
+    [
+        ({"GITHUB_REF": "refs/tags/v0.8.0"}, True),
+        ({"GITHUB_REF": "refs/tags/v0.8.0rc2"}, True),
+        ({"GITHUB_REF": "refs/heads/release/0.8.0"}, True),
+        ({"GITHUB_REF": "refs/pull/470/merge", "GITHUB_HEAD_REF": "release/0.8.0"}, True),
+        ({"GITHUB_REF": "refs/heads/main"}, False),
+        ({"GITHUB_REF": "refs/tags/v0.8.1"}, False),
+        ({"GITHUB_REF": "refs/tags/v0.8.01"}, False),
+        ({"GITHUB_REF": "refs/heads/release/0.8.x"}, False),
+        ({}, False),
+    ],
+)
+def test_is_release_build(env, expected) -> None:
+    assert is_release_build(env) is expected
+
+
+def test_a_0_8_0_release_build_freezes_every_v1_term() -> None:
+    """RELEASING.md step 4 as a CI gate: 0.8.0 ships no v1 term that the snapshot does not freeze."""
+    if not is_release_build(os.environ):
+        pytest.skip("not a CI run for the 0.8.0 release branch or tags")
+    added = sorted(set(_v1_terms()) - set(_snapshot()["terms"]))
+    assert not added, (
+        f"records.context.v1.json has {len(added)} term(s) the 0.8.0 snapshot does not freeze: {added}. "
+        "Before the tag, run python scripts/gen_context.py --write-snapshot and commit v1 and the snapshot."
+    )
