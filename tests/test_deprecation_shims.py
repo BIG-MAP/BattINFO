@@ -34,6 +34,41 @@ def test_retired_input_names_resolve_with_a_deprecation_warning(name: str) -> No
     assert resolved is ALIASES[name], "the shim must forward to the model itself"
 
 
+def _top_level_warning(name: str, monkeypatch: pytest.MonkeyPatch) -> str:
+    """The DeprecationWarning that ``battinfo.<name>`` gives, read past the cache of names already resolved."""
+    monkeypatch.delitem(battinfo.__dict__, name, raising=False)
+    with pytest.warns(DeprecationWarning) as caught:
+        getattr(battinfo, name)
+    return str(caught[0].message)
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "CellSpecification",  # a retired class name
+        "TestProtocolInput",  # a retired *Input model
+        "Workspace",  # the object-graph engine
+        "bom",  # an off-surface name with a home module (_LAZY_EXPORTS)
+        "create_separator_spec",  # a generated component wrapper
+    ],
+)
+def test_every_top_level_deprecation_names_the_release_that_removes_it(
+    name: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # CONTRIBUTING.md: a deprecation warning names the replacement and the removal release.
+    message = _top_level_warning(name, monkeypatch)
+    assert "removed in 0.9.0" in message, message
+    assert "one release after" not in message
+
+
+def test_the_legacy_publish_call_names_the_release_that_removes_it(monkeypatch: pytest.MonkeyPatch) -> None:
+    from battinfo import _publish
+
+    monkeypatch.setattr(_publish, "_legacy_publish", lambda **kwargs: {"ok": True})
+    with pytest.warns(DeprecationWarning, match=r"removed in 0\.9\.0"):
+        battinfo.publish(cell_spec="spec-sentinel")
+
+
 def test_unknown_attribute_still_raises_attribute_error() -> None:
     with pytest.raises(AttributeError, match="no_such_thing"):
         battinfo.no_such_thing  # noqa: B018
