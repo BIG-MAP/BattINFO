@@ -43,7 +43,7 @@ def test_semantic_validation_rejects_unit_mismatch_for_specs() -> None:
 
 def test_semantic_validation_rejects_unit_mismatch_for_continuous_current_specs() -> None:
     doc = _load_json("src/battinfo/data/examples/cell-spec/A123__ANR26650M1-B.json")
-    doc["properties"]["maximum_continuous_charging_current"]["unit"] = "V"
+    doc["properties"]["maximum_continuous_charging_current"] = {"value": 5.0, "unit": "V"}
     report = validate_semantic_report(doc, policy=STRICT_SEMANTIC)
     assert not report.ok
     assert any(issue.code == "semantic.unit_mismatch" for issue in report.errors)
@@ -221,7 +221,9 @@ def test_property_unmapped_message_matches_transform_reality() -> None:
     doc = _load_json("src/battinfo/data/examples/cell-spec/A123__ANR26650M1-B.json")
     doc["properties"]["frobnication_index"] = {"value": 1.0, "unit": "%"}
     report = validate_semantic_report(doc, policy=STRICT_SEMANTIC)
-    issue = next(i for i in report.issues if i.code == "semantic.property_unmapped")
+    issue = next(
+        i for i in report.issues if i.code == "semantic.property_unmapped" and i.path.endswith("frobnication_index")
+    )
     assert "no quantity class" in issue.message
     assert "OMITTED" not in issue.message
 

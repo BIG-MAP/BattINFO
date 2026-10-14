@@ -2054,6 +2054,7 @@ class CellSpec(BundleJsonModel):
         return cls(
             schema_version=schema_version,
             id=str(specification["id"]),
+            name=str(specification["name"]) if specification.get("name") else None,
             manufacturer=str(specification["manufacturer"]),
             model=str(specification["model"]),
             format=str(specification["format"]),
@@ -2083,8 +2084,10 @@ class CellSpec(BundleJsonModel):
         )
 
     def to_library_record(self) -> dict[str, Any]:
-        specification: dict[str, Any] = {
-            "id": self.id,
+        specification: dict[str, Any] = {"id": self.id}
+        if self.name is not None:
+            specification["name"] = self.name
+        specification |= {
             "manufacturer": self.manufacturer,
             "model": self.model,
             "format": self.format,

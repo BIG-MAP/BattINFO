@@ -24,6 +24,9 @@ def test_validate_record_report_accepts_canonical_cell_spec_example() -> None:
     doc["properties"]["power_density"] = {"value": 1700.0, "unit": "W/L"}
     doc["properties"]["typical_energy"] = {"value": 8.25, "unit": "Wh"}
     doc["properties"]["rated_energy"] = {"value": 8.0, "unit": "Wh"}
+    # Not on the A123 data sheet; fixture values check that the schema takes them.
+    doc["cell_spec"]["iec_code"] = "IFpR27/66"
+    doc["cell_spec"]["country_of_origin"] = "Example Country"
     report = validate_record_report(doc, policy=STRICT)
     assert report.ok
     # The record is valid but NOT fully exportable - the mappability warnings
@@ -36,8 +39,6 @@ def test_validate_record_report_accepts_canonical_cell_spec_example() -> None:
     }
     assert {i.code for i in report.issues} <= expected_warnings
     assert all(i.severity == "warning" for i in report.issues)
-    assert doc["cell_spec"]["iec_code"] == "IFpR26650"
-    assert doc["cell_spec"]["country_of_origin"] == "United States"
     assert doc["cell_spec"]["year"] == 2012
 
 

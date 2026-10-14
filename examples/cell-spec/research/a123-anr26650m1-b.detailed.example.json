@@ -16,10 +16,10 @@
   },
   "properties": {
     "nominal_capacity": {
-      "typical_value": 2.5,
+      "value": 2.5,
       "unit": "Ah"
     },
-    "rated_capacity": {
+    "minimum_capacity": {
       "value": 2.4,
       "unit": "Ah"
     },
@@ -27,97 +27,63 @@
       "value": 3.3,
       "unit": "V"
     },
-    "charging_voltage": {
-      "value": 3.65,
-      "unit": "V"
+    "ac_internal_resistance": {
+      "value": 6.0,
+      "unit": "mΩ"
     },
-    "discharging_cutoff_voltage": {
-      "value": 2.0,
-      "unit": "V"
-    },
-    "nominal_continuous_charging_current": {
-      "value": 2.5,
-      "unit": "A"
-    },
-    "maximum_continuous_charging_current": {
-      "value": 2.5,
-      "unit": "A"
-    },
-    "pulse_charging_current": {
-      "max_value": 10.0,
-      "unit": "A"
-    },
-    "nominal_continuous_discharging_current": {
-      "value": 50.0,
-      "unit": "A"
-    },
-    "maximum_continuous_discharging_current": {
-      "value": 50.0,
-      "unit": "A"
-    },
-    "pulse_discharging_current": {
-      "max_value": 120.0,
-      "unit": "A"
-    },
-    "minimum_charging_temperature": {
-      "value": 0.0,
-      "unit": "degC"
-    },
-    "maximum_charging_temperature": {
-      "value": 45.0,
-      "unit": "degC"
-    },
-    "minimum_discharging_temperature": {
-      "value": -20.0,
-      "unit": "degC"
-    },
-    "maximum_discharging_temperature": {
-      "value": 60.0,
-      "unit": "degC"
-    },
-    "minimum_storage_temperature": {
-      "value": -20.0,
-      "unit": "degC"
-    },
-    "maximum_storage_temperature": {
-      "value": 45.0,
-      "unit": "degC"
-    },
-    "cycle_life": {
-      "value": 2000,
-      "unit": "count"
+    "mass": {
+      "value": 76.0,
+      "unit": "g"
     },
     "diameter": {
       "value": 26.0,
       "unit": "mm"
     },
     "height": {
-      "value": 65.2,
+      "value": 65.0,
       "unit": "mm"
     },
-    "mass": {
-      "value": 76.0,
-      "unit": "g"
+    "charging_voltage": {
+      "value": 3.6,
+      "unit": "V"
     },
-    "volume": {
-      "value": 0.0346,
-      "unit": "L"
+    "nominal_continuous_charging_current": {
+      "value": 2.5,
+      "unit": "A"
     },
-    "specific_energy": {
-      "value": 108.6,
-      "unit": "Wh/kg"
+    "maximum_continuous_discharging_current": {
+      "value": 50.0,
+      "unit": "A"
     },
-    "energy_density": {
-      "value": 238.0,
-      "unit": "Wh/L"
+    "maximum_pulse_discharging_current": {
+      "value": 120.0,
+      "unit": "A",
+      "conditions": {
+        "duration": {
+          "value": 10,
+          "unit": "s"
+        }
+      }
     },
-    "internal_resistance": {
-      "value": 6.0,
-      "unit": "milliohm"
+    "operating_temperature_min": {
+      "value": -30,
+      "unit": "°C"
     },
-    "impedance": {
-      "value_text": "5-8 (1 kHz, 50% SOC)",
-      "unit": "milliohm"
+    "operating_temperature_max": {
+      "value": 55,
+      "unit": "°C"
+    },
+    "minimum_storage_temperature": {
+      "value": -40,
+      "unit": "°C"
+    },
+    "maximum_storage_temperature": {
+      "value": 60,
+      "unit": "°C"
+    },
+    "cycle_life": {
+      "value_text": ">1000",
+      "unit": "count"
     }
   },
   "positive_electrode": {
@@ -128,7 +94,7 @@
             "name": "LFP",
             "property": {
               "mass_fraction": {
-                "value": 0.935,
+                "value": 0.94,
                 "unit": "1"
               },
               "particle_d50": {
@@ -158,15 +124,6 @@
                 "unit": "1"
               }
             }
-          },
-          {
-            "name": "Al2O3 coating particles",
-            "property": {
-              "mass_fraction": {
-                "value": 0.005,
-                "unit": "1"
-              }
-            }
           }
         ]
       },
@@ -184,7 +141,7 @@
           "unit": "um"
         }
       },
-      "comment": "Representative production coating composition."
+      "comment": "Illustrative composition."
     },
     "current_collector": {
       "name": "Al foil",
@@ -192,13 +149,8 @@
         "thickness": {
           "value": 15.0,
           "unit": "um"
-        },
-        "areal_mass": {
-          "value": 40.5,
-          "unit": "mg/cm^2"
         }
-      },
-      "comment": "Etched aluminum collector."
+      }
     },
     "property": {
       "compaction_density": {
@@ -206,7 +158,7 @@
         "unit": "g/cm^3"
       }
     },
-    "comment": "Positive electrode parameters from internal recipe."
+    "comment": "Illustrative LFP electrode that exercises the descriptor structure. A123 does not publish these values, and they were not measured on this cell."
   },
   "negative_electrode": {
     "coating": {
@@ -255,7 +207,7 @@
           "unit": "um"
         }
       },
-      "comment": "Representative negative coating."
+      "comment": "Illustrative composition."
     },
     "current_collector": {
       "name": "Cu foil",
@@ -266,7 +218,7 @@
         }
       }
     },
-    "comment": "Negative electrode with graphite-dominant active material."
+    "comment": "Illustrative graphite electrode that exercises the descriptor structure. A123 does not publish these values, and they were not measured on this cell."
   },
   "electrolyte": {
     "family": "organic",
@@ -296,8 +248,7 @@
           "max_value": 20,
           "unit": "ppm"
         }
-      },
-      "comment": "Base solvent system."
+      }
     },
     "salt": {
       "name": "LiPF6",
@@ -308,8 +259,7 @@
           "value": 1.0,
           "unit": "mol/L"
         }
-      },
-      "comment": "Standard 1M salt concentration."
+      }
     },
     "additive": [
       {
@@ -341,7 +291,7 @@
         "unit": "mPa*s"
       }
     },
-    "comment": "Electrolyte composition at 25 C."
+    "comment": "Illustrative carbonate electrolyte that exercises the descriptor structure. A123 does not publish these values, and they were not measured on this cell."
   },
   "separator": {
     "material": "PE/PP trilayer",
@@ -355,21 +305,31 @@
         "unit": "1"
       }
     },
-    "comment": "Microporous polyolefin separator."
+    "comment": "Illustrative polyolefin separator that exercises the descriptor structure. A123 does not publish these values, and they were not measured on this cell."
+  },
+  "bibliography": {
+    "subject_of": [
+      {
+        "id": "https://doi.org/10.17632/kxsbr4x3j2.2",
+        "doi": "10.17632/kxsbr4x3j2.2",
+        "type": "Dataset",
+        "headline": "Experimental data of three lithium-ion batteries under galvanostatic discharge tests at different C-rates and operating temperatures",
+        "author": "Edoardo Catenaro, Simona Onori",
+        "date_published": 2021
+      }
+    ]
   },
   "provenance": {
     "source_type": "manual",
-    "source_name": "Catenaro 2021 ingestion pilot",
-    "source_file": "sources/a123/anr26650m1-b/catenaro-2021/battery.json",
-    "source_url": "https://doi.org/10.17632/kxsbr4x3j2.2",
+    "source_name": "A123 ANR26650M1-B data sheet, MD100113-02 (2012), with illustrative internals",
+    "source_file": null,
+    "source_url": null,
     "retrieved_at": 1772556000,
-    "workflow_version": "battinfo-ingest-0.2.0",
-    "comment": "Manually curated example for schema validation and RDF mapping review.",
-    "citation": "https://doi.org/10.17632/kxsbr4x3j2.2"
+    "comment": "Hand-written review example. The cell header and properties follow the data sheet; the electrode, electrolyte and separator blocks are illustrative."
   },
   "notes": [
-    "Primary review artifact for BattINFO/BDF battery descriptor structure.",
-    "Values are representative and intended for schema/mapping review.",
+    "The cell header and the properties are from the A123 ANR26650M1-B data sheet, MD100113-02 (2012), as in the flagship record examples/cell-spec/A123__ANR26650M1-B.json.",
+    "The electrode, electrolyte and separator blocks are illustrative values that exercise the descriptor structure. A123 does not publish these values, and they were not measured on this cell.",
     "This is the primary end-to-end review file for battery descriptor changes.",
     "Update this file whenever schema or mapping decisions change."
   ]

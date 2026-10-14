@@ -97,9 +97,11 @@ def snippet_cell_spec():
     from battinfo import CellSpec
 
     spec = CellSpec(
-        # The published flagship IRI: dereference it (Accept: application/ld+json)
-        # to get this exact record. In the workspace flow the IRI is minted for
-        # you at ws.save(); standalone, you set it (or let publish() mint it).
+        # The flagship's published IRI. Dereferencing it (Accept:
+        # application/ld+json) returns the published flagship record, which
+        # carries more of the datasheet than this snippet sets. In the
+        # workspace flow the IRI is minted for you at ws.save(); standalone,
+        # you set it (or let publish() mint it).
         id="https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0",
         manufacturer="A123",
         model="ANR26650M1-B",

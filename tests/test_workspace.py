@@ -136,15 +136,22 @@ def test_finalize_disambiguates_colliding_test_and_cell_ids(tmp_path: Path) -> N
 
 def test_workspace_loads_cell_spec_from_validated_json_record(tmp_path: Path) -> None:
     workspace = Workspace(root=tmp_path / "workspace")
+    # The data sheet gives neither an IEC designation nor a country of
+    # manufacture; fixture values check that both load.
+    record = json.loads((ROOT / "examples" / "cell-spec" / "A123__ANR26650M1-B.json").read_text(encoding="utf-8"))
+    record["cell_spec"]["iec_code"] = "IFpR27/66"
+    record["cell_spec"]["country_of_origin"] = "Example Country"
+    source = tmp_path / "A123__ANR26650M1-B.json"
+    source.write_text(json.dumps(record), encoding="utf-8")
 
-    cell_spec = workspace.load_cell_spec(ROOT / "examples" / "cell-spec" / "A123__ANR26650M1-B.json")
+    cell_spec = workspace.load_cell_spec(source)
 
     assert len(workspace.cell_specs) == 1
     assert cell_spec.manufacturer == "A123"
     assert cell_spec.model == "ANR26650M1-B"
     assert cell_spec.id == "https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0"
-    assert cell_spec.iec_code == "IFpR26650"
-    assert cell_spec.country_of_origin == "United States"
+    assert cell_spec.iec_code == "IFpR27/66"
+    assert cell_spec.country_of_origin == "Example Country"
     assert cell_spec.year == 2012
 
 

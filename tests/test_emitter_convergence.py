@@ -129,6 +129,9 @@ def test_resolver_cell_spec_artifact_passes_publication_validation() -> None:
 def test_shipped_example_record_resolves_without_drops() -> None:
     src = ROOT / "examples" / "cell-spec" / "A123__ANR26650M1-B.json"
     record = json.loads(src.read_text(encoding="utf-8"))
+    # The data sheet gives no IEC 61960 designation; a fixture value checks
+    # that one reaches schema:productID.
+    record["cell_spec"]["iec_code"] = "IFpR27/66"
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         doc = _resolver_jsonld(record)

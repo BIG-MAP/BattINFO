@@ -24,8 +24,9 @@ How to describe a cell: the design as a **cell spec**, each physical unit as a *
 from battinfo import CellSpec
 
 spec = CellSpec(
-    # The published flagship IRI — dereference it (Accept:
-    # application/ld+json) to get this exact record.
+    # The flagship's published IRI. Dereferencing it (Accept:
+    # application/ld+json) returns the published flagship record, which
+    # carries more of the datasheet than this snippet sets.
     id="https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0",
     manufacturer="A123",
     model="ANR26650M1-B",
@@ -325,7 +326,6 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     ],
     "@id": "https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0#described",
     "skos:prefLabel": "A123 ANR26650M1-B",
-    "hasIECCode": "IFpR26650",
     "hasProperty": [
       {
         "@type": [
@@ -365,10 +365,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       },
       {
         "@type": [
-          "InternalResistance",
+          "ACInternalResistance",
           "ConventionalProperty"
         ],
-        "skos:prefLabel": "InternalResistance",
+        "skos:prefLabel": "ACInternalResistance",
         "hasNumericalPart": {
           "@type": "RealData",
           "hasNumberValue": 6.0
@@ -413,22 +413,22 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       },
       {
         "@type": [
-          "MaximumPulseChargingCurrent",
+          "ChargingVoltage",
           "ConventionalProperty"
         ],
-        "skos:prefLabel": "MaximumPulseChargingCurrent",
+        "skos:prefLabel": "ChargingVoltage",
         "hasNumericalPart": {
           "@type": "RealData",
-          "hasNumberValue": 10.0
+          "hasNumberValue": 3.6
         },
-        "hasMeasurementUnit": "https://w3id.org/emmo#Ampere"
+        "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
       },
       {
         "@type": [
-          "MaximumContinuousChargingCurrent",
+          "ChargingCurrent",
           "ConventionalProperty"
         ],
-        "skos:prefLabel": "MaximumContinuousChargingCurrent",
+        "skos:prefLabel": "ChargingCurrent",
         "hasNumericalPart": {
           "@type": "RealData",
           "hasNumberValue": 2.5
@@ -449,10 +449,28 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       },
       {
         "@type": [
-          "MinimumDischargingTemperature",
+          "MaximumPulseDischargingCurrent",
           "ConventionalProperty"
         ],
-        "skos:prefLabel": "MinimumDischargingTemperature",
+        "skos:prefLabel": "MaximumPulseDischargingCurrent",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 120.0
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#Ampere",
+        "schema:valueReference": {
+          "@type": "schema:PropertyValue",
+          "schema:propertyID": "duration",
+          "schema:value": 10,
+          "schema:unitText": "s"
+        }
+      },
+      {
+        "@type": [
+          "MinimumOperatingTemperature",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "MinimumOperatingTemperature",
         "hasNumericalPart": {
           "@type": "RealData",
           "hasNumberValue": -30
@@ -461,10 +479,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       },
       {
         "@type": [
-          "MaximumDischargingTemperature",
+          "MaximumOperatingTemperature",
           "ConventionalProperty"
         ],
-        "skos:prefLabel": "MaximumDischargingTemperature",
+        "skos:prefLabel": "MaximumOperatingTemperature",
         "hasNumericalPart": {
           "@type": "RealData",
           "hasNumberValue": 55
@@ -510,16 +528,11 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     }
   },
   "schema:size": "R26650",
-  "schema:productID": "IFpR26650",
   "schema:brand": {
     "@type": "schema:Brand",
     "schema:name": "A123"
   },
   "schema:category": "battery cell",
-  "schema:countryOfOrigin": {
-    "@type": "schema:Country",
-    "schema:name": "United States"
-  },
   "schema:releaseDate": "2012-01-01",
   "schema:schemaVersion": "0.2.0",
   "schema:weight": {
