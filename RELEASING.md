@@ -25,9 +25,9 @@ Keep the Zenodo integration switched on for the repository. Its webhook archives
 
 ## Cutting a release
 
-1. On a branch `release/X.Y.Z`, set the version: `__version__` in `src/battinfo/__init__.py` (the build reads it from there), `owl:versionIRI` and `owl:versionInfo` in `battinfo.ttl`, `version` and `date-released` in `CITATION.cff`, the table in `SECURITY.md` and the pin in `tests/installed_smoke.py`. Then regenerate the files that embed it, at least `scripts/gen_reference_records.py` and `scripts/gen_web_examples.py`; AGENTS.md lists every generator.
+1. On a branch `release/X.Y.Z`, move the `[Unreleased]` entries in `CHANGELOG.md` under `## [X.Y.Z] - <date>` and leave an empty `[Unreleased]` above. Step 2 fills in the date.
+2. Set the version with `python scripts/set_version.py X.Y.Z --date <release day>`. The script writes every stamp: `__version__` in `src/battinfo/__init__.py` (the build reads it from there), `owl:versionIRI` and `owl:versionInfo` in `battinfo.ttl`, `version` and `date-released` in `CITATION.cff`, the table in `SECURITY.md` and the date of the release's heading in `CHANGELOG.md`. It then reruns the two generators whose output embeds the version, `scripts/gen_reference_records.py` and `scripts/gen_web_examples.py`. The other stamps always take the base version X.Y.Z, so setting a release candidate or a rehearsal build (`X.Y.Zrc1`, `X.Y.Z.dev1`) on a branch already at X.Y.Z changes only `__version__` and the generated files. `python scripts/set_version.py --check` changes nothing and fails when a stamp disagrees with `__version__`, or when `CHANGELOG.md` has no heading for X.Y.Z or dates it differently from `CITATION.cff`. The test suite runs the same check, and `tests/installed_smoke.py` compares the installed version with `__version__`, so it needs no pin.
    Until the first PyPI release (0.8.0), the install lines point at GitHub: `README.md` (which also drops the PyPI badge), `QUICKSTART.md`, `docs/pages/getting-started.rst`, `docs/howto/read-registry-data.md` and `installSnippet` in `web/lib/examples.ts`, with `pypiLive: false` in `web/lib/site.ts`. The 0.8.0 release commit restores `pip install battinfo` and the badge in the files outside `web/`. The website's two lines (`pypiLive` and `installSnippet`) switch back in a separate pull request, merged only once `pip install battinfo==0.8.0` works, so battinfo.org never shows the PyPI install line before it does.
-2. In `CHANGELOG.md`, move the `[Unreleased]` entries under `## [X.Y.Z] - <date>` and leave an empty `[Unreleased]` above.
 3. Remove what has warned for a full release (`_DEPRECATED_ALIASES` and `_LAZY_EXPORTS` in `src/battinfo/__init__.py`, policy in CONTRIBUTING.md). Deprecations added in this release keep their shims for one more.
 4. Run the checks listed in AGENTS.md, then build and check the distribution:
 
@@ -42,16 +42,18 @@ Keep the Zenodo integration switched on for the repository. Its webhook archives
    gh workflow run release.yml --ref release/X.Y.Z -f target=testpypi
    ```
 
-   Install the rehearsal into a clean environment, with dependencies from PyPI, and run `tests/installed_smoke.py` from a checkout against it:
+   In a clean environment, install the battinfo wheel from TestPyPI with its dependencies from PyPI, then run `tests/installed_smoke.py` from a checkout against it:
 
    ```bash
-   pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ "battinfo==X.Y.Z"
+   VERSION=0.8.0rc1  # the exact version on the branch
+   pip download --no-deps --only-binary :all: --index-url https://test.pypi.org/simple/ "battinfo==$VERSION" -d "rehearsal-$VERSION"
+   pip install "rehearsal-$VERSION"/battinfo-*.whl
    ```
 
-   An index never takes the same version twice, so each version can be rehearsed once.
+   Only the battinfo wheel comes from TestPyPI. An install with `--extra-index-url` would also let a package on TestPyPI stand in for a PyPI dependency of the same name. Pin the exact version, such as `0.8.0rc1` or `0.8.0.dev1`: TestPyPI already holds a 0.8.0, built from an older commit, and it sorts above every 0.8.0 pre-release. An index never takes the same version twice, so each version can be rehearsed once.
 
 6. Open the pull request and merge it into `main`.
-7. If the tag day differs from the date in `CITATION.cff` and the changelog heading, correct both on `main` first. Then tag `main` and push the tag:
+7. If the tag day differs from the date in `CITATION.cff` and the changelog heading, correct both on `main` first (`python scripts/set_version.py X.Y.Z --date <tag day>`). Then tag `main` and push the tag:
 
    ```bash
    git switch main

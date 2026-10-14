@@ -158,6 +158,7 @@ Edit the source, then regenerate. A CI step or a test fails when a generated cop
 | mapping tables, emitter terms | `assets/vocab/emmo-labels.ttl` | `uv run python scripts/gen_emmo_labels.py` |
 | examples, emitters | `web/lib/showcase.generated.ts`, `web/lib/jsonld.generated.ts` | `scripts/gen_web_examples.py`, `scripts/gen_web_jsonld.py` |
 | schemas, examples, records context | the other `web/lib/*.generated.ts` files | `npm run sync:schemas`, `sync:examples`, `sync:context` in `web/` |
+| the version (`__version__` in `src/battinfo/__init__.py`) | `battinfo.ttl`, `CITATION.cff`, `SECURITY.md`, `docs/records/*.md`, `web/lib/showcase.generated.ts` | `uv run python scripts/set_version.py X.Y.Z`; `tests/test_set_version.py` runs its `--check` |
 | EMMO pins in `battinfo.ttl` | `src/battinfo/data/context/domain-battery.context.json`, `tests/fixtures/emmo/closure-terms.json` | set `PINNED_VERSION` in `.tools/quality/refresh_emmo_context.py`, run it, then run `.tools/quality/emmo_closure_terms.py` (both read the release tags online) |
 
 The record-type pages under `docs/records/` run each authoring snippet against the current library and validate the result under the strict policy. A change to a schema, the API or an emitter that alters a reference record must regenerate that chapter in the same commit.

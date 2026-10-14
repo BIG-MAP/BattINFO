@@ -1,6 +1,14 @@
+"""Smoke test for an installed battinfo, run from a checkout.
+
+CI builds the wheel, installs it and runs this file, and RELEASING.md runs it
+against each TestPyPI rehearsal.
+"""
+
 from __future__ import annotations
 
+import importlib.metadata
 import json
+import re
 import tempfile
 from pathlib import Path
 
@@ -8,12 +16,37 @@ from typer.testing import CliRunner
 
 ROOT = Path(__file__).resolve().parents[1]
 
+# The wheel records its version in PEP 440 normal form. The one other spelling the
+# release process allows is the hyphenated pre-release (0.8.0-rc1), which the wheel
+# records as 0.8.0rc1. packaging is not a core dependency, so a small regex does it.
+_HYPHENATED_PRE_RELEASE = re.compile(r"-(a|b|rc)(\d+)$")
+
+
+def wheel_version(version: str) -> str:
+    """*version* as the built wheel records it: ``0.8.0-rc1`` becomes ``0.8.0rc1``."""
+    return _HYPHENATED_PRE_RELEASE.sub(r"\1\2", version)
+
+
+def check_version() -> str:
+    """Check that the imported battinfo is the installed distribution, and return its version."""
+    import battinfo
+
+    installed = importlib.metadata.version("battinfo")
+    assert installed == wheel_version(battinfo.__version__), (
+        f"battinfo.__version__ is {battinfo.__version__}, but the installed distribution is {installed}: "
+        "reinstall the package (for an editable checkout, uv sync or pip install -e .), "
+        "or check that the import does not come from another checkout"
+    )
+    return installed
+
 
 def main() -> None:
     import battinfo
+    from battinfo.api import build_index
     from battinfo.cli import app
+    from battinfo.publication import load_publication
 
-    assert battinfo.__version__ == "0.8.0"
+    check_version()
     runner = CliRunner()
     result = runner.invoke(
         app,
@@ -84,11 +117,11 @@ def main() -> None:
         test_types = test_node["@type"] if isinstance(test_node["@type"], list) else [test_node["@type"]]
         assert "schema:Action" in test_types
         assert "BatteryTest" in test_types
-        bundle = battinfo.load_publication(publish_dir / "battinfo.publish.jsonld")
+        bundle = load_publication(publish_dir / "battinfo.publish.jsonld")
         assert bundle.dataset is not None
 
         index_path = tmp_root / "index.json"
-        stats = battinfo.build_index(source_root=ROOT / "examples", out_path=index_path)
+        stats = build_index(source_root=ROOT / "examples", out_path=index_path)
         assert stats["total_count"] >= 4
         assert index_path.exists()
 
