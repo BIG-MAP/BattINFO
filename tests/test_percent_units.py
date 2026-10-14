@@ -213,11 +213,13 @@ def test_a_measured_fraction_keeps_its_basis_and_conditions() -> None:
     assert node["isOutputOf"]["hasMeasurementParameter"]["skos:prefLabel"] == "temperature"
 
 
-def test_a_numeric_string_fraction_rescales_and_text_is_left_alone() -> None:
-    (node,) = _descriptor_property_nodes({"mass_fraction": {"value": "95", "unit": "%"}})
-    assert node["hasNumericalPart"]["hasNumberValue"] == 0.95
-    (text,) = _descriptor_property_nodes({"mass_fraction": {"value": "about 95", "unit": "%"}})
-    assert text["hasMeasurementUnit"] == PERCENT_UNIT
+def test_a_fraction_given_as_text_is_neither_coerced_nor_rescaled() -> None:
+    """Text in value fails the schema; a dict that skipped validation keeps it as text, even "95"."""
+    for value in ("95", "about 95"):
+        (node,) = _quiet(_descriptor_property_nodes, {"mass_fraction": {"value": value, "unit": "%"}})
+        assert "hasNumericalPart" not in node
+        assert node["hasStringValue"] == value
+        assert node["hasMeasurementUnit"] == PERCENT_UNIT
 
 
 def test_a_separator_porosity_in_percent_is_published_on_unit_one() -> None:

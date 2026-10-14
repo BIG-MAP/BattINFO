@@ -1,17 +1,20 @@
 """Only numbers are published as hasNumberValue.
 
 The records contexts type ``hasNumberValue`` as ``xsd:double``, so one number
-gets one datatype whatever the JSON-LD processor. The quantity schema still
-lets ``value`` be a string "when the source value is not purely numeric", and
+gets one datatype whatever the JSON-LD processor. The quantity schema used to
+let ``value`` be a string "when the source value is not purely numeric", and
 the shared quantity emitter copied it into ``hasNumberValue`` as it was. A
 component thickness of "about 500" became ``"about 500"^^xsd:double``, an
 ill-typed literal: rdflib logged a conversion traceback for it, SPARQL numeric
 comparisons failed on it, and Turtle that writes doubles as bare tokens could
 not be parsed.
 
-A string that reads as a number is now published as that number. Any other
-string is published as ``hasStringValue`` (unless the quantity has its own
-``value_text``), with a ``semantic.value_text_only`` warning.
+The schema now takes a number only in ``value`` (tests/test_quantity_value_number.py),
+so these tests build text in ``value`` on purpose: it is what a dict that
+skipped validation can still hold. The emitter publishes a finite real number
+as ``hasNumberValue`` and any string, even one that reads as a number, as
+``hasStringValue`` beside ``value_text``, with a ``semantic.value_text_only``
+warning.
 """
 
 from __future__ import annotations
@@ -115,14 +118,21 @@ def test_a_value_that_is_not_a_number_is_published_as_text_with_a_warning() -> N
     assert [m for m in messages if m.startswith("semantic.value_text_only: 'thickness' value 'about 500'")]
 
 
-@pytest.mark.parametrize(("value", "number"), [("3.6", 3.6), (" 42 ", 42.0), ("1e-3", 0.001), (3, 3), (2.5, 2.5)])
-def test_a_value_that_reads_as_a_number_is_that_number(value: Any, number: float) -> None:
+@pytest.mark.parametrize("value", [3, 2.5])
+def test_a_number_is_published_as_that_number(value: Any) -> None:
     node, messages = _warned(_descriptor_quantity_node, "thickness", {"value": value, "unit": "um"})
-    published = node["hasNumericalPart"]["hasNumberValue"]
-    assert published == number
-    assert not isinstance(published, str)
+    assert node["hasNumericalPart"]["hasNumberValue"] == value
     assert "hasStringValue" not in node
     assert not [m for m in messages if "value_text_only" in m]
+
+
+@pytest.mark.parametrize("value", ["3.6", " 42 ", "1e-3"])
+def test_a_string_that_reads_as_a_number_is_text_not_a_number(value: str) -> None:
+    """Only a real number is a number: the emitter never coerces a string."""
+    node, messages = _warned(_descriptor_quantity_node, "thickness", {"value": value, "unit": "um"})
+    assert "hasNumericalPart" not in node
+    assert node["hasStringValue"] == value
+    assert [m for m in messages if m.startswith(f"semantic.value_text_only: 'thickness' value '{value.strip()}'")]
 
 
 @pytest.mark.parametrize("value", ["nan", "inf", "-Infinity"])
@@ -132,18 +142,14 @@ def test_a_string_that_is_not_a_finite_number_is_text(value: str) -> None:
     assert node["hasStringValue"] == value
 
 
-def test_value_text_wins_over_a_value_that_is_not_a_number() -> None:
+def test_value_text_and_a_value_that_is_not_a_number_are_both_published() -> None:
     quantity = {"value": "about 500", "value_text": "approx. 500 um", "unit": "um"}
     node, messages = _warned(_descriptor_quantity_node, "thickness", quantity)
     assert "hasNumericalPart" not in node
-    assert node["hasStringValue"] == "approx. 500 um"
-    # The warning says the value string is dropped, not that it is carried as text.
+    assert node["hasStringValue"] == ["approx. 500 um", "about 500"]
     (message,) = [m for m in messages if "value_text_only" in m]
-    assert message.startswith(
-        "semantic.value_text_only: 'thickness' value 'about 500' is not a number and is not published"
-    )
-    assert "value_text 'approx. 500 um'" in message
-    assert "carries it as text" not in message
+    assert message.startswith("semantic.value_text_only: 'thickness' value 'about 500' is text, not a number")
+    assert "carries it as text" in message
 
 
 def test_a_typical_value_is_the_number_when_the_value_is_text() -> None:
@@ -169,10 +175,11 @@ def test_a_fraction_given_as_text_keeps_its_percent_unit_and_no_number() -> None
     assert node["hasMeasurementUnit"].endswith("electrochemistry_8430be19_6cae_4a15_a570_3c15d0d190eb")
 
 
-def test_a_fraction_given_as_a_numeric_string_is_rescaled() -> None:
+def test_a_fraction_given_as_a_numeric_string_is_neither_coerced_nor_rescaled() -> None:
     node = _quiet(_descriptor_quantity_node, "porosity", {"value": "35", "unit": "%"})
-    assert node["hasNumericalPart"]["hasNumberValue"] == 0.35
-    assert "hasStringValue" not in node
+    assert "hasNumericalPart" not in node
+    assert node["hasStringValue"] == "35"
+    assert node["hasMeasurementUnit"].endswith("electrochemistry_8430be19_6cae_4a15_a570_3c15d0d190eb")
 
 
 # ── Whole records, both context modes and the deposit graph ───────────────────
@@ -188,10 +195,13 @@ def _half_cell_with_text_values() -> dict[str, Any]:
     return record
 
 
-def test_the_record_with_text_values_is_strict_valid() -> None:
-    """The schema allows the string, so nothing before the emitter catches it."""
+def test_the_record_with_text_values_fails_strict_validation() -> None:
+    """The schema refuses the strings, so only a record that skipped validation reaches the emitter with them."""
     report = battinfo.validate_record_report(_half_cell_with_text_values(), policy="strict")
-    assert list(report.errors) == []
+    assert {(issue.code, issue.path) for issue in report.errors} == {
+        ("schema.type", "counter_electrode.property.thickness.value"),
+        ("schema.type", "counter_electrode.property.porosity.value"),
+    }
 
 
 @pytest.mark.parametrize("mode", ["url", "inline"])
@@ -204,7 +214,7 @@ def test_record_to_jsonld_writes_no_ill_typed_double(mode: str) -> None:
     assert len([m for m in messages if m.startswith("semantic.value_text_only")]) == 2
 
 
-def test_the_deposit_graph_writes_no_ill_typed_double(tmp_path: Path) -> None:
+def _workspace_with_separator_thickness(tmp_path: Path, thickness: dict[str, Any]) -> AuthoringWorkspace:
     workspace = AuthoringWorkspace(root=tmp_path, registry_url=None)
     workspace.license("cc-by-4.0")
     spec = battinfo.CellSpec(
@@ -213,13 +223,22 @@ def test_the_deposit_graph_writes_no_ill_typed_double(tmp_path: Path) -> None:
         format="coin",
         chemistry="li-ion",
         properties={"nominal_capacity": {"value": 3.0, "unit": "mAh"}},
-        separator={
-            "name": "Glass fibre",
-            "material": "glass fibre",
-            "property": {"thickness": {"value": "about 260", "unit": "um"}},
-        },
+        separator={"name": "Glass fibre", "material": "glass fibre", "property": {"thickness": thickness}},
     )
     workspace.add("cell", spec=spec, serial_numbers=["T1-01"])
+    return workspace
+
+
+def test_the_workspace_refuses_to_save_text_in_value(tmp_path: Path) -> None:
+    workspace = _workspace_with_separator_thickness(tmp_path, {"value": "about 260", "unit": "um"})
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        with pytest.raises(ValueError, match="separator.property.thickness.value.*value_text"):
+            workspace.save()
+
+
+def test_the_deposit_graph_writes_no_ill_typed_double(tmp_path: Path) -> None:
+    workspace = _workspace_with_separator_thickness(tmp_path, {"value_text": "about 260", "unit": "um"})
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         workspace.save()
