@@ -857,6 +857,12 @@ export const recordsContext: Record<string, unknown> = {
     "MilliAmpereHourPerSquareCentiMetre": "emmo:MilliAmpereHourPerSquareCentiMetre",
     "SiemensPerCentiMetre": "emmo:SiemensPerCentiMetre",
     "KiloPascal": "emmo:KiloPascal",
-    "MegaPascal": "emmo:MegaPascal"
+    "MegaPascal": "emmo:MegaPascal",
+    "WattPerWattHour": "electrochemistry:WattPerWattHour",
+    "KiloWatt": "emmo:KiloWatt",
+    "MilliWatt": "emmo:MilliWatt",
+    "SquareMilliMetre": "emmo:SquareMilliMetre",
+    "CubicMilliMetre": "emmo:CubicMilliMetre",
+    "Day": "emmo:Day"
   }
 };

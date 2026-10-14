@@ -87,7 +87,8 @@ SPEC_UNIT_COMPATIBILITY: dict[str, tuple[str, ...]] = {
     # 'count' and '1' are both EMMO's UnitOne; 'cycles' is accepted as a spelling of 'count'.
     "cycle_life": ("count", "1"),
     "cycle_life_c_rate": ("A/Ah",),
-    "calendar_life": ("year", "years", "month", "months", "day", "days"),
+    # 'days' is accepted as a spelling of 'day', the one of these with an EMMO unit.
+    "calendar_life": ("year", "years", "month", "months", "day"),
     "capacity_fade": ("%",),
     "capacity_threshold_exhaustion": ("%",),
     "power_capability": ("W", "kW", "mW"),
@@ -130,6 +131,7 @@ _UNIT_SPELLINGS: dict[str, tuple[str, ...]] = {
     "C": ("°C", "A/Ah"),
     "cycle": ("count",),
     "cycles": ("count",),
+    "days": ("day",),
     "Wh/lt": ("Wh/L",),
     "Wh/liter": ("Wh/L",),
     "W/lt": ("W/L",),
@@ -411,17 +413,36 @@ def _match_spec_unit(unit: str, allowed: tuple[str, ...]) -> tuple[str, str] | N
     return None
 
 
+def _changes_a_one_letter_symbol(written: str, spelling: str) -> bool:
+    """Whether ``spelling`` changes the case of a one-letter factor of ``written``.
+
+    Case alone tells such symbols apart: 'M' (molar) and 'm' (metre), 'S' (siemens)
+    and 's' (second).
+    """
+    for got, want in zip(_UNIT_FACTOR_SPLIT.split(written), _UNIT_FACTOR_SPLIT.split(spelling)):
+        if len(got) == 1 and got != want:
+            return True
+    return False
+
+
 def _unit_map_match(unit: str) -> str | None:
     """The unit-map symbol ``unit`` matches once case is ignored, when exactly one does.
 
-    A symbol that reads a written milli prefix as mega is never offered: 'mPa' does
-    not get 'MPa', which is a billion times more.
+    A match that could change what the unit means is never offered: one that swaps
+    the prefixes milli and mega in either direction ('mPa' does not get 'MPa', a
+    billion times more, nor 'MΩ' get 'mΩ'), or that changes the case of a one-letter
+    symbol ('M' does not get 'm', nor 'S' get 's').
     """
     from battinfo.transform.json_to_jsonld import _unit_iri  # noqa: PLC0415
 
     for form in (unit, *_unit_forms(unit)):
         hit = _unit_map_by_casefold().get(form.casefold())
-        if hit is not None and _unit_iri(hit[1]) is not None and not _turns_milli_into_mega(form, hit[0]):
+        if (
+            hit is not None
+            and _unit_iri(hit[1]) is not None
+            and not _swaps_milli_and_mega(form, hit[0])
+            and not _changes_a_one_letter_symbol(form, hit[0])
+        ):
             return hit[1]
     return None
 
@@ -463,7 +484,7 @@ def _warn_unit_unmapped(
     is the accepted symbol the unit stands for, when the property has a unit check;
     the warning names it when the unit is spelled another way ('ah' for 'Ah'). For a
     property without a unit check it offers the unit-map symbol that matches once case
-    is ignored, unless that symbol reads a milli prefix as mega.
+    is ignored, unless that could change what the unit means (see ``_unit_map_match``).
     """
     from battinfo.transform.json_to_jsonld import _unit_iri, normalize_unit_symbol  # noqa: PLC0415
 

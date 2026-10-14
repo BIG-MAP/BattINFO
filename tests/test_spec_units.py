@@ -270,12 +270,11 @@ def test_every_cell_spec_property_has_a_unit_check() -> None:
     assert not sorted(spec_keys - set(SPEC_UNIT_COMPATIBILITY))
 
 
-# Example units the unit map gives no EMMO unit IRI: 'year' and '%/month', for which the
-# pinned closure defines no unit, and 'W/Wh', which the closure defines as
-# electrochemistry:WattPerWattHour but the map does not list.
+# Example units the unit map gives no EMMO unit IRI, because the pinned closure defines
+# no unit for them: 'year', a count-like unit, and '%/month', for which no per-time
+# percentage of the closure would do.
 EXAMPLE_UNITS_WITHOUT_IRI = {
     "calendar_life": "year",
-    "power_energy_ratio": "W/Wh",
     "self_discharge_rate": "%/month",
 }
 
@@ -283,6 +282,30 @@ EXAMPLE_UNITS_WITHOUT_IRI = {
 def test_the_example_unit_resolves_to_a_unit_iri() -> None:
     missing = {key: units[0] for key, units in SPEC_UNIT_COMPATIBILITY.items() if _unit_iri(units[0]) is None}
     assert missing == EXAMPLE_UNITS_WITHOUT_IRI
+
+
+@pytest.mark.parametrize(
+    ("key", "unit"),
+    [
+        ("power_energy_ratio", "W/Wh"),
+        ("maximum_power", "kW"),
+        ("power_capability", "mW"),
+        ("electrode_area", "mm2"),
+        ("volume", "mm3"),
+        ("calendar_life", "day"),
+    ],
+)
+def test_an_accepted_unit_the_closure_defines_draws_no_warning(key: str, unit: str) -> None:
+    report = validate_semantic_report(_cell_spec(**{key: {"value": 2.0, "unit": unit}}), policy=STRICT)
+    assert report.ok, [issue.message for issue in report.errors]
+    assert not _at(report, "semantic.unit_unmapped", f"properties.{key}")
+
+
+def test_days_is_accepted_as_a_spelling_of_day() -> None:
+    report = validate_semantic_report(_cell_spec(calendar_life={"value": 300, "unit": "days"}), policy=STRICT)
+    assert report.ok, [issue.message for issue in report.errors]
+    (warning,) = _at(report, "semantic.unit_unmapped", "properties.calendar_life")
+    assert warning.message.startswith("write 'day';")
 
 
 def test_plausibility_bound_for_ah_per_kg_matches_mah_per_g() -> None:
@@ -306,10 +329,26 @@ def test_an_unmapped_unit_is_a_warning_under_strict() -> None:
 
 def test_an_unlisted_property_names_a_case_insensitive_match() -> None:
     doc = json.loads((EXAMPLES / "electrode-spec" / "qw3j-we77-zzj1-ya55.json").read_text(encoding="utf-8"))
-    doc["electrode_spec"]["property"]["loading"] = {"value": 6.2, "unit": "MG/CM2"}
+    doc["electrode_spec"]["property"]["loading"] = {"value": 6.2, "unit": "mg/CM2"}
     report = validate_semantic_report(doc, policy=STRICT)
     warnings = _at(report, "semantic.unit_unmapped", "electrode_spec.property.loading")
     assert len(warnings) == 1 and "did you mean 'mg/cm2'?" in warnings[0].message
+
+
+@pytest.mark.parametrize(
+    ("key", "unit"),
+    [
+        ("concentration", "M"),  # molar, not metre
+        ("ionic_conductivity", "S"),  # siemens, not second
+        ("insulation_resistance", "MΩ"),  # megaohm, not milliohm
+        ("loading", "MG/CM2"),  # could be megagram
+        ("skeletal_density", "G/CM3"),  # G could be gauss
+    ],
+)
+def test_an_unlisted_property_is_not_offered_a_match_that_changes_the_meaning(key: str, unit: str) -> None:
+    report = validate_semantic_report(_material_spec(**{key: {"value": 1.0, "unit": unit}}), policy=STRICT)
+    (warning,) = _at(report, "semantic.unit_unmapped", f"material_spec.property.{key}")
+    assert "did you mean" not in warning.message and "unit_map.curated.json" in warning.message
 
 
 @pytest.mark.parametrize("unit", ["mPa", "mpa"])

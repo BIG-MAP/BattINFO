@@ -1,5 +1,5 @@
 {
-  "version": "0.5.3",
+  "version": "0.5.4",
   "status": "review",
   "notes": [
     "Curated unit mappings promoted from decisions in interactive review.",
@@ -11,7 +11,8 @@
     "0.5.0: added 1, mS/cm, m2/g, g/mol, mol/kg, nm, mPa.s, mg, Hz, A/Ah, kg/m3, cm3, cm2; IRIs verified against the bundled domain-battery context. ASCII aliases (um, mg/cm^2, mOhm, ...) are normalised in code, not listed here.",
     "0.5.1: added mA/cm2, A/cm2 and A/m2 for current densities in test methods (coin-cell protocols state their currents per area). IRIs checked in EMMO 1.0.2 disciplines/units/noncoherentsiunits.ttl (MilliAmperePerSquareCentiMetre, AmperePerSquareCentiMetre) and coherentsiunits.ttl (AmperePerSquareMetre), all subclasses of ElectricCurrentDensityUnit, and present in the bundled domain-battery context.",
     "0.5.2: added the SI units BPX states its parameters in: m2, m3, mol/m3, m2/s, J/mol, V/K, S/m, 1/m, mol.m-2.s-1, J/(kg.K), W/(m.K) and W/(m2.K). IRIs checked in EMMO 1.0.2 disciplines/units/coherentsiunits.ttl (SquareMetre, CubicMetre, MolePerCubicMetre, SquareMetrePerSecond, JoulePerMole, VoltPerKelvin, SiemensPerMetre, PerMetre, MolePerSquareMetrePerSecond, JoulePerKilogramKelvin, WattPerMetreKelvin, WattPerSquareMetreKelvin), all present in the bundled domain-battery context.",
-    "0.5.3: added mAh/g and Ah/kg for specific capacities, mAh/cm2 for areal capacities, S/cm for conductivities, and kPa and MPa for pressures, which the export had kept as text (schema:unitText) only. The IRIs (MilliAmpereHourPerGram, AmpereHourPerKilogram, MilliAmpereHourPerSquareCentiMetre, SiemensPerCentiMetre, KiloPascal, MegaPascal) are measurement units of the pinned EMMO closure and terms of the bundled domain-battery context."
+    "0.5.3: added mAh/g and Ah/kg for specific capacities, mAh/cm2 for areal capacities, S/cm for conductivities, and kPa and MPa for pressures, which the export had kept as text (schema:unitText) only. The IRIs (MilliAmpereHourPerGram, AmpereHourPerKilogram, MilliAmpereHourPerSquareCentiMetre, SiemensPerCentiMetre, KiloPascal, MegaPascal) are measurement units of the pinned EMMO closure and terms of the bundled domain-battery context.",
+    "0.5.4: added W/Wh for a power-to-energy ratio, kW and mW for powers, mm2 for areas, mm3 for volumes and day for a calendar life: units validation accepts on cell-spec properties, which the export had kept as text (schema:unitText) only. The IRIs (electrochemistry:WattPerWattHour, KiloWatt, MilliWatt, SquareMilliMetre, CubicMilliMetre, Day) are measurement units of the pinned EMMO closure and terms of the bundled domain-battery context."
   ],
   "mappings": [
     {
@@ -639,6 +640,60 @@
       "unit_qname": "emmo:MegaPascal",
       "unit_pref_label": "MegaPascal",
       "unit_label": "MPa",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "W/Wh",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo/domain/electrochemistry#WattPerWattHour",
+      "unit_qname": "electrochemistry:WattPerWattHour",
+      "unit_pref_label": "WattPerWattHour",
+      "unit_label": "W/Wh",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "kW",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#KiloWatt",
+      "unit_qname": "emmo:KiloWatt",
+      "unit_pref_label": "KiloWatt",
+      "unit_label": "kW",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "mW",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#MilliWatt",
+      "unit_qname": "emmo:MilliWatt",
+      "unit_pref_label": "MilliWatt",
+      "unit_label": "mW",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "mm2",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#SquareMilliMetre",
+      "unit_qname": "emmo:SquareMilliMetre",
+      "unit_pref_label": "SquareMilliMetre",
+      "unit_label": "mm²",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "mm3",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#CubicMilliMetre",
+      "unit_qname": "emmo:CubicMilliMetre",
+      "unit_pref_label": "CubicMilliMetre",
+      "unit_label": "mm³",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "day",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#Day",
+      "unit_qname": "emmo:Day",
+      "unit_pref_label": "Day",
+      "unit_label": "day",
       "confidence": 1.0
     }
   ]

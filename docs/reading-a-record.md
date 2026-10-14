@@ -50,7 +50,7 @@ record and SHACL validation alike:
 
 Unit IRIs are EMMO where defined; compound units EMMO lacks (`W/kg`, `W/L`) use QUDT.
 
-A unit with no IRI in the unit map, such as `years` for a calendar life, is written as text only, as `schema:unitText` with no `hasMeasurementUnit`, and validation warns `semantic.unit_unmapped` on the record.
+A unit with no IRI in the unit map, such as `years` for a calendar life, is written as text only, as `schema:unitText` with no `hasMeasurementUnit`. Validation warns `semantic.unit_unmapped` when this happens in a record's `properties` or in the `property` map of a material, material-spec, electrode or electrode-spec record. Units elsewhere, such as those of test conditions, `conditions` maps and the components of a cell spec, are not checked for an IRI.
 
 ## Structured test conditions
 
