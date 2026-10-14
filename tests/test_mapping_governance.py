@@ -523,6 +523,92 @@ def test_curated_property_classes_agree_with_the_bundled_context() -> None:
     assert not wrong, wrong
 
 
+# ── test-method vocabulary and current-collector classes ──────────────────────
+
+_TEST_METHOD_VOCAB = ROOT / "src" / "battinfo" / "data" / "vocab" / "test-method"
+
+
+def _test_method_vocab_entries() -> list[tuple[str, dict[str, Any]]]:
+    """``(where, entry)`` for every entry of data/vocab/test-method/*.json that names an emmo_class."""
+    found: list[tuple[str, dict[str, Any]]] = []
+
+    def walk(value: Any, where: str) -> None:
+        if isinstance(value, dict):
+            if "emmo_class" in value:
+                found.append((where, value))
+            for key, item in value.items():
+                walk(item, f"{where}.{key}")
+
+    for path in sorted(_TEST_METHOD_VOCAB.glob("*.json")):
+        walk(_load_json(path), path.stem)
+    return found
+
+
+def _unresolved_classes(terms: dict[str, str]) -> dict[str, tuple[str, Any, Any]]:
+    """The ``{where: term}`` entries whose term the v1 records context and the
+    bundled EMMO context do not both define with the same IRI."""
+    v1 = _load_json(_CONTEXT_DIR / "records.context.v1.json")["@context"]
+    bundled = _load_json(_CONTEXT_DIR / "domain-battery.context.json")["@context"]
+    wrong = {}
+    for where, term in terms.items():
+        in_v1 = _expand_with(v1, v1.get(term))
+        in_bundled = _expand_with(bundled, bundled.get(term))
+        if in_v1 is None or in_v1 != in_bundled:
+            wrong[where] = (term, in_v1, in_bundled)
+    return wrong
+
+
+def test_every_test_method_class_resolves_in_v1_and_the_bundled_context() -> None:
+    """A step, setpoint or cut-off class the contexts do not define expands to a
+    relative IRI. Four of the 27 classes the vocabulary named did, among them
+    ConstantResistanceDischarging and ElectricalResistance."""
+    entries = _test_method_vocab_entries()
+    named = {where: entry["emmo_class"] for where, entry in entries if entry["emmo_class"]}
+    assert not _unresolved_classes(named)
+    assert len(set(named.values())) > 25, "the inventory of test-method classes looks broken"
+    # Where an entry also records the IRI, it is the one the class resolves to.
+    v1 = _load_json(_CONTEXT_DIR / "records.context.v1.json")["@context"]
+    wrong = {
+        where: entry["iri"]
+        for where, entry in entries
+        if entry.get("iri") and _expand_with(v1, entry["iri"]) != _expand_with(v1, v1.get(entry["emmo_class"]))
+    }
+    assert not wrong, wrong
+
+
+def test_a_test_method_class_that_has_no_published_class_names_what_is_missing() -> None:
+    """A step typed by a published parent, or by no class, names the class EMMO
+    lacks (queued in docs/internal/ontology-additions-needed.md). Once the pinned
+    context defines it, this fails so the vocabulary can use it."""
+    bundled = _load_json(_CONTEXT_DIR / "domain-battery.context.json")["@context"]
+    entries = _test_method_vocab_entries()
+    waiting = {where: entry["missing_class"] for where, entry in entries if entry.get("missing_class")}
+    assert set(waiting.values()) == {
+        "ConstantResistanceCharging",
+        "ConstantResistanceDischarging",
+        "ResistanceControlledProcess",
+        "ConstantCurrentConstantVoltageDischarging",
+    }
+    published = {where: name for where, name in waiting.items() if name in bundled}
+    assert not published, f"now in the pinned EMMO context, use it in the vocabulary: {published}"
+    # A step with no class names what it waits for, or says why none fits.
+    for where, entry in entries:
+        if entry["emmo_class"] is None:
+            assert entry.get("missing_class") or entry.get("note"), where
+
+
+def test_every_current_collector_class_resolves_in_v1_and_the_bundled_context() -> None:
+    """'Stainless steel mesh' was typed Steel, which neither context defines, and
+    record_to_jsonld raised on an electrode spec that passed strict validation."""
+    from battinfo.transform.json_to_jsonld import _CC_FORM_FACTOR_MAP, _CC_MATERIAL_MAP
+
+    targets = {f"material:{key}": cls for key, cls in _CC_MATERIAL_MAP.items()}
+    targets.update({f"form:{key}": cls for key, cls in _CC_FORM_FACTOR_MAP.items()})
+    assert "Steel" not in targets.values()
+    assert {"StainlessSteel", "Mesh", "Foam"} <= set(targets.values())
+    assert not _unresolved_classes(targets)
+
+
 def test_electrode_open_circuit_potential_is_not_typed_as_a_cell_voltage() -> None:
     """domain-electrochemistry 0.39.0 split the two quantities.
 

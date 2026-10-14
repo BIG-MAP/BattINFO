@@ -92,6 +92,7 @@ These gaps were known when 0.8.0 was released and are planned for 0.8.x or 0.9. 
 - The Zenodo deposit graph and `record_to_jsonld` describe tests and datasets differently: `schema:about` against `dcterms:subject` for a dataset's cell and test, `prov:used` against `dcterms:conformsTo` for a test's protocol, and different test titles. Neither emits a test's `description`.
 - In JSON-LD, `provenance.retrieved_at` is an untyped `prov:generatedAtTime` literal, not an `xsd:dateTime`.
 - A value in `%` or `vol%` is typed with `WeightPercent` or `VolumePercent`, which EMMO defines as quantities rather than units, because EMMO's `Percent` unit is outside the imported ontologies (and EMMO 1.0.2 gives it a conversion factor of 1 instead of 0.01).
+- EMMO has no class for a constant-resistance step or a CC-CV discharge. In a test protocol's JSON-LD a cr or cccv discharge is typed with the parent class `Discharging`, and a cr charge, or a cr or cccv step with no direction, has no class, only its mode as `skos:prefLabel`; validation warns `semantic.method_step_unmapped`.
 - A cell record lists its dataset with role `raw` even when the dataset's main file is the processed table.
 - `TestSpec.experiment` writes a constant-current step that has a cutoff but no current as "Discharge until 0.9 V", which the step grammar does not read back.
 - `ws.save()` prints "ERROR: ... failed validation" for some records it does write, such as a parameter set still minted under `spec/`.

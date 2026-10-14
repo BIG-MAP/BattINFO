@@ -1,13 +1,13 @@
 {
-  "$comment": "Controlled vocabulary for setpoint and condition quantities. Each entry maps an authoring key to an EMMO quantity class (prefLabel; resolved by the remote EMMO battery @context) and the relation predicate it is attached under (hasControlParameter for setpoints, hasProperty for ambient conditions). IRIs that are already pinned in jsonld.py are recorded here as compact IRIs; the rest resolve via the remote context. Quantities flagged generic carry an rdfs:label because the EMMO class is non-specific.",
-  "version": "1.0.0",
+  "$comment": "Controlled vocabulary for setpoint and condition quantities. Each entry maps an authoring key to an EMMO quantity class (prefLabel; resolved by the remote EMMO battery @context) and the relation predicate it is attached under (hasControlParameter for setpoints, hasProperty for ambient conditions). IRIs that are already pinned in jsonld.py are recorded here as compact IRIs; the rest resolve via the remote context. Every emmo_class resolves in the v1 records context and in the bundled EMMO context (tests/test_mapping_governance.py). Quantities flagged generic carry an rdfs:label because the EMMO class is non-specific.",
+  "version": "1.1.0",
   "setpoints": {
     "current":    {"emmo_class": "ElectricCurrent", "iri": "emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88"},
     "voltage":    {"emmo_class": "Voltage",          "iri": "emmo:EMMO_17b031fb_4695_49b6_bb69_189ec63df3ee"},
     "c_rate":     {"emmo_class": "CRate",            "iri": "electrochemistry:electrochemistry_e1fd84eb_acdb_4b2c_b90c_e899d552a3ee"},
     "current_density": {"emmo_class": "ElectricCurrentDensity", "iri": "emmo:EMMO_7c8007b0_58a7_4486_bf1c_4772852caca0"},
-    "power":      {"emmo_class": "Power",            "best_effort": true},
-    "resistance": {"emmo_class": "ElectricalResistance", "best_effort": true}
+    "power":      {"emmo_class": "Power",            "iri": "emmo:EMMO_09b9021b_f97b_43eb_b83d_0a764b472bc2"},
+    "resistance": {"emmo_class": "ElectricResistance", "iri": "emmo:EMMO_e88f75d6_9a17_4cfc_bdf7_43d7cea5a9a1"}
   },
   "conditions": {
     "temperature": {"emmo_class": "ConventionalProperty", "iri": "emmo:EMMO_d8aa8e1f_b650_416d_88a0_5118de945456", "generic": true},

@@ -210,6 +210,19 @@ To wire after any of these publish: curated entry in
 mirror, then `scripts/gen_context.py` and `scripts/gen_reference_records.py`; the
 value-basis-only typing retires automatically.
 
+## 11. Test-method steps without a process class (2026-10-14)
+
+The step vocabulary (`src/battinfo/data/vocab/test-method/step-modes.json`) named three process classes that no context defines, and the resistance setpoint was typed `ElectricalResistance`, a name EMMO does not have (it is `ElectricResistance`, EMMO core). All four expanded to relative IRIs. Since 2026-10-14 a step takes a published parent class where one is true of it and no class where none is. Each such entry names the class it waits for as `missing_class`, and `tests/test_mapping_governance.py` fails once the pinned context defines one, so the vocabulary can switch to it.
+
+| Wanted term | Kind | Placement | Until then |
+|---|---|---|---|
+| **`ConstantResistanceDischarging`** | Class | domain-electrochemistry, under `Discharging`, beside `ConstantCurrentDischarging` and `ConstantPowerDischarging` | A cr discharge step types as `Discharging`. |
+| **`ConstantResistanceCharging`** | Class | domain-electrochemistry, under `Charging` | A cr charge step gets no class. It keeps its parameters and its mode as `skos:prefLabel` ("cr charge"), and validation warns `semantic.method_step_unmapped`. |
+| **`ResistanceControlledProcess`** (or another name for it) | Class | domain-electrochemistry, beside `CurrentControlledProcess`, `PowerControlledProcess` and `VoltageControlledProcess` | A cr step with no charge or discharge direction gets no class, as above. |
+| **`ConstantCurrentConstantVoltageDischarging`** | Class | domain-electrochemistry, the twin of `ConstantCurrentConstantVoltageCharging` | A cccv discharge step types as `Discharging`. |
+
+A cccv step with no direction also gets no class, but needs nothing upstream, since a CC-CV step charges or discharges. In the same change a cc or cp step with no direction became a `CurrentControlledProcess` or `PowerControlledProcess`, a cv charge or discharge a `ConstantVoltageCharging` or `ConstantVoltageDischarging`, and a current cutoff a `LowerCurrentLimit` or `UpperCurrentLimit`; all of these are published.
+
 ## Landed upstream — stubs flipped
 
 ### domain-electrochemistry 0.36.0

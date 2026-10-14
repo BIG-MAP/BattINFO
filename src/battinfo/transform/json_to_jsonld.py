@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from functools import lru_cache
 from importlib import resources
 from pathlib import Path
-from typing import Any
+from typing import Any, NamedTuple
 
 from battinfo._util import _citation_doi_from_url
 from battinfo.entities import COMPONENT_FAMILIES
@@ -1798,27 +1798,111 @@ _ELECTRODE_ROLE_MAP: dict[str, dict[str, str]] = {
 # Fraction values stored as percentages (0–100) are converted to the [0, 1] range on output.
 _UNIT_ONE_IRI = "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
 
-# Recognized current-collector form factors and their EMMO class terms.
+# Current-collector forms and substrates -> EMMO class terms, keyed by whole
+# lower-case words. One normaliser (_current_collector_terms) reads a
+# collector's form and material fields and then its name with these tables. A
+# generic "mesh" is a Mesh; only a name that says "woven mesh" is a WovenMesh.
+# The form field's values (foil, mesh, foam, perforated) are keys too. Plain
+# steel has no class: neither the v1 records context nor the pinned EMMO context
+# defines Steel, so only "stainless steel" and its spellings type.
+# tests/test_mapping_governance.py checks that every class here resolves in both.
 _CC_FORM_FACTOR_MAP: dict[str, str] = {
     "foil": "Foil",
     "perforated foil": "PerforatedFoil",
+    "perforated": "PerforatedFoil",
     "expanded mesh": "ExpandedMesh",
     "woven mesh": "WovenMesh",
-    "mesh": "WovenMesh",
     "electrospun mesh": "ElectrospunMesh",
+    "mesh": "Mesh",
+    "foam": "Foam",
 }
 
-# Recognized current-collector substrate materials and their EMMO class terms.
 _CC_MATERIAL_MAP: dict[str, str] = {
     "aluminium": "Aluminium",
     "aluminum": "Aluminium",
+    "al": "Aluminium",
     "copper": "Copper",
+    "cu": "Copper",
     "nickel": "Nickel",
-    "steel": "Steel",
-    "stainless steel": "StainlessSteel",
+    "ni": "Nickel",
     "titanium": "Titanium",
+    "ti": "Titanium",
+    "stainless steel": "StainlessSteel",
+    "stainless": "StainlessSteel",
+    "ss": "StainlessSteel",
     "carbon": "Carbon",
 }
+
+# A stainless steel grade written as one word: SUS304, SS316L, 316L.
+_CC_STAINLESS_GRADE = re.compile(r"^(?:(?:sus|ss)3\d\d[a-z]?|3\d\dl)$")
+# "carbon-coated Al", "nickel-plated copper": the word before marks the coating,
+# and so does the word after "coated with".
+_CC_COATING_WORDS = frozenset({"coated", "plated"})
+# Words that say how or where a foil is coated, not what with: "double side
+# coated", "pre-coated", "non-coated".
+_CC_NOT_A_COATING = frozenset({"double", "single", "side", "sided", "both", "one", "two", "pre", "non", "un"})
+
+
+def _phrases(table: dict[str, str]) -> list[tuple[tuple[str, ...], str]]:
+    """``(words, class)`` for each key of ``table``, longest phrase first."""
+    return sorted(((tuple(key.split()), cls) for key, cls in table.items()), key=lambda item: -len(" ".join(item[0])))
+
+
+_CC_FORM_PHRASES = _phrases(_CC_FORM_FACTOR_MAP)
+_CC_MATERIAL_PHRASES = _phrases(_CC_MATERIAL_MAP)
+
+
+class _CollectorTerms(NamedTuple):
+    substrate: str | None
+    form: str | None
+    coating: str | None
+
+
+def _current_collector_terms(text: Any) -> _CollectorTerms:
+    """The substrate class, form class and coating text a collector string names.
+
+    One normaliser for the ``material`` field, the ``form`` field and the
+    product name. Words match whole and in any case. The substrate is the first
+    material named, a two-word name ("stainless steel") before a word of it. A
+    word before "coated" or "plated", or after "coated with", is the coating
+    and never the substrate, so "carbon-coated Al" is aluminium with a carbon
+    coating; the coating is returned as written. A word that says how the foil
+    is coated ("double side coated", "pre-coated") names no coating. The form
+    is the most specific one named, so "perforated foil" wins over "foil" and
+    "woven mesh" over "mesh".
+    """
+    if not isinstance(text, str) or not text.strip():
+        return _CollectorTerms(None, None, None)
+    words = re.findall(r"[A-Za-z0-9]+", text)
+    tokens = [word.lower() for word in words]
+    coating_at: set[int] = set()
+    for idx, token in enumerate(tokens):
+        if token not in _CC_COATING_WORDS:
+            continue
+        if idx + 2 < len(tokens) and tokens[idx + 1] == "with":
+            coating_at.add(idx + 2)
+        elif idx > 0 and tokens[idx - 1] not in _CC_NOT_A_COATING:
+            coating_at.add(idx - 1)
+    substrate: str | None = None
+    for start, token in enumerate(tokens):
+        if start in coating_at:
+            continue
+        for phrase, cls in _CC_MATERIAL_PHRASES:
+            end = start + len(phrase)
+            if tuple(tokens[start:end]) == phrase and not coating_at.intersection(range(start, end)):
+                substrate = cls
+                break
+        if substrate is None and _CC_STAINLESS_GRADE.match(token):
+            substrate = _CC_MATERIAL_MAP["stainless steel"]
+        if substrate is not None:
+            break
+    form: str | None = None
+    for phrase, cls in _CC_FORM_PHRASES:
+        if any(tuple(tokens[start : start + len(phrase)]) == phrase for start in range(len(tokens))):
+            form = cls
+            break
+    coating = words[min(coating_at)] if coating_at else None
+    return _CollectorTerms(substrate, form, coating)
 
 
 def _emmo_quantity_node(
@@ -1881,32 +1965,6 @@ def _fraction_quantity_node(emmo_type: str, quantity: dict[str, Any]) -> dict[st
         _apply_sample_statistics(node, rescaled)
         return node
     return _emmo_quantity_node(emmo_type, quantity)
-
-
-def _parse_current_collector_types(name: str) -> list[str]:
-    """Parse a current collector name into EMMO @type classes.
-
-    Examples:
-        'Aluminium foil'     → ['CurrentCollector', 'Aluminium', 'Foil']
-        'Copper foil'        → ['CurrentCollector', 'Copper', 'Foil']
-        'Aluminium mesh'     → ['CurrentCollector', 'Aluminium', 'WovenMesh']
-    """
-    types: list[str] = ["CurrentCollector"]
-    name_lower = name.strip().lower()
-    # Collect material class first (single word lookup)
-    mat_class: str | None = None
-    for word in name_lower.split():
-        mat_class = _CC_MATERIAL_MAP.get(word)
-        if mat_class:
-            types.append(mat_class)
-            name_lower = name_lower.replace(word, "").strip()
-            break
-    # Then check for multi-word form factors (longest match first)
-    for form, emmo_class in sorted(_CC_FORM_FACTOR_MAP.items(), key=lambda x: -len(x[0])):
-        if form in name_lower:
-            types.append(emmo_class)
-            break
-    return types
 
 
 def _typed_constituent_node(
@@ -2016,9 +2074,20 @@ def _descriptor_electrode_coating_to_jsonld(coating: dict[str, Any] | None) -> d
 def _descriptor_current_collector_to_jsonld(cc: dict[str, Any] | None) -> dict[str, Any] | None:
     """Convert a current collector dict to a typed CurrentCollector node.
 
-    The name (e.g. 'Aluminium foil') is parsed to build an @type list that stacks the
-    substrate material and physical form onto CurrentCollector:
-        'Aluminium foil' → ['CurrentCollector', 'Aluminium', 'Foil']
+    The substrate and form classes stack onto CurrentCollector. They come from
+    the ``material`` and ``form`` fields first and from the name after them,
+    through one normaliser (:func:`_current_collector_terms`)::
+
+        'Aluminium foil'                → ['CurrentCollector', 'Aluminium', 'Foil']
+        {material: 'Al', form: 'foil'}  → ['CurrentCollector', 'Aluminium', 'Foil']
+        'Stainless steel mesh'          → ['CurrentCollector', 'StainlessSteel', 'Mesh']
+        'Carbon coated aluminium foil'  → ['CurrentCollector', 'Aluminium', 'Foil']
+
+    A field that names no class leaves its facet to the name, except form
+    ``other``, which says the form is none of the listed ones. The name and the
+    material are kept as ``schema:name`` and ``schema:material``. A coating is
+    not a class of the collector: it is kept as the text of a ``hasCoating``
+    node (``{"schema:material": "Carbon"}``), as housing parts keep theirs.
 
     ``material_spec_id`` cites the standalone material-spec for the foil material,
     emitted as ``schema:isVariantOf`` — the same reference seam a material
@@ -2027,17 +2096,31 @@ def _descriptor_current_collector_to_jsonld(cc: dict[str, Any] | None) -> dict[s
     if not isinstance(cc, dict):
         return None
     name = cc.get("name", "")
-    cc_types = _parse_current_collector_types(name) if name else ["CurrentCollector"]
+    material = cc.get("material")
+    form = cc.get("form")
+    from_name = _current_collector_terms(name)
+    from_material = _current_collector_terms(material)
+    substrate = from_material.substrate or from_name.substrate
+    if isinstance(form, str) and form.strip().lower() == "other":
+        form_class = None
+    else:
+        form_class = _current_collector_terms(form).form or from_name.form
+    coating = from_material.coating or from_name.coating
+    cc_types = ["CurrentCollector", *(cls for cls in (substrate, form_class) if cls)]
     node: dict[str, Any] = {"@type": cc_types if len(cc_types) > 1 else cc_types[0]}
     if name:
         node["schema:name"] = name
+    if isinstance(material, str) and material.strip():
+        node["schema:material"] = material
+    if coating:
+        node["hasCoating"] = {"schema:material": coating}
     spec_ref = cc.get("material_spec_id")
     if isinstance(spec_ref, str) and spec_ref.strip():
         node["schema:isVariantOf"] = {"@id": spec_ref}
     prop_nodes = _descriptor_property_nodes(cc.get("property"))
     if prop_nodes:
         node["hasProperty"] = prop_nodes[0] if len(prop_nodes) == 1 else prop_nodes
-    return node if len(node) > 1 else None
+    return node if len(node) > 1 or len(cc_types) > 1 else None
 
 
 def _descriptor_electrolyte_to_jsonld(electrolyte: dict[str, Any] | None) -> dict[str, Any] | None:

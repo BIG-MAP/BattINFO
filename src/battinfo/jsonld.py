@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import json
 import re
+import warnings
 from collections.abc import Mapping
 from functools import lru_cache
 from pathlib import Path
@@ -27,7 +28,7 @@ from typing import Any, Callable
 
 from battinfo._util import is_dataset_series
 from battinfo.entities import kind_for_doc
-from battinfo.testmethod import _is_current_density_unit
+from battinfo.testmethod import _is_current_density_unit, _other_quantity_of_unit
 
 _DATA = Path(__file__).parent / "data"
 # Inline emission must expand identically to the hosted context the URL names,
@@ -62,10 +63,12 @@ def _load_entity_type_map() -> dict:
 
 def _load_test_method_vocab() -> dict:
     base = _DATA / "vocab" / "test-method"
+    termination = json.loads((base / "termination.json").read_text(encoding="utf-8"))
     return {
         "step_modes": json.loads((base / "step-modes.json").read_text(encoding="utf-8"))["modes"],
         "quantities": json.loads((base / "quantities.json").read_text(encoding="utf-8")),
-        "termination": json.loads((base / "termination.json").read_text(encoding="utf-8"))["terminations"],
+        "termination": termination["terminations"],
+        "termination_generic": termination["generic"],
     }
 
 
@@ -73,6 +76,24 @@ _PROP_MAP = _load_property_map()
 _UNIT_MAP = _load_unit_map()
 _ENTITY_MAP = _load_entity_type_map()
 _METHOD_VOCAB = _load_test_method_vocab()
+
+
+def _test_method_vocab_classes() -> list[str]:
+    """Every class the test-method vocabulary names (step processes, setpoint
+    and condition quantities, cutoff classes), in file order."""
+    found: list[str] = []
+
+    def walk(value: Any) -> None:
+        if isinstance(value, Mapping):
+            cls = value.get("emmo_class")
+            if isinstance(cls, str) and cls not in found:
+                found.append(cls)
+            for item in value.values():
+                walk(item)
+
+    for section in ("step_modes", "quantities", "termination", "termination_generic"):
+        walk(_METHOD_VOCAB[section])
+    return found
 
 
 def _load_test_method_context_terms() -> dict:
@@ -86,33 +107,11 @@ def _load_test_method_context_terms() -> dict:
         "hasControlParameter",
         "hasTerminationParameter",
         "hasProperty",
-        "ConstantCurrentCharging",
-        "ConstantCurrentDischarging",
-        "ConstantCurrentConstantVoltageCharging",
-        "ConstantCurrentConstantVoltageDischarging",
-        "ConstantPowerCharging",
-        "ConstantPowerDischarging",
-        "VoltageHold",
-        "OpenCircuitHold",
-        "IterativeWorkflow",
-        "ElectrochemicalImpedanceSpectroscopy",
-        "LinearScanVoltammetry",
-        "LowerVoltageLimit",
-        "UpperVoltageLimit",
-        "TerminationQuantity",
-        "StateOfCharge",  # SOC-based termination (the UCP/HPPC seam)
-        "CRate",
-        "ElectricCurrent",
-        "Voltage",
-        "Power",
-        "ElectricalResistance",
-        # Current densities: coin-cell protocols state their currents per area
-        # (0.1 mA/cm2), as setpoints and as cutoffs.
-        "ElectricCurrentDensity",
-        "LowerCurrentDensityLimit",
-        "UpperCurrentDensityLimit",
-        "Duration",
-        "ConventionalProperty",
+        # Every class data/vocab/test-method/ names, read from the vocabulary so
+        # a class added there reaches the contexts and the validator with no
+        # second list to keep in step. A name the bundled context lacks would be
+        # dropped here; tests/test_mapping_governance.py fails on one instead.
+        *_test_method_vocab_classes(),
         # Measurement-provenance subtree (as-run conditions emit typed
         # hasMeasurementParameter nodes on the test node itself) and the
         # metrological references the voltage_reference datum resolves to.
@@ -187,16 +186,64 @@ def test_method_class(kind: Any) -> str | None:
 
 
 def step_emmo_class(mode: str, direction: str | None) -> str | None:
-    """(mode, direction) → EMMO process class prefLabel for a method step @type."""
+    """(mode, direction) → EMMO process class prefLabel for a method step @type.
+
+    A step takes the vocabulary entry for its direction. A step with no
+    direction, or with one its mode does not list, takes the mode's ``none``
+    entry, so a cc step with no charge or discharge direction is a
+    ``CurrentControlledProcess``. Where EMMO has no class for a step, the entry
+    names a published parent (a constant-resistance discharge is a
+    ``Discharging``) or none: ``None`` is returned for a constant-resistance
+    charge, a cr or cccv step with no direction, and an unknown mode, and the
+    step is then emitted without a class (see :func:`unmapped_step_reason`).
+    """
     entry = _METHOD_VOCAB["step_modes"].get(mode)
     if not entry:
         return None
     dirs = entry.get("directions", {})
-    if direction and direction in dirs:
-        return dirs[direction]["emmo_class"]
-    if len(dirs) == 1:
-        return next(iter(dirs.values()))["emmo_class"]
-    return None
+    chosen = dirs.get(direction) if isinstance(direction, str) and direction in dirs else dirs.get("none")
+    return chosen.get("emmo_class") if isinstance(chosen, Mapping) else None
+
+
+def method_step_label(step: Mapping[str, Any]) -> str:
+    """How a step with no class is labelled: its mode, then its direction when
+    it states one (``"cr charge"``, ``"cccv"``)."""
+    parts = [str(step.get(key) or "") for key in ("mode", "direction")]
+    return " ".join(part for part in parts if part and part != "none") or "step"
+
+
+def unmapped_step_reason(step: Mapping[str, Any]) -> str | None:
+    """Why a leaf method step is emitted without a class, or ``None`` when the
+    vocabulary gives it one.
+
+    Shared by the emitter's warning and validation's
+    ``semantic.method_step_unmapped``, so both say the same thing.
+    """
+    mode = str(step.get("mode") or "")
+    direction = step.get("direction")
+    if mode == "group" or step_emmo_class(mode, direction):
+        return None
+    label = method_step_label(step)
+    reason = (
+        f"Step '{label}' has no EMMO process class, so the JSON-LD export emits it without a @type, "
+        "with its mode as skos:prefLabel."
+    )
+    entry = _METHOD_VOCAB["step_modes"].get(mode)
+    if not mode:
+        return f"{reason} The step names no mode."
+    if entry is None:
+        return f"{reason} The test-method vocabulary has no step mode '{mode}'."
+    dirs = entry.get("directions", {})
+    if direction in ("charge", "discharge"):
+        return f"{reason} EMMO publishes no class for a {entry.get('label', mode)} {direction} yet."
+    typed = [
+        f"a {mode} {key} types as {dirs[key]['emmo_class']}"
+        for key in ("charge", "discharge")
+        if isinstance(dirs.get(key), Mapping) and dirs[key].get("emmo_class")
+    ]
+    if typed:
+        return f"{reason} Give the step its direction: {', '.join(typed)}."
+    return reason
 
 
 def setpoint_emmo_class(quantity: str) -> str | None:
@@ -443,11 +490,18 @@ def _setpoint_class(key: str, unit: Any) -> str | None:
 
 
 def _termination_class(term: Mapping[str, Any]) -> str | None:
-    """The termination class of a step cutoff. A current cutoff stated per area
-    (0.05 mA/cm2) is a current-density limit, not a current limit."""
+    """The termination class of a step cutoff. A current cutoff is a
+    ``LowerCurrentLimit`` or ``UpperCurrentLimit``; stated per area (0.05
+    mA/cm2) it is a current-density limit instead. A current limit is an
+    electric current, so a current cutoff in a unit of another quantity (V, C,
+    Ah) keeps the generic termination class."""
     quantity = str(term.get("quantity") or "")
-    if quantity == "current" and _is_current_density_unit(term.get("unit")):
-        quantity = "current_density"
+    unit = term.get("unit")
+    if quantity == "current":
+        if _is_current_density_unit(unit):
+            quantity = "current_density"
+        elif isinstance(unit, str) and _other_quantity_of_unit(unit) is not None:
+            return _METHOD_VOCAB["termination_generic"]["emmo_class"]
     return termination_emmo_class(quantity, term.get("direction"))
 
 
@@ -456,7 +510,10 @@ def method_step_node(step: Mapping[str, Any]) -> dict:
 
     Groups become an ``IterativeWorkflow`` with ``NumberOfIterations`` + nested
     ``hasTask``; leaf steps carry ``hasControlParameter`` /
-    ``hasTerminationParameter`` / ``hasProperty``.
+    ``hasTerminationParameter`` / ``hasProperty``. A step no published class
+    fits keeps its parameters and carries its mode as ``skos:prefLabel``
+    instead of a class, with a ``semantic.method_step_unmapped`` warning, as a
+    property key with no mapped class does.
     """
     mode = step.get("mode")
     if mode == "group":
@@ -467,7 +524,12 @@ def method_step_node(step: Mapping[str, Any]) -> dict:
         gnode["hasTask"] = [method_step_node(s) for s in (step.get("steps") or []) if isinstance(s, Mapping)]
         return gnode
 
-    node: dict = {"@type": step_emmo_class(str(mode or ""), step.get("direction")) or "ElectrochemicalProcess"}
+    step_class = step_emmo_class(str(mode or ""), step.get("direction"))
+    if step_class:
+        node: dict = {"@type": step_class}
+    else:
+        node = {"skos:prefLabel": method_step_label(step)}
+        warnings.warn(f"semantic.method_step_unmapped: {unmapped_step_reason(step)}", UserWarning, stacklevel=2)
     if step.get("description"):
         node["rdfs:label"] = step["description"]
     controls: list = []

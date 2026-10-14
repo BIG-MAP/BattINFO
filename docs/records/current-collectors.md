@@ -85,6 +85,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "Foil"
     ],
     "schema:name": "Aluminium foil",
+    "schema:material": "Al",
     "hasProperty": {
       "@type": [
         "Thickness",
@@ -382,7 +383,7 @@ Schema: [`current-collector.schema.json`](https://w3id.org/battinfo/schema/curre
 :::{dropdown} The reasoning behind the model
 **Inline first, standalone when shared.** An electrode spec carries its collector inline (`current_collector` holder: name, form, thickness); that inline holder and this standalone record are the same shape, and both can cite the foil's material-spec via `material_spec_id` — so a lab that later starts tracking foil lots promotes the holder to a record without re-modeling.
 
-**Emission.** The name parses to a typed stack — 'Aluminium foil' → `[CurrentCollector, Aluminium, Foil]`, 'expanded mesh' variants reach `ExpandedMesh` / `WovenMesh` / `PerforatedFoil` — so substrate and form are classes, not strings. On a spec the stack rides the described individual (`<spec-IRI>#described`) under `isDescriptionFor` (the spec itself is a `[Description, schema:ProductModel, schema:CreativeWork]`); on an instance it types the node directly.
+**Emission.** The substrate and the form are classes stacked on `CurrentCollector`, read from the `material` and `form` fields first and from the name after them. `{"material": "Al", "form": "foil"}` and 'Aluminium foil' both give `[CurrentCollector, Aluminium, Foil]`, 'Stainless steel mesh' gives `[CurrentCollector, StainlessSteel, Mesh]`, and form `foam` gives `Foam`. A name that says 'woven mesh', 'expanded mesh' or 'perforated foil' gets `WovenMesh`, `ExpandedMesh` or `PerforatedFoil`. A coated foil types as its substrate and keeps the coating as text: 'Carbon coated aluminium foil' is `[CurrentCollector, Aluminium, Foil]` with `hasCoating` `{"schema:material": "Carbon"}`. A substrate with no class, such as plain steel or brass, is left untyped, and the name and the material are always kept as `schema:name` and `schema:material`. On a spec the stack rides the described individual (`<spec-IRI>#described`) under `isDescriptionFor` (the spec itself is a `[Description, schema:ProductModel, schema:CreativeWork]`); on an instance it types the node directly.
 
 **Generated surface.** `create_current_collector_spec` and friends wrap the shared component machinery; family identifiers use underscores (`current_collector`), IRI namespaces use hyphens (`current-collector`), and the API derives one from the other.
 :::

@@ -1144,6 +1144,46 @@ def _validate_ambient_temperature_unit(
         )
 
 
+def _validate_method_step_classes(
+    doc: Mapping[str, Any],
+    issues: list[ValidationIssue],
+    resource_type: str | None,
+) -> None:
+    """Warn where a test-protocol step will be emitted without a class.
+
+    EMMO has no class for some steps: a constant-resistance charge, and a cr or
+    cccv step with no charge or discharge direction. The JSON-LD export keeps
+    such a step with its parameters and its mode as a label, but gives it no
+    ``@type``, as it does for a property key with no mapped class
+    (``semantic.property_unmapped``). Steps inside a repeated group are checked
+    too.
+    """
+    from battinfo.jsonld import unmapped_step_reason
+
+    def walk(steps: Any, prefix: str) -> None:
+        if not isinstance(steps, list):
+            return
+        for idx, step in enumerate(steps):
+            if not isinstance(step, Mapping):
+                continue
+            path = f"{prefix}[{idx}]"
+            if step.get("mode") == "group":
+                walk(step.get("steps"), f"{path}.steps")
+                continue
+            reason = unmapped_step_reason(step)
+            if reason:
+                _append_issue(
+                    issues,
+                    code="semantic.method_step_unmapped",
+                    severity="warning",
+                    path=path,
+                    message=reason,
+                    resource_type=resource_type,
+                )
+
+    walk(doc.get("method"), "method")
+
+
 _EPOCH_MIN = 946684800  # 2000-01-01
 _EPOCH_MAX = 4102444800  # 2100-01-01
 
@@ -1624,6 +1664,7 @@ def validate_semantic_report(
     if isinstance(test, Mapping):
         _validate_test_semantics(test, issues, resource_type, hard_issue_severity)
     _validate_ambient_temperature_unit(doc, issues, resource_type)
+    _validate_method_step_classes(doc, issues, resource_type)
 
     return ValidationReport(issues=tuple(issues), policy=resolved_policy)
 

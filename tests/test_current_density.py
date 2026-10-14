@@ -124,7 +124,7 @@ def test_current_setpoint_stated_per_area_is_typed_as_a_current_density() -> Non
     assert control["hasMeasurementUnit"] == {"@id": "emmo:MilliAmperePerSquareCentiMetre"}
 
 
-def test_plain_current_setpoint_and_cutoff_are_unchanged() -> None:
+def test_plain_current_setpoint_and_cutoff_are_currents() -> None:
     record = _step(
         setpoints={"current": {"value": 0.2, "unit": "A"}},
         termination=[{"quantity": "current", "value": 50, "unit": "mA", "direction": "below"}],
@@ -132,7 +132,7 @@ def test_plain_current_setpoint_and_cutoff_are_unchanged() -> None:
     task = record_to_jsonld(record, "test-protocol")["hasTask"][0]
     assert task["hasControlParameter"][0]["@type"] == "ElectricCurrent"
     assert task["hasControlParameter"][0]["hasMeasurementUnit"] == {"@id": "emmo:Ampere"}
-    assert task["hasTerminationParameter"][0]["@type"] == "TerminationQuantity"
+    assert task["hasTerminationParameter"][0]["@type"] == "LowerCurrentLimit"
     assert task["hasTerminationParameter"][0]["hasMeasurementUnit"] == {"@id": "emmo:MilliAmpere"}
 
 
@@ -526,7 +526,8 @@ def test_plain_unit_prefixes_are_case_sensitive_too() -> None:
 @pytest.mark.parametrize("unit", ["pA/cm2", "Ma/cm2", "mA/Mm2"])
 def test_the_emitters_leave_an_unreadable_stored_unit_as_written(unit: str) -> None:
     """A stored record with a unit the grammar refuses still emits; the value
-    keeps its unit as text and is not typed as a current density."""
+    keeps its unit as text and is typed as the current it is written as, not as
+    a current density."""
     record = _step(
         setpoints={"current": {"value": 1, "unit": unit}},
         termination=[{"quantity": "current", "value": 1, "unit": unit, "direction": "below"}],
@@ -534,5 +535,5 @@ def test_the_emitters_leave_an_unreadable_stored_unit_as_written(unit: str) -> N
     task = record_to_jsonld(record, "test-protocol")["hasTask"][0]
     assert task["hasControlParameter"][0]["@type"] == "ElectricCurrent"
     assert task["hasControlParameter"][0]["schema:unitText"] == unit
-    assert task["hasTerminationParameter"][0]["@type"] == "TerminationQuantity"
+    assert task["hasTerminationParameter"][0]["@type"] == "LowerCurrentLimit"
     assert task["hasTerminationParameter"][0]["schema:unitText"] == unit

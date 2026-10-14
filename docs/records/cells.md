@@ -721,6 +721,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "hasCurrentCollector": {
         "@type": [
           "CurrentCollector",
+          "Aluminium",
           "Foil"
         ],
         "schema:name": "Al foil",
@@ -791,6 +792,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "hasCurrentCollector": {
         "@type": [
           "CurrentCollector",
+          "Copper",
           "Foil"
         ],
         "schema:name": "Cu foil",
@@ -1097,6 +1099,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "hasCurrentCollector": {
         "@type": [
           "CurrentCollector",
+          "Aluminium",
           "Foil"
         ],
         "schema:name": "Al foil"
@@ -1155,6 +1158,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "hasCurrentCollector": {
         "@type": [
           "CurrentCollector",
+          "Copper",
           "Foil"
         ],
         "schema:name": "Cu foil"
@@ -1448,6 +1452,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "hasCurrentCollector": {
         "@type": [
           "CurrentCollector",
+          "Aluminium",
           "Foil"
         ],
         "schema:name": "Al foil"
@@ -1506,6 +1511,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "hasCurrentCollector": {
         "@type": [
           "CurrentCollector",
+          "Copper",
           "Foil"
         ],
         "schema:name": "Cu foil"
@@ -1799,6 +1805,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "hasCurrentCollector": {
         "@type": [
           "CurrentCollector",
+          "Aluminium",
           "Foil"
         ],
         "schema:name": "Al foil"
@@ -1857,6 +1864,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "hasCurrentCollector": {
         "@type": [
           "CurrentCollector",
+          "Copper",
           "Foil"
         ],
         "schema:name": "Cu foil"
