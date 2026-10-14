@@ -1,7 +1,8 @@
 """SHACL validation layer for BattINFO records.
 
 Applies the SHACL shapes in ``assets/shapes/`` to the JSON-LD representation
-of a record (as produced by :mod:`battinfo.jsonld`).  Requires ``pyshacl``.
+of a record (as produced by :mod:`battinfo.jsonld`) with ``pyshacl``, a core
+dependency that is imported only when a check runs.
 
 The shapes target *quantity nodes* — the blank nodes that are values of each
 spec property IRI.  All violations are emitted as ``sh:Warning`` (never errors)
@@ -104,7 +105,11 @@ def validate_shacl_report(
     """Validate *doc* against the SHACL shapes and return a ValidationReport.
 
     Only cell-spec records are validated; other record types return an empty
-    report.  ``pyshacl`` must be installed (it is a dev dependency).
+    report. When pyshacl cannot be imported, the report carries a
+    ``shacl.unavailable`` warning under every policy: these shapes only warn,
+    so skipping them cannot hide an error. The publication shapes, whose
+    rules can be errors, fail closed instead (see
+    :func:`battinfo.validate.publication.validate_publication_report`).
     """
     resolved_policy = get_validation_policy(policy) if isinstance(policy, str) else policy
 

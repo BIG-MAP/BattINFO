@@ -10,7 +10,7 @@ Package code is in `src/battinfo/`, schemas and mappings in `assets/`, example r
 
 ## Set up and run the checks
 
-The project uses [uv](https://docs.astral.sh/uv/) with a committed `uv.lock`. It needs Python 3.11 or newer, and CI runs 3.11 and 3.12 on Linux and Windows.
+The project uses [uv](https://docs.astral.sh/uv/) with a committed `uv.lock`. It needs Python 3.11 or newer, and CI tests 3.11–3.14 on Linux and Windows. A further CI job installs the lowest version that `pyproject.toml` allows of each core, `publish` and `processing` requirement, on Python 3.11, and runs part of the suite against them. Raise a floor only when battinfo needs the newer release, and run `uv lock` in the same change; `tests/test_packaging_metadata.py` fails while the lock disagrees.
 
 ```bash
 uv sync --all-extras    # .venv from uv.lock, with the dev, docs and feature extras
@@ -32,6 +32,8 @@ uv run python .tools/quality/run_doc_snippets.py
 uv run pytest --nbmake docs/guides/ -q
 uv run sphinx-build -b html -W --keep-going docs docs/_build/html
 ```
+
+CI also lints every workflow file with [actionlint](https://github.com/rhysd/actionlint), which passes each `run:` script to shellcheck, so run `actionlint` before you push a change to `.github/workflows/`. `tests/test_release_workflow.py` checks the conditions in `release.yml` that keep PyPI uploads to pushed tags, and `tests/test_docs_deploy.py` runs `docs-deploy.sh` against a scratch gh-pages tree, the ontology it publishes for a final tag included. After `uv build`, the CI package job runs `scripts/check_distribution.py dist`, which fails when the wheel or the sdist carries other metadata than `pyproject.toml` declares, or the sdist holds the tests.
 
 The test suite runs with sockets disabled (pytest-socket, set in `pyproject.toml`). Mock network calls; a test that really needs the network opts in with `@pytest.mark.enable_socket`. Coverage has to stay at or above the `fail_under` floor in `pyproject.toml`.
 
@@ -107,7 +109,7 @@ A few record types are written outside the workspace. Separators, current collec
 
 For one record without a workspace, use the record models (`CellSpec`, `Cell`, `TestSpec`, `Test`, `Dataset`) with `battinfo.publish(...)`. Detailed cell composition (bill of materials, electrode coatings, electrolyte recipe) is built with the helpers in `battinfo.authoring`, such as `bom`, `electrode`, `electrolyte_recipe` and `separator_spec`.
 
-Do not build on `battinfo.Workspace`. That name is the object-graph engine behind the workspace, now at `battinfo._workspace.Workspace`; the top-level alias warns and is due to be removed one release after 0.8. The curated top level is the `__all__` list in `src/battinfo/__init__.py`. Other names still import from `battinfo` with a `DeprecationWarning` (`_LAZY_EXPORTS`), so new code imports them from their home module, for example `from battinfo.authoring import bom`. Retired class names such as `CellSpecification` resolve through `_DEPRECATED_ALIASES`.
+Do not build on `battinfo.Workspace`. That name is the object-graph engine behind the workspace, now at `battinfo._workspace.Workspace`; the top-level alias warns and is due to be removed in 0.9.0. The curated top level is the `__all__` list in `src/battinfo/__init__.py`. Other names still import from `battinfo` with a `DeprecationWarning` (`_LAZY_EXPORTS`), so new code imports them from their home module, for example `from battinfo.authoring import bom`. Retired class names such as `CellSpecification` resolve through `_DEPRECATED_ALIASES`.
 
 The workspace is for describing and publishing. Reading published data goes through `battinfo.registry.Registry` (`list`, `get`, `links`, `files`, `download`, `read`, `catalog`), which is provisional in 0.8; `docs/howto/read-registry-data.md` shows it in use. Importers and exporters for other formats (BPX, Battery Data Commons, battdat, BattInfoConverter JSON-LD, Discovery, the solid-state database, and the aurora-unicycler, bmgen, PyBaMM and UCP protocol formats) live in `battinfo.interop`.
 
@@ -156,7 +158,7 @@ Edit the source, then regenerate. A CI step or a test fails when a generated cop
 | mapping tables, emitter terms | `assets/vocab/emmo-labels.ttl` | `uv run python scripts/gen_emmo_labels.py` |
 | examples, emitters | `web/lib/showcase.generated.ts`, `web/lib/jsonld.generated.ts` | `scripts/gen_web_examples.py`, `scripts/gen_web_jsonld.py` |
 | schemas, examples, records context | the other `web/lib/*.generated.ts` files | `npm run sync:schemas`, `sync:examples`, `sync:context` in `web/` |
-| the version (`__version__` in `src/battinfo/__init__.py`) | `battinfo.ttl`, `CITATION.cff`, `SECURITY.md`, `docs/records/*.md`, `web/lib/showcase.generated.ts` | `uv run python scripts/set_version.py X.Y.Z`; `tests/test_set_version.py` runs its `--check` |
+| the version (`__version__` in `src/battinfo/__init__.py`) | `battinfo.ttl`, `CITATION.cff`, `SECURITY.md`, the `Changelog` URL in `pyproject.toml`, `docs/records/*.md`, `web/lib/showcase.generated.ts` | `uv run python scripts/set_version.py X.Y.Z`; `tests/test_set_version.py` runs its `--check` |
 | EMMO pins in `battinfo.ttl` | `src/battinfo/data/context/domain-battery.context.json`, `tests/fixtures/emmo/closure-terms.json` | set `PINNED_VERSION` in `.tools/quality/refresh_emmo_context.py`, run it, then run `.tools/quality/emmo_closure_terms.py` (both read the release tags online) |
 
 The record-type pages under `docs/records/` run each authoring snippet against the current library and validate the result under the strict policy. A change to a schema, the API or an emitter that alters a reference record must regenerate that chapter in the same commit.

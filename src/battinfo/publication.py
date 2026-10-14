@@ -26,6 +26,7 @@ from battinfo._util import (
     is_file_uri,
     url_segment,
 )
+from battinfo.api._shared import PACKAGED_LIBRARY_CELL_SPEC_DIR
 from battinfo.bundle import (
     ZENODO_CELL_RECORD_FILENAME,
     BattinfoBundle,
@@ -169,9 +170,8 @@ def check_artifact_conformance(
     return out
 
 
-ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_CR2032_DATASHEET = Path("ENERGIZER__CR2032.pdf")
-DEFAULT_CR2032_LIBRARY_SPEC = ROOT / "src" / "battinfo" / "data" / "library" / "cell-spec" / "ENERGIZER__CR2032.json"
+DEFAULT_CR2032_LIBRARY_SPEC = PACKAGED_LIBRARY_CELL_SPEC_DIR / "ENERGIZER__CR2032.json"
 DEFAULT_CR2032_DATASET_DIRS: tuple[Path, ...] = ()
 DEFAULT_PUBLISH_FILENAME = "battinfo.publish.jsonld"
 DEFAULT_RO_CRATE_METADATA_FILENAME = "ro-crate-metadata.json"

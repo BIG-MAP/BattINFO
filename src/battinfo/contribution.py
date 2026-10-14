@@ -131,17 +131,54 @@ def validate_contribution_manifest(manifest: dict) -> list[str]:
     return errors
 
 
-def _resolve_type_record_path(cell_spec_iri: str) -> str | None:
-    """Return the absolute path to the library record.json for a cell-spec IRI."""
-    from battinfo.api import DEFAULT_LIBRARY_CELL_TYPES_DIR, query_library_cell_specs
-    from battinfo.publication import DEFAULT_CR2032_LIBRARY_SPEC
+# ── Cell-spec library ─────────────────────────────────────────────────────────
 
-    packaged_lib = DEFAULT_CR2032_LIBRARY_SPEC.parent
-    for directory in (packaged_lib, DEFAULT_LIBRARY_CELL_TYPES_DIR):
+
+def _cell_spec_libraries() -> tuple[Path, Path]:
+    """The cell-spec libraries the contributor and batch commands read, in search order.
+
+    First the library packaged with battinfo, found from the package itself so
+    that an installed wheel finds it too, then ``./.battinfo/library/cell-spec``
+    under the current folder, where ``battinfo library save cell-spec`` writes.
+    """
+    from battinfo.api import DEFAULT_LIBRARY_CELL_TYPES_DIR, PACKAGED_LIBRARY_CELL_SPEC_DIR
+
+    return PACKAGED_LIBRARY_CELL_SPEC_DIR, DEFAULT_LIBRARY_CELL_TYPES_DIR
+
+
+def _cell_spec_libraries_hint() -> str:
+    """Where a cell-spec lookup searched, and how to add a cell spec, for an error message.
+
+    The command it suggests has ``--no-sync-packaged-copy``: by default
+    ``library save`` also writes a copy under ``./src/battinfo/data/``, a
+    source-checkout path that would be a stray folder anywhere else.
+    """
+    packaged, local = _cell_spec_libraries()
+    return (
+        f"Searched the library packaged with battinfo ({packaged}) and the local library ({local.absolute()}). "
+        "Add the cell spec to the local library with "
+        "`battinfo library save cell-spec --input <file> --no-sync-packaged-copy`, run from this folder."
+    )
+
+
+def _library_cell_spec(cell_spec_iri: str) -> dict[str, Any]:
+    """The cell-spec library entry for *cell_spec_iri*, as ``query_library_cell_specs`` returns it.
+
+    Raises ValueError, naming the IRI and both libraries, when neither holds it:
+    the commands must not go on with a cell spec that carries only its IRI.
+    """
+    from battinfo.api import query_library_cell_specs
+
+    for directory in _cell_spec_libraries():
         results = query_library_cell_specs(id=cell_spec_iri, directory=directory)
         if results:
-            return results[0]["path"]
-    return None
+            return results[0]
+    raise ValueError(f"Cell spec {cell_spec_iri} is not in the cell-spec library. {_cell_spec_libraries_hint()}")
+
+
+def _resolve_type_record_path(cell_spec_iri: str) -> str:
+    """Return the path of the library record for a cell-spec IRI (see :func:`_library_cell_spec`)."""
+    return _library_cell_spec(cell_spec_iri)["path"]
 
 
 def _contribution_to_ingest_manifest(manifest: dict, root: Path) -> dict:
@@ -326,6 +363,10 @@ def process_contribution(
     When ``bundle=False`` the workspace is built but not bundled into a
     registry-intake package.  Use this for batch→Zenodo workflows where
     bundling is handled by :func:`package_batch`.
+
+    The cell spec that ``cell_spec_iri`` names is read from the cell-spec
+    library (the packaged one, then ``./.battinfo/library/cell-spec``); a
+    ValueError names both when neither holds it.
     """
     root = Path(root).resolve()
     manifest = load_contribution_manifest(root)
@@ -534,24 +575,19 @@ def _resolve_cell_spec_for_batch(cell_spec: str) -> tuple[str, str, str, str]:
 
     Accepts either a full BattINFO IRI or a free-text query like
     ``"Energizer CR2032"`` / ``"Energizer/CR2032"``.  Searches the packaged
-    library first, then the local workspace library as a fallback.
+    library first, then the local workspace library as a fallback, and raises
+    ValueError when neither holds a match.
     """
     import re
 
-    from battinfo.api import DEFAULT_LIBRARY_CELL_TYPES_DIR, query_library_cell_specs
-    from battinfo.publication import DEFAULT_CR2032_LIBRARY_SPEC
+    from battinfo.api import query_library_cell_specs
 
-    packaged_lib = DEFAULT_CR2032_LIBRARY_SPEC.parent
     is_iri = bool(re.fullmatch(_CELL_TYPE_IRI_PATTERN, cell_spec.strip()))
 
     if is_iri:
         iri = cell_spec.strip()
-        for directory in (packaged_lib, DEFAULT_LIBRARY_CELL_TYPES_DIR):
-            results = query_library_cell_specs(id=iri, directory=directory)
-            if results:
-                r = results[0]
-                return iri, f"{r['manufacturer']} {r['model']}", r["manufacturer"], r["model"]
-        return iri, iri.rstrip("/").split("/")[-1], "", ""
+        r = _library_cell_spec(iri)
+        return iri, f"{r['manufacturer']} {r['model']}", r["manufacturer"], r["model"]
 
     query = cell_spec.strip().replace("/", " ")
     parts = query.split(None, 1)
@@ -559,7 +595,7 @@ def _resolve_cell_spec_for_batch(cell_spec: str) -> tuple[str, str, str, str]:
     model = parts[1] if len(parts) > 1 else None
 
     results = []
-    for directory in (packaged_lib, DEFAULT_LIBRARY_CELL_TYPES_DIR):
+    for directory in _cell_spec_libraries():
         results = query_library_cell_specs(
             manufacturer=manufacturer,
             model_contains=model,
@@ -569,7 +605,10 @@ def _resolve_cell_spec_for_batch(cell_spec: str) -> tuple[str, str, str, str]:
             break
 
     if not results:
-        raise ValueError(f"No cell spec found matching {cell_spec!r}. Check the library or pass the IRI directly.")
+        raise ValueError(
+            f"No cell spec found matching {cell_spec!r}. Check the spelling, or pass the cell spec's IRI. "
+            f"{_cell_spec_libraries_hint()}"
+        )
     if len(results) > 1:
         options = "\n".join(f"  {r['manufacturer']} {r['model']}  ({r['id']})" for r in results[:5])
         raise ValueError(
@@ -681,7 +720,11 @@ def init_batch(
         output_dir: Root directory to create (must not exist unless
                     *overwrite* is True).
         cell_spec: BattINFO cell-spec IRI **or** a free-text query like
-                   ``"Energizer CR2032"`` — resolved via the library.
+                   ``"Energizer CR2032"``, looked up in the packaged
+                   cell-spec library, then in
+                   ``./.battinfo/library/cell-spec``. A cell spec that
+                   neither holds raises ValueError before anything is
+                   written.
         count: Number of cell instances to scaffold.
         batch_id: Batch / lot identifier stamped on every manifest.
         lab: Institution name stamped on every manifest.
@@ -1013,23 +1056,17 @@ def _test_kind_from_path(path: Path, subdir_name: str = "") -> str:
 
 
 def _load_cell_spec_for_batch(cell_spec_iri: str) -> tuple[Any, Any]:
-    """Return (CellSpec, CellSpec | None) for a cell-spec IRI.
+    """Return (CellSpec, CellSpec) for a cell-spec IRI: the cell spec and the library specification it is built from.
 
-    Searches the packaged library first, then the local workspace library.
-    Falls back to a minimal CellSpec carrying only the IRI.
+    Searches the packaged library first, then the local workspace library, and
+    raises ValueError when neither holds the IRI (see :func:`_library_cell_spec`),
+    so a package never carries a cell spec with nothing but its IRI.
     """
-    from battinfo.api import DEFAULT_LIBRARY_CELL_TYPES_DIR, query_library_cell_specs
     from battinfo.bundle import CellSpec
-    from battinfo.publication import DEFAULT_CR2032_LIBRARY_SPEC
 
-    packaged_lib = DEFAULT_CR2032_LIBRARY_SPEC.parent
-    for directory in (packaged_lib, DEFAULT_LIBRARY_CELL_TYPES_DIR):
-        results = query_library_cell_specs(id=cell_spec_iri, directory=directory)
-        if results:
-            spec = CellSpec.from_library_record(results[0]["record"])
-            ct = CellSpec.from_cell_specification(spec, id=cell_spec_iri)
-            return ct, spec
-    return CellSpec(id=cell_spec_iri), None
+    spec = CellSpec.from_library_record(_library_cell_spec(cell_spec_iri)["record"])
+    ct = CellSpec.from_cell_specification(spec, id=cell_spec_iri)
+    return ct, spec
 
 
 def _is_file_url(value: object) -> bool:
@@ -1087,6 +1124,11 @@ def package_batch(
         ``bundle_path``, ``publish_path``, ``ro_crate_path``,
         ``staged_data_files``, ``file_url_map``, etc.) plus
         ``cell_count``, ``entry_count``.
+
+    Raises:
+        ValueError: The cell-spec library (the packaged one, then
+            ``./.battinfo/library/cell-spec``) has no record for the batch's
+            ``cell_spec_iri``. Nothing is staged.
     """
     from battinfo.bundle import (
         Cell,
