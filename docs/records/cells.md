@@ -239,6 +239,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     "schema:IndividualProduct"
   ],
   "@id": "https://w3id.org/battinfo/cell/y9xy-kr0v-y5tn-dfj7",
+  "schema:name": "LAB-2026-0001",
   "schema:serialNumber": "LAB-2026-0001",
   "hasDescription": {
     "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5"

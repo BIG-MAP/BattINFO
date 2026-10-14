@@ -1600,6 +1600,8 @@ def _descriptor_housing_to_jsonld(housing: Any, fmt: Any) -> dict[str, Any]:
             node["schema:size"] = case["size_code"]
         if not mat_class and case.get("material"):
             node["schema:material"] = case["material"]
+        if case.get("coating"):
+            node["hasCoating"] = {"schema:material": case["coating"]}
         _converter_component_metadata(node, case)
         props = _descriptor_property_nodes(case.get("property"))
         if props:

@@ -332,6 +332,20 @@ def test_separator_manufacturer_and_product_id_are_emitted() -> None:
     assert node["schema:productID"] == "2500"
 
 
+def test_case_coating_is_emitted() -> None:
+    from battinfo.transform.json_to_jsonld import _descriptor_housing_to_jsonld
+
+    relations = _descriptor_housing_to_jsonld({"case": {"material": "Stainless steel", "coating": "Aluminium"}}, "coin")
+    assert relations["hasCase"]["hasCoating"] == {"schema:material": "Aluminium"}
+
+
+def test_cell_instance_name_is_emitted() -> None:
+    from battinfo.jsonld import cell_instance_to_jsonld
+
+    node = cell_instance_to_jsonld({"cell_instance": {"id": "x", "name": "240616_bco_gr-NMC_01"}})
+    assert node["schema:name"] == "240616_bco_gr-NMC_01"
+
+
 def test_record_notes_reach_publication_graph(tmp_path: Path) -> None:
     ws = _new_ws(tmp_path)
     ws.add("test", type="capacity_check", cell="SN-1", data="f.csv")

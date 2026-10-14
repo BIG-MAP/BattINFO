@@ -886,6 +886,8 @@ export const recordsContext: Record<string, unknown> = {
     "MilliWatt": "emmo:MilliWatt",
     "SquareMilliMetre": "emmo:SquareMilliMetre",
     "CubicMilliMetre": "emmo:CubicMilliMetre",
-    "Day": "emmo:Day"
+    "Day": "emmo:Day",
+    "MicroLitre": "emmo:MicroLitre",
+    "TrisTrimethylsilyPhosphite": "https://w3id.org/emmo/domain/chemical-substance#substance_69ce48e4_23e3_4758_84ae_f00ed3f79518"
   }
 };

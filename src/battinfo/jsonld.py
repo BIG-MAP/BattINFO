@@ -1164,6 +1164,7 @@ def cell_instance_to_jsonld(record: dict, *, cell_spec: Mapping | None = None) -
         "@context": context,
         "@type": ["BatteryCell", "schema:IndividualProduct"],
         "@id": ci.get("id", ""),
+        "schema:name": ci.get("name"),
         "schema:serialNumber": ci.get("serial_number"),
     }
     if ci.get("cell_spec_id"):
