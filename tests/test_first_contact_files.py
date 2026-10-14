@@ -219,3 +219,82 @@ def test_ws_module_docstring_example_runs_offline(tmp_path: Path, monkeypatch: p
         exec(compile(block.text, block.label, "exec"), namespace)
     saved = sorted(path.parent.name for path in tmp_path.glob("**/.battinfo/records/*/*.json"))
     assert {"cell-spec", "cell-instance", "test-protocol", "test"} <= set(saved), saved
+
+
+# ── The docs home page ────────────────────────────────────────────────────────
+
+
+def _home_page_includes() -> list[tuple[str, str, set[str]]]:
+    """(tab label, path from the repository root, option names) of each literalinclude on docs/index.rst."""
+    lines = _read("docs/index.rst").splitlines()
+    includes = []
+    for index, line in enumerate(lines):
+        match = re.match(r"^(\s*)\.\. literalinclude::\s*(\S+)\s*$", line)
+        if not match:
+            continue
+        options = set()
+        for follow in lines[index + 1 :]:
+            option = re.match(r"^(\s+):([\w-]+):", follow)
+            if not option or len(option.group(1)) <= len(match.group(1)):
+                break
+            options.add(option.group(2))
+        tabs = [
+            found.group(1).strip() for prev in lines[:index] if (found := re.match(r"^\s*\.\. tab-item::(.*)$", prev))
+        ]
+        path = (ROOT / "docs" / match.group(2)).resolve().relative_to(ROOT).as_posix()
+        includes.append((tabs[-1] if tabs else "", path, options))
+    return includes
+
+
+def test_docs_home_page_shows_the_flagship_record_and_its_generated_jsonld() -> None:
+    """Both tabs include files, so neither can drift from the record or from what the library emits."""
+    gallery = _load_tool("scripts/gen_web_jsonld.py")
+    flagship = next(item for item in gallery.GALLERY if item["slug"] == "cell-spec")
+    # tests/test_web_generated.py fails when this file drifts from record_to_jsonld.
+    jsonld = (gallery.PUBLIC_DIR / "cell-spec.jsonld").relative_to(ROOT).as_posix()
+
+    includes = _home_page_includes()
+
+    assert [path for _, path, _ in includes] == [flagship["file"], jsonld]
+    for label, path, options in includes:
+        assert (ROOT / path).is_file(), path
+        assert "flagship" in label.lower(), f"label the tab that shows {path} as the flagship's"
+        # Whole files: a line range would shift when the file is regenerated.
+        assert not options & {"lines", "start-after", "end-before", "start-at", "end-at", "pyobject"}, options
+    assert ".. code-block:: json" not in _read("docs/index.rst"), "a hand-written record goes stale"
+
+
+def test_docs_home_page_python_tab_says_it_mints_its_own_iri(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    snippets = _load_tool(".tools/quality/run_doc_snippets.py")
+    assert "docs/index.rst" in snippets.SNIPPET_FILES, "the doc-snippet job runs the home page's Python tab"
+    blocks = [block for block in snippets._extract("docs/index.rst") if block.lang == "python"]
+    assert len(blocks) == 1, blocks
+    code = blocks[0].text
+
+    monkeypatch.chdir(tmp_path)
+    namespace: dict = {"__name__": "docs_home_page"}
+    exec(compile(code, blocks[0].label, "exec"), namespace)
+
+    flagship = json.loads(_read("examples/cell-spec/A123__ANR26650M1-B.json"))["cell_spec"]["id"]
+    minted = namespace["result"].canonical_iri
+    assert minted.startswith("https://w3id.org/battinfo/spec/") and minted != flagship
+    comments = " ".join(line.strip(" #") for line in code.splitlines() if line.lstrip().startswith("#"))
+    assert "own IRI" in comments and "flagship" in comments, "say that the snippet mints its own IRI"
+
+
+# ── Tutorials in Colab ────────────────────────────────────────────────────────
+
+_COLAB_LINK = re.compile(r"https://colab\.research\.google\.com/github/[^\s)\"'>]+")
+
+
+@pytest.mark.parametrize(
+    "rel", ["README.md", "QUICKSTART.md", "docs/index.md", "docs/index.rst", "docs/pages/guides.rst"]
+)
+def test_colab_links_open_a_release_tag_with_an_install_cell(rel: str) -> None:
+    """Colab opened on main runs the notebook as main has it, against whatever pip installs then."""
+    for link in _COLAB_LINK.findall(_read(rel)):
+        pinned = re.search(r"/blob/v\d+\.\d+\.\d+/(.+\.ipynb)$", link)
+        assert pinned, f"{rel} opens {link} from a branch; pin it to a release tag"
+        notebook = json.loads(_read(pinned.group(1)))
+        code = ["".join(cell["source"]) for cell in notebook["cells"] if cell["cell_type"] == "code"]
+        assert any("pip install" in source for source in code), f"{pinned.group(1)} has no install cell for Colab"

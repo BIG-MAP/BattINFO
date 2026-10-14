@@ -88,6 +88,7 @@ registry_result = publish(
 )
 ```
 
+- `publish` takes a `CellSpec` only. A `Cell`, `TestSpec`, `Test` or `Dataset` is saved with `save_cell_instance`, `save_test_spec`, `save_test` or `save_dataset`, which mint its IRI; the "Query and save" section below shows one.
 - `destination="local"` writes the canonical BattINFO record and returns its path in `debug_paths`.
 - `destination="registry"` also generates the submission package and submits it to `battinfo-registry`.
 - `destination="battery-genome"` additionally returns the expected Battery Genome page URL when `platform_base_url` is configured.

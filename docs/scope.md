@@ -36,7 +36,7 @@ These capabilities are covered by tests in CI, documented as supported, and are 
 - JSON-LD for every record type through `battinfo.record_to_jsonld`, built from the curated property and unit maps and the versioned records context at `https://w3id.org/battinfo/context/records/v1.json`
 - authoring with `battinfo.workspace()` for cells, test specs, tests, datasets from local data files, materials, electrodes, equipment and channels, and parameter sets, all saved with deterministic IRIs
 - publishing a workspace as a Zenodo deposit (`ws.zenodo()`, which leaves a draft unless `publish=True`) and submitting it to the registry review queue (`ws.submit()`), with `ws.preview_jsonld()` to run the publication checks on the deposit graph beforehand
-- single records through the record models (`CellSpec`, `Cell`, `TestSpec`, `Test`, `Dataset`) and `battinfo.publish(...)`
+- single cell-spec records with `CellSpec` and `battinfo.publish(...)`, and single `Cell`, `TestSpec`, `Test` and `Dataset` records with `save_cell_instance`, `save_test_spec`, `save_test` and `save_dataset`
 - CLI and `battinfo.api` save, query, index and resolver-publish flows for cell specs, cells, test specs, tests and datasets; `battinfo save record` saves a record of any type from a JSON file
 - detailed cell descriptions for coin, cylindrical, single-layer pouch, multilayer pouch and prismatic formats, plus half cells and three-electrode cells through `cell_configuration`
 - test records with a controlled `kind` such as `cycling`, `capacity_check`, `rate_capability`, `gitt`, `hppc` or `eis` (the full list is in `assets/schemas/test.schema.json`)
@@ -106,6 +106,10 @@ These gaps were known when 0.8.0 was released and are planned for 0.8.x or 0.9. 
 ### Command line
 
 - `battinfo dataset` is experimental: its `init`, `process` and `publish` steps cannot take a contribution through to a published dataset in 0.8.0. Publish a dataset from Python with `ws.add("test", data=...)` and `ws.zenodo()` instead.
+
+### Tutorials
+
+- The tutorials have no "Open in Colab" link in 0.8.0. A hosted notebook service such as Colab starts without BattINFO, so install it in the notebook first, as [Getting started](pages/getting-started.rst) describes; tutorial 6 also needs the `processing` extra.
 
 ### Dependencies
 

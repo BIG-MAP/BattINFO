@@ -1,9 +1,9 @@
 """Execute the code snippets in the newcomer-path docs so they cannot rot.
 
-Extracts fenced code blocks from QUICKSTART.md, docs/python-api.md, and
-docs/pages/getting-started.rst, and the ``::`` example blocks of the module
-docstrings listed (a ``.py`` path in ``SNIPPET_FILES``), then executes the
-safe ones:
+Extracts the code blocks of the pages listed in ``SNIPPET_FILES`` (QUICKSTART.md,
+the docs home page, docs/python-api.md, the getting-started page and the how-to
+guides), and the ``::`` example blocks of the module docstrings listed there (a
+``.py`` path), then executes the safe ones:
 
 - ``python`` blocks run cumulatively per file (each block re-runs the file's
   previous blocks first, in a fresh temp directory, so later blocks may use
@@ -37,6 +37,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 
 SNIPPET_FILES = (
     "QUICKSTART.md",
+    "docs/index.rst",
     "docs/python-api.md",
     "docs/pages/getting-started.rst",
     "docs/pages/troubleshooting.md",

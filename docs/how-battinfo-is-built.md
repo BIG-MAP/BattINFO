@@ -61,7 +61,7 @@ If you know pydantic, you already know the core of BattINFO.
 | You are… | Use | Module |
 |---|---|---|
 | Working with **data files** (the usual case) | `ws = battinfo.workspace(".")` → `convert / search / add / save / publish` (`ws.quickstart()` prints the recipe) | `ws.py` |
-| **Scripting records** directly — building a cell spec in code, batch-generating records | The record classes (`CellSpec`, `Test`, …) + `battinfo.publish(...)` or the `save_*` functions | `bundle.py`, `api.py` |
+| **Scripting records** directly — building a cell spec in code, batch-generating records | The record classes with their `save_*` functions, or `battinfo.publish(...)` for a `CellSpec` | `bundle.py`, `api.py` |
 
 Both run on the same internal object-graph engine (`_workspace.py`), which
 finalizes links and mints IRIs at save time — an implementation detail, not a

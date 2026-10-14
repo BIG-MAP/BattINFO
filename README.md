@@ -26,7 +26,6 @@ and resolvable through persistent `https://w3id.org/battinfo/` identifiers.
 [![Ontology: EMMO domain-battery](https://img.shields.io/badge/ontology-EMMO%20domain--battery-6E4C9F.svg)](https://github.com/emmo-repo/domain-battery)
 <br/>
 <!-- Badges · learn & cite -->
-[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/BIG-MAP/BattINFO/blob/main/docs/guides/01-concepts.ipynb)
 [![nbviewer](https://img.shields.io/badge/render-nbviewer-F37726?logo=jupyter&logoColor=white)](https://nbviewer.org/github/BIG-MAP/BattINFO/tree/main/docs/guides/)
 <!-- DOI: the Zenodo concept DOI; it resolves to the latest archived release -->
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6304782.svg)](https://doi.org/10.5281/zenodo.6304782)
@@ -154,7 +153,9 @@ shows which surface (workspace, `battinfo.api`, CLI) authors which record types 
 
 Six tutorial notebooks in [`docs/guides/`](https://github.com/BIG-MAP/BattINFO/tree/main/docs/guides) — one story, from the
 record model to a published dataset. Each runs from its own folder and writes
-only to a throwaway `_scratch/` directory next to it.
+only to a throwaway `_scratch/` directory next to it. The example files they read
+ship inside the package, so a pip install is enough to run them (tutorial 6 also
+needs the `processing` extra).
 
 | Tutorial | What you'll learn |
 |---|---|
