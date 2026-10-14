@@ -232,18 +232,8 @@ def _paginate(items: list[dict[str, Any]], limit: int, offset: int) -> list[dict
     return items[offset : offset + limit]
 
 
-def _spec_numeric_value(specs: Mapping[str, Any], key: str) -> float | None:
-    item = specs.get(key)
-    if not isinstance(item, Mapping):
-        return None
-    for candidate in ("value", "value_typical", "value_max", "value_min"):
-        val = item.get(candidate)
-        if isinstance(val, (int, float)):
-            return float(val)
-    return None
-
-
 def _quantity_numeric_value(specs: Mapping[str, Any], key: str) -> float | None:
+    """The number a quantity states: ``value``, else ``typical_value``, ``max_value``, ``min_value``."""
     item = specs.get(key)
     if not isinstance(item, Mapping):
         return None

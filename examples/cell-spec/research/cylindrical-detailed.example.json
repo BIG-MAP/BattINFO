@@ -12,7 +12,7 @@
     "chemistry": "Li-ion",
     "positive_electrode_basis": "LFP",
     "negative_electrode_basis": "graphite",
-    "size_code": "18650"
+    "size_code": "R18650"
   },
   "properties": {
     "nominal_capacity": {

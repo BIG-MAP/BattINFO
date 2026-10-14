@@ -392,6 +392,80 @@ def resolve_unit_iri(unit_symbol: str) -> str | None:
     return None
 
 
+# Where the unit tables give an IRI more than one symbol, the one it reads back
+# as. UnitOne is written both for counts ('count') and for fractions ('1'); a
+# reader cannot tell which was meant, and '1' is the unit's own symbol.
+_READ_BACK_SYMBOLS: dict[str, str] = {
+    "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978": "1",
+}
+
+
+def _expand_unit_iri(term: str) -> str:
+    """*term* as a full IRI: a records-context term or a ``prefix:local`` IRI is expanded."""
+    mapped = _CONTEXT_INLINE.get(term)
+    if isinstance(mapped, Mapping):
+        mapped = mapped.get("@id")
+    if isinstance(mapped, str):
+        term = mapped
+    prefix, sep, local = term.partition(":")
+    base = _CONTEXT_INLINE.get(prefix) if sep else None
+    if isinstance(base, str) and base.endswith(("#", "/")):
+        return base + local
+    return term
+
+
+@lru_cache(maxsize=1)
+def _unit_symbols_by_iri() -> dict[str, str]:
+    """{full unit IRI -> symbol}: every table the emitters resolve a unit through, reversed.
+
+    The first symbol listed for an IRI wins, in the emitters' own order: the
+    curated map, the hand-kept aliases, the candidate map, then the
+    records-context unit terms and the test-condition extras. The unit IRIs
+    BattINFO wrote by mistake before 0.8.0 read back as the symbol they stood for.
+    """
+    from battinfo.transform.json_to_jsonld import LEGACY_UNIT_IRIS, MANUAL_UNIT_TYPES  # noqa: PLC0415
+
+    table: dict[str, str] = dict(_READ_BACK_SYMBOLS)
+
+    def _add(symbol: Any, iri: Any) -> None:
+        if isinstance(symbol, str) and symbol and isinstance(iri, str) and iri:
+            table.setdefault(_expand_unit_iri(iri), symbol)
+
+    for symbol, iri in _UNIT_MAP.items():
+        _add(symbol, iri)
+    for symbol, iri in MANUAL_UNIT_TYPES.items():
+        _add(symbol, iri)
+    candidates = _DATA / "mappings" / "domain-battery" / "unit_map.candidates.json"
+    if candidates.exists():
+        for entry in json.loads(candidates.read_text(encoding="utf-8")).get("mappings", []):
+            _add(entry.get("symbol"), entry.get("unit_iri"))
+    for symbol, iri in CONTEXT_UNIT_SYMBOLS.items():
+        _add(symbol, iri)
+    for symbol, iri in TEST_CONDITION_UNIT_IRI.items():
+        _add(symbol, iri)
+    for iri, symbol in LEGACY_UNIT_IRIS.items():
+        _add(symbol, iri)
+    return table
+
+
+def unit_symbol_for_iri(unit: Any) -> str | None:
+    """The unit symbol a unit IRI stands for, or ``None`` when no unit table names it.
+
+    The reverse of :func:`resolve_unit_iri` and of the unit lookup the JSON-LD
+    emitters use, for code that reads a graph back into records. *unit* may be
+    a full IRI, a compact one (``emmo:MilliVolt``), a records-context term or a
+    node reference (``{"@id": ...}``). Where several symbols share an IRI, the
+    canonical one comes back: ``°C`` for DegreeCelsius, ``1`` for UnitOne. An IRI
+    no table names gives ``None``; the caller decides what to keep, and a prefix
+    is never dropped to guess at the base unit.
+    """
+    if isinstance(unit, Mapping):
+        unit = unit.get("@id")
+    if not isinstance(unit, str) or not unit.strip():
+        return None
+    return _unit_symbols_by_iri().get(_expand_unit_iri(unit.strip()))
+
+
 def _attach_unit(node: dict, unit_symbol: Any) -> None:
     """Put the unit on a quantity node: its IRI when one is mapped, otherwise
     the symbol as ``schema:unitText``. A value never loses its unit.

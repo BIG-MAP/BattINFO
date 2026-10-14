@@ -39,6 +39,8 @@ from battinfo._jsonio import chmod_owner_only as _chmod_owner_only
 from battinfo._jsonio import read_json as _read_json
 from battinfo._jsonio import write_private_text as _write_private_text
 from battinfo._util import _now_iso, is_dataset_series, local_file_references
+from battinfo._util import jsonld_literal as _jsonld_literal
+from battinfo._util import jsonld_text as _jsonld_text
 from battinfo._util import local_files_message as _local_files_message
 from battinfo.canonical_aliases import migrate_quantity_values
 from battinfo.entities import entity_id_from_doc, is_dashed_uid, kind_for_type, record_set_dirs, save_entity_path
@@ -600,18 +602,6 @@ def _media_type_from_jsonld(value: Any) -> str:
     if value.startswith(_IANA_MEDIA_TYPES):
         return value[len(_IANA_MEDIA_TYPES) :]
     return "" if value.startswith(("http://", "https://")) else value
-
-
-def _jsonld_literal(value: Any) -> Any:
-    """The value of a typed JSON-LD literal (``{"@value": ..., "@type": ...}``), else *value*."""
-    return value.get("@value") if isinstance(value, Mapping) else value
-
-
-def _jsonld_text(value: Any) -> str | None:
-    """The text of a JSON-LD string value (plain, typed, or a list of them, joined by '; ')."""
-    items = value if isinstance(value, list) else [value]
-    texts = [text for item in items if isinstance(text := _jsonld_literal(item), str) and text.strip()]
-    return "; ".join(texts) or None
 
 
 def _warn_text_moved(source: str, notes: Iterable[str]) -> None:
@@ -2669,11 +2659,13 @@ class AuthoringWorkspace:
 
         The funding block is set when absent; each contributor (a ``Person``
         carrying the ORCID in ``same_as``) is appended if its ORCID is not already
-        listed; the workspace default license is set to reflect the current value.
+        listed; the workspace default license is set on a record that carries
+        none, and a license the record states itself is kept.
         All are idempotent and back-fill records authored before the
         project/contributor/license was set — a re-save whose stamped result is
         byte-identical is reported ``unchanged``, while changing the workspace
-        license re-stamps the new value (reported ``updated``).  Returns
+        license re-stamps the new value on the records that take the default
+        (reported ``updated``).  Returns
         ``(None, counters)`` when none of project/contributor/license is set.
         ``counters`` is updated as the callback runs so :meth:`save` can report
         how many records each stamp reached.
@@ -2707,16 +2699,14 @@ class AuthoringWorkspace:
             if lic:
                 # Datasets carry the license on the dataset body (the existing
                 # slot the emitter reads and where an explicit ws.add(license=)
-                # lands); other record types carry it at the top level. An
-                # explicit per-record dataset license is left untouched — the
-                # workspace default only back-fills records that have none.
+                # lands); other record types carry it at the top level. For
+                # every record type the workspace default only back-fills a
+                # record that has none: an explicit per-record license, such
+                # as ws.add("parameter_set", ..., license=...), is kept.
                 ds_body = doc.get("dataset")
-                if isinstance(ds_body, dict):
-                    if not ds_body.get("license"):
-                        ds_body["license"] = lic
-                        counters["license"] += 1
-                elif doc.get("license") != lic:
-                    doc["license"] = lic
+                holder = ds_body if isinstance(ds_body, dict) else doc
+                if not holder.get("license"):
+                    holder["license"] = lic
                     counters["license"] += 1
 
         return stamp, counters
@@ -2856,7 +2846,8 @@ class AuthoringWorkspace:
         Mirrors :meth:`contributor` and :meth:`project`: the value is persisted in
         ``.battinfo/workspace.json`` and stamped onto each record at ``save()``, so
         the license travels with the record itself (FAIR R1.1) rather than existing
-        only on the Zenodo deposit. Pass an SPDX license identifier (e.g.
+        only on the Zenodo deposit. It fills in a record that has no license of its
+        own; a record that states one keeps it. Pass an SPDX license identifier (e.g.
         ``"cc-by-4.0"``) or a license URL; a recognised identifier is normalised to
         canonical lower-case, anything else is kept verbatim with a warning.
 
@@ -4467,7 +4458,7 @@ class AuthoringWorkspace:
             return term
 
         # ── 3. Build reverse lookup tables ────────────────────────────────────
-        from battinfo.jsonld import _UNIT_MAP
+        from battinfo.jsonld import unit_symbol_for_iri
 
         # Load prop map directly so we can keep only the FIRST key per IRI
         # (later aliases like "discharging_temperature_min" must not overwrite
@@ -4480,24 +4471,6 @@ class AuthoringWorkspace:
                 key = m.get("key", "")
                 if iri and key and iri not in rev_prop:  # first occurrence wins
                     rev_prop[iri] = key
-
-        rev_unit: dict[str, str] = {v: k for k, v in _UNIT_MAP.items()}
-        # The shared quantity-node builder resolves units through the curated /
-        # candidate unit maps as well, so reverse those too (first symbol wins;
-        # _UNIT_MAP symbols take precedence for stability with older files).
-        for _unit_file in ("unit_map.curated.json", "unit_map.candidates.json"):
-            _unit_path = Path(__file__).parent / "data" / "mappings" / "domain-battery" / _unit_file
-            if _unit_path.exists():
-                for m in json.loads(_unit_path.read_text(encoding="utf-8")).get("mappings", []):
-                    if m.get("unit_iri") and m.get("symbol"):
-                        rev_unit.setdefault(m["unit_iri"], m["symbol"])
-        from battinfo.transform.json_to_jsonld import LEGACY_UNIT_IRIS as _LEGACY_UNIT_IRIS
-        from battinfo.transform.json_to_jsonld import MANUAL_UNIT_TYPES as _MANUAL_UNIT_TYPES
-
-        for _sym, _iri in _MANUAL_UNIT_TYPES.items():
-            rev_unit.setdefault(_iri, _sym)
-        for _iri, _sym in _LEGACY_UNIT_IRIS.items():
-            rev_unit.setdefault(_iri, _sym)
 
         # Build chemistry value reverse map (IRI → original-case chemistry string)
         # so the reconstructed records match the source exactly.
@@ -4580,7 +4553,7 @@ class AuthoringWorkspace:
                 else:
                     unit_term = ""
                 if unit_term:
-                    quantity["unit"] = rev_unit.get(_expand(unit_term), unit_term.split(":")[-1])
+                    quantity["unit"] = unit_symbol_for_iri(_expand(unit_term)) or unit_term.split(":")[-1]
                 elif text_unit := _jsonld_text(node.get("schema:unitText")):
                     quantity["unit"] = text_unit
                 moved.extend(migrate_quantity_values(quantity, f"properties.{prop_key}"))

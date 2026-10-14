@@ -53,7 +53,6 @@ from battinfo.api._shared import (
     _resolved_time,
     _short_id_from_iri,
     _spec_iri_re,
-    _spec_numeric_value,
     _str_contains,
     _str_eq,
     _str_fuzzy_match,
@@ -432,8 +431,8 @@ def query_cell_specs(
                 "iec_code": iec_code,
                 "country_of_origin": country_of_origin,
                 "year": year,
-                "nominal_capacity": _spec_numeric_value(specs, "nominal_capacity"),
-                "nominal_voltage": _spec_numeric_value(specs, "nominal_voltage"),
+                "nominal_capacity": _quantity_numeric_value(specs, "nominal_capacity"),
+                "nominal_voltage": _quantity_numeric_value(specs, "nominal_voltage"),
                 "properties": specs,
                 "source": "cell-spec",
                 "origin": origin,
@@ -465,7 +464,7 @@ def query_cell_specs(
             matches = True
             for key, bounds in spec_filters.items():
                 minimum, maximum = bounds
-                if not _in_range(_spec_numeric_value(specs, key), minimum, maximum):
+                if not _in_range(_quantity_numeric_value(specs, key), minimum, maximum):
                     matches = False
                     break
             if not matches:

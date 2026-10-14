@@ -13,8 +13,10 @@ import hashlib
 import math
 import numbers
 import re
+from collections.abc import Mapping
 from datetime import datetime, timezone
 from pathlib import Path, PureWindowsPath
+from typing import Any
 from urllib.parse import unquote, urlparse
 
 PathLike = str | Path
@@ -256,6 +258,18 @@ def number_from_text(text: str) -> int | float | None:
     except ValueError:  # more digits than int() reads
         return None
     return number if math.isfinite(number) else None
+
+
+def jsonld_literal(value: Any) -> Any:
+    """The value of a typed JSON-LD literal (``{"@value": ..., "@type": ...}``), else *value*."""
+    return value.get("@value") if isinstance(value, Mapping) else value
+
+
+def jsonld_text(value: Any) -> str | None:
+    """The text of a JSON-LD string value (plain, typed, or a list of them, joined by '; ')."""
+    items = value if isinstance(value, list) else [value]
+    texts = [text for item in items if isinstance(text := jsonld_literal(item), str) and text.strip()]
+    return "; ".join(texts) or None
 
 
 def is_dataset_series(additional_type: object) -> bool:
