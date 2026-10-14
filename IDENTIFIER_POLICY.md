@@ -106,45 +106,41 @@ All metadata belongs in RDF properties, not in identifiers.
 
 ## 5. Minting Rules
 
-### 5.1 Authority
+### 5.1 Where uids are minted
 
-UID minting is centrally governed by the BattINFO registry authority.
+BattINFO mints a record's uid on the machine that writes the record, offline and without asking the registry. Every authoring path mints through one primitive, `battinfo.entities.stable_uid(seed)`: the seed is put in Unicode NFC and hashed with SHA-256, and the first 16 bytes of the digest, read as one big-endian integer, are written as 16 characters of the alphabet in 3.3, dashed 4-4-4-4. The paths that mint this way are the workspace (`battinfo.workspace()`) and the engine behind it, the `create_*` and `save_*` functions, a save of a record without an id, the publication package (`battinfo.publish`, `build_publication_package`) and the folder-based batch path (`battinfo batch init`, `battinfo batch add`, `battinfo batch package`). Section 5.4 names the exceptions. The registry does not issue uids for these records: it takes the IRI a record carries (5.3).
 
-### 5.2 Generation
+### 5.2 Identity seeds
 
-- UIDs MUST be generated from a cryptographically strong random source where available.
-- For offline or spreadsheet workflows, candidate UIDs MUST be checked against the registry before assignment.
+A seed is built from what identifies the record, its natural key, by the seed builders in `battinfo.entities`, so one identity gives one uid on every path, and saving a record again updates it instead of adding a copy. A cell spec is seeded from its manufacturer, model, format, chemistry and size code; a cell from its spec's IRI, its serial number and batch, and its name when it has no serial number; a test from its cell's IRI, its kind, its protocol (the protocol's IRI when it has one, else its name) and its run (the location of its first data file, else a start time the caller gives). Free-text fields go through one normaliser, `entities.seed_text`, which applies Unicode NFC, strips the text and turns each run of whitespace into one space. Cell specs, cells and tests keep the case of the text, and a cell spec's chemistry enters as its key in the chemistry vocabulary; material and electrode specs lower-case their fields. Locators get NFC alone, and hashes and content seeds enter as they are. Display text, such as a test's title, never enters a seed.
 
-### 5.3 Atomic Issuance Workflow
+On every path that mints through `battinfo.entities`:
 
-Minting MUST be implemented as an atomic process:
+- A record keeps an IRI it already has. One pinned by its author, imported, or given by an earlier save is never minted again.
+- When records minted in one save get one IRI from their identity fields, each of them is minted again from its content. Two records that already had one IRI are refused.
+- A record that carries none of its identity fields is never merged with another: a save without an id refuses it, and a builder that accepts it gives it a random uid.
+- `tests/test_golden_iris.py` holds the IRI each path minted for each case when the 0.8.0 seeds were settled, and fails on any move it does not list.
 
-- Generate candidate UID
-- Normalize candidate to lowercase dashed form
-- Check non-existence in registry
-- Reserve UID
-- Bind UID to exactly one entity record
-- Commit issuance event to an append-only log
+### 5.3 The registry
 
-A failure before commit MUST release the reservation and retry with a new candidate.
+The registry takes the BattINFO IRI a submission carries as the record's canonical IRI. A submission that carries none, such as a record written by another tool, gets one from the registry's fallback minter, `mint_canonical_id` in battinfo-registry's `publishing/identifiers.py`. It derives an opaque uid of the form in section 3 from the record type, the publisher and the submission's source-local id, so the same publisher submitting the same record again gets the same IRI, under the namespace segment of the record type (6.1).
 
-### 5.4 Collision Handling
+The first publisher to register an IRI owns it. The registry refuses a submission from another publisher that carries an IRI already registered (conflict `canonical_identity`) and never reassigns or re-mints that IRI; the submitter gives the record an identity of its own or pins another IRI. Lab labels such as `C01` are not scoped to their publisher before 0.9, so two labs can mint one IRI for two cells, and this rule decides which keeps it.
 
-If a collision is detected:
+### 5.4 Minting outside the identity contract
 
-- Discard candidate UID
-- Generate a new UID
-- Record collision event in issuance logs
-- Never alter existing identifiers
+The uids below are as permanent as any other once published, but no other path reproduces them, so the same thing authored another way gets another IRI.
 
-### 5.5 Distributed Data Generation
+- Random uids. `create_component_spec` and `create_component_instance`, with their per-family wrappers for separators, current collectors, electrolytes and housings, and `create_equipment_spec` and `create_equipment` give a record without `uid=` or `id=` a random uid, a new one on every call. On the batch path, a cell without a serial number gets a random uid, recorded in its `battinfo.yaml`, where `battinfo batch package` reads it. Pass a uid derived from the record's natural key, or keep the file that records it. These builders get natural-key seeds in 0.9.
+- The interop importers. The BattInfoConverter importer (`battinfo.interop.converter`, which hashes its own seeds with SHA-1, and its component helper `_converter_components._uid`), the solid-state database importer (`solid_state_db._uid_from_seed`), the Discovery importer (`discovery._uid`) and the Battery Data Commons bridge (`battery_data_commons._uid`) seed from their source's own keys. Importing the same source again gives the same IRIs, but their seeds are not those of `battinfo.entities`, so a cell imported from two sources, or imported and also authored in the workspace, gets two IRIs. They are unstable until 0.9, which moves every minting path onto `battinfo.entities`; 5.5 keeps the IRIs they minted findable then.
 
-Distributed data creation is allowed, but canonical UID issuance remains centrally controlled through one of these mechanisms:
+### 5.5 Changing a seed
 
-- Online minting API
-- Pre-allocated signed UID pools issued by registry authority
+Seed rules are a public contract from 0.8.0, the first release on PyPI: a seed change moves IRIs that users have already saved or published.
 
-All minted UIDs MUST be reconciled against the central registry.
+- A seed change after 0.8.0, such as scoping lab labels to their publisher, or 0.9's move of every minting path onto `battinfo.entities`, MUST keep the IRIs minted under the old seed findable through a legacy-seed lookup. The code keeps the old seed, so that the record an old IRI names can still be found from its fields, as `_LEGACY_PARAMETER_FILE_SEED` (`api/_parameters.py`) does for parameter files minted before 2026-10-11, and as `entities.keep_legacy_uid` and `Workspace._keep_legacy_test_iris` do for cell specs and tests saved before 0.8.0, whose saves reuse the IRI already on disk.
+- A 0.8.x patch release MUST keep every IRI already on disk or published. A fix may change what a new record mints, never the IRI of a record that exists.
+- Every move is listed in the changelog, and in `MOVED` in `tests/test_golden_iris.py` with its reason.
 
 ## 6. Entity-Type Registry Governance
 

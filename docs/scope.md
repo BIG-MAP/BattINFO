@@ -99,6 +99,15 @@ These gaps were known when 0.8.0 was released and are planned for 0.8.x or 0.9. 
 - Display papercuts: `ws.search()` shows manufacturer and model in lower case, `ws.list(verbose=True)` shows cells by file name, the `ws.save()` summary cuts titles at about 36 characters and collapses after 20 records, and `battinfo.naming.title_for()` writes an all-lowercase method in capitals ("CYCLING test").
 - Submission reporting: outcomes and journal entries carry an empty `iri`, a deduplicated re-submission is reported as live, and `ws.status()` lists every submission in the shared registry workspace.
 
+### Identifiers
+
+These paths mint IRIs that no other path reproduces. The [identifier policy](https://github.com/BIG-MAP/BattINFO/blob/main/IDENTIFIER_POLICY.md) (section 5.4) keeps them outside the identity contract until 0.9, which moves every minting path onto the shared seed builders in `battinfo.entities`; an IRI they minted in 0.8 stays findable then.
+
+- `create_component_spec`, `create_component_instance` and their per-family wrappers (separators, current collectors, electrolytes and housings), `create_equipment_spec` and `create_equipment` give a record without `uid=` or `id=` a random IRI, a new one on every call, so saving their output again saves a second record. Pass a uid derived from the part's natural key, as [Build a cell from components](howto/build-a-cell-from-components.md) does; `ws.add("equipment")` mints equipment from its spec and serial number.
+- The BattInfoConverter, solid-state database and Discovery importers, and the Battery Data Commons bridge, mint from their own seeds. Importing one source again gives the same IRIs, but a cell imported from two sources, or imported and also authored in the workspace, gets two.
+- On the batch path, `battinfo batch init` and `battinfo batch add` give a cell without a serial number a random IRI, recorded in its `battinfo.yaml`. Keep that file, or pass `--serials` (or `--iris`).
+- The publication package (`battinfo.publish`, `build_publication_package`) and `battinfo batch package` seed a dataset from its folder and title rather than its file, so the same data saved from a workspace gets another dataset IRI, and so does a test with data in the publication package. There, `Dataset(id=...)` and `Test(id=...)` keep an IRI you published.
+
 ### Dependencies
 
 - The `processing` extra requires `batterydf[nda,excel,mat]>=0.2.0rc2,<0.3`, so it installs the batterydf 0.2.0 release candidate until batterydf 0.2.0 is published.

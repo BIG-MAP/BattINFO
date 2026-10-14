@@ -43,19 +43,45 @@ preserved, so re-serialising another build's record never falsifies origin.
 
 ### Identifiers are deterministic
 
-Records saved without an explicit `uid` mint their IRI from the record's
-natural identity key (for a cell spec: manufacturer :: model :: format ::
-chemistry :: size code), using the same seeds in every authoring path.
-Consequences you can rely on:
+Records saved without an explicit `uid` mint their IRI on your machine from the
+record's natural identity key, through one primitive (`entities.stable_uid`)
+and the shared seed builders in `battinfo.entities`. A cell spec's key is its
+manufacturer, model, format, chemistry and size code; a cell's is its spec and
+its serial number (or name); a test's is its cell, kind, protocol and run.
+Free text in a key is normalised first (surrounding and repeated whitespace, a
+no-break space and a decomposed accent change nothing, case does), and a
+chemistry counts by its vocabulary key, so `Li-ion` and `LI-ION` are one cell
+spec. Consequences you can rely on:
 
 - re-running an identical ingest is a **no-op**, never a duplicate corpus;
 - running the same `ws.load()` or `ws.add()` call again in one session, as a notebook does when a cell is re-run, reuses the record the session already holds instead of adding a copy;
 - an IRI a record already has (pinned, imported, or given by an earlier save) never moves when a record with the same identity fields joins the session: the newcomer is minted from its content;
 - a test's IRI names one run on one cell, told apart by its protocol and its first data file (or, for a test without data, a start time you pass), so a later run with its own data never takes an earlier run's IRI, and renaming a test keeps its IRI;
-- the workspace and `save_*` paths mint **identical IRIs** for identical
-  identities (tested);
+- the workspace, its engine, a save without an id, and the `save_*` and `create_*` functions for cell specs, cells, test specs, tests, materials, electrodes, channels, parameter sets and organizations mint **identical IRIs** for identical identities, and so do the publication package for cell specs and cells and the batch path for a cell with a serial number and its tests (`tests/test_idempotent_minting.py`); `tests/test_golden_iris.py` fails if any path's IRI moves without a changelog entry;
 - records with no distinguishing identity still mint randomly — two anonymous
   but physically distinct cells never silently merge.
+
+Some paths are outside this until 0.9, which moves every minting path onto
+`battinfo.entities` and keeps the IRIs they minted in 0.8 findable (section 5
+of the identifier policy):
+
+- the component and equipment builders (`create_component_spec`,
+  `create_component_instance`, their per-family wrappers, `create_equipment_spec`
+  and `create_equipment`) give a record without `uid=` or `id=` a random IRI,
+  a new one on every call;
+- `battinfo batch init` and `battinfo batch add` give a cell without a serial
+  number a random IRI, recorded in its `battinfo.yaml`;
+- the interop importers (BattInfoConverter, the solid-state database,
+  Discovery and the Battery Data Commons bridge) mint from their own seeds:
+  stable when the same source is imported again, but not the IRIs the
+  workspace gives the same records;
+- the publication package and `battinfo batch package` seed a dataset from its
+  folder and title, not its file, so its dataset IRI differs from the
+  workspace's, and the publication package does the same for the run of a
+  test with data.
+
+The [known limitations](scope.md#identifiers) say what to do on each of these
+paths.
 
 Governance of the IRI space itself is written down in the
 [identifier policy](https://github.com/BIG-MAP/BattINFO/blob/main/IDENTIFIER_POLICY.md).
