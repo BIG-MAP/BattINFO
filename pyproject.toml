@@ -140,6 +140,13 @@ battinfo = ["py.typed", "data/**/*"]
 [tool.setuptools.exclude-package-data]
 battinfo = ["**/__pycache__/*", "**/*.py[cod]"]
 
+[tool.uv]
+# uv rebuilds the editable install only when one of these files changes. Its
+# default list holds pyproject.toml but not the file with __version__, so after
+# scripts/set_version.py the installed metadata kept the old version, and
+# tests/installed_smoke.py, which compares the two, failed in a dev environment.
+cache-keys = [{ file = "pyproject.toml" }, { file = "src/battinfo/__init__.py" }]
+
 [tool.pytest.ini_options]
 norecursedirs = ["legacy"]
 # --strict-markers: unknown markers are an error (typo guard).
