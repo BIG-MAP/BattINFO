@@ -15,7 +15,7 @@ BattINFO
 
 **BattINFO** is the semantic data layer for battery technology — a Python library, CLI, and canonical asset suite that validates, maps, and publishes battery metadata as machine-readable Linked Data aligned with the `EMMO Battery Domain Ontology <https://emmo-repo.github.io/domain-battery/>`_.
 
-Here is a minimal example that creates a canonical cell-spec record and publishes it locally. It uses the same flagship cell shown on `battinfo.org <https://battinfo.org>`_ (A123 ANR26650M1-B); the full canonical record lives at ``examples/cell-spec/A123__ANR26650M1-B.json``.
+Here is a minimal example that describes a cell spec in Python and saves it locally. The other two tabs show the flagship cell from `battinfo.org <https://battinfo.org>`_, the A123 ANR26650M1-B: its record as stored in ``examples/cell-spec/A123__ANR26650M1-B.json``, and the JSON-LD that ``battinfo.record_to_jsonld`` writes for that record.
 
 .. tab-set::
 
@@ -29,53 +29,26 @@ Here is a minimal example that creates a canonical cell-spec record and publishe
              manufacturer="A123",
              model="ANR26650M1-B",
              format="cylindrical",
-             chemistry="Li-ion",
+             chemistry="li-ion",
              nominal_capacity={"value": 2.5, "unit": "Ah"},
          )
 
+         # publish() gives this spec its own IRI, minted from its manufacturer,
+         # model, format, chemistry and size code. The flagship record in the
+         # next two tabs has more fields and keeps the IRI it was published
+         # under, so the two IRIs differ.
          result = publish(spec, destination="local")
-         # → writes a canonical BattINFO record with a persistent spec IRI
+         print(result.canonical_iri)
 
-   .. tab-item:: Canonical record (JSON)
+   .. tab-item:: Flagship record (JSON)
 
-      .. code-block:: json
+      .. literalinclude:: ../examples/cell-spec/A123__ANR26650M1-B.json
+         :language: json
 
-         {
-           "schema_version": "0.2.0",
-           "cell_spec": {
-             "id": "https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0",
-             "name": "A123 ANR26650M1-B",
-             "model": "ANR26650M1-B",
-             "manufacturer": { "type": "Organization", "name": "A123" },
-             "category": "battery cell",
-             "cell_format": "cylindrical",
-             "chemistry": "Li-ion",
-             "positive_electrode_basis": "LFP"
-           },
-           "properties": {
-             "nominal_capacity": { "value": 2.5, "unit": "Ah" },
-             "nominal_voltage":  { "value": 3.3, "unit": "V" }
-           }
-         }
+   .. tab-item:: Flagship JSON-LD
 
-   .. tab-item:: Linked Data (JSON-LD)
-
-      .. code-block:: json
-
-         {
-           "@context": "https://w3id.org/battinfo/context/domain-battery.jsonld",
-           "@id": "https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0",
-           "@type": ["BatteryCell", "CylindricalBattery", "LithiumIonBattery"],
-           "skos:prefLabel": "A123 ANR26650M1-B",
-           "manufacturer": { "@type": "Organization", "name": "A123" },
-           "hasProperty": [
-             {
-               "@type": ["NominalCapacity", "ConventionalProperty"],
-               "hasNumericalPart": { "@type": "RealData", "hasNumberValue": 2.5 },
-               "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
-             }
-           ]
-         }
+      .. literalinclude:: ../web/public/jsonld/cell-spec.jsonld
+         :language: json
 
 
 Explore the documentation

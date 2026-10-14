@@ -33,7 +33,7 @@ GALLERY = [
         "label": "Cell spec — A123 ANR26650M1-B",
         "recordType": "cell-spec",
         "file": "examples/cell-spec/A123__ANR26650M1-B.json",
-        "highlight": "EMMO @type stacking: one cylindrical LFP cell is simultaneously a BatteryCell, a CylindricalBattery, and a LithiumIronPhosphateBattery — no manual annotation.",
+        "highlight": "EMMO @type stacking: one cylindrical LFP cell is simultaneously a BatteryCell, a CylindricalBattery, a LithiumIonBattery and a LithiumIonIronPhosphateBattery, with no manual annotation.",
     },
     {
         "slug": "test",

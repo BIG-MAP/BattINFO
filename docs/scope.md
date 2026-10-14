@@ -36,7 +36,7 @@ These capabilities are covered by tests in CI, documented as supported, and are 
 - JSON-LD for every record type through `battinfo.record_to_jsonld`, built from the curated property and unit maps and the versioned records context at `https://w3id.org/battinfo/context/records/v1.json`
 - authoring with `battinfo.workspace()` for cells, test specs, tests, datasets from local data files, materials, electrodes, equipment and channels, and parameter sets, all saved with deterministic IRIs
 - publishing a workspace as a Zenodo deposit (`ws.zenodo()`, which leaves a draft unless `publish=True`) and submitting it to the registry review queue (`ws.submit()`), with `ws.preview_jsonld()` to run the publication checks on the deposit graph beforehand
-- single records through the record models (`CellSpec`, `Cell`, `TestSpec`, `Test`, `Dataset`) and `battinfo.publish(...)`
+- single cell-spec records with `CellSpec` and `battinfo.publish(...)`, and single `Cell`, `TestSpec`, `Test` and `Dataset` records with `save_cell_instance`, `save_test_spec`, `save_test` and `save_dataset`
 - CLI and `battinfo.api` save, query, index and resolver-publish flows for cell specs, cells, test specs, tests and datasets; `battinfo save record` saves a record of any type from a JSON file
 - detailed cell descriptions for coin, cylindrical, single-layer pouch, multilayer pouch and prismatic formats, plus half cells and three-electrode cells through `cell_configuration`
 - test records with a controlled `kind` such as `cycling`, `capacity_check`, `rate_capability`, `gitt`, `hppc` or `eis` (the full list is in `assets/schemas/test.schema.json`)
@@ -64,6 +64,7 @@ Present but with no stability promise:
 - datasheet tooling under `.tools/datasheets/`, which is maintainer-only and has no public contract
 - semantic mapping candidate generation and review (`.tools/semantic/`)
 - reference validation for corpora larger than a repository-scale source tree
+- a Battery Pass crosswalk, from cell records to the Battery Pass Data Model. 0.8.0 has none: the draft `batterypass` mapping target and validation profile are removed, and the draft profile schema stays at its URL, marked withdrawn
 
 ## Known limitations in 0.8.0
 
@@ -97,6 +98,18 @@ These gaps were known when 0.8.0 was released and are planned for 0.8.x or 0.9. 
 - `ws.save()` prints "ERROR: ... failed validation" for some records it does write, such as a parameter set still minted under `spec/`.
 - Display papercuts: `ws.search()` shows manufacturer and model in lower case, `ws.list(verbose=True)` shows cells by file name, the `ws.save()` summary cuts titles at about 36 characters and collapses after 20 records, and `battinfo.naming.title_for()` writes an all-lowercase method in capitals ("CYCLING test").
 - Submission reporting: outcomes and journal entries carry an empty `iri`, a deduplicated re-submission is reported as live, and `ws.status()` lists every submission in the shared registry workspace.
+
+### Linked data at record IRIs
+
+- A record's `https://w3id.org/battinfo/` IRI serves the record body expanded with the v1 records context, not the EMMO model that `battinfo.record_to_jsonld`, `ws.export` and the Zenodo deposit graph write. In that body a quantity key such as `nominal_capacity` is a property named by its EMMO class IRI, with `schema:value` and `schema:unitText`, and the record's own id is a `schema:productID` literal. For the EMMO model, run `record_to_jsonld` on the record or read the deposit's `battinfo.json`. Serving that model at record IRIs is planned for 0.9.
+
+### Command line
+
+- `battinfo dataset` is experimental: its `init`, `process` and `publish` steps cannot take a contribution through to a published dataset in 0.8.0. Publish a dataset from Python with `ws.add("test", data=...)` and `ws.zenodo()` instead.
+
+### Tutorials
+
+- The tutorials have no "Open in Colab" link in 0.8.0. A hosted notebook service such as Colab starts without BattINFO, so install it in a cell first with the `%pip` line that [Getting started](pages/getting-started.rst) gives; tutorial 6 needs the one with the `processing` extra.
 
 ### CLI batch path
 

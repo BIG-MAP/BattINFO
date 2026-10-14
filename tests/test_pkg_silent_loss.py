@@ -120,6 +120,16 @@ def test_add_test_rejects_plain_string_spec(tmp_path: Path) -> None:
         ws.add("test", type="cycling", cell="SN-1", data="f.csv", spec="my nice protocol")
 
 
+def test_plain_string_spec_error_names_the_namespace_test_specs_use(tmp_path: Path) -> None:
+    """Test specs (test protocols) are minted under spec/; there is no test-protocol/ namespace."""
+    ws = _new_ws(tmp_path)
+    with pytest.raises(ValueError) as caught:
+        ws.add("test", type="cycling", cell="SN-1", data="f.csv", spec="constant current discharge")
+    message = str(caught.value)
+    assert "https://w3id.org/battinfo/spec/" in message
+    assert "/test-protocol/" not in message
+
+
 def test_add_test_rejects_non_testspec_object(tmp_path: Path) -> None:
     ws = _new_ws(tmp_path)
     with pytest.raises(TypeError, match="battinfo.TestSpec"):
