@@ -14,10 +14,11 @@ already carries every entry. Before the tag, ``gen_context.py --write-snapshot``
 retakes the snapshot after the last pre-release correction; once the tag exists it
 refuses.
 
-Two checks hold the line where the snapshot file alone cannot. In a checkout that
-has release tags from v0.8.0 on, v1 keeps every term each tag's v1 defines, and the
-snapshot equals the tag's copy, so a change to v1 and the snapshot together fails,
-and so does a change to a term added after 0.8.0. In CI for a 0.8.0 release build
+Two checks hold the line where the snapshot file alone cannot. Against each
+release tag from v0.8.0 on that the checked-out commit contains, v1 keeps every
+term the tag's v1 defines, and the snapshot equals the tag's copy, so a change to
+v1 and the snapshot together fails, and so does a change to a term added after
+0.8.0. The CI test job fetches the tags for this. In CI for a 0.8.0 release build
 (the ``release/0.8.0`` branch or a ``v0.8.0`` tag, release candidates included) the
 snapshot must hold every v1 term, so that no term ships in 0.8.0 unfrozen.
 """
@@ -334,10 +335,15 @@ def _final_release_tags(names: Iterable[str]) -> list[str]:
     return sorted(versions, key=versions.__getitem__)
 
 
-def _local_tags() -> list[str]:
+def _local_tags(root: Path = ROOT) -> list[str]:
+    """The ``v*`` tags that the checked-out commit contains. A tag on a later line, such as
+    v0.9.0 seen from a branch cut from v0.8.0, is not a release this commit has to keep."""
     try:
         result = subprocess.run(
-            ["git", "-C", str(ROOT), "tag", "--list", "v*"], capture_output=True, text=True, check=False
+            ["git", "-C", str(root), "tag", "--merged", "HEAD", "--list", "v*"],
+            capture_output=True,
+            text=True,
+            check=False,
         )
     except OSError:
         return []
@@ -372,9 +378,39 @@ def test_final_release_tags_start_at_0_8_0() -> None:
     assert _final_release_tags(names) == ["v0.8.0", "v0.8.2", "v0.10.0"]
 
 
+def _git(repo: Path, *args: str) -> None:
+    subprocess.run(
+        ["git", "-c", "user.name=Test", "-c", "user.email=test@example.org", "-c", "commit.gpgsign=false", *args],
+        cwd=repo,
+        env={**os.environ, "GIT_CONFIG_NOSYSTEM": "1", "GIT_CONFIG_GLOBAL": os.devnull},
+        check=True,
+        capture_output=True,
+    )
+
+
+def test_tagged_release_checks_read_only_the_tags_the_commit_contains(tmp_path: Path) -> None:
+    # A release/0.8.x branch cut from v0.8.0 must not be held to the terms v0.9.0 adds.
+    if shutil.which("git") is None:
+        pytest.skip("needs git")
+    _git(tmp_path, "init", "-q")
+    (tmp_path / "v1.json").write_text("{}", encoding="utf-8")
+    _git(tmp_path, "add", "-A")
+    _git(tmp_path, "commit", "-q", "-m", "0.8.0")
+    _git(tmp_path, "tag", "v0.8.0")
+    _git(tmp_path, "branch", "release-0.8.x")
+    (tmp_path / "v1.json").write_text('{"later": 1}', encoding="utf-8")
+    _git(tmp_path, "commit", "-q", "-am", "0.9.0")
+    _git(tmp_path, "tag", "v0.9.0")
+
+    assert _final_release_tags(_local_tags(tmp_path)) == ["v0.8.0", "v0.9.0"]
+    _git(tmp_path, "checkout", "-q", "release-0.8.x")
+    assert _final_release_tags(_local_tags(tmp_path)) == ["v0.8.0"]
+
+
 def test_v1_keeps_every_term_of_each_tagged_release() -> None:
     """Covers what the snapshot file cannot: a pull request that changes v1 and the snapshot together,
-    and a change to a term added after 0.8.0. Runs where the checkout has the release tags."""
+    and a change to a term added after 0.8.0. Runs where the checkout has the release tags, as the CI
+    test job does."""
     tags = _final_release_tags(_local_tags())
     if not tags:
         pytest.skip("this checkout has no release tag from v0.8.0 on")

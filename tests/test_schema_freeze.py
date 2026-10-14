@@ -6,15 +6,18 @@ schema may change only in ``description``, ``title``, ``$comment`` or
 ``examples``; any other change, a new optional property included, goes to a new
 versioned URL. The registry serves the copies bundled in
 ``src/battinfo/data/schemas/``, so in a checkout that has release tags from
-v0.8.0 on, each schema a tag holds must still be there, with the same content
-once those four annotations are set aside. Without the tags (a shallow CI clone
-or an sdist) the check skips, and review holds the line.
+v0.8.0 on that the checked-out commit contains, each schema a tag holds must
+still be there, with the same content once those four annotations are set aside.
+The CI test job fetches the tags for this. Without them (a shallow clone or an
+sdist) the check skips, and review holds the line.
 """
 
 from __future__ import annotations
 
 import json
+import os
 import re
+import shutil
 import subprocess
 from collections.abc import Callable, Iterable
 from pathlib import Path
@@ -74,10 +77,15 @@ def tagged_schema_problems(
     return problems
 
 
-def _final_release_tags() -> list[str]:
+def _final_release_tags(root: Path = ROOT) -> list[str]:
+    """The final release tags from v0.8.0 on that the checked-out commit contains. A tag on a
+    later line, such as v0.9.0 seen from a branch cut from v0.8.0, does not bind this commit."""
     try:
         result = subprocess.run(
-            ["git", "-C", str(ROOT), "tag", "--list", "v*"], capture_output=True, text=True, check=False
+            ["git", "-C", str(root), "tag", "--merged", "HEAD", "--list", "v*"],
+            capture_output=True,
+            text=True,
+            check=False,
         )
     except OSError:
         return []
@@ -104,6 +112,37 @@ def _read_at(tag: str, path: str) -> str:
     return subprocess.run(
         ["git", "-C", str(ROOT), "show", f"{tag}:{path}"], capture_output=True, check=True
     ).stdout.decode("utf-8")
+
+
+def _git(repo: Path, *args: str) -> None:
+    subprocess.run(
+        ["git", "-c", "user.name=Test", "-c", "user.email=test@example.org", "-c", "commit.gpgsign=false", *args],
+        cwd=repo,
+        env={**os.environ, "GIT_CONFIG_NOSYSTEM": "1", "GIT_CONFIG_GLOBAL": os.devnull},
+        check=True,
+        capture_output=True,
+    )
+
+
+def test_release_tags_are_the_ones_the_commit_contains(tmp_path: Path) -> None:
+    # A release/0.8.x branch cut from v0.8.0 must not be held to the schemas v0.9.0 adds.
+    if shutil.which("git") is None:
+        pytest.skip("needs git")
+    _git(tmp_path, "init", "-q")
+    (tmp_path / "a.schema.json").write_text("{}", encoding="utf-8")
+    _git(tmp_path, "add", "-A")
+    _git(tmp_path, "commit", "-q", "-m", "0.8.0")
+    _git(tmp_path, "tag", "v0.8.0")
+    _git(tmp_path, "tag", "v0.8.1rc1")
+    _git(tmp_path, "branch", "release-0.8.x")
+    (tmp_path / "b.schema.json").write_text("{}", encoding="utf-8")
+    _git(tmp_path, "add", "-A")
+    _git(tmp_path, "commit", "-q", "-m", "0.9.0")
+    _git(tmp_path, "tag", "v0.9.0")
+
+    assert _final_release_tags(tmp_path) == ["v0.8.0", "v0.9.0"]
+    _git(tmp_path, "checkout", "-q", "release-0.8.x")
+    assert _final_release_tags(tmp_path) == ["v0.8.0"]
 
 
 def test_served_schemas_keep_what_they_accept_from_each_tagged_release() -> None:

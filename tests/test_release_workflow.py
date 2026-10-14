@@ -443,6 +443,13 @@ def test_ci_lints_the_workflow_files_with_a_pinned_actionlint() -> None:
     assert re.fullmatch(r"docker://rhysd/actionlint:\d+\.\d+\.\d+", lint[0]), "pin an actionlint release"
 
 
+def test_the_ci_test_job_fetches_the_release_tags() -> None:
+    # Without the tags the freeze checks against each release skip, so a pull request
+    # could change a released v1 term together with the snapshot, or a released schema.
+    job = _workflow("ci.yml")["jobs"]["test"]
+    assert _step(job, uses="actions/checkout@")["with"]["fetch-depth"] == 0
+
+
 def test_a_scheduled_job_checks_the_hosted_context_keeps_the_released_terms() -> None:
     workflow = _workflow("hosted-files.yml")
     assert _triggers(workflow)["schedule"]

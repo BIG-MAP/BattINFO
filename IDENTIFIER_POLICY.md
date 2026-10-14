@@ -300,7 +300,7 @@ Both are frozen from the `v0.8.0` tag of BattINFO, its first release on PyPI. Co
 
 The `v1` records context is append-only from the tag. It defines 705 terms at the tag, and `tests/fixtures/context/records-v1-0.8.0.json` records each of them with its full definition. From the tag:
 
-- A term that `v1` defines in a release MUST NOT change any part of its definition (its IRI, `@type`, `@container` or anything else) and MUST NOT be removed, and `v1` MUST NOT gain a JSON-LD keyword such as `@vocab`, which would change how every document expands. For the terms of 0.8.0, `scripts/gen_context.py` refuses to write such a change and `tests/test_context_v1_freeze.py` fails on one. For the terms of later releases, the same test compares `v1` with the copy at each release tag. `PRE_RELEASE_CORRECTIONS`, the table in that script that corrected terms before the tag, is closed and no longer applied.
+- A term that `v1` defines in a release MUST NOT change any part of its definition (its IRI, `@type`, `@container` or anything else) and MUST NOT be removed, and `v1` MUST NOT gain a JSON-LD keyword such as `@vocab`, which would change how every document expands. For the terms of 0.8.0, `scripts/gen_context.py` refuses to write such a change and `tests/test_context_v1_freeze.py` fails on one. For the terms of later releases, the same test compares `v1` with the copy at each release tag the commit contains; CI fetches the tags for it. `PRE_RELEASE_CORRECTIONS`, the table in that script that corrected terms before the tag, is closed and no longer applied.
 - A release MAY add terms. A release whose records use a new term ships only after the registry serves the context that defines it.
 - A term found to be wrong stays as it is. Where an emitter chooses the term, as for a class in `@type`, it can switch to a new, correct term; records published with the old one keep their old meaning. A record key whose expansion is wrong waits for a `v2` context at a new URL (`context/records/v2.json`).
 
@@ -310,7 +310,7 @@ The 0.8.0 schemas are frozen from the same tag. Each schema served under `https:
 - Any other change, whether it tightens a rule, widens one or adds an optional property, MUST be published as a new schema at a new, versioned URL (`schema/.../v2/...`), while the old URL keeps serving the old content.
 - A schema for a new record type MAY be added at its own URL at any time.
 
-`tests/test_schema_freeze.py` compares each schema with its copy at every release tag from `v0.8.0` on, setting those four annotations aside.
+`tests/test_schema_freeze.py` compares each schema with its copy at every release tag from `v0.8.0` on that the commit contains, setting those four annotations aside. CI fetches the tags for both tests.
 
 So a 0.8.1 or later release can add terms to `v1`, add schemas and reword descriptions, but it cannot correct a `v1` term or change what a 0.8.0 schema accepts at its URL. How versioned schema URLs are laid out, and what a record's `schema_version` then says about the schemas it was written against, are to be defined in 0.9. Existing versioned URLs remain served and unchanged, so records that reference them keep resolving to the exact document they were written against.
 
