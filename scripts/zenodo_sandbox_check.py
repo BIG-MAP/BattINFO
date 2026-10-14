@@ -232,7 +232,11 @@ def check_data_files(files: dict[str, str], expected: dict[str, str]) -> list[st
 
 
 def check_sandbox_left_records_alone(root: Path) -> None:
-    on_zenodo = [location for location in locations(root) if "zenodo.org" in location]
+    on_zenodo = [
+        location
+        for location in locations(root)
+        if (urllib.parse.urlsplit(location).hostname or "").endswith("zenodo.org")
+    ]
     expect(not on_zenodo, f"a sandbox deposit changed the dataset records, which now name {on_zenodo}")
     expect(
         state(root, "zenodo.json") is None, "a sandbox deposit wrote .battinfo/zenodo.json, the zenodo.org state file"
