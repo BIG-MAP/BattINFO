@@ -16,6 +16,7 @@ from __future__ import annotations
 import copy
 import json
 import math
+import warnings
 from pathlib import Path
 from typing import Any, Callable
 
@@ -203,6 +204,29 @@ def test_the_component_emitters_neither_coerce_nor_scale_text() -> None:
     assert converter is not None and converter["hasStringValue"] == "1.2" and _numbers(converter) == []
 
 
+def test_the_component_emitters_write_value_text() -> None:
+    from battinfo.transform.json_to_jsonld import _emmo_quantity_node, _fraction_quantity_node
+
+    for unit in ("1", "%"):
+        node = _fraction_quantity_node("MassFraction", {"value_text": "about 92", "unit": unit})
+        assert node is not None and node["hasStringValue"] == "about 92" and _numbers(node) == []
+    beside = _fraction_quantity_node("MassFraction", {"value": 92, "value_text": "nominal", "unit": "%"})
+    assert beside is not None and _numbers(beside) == [0.92] and beside["hasStringValue"] == "nominal"
+    emmo = _emmo_quantity_node("Thickness", {"value_text": "thin", "unit": "um"})
+    assert emmo is not None and emmo["hasStringValue"] == "thin" and _numbers(emmo) == []
+    assert _fraction_quantity_node("MassFraction", {"unit": "1"}) is None
+
+
+def test_a_component_fraction_given_as_text_reaches_the_json_ld() -> None:
+    from battinfo.transform.json_to_jsonld import to_jsonld
+
+    doc = _load(ROOT / "examples" / "cell-spec" / "research" / "coin-detailed.example.json")
+    component = doc["positive_electrode"]["coating"]["component"]["active_material"][0]
+    component["property"]["mass_fraction"] = {"value_text": "about 92", "unit": "1"}
+    assert validate_record_report(doc, policy="strict").ok
+    assert "about 92" in json.dumps(to_jsonld(doc))
+
+
 def test_the_publication_property_node_sends_text_to_has_string_value() -> None:
     from battinfo.publication import _cell_spec_property_node
 
@@ -304,16 +328,17 @@ def test_migrate_quantity_values_turns_numbers_into_numbers_and_moves_text() -> 
     assert notes == ["material_spec.property.specific_capacity.value: moved the text 'about 360' to value_text"]
 
 
-def test_migrate_quantity_values_keeps_value_text_and_drops_blank_text() -> None:
-    held = {"value": "approx 3", "value_text": "about 3", "unit": "V"}
-    blank = {"value": "  ", "unit": "V"}
+def test_migrate_quantity_values_joins_value_text_and_drops_blank_text() -> None:
+    held = {"value": "3.6-3.7", "value_text": "at 25 C", "unit": "V"}
+    blank = {"value": "  ", "value_text": "about 3", "unit": "V"}
     same = {"value": "about 3", "value_text": "about 3", "unit": "V"}
     notes = migrate_quantity_values({"a": held, "b": blank, "c": same})
-    assert held == {"value_text": "about 3", "unit": "V"}
-    assert blank == {"unit": "V"}
+    # Neither text is lost: the one from value comes first.
+    assert held == {"value_text": "3.6-3.7; at 25 C", "unit": "V"}
+    assert blank == {"value_text": "about 3", "unit": "V"}
     assert same == {"value_text": "about 3", "unit": "V"}
     assert notes == [
-        "a.value: dropped the text 'approx 3', as value_text already holds 'about 3'",
+        "a.value: joined the text '3.6-3.7' to value_text, which now reads '3.6-3.7; at 25 C'",
         "b.value: dropped the blank text '  '",
         "c.value: moved the text 'about 3' to value_text",
     ]
@@ -415,6 +440,35 @@ def test_load_reads_text_out_of_a_cell_spec_draft(tmp_path: Path) -> None:
     assert ws.save()["index"]["failures"] == []
 
 
+def test_load_reads_text_out_of_the_component_quantities_of_a_cell_spec_draft(tmp_path: Path) -> None:
+    detailed = _load(ROOT / "examples" / "cell-spec" / "research" / "coin-detailed.example.json")
+    positive = detailed["positive_electrode"]
+    positive["coating"]["component"]["active_material"][0]["property"]["mass_fraction"] = {"value": "0.92", "unit": "1"}
+    positive["coating"]["property"]["thickness"] = {"value": "about 55", "unit": "um"}
+    draft = {
+        "manufacturer": "Example Lab",
+        "model": "COIN-1",
+        "format": "coin",
+        "chemistry": "li-ion",
+        "properties": {"nominal_voltage": {"value": "3.2", "unit": "V"}},
+        "positive_electrode": positive,
+    }
+    path = tmp_path / "lab.cell-spec.json"
+    path.write_text(json.dumps(draft), encoding="utf-8")
+    ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
+    with pytest.warns(
+        UserWarning, match=r"positive_electrode\.coating\.property\.thickness\.value: moved the text 'about 55'"
+    ):
+        spec = ws.load(path)
+    assert spec.positive_electrode is not None
+    coating = spec.positive_electrode.model_dump(exclude_none=True)["coating"]
+    assert coating["component"]["active_material"][0]["property"]["mass_fraction"] == {"value": 0.92, "unit": "1"}
+    assert coating["property"]["thickness"] == {"value_text": "about 55", "unit": "um"}
+    assert spec.properties["nominal_voltage"] == {"value": 3.2, "unit": "V"}
+    ws.add("cell", spec=spec, serial_numbers=["C01"])
+    assert ws.save()["index"]["failures"] == []  # strict by default
+
+
 def test_load_reads_text_out_of_an_equipment_spec_draft(tmp_path: Path) -> None:
     ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
     path = ws.template("equipment-spec", name="Cycler", manufacturer="Example", model="C1", channel_count=2)
@@ -471,7 +525,12 @@ def test_an_upsert_over_a_record_saved_with_text_in_value_is_unchanged_and_rewri
     path.write_text(json.dumps(older, indent=2), encoding="utf-8")
     assert _compare_with_saved(path, doc) == (False, True)
 
-    again = save_record(_load(CELL_SPEC), source_root=tmp_path, mode=REGISTER_MODE_UPSERT, publish=False)
+    with pytest.warns(
+        UserWarning, match=r"properties\.cycle_life\.value: moved the text '>1000' to value_text"
+    ) as caught:
+        again = save_record(_load(CELL_SPEC), source_root=tmp_path, mode=REGISTER_MODE_UPSERT, publish=False)
+    # The numeric string is read as the number without a note.
+    assert "nominal_capacity" not in str(caught[0].message)
     assert again["status"] == "updated"
     assert again["content_changed"] is False
     rewritten = _load(path)
@@ -483,5 +542,8 @@ def test_an_upsert_over_a_record_saved_with_text_in_value_is_unchanged_and_rewri
     # Once the copy is up to date, an identical upsert writes nothing.
     assert _compare_with_saved(path, doc) == (False, False)
     stamp = path.stat().st_mtime_ns
-    save_record(_load(CELL_SPEC), source_root=tmp_path, mode=REGISTER_MODE_UPSERT, publish=False)
+    with warnings.catch_warnings(record=True) as quiet:
+        warnings.simplefilter("always")
+        save_record(_load(CELL_SPEC), source_root=tmp_path, mode=REGISTER_MODE_UPSERT, publish=False)
     assert path.stat().st_mtime_ns == stamp
+    assert not [w for w in quiet if "held text" in str(w.message)]

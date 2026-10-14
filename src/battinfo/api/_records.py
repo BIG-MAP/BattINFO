@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import copy
 import re
+import warnings
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any, Mapping, Sequence
@@ -1589,15 +1590,20 @@ def _compare_with_saved(existing_path: PathLike, new_doc: Mapping[str, Any]) -> 
     has to be rewritten although its content did not change. Volatile timestamps
     and identity scaffolding (see ``_strip_volatile``) are ignored. A missing or
     unreadable file differs."""
+    return _compare_with_saved_copy(existing_path, new_doc)[:2]
+
+
+def _compare_with_saved_copy(existing_path: PathLike, new_doc: Mapping[str, Any]) -> tuple[bool, bool, list[str]]:
+    """``_compare_with_saved`` plus the notes ``migrate_quantity_values`` gave on the saved copy."""
     from battinfo._workspace import _strip_volatile
 
     try:
         existing = _load_json(_as_path(existing_path))
     except (OSError, ValueError):
-        return True, False
+        return True, False, []
     migrated = copy.deepcopy(existing)
-    migrate_quantity_values(migrated)
-    return _strip_volatile(migrated) != _strip_volatile(dict(new_doc)), migrated != existing
+    notes = migrate_quantity_values(migrated)
+    return _strip_volatile(migrated) != _strip_volatile(dict(new_doc)), migrated != existing, notes
 
 
 def _record_content_differs(existing_path: PathLike, new_doc: Mapping[str, Any]) -> bool:
@@ -1714,8 +1720,9 @@ def save_record(
     # the caller can surface it or choose mode='create_only' to refuse it. (A-4)
     content_changed = False
     saved_copy_outdated = False
+    moved_text: list[str] = []
     if existing_path is not None and mode_normalized == REGISTER_MODE_UPSERT:
-        content_changed, saved_copy_outdated = _compare_with_saved(existing_path, doc)
+        content_changed, saved_copy_outdated, moved_text = _compare_with_saved_copy(existing_path, doc)
     payload: dict[str, Any] = {
         "status": "dry-run" if dry_run else operation,
         "id": entity_id,
@@ -1743,6 +1750,12 @@ def save_record(
     unchanged_upsert = existing_path is not None and mode_normalized == REGISTER_MODE_UPSERT and not content_changed
     if not unchanged_upsert or saved_copy_outdated:
         _write_json(target_path, doc, durable=cache is None)
+    if unchanged_upsert and moved_text:
+        warnings.warn(
+            f"{_as_path(existing_path).name} held text in a quantity's value, which takes a number only "
+            f"from 0.8.0 on: {'; '.join(moved_text)}. The saved copy was rewritten with it in value_text.",
+            stacklevel=2,
+        )
     if cache is not None:
         cache.record_saved(entity_id, target_path, entity_type)
 
@@ -1981,7 +1994,9 @@ def save_dataset(
       ``content_changed`` is ``True`` when the record differs from the saved
       one and ``False`` when it does not, in which case nothing is rewritten
       unless the saved copy holds text in a quantity's ``value``, which is
-      read as ``value_text`` for the comparison and then rewritten.
+      read as ``value_text`` for the comparison and then rewritten, with a
+      warning that names each text value moved (a numeric string is read as
+      the number without one).
       The comparison ignores ``id``, ``uid`` and the ``created_at``,
       ``modified_at``, ``retrieved_at``, ``generated_at`` and ``imported_at``
       timestamps, but not ``published_at``: a ``Dataset`` saved without one

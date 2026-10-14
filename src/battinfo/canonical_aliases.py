@@ -220,8 +220,9 @@ def migrate_quantity_values(node: Any, path: str = "") -> list[str]:
     now holds a number only, and text belongs in ``value_text``. This brings an
     older record, or any part of one, up to date as it is read back: a numeric
     string (``"2.5"``) becomes the number, and other text moves to
-    ``value_text``. When ``value_text`` already holds different text, that is
-    kept and the text in ``value`` is dropped; blank text is dropped too.
+    ``value_text``. When ``value_text`` already holds different text, the two
+    are joined, the text from ``value`` first (``"3.6-3.7; at 25 C"``), so
+    nothing the record said is lost; blank text is dropped.
     Conditions maps and lists are walked as well.
 
     Returns one line for each text value moved or dropped, naming its path
@@ -259,8 +260,8 @@ def _migrate_text_value(quantity: dict[str, Any], text: str, where: str, notes: 
         notes.append(f"{where}: dropped the blank text {text!r}")
         target = None
     elif isinstance(held, str) and held.strip() and held != text:
-        notes.append(f"{where}: dropped the text {text!r}, as value_text already holds {held!r}")
-        target = None
+        target = f"{text}; {held}"
+        notes.append(f"{where}: joined the text {text!r} to value_text, which now reads {target!r}")
     else:
         notes.append(f"{where}: moved the text {text!r} to value_text")
         target = text

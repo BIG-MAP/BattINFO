@@ -1715,8 +1715,9 @@ def _emmo_quantity_node(
 ) -> dict[str, Any] | None:
     """Build a ConventionalProperty node with an explicit EMMO type (bypasses the property map).
 
-    A real number becomes ``hasNumberValue``; text in ``value`` (from a dict
-    that skipped validation) becomes ``hasStringValue`` and is not coerced.
+    A real number becomes ``hasNumberValue``; ``value_text``, and text in
+    ``value`` (from a dict that skipped validation), become ``hasStringValue``
+    and are not coerced. A quantity with neither gives no node.
     """
     if not isinstance(quantity, dict):
         return None
@@ -1724,9 +1725,9 @@ def _emmo_quantity_node(
     node: dict[str, Any] = {"@type": [emmo_type, "ConventionalProperty"]}
     if is_real_number(value):
         node["hasNumericalPart"] = {"@type": "RealData", "hasNumberValue": value}
-    elif isinstance(value, str) and value.strip():
-        node["hasStringValue"] = value
-    else:
+    for text in (quantity.get("value_text"), value):
+        _add_string_value(node, text)
+    if "hasNumericalPart" not in node and "hasStringValue" not in node:
         return None
     unit = quantity.get("unit")
     iri = unit_iri_override or _unit_iri(unit)
@@ -1743,19 +1744,18 @@ def _fraction_quantity_node(emmo_type: str, quantity: dict[str, Any]) -> dict[st
 
     When the stored unit is '%', the value is converted from the 0–100 percentage range to the
     [0, 1] range and hasMeasurementUnit is set to UnitOne (dimensionless).  Other units are passed
-    through to the standard unit map lookup.
+    through to the standard unit map lookup. ``value_text`` goes out as ``hasStringValue``, as
+    ``_emmo_quantity_node`` writes it, and is never scaled.
     """
     if not isinstance(quantity, dict):
         return None
     value = quantity.get("value")
-    if value is None:
-        return None
     unit = quantity.get("unit", "")
     if unit == "%":
         if not is_real_number(value):
             # Text in value (a dict that skipped validation, e.g. "95" from a
             # spreadsheet) is not scaled or coerced: the standard path emits it
-            # as hasStringValue.
+            # as hasStringValue, and value_text with it.
             return _emmo_quantity_node(emmo_type, quantity)
         scaled = round(float(value) / 100, 6)
         node = {
@@ -1763,6 +1763,7 @@ def _fraction_quantity_node(emmo_type: str, quantity: dict[str, Any]) -> dict[st
             "hasNumericalPart": {"@type": "RealData", "hasNumberValue": scaled},
             "hasMeasurementUnit": _UNIT_ONE_IRI,
         }
+        _add_string_value(node, quantity.get("value_text"))
         # A spread stated in % rescales with the value it qualifies, or the
         # emitted node would pair a [0,1] mean with a 0-100 deviation.
         rescaled = dict(quantity)

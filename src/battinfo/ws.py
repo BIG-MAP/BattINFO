@@ -3568,7 +3568,9 @@ class AuthoringWorkspace:
         A quantity's ``value`` holds a number only. A cell-spec or
         equipment-spec draft, or a found cell spec, written before 0.8.0 may
         hold text there: a numeric string (``"2.5"``) is read as the number,
-        and other text moves to ``value_text`` with a warning.
+        and other text moves to ``value_text`` with a warning. In a draft this
+        covers every quantity, those in the electrodes, electrolyte,
+        separator, housing and construction included.
 
         Example::
 
@@ -8415,7 +8417,12 @@ class AuthoringWorkspace:
         quantities = {**(fields.pop("specs", None) or {}), **(fields.pop("properties", None) or {}), **flat}
         # A draft written before 0.8.0 may hold text in a quantity's value: a
         # numeric string becomes the number, other text moves to value_text.
-        _warn_text_moved(path.name, migrate_quantity_values(quantities, "properties"))
+        # The component holders (electrodes, electrolyte, separator, housing,
+        # construction) carry quantities too, so the rest of the draft is read
+        # the same way; only quantity-shaped objects are touched.
+        moved = migrate_quantity_values(quantities, "properties")
+        moved.extend(migrate_quantity_values(fields))
+        _warn_text_moved(path.name, moved)
         fields["properties"] = _filled_quantities(quantities, path)
         _merge_draft_alias(fields, "model_name", "model", path)
         comment = [*_draft_text_list(fields.pop("comment", None)), *_draft_text_list(fields.pop("notes", None))]
@@ -8990,7 +8997,8 @@ class AuthoringWorkspace:
         uid = None if pinned else stable_uid("::".join(["equipment-spec", manufacturer or "", model or "", name]))
         # A draft written before 0.8.0 may hold text in a quantity's value: a
         # numeric string becomes the number, other text moves to value_text.
-        _warn_text_moved(path.name, migrate_quantity_values(raw.get("property"), "property"))
+        # The whole draft is read, so a quantity outside `property` is covered too.
+        _warn_text_moved(path.name, migrate_quantity_values(raw))
         # Drop template placeholders (null quantity fields) so the record stays valid.
         props: dict[str, dict] = {}
         for key, value in (raw.get("property") or {}).items():
