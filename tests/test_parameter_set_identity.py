@@ -303,6 +303,9 @@ def _no_zenodo(*args: object, **kwargs: object) -> None:
     raise _ZenodoReached
 
 
+CREATORS = [{"name": "Doe, Jane"}]  # a deposit without creators is refused before anything else
+
+
 @pytest.mark.parametrize(
     "record,code",
     [
@@ -328,7 +331,7 @@ def test_ws_zenodo_refuses_a_parameter_set_ws_submit_refuses(
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(record), encoding="utf-8")
     with pytest.raises(RuntimeError, match="Refusing to deposit") as excinfo:
-        ws.zenodo(token="placeholder")
+        ws.zenodo(token="placeholder", creators=CREATORS)
     assert record["parameter_set"]["id"] in str(excinfo.value)
     assert "supersede_parameter_set" in str(excinfo.value)
 
@@ -340,7 +343,7 @@ def test_ws_zenodo_deposits_a_dataset_parameter_set(tmp_path: Path, monkeypatch:
     ws.add("parameter_set", record=_load(CLAIM_BATCH_FIXTURE))
     ws.save()
     with pytest.raises(_ZenodoReached):
-        ws.zenodo(token="placeholder")
+        ws.zenodo(token="placeholder", creators=CREATORS)
 
 
 # ── a uid is never reused ────────────────────────────────────────────────────
@@ -568,7 +571,7 @@ def test_ws_zenodo_leaves_out_a_legacy_record_its_replacement_supersedes(
     capsys.readouterr()
 
     with pytest.raises(_ZenodoReached):
-        ws.zenodo(token="placeholder")
+        ws.zenodo(token="placeholder", creators=CREATORS)
     assert f"Leaving out {old_iri}" in capsys.readouterr().out
 
     preview = ws.preview_jsonld()

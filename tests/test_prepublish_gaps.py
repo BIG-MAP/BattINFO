@@ -99,9 +99,10 @@ def _deposit_graph(algorithm: str, value: str) -> dict:
                 }
             }
         ],
+        # The body key is cell_instance; the graph builder refuses a record without one.
         "cell-instance": [
             {
-                "cell": {
+                "cell_instance": {
                     "id": "https://w3id.org/battinfo/cell/c1",
                     "serial_number": "SN-001",
                     "cell_spec_id": "https://w3id.org/battinfo/spec/cs1",

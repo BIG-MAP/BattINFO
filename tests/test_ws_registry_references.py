@@ -14,6 +14,7 @@ The registry is mocked (sockets are disabled in the test suite).
 from __future__ import annotations
 
 import copy
+import hashlib
 import io
 import json
 import urllib.error
@@ -441,6 +442,7 @@ class _FakeZenodo:
     def __init__(self) -> None:
         self.calls: list[str] = []
         self.uploaded: dict[str, str] = {}
+        self.md5: dict[str, str] = {}
 
     def client(self, *args: object, **kwargs: object) -> _FakeZenodo:
         self.calls.append("client")
@@ -450,10 +452,18 @@ class _FakeZenodo:
         self.calls.append("create")
         return {"id": 7, "record_id": 7, "metadata": {"prereserve_doi": {"doi": "10.5281/zenodo.7"}}}
 
-    def sync_files(self, deposit_id: int, upload_map: dict) -> dict:
+    def sync_files(self, deposit_id: int, upload_map: dict, *, keep: dict | None = None) -> dict:
         self.calls.append("upload")
         self.uploaded = {name: Path(path).read_text(encoding="utf-8") for path, name in upload_map.items()}
+        self.md5 = {
+            name: hashlib.md5(Path(path).read_bytes()).hexdigest()  # noqa: S324 - Zenodo's checksum
+            for path, name in upload_map.items()
+        }
         return {"uploaded": sorted(self.uploaded), "kept": [], "removed": []}
+
+    def list_files(self, deposit_id: int) -> list[dict]:
+        self.calls.append("list")
+        return [{"filename": name, "checksum": md5} for name, md5 in self.md5.items()]
 
     def update_metadata(self, deposit_id: int, metadata: dict) -> dict:
         self.calls.append("metadata")
@@ -480,6 +490,8 @@ def test_a_refused_publish_leaves_nothing_on_zenodo(
     message = str(excinfo.value)
     assert message.startswith("Refusing to publish: 1 validation error(s)")
     assert "Not found locally" in message and message.endswith("Nothing was sent to Zenodo.")
+    # A draft would be refused for the same error, so the refusal does not suggest one.
+    assert "leave the deposit as a draft" not in message
     assert zenodo.calls == []  # no client, so no draft with a dangling cell IRI
     assert not (tmp_path / ".battinfo" / "zenodo.json").exists()
 
@@ -501,7 +513,9 @@ def test_a_publish_on_a_registry_only_cell_deposits_its_stub(
     ws = _workspace_on_registry_cell(tmp_path, REGISTRY)
     result = ws.zenodo(publish=True, token="placeholder", title="NEW-1", creators=CREATORS)
     assert result.published
-    assert zenodo.calls == ["client", "create", "upload", "metadata", "publish"]
+    # The metadata goes up as soon as the deposit exists, before any file, and
+    # the deposit's files are listed and checked before the publish.
+    assert zenodo.calls == ["client", "create", "metadata", "upload", "list", "publish"]
     # The data file and the two metadata files; the reference copies stay local.
     assert sorted(zenodo.uploaded) == ["battinfo.json", "ro-crate-metadata.json", "run.bdf.csv"]
     deposited = json.loads(zenodo.uploaded["battinfo.json"])
@@ -520,7 +534,8 @@ def test_the_check_before_the_deposit_gives_the_deposited_graph_verdict(
     changes what the publication check reports.
     """
     ws = _workspace_on_registry_cell(tmp_path, registry_url)
-    common = {"data_filenames": ["run.bdf.csv"], "title": "NEW-1", "creators": CREATORS, "license": "cc-by-4.0"}
+    plan = ws._deposit_file_plan(ws._ws.source_root)
+    common = {"file_plan": plan, "title": "NEW-1", "creators": CREATORS, "license": "cc-by-4.0"}
     before = ws._build_zenodo_jsonld(
         zenodo_record_id=0,
         prereserved_doi="10.5281/zenodo.RECORD_ID",
@@ -535,7 +550,7 @@ def test_the_check_before_the_deposit_gives_the_deposited_graph_verdict(
         is_version_of="https://zenodo.org/records/4241",
         **common,
     )
-    assert ws._apply_zenodo_file_urls(record_url, {"run.bdf.csv"}) == 1
+    assert ws._apply_zenodo_file_urls(record_url, plan) == 1
     rebuilt = ws._build_zenodo_jsonld(
         zenodo_record_id=4242,
         prereserved_doi="10.5281/zenodo.4242",
