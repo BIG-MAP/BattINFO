@@ -1293,7 +1293,8 @@ class Electrolyte(BaseModel):
     # is the deprecated wrapper spelling.
     solvent: MaterialComponent | list[MaterialComponent] | None = None
     solvent_mixture: SolventMixture | None = None
-    salt: Salt | None = None
+    # One salt, or a list for a multi-salt electrolyte.
+    salt: Salt | list[Salt] | None = None
     additive: list[MaterialComponent] = Field(default_factory=list)
     manufacturer: str | None = None
     supplier: str | None = None

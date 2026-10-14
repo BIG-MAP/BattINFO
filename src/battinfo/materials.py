@@ -254,9 +254,9 @@ def _iter_embedded_materials(cell_spec_record: Mapping[str, Any]):
 
     electrolyte = data.get("electrolyte")
     if isinstance(electrolyte, Mapping):
-        salt = electrolyte.get("salt")
-        if isinstance(salt, Mapping) and salt.get("name"):
-            yield salt, "electrolyte_salt"
+        for salt in _as_material_list(electrolyte.get("salt")):
+            if isinstance(salt, Mapping) and salt.get("name"):
+                yield salt, "electrolyte_salt"
         solvent_mixture = electrolyte.get("solvent_mixture")
         if isinstance(solvent_mixture, Mapping):
             for item in _as_material_list(solvent_mixture.get("component")):

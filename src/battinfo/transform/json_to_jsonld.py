@@ -1862,10 +1862,20 @@ def _converter_electrolyte_node(electrolyte: dict[str, Any] | None) -> dict[str,
             _converter_component_metadata(solvent_node, solvent_mixture)
             node["hasSolvent"] = solvent_node
     solute_node: dict[str, Any] | None = None
-    salt = electrolyte.get("salt")
-    if isinstance(salt, dict):
-        solute_component = _converter_named_node(salt, property_types=CONVERTER_PROPERTY_TYPES)
-        solute_node = {"@type": "Solute", "hasConstituent": solute_component}
+    salts = electrolyte.get("salt")
+    if isinstance(salts, dict):
+        salts = [salts]
+    solute_components = [
+        c
+        for salt in (salts if isinstance(salts, list) else [])
+        if isinstance(salt, dict)
+        if (c := _converter_named_node(salt, property_types=CONVERTER_PROPERTY_TYPES))
+    ]
+    if solute_components:
+        solute_node = {
+            "@type": "Solute",
+            "hasConstituent": solute_components[0] if len(solute_components) == 1 else solute_components,
+        }
     additives = electrolyte.get("additive")
     if isinstance(additives, list):
         additive_items = [
@@ -2359,11 +2369,18 @@ def _descriptor_electrolyte_to_jsonld(electrolyte: dict[str, Any] | None) -> dic
     elyte_type = _ELECTROLYTE_FAMILY_TYPES.get(family, "ElectrolyteSolution")
     node: dict[str, Any] = {"@type": elyte_type}
 
-    salt = electrolyte.get("salt")
-    if isinstance(salt, dict) and salt.get("name"):
-        salt_node = _typed_constituent_node(salt, "Solute", "Concentration")
-        if salt_node:
-            node["hasSolute"] = salt_node
+    # `salt` is one salt or a list of them.
+    salts = electrolyte.get("salt")
+    if isinstance(salts, dict):
+        salts = [salts]
+    salt_nodes = [
+        c
+        for s in (salts if isinstance(salts, list) else [])
+        if isinstance(s, dict) and s.get("name")
+        if (c := _typed_constituent_node(s, "Solute", "Concentration")) is not None
+    ]
+    if salt_nodes:
+        node["hasSolute"] = salt_nodes[0] if len(salt_nodes) == 1 else salt_nodes
 
     # `solvent` is one component or a list of them; the deprecated
     # solvent_mixture {component: [...]} wrapper stays readable.

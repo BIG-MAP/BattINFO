@@ -8167,6 +8167,50 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "description": "Deprecated alias of solvent (its {component: [...]} wrapper form); accepted so existing records keep validating, normalized to solvent on round-trip."
         },
         "salt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Salt"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Salt"
+              },
+              "minItems": 1
+            }
+          ],
+          "description": "Conducting salt(s): a single salt object, or an array for a multi-salt electrolyte (e.g. LiPF6 + LiFSI). Each salt carries its concentration under its property map."
+        },
+        "additive": {
+          "type": "array",
+          "items": {
+            "$ref": "material-component.schema.json"
+          },
+          "description": "Functional additives (e.g. VC, FEC). Each carries its mass_fraction of the total electrolyte under property, unless the component comment states another basis."
+        },
+        "manufacturer": {
+          "type": "string",
+          "description": "Manufacturer of the item."
+        },
+        "supplier": {
+          "type": "string",
+          "description": "Supplier or vendor the item was sourced from."
+        },
+        "product_id": {
+          "type": "string",
+          "description": "Manufacturer or supplier product/grade identifier."
+        },
+        "property": {
+          "$ref": "../common/quantitative-properties.schema.json",
+          "description": "Named quantity map of technical properties (snake_case key to value+unit quantity)."
+        },
+        "comment": {
+          "type": "string",
+          "description": "Free-text comment."
+        }
+      },
+      "$defs": {
+        "Salt": {
           "type": "object",
           "additionalProperties": false,
           "required": [
@@ -8236,33 +8280,6 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             }
           },
           "description": "Conducting salt (e.g. LiPF6), with concentration under its property map."
-        },
-        "additive": {
-          "type": "array",
-          "items": {
-            "$ref": "material-component.schema.json"
-          },
-          "description": "Functional additives (e.g. VC, FEC). Each carries its mass_fraction of the total electrolyte under property, unless the component comment states another basis."
-        },
-        "manufacturer": {
-          "type": "string",
-          "description": "Manufacturer of the item."
-        },
-        "supplier": {
-          "type": "string",
-          "description": "Supplier or vendor the item was sourced from."
-        },
-        "product_id": {
-          "type": "string",
-          "description": "Manufacturer or supplier product/grade identifier."
-        },
-        "property": {
-          "$ref": "../common/quantitative-properties.schema.json",
-          "description": "Named quantity map of technical properties (snake_case key to value+unit quantity)."
-        },
-        "comment": {
-          "type": "string",
-          "description": "Free-text comment."
         }
       }
     }
