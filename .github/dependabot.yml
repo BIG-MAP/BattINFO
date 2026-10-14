@@ -6,6 +6,18 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
+    # Refresh uv.lock only. The lower bounds in pyproject.toml become permanent
+    # metadata once a release is on PyPI, and the "Dependency floors" job in
+    # ci.yml tests them, so raise one by hand, and only when battinfo needs the
+    # newer release. Without this, Dependabot raised each floor to the latest
+    # release.
+    versioning-strategy: "lockfile-only"
+    ignore:
+      # The [build-system] requirements, which decide what an sdist build
+      # needs, change by hand. This also holds back the locked setuptools and
+      # wheel that the dev extra installs.
+      - dependency-name: "setuptools"
+      - dependency-name: "wheel"
     groups:
       python-minor-patch:
         update-types: ["minor", "patch"]

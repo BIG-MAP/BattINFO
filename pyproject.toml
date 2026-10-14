@@ -50,7 +50,8 @@ dependencies = [
   # (bundle_generated.py) set ConfigDict keys that only 2.11 and later read.
   "pydantic>=2.11",
   "typer>=0.27.0",
-  "rich>=13.7",
+  # cli.py imports rich itself. typer 0.27.0 requires rich 13.8.0 or later.
+  "rich>=13.8",
   "jsonschema>=4.21",
   # pyshacl runs the SHACL shapes, among them the publication shapes checked
   # before a Zenodo DOI is minted. It is pure Python and loads only when a check

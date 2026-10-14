@@ -81,6 +81,99 @@ jobs:
           name: coverage-xml
           path: coverage.xml
 
+  floors:
+    # Every other job installs the locked, newest versions. This one installs
+    # the lowest version of each requirement that pyproject.toml declares for
+    # the core install and the publish and processing extras, on the oldest
+    # supported Python, because those floors become permanent metadata once a
+    # release is on PyPI. The requirements are read from pyproject.toml, so uv
+    # treats them as direct ones; read from the wheel, they would count as
+    # transitive and get the newest versions. uv sync is not used: uv.lock is
+    # resolved for every extra at once, so a requirement of the dev or docs
+    # extras can lift a core package above its floor.
+    name: Dependency floors (py3.11)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+      - name: Install the lowest versions pyproject.toml allows
+        run: |
+          uv venv --python 3.11
+          uv pip install --resolution lowest-direct -r pyproject.toml --extra publish --extra processing
+          uv pip install --no-deps .
+          uv pip install pytest pytest-timeout pytest-socket
+      - name: Each requirement is installed at its floor
+        run: |
+          uv run --no-sync python - <<'PY'
+          import tomllib
+          from importlib.metadata import version
+
+          from packaging.requirements import Requirement
+          from packaging.version import Version
+
+          with open("pyproject.toml", "rb") as handle:
+              project = tomllib.load(handle)["project"]
+          extras = project["optional-dependencies"]
+          no_floor, lifted = [], []
+          for raw in project["dependencies"] + extras["publish"] + extras["processing"]:
+              requirement = Requirement(raw)
+              floors = [Version(spec.version) for spec in requirement.specifier if spec.operator == ">="]
+              installed = Version(version(requirement.name))
+              print(f"{requirement.name:12} floor {', '.join(map(str, floors)) or 'none':10} installed {installed}")
+              if len(floors) != 1:
+                  no_floor.append(requirement.name)
+              elif installed != floors[0]:
+                  lifted.append(requirement.name)
+          problems = []
+          if no_floor:
+              problems.append(f"Declare one >= floor for {', '.join(no_floor)}.")
+          if lifted:
+              problems.append(
+                  f"Installed above the declared floor: {', '.join(lifted)}. Another requirement "
+                  "needs a newer release, so raise the floor to the version installed here."
+              )
+          if problems:
+              raise SystemExit(" ".join(problems))
+          PY
+      - name: Installed-package smoke test
+        run: |
+          uv run --no-sync python tests/installed_smoke.py
+          uv run --no-sync battinfo --help > /dev/null
+      # The tests that exercise these packages: the record models and
+      # validation (pydantic, jsonschema, rdflib, pyld), the SHACL gate
+      # (pyshacl), the CLI (typer, rich), the config file (PyYAML), the
+      # workspace and deposit paths, conversion (batterydf), the dataset
+      # previews (matplotlib, plotly) and RO-Crate validation (rocrate).
+      - name: Tests that use these packages
+        run: >-
+          uv run --no-sync pytest -q
+          tests/test_testmethod.py
+          tests/test_bundle.py
+          tests/test_validation_core.py
+          tests/test_validation_record.py
+          tests/test_jsonld_offline.py
+          tests/test_examples_jsonld.py
+          tests/test_record_roundtrip.py
+          tests/test_publication_shacl_gate.py
+          tests/test_ws_publish_gate.py
+          tests/test_cli_query_create_publish.py
+          tests/test_user_config.py
+          tests/test_batch_init.py
+          tests/test_acceptance_workflows.py
+          tests/test_quickstart_recipe.py
+          tests/test_authoring_ws.py
+          tests/test_build_zenodo_package.py
+          tests/test_lab_p1_traps.py
+          tests/test_processing_artifacts.py
+          tests/test_optional_extras.py
+
   notebooks:
     name: Guide notebooks execute
     runs-on: ubuntu-latest

@@ -10,7 +10,7 @@ Package code is in `src/battinfo/`, schemas and mappings in `assets/`, example r
 
 ## Set up and run the checks
 
-The project uses [uv](https://docs.astral.sh/uv/) with a committed `uv.lock`. It needs Python 3.11 or newer, and CI tests 3.11–3.14 on Linux and Windows.
+The project uses [uv](https://docs.astral.sh/uv/) with a committed `uv.lock`. It needs Python 3.11 or newer, and CI tests 3.11–3.14 on Linux and Windows. A further CI job installs the lowest version that `pyproject.toml` allows of each core, `publish` and `processing` requirement, on Python 3.11, and runs part of the suite against them. Raise a floor only when battinfo needs the newer release, and run `uv lock` in the same change; `tests/test_packaging_metadata.py` fails while the lock disagrees.
 
 ```bash
 uv sync --all-extras    # .venv from uv.lock, with the dev, docs and feature extras

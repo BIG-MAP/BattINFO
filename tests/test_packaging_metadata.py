@@ -4,7 +4,9 @@ The floors become permanent PyPI metadata once a release is uploaded, so each
 one has to be a release battinfo works with. uv.lock records the declared
 requirements, and CI installs from it with ``--frozen``, which never compares
 the two: a floor changed without ``uv lock`` would pass CI while the lock
-still recorded the old one.
+still recorded the old one. Every other CI job installs the locked, newest
+versions, so one job installs the floors themselves, and Dependabot only
+refreshes the lock.
 
 The classifiers name the Python versions CI tests, and the install pages, the
 contributor guides and the scope page state the same range.
@@ -56,6 +58,11 @@ def _ci_jobs() -> dict:
     return _yaml(".github/workflows/ci.yml")["jobs"]
 
 
+def _run_text(job: dict) -> str:
+    """The shell commands of every step of a workflow job, one string."""
+    return "\n".join(str(step.get("run", "")) for step in job.get("steps", []))
+
+
 def _core() -> dict[str, Requirement]:
     requirements = (Requirement(raw) for raw in _pyproject()["project"]["dependencies"])
     return {canonicalize_name(req.name): req for req in requirements}
@@ -90,6 +97,12 @@ def test_rdflib_floor_is_one_pyshacl_can_use() -> None:
     # pyshacl 0.40.1 needs owlrl 7.6.2, which requires rdflib>=7.6.0, so an
     # older rdflib can never be installed next to it.
     assert _floor(_core()["rdflib"]) >= Version("7.6")
+
+
+def test_rich_floor_is_one_the_typer_floor_allows() -> None:
+    # typer 0.27.0 requires rich>=13.8.0, so a lower rich floor could never be
+    # installed, and the CI job that installs the floors could not test it.
+    assert _floor(_core()["rich"]) >= Version("13.8")
 
 
 def test_import_battinfo_does_not_load_pyshacl() -> None:
@@ -175,3 +188,31 @@ def test_docs_state_the_python_versions_ci_tests() -> None:
         assert span in text, f"{relative} does not state the tested range Python {span}"
         stale = re.findall(r"3\.11(?:/| and )3\.12\b|Python 3\.11\+", text)
         assert not stale, f"{relative} still states an older range: {stale}"
+
+
+def test_a_ci_job_installs_the_declared_floors() -> None:
+    # The floors become permanent metadata on PyPI, and every other job
+    # installs the locked, newest versions. The requirements are read from
+    # pyproject.toml so that uv treats them as direct ones: given the wheel,
+    # it would treat them as transitive and install the newest versions.
+    # uv.lock is not used, because it is resolved for every extra at once, so a
+    # requirement of the dev or docs extras can lift a core package above its floor.
+    jobs = [job for job in _ci_jobs().values() if "--resolution lowest-direct" in _run_text(job)]
+    assert len(jobs) == 1, "ci.yml needs one job that installs the lowest versions pyproject.toml allows"
+    run = _run_text(jobs[0])
+    assert re.search(r"uv venv --python 3\.11\b", run), "the floors are tested on the oldest supported Python"
+    assert "uv pip install --resolution lowest-direct -r pyproject.toml --extra publish --extra processing" in run
+    assert "uv sync" not in run
+    assert "tests/installed_smoke.py" in run
+    assert "pytest" in run
+
+
+def test_dependabot_refreshes_the_lock_and_leaves_the_floors_alone() -> None:
+    updates = _yaml(".github/dependabot.yml")["updates"]
+    uv = next(entry for entry in updates if entry["package-ecosystem"] == "uv")
+    assert uv.get("versioning-strategy") == "lockfile-only"
+    ignored = {canonicalize_name(entry["dependency-name"]) for entry in uv.get("ignore", [])}
+    build_requires = {canonicalize_name(Requirement(raw).name) for raw in _pyproject()["build-system"]["requires"]}
+    assert build_requires <= ignored, (
+        f"Dependabot may still change the build requirements {sorted(build_requires - ignored)}"
+    )

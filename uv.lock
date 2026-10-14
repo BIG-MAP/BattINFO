@@ -423,7 +423,7 @@ requires-dist = [
     { name = "pytest-timeout", marker = "extra == 'dev'", specifier = ">=2.3" },
     { name = "pyyaml", specifier = ">=6.0.1" },
     { name = "rdflib", specifier = ">=7.6" },
-    { name = "rich", specifier = ">=13.7" },
+    { name = "rich", specifier = ">=13.8" },
     { name = "rocrate", marker = "extra == 'publish'", specifier = ">=0.15.1" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.16.0" },
     { name = "setuptools", marker = "extra == 'dev'", specifier = ">=83.0.0" },
