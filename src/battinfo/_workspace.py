@@ -212,6 +212,31 @@ def _content_seed(entity: Any, *, workspace_root: Path | None = None) -> str:
     return json.dumps(_seed_view(data, workspace_root), sort_keys=True, ensure_ascii=False)
 
 
+def _link_key(linked: Any, iri: str | None) -> str | None:
+    """How a session view names the record a link leads to.
+
+    By the linked object's IRI, or by the object itself while it has none
+    (two objects without an IRI are two records until a save tells them
+    apart), else by the IRI the link already holds.
+    """
+    if linked is not None:
+        return getattr(linked, "id", None) or f"session-object:{id(linked)}"
+    return iri
+
+
+def _repeat_key(entity: Any) -> tuple[Any, ...]:
+    """A few fields two objects share whenever their session views are equal (a cheap first check)."""
+    if isinstance(entity, CellSpec):
+        return (entity.manufacturer, entity.model)
+    if isinstance(entity, TestSpec):
+        return (entity.name, str(entity.test_type))
+    if isinstance(entity, Test):
+        return (str(entity.test_type), _link_key(entity.cell, entity.cell_instance_id))
+    if isinstance(entity, Cell):
+        return (entity.serial_number, entity.batch_id)
+    return ()
+
+
 def _disambiguate_entity_ids(entities: Sequence[Any], entity_type: str, *, workspace_root: Path | None = None) -> None:
     """Ensure auto-minted IRIs are unique across distinct authored entities.
 
@@ -1899,6 +1924,62 @@ class Workspace:
     load_test_protocol = load_test_spec
     load_test_protocols = load_test_specs
     query_test_protocols = query_test_specs
+
+    def _session_view(self, entity: Any, *, without: Sequence[str] = ()) -> str:
+        """*entity* as the next save would write it, to tell a repeated record from a new one.
+
+        The record a finalize pass makes of *entity*, without its own IRI, its
+        timestamps, its derived back-links (``dataset_ids``) and the fields in
+        *without*. A link to another record names that record by its IRI or,
+        while it has none, by the object (:func:`_link_key`), so two links are
+        equal only when they lead to one record. Two objects with one view would
+        save as one record. Nothing in the session changes.
+        """
+        cells = {id(cell): cell for cell in self.cells}
+        links: dict[str, str | None] = {}
+        finalized: Any
+        if isinstance(entity, CellSpec):
+            finalized = self._finalize_cell_spec(entity)
+        elif isinstance(entity, Cell):
+            finalized = self._finalize_cell(entity, {id(spec): spec for spec in self.cell_specs})
+            links["cell_spec_id"] = _link_key(entity.cell_spec, entity.cell_spec_id)
+        elif isinstance(entity, TestSpec):
+            finalized = self._finalize_test_spec(entity)
+        elif isinstance(entity, Test):
+            finalized = self._finalize_test(entity, cells, {id(spec): spec for spec in self.test_specs})
+            links["cell_instance_id"] = _link_key(entity.cell, entity.cell_instance_id)
+            links["protocol_id"] = _link_key(entity.protocol_entity, entity.protocol_id)
+        elif isinstance(entity, Dataset):
+            finalized = self._finalize_dataset(entity, cells, {id(test): test for test in self.tests})
+            links["cell_instance_id"] = _link_key(entity.cell, entity.cell_instance_id)
+            links["test_id"] = _link_key(entity.test, entity.test_id)
+        else:
+            raise TypeError(f"No session view for {type(entity).__name__}.")
+        data = finalized.model_dump(mode="json", exclude_none=True)
+        data.update({key: value for key, value in links.items() if value is not None})
+        for key in ("id", "dataset_ids", *without):
+            data.pop(key, None)
+        return json.dumps(_seed_view(data, self.data_root), sort_keys=True, ensure_ascii=False)
+
+    def _repeats_in(self, entity: Any, pool: Sequence[Any]) -> list[Any]:
+        """The objects of *pool* that *entity* repeats, in order: the same view, and its IRI if it has one.
+
+        *entity* is never a repeat of itself. Used when a load or add runs a
+        second time, so the session keeps the object it already holds.
+        """
+        pinned = getattr(entity, "id", None)
+        candidates = [
+            other
+            for other in pool
+            if other is not entity
+            and type(other) is type(entity)
+            and (pinned is None or getattr(other, "id", None) == pinned)
+            and _repeat_key(other) == _repeat_key(entity)
+        ]
+        if not candidates:
+            return []
+        view = self._session_view(entity)
+        return [other for other in candidates if self._session_view(other) == view]
 
     def _finalize(self, *, record_roots: Sequence[Path] | None = None) -> dict[str, list[Any]]:
         """Mint and link every record of the session, in place.

@@ -176,6 +176,56 @@ def test_a_test_with_two_datasets_imports_as_one_test_under_its_iri(tmp_path: Pa
     assert all(source_test["test"]["id"] in record["dataset"]["about"] for record in datasets)
 
 
+def test_importing_the_same_deposit_twice_adds_nothing(tmp_path: Path, source: tuple[Path, dict]) -> None:
+    _, graph = source
+    path = tmp_path / "battinfo.json"
+    path.write_text(json.dumps(graph), encoding="utf-8")
+    once = tmp_path / "once"
+    ws = AuthoringWorkspace(root=once, registry_url=None)
+    ws.import_(str(path))
+    ws.save()
+
+    twice = tmp_path / "twice"
+    ws = AuthoringWorkspace(root=twice, registry_url=None)
+    first = ws.import_(str(path))
+    size = [len(items) for items in (ws._ws.cell_specs, ws._ws.cells, ws._ws.tests, ws._ws.datasets)]
+    assert ws.import_(str(path)) == first
+    assert [len(items) for items in (ws._ws.cell_specs, ws._ws.cells, ws._ws.tests, ws._ws.datasets)] == size
+    assert ws.save()["index"]["failures"] == []
+    for folder in ("cell-spec", "cell-instance", "test", "dataset"):
+        assert sorted(_ids(_saved(twice, folder))) == sorted(_ids(_saved(once, folder))), folder
+
+
+def _ids(records: list[dict]) -> list[str]:
+    """The IRI of each saved record."""
+    return [
+        next(body["id"] for body in record.values() if isinstance(body, dict) and "id" in body) for record in records
+    ]
+
+
+def test_a_deposit_that_reuses_an_iri_for_other_content_imports_nothing(
+    tmp_path: Path, source: tuple[Path, dict]
+) -> None:
+    _, graph = source
+    path = tmp_path / "battinfo.json"
+    path.write_text(json.dumps(graph), encoding="utf-8")
+    changed = copy.deepcopy(graph)
+    for node in changed["@graph"]:
+        if node.get("schema:serialNumber") == "C01":
+            node["schema:serialNumber"] = "C01-relabelled"
+    other = tmp_path / "other.json"
+    other.write_text(json.dumps(changed), encoding="utf-8")
+
+    ws = AuthoringWorkspace(root=tmp_path / "ws", registry_url=None)
+    ws.import_(str(path))
+    held = [list(items) for items in (ws._ws.cell_specs, ws._ws.cells, ws._ws.tests, ws._ws.datasets)]
+    with pytest.raises(ValueError, match="nothing was imported"):
+        ws.import_(str(other))
+    after = [list(items) for items in (ws._ws.cell_specs, ws._ws.cells, ws._ws.tests, ws._ws.datasets)]
+    assert all(len(a) == len(b) and all(x is y for x, y in zip(a, b)) for a, b in zip(after, held))
+    assert ws._resolve_cell("C01").serial_number == "C01"
+
+
 @pytest.mark.parametrize(
     "value,expected",
     [

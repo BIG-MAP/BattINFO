@@ -49,6 +49,7 @@ chemistry :: size code), using the same seeds in every authoring path.
 Consequences you can rely on:
 
 - re-running an identical ingest is a **no-op**, never a duplicate corpus;
+- running the same `ws.load()` or `ws.add()` call again in one session, as a notebook does when a cell is re-run, reuses the record the session already holds instead of adding a copy;
 - the workspace and `save_*` paths mint **identical IRIs** for identical
   identities (tested);
 - records with no distinguishing identity still mint randomly — two anonymous

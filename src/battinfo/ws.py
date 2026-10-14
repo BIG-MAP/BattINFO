@@ -3553,6 +3553,11 @@ class AuthoringWorkspace:
         A relative draft path resolves against the workspace root, not the
         current directory.
 
+        Loading the same draft or result again, as a notebook does when a cell
+        is re-run, returns the record the session already holds rather than a
+        second copy. A draft whose ``id`` a different record of the session
+        already has raises ``ValueError``: one IRI names one record.
+
         Example::
 
             spec = ws.load("duracell.cell-spec.json")               # author new
@@ -3658,6 +3663,12 @@ class AuthoringWorkspace:
             ws.add("test", type="gitt", cell="063b77", name="Graphite AQ-1 cell 063b77 GITT test",
                    handle="flores-ocv/graphite-aq-1-063b77-gitt-test",
                    iri="https://w3id.org/battinfo/test/....")
+
+        **Running a call again.** The same call run a second time in one
+        session, as when a notebook cell is re-run, adds nothing: a test with
+        the same fields and data files returns the test the session already
+        holds, and cells already in the session are skipped. A pinned IRI that
+        a different record of the session already has raises ``ValueError``.
 
         **Equipment** (``"equipment"``) — register a physical unit + its channels::
 
@@ -4380,6 +4391,9 @@ class AuthoringWorkspace:
         ``ws.save()`` and ``ws.submit()``.  All canonical IRIs from the source
         document are preserved — no new IRIs are minted. A test that produced
         several data files comes back as one test, with one dataset per file.
+        Importing the same deposit again in one session reuses the records the
+        first import made. A deposit that gives an IRI the session already
+        holds to a different record raises ``ValueError`` and imports nothing.
 
         Parameters
         ----------
@@ -4575,6 +4589,31 @@ class AuthoringWorkspace:
                 # before the catalog shape carried them all on one dataset.
                 dataset_nodes.append(node)
 
+        # A record the session already holds under a deposit IRI, as when the
+        # import runs a second time, is reused. A different record under one of
+        # those IRIs is a clash: once the deposit is read, the session is put
+        # back as it was and the import raises, because one IRI names one record.
+        engine = self._ws
+        collections: tuple[builtins.list[Any], ...] = (
+            engine.cell_specs,
+            engine.cells,
+            engine.test_specs,
+            engine.tests,
+            engine.datasets,
+        )
+        held_before = [builtins.list(collection) for collection in collections]
+        index_before = (dict(self._cells_by_short_id), set(self._ambiguous_cell_keys))
+        clashes: builtins.list[str] = []
+
+        def _held_or_new(obj: Any, pool: builtins.list[Any], what: str) -> Any:
+            repeats = engine._repeats_in(obj, pool)
+            if repeats:
+                self._discard(obj)
+                return repeats[0]
+            if obj.id is not None and any(other is not obj and other.id == obj.id for other in pool):
+                clashes.append(f"{what} {obj.id}")
+            return obj
+
         # ── 5. Import cell specs ───────────────────────────────────────────────
         spec_objects: dict[str, Any] = {}  # IRI → CellSpec
         for iri, node in sorted(spec_nodes_by_iri.items()):
@@ -4624,7 +4663,7 @@ class AuthoringWorkspace:
                 source_type="zenodo",
             )
             ct.id = iri
-            spec_objects[iri] = ct
+            spec_objects[iri] = _held_or_new(ct, engine.cell_specs, "cell spec")
             print(f"  spec:     {node.get('schema:name', iri)}")
 
         # ── 6. Import cell instances ───────────────────────────────────────────
@@ -4646,7 +4685,9 @@ class AuthoringWorkspace:
             )
             cell.id = iri
             sn = node.get("schema:serialNumber", "")
-            self._index_cell(cell, sn)
+            held = _held_or_new(cell, engine.cells, "cell")
+            if held is cell:
+                self._index_cell(cell, sn)
             imported_cells += 1
             print(f"  instance: {sn or iri}")
 
@@ -4758,6 +4799,7 @@ class AuthoringWorkspace:
                         status="completed",
                     )
                     test.id = test_iri
+                    test = _held_or_new(test, engine.tests, "test")
                 dataset = self._ws.dataset(
                     test_cell,
                     title=f"{test_cell.name or test_cell.serial_number or 'cell'} {kind} dataset",
@@ -4769,12 +4811,24 @@ class AuthoringWorkspace:
                 )
                 if ds_iri:
                     dataset.id = ds_iri
+                _held_or_new(dataset, engine.datasets, "dataset")
                 imported_datasets += 1
                 print(f"  test:     {fname}")
             if test is not None:
                 imported_tests += 1
             else:
                 skipped_tests.append({"test": test_iri, "cell": cell_iri, "reason": "no distribution"})
+
+        if clashes:
+            for collection, items in zip(collections, held_before):
+                collection[:] = items
+            self._cells_by_short_id, self._ambiguous_cell_keys = index_before
+            shown = ", ".join(clashes[:3]) + (f" and {len(clashes) - 3} more" if len(clashes) > 3 else "")
+            raise ValueError(
+                f"The deposit has {len(clashes)} record(s) whose IRI a different record of this session "
+                f"already has: {shown}. One IRI names one record, so nothing was imported. Import into a "
+                "fresh workspace, or start over with ws.clear()."
+            )
 
         counts: dict[str, Any] = {
             "properties": len(spec_objects),
@@ -4805,8 +4859,10 @@ class AuthoringWorkspace:
         """Clear all in-memory records and reset the workspace for a new authoring session.
 
         Does not delete any files already saved to ``.battinfo/records/``.
-        Call before re-running ``ws.add()`` + ``ws.save()`` in a notebook to
-        avoid accumulating duplicate records across cells.
+        A ``ws.load()`` or ``ws.add()`` cell re-run unchanged needs no clear:
+        the session reuses what it holds. Call it to start a session over, for
+        example after editing a draft whose pinned IRI the session already
+        holds.
 
         Example::
 
@@ -8424,6 +8480,11 @@ class AuthoringWorkspace:
         # change does not move the IRI.
         if isinstance(name, str) and name.strip():
             ct.name = name.strip()
+        # Loading the same draft again (a notebook cell run twice) reuses the
+        # spec the session already holds.
+        repeat = self._session_repeat(ct, self._ws.cell_specs, what=path.name)
+        if repeat is not None:
+            return repeat
         self._ws.cell_specs.append(ct)
         return ct
 
@@ -8443,8 +8504,14 @@ class AuthoringWorkspace:
         """
         from battinfo.bundle import Cell  # noqa: PLC0415
 
+        # Loading the same result again (a notebook cell re-run) reuses the cell
+        # already referenced; a second object would make its serial ambiguous.
+        iri = result.get("id")
+        known = next((cell for cell in self._cells_by_short_id.values() if iri and cell.id == iri), None)
+        if known is not None:
+            return known
         cell = Cell(
-            id=result.get("id"),
+            id=iri,
             cell_spec_id=result.get("cell_spec_id"),
             name=result.get("name"),
             serial_number=result.get("serial_number"),
@@ -8637,8 +8704,13 @@ class AuthoringWorkspace:
         if isinstance(spec, CellSpec):
             # A NEW spec (no id yet) must join the save set, or the instances
             # would reference a spec that never gets saved and fail at save
-            # time with an obscure error. IRI is minted at ws.save().
-            if spec.id is None and spec not in self._ws.cell_specs:
+            # time with an obscure error. IRI is minted at ws.save(). A new
+            # object equal to a spec the session already holds (the cell that
+            # builds it run again) is not added twice: the cells link the held one.
+            if spec.id is None and not any(existing is spec for existing in self._ws.cell_specs):
+                repeat = self._session_repeat(spec, self._ws.cell_specs, what="cell spec", note=False)
+                if repeat is not None:
+                    return repeat
                 self._ws.cell_specs.append(spec)
             return spec
         if isinstance(spec, str):
@@ -8724,56 +8796,59 @@ class AuthoringWorkspace:
             handle_list = builtins.list(handles) if handles is not None else [None] * len(pairs)
             entries = [(n, s, iri, h) for (n, s), iri, h in zip(pairs, iri_list, handle_list)]
 
-            # Drop cells already in this session, keyed on IDENTITY.
-            #
-            # A cell instance is identified by its serial number. The name is
-            # display text: a batch may legitimately share one public label
-            # across many physical cells (95 cells under 12 labels is a real
-            # shape), so keying the de-duplication on the label collapsed such a
-            # batch to one cell per label and lost the rest without failing.
-            # Prefer the serial; fall back to the name only when no serial is
-            # supplied, which is the single-label case the old key served.
-            seen: dict[str, str | None] = {}
-            already: list[str] = []
-            repeated_serials: list[str] = []
-            repeated_names: list[str] = []
-            deduped: list[tuple[str | None, str | None, str | None, str | None]] = []
-            for n, s, iri, h in entries:
-                key = s or n or ""
-                if key and key in seen:
-                    # Two entries claiming one identity. A repeated serial is a
-                    # contradiction in the input (loud); a repeated bare name is
-                    # merely indistinguishable (warn and keep the first).
-                    (repeated_serials if s else repeated_names).append(key)
-                    continue
-                if key and key in self._cells_by_short_id:
-                    already.append(key)
-                    continue
-                if key:
-                    seen[key] = n
-                deduped.append((n, s, iri, h))
-            if repeated_serials:
-                dupes = sorted(set(repeated_serials))
-                raise ValueError(
-                    f"serial_numbers contains {len(repeated_serials)} repeated serial(s): "
-                    f"{dupes[:5]}" + (" ..." if len(dupes) > 5 else "") + ". "
-                    "A serial number identifies one physical cell, so it cannot appear "
-                    "twice in one batch. Names may repeat; serials may not."
-                )
-            if repeated_names:
-                dupes = sorted(set(repeated_names))
-                print(
-                    f"  WARNING: {len(repeated_names)} repeated name(s) with no serial "
-                    f"-- keeping the first of each: {dupes[:5]}"
-                    + (" ..." if len(dupes) > 5 else "")
-                    + "\n           Pass serial_numbers=[...] to author them as distinct cells."
-                )
-            if already:
-                print(
-                    f"  WARNING: {len(already)} already in workspace -- skipping: {already[:5]}"
-                    + (" ..." if len(already) > 5 else "")
-                )
-            entries = deduped
+        # Drop cells already in this session, keyed on IDENTITY, so the same call
+        # run twice (a notebook cell re-run) adds nothing. A from_file= map is
+        # keyed on its labels, the names its cells are indexed under.
+        #
+        # A cell instance is identified by its serial number. The name is
+        # display text: a batch may legitimately share one public label
+        # across many physical cells (95 cells under 12 labels is a real
+        # shape), so keying the de-duplication on the label collapsed such a
+        # batch to one cell per label and lost the rest without failing.
+        # Prefer the serial; fall back to the name only when no serial is
+        # supplied, which is the single-label case the old key served.
+        seen: dict[str, str | None] = {}
+        already: list[str] = []
+        repeated_serials: list[str] = []
+        repeated_names: list[str] = []
+        deduped: list[tuple[str | None, str | None, str | None, str | None]] = []
+        for n, s, iri, h in entries:
+            key = s or n or ""
+            if key and key in seen:
+                # Two entries claiming one identity. A repeated serial is a
+                # contradiction in the input (loud); a repeated bare name is
+                # merely indistinguishable (warn and keep the first).
+                (repeated_serials if s else repeated_names).append(key)
+                continue
+            if key and key in self._cells_by_short_id:
+                already.append(key)
+                continue
+            if key:
+                seen[key] = n
+            deduped.append((n, s, iri, h))
+        if repeated_serials:
+            dupes = sorted(set(repeated_serials))
+            raise ValueError(
+                f"serial_numbers contains {len(repeated_serials)} repeated serial(s): "
+                f"{dupes[:5]}" + (" ..." if len(dupes) > 5 else "") + ". "
+                "A serial number identifies one physical cell, so it cannot appear "
+                "twice in one batch. Names may repeat; serials may not."
+            )
+        if repeated_names:
+            dupes = sorted(set(repeated_names))
+            print(
+                f"  WARNING: {len(repeated_names)} repeated name(s) with no serial "
+                f"-- keeping the first of each: {dupes[:5]}"
+                + (" ..." if len(dupes) > 5 else "")
+                + "\n           Pass serial_numbers=[...] to author them as distinct cells."
+            )
+        if already:
+            print(
+                f"  WARNING: {len(already)} already in workspace -- skipping: {already[:5]}"
+                + (" ..." if len(already) > 5 else "")
+            )
+        entries = deduped
+        self._refuse_shared_cell_iris(entries)
 
         if not entries:
             print("  No cell instances to add" + (f" (match={match!r})." if match else "."))
@@ -8836,6 +8911,31 @@ class AuthoringWorkspace:
             cells.append(cell)
             print(f"  cell: {name or serial}  {iri or '(IRI auto-assigned)'}")
         return cells
+
+    def _refuse_shared_cell_iris(
+        self, entries: builtins.list[tuple[str | None, str | None, str | None, str | None]]
+    ) -> None:
+        """Raise ``ValueError`` when two new cells pin one IRI, or one pins the IRI of a cell this session saves.
+
+        *entries* are the ``(name, serial, iri, handle)`` of the cells about to
+        be made. One IRI names one cell. A cell the session only references
+        (rehydrated from disk or found in the registry) is not in the save set,
+        so pinning its IRI on a renamed cell is allowed: the save rewrites it.
+        """
+        pinned = [iri for _, _, iri, _ in entries if iri]
+        repeated = sorted({iri for iri in pinned if pinned.count(iri) > 1})
+        if repeated:
+            raise ValueError(
+                f"{repeated[0]} is given to more than one cell; one IRI names one cell. Nothing was added."
+            )
+        for name, serial, iri, _ in entries:
+            holder = next((cell for cell in self._ws.cells if iri and cell.id == iri), None)
+            if holder is not None:
+                held_by = holder.serial_number or holder.name or iri
+                raise ValueError(
+                    f"{iri} is already the IRI of cell {held_by!r} in this session, so it cannot also name "
+                    f"{serial or name!r}; one IRI names one cell. Nothing was added."
+                )
 
     def _load_test_spec(self, path: Path) -> Any:
         from battinfo.bundle import BatteryTestType, ProvenanceInfo  # noqa: PLC0415
@@ -8935,6 +9035,13 @@ class AuthoringWorkspace:
             tp.id = pinned
         if raw.get("handle"):
             tp.handle = raw["handle"]
+        # Held back until it is known to be new: loading the same draft again
+        # reuses the spec the session already holds.
+        self._discard(tp)
+        repeat = self._session_repeat(tp, self._ws.test_specs, what=path.name)
+        if repeat is not None:
+            return repeat
+        self._ws.test_specs.append(tp)
         return tp
 
     def _load_equipment_spec(self, path: Path) -> dict:
@@ -9465,17 +9572,62 @@ class AuthoringWorkspace:
             hint = "  No channels registered yet - run ws.add('equipment', spec=..., serial_number=...) first."
         raise ValueError(f"Unknown channel {ref!r}. Pass a channel IRI, a channel label, or 'unit/CHn'.\n" + hint)
 
-    def _register_test_spec(self, spec: Any) -> None:
+    def _register_test_spec(self, spec: Any) -> Any:
         """Register a ``TestSpec`` object so its protocol record is saved and its
-        minted IRI links back to the tests that reference it.
+        minted IRI links back to the tests that reference it; returns the spec
+        the tests should link.
 
         Idempotent by identity: passing the same spec object to several tests
         registers one protocol record, and the finalizer maps the linked test's
-        ``protocol_entity`` back to it by object identity.
+        ``protocol_entity`` back to it by object identity. A new object equal
+        to a spec the session already holds, as when a notebook cell that
+        builds it runs again, is not registered twice: the held spec is
+        returned instead. A spec that pins an IRI another spec of the session
+        has raises ``ValueError``.
         """
         specs = self._ws.test_specs
-        if not any(existing is spec for existing in specs):
-            specs.append(spec)
+        if any(existing is spec for existing in specs):
+            return spec
+        repeat = self._session_repeat(spec, specs, what=f"test spec {spec.name!r}", note=False)
+        if repeat is not None:
+            return repeat
+        specs.append(spec)
+        return spec
+
+    def _session_repeat(self, obj: Any, pool: builtins.list[Any], *, what: str, note: bool = True) -> Any:
+        """The object of *pool* that *obj*, just built by a load or an add, repeats, else ``None``.
+
+        A repeat would save as the same record (see ``Workspace._session_view``)
+        and has *obj*'s IRI if *obj* pins one; it is reused, with a note unless
+        *note* is false. When *obj* pins an IRI that a different object of
+        *pool* already has, raises ``ValueError``: one IRI names one record.
+        """
+        repeats = self._ws._repeats_in(obj, pool)
+        if repeats:
+            if note:
+                print(f"  {what}: already in this session, reusing it")
+            return repeats[0]
+        pinned = getattr(obj, "id", None)
+        if pinned is not None and any(other is not obj and getattr(other, "id", None) == pinned for other in pool):
+            raise ValueError(
+                f"{what} has the IRI {pinned}, which a different record in this session already has. "
+                "One IRI names one record: correct the IRI, or start over with ws.clear() and run the "
+                "cells again."
+            )
+        return None
+
+    def _discard(self, *objects: Any) -> None:
+        """Take *objects* out of the session (by identity), as if the call that made them had not run."""
+        engine = self._ws
+        collections: tuple[builtins.list[Any], ...] = (
+            engine.cell_specs,
+            engine.cells,
+            engine.test_specs,
+            engine.tests,
+            engine.datasets,
+        )
+        for collection in collections:
+            collection[:] = [item for item in collection if not any(item is obj for obj in objects)]
 
     def _resolve_test_protocol_ref(self, iri: str) -> tuple[str | None, str | None]:
         """Look up a saved test-protocol record by IRI → ``(name, test_kind)``.
@@ -9574,6 +9726,7 @@ class AuthoringWorkspace:
         # written and its minted IRI links back to this test (same outcome as
         # the ws.load(<draft>) path). Never reduce a spec to a name string.
         protocol_ref = None
+        registered_here = False  # this call added protocol_ref to the session
         if test_spec is not None:
             if isinstance(test_spec, str):
                 # A bare string is meaningful only as a reference to a saved
@@ -9610,8 +9763,9 @@ class AuthoringWorkspace:
                         f"{test_spec.__class__.__name__}. Author one inline "
                         "(battinfo.TestSpec(...)) or via ws.load(<draft file>)."
                     )
-                protocol_ref = test_spec
-                self._register_test_spec(test_spec)
+                held = any(existing is test_spec for existing in self._ws.test_specs)
+                protocol_ref = self._register_test_spec(test_spec)
+                registered_here = not held and protocol_ref is test_spec
                 protocol_name = test_spec.name
                 protocol_url = test_spec.protocol_url
                 spec_kind = getattr(test_spec, "test_type", None)
@@ -9690,6 +9844,7 @@ class AuthoringWorkspace:
                 test.channel_id = channel_id
             label = getattr(resolved, "name", None) or getattr(resolved, "serial_number", None) or resolved.id or "cell"
             n_raw = 0
+            made: builtins.list[Any] = []
             for i, f in enumerate(files):
                 # Explicit raw= wins; otherwise fall back to the convert() manifest.
                 src = raw_files[i] if raw_files else self._resolve_raw_source(f)
@@ -9711,6 +9866,19 @@ class AuthoringWorkspace:
                     dataset_obj.id = pinned_dataset_ids[i]
                 if member_series_id is not None:
                     dataset_obj.series_id = member_series_id
+                made.append(dataset_obj)
+            # The same call run again (a notebook cell re-run) reuses the test
+            # and datasets the session already holds.
+            repeat = self._repeated_test(test, made)
+            if repeat is not None:
+                self._discard(test, *made, *([protocol_ref] if registered_here else []))
+                print(f"  test [{test_type}] on {label}: already in this session, reusing it")
+                return [repeat]
+            try:
+                self._refuse_taken_test_pins(test, made)
+            except ValueError:
+                self._discard(test, *made, *([protocol_ref] if registered_here else []))
+                raise
             conf_status = conformance.status if conformance is not None else None
             print(
                 f"  test [{test_type}] on {label}"
@@ -9747,7 +9915,19 @@ class AuthoringWorkspace:
                 for t in tests:
                     t.equipment_id = equipment_id
                     t.channel_id = channel_id
-            return tests
+            # Matching the same files again (a notebook cell re-run) reuses the
+            # tests and datasets the session already holds.
+            kept: builtins.list[Any] = []
+            for t in tests:
+                made = [d for d in self._ws.datasets if d.test is t]
+                repeat = self._repeated_test(t, made)
+                if repeat is not None:
+                    self._discard(t, *made)
+                kept.append(repeat if repeat is not None else t)
+            reused = sum(1 for new, held in zip(tests, kept) if new is not held)
+            if reused:
+                print(f"  {reused} of these test(s) already in this session, reusing them")
+            return kept
 
         raise ValueError(
             "ws.add('test', ...) needs either cell=<serial|IRI|object> (with data=...) "
@@ -9759,9 +9939,10 @@ class AuthoringWorkspace:
 
         Same contract as the cell ``iris=`` path: the caller supplies an
         identity that was published before, and it replaces the seeded IRI.
-        The shape is checked here so a typo fails before anything is created,
-        and a pin already taken by another test in this session is refused
-        (the save would otherwise re-mint both to keep them apart).
+        The shape is checked here so a typo fails before anything is created.
+        A pin another test of this session already has is refused once the
+        test is built (``_refuse_taken_test_pins``), unless the call repeats
+        that test.
         """
         from battinfo.api._shared import TEST_IRI_RE, _normalized_dashed_uid  # noqa: PLC0415
 
@@ -9779,14 +9960,17 @@ class AuthoringWorkspace:
             if pinned is not None and pinned != from_uid:
                 raise ValueError(f"iri={iri!r} and uid={uid!r} name different tests; pass one.")
             pinned = from_uid
-        if any(getattr(existing, "id", None) == pinned for existing in self._ws.tests):
-            raise ValueError(f"{pinned} is already used by another test in this session.")
         return pinned
 
     def _pinned_dataset_iris(
         self, dataset_iris: "builtins.list[str] | None", n_files: int
     ) -> "builtins.list[str] | None":
-        """``dataset_iris=`` checked against the data files it pins, or ``None``."""
+        """``dataset_iris=`` checked against the data files it pins, or ``None``.
+
+        The shape, the count and that no IRI repeats are checked here; that no
+        other dataset of the session has one of them, once the datasets are
+        built (``_refuse_taken_test_pins``).
+        """
         from battinfo.api._shared import DATASET_IRI_RE  # noqa: PLC0415
 
         if dataset_iris is None:
@@ -9804,11 +9988,48 @@ class AuthoringWorkspace:
                 f"dataset_iris entries must be dataset IRIs "
                 f"(https://w3id.org/battinfo/dataset/xxxx-xxxx-xxxx-xxxx); got {bad[:3]}."
             )
-        taken = {getattr(ds, "id", None) for ds in self._ws.datasets}
-        clashes = [item for item in pinned if item in taken]
-        if len(set(pinned)) != len(pinned) or clashes:
+        if len(set(pinned)) != len(pinned):
             raise ValueError("dataset_iris must name distinct datasets not already used in this session.")
         return pinned
+
+    def _repeated_test(self, test: Any, datasets: builtins.list[Any]) -> Any:
+        """The test of this session that *test*, just added with *datasets*, repeats, else ``None``.
+
+        A repeat saves as the same test record (``Workspace._session_view``) and
+        has the same data: as many datasets, each saving as the same record
+        apart from its link to the test, with every IRI *datasets* pin.
+        """
+        engine = self._ws
+        candidates = engine._repeats_in(test, engine.tests)
+        if not candidates:
+            return None
+
+        def views(items: Iterable[Any]) -> builtins.list[tuple[str, str]]:
+            return sorted((engine._session_view(item, without=("test_id",)), item.id or "") for item in items)
+
+        mine = views(datasets)
+        for other in candidates:
+            theirs = views(
+                d
+                for d in engine.datasets
+                if d.test is other or (d.test is None and other.id is not None and d.test_id == other.id)
+            )
+            same_data = [view for view, _ in mine] == [view for view, _ in theirs]
+            if same_data and all(not own or own == held for (_, own), (_, held) in zip(mine, theirs)):
+                return other
+        return None
+
+    def _refuse_taken_test_pins(self, test: Any, datasets: builtins.list[Any]) -> None:
+        """Raise ``ValueError`` when *test* pins an IRI another test of this session has, or *datasets* one
+        another dataset has. One IRI names one record; a call that repeats a whole test reused it before."""
+        if test.id is not None and any(other is not test and other.id == test.id for other in self._ws.tests):
+            raise ValueError(f"{test.id} is already used by another test in this session.")
+        pinned = {dataset.id for dataset in datasets if dataset.id is not None}
+        taken = {
+            other.id for other in self._ws.datasets if other.id is not None and not any(other is d for d in datasets)
+        }
+        if pinned & taken:
+            raise ValueError("dataset_iris must name distinct datasets not already used in this session.")
 
     def _require_files(self, paths: builtins.list[Path], argument: str) -> None:
         """Raise FileNotFoundError naming each resolved path in *paths* that does not exist."""

@@ -131,7 +131,7 @@ rebuilt.save()
 print(test.id)  # https://w3id.org/battinfo/test/7d9k-2m4p-8t3x-6nq5
 ```
 
-A pinned IRI must have the right namespace (`/test/` for a test, `/dataset/` for a dataset, `/spec/` for a spec), and one IRI can name only one record in a session.
+A pinned IRI must have the right namespace (`/test/` for a test, `/dataset/` for a dataset, `/spec/` for a spec), and one IRI can name only one record in a session. Running the same `ws.add()` or `ws.load()` call again, as when a notebook cell is re-run, reuses the record the session already holds, so a pin is never taken twice by one record.
 
 ## What validation checks
 
