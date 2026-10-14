@@ -1436,6 +1436,15 @@ def dataset_to_jsonld(record: dict) -> dict:
     citations = _schema_citations(ds.get("citations"))
     if citations:
         node["schema:citation"] = citations
+    creators = [agent for c in (ds.get("creators") or []) if (agent := _agent_to_jsonld(c))]
+    if creators:
+        node["dcterms:creator"] = creators
+    publisher = _agent_to_jsonld(ds.get("publisher"))
+    if publisher:
+        node["dcterms:publisher"] = publisher
+    same_as = [{"@id": iri} for iri in (ds.get("same_as") or []) if isinstance(iri, str) and iri]
+    if same_as:
+        node["schema:sameAs"] = same_as
     about = ds.get("about")
     if about:
         # Tolerate a single IRI string (wrap it) instead of iterating it
@@ -1597,11 +1606,26 @@ def contributor_to_jsonld(contributor: Any) -> list[dict] | None:
         if isinstance(name, str) and name.strip():
             node["schema:name"] = name
         aff = person.get("affiliation")
-        if isinstance(aff, dict) and aff.get("name"):
-            node["schema:affiliation"] = {"@type": "schema:Organization", "schema:name": aff["name"]}
+        aff = _agent_to_jsonld({**aff, "type": "Organization"}) if isinstance(aff, dict) else None
+        if aff:
+            node["schema:affiliation"] = aff
         if len(node) > 1:  # more than the bare @type
             out.append(node)
     return out or None
+
+
+def _agent_to_jsonld(agent: Any) -> dict | None:
+    """A ``Person`` or ``Organization`` object as a schema.org node; its ``same_as``
+    (ORCID, ROR, Wikidata) becomes the node's ``@id``."""
+    if not isinstance(agent, dict) or not agent.get("name"):
+        return None
+    if agent.get("type") != "Organization":
+        people = contributor_to_jsonld([agent])
+        return people[0] if people else None
+    node: dict = {"@type": "schema:Organization", "schema:name": agent["name"]}
+    if agent.get("same_as"):
+        node = {"@id": agent["same_as"], **node}
+    return node
 
 
 def _material_to_jsonld(record: dict) -> dict:

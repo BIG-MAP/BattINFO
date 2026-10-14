@@ -97,6 +97,11 @@
       "required": [
         "property"
       ]
+    },
+    {
+      "required": [
+        "material"
+      ]
     }
   ]
 }

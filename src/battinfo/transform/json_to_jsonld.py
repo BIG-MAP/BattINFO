@@ -953,6 +953,7 @@ _MEASUREMENT_PARAMETER_TERMS: dict[str, str] = {
     "discharge_c_rate": "CRate",
     "charge_c_rate": "CRate",
     "current": "ElectricCurrent",
+    "current_density": "ElectricCurrentDensity",
     "temperature": "CelsiusTemperature",
     "lower_voltage_limit": "LowerVoltageLimit",
     "upper_voltage_limit": "UpperVoltageLimit",

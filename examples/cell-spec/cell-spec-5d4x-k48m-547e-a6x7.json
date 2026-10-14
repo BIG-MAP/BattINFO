@@ -1,0 +1,110 @@
+{
+  "schema_version": "0.2.0",
+  "cell_spec": {
+    "id": "https://w3id.org/battinfo/spec/5d4x-k48m-547e-a6x7",
+    "name": "Empa NMC622 || Li coin half cell",
+    "manufacturer": {
+      "type": "Organization",
+      "id": "https://w3id.org/battinfo/organization/mtf8-84d1-addg-nnvv",
+      "name": "Empa"
+    },
+    "model": "R2032 NMC622 half cell",
+    "cell_format": "coin",
+    "chemistry": "Li-ion",
+    "cell_configuration": "half_cell",
+    "size_code": "R2032"
+  },
+  "working_electrode": {
+    "manufacturer": "Customcells",
+    "product_id": "100000030",
+    "current_collector": {
+      "name": "Aluminium",
+      "property": {
+        "thickness": {
+          "value": 15,
+          "unit": "um"
+        }
+      }
+    },
+    "coating": {
+      "component": {
+        "active_material": [
+          {
+            "name": "NMC",
+            "molecular_formula": "LiNi0.6Mn0.2Co0.2O2",
+            "property": {
+              "mass_fraction": {
+                "value": 96,
+                "unit": "%"
+              },
+              "loading": {
+                "value": 6.6,
+                "unit": "mg/cm2"
+              },
+              "d50_particle_size": {
+                "value": 8,
+                "unit": "um"
+              }
+            }
+          }
+        ],
+        "binder": [
+          {
+            "name": "PVDF",
+            "property": {
+              "mass_fraction": {
+                "value": 2,
+                "unit": "%"
+              }
+            }
+          }
+        ],
+        "additive": [
+          {
+            "name": "Carbon black",
+            "property": {
+              "mass_fraction": {
+                "value": 2,
+                "unit": "%"
+              }
+            }
+          }
+        ]
+      },
+      "property": {
+        "thickness": {
+          "value": 16,
+          "unit": "um"
+        },
+        "porosity": {
+          "value": 35,
+          "unit": "%"
+        },
+        "tortuosity": {
+          "value": 2.5,
+          "unit": "1"
+        }
+      }
+    },
+    "property": {
+      "diameter": {
+        "value": 14,
+        "unit": "mm"
+      }
+    }
+  },
+  "counter_electrode": {
+    "material": {
+      "name": "Lithium metal"
+    }
+  },
+  "notes": [
+    "The positive electrode of https://w3id.org/battinfo/spec/5hy0-g0f7-bxzz-tmtm measured against lithium, as the Empa coin cell template records."
+  ],
+  "provenance": {
+    "source_type": "manual",
+    "source_name": "CatINFO converter coin cell template, filled example",
+    "workflow_version": "CoinCellSchema 2.0.0",
+    "retrieved_at": 1791936000
+  }
+}

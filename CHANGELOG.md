@@ -11,12 +11,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - **An electrolyte can have more than one salt.** `salt` takes one salt or a list of them, the same way `solvent` does, so a dual-salt electrolyte such as LiPF6 + LiFSI is expressible; a single salt stays valid. Both JSON-LD exports write every salt, and substance resolution checks each one.
 - **An Empa coin cell example with its cell and half-cell protocols.** `examples/cell-spec/cell-spec-5hy0-g0f7-bxzz-tmtm.json` holds every value of the filled coin cell template (CoinCellSchema 2.0.0) of the BattINFO/CatINFO converter. The physical cell (ID, name, assembly date, operator) is `examples/cell-instance/cell-cfdv-7qzr-ne91-2y8x.json`, and the two half-cell rated-capacity measurements vs Li/Li+ are test protocols (`test-protocol-xj15-1cpp-amcv-kyxz`, `test-protocol-gc8e-hqby-ve43-efza`).
-- **More units and materials map to EMMO.** `µL` now emits its EMMO unit instead of unit text, and TMSPi (`TrisTrimethylsilyPhosphite`) and stainless steel resolve to their classes.
+- **The Empa example links its measurements.** Each electrode's rated capacity is a measured value whose conditions (current density, voltage limits, Li/Li+) emit as the `BatteryMeasurement` it is the output of. The two half cells are their own specs and cells, each with a capacity-check test that conforms to its protocol, and the full-cell cycling test points at a dataset record that carries the template's `@References` (authors with ORCID, publisher, licence, DOI, publication, data files).
+- **More units and materials map to EMMO.** `µL` now emits its EMMO unit instead of unit text, TMSPi (`TrisTrimethylsilyPhosphite`) and stainless steel resolve to their classes, and a `current_density` measurement condition emits as `ElectricCurrentDensity`.
 
 ### Fixed
 
 - **A coin case's coating and a cell's name reach the JSON-LD.** `housing.case.coating` and `cell_instance.name` were accepted by the schemas but never emitted.
 - **A cell spec's manufacturer keeps its link to the organization record.** The spec node wrote only the manufacturer's name and dropped `manufacturer.id`, so the link to the organization record (and through it to ROR and Wikidata) was lost; it is now the manufacturer's `@id`.
+- **A dataset's creators, publisher and `same_as` reach the JSON-LD**, as `dcterms:creator`, `dcterms:publisher` and `schema:sameAs` (the terms the schema model names). A person's or organization's `same_as` (ORCID, ROR, Wikidata) is the node's `@id`, an affiliation's included.
+- **An electrode may be a monolithic `material` alone**, such as a lithium-metal counter electrode, as the field's description already said; the schema rejected it unless another field was present.
 - **The cell-conformance graph test checks each cell's own spec link.** It counted every `dcterms:conformsTo` edge in the corpus, which cell instances do not emit, and passed only because the counts happened to match; it now requires every cell instance to link its spec through `schema:isVariantOf`.
 
 ## [0.8.0] - 2026-10-13

@@ -109,7 +109,20 @@
       "rated_areal_discharge_capacity": {
         "value": 1.056,
         "unit": "mAh/cm2",
+        "value_basis": "Measured",
         "conditions": {
+          "lower_voltage_limit": {
+            "value": 2.5,
+            "unit": "V"
+          },
+          "upper_voltage_limit": {
+            "value": 4.2,
+            "unit": "V"
+          },
+          "current_density": {
+            "value": 0.1,
+            "unit": "mA/cm2"
+          },
           "voltage_reference": {
             "value_text": "Li/Li+"
           }
@@ -118,7 +131,20 @@
       "rated_specific_discharge_capacity": {
         "value": 160,
         "unit": "mAh/g",
+        "value_basis": "Measured",
         "conditions": {
+          "lower_voltage_limit": {
+            "value": 2.5,
+            "unit": "V"
+          },
+          "upper_voltage_limit": {
+            "value": 4.2,
+            "unit": "V"
+          },
+          "current_density": {
+            "value": 0.1,
+            "unit": "mA/cm2"
+          },
           "voltage_reference": {
             "value_text": "Li/Li+"
           }
@@ -205,7 +231,20 @@
       "rated_areal_discharge_capacity": {
         "value": 1.19,
         "unit": "mAh/cm2",
+        "value_basis": "Measured",
         "conditions": {
+          "lower_voltage_limit": {
+            "value": 0.01,
+            "unit": "V"
+          },
+          "upper_voltage_limit": {
+            "value": 1,
+            "unit": "V"
+          },
+          "current_density": {
+            "value": 0.1,
+            "unit": "mA/cm2"
+          },
           "voltage_reference": {
             "value_text": "Li/Li+"
           }
@@ -214,7 +253,20 @@
       "rated_specific_discharge_capacity": {
         "value": 350,
         "unit": "mAh/g",
+        "value_basis": "Measured",
         "conditions": {
+          "lower_voltage_limit": {
+            "value": 0.01,
+            "unit": "V"
+          },
+          "upper_voltage_limit": {
+            "value": 1,
+            "unit": "V"
+          },
+          "current_density": {
+            "value": 0.1,
+            "unit": "mA/cm2"
+          },
           "voltage_reference": {
             "value_text": "Li/Li+"
           }

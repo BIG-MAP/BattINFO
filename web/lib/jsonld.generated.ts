@@ -699,6 +699,21 @@ export const jsonldGallery: {
           "schema:identifier": "example_dataset_2026"
         }
       ],
+      "dcterms:creator": [
+        {
+          "@type": "schema:Organization",
+          "schema:name": "BattINFO Maintainers"
+        }
+      ],
+      "dcterms:publisher": {
+        "@type": "schema:Organization",
+        "schema:name": "BattINFO"
+      },
+      "schema:sameAs": [
+        {
+          "@id": "https://doi.org/10.5281/zenodo.1234567"
+        }
+      ],
       "dcterms:subject": [
         {
           "@id": "https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8"

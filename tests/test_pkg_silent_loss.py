@@ -354,6 +354,26 @@ def test_cell_spec_manufacturer_keeps_its_organization_link() -> None:
     assert node["schema:manufacturer"]["@id"] == org
 
 
+def test_dataset_creators_publisher_and_same_as_are_emitted() -> None:
+    from battinfo.jsonld import dataset_to_jsonld
+
+    empa = {"type": "Organization", "name": "Empa", "same_as": "http://www.wikidata.org/entity/Q683116"}
+    person = {
+        "type": "Person",
+        "name": "C. B.",
+        "same_as": "https://orcid.org/0000-0002-5003-1134",
+        "affiliation": empa,
+    }
+    doi = "https://doi.org/10.5281/zenodo.15481956"
+    node = dataset_to_jsonld(
+        {"dataset": {"id": "x", "name": "d", "creators": [person, empa], "publisher": empa, "same_as": [doi]}}
+    )
+    assert [c["@id"] for c in node["dcterms:creator"]] == [person["same_as"], empa["same_as"]]
+    assert node["dcterms:creator"][0]["schema:affiliation"]["@id"] == empa["same_as"]
+    assert node["dcterms:publisher"]["@id"] == empa["same_as"]
+    assert node["schema:sameAs"] == [{"@id": doi}]
+
+
 def test_record_notes_reach_publication_graph(tmp_path: Path) -> None:
     ws = _new_ws(tmp_path)
     ws.add("test", type="capacity_check", cell="SN-1", data="f.csv")

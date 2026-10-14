@@ -8116,6 +8116,11 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "required": [
             "property"
           ]
+        },
+        {
+          "required": [
+            "material"
+          ]
         }
       ]
     }
