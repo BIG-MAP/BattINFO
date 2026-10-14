@@ -22,14 +22,23 @@ only ``__version__`` and the generated files: battinfo.ttl, CITATION.cff and
 SECURITY.md keep naming the release it leads to.
 
 ``--date`` sets the release date: ``date-released`` in CITATION.cff and the date
-of the release's heading in CHANGELOG.md. Without it the date changes only when
-CITATION.cff moves to another version, and then takes the date of that version's
-CHANGELOG.md heading, or today's date if there is no heading yet.
+of the release's heading in CHANGELOG.md, which RELEASING.md has you add first.
+Without it the date changes only when CITATION.cff moves to another version, and
+then takes the date of that version's CHANGELOG.md heading, or today's date if
+there is no heading yet. A heading dated with a placeholder such as ``<date>``
+is refused; give the day with ``--date``.
 
 ``--check`` changes nothing. It exits 1 when a stamp or a generated file
 disagrees with ``__version__``, or when CHANGELOG.md has no heading for the
 release or dates it differently from CITATION.cff. tests/test_set_version.py
 runs the same check in CI.
+
+An editable install keeps the version it was installed with in its metadata,
+which tests/installed_smoke.py compares with ``__version__``. ``uv sync`` and
+``uv run`` reinstall it when ``__version__`` changes, because pyproject.toml
+lists src/battinfo/__init__.py among uv's cache keys; a pip editable install
+needs ``pip install -e .`` again. The script says so whenever it changes
+``__version__``.
 
 Usage:
     python scripts/set_version.py 0.8.0rc1                 # a release candidate
@@ -220,8 +229,8 @@ def check(root: Path = ROOT) -> list[str]:
         headings = _TextFile(root, CHANGELOG).values(_changelog_heading(version.base))
         if not headings:
             problems.append(
-                f"{CHANGELOG}: no '## [{version.base}] - <date>' heading; "
-                "move the [Unreleased] entries under one (RELEASING.md step 2)"
+                f"{CHANGELOG}: no '## [{version.base}] - <date>' heading; move the [Unreleased] entries "
+                "under one, then date it with --date (RELEASING.md)"
             )
         elif citation_dates and headings[0] != citation_dates[0]:
             problems.append(
@@ -276,6 +285,12 @@ def set_version(root: Path, version: str, *, date: str | None = None, generate: 
     if date is None and citation_moves:
         dates = changelog.values(heading)
         date = dates[0] if dates else dt.date.today().isoformat()
+        try:
+            _check_date(date)
+        except ValueError:
+            raise ValueError(
+                f"{CHANGELOG}: the {parsed.base} heading is dated {date!r}; give the release day with --date"
+            ) from None
     if date is not None:
         if files[CITATION].set(_CITATION_DATE, date) == 0:
             raise ValueError(f"{CITATION}: found no date-released to set")
@@ -331,6 +346,12 @@ def main(argv: list[str] | None = None) -> int:
         return exc.returncode
     for rel in changed:
         print(f"Updated {rel}")
+    if INIT in changed:
+        print(
+            "An editable install of battinfo keeps the old version in its metadata until it is reinstalled: "
+            "uv sync and uv run do that, and a pip editable install needs pip install -e . again."
+        )
+    sys.stdout.flush()  # keep these lines ahead of the report's stderr in a shared log
     return _report(args.root, after_setting=True)
 
 

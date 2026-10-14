@@ -14,6 +14,7 @@ import importlib.util
 import re
 import shutil
 import sys
+import tomllib
 from pathlib import Path
 from typing import Any
 
@@ -67,6 +68,19 @@ def _read(root: Path, rel: str) -> str:
     return (root / rel).read_text(encoding="utf-8")
 
 
+def _add_changelog_heading(root: Path, heading: str) -> None:
+    """Add *heading* below [Unreleased], which moves its entries under it (RELEASING.md step 1)."""
+    changelog = _read(root, "CHANGELOG.md")
+    (root / "CHANGELOG.md").write_text(
+        changelog.replace("## [Unreleased]", f"## [Unreleased]\n\n{heading}", 1), encoding="utf-8"
+    )
+
+
+def _fake_generators(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Stand in for the generators: rewrite the provenance stamp that they would change."""
+    monkeypatch.setattr(sv, "run_generators", lambda root: _regenerate(root, sv.read_version(root)))
+
+
 # ── installed_smoke: the installed distribution matches battinfo.__version__ ──
 
 
@@ -118,6 +132,21 @@ def test_installed_smoke_pins_no_version_and_uses_only_the_curated_top_level() -
     assert used and used <= set(battinfo.__all__), sorted(used - set(battinfo.__all__))
 
 
+def test_uv_cache_keys_cover_the_file_that_holds_the_version() -> None:
+    # uv rebuilds an editable install only when one of its cache keys changes. Unless
+    # the file holding __version__ is one, the installed metadata keeps the old version
+    # after set_version.py, and the smoke's comparison fails in a dev environment.
+    pyproject = tomllib.loads(_read(ROOT, "pyproject.toml"))
+    module = pyproject["tool"]["setuptools"]["dynamic"]["version"]["attr"].rpartition(".")[0]
+    package_dir = pyproject["tool"]["setuptools"]["package-dir"][""]
+    version_file = f"{package_dir}/{module.replace('.', '/')}/__init__.py"
+    assert version_file == sv.INIT
+    cache_keys = pyproject["tool"]["uv"]["cache-keys"]
+    # Listing cache keys replaces uv's default, which watches pyproject.toml.
+    assert {"file": "pyproject.toml"} in cache_keys
+    assert {"file": version_file} in cache_keys
+
+
 # ── set_version.py --check ──
 
 
@@ -125,7 +154,7 @@ def test_the_repository_version_stamps_agree() -> None:
     problems = sv.check(ROOT)
     assert not problems, (
         "the version stamps disagree with __version__; set the version with "
-        "`python scripts/set_version.py <version>` (RELEASING.md step 1):\n" + "\n".join(problems)
+        "`python scripts/set_version.py <version>` (RELEASING.md):\n" + "\n".join(problems)
     )
 
 
@@ -214,25 +243,75 @@ def test_a_new_release_moves_every_stamp(tmp_path: Path) -> None:
     _regenerate(root, "9.10.0")
     problems = sv.check(root)
     assert len(problems) == 1 and "CHANGELOG.md" in problems[0], problems
-    changelog = _read(root, "CHANGELOG.md")
-    (root / "CHANGELOG.md").write_text(
-        changelog.replace("## [Unreleased]", "## [Unreleased]\n\n## [9.10.0] - 2031-02-03", 1), encoding="utf-8"
-    )
+    _add_changelog_heading(root, "## [9.10.0] - 2031-02-03")
     assert sv.check(root) == []
 
 
 def test_a_release_rc_of_a_new_version_takes_the_changelog_date(tmp_path: Path) -> None:
     root = _copy_stamped_files(tmp_path)
-    changelog = _read(root, "CHANGELOG.md")
-    (root / "CHANGELOG.md").write_text(
-        changelog.replace("## [Unreleased]", "## [Unreleased]\n\n## [9.10.0] - 2031-02-03", 1), encoding="utf-8"
-    )
+    _add_changelog_heading(root, "## [9.10.0] - 2031-02-03")
     sv.set_version(root, "9.10.0rc2", generate=False)
     citation = _read(root, "CITATION.cff")
     assert re.search(r"^version: 9\.10\.0$", citation, re.MULTILINE)
     assert re.search(r"^date-released: 2031-02-03$", citation, re.MULTILINE)
     _regenerate(root, "9.10.0rc2")
     assert sv.check(root) == []
+
+
+def test_the_release_steps_in_order_end_with_every_stamp_agreeing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    root = _copy_stamped_files(tmp_path)
+    _fake_generators(monkeypatch)
+    _add_changelog_heading(root, "## [9.10.0] - <date>")  # step 1; step 2 sets the date
+    assert sv.main(["9.10.0", "--date", "2031-02-03", "--root", str(root)]) == 0
+    assert "Version 9.10.0: every stamp agrees." in capsys.readouterr().out
+    assert "## [9.10.0] - 2031-02-03" in _read(root, "CHANGELOG.md")
+    assert re.search(r"^date-released: 2031-02-03$", _read(root, "CITATION.cff"), re.MULTILINE)
+
+
+def test_releasing_adds_the_changelog_heading_before_it_sets_the_version() -> None:
+    # The script's check wants the release's heading, so the checklist adds it first.
+    releasing = _read(ROOT, "RELEASING.md")
+    heading = releasing.find("under `## [X.Y.Z] - <date>`")
+    set_version = releasing.find("`python scripts/set_version.py X.Y.Z --date")
+    assert 0 <= heading < set_version, (heading, set_version)
+
+
+def test_setting_a_release_before_its_changelog_heading_exists_says_what_is_left(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    root = _copy_stamped_files(tmp_path)
+    _fake_generators(monkeypatch)
+    assert sv.main(["9.10.0", "--date", "2031-02-03", "--root", str(root)]) == 1
+    err = capsys.readouterr().err
+    assert "Still to do:" in err and "no '## [9.10.0] - <date>' heading" in err, err
+    # Every stamp was written; only the heading is missing.
+    problems = sv.check(root)
+    assert len(problems) == 1 and "CHANGELOG.md" in problems[0], problems
+
+
+def test_a_heading_date_left_as_a_placeholder_is_not_copied(tmp_path: Path) -> None:
+    root = _copy_stamped_files(tmp_path)
+    _add_changelog_heading(root, "## [9.10.0] - <date>")
+    before = {rel: (root / rel).read_bytes() for rel in STAMPED}
+    with pytest.raises(ValueError, match="--date"):
+        sv.set_version(root, "9.10.0", generate=False)
+    assert {rel: (root / rel).read_bytes() for rel in STAMPED} == before
+
+
+def test_a_version_change_says_how_to_reinstall_an_editable_install(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    root = _copy_stamped_files(tmp_path)
+    version = next(f"{BASE}rc{n}" for n in range(1, 4) if f"{BASE}rc{n}" != CURRENT)
+    sv.main([version, "--no-generate", "--root", str(root)])
+    out = capsys.readouterr().out
+    assert "Updated src/battinfo/__init__.py" in out
+    assert "uv sync" in out and "pip install -e ." in out, out
+    # Setting it again leaves __version__ as it is, so there is nothing to reinstall.
+    sv.main([version, "--no-generate", "--root", str(root)])
+    assert "pip install -e ." not in capsys.readouterr().out
 
 
 def test_date_sets_the_citation_and_changelog_release_date(tmp_path: Path) -> None:

@@ -34,7 +34,8 @@ def check_version() -> str:
     installed = importlib.metadata.version("battinfo")
     assert installed == wheel_version(battinfo.__version__), (
         f"battinfo.__version__ is {battinfo.__version__}, but the installed distribution is {installed}: "
-        "reinstall the package, or check that the import does not come from another checkout"
+        "reinstall the package (for an editable checkout, uv sync or pip install -e .), "
+        "or check that the import does not come from another checkout"
     )
     return installed
 
