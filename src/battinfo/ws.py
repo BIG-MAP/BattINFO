@@ -4,14 +4,17 @@ Usage::
 
     import battinfo
 
-    ws = battinfo.workspace()
-    ws.search("duracell mn2400")
-    ws.template("cell-spec", manufacturer="Duracell", model="MN2400")
-    # edit the generated JSON, then:
+    ws = battinfo.workspace("lab", registry_url=None)  # None: no registry lookups
+    ws.search("duracell mn2400")  # with a registry, ws.load(hit) reuses a published spec
+    ws.template("cell-spec", manufacturer="Duracell", model="MN2400",
+                format="cylindrical", chemistry="alkaline-zn-mno2")
+    # fill in the draft lab/Duracell-MN2400.cell-spec.json, then:
     spec = ws.load("Duracell-MN2400.cell-spec.json")
-    ws.add("cell-instance", spec=spec, from_file="cell_iris.json", match="duracell-mn2400")
-    ws.add("test", kind="capacity_check", datasets="bdf/*.bdf.parquet",
-           protocol="constant current discharge", instrument="NEWARE BTS82 cycler")
+    ws.add("cell", spec=spec, serial_numbers=["C01", "C02"])
+    ws.template("test-spec", name="CC discharge C/5", type="capacity_check")
+    # fill in the draft lab/CC-discharge-C-5.test-spec.json, then:
+    protocol = ws.load("CC-discharge-C-5.test-spec.json")
+    ws.add("test", spec=protocol, cell="C01", instrument="NEWARE BTS82")
     ws.save()
 """
 
@@ -9533,7 +9536,7 @@ class AuthoringWorkspace:
         fmt: str = "json-ld",
         output_dir: str | Path | None = None,
     ) -> builtins.list[Path]:
-        """Export all workspace records as RDF.
+        """Export the workspace's saved cell specs, cells, test specs, tests and datasets as RDF.
 
         Converts each record to JSON-LD, loads it into an RDF graph, then
         serializes to the requested format.  Requires ``ws.save()`` first.
@@ -11004,7 +11007,7 @@ class AuthoringWorkspace:
                         f"spec={test_spec!r} is not a test-protocol reference. Pass a "
                         "battinfo.TestSpec (authored inline or via ws.load(<draft file>)), "
                         "or the IRI of a test-protocol saved in this workspace "
-                        "(https://w3id.org/battinfo/test-protocol/...). A plain string is "
+                        "(https://w3id.org/battinfo/spec/...). A plain string is "
                         "not accepted as a protocol name: it would leave the run unlinked "
                         "to any saved protocol."
                     )

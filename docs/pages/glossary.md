@@ -57,8 +57,8 @@ them, follow the link at the end of the entry.
 **@type stacking**
 : One record carrying several ontology classes at once: a cylindrical LFP
   cell is simultaneously a `BatteryCell`, a `CylindricalBattery`, and a
-  `LithiumIronPhosphateBattery`. BattINFO stacks these automatically from
-  the format and chemistry you enter.
+  `LithiumIonIronPhosphateBattery`. BattINFO stacks these automatically from
+  the format, chemistry and electrode basis fields you fill in.
 
 **SHACL**
 : A rule language for checking RDF graphs — the semantic layer's

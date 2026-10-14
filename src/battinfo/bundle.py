@@ -399,6 +399,15 @@ def _reject_unknown_kwargs(
     )
 
 
+def _missing_id(model: str, save_function: str) -> str:
+    """The error for ``to_record()`` on a draft with no id: the save function mints one."""
+    return (
+        f"{model}.id is required before serialization. Save the {model} with "
+        f"battinfo.{save_function}(...), which mints its IRI, or use battinfo.workspace() "
+        "to save and publish linked cells, tests and datasets."
+    )
+
+
 def _provenance_from_record(provenance: Mapping[str, Any]) -> ProvenanceInfo:
     """Read a record's provenance block back into ProvenanceInfo.
 
@@ -2298,9 +2307,7 @@ class Cell(BundleJsonModel):
 
     def to_record(self) -> dict[str, Any]:
         if self.id is None:
-            raise ValueError(
-                "Cell.id is required before serialization. Use battinfo.build_publication_package(...) or battinfo.publish(...) to finalize IDs."
-            )
+            raise ValueError(_missing_id("Cell", "save_cell_instance"))
         if self.cell_spec_id is None:
             raise ValueError("Cell.cell_spec_id is required before serialization.")
         record: dict[str, Any] = {
@@ -2748,7 +2755,7 @@ class TestSpec(BundleJsonModel):
 
     def to_record(self) -> dict[str, Any]:
         if self.id is None:
-            raise ValueError("TestSpec.id is required before serialization.")
+            raise ValueError(_missing_id("TestSpec", "save_test_spec"))
         if self.name is None:
             raise ValueError("TestSpec.name is required before serialization.")
         record: dict[str, Any] = {
@@ -3057,9 +3064,7 @@ class Test(BundleJsonModel):
 
     def to_record(self) -> dict[str, Any]:
         if self.id is None:
-            raise ValueError(
-                "Test.id is required before serialization. Use battinfo.build_publication_package(...) or battinfo.publish(...) to finalize IDs."
-            )
+            raise ValueError(_missing_id("Test", "save_test"))
         if self.name is None:
             raise ValueError("Test.name is required before serialization.")
         if self.cell_instance_id is None:
@@ -3629,9 +3634,7 @@ class Dataset(BundleJsonModel):
 
     def to_record(self) -> dict[str, Any]:
         if self.id is None:
-            raise ValueError(
-                "Dataset.id is required before serialization. Use battinfo.build_publication_package(...) or battinfo.publish(...) to finalize IDs."
-            )
+            raise ValueError(_missing_id("Dataset", "save_dataset"))
         if self.name is None:
             raise ValueError("Dataset.name is required before serialization.")
         dataset_obj: dict[str, Any] = {

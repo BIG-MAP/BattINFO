@@ -19,4 +19,3 @@ Key folders:
 - `test-protocol/` Reusable test protocol records referenced by tests.
 - `dataset/` Dataset records linked to cells and tests.
 - `organization/` Organisation records for labs and manufacturers.
-- `profiles/` Compliance/profile fixtures (e.g. Battery Passport minimal).

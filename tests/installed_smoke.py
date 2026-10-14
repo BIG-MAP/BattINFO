@@ -125,7 +125,23 @@ def main() -> None:
         assert stats["total_count"] >= 4
         assert index_path.exists()
 
+    check_tutorial_files()
     check_batch_path()
+
+
+def check_tutorial_files() -> None:
+    """The tutorials read these from the installed package, so they run from a pip install."""
+    from importlib.resources import files
+
+    data = files("battinfo.data")
+    for parts in (
+        ("examples", "cell-spec", "A123__ANR26650M1-B.json"),  # tutorial 1
+        ("mappings", "domain-battery", "property_map.curated.json"),  # tutorial 4
+        ("samples", "neware-sample.csv"),  # tutorial 6
+    ):
+        packaged = data.joinpath(*parts)
+        assert packaged.is_file(), f"the wheel does not ship battinfo/data/{'/'.join(parts)}"
+        assert packaged.read_bytes(), f"battinfo/data/{'/'.join(parts)} is empty"
 
 
 def check_batch_path() -> None:

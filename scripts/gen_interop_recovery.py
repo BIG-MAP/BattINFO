@@ -176,6 +176,25 @@ def _kind_of(record: dict[str, Any]) -> str | None:
     return None
 
 
+def _emits_jsonld(record: dict[str, Any]) -> bool:
+    """True when record_to_jsonld gives a document with a node for the record's own IRI."""
+    from battinfo import record_to_jsonld
+    from battinfo.entities import kind_for_doc
+
+    kind = kind_for_doc(record)
+    iri = record[kind.record_key].get("id") if kind is not None else None
+    if kind is None or not iri:
+        return False
+    record_type = "cell-instance" if kind.entity_type == "cell" else kind.entity_type
+    try:
+        doc = record_to_jsonld(record, record_type)
+    except Exception:  # noqa: BLE001 - a record that cannot emit is a red cell, not a crash
+        return False
+    graph = doc.get("@graph")
+    nodes = graph if isinstance(graph, list) else [doc]
+    return iri in {node.get("@id") for node in nodes if isinstance(node, dict)}
+
+
 def _count_quantities(node: Any) -> int:
     n = 0
     if isinstance(node, dict):
@@ -462,7 +481,6 @@ def _comparison(
 
 # --- scoring ------------------------------------------------------------------
 def _score(src: dict[str, Any]) -> SourceScore:
-    from battinfo.transform import to_jsonld
     from battinfo.validate import validate_record
 
     loader: Callable[[Path], tuple[dict[str, Any], list[dict[str, Any]], bool]] = src["loader"]
@@ -539,7 +557,8 @@ def _score(src: dict[str, Any]) -> SourceScore:
     else:
         score.dims["components"] = (FAIL, "no component data recovered")
 
-    # Canonical JSON-LD — every record validates and emits domain-battery JSON-LD.
+    # Canonical JSON-LD: every record validates, and record_to_jsonld emits a
+    # document that carries it (a document with no node for the record does not count).
     n_valid = 0
     n_jsonld = 0
     for r in records:
@@ -548,11 +567,8 @@ def _score(src: dict[str, Any]) -> SourceScore:
                 n_valid += 1
         except Exception:  # noqa: BLE001
             pass
-        try:
-            to_jsonld(r, target="domain-battery")
+        if _emits_jsonld(r):
             n_jsonld += 1
-        except Exception:  # noqa: BLE001
-            pass
     if n_valid == n_records and n_jsonld == n_records and n_records:
         score.dims["canonical"] = (PASS, f"all {n_records} records validate and emit canonical JSON-LD")
     elif n_valid or n_jsonld:

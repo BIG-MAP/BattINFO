@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from battinfo._util import _citation_doi_from_url
-from battinfo.entities import COMPONENT_FAMILIES
+from battinfo.entities import COMPONENT_FAMILIES, EntityKind, kind_for_doc
 from battinfo.validate.jsonld import validate_jsonld
 
 # Battery aggregation level -> EMMO domain-battery class (resolved by the
@@ -3348,6 +3348,58 @@ def _to_domain_battery_jsonld_component(data: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+# Record kinds `_to_domain_battery_jsonld` routes. The other kinds (cell
+# instances, test specs, tests, datasets, equipment specs, equipment, channels
+# and organizations) are emitted by battinfo.record_to_jsonld only.
+_DOMAIN_BATTERY_RECORD_KEYS: frozenset[str] = frozenset(
+    {
+        "cell_spec",
+        "parameter_set",
+        "material_spec",
+        "material",
+        "electrode_spec",
+        "electrode",
+        *COMPONENT_FAMILIES,
+        *(f"{family}_spec" for family in COMPONENT_FAMILIES),
+    }
+)
+
+# Top-level keys of the base-profile envelope (battinfo.base.schema.json),
+# which the legacy emitter maps.
+_BASE_ENVELOPE_KEYS = ("record", "battery", "measurements")
+
+
+def _record_to_jsonld_type(kind: EntityKind) -> str:
+    """The ``record_type`` that :func:`battinfo.record_to_jsonld` takes for *kind*."""
+    return "cell-instance" if kind.entity_type == "cell" else kind.entity_type
+
+
+def _unrouted_document_error(data: dict[str, Any]) -> ValueError:
+    """The error for a document the domain-battery target cannot map.
+
+    Such documents used to fall through to the legacy emitter, which wrote a
+    ``schema:Dataset`` with no ``@id`` and none of the record's content.
+    """
+    kind = kind_for_doc(data)
+    if kind is None:
+        if isinstance(data.get("specification"), dict):
+            return ValueError("to_jsonld maps a cell descriptor only when it has a schema_version; add one.")
+        return ValueError(
+            "to_jsonld cannot map this document: it is not a BattINFO record and has none of the "
+            f"base-profile keys {', '.join(_BASE_ENVELOPE_KEYS)}."
+        )
+    hint = f"battinfo.record_to_jsonld(record, {_record_to_jsonld_type(kind)!r})"
+    if kind.record_key in _DOMAIN_BATTERY_RECORD_KEYS:
+        # A kind this target emits, without the schema_version that routes it.
+        # record_to_jsonld has its own emitter for a cell spec, but hands the
+        # other kinds back to to_jsonld, so only a cell spec gets the hint.
+        message = f"to_jsonld maps {kind.entity_type} records only when they have a schema_version; add one"
+        if kind.record_key == "cell_spec":
+            return ValueError(f"{message}, or use {hint}.")
+        return ValueError(f"{message}.")
+    return ValueError(f"to_jsonld does not emit {kind.entity_type} records; use {hint}.")
+
+
 def _to_domain_battery_jsonld(data: dict[str, Any]) -> dict[str, Any]:
     if isinstance(data.get("parameter_set"), dict):
         return _to_domain_battery_jsonld_parameter_set(data)
@@ -3425,7 +3477,9 @@ def _to_domain_battery_jsonld(data: dict[str, Any]) -> dict[str, Any]:
             "comment": data.get("notes"),
         }
         return _to_domain_battery_jsonld_descriptor(descriptor)
-    return _to_domain_battery_jsonld_legacy(data)
+    if kind_for_doc(data) is None and any(key in data for key in _BASE_ENVELOPE_KEYS):
+        return _to_domain_battery_jsonld_legacy(data)
+    raise _unrouted_document_error(data)
 
 
 def _to_converter_compatible_jsonld(data: dict[str, Any]) -> dict[str, Any]:
@@ -3500,36 +3554,29 @@ def _to_converter_compatible_jsonld(data: dict[str, Any]) -> dict[str, Any]:
     return doc
 
 
-def _to_batterypass_jsonld(data: dict[str, Any]) -> dict[str, Any]:
-    doc = _to_domain_battery_jsonld(data)
-    context = doc.get("@context", [])
-    if isinstance(context, list):
-        context.append({"batterypass": "https://w3id.org/batterypass#"})
-        doc["@context"] = context
-
-    current_type = doc.get("@type")
-    if current_type is None:
-        doc["@type"] = "batterypass:BatteryPassportRecord"
-    elif isinstance(current_type, list):
-        doc["@type"] = [*current_type, "batterypass:BatteryPassportRecord"]
-    else:
-        doc["@type"] = [current_type, "batterypass:BatteryPassportRecord"]
-    doc["batterypass:version"] = "1.2.0"
-    return doc
-
-
 def to_jsonld(data: dict[str, Any], target: str = "domain-battery") -> dict[str, Any]:
-    """Transform canonical JSON to JSON-LD for a given target."""
+    """Transform a record to JSON-LD for a mapping target.
+
+    ``target="domain-battery"`` maps cell-spec, material, electrode, component
+    and parameter-set records, and the base-profile envelope of
+    ``battinfo.base.schema.json``. For the other record kinds (cell
+    instances, test specs, tests, datasets, equipment specs, equipment,
+    channels and organizations) it raises ``ValueError`` naming
+    :func:`battinfo.record_to_jsonld`, which emits every kind, and it raises
+    ``ValueError`` for a document it cannot route. ``target="converter-compatible"``
+    maps a cell descriptor to BattInfoConverter JSON-LD.
+    """
     if target == "domain-battery":
         doc = _to_domain_battery_jsonld(data)
-    elif target == "batterypass":
-        doc = _to_batterypass_jsonld(data)
     elif target == "converter-compatible":
         return _to_converter_compatible_jsonld(data)
-    else:
+    elif target == "batterypass":
         raise ValueError(
-            f"Unknown mapping target '{target}'. Expected 'domain-battery', 'batterypass', or 'converter-compatible'."
+            "The 'batterypass' mapping target was removed in 0.8.0: it added a placeholder type, "
+            "not Battery Pass data. Use 'domain-battery'."
         )
+    else:
+        raise ValueError(f"Unknown mapping target '{target}'. Expected 'domain-battery' or 'converter-compatible'.")
     validation = validate_jsonld(doc)
     if not validation.ok:
         raise ValueError(f"json-ld validation failed: {'; '.join(validation.errors)}")

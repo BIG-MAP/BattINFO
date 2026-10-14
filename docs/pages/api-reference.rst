@@ -14,12 +14,13 @@ own page at :doc:`../workspace-authoring`.
 The record classes
 ~~~~~~~~~~~~~~~~~~
 
-The five record classes — ``CellSpec``, ``Cell``, ``TestSpec``, ``Test``,
-``Dataset`` — are both the canonical source of truth and the authoring
-input: construct them with the flat field names you know from the datasheet
-and hand them to ``publish`` or the matching ``save_*`` function.
-``ProvenanceInfo``, documented with them, is the provenance block every
-record embeds. Every field is documented below; quantity keys and unit
+The five record classes (``CellSpec``, ``Cell``, ``TestSpec``, ``Test`` and
+``Dataset``) are the authoring input: construct them with the flat field
+names you know from the datasheet, then save each with its ``save_*``
+function (``save_cell_spec``, ``save_cell_instance``, ``save_test_spec``,
+``save_test`` or ``save_dataset``). ``publish`` is a shortcut for a
+``CellSpec`` only. ``ProvenanceInfo``, documented with them, is the
+provenance block every record embeds. Every field is documented below; quantity keys and unit
 symbols are enumerated in :doc:`property-reference`.
 
 .. autopydantic_model:: battinfo.CellSpec
@@ -50,6 +51,16 @@ Publish and save
 ~~~~~~~~~~~~~~~~
 
 .. autofunction:: battinfo.publish
+
+.. autofunction:: battinfo.save_cell_spec
+
+.. autofunction:: battinfo.save_cell_instance
+
+.. autofunction:: battinfo.save_test_spec
+
+.. autofunction:: battinfo.save_test
+
+.. autofunction:: battinfo.save_dataset
 
 .. autofunction:: battinfo.save_record
 
