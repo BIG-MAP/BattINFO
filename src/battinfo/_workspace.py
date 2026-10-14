@@ -229,11 +229,24 @@ def _seed_view(value: Any, workspace_root: Path | None, *, top: bool = True) -> 
     return value
 
 
+# Links a finalize pass derives from other records (the datasets that name a cell
+# or a test), not content of the record itself.
+_DERIVED_BACK_LINKS = ("dataset_ids",)
+
+
 def _content_seed(entity: Any, *, workspace_root: Path | None = None) -> str:
     """A stable, order-independent seed from an entity's distinguishing content
     (its canonical record minus its own IRI and the volatile timestamps, with
-    local file locations as their workspace-relative locators)."""
+    local file locations as their workspace-relative locators).
+
+    A derived back-link (``dataset_ids``, which each finalize pass sets from the
+    datasets that name the record) enters empty, as it is before any pass, so a
+    content seed never depends on an earlier pass.
+    """
     data = entity.model_dump(mode="json", exclude_none=True)
+    for key in _DERIVED_BACK_LINKS:
+        if key in data:
+            data[key] = []
     return json.dumps(_seed_view(data, workspace_root), sort_keys=True, ensure_ascii=False)
 
 
@@ -262,47 +275,79 @@ def _repeat_key(entity: Any) -> tuple[Any, ...]:
     return ()
 
 
-def _disambiguate_entity_ids(entities: Sequence[Any], entity_type: str, *, workspace_root: Path | None = None) -> None:
-    """Ensure auto-minted IRIs are unique across distinct authored entities.
+def _entity_label(entity: Any) -> str:
+    """A short name for *entity* in a message: its name, serial number or model, quoted."""
+    for field in ("name", "serial_number", "model"):
+        value = getattr(entity, field, None)
+        if isinstance(value, str) and value.strip():
+            return repr(value.strip())
+    return "an unnamed record"
+
+
+def _disambiguate_entity_ids(
+    entities: Sequence[Any],
+    entity_type: str,
+    *,
+    workspace_root: Path | None = None,
+    assigned: Sequence[bool] | None = None,
+) -> None:
+    """Make the IRIs of *entities* unique without moving one that was assigned before this pass.
 
     Deterministic IRIs are seeded from a record's identity fields, so two
-    genuinely-distinct entities whose identity fields happen to match — e.g. two
-    cell-specs for one manufacturer+model with different capacities, or two unnamed
-    cycling tests on one cell — mint the *same* IRI. On save each record is written
-    to a file named after its IRI, so the duplicate silently overwrote its sibling
-    and one record was lost.
+    distinct records whose identity fields match (two cell specs for one
+    manufacturer and model with different capacities, two unnamed cycling
+    tests on one cell) mint the *same* IRI, and on save the second would
+    overwrite the first. *assigned* says, for each entity, whether it had its
+    IRI before this finalize pass: pinned by the caller, imported, or minted by
+    an earlier pass (a save earlier in the session). Within a group of entities
+    that share an IRI:
 
-    When >=2 entities collide on one IRI, re-mint *every* member of that group from a
-    hash of its distinguishing content (``{iri}::{content}``). This is
-    order-independent — a given record keeps the same IRI regardless of sibling order
-    or re-run — and guarantees distinct content can never overwrite. A genuine
-    full-content duplicate (identical content) falls back to a stable ordinal suffix
-    so it still persists. Entities whose IRI is already unique are untouched,
-    preserving the idempotent identity-seeded IRI for the common single-record case.
+    - an assigned IRI is never re-minted: published identities and the links
+      other records already hold to them stay where they are;
+    - two or more assigned members raise ``ValueError``, since one IRI names
+      one record;
+    - every member minted in this pass is re-minted from a hash of its content
+      (``{iri}::{content}``), which does not depend on sibling order; a member
+      whose content is identical to another's falls back to a stable ordinal
+      suffix (``::dupN``) so it still persists.
 
-    Note: adding an identity-colliding sibling later re-mints a previously-unique record
-    to a content-seeded IRI — the deliberate cost of order-independence. This loses no
-    data within a workspace, since save() stages-then-swaps the full finalized set.
-    The content seed names a local data file by its locator relative to
-    *workspace_root* (see ``entities.dataset_locator_seed``), not its absolute path.
+    An entity whose IRI no other entity shares keeps it, so the common case
+    keeps its identity-seeded, idempotent IRI. *assigned* defaults to "none
+    assigned before this pass". The content seed names a local data file by its
+    locator relative to *workspace_root* (see ``entities.dataset_locator_seed``),
+    not its absolute path, and leaves derived back-links out (``_content_seed``).
     """
-    by_id: dict[str, list[Any]] = {}
-    for entity in entities:
+    flags = list(assigned) if assigned is not None else [False] * len(entities)
+    if len(flags) != len(entities):
+        raise ValueError("assigned must say, for each entity, whether it had its IRI before the pass.")
+    by_id: dict[str, list[int]] = {}
+    for index, entity in enumerate(entities):
         current = getattr(entity, "id", None)
         if current is not None:
-            by_id.setdefault(current, []).append(entity)
+            by_id.setdefault(current, []).append(index)
 
-    seen: set[str] = set()
-    for entity in entities:
+    for current, members in by_id.items():
+        held = [entities[index] for index in members if flags[index]]
+        if len(held) > 1:
+            labels = ", ".join(_entity_label(entity) for entity in held)
+            kind = entity_type.replace("-", " ")
+            raise ValueError(
+                f"{len(held)} {kind} records in this session have the IRI {current}: {labels}. One IRI names "
+                "one record, and an IRI a record already has (pinned, imported or saved earlier) is never "
+                "re-minted. Give each record its own IRI, or remove the duplicate."
+            )
+
+    # Assigned IRIs are fixed first, so a member minted in this pass never takes one.
+    seen: set[str] = {entity.id for index, entity in enumerate(entities) if flags[index] and entity.id is not None}
+    for index, entity in enumerate(entities):
         current = getattr(entity, "id", None)
-        if current is None:
+        if current is None or flags[index]:
             continue
-        group = by_id.get(current)
-        if group is not None and len(group) > 1:
-            # Distinct entities sharing an IRI: re-seed from content (order-independent).
+        if len(by_id[current]) > 1:
+            # Shares its IRI with another record: re-seed from content (order-independent).
             current = _entity_iri(entity_type, f"{current}::{_content_seed(entity, workspace_root=workspace_root)}")
         if current in seen:
-            # Genuine full-content duplicate — keep both with a stable ordinal suffix.
+            # Genuine full-content duplicate: keep both with a stable ordinal suffix.
             ordinal = 1
             candidate = _entity_iri(entity_type, f"{current}::dup{ordinal}")
             while candidate in seen:
@@ -2012,8 +2057,21 @@ class Workspace:
         *record_roots* are the records folders a save writes to (by default
         :attr:`source_root`): a cell spec saved there under the IRI the seeds
         of before 0.8.0 gave it keeps that IRI.
+
+        A record keeps an IRI it had before the pass, whether the caller pinned
+        it, an import set it or an earlier pass minted it; a record minted in
+        this pass whose IRI collides with another's is re-minted from its
+        content, and two records that both had one IRI before the pass raise
+        ``ValueError`` (see :func:`_disambiguate_entity_ids`).
         """
         roots = [self.source_root] if record_roots is None else list(record_roots)
+        # IRIs held before this pass (pinned, imported, or minted by an earlier
+        # pass) are never re-minted when a sibling collides with them.
+        assigned_cell_specs = [item.id is not None for item in self.cell_specs]
+        assigned_cells = [item.id is not None for item in self.cells]
+        assigned_test_specs = [item.id is not None for item in self.test_specs]
+        assigned_tests = [item.id is not None for item in self.tests]
+        assigned_datasets = [item.id is not None for item in self.datasets]
         finalized_cell_specs = [self._finalize_cell_spec(item, record_roots=roots) for item in self.cell_specs]
         cell_spec_map = {
             id(original): finalized for original, finalized in zip(self.cell_specs, finalized_cell_specs, strict=True)
@@ -2022,27 +2080,33 @@ class Workspace:
         # share identity fields must not overwrite each other on save, and each cell must
         # link to its own spec (cell_spec_map holds the same objects, so in-place
         # re-minting propagates into _finalize_cell's cell_spec_id lookup below).
-        _disambiguate_entity_ids(finalized_cell_specs, "cell-spec", workspace_root=self.data_root)
+        _disambiguate_entity_ids(
+            finalized_cell_specs, "cell-spec", workspace_root=self.data_root, assigned=assigned_cell_specs
+        )
 
         finalized_cells = [self._finalize_cell(item, cell_spec_map) for item in self.cells]
         cell_map = {id(original): finalized for original, finalized in zip(self.cells, finalized_cells, strict=True)}
         # Break IRI collisions before datasets link to these ids (cell_map holds
         # the same objects, so in-place re-minting propagates to dataset linking).
-        _disambiguate_entity_ids(finalized_cells, "cell", workspace_root=self.data_root)
+        _disambiguate_entity_ids(finalized_cells, "cell", workspace_root=self.data_root, assigned=assigned_cells)
 
         finalized_test_specs = [self._finalize_test_spec(item) for item in self.test_specs]
         test_spec_map = {
             id(original): finalized for original, finalized in zip(self.test_specs, finalized_test_specs, strict=True)
         }
         # Break test-spec IRI collisions before tests link to them via conformsTo.
-        _disambiguate_entity_ids(finalized_test_specs, "test-protocol", workspace_root=self.data_root)
+        _disambiguate_entity_ids(
+            finalized_test_specs, "test-protocol", workspace_root=self.data_root, assigned=assigned_test_specs
+        )
 
         finalized_tests = [self._finalize_test(item, cell_map, test_spec_map) for item in self.tests]
         test_map = {id(original): finalized for original, finalized in zip(self.tests, finalized_tests, strict=True)}
-        _disambiguate_entity_ids(finalized_tests, "test", workspace_root=self.data_root)
+        _disambiguate_entity_ids(finalized_tests, "test", workspace_root=self.data_root, assigned=assigned_tests)
 
         finalized_datasets = [self._finalize_dataset(item, cell_map, test_map) for item in self.datasets]
-        _disambiguate_entity_ids(finalized_datasets, "dataset", workspace_root=self.data_root)
+        _disambiguate_entity_ids(
+            finalized_datasets, "dataset", workspace_root=self.data_root, assigned=assigned_datasets
+        )
 
         dataset_ids_by_cell: dict[str, list[str]] = {}
         for dataset in finalized_datasets:

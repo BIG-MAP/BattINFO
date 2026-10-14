@@ -182,3 +182,110 @@ def test_three_way_collision_gives_distinct_ids(tmp_path: Path) -> None:
         _spec(ws, cap)
     ws._finalize()
     assert len({s.id for s in ws.cell_specs}) == 3
+
+
+# ── An IRI a record already has is never re-minted ────────────────────────────
+#
+# Pinned by the caller, imported, or minted by an earlier save in the session:
+# a sibling whose identity fields collide later is the one that moves, and two
+# records holding one IRI before a save are refused.
+
+PINNED = "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5"
+
+
+def _identity_mint(tmp_path: Path, capacity: float) -> str:
+    """The IRI the spec _ws_spec builds mints when nothing collides with it."""
+    alone = _ws(tmp_path / f"alone-{capacity}")
+    spec = _ws_spec(alone, capacity)
+    alone._finalize()
+    return str(spec.id)
+
+
+def test_a_colliding_sibling_never_moves_a_saved_iri(tmp_path: Path) -> None:
+    ws = _ws(tmp_path / "ws")
+    first = _ws_spec(ws, 2.5)
+    cell = ws.cell(first, serial_number="c1", source_type="lab")
+    ws._finalize()
+    saved_spec, saved_cell = first.id, cell.id
+    assert saved_spec == _identity_mint(tmp_path, 2.5)
+
+    second = _ws_spec(ws, 3.5)
+    ws._finalize()
+
+    assert (first.id, cell.id, cell.cell_spec_id) == (saved_spec, saved_cell, saved_spec)
+    assert second.id is not None and second.id != saved_spec
+
+
+def test_a_colliding_sibling_never_moves_a_pinned_iri(tmp_path: Path) -> None:
+    ws = _ws(tmp_path / "ws")
+    pinned = _ws_spec(ws, 2.5)
+    pinned.id = _identity_mint(tmp_path, 3.5)  # the IRI the sibling below mints
+    sibling = _ws_spec(ws, 3.5)
+    ws._finalize()
+    assert pinned.id == _identity_mint(tmp_path, 3.5)
+    assert sibling.id not in (None, pinned.id)
+
+
+def test_the_sibling_gets_the_iri_it_would_get_beside_any_other_collision(tmp_path: Path) -> None:
+    # The record minted in the pass is re-seeded from its content, as it would be
+    # if both were new: a later save of the same content lands on the same IRI.
+    ws = _ws(tmp_path / "ws")
+    _ws_spec(ws, 2.5)
+    ws._finalize()
+    later = _ws_spec(ws, 3.5)
+    ws._finalize()
+
+    both_new = _ws(tmp_path / "both-new")
+    _ws_spec(both_new, 2.5)
+    together = _ws_spec(both_new, 3.5)
+    both_new._finalize()
+    assert later.id == together.id
+
+
+def test_two_records_that_held_one_iri_before_the_pass_are_refused(tmp_path: Path) -> None:
+    ws = _ws(tmp_path / "ws")
+    first = _ws_spec(ws, 2.5)
+    second = _ws_spec(ws, 3.5)
+    first.id = second.id = PINNED
+    with pytest.raises(ValueError, match=f"have the IRI {PINNED}") as excinfo:
+        ws._finalize()
+    assert "One IRI names one record" in str(excinfo.value)
+    assert first.id == second.id == PINNED, "a refused pass changes nothing"
+
+
+def test_a_test_saved_earlier_in_the_session_keeps_its_iri_when_a_sibling_joins(tmp_path: Path) -> None:
+    import battinfo
+
+    root = tmp_path / "lab"
+    (root / "data").mkdir(parents=True)
+    for name, voltage in (("a.csv", "3.1"), ("b.csv", "3.2")):
+        (root / "data" / name).write_text(f"test_time_second,voltage_volt\n0,3.0\n60,{voltage}\n", encoding="utf-8")
+    ws = battinfo.workspace(root, registry_url=None)
+    spec = battinfo.CellSpec(manufacturer="Example Lab", model="R2032", format="coin", chemistry="li-ion")
+    ws.add("cell", spec=spec, serial_numbers=["C01"])
+    (first,) = ws.add("test", type="cycling", cell="C01", data="data/a.csv")
+    ws.save()
+    saved = first.id
+    (first_dataset,) = [d for d in ws._ws.datasets if d.test_id == saved]
+
+    (second,) = ws.add("test", type="cycling", cell="C01", data="data/b.csv")
+    ws.save()
+
+    assert first.id == saved
+    assert second.id not in (None, saved)
+    assert first_dataset.test_id == saved
+    records = {
+        doc["test"]["id"]: doc["test"]
+        for doc in (json.loads(p.read_text(encoding="utf-8")) for p in (root / ".battinfo/records/test").glob("*.json"))
+    }
+    assert set(records) == {saved, second.id}
+    assert records[saved]["dataset_ids"] == [first_dataset.id]
+
+
+def test_a_content_seed_leaves_derived_dataset_links_out() -> None:
+    from battinfo._workspace import _content_seed
+    from battinfo.bundle import Test
+
+    test = Test(test_kind="cycling", cell_instance_id="https://w3id.org/battinfo/cell/aaaa-bbbb-cccc-dddd")
+    linked = test.model_copy(update={"dataset_ids": ["https://w3id.org/battinfo/dataset/aaaa-bbbb-cccc-0001"]})
+    assert _content_seed(linked) == _content_seed(test)
