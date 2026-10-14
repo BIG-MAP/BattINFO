@@ -68,7 +68,7 @@ Present but with no stability promise:
 
 ## Known limitations in 0.8.0
 
-These gaps were known when 0.8.0 was released and are planned for 0.8.x or 0.9. Where there is a way around one, the line says how.
+These gaps were known when 0.8.0 was released. Each is planned for a 0.8.x release or for 0.9; where the release is settled, the line names it and says why the gap can wait, and where there is a way around a gap, the line says how.
 
 ### BPX parameter files
 
@@ -101,19 +101,47 @@ These gaps were known when 0.8.0 was released and are planned for 0.8.x or 0.9. 
 
 ### Linked data at record IRIs
 
-- A record's `https://w3id.org/battinfo/` IRI serves the record body expanded with the v1 records context, not the EMMO model that `battinfo.record_to_jsonld`, `ws.export` and the Zenodo deposit graph write. In that body a quantity key such as `nominal_capacity` is a property named by its EMMO class IRI, with `schema:value` and `schema:unitText`, and the record's own id is a `schema:productID` literal. For the EMMO model, run `record_to_jsonld` on the record or read the deposit's `battinfo.json`. Serving that model at record IRIs is planned for 0.9.
+- A record's `https://w3id.org/battinfo/` IRI serves the record body expanded with the v1 records context, not the EMMO model that `battinfo.record_to_jsonld`, `ws.export` and the Zenodo deposit graph write. In that body a quantity key such as `nominal_capacity` is a property named by its EMMO class IRI, with `schema:value` and `schema:unitText`, and the record's own id is a `schema:identifier` literal. For the EMMO model, run `record_to_jsonld` on the record or read the deposit's `battinfo.json`. The record body is not normative, and a future v2 context drops it. Serving the EMMO model at record IRIs is planned for 0.9, since it changes what the registry returns for every published record.
 
 ### Command line
 
 - `battinfo dataset` is experimental: its `init`, `process` and `publish` steps cannot take a contribution through to a published dataset in 0.8.0. Publish a dataset from Python with `ws.add("test", data=...)` and `ws.zenodo()` instead.
+- `battinfo save batch`, `battinfo publish batch`, `battinfo index build --validate` and the `battinfo editorial` validators exit 0 when records fail validation. Read the failed count, or `ok: false`, in their output, which reports every failure. Planned for 0.8.1.
+- On Windows, a command that prints JSON can stop with `UnicodeEncodeError` when its output is redirected or piped and holds a character outside the console's code page, such as Ω. Set `PYTHONUTF8=1` to avoid it. Planned for 0.8.1.
+- `battinfo query cell-spec` and `battinfo.api.query_cell_specs` compare the capacity and voltage range filters with the number a record stores, whatever its unit, so a capacity stored in mAh is compared as if it were in Ah. Give the filter in the unit your records use. Planned for 0.8.1; a query changes no record.
+- `battinfo save batch` and `battinfo publish batch` without `--source-dir` copy BattINFO's packaged example records into your records root, where queries then list them as `local`. Pass `--source-dir`. Planned for 0.8.1.
 
 ### Tutorials
 
 - The tutorials have no "Open in Colab" link in 0.8.0. A hosted notebook service such as Colab starts without BattINFO, so install it in a cell first with the `%pip` line that [Getting started](pages/getting-started.rst) gives; tutorial 6 needs the one with the `processing` extra.
 
+### Records and the Python API
+
+- A record model drops the fields it does not represent when it reads a record and writes it again (`from_record()`, then `to_record()`), such as a cell spec's `brand` and `battery_category`, and nothing warns. Edit such a record as JSON instead. Planned for 0.8.1.
+- A tuple, set, generator or NumPy array passed to a list field of a record model, such as `links`, `keywords`, `notes` or `creators`, becomes an empty list. Pass a list; a single string is kept. Planned for 0.8.1.
+- `ws.convert()` skips a second input file whose output would have the same name as another's in the same run, links the wrong raw file to that output, and keeps a truncated output when run again. It prints a `skip (exists)` line for the second file; rename one of the two inputs. Planned for 0.8.1.
+- A cell spec with a `reference_electrode` and no `cell_configuration` is published as a `HalfCellDevice` with two reference electrodes. State `cell_configuration` (`full_cell`, `half_cell` or `three_electrode_cell`) to avoid it. Planned for 0.8.1.
+- `ws.import_()` leaves out a property that a deposit states as text only, with `hasStringValue` and no number. Planned for 0.8.1.
+- `battinfo.interop.import_bmgen_jsonld` reads steps only from a flat `@graph`, which bmgen does not write, so a real bmgen file imports as a test spec with no steps. Planned for 0.8.1; the importers are in preview.
+- `load_publication_package()` recognises seven property classes and reads a cell spec's chemistry back as `unknown`.
+- BattINFO writes its progress messages with `print()` rather than the `logging` module and raises built-in exception types, so a caller cannot silence its output through logging or catch its errors by one exception class. Both change in 0.9, since they touch every module.
+- `battinfo.bundle_generated`, the model layer generated from the LinkML schema, has been edited by hand since it was generated, and nothing regenerates it; the record models in `battinfo` are the authoring surface. 0.9 regenerates it or retires it.
+
+### Vocabularies and classes
+
+- Material specs for sodium, sulfur, solid electrolytes such as LLZO and LPSCl, and other materials beyond Li-ion fail validation: `material_kinds.json` has no kind for them, and `semantic.material_kind_unknown` is an error under every policy. So Na-ion, Li-S and solid-state cells cannot be described down to their materials yet. Planned for 0.8.1, which adds the kinds the pinned ontologies already have classes for; the registry validates against the same vocabulary, so its copy is updated before that release.
+- `typical_energy` is typed `StoredEnergy`, because the ontologies have no class for a typical energy, and an LNMO positive electrode is typed `MetalOxideElectrode`, because its own class is deprecated upstream with no replacement. Both change once domain-electrochemistry publishes the classes.
+- No property key holds a maximum C-rate. Give a current in A, or state a C-rate as `charging_c_rate` or `discharging_c_rate` in the conditions of the value it applies to.
+- In the JSON-LD of materials and components, which uses the EMMO domain-battery context, numbers carry no datatype, so JSON-LD processors disagree on whether 76.0 is an integer or a double. Records under the v1 records context type them `xsd:double`.
+
+### Schemas
+
+- From 0.8.0 a schema served under `https://w3id.org/battinfo/schema/` changes in place only in its descriptions, titles and examples ([identifier policy, section 11.1](https://github.com/BIG-MAP/BattINFO/blob/main/IDENTIFIER_POLICY.md#111-served-artifact-immutability)). Any other change, a new optional property included, needs a new versioned schema URL, and the layout of those URLs and what `schema_version` promises are defined in 0.9. Until then no 0.8.x release changes what a schema accepts.
+
 ### CLI batch path
 
-- `battinfo batch upload` and `battinfo push` upload only to the Zenodo sandbox, so an upload needs `--sandbox`; without it they stop before contacting Zenodo. They send a sandbox token: `--token`, else `ZENODO_SANDBOX_TOKEN`, else `zenodo_sandbox_token` in the config file (`battinfo config set zenodo_sandbox_token <token>`). Uploads to zenodo.org from the batch path come in a later release; to publish there now, use `ws.zenodo()` from `battinfo.workspace()`.
+- `battinfo push` stops with `FileExistsError` on its flat and sub-folder layouts. Use `battinfo batch upload`, the route that works. Planned for 0.8.2, since `battinfo push` is in development.
+- `battinfo batch upload` and `battinfo push` upload only to the Zenodo sandbox, so an upload needs `--sandbox`; without it they stop before contacting Zenodo. They send a sandbox token: `--token`, else `ZENODO_SANDBOX_TOKEN`, else `zenodo_sandbox_token` in the config file (`battinfo config set zenodo_sandbox_token <token>`). Uploads to zenodo.org from the batch path come in 0.8.1, once a retry no longer carries the first upload's record id and the batch path reads the DOI from the deposit; to publish there now, use `ws.zenodo()` from `battinfo.workspace()`.
 - Run `battinfo batch package` again before you retry `battinfo batch upload`: a retry of the same staging folder carries the record id of the first upload. The fix comes in 0.8.1.
 
 ### Dependencies
@@ -121,6 +149,8 @@ These gaps were known when 0.8.0 was released and are planned for 0.8.x or 0.9. 
 - The `processing` extra requires `batterydf[nda,excel,mat]>=0.2.0rc2,<0.3`, so it installs the batterydf 0.2.0 release candidate until batterydf 0.2.0 is published.
 - `pyshacl`, which runs the SHACL shapes and is a core dependency, requires `rdflib` below 8 in its release 0.40.1, so battinfo can only be installed next to rdflib 7 until a pyshacl release allows rdflib 8.
 - Python 3.15 is not supported yet. `requires-python` has no upper bound, so pip will still try to install battinfo on 3.15, and on Windows without a C compiler that install fails while building PyYAML, which has no wheels for Python 3.15 yet; the error asks for Microsoft Visual C++ 14.0 or greater. Use Python 3.11–3.14.
+- The `tabular` extra requires pandas 3.0.5 or later and pyarrow 25 or later, so it cannot be installed into an environment held to pandas 2.
+- CI tests Linux and Windows. macOS is not tested until 0.8.1 adds a macOS job.
 
 ## Verification
 
