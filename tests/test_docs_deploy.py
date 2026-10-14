@@ -173,7 +173,7 @@ def test_a_final_release_updates_stable_and_the_switcher_and_a_backport_does_not
     assert [entry["version"] for entry in _switcher(site)] == ["dev", "v0.8.0", "v0.7.1", "v0.7.0"]
 
 
-def test_deploys_run_one_at_a_time_and_none_is_cancelled() -> None:
+def test_deploys_run_one_at_a_time_and_a_running_one_is_never_cancelled() -> None:
     """A tag's deploy and main's would otherwise both push to gh-pages, and the second push be refused."""
     docs = yaml.safe_load((ROOT / ".github" / "workflows" / "docs.yml").read_text(encoding="utf-8"))
     deploy = docs["jobs"]["deploy"]

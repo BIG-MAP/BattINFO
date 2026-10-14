@@ -36,7 +36,7 @@ Keep the Zenodo integration switched on for the repository. Its webhook archives
    uvx twine check dist/*
    ```
 
-5. Push the branch and rehearse on TestPyPI. The workflow runs CI as its gate, builds the distribution and uploads it:
+5. Push the branch and rehearse on TestPyPI. The workflow runs the CI suite and the install gate, builds the distribution and uploads it. On a manual run the hosted check only reports, since a rehearsal usually runs before the registry has the new copies:
 
    ```bash
    gh workflow run release.yml --ref release/X.Y.Z -f target=testpypi
@@ -78,4 +78,4 @@ Before a release, run `scripts/zenodo_sandbox_check.py` by hand against the rele
 ZENODO_SANDBOX_TOKEN=<token> python scripts/zenodo_sandbox_check.py
 ```
 
-It builds a small workspace in a new folder and deposits it to the sandbox the ways a user does: three data files that share a name or differ only in case, a draft then its publish, a run that stops part-way and is finished by a retry, a new version (first with a local data file deleted), a draft then `ws.submit()`, and sandbox then production: the sandbox runs leave the records and the zenodo.org state alone, and a deposit to zenodo.org would start a record of its own. That last check stops every request to zenodo.org before it is sent, so the script reaches the sandbox only. It never uses `ZENODO_API_TOKEN` and will not run in CI or under pytest. It stops at the first step that fails and lists the sandbox records it made.
+It builds a small workspace in a new folder and deposits it to the sandbox the ways a user does: three data files that share a name or differ only in case, a draft then its publish, a run that stops part-way and is finished by a retry, a new version after one data file changed and another was deleted locally (it keeps the copy the version before holds), a draft then `ws.submit()`, and sandbox then production: the sandbox runs leave the records and the zenodo.org state alone, and a deposit to zenodo.org would start a record of its own. That last check stops every request to zenodo.org before it is sent, so the script reaches the sandbox only. It never uses `ZENODO_API_TOKEN` and will not run in CI or under pytest. It stops at the first step that fails and lists the sandbox records it made.

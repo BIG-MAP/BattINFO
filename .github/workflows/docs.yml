@@ -66,7 +66,9 @@ jobs:
     needs: build
     # One deploy at a time. Each pushes to gh-pages, so the deploy of a release
     # tag that ran next to the deploy of the main commit it was cut from would
-    # be refused at the push.
+    # be refused at the push. A running deploy is never cancelled, but GitHub
+    # keeps only the newest waiting one: if a third deploy queues while a tag's
+    # deploy waits, the tag's is cancelled, so re-run it from the tag's run.
     concurrency:
       group: docs-deploy-gh-pages
       cancel-in-progress: false

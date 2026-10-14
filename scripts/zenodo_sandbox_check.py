@@ -13,10 +13,10 @@ each step what the deposit holds and what the records say:
 3. A retry. A new version whose run stops part-way (this script fails the
    upload of battinfo.json once, on purpose) is finished by the same call
    run again: the same draft, no second new version, every file there.
-4. A new version. A changed data file goes up again and the others stay as
-   they were, each under the name it had, in the same concept. Before that,
-   a new version with one local data file deleted must either keep the copy
-   the version before holds or be refused before any request.
+4. A new version, made after one data file changed and another was deleted
+   locally. The changed file goes up again, the deleted one keeps the copy
+   the version before holds, and the files that did not change keep the
+   names they had, in the same concept.
 5. Draft then submit. After a sandbox draft, ws.submit() refuses the
    records' local paths before anything is sent, and with
    allow_local_files=True it sends neither a sandbox URL nor a DOI. No
@@ -333,40 +333,36 @@ class Run:
         return f"the run stopped ({failure[:80]}); the retry published draft {finished.record_id}"
 
     def new_version(self) -> str:
-        # First with one local data file gone. The new version may keep the copy
-        # the version before holds, or be refused before anything is sent; a
-        # version without that file, or a refusal after requests, fails.
+        # One data file changed and another deleted locally. The new version
+        # carries the changed file and keeps the copy of the deleted one that
+        # the version before holds, each file under the name it had.
+        concept = self.sandbox_state().get("concept_record_id")
+        before = check_data_files(deposit_files(self.client, self.published.record_id), self.md5s)
+        changed = data_file(self.root, "C03")
+        changed.write_bytes(changed.read_bytes() + b"180,3.7,0.001\n")
+        self.md5s["C03"] = md5(changed.read_bytes())
         gone = data_file(self.root, "C02")
         kept = gone.read_bytes()
         gone.unlink()
         mark = len(self.network.requests)
         try:
-            without = self.deposit(publish=True)
-        except Exception as exc:  # noqa: BLE001 - a refusal is one of the two safe outcomes
-            sent = self.network.since(mark)
-            expect(not sent, f"the refused new version sent {len(sent)} requests first: {sent}")
-            deleted = f"with C02 deleted locally it was refused before any request ({type(exc).__name__})"
-        else:
-            expect(
-                without.published and without.record_id != self.published.record_id,
-                f"with C02 deleted locally, no new version was published: {without.record_id}",
-            )
-            check_data_files(deposit_files(self.client, without.record_id), self.md5s)
-            self.published = without
-            deleted = f"with C02 deleted locally, version {without.record_id} kept the copy the version before holds"
+            version = self.deposit(publish=True)
+        except Exception as exc:  # noqa: BLE001 - reported as the step's failure
+            sent = len(self.network.since(mark))
+            raise CheckFailed(
+                f"with C03 changed and C02 deleted locally, the new version failed after {sent} requests: "
+                f"{type(exc).__name__}: {exc}"
+            ) from exc
         finally:
             gone.write_bytes(kept)  # back for the steps that follow
-
-        concept = self.sandbox_state().get("concept_record_id")
-        changed = data_file(self.root, "C03")
-        changed.write_bytes(changed.read_bytes() + b"180,3.7,0.001\n")
-        self.md5s["C03"] = md5(changed.read_bytes())
-        version = self.deposit(publish=True)
         expect(
             version.published and version.record_id != self.published.record_id,
             f"no new version was published: {version.record_id}",
         )
-        check_data_files(deposit_files(self.client, version.record_id), self.md5s)
+        after = check_data_files(deposit_files(self.client, version.record_id), self.md5s)
+        kept_names = [(serial, old, new) for serial, old, new in zip(DATA_FILES, before, after) if serial != "C03"]
+        moved = [f"{serial}: {old} -> {new}" for serial, old, new in kept_names if old != new]
+        expect(not moved, f"files that did not change were renamed in the new version: {moved}")
         recorded = self.sandbox_state()
         expect(
             recorded.get("record_id") == version.record_id and recorded.get("concept_record_id") == concept,
@@ -374,7 +370,10 @@ class Run:
         )
         check_sandbox_left_records_alone(self.root)
         self.published = version
-        return f"{deleted}; version {version.record_id} holds the changed C03 and the other files as they were"
+        return (
+            f"version {version.record_id} holds the changed C03, the copy of C02 (deleted locally) "
+            "and C01, the last two under the names they had"
+        )
 
     def draft_then_submit(self) -> str:
         from battinfo.ws import SubmitError

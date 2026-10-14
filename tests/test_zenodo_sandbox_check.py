@@ -10,10 +10,12 @@ deposit's data files. Nothing here reaches the network.
 from __future__ import annotations
 
 import importlib.util
+import json
 import sys
 import urllib.error
 import urllib.request
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -158,3 +160,100 @@ def test_the_deposit_listing_is_read_with_or_without_the_md5_prefix() -> None:
             return [{"filename": "cycling.csv", "checksum": "aaa"}, {"key": "battinfo.json", "checksum": "md5:ddd"}]
 
     assert check.deposit_files(_Client(), "123") == {"cycling.csv": "aaa", "battinfo.json": "ddd"}
+
+
+# ── Step 4, against a stand-in for the sandbox ────────────────────────────────
+
+# The deposit name of each test's data file in every version.
+NAMES = {"C01": "cycling.csv", "C02": "0b1c-cycling.csv", "C03": "0d2e-CYCLING.csv"}
+
+
+class _Sandbox:
+    """Stands in for ws.zenodo() and ZenodoClient.list_files() on the sandbox, one record per version.
+
+    *deleted* says what a new version does with a data file deleted locally:
+    "keep" the copy the version before holds, or "refuse". *rename* gives
+    C01, which does not change, a new name in the new version.
+    """
+
+    def __init__(self, root: Path, *, deleted: str, rename: bool = False) -> None:
+        self.root = root
+        self.deleted = deleted
+        self.rename = rename
+        first = {NAMES[serial]: check.md5(check.data_file(root, serial).read_bytes()) for serial in check.DATA_FILES}
+        self.versions = {"1": first}
+        self._state("1")
+
+    def _state(self, record_id: str) -> None:
+        state = {"environment": "sandbox", "record_id": record_id, "concept_record_id": "100", "published": True}
+        (self.root / ".battinfo").mkdir(exist_ok=True)
+        (self.root / ".battinfo" / "zenodo-sandbox.json").write_text(json.dumps(state), encoding="utf-8")
+
+    def list_files(self, record_id: str) -> list[dict]:
+        return [{"filename": name, "checksum": f"md5:{md5}"} for name, md5 in self.versions[record_id].items()]
+
+    def zenodo(self, **kwargs: object) -> SimpleNamespace:
+        assert kwargs["sandbox"] is True and kwargs["publish"] is True
+        before = self.versions[max(self.versions, key=int)]
+        files = {}
+        for serial in check.DATA_FILES:
+            path = check.data_file(self.root, serial)
+            if path.exists():
+                checksum = check.md5(path.read_bytes())
+            elif self.deleted == "refuse":
+                raise ValueError(f"data file not found: {path}")
+            else:
+                checksum = before[NAMES[serial]]
+            files["ffff-cycling.csv" if self.rename and serial == "C01" else NAMES[serial]] = checksum
+        record_id = str(len(self.versions) + 1)
+        self.versions[record_id] = files
+        self._state(record_id)
+        return SimpleNamespace(record_id=record_id, published=True, doi=f"10.5072/zenodo.{record_id}")
+
+
+def _run(tmp_path: Path, **sandbox: object) -> tuple[object, _Sandbox]:
+    for serial, name in check.DATA_FILES.items():
+        path = tmp_path / serial / name
+        path.parent.mkdir(parents=True)
+        path.write_bytes(f"test_time_second,voltage_volt\n0,3.0\n# {serial}\n".encode())
+    stand_in = _Sandbox(tmp_path, **sandbox)  # type: ignore[arg-type]
+    run = object.__new__(check.Run)  # without the real workspace and client
+    run.root = tmp_path
+    run.token = "not-a-token"
+    run.network = check.Network(_Opener())
+    run.client = stand_in
+    run.ws = stand_in
+    run.md5s = {serial: check.md5(check.data_file(tmp_path, serial).read_bytes()) for serial in check.DATA_FILES}
+    run.records = []
+    run.published = SimpleNamespace(record_id="1")
+    return run, stand_in
+
+
+def test_a_new_version_keeps_the_copy_of_a_data_file_deleted_locally(tmp_path: Path) -> None:
+    run, sandbox = _run(tmp_path, deleted="keep")
+    c02 = check.data_file(tmp_path, "C02").read_bytes()
+
+    outcome = run.new_version()
+
+    assert "copy of C02" in outcome
+    assert run.published.record_id == "2"
+    assert sandbox.versions["2"][NAMES["C02"]] == sandbox.versions["1"][NAMES["C02"]]
+    assert sandbox.versions["2"][NAMES["C03"]] != sandbox.versions["1"][NAMES["C03"]]
+    assert check.data_file(tmp_path, "C02").read_bytes() == c02  # put back for the steps that follow
+
+
+def test_a_new_version_refused_for_a_data_file_deleted_locally_fails_the_step(tmp_path: Path) -> None:
+    run, sandbox = _run(tmp_path, deleted="refuse")
+
+    with pytest.raises(check.CheckFailed, match="C02 deleted locally, the new version failed after 0 requests"):
+        run.new_version()
+
+    assert list(sandbox.versions) == ["1"]
+    assert check.data_file(tmp_path, "C02").exists()
+
+
+def test_a_new_version_that_renames_a_file_that_did_not_change_fails_the_step(tmp_path: Path) -> None:
+    run, _sandbox = _run(tmp_path, deleted="keep", rename=True)
+
+    with pytest.raises(check.CheckFailed, match="renamed in the new version: .*C01: cycling.csv -> ffff-cycling.csv"):
+        run.new_version()
