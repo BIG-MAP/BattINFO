@@ -258,26 +258,27 @@ def _material_spec_identity_uid(draft: MaterialSpecInput, kind_key: str | None) 
     """Deterministic content-derived uid for a material spec (fixes H1).
 
     Mirrors the engine's other five types: the IRI is minted from the spec's
-    identity — normalized (manufacturer, product, grade) — so re-authoring the
-    same product is a no-op, never a duplicate. Lab-synthesized materials use the
-    lab as manufacturer and the recipe/batch-family name as product. Processing
-    is NOT part of identity. There is no random-id path.
+    identity, its normalised manufacturer, product and grade and its canonical
+    kind key, so re-authoring the same product is a no-op, never a duplicate
+    (see :func:`battinfo.entities.material_spec_identity_seed`). Lab-synthesized
+    materials use the lab as manufacturer and the recipe/batch-family name as
+    product. Processing is NOT part of identity. There is no random-id path.
     """
-    from battinfo.entities import stable_uid
+    from battinfo.entities import material_spec_identity_seed, seed_text, stable_uid
 
     org = _org_value(draft.manufacturer)
     manufacturer = (org or {}).get("name") if org else None
-    product = draft.product_id or draft.name
-    seed = "::".join(
-        [
-            "material-spec",
-            (manufacturer or "unknown-manufacturer").strip().lower(),
-            (product or "unknown-product").strip().lower(),
-            (draft.grade or "").strip().lower(),
-            kind_key or "",
-        ]
+    product = draft.product_id if seed_text(draft.product_id) else draft.name
+    return stable_uid(
+        material_spec_identity_seed(manufacturer=manufacturer, product=product, grade=draft.grade, kind=kind_key)
     )
-    return stable_uid(seed)
+
+
+def _material_identity_seed(material_spec_id: str, lot: Any) -> str:
+    """The identity seed of a material lot, read from its spec IRI and lot label."""
+    from battinfo.entities import material_identity_seed  # noqa: PLC0415
+
+    return material_identity_seed(material_spec_id=material_spec_id, lot=lot)
 
 
 def _record_from_material_spec(draft: MaterialSpecInput) -> dict[str, Any]:
@@ -368,7 +369,7 @@ def _record_from_material(draft: MaterialInput) -> dict[str, Any]:
             from battinfo.entities import stable_uid
 
             lot = draft.lot_id or draft.batch_id or draft.name or ""
-            dashed_uid = stable_uid("::".join(["material", draft.material_spec_id.strip(), lot.strip()]))
+            dashed_uid = stable_uid(_material_identity_seed(draft.material_spec_id, lot))
         entity_id = f"https://w3id.org/battinfo/material/{dashed_uid}"
 
     material: dict[str, Any] = {
@@ -1449,7 +1450,13 @@ def _record_from_component_instance(
 
 
 def create_component_spec(component_family: str, *, validate: bool = True, **fields: Any) -> dict[str, Any]:
-    """Create a canonical component-spec document for a component family (electrode, separator, …)."""
+    """Create a canonical component-spec document for a component family (separator, electrolyte, …).
+
+    Without ``uid=`` or ``id=`` the record gets a random IRI, a new one on every
+    call, which nothing can derive again: it is outside the identity contract
+    (IDENTIFIER_POLICY 5.4), and saving it twice saves two records. Pass a uid
+    derived from the part's natural key for a record you will save.
+    """
     record = _record_from_component_spec(component_family, **fields)
     if validate:
         _validate_canonical_record(record, policy=DEFAULT_POLICY)
@@ -1461,6 +1468,11 @@ def create_component_instance(component_family: str, *, validate: bool = True, *
 
     ``spec_id=`` is the authoring kwarg (the record stores the canonical
     ``<component_family>_spec_id`` key); the prefixed spelling is accepted too.
+
+    Without ``uid=`` or ``id=`` the record gets a random IRI, a new one on every
+    call, which nothing can derive again: it is outside the identity contract
+    (IDENTIFIER_POLICY 5.4), and saving it twice saves two records. Pass a uid
+    derived from the part's natural key for a record you will save.
     """
     prefixed = fields.pop(f"{component_family}_spec_id", None)
     if prefixed is not None:
@@ -1632,9 +1644,10 @@ def template_component_spec(family: str, *, name: str | None = None, uid: str | 
     """Build a starter component-spec document for a family.
 
     The document has no ``id`` unless *uid* is given. A component spec has no
-    natural key to mint its IRI from, so pass *uid* for a record you will save:
-    a save without an id is refused rather than given a random IRI, which would
-    turn every re-run into a duplicate.
+    natural key to mint its IRI from yet, so pass *uid* for a record you will
+    save: a save of this document without an id is refused. ``create_component_spec``
+    is different: without ``uid=`` or ``id=`` it gives the record a random IRI, a
+    new one on every call, so saving its output again saves a second record.
     """
     record = _record_from_component_spec(
         family,
@@ -1654,8 +1667,10 @@ def template_component_instance(
     """Build a starter component (instance) document for a family.
 
     The document has no ``id`` unless *uid* is given and no ``<family>_spec_id``
-    unless *spec_id* is. A component has no natural key to mint its IRI from, so
-    pass *uid* for a record you will save: a save without an id is refused.
+    unless *spec_id* is. A component has no natural key to mint its IRI from yet,
+    so pass *uid* for a record you will save: a save of this document without an
+    id is refused. ``create_component_instance`` without ``uid=`` or ``id=`` gives
+    a random IRI instead, a new one on every call.
     """
     record = _record_from_component_instance(
         family,

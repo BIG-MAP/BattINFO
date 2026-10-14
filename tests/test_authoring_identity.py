@@ -140,3 +140,120 @@ def test_non_conflict_error_does_not_bump(monkeypatch: pytest.MonkeyPatch) -> No
     assert out["ok"] is False
     assert out["version_bumped"] is None
     assert state["n"] == 1  # a non-conflict error is not retried
+
+
+CLASHING_CELL = "https://w3id.org/battinfo/cell/q2kd-7x4m-p9ar-vd3n"
+
+
+def _canonical_identity_409() -> RegistryClientError:
+    """The 409 the registry returns when another publisher holds the record's IRI."""
+    body = {
+        "detail": {
+            "message": f"Canonical identity '{CLASHING_CELL}' is already registered to publisher 'lab-b'.",
+            "conflict": "canonical_identity",
+            "existing_id": "q2kd7x4mp9arvd3n",
+            "publisher_id": "lab-b",
+            "workspace_id": "ws-lab-b",
+            "canonical_iri": CLASHING_CELL,
+        }
+    }
+    return RegistryClientError(
+        "Registry submission failed with HTTP 409", status_code=409, response_body=json.dumps(body)
+    )
+
+
+@pytest.mark.parametrize("first_attempt_conflict", ["canonical_identity", "submission_content"])
+def test_canonical_identity_conflict_is_reported_not_retried(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], first_attempt_conflict: str
+) -> None:
+    calls: list[str | None] = []
+
+    def behavior(payload, **kw):  # noqa: ANN001
+        calls.append(payload.get("source_version"))
+        if first_attempt_conflict == "submission_content" and len(calls) == 1:
+            raise RegistryClientError("conflict", status_code=409)  # retried as a new version
+        raise _canonical_identity_409()
+
+    out = _run_do_submit(monkeypatch, behavior)
+
+    # Another publisher's IRI: a new version would clash the same way, so no retry.
+    assert len(calls) == (1 if first_attempt_conflict == "canonical_identity" else 2)
+    assert out["ok"] is False
+    assert out["status"] == "conflict"
+    assert out["conflict"] == "canonical_identity"
+    assert out["existing_iri"] == CLASHING_CELL
+    assert out["publisher_id"] == "lab-b"
+    printed = capsys.readouterr().out
+    for text in (out["error"], printed):
+        assert CLASHING_CELL in text and "lab-b" in text
+        assert "names=" in text and "serial_numbers=" in text and "iris=" in text
+    assert printed.count("retrying as version") == len(calls) - 1
+
+
+def test_a_spec_held_by_another_publisher_is_pointed_at_the_published_one(monkeypatch: pytest.MonkeyPatch) -> None:
+    def behavior(payload, **kw):  # noqa: ANN001
+        raise _canonical_identity_409()
+
+    monkeypatch.setattr("battinfo.api.submit_publication_package", behavior)
+    payload = {"source_version": "2026-07-02", "resource": {"resource_type": "cell_spec", "source_version": "x"}}
+    out = ws_module._do_submit(payload, "https://registry.example", "k", "Molicel INR21700-P45B")
+
+    assert out["status"] == "conflict"
+    assert "ws.load(ws.search(" in out["error"] and "serial_numbers=" not in out["error"]
+
+
+# ── Nested ids are content: only the record's own id is left out ──────────────
+SPEC_IRI = "https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd"
+WRONG_DATASET = "https://w3id.org/battinfo/dataset/aaaa-bbbb-cccc-0001"
+RIGHT_DATASET = "https://w3id.org/battinfo/dataset/aaaa-bbbb-cccc-0002"
+
+
+def test_an_upsert_that_changes_only_a_dataset_link_rewrites_the_file(tmp_path: Path) -> None:
+    from battinfo.api import save_cell_instance
+
+    draft = {"cell_spec_id": SPEC_IRI, "serial_number": "S1"}
+    first = save_cell_instance(
+        {**draft, "dataset_ids": [WRONG_DATASET]}, source_root=tmp_path, resolve_references=False
+    )
+    corrected = save_cell_instance(
+        {**draft, "dataset_ids": [RIGHT_DATASET]},
+        source_root=tmp_path,
+        mode=REGISTER_MODE_UPSERT,
+        resolve_references=False,
+    )
+    assert corrected["id"] == first["id"]
+    assert corrected["content_changed"] is True
+    saved = json.loads(Path(corrected["path"]).read_text(encoding="utf-8"))
+    assert [link["id"] for link in saved["datasets"]] == [RIGHT_DATASET]
+
+
+def test_an_upsert_that_changes_only_an_organisation_iri_is_a_change(tmp_path: Path) -> None:
+    doc = json.loads(EXAMPLE.read_text(encoding="utf-8"))
+    doc["cell_spec"]["manufacturer"]["id"] = "https://w3id.org/battinfo/organization/aaaa-bbbb-cccc-0001"
+    save_record(doc, source_root=tmp_path, mode=REGISTER_MODE_UPSERT, validate=False, publish=False)
+    doc["cell_spec"]["manufacturer"]["id"] = "https://w3id.org/battinfo/organization/aaaa-bbbb-cccc-0002"
+    again = save_record(doc, source_root=tmp_path, mode=REGISTER_MODE_UPSERT, validate=False, publish=False)
+    assert again["content_changed"] is True
+
+
+def test_the_comparison_still_leaves_out_the_records_own_id(tmp_path: Path) -> None:
+    body = {"cell_spec_id": SPEC_IRI, "serial_number": "S1", "datasets": [{"id": RIGHT_DATASET}]}
+    existing = _write(tmp_path / "a.json", {"cell_instance": {**body, "id": "https://w3id.org/battinfo/cell/a"}})
+    assert (
+        _record_content_differs(existing, {"cell_instance": {**body, "id": "https://w3id.org/battinfo/cell/b"}})
+        is False
+    )
+
+
+def test_a_content_seed_tells_apart_records_that_differ_only_in_a_nested_id() -> None:
+    from battinfo._workspace import _content_seed
+    from battinfo.bundle import Test
+
+    def run(chamber: str) -> Test:
+        return Test(test_kind="cycling", cell_instance_id=SPEC_IRI, conditions={"chamber": {"id": chamber}})
+
+    first = run("https://example.org/chamber/1")
+    second = run("https://example.org/chamber/2")
+    assert _content_seed(first) != _content_seed(second)
+    # The record's own IRI stays out of its content seed.
+    assert _content_seed(first) == _content_seed(first.model_copy(update={"id": "https://w3id.org/battinfo/test/x"}))

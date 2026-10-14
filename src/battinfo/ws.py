@@ -10,11 +10,11 @@ Usage::
                 format="cylindrical", chemistry="alkaline-zn-mno2")
     # fill in the draft lab/Duracell-MN2400.cell-spec.json, then:
     spec = ws.load("Duracell-MN2400.cell-spec.json")
-    ws.add("cell", spec=spec, serial_numbers=["C01", "C02"])
+    ws.add("cell", spec=spec, serial_numbers=["MYLAB-MN2400-01", "MYLAB-MN2400-02"])  # serials only your lab uses
     ws.template("test-spec", name="CC discharge C/5", type="capacity_check")
     # fill in the draft lab/CC-discharge-C-5.test-spec.json, then:
     protocol = ws.load("CC-discharge-C-5.test-spec.json")
-    ws.add("test", spec=protocol, cell="C01", instrument="NEWARE BTS82")
+    ws.add("test", spec=protocol, cell="MYLAB-MN2400-01", instrument="NEWARE BTS82")
     ws.save()
 """
 
@@ -28,12 +28,14 @@ import json
 import os
 import re
 import warnings
-from collections.abc import Callable, Iterable, Iterator, Mapping
+from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
+    import datetime as _datetime
+
     from battinfo._workspace import Workspace
 
 from battinfo._deposit_files import (
@@ -241,16 +243,123 @@ def _short_id(name: str) -> str | None:
     return m.group(1) if m else None
 
 
-def _serial_matches(token: str, serial: str | None) -> bool:
-    """True if *token* identifies *serial* — by exact match or shared 6-char short ID.
+# A short ID on its own: six characters of the UID alphabet (no i, l, o or u),
+# such as "063b77". Only such a label is matched by short ID; any other label
+# has to match a cell's serial number or name exactly, so "LAB-2025-000001"
+# never binds "LAB-2024-000001" and "NMC-sample" never binds "LFP-sample".
+_BARE_SHORT_ID_RE = re.compile(r"[0-9a-hjkmnp-tv-z]{6}")
 
-    Lets a filename stem, a short ID, or a full serial all resolve to the same cell.
+
+def _is_short_id(token: str) -> bool:
+    """True if *token* is a short ID on its own, not a label that ends in one."""
+    return _BARE_SHORT_ID_RE.fullmatch(token) is not None
+
+
+# Data-format suffixes a data file's name can carry before its extension, such
+# as the .bdf in the <serial>.bdf.csv files ws.convert() writes. Only these come
+# off after the extension when a file is matched to a cell, so a dot that is
+# part of a serial number (S1.5.bdf.csv) stays.
+_DATA_FILE_SUFFIXES = frozenset(
+    {
+        ".arrow",
+        ".bdf",
+        ".csv",
+        ".dat",
+        ".feather",
+        ".gz",
+        ".h5",
+        ".hdf5",
+        ".json",
+        ".jsonld",
+        ".mat",
+        ".mpr",
+        ".mpt",
+        ".nda",
+        ".ndax",
+        ".parquet",
+        ".res",
+        ".tar",
+        ".tsv",
+        ".txt",
+        ".xls",
+        ".xlsx",
+        ".zip",
+    }
+)
+
+
+def _data_file_stems(name: str) -> builtins.list[str]:
+    """The names a data file called *name* can name a cell by, longest first.
+
+    The file name itself, then the name without its extension (the last
+    suffix, when it has a letter in it), then without each data-format suffix
+    before that (:data:`_DATA_FILE_SUFFIXES`), one at a time. So
+    ``LAB-01.bdf.csv`` gives ``LAB-01.bdf`` and ``LAB-01``, while ``S1.6.csv``
+    stops at ``S1.6`` and never gives ``S1``.
     """
-    if not serial or not token:
-        return False
-    if token == serial:
-        return True
-    return (_short_id(token) or token) == (_short_id(serial) or serial)
+    stems = [name]
+    current = name
+    while True:
+        stem, dot, suffix = current.rpartition(".")
+        if not dot or not stem.strip("."):
+            return stems
+        suffix = f".{suffix}".lower()
+        is_extension = len(stems) == 1 and any(char.isalpha() for char in suffix)
+        if not is_extension and suffix not in _DATA_FILE_SUFFIXES:
+            return stems
+        current = stem
+        stems.append(current)
+
+
+def _iri_short_id(iri: str | None) -> str | None:
+    """The short ID of a record IRI: the first six characters of its UID."""
+    tail = (iri or "").rstrip("/").rsplit("/", 1)[-1]
+    return tail.replace("-", "")[:6] if is_dashed_uid(tail) else None
+
+
+def _cells_named_by(
+    label: str, cells: Sequence[tuple[builtins.list[str], str | None]], short_id: str | None
+) -> builtins.list[int]:
+    """Indexes of the cells *label* names, exact serial or name matches first.
+
+    *cells* holds each cell's labels (its serial number and name) and its IRI. A
+    cell with *label* among its labels matches. Only when none does is
+    *short_id* tried: a cell matches when its IRI's short ID, or the short ID one
+    of its labels ends in, equals it.
+    """
+    exact = [i for i, (labels, _) in enumerate(cells) if label in labels]
+    if exact or not short_id:
+        return exact
+    return [
+        i
+        for i, (labels, iri) in enumerate(cells)
+        if short_id == _iri_short_id(iri) or any(_short_id(text) == short_id for text in labels)
+    ]
+
+
+def _describe_session_cell(cell: Any) -> str:
+    """One line naming a session cell: serial, name, spec and IRI."""
+    serial = getattr(cell, "serial_number", None)
+    name = getattr(cell, "name", None)
+    spec = getattr(cell, "cell_spec_id", None) or getattr(getattr(cell, "cell_spec", None), "id", None)
+    parts = [f"serial {serial!r}" if serial else "no serial"]
+    if name and name != serial:
+        parts.append(f"name {name!r}")
+    if spec:
+        parts.append(f"spec {spec}")
+    parts.append(getattr(cell, "id", None) or "no IRI until ws.save()")
+    return ", ".join(parts)
+
+
+def _describe_registry_cell(hit: Mapping[str, Any]) -> str:
+    """One line naming a registry cell: IRI, label, spec and publisher."""
+    label = hit.get("title") or hit.get("serial_number") or hit.get("name") or "untitled"
+    details = [str(label)]
+    if hit.get("cell_spec_id"):
+        details.append(f"spec {hit['cell_spec_id']}")
+    publisher = hit.get("publisher_id")
+    details.append(f"published by {publisher}" if publisher else "publisher not given")
+    return f"{hit.get('id') or '(no IRI)'} ({', '.join(details)})"
 
 
 # ── Resource-type vocabulary ──────────────────────────────────────────────────
@@ -572,6 +681,28 @@ def _unix_to_iso(ts: int | float | str | None, *, what: str = "a timestamp") -> 
         )
         return None
     return moment.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def _given_run_period(started_at: Any, ended_at: Any) -> tuple[int | None, int | None]:
+    """The start and end of a run passed to ``ws.add("test")``, in Unix seconds (``None`` when not given).
+
+    Raises ``ValueError`` for a value that is not a time, and for an end before the start.
+    """
+    from battinfo.api._shared import _to_unix_time  # noqa: PLC0415
+
+    times: dict[str, int | None] = {}
+    for keyword, value in (("started_at", started_at), ("ended_at", ended_at)):
+        unix = _to_unix_time(value) if value is not None else None
+        if value is not None and unix is None:
+            raise ValueError(
+                f"{keyword}={value!r} is not a time. Pass Unix seconds, an ISO 8601 time such as "
+                "'2026-10-01T09:00:00Z' (read as UTC without an offset) or a datetime."
+            )
+        times[keyword] = unix
+    start, end = times["started_at"], times["ended_at"]
+    if start is not None and end is not None and end < start:
+        raise ValueError(f"ended_at={ended_at!r} is before started_at={started_at!r}.")
+    return start, end
 
 
 def _plan_zenodo_deposit(
@@ -2197,15 +2328,15 @@ class AuthoringWorkspace:
         if registry_url is not _UNSET:
             registry_url = registry_url.rstrip("/") if registry_url else None
         self._registry_url_given: str | None = registry_url
-        # name -> Cell, keyed by short_id for test matching
-        self._cells_by_short_id: dict[str, Any] = {}
-        # Lookup keys that two or more DIFFERENT cells answer to. A display name
-        # is not an identifier: a batch may legitimately share one public label
-        # across many serials. Such a key cannot pick a cell, so resolving it
-        # raises instead of silently returning whichever cell was indexed last.
-        self._ambiguous_cell_keys: set[str] = set()
+        # Every cell the session can be pointed at by a label, once each, with
+        # the labels it answers to (its serial number and name as given). A
+        # cell known only by its IRI is not listed. A lookup reads
+        # this list, so a label that two or more cells answer to is reported
+        # with every candidate rather than resolved to whichever came last: a
+        # display name is not an identifier, and a batch may share one.
+        self._indexed_cells: builtins.list[tuple[Any, builtins.list[str]]] = []
         # True once cell instances saved in a previous session have been lazily
-        # loaded from .battinfo/records/cell-instance/ into the index above, so a
+        # loaded from .battinfo/records/cell-instance/ into the list above, so a
         # fresh process can still resolve a cell by serial (day-2 rehydration).
         self._cells_rehydrated = False
         # (registry, entity type, IRI) -> outcome of looking a referenced record
@@ -3539,11 +3670,13 @@ class AuthoringWorkspace:
             '    manufacturer="Samsung SDI", model="INR21700-50E",\n'
             '    format="cylindrical", chemistry="Li-ion")\n'
             "\n"
-            "# 5. Register the physical cells you tested\n"
-            'ws.add("cell", spec=spec, serial_numbers=["S1", "S2", "S3"])\n'
+            "# 5. Register the physical cells you tested, by the serials printed on\n"
+            "#    them or labels only your lab uses: a cell's IRI comes from its spec\n"
+            '#    and serial, so a bare "S1" mints the IRI of every other lab\'s "S1".\n'
+            'ws.add("cell", spec=spec, serial_numbers=["MYLAB-50E-001", "MYLAB-50E-002", "MYLAB-50E-003"])\n'
             "\n"
             "# 6. Attach a test + data to a cell (explicit)\n"
-            'ws.add("test", type="cycling", cell="S1", data="bdf/S1.bdf.csv")\n'
+            'ws.add("test", type="cycling", cell="MYLAB-50E-001", data="bdf/MYLAB-50E-001.bdf.csv")\n'
             "\n"
             "# 7. Publish (add zenodo=True for a citable DOI)\n"
             "ws.save()\n"
@@ -3570,7 +3703,10 @@ class AuthoringWorkspace:
         - ``type="cell-spec"`` (default) — fuzzy text search by manufacturer/model;
           tolerates typos. ``ws.search("duracell mn2400")``
         - ``type="cell"`` — look up existing instances by ``serial``/``serials``/
-          ``batch`` (exact or 6-char short ID). ``ws.search(type="cell", serial="tpejqj")``
+          ``batch``. A serial matches a cell's serial number or name exactly; a
+          6-char short ID on its own also matches the cell whose IRI or label
+          carries it. ``serial`` and ``batch`` together narrow to both. Each hit
+          names its publisher. ``ws.search(type="cell", serial="tpejqj")``
         - ``type="test"`` / ``"test-spec"`` / ``"dataset"`` — list records, optionally
           narrowed by ``query`` (title substring).
 
@@ -3613,7 +3749,8 @@ class AuthoringWorkspace:
             if found:
                 print(f"Found {len(found)} cell instance(s):")
                 for c in found:
-                    print(f"  {c.get('name') or c.get('serial_number') or ''}  {c['id']}")
+                    publisher = f"  (published by {c['publisher_id']})" if c.get("publisher_id") else ""
+                    print(f"  {c.get('name') or c.get('serial_number') or ''}  {c['id']}{publisher}")
             else:
                 print("No matching cell instances found in the registry.")
             return found
@@ -3822,6 +3959,11 @@ class AuthoringWorkspace:
         A relative draft path resolves against the workspace root, not the
         current directory.
 
+        Loading the same draft or result again, as a notebook does when a cell
+        is re-run, returns the record the session already holds rather than a
+        second copy. A draft whose ``id`` a different record of the session
+        already has raises ``ValueError``: one IRI names one record.
+
         A quantity's ``value`` holds a number only. A cell-spec or
         equipment-spec draft, or a found cell spec, written before 0.8.0 may
         hold text there: a numeric string (``"2.5"``) is read as the number,
@@ -3867,15 +4009,26 @@ class AuthoringWorkspace:
             # ...or from a JSON map {serial: iri}:
             ws.add("cell", spec=spec, from_file="cell_iris.json")
 
+        It returns the cells it names, in the order given; a serial (or name)
+        the workspace already holds returns that cell, so a re-run adds nothing.
+
         **Tests** (``"test"``) — link a cell and its data explicitly::
 
             ws.add("test", type="capacity_check", cell="FAC-001",
                    data="data/FAC-001.csv", instrument="Maccor 4200")
 
-        ``cell`` accepts a serial, IRI, ``Cell``, or search result, and is
-        resolved in this session, locally, then in the registry (referenced if it
-        already exists).  A cell found in the registry is kept as a read-only copy
-        of its published record under ``.battinfo/references/``, so the strict
+        ``cell`` accepts a serial, name, short ID, IRI, ``Cell``, or search
+        result, and is resolved in this session, locally, then in the registry
+        (referenced if it already exists).  A serial or name has to match a
+        cell's exactly; a six-character short ID on its own (``"063b77"``) also
+        matches the cell whose IRI or label carries it, but ``"LAB-2025-000001"``
+        never binds ``"LAB-2024-000001"``.  A label that several cells answer to,
+        here or in the registry, raises ``ValueError`` listing them; pass the
+        one you mean by its IRI.  When the registry binds the cell, a line names
+        it and its publisher: lab labels such as ``"C01"`` are not scoped to a
+        lab until 0.9, so check it is yours.  A cell found in the registry is
+        kept as a read-only copy of its published record under
+        ``.battinfo/references/``, so the strict
         save resolves it and a Zenodo deposit describes it with a stub node;
         the copy is never submitted or uploaded.  With ``registry_url=None``
         a cell this workspace does not hold cannot be checked, and ``ws.save()``
@@ -3892,12 +4045,17 @@ class AuthoringWorkspace:
         channel label, or ``"<unit>/CHn"`` (see ``ws.add("equipment", ...)``).
 
         For large batches you may instead pass ``datasets="glob"`` to match files to
-        already-loaded cells by the 6-char short ID in each filename.
+        already-loaded cells: a file named after a cell's serial or name
+        (``C01.csv``, ``C01.bdf.csv``) matches that cell. Otherwise a file named
+        by a cell's 6-char short ID alone (``gm6pmr.csv``) matches the cell whose
+        IRI or label carries it, and one whose name ends in it
+        (``cycling-gm6pmr.csv``) the cell whose IRI it is the short ID of.
 
         The keywords a test takes are ``type`` (or ``kind``), ``cell``, ``data``,
         ``raw``, ``datasets``, ``spec`` (or ``protocol``), ``conformance``,
         ``name``, ``handle``, ``iri``, ``uid``, ``dataset_iris``, ``series_id``,
-        ``instrument``, ``channel``, ``license``, ``description`` and ``status``.
+        ``instrument``, ``channel``, ``license``, ``description``, ``status``,
+        ``started_at`` and ``ended_at``.
         Any other keyword raises ``TypeError`` naming the closest match and
         listing the accepted ones, before anything is created; every record type
         checks its keywords this way.
@@ -3916,6 +4074,19 @@ class AuthoringWorkspace:
         - ``conformance`` says whether the run followed its spec:
           ``"conformant"``, ``"non-conformant"``, ``"unknown"``, or a dict with
           ``status``, ``note`` and ``deviations``.
+        - ``started_at`` and ``ended_at`` say when the run started and ended
+          (Unix seconds, an ISO 8601 time or a datetime). Without them the times
+          are read from a BDF data file that records them.
+
+        A test's IRI names one run: it is seeded from the cell, the type, the
+        protocol (the IRI of ``spec=`` whenever there is one) and the run, which
+        is the location of the first ``data`` file, else ``started_at``, else
+        the ``name`` you give. So renaming a test with data or a start time
+        keeps its IRI, and a second run of one type on one cell, with its own
+        data file, start time or name, gets its own IRI, in this session or a
+        later one. A title the workspace generates (``C01 cycling``) and a time
+        read from a data file never enter it. A test saved before 0.8.0
+        changed this seed keeps the IRI it was saved under.
 
         ``series_id`` puts every dataset made from ``data=`` in a collection. Pass
         the collection's IRI; the collection itself is saved first, with
@@ -3933,12 +4104,20 @@ class AuthoringWorkspace:
         never generated here; build them with ``battinfo.naming.handle_for()``.
         Renaming a record must not move its IRI, so pin a published identity
         when the display name changes: ``iris=[...]`` for cells, ``uid=`` for
-        material and electrode records, and ``iri=``/``uid=`` (plus
-        ``dataset_iris=[...]`` for its data files) for a test::
+        material and electrode records, and ``dataset_iris=[...]`` for the data
+        files of a test, whose dataset titles are made from the test's name.
+        A test keeps its IRI when renamed; pin one published before 0.8.0 with
+        ``iri=``/``uid=`` when you rebuild it in a new folder::
 
             ws.add("test", type="gitt", cell="063b77", name="Graphite AQ-1 cell 063b77 GITT test",
                    handle="flores-ocv/graphite-aq-1-063b77-gitt-test",
                    iri="https://w3id.org/battinfo/test/....")
+
+        **Running a call again.** The same call run a second time in one
+        session, as when a notebook cell is re-run, adds nothing: a test with
+        the same fields and data files returns the test the session already
+        holds, and cells already in the session are skipped. A pinned IRI that
+        a different record of the session already has raises ``ValueError``.
 
         **Equipment** (``"equipment"``) — register a physical unit + its channels::
 
@@ -4552,32 +4731,82 @@ class AuthoringWorkspace:
         print(f"  Loaded {count} cell instance(s) into matching index.")
         return count
 
+    def _unsaved_cell_iris(self) -> set[str]:
+        """The IRIs the next save mints for the session's cells that have none yet.
+
+        The save's own finalize pass, run on copies (``Workspace._finalized_records``),
+        so a cell whose spec collides with another spec of the session, or
+        keeps an IRI saved before, is predicted as the save mints it. When that
+        pass refuses the session as it stands (a save would raise too), each
+        cell is predicted from its own seed and its spec's natural key.
+        """
+        engine = self._ws
+        try:
+            finalized = engine._finalized_records()
+        except (TypeError, ValueError):
+            pass
+        else:
+            return {
+                item.id
+                for original, item in zip(engine.cells, finalized["cells"], strict=True)
+                if original.id is None and item.id
+            }
+        specs: dict[int, Any] = {}
+        iris: set[str] = set()
+        for cell in engine.cells:
+            if cell.id is not None:
+                continue
+            spec = cell.cell_spec
+            if spec is not None and getattr(spec, "id", None) is None and id(spec) not in specs:
+                specs[id(spec)] = engine._finalize_cell_spec(spec, record_roots=[engine.source_root])
+            try:
+                minted = engine._finalize_cell(cell, specs).id
+            except (TypeError, ValueError):
+                continue
+            if minted:
+                iris.add(minted)
+        return iris
+
     def _index_cell(self, cell: Any, *keys: str | None) -> None:
-        """Index ``cell`` under every lookup key it answers to (and each key's short id).
+        """Index ``cell`` under the labels it answers to (its serial number and name).
 
         A cell's IDENTITY is its serial number; its name is display text, so a
-        batch may share one public label across many serials. When a key already
-        points at a *different* cell it is recorded as ambiguous rather than
-        overwritten, and :meth:`_resolve_cell` then refuses to guess.
+        batch may share one public label across many serials. Indexing never
+        decides between two cells that share a label: :meth:`_cells_labelled`
+        finds every cell a label names, and :meth:`_resolve_cell` then refuses
+        to guess.
         """
-        for key in keys:
-            if not key:
-                continue
-            for k in (key, _short_id(key)):
-                if not k:
-                    continue
-                existing = self._cells_by_short_id.get(k)
-                if existing is not None and existing is not cell:
-                    self._ambiguous_cell_keys.add(k)
-                self._cells_by_short_id[k] = cell
+        labels = [key for key in keys if key]
+        if not labels:
+            return  # a cell known only by its IRI is looked up by that IRI each time
+        entry = next((item for item in self._indexed_cells if item[0] is cell), None)
+        if entry is None:
+            self._indexed_cells.append((cell, labels))
+        else:
+            entry[1].extend(label for label in labels if label not in entry[1])
+
+    def _cells_labelled(self, label: str) -> builtins.list[Any]:
+        """Every cell this session indexes that *label* names, exact matches first.
+
+        A cell whose serial number or name is *label* matches. Only when none
+        does, and *label* is a short ID on its own, does a cell match whose IRI
+        or label carries that short ID. See ``_cells_named_by``; a data file's
+        name is matched by :meth:`_cells_for_data_file`.
+        """
+        cells = [(labels, getattr(cell, "id", None)) for cell, labels in self._indexed_cells]
+        short_id = label if _is_short_id(label) else None
+        return [self._indexed_cells[i][0] for i in _cells_named_by(label, cells, short_id)]
 
     def _index_saved_cells(self) -> int:
         """Load cell instances saved on disk into the serial → cell index (quiet).
 
         Shared core of :meth:`reload_cells` and :meth:`_rehydrate_cell_index`;
         scans ``.battinfo/records/cell-instance/`` and returns the count loaded.
-        Marks the index as rehydrated so :meth:`_rehydrate_cell_index` becomes a
-        no-op afterwards.
+        A saved cell the session already holds is counted but not loaded
+        again, so reading the records back never gives one cell two objects:
+        one held under its IRI, and one not saved yet whose next save mints the
+        IRI the saved cell has. Marks the index as rehydrated so
+        :meth:`_rehydrate_cell_index` becomes a no-op afterwards.
         """
         from battinfo.bundle import Cell
 
@@ -4586,11 +4815,16 @@ class AuthoringWorkspace:
         if not ci_dir.exists():
             return 0
 
+        held = {getattr(cell, "id", None) for cell, _ in self._indexed_cells} - {None}
+        held |= self._unsaved_cell_iris()
         count = 0
         for src in sorted(ci_dir.glob("*.json")):
             try:
                 raw = json.loads(src.read_text(encoding="utf-8"))
                 ci = raw.get("cell_instance", {})
+                if ci.get("id") and ci.get("id") in held:
+                    count += 1
+                    continue
                 cell = Cell(
                     id=ci.get("id"),
                     cell_spec_id=ci.get("cell_spec_id"),
@@ -4600,7 +4834,7 @@ class AuthoringWorkspace:
                     working_electrode_id=ci.get("working_electrode_id"),
                     counter_electrode_id=ci.get("counter_electrode_id"),
                 )
-                self._index_cell(cell, ci.get("serial_number"), ci.get("name"), ci.get("short_id") or None)
+                self._index_cell(cell, ci.get("serial_number"), ci.get("name"))
                 count += 1
             except Exception as exc:
                 print(f"  WARNING: could not load {src.name} -- {exc}")
@@ -4674,37 +4908,44 @@ class AuthoringWorkspace:
         serials: builtins.list[str] | None = None,
         batch_id: str | None = None,
     ) -> builtins.list[dict]:
-        """Resolve published cell instances by serial/short-ID or batch.
+        """Resolve published cell instances by serial or name, short ID, and batch.
 
-        Returns one dict per match: id (canonical IRI), serial_number, batch_id,
-        cell_spec_id, manufacturer, model, title.
+        Each label in *serials* matches the cells whose serial number or name
+        is exactly that label. Only when none is, and the label is a short ID
+        on its own (six characters such as ``"tpejqj"``), does it match the
+        cells whose IRI, serial or name carries that short ID; a label that
+        merely ends like another cell's serial never matches it. With
+        *batch_id*, only cells of that batch count, together with *serials*
+        when both are given. Returns one dict per match, in the registry's
+        order: id (canonical IRI), name, serial_number, batch_id, cell_spec_id,
+        manufacturer, model, title and publisher_id.
         """
         wanted = [s for s in (serials or []) if s]
-        out: list[dict] = []
+        rows: list[dict] = []
         for r in self._registry_resources("cell"):
             meta = r.get("metadata") or {}
-            name = meta.get("name") or r.get("title")
-            serial = meta.get("serial_number")
-            batch = meta.get("batch_id")
-            if batch_id is not None:
-                if batch != batch_id:
-                    continue
-            elif wanted:
-                if not any(_serial_matches(t, name) or _serial_matches(t, serial) for t in wanted):
-                    continue
-            out.append(
+            if batch_id is not None and meta.get("batch_id") != batch_id:
+                continue
+            rows.append(
                 {
                     "id": r.get("canonical_iri", ""),
-                    "name": name,
-                    "serial_number": serial,
-                    "batch_id": batch,
+                    "name": meta.get("name") or r.get("title"),
+                    "serial_number": meta.get("serial_number"),
+                    "batch_id": meta.get("batch_id"),
                     "cell_spec_id": meta.get("cell_spec_id"),
                     "manufacturer": meta.get("manufacturer"),
                     "model": meta.get("model"),
                     "title": r.get("title", ""),
+                    "publisher_id": r.get("publisher_id"),
                 }
             )
-        return out
+        if not wanted:
+            return rows
+        cells = [([text for text in (row["serial_number"], row["name"]) if text], row["id"]) for row in rows]
+        chosen: set[int] = set()
+        for token in wanted:
+            chosen.update(_cells_named_by(token, cells, token if _is_short_id(token) else None))
+        return [row for i, row in enumerate(rows) if i in chosen]
 
     def import_(
         self,
@@ -4717,10 +4958,14 @@ class AuthoringWorkspace:
         Parses the JSON-LD `@graph`, reconstructs cell specs, cell instances,
         tests, and datasets, then populates this workspace ready for
         ``ws.save()`` and ``ws.submit()``.  All canonical IRIs from the source
-        document are preserved — no new IRIs are minted. A deposit written
-        before 0.8.0 may carry text as a quantity's number: a numeric string
-        (``"2.5"``) is read as the number, and other text moves to
-        ``value_text`` with a warning.
+        document are preserved — no new IRIs are minted. A test that produced
+        several data files comes back as one test, with one dataset per file.
+        Importing the same deposit again in one session reuses the records the
+        first import made. A deposit that gives an IRI the session already
+        holds to a different record raises ``ValueError`` and imports nothing.
+        A deposit written before 0.8.0 may carry text as a quantity's number:
+        a numeric string (``"2.5"``) is read as the number, and other text
+        moves to ``value_text`` with a warning.
 
         A cell spec's chemistry is the first class of its described battery
         that the chemistry vocabulary names, which is the declared chemistry's;
@@ -5040,6 +5285,31 @@ class AuthoringWorkspace:
                 # before the catalog shape carried them all on one dataset.
                 dataset_nodes.append(node)
 
+        # A record the session already holds under a deposit IRI, as when the
+        # import runs a second time, is reused. A different record under one of
+        # those IRIs is a clash: once the deposit is read, the session is put
+        # back as it was and the import raises, because one IRI names one record.
+        engine = self._ws
+        collections: tuple[builtins.list[Any], ...] = (
+            engine.cell_specs,
+            engine.cells,
+            engine.test_specs,
+            engine.tests,
+            engine.datasets,
+        )
+        held_before = [builtins.list(collection) for collection in collections]
+        index_before = [(cell, builtins.list(labels)) for cell, labels in self._indexed_cells]
+        clashes: builtins.list[str] = []
+
+        def _held_or_new(obj: Any, pool: builtins.list[Any], what: str) -> Any:
+            repeats = engine._repeats_in(obj, pool)
+            if repeats:
+                self._discard(obj)
+                return repeats[0]
+            if obj.id is not None and any(other is not obj and other.id == obj.id for other in pool):
+                clashes.append(f"{what} {obj.id}")
+            return obj
+
         # ── 5. Import cell specs ───────────────────────────────────────────────
         spec_objects: dict[str, Any] = {}  # IRI → CellSpec
         for iri, node in sorted(spec_nodes_by_iri.items()):
@@ -5095,7 +5365,7 @@ class AuthoringWorkspace:
                 source_type="zenodo",
             )
             ct.id = iri
-            spec_objects[iri] = ct
+            spec_objects[iri] = _held_or_new(ct, engine.cell_specs, "cell spec")
             print(f"  spec:     {node.get('schema:name', iri)}")
             # A deposit whose chemistry was free text kept only the classes its
             # electrode bases added, so the chemistry read back can be one the
@@ -5132,7 +5402,9 @@ class AuthoringWorkspace:
             )
             cell.id = iri
             sn = node.get("schema:serialNumber", "")
-            self._index_cell(cell, sn)
+            held = _held_or_new(cell, engine.cells, "cell")
+            if held is cell:
+                self._index_cell(cell, sn)
             imported_cells += 1
             print(f"  instance: {sn or iri}")
 
@@ -5179,6 +5451,10 @@ class AuthoringWorkspace:
         imported_tests = imported_datasets = 0
         skipped_tests: builtins.list[dict] = []
         skipped_datasets: builtins.list[dict] = []
+        # A dataset that several tests name as an output is one record: the first
+        # test that names it is its test, and each other one a related test.
+        datasets_here: dict[str, Any] = {}
+        made_datasets: builtins.list[Any] = []
         for test_iri, tnode in sorted(test_nodes_by_iri.items()):
             # prov:used may now be a list (cell + spec); hasTestObject is preferred.
             cell_iri = _first_id(tnode.get("hasTestObject")) or _first_id(tnode.get("prov:used"))
@@ -5220,7 +5496,11 @@ class AuthoringWorkspace:
             if not isinstance(kind, str) or not kind.strip():
                 kind = _import_test_kind_from_technique(protocol)
 
-            test_imported = False
+            # One engine test per BatteryTest node, made when its first output
+            # resolves and kept under the deposit's IRI; each output becomes one
+            # of its datasets, under its own IRI. (One test per output would put
+            # several tests on one IRI, which ws.save() refuses.)
+            test = None
             for output in outputs:
                 ds_iri = output.get("@id", "")
                 own = dists_by_dataset.get(ds_iri, [])
@@ -5282,32 +5562,59 @@ class AuthoringWorkspace:
                     )
                     continue
 
-                self._ws.record_test(
+                if test is None:
+                    test = self._ws.test(
+                        test_cell,
+                        kind=kind,
+                        name=f"{test_cell.serial_number or cell_iri.split('/')[-1]} {protocol}",
+                        protocol=protocol or kind.replace("_", " "),
+                        instrument=instrument,
+                        status="completed",
+                    )
+                    test.id = test_iri
+                    test = _held_or_new(test, engine.tests, "test")
+                shared = datasets_here.get(ds_iri) if ds_iri else None
+                if shared is not None:
+                    primary = shared.test.id if shared.test is not None else shared.test_id
+                    if test_iri != primary and test_iri not in shared.related_test_ids:
+                        shared.related_test_ids.append(test_iri)
+                    continue
+                dataset = self._ws.dataset(
                     test_cell,
-                    kind=kind,
-                    name=f"{test_cell.serial_number or cell_iri.split('/')[-1]} {protocol}",
-                    protocol=protocol,
-                    instrument=instrument,
-                    status="completed",
+                    title=f"{test_cell.name or test_cell.serial_number or 'cell'} {kind} dataset",
+                    test=test,
                     access_url=dl_url,
                     format=fmt or None,
                     checksum_algorithm=_spdx_algorithm_name(cs),
                     checksum_value=cs.get("spdx:checksumValue") or None,
                 )
-                # Preserve the test IRI and the dataset IRI from the JSON-LD
-                if self._ws.tests:
-                    self._ws.tests[-1].id = test_iri
-                if self._ws.datasets and ds_iri:
-                    self._ws.datasets[-1].id = ds_iri
-                if note is not None and self._ws.datasets:
-                    self._ws.datasets[-1].comment.append(note)
-                test_imported = True
+                if ds_iri:
+                    dataset.id = ds_iri
+                    datasets_here[ds_iri] = dataset
+                if note is not None:
+                    dataset.comment.append(note)
+                made_datasets.append(dataset)
                 imported_datasets += 1
                 print(f"  test:     {fname}")
-            if test_imported:
+            if test is not None:
                 imported_tests += 1
             else:
                 skipped_tests.append({"test": test_iri, "cell": cell_iri, "reason": "no distribution"})
+
+        # Compared once every test has named its outputs, related tests included.
+        for dataset in made_datasets:
+            _held_or_new(dataset, engine.datasets, "dataset")
+
+        if clashes:
+            for collection, items in zip(collections, held_before):
+                collection[:] = items
+            self._indexed_cells = index_before
+            shown = ", ".join(clashes[:3]) + (f" and {len(clashes) - 3} more" if len(clashes) > 3 else "")
+            raise ValueError(
+                f"The deposit has {len(clashes)} record(s) whose IRI a different record of this session "
+                f"already has: {shown}. One IRI names one record, so nothing was imported. Import into a "
+                "fresh workspace, or start over with ws.clear()."
+            )
 
         counts: dict[str, Any] = {
             "properties": len(spec_objects),
@@ -5338,8 +5645,10 @@ class AuthoringWorkspace:
         """Clear all in-memory records and reset the workspace for a new authoring session.
 
         Does not delete any files already saved to ``.battinfo/records/``.
-        Call before re-running ``ws.add()`` + ``ws.save()`` in a notebook to
-        avoid accumulating duplicate records across cells.
+        A ``ws.load()`` or ``ws.add()`` cell re-run unchanged needs no clear:
+        the session reuses what it holds. Call it to start a session over, for
+        example after editing a draft whose pinned IRI the session already
+        holds.
 
         Example::
 
@@ -5348,8 +5657,7 @@ class AuthoringWorkspace:
             ws.save()
         """
         self._ws = self._make_engine()
-        self._cells_by_short_id = {}
-        self._ambiguous_cell_keys = set()
+        self._indexed_cells = []
         self._session_paths = set()
         self._added_paths = set()
         print("Workspace cleared.")
@@ -5393,6 +5701,14 @@ class AuthoringWorkspace:
         — unless ``allow_partial=True``, in which case failures are returned in the
         outcome list instead.  Returns a list of per-record outcome dicts (``ok``,
         ``status``, ``error``, ``iri`` …).  No git or filesystem dependency.
+
+        A record the registry already holds with other content is retried once
+        as a new version (``version_bumped``).  A record whose IRI another
+        publisher holds is not: its outcome has status ``conflict``, names the
+        IRI and the publisher, and says how to rename it (a serial or
+        ``names=`` only your lab uses) or pin an IRI of your own.  Lab labels
+        such as ``"S1"`` are not scoped to a lab until 0.9, so two labs that both
+        name a cell of one spec ``"S1"`` mint one IRI.
 
         Credentials can be passed as arguments, established with ``ws.login()``
         (scoped to this workspace instance), set as environment variables, or
@@ -10019,6 +10335,11 @@ class AuthoringWorkspace:
         # change does not move the IRI.
         if isinstance(name, str) and name.strip():
             ct.name = name.strip()
+        # Loading the same draft again (a notebook cell run twice) reuses the
+        # spec the session already holds.
+        repeat = self._session_repeat(ct, self._ws.cell_specs, what=path.name)
+        if repeat is not None:
+            return repeat
         self._ws.cell_specs.append(ct)
         return ct
 
@@ -10038,8 +10359,14 @@ class AuthoringWorkspace:
         """
         from battinfo.bundle import Cell  # noqa: PLC0415
 
+        # Loading the same result again (a notebook cell re-run) reuses the cell
+        # already referenced; a second object would make its serial ambiguous.
+        iri = result.get("id")
+        known = next((cell for cell, _ in self._indexed_cells if iri and cell.id == iri), None)
+        if known is not None:
+            return known
         cell = Cell(
-            id=result.get("id"),
+            id=iri,
             cell_spec_id=result.get("cell_spec_id"),
             name=result.get("name"),
             serial_number=result.get("serial_number"),
@@ -10243,8 +10570,13 @@ class AuthoringWorkspace:
         if isinstance(spec, CellSpec):
             # A NEW spec (no id yet) must join the save set, or the instances
             # would reference a spec that never gets saved and fail at save
-            # time with an obscure error. IRI is minted at ws.save().
-            if spec.id is None and spec not in self._ws.cell_specs:
+            # time with an obscure error. IRI is minted at ws.save(). A new
+            # object equal to a spec the session already holds (the cell that
+            # builds it run again) is not added twice: the cells link the held one.
+            if spec.id is None and not any(existing is spec for existing in self._ws.cell_specs):
+                repeat = self._session_repeat(spec, self._ws.cell_specs, what="cell spec", note=False)
+                if repeat is not None:
+                    return repeat
                 self._ws.cell_specs.append(spec)
             return spec
         if isinstance(spec, str):
@@ -10270,7 +10602,12 @@ class AuthoringWorkspace:
         working_electrode_id: Any = None,
         counter_electrode_id: Any = None,
     ) -> builtins.list:
-        """Create cell instances.
+        """Create cell instances, and return the cells the call names.
+
+        The cells come back in the order given. A serial number (or, for a
+        cell without one, a name) the workspace already holds a cell under
+        returns that cell instead of adding another, so running the same call
+        again returns the same cells and adds nothing.
 
         * ``names`` — human labels (e.g. lab batch IDs); display text, which
           several cells of one batch may share.
@@ -10330,60 +10667,70 @@ class AuthoringWorkspace:
             handle_list = builtins.list(handles) if handles is not None else [None] * len(pairs)
             entries = [(n, s, iri, h) for (n, s), iri, h in zip(pairs, iri_list, handle_list)]
 
-            # Drop cells already in this session, keyed on IDENTITY.
-            #
-            # A cell instance is identified by its serial number. The name is
-            # display text: a batch may legitimately share one public label
-            # across many physical cells (95 cells under 12 labels is a real
-            # shape), so keying the de-duplication on the label collapsed such a
-            # batch to one cell per label and lost the rest without failing.
-            # Prefer the serial; fall back to the name only when no serial is
-            # supplied, which is the single-label case the old key served.
-            seen: dict[str, str | None] = {}
-            already: list[str] = []
-            repeated_serials: list[str] = []
-            repeated_names: list[str] = []
-            deduped: list[tuple[str | None, str | None, str | None, str | None]] = []
-            for n, s, iri, h in entries:
-                key = s or n or ""
-                if key and key in seen:
-                    # Two entries claiming one identity. A repeated serial is a
-                    # contradiction in the input (loud); a repeated bare name is
-                    # merely indistinguishable (warn and keep the first).
-                    (repeated_serials if s else repeated_names).append(key)
-                    continue
-                if key and key in self._cells_by_short_id:
-                    already.append(key)
-                    continue
-                if key:
-                    seen[key] = n
-                deduped.append((n, s, iri, h))
-            if repeated_serials:
-                dupes = sorted(set(repeated_serials))
-                raise ValueError(
-                    f"serial_numbers contains {len(repeated_serials)} repeated serial(s): "
-                    f"{dupes[:5]}" + (" ..." if len(dupes) > 5 else "") + ". "
-                    "A serial number identifies one physical cell, so it cannot appear "
-                    "twice in one batch. Names may repeat; serials may not."
-                )
-            if repeated_names:
-                dupes = sorted(set(repeated_names))
-                print(
-                    f"  WARNING: {len(repeated_names)} repeated name(s) with no serial "
-                    f"-- keeping the first of each: {dupes[:5]}"
-                    + (" ..." if len(dupes) > 5 else "")
-                    + "\n           Pass serial_numbers=[...] to author them as distinct cells."
-                )
-            if already:
-                print(
-                    f"  WARNING: {len(already)} already in workspace -- skipping: {already[:5]}"
-                    + (" ..." if len(already) > 5 else "")
-                )
-            entries = deduped
+        # Drop cells already in this session, keyed on IDENTITY, so the same call
+        # run twice (a notebook cell re-run) adds nothing. A from_file= map is
+        # keyed on its labels, the names its cells are indexed under.
+        #
+        # A cell instance is identified by its serial number. The name is
+        # display text: a batch may legitimately share one public label
+        # across many physical cells (95 cells under 12 labels is a real
+        # shape), so keying the de-duplication on the label collapsed such a
+        # batch to one cell per label and lost the rest without failing.
+        # Prefer the serial; fall back to the name only when no serial is
+        # supplied, which is the single-label case the old key served.
+        seen: dict[str, str | None] = {}
+        already: list[str] = []
+        repeated_serials: list[str] = []
+        repeated_names: list[str] = []
+        deduped: list[tuple[str | None, str | None, str | None, str | None]] = []
+        # What the call returns, in input order: a cell the workspace already
+        # holds, or the place of a cell about to be made in `deduped`.
+        returned: list[Any] = []
+        for n, s, iri, h in entries:
+            key = s or n or ""
+            if key and key in seen:
+                # Two entries claiming one identity. A repeated serial is a
+                # contradiction in the input (loud); a repeated bare name is
+                # merely indistinguishable (warn and keep the first).
+                (repeated_serials if s else repeated_names).append(key)
+                continue
+            held = next((cell for cell, labels in self._indexed_cells if key and key in labels), None)
+            if held is not None:
+                already.append(key)
+                returned.append(held)
+                continue
+            if key:
+                seen[key] = n
+            returned.append(len(deduped))
+            deduped.append((n, s, iri, h))
+        if repeated_serials:
+            dupes = sorted(set(repeated_serials))
+            raise ValueError(
+                f"serial_numbers contains {len(repeated_serials)} repeated serial(s): "
+                f"{dupes[:5]}" + (" ..." if len(dupes) > 5 else "") + ". "
+                "A serial number identifies one physical cell, so it cannot appear "
+                "twice in one batch. Names may repeat; serials may not."
+            )
+        if repeated_names:
+            dupes = sorted(set(repeated_names))
+            print(
+                f"  WARNING: {len(repeated_names)} repeated name(s) with no serial "
+                f"-- keeping the first of each: {dupes[:5]}"
+                + (" ..." if len(dupes) > 5 else "")
+                + "\n           Pass serial_numbers=[...] to author them as distinct cells."
+            )
+        if already:
+            print(
+                f"  {len(already)} already in this workspace, reusing them: {already[:5]}"
+                + (" ..." if len(already) > 5 else "")
+            )
+        entries = deduped
+        self._refuse_shared_cell_iris(entries)
 
         if not entries:
-            print("  No cell instances to add" + (f" (match={match!r})." if match else "."))
-            return []
+            if not already:
+                print("  No cell instances to add" + (f" (match={match!r})." if match else "."))
+            return returned
 
         # NOTE: spec nominal ratings are deliberately NOT copied into each
         # instance's `measured` block. Rated/nominal values are not
@@ -10441,7 +10788,32 @@ class AuthoringWorkspace:
             self._index_cell(cell, serial, name)
             cells.append(cell)
             print(f"  cell: {name or serial}  {iri or '(IRI auto-assigned)'}")
-        return cells
+        return [cells[item] if isinstance(item, int) else item for item in returned]
+
+    def _refuse_shared_cell_iris(
+        self, entries: builtins.list[tuple[str | None, str | None, str | None, str | None]]
+    ) -> None:
+        """Raise ``ValueError`` when two new cells pin one IRI, or one pins the IRI of a cell this session saves.
+
+        *entries* are the ``(name, serial, iri, handle)`` of the cells about to
+        be made. One IRI names one cell. A cell the session only references
+        (rehydrated from disk or found in the registry) is not in the save set,
+        so pinning its IRI on a renamed cell is allowed: the save rewrites it.
+        """
+        pinned = [iri for _, _, iri, _ in entries if iri]
+        repeated = sorted({iri for iri in pinned if pinned.count(iri) > 1})
+        if repeated:
+            raise ValueError(
+                f"{repeated[0]} is given to more than one cell; one IRI names one cell. Nothing was added."
+            )
+        for name, serial, iri, _ in entries:
+            holder = next((cell for cell in self._ws.cells if iri and cell.id == iri), None)
+            if holder is not None:
+                held_by = holder.serial_number or holder.name or iri
+                raise ValueError(
+                    f"{iri} is already the IRI of cell {held_by!r} in this session, so it cannot also name "
+                    f"{serial or name!r}; one IRI names one cell. Nothing was added."
+                )
 
     def _load_test_spec(self, path: Path) -> Any:
         from battinfo.bundle import BatteryTestType, ProvenanceInfo  # noqa: PLC0415
@@ -10541,18 +10913,26 @@ class AuthoringWorkspace:
             tp.id = pinned
         if raw.get("handle"):
             tp.handle = raw["handle"]
+        # Held back until it is known to be new: loading the same draft again
+        # reuses the spec the session already holds.
+        self._discard(tp)
+        repeat = self._session_repeat(tp, self._ws.test_specs, what=path.name)
+        if repeat is not None:
+            return repeat
+        self._ws.test_specs.append(tp)
         return tp
 
     def _load_equipment_spec(self, path: Path) -> dict:
         """Lift an equipment-spec draft (from ``ws.template``) to a canonical record.
 
         The uid is minted deterministically from the draft's natural key
-        (manufacturer :: model :: name), so re-loading the same draft converges
-        on the same spec IRI instead of minting a duplicate. An ``id`` or
-        ``uid`` in the draft pins the IRI instead.
+        (manufacturer :: model :: name, each normalised by
+        ``entities.seed_text``), so re-loading the same draft converges on the
+        same spec IRI instead of minting a duplicate. An ``id`` or ``uid`` in
+        the draft pins the IRI instead.
         """
         from battinfo.api import create_equipment_spec  # noqa: PLC0415
-        from battinfo.entities import stable_uid  # noqa: PLC0415
+        from battinfo.entities import seed_text, stable_uid  # noqa: PLC0415
 
         raw = json.loads(path.read_text(encoding="utf-8"))
         _check_draft_keys(raw, _EQUIPMENT_SPEC_DRAFT_KEYS, draft="equipment-spec", path=path)
@@ -10564,7 +10944,11 @@ class AuthoringWorkspace:
                 f"{path.name} needs at least a name (or manufacturer/model) - fill in the template before loading it."
             )
         pinned = _draft_spec_iri(raw.get("id"), raw.get("uid"), path.name)
-        uid = None if pinned else stable_uid("::".join(["equipment-spec", manufacturer or "", model or "", name]))
+        uid = (
+            None
+            if pinned
+            else stable_uid("::".join(["equipment-spec", seed_text(manufacturer), seed_text(model), seed_text(name)]))
+        )
         # A draft written before 0.8.0 may hold text in a quantity's value: a
         # numeric string becomes the number, other text moves to value_text.
         # The whole draft is read, so a quantity outside `property` is covered too.
@@ -10682,7 +11066,7 @@ class AuthoringWorkspace:
         the same records instead of duplicating them.
         """
         from battinfo.api import create_channel, create_equipment, save_record  # noqa: PLC0415
-        from battinfo.entities import stable_uid  # noqa: PLC0415
+        from battinfo.entities import seed_text, stable_uid  # noqa: PLC0415
 
         if spec is None:
             raise ValueError(
@@ -10739,7 +11123,7 @@ class AuthoringWorkspace:
         # ws.add('equipment', ...) with the same inputs converges on the existing
         # unit instead of minting a duplicate. Chosen over random minting because
         # a physical unit's natural key IS its model + serial number.
-        equipment_uid = stable_uid(f"equipment:{spec_uid}:{serial_number}")
+        equipment_uid = stable_uid(f"equipment:{spec_uid}:{seed_text(serial_number)}")
         equipment_record = create_equipment(
             uid=equipment_uid,
             equipment_spec_id=spec_id,
@@ -11088,17 +11472,62 @@ class AuthoringWorkspace:
             hint = "  No channels registered yet - run ws.add('equipment', spec=..., serial_number=...) first."
         raise ValueError(f"Unknown channel {ref!r}. Pass a channel IRI, a channel label, or 'unit/CHn'.\n" + hint)
 
-    def _register_test_spec(self, spec: Any) -> None:
+    def _register_test_spec(self, spec: Any) -> Any:
         """Register a ``TestSpec`` object so its protocol record is saved and its
-        minted IRI links back to the tests that reference it.
+        minted IRI links back to the tests that reference it; returns the spec
+        the tests should link.
 
         Idempotent by identity: passing the same spec object to several tests
         registers one protocol record, and the finalizer maps the linked test's
-        ``protocol_entity`` back to it by object identity.
+        ``protocol_entity`` back to it by object identity. A new object equal
+        to a spec the session already holds, as when a notebook cell that
+        builds it runs again, is not registered twice: the held spec is
+        returned instead. A spec that pins an IRI another spec of the session
+        has raises ``ValueError``.
         """
         specs = self._ws.test_specs
-        if not any(existing is spec for existing in specs):
-            specs.append(spec)
+        if any(existing is spec for existing in specs):
+            return spec
+        repeat = self._session_repeat(spec, specs, what=f"test spec {spec.name!r}", note=False)
+        if repeat is not None:
+            return repeat
+        specs.append(spec)
+        return spec
+
+    def _session_repeat(self, obj: Any, pool: builtins.list[Any], *, what: str, note: bool = True) -> Any:
+        """The object of *pool* that *obj*, just built by a load or an add, repeats, else ``None``.
+
+        A repeat would save as the same record (see ``Workspace._session_view``)
+        and has *obj*'s IRI if *obj* pins one; it is reused, with a note unless
+        *note* is false. When *obj* pins an IRI that a different object of
+        *pool* already has, raises ``ValueError``: one IRI names one record.
+        """
+        repeats = self._ws._repeats_in(obj, pool)
+        if repeats:
+            if note:
+                print(f"  {what}: already in this session, reusing it")
+            return repeats[0]
+        pinned = getattr(obj, "id", None)
+        if pinned is not None and any(other is not obj and getattr(other, "id", None) == pinned for other in pool):
+            raise ValueError(
+                f"{what} has the IRI {pinned}, which a different record in this session already has. "
+                "One IRI names one record: correct the IRI, or start over with ws.clear() and run the "
+                "cells again."
+            )
+        return None
+
+    def _discard(self, *objects: Any) -> None:
+        """Take *objects* out of the session (by identity), as if the call that made them had not run."""
+        engine = self._ws
+        collections: tuple[builtins.list[Any], ...] = (
+            engine.cell_specs,
+            engine.cells,
+            engine.test_specs,
+            engine.tests,
+            engine.datasets,
+        )
+        for collection in collections:
+            collection[:] = [item for item in collection if not any(item is obj for obj in objects)]
 
     def _resolve_test_protocol_ref(self, iri: str) -> tuple[str | None, str | None]:
         """Look up a saved test-protocol record by IRI → ``(name, test_kind)``.
@@ -11139,23 +11568,45 @@ class AuthoringWorkspace:
         license: str | None = None,
         description: str | None = None,
         status: str = "completed",
+        started_at: "int | float | str | _datetime.datetime | None" = None,
+        ended_at: "int | float | str | _datetime.datetime | None" = None,
     ) -> builtins.list:
         """Create a test (+ dataset(s)).
 
         Explicit (preferred): ``cell=<serial|IRI|object>`` and ``data=<path|list>``.
-        Batch: ``datasets="glob"`` matches files to loaded cells by short ID.
+        Batch: ``datasets="glob"`` matches files to loaded cells by serial
+        number or name, else by short ID (``_cells_for_data_file``).
         Relative paths resolve against the workspace root, and a data file that
         does not exist raises ``FileNotFoundError`` before anything is created.
 
         ``name`` is the test's title and ``handle`` its short slug (see
         :mod:`battinfo.naming`); neither is generated for you.
 
+        The test IRI names one run (``entities.test_identity_seed``): it
+        comes from the cell, the type, the protocol (the IRI of ``spec=``
+        whenever there is one, saved in this workspace or not) and the run,
+        which is the location of the first ``data`` file, else
+        ``started_at``, else the ``name`` you give. Renaming a test with data
+        or a start time keeps its IRI, and two runs of one type on one cell,
+        with other data files, start times or names, get two IRIs. A test
+        with none of these is one run per cell, type and protocol: a later
+        ``ws.save()`` refuses to let such a test replace a saved run with
+        another instrument or time window.
+
+        ``started_at`` and ``ended_at`` (Unix seconds, an ISO 8601 time or a
+        datetime) say when the run started and ended. Without them, the times
+        are read from a BDF data file's ``unix_time_second`` column when it has
+        one. A time read from a file never enters the IRI, so converting the
+        data again after a converter upgrade keeps it.
+
         ``iri`` (a full ``https://w3id.org/battinfo/test/...`` IRI) or ``uid``
-        (its 16-character uid) pins a published identity when the display name
-        changes. The test IRI is otherwise seeded from the cell, type, protocol
-        and name, so a new title would mint a new test. ``dataset_iris`` does the
-        same for the datasets made from ``data=``: one IRI per data file, in the
-        same order. All three need the explicit ``cell=`` form.
+        (its 16-character uid) pins a published identity, such as a test
+        published before the test seed changed in 0.8.0 and rebuilt in a new
+        folder. ``dataset_iris`` does the same for the datasets made from
+        ``data=``: one IRI per data file, in the same order. A dataset's IRI is
+        seeded from its test, its file's location and its title, which is made
+        from the test's name. ``iri``, ``uid``, ``dataset_iris``, ``started_at``
+        and ``ended_at`` need the explicit ``cell=`` form.
 
         ``series_id`` puts the datasets made from ``data=`` in a collection: it is
         the collection's IRI (``https://w3id.org/battinfo/dataset/...``) and is set
@@ -11185,6 +11636,7 @@ class AuthoringWorkspace:
         # The collection for the datasets made from data=. Checked first, so a bad
         # value fails before any test, dataset or test spec is created.
         member_series_id = self._checked_series_id(series_id, cell=cell, data=data)
+        given_start, given_end = _given_run_period(started_at, ended_at)
 
         # Resolve the test type (type=, legacy kind=, or from a linked spec).
         test_type = type or kind
@@ -11197,6 +11649,7 @@ class AuthoringWorkspace:
         # written and its minted IRI links back to this test (same outcome as
         # the ws.load(<draft>) path). Never reduce a spec to a name string.
         protocol_ref = None
+        registered_here = False  # this call added protocol_ref to the session
         if test_spec is not None:
             if isinstance(test_spec, str):
                 # A bare string is meaningful only as a reference to a saved
@@ -11233,8 +11686,9 @@ class AuthoringWorkspace:
                         f"{test_spec.__class__.__name__}. Author one inline "
                         "(battinfo.TestSpec(...)) or via ws.load(<draft file>)."
                     )
-                protocol_ref = test_spec
-                self._register_test_spec(test_spec)
+                held = any(existing is test_spec for existing in self._ws.test_specs)
+                protocol_ref = self._register_test_spec(test_spec)
+                registered_here = not held and protocol_ref is test_spec
                 protocol_name = test_spec.name
                 protocol_url = test_spec.protocol_url
                 spec_kind = getattr(test_spec, "test_type", None)
@@ -11257,10 +11711,10 @@ class AuthoringWorkspace:
         # Identity pins and the handle name ONE test, so they need the explicit
         # form; check them before anything is created.
         pinned_test_id = self._pinned_test_iri(iri, uid)
-        if cell is None and any(v is not None for v in (handle, iri, uid, dataset_iris)):
+        if cell is None and any(v is not None for v in (handle, iri, uid, dataset_iris, started_at, ended_at)):
             raise ValueError(
-                "handle=, iri=, uid= and dataset_iris= describe one test; use the explicit "
-                "form ws.add('test', cell=..., ...) rather than datasets='glob'."
+                "handle=, iri=, uid=, dataset_iris=, started_at= and ended_at= describe one test; use "
+                "the explicit form ws.add('test', cell=..., ...) rather than datasets='glob'."
             )
 
         # ── Explicit mode: a named cell (+ optional data files) ──────────────────
@@ -11289,9 +11743,13 @@ class AuthoringWorkspace:
             self._register_sources([*files, *sources], by="ws.add")
             # Measured period per data file (from the BDF unix_time_second column), so
             # the test activity and each dataset are placed in time from the data itself
-            # rather than the record-assembly clock.
+            # rather than the record-assembly clock. A start or end the caller gives wins.
+            # Neither measured time enters the test IRI: the first data file's location
+            # tells the run apart (entities.test_identity_seed).
             periods = [_bdf_measurement_period(f) for f in files]
             _spans = [p for p in periods if p]
+            run_start = given_start if given_start is not None else (min(s for s, _ in _spans) if _spans else None)
+            run_end = given_end if given_end is not None else (max(e for _, e in _spans) if _spans else None)
             test = self._ws.test(
                 resolved,
                 kind=test_type,
@@ -11303,8 +11761,8 @@ class AuthoringWorkspace:
                 status=status,
                 conformance=conformance,
                 instrument=instrument,
-                started_at=min(s for s, _ in _spans) if _spans else None,
-                ended_at=max(e for _, e in _spans) if _spans else None,
+                started_at=run_start,
+                ended_at=run_end,
             )
             if pinned_test_id is not None:
                 test.id = pinned_test_id
@@ -11321,6 +11779,7 @@ class AuthoringWorkspace:
                 test.channel_id = channel_id
             label = getattr(resolved, "name", None) or getattr(resolved, "serial_number", None) or resolved.id or "cell"
             n_raw = 0
+            made: builtins.list[Any] = []
             for i, f in enumerate(files):
                 src = sources[i]
                 if src is not None:
@@ -11341,6 +11800,19 @@ class AuthoringWorkspace:
                     dataset_obj.id = pinned_dataset_ids[i]
                 if member_series_id is not None:
                     dataset_obj.series_id = member_series_id
+                made.append(dataset_obj)
+            # The same call run again (a notebook cell re-run) reuses the test
+            # and datasets the session already holds.
+            repeat = self._repeated_test(test, made)
+            if repeat is not None:
+                self._discard(test, *made, *([protocol_ref] if registered_here else []))
+                print(f"  test [{test_type}] on {label}: already in this session, reusing it")
+                return [repeat]
+            try:
+                self._refuse_taken_test_pins(test, made)
+            except ValueError:
+                self._discard(test, *made, *([protocol_ref] if registered_here else []))
+                raise
             conf_status = conformance.status if conformance is not None else None
             print(
                 f"  test [{test_type}] on {label}"
@@ -11352,7 +11824,7 @@ class AuthoringWorkspace:
             )
             return [test]
 
-        # ── Batch mode: match a glob of files to loaded cells by short ID ────────
+        # ── Batch mode: match a glob of files to loaded cells by name ────────────
         if datasets is not None:
             if conformance is not None:
                 raise ValueError(
@@ -11377,7 +11849,19 @@ class AuthoringWorkspace:
                 for t in tests:
                     t.equipment_id = equipment_id
                     t.channel_id = channel_id
-            return tests
+            # Matching the same files again (a notebook cell re-run) reuses the
+            # tests and datasets the session already holds.
+            kept: builtins.list[Any] = []
+            for t in tests:
+                made = [d for d in self._ws.datasets if d.test is t]
+                repeat = self._repeated_test(t, made)
+                if repeat is not None:
+                    self._discard(t, *made)
+                kept.append(repeat if repeat is not None else t)
+            reused = sum(1 for new, held in zip(tests, kept) if new is not held)
+            if reused:
+                print(f"  {reused} of these test(s) already in this session, reusing them")
+            return kept
 
         raise ValueError(
             "ws.add('test', ...) needs either cell=<serial|IRI|object> (with data=...) "
@@ -11389,9 +11873,10 @@ class AuthoringWorkspace:
 
         Same contract as the cell ``iris=`` path: the caller supplies an
         identity that was published before, and it replaces the seeded IRI.
-        The shape is checked here so a typo fails before anything is created,
-        and a pin already taken by another test in this session is refused
-        (the save would otherwise re-mint both to keep them apart).
+        The shape is checked here so a typo fails before anything is created.
+        A pin another test of this session already has is refused once the
+        test is built (``_refuse_taken_test_pins``), unless the call repeats
+        that test.
         """
         from battinfo.api._shared import TEST_IRI_RE, _normalized_dashed_uid  # noqa: PLC0415
 
@@ -11409,14 +11894,17 @@ class AuthoringWorkspace:
             if pinned is not None and pinned != from_uid:
                 raise ValueError(f"iri={iri!r} and uid={uid!r} name different tests; pass one.")
             pinned = from_uid
-        if any(getattr(existing, "id", None) == pinned for existing in self._ws.tests):
-            raise ValueError(f"{pinned} is already used by another test in this session.")
         return pinned
 
     def _pinned_dataset_iris(
         self, dataset_iris: "builtins.list[str] | None", n_files: int
     ) -> "builtins.list[str] | None":
-        """``dataset_iris=`` checked against the data files it pins, or ``None``."""
+        """``dataset_iris=`` checked against the data files it pins, or ``None``.
+
+        The shape, the count and that no IRI repeats are checked here; that no
+        other dataset of the session has one of them, once the datasets are
+        built (``_refuse_taken_test_pins``).
+        """
         from battinfo.api._shared import DATASET_IRI_RE  # noqa: PLC0415
 
         if dataset_iris is None:
@@ -11434,11 +11922,64 @@ class AuthoringWorkspace:
                 f"dataset_iris entries must be dataset IRIs "
                 f"(https://w3id.org/battinfo/dataset/xxxx-xxxx-xxxx-xxxx); got {bad[:3]}."
             )
-        taken = {getattr(ds, "id", None) for ds in self._ws.datasets}
-        clashes = [item for item in pinned if item in taken]
-        if len(set(pinned)) != len(pinned) or clashes:
+        if len(set(pinned)) != len(pinned):
             raise ValueError("dataset_iris must name distinct datasets not already used in this session.")
         return pinned
+
+    def _repeated_test(self, test: Any, datasets: builtins.list[Any]) -> Any:
+        """The test of this session that *test*, just added with *datasets*, repeats, else ``None``.
+
+        A repeat saves as the same test record (``Workspace._session_view``) and
+        has the same data: as many datasets, each saving as the same record
+        apart from its link to the test, with every IRI *datasets* pin.
+        """
+        engine = self._ws
+        # The datasets of each test, read in one pass: by the test object, or by
+        # its IRI for a dataset that holds only that.
+        by_test: dict[int, builtins.list[Any]] = {}
+        by_iri: dict[str, builtins.list[Any]] = {}
+        for dataset in engine.datasets:
+            if dataset.test is not None:
+                by_test.setdefault(id(dataset.test), []).append(dataset)
+            elif dataset.test_id is not None:
+                by_iri.setdefault(dataset.test_id, []).append(dataset)
+
+        def data_of(other: Any) -> builtins.list[Any]:
+            return by_test.get(id(other), []) + (by_iri.get(other.id, []) if other.id is not None else [])
+
+        def places(items: Iterable[Any]) -> builtins.list[str]:
+            return sorted(engine._dataset_locator(item) for item in items)
+
+        # A repeat has the same data files, so only tests with them are compared
+        # in full; the session view is far dearer than the file's locator.
+        mine_places = places(datasets)
+        pool = [other for other in engine.tests if other is not test and places(data_of(other)) == mine_places]
+        candidates = engine._repeats_in(test, pool)
+        if not candidates:
+            return None
+
+        def views(items: Iterable[Any]) -> builtins.list[tuple[str, str]]:
+            return sorted((engine._session_view(item, without=("test_id",)), item.id or "") for item in items)
+
+        mine = views(datasets)
+        for other in candidates:
+            theirs = views(data_of(other))
+            same_data = [view for view, _ in mine] == [view for view, _ in theirs]
+            if same_data and all(not own or own == held for (_, own), (_, held) in zip(mine, theirs)):
+                return other
+        return None
+
+    def _refuse_taken_test_pins(self, test: Any, datasets: builtins.list[Any]) -> None:
+        """Raise ``ValueError`` when *test* pins an IRI another test of this session has, or *datasets* one
+        another dataset has. One IRI names one record; a call that repeats a whole test reused it before."""
+        if test.id is not None and any(other is not test and other.id == test.id for other in self._ws.tests):
+            raise ValueError(f"{test.id} is already used by another test in this session.")
+        pinned = {dataset.id for dataset in datasets if dataset.id is not None}
+        taken = {
+            other.id for other in self._ws.datasets if other.id is not None and not any(other is d for d in datasets)
+        }
+        if pinned & taken:
+            raise ValueError("dataset_iris must name distinct datasets not already used in this session.")
 
     def _require_files(self, paths: builtins.list[Path], argument: str) -> None:
         """Raise FileNotFoundError naming each resolved path in *paths* that does not exist."""
@@ -11489,11 +12030,15 @@ class AuthoringWorkspace:
     def _resolve_cell(self, ref: Any) -> Any:
         """Resolve a cell reference: this session, then records saved on disk, then the registry.
 
-        Accepts a ``Cell``, a search result, a serial / short ID, or an IRI.
-        Serials authored in a previous session are rehydrated from
-        ``.battinfo/records/cell-instance/`` (so resolution works in a fresh
-        process). An instance found only in the registry is referenced (not
-        re-published).
+        Accepts a ``Cell``, a search result, a serial number or name, a short
+        ID, or an IRI. A serial number or name has to match a cell's exactly; a
+        short ID is matched only when the label is one on its own (see
+        :meth:`_cells_labelled`). Serials authored in a previous session are
+        rehydrated from ``.battinfo/records/cell-instance/`` (so resolution
+        works in a fresh process). An instance found only in the registry is
+        referenced (not re-published), with a line naming it and its
+        publisher. A label that several cells answer to, in the session or in
+        the registry, raises ``ValueError`` listing them.
         """
         from battinfo.bundle import Cell  # noqa: PLC0415
 
@@ -11506,39 +12051,29 @@ class AuthoringWorkspace:
             if s.startswith("http"):  # an IRI
                 # A cell already found (by serial, a search hit or an earlier IRI) is
                 # reused, not referenced and looked up in the registry again.
-                known = next(
-                    (cell for cell in self._cells_by_short_id.values() if getattr(cell, "id", None) == s), None
-                )
+                known = next((cell for cell, _ in self._indexed_cells if getattr(cell, "id", None) == s), None)
                 if known is not None:
                     return known
                 return self._reference_cell({"id": s, "type": "cell"})
-            sid = _short_id(s)
 
-            def _lookup() -> Any:
-                for key in (s, sid):
-                    if not key:
-                        continue
-                    if key in self._ambiguous_cell_keys:
-                        raise ValueError(
-                            f"{key!r} matches more than one cell in this workspace, so it "
-                            "cannot identify one. It is a display name shared by several "
-                            "cells; reference the cell by its serial number or IRI instead."
-                        )
-                    hit = self._cells_by_short_id.get(key)
-                    if hit is not None:
-                        return hit
-                return None
-
-            hit = _lookup()
+            hit = self._session_cell(s)
             if hit is None:
                 # Day-2: this fresh process has an empty index; load cells saved
                 # to disk in a previous session before falling back to the registry.
                 self._rehydrate_cell_index()
-                hit = _lookup()
+                hit = self._session_cell(s)
             if hit is not None:
                 return hit
             found = self._query_registry_cells(serials=[s])
+            if len(found) > 1:
+                listing = "\n".join(f"  {_describe_registry_cell(c)}" for c in found)
+                raise ValueError(
+                    f"{s!r} matches {len(found)} cells in the registry, so it cannot pick one:\n{listing}\n"
+                    'Pass the one you mean by its IRI, cell="https://w3id.org/battinfo/cell/...", '
+                    f"or reference it first with ws.load(ws.search(type='cell', serial={s!r})[i])."
+                )
             if found:
+                print(f"  cell {s!r} found in the registry: {_describe_registry_cell(found[0])}")
                 return self._reference_cell({**found[0], "type": "cell"})
             searched = "this session, the records saved under {root}".format(root=self._ws.source_root)
             searched += ", or the registry" if self._registry_url else " (registry not configured)"
@@ -11547,6 +12082,49 @@ class AuthoringWorkspace:
                 "Create it with ws.add('cell', ...), or check the serial."
             )
         raise TypeError("cell= must be a serial, IRI, Cell, or search result.")
+
+    def _cells_for_data_file(self, path: Path) -> tuple[builtins.list[Any], str | None, bool]:
+        """The cells a data file's name names, the part of the name that named them, and whether it was a label.
+
+        The name, then the name with its extension and data-format suffixes
+        taken off one at a time (``LAB-01.bdf.csv`` gives ``LAB-01.bdf``, then
+        ``LAB-01``; see :func:`_data_file_stems`), is matched against every
+        cell's serial number and name exactly; the first that matches a cell
+        decides. A dot that is part of a serial stays, so ``S1.6.csv`` never
+        names the cell ``S1``. Only when no cell matches is a short ID tried. A
+        name that is a short ID on its own (``gm6pmr.bdf.csv``) finds a cell
+        whose IRI or label carries it. A short ID a name ends in
+        (``cycling-gm6pmr.csv``) finds only the cell whose IRI it is the short
+        ID of, because a serial number such as ``LAB-2024-000001`` ends in six
+        characters another serial can share.
+        """
+        stems = _data_file_stems(path.name)
+        for stem in stems:
+            exact = [cell for cell, labels in self._indexed_cells if stem in labels]
+            if exact:
+                return exact, stem, True
+        base = stems[-1]
+        if _is_short_id(base):
+            cells = [(labels, getattr(cell, "id", None)) for cell, labels in self._indexed_cells]
+            return [self._indexed_cells[i][0] for i in _cells_named_by(base, cells, base)], base, False
+        short_id = next((sid for sid in (_short_id(stem) for stem in stems) if sid and _is_short_id(sid)), None)
+        if short_id is None:
+            return [], None, False
+        by_iri = [cell for cell, _ in self._indexed_cells if _iri_short_id(getattr(cell, "id", None)) == short_id]
+        return by_iri, short_id, False
+
+    def _session_cell(self, label: str) -> Any:
+        """The one session cell *label* names, or None; raises when it names several."""
+        cells = self._cells_labelled(label)
+        if len(cells) > 1:
+            listing = "\n".join(f"  {_describe_session_cell(c)}" for c in cells)
+            raise ValueError(
+                f"{label!r} matches more than one cell in this workspace, so it cannot identify one:\n"
+                f"{listing}\n"
+                "Pass the cell itself (the object ws.add('cell') returned), its IRI, or a serial "
+                "number only it has."
+            )
+        return cells[0] if cells else None
 
     def _add_tests_by_filename(
         self,
@@ -11560,7 +12138,7 @@ class AuthoringWorkspace:
         description: str | None,
         status: str,
     ) -> builtins.list:
-        """Batch helper: match a glob of data files to loaded cells by short ID."""
+        """Batch helper: match a glob of data files to loaded cells by serial, name or short ID."""
         if isinstance(datasets, str):
             matched_files = sorted(self._root.glob(datasets))
         else:
@@ -11572,12 +12150,12 @@ class AuthoringWorkspace:
             return []
 
         # Auto-reload cells saved in a previous session so matching can succeed.
-        if not self._cells_by_short_id:
+        if not self._indexed_cells:
             ci_dir = self._ws.source_root / "cell-instance"
             if ci_dir.exists() and any(ci_dir.glob("*.json")):
                 print("  No cells in memory - reloading saved cell instances...")
                 self.reload_cells()
-        if not self._cells_by_short_id:
+        if not self._indexed_cells:
             raise RuntimeError(
                 "No cell instances available to match.\n"
                 "  Create them:                ws.add('cell', spec=spec, serial_numbers=[...])\n"
@@ -11590,25 +12168,26 @@ class AuthoringWorkspace:
         unmatched: list[Path] = []
         tests = []
         for f in matched_files:
-            sid = _short_id(f.stem)
-            ambiguous = next((k for k in (sid, f.stem) if k and k in self._ambiguous_cell_keys), None)
-            if ambiguous is not None:
+            # A file named after a cell's serial or name matches that cell; only
+            # otherwise does the short ID in its name count.
+            candidates, key, by_label = self._cells_for_data_file(f)
+            if len(candidates) > 1:
                 # Matching this file to "a" cell would attach the measurement to
                 # an arbitrary one of several. Skip it and say why.
                 unmatched.append(f)
                 print(
-                    f"  AMBIGUOUS {f.name} -- {ambiguous!r} matches more than one cell; "
-                    "name the file after the serial number"
+                    f"  AMBIGUOUS {f.name} -- {key!r} matches more than one cell; name the file after the serial number"
                 )
                 continue
-            if sid and sid in self._cells_by_short_id:
-                cell, how = self._cells_by_short_id[sid], f'short id "{sid}"'
-            elif f.stem in self._cells_by_short_id:
-                cell, how = self._cells_by_short_id[f.stem], "serial number"
-            else:
+            if not candidates:
                 unmatched.append(f)
                 print(f"  NO MATCH  {f.name}")
                 continue
+            cell = candidates[0]
+            if not by_label:
+                how = f'short id "{key}"'
+            else:
+                how = "serial number" if key == getattr(cell, "serial_number", None) else "name"
             test = self._ws.record_test(
                 cell,
                 kind=test_type,
@@ -11630,14 +12209,14 @@ class AuthoringWorkspace:
             known = sorted(
                 {
                     (c.name or c.serial_number)
-                    for c in self._cells_by_short_id.values()
+                    for c, _ in self._indexed_cells
                     if getattr(c, "name", None) or getattr(c, "serial_number", None)
                 }
             )
             print(f"\n  {len(unmatched)} file(s) had no matching cell instance:")
             for f in unmatched:
                 print(f"    {f.name}")
-            stems = ", ".join(repr(f.stem) for f in unmatched[:5])
+            stems = ", ".join(repr(_data_file_stems(f.name)[-1]) for f in unmatched[:5])
             print("  Reference the missing cells (e.g. registered at manufacture), then re-run:")
             print(f"      ws.load(ws.search(type='cell', serials=[{stems}]))")
             print("  ...or pass them explicitly: ws.add('test', cell='<serial>', data='<file>').")
@@ -12146,7 +12725,8 @@ def _registry_conflict_detail(exc: Exception) -> dict | None:
 
     Prefers the parsed HTTP status code and JSON body carried by
     ``RegistryClientError`` (``status_code`` + ``response_body``); the registry
-    declares the 409 body with ``keys`` / ``existing_id`` / ``existing_status`` /
+    declares the 409 body with ``conflict`` (the kind, such as
+    ``canonical_identity``) / ``keys`` / ``existing_id`` / ``existing_status`` /
     ``context``. Falls back to a bare ``"409"`` substring match only when neither
     the status code nor a parseable body is available (a plain ``RuntimeError``).
 
@@ -12168,7 +12748,7 @@ def _registry_conflict_detail(exc: Exception) -> dict | None:
             inner = parsed.get("detail")
             candidate = inner if isinstance(inner, dict) else parsed
             if isinstance(candidate, dict) and any(
-                candidate.get(k) is not None for k in ("existing_id", "existing_status", "keys")
+                candidate.get(k) is not None for k in ("conflict", "existing_id", "existing_status", "keys")
             ):
                 detail = candidate
     if status == 409:
@@ -12194,10 +12774,15 @@ def _do_submit(
 ) -> dict:
     """Submit one record; return a structured outcome (never silently drop it).
 
-    Retries once with a bumped source_version on 409. Returns a dict with ``ok``
-    (True for published/validated, False for failed/rejected/errored), ``status``,
-    ``error`` (the message when not ok), ``iri`` and the raw ``result``. A failed
-    record is reported in the outcome, never swallowed, so the batch surfaces it.
+    Retries once with a bumped source_version on a 409, except one with
+    ``conflict == "canonical_identity"``: the record's IRI belongs to another
+    publisher, so a new version would clash the same way. That outcome has
+    status ``conflict``, names the IRI and its publisher (``existing_iri``,
+    ``publisher_id``) and says how to rename or pin the record. Returns a dict
+    with ``ok`` (True for published/validated, False for failed/rejected/errored),
+    ``status``, ``error`` (the message when not ok), ``iri`` and the raw
+    ``result``. A failed record is reported in the outcome, never swallowed, so
+    the batch surfaces it.
     """
     import copy
 
@@ -12241,6 +12826,27 @@ def _do_submit(
             # Parse the structured 409 (status code + JSON body) over matching the
             # string "409", which could appear anywhere in an error/response body.
             conflict = _registry_conflict_detail(exc)
+            if conflict is not None and conflict.get("conflict") == "canonical_identity":
+                existing = str(conflict.get("canonical_iri") or conflict.get("existing_id") or "")
+                owner = str(conflict.get("publisher_id") or "")
+                resource = payload.get("resource")
+                resource_type = resource.get("resource_type") if isinstance(resource, dict) else None
+                head, hint = _canonical_identity_message(existing, owner, resource_type)
+                print(f"  ERROR: {title} -- {head}")
+                print(f"    {hint}")
+                return {
+                    "title": title,
+                    "source_local_id": source_local_id,
+                    "ok": False,
+                    "status": "conflict",
+                    "iri": "",
+                    "error": f"{head} {hint}",
+                    "result": None,
+                    "version_bumped": bumped_version,
+                    "conflict": "canonical_identity",
+                    "existing_iri": existing,
+                    "publisher_id": owner,
+                }
             if attempt == 0 and conflict is not None:
                 # The registry already holds a record for this identity. It de-duplicates an
                 # identical re-submission on its side, so a 409 here means the content genuinely
@@ -12279,6 +12885,39 @@ def _do_submit(
         "result": None,
         "version_bumped": bumped_version,
     }
+
+
+# Record types whose IRI comes from what they describe (a product, a protocol,
+# a parameter file's content), the same for everyone, so a clash means the same
+# thing was published before.
+_SHARED_KEY_RESOURCE_TYPES = frozenset(
+    {"cell_spec", "test_spec", "test_protocol", "material_spec", "electrode_spec", "equipment_spec", "parameter_set"}
+)
+
+
+def _canonical_identity_message(iri: str, publisher: str, resource_type: str | None) -> tuple[str, str]:
+    """The line and the advice for a record whose IRI another publisher holds."""
+    owner = f"publisher {publisher!r}" if publisher else "another publisher"
+    head = f"{iri or 'its IRI'} is already registered to {owner}; not retried as a new version."
+    if resource_type in _SHARED_KEY_RESOURCE_TYPES:
+        hint = (
+            "This record's IRI comes from what it describes (a product's manufacturer and model, a "
+            "protocol, a parameter file's content), so that publisher has published the same thing. "
+            "Reference theirs with ws.load(ws.search(...)) instead of submitting a copy. If yours "
+            "describes something else, correct its identity fields, or pin an IRI of your own with id= "
+            "or uid=."
+        )
+    else:
+        hint = (
+            "Your record mints the same IRI as theirs from the same identity fields: labels such as "
+            "serial 'S1' or name 'C01' are not scoped to a lab until BattINFO 0.9. Give it an identity "
+            "only your lab uses and save again: the serial printed on the cell or a lab-specific one "
+            "(ws.add('cell', ..., serial_numbers=[...])), a lab-specific name for a cell without a "
+            "serial (names=[...]), or an IRI of your own pinned with iris=[...] (iri= or uid= for a "
+            "test). A cell's tests and datasets get new IRIs with it. If the record is yours, submit "
+            "with that publisher's key instead."
+        )
+    return head, hint
 
 
 def _bump_version(ver: str) -> str:

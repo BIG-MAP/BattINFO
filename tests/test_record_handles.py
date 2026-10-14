@@ -383,10 +383,13 @@ def test_cell_handles_must_parallel_the_cells(tmp_path: Path) -> None:
         ws.add("cell", spec=spec, names=["c1", "c2"], handles=["a-cell"])
 
 
-def test_a_new_test_title_moves_the_iri_unless_it_is_pinned(tmp_path: Path) -> None:
+def test_a_new_test_title_keeps_the_test_iri_and_moves_its_datasets_unless_they_are_pinned(tmp_path: Path) -> None:
     first = _gitt_session(tmp_path / "a", name="063b77 gitt")
     renamed = _gitt_session(tmp_path / "b", name="Graphite AQ-1 cell 063b77 GITT test")
-    assert first._ws.tests[0].id != renamed._ws.tests[0].id  # the seed includes the name
+    # The test seed is the run (cell, kind, protocol, data file), never the name ...
+    assert first._ws.tests[0].id == renamed._ws.tests[0].id
+    # ... while a dataset made from data= is titled after the test, and its seed includes the title.
+    assert first._ws.datasets[0].id != renamed._ws.datasets[0].id
 
     original = _records(tmp_path / "a", "test")[0]["test"]["id"]
     original_dataset = _records(tmp_path / "a", "dataset")[0]["dataset"]["id"]

@@ -16,7 +16,7 @@ from importlib import resources
 from pathlib import Path
 from typing import Any, Mapping
 
-from battinfo._workspace import _stable_uid
+from battinfo.entities import stable_uid
 
 # ── Level 1: MaterialKind vocabulary ────────────────────────────────────────────
 #
@@ -180,9 +180,14 @@ def material_spec_from_component(
 ) -> dict[str, Any]:
     """Lift an embedded material holder to a standalone material-spec record.
 
-    The IRI is minted deterministically from the material name (or *uid_seed*),
-    so the same material lifts to the same spec IRI across cells — enabling dedup.
-    Cell-local composition fractions are dropped; intrinsic properties are kept.
+    The IRI is minted through the material-spec seed (manufacturer, product,
+    grade, kind), the same IRI ``create_material_spec`` and
+    ``ws.add("material_spec", ...)`` give the same fields, so the same
+    material lifts to the same spec across cells, while one material name from
+    two suppliers lifts to two specs. The kind is resolved from the name or
+    product id, as the builder resolves it. *uid_seed*, when given, mints the
+    IRI from that seed instead. Cell-local composition fractions are dropped;
+    intrinsic properties are kept.
     """
     from battinfo.api import create_material_spec
 
@@ -192,10 +197,11 @@ def material_spec_from_component(
         raise ValueError("component must have a non-empty name")
 
     fields: dict[str, Any] = {
-        "uid": _stable_uid(uid_seed or f"material-spec:{name.strip().lower()}"),
         "name": name,
         "property": _intrinsic_property(holder.get("property")),
     }
+    if uid_seed:
+        fields["uid"] = stable_uid(uid_seed)
     if holder.get("molecular_formula"):
         fields["formula"] = holder["molecular_formula"]
     for key in ("manufacturer", "supplier", "product_id"):
@@ -269,27 +275,29 @@ def extract_material_specs(cell_spec_record: Mapping[str, Any]) -> list[dict[str
     """Extract de-duplicated standalone material-spec records from a cell-spec record.
 
     Walks electrode coatings, the electrolyte, and the separator, lifting each
-    embedded material to a material-spec. Materials are de-duplicated by name
-    (case-insensitive), so a material shared across electrodes yields one spec.
+    embedded material to a material-spec (:func:`material_spec_from_component`).
+    Materials are de-duplicated by the IRI they mint: "Graphite" and "graphite"
+    from one manufacturer, or a material shared across electrodes, yield one
+    spec, while Graphite from two suppliers yields two.
     """
     seen: dict[str, dict[str, Any]] = {}
     seen_identity: dict[str, tuple[Any, dict[str, Any]]] = {}
     for holder, mclass in _iter_embedded_materials(cell_spec_record):
-        key = str(holder["name"]).strip().lower()
+        spec = material_spec_from_component(holder, material_class=mclass)
+        key = spec["material_spec"]["id"]
         identity = (holder.get("molecular_formula"), _intrinsic_property(holder.get("property")))
         if key in seen:
-            # Name-based dedup is intentional (e.g. "Graphite"/"graphite" → one spec),
-            # but two materials that share a name yet differ in formula / intrinsic
-            # properties are genuinely distinct — surface that rather than silently
-            # dropping one's data.
+            # One IRI is one spec, but two holders that mint it yet differ in
+            # formula / intrinsic properties may be distinct materials: surface
+            # that rather than silently dropping one's data.
             if identity != seen_identity[key]:
                 warnings.warn(
                     f"extract_material_specs: multiple materials named {holder['name']!r} differ in "
                     f"formula/intrinsic properties; keeping the first and dropping the rest. "
-                    f"Give them distinct names to retain both.",
+                    f"Give them distinct names, or a manufacturer and product id, to retain both.",
                     stacklevel=2,
                 )
             continue
-        seen[key] = material_spec_from_component(holder, material_class=mclass)
+        seen[key] = spec
         seen_identity[key] = identity
     return list(seen.values())

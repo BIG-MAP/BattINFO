@@ -1120,14 +1120,17 @@ def test_search_cell_returns_registry_matches(tmp_path: Path, monkeypatch: pytes
     assert found[0]["type"] == "cell"
 
 
-def test_serial_matches_short_id_and_full():
-    from battinfo.ws import _serial_matches
+def test_a_label_names_a_cell_by_exact_match_or_its_own_short_id():
+    from battinfo.ws import _cells_named_by, _is_short_id
+
+    def named(token: str, serial: str) -> bool:
+        return bool(_cells_named_by(token, [([serial], None)], token if _is_short_id(token) else None))
 
     full = "duracell-mn2400-2026-02-tpejqj"
-    assert _serial_matches("tpejqj", full)  # short id -> full serial
-    assert _serial_matches(full, full)  # exact
-    assert _serial_matches(full, "x-y-z-tpejqj")  # shared short id
-    assert not _serial_matches("zzzzzz", full)
+    assert named("tpejqj", full)  # a short id on its own -> the serial ending in it
+    assert named(full, full)  # exact
+    assert not named(full, "x-y-z-tpejqj")  # two labels sharing a suffix are two cells
+    assert not named("zzzzzz", full)
 
 
 def test_load_then_add_test_links_existing_cell_without_duplicating(

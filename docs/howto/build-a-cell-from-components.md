@@ -3,7 +3,8 @@
 Describe a coin cell the way you built it: materials → electrodes →
 electrolyte/separator/housing → cell spec → physical cells — every layer a
 saved record, every link an IRI. This whole page is one continuous script;
-run it top to bottom.
+run it top to bottom. Running it again updates the records it saved in place,
+because every record here gets its IRI from what identifies it.
 
 **Ingredients:** a library folder (here `my-library`) and the material specs
 from [Register materials](register-materials.md). All the `create_*`/`save_*`
@@ -36,54 +37,66 @@ EMC_IRI      = material("EMC", kind="emc", formula="C4H8O3")
 ## 2. The electrodes — a 96/2/2 coating, by IRI
 
 ```python
-from battinfo.api import create_component_spec, save_component_spec
+from battinfo.api import create_electrode_spec, save_electrode_spec
 
-cathode = create_component_spec(
-    "electrode", name="NMC811 cathode 96/2/2", polarity="positive",
-    body={
-        "coating": {
-            "component": {
-                "active_material": [{"name": "NMC811", "material_spec_id": NMC811_IRI,
-                                     "property": {"mass_fraction": {"value": 0.96, "unit": "1"}}}],
-                "binder":   [{"name": "PVDF", "material_spec_id": PVDF_IRI,
-                              "property": {"mass_fraction": {"value": 0.02, "unit": "1"}}}],
-                "additive": [{"name": "Carbon black", "material_spec_id": CB_IRI,
-                              "property": {"mass_fraction": {"value": 0.02, "unit": "1"}}}],
-            },
-            "property": {"loading":   {"value": 21, "unit": "mg/cm2"},
-                         "thickness": {"value": 75, "unit": "um"}},
+cathode = create_electrode_spec(
+    name="NMC811 cathode 96/2/2", active_material_kind="nmc811", polarity="positive",
+    coating={
+        "component": {
+            "active_material": [{"name": "NMC811", "material_spec_id": NMC811_IRI,
+                                 "property": {"mass_fraction": {"value": 0.96, "unit": "1"}}}],
+            "binder":   [{"name": "PVDF", "material_spec_id": PVDF_IRI,
+                          "property": {"mass_fraction": {"value": 0.02, "unit": "1"}}}],
+            "additive": [{"name": "Carbon black", "material_spec_id": CB_IRI,
+                          "property": {"mass_fraction": {"value": 0.02, "unit": "1"}}}],
         },
-        "current_collector": {"name": "Aluminium foil",
-                              "property": {"thickness": {"value": 15, "unit": "um"}}},
-    })
-CATHODE_IRI = save_component_spec("electrode", cathode, source_root=LAB, mode="upsert")["id"]
+        "property": {"loading":   {"value": 21, "unit": "mg/cm2"},
+                     "thickness": {"value": 75, "unit": "um"}},
+    },
+    current_collector={"name": "Aluminium foil",
+                       "property": {"thickness": {"value": 15, "unit": "um"}}})
+CATHODE_IRI = save_electrode_spec(cathode, source_root=LAB, mode="upsert")["id"]
 
-anode = create_component_spec(
-    "electrode", name="Graphite anode", polarity="negative",
-    body={
-        "coating": {
-            "component": {
-                "active_material": [{"name": "Graphite", "material_spec_id": GRAPHITE_IRI,
-                                     "property": {"mass_fraction": {"value": 0.96, "unit": "1"}}}],
-                "binder": [{"name": "PVDF", "material_spec_id": PVDF_IRI}],
-            },
-            "property": {"loading": {"value": 12, "unit": "mg/cm2"}},
+anode = create_electrode_spec(
+    name="Graphite anode", active_material_kind="graphite", polarity="negative",
+    coating={
+        "component": {
+            "active_material": [{"name": "Graphite", "material_spec_id": GRAPHITE_IRI,
+                                 "property": {"mass_fraction": {"value": 0.96, "unit": "1"}}}],
+            "binder": [{"name": "PVDF", "material_spec_id": PVDF_IRI}],
         },
-        "current_collector": {"name": "Copper foil",
-                              "property": {"thickness": {"value": 10, "unit": "um"}}},
-    })
-ANODE_IRI = save_component_spec("electrode", anode, source_root=LAB, mode="upsert")["id"]
+        "property": {"loading": {"value": 12, "unit": "mg/cm2"}},
+    },
+    current_collector={"name": "Copper foil",
+                       "property": {"thickness": {"value": 10, "unit": "um"}}})
+ANODE_IRI = save_electrode_spec(anode, source_root=LAB, mode="upsert")["id"]
 ```
 
-The `body=` shapes mirror the canonical examples in
+An electrode spec gets its IRI from its producer, product (here its name),
+grade, active-material kind and processing route: the IRI
+`ws.add("electrode_spec", ...)` gives the same electrode. The `coating=` and
+`current_collector=` shapes mirror the canonical examples in
 [`examples/electrode-spec/`](https://github.com/BIG-MAP/BattINFO/tree/main/examples/electrode-spec)
 — when in doubt, open one and copy its structure.
 
 ## 3. Electrolyte, separator, housing
 
+These three do not mint from a natural key yet: without a `uid=` or `id=`,
+`create_component_spec` gives each a random IRI, a new one on every call, so a
+second run would save a second copy. Derive each uid from what identifies the
+part instead:
+
 ```python
+from battinfo.api import create_component_spec, save_component_spec
+from battinfo.entities import stable_uid
+
+def part_uid(family, *key):
+    """A uid from the part's natural key: the same part always gets the same IRI."""
+    return stable_uid("::".join([f"{family}-spec", *key]))
+
 electrolyte = create_component_spec(
     "electrolyte", name="1M LiPF6 EC:EMC 3:7",
+    uid=part_uid("electrolyte", "My Lab", "1M LiPF6 EC:EMC 3:7"),
     body={
         "family": "organic",
         "salt": {"name": "LiPF6", "material_spec_id": LIPF6_IRI,
@@ -99,7 +112,8 @@ ELECTROLYTE_IRI = save_component_spec("electrolyte", electrolyte,
                                       source_root=LAB, mode="upsert")["id"]
 
 separator = create_component_spec(
-    "separator", name="Celgard 2325",
+    "separator", name="Celgard 2325", manufacturer="Celgard", product_id="2325",
+    uid=part_uid("separator", "Celgard", "2325"),
     body={"material": "polypropylene", "structure": "trilayer",
           "property": {"thickness": {"value": 25, "unit": "um"},
                        "porosity":  {"value": 0.39, "unit": "1"}}})
@@ -108,6 +122,7 @@ SEPARATOR_IRI = save_component_spec("separator", separator,
 
 housing = create_component_spec(
     "housing", name="CR2032 coin housing",
+    uid=part_uid("housing", "My Lab", "CR2032 coin housing"),
     body={"cell_format": "coin",
           "case": {"size_code": "2032", "material": "Stainless steel",
                    "property": {"diameter": {"value": 20, "unit": "mm"},
@@ -119,6 +134,13 @@ HOUSING_IRI = save_component_spec("housing", housing,
 > The first argument names the component family — note it goes before `name=`:
 > the electrolyte's `"organic"`/`"aqueous"` classification is the `family` key
 > *inside* `body=`, not a keyword argument.
+
+The random IRI that `create_component_spec` and `create_component_instance`,
+and the equipment builders `create_equipment_spec` and `create_equipment`,
+give a record without a `uid=` or `id=` is outside BattINFO's identity
+contract: nothing can derive it again. These builders get natural-key minting
+in 0.9. Until then, give every record you will save a uid, as above; the
+[known limitations](../scope.md#identifiers) list this.
 
 ## 4. The cell spec — all five references
 
@@ -164,9 +186,11 @@ for name in ("B7-01", "B7-02", "B7-03"):
 (validate-the-set)=
 ## 6. Validate the whole set
 
-Save does **not** currently reject a reference to a spec that does not exist —
-a typo in an IRI lands on disk silently. `validate_record_report` catches it,
-so finish every build session by sweeping the library:
+Saves check references by default, so a typo in an IRI normally fails at
+`save_*` time. Finish every build session by sweeping the library under the
+strict policy anyway: it also catches a reference that went missing after the
+save, and the gaps strict validation refuses, such as an electrode spec with no
+active-material kind:
 
 ```python
 import json
@@ -176,7 +200,7 @@ from battinfo import validate_record_report
 bad = 0
 for path in sorted(Path(LAB).rglob("*.json")):
     report = validate_record_report(json.loads(path.read_text(encoding="utf-8")),
-                                    source_root=LAB)
+                                    source_root=LAB, policy="strict")
     if not report.ok:
         bad += 1
         print(f"INVALID {path.name}")
@@ -187,16 +211,14 @@ assert bad == 0
 ```
 
 A dangling reference reports as `reference.missing` with the offending IRI —
-fix the reference (or register the missing part) and re-run. Saves also
-check references by default, so a typo normally fails at `save_*` time
-before it ever lands on disk; this sweep is the belt-and-braces check over
-a finished set.
+fix the reference (or register the missing part) and re-run.
 
 ## What you have now
 
 A three-level graph on disk — cell → components → materials — where every node
-is a schema-valid record with a permanent IRI, and shared parts (that binder,
-that electrolyte) are registered once and referenced everywhere. The
+is a strictly valid record with a permanent IRI, and shared parts (that binder,
+that electrolyte) are registered once and referenced everywhere. Run the page
+again and it lands on the same files and the same links. The
 [cells page](../records/cells.md) shows the same pattern across the packaged
 example fleet, and [Find existing records](find-existing-records.md) shows how
 to query what you have built.

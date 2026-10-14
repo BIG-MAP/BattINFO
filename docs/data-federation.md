@@ -24,8 +24,11 @@ BattINFO supplies exactly that shared layer, and nothing more:
    [Ontology / profile architecture](ontology-profile-architecture.md).
 2. **Shared identifiers** — cells, specs, tests, and datasets receive persistent
    `https://w3id.org/battinfo/` IRIs, so a record in one repository can reference
-   a record published by another and the link still resolves. The registry mints
-   these and renders resolvable public artifacts.
+   a record published by another and the link still resolves. BattINFO mints
+   them where the record is written, from what identifies it, so the same thing
+   described twice gets the same IRI (see [Identifiers](identifiers.md)); the
+   registry mints one only for a submission that carries none, and renders
+   resolvable public artifacts.
 3. **Shared serialization** — records publish as JSON-LD aligned to one context,
    so independently authored documents merge into a single RDF graph. See the
    [Semantic layer guide](guides/04-semantic-layer.ipynb).

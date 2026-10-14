@@ -142,6 +142,106 @@ def test_a_deposit_in_the_older_string_form_still_imports(tmp_path: Path, source
     assert {t["test"]["kind"] for t in _saved(dst, "test")} == {"cycling"}
 
 
+def test_a_test_with_two_datasets_imports_as_one_test_under_its_iri(tmp_path: Path) -> None:
+    """One deposit test with two data files comes back as one test that links both, under its own IRI."""
+    root = tmp_path / "source"
+    root.mkdir()
+    ws = AuthoringWorkspace(root=root, registry_url=None)
+    ws.license("cc-by-4.0")
+    spec = battinfo.CellSpec(manufacturer="Example Lab", model="R2032", format="coin", chemistry="li-ion")
+    ws.add("cell", spec=spec, serial_numbers=["C01"])
+    for name, voltage in (("C01a.bdf.csv", "3.5"), ("C01b.bdf.csv", "3.6")):
+        (root / name).write_text(DATA.replace("3.5", voltage), encoding="utf-8")
+    ws.add("test", type="cycling", cell="C01", data=["C01a.bdf.csv", "C01b.bdf.csv"])
+    ws.save()
+    graph = ws._build_zenodo_jsonld(
+        zenodo_record_id=1,
+        prereserved_doi="10.5281/zenodo.1",
+        record_url=RECORD_URL,
+        data_filenames=["C01a.bdf.csv", "C01b.bdf.csv"],
+        title="Two files, one test",
+        creators=[{"name": "Doe, Jane"}],
+    )
+    [source_test] = _saved(root, "test")
+    source_datasets = {record["dataset"]["id"] for record in _saved(root, "dataset")}
+    assert len(source_datasets) == 2
+
+    dst, counts = _import(tmp_path, graph)
+    assert (counts["tests"], counts["datasets"]) == (1, 2)
+    [test] = _saved(dst, "test")
+    assert test["test"]["id"] == source_test["test"]["id"]
+    assert set(test["test"]["dataset_ids"]) == source_datasets
+    datasets = _saved(dst, "dataset")
+    assert {record["dataset"]["id"] for record in datasets} == source_datasets
+    assert all(source_test["test"]["id"] in record["dataset"]["about"] for record in datasets)
+
+
+def test_a_dataset_two_tests_name_imports_once_under_its_iri(tmp_path: Path, source: tuple[Path, dict]) -> None:
+    """A dataset several deposit tests list as an output is one dataset; the other tests are related to it."""
+    _, graph = source
+    shared = copy.deepcopy(graph)
+    first, second = sorted((n for n in shared["@graph"] if "BatteryTest" in n.get("@type", [])), key=lambda n: n["@id"])
+    [first_output] = [output["@id"] for output in first["hasOutput"]]
+    second["hasOutput"] = [*second["hasOutput"], {"@id": first_output}]
+
+    dst, counts = _import(tmp_path, shared)
+    assert (counts["tests"], counts["datasets"]) == (2, 2)
+    assert {record["test"]["id"] for record in _saved(dst, "test")} == {first["@id"], second["@id"]}
+    datasets = {record["dataset"]["id"]: record["dataset"] for record in _saved(dst, "dataset")}
+    assert first_output in datasets
+    assert datasets[first_output]["about"][1:] == [first["@id"], second["@id"]]
+
+
+def test_importing_the_same_deposit_twice_adds_nothing(tmp_path: Path, source: tuple[Path, dict]) -> None:
+    _, graph = source
+    path = tmp_path / "battinfo.json"
+    path.write_text(json.dumps(graph), encoding="utf-8")
+    once = tmp_path / "once"
+    ws = AuthoringWorkspace(root=once, registry_url=None)
+    ws.import_(str(path))
+    ws.save()
+
+    twice = tmp_path / "twice"
+    ws = AuthoringWorkspace(root=twice, registry_url=None)
+    first = ws.import_(str(path))
+    size = [len(items) for items in (ws._ws.cell_specs, ws._ws.cells, ws._ws.tests, ws._ws.datasets)]
+    assert ws.import_(str(path)) == first
+    assert [len(items) for items in (ws._ws.cell_specs, ws._ws.cells, ws._ws.tests, ws._ws.datasets)] == size
+    assert ws.save()["index"]["failures"] == []
+    for folder in ("cell-spec", "cell-instance", "test", "dataset"):
+        assert sorted(_ids(_saved(twice, folder))) == sorted(_ids(_saved(once, folder))), folder
+
+
+def _ids(records: list[dict]) -> list[str]:
+    """The IRI of each saved record."""
+    return [
+        next(body["id"] for body in record.values() if isinstance(body, dict) and "id" in body) for record in records
+    ]
+
+
+def test_a_deposit_that_reuses_an_iri_for_other_content_imports_nothing(
+    tmp_path: Path, source: tuple[Path, dict]
+) -> None:
+    _, graph = source
+    path = tmp_path / "battinfo.json"
+    path.write_text(json.dumps(graph), encoding="utf-8")
+    changed = copy.deepcopy(graph)
+    for node in changed["@graph"]:
+        if node.get("schema:serialNumber") == "C01":
+            node["schema:serialNumber"] = "C01-relabelled"
+    other = tmp_path / "other.json"
+    other.write_text(json.dumps(changed), encoding="utf-8")
+
+    ws = AuthoringWorkspace(root=tmp_path / "ws", registry_url=None)
+    ws.import_(str(path))
+    held = [list(items) for items in (ws._ws.cell_specs, ws._ws.cells, ws._ws.tests, ws._ws.datasets)]
+    with pytest.raises(ValueError, match="nothing was imported"):
+        ws.import_(str(other))
+    after = [list(items) for items in (ws._ws.cell_specs, ws._ws.cells, ws._ws.tests, ws._ws.datasets)]
+    assert all(len(a) == len(b) and all(x is y for x, y in zip(a, b)) for a, b in zip(after, held))
+    assert ws._resolve_cell("C01").serial_number == "C01"
+
+
 @pytest.mark.parametrize(
     "value,expected",
     [

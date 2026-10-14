@@ -34,11 +34,13 @@ ws.convert()                         # -> bdf/*.bdf.csv
 # 4. Find your cell in the registry (fuzzy search)
 spec = ws.search("samsung inr21700 50e")[0]
 
-# 5. Register the physical cells you tested
-ws.add("cell", spec=spec, serial_numbers=["S1", "S2", "S3"])
+# 5. Register the physical cells you tested, by the serials printed on
+#    them or labels only your lab uses: a cell's IRI comes from its spec
+#    and serial, so a bare "S1" mints the IRI of every other lab's "S1".
+ws.add("cell", spec=spec, serial_numbers=["MYLAB-50E-001", "MYLAB-50E-002", "MYLAB-50E-003"])
 
 # 6. Attach a test + data to a cell (explicit)
-ws.add("test", type="cycling", cell="S1", data="bdf/S1.bdf.csv")
+ws.add("test", type="cycling", cell="MYLAB-50E-001", data="bdf/MYLAB-50E-001.bdf.csv")
 
 # 7. Publish (add zenodo=True for a citable DOI)
 ws.save()

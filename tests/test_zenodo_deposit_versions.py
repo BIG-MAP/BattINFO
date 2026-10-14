@@ -744,11 +744,11 @@ def test_a_later_version_keeps_the_name_an_earlier_one_gave_a_file(tmp_path: Pat
     assert set(_locations(ws)) == {first_url}
     # Another cell, whose data file has the same name. Its dataset record
     # comes first, so on order alone its file would take the plain name.
-    _data_file(tmp_path, "C10")
-    ws.add("cell", spec=ws._ws.cell_specs[0], serial_numbers=["C10"])
-    ws.add("test", type="cycling", cell="C10", data="C10/cycling.csv")
+    _data_file(tmp_path, "C11")
+    ws.add("cell", spec=ws._ws.cell_specs[0], serial_numbers=["C11"])
+    ws.add("test", type="cycling", cell="C11", data="C11/cycling.csv")
     ws.save()
-    assert _datasets(ws)[0][1]["dataset"]["distributions"][0]["content_url"].endswith("/C10/cycling.csv")
+    assert _datasets(ws)[0][1]["dataset"]["distributions"][0]["content_url"].endswith("/C11/cycling.csv")
 
     with pytest.warns(UserWarning, match="NEW VERSION"):
         second = _deposit(ws, publish=True)
@@ -759,7 +759,7 @@ def test_a_later_version_keeps_the_name_an_earlier_one_gave_a_file(tmp_path: Pat
     [other] = [name for name in names if name != "cycling.csv"]
     assert other.endswith("-cycling.csv")
     assert files["cycling.csv"] == (tmp_path / "C01" / "cycling.csv").read_bytes()
-    assert files[other] == (tmp_path / "C10" / "cycling.csv").read_bytes()
+    assert files[other] == (tmp_path / "C11" / "cycling.csv").read_bytes()
 
 
 # ── Sandbox and production ────────────────────────────────────────────────────

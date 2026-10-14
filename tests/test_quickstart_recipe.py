@@ -62,12 +62,12 @@ def test_quickstart_recipe_runs_offline(ws: AuthoringWorkspace, tmp_path: Path) 
     assert hits, "offline search must fall back to the packaged index"
 
     # Step 5: register the physical cells — a raw search hit must be accepted.
-    cells = ws.add("cell", spec=hits[0], serial_numbers=["S1", "S2"])
+    cells = ws.add("cell", spec=hits[0], serial_numbers=["MYLAB-P45B-001", "MYLAB-P45B-002"])
     assert len(cells) == 2
     assert cells[0].cell_spec is not None
 
     # Step 6: attach a test + data to a cell.
-    ws.add("test", type="cycling", cell="S1", data=str(bdf_files[0]))
+    ws.add("test", type="cycling", cell="MYLAB-P45B-001", data=str(bdf_files[0]))
 
     # Step 7 (local half): save the linked records.
     ws.save()

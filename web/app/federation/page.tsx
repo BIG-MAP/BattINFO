@@ -129,11 +129,13 @@ export default function FederationPage() {
             ))}
           </div>
           <p className="mt-8 max-w-prose text-sm leading-relaxed text-ink-muted">
+            BattINFO mints those identifiers where a record is written, from
+            what identifies it, so describing the same thing again gives the same IRI.
             A publication backend, the{" "}
             <span className="font-semibold text-ink">BattINFO registry</span>,
-            mints those canonical identifiers and renders public, resolvable
-            artifacts, so a record published by one group is addressable and
-            linkable by everyone else.{" "}
+            keeps them, mints one only for a record that arrives without one,
+            and renders public, resolvable artifacts, so a record published by
+            one group is addressable and linkable by everyone else.{" "}
             <Link
               href="/docs#identifiers"
               className="font-semibold text-brandtext hover:text-brandtext"
@@ -171,7 +173,7 @@ export default function FederationPage() {
           <ol className="space-y-4">
             {[
               "A lab describes a cell and its tests with BattINFO, in plain JSON.",
-              "Publishing mints persistent IRIs and emits EMMO-aligned JSON-LD.",
+              "Saving mints persistent IRIs; publishing emits EMMO-aligned JSON-LD.",
               "The registry renders resolvable public artifacts for each resource.",
               "Records from different contributors link by IRI into one graph.",
               "Battery Genome queries across all of it, as if it were one dataset.",

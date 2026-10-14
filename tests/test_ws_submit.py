@@ -141,6 +141,38 @@ def test_submit_allow_partial_returns_failures_without_raising(tmp_path: Path, m
     assert len(failed) == 1 and len(staged) == 1  # no raise; both surfaced
 
 
+def test_submit_reports_an_iri_another_publisher_holds_without_a_new_version(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    import json
+
+    from battinfo.api import RegistryClientError
+
+    ws = _saved_ws(tmp_path)
+    iri = "https://w3id.org/battinfo/spec/q2kd-7x4m-p9ar-vd3n"
+    body = {
+        "detail": {
+            "conflict": "canonical_identity",
+            "existing_id": "q2kd",
+            "publisher_id": "lab-b",
+            "canonical_iri": iri,
+        }
+    }
+
+    def clash(_payload):
+        raise RegistryClientError("HTTP 409", status_code=409, response_body=json.dumps(body))
+
+    fake = _patch_registry(monkeypatch, clash)
+    with pytest.raises(SubmitError) as exc_info:
+        ws.submit(**_CREDS)
+
+    assert fake.calls == 1  # not retried as a new version
+    (failed,) = exc_info.value.failed
+    assert failed["status"] == "conflict" and failed["publisher_id"] == "lab-b" and failed["existing_iri"] == iri
+    out = capsys.readouterr().out
+    assert "already registered to publisher 'lab-b'" in out and "ws.load(ws.search(" in out
+
+
 def test_submit_all_failed_is_distinct_from_no_records(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     # All-failed raises (loud), whereas an empty workspace returns [] (quiet no-op).
     ws = _saved_ws(tmp_path)
