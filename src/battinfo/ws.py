@@ -4339,12 +4339,23 @@ class AuthoringWorkspace:
     def _unsaved_cell_iris(self) -> set[str]:
         """The IRIs the next save mints for the session's cells that have none yet.
 
-        Each cell's own seed (``Workspace._finalize_cell``), its spec's IRI
-        minted the same way when the spec has none either. A cell another of
-        the session collides with is minted from its content at the save; it
-        is not covered here.
+        The save's own finalize pass, run on copies (``Workspace._finalized_records``),
+        so a cell whose spec collides with another spec of the session, or
+        keeps an IRI saved before, is predicted as the save mints it. When that
+        pass refuses the session as it stands (a save would raise too), each
+        cell is predicted from its own seed and its spec's natural key.
         """
         engine = self._ws
+        try:
+            finalized = engine._finalized_records()
+        except (TypeError, ValueError):
+            pass
+        else:
+            return {
+                item.id
+                for original, item in zip(engine.cells, finalized["cells"], strict=True)
+                if original.id is None and item.id
+            }
         specs: dict[int, Any] = {}
         iris: set[str] = set()
         for cell in engine.cells:

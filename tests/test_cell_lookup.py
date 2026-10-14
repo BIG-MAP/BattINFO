@@ -285,3 +285,53 @@ def test_reading_the_saved_cells_back_leaves_an_unsaved_session_cell_unambiguous
         ws._resolve_cell("C03")
 
     assert ws._resolve_cell("C01") is c01
+
+
+def _rated_spec(rated: float, chemistry: str = "li-ion") -> battinfo.CellSpec:
+    return battinfo.CellSpec(
+        manufacturer="Example Lab",
+        model="R2032",
+        format="coin",
+        chemistry=chemistry,
+        properties={"rated_capacity": {"value": rated, "unit": "mAh"}},
+    )
+
+
+def test_reading_saved_cells_back_leaves_cells_of_colliding_specs_unambiguous(tmp_path: Path) -> None:
+    """Two specs share a natural key, so a save mints both from their content; their cells are predicted the same way."""
+    first = AuthoringWorkspace(root=tmp_path, registry_url=None)
+    first.add("cell", spec=_rated_spec(2.0), serial_numbers=["C01"])
+    first.add("cell", spec=_rated_spec(3.0), serial_numbers=["C02"])
+    first.save()
+    saved = {cell.serial_number: cell.id for cell in first._ws.cells}
+
+    ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
+    (c01,) = ws.add("cell", spec=_rated_spec(2.0), serial_numbers=["C01"])
+    ws.add("cell", spec=_rated_spec(3.0), serial_numbers=["C02"])
+    with pytest.raises(ValueError, match="Could not resolve cell 'C99'"):
+        ws.add("test", type="cycling", cell="C99")
+
+    (test,) = ws.add("test", type="cycling", cell="C01")
+    assert test.cell is c01
+    ws.save()
+    assert c01.id == saved["C01"]
+
+
+def test_reading_saved_cells_back_leaves_a_cell_whose_spec_keeps_an_earlier_iri_unambiguous(tmp_path: Path) -> None:
+    """The spec was saved on its own before 0.8.0; with a sibling of the same natural key it keeps that IRI."""
+    spec_iri = "https://w3id.org/battinfo/spec/8tdq-hs3n-kqf4-bmhb"  # what 057b66a0 minted for it
+    first = AuthoringWorkspace(root=tmp_path, registry_url=None)
+    first.add("cell", spec=_rated_spec(2.0, "Li-ion"), serial_numbers=["C01"])
+    first._ws.cell_specs[0].id = spec_iri
+    first.save()
+    (saved_cell,) = first._ws.cells
+
+    ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
+    (c01,) = ws.add("cell", spec=_rated_spec(2.0, "Li-ion"), serial_numbers=["C01"])
+    ws.add("cell", spec=_rated_spec(3.0, "Li-ion"), serial_numbers=["C02"])
+    with pytest.raises(ValueError, match="Could not resolve cell 'C99'"):
+        ws._resolve_cell("C99")
+
+    assert ws._resolve_cell("C01") is c01
+    ws.save()
+    assert c01.id == saved_cell.id

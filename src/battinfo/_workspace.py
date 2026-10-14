@@ -2227,6 +2227,28 @@ class Workspace:
         not depend on whether a save ran between adding it and adding the
         record that collides with it.
         """
+        finalized = self._finalized_records(record_roots=record_roots, refuse_replaced_runs=refuse_replaced_runs)
+        for key in ("cell_specs", "cells", "test_specs", "tests", "datasets"):
+            for original, item in zip(getattr(self, key), finalized[key], strict=True):
+                _sync_model_state(original, item)
+        return {
+            "cell_specs": self.cell_specs,
+            "cells": self.cells,
+            "test_specs": self.test_specs,
+            "tests": self.tests,
+            "datasets": self.datasets,
+        }
+
+    def _finalized_records(
+        self, *, record_roots: Sequence[Path] | None = None, refuse_replaced_runs: bool = False
+    ) -> dict[str, list[Any]]:
+        """The records :meth:`_finalize` makes of the session, as copies: the session is not changed.
+
+        Each list holds the finalized copy of the session's record at the same
+        position (``cell_specs``, ``cells``, ``test_specs``, ``tests`` and
+        ``datasets``), with the IRI a save under *record_roots* would write it
+        under.
+        """
         roots = [self.source_root] if record_roots is None else list(record_roots)
         # IRIs held before this pass (pinned, imported, or minted by an earlier
         # pass) are never re-minted when a sibling collides with them.
@@ -2320,23 +2342,12 @@ class Workspace:
             if test.id is not None:
                 test.dataset_ids = list(dict.fromkeys(dataset_ids_by_test.get(test.id, [])))
 
-        for original, finalized in zip(self.cell_specs, finalized_cell_specs, strict=True):
-            _sync_model_state(original, finalized)
-        for original, finalized in zip(self.cells, finalized_cells, strict=True):
-            _sync_model_state(original, finalized)
-        for original, finalized in zip(self.test_specs, finalized_test_specs, strict=True):
-            _sync_model_state(original, finalized)
-        for original, finalized in zip(self.tests, finalized_tests, strict=True):
-            _sync_model_state(original, finalized)
-        for original, finalized in zip(self.datasets, finalized_datasets, strict=True):
-            _sync_model_state(original, finalized)
-
         return {
-            "cell_specs": self.cell_specs,
-            "cells": self.cells,
-            "test_specs": self.test_specs,
-            "tests": self.tests,
-            "datasets": self.datasets,
+            "cell_specs": finalized_cell_specs,
+            "cells": finalized_cells,
+            "test_specs": finalized_test_specs,
+            "tests": finalized_tests,
+            "datasets": finalized_datasets,
         }
 
     def _stage_publication_dataset(self, dataset: Dataset, *, publication_root: Path) -> Dataset:
