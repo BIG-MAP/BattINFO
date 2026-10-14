@@ -1309,17 +1309,24 @@ materials and components — are unaffected by <code class="docutils literal not
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><ul>
-<li><p><em>dict</em> – A JSON-LD document with <code class="docutils literal notranslate"><span class="pre">&#64;context</span></code>, <code class="docutils literal notranslate"><span class="pre">&#64;id</span></code>, <code class="docutils literal notranslate"><span class="pre">&#64;type</span></code>, and
-semantically typed properties using EMMO/schema.org IRIs.</p></li>
-<li><p><em>Example::</em> – import json
-from battinfo.jsonld import record_to_jsonld</p>
-<p>raw = json.loads(Path(“cell-spec-xyz.json”).read_text())
-ld  = record_to_jsonld(raw, “cell-spec”)
-print(json.dumps(ld, indent=2))</p>
-</li>
+<dd class="field-even"><p>A JSON-LD document with <code class="docutils literal notranslate"><span class="pre">&#64;context</span></code>, <code class="docutils literal notranslate"><span class="pre">&#64;id</span></code>, <code class="docutils literal notranslate"><span class="pre">&#64;type</span></code>, and
+semantically typed properties using EMMO/schema.org IRIs.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)">dict</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><strong>ValueError</strong></a> – For an unknown <code class="docutils literal notranslate"><span class="pre">record_type</span></code>, or when the document would carry a
+    bare <code class="docutils literal notranslate"><span class="pre">&#64;type</span></code> that its own <code class="docutils literal notranslate"><span class="pre">&#64;context</span></code> does not define as a class
+    (<code class="docutils literal notranslate"><span class="pre">jsonld.type_term_unknown</span></code>), for every record type.</p></li>
+<li><p><strong>Example::</strong> – import json
+    from battinfo.jsonld import record_to_jsonld
+    
+    raw = json.loads(Path(“cell-spec-xyz.json”).read_text())
+    ld  = record_to_jsonld(raw, “cell-spec”)
+    print(json.dumps(ld, indent=2))</p></li>
 </ul>
-</p>
 </dd>
 </dl>
 </dd></dl>
