@@ -7632,7 +7632,10 @@ class AuthoringWorkspace:
         *context* (by default the one :meth:`_deposit_context` reads): its
         local file is planned when it is there; when it is gone, a deposit
         that continues the record holding the copy keeps that copy, and any
-        other lists the file as missing. The URL of a copy :meth:`upload`
+        other lists the file as missing. A ``file:`` location whose file is
+        gone is kept the same way when the record the deposit continues holds
+        the copy the index noted for that file: a sandbox deposit leaves the
+        records on their local files. The URL of a copy :meth:`upload`
         made goes into ``plan.hosted``, which :meth:`zenodo` refuses unless it
         is asked to archive such files. A copy of the workspace's own data
         whose local file the index does not know is an omission instead of a
@@ -7767,6 +7770,7 @@ class AuthoringWorkspace:
             owners=owners,
             remote=remote,
             unplaced=unplaced,
+            held=context.held_files(),
         )
         if report:
             # Do NOT silently drop a distribution whose data file is missing: the

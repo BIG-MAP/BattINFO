@@ -828,6 +828,55 @@ def test_a_sandbox_rehearsal_leaves_the_published_record_its_next_version(tmp_pa
     assert zenodo.deposit(int(second.record_id)).files["cycling.csv"] == data
 
 
+def test_a_sandbox_new_version_after_a_local_file_is_deleted_keeps_its_copy(tmp_path: Path, zenodo: _Zenodo) -> None:
+    """A sandbox deposit leaves the records on their local files, so the index places the copy of a deleted one."""
+    ws = _workspace(tmp_path, ("C01", "C02"))
+    gone, changed = tmp_path / "C01" / "cycling.csv", tmp_path / "C02" / "cycling.csv"
+    old_gone, old_changed = gone.read_bytes(), changed.read_bytes()
+    first = _deposit(ws, sandbox=True, publish=True)
+    names = {data: name for name, data in zenodo.deposit(int(first.record_id), "sandbox").files.items()}
+    local = _locations(ws)
+    gone.unlink()
+    changed.write_bytes(b"time_s,voltage_V\n0,4.1\n")
+    zenodo.requests.clear()
+
+    with pytest.warns(UserWarning, match="NEW VERSION"):
+        second = _deposit(ws, sandbox=True, publish=True)
+
+    assert second.published and second.record_id != first.record_id
+    files = zenodo.deposit(int(second.record_id), "sandbox").files
+    assert sorted(name for name in files if name.endswith(".csv")) == sorted([names[old_gone], names[old_changed]])
+    assert files[names[old_gone]] == old_gone
+    assert files[names[old_changed]] == b"time_s,voltage_V\n0,4.1\n"
+    # The copy the new version took over is kept, not sent again.
+    puts = [line for line in zenodo.sent("sandbox") if line.startswith("PUT /files/")]
+    assert not any(line.endswith(f"/{names[old_gone]}") for line in puts)
+    assert any(line.endswith(f"/{names[old_changed]}") for line in puts)
+    assert _locations(ws) == local
+
+
+def test_a_sandbox_new_version_whose_record_holds_another_copy_names_the_dataset(
+    tmp_path: Path, zenodo: _Zenodo
+) -> None:
+    ws = _workspace(tmp_path)
+    first = _deposit(ws, sandbox=True, publish=True)
+    (tmp_path / "C01" / "cycling.csv").unlink()
+    zenodo.deposit(int(first.record_id), "sandbox").files["cycling.csv"] = b"another copy"
+    [(_path, record)] = _datasets(ws)
+    zenodo.requests.clear()
+
+    with pytest.raises(RuntimeError) as excinfo:
+        _deposit(ws, sandbox=True, publish=True)
+
+    message = str(excinfo.value)
+    assert message.startswith(
+        f"Refusing to deposit: the published record {first.record_id} that this deposit makes a new version of"
+    )
+    assert f"dataset {record['dataset']['id']}: {record['dataset']['distributions'][0]['content_url']}" in message
+    assert message.endswith("Nothing was created or changed on Zenodo.")
+    assert not any(line.startswith(("POST", "PUT", "DELETE")) for line in zenodo.sent("sandbox"))
+
+
 def test_a_sandbox_record_an_earlier_build_kept_in_the_production_file_moves_to_its_own(
     tmp_path: Path, zenodo: _Zenodo
 ) -> None:

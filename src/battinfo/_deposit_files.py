@@ -626,6 +626,7 @@ def build_deposit_file_plan(
     owners: Mapping[str, str] | None = None,
     remote: Iterable[tuple[RemoteSource, str]] = (),
     unplaced: Mapping[str, Iterable[tuple[str, str]]] | None = None,
+    held: Mapping[str, IndexedFile] | None = None,
 ) -> DepositFilePlan:
     """Plan the files of one deposit.
 
@@ -634,8 +635,15 @@ def build_deposit_file_plan(
     files already chosen for the deposit. A file named twice, by two
     distributions or two datasets, is one entry, under the first kind that
     names it. A location whose file is missing, or is not a file, is listed
-    in ``missing``. *omissions* are the records the caller could not read,
-    kept in the plan for the caller to refuse.
+    in ``missing``, unless the record the deposit continues holds a copy of
+    it: *held* maps each file that record holds, by deposit name, to the
+    local file the index noted behind it (:meth:`DepositContext.held_files`),
+    and a location whose file is gone but which names one of those local
+    files is a kept file, as a copy a record points at would be. A sandbox
+    deposit leaves the records on their local files, so a new version made
+    there after a file was deleted finds the copy this way. *omissions* are
+    the records the caller could not read, kept in the plan for the caller
+    to refuse.
 
     Each location is screened first, from its text alone (:func:`location_path`,
     with *registered* the keys of the files the workspace registered). A
@@ -688,6 +696,24 @@ def build_deposit_file_plan(
             seen.add(key)
             found.append((key, path, kind))
 
+    def _keep(name: str, path: Path | None, digests: IndexedFile | RemoteSource, kind: str) -> DepositFile:
+        """The kept file the deposit holds as *name*, made on first use."""
+        entry = kept.get(name_key(name))
+        if entry is None:
+            entry = DepositFile(
+                path=path or Path(),
+                name=name,
+                segment=url_segment(name),
+                size=digests.size,
+                md5=digests.md5,
+                sha256=digests.sha256,
+                kind=kind,
+                kept=True,
+            )
+            kept[name_key(name)] = entry
+        return entry
+
+    held_by_path = {item.path_key(): (name, item) for name, item in (held or {}).items() if item.path}
     for location, kind in locations:
         try:
             path = location_path(location, root, registered=registered)
@@ -705,6 +731,11 @@ def build_deposit_file_plan(
         # Up to here only the location's text was read; this is the first
         # question put to the file system about the file.
         if not path.is_file():
+            copy = held_by_path.get(path_key(path))
+            if copy is not None:
+                held_name, held_file = copy
+                kept_location[location] = _keep(held_name, path, held_file, kind)
+                continue
             missing.append(str(path))
             continue
         resolved = _resolved(path)
@@ -728,20 +759,7 @@ def build_deposit_file_plan(
                 url_names.setdefault(key, source.name)
             continue
         if source.continued and source.name:
-            entry = kept.get(name_key(source.name))
-            if entry is None:
-                entry = DepositFile(
-                    path=source.path or Path(),
-                    name=source.name,
-                    segment=url_segment(source.name),
-                    size=source.size,
-                    md5=source.md5,
-                    sha256=source.sha256,
-                    kind=kind,
-                    kept=True,
-                )
-                kept[name_key(source.name)] = entry
-            kept_location[source.url] = entry
+            kept_location[source.url] = _keep(source.name, source.path, source, kind)
             continue
         missing.append(f"{source.path} (the local file of {source.url})" if source.path is not None else source.url)
     for artifact in artifacts:
