@@ -688,7 +688,6 @@ class TestDepositTitle:
     def test_zenodo_without_a_title_names_the_catalog_as_the_metadata(
         self, tmp_path: Path, recording_zenodo: _RecordingZenodo
     ) -> None:
-        pytest.importorskip("pyshacl")  # the catalog-name rule is a SHACL shape
         ws = _titleless_workspace(tmp_path)
         result = ws.zenodo(publish=True, token="placeholder", creators=CREATORS)
 
@@ -715,7 +714,6 @@ class TestDepositTitle:
     def test_publish_to_zenodo_without_a_title_is_not_refused(
         self, tmp_path: Path, recording_zenodo: _RecordingZenodo, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        pytest.importorskip("pyshacl")
         # ws.publish() takes no token; give it a placeholder so the test never
         # depends on (or reads) a real token in the developer's environment.
         monkeypatch.setenv("ZENODO_API_TOKEN", "placeholder")
