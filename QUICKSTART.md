@@ -20,7 +20,7 @@ the guided tour is on the same page.
 
 ## Prerequisites
 
-- Python 3.11+
+- Python 3.11–3.14
 - A terminal
 
 Install BattINFO from GitHub into a virtual environment. 0.8.0 will be its first working release on PyPI.

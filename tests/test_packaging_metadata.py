@@ -1,10 +1,13 @@
-"""The dependencies pyproject.toml declares, and the lock that records them.
+"""The dependencies and Python versions pyproject.toml declares, and how CI keeps them true.
 
 The floors become permanent PyPI metadata once a release is uploaded, so each
 one has to be a release battinfo works with. uv.lock records the declared
 requirements, and CI installs from it with ``--frozen``, which never compares
 the two: a floor changed without ``uv lock`` would pass CI while the lock
 still recorded the old one.
+
+The classifiers name the Python versions CI tests, and the install pages, the
+contributor guides and the scope page state the same range.
 """
 
 from __future__ import annotations
@@ -17,6 +20,7 @@ from collections import Counter
 from collections.abc import Iterable
 from pathlib import Path
 
+import yaml
 from packaging.requirements import Requirement
 from packaging.specifiers import SpecifierSet
 from packaging.utils import canonicalize_name
@@ -24,9 +28,32 @@ from packaging.version import Version
 
 ROOT = Path(__file__).resolve().parents[1]
 
+# The Python versions 0.8.0 supports. Python 3.15 is left out until PyYAML
+# publishes wheels for it: without them a core install on Windows needs a C
+# compiler (docs/scope.md, known limitations).
+SUPPORTED_PYTHONS = ["3.11", "3.12", "3.13", "3.14"]
+
+# Files that state the Python versions battinfo supports and CI tests.
+PYTHON_RANGE_STATEMENTS = [
+    "README.md",
+    "QUICKSTART.md",
+    "CONTRIBUTING.md",
+    "AGENTS.md",
+    "docs/scope.md",
+    "docs/pages/getting-started.rst",
+]
+
 
 def _pyproject() -> dict:
     return tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+
+
+def _yaml(relative: str) -> dict:
+    return yaml.safe_load((ROOT / relative).read_text(encoding="utf-8"))
+
+
+def _ci_jobs() -> dict:
+    return _yaml(".github/workflows/ci.yml")["jobs"]
 
 
 def _core() -> dict[str, Requirement]:
@@ -117,3 +144,34 @@ def test_uv_lock_records_the_declared_requirements() -> None:
         f"Only in uv.lock: {sorted((locked - declared).elements())}."
     )
     assert lock["requires-python"] == _pyproject()["project"]["requires-python"]
+
+
+def test_ci_tests_every_supported_python_on_linux_and_windows() -> None:
+    matrix = _ci_jobs()["test"]["strategy"]["matrix"]
+    assert matrix["python-version"] == SUPPORTED_PYTHONS
+    assert sorted(matrix["os"]) == ["ubuntu-latest", "windows-latest"]
+    # No include or exclude: every version runs on both systems.
+    assert set(matrix) == {"os", "python-version"}
+
+
+def test_classifiers_name_the_python_versions_ci_tests() -> None:
+    classifiers = _pyproject()["project"]["classifiers"]
+    minor = [
+        c.rsplit("::", 1)[1].strip()
+        for c in classifiers
+        if re.fullmatch(r"Programming Language :: Python :: 3\.\d+", c)
+    ]
+    assert minor == _ci_jobs()["test"]["strategy"]["matrix"]["python-version"]
+    # requires-python keeps no upper bound: with a cap, pip on a newer Python
+    # would quietly install an older battinfo release instead of this one.
+    assert _pyproject()["project"]["requires-python"] == ">=3.11"
+
+
+def test_docs_state_the_python_versions_ci_tests() -> None:
+    tested = _ci_jobs()["test"]["strategy"]["matrix"]["python-version"]
+    span = f"{tested[0]}\N{EN DASH}{tested[-1]}"
+    for relative in PYTHON_RANGE_STATEMENTS:
+        text = (ROOT / relative).read_text(encoding="utf-8")
+        assert span in text, f"{relative} does not state the tested range Python {span}"
+        stale = re.findall(r"3\.11(?:/| and )3\.12\b|Python 3\.11\+", text)
+        assert not stale, f"{relative} still states an older range: {stale}"

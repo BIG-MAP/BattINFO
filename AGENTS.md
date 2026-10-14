@@ -10,7 +10,7 @@ Package code is in `src/battinfo/`, schemas and mappings in `assets/`, example r
 
 ## Set up and run the checks
 
-The project uses [uv](https://docs.astral.sh/uv/) with a committed `uv.lock`. It needs Python 3.11 or newer, and CI runs 3.11 and 3.12 on Linux and Windows.
+The project uses [uv](https://docs.astral.sh/uv/) with a committed `uv.lock`. It needs Python 3.11 or newer, and CI tests 3.11–3.14 on Linux and Windows.
 
 ```bash
 uv sync --all-extras    # .venv from uv.lock, with the dev, docs and feature extras

@@ -17,10 +17,7 @@ By participating in this project you agree to abide by our
 
 ## Development setup
 
-Requires **Python 3.11+**. This project uses [uv](https://docs.astral.sh/uv/)
-for environment and dependency management. `uv sync` manages a `.venv` at the
-repo root from the committed `uv.lock` — do not use system Python or `pip`
-directly.
+Requires **Python 3.11–3.14**. This project uses [uv](https://docs.astral.sh/uv/) for environment and dependency management. `uv sync` manages a `.venv` at the repo root from the committed `uv.lock`; do not use system Python or `pip` directly.
 
 ```powershell
 # Create/sync the environment from the lockfile
@@ -31,9 +28,7 @@ Run tools via `uv run <cmd>`; no manual venv activation is needed.
 
 ## Quality gate
 
-Every pull request must pass the same checks CI runs across Python 3.11/3.12 on
-Linux and Windows ([CI](.github/workflows/ci.yml)). Run them locally before
-pushing:
+Every pull request must pass the same checks CI runs across Python 3.11–3.14 on Linux and Windows ([CI](.github/workflows/ci.yml)). Run them locally before pushing:
 
 ```powershell
 # Lint and formatting

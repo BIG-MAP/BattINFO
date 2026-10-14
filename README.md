@@ -82,7 +82,7 @@ JSON. BattINFO turns that into a single, semantically-grounded record model:
 
 ## Installation
 
-Requires **Python 3.11+**. 0.8.0 will be the first working release of battinfo on PyPI. Until then, install it from GitHub into a virtual environment:
+Supports **Python 3.11–3.14**. 0.8.0 will be the first working release of battinfo on PyPI. Until then, install it from GitHub into a virtual environment:
 
 ```bash
 python -m venv .venv
@@ -197,7 +197,7 @@ Published records use:
 
 ## Project status
 
-> **Beta.** The test suite (3,240 tests at the 0.8.0 release) runs in CI on Python 3.11 and 3.12, on Linux and Windows. Ontology dependency versions are pinned and verified. See [`docs/scope.md`](https://github.com/BIG-MAP/BattINFO/blob/main/docs/scope.md) for the full capability map and the [known limitations](https://github.com/BIG-MAP/BattINFO/blob/main/docs/scope.md#known-limitations-in-080) of this release.
+> **Beta.** The test suite (3,240 tests at the 0.8.0 release) runs in CI on Python 3.11–3.14, on Linux and Windows. Ontology dependency versions are pinned and verified. See [`docs/scope.md`](https://github.com/BIG-MAP/BattINFO/blob/main/docs/scope.md) for the full capability map and the [known limitations](https://github.com/BIG-MAP/BattINFO/blob/main/docs/scope.md#known-limitations-in-080) of this release.
 
 **Supported**
 - Cell-descriptor validation and mapping, canonical record query/save/publish/index flows, JSON-LD-first publication, and validation policies.
@@ -250,10 +250,7 @@ A shorter acceptance gate runs the acceptance tests, a smoke test of the install
 uv run python .tools/quality/run_verification.py
 ```
 
-CI runs the same checks across Python 3.11/3.12 on Linux and Windows via the
-[CI](https://github.com/BIG-MAP/BattINFO/blob/main/.github/workflows/ci.yml) workflow, alongside
-[Security](https://github.com/BIG-MAP/BattINFO/blob/main/.github/workflows/security.yml) (pip-audit + CodeQL) and
-[Docs](https://github.com/BIG-MAP/BattINFO/blob/main/.github/workflows/docs.yml) builds.
+CI runs the same checks across Python 3.11–3.14 on Linux and Windows via the [CI](https://github.com/BIG-MAP/BattINFO/blob/main/.github/workflows/ci.yml) workflow, alongside [Security](https://github.com/BIG-MAP/BattINFO/blob/main/.github/workflows/security.yml) (pip-audit + CodeQL) and [Docs](https://github.com/BIG-MAP/BattINFO/blob/main/.github/workflows/docs.yml) builds.
 
 ## Citation
 
