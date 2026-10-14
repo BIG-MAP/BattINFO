@@ -2,44 +2,128 @@
   "schema_version": "1.0.0",
   "specification": {
     "id": "https://w3id.org/battinfo/spec/7r2m-4q8v-k6nt-c3pj",
+    "name": "Energizer CR2032",
     "manufacturer": "Energizer",
     "model": "CR2032",
     "format": "coin",
-    "chemistry": "Li-primary",
+    "chemistry": "li-mno2",
+    "rechargeable": false,
     "positive_electrode_basis": "MnO2",
     "negative_electrode_basis": "Li-metal",
     "size_code": "R2032",
     "property": {
       "nominal_voltage": {
         "value": 3.0,
-        "unit": "V"
+        "unit": "V",
+        "raw": {
+          "text": "Nominal Voltage: 3.0 Volts",
+          "page": 1
+        }
+      },
+      "typical_capacity": {
+        "value": 235,
+        "unit": "mAh",
+        "conditions": {
+          "lower_voltage_limit": {
+            "value": 2.0,
+            "unit": "V"
+          },
+          "load_resistance": {
+            "value": 15000,
+            "unit": "Ω"
+          },
+          "temperature": {
+            "value": 21,
+            "unit": "°C"
+          }
+        },
+        "raw": {
+          "text": "Typical Capacity: 235 mAh (to 2.0 volts) (Rated at 15K ohms at 21°C)",
+          "page": 1
+        }
+      },
+      "mass": {
+        "value": 3.0,
+        "unit": "g",
+        "raw": {
+          "text": "Typical Weight: 3.0 grams (0.10 oz.)",
+          "page": 1
+        }
+      },
+      "volume": {
+        "value": 1.0,
+        "unit": "cm3",
+        "raw": {
+          "text": "Typical Volume: 1.0 cubic centimeters (0.06 cubic inch)",
+          "page": 1
+        }
+      },
+      "specific_energy": {
+        "value": 198,
+        "unit": "Wh/kg",
+        "raw": {
+          "text": "Energy Density: 198 milliwatt hr/g, 653 milliwatt hr/cc",
+          "page": 1
+        }
+      },
+      "energy_density": {
+        "value": 653,
+        "unit": "Wh/L",
+        "raw": {
+          "text": "Energy Density: 198 milliwatt hr/g, 653 milliwatt hr/cc",
+          "page": 1
+        }
+      },
+      "operating_temperature_min": {
+        "value": -30,
+        "unit": "°C",
+        "raw": {
+          "text": "Operating Temp: -30C to 60C",
+          "page": 1
+        }
+      },
+      "operating_temperature_max": {
+        "value": 60,
+        "unit": "°C",
+        "raw": {
+          "text": "Operating Temp: -30C to 60C",
+          "page": 1
+        }
       },
       "diameter": {
         "value": 20.0,
-        "unit": "mm"
+        "unit": "mm",
+        "raw": {
+          "text": "Industry Standard Dimensions, mm (inches): 20.00 (0.787) maximum, 19.70 (0.776) minimum",
+          "page": 1
+        }
       },
       "height": {
         "value": 3.2,
-        "unit": "mm"
+        "unit": "mm",
+        "raw": {
+          "text": "Industry Standard Dimensions, mm (inches): 3.20 (0.126) maximum, 2.90 (0.114) minimum",
+          "page": 1
+        }
       }
     },
     "comment": [
-      "Minimal CR2032 descriptor draft promoted into the reusable cell-spec library.",
-      "Chemistry and electrode-basis values should be confirmed against the datasheet during curation hardening."
+      "Properties are from the Energizer CR2032 product datasheet, form no. 2032NA0618 (Lithium / Manganese Dioxide, IEC-CR2032).",
+      "The datasheet also states a typical lithium content of 0.109 g, a maximum reverse charge of 1 microampere and a self-discharge of about 1 % a year; the record has no property keys for these."
     ]
   },
   "provenance": {
     "source_type": "datasheet",
-    "source_name": "ENERGIZER__CR2032.pdf",
-    "source_file": "datasheets/ENERGIZER__CR2032.pdf",
-    "source_url": "https://example.org/datasheets/ENERGIZER__CR2032.pdf",
+    "source_name": "Energizer CR2032 product datasheet, form no. 2032NA0618",
+    "source_file": "ENERGIZER__CR2032.pdf",
+    "source_url": "https://data.energizer.com/pdfs/cr2032.pdf",
+    "file_hash": "ff05548e1efc6164fc779836976b0de4859ddcfa0c4f058dd55147bdc239d41f",
     "retrieved_at": 1773173618,
     "workflow_version": "notebook-cr2032-eval-0.1.0",
-    "comment": "Datasheet SHA-256: ff05548e1efc6164fc779836976b0de4859ddcfa0c4f058dd55147bdc239d41f",
-    "citation": "https://example.org/datasheets/ENERGIZER__CR2032.pdf"
+    "citation": "https://data.energizer.com/pdfs/cr2032.pdf"
   },
   "comment": [
-    "Reusable BattINFO library example for a commercial coin cell type.",
-    "This record was promoted from the concrete CR2032 workflow notebook."
+    "Reusable BattINFO library record for a commercial primary coin cell.",
+    "This record was promoted from the concrete CR2032 workflow notebook and checked against the datasheet it cites."
   ]
 }

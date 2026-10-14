@@ -24,8 +24,9 @@ How to describe a cell: the design as a **cell spec**, each physical unit as a *
 from battinfo import CellSpec
 
 spec = CellSpec(
-    # The published flagship IRI — dereference it (Accept:
-    # application/ld+json) to get this exact record.
+    # The flagship's published IRI. Dereferencing it (Accept:
+    # application/ld+json) returns the published flagship record, which
+    # carries more of the datasheet than this snippet sets.
     id="https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0",
     manufacturer="A123",
     model="ANR26650M1-B",
@@ -325,7 +326,6 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     ],
     "@id": "https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0#described",
     "skos:prefLabel": "A123 ANR26650M1-B",
-    "hasIECCode": "IFpR26650",
     "hasProperty": [
       {
         "@type": [
@@ -365,10 +365,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       },
       {
         "@type": [
-          "InternalResistance",
+          "ACInternalResistance",
           "ConventionalProperty"
         ],
-        "skos:prefLabel": "InternalResistance",
+        "skos:prefLabel": "ACInternalResistance",
         "hasNumericalPart": {
           "@type": "RealData",
           "hasNumberValue": 6.0
@@ -413,22 +413,22 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       },
       {
         "@type": [
-          "MaximumPulseChargingCurrent",
+          "ChargingVoltage",
           "ConventionalProperty"
         ],
-        "skos:prefLabel": "MaximumPulseChargingCurrent",
+        "skos:prefLabel": "ChargingVoltage",
         "hasNumericalPart": {
           "@type": "RealData",
-          "hasNumberValue": 10.0
+          "hasNumberValue": 3.6
         },
-        "hasMeasurementUnit": "https://w3id.org/emmo#Ampere"
+        "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
       },
       {
         "@type": [
-          "MaximumContinuousChargingCurrent",
+          "ChargingCurrent",
           "ConventionalProperty"
         ],
-        "skos:prefLabel": "MaximumContinuousChargingCurrent",
+        "skos:prefLabel": "ChargingCurrent",
         "hasNumericalPart": {
           "@type": "RealData",
           "hasNumberValue": 2.5
@@ -449,10 +449,28 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       },
       {
         "@type": [
-          "MinimumDischargingTemperature",
+          "MaximumPulseDischargingCurrent",
           "ConventionalProperty"
         ],
-        "skos:prefLabel": "MinimumDischargingTemperature",
+        "skos:prefLabel": "MaximumPulseDischargingCurrent",
+        "hasNumericalPart": {
+          "@type": "RealData",
+          "hasNumberValue": 120.0
+        },
+        "hasMeasurementUnit": "https://w3id.org/emmo#Ampere",
+        "schema:valueReference": {
+          "@type": "schema:PropertyValue",
+          "schema:propertyID": "duration",
+          "schema:value": 10,
+          "schema:unitText": "s"
+        }
+      },
+      {
+        "@type": [
+          "MinimumOperatingTemperature",
+          "ConventionalProperty"
+        ],
+        "skos:prefLabel": "MinimumOperatingTemperature",
         "hasNumericalPart": {
           "@type": "RealData",
           "hasNumberValue": -30
@@ -461,10 +479,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       },
       {
         "@type": [
-          "MaximumDischargingTemperature",
+          "MaximumOperatingTemperature",
           "ConventionalProperty"
         ],
-        "skos:prefLabel": "MaximumDischargingTemperature",
+        "skos:prefLabel": "MaximumOperatingTemperature",
         "hasNumericalPart": {
           "@type": "RealData",
           "hasNumberValue": 55
@@ -510,16 +528,11 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     }
   },
   "schema:size": "R26650",
-  "schema:productID": "IFpR26650",
   "schema:brand": {
     "@type": "schema:Brand",
     "schema:name": "A123"
   },
   "schema:category": "battery cell",
-  "schema:countryOfOrigin": {
-    "@type": "schema:Country",
-    "schema:name": "United States"
-  },
   "schema:releaseDate": "2012-01-01",
   "schema:schemaVersion": "0.2.0",
   "schema:weight": {
@@ -1739,7 +1752,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         "skos:prefLabel": "NominalCapacity",
         "hasNumericalPart": {
           "@type": "RealData",
-          "hasNumberValue": 0.04
+          "hasNumberValue": 0.004
         },
         "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
       },
@@ -2010,7 +2023,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 :::::
 ::::::
 
-::::::{dropdown} EMPA COIN-NMC811-D (cell-spec)
+::::::{dropdown} Example Lab COIN-NMC811-D (cell-spec)
 :::::{tab-set}
 
 ::::{tab-item} Python
@@ -2047,11 +2060,11 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   ],
   "@id": "https://w3id.org/battinfo/spec/tme2-0sy6-q89b-8m92",
   "schema:identifier": "tme2-0sy6-q89b-8m92",
-  "schema:name": "EMPA COIN-NMC811-D",
+  "schema:name": "Example Lab COIN-NMC811-D",
   "schema:model": "COIN-NMC811-D",
   "schema:manufacturer": {
     "@type": "schema:Organization",
-    "schema:name": "EMPA"
+    "schema:name": "Example Lab"
   },
   "schema:url": "https://www.battery-genome.org/registry/spec/tme2-0sy6-q89b-8m92",
   "isDescriptionFor": {
@@ -2063,7 +2076,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "LithiumIonGraphiteBattery"
     ],
     "@id": "https://w3id.org/battinfo/spec/tme2-0sy6-q89b-8m92#described",
-    "skos:prefLabel": "EMPA COIN-NMC811-D",
+    "skos:prefLabel": "Example Lab COIN-NMC811-D",
     "hasProperty": [
       {
         "@type": [
@@ -2085,7 +2098,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         "skos:prefLabel": "NominalVoltage",
         "hasNumericalPart": {
           "@type": "RealData",
-          "hasNumberValue": 3.8
+          "hasNumberValue": 3.65
         },
         "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
       }
@@ -2111,7 +2124,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "schema:schemaVersion": "0.2.0",
   "dcterms:source": {
     "@type": "prov:Entity",
-    "dcterms:type": "datasheet",
+    "dcterms:type": "manual",
     "prov:generatedAtTime": "2026-06-18T08:52:46+00:00"
   }
 }
@@ -2121,7 +2134,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 :::::
 ::::::
 
-::::::{dropdown} EMPA PRISM-LFP-100AH (cell-spec)
+::::::{dropdown} Example Lab PRISM-LFP-100AH (cell-spec)
 :::::{tab-set}
 
 ::::{tab-item} Python
@@ -2158,11 +2171,11 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   ],
   "@id": "https://w3id.org/battinfo/spec/86k6-6tzd-c4sf-5s01",
   "schema:identifier": "86k6-6tzd-c4sf-5s01",
-  "schema:name": "EMPA PRISM-LFP-100AH",
+  "schema:name": "Example Lab PRISM-LFP-100AH",
   "schema:model": "PRISM-LFP-100AH",
   "schema:manufacturer": {
     "@type": "schema:Organization",
-    "schema:name": "EMPA"
+    "schema:name": "Example Lab"
   },
   "schema:url": "https://www.battery-genome.org/registry/spec/86k6-6tzd-c4sf-5s01",
   "isDescriptionFor": {
@@ -2174,7 +2187,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "LithiumIonGraphiteBattery"
     ],
     "@id": "https://w3id.org/battinfo/spec/86k6-6tzd-c4sf-5s01#described",
-    "skos:prefLabel": "EMPA PRISM-LFP-100AH",
+    "skos:prefLabel": "Example Lab PRISM-LFP-100AH",
     "hasProperty": [
       {
         "@type": [
@@ -2222,7 +2235,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "schema:schemaVersion": "0.2.0",
   "dcterms:source": {
     "@type": "prov:Entity",
-    "dcterms:type": "datasheet",
+    "dcterms:type": "manual",
     "prov:generatedAtTime": "2026-06-18T08:52:47+00:00"
   }
 }
@@ -2232,7 +2245,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 :::::
 ::::::
 
-::::::{dropdown} EMPA COIN-ZNMNO2-ALK (cell-spec)
+::::::{dropdown} Example Lab COIN-ZNMNO2-ALK (cell-spec)
 :::::{tab-set}
 
 ::::{tab-item} Python
@@ -2269,11 +2282,11 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   ],
   "@id": "https://w3id.org/battinfo/spec/jgyy-x3h5-drmv-5tn5",
   "schema:identifier": "jgyy-x3h5-drmv-5tn5",
-  "schema:name": "EMPA COIN-ZNMNO2-ALK",
+  "schema:name": "Example Lab COIN-ZNMNO2-ALK",
   "schema:model": "COIN-ZNMNO2-ALK",
   "schema:manufacturer": {
     "@type": "schema:Organization",
-    "schema:name": "EMPA"
+    "schema:name": "Example Lab"
   },
   "schema:url": "https://www.battery-genome.org/registry/spec/jgyy-x3h5-drmv-5tn5",
   "isDescriptionFor": {
@@ -2283,7 +2296,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "AlkalineZincManganeseDioxideBattery"
     ],
     "@id": "https://w3id.org/battinfo/spec/jgyy-x3h5-drmv-5tn5#described",
-    "skos:prefLabel": "EMPA COIN-ZNMNO2-ALK",
+    "skos:prefLabel": "Example Lab COIN-ZNMNO2-ALK",
     "hasProperty": [
       {
         "@type": [
@@ -2322,7 +2335,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "@id": "https://w3id.org/battinfo/spec/gzt2-hrqq-gsfn-sp94#described"
     },
     "hasSeparator": {
-      "@id": "https://w3id.org/battinfo/spec/wgym-4xfa-pws1-ek1b#described"
+      "@id": "https://w3id.org/battinfo/spec/nqex-73kg-ptgm-6hq0#described"
     },
     "hasConstituent": {
       "@id": "https://w3id.org/battinfo/spec/38af-bpnv-1zmm-32hs#described"
@@ -2331,7 +2344,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "schema:schemaVersion": "0.2.0",
   "dcterms:source": {
     "@type": "prov:Entity",
-    "dcterms:type": "datasheet",
+    "dcterms:type": "manual",
     "prov:generatedAtTime": "2026-06-18T08:52:47+00:00"
   }
 }
@@ -2344,7 +2357,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 
 ## Fields
 
-Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`). Quantities are `{value, unit}` maps whose `value` is a number; text that is not a number goes in `value_text`. They may also carry `value_basis` (Measured, Conventional, Rated, or Nominal) and `conditions` (the parameters under which the value holds, each itself a quantity; a qualitative condition may be `value_text` alone). In JSON-LD, conditions ride a measurement node the quantity `isOutputOf`; the `voltage_reference` key instead becomes a `hasMetrologicalReference` datum on the quantity, beside its unit. When authoring, an instance references its spec with the `spec_id=` kwarg; the record stores the self-describing `<type>_spec_id` key shown in the tables below.
+Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`). Quantities are `{value, unit}` maps whose `value` is a number; text that is not a number goes in `value_text`. They may also carry `value_basis` (Measured, Conventional, Rated, or Nominal) and `conditions` (the parameters under which the value holds, each itself a quantity; a qualitative condition may be `value_text` alone). In JSON-LD, conditions on a measured value ride a measurement node the quantity `isOutputOf`, and conditions on a declared value (Conventional, Rated or Nominal) become named `schema:valueReference` qualifiers on the quantity. The `voltage_reference` key goes under `schema:valueReference` either way, as a node typed with the reference electrode's classes (`Li/Li+` gives `ReferenceElectrode` and `LithiumElectrode`). When authoring, an instance references its spec with the `spec_id=` kwarg; the record stores the self-describing `<type>_spec_id` key shown in the tables below.
 
 ### cell-spec fields
 

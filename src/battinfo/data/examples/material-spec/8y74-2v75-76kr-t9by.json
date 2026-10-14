@@ -32,7 +32,6 @@
       "specific_capacity": {
         "value": 198,
         "unit": "mAh/g",
-        "value_basis": "Measured",
         "conditions": {
           "discharging_c_rate": {
             "value": 0.1,
@@ -58,10 +57,11 @@
     }
   },
   "provenance": {
-    "source_type": "datasheet",
+    "source_type": "manual",
     "retrieved_at": 1781740346
   },
   "notes": [
-    "Surface-coated NMC811 grade: base NMC811 with a nanometric Al2O3 coating to suppress surface reactivity."
+    "Surface-coated NMC811 grade: base NMC811 with a nanometric Al2O3 coating to suppress surface reactivity.",
+    "Illustrative example: values typical of this material, not taken from a datasheet or measured."
   ]
 }

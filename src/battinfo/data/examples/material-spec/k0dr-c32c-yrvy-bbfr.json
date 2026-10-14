@@ -16,10 +16,11 @@
     }
   },
   "provenance": {
-    "source_type": "datasheet",
+    "source_type": "manual",
     "retrieved_at": 1781740345
   },
   "notes": [
-    "Aluminium oxide ceramic coating material (cathode surface coating)."
+    "Aluminium oxide ceramic coating material (cathode surface coating).",
+    "Illustrative example: values typical of this material, not taken from a datasheet or measured."
   ]
 }

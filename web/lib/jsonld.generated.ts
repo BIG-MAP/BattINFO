@@ -41,8 +41,6 @@ export const jsonldGallery: {
         "positive_electrode_basis": "LFP",
         "negative_electrode_basis": "unknown",
         "size_code": "R26650",
-        "iec_code": "IFpR26650",
-        "country_of_origin": "United States",
         "year": 2012
       },
       "properties": {
@@ -73,7 +71,7 @@ export const jsonldGallery: {
             "confidence": 0.8
           }
         },
-        "internal_resistance": {
+        "ac_internal_resistance": {
           "value": 6.0,
           "unit": "mΩ",
           "raw": {
@@ -109,16 +107,16 @@ export const jsonldGallery: {
             "confidence": 0.8
           }
         },
-        "pulse_charging_current": {
-          "value": 10.0,
-          "unit": "A",
+        "charging_voltage": {
+          "value": 3.6,
+          "unit": "V",
           "raw": {
-            "text": "Recommended Fast Charge Method to 80% SOC 10A to 3.6V CC, 12 min",
+            "text": "Recommended Standard Charge Method 2.5A to 3.6V CCCV, 60 min",
             "page": 1,
             "confidence": 0.8
           }
         },
-        "maximum_continuous_charging_current": {
+        "nominal_continuous_charging_current": {
           "value": 2.5,
           "unit": "A",
           "raw": {
@@ -136,7 +134,22 @@ export const jsonldGallery: {
             "confidence": 0.8
           }
         },
-        "minimum_discharging_temperature": {
+        "maximum_pulse_discharging_current": {
+          "value": 120.0,
+          "unit": "A",
+          "conditions": {
+            "duration": {
+              "value": 10,
+              "unit": "s"
+            }
+          },
+          "raw": {
+            "text": "Maximum Pulse Discharge (10 seconds) 120A",
+            "page": 1,
+            "confidence": 0.8
+          }
+        },
+        "operating_temperature_min": {
           "value": -30,
           "unit": "°C",
           "raw": {
@@ -145,7 +158,7 @@ export const jsonldGallery: {
             "confidence": 0.8
           }
         },
-        "maximum_discharging_temperature": {
+        "operating_temperature_max": {
           "value": 55,
           "unit": "°C",
           "raw": {
@@ -182,6 +195,9 @@ export const jsonldGallery: {
           }
         }
       },
+      "notes": [
+        "Recommended fast charge to 80% SOC: 10 A to 3.6 V CC, 12 min (data sheet). Kept as a note: the data sheet gives no maximum continuous or pulse charging current."
+      ],
       "provenance": {
         "source_type": "datasheet",
         "source_file": "A123__ANR26650M1-B.pdf",
@@ -215,7 +231,6 @@ export const jsonldGallery: {
         ],
         "@id": "https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0#described",
         "skos:prefLabel": "A123 ANR26650M1-B",
-        "hasIECCode": "IFpR26650",
         "hasProperty": [
           {
             "@type": [
@@ -255,10 +270,10 @@ export const jsonldGallery: {
           },
           {
             "@type": [
-              "InternalResistance",
+              "ACInternalResistance",
               "ConventionalProperty"
             ],
-            "skos:prefLabel": "InternalResistance",
+            "skos:prefLabel": "ACInternalResistance",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 6.0
@@ -303,22 +318,22 @@ export const jsonldGallery: {
           },
           {
             "@type": [
-              "MaximumPulseChargingCurrent",
+              "ChargingVoltage",
               "ConventionalProperty"
             ],
-            "skos:prefLabel": "MaximumPulseChargingCurrent",
+            "skos:prefLabel": "ChargingVoltage",
             "hasNumericalPart": {
               "@type": "RealData",
-              "hasNumberValue": 10.0
+              "hasNumberValue": 3.6
             },
-            "hasMeasurementUnit": "https://w3id.org/emmo#Ampere"
+            "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
           },
           {
             "@type": [
-              "MaximumContinuousChargingCurrent",
+              "ChargingCurrent",
               "ConventionalProperty"
             ],
-            "skos:prefLabel": "MaximumContinuousChargingCurrent",
+            "skos:prefLabel": "ChargingCurrent",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 2.5
@@ -339,10 +354,28 @@ export const jsonldGallery: {
           },
           {
             "@type": [
-              "MinimumDischargingTemperature",
+              "MaximumPulseDischargingCurrent",
               "ConventionalProperty"
             ],
-            "skos:prefLabel": "MinimumDischargingTemperature",
+            "skos:prefLabel": "MaximumPulseDischargingCurrent",
+            "hasNumericalPart": {
+              "@type": "RealData",
+              "hasNumberValue": 120.0
+            },
+            "hasMeasurementUnit": "https://w3id.org/emmo#Ampere",
+            "schema:valueReference": {
+              "@type": "schema:PropertyValue",
+              "schema:propertyID": "duration",
+              "schema:value": 10,
+              "schema:unitText": "s"
+            }
+          },
+          {
+            "@type": [
+              "MinimumOperatingTemperature",
+              "ConventionalProperty"
+            ],
+            "skos:prefLabel": "MinimumOperatingTemperature",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": -30
@@ -351,10 +384,10 @@ export const jsonldGallery: {
           },
           {
             "@type": [
-              "MaximumDischargingTemperature",
+              "MaximumOperatingTemperature",
               "ConventionalProperty"
             ],
-            "skos:prefLabel": "MaximumDischargingTemperature",
+            "skos:prefLabel": "MaximumOperatingTemperature",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 55
@@ -400,16 +433,11 @@ export const jsonldGallery: {
         }
       },
       "schema:size": "R26650",
-      "schema:productID": "IFpR26650",
       "schema:brand": {
         "@type": "schema:Brand",
         "schema:name": "A123"
       },
       "schema:category": "battery cell",
-      "schema:countryOfOrigin": {
-        "@type": "schema:Country",
-        "schema:name": "United States"
-      },
       "schema:releaseDate": "2012-01-01",
       "schema:schemaVersion": "0.2.0",
       "schema:weight": {

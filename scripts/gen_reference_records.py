@@ -65,8 +65,9 @@ def snippet_cell_spec():
     from battinfo import CellSpec
 
     spec = CellSpec(
-        # The published flagship IRI — dereference it (Accept:
-        # application/ld+json) to get this exact record.
+        # The flagship's published IRI. Dereferencing it (Accept:
+        # application/ld+json) returns the published flagship record, which
+        # carries more of the datasheet than this snippet sets.
         id="https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0",
         manufacturer="A123",
         model="ANR26650M1-B",
@@ -1672,10 +1673,14 @@ def render_page(family: dict, sections: list[dict]) -> str:
         "`value_basis` (Measured, Conventional, Rated, or Nominal) and "
         "`conditions` (the parameters under which the value holds, each "
         "itself a quantity; a qualitative condition may be `value_text` "
-        "alone). In JSON-LD, conditions ride a measurement node the quantity "
-        "`isOutputOf`; the `voltage_reference` key instead becomes a "
-        "`hasMetrologicalReference` datum on the quantity, beside its "
-        "unit. When authoring, an instance references its spec with the "
+        "alone). In JSON-LD, conditions on a measured value ride a "
+        "measurement node the quantity `isOutputOf`, and conditions on a "
+        "declared value (Conventional, Rated or Nominal) become named "
+        "`schema:valueReference` qualifiers on the quantity. The "
+        "`voltage_reference` key goes under `schema:valueReference` either "
+        "way, as a node typed with the reference electrode's classes "
+        "(`Li/Li+` gives `ReferenceElectrode` and `LithiumElectrode`). "
+        "When authoring, an instance references its spec with the "
         "`spec_id=` kwarg; the record stores the self-describing "
         "`<type>_spec_id` key shown in the tables below." + NL,
         NL,

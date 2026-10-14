@@ -13,7 +13,7 @@ referenced from tests and docs.
 > `python scripts/sync_examples.py` to regenerate it.
 
 Key folders:
-- `cell-spec/` Canonical commercial cell spec records (datasheet-derived). `cell-spec/research/` holds material-grade descriptor examples with electrode/electrolyte/separator detail.
+- `cell-spec/` Cell spec records. `A123__ANR26650M1-B.json` is a commercial cell with values from A123's datasheet. The others are illustrative cells from "Example Lab": full and half coin cells, a three-electrode pouch cell and a prismatic cell. `cell-spec/research/` holds material-grade descriptor examples with electrode/electrolyte/separator detail.
 - `cell-instance/` Physical cell instance records linked to a cell spec.
 - `test/` Test activity records — one per canonical test kind (cycling, rate_capability, formation, HPPC, ICI, GITT, DCIR, EIS).
 - `test-protocol/` Reusable test protocol records referenced by tests.

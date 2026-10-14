@@ -407,3 +407,19 @@ def test_local_workspace_rehydrates_from_registry_export_wrapper(tmp_path: Path)
     assert objects["test"].cell_instance_id == objects["cell"].id
     assert objects["dataset"].test_id == objects["test"].id
     assert objects["dataset"].cell_instance_id == objects["cell"].id
+
+
+def test_workspace_scaffold_cr2032_matches_the_library_record(tmp_path: Path) -> None:
+    # The scaffold's example cell is the packaged Energizer CR2032 library record:
+    # a primary Li-MnO2 cell sourced from Energizer's named datasheet.
+    workspace = LocalWorkspace.init(tmp_path / "ws")
+    cell_doc = json.loads((workspace.root / "resources" / "cell.json").read_text(encoding="utf-8"))
+    spec = cell_doc["cell_spec"]
+    assert spec["chemistry"] == "li-mno2"
+    assert spec["rechargeable"] is False
+    assert spec["provenance"]["url"] == "https://data.energizer.com/pdfs/cr2032.pdf"
+    assert "file" not in spec["provenance"]
+
+    bundle = workspace.to_bundle()
+    assert bundle.cell_spec.chemistry == "li-mno2"
+    assert bundle.cell_spec.rechargeable is False

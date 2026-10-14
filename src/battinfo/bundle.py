@@ -2105,10 +2105,12 @@ class CellSpec(BundleJsonModel):
         return cls(
             schema_version=schema_version,
             id=str(specification["id"]),
+            name=str(specification["name"]) if specification.get("name") else None,
             manufacturer=str(specification["manufacturer"]),
             model=str(specification["model"]),
             format=str(specification["format"]),
             chemistry=str(specification["chemistry"]),
+            rechargeable=specification["rechargeable"] if isinstance(specification.get("rechargeable"), bool) else None,
             product_type=product_type,
             positive_electrode_basis=specification.get("positive_electrode_basis"),
             negative_electrode_basis=specification.get("negative_electrode_basis"),
@@ -2134,13 +2136,17 @@ class CellSpec(BundleJsonModel):
         )
 
     def to_library_record(self) -> dict[str, Any]:
-        specification: dict[str, Any] = {
-            "id": self.id,
+        specification: dict[str, Any] = {"id": self.id}
+        if self.name is not None:
+            specification["name"] = self.name
+        specification |= {
             "manufacturer": self.manufacturer,
             "model": self.model,
             "format": self.format,
             "chemistry": self.chemistry,
         }
+        if self.rechargeable is not None:
+            specification["rechargeable"] = self.rechargeable
         if self.product_type is not None:
             specification["product_type"] = str(self.product_type)
         if self.positive_electrode_basis is not None:

@@ -9,11 +9,12 @@
     "electrode_polarity": "none"
   },
   "provenance": {
-    "source_type": "datasheet",
+    "source_type": "manual",
     "retrieved_at": 1786492800,
     "battinfo_version": "0.7.0"
   },
   "notes": [
-    "Carboxymethyl cellulose binder, the water-processible counterpart to PVDF."
+    "Carboxymethyl cellulose binder, the water-processible counterpart to PVDF.",
+    "Illustrative example: values typical of this material, not taken from a datasheet or measured."
   ]
 }

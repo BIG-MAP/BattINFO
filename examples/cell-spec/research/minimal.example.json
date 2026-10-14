@@ -15,5 +15,8 @@
   },
   "provenance": {
     "source_type": "manual"
-  }
+  },
+  "notes": [
+    "Minimal example of the cell header. The data sheet does not name the negative electrode: the graphite basis in the header belongs to the illustrative internals of the research examples, as in extended.example.json."
+  ]
 }

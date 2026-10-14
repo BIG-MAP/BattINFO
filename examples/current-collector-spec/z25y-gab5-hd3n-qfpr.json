@@ -12,10 +12,11 @@
     }
   },
   "provenance": {
-    "source_type": "datasheet",
+    "source_type": "manual",
     "retrieved_at": 1781768181
   },
   "notes": [
-    "Copper foil anode current collector (10 um)."
+    "Copper foil anode current collector (10 um).",
+    "Illustrative example: values typical of this current collector, not taken from a datasheet or measured."
   ]
 }

@@ -43,7 +43,7 @@ def test_semantic_validation_rejects_unit_mismatch_for_specs() -> None:
 
 def test_semantic_validation_rejects_unit_mismatch_for_continuous_current_specs() -> None:
     doc = _load_json("src/battinfo/data/examples/cell-spec/A123__ANR26650M1-B.json")
-    doc["properties"]["maximum_continuous_charging_current"]["unit"] = "V"
+    doc["properties"]["maximum_continuous_charging_current"] = {"value": 5.0, "unit": "V"}
     report = validate_semantic_report(doc, policy=STRICT_SEMANTIC)
     assert not report.ok
     assert any(issue.code == "semantic.unit_mismatch" for issue in report.errors)
@@ -105,6 +105,23 @@ def test_semantic_validation_rejects_dataset_without_cell_link() -> None:
     report = validate_semantic_report(doc, policy=STRICT_SEMANTIC)
     assert not report.ok
     assert any(issue.code == "semantic.dataset_missing_cell_link" for issue in report.errors)
+
+
+@pytest.mark.parametrize(
+    "about",
+    [
+        ["https://w3id.org/battinfo/material/syzh-8sbd-ygb1-kfgg"],
+        ["https://w3id.org/battinfo/spec/npa4-0dnw-evyh-hhdm"],
+    ],
+    ids=["material-lot", "material-spec"],
+)
+def test_semantic_validation_allows_a_material_dataset(about: list[str]) -> None:
+    # A powder XRD dataset measures a material, not a cell: its material lot or
+    # that lot's material spec is a valid subject on its own.
+    doc = _load_json("src/battinfo/data/examples/dataset/dataset-1f8r-6v2k-9p4m-3t7x.json")
+    doc["dataset"]["about"] = about
+    report = validate_semantic_report(doc, policy=STRICT_SEMANTIC)
+    assert not any(issue.code == "semantic.dataset_missing_cell_link" for issue in report.issues)
 
 
 def test_semantic_validation_allows_dataset_with_cell_spec_link_only() -> None:
@@ -221,7 +238,9 @@ def test_property_unmapped_message_matches_transform_reality() -> None:
     doc = _load_json("src/battinfo/data/examples/cell-spec/A123__ANR26650M1-B.json")
     doc["properties"]["frobnication_index"] = {"value": 1.0, "unit": "%"}
     report = validate_semantic_report(doc, policy=STRICT_SEMANTIC)
-    issue = next(i for i in report.issues if i.code == "semantic.property_unmapped")
+    issue = next(
+        i for i in report.issues if i.code == "semantic.property_unmapped" and i.path.endswith("frobnication_index")
+    )
     assert "no quantity class" in issue.message
     assert "OMITTED" not in issue.message
 

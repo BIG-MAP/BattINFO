@@ -34,10 +34,11 @@
     "polarity": "negative"
   },
   "provenance": {
-    "source_type": "datasheet",
+    "source_type": "manual",
     "retrieved_at": 1781772766
   },
   "notes": [
-    "Zinc metal anode for alkaline Zn-MnO2 cells."
+    "Zinc metal anode for alkaline Zn-MnO2 cells.",
+    "Illustrative example: values typical of this electrode, not taken from a datasheet or measured."
   ]
 }

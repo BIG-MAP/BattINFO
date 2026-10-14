@@ -16,10 +16,11 @@
     }
   },
   "provenance": {
-    "source_type": "datasheet",
+    "source_type": "manual",
     "retrieved_at": 1781768181
   },
   "notes": [
-    "Aluminium foil cathode current collector (15 um)."
+    "Aluminium foil cathode current collector (15 um).",
+    "Illustrative example: values typical of this current collector, not taken from a datasheet or measured."
   ]
 }

@@ -426,13 +426,35 @@ def test_descriptor_instance_nodes_have_dual_type() -> None:
     assert "schema:IndividualProduct" in types, "schema:IndividualProduct (schema.org) must be in @type"
 
 
-def test_publish_record_jsonld_has_no_value_reference(tmp_path: Path) -> None:
-    """schema:valueReference must not appear in published JSON-LD (removed misuse)."""
+def _value_references(node: object) -> list[object]:
+    found: list[object] = []
+    if isinstance(node, dict):
+        refs = node.get("schema:valueReference")
+        if refs is not None:
+            found.extend(refs if isinstance(refs, list) else [refs])
+        for value in node.values():
+            found.extend(_value_references(value))
+    elif isinstance(node, list):
+        for value in node:
+            found.extend(_value_references(value))
+    return found
+
+
+def test_publish_record_jsonld_value_references_are_named_qualifiers(tmp_path: Path) -> None:
+    """schema:valueReference carries named qualifiers only, never a bare value.
+
+    The descriptor emitter once hung range bounds on schema:valueReference. A
+    declared value's conditions ride it on purpose, as named
+    schema:PropertyValue nodes: the example's 10 s pulse duration is one.
+    """
     publish_record(_EXAMPLE_CELL_TYPE, target_root=tmp_path)
     jsonld_files = list(tmp_path.rglob("index.jsonld"))
     doc = json.loads(jsonld_files[0].read_text(encoding="utf-8"))
-    raw = json.dumps(doc)
-    assert "valueReference" not in raw, "schema:valueReference must not appear in published output"
+    refs = _value_references(doc)
+    assert refs, "the example's pulse duration should be a named qualifier"
+    for ref in refs:
+        assert isinstance(ref, dict), ref
+        assert ref.get("@type") == "schema:PropertyValue" and ref.get("schema:propertyID"), ref
 
 
 def test_publish_record_skip_jsonld(tmp_path: Path) -> None:

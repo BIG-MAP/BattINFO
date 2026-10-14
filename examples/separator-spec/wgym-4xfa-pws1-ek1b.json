@@ -23,10 +23,11 @@
     }
   },
   "provenance": {
-    "source_type": "datasheet",
+    "source_type": "manual",
     "retrieved_at": 1781768181
   },
   "notes": [
-    "Celgard 2400 monolayer PP separator. Discovery-Benchmark cells use Celgard separators."
+    "Celgard 2400 monolayer PP separator. Discovery-Benchmark cells use Celgard separators.",
+    "Illustrative example: values typical of this separator, not taken from a datasheet or measured."
   ]
 }

@@ -20,10 +20,11 @@
     }
   },
   "provenance": {
-    "source_type": "datasheet",
+    "source_type": "manual",
     "retrieved_at": 1781740345
   },
   "notes": [
-    "Conductive carbon additive (e.g. Super P-grade)."
+    "Conductive carbon additive (e.g. Super P-grade).",
+    "Illustrative example: values typical of this material, not taken from a datasheet or measured."
   ]
 }

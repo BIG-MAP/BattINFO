@@ -57,11 +57,12 @@
     ]
   },
   "provenance": {
-    "source_type": "datasheet",
+    "source_type": "manual",
     "retrieved_at": 1781768181,
     "battinfo_version": "0.7.0"
   },
   "notes": [
-    "21700 cylindrical housing: nickel-plated steel can, Al/Ni current-collector tabs, and a top-cap safety vent."
+    "21700 cylindrical housing: nickel-plated steel can, Al/Ni current-collector tabs, and a top-cap safety vent.",
+    "Illustrative example: values typical of this housing, not taken from a datasheet or measured."
   ]
 }

@@ -17,7 +17,6 @@
       "specific_capacity": {
         "value": 155,
         "unit": "mAh/g",
-        "value_basis": "Measured",
         "conditions": {
           "discharging_c_rate": {
             "value": 0.1,
@@ -42,15 +41,21 @@
       },
       "average_voltage": {
         "value": 3.8,
-        "unit": "V"
+        "unit": "V",
+        "conditions": {
+          "voltage_reference": {
+            "value_text": "Li/Li+"
+          }
+        }
       }
     }
   },
   "provenance": {
-    "source_type": "datasheet",
+    "source_type": "manual",
     "retrieved_at": 1781740345
   },
   "notes": [
-    "Lithium manganese iron phosphate cathode. Discovery-Benchmark LMFP-Graphite cells."
+    "Lithium manganese iron phosphate cathode. Discovery-Benchmark LMFP-Graphite cells.",
+    "Illustrative example: values typical of this material, not taken from a datasheet or measured."
   ]
 }

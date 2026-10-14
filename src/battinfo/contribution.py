@@ -116,7 +116,16 @@ def load_contribution_manifest(root: Path) -> dict[str, Any]:
         raise FileNotFoundError(
             f"No {CONTRIBUTION_MANIFEST} found in {root}. Run `battinfo dataset init` to create one."
         )
-    return yaml.safe_load(manifest_path.read_text(encoding="utf-8")) or {}
+    try:
+        manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8")) or {}
+    except yaml.YAMLError as exc:
+        raise ValueError(f"{manifest_path} is not valid YAML: {exc}") from exc
+    if not isinstance(manifest, dict):
+        raise ValueError(
+            f"{manifest_path} must hold key: value pairs such as cell_spec_iri and cell_name, "
+            f"not a {type(manifest).__name__}."
+        )
+    return manifest
 
 
 def validate_contribution_manifest(manifest: dict) -> list[str]:

@@ -16,10 +16,11 @@
     }
   },
   "provenance": {
-    "source_type": "datasheet",
+    "source_type": "manual",
     "retrieved_at": 1781740346
   },
   "notes": [
-    "Potassium hydroxide; solute substance for aqueous alkaline electrolytes (e.g. 7M KOH in H2O)."
+    "Potassium hydroxide; solute substance for aqueous alkaline electrolytes (e.g. 7M KOH in H2O).",
+    "Illustrative example: values typical of this material, not taken from a datasheet or measured."
   ]
 }

@@ -4,12 +4,11 @@
     "id": "https://w3id.org/battinfo/spec/86k6-6tzd-c4sf-5s01",
     "short_id": "86k66t",
     "identifier": "cell-spec:86k6-6tzd-c4sf-5s01",
-    "name": "EMPA PRISM-LFP-100AH",
+    "name": "Example Lab PRISM-LFP-100AH",
     "model": "PRISM-LFP-100AH",
     "manufacturer": {
       "type": "Organization",
-      "name": "EMPA",
-      "id": "https://w3id.org/battinfo/organization/mtf8-84d1-addg-nnvv"
+      "name": "Example Lab"
     },
     "cell_format": "prismatic",
     "chemistry": "Li-ion",
@@ -27,9 +26,7 @@
     }
   },
   "provenance": {
-    "source_type": "datasheet",
-    "source_file": "manual.json",
-    "source_url": null,
+    "source_type": "manual",
     "retrieved_at": 1781772767
   },
   "positive_electrode_spec_id": "https://w3id.org/battinfo/spec/m6y0-tkfg-sn40-q10p",
@@ -38,6 +35,7 @@
   "separator_spec_id": "https://w3id.org/battinfo/spec/wgym-4xfa-pws1-ek1b",
   "housing_spec_id": "https://w3id.org/battinfo/spec/ypyh-v38v-r276-snmk",
   "notes": [
-    "LFP 100 Ah prismatic engineering cell (Cell_Design_Tool)."
+    "LFP 100 Ah prismatic engineering cell (Cell_Design_Tool).",
+    "Illustrative example: values typical of this design, not taken from a datasheet or measured on a cell."
   ]
 }

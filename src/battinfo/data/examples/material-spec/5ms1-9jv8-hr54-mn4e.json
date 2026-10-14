@@ -17,7 +17,6 @@
       "specific_capacity": {
         "value": 160,
         "unit": "mAh/g",
-        "value_basis": "Measured",
         "conditions": {
           "discharging_c_rate": {
             "value": 0.1,
@@ -46,15 +45,21 @@
       },
       "average_voltage": {
         "value": 3.4,
-        "unit": "V"
+        "unit": "V",
+        "conditions": {
+          "voltage_reference": {
+            "value_text": "Li/Li+"
+          }
+        }
       }
     }
   },
   "provenance": {
-    "source_type": "datasheet",
+    "source_type": "manual",
     "retrieved_at": 1781740345
   },
   "notes": [
-    "Lithium iron phosphate cathode active material. Discovery-Benchmark LFP-Graphite cells."
+    "Lithium iron phosphate cathode active material. Discovery-Benchmark LFP-Graphite cells.",
+    "Illustrative example: values typical of this material, not taken from a datasheet or measured."
   ]
 }

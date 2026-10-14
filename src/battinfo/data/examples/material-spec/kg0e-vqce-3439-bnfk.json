@@ -20,10 +20,11 @@
     }
   },
   "provenance": {
-    "source_type": "datasheet",
+    "source_type": "manual",
     "retrieved_at": 1781740345
   },
   "notes": [
-    "Zinc metal anode for aqueous/alkaline cells (synthetic reference example)."
+    "Zinc metal anode for aqueous/alkaline cells (synthetic reference example).",
+    "Illustrative example: values typical of this material, not taken from a datasheet or measured."
   ]
 }

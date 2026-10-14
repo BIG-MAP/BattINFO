@@ -69,10 +69,11 @@
     }
   },
   "provenance": {
-    "source_type": "datasheet",
+    "source_type": "manual",
     "retrieved_at": 1781772766
   },
   "notes": [
-    "LCO cathode (96/2/2 LCO/PVDF/carbon black on Al foil)."
+    "LCO cathode (96/2/2 LCO/PVDF/carbon black on Al foil).",
+    "Illustrative example: values typical of this electrode, not taken from a datasheet or measured."
   ]
 }
