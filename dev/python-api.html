@@ -651,6 +651,7 @@ artifacts without a workspace, build the package directly:</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">battinfo.publish.jsonld</span></code> is the foundational Schema.org JSON-LD artifact.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ro-crate-metadata.json</span></code> and <code class="docutils literal notranslate"><span class="pre">datacite-metadata.json</span></code> are emitted alongside it.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">battinfo.dcat.jsonld</span></code> is available as an optional export.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">load_publication_package</span></code> reads a package back into the record objects. Units come back as they were written. Of the cell spec’s properties it reads the dimensions, mass, nominal capacity and nominal voltage, and it gives the chemistry as <code class="docutils literal notranslate"><span class="pre">unknown</span></code>.</p></li>
 </ul>
 </section>
 <section id="query-and-save-battinfo-api">

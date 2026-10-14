@@ -713,6 +713,7 @@ artifacts without a workspace, build the package directly:</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">battinfo.publish.jsonld</span></code> is the foundational Schema.org JSON-LD artifact.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ro-crate-metadata.json</span></code> and <code class="docutils literal notranslate"><span class="pre">datacite-metadata.json</span></code> are emitted alongside it.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">battinfo.dcat.jsonld</span></code> is available as an optional export.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">load_publication_package</span></code> reads a package back into the record objects. Units come back as they were written. Of the cell spec’s properties it reads the dimensions, mass, nominal capacity and nominal voltage, and it gives the chemistry as <code class="docutils literal notranslate"><span class="pre">unknown</span></code>.</p></li>
 </ul>
 </section>
 <section id="query-and-save-battinfo-api">
@@ -1202,7 +1203,11 @@ error raises <code class="docutils literal notranslate"><span class="pre">ValueE
 <li><p><strong>status</strong></p></li>
 <li><p><strong>&quot;created&quot;</strong> (<em>-</em>) – <code class="docutils literal notranslate"><span class="pre">False</span></code>; it only describes a record that was already there.</p></li>
 <li><p><strong>record</strong><strong>)</strong> (<em>- &quot;updated&quot;</em><em> (</em><em>mode=&quot;upsert&quot; over a saved</em>) – <code class="docutils literal notranslate"><span class="pre">content_changed</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code> when the record differs from the saved
-one and <code class="docutils literal notranslate"><span class="pre">False</span></code> when it does not, in which case nothing is rewritten.
+one and <code class="docutils literal notranslate"><span class="pre">False</span></code> when it does not, in which case nothing is rewritten
+unless the saved copy holds text in a quantity’s <code class="docutils literal notranslate"><span class="pre">value</span></code>, which is
+read as <code class="docutils literal notranslate"><span class="pre">value_text</span></code> for the comparison and then rewritten, with a
+warning that names each text value moved (a numeric string is read as
+the number without one).
 The comparison ignores <code class="docutils literal notranslate"><span class="pre">id</span></code>, <code class="docutils literal notranslate"><span class="pre">uid</span></code> and the <code class="docutils literal notranslate"><span class="pre">created_at</span></code>,
 <code class="docutils literal notranslate"><span class="pre">modified_at</span></code>, <code class="docutils literal notranslate"><span class="pre">retrieved_at</span></code>, <code class="docutils literal notranslate"><span class="pre">generated_at</span></code> and <code class="docutils literal notranslate"><span class="pre">imported_at</span></code>
 timestamps, but not <code class="docutils literal notranslate"><span class="pre">published_at</span></code>: a <code class="docutils literal notranslate"><span class="pre">Dataset</span></code> saved without one

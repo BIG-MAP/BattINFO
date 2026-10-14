@@ -621,6 +621,7 @@ from one source so they cannot drift.</p>
 </pre></div>
 </div>
 <p>Unit IRIs are EMMO where defined; compound units EMMO lacks (<code class="docutils literal notranslate"><span class="pre">W/kg</span></code>, <code class="docutils literal notranslate"><span class="pre">W/L</span></code>) use QUDT.</p>
+<p>A unit with no IRI in the unit map, such as <code class="docutils literal notranslate"><span class="pre">years</span></code> for a calendar life, is written as text only, as <code class="docutils literal notranslate"><span class="pre">schema:unitText</span></code> with no <code class="docutils literal notranslate"><span class="pre">hasMeasurementUnit</span></code>. Validation warns <code class="docutils literal notranslate"><span class="pre">semantic.unit_unmapped</span></code> when this happens in a record’s <code class="docutils literal notranslate"><span class="pre">properties</span></code> or in the <code class="docutils literal notranslate"><span class="pre">property</span></code> map of a material, material-spec, electrode or electrode-spec record. Units elsewhere, such as those of test conditions, <code class="docutils literal notranslate"><span class="pre">conditions</span></code> maps and the components of a cell spec, are not checked for an IRI.</p>
 </section>
 <section id="structured-test-conditions">
 <h2>Structured test conditions<a class="headerlink" href="#structured-test-conditions" title="Link to this heading">#</a></h2>
