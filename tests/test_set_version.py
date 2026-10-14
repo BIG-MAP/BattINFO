@@ -129,7 +129,10 @@ def test_installed_smoke_pins_no_version_and_uses_only_the_curated_top_level() -
         for node in ast.walk(ast.parse(source))
         if isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name) and node.value.id == "battinfo"
     }
-    assert used and used <= set(battinfo.__all__), sorted(used - set(battinfo.__all__))
+    # Dunder attributes such as __file__ and __version__ are not public API names; the guard
+    # is there to catch deprecated top-level names.
+    public = {name for name in used if not (name.startswith("__") and name.endswith("__"))}
+    assert used and public <= set(battinfo.__all__), sorted(public - set(battinfo.__all__))
 
 
 def test_uv_cache_keys_cover_the_file_that_holds_the_version() -> None:
