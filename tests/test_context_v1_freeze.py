@@ -59,6 +59,15 @@ def gen(tmp_path, monkeypatch):
     return module
 
 
+def _added_since_snapshot(gen) -> int:
+    """Terms v1 holds beyond the snapshot, before a test changes anything.
+
+    Between a merge that adds terms and the next retake of the snapshot, v1 runs ahead of it, so the
+    counts below are taken relative to this.
+    """
+    return len(set(json.loads(gen.OUT.read_text(encoding="utf-8"))["@context"]) - set(_snapshot()["terms"]))
+
+
 def _plain_frozen_term(gen) -> str:
     """A class or unit term of the snapshot that no correction rewrites, so an edit to it survives a build."""
     return next(
@@ -193,6 +202,7 @@ def test_build_without_a_snapshot_has_nothing_to_guard(gen, monkeypatch) -> None
 
 def test_write_snapshot_takes_a_pre_release_correction_before_the_tag(gen, monkeypatch, capsys) -> None:
     term = _plain_frozen_term(gen)
+    added = _added_since_snapshot(gen)
     monkeypatch.setattr(gen, "PRE_RELEASE_CORRECTIONS", {**gen.PRE_RELEASE_CORRECTIONS, term: "emmo:Corrected"})
     assert gen.main(["--check"]) == 1  # the snapshot still holds the old definition
 
@@ -200,7 +210,7 @@ def test_write_snapshot_takes_a_pre_release_correction_before_the_tag(gen, monke
 
     assert gen.main(["--write-snapshot"]) == 0
     out = capsys.readouterr().out
-    assert "0 term(s) added, 1 changed or removed" in out and repr(term) in out
+    assert f"{added} term(s) added, 1 changed or removed" in out and repr(term) in out
 
     snapshot = json.loads(gen.SNAPSHOT.read_text(encoding="utf-8"))
     assert snapshot["terms"][term] == "emmo:Corrected"
@@ -222,9 +232,10 @@ def test_write_snapshot_refuses_once_the_release_is_tagged(gen, monkeypatch, cap
 
 
 def test_check_counts_terms_added_since_the_snapshot(gen, monkeypatch, capsys) -> None:
+    added = _added_since_snapshot(gen)
     monkeypatch.setattr(gen, "EMITTER_CLASS_TERMS", {**gen.EMITTER_CLASS_TERMS, "AddedInATest": "emmo:Added"})
     assert gen.main([]) == 0
     capsys.readouterr()
 
     assert gen.main(["--check"]) == 0
-    assert "1 added since the 0.8.0 snapshot" in capsys.readouterr().out
+    assert f"{added + 1} added since the 0.8.0 snapshot" in capsys.readouterr().out
