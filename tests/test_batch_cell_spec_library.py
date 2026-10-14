@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -51,6 +52,7 @@ def _assert_names_the_libraries(message: str, folder: Path) -> None:
     assert str(PACKAGED_LIBRARY_CELL_SPEC_DIR) in message
     assert str(_local_library(folder)) in message
     assert "battinfo library save cell-spec" in message
+    assert "--no-sync-packaged-copy" in message  # no stray ./src/battinfo/ copy outside a checkout
 
 
 def _cell_with_data(batch_dir: Path, result: dict) -> Path:
@@ -208,18 +210,31 @@ class TestACellSpecNeitherLibraryHolds:
 # ── The local library ─────────────────────────────────────────────────────────
 
 
+def _suggested_command(message: str) -> list[str]:
+    """The `battinfo ...` command an error message suggests, as arguments for the CLI app."""
+    match = re.search(r"`battinfo ([^`]+)`", message)
+    assert match, message
+    return match.group(1).split()
+
+
 def test_a_cell_spec_saved_as_the_error_suggests_is_found(tmp_path: Path, monkeypatch) -> None:
-    # The error tells the user to save the cell spec with `battinfo library save
-    # cell-spec`; doing that in the same folder makes the whole batch path work.
+    # The error tells the user how to save the cell spec; running that command
+    # as written, in the same folder, makes the whole batch path work and
+    # writes nothing outside .battinfo/ (no stray src/battinfo/ copy).
     monkeypatch.chdir(tmp_path)
     record = json.loads(DEFAULT_CR2032_LIBRARY_SPEC.read_text(encoding="utf-8"))
     record["specification"].update(id=UNKNOWN_IRI, manufacturer="Acme", model="X1", size_code="R9999")
     (tmp_path / "acme.json").write_text(json.dumps(record), encoding="utf-8")
 
-    saved = runner.invoke(app, ["library", "save", "cell-spec", "--input", "acme.json"])
+    with pytest.raises(ValueError) as excinfo:
+        init_batch(tmp_path / "first-try", UNKNOWN_IRI, 1, lab="SINTEF")
+    command = _suggested_command(str(excinfo.value))
+    assert command[:3] == ["library", "save", "cell-spec"] and "<file>" in command
+    saved = runner.invoke(app, [("acme.json" if arg == "<file>" else arg) for arg in command])
     assert saved.exit_code == 0, saved.output
     saved_path = Path(json.loads(saved.stdout)["path"])
     assert saved_path.parent.absolute() == _local_library(tmp_path)
+    assert sorted(path.name for path in tmp_path.iterdir()) == [".battinfo", "acme.json"]
 
     batch_dir = tmp_path / "batch"
     result = init_batch(batch_dir, UNKNOWN_IRI, 1, lab="SINTEF")

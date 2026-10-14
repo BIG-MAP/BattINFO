@@ -147,12 +147,17 @@ def _cell_spec_libraries() -> tuple[Path, Path]:
 
 
 def _cell_spec_libraries_hint() -> str:
-    """Where a cell-spec lookup searched, and how to add a cell spec, for an error message."""
+    """Where a cell-spec lookup searched, and how to add a cell spec, for an error message.
+
+    The command it suggests has ``--no-sync-packaged-copy``: by default
+    ``library save`` also writes a copy under ``./src/battinfo/data/``, a
+    source-checkout path that would be a stray folder anywhere else.
+    """
     packaged, local = _cell_spec_libraries()
     return (
         f"Searched the library packaged with battinfo ({packaged}) and the local library ({local.absolute()}). "
-        "Add the cell spec to the local library with `battinfo library save cell-spec --input <file>`, "
-        "run from this folder."
+        "Add the cell spec to the local library with "
+        "`battinfo library save cell-spec --input <file> --no-sync-packaged-copy`, run from this folder."
     )
 
 
